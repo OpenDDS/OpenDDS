@@ -66,9 +66,9 @@ const char SEDP_AGENT_INFO_KEY[] = "SEDP";
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp
-  : public DCPS::RcObject
+  : public virtual DCPS::RcObject
 #ifdef OPENDDS_SECURITY
-  , public ICE::AgentInfoListener
+  , public virtual ICE::AgentInfoListener
 #endif
 {
 public:
@@ -216,7 +216,7 @@ public:
   }
 #endif
 
-  ICE::Endpoint* get_ice_endpoint_if_added();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint_if_added();
 
   ParticipantData_t build_local_pdata(
 #ifdef OPENDDS_SECURITY
@@ -235,6 +235,8 @@ public:
   void remove_domain_participant(const GUID_t& removeId);
 
   bool update_domain_participant_qos(const DDS::DomainParticipantQos& qos);
+
+  bool has_domain_participant(const GUID_t& ignoreId) const;
 
   DCPS::TopicStatus assert_topic(GUID_t& topicId, const char* topicName,
     const char* dataTypeName, const DDS::TopicQos& qos,
@@ -482,7 +484,7 @@ private:
     : public virtual DCPS::RcEventHandler
     , public virtual DCPS::NetworkConfigListener
 #ifdef OPENDDS_SECURITY
-    , public ICE::Endpoint
+    , public virtual ICE::Endpoint
 #endif
   {
     typedef size_t WriteFlags;
@@ -548,7 +550,7 @@ private:
     void remove_address(const DCPS::NetworkInterface& nic,
                         const ACE_INET_Addr& address);
 
-    ICE::Endpoint* get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
 #ifdef OPENDDS_SECURITY
     ICE::AddressListType host_addresses() const;
@@ -565,7 +567,6 @@ private:
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
     u_short uni_port_;
-    u_short mc_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
     ACE_INET_Addr multicast_address_;
@@ -732,10 +733,10 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
-  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+  void start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
                  DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                  const ICE::AgentInfo& agent_info);
-  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+  void stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
                 DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);
@@ -743,7 +744,12 @@ private:
 
   void purge_handshake_resends(DiscoveredParticipantIter iter);
   TimeQueue handshake_resends_;
+
+  size_t n_participants_in_authentication_;
+  void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
+
+  void erase_participant(DiscoveredParticipantIter iter);
 
   friend class ::DDS_TEST;
 };

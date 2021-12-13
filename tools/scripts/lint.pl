@@ -11,7 +11,7 @@ use File::Find qw/find/;
 use Encode qw/decode encode FB_CROAK/;
 use Cwd qw/abs_path/;
 use Getopt::Long qw/GetOptions/;
-use Term::ANSIColor;
+use Term::ANSIColor qw//;
 
 use constant line_length_limit => 100;
 use constant eof_newline_limit => 2;
@@ -23,9 +23,8 @@ my $ace = 1; # Warn if ACE not found
 my $ace_arg = 0; # Error if ACE not found
 my $no_ace_arg = 0; # Silence warning
 my @paths = ();
-my @ext_paths = ();
 my $simple_output = 0;
-my $files_only = 0;
+my $files_only_output = 0;
 my $help = 0;
 my $list_checks = 0;
 my $list_default_checks = 0;
@@ -40,20 +39,20 @@ my $color_arg = 0;
 
 # Term::ANSIColor doesn't seem to give real control over color, so provide our
 # own.
-sub colour {
+sub color {
   my $rv = '';
   if ($color) {
     foreach my $arg (@_) {
-      $rv .= color($arg);
+      $rv .= Term::ANSIColor::color($arg);
     }
   }
   return $rv;
 }
 
-sub colour_else {
+sub color_else {
   my $not_color = shift;
   if ($color) {
-    return colour(@_);
+    return color(@_);
   }
   else {
     return $not_color;
@@ -62,12 +61,16 @@ sub colour_else {
 
 sub mark_error {
   my $s = shift;
-  $s =~ s/\t/        /g;
-  return colour_else('>>>', 'white', 'on_red') .  $s . colour_else('<<<', 'reset');
+  if ($color) {
+    # The inter puncta or middle dot is often used in software like word
+    # processors to indicate whitespace.
+    $s =~ s/\s/·/g;
+  }
+  return color_else('>>>', 'white', 'on_red') .  $s . color_else('<<<', 'reset');
 }
 
 sub error {
-  return colour('red') . "ERROR:" . colour('reset');
+  return color('red') . "ERROR:" . color('reset');
 }
 
 sub print_error {
@@ -75,11 +78,11 @@ sub print_error {
 }
 
 sub print_warning {
-  print STDERR (colour('yellow') . "WARNING:" . colour('reset') . " " . shift . "\n");
+  print STDERR (color('yellow') . "WARNING:" . color('reset') . " " . shift . "\n");
 }
 
 sub print_note {
-  print(colour('blue') . "NOTE" . colour('reset') . " " . shift . "\n");
+  print(color('blue') . "NOTE" . color('reset') . " " . shift . "\n");
 }
 
 # Try to Find ACE_ARGS
@@ -107,50 +110,54 @@ my $help_message = $usage_message .
   "\n" .
   "OpenDDS Repo General Linter\n" .
   "\n" .
-  "CHECK               Check(s) to run. If no checks are given, then the default\n" .
-  "                    checks are run.\n" .
-  "ACE_ARGS            Arguments to pass to ACE's fuzz.pl\n" .
+  "Positional Arguments:\n" .
+  "  CHECK                Check(s) to run. If no checks are given, then the default\n" .
+  "                       checks are run.\n" .
+  "  ACE_ARGS             Arguments to pass to ACE's fuzz.pl\n" .
   "\n" .
   "OPTIONS:\n" .
-  "--help | -h         Show this message\n" .
-  "--debug             Print script debug information\n" .
-  "--[no-]ace          Run ACE's fuzz.pl? Requires ACE to be in a usual place or\n" .
-  "                    ACE_ROOT to be defined. By default the script will try to\n" .
-  "                    use ACE, but issue a warning if it can't be found. Pass\n" .
-  "                    --no-ace to silence this warning. Pass --ace to turn the\n" .
-  "                    warning into an error if ACE can't be found.\n" .
-  "--path | -p PATH    Restrict to PATH instead of everything in OpenDDS. Can be\n" .
-  "                    a directory or a file. Can be specified multiple times.\n" .
-  "                    PATH must be relative to the root of OpenDDS.\n" .
-  "--ext-path PATH     Path outside the OpenDDS source tree to check.\n" .
-  "                    Can be specified multiple times.\n" .
-  "--simple-output     Print individual errors as single lines\n" .
-  "--files-only        Just print the files that failed\n" .
-  "--list | -l         List all checks\n" .
-  "--list-default      List all default checks\n" .
-  "--list-non-default  List all non-default checks\n" .
-  "--all | -a          Run all checks\n" .
-  "--try-fix           ATTEMPT to fix issues that support fixing. THIS IS POWERED\n" .
-  "                    BY REGEX, NOT MAGIC. Don't try this unless your existing\n" .
-  "                    work is committed or otherwise safe from this script.\n" .
-  "                    See --list to see what checks support this.\n" .
-  "--include PATH      Add PATH to preproccessor include paths for the sake of\n" .
-  "                    checks that care about them. Can be specified multiple\n" .
-  "                    times. Default is root of OpenDDS source tree.\n" .
-  "--[no-]color        Force enable or disable ANSI escape code color output.\n" .
-  "                    Can also be done with NO_COLOR environment variable.\n" .
-  "                    By default it uses isatty like most programs\n" .
+  "  --help | -h          Show this message\n" .
+  "  --debug              Print script debug information\n" .
+  "  --[no-]ace           Require ACE to be present? ACE is required for the script\n" .
+  "                       to run ACE's fuzz.pl.\n" .
+  "                       ACE should be in a \"usual place\" or else ACE_ROOT must be\n" .
+  "                       set. By default the script will try to use ACE, but issue\n" .
+  "                       a warning if it can't be found. Pass --no-ace to silence\n" .
+  "                       this warning. Pass --ace to turn the warning into an\n" .
+  "                       error if ACE can't be found.\n" .
+  "  --path | -p PATH     Restrict to PATH that is absolute or relative the current\n" .
+  "                       directory instead of everything in OpenDDS. Can be a\n" .
+  "                       directory or a file. Can be specified multiple times.\n" .
+  "                       It doesn't have to be inside the OpenDDS that would\n" .
+  "                       otherwise be checked, but using a path in another OpenDDS\n" .
+  "                       will skip checks that use specific paths\n" .
+  "  --simple-output      Print individual errors as single lines\n" .
+  "  --files-only-output  Just print the files that failed\n" .
+  "  --list | -l          List all checks\n" .
+  "  --list-default       List all default checks\n" .
+  "  --list-non-default   List all non-default checks\n" .
+  "  --all | -a           Run all checks\n" .
+  "  --try-fix            ATTEMPT to fix issues that support fixing. THIS IS\n" .
+  "                       POWERED BY REGEX, NOT MAGIC. Don't try this unless your\n" .
+  "                       existing work is committed or otherwise safe from this\n" .
+  "                       script. See --list to see what checks support this.\n" .
+  "  --include PATH       Add PATH to preproccessor include paths for the sake of\n" .
+  "                       checks that care about them. Can be specified multiple\n" .
+  "                       times. Default is root of OpenDDS source tree.\n" .
+  "  --[no-]color         Force enable or disable ANSI escape code color output.\n" .
+  "                       Can also be done with NO_COLOR environment variable.\n" .
+  "                       By default it uses isatty like most programs\n" .
   "\n" .
-  "If run with DDS_ROOT being defined, it will use that path. If not it will\n" .
-  "use the OpenDDS source tree the script is in.\n" .
+  "If run with DDS_ROOT defined, it will use that path. If not, it will use the\n" .
+  "OpenDDS source tree the script is in.\n" .
   "\n" .
   "The script can be configured to ignore checks in two ways. First way is by\n" .
   "comment. This takes following form:\n" .
   "  lint.pl ignores CHECK_NAME... on next line\n" .
-  "This only works with checks that are checked on a line by line basis,\n" .
-  "which are indicated by --list.\n" .
-  "The second method is using .lint_config files. These are files with lines\n" .
-  "that take the form:\n" .
+  "This only works with checks that are checked on a line by line basis, which are\n" .
+  "indicated by --list.\n" .
+  "The second method is using .lint_config files. These are files with lines that\n" .
+  "take the form:\n" .
   "  ignore [check[s] CHECK_NAME...] path[s] PATH...\n" .
   "check and path can optionally be plural for readability.\n" .
   "If there are no checks then the entire file is ignored. If PATH is \".\", then\n" .
@@ -164,9 +171,8 @@ if (!GetOptions(
   'ace' => \$ace_arg,
   'no-ace' => \$no_ace_arg,
   'path=s' => \@paths,
-  'ext-path=s' => \@ext_paths,
   'simple-output' => \$simple_output,
-  'files-only' => \$files_only,
+  'files-only-output' => \$files_only_output,
   'l|list' => \$list_checks,
   'list-default' => \$list_default_checks,
   'list-non-default' => \$list_non_default_checks,
@@ -208,6 +214,7 @@ my $root = $ENV{'DDS_ROOT'} || dirname(dirname(dirname(abs_path(__FILE__))));
 $root =~ s@(?<!/)$@/@;
 push(@includes, "$root");
 my $root_re = quotemeta($root);
+print("OpenDDS is $root\n") if ($debug);
 
 $ace = 0 if ($no_ace_arg && !$ace_arg);
 my $ace_root = $ENV{'ACE_ROOT'};
@@ -230,23 +237,27 @@ if ($ace and not $listing_checks and !defined $ace_root) {
       "Pass --no-ace to silence this warning.");
     $ace = 0;
   }
+} else {
+  $ace = 0;
+}
+if ($ace) {
+  print("ACE is $ace_root\n") if ($debug);
+}
+else {
+  print("No ACE\n") if ($debug);
 }
 
-if (scalar(@paths) == 0 && scalar(@ext_paths) == 0) {
+if (scalar(@paths) == 0) {
   push(@paths, $root);
 }
 else {
   my @full_paths;
   foreach my $path (@paths) {
-    my $full_path = catfile($root, $path);
-    die("${\error()} $path does not exist in DDS_ROOT") if (not -e $full_path);
+    my $full_path = abs_path($path);
+    die("${\error()} $path does not exist") if (not -e $full_path);
     push(@full_paths, $full_path);
   }
   @paths = @full_paths;
-}
-
-foreach my $path (@ext_paths) {
-  push(@paths, $path);
 }
 
 sub is_elf_file {
@@ -431,7 +442,7 @@ sub match_prefix_get_suffix {
 #     around error and it can be fixed by simply omitted the contents of the
 #     capture groups, allow --try-fix to do that.
 #   can_fix => Simply indicate that this check **could** be fixed by running
-#     --try-fix. This just inserts a messsage during --list.
+#     --try-fix. This just inserts a message during --list.
 # }
 my %all_checks = (
 
@@ -492,7 +503,7 @@ my %all_checks = (
       '!p7s_file',
     ],
     message => [
-      "Test file must end in at least one newline, but not more than " .
+      "Text file must end in at least one newline, but not more than " .
       "${\eof_newline_limit}",
     ],
     file_matches => sub {
@@ -593,7 +604,7 @@ my %all_checks = (
       'Whitespace before a newline in a string'
     ],
     path_matches_all_of => ['source_code'],
-    line_matches => qr/".*(\s+)\\n.*"/,
+    line_matches => qr/".*(?<!\s)(\s+)\\n.*"/,
     strip_fix => 1,
   },
 
@@ -1009,10 +1020,28 @@ sub check_lint_config {
   return 0;
 }
 
+sub ignored_by_git {
+  my $path = shift;
+
+  my $cmd = "git check-ignore --quiet $path";
+  my $exit_status = 0;
+  if (system($cmd)) {
+    $exit_status = $? >> 8;
+    if ($? == -1 || $? & 127 || $exit_status != 1) {
+      die("${\error()} \"$cmd\" failed: $? $! $exit_status");
+    }
+  }
+  # See https://git-scm.com/docs/git-check-ignore#_exit_status
+  return $exit_status == 0;
+}
+
 sub process_directory {
-  my $full_dir_path = $File::Find::dir;
+  my $full_dir_path = abs_path($File::Find::dir);
+  my $in_root = $full_dir_path =~ /^$root_re/;
   my $dir_path = $full_dir_path;
-  $dir_path =~ s/$root_re//;
+  if ($in_root) {
+    $dir_path =~ s/$root_re//;
+  }
   my @dir_contents = sort(@_);
 
   print("process_directory: $dir_path\n") if($debug);
@@ -1022,6 +1051,12 @@ sub process_directory {
     return ();
   }
   $directories_seen{$full_dir_path} = 1;
+  $paths_seen{$full_dir_path} = 1;
+
+  if ($in_root && ignored_by_git($full_dir_path)) {
+    print("  (ignored by git)\n") if ($debug);
+    return ();
+  }
 
   if (exists($paths_to_ignore{$full_dir_path}) and
       scalar(@{$paths_to_ignore{$full_dir_path}}) == 0) {
@@ -1039,9 +1074,12 @@ sub process_directory {
 my $opendds_checks_failed = 0;
 my %checks_map = map {$_ => 1} @checks;
 sub process_path {
-  my $full_filename = $_;
+  my $full_filename = abs_path($_);
+  my $in_root = $full_filename =~ /^$root_re/;
   my $filename = $full_filename;
-  $filename =~ s/$root_re//;
+  if ($in_root) {
+    $filename =~ s/^$root_re//;
+  }
 
   print("process_path: $filename\n") if ($debug);
 
@@ -1056,17 +1094,10 @@ sub process_path {
   }
   $paths_seen{$full_filename} = 1;
 
-  # Ignore file if it's ignored by git.
-  my $cmd = "git check-ignore --quiet $full_filename";
-  my $exit_status = 0;
-  if (system($cmd)) {
-    $exit_status = $? >> 8;
-    if ($? == -1 || $? & 127 || $exit_status != 1) {
-      die("${\error()} \"$cmd\" failed: $? $! $exit_status");
+  if ($in_root && ignored_by_git($full_filename)) {
+    if (-d $full_filename) {
+      $directories_seen{$full_filename} = 1;
     }
-  }
-  # See https://git-scm.com/docs/git-check-ignore#_exit_status
-  if ($exit_status == 0) {
     print("  (ignored by git)\n") if ($debug);
     return;
   }
@@ -1265,7 +1296,7 @@ sub process_path {
         }
       }
     }
-    elsif ($files_only) {
+    elsif ($files_only_output) {
       print "$filename\n";
     }
     else {

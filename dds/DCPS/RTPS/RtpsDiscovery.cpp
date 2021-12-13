@@ -20,6 +20,7 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <cstdlib>
+#include <limits>
 
 namespace {
   u_short get_default_d0(u_short fallback)
@@ -49,6 +50,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , max_lease_duration_(300)
 #ifdef OPENDDS_SECURITY
   , security_unsecure_lease_duration_(30)
+  , max_participants_in_authentication_(0)
 #endif
   , lease_extension_(0)
   , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
@@ -87,7 +89,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , periodic_directed_spdp_(false)
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
-  , use_xtypes_(true)
+  , use_xtypes_(XTYPES_MINIMAL)
   , sedp_heartbeat_period_(0, 200*1000 /*microseconds*/)
   , sedp_nak_response_delay_(0, 100*1000 /*microseconds*/)
   , sedp_send_delay_(0, 10 * 1000)
@@ -225,6 +227,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
               value.c_str(), rtps_name.c_str()), -1);
           }
           config->security_unsecure_lease_duration(TimeDuration(duration));
+        } else if (name == "MaxParticipantsInAuthentication") {
+          const OPENDDS_STRING& value = it->second;
+          unsigned int max_participants;
+          if (!DCPS::convertToInteger(value, max_participants)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
+              ACE_TEXT("Invalid entry (%C) for MaxParticipantsInAuthentication in ")
+              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->max_participants_in_authentication(max_participants);
 #endif
         } else if (name == "LeaseExtension") {
           const OPENDDS_STRING& value = it->second;
@@ -779,15 +792,19 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
         } else if (name == "UseXTypes") {
           const OPENDDS_STRING& value = it->second;
-          int smInt;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-              ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
+          if (value.size() == 1) {
+            int smInt;
+            if (!DCPS::convertToInteger(value, smInt) || smInt < 0 || smInt > 2) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                                ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
+                                ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                                value.c_str(), rtps_name.c_str()), -1);
+            }
+            config->use_xtypes(static_cast<RtpsDiscoveryConfig::UseXTypes>(smInt));
+          } else {
+            config->use_xtypes(value.c_str());
           }
-          config->use_xtypes(bool(smInt));
         } else if (name == "SedpResponsiveMode") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
@@ -1276,6 +1293,11 @@ bool RtpsDiscovery::update_domain_participant_qos(
   DDS::DomainId_t domain, const GUID_t& participant, const DDS::DomainParticipantQos& qos)
 {
   return get_part(domain, participant)->update_domain_participant_qos(qos);
+}
+
+bool RtpsDiscovery::has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const
+{
+  return get_part(domain, local)->has_domain_participant(remote);
 }
 
 DCPS::TopicStatus RtpsDiscovery::assert_topic(

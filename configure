@@ -25,8 +25,8 @@ use warnings;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.15';
-my $doc_tao3_version = '7.0.4';
+my $doc_tao2_version = '6.5.16';
+my $doc_tao3_version = '7.0.5';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -53,7 +53,7 @@ my %platforminfo =
                'cl_versions' => {13.1 => 'vc71', 14 => 'vc8', 15 => 'vc9',
                                  16 => 'vc10', 17 => 'vc11', 18 => 'vc12',
                                  19 => 'vc14', 19.1 => 'vs2017',
-                                 19.2 => 'vs2019'},
+                                 19.2 => 'vs2019', 19.3 => 'vs2022'},
                'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
    'macosx' => {
@@ -1607,8 +1607,10 @@ if ($opts{'openssl'} && $opts{'openssl'} ne 'skip_version_check') {
   while (<$fh>) {
     if (/^\s*#\s*define\s*OPENSSL_VERSION_TEXT\s*"([^"]*)"/) {
       my $ver = $1;
+      print "OpenSSL version detected: \"$ver\"\n" if $opts{'verbose'};
       if ($ver =~ /OpenSSL[\W]+1\.1/ || $ver =~ /OpenSSL[\W]+3\./) {
-        push(@features, 'openssl11=1') if $1;
+        print "OpenSSL 1.1+ MPC feature enabled\n" if $opts{'verbose'};
+        push(@features, 'openssl11=1');
       }
       last;
     }

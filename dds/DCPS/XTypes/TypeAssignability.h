@@ -84,7 +84,7 @@ public:
 
   void insert_entry(const TypeIdentifier& ti, const TypeObject& tobj)
   {
-    tl_service_->add_type_objects_to_cache(ti, tobj);
+    tl_service_->add(ti, tobj);
   }
 
 private:
@@ -141,7 +141,7 @@ private:
 
   const MinimalTypeObject& lookup_minimal(const TypeIdentifier& ti) const
   {
-    return tl_service_->get_type_objects(ti).minimal;
+    return tl_service_->get_type_object(ti).minimal;
   }
 
   XTypes::TypeLookupService_rch tl_service_;

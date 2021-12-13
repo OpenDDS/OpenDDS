@@ -229,24 +229,29 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     data_registration(new Bench::DataTypeSupportImpl());
 
   // Register some Bench-specific listener factories
-  Builder::register_topic_listener("bench_tl", [](const Builder::PropertySeq& properties){
-      return DDS::TopicListener_var(new Bench::WorkerTopicListener(properties));
-    });
-  Builder::register_data_reader_listener("bench_drl", [](const Builder::PropertySeq& properties){
-      return DDS::DataReaderListener_var(new Bench::WorkerDataReaderListener(properties));
-    });
-  Builder::register_subscriber_listener("bench_sl", [](const Builder::PropertySeq& properties){
-      return DDS::SubscriberListener_var(new Bench::WorkerSubscriberListener(properties));
-    });
-  Builder::register_data_writer_listener("bench_dwl", [](const Builder::PropertySeq& properties){
-      return DDS::DataWriterListener_var(new Bench::WorkerDataWriterListener(properties));
-    });
-  Builder::register_publisher_listener("bench_pl", [](const Builder::PropertySeq& properties){
-      return DDS::PublisherListener_var(new Bench::WorkerPublisherListener(properties));
-    });
-  Builder::register_domain_participant_listener("bench_partl", [](const Builder::PropertySeq& properties){
-      return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener(properties));
-    });
+  try {
+    Builder::register_topic_listener("bench_tl", [](const Builder::PropertySeq& properties){
+        return DDS::TopicListener_var(new Bench::WorkerTopicListener(properties));
+      });
+    Builder::register_datareader_listener("bench_drl", [](const Builder::PropertySeq& properties){
+        return DDS::DataReaderListener_var(new Bench::WorkerDataReaderListener(properties));
+      });
+    Builder::register_subscriber_listener("bench_sl", [](const Builder::PropertySeq& properties){
+        return DDS::SubscriberListener_var(new Bench::WorkerSubscriberListener(properties));
+      });
+    Builder::register_datawriter_listener("bench_dwl", [](const Builder::PropertySeq& properties){
+        return DDS::DataWriterListener_var(new Bench::WorkerDataWriterListener(properties));
+      });
+    Builder::register_publisher_listener("bench_pl", [](const Builder::PropertySeq& properties){
+        return DDS::PublisherListener_var(new Bench::WorkerPublisherListener(properties));
+      });
+    Builder::register_domain_participant_listener("bench_partl", [](const Builder::PropertySeq& properties){
+        return DDS::DomainParticipantListener_var(new Bench::WorkerParticipantListener(properties));
+      });
+  } catch (const std::exception& e) {
+    std::cerr << "Exception caught trying to register listener factories: " << e.what() << std::endl;
+    return 4;
+  }
 
   // Disable some Proactor debug chatter to stdout (eventually make this configurable?)
   ACE_Log_Category::ace_lib().priority_mask(0);
@@ -458,7 +463,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
-    std::cerr << "Exception caught trying execute test sequence: " << e.what() << std::endl;
+    std::cerr << "Exception caught trying to execute test sequence: " << e.what() << std::endl;
     proactor->proactor_end_event_loop();
     for (size_t i = 0; i < thread_pool_size; ++i) {
       thread_pool[i]->join();
@@ -543,56 +548,61 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Bench::SimpleStatBlock consolidated_round_trip_latency_stats;
   Bench::SimpleStatBlock consolidated_round_trip_jitter_stats;
 
-  for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
-    for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
-      for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
-        Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
+  try {
+    for (CORBA::ULong i = 0; i < process_report.participants.length(); ++i) {
+      for (CORBA::ULong j = 0; j < process_report.participants[i].subscribers.length(); ++j) {
+        for (CORBA::ULong k = 0; k < process_report.participants[i].subscribers[j].datareaders.length(); ++k) {
+          Builder::DataReaderReport& dr_report = process_report.participants[i].subscribers[j].datareaders[k];
 
-        const Builder::TimeStamp dr_enable_time =
-          get_or_create_property(dr_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
-        const Builder::TimeStamp dr_last_discovery_time =
-          get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+          const Builder::TimeStamp dr_enable_time =
+            get_or_create_property(dr_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
+          const Builder::TimeStamp dr_last_discovery_time =
+            get_or_create_property(dr_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
 
-        if (ZERO < dr_enable_time && ZERO < dr_last_discovery_time) {
-          auto delta = dr_last_discovery_time - dr_enable_time;
-          if (worker_report.max_discovery_time_delta < delta) {
-            worker_report.max_discovery_time_delta = delta;
+          if (ZERO < dr_enable_time && ZERO < dr_last_discovery_time) {
+            auto delta = dr_last_discovery_time - dr_enable_time;
+            if (worker_report.max_discovery_time_delta < delta) {
+              worker_report.max_discovery_time_delta = delta;
+            }
+          } else {
+            ++worker_report.undermatched_readers;
           }
-        } else {
-          ++worker_report.undermatched_readers;
-        }
 
-        Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
-        Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
-        Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
-        Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
+          Bench::ConstPropertyStatBlock dr_latency(dr_report.properties, "latency");
+          Bench::ConstPropertyStatBlock dr_jitter(dr_report.properties, "jitter");
+          Bench::ConstPropertyStatBlock dr_round_trip_latency(dr_report.properties, "round_trip_latency");
+          Bench::ConstPropertyStatBlock dr_round_trip_jitter(dr_report.properties, "round_trip_jitter");
 
-        consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
-        consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
-        consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
-        consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
-      }
-    }
-
-    for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
-      for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
-        Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
-
-        const Builder::TimeStamp dw_enable_time =
-          get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
-        const Builder::TimeStamp dw_last_discovery_time =
-          get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
-
-        if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
-          auto delta = dw_last_discovery_time - dw_enable_time;
-          if (worker_report.max_discovery_time_delta < delta) {
-            worker_report.max_discovery_time_delta = delta;
-          }
-        } else {
-          ++worker_report.undermatched_writers;
+          consolidated_latency_stats = consolidate(consolidated_latency_stats, dr_latency.to_simple_stat_block());
+          consolidated_jitter_stats = consolidate(consolidated_jitter_stats, dr_jitter.to_simple_stat_block());
+          consolidated_round_trip_latency_stats = consolidate(consolidated_round_trip_latency_stats, dr_round_trip_latency.to_simple_stat_block());
+          consolidated_round_trip_jitter_stats = consolidate(consolidated_round_trip_jitter_stats, dr_round_trip_jitter.to_simple_stat_block());
         }
       }
+
+      for (CORBA::ULong j = 0; j < process_report.participants[i].publishers.length(); ++j) {
+        for (CORBA::ULong k = 0; k < process_report.participants[i].publishers[j].datawriters.length(); ++k) {
+          Builder::DataWriterReport& dw_report = process_report.participants[i].publishers[j].datawriters[k];
+
+          const Builder::TimeStamp dw_enable_time =
+            get_or_create_property(dw_report.properties, "enable_time", Builder::PVK_TIME)->value.time_prop();
+          const Builder::TimeStamp dw_last_discovery_time =
+            get_or_create_property(dw_report.properties, "last_discovery_time", Builder::PVK_TIME)->value.time_prop();
+
+          if (ZERO < dw_enable_time && ZERO < dw_last_discovery_time) {
+            auto delta = dw_last_discovery_time - dw_enable_time;
+            if (worker_report.max_discovery_time_delta < delta) {
+              worker_report.max_discovery_time_delta = delta;
+            }
+          } else {
+            ++worker_report.undermatched_writers;
+          }
+        }
+      }
     }
+  } catch (...) {
+    std::cerr << "Unknown exception caught trying to consolidate statistics" << std::endl;
+    return 5;
   }
 
   worker_report.latency_sample_count = consolidated_latency_stats.sample_count_;

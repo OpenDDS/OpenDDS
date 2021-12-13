@@ -37,6 +37,7 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/Version.h>
 
+#include <cstring>
 #ifdef OPENDDS_SAFETY_PROFILE
 #  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
@@ -163,6 +164,7 @@ static bool got_default_address = false;
 static bool got_bidir_giop = false;
 static bool got_thread_status_interval = false;
 static bool got_monitor = false;
+static bool got_type_object_encoding = false;
 static bool got_log_level = false;
 
 Service_Participant::Service_Participant()
@@ -208,8 +210,8 @@ Service_Participant::Service_Participant()
     bidir_giop_(true),
     monitor_enabled_(false),
     shut_down_(false),
-    shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT(""))
+    default_configuration_file_(ACE_TEXT("")),
+    type_object_encoding_(Encoding_Normal)
 {
   initialize();
 }
@@ -677,6 +679,15 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_security_flag = true;
 
 #endif
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSTypeObjectEncoding"))) != 0) {
+      type_object_encoding(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+      got_type_object_encoding = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSLogLevel"))) != 0) {
+      log_level.set_from_string(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+      got_log_level = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSLogLevel"))) != 0) {
       log_level.set_from_string(ACE_TEXT_ALWAYS_CHAR(currentArg));
@@ -1874,6 +1885,16 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSMonitor"), monitor_enabled_, bool)
     }
 
+    if (got_type_object_encoding) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSTypeObjectEncoding")));
+    } else {
+      String str;
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSTypeObjectEncoding"), str);
+      if (!str.empty()) {
+        type_object_encoding(str.c_str());
+      }
+    }
+
     if (got_log_level) {
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSLogLevel")));
     } else {
@@ -2725,7 +2746,7 @@ Service_Participant::add_discovery(Discovery_rch discovery)
 }
 
 void
-Service_Participant::set_shutdown_listener(ShutdownListener* listener)
+Service_Participant::set_shutdown_listener(RcHandle<ShutdownListener> listener)
 {
   shutdown_listener_ = listener;
 }
@@ -2911,6 +2932,58 @@ void
 Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
 {
   bit_autopurge_disposed_samples_delay_ = duration;
+}
+
+XTypes::TypeInformation
+Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant,
+                                          const DDS::BuiltinTopicKey_t& key) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_info(key);
+    }
+  }
+
+  return XTypes::TypeInformation();
+}
+
+XTypes::TypeObject
+Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_object(ti);
+    }
+  }
+
+  return XTypes::TypeObject();
+}
+
+void
+Service_Participant::type_object_encoding(const char* encoding)
+{
+  struct NameValue {
+    const char* name;
+    TypeObjectEncoding value;
+  };
+  static const NameValue entries[] = {
+    {"Normal", Encoding_Normal},
+    {"WriteOldFormat", Encoding_WriteOldFormat},
+    {"ReadOldFormat", Encoding_ReadOldFormat},
+  };
+  for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
+    if (0 == std::strcmp(entries[i].name, encoding)) {
+      type_object_encoding(entries[i].value);
+      return;
+    }
+  }
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Service_Participant::type_object_encoding: "
+             "invalid encoding %C\n", encoding));
 }
 
 } // namespace DCPS

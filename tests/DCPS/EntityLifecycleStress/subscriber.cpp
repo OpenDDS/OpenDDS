@@ -103,7 +103,7 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
 #ifdef ACE_HAS_CPP11
     while (!valid_data_seen_ && cv_.wait_for(lock, ms) != cv_status::timeout) {
 #else
-    while (!valid_data_seen_ && !(cv_.wait_until(deadline) == OpenDDS::DCPS::CvStatus_NoTimeout)) {
+    while (!valid_data_seen_ && cv_.wait_until(deadline) != OpenDDS::DCPS::CvStatus_Timeout) {
 #endif
     }
   }

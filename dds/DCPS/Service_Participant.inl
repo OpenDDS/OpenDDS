@@ -382,6 +382,19 @@ Service_Participant::use_bidir_giop() const
   return bidir_giop_;
 }
 
+ACE_INLINE
+Service_Participant::TypeObjectEncoding
+Service_Participant::type_object_encoding() const
+{
+  return type_object_encoding_;
+}
+
+ACE_INLINE
+void Service_Participant::type_object_encoding(TypeObjectEncoding encoding)
+{
+  type_object_encoding_ = encoding;
+}
+
 } // namespace DDS
 } // namespace OpenDDS
 

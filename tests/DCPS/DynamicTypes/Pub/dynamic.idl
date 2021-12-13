@@ -1,0 +1,208 @@
+#include <tao/BooleanSeq.pidl>
+
+module Dynamic {
+typedef sequence<boolean> bool_seq;
+typedef char char_arr[2];
+enum EnumType {V1, V2};
+typedef EnumType enum_arr[2];
+
+@final
+struct long_struct_final {
+  long my_long;
+};
+
+typedef long_struct_final long_struct_arr_final[2];
+
+@topic
+@final
+union inner_union_final switch (long) {
+  case 1: long l;
+  case 2: bool_seq my_alias_seq;
+  default: boolean b;
+};
+
+typedef sequence<inner_union_final> inner_union_seq_final;
+
+@final
+struct inner_struct_final {
+  inner_union_final iu;
+};
+
+@topic
+@final
+union outer_union_final switch (EnumType) {
+  case V1: inner_struct_final is;
+  case V2: inner_union_final mu;
+  default: boolean b;
+};
+
+@topic
+@final
+struct outer_struct_final {
+  inner_struct_final is;
+};
+
+@topic
+@final
+struct my_struct_final {
+  long_struct_arr_final my_long_struct_arr;
+  inner_union_seq_final my_inner_union_seq;
+  enum_arr my_enum_arr;
+  int8 my_int8;
+  uint8 my_uint8;
+  short my_short;
+  unsigned short my_ushort;
+  long my_long;
+  unsigned long my_ulong;
+  long long my_longlong;
+  unsigned long long my_ulonglong;
+  float my_float;
+  double my_double;
+  long double my_longdouble;
+  boolean my_boolean;
+  octet my_byte;
+  char my_char;
+  wchar my_wchar;
+  string my_string;
+  wstring my_wstring;
+  bool_seq my_alias_seq;
+  char_arr my_alias_array;
+  sequence<EnumType, 2> my_anon_seq;
+  short my_anon_arr[2];
+};
+
+// Appendable
+
+@appendable
+struct long_struct_appendable {
+  long my_long;
+};
+
+typedef long_struct_appendable long_struct_arr_appendable[2];
+
+@topic
+@appendable
+union inner_union_appendable switch (long) {
+  case 1: long l;
+  case 2: bool_seq my_alias_seq;
+  default: boolean b;
+};
+
+typedef sequence<inner_union_appendable> inner_union_seq_appendable;
+
+@appendable
+struct inner_struct_appendable {
+  inner_union_appendable iu;
+};
+
+@topic
+@appendable
+union outer_union_appendable switch (EnumType) {
+  case V1: inner_struct_appendable is;
+  case V2: inner_union_appendable mu;
+  default: boolean b;
+};
+
+@topic
+@appendable
+struct outer_struct_appendable {
+  inner_struct_appendable is;
+};
+
+@topic
+@appendable
+struct my_struct_appendable {
+  long_struct_arr_appendable my_long_struct_arr;
+  inner_union_seq_appendable my_inner_union_seq;
+  enum_arr my_enum_arr;
+  int8 my_int8;
+  uint8 my_uint8;
+  short my_short;
+  unsigned short my_ushort;
+  long my_long;
+  unsigned long my_ulong;
+  long long my_longlong;
+  unsigned long long my_ulonglong;
+  float my_float;
+  double my_double;
+  long double my_longdouble;
+  boolean my_boolean;
+  octet my_byte;
+  char my_char;
+  wchar my_wchar;
+  string my_string;
+  wstring my_wstring;
+  bool_seq my_alias_seq;
+  char_arr my_alias_array;
+  sequence<EnumType, 2> my_anon_seq;
+  short my_anon_arr[2];
+};
+
+// Mutable
+
+@mutable
+struct long_struct_mutable {
+  long my_long;
+};
+
+typedef long_struct_mutable long_struct_arr_mutable[2];
+
+@topic
+@mutable
+union inner_union_mutable switch (long) {
+  case 1: long l;
+  case 2: bool_seq my_alias_seq;
+  default: boolean b;
+};
+
+typedef sequence<inner_union_mutable> inner_union_seq_mutable;
+
+@mutable
+struct inner_struct_mutable {
+  inner_union_mutable iu;
+};
+
+@topic
+@mutable
+union outer_union_mutable switch (EnumType) {
+  case V1: inner_struct_mutable is;
+  case V2: inner_union_mutable mu;
+  default: boolean b;
+};
+
+@topic
+@mutable
+struct outer_struct_mutable {
+  inner_struct_mutable is;
+};
+
+@topic
+@mutable
+struct my_struct_mutable {
+  long_struct_arr_mutable my_long_struct_arr;
+  inner_union_seq_mutable my_inner_union_seq;
+  enum_arr my_enum_arr;
+  int8 my_int8;
+  uint8 my_uint8;
+  short my_short;
+  unsigned short my_ushort;
+  long my_long;
+  unsigned long my_ulong;
+  long long my_longlong;
+  unsigned long long my_ulonglong;
+  float my_float;
+  double my_double;
+  long double my_longdouble;
+  boolean my_boolean;
+  octet my_byte;
+  char my_char;
+  wchar my_wchar;
+  string my_string;
+  wstring my_wstring;
+  bool_seq my_alias_seq;
+  char_arr my_alias_array;
+  sequence<EnumType, 2> my_anon_seq;
+  short my_anon_arr[2];
+};
+
+};

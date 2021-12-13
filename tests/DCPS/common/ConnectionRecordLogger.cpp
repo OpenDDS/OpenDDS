@@ -13,23 +13,23 @@ namespace Test {
 #ifndef DDS_HAS_MINIMUM_BIT
 
 class Listener : public DDS::DataReaderListener {
-  void on_requested_deadline_missed (::DDS::DataReader_ptr,
-                                     const ::DDS::RequestedDeadlineMissedStatus&)
+  virtual void on_requested_deadline_missed (::DDS::DataReader_ptr,
+                                             const ::DDS::RequestedDeadlineMissedStatus&)
   {}
 
-  void on_requested_incompatible_qos (::DDS::DataReader_ptr,
-                                      const ::DDS::RequestedIncompatibleQosStatus&)
+  virtual void on_requested_incompatible_qos (::DDS::DataReader_ptr,
+                                              const ::DDS::RequestedIncompatibleQosStatus&)
   {}
 
-  void on_sample_rejected (::DDS::DataReader_ptr,
-                           const ::DDS::SampleRejectedStatus&)
+  virtual void on_sample_rejected (::DDS::DataReader_ptr,
+                                   const ::DDS::SampleRejectedStatus&)
   {}
 
-  void on_liveliness_changed (::DDS::DataReader_ptr,
-                              const ::DDS::LivelinessChangedStatus&)
+  virtual void on_liveliness_changed (::DDS::DataReader_ptr,
+                                      const ::DDS::LivelinessChangedStatus&)
   {}
 
-  void on_data_available (::DDS::DataReader_ptr reader)
+  virtual void on_data_available (::DDS::DataReader_ptr reader)
   {
     OpenDDS::DCPS::ConnectionRecordDataReader_var r = OpenDDS::DCPS::ConnectionRecordDataReader::_narrow(reader);
     if (!r) {
@@ -48,12 +48,12 @@ class Listener : public DDS::DataReaderListener {
     }
   }
 
-  void on_subscription_matched (::DDS::DataReader_ptr,
-                                const ::DDS::SubscriptionMatchedStatus&)
+  virtual void on_subscription_matched (::DDS::DataReader_ptr,
+                                        const ::DDS::SubscriptionMatchedStatus&)
   {}
 
-  void on_sample_lost (::DDS::DataReader_ptr,
-                       const ::DDS::SampleLostStatus&)
+  virtual void on_sample_lost (::DDS::DataReader_ptr,
+                              const ::DDS::SampleLostStatus&)
   {}
 };
 #endif

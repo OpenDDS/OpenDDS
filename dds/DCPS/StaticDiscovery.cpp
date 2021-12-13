@@ -1045,79 +1045,6 @@ void StaticEndpointManager::match(const GUID_t& writer, const GUID_t& reader)
       LogGuid(writer).c_str(), LogGuid(reader).c_str()));
   }
 
-  // 1. collect type info about the writer, which may be local or discovered
-  XTypes::TypeInformation* writer_type_info = 0;
-
-  const LocalPublicationIter lpi = local_publications_.find(writer);
-  DiscoveredPublicationIter dpi;
-  bool writer_local = false;
-  if (lpi != local_publications_.end()) {
-    writer_local = true;
-    writer_type_info = &lpi->second.type_info_;
-  } else if ((dpi = discovered_publications_.find(writer))
-             != discovered_publications_.end()) {
-    writer_type_info = &dpi->second.type_info_;
-  } else {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Undiscovered Writer\n"));
-    }
-    return; // Possible and ok, since lock is released
-  }
-
-  // 2. collect type info about the reader, which may be local or discovered
-  XTypes::TypeInformation* reader_type_info = 0;
-
-  const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
-  DiscoveredSubscriptionIter dsi;
-  bool reader_local = false;
-  if (lsi != local_subscriptions_.end()) {
-    reader_local = true;
-    reader_type_info = &lsi->second.type_info_;
-  } else if ((dsi = discovered_subscriptions_.find(reader))
-             != discovered_subscriptions_.end()) {
-    reader_type_info = &dsi->second.type_info_;
-  } else {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Undiscovered Reader\n"));
-    }
-    return; // Possible and ok, since lock is released
-  }
-
-  MatchingData md;
-
-  // if the type object is not in cache, send RPC request
-  md.writer = writer;
-  md.reader = reader;
-  md.time_added_to_map = MonotonicTimePoint::now();
-
-  if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
-      (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
-    if (!writer_local && reader_local) {
-      if (type_lookup_service_ &&
-          !type_lookup_service_->type_object_in_cache(
-            writer_type_info->minimal.typeid_with_size.type_id)) {
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Remote Writer\n"));
-        }
-        bool is_discovery_protected = false;
-        save_matching_data_and_get_typeobjects(
-          writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
-        return;
-      }
-    } else if (!reader_local && writer_local) {
-      if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(
-          reader_type_info->minimal.typeid_with_size.type_id)) {
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Remote Reader\n"));
-        }
-        bool is_discovery_protected = false;
-        save_matching_data_and_get_typeobjects(
-          reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
-        return;
-      }
-    }
-  }
-
   match_continue(writer, reader);
 }
 
@@ -1134,7 +1061,7 @@ void StaticEndpointManager::remove_expired_endpoints(
       if (DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::remove_expired_endpoints: "
           "clean up pending pair w: %C r: %C\n",
-          LogGuid(iter->second.writer).c_str(), LogGuid(iter->second.reader).c_str()));
+          LogGuid(iter->first.writer_).c_str(), LogGuid(iter->first.reader_).c_str()));
       }
       matching_data_buffer_.erase(iter++);
     } else {
@@ -1155,34 +1082,6 @@ void StaticEndpointManager::remove_expired_endpoints(
     } else {
       ++it;
     }
-  }
-}
-
-/// This assumes that lock_ is being held
-void StaticEndpointManager::match_continue(SequenceNumber rpc_sequence_number)
-{
-  if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match_continue: rpc seq: %q\n",
-      rpc_sequence_number.getValue()));
-  }
-
-  MatchingDataIter it;
-  for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match_continue: matches %q?\n",
-        it->second.rpc_sequence_number.getValue()));
-    }
-    if (it->second.rpc_sequence_number == rpc_sequence_number) {
-      const GUID_t& reader = it->second.reader;
-      const GUID_t& writer = it->second.writer;
-      matching_data_buffer_.erase(MatchingPair(writer, reader));
-      return match_continue(writer, reader);
-    }
-  }
-  if (DCPS_debug_level) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) StaticEndpointManager::match_continue: "
-      " rpc seq: %q: No data found in matching data buffer\n",
-      rpc_sequence_number.getValue()));
   }
 }
 
@@ -1593,53 +1492,6 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       }
     }
   }
-}
-
-void StaticEndpointManager::save_matching_data_and_get_typeobjects(
-  const XTypes::TypeInformation* type_info,
-  MatchingData& md, const MatchingPair& mp,
-  const GUID_t& remote_id,
-  bool is_discovery_protected)
-{
-  const SequenceNumber seqnum = ++type_lookup_service_sequence_number_;
-  if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG,
-      "(%P|%t) StaticEndpointManager::save_matching_data_and_get_typeobjects: "
-      "remote: %C seq: %q\n", LogGuid(remote_id).c_str(), seqnum.getValue()));
-  }
-  md.rpc_sequence_number = seqnum;
-  MatchingDataIter md_it = matching_data_buffer_.find(mp);
-  if (md_it != matching_data_buffer_.end()) {
-    md_it->second = md;
-  } else {
-    matching_data_buffer_.insert(std::make_pair(mp, md));
-  }
-  // Store an entry for the first request
-  TypeIdOrigSeqNumber orig_req_data;
-  std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
-  orig_req_data.type_id = type_info->minimal.typeid_with_size.type_id;
-  orig_req_data.seq_number = md.rpc_sequence_number;
-  orig_req_data.secure = false;
-  orig_req_data.time_started = md.time_added_to_map;
-  orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, orig_req_data));
-
-  XTypes::TypeIdentifierSeq type_ids;
-  if (type_info->minimal.dependent_typeid_count == -1 ||
-      type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
-    type_ids.append(type_info->minimal.typeid_with_size.type_id);
-
-    // Get dependencies of topic type
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
-  } else {
-    type_ids.length(type_info->minimal.dependent_typeid_count + 1);
-    type_ids[0] = type_info->minimal.typeid_with_size.type_id;
-    for (unsigned i = 1; i <= (unsigned)type_info->minimal.dependent_typeid_count; ++i) {
-      type_ids[i] = type_info->minimal.dependent_typeids[i - 1].type_id;
-    }
-    // Get TypeObjects of topic type and all of its dependencies
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
-  }
-  type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
 }
 
 GUID_t StaticEndpointManager::make_topic_guid()

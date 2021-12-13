@@ -38,6 +38,12 @@ class OpenDDS_Rtps_Export RtpsDiscoveryConfig : public OpenDDS::DCPS::RcObject {
 public:
   typedef OPENDDS_VECTOR(OPENDDS_STRING) AddrVec;
 
+  enum UseXTypes {
+    XTYPES_NONE = 0, ///< Turn off support for XTypes
+    XTYPES_MINIMAL, ///< Only use minimal TypeObjects
+    XTYPES_COMPLETE ///< Use both minimal and complete TypeObjects
+  };
+
   RtpsDiscoveryConfig();
 
   DCPS::TimeDuration resend_period() const
@@ -104,6 +110,17 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     security_unsecure_lease_duration_ = period;
+  }
+
+  size_t max_participants_in_authentication() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    return max_participants_in_authentication_;
+  }
+  void max_participants_in_authentication(size_t m)
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(lock_);
+    max_participants_in_authentication_ = m;
   }
 #endif
 
@@ -297,6 +314,23 @@ public:
     }
   }
 
+  u_short port_common(DDS::DomainId_t domain) const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, 0);
+    // Ports are set by the formulas in RTPS v2.1 Table 9.8
+    return  pb_ + (dg_ * domain);
+  }
+
+  ACE_INET_Addr multicast_address(u_short port_common) const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+
+    ACE_INET_Addr addr = default_multicast_group_;
+    // Ports are set by the formulas in RTPS v2.1 Table 9.8
+    addr.set_port_number(port_common + d0_);
+    return addr;
+  }
+
 #ifdef ACE_HAS_IPV6
   ACE_INET_Addr ipv6_spdp_local_address() const
   {
@@ -357,6 +391,17 @@ public:
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::ipv6_default_multicast_group set failed because address family is not AF_INET6\n")));
     }
   }
+
+  ACE_INET_Addr ipv6_multicast_address(u_short port_common) const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ACE_INET_Addr());
+
+    ACE_INET_Addr addr = ipv6_default_multicast_group_;
+    // Ports are set by the formulas in RTPS v2.1 Table 9.8
+    addr.set_port_number(port_common + d0_);
+    return addr;
+  }
+
 #endif
 
   AddrVec spdp_send_addrs() const
@@ -556,11 +601,39 @@ public:
 
   bool use_xtypes() const
   {
-    return use_xtypes_.value();
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_xtypes_ != XTYPES_NONE;
   }
-  void use_xtypes(bool use_xtypes)
+  void use_xtypes(UseXTypes use_xtypes)
   {
     use_xtypes_ = use_xtypes;
+  }
+  void use_xtypes(const char* str)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    struct NameValue {
+      const char* name;
+      UseXTypes value;
+    };
+    static const NameValue entries[] = {
+      {"no", XTYPES_NONE},
+      {"minimal", XTYPES_MINIMAL},
+      {"complete", XTYPES_COMPLETE}
+    };
+
+    for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
+      if (0 == std::strcmp(entries[i].name, str)) {
+        use_xtypes(entries[i].value);
+        return;
+      }
+    }
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::use_xtypes -")
+               ACE_TEXT(" invalid XTypes configuration: %C\n"), str));
+  }
+  bool use_xtypes_complete() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, bool());
+    return use_xtypes_ == XTYPES_COMPLETE;
   }
 
   DCPS::TimeDuration sedp_heartbeat_period() const
@@ -678,6 +751,7 @@ private:
   DCPS::TimeDuration max_lease_duration_;
 #ifdef OPENDDS_SECURITY
   DCPS::TimeDuration security_unsecure_lease_duration_;
+  size_t max_participants_in_authentication_;
 #endif
   DCPS::TimeDuration lease_extension_;
   u_short pb_, dg_, pg_, d0_, d1_, dx_;
@@ -712,7 +786,7 @@ private:
   /// Should participant user data QoS only be sent when the message is secure?
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> secure_participant_user_data_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_xtypes_;
+  UseXTypes use_xtypes_;
   DCPS::TimeDuration sedp_heartbeat_period_;
   DCPS::TimeDuration sedp_nak_response_delay_;
   DCPS::TimeDuration sedp_send_delay_;
@@ -854,7 +928,8 @@ public:
   }
 
   bool use_xtypes() const { return config_->use_xtypes(); }
-  void use_xtypes(bool xt) { config_->use_xtypes(xt); }
+  void use_xtypes(RtpsDiscoveryConfig::UseXTypes val) { return config_->use_xtypes(val); }
+  bool use_xtypes_complete() const { return config_->use_xtypes_complete(); }
 
   RtpsDiscoveryConfig_rch config() const { return config_; }
 
@@ -899,6 +974,8 @@ public:
 
   bool update_domain_participant_qos(DDS::DomainId_t domain, const GUID_t& participant,
     const DDS::DomainParticipantQos& qos);
+
+  bool has_domain_participant(DDS::DomainId_t domain, const GUID_t& local, const GUID_t& remote) const;
 
   DCPS::TopicStatus assert_topic(
     GUID_t& topicId,

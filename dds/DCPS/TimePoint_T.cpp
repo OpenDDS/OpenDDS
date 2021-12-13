@@ -2,6 +2,8 @@
 
 #ifdef ACE_HAS_CPP11
 #  include <limits>
+#else
+#  include <ace/Numeric_Limits.h>
 #endif /* ACE_HAS_CPP11*/
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

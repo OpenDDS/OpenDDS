@@ -310,21 +310,25 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
 
   if (cfg.use_multicast_) {
     if (!set_socket_multicast_ttl(unicast_socket_, cfg.ttl_)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: ")
-                        ACE_TEXT("failed to set TTL: %d\n"),
-                        cfg.ttl_),
-                       false);
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("RtpsUdpDataLink::open: ")
+                   ACE_TEXT("failed to set TTL: %d\n"),
+                   cfg.ttl_));
+      }
+      return false;
     }
 #ifdef ACE_HAS_IPV6
     if (!set_socket_multicast_ttl(ipv6_unicast_socket_, cfg.ttl_)) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: ")
-                        ACE_TEXT("failed to set TTL: %d\n"),
-                        cfg.ttl_),
-                       false);
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("RtpsUdpDataLink::open: ")
+                   ACE_TEXT("failed to set TTL: %d\n"),
+                   cfg.ttl_));
+      }
+      return false;
     }
 #endif
   }
@@ -336,11 +340,13 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                                 (void *) &snd_size,
                                 sizeof(snd_size)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the send buffer size to %d errno %m\n"),
-                        snd_size),
-                       false);
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("RtpsUdpDataLink::open: failed to set the send buffer size to %d errno %m\n"),
+                   snd_size));
+      }
+      return false;
     }
 #ifdef ACE_HAS_IPV6
     if (ipv6_unicast_socket_.set_option(SOL_SOCKET,
@@ -348,11 +354,13 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                                         (void *) &snd_size,
                                         sizeof(snd_size)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the send buffer size to %d errno %m\n"),
-                        snd_size),
-                       false);
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("RtpsUdpDataLink::open: failed to set the send buffer size to %d errno %m\n"),
+                   snd_size));
+      }
+      return false;
     }
 #endif
   }
@@ -364,11 +372,13 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                                 (void *) &rcv_size,
                                 sizeof(int)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
-                        rcv_size),
-                       false);
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
+                   rcv_size));
+      }
+      return false;
     }
 #ifdef ACE_HAS_IPV6
     if (ipv6_unicast_socket_.set_option(SOL_SOCKET,
@@ -376,11 +386,13 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
                                         (void *) &rcv_size,
                                         sizeof(int)) < 0
         && errno != ENOTSUP) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) ERROR: ")
-                        ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
-                        rcv_size),
-                       false);
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("RtpsUdpDataLink::open: failed to set the receive buffer size to %d errno %m\n"),
+                   rcv_size));
+      }
+      return false;
     }
 #endif
   }
@@ -390,10 +402,12 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   if (start(send_strategy_,
             receive_strategy_, false) != 0) {
     stop_i();
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("UdpDataLink::open: start failed!\n")),
-                     false);
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: ")
+                 ACE_TEXT("UdpDataLink::open: start failed!\n")));
+    }
+    return false;
   }
 
   NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
@@ -454,12 +468,16 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
       if (get_reactor()->register_handler(multicast_socket_.get_handle(),
                                           receive_strategy().in(),
                                           ACE_Event_Handler::READ_MASK) != 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register multicast input handler\n")));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register multicast input handler\n")));
+        }
       }
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+      }
     }
   }
 
@@ -479,12 +497,16 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface& nic,
       if (get_reactor()->register_handler(ipv6_multicast_socket_.get_handle(),
                                           receive_strategy().in(),
                                           ACE_Event_Handler::READ_MASK) != 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register ipv6 multicast input handler\n")));
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register ipv6 multicast input handler\n")));
+        }
       }
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+      }
     }
   }
 #endif
@@ -505,9 +527,11 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
     if (0 == multicast_socket_.leave(config().multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
       joined_interfaces_.erase(nic.name());
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+      }
     }
   }
 
@@ -524,9 +548,11 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface& nic)
     if (0 == ipv6_multicast_socket_.leave(config().ipv6_multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic.name().c_str()))) {
       ipv6_joined_interfaces_.erase(nic.name());
     } else {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_ipv6_multicast_group(): ")
-                 ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_ipv6_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+      }
     }
   }
 #endif
@@ -547,7 +573,9 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
                                  bool add_ref)
 {
   if (unicast_addresses.empty() && multicast_addresses.empty()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::update_locators: no addresses for %C\n"), LogGuid(remote_id).c_str()));
+    if (DCPS_debug_level > 0) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::update_locators: no addresses for %C\n"), LogGuid(remote_id).c_str()));
+    }
   }
 
   remove_locator_and_bundling_cache(remote_id);
@@ -1066,9 +1094,8 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
   }
 
   if (Transport_debug_level > 5) {
-    const GuidConverter pub(pub_id);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert() - "
-      "pub_id %C seq %q frag %d\n", OPENDDS_STRING(pub).c_str(), seq.getValue(),
+      "pub_id %C seq %q frag %d\n", LogGuid(pub_id).c_str(), seq.getValue(),
       (int)tqe->is_fragment()));
   }
 
@@ -1078,10 +1105,9 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
     if (rce) {
       send_buff->insert_fragment(seq, rce->last_fragment(), q, chain);
     } else if (Transport_debug_level) {
-      const GuidConverter pub(pub_id);
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert()"
         " - ERROR: couldn't get fragment number for pub_id %C seq %q\n",
-        OPENDDS_STRING(pub).c_str(), seq.getValue()));
+        LogGuid(pub_id).c_str(), seq.getValue()));
     }
   } else {
     send_buff->insert(seq, q, chain);
@@ -4606,7 +4632,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     return;
   }
 
-  if (config().rtps_relay_only()) {
+  if (config().rtps_relay_only() && std::memcmp(&local.guidPrefix, &remote.guidPrefix, sizeof(GuidPrefix_t)) != 0) {
     if (config().rtps_relay_address() != ACE_INET_Addr()) {
       addresses.insert(config().rtps_relay_address());
       entry.value().addrs_.insert(config().rtps_relay_address());
@@ -4666,7 +4692,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
     ice_addr = ICE::Agent::instance()->get_address(endpoint, local, remote);
   }
@@ -4695,7 +4721,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   entry.value().expires_ = normal_addrs_expires;
 }
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {
   return impl().get_ice_endpoint();
 }

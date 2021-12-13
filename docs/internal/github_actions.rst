@@ -125,7 +125,7 @@ As a result, they only build and run a subset of the tests in their final jobs, 
 These jobs are prefixed by:
 
 - *compiler_* which runs the :ghfile:`tests/DCPS/Compiler` tests.
-- *unit_* which runs the unit tests located in :ghfile:`tests/DCPS/UnitTests` and :ghfile:`tests/unit-tests`.
+- *unit_* which runs the unit tests located in :ghfile:`tests/unit-tests`.
 - *messenger_* which runs the tests in :ghfile:`tests/DCPS/Messenger` and :ghfile:`tests/DCPS/C++11/Messenger`.
 
 To shorten the runtime of the continuous integration, some other builds will not run the test suite.

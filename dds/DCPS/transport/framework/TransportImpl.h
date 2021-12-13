@@ -163,7 +163,7 @@ public:
     DataLink_rch link_;
   };
 
-  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
   virtual void rtps_relay_only_now(bool /*flag*/) {}
   virtual void use_rtps_relay_now(bool /*flag*/) {}
   virtual void use_ice_now(bool /*flag*/) {}

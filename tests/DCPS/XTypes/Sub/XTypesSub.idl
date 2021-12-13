@@ -11,7 +11,7 @@ struct PlainCdrStruct {
   long value;
 };
 
-// Final structues
+// Final structures
 
 @topic
 @final
@@ -19,7 +19,7 @@ struct FinalStructSub {
   @key long key;
 };
 
-// Appendable structues
+// Appendable structures
 
 @topic
 @appendable
@@ -27,7 +27,7 @@ struct AppendableStruct {
   @key long key;
 };
 
-// Mutable structues
+// Mutable structures
 
 @topic
 @mutable

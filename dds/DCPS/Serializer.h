@@ -13,11 +13,11 @@
  *       const Encoding& encoding, size_t& size, const Type& value);
  *     Get the byte size of the representation of value.
  *
- *   bool operator<<(Serializer& serializer, Type& value);
+ *   bool operator<<(Serializer& serializer, const Type& value);
  *     Tries to encode value into the stream of the serializer. Returns true if
  *     successful, else false.
  *
- *   bool operator>>(Serializer& serializer, const Type& value);
+ *   bool operator>>(Serializer& serializer, Type& value);
  *     Tries to decodes a representation of Type located at the current
  *     position of the stream and use that to set value. Returns true if
  *     successful, else false.
@@ -162,6 +162,17 @@ public:
   ///@}
 
   ///@{
+  /**
+   * Should the XCDR2 sequence DHEADER be skipped?
+   * This is not spec compliant -- used for compatibility with earlier
+   * OpenDDS versions that had a bug.
+   * Only used for XTypes::TypeObject and related structs.
+   */
+  bool skip_sequence_dheader() const;
+  void skip_sequence_dheader(bool value);
+  ///@}
+
+  ///@{
   ///@}
   /// Return the maximum alignment dictated by the alignment policy.
   size_t max_align() const;
@@ -189,6 +200,7 @@ private:
   Endianness endianness_;
   Alignment alignment_;
   bool zero_init_padding_;
+  bool skip_sequence_dheader_;
   XcdrVersion xcdr_version_;
 };
 
@@ -255,6 +267,11 @@ public:
    */
   bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
 
+  /**
+   * Like to_encoding, but without an expected extensibility.
+   */
+  bool to_any_encoding(Encoding& encoding);
+
   String to_string() const;
 
   static bool set_encapsulation_options(Message_Block_Ptr& mb);
@@ -264,6 +281,8 @@ private:
   Kind kind_;
   /// The last two bytes as a big endian integer
   ACE_CDR::UShort options_;
+
+  bool to_encoding_i(Encoding& encoding, Extensibility* expected_extensibility_ptr);
 };
 
 class Serializer;
@@ -349,6 +368,10 @@ public:
 
   // EMHEADER must understand flag
   static const ACE_CDR::ULong emheader_must_understand = 1U << 31U;
+
+  /// Maximum value for member id.
+  static const ACE_CDR::ULong MEMBER_ID_MAX = 0x0FFFFFFF;
+  static const ACE_CDR::ULong MEMBER_ID_MASK = MEMBER_ID_MAX;
 
   /**
    * Constructor with a message block chain.  This installs the
@@ -439,6 +462,11 @@ public:
 
   /// Examine the logical writing position of the stream.
   size_t wpos() const { return wpos_; }
+
+  ACE_Message_Block* current() const
+  {
+    return current_;
+  }
 
   /**
    * Read basic IDL types arrays
@@ -752,6 +780,18 @@ public:
 
   bool peek(ACE_CDR::ULong& t);
 
+  // This is used by DynamicData and must have all reading-related members of
+  // of Serializer for DynamicData to work correctly.
+  struct RdState {
+    explicit RdState(unsigned char shift = 0, size_t pos = 0)
+      : align_rshift(shift), rpos(pos) {}
+    unsigned char align_rshift;
+    size_t rpos;
+  };
+
+  RdState rdstate() const;
+  void rdstate(const RdState& state);
+
 private:
   ///@{
   /// Read an array of values from the chain.
@@ -867,6 +907,18 @@ namespace IDL {
     DistinctType(T& val) : val_(&val) {}
     operator T&() const { return *val_; }
   };
+}
+
+template<typename Type>
+void set_default(Type&)
+{
+  OPENDDS_ASSERT(false);
+}
+
+template<typename Type, typename Tag>
+void set_default(IDL::DistinctType<Type, Tag>)
+{
+  OPENDDS_ASSERT(false);
 }
 
 // predefined type methods

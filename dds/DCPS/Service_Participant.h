@@ -50,7 +50,7 @@ class DataDurabilityCache;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
-class ShutdownListener {
+class ShutdownListener : public virtual RcObject {
 public:
   virtual ~ShutdownListener() {}
   virtual void notify_shutdown() = 0;
@@ -94,7 +94,7 @@ public:
 
   JobQueue_rch job_queue() const;
 
-  void set_shutdown_listener(ShutdownListener* listener);
+  void set_shutdown_listener(RcHandle<ShutdownListener> listener);
 
   /**
    * Initialize the DDS client environment and get the
@@ -440,6 +440,23 @@ public:
   DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
   void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
+  /**
+   * Get TypeInformation of a remote entity given the corresponding BuiltinTopicKey_t.
+   */
+  XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
+                                               const DDS::BuiltinTopicKey_t& key) const;
+
+  /**
+   * Get TypeObject for a given TypeIdentifier.
+   */
+  XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const;
+
+  enum TypeObjectEncoding { Encoding_Normal, Encoding_WriteOldFormat, Encoding_ReadOldFormat };
+  TypeObjectEncoding type_object_encoding() const;
+  void type_object_encoding(TypeObjectEncoding encoding);
+  void type_object_encoding(const char* encoding);
+
 private:
 
   /// Initialize default qos.
@@ -740,7 +757,7 @@ private:
   /// Used to track state of service participant
   bool shut_down_;
 
-  ShutdownListener* shutdown_listener_;
+  RcHandle<ShutdownListener> shutdown_listener_;
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;
@@ -758,6 +775,8 @@ private:
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
+
+  TypeObjectEncoding type_object_encoding_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

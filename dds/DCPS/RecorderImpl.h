@@ -96,6 +96,8 @@ public:
 
   void remove_all_associations();
 
+  void add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti);
+
 #if !defined (DDS_HAS_MINIMUM_BIT)
   // implement Recoder
   virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId&     id,
@@ -137,7 +139,7 @@ public:
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/);
 
-  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
 
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
@@ -150,6 +152,10 @@ private:
   /// Lookup the instance handles by the publication repo ids
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
+
+  XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
+  void check_encap(bool b) { check_encap_ = b; }
+  bool check_encap() const { return check_encap_; }
 
   DDS::DataReaderQos qos_;
 
@@ -196,6 +202,10 @@ private:
 
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
+
+  typedef OPENDDS_MAP(PublicationId, XTypes::DynamicType_rch) DynamicTypeByPubId;
+  DynamicTypeByPubId dt_map_;
+  bool check_encap_;
 };
 
 

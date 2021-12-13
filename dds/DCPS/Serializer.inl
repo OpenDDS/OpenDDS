@@ -93,6 +93,18 @@ void Encoding::zero_init_padding(bool value)
 }
 
 ACE_INLINE
+bool Encoding::skip_sequence_dheader() const
+{
+  return skip_sequence_dheader_;
+}
+
+ACE_INLINE
+void Encoding::skip_sequence_dheader(bool value)
+{
+  skip_sequence_dheader_ = value;
+}
+
+ACE_INLINE
 size_t Encoding::max_align() const
 {
   return static_cast<size_t>(alignment_);
@@ -1720,6 +1732,20 @@ ACE_INLINE
 void Serializer::set_construction_status(ConstructionStatus cs)
 {
   construction_status_ = cs;
+}
+
+ACE_INLINE
+Serializer::RdState Serializer::rdstate() const
+{
+  RdState state(align_rshift_, rpos_);
+  return state;
+}
+
+ACE_INLINE
+void Serializer::rdstate(const RdState& state)
+{
+  align_rshift_ = state.align_rshift;
+  rpos_ = state.rpos;
 }
 
 } // namespace DCPS

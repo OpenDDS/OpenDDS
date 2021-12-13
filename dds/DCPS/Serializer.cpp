@@ -75,18 +75,21 @@ String endianness_to_string(Endianness endianness)
 
 Encoding::Encoding()
   : endianness_(ENDIAN_NATIVE)
+  , skip_sequence_dheader_(false)
 {
   kind(KIND_XCDR1);
 }
 
 Encoding::Encoding(Kind k, Endianness endianness)
   : endianness_(endianness)
+  , skip_sequence_dheader_(false)
 {
   kind(k);
 }
 
 Encoding::Encoding(Kind k, bool swap_bytes)
   : endianness_(swap_bytes ? ENDIAN_NONNATIVE : ENDIAN_NATIVE)
+  , skip_sequence_dheader_(false)
 {
   kind(k);
 }
@@ -150,6 +153,19 @@ bool EncapsulationHeader::from_encoding(
 bool EncapsulationHeader::to_encoding(
   Encoding& encoding, Extensibility expected_extensibility)
 {
+  return to_encoding_i(encoding, &expected_extensibility);
+}
+
+bool EncapsulationHeader::to_any_encoding(Encoding& encoding)
+{
+  return to_encoding_i(encoding, 0);
+}
+
+bool EncapsulationHeader::to_encoding_i(
+  Encoding& encoding, Extensibility* expected_extensibility_ptr)
+{
+  Extensibility expected_extensibility = expected_extensibility_ptr ?
+    *expected_extensibility_ptr : FINAL; // Placeholder, doesn't matter
   bool wrong_extensibility = true;
   switch (kind_) {
   case KIND_CDR_BE:
@@ -220,7 +236,7 @@ bool EncapsulationHeader::to_encoding(
     return false;
   }
 
-  if (wrong_extensibility) {
+  if (expected_extensibility_ptr && wrong_extensibility) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
         ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),
@@ -755,6 +771,10 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
 
 bool Serializer::write_parameter_id(const unsigned id, const size_t size, const bool must_understand)
 {
+  if (static_cast<ACE_CDR::ULong>(id) > MEMBER_ID_MAX) {
+    return false;
+  }
+
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
     if (!align_w(xcdr1_pid_alignment)) {

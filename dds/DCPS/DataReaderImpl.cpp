@@ -1320,8 +1320,7 @@ DataReaderImpl::enable()
     typesupport->to_type_info(type_info);
 
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    type_lookup_service->add_type_objects_to_cache(*typesupport);
-
+    typesupport->add_types(type_lookup_service);
     typesupport->populate_dependencies(type_lookup_service);
 
     RepoId subscription_id =
@@ -3407,7 +3406,7 @@ DataReaderImpl::update_locators(const RepoId& writerId,
   TransportClient::update_locators(writerId, locators);
 }
 
-ICE::Endpoint*
+WeakRcHandle<ICE::Endpoint>
 DataReaderImpl::get_ice_endpoint()
 {
   return TransportClient::get_ice_endpoint();
