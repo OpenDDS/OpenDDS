@@ -44,12 +44,12 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey : public RcObject {
 
   bool operator<(const LocatorCacheKey& rhs) const
   {
-    return std::memcmp(&remote_, &rhs.remote_, 2 * sizeof (OpenDDS::DCPS::GUID_t) + sizeof (bool)) < 0;
+    return std::memcmp(static_cast<const void*>(&remote_), static_cast<const void*>(&rhs.remote_), 2 * sizeof (OpenDDS::DCPS::GUID_t) + sizeof (bool)) < 0;
   }
 
   bool operator==(const LocatorCacheKey& rhs) const
   {
-    return std::memcmp(&remote_, &rhs.remote_, 2 * sizeof (OpenDDS::DCPS::GUID_t) + sizeof (bool)) == 0;
+    return std::memcmp(static_cast<const void*>(&remote_), static_cast<const void*>(&rhs.remote_), 2 * sizeof (OpenDDS::DCPS::GUID_t) + sizeof (bool)) == 0;
   }
 
   LocatorCacheKey& operator=(const LocatorCacheKey& rhs)
