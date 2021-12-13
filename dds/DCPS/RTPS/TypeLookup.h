@@ -129,7 +129,7 @@ struct TypeLookup_Return { //IDL: union switch (long)
 
 // @final @RPCRequestType
 struct TypeLookup_Reply {
-  DDS::RPC::ReplyHeader header;
+  DDS::RPC::ResponseHeader header;
   TypeLookup_Return _cxx_return;
 
   TypeLookup_Reply()

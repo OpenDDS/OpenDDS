@@ -2322,20 +2322,18 @@ namespace XTypes {
     TypeIdentifierWithDependencies minimal;
     TypeIdentifierWithDependencies complete;
   };
+  typedef Sequence<TypeInformation> TypeInformationSeq;
 
   OpenDDS_Dcps_Export
-  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object,
-                                    const DCPS::Encoding* encoding_option = 0);
+  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object);
 
   template <typename T>
-  void serialize_type_info(const TypeInformation& type_info, T& seq,
-                           const DCPS::Encoding* encoding_option = 0)
+  void serialize_type_info(const TypeInformation& type_info, T& seq)
   {
-    const DCPS::Encoding& encoding = encoding_option ? *encoding_option : get_typeobject_encoding();
-    const size_t sz = DCPS::serialized_size(encoding, type_info);
+    const size_t sz = DCPS::serialized_size(XTypes::get_typeobject_encoding(), type_info);
     seq.length(static_cast<unsigned>(sz));
     DCPS::MessageBlockHelper<T> helper(seq);
-    DCPS::Serializer serializer(helper, encoding);
+    DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer << type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: serialize_type_info ")
                  ACE_TEXT("serialization of type information failed.\n")));
@@ -2343,16 +2341,14 @@ namespace XTypes {
   }
 
   template <typename T>
-  bool deserialize_type_info(TypeInformation& type_info, const T& seq)
+  void deserialize_type_info(TypeInformation& type_info, const T& seq)
   {
     DCPS::MessageBlockHelper<T> helper(seq);
     DCPS::Serializer serializer(helper, XTypes::get_typeobject_encoding());
     if (!(serializer >> type_info)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: deserialize_type_info ")
                  ACE_TEXT("deserialization of type information failed.\n")));
-      return false;
     }
-    return true;
   }
 
   OpenDDS_Dcps_Export
@@ -2433,15 +2429,10 @@ bool operator>>(Serializer& strm, XTypes::Optional<T>& opt)
 }
 
 
-// XCDR2 encoding rule 12 - Sequences not "of primitive element type"
-
 template<typename T>
 void serialized_size(const Encoding& encoding, size_t& size,
                      const XTypes::Sequence<T>& seq)
 {
-  if (!encoding.skip_sequence_dheader()) {
-    serialized_size_delimiter(encoding, size);
-  }
   primitive_serialized_size_ulong(encoding, size);
   for (ACE_CDR::ULong i = 0; i < seq.length(); ++i) {
     serialized_size(encoding, size, seq[i]);
@@ -2451,13 +2442,6 @@ void serialized_size(const Encoding& encoding, size_t& size,
 template<typename T>
 bool operator<<(Serializer& strm, const XTypes::Sequence<T>& seq)
 {
-  if (!strm.encoding().skip_sequence_dheader()) {
-    size_t total_size = 0;
-    serialized_size(strm.encoding(), total_size, seq);
-    if (!strm.write_delimiter(total_size)) {
-      return false;
-    }
-  }
   const ACE_CDR::ULong length = seq.length();
   if (!(strm << length)) {
     return false;
@@ -2473,71 +2457,35 @@ bool operator<<(Serializer& strm, const XTypes::Sequence<T>& seq)
 template<typename T>
 bool operator>>(Serializer& strm, XTypes::Sequence<T>& seq)
 {
-  size_t total_size = 0;
-  if (!strm.read_delimiter(total_size)) {
-    return false;
-  }
-
-  // special cases for compatibility with older versions that encoded this
-  // sequence incorrectly - if the DHeader was read as a 0, it's an empty
-  // sequence although it should have been encoded as DHeader (4) + Length (0)
-  if (total_size == 0) {
-    seq.length(0);
-    return true;
-  }
-
-  if (total_size < 4) {
-    return false;
-  }
-
-  const size_t end_of_seq = strm.rpos() + total_size;
   ACE_CDR::ULong length;
   if (!(strm >> length)) {
     return false;
   }
-
-  if (length > strm.length()) {
-    // if encoded incorrectly, the first 4 bytes of the elements were read
-    // as if they were the length - this may end up being larger than the
-    // number of bytes remaining in the Serializer
-    return false;
-  }
-
   seq.length(length);
   for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (!(strm >> seq[i])) {
       return false;
     }
   }
-  return strm.skip(end_of_seq - strm.rpos());
+  return true;
 }
 
 
 // non-template overloads for sequences of basic types:
-// XCDR2 encoding rule 11 - Sequences of primitive element type
 
-OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq);
-OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::LBoundSeq& seq);
-OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::LBoundSeq& seq);
 
-OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::SBoundSeq& seq);
-OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::SBoundSeq& seq);
-OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::SBoundSeq& seq);
 
-OpenDDS_Dcps_Export
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::UnionCaseLabelSeq& seq);
-OpenDDS_Dcps_Export
 bool operator<<(Serializer& strm, const XTypes::UnionCaseLabelSeq& seq);
-OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::UnionCaseLabelSeq& seq);
 
 

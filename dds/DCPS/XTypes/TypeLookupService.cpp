@@ -47,7 +47,7 @@ void TypeLookupService::get_type_objects(const TypeIdentifierSeq& type_ids,
                                          TypeIdentifierTypeObjectPairSeq& types) const
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  for (unsigned i = 0; i < type_ids.length(); ++i) {
+  for (CORBA::ULong i = 0; i < type_ids.length(); ++i) {
     TypeMap::const_iterator pos = type_map_.find(type_ids[i]);
     if (pos != type_map_.end()) {
       types.append(TypeIdentifierTypeObjectPair(pos->first, pos->second));
@@ -118,7 +118,7 @@ void TypeLookupService::get_type_dependencies_i(const TypeIdentifierSeq& type_id
 void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObjectPairSeq& types)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  for (unsigned i = 0; i < types.length(); ++i) {
+  for (ACE_UINT32 i = 0; i < types.length(); ++i) {
     const TypeMap::iterator pos = type_map_.find(types[i].type_identifier);
     if (pos == type_map_.end()) {
       type_map_.insert(std::make_pair(types[i].type_identifier, types[i].type_object));
@@ -126,13 +126,15 @@ void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObject
   }
 }
 
-void TypeLookupService::add(TypeMap::const_iterator begin, TypeMap::const_iterator end)
+void TypeLookupService::add_type_objects_to_cache(const DCPS::TypeSupportImpl& typesupport)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-  type_map_.insert(begin, end);
+  // TODO: This populates the map N times instead of 1.
+  const XTypes::TypeMap& minimal_type_map = typesupport.getMinimalTypeMap();
+  minimal_type_map_.insert(minimal_type_map.begin(), minimal_type_map.end());
 }
 
-void TypeLookupService::add(const TypeIdentifier& ti, const TypeObject& tobj)
+void TypeLookupService::add_type_objects_to_cache(const TypeIdentifier& ti, const TypeObject& tobj)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   TypeMap::const_iterator pos = type_map_.find(ti);

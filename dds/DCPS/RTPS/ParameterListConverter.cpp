@@ -46,25 +46,14 @@ namespace {
 
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info)
   {
-    if (!XTypes::deserialize_type_info(type_info, param.type_information())) {
-      type_info.minimal.typeid_with_size.type_id = XTypes::TypeIdentifier();
-      type_info.complete.typeid_with_size.type_id = XTypes::TypeIdentifier();
-    }
+    XTypes::deserialize_type_info(type_info, param.type_information());
   }
 
   void add_type_info_param(ParameterList& param_list, const XTypes::TypeInformation& type_info)
   {
     Parameter param;
     DDS::OctetSeq seq;
-    if (TheServiceParticipant->type_object_encoding() == DCPS::Service_Participant::Encoding_WriteOldFormat) {
-      DCPS::Encoding encoding = XTypes::get_typeobject_encoding();
-      encoding.skip_sequence_dheader(true);
-      XTypes::serialize_type_info(type_info, seq, &encoding);
-
-    } else {
-      XTypes::serialize_type_info(type_info, seq);
-    }
-
+    XTypes::serialize_type_info(type_info, seq);
     param.type_information(seq);
     add_param(param_list, param);
   }
