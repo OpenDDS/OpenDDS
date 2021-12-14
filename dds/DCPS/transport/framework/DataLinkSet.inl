@@ -39,6 +39,8 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
   TransportSendElement* send_element = 0;
   if (map_copy.size()) {
     send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
+  } else if (sample->get_send_listener()) {
+    sample->get_send_listener()->data_dropped(sample, true);
   }
 
   for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
