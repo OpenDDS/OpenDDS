@@ -298,14 +298,21 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     return DDS::RETCODE_ALREADY_DELETED;
   }
 
+  monitor_factory_->deinitialize();
+  monitor_factory_ = 0;
+
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
-    if (dp_factory_servant_ && dp_factory_servant_->participant_count()) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
-          "all domain participants must be deleted before shutdown can occur\n"));
+    if (dp_factory_servant_) {
+      const size_t count = dp_factory_servant_->participant_count();
+      if (count > 0) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
+            "there are %B domain participant(s) that must be deleted before shutdown can occur\n",
+            count));
+        }
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
       }
-      return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
   }
 
@@ -345,7 +352,6 @@ DDS::ReturnCode_t Service_Participant::shutdown()
 #endif
 
       discovery_types_.clear();
-      monitor_factory_ = 0;
     }
     TransportRegistry::close();
 #ifdef OPENDDS_SECURITY

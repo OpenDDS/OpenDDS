@@ -1,6 +1,6 @@
 # Thread sanitizer suppressions
 # See here for how this works:
-#   https://clang.llvm.org/docs/ThreadSanitizer.html
+#   https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
 
 deadlock:ACE_Data_Block::release_no_delete
 deadlock:CORBA::ORB_init
@@ -18,5 +18,10 @@ race:TAO_IIOP_Connection_Handler
 race:TAO_Leader_Follower
 race:TAO_ORB_Core
 mutex:TAO_log_category
+race:TAO_ORB_Core::shutdown
+race:TAO_ORB_Core::has_shutdown
+race:ACE_Thread_Exit::is_constructed_
+race:ACE_OS_Object_Manager::instance_
+race:ACE_OS_Object_Manager::fini
 
 race:OpenDDS::DCPS::DCPS_debug_level
