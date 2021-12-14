@@ -36,6 +36,11 @@ public:
     bool stacked_;
    };
 
+  virtual size_t thread_count();
+
+  virtual void summarize();
+
+  virtual void report();
 
   virtual void preset(ThreadStatusManager*, const char*);
 
@@ -48,7 +53,7 @@ public:
    * retrieve the most recently measured thread business as a percentage
    * of the measured time span. Range is 0.0 to 100.0
    */
-  virtual double get_busy_pct(const char* alias) const;
+  virtual double get_utilization(const char* alias) const;
 
   static ThreadMonitor* installed_monitor_;
 

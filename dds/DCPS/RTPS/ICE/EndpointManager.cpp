@@ -25,7 +25,7 @@ namespace ICE {
 
 using DCPS::MonotonicTimePoint;
 
-EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) :
+EndpointManager::EndpointManager(AgentImpl* a_agent_impl, DCPS::WeakRcHandle<Endpoint> a_endpoint) :
   agent_impl(a_agent_impl),
   endpoint(a_endpoint),
   requesting_(true),
@@ -42,7 +42,10 @@ EndpointManager::EndpointManager(AgentImpl* a_agent_impl, Endpoint* a_endpoint) 
   TheSecurityRegistry->builtin_config()->get_utility()->generate_random_bytes(&ice_tie_breaker_, sizeof(ice_tie_breaker_));
 
   change_username();
-  set_host_addresses(endpoint->host_addresses());
+  DCPS::RcHandle<Endpoint> e = endpoint.lock();
+  if (e) {
+    set_host_addresses(e->host_addresses());
+  }
 }
 
 void EndpointManager::start_ice(const DCPS::RepoId& a_local_guid,
@@ -285,7 +288,10 @@ void EndpointManager::regenerate_agent_info(bool password_only)
 
     for (AgentInfoListenersType::const_iterator pos = agent_info_listeners.begin(),
          limit =  agent_info_listeners.end(); pos != limit; ++pos) {
-      pos->second->update_agent_info(pos->first, agent_info);
+      DCPS::RcHandle<AgentInfoListener> ail = pos->second.lock();
+      if (ail) {
+        ail->update_agent_info(pos->first, agent_info);
+      }
     }
   }
 }
@@ -293,7 +299,11 @@ void EndpointManager::regenerate_agent_info(bool password_only)
 void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
 {
   // Request and maintain a server-reflexive address.
-  next_stun_server_address_ = endpoint->stun_server_address();
+  DCPS::RcHandle<Endpoint> e = endpoint.lock();
+
+  if (e) {
+    next_stun_server_address_ = e->stun_server_address();
+  }
 
   if (next_stun_server_address_ != ACE_INET_Addr()) {
     binding_request_ = STUN::Message();
@@ -331,7 +341,9 @@ void EndpointManager::server_reflexive_task(const MonotonicTimePoint& a_now)
   }
 
   // Repopulate the host addresses.
-  set_host_addresses(endpoint->host_addresses());
+  if (e) {
+    set_host_addresses(e->host_addresses());
+  }
 }
 
 bool EndpointManager::success_response(const STUN::Message& a_message)
@@ -803,12 +815,18 @@ void EndpointManager::ChangePasswordTask::execute(const MonotonicTimePoint& a_no
 
 void EndpointManager::network_change()
 {
-  set_host_addresses(endpoint->host_addresses());
+  DCPS::RcHandle<Endpoint> e = endpoint.lock();
+  if (e) {
+    set_host_addresses(e->host_addresses());
+  }
 }
 
 void EndpointManager::send(const ACE_INET_Addr& address, const STUN::Message& message)
 {
-  endpoint->send(address, message);
+  DCPS::RcHandle<Endpoint> e = endpoint.lock();
+  if (e) {
+    e->send(address, message);
+  }
 }
 
 void EndpointManager::purge()
@@ -819,7 +837,10 @@ void EndpointManager::purge()
   }
 
   for (AgentInfoListenersType::const_iterator pos = agent_info_listeners_.begin(), limit = agent_info_listeners_.end(); pos != limit; ++pos) {
-    pos->second->remove_agent_info(pos->first);
+    DCPS::RcHandle<AgentInfoListener> ail = pos->second.lock();
+    if (ail) {
+      ail->remove_agent_info(pos->first);
+    }
   }
 }
 

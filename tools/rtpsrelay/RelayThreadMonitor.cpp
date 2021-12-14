@@ -2,6 +2,7 @@
 
 #include <dds/DCPS/ReactorTask.h>
 #include <ace/Thread.h>
+#include <ace/OS_NS_strings.h>
 
 #include <stdexcept>
 
@@ -15,6 +16,10 @@ RelayThreadMonitor::RelayThreadMonitor(TimeDuration perd, size_t depth)
   ThreadMonitor::installed_monitor_ = this;
 }
 
+RelayThreadMonitor::~RelayThreadMonitor() noexcept
+{
+  for (auto r : reporters_) delete r;
+}
 void RelayThreadMonitor::preset(ThreadStatusManager *tsm, const char *alias)
 {
   pending_reg_[alias] = tsm;
@@ -24,7 +29,7 @@ void RelayThreadMonitor::update(ThreadMonitor::UpdateMode mode,
                                 const char* alias)
 {
   MonotonicTimePoint tnow = MonotonicTimePoint::now();
-  struct Sample s = { mode, tnow };
+  Sample s = { mode, tnow };
   ACE_thread_t key = ACE_OS::thr_self();
   try {
     ThreadDescriptor_rch& td = descs_.at(key);
@@ -41,7 +46,7 @@ void RelayThreadMonitor::update(ThreadMonitor::UpdateMode mode,
   }
 }
 
-double RelayThreadMonitor::get_busy_pct(const char* key) const
+double RelayThreadMonitor::get_utilization(const char* key) const
 {
   try {
     return busy_map_.at(key);
@@ -50,8 +55,7 @@ double RelayThreadMonitor::get_busy_pct(const char* key) const
   }
 }
 
-RelayThreadMonitor::ThreadDescriptor::ThreadDescriptor(const char* alias,
-                                                     MonotonicTimePoint tnow)
+ThreadDescriptor::ThreadDescriptor(const char* alias, MonotonicTimePoint tnow)
 : alias_(alias)
 , tsm_(nullptr)
 , last_(tnow)
@@ -75,20 +79,22 @@ void RelayThreadMonitor::summarize()
 
     while (!local.empty()) {
       auto& s = local.front();
-      ACE_UINT64* bucket = s.mode_.idle_ ? &ls.accum_busy_
-                                         : &ls.accum_idle_;
-      if (td->nested_.size()) {
-        UpdateMode prev = td->nested_.top();
-        if (s.mode_.implicit_) {
-          td->nested_.pop();
-        } else {
-          if (prev.idle_ == s.mode_.idle_) {
-            bucket = s.mode_.idle_ ? &ls.accum_idle_ : &ls.accum_busy_;
+      ACE_UINT64* bucket = s.mode_.idle_ && s.mode_.stacked_ ? &ls.accum_busy_ : &ls.accum_idle_;
+      if (s.mode_.stacked_) {
+        if (td->nested_.size()) {
+          UpdateMode prev = td->nested_.top();
+          if (s.mode_.implicit_) {
+            td->nested_.pop();
+          } else {
+            if (prev.idle_ == s.mode_.idle_) {
+              bucket = s.mode_.idle_ ? &ls.accum_idle_ : &ls.accum_busy_;
+            }
+            td->nested_.push(s.mode_);
           }
+        } else {
           td->nested_.push(s.mode_);
         }
-      } else {
-        td->nested_.push(s.mode_);
+
       }
       if (bucket) {
         ACE_UINT64 udiff = 0;
@@ -100,7 +106,7 @@ void RelayThreadMonitor::summarize()
       local.pop_front();
     }
     {
-      UpdateMode mode = {true, true, true};
+      UpdateMode mode = {true, true, false};
       if (td->nested_.size()) {
         mode = td->nested_.top();
       }
@@ -112,6 +118,17 @@ void RelayThreadMonitor::summarize()
       *bucket += udiff;
       td->last_ = tnow;
     }
+
+    double pbusy = 0.0;
+    double uspan = static_cast<double>(ls.accum_idle_ + ls.accum_busy_);
+    if (uspan != 0.0) {
+      if (td->tsm_) {
+        td->tsm_->update_busy(td->alias_.c_str(), pbusy);
+      } else {
+        busy_map_[td->alias_.c_str()] = pbusy;
+      }
+    }
+
     if (td->summaries_.size() >= history_depth_) {
       td->summaries_.pop_front();
     }
@@ -119,44 +136,86 @@ void RelayThreadMonitor::summarize()
   }
 }
 
-void RelayThreadMonitor::report_thread(ACE_thread_t key)
+ThreadLoadReporter::~ThreadLoadReporter() noexcept
 {
-  try {
-    ThreadDescriptor_rch& td = descs_.at(key);
-    if (td->summaries_.empty()) {
-      ACE_DEBUG((LM_INFO, "     TLM thread: 0x%x \"%s\" busy:  n/a    idle: n/a", key, td->alias_.c_str()));
-      return;
-    }
-    const LoadSummary& ls = td->summaries_.back();
-    double pbusy = 0.0;
-    ACE_UINT64 uspan = ls.accum_idle_ + ls.accum_busy_;
-    if (uspan > 0) {
-      pbusy = 100.0 * ls.accum_busy_ / uspan;
-      double pidle = 100.0 * ls.accum_idle_ / uspan;
-      ACE_DEBUG((LM_INFO, "     TLM thread: 0x%x \"%s\" busy:%6.4F%% (%d usec) idle: %6.4F%% measured interval: %F sec and %d samples\n",
-                 key, td->alias_.c_str(), pbusy, ls.accum_busy_, pidle, uspan / 1000000.0, ls.samples_));
-    } else {
-      ACE_DEBUG((LM_INFO, "     TLM thread: 0x%x \"%s\" busy:  N/A idle: N/A  measured interval: N/A\n",
-                 key, td->alias_.c_str()));
-    }
-    if (td->nested_.size()) {
-      ACE_DEBUG((LM_INFO, "     TLM thread: 0x%x nesting level is %d\n", key, td->nested_.size()));
-    }
-    if (td->tsm_) {
-      td->tsm_->update_busy(td->alias_.c_str(), pbusy);
-    } else {
-      busy_map_[td->alias_.c_str()] = pbusy;
-    }
-  } catch (const std::out_of_range&) {
-    ACE_DEBUG((LM_INFO, "     TLM: No entry available for thread id 0x%x\n", key));
+}
+
+void ThreadLoadReporter::report_header(ThreadMonitor&) const
+{
+}
+
+void ThreadLoadReporter::report_thread(ThreadDescriptor_rch) const
+{
+}
+
+void ThreadLoadReporter::report_footer(ThreadMonitor&) const
+{
+}
+
+AceLogReporter::~AceLogReporter() noexcept
+{
+}
+
+void AceLogReporter::report_header(ThreadMonitor& tlm) const
+{
+  ACE_DEBUG((LM_INFO, "%T TLM: Reporting on %d threads\n", tlm.thread_count()));
+}
+
+void AceLogReporter::report_thread(ThreadDescriptor_rch td) const
+{
+  if (td->summaries_.empty()) {
+    ACE_DEBUG((LM_INFO, "     TLM thread \"%s\" busy:  n/a    idle: n/a", td->alias_.c_str()));
+    return;
+  }
+  const LoadSummary& ls = td->summaries_.back();
+  double pbusy = 0.0;
+  double uspan = static_cast<double>(ls.accum_idle_ + ls.accum_busy_);
+  if (uspan != 0.0) {
+    pbusy = ls.accum_busy_ / uspan;
+    double pidle = ls.accum_idle_ / uspan;
+    ACE_DEBUG((LM_INFO, "     TLM thread \"%s\" busy:%6.4F%% (%d usec) idle: %6.4F%% measured interval: %F sec and %d samples\n",
+               td->alias_.c_str(), 100.0 * pbusy, ls.accum_busy_, 100.0 * pidle, uspan / 1000000.0, ls.samples_));
+  } else {
+    ACE_DEBUG((LM_INFO, "     TLM thread \"%s\" busy:  N/A idle: N/A  measured interval: N/A\n",
+               td->alias_.c_str()));
+  }
+  if (td->nested_.size()) {
+    ACE_DEBUG((LM_INFO, "     TLM nesting level is %d\n", td->nested_.size()));
+  }
+}
+
+size_t RelayThreadMonitor::thread_count()
+{
+  return descs_.size();
+}
+
+int RelayThreadMonitor::add_reporter(const char* name)
+{
+  ACE_DEBUG((LM_DEBUG,"(%P|%t) RelayThreadMonitor::add_reporter adding \'%C\'\n", name));
+  if (ACE_OS::strcasecmp(name, "AceLog") == 0) {
+    reporters_.push_back(new AceLogReporter);
+    return 0;
+  } else {
+    ACE_ERROR((LM_ERROR,ACE_TEXT("(%P|%t) ERROR: RelayThreadMonitor::add_reporter \'%C\' not recognized\n"), name));
+    return -1;
   }
 }
 
 void RelayThreadMonitor::report()
 {
-  ACE_DEBUG((LM_INFO, "%T TLM: Reporting on %d threads\n", descs_.size()));
+  if (reporters_.empty()) {
+    return;
+  }
+  for(auto r : reporters_) {
+    r->report_header(*this);
+  }
   for (auto d = descs_.begin(); d != descs_.end(); d++) {
-    report_thread(d->first);
+    for (auto r : reporters_) {
+      r->report_thread(d->second);
+    }
+  }
+  for (auto r : reporters_) {
+    r->report_footer(*this);
   }
 }
 
@@ -170,7 +229,7 @@ void RelayThreadMonitor::stop()
   summarizer_.stop();
 }
 
-RelayThreadMonitor::Summarizer::Summarizer(RelayThreadMonitor& owner, TimeDuration perd)
+Summarizer::Summarizer(ThreadMonitor& owner, TimeDuration perd)
 : running_(false)
 , period_(perd)
 , lock_()
@@ -179,14 +238,14 @@ RelayThreadMonitor::Summarizer::Summarizer(RelayThreadMonitor& owner, TimeDurati
 {
 }
 
-RelayThreadMonitor::Summarizer::~Summarizer()
+Summarizer::~Summarizer()
 {
 }
 
 
-int RelayThreadMonitor::Summarizer::svc()
+int Summarizer::svc()
 {
-  GuardType  guard(lock_);
+  GuardType guard(lock_);
   running_ = true;
   condition_.notify_all();
   while (running_) {
@@ -200,7 +259,7 @@ int RelayThreadMonitor::Summarizer::svc()
   return 0;
 }
 
-int RelayThreadMonitor::Summarizer::start()
+int Summarizer::start()
 {
   GuardType guard(lock_);
   if (running_) {
@@ -218,7 +277,7 @@ int RelayThreadMonitor::Summarizer::start()
   return 0;
 }
 
-void RelayThreadMonitor::Summarizer::stop()
+void Summarizer::stop()
 {
   if (running_) {
     GuardType guard(lock_);

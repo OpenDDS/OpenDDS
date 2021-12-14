@@ -220,10 +220,10 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   tport_->open(sedp_->reactor_task());
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
-    ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
+    ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<AgentInfoListener>(rchandle_from(this)));
   }
 #endif
   initialized_flag_ = true;
@@ -390,12 +390,12 @@ Spdp::shutdown()
          /* Update in loop*/)
     {
 #ifdef OPENDDS_SECURITY
-      ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
                  part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
       }
-      ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
       if (spdp_endpoint) {
         ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
       }
@@ -406,7 +406,7 @@ Spdp::shutdown()
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
     ICE::Agent::instance()->remove_local_agent_info_listener(sedp_endpoint, l);
@@ -584,10 +584,10 @@ Spdp::publish_location_update_i(const DiscoveredParticipantIter& iter)
 }
 #endif
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 Spdp::get_ice_endpoint_if_added()
 {
-  return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : 0;
+  return tport_->ice_endpoint_added_ ? tport_->get_ice_endpoint() : DCPS::WeakRcHandle<ICE::Endpoint>();
 }
 
 bool cmp_ip4(const ACE_INET_Addr& a, const DCPS::Locator_t& locator)
@@ -910,12 +910,12 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
     if (id == DCPS::DISPOSE_INSTANCE || id == DCPS::DISPOSE_UNREGISTER_INSTANCE) {
 #ifdef OPENDDS_SECURITY
-      ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
         stop_ice(sedp_endpoint, iter->first, iter->second.pdata_.participantProxy.availableBuiltinEndpoints,
                  iter->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
       }
-      ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
       if (spdp_endpoint) {
         ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, iter->first);
       }
@@ -1048,11 +1048,13 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
+  const DCPS::MessageId msg_id = (data.inlineQos.length() && disposed(data.inlineQos)) ? DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA;
+
 #ifdef OPENDDS_SECURITY
   const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
   const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
 
-  if (config_->check_source_ip() && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
+  if (config_->check_source_ip() && msg_id == DCPS::SAMPLE_DATA && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList) && !ip_in_AgentInfo(from, plist)) {
     if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - dropped IP: %C\n"), DCPS::LogAddr(from).c_str()));
     }
@@ -1065,7 +1067,7 @@ Spdp::data_received(const DataSubmessage& data,
   const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
   const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
 
-  if (config_->check_source_ip() && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+  if (config_->check_source_ip() && msg_id == DCPS::SAMPLE_DATA && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
     if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
@@ -1073,10 +1075,7 @@ Spdp::data_received(const DataSubmessage& data,
   }
 #endif
 
-  handle_participant_data(
-    (data.inlineQos.length() && disposed(data.inlineQos)) ?
-      DCPS::DISPOSE_INSTANCE : DCPS::SAMPLE_DATA,
-    pdata, to_opendds_seqnum(data.writerSN), from, false);
+  handle_participant_data(msg_id, pdata, to_opendds_seqnum(data.writerSN), from, false);
 }
 
 void
@@ -1717,12 +1716,12 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
       }
       const DCPS::MonotonicTimePoint ptime = pos->first;
       if (participant_sec_attr_.allow_unauthenticated_participants == false) {
-        ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+        DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints,
                    pit->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
         }
-        ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+        DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
         if (spdp_endpoint) {
           ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, pit->first);
         }
@@ -2421,11 +2420,11 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
 #ifdef OPENDDS_SECURITY
   // Add the endpoint before any sending and receiving occurs.
-  ICE::Endpoint* endpoint = get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->add_endpoint(endpoint);
     ice_endpoint_added_ = true;
-    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, outer->guid_, outer.get());
+    ICE::Agent::instance()->add_local_agent_info_listener(endpoint, outer->guid_, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(outer));
   }
 #endif
 
@@ -2632,7 +2631,7 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
     ICE::Agent::instance()->remove_endpoint(endpoint);
     ice_endpoint_added_ = false;
@@ -2731,11 +2730,11 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
 #ifdef OPENDDS_SECURITY
   if (!outer->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
-    ICE::Endpoint* sedp_endpoint = outer->sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = outer->sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
       ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
     }
-    ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = get_ice_endpoint();
     if (spdp_endpoint) {
       ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
@@ -2866,11 +2865,11 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
 #ifdef OPENDDS_SECURITY
   if (!outer->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
-    ICE::Endpoint* sedp_endpoint = outer->sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = outer->sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
       ai_map[SEDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(sedp_endpoint);
     }
-    ICE::Endpoint* spdp_endpoint = get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = get_ice_endpoint();
     if (spdp_endpoint) {
       ai_map[SPDP_AGENT_INFO_KEY] = ICE::Agent::instance()->get_local_agent_info(spdp_endpoint);
     }
@@ -3258,7 +3257,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     if (relay_srsm_.is_response(message)) {
       process_relay_sra(relay_srsm_.receive(message));
     } else {
-      ICE::Endpoint* endpoint = get_ice_endpoint();
+      DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
       if (endpoint) {
         ICE::Agent::instance()->receive(endpoint, local, remote, message);
       }
@@ -3270,14 +3269,14 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   return 0;
 }
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 Spdp::SpdpTransport::get_ice_endpoint()
 {
 #ifdef OPENDDS_SECURITY
   DCPS::RcHandle<Spdp> outer = outer_.lock();
-  return outer && outer->config_->use_ice() ? this : 0;
+  return outer && outer->config_->use_ice() ? DCPS::static_rchandle_cast<ICE::Endpoint>(rchandle_from(this)) : DCPS::WeakRcHandle<ICE::Endpoint>();
 #else
-  return 0;
+  return DCPS::WeakRcHandle<ICE::Endpoint>();
 #endif
 }
 
@@ -3897,12 +3896,12 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
     }
 
 #ifdef OPENDDS_SECURITY
-    ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
     if (sedp_endpoint) {
       stop_ice(sedp_endpoint, part->first, part->second.pdata_.participantProxy.availableBuiltinEndpoints,
                part->second.pdata_.participantProxy.availableExtendedBuiltinEndpoints);
     }
-    ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
     if (spdp_endpoint) {
       ICE::Agent::instance()->stop_ice(spdp_endpoint, guid_, part->first);
     }
@@ -4009,7 +4008,7 @@ operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
 #endif
 
 #ifdef OPENDDS_SECURITY
-void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, BuiltinEndpointSet_t avail,
+void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, RepoId r, BuiltinEndpointSet_t avail,
                      DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                      const ICE::AgentInfo& agent_info)
 {
@@ -4151,7 +4150,7 @@ void Spdp::start_ice(ICE::Endpoint* endpoint, RepoId r, BuiltinEndpointSet_t ava
   }
 }
 
-void Spdp::stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId r, BuiltinEndpointSet_t avail,
+void Spdp::stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId r, BuiltinEndpointSet_t avail,
                     DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail) {
   RepoId l = guid_;
 
@@ -4457,6 +4456,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        data.utilization = 0.0;
         bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
       }
 
@@ -4464,6 +4464,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         DCPS::InternalThreadBuiltinTopicData data;
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
+        data.utilization = i->second.utilization;
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {
@@ -4564,7 +4565,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     }
   }
 
-  ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     if (sedp_pos != ai_map.end()) {
       start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints,
@@ -4574,7 +4575,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
                pdata.participantProxy.availableExtendedBuiltinEndpoints);
     }
   }
-  ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
   if (spdp_endpoint) {
     if (spdp_pos != ai_map.end()) {
       ICE::Agent::instance()->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
@@ -4714,18 +4715,19 @@ Spdp::use_ice_now(bool flag)
   sedp_->use_ice_now(flag);
 
   if (flag) {
-    ICE::Endpoint* spdp_endpoint = tport_->get_ice_endpoint();
-    ICE::Endpoint* sedp_endpoint = sedp_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
 
     if (sedp_endpoint) {
       const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
-      ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, this);
+      ICE::Agent::instance()->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(DCPS::rchandle_from(this)));
     }
-    ICE::Agent::instance()->add_endpoint(tport_.get());
+
+    ICE::Agent::instance()->add_endpoint(DCPS::static_rchandle_cast<ICE::Endpoint>(tport_));
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     tport_->ice_endpoint_added_ = true;
     if (spdp_endpoint) {
-      ICE::Agent::instance()->add_local_agent_info_listener(spdp_endpoint, guid_, this);
+      ICE::Agent::instance()->add_local_agent_info_listener(spdp_endpoint, guid_, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(DCPS::rchandle_from(this)));
     }
 
     for (DiscoveredParticipantConstIter pos = participants_.begin(), limit = participants_.end(); pos != limit; ++pos) {
@@ -4739,7 +4741,7 @@ Spdp::use_ice_now(bool flag)
       }
     }
   } else {
-    ICE::Agent::instance()->remove_endpoint(tport_.get());
+    ICE::Agent::instance()->remove_endpoint(DCPS::static_rchandle_cast<ICE::Endpoint>(tport_));
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     tport_->ice_endpoint_added_ = false;
 

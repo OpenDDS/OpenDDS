@@ -66,9 +66,9 @@ const char SEDP_AGENT_INFO_KEY[] = "SEDP";
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp
-  : public DCPS::RcObject
+  : public virtual DCPS::RcObject
 #ifdef OPENDDS_SECURITY
-  , public ICE::AgentInfoListener
+  , public virtual ICE::AgentInfoListener
 #endif
 {
 public:
@@ -216,7 +216,7 @@ public:
   }
 #endif
 
-  ICE::Endpoint* get_ice_endpoint_if_added();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint_if_added();
 
   ParticipantData_t build_local_pdata(
 #ifdef OPENDDS_SECURITY
@@ -484,7 +484,7 @@ private:
     : public virtual DCPS::RcEventHandler
     , public virtual DCPS::NetworkConfigListener
 #ifdef OPENDDS_SECURITY
-    , public ICE::Endpoint
+    , public virtual ICE::Endpoint
 #endif
   {
     typedef size_t WriteFlags;
@@ -550,7 +550,7 @@ private:
     void remove_address(const DCPS::NetworkInterface& nic,
                         const ACE_INET_Addr& address);
 
-    ICE::Endpoint* get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
 #ifdef OPENDDS_SECURITY
     ICE::AddressListType host_addresses() const;
@@ -733,10 +733,10 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
-  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+  void start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
                  DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                  const ICE::AgentInfo& agent_info);
-  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+  void stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
                 DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);

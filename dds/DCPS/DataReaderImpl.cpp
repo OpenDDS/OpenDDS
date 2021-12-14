@@ -3406,7 +3406,7 @@ DataReaderImpl::update_locators(const RepoId& writerId,
   TransportClient::update_locators(writerId, locators);
 }
 
-ICE::Endpoint*
+WeakRcHandle<ICE::Endpoint>
 DataReaderImpl::get_ice_endpoint()
 {
   return TransportClient::get_ice_endpoint();

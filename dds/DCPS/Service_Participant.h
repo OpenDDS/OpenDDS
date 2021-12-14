@@ -48,7 +48,7 @@ class DataDurabilityCache;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
-class ShutdownListener {
+class ShutdownListener : public virtual RcObject {
 public:
   virtual ~ShutdownListener() {}
   virtual void notify_shutdown() = 0;
@@ -92,7 +92,7 @@ public:
 
   JobQueue_rch job_queue() const;
 
-  void set_shutdown_listener(ShutdownListener* listener);
+  void set_shutdown_listener(RcHandle<ShutdownListener> listener);
 
   /**
    * Initialize the DDS client environment and get the
@@ -759,7 +759,7 @@ private:
   /// Used to track state of service participant
   bool shut_down_;
 
-  ShutdownListener* shutdown_listener_;
+  RcHandle<ShutdownListener> shutdown_listener_;
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;

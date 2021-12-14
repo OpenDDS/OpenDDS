@@ -458,7 +458,7 @@ public:
   PublicationInstance_rch get_handle_instance(
     DDS::InstanceHandle_t handle);
 
-  virtual ICE::Endpoint* get_ice_endpoint();
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   const RepoId& get_repo_id() const {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());

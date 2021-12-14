@@ -203,7 +203,7 @@ public:
 
   virtual void pre_stop_i();
 
-  virtual ICE::Endpoint* get_ice_endpoint() const;
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const;
 
   virtual bool is_leading(const GUID_t& writer_id,
                           const GUID_t& reader_id) const;

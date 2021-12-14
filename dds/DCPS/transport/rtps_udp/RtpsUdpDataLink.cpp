@@ -4632,7 +4632,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     return;
   }
 
-  if (config().rtps_relay_only()) {
+  if (config().rtps_relay_only() && std::memcmp(&local.guidPrefix, &remote.guidPrefix, sizeof(GuidPrefix_t)) != 0) {
     if (config().rtps_relay_address() != ACE_INET_Addr()) {
       addresses.insert(config().rtps_relay_address());
       entry.value().addrs_.insert(config().rtps_relay_address());
@@ -4692,7 +4692,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   }
 
 #ifdef OPENDDS_SECURITY
-  ICE::Endpoint* endpoint = get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
     ice_addr = ICE::Agent::instance()->get_address(endpoint, local, remote);
   }
@@ -4721,7 +4721,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   entry.value().expires_ = normal_addrs_expires;
 }
 
-ICE::Endpoint*
+DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {
   return impl().get_ice_endpoint();
 }
