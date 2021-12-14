@@ -1691,7 +1691,7 @@ protected:
   TimeDuration max_type_lookup_service_reply_period_;
   DCPS::SequenceNumber type_lookup_service_sequence_number_;
   const bool use_xtypes_;
-  bool use_xtypes_complete_;
+  const bool use_xtypes_complete_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
