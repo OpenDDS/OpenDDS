@@ -297,8 +297,10 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     return DDS::RETCODE_ALREADY_DELETED;
   }
 
-  monitor_factory_->deinitialize();
-  monitor_factory_ = 0;
+  if (monitor_factory_) {
+    monitor_factory_->deinitialize();
+    monitor_factory_ = 0;
+  }
 
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
