@@ -21,6 +21,7 @@ const unsigned long TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION;
 TransportConfig::TransportConfig(const OPENDDS_STRING& name)
   : swap_bytes_(false)
   , cdr_encapsulation_(false)
+  , allow_unaligned_(true)
   , passive_connect_duration_(DEFAULT_PASSIVE_CONNECT_DURATION)
   , name_(name)
 {}

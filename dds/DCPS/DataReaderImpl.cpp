@@ -1207,7 +1207,7 @@ DataReaderImpl::enable()
 
   if (topic_servant_) {
     if (!topic_servant_->check_data_representation(
-        get_effective_data_rep_qos(qos_.representation.value, true), false)) {
+        get_effective_data_rep_qos(qos_.representation.value, true, allow_unaligned()), false)) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
           ACE_TEXT("none of the data representation QoS is allowed by the ")
@@ -3415,33 +3415,39 @@ DataReaderImpl::get_ice_endpoint()
 DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
   const DDS::DataRepresentationIdSeq repIds =
-    get_effective_data_rep_qos(qos_.representation.value, true);
+    get_effective_data_rep_qos(qos_.representation.value, true, allow_unaligned());
   bool xcdr1_mutable = false;
-  if (cdr_encapsulation() || qos_.representation.value.length() > 0) {
-    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-      Encoding::Kind encoding_kind;
-      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-        if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
-          xcdr1_mutable = true;
-        } else {
-          decoding_modes_.insert(encoding_kind);
-        }
-      } else if (DCPS_debug_level) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                   ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                   ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
-                   repIds[i]));
+  bool illegal_unaligned = false;
+  for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
+    Encoding::Kind encoding_kind;
+    if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
+      if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
+        xcdr1_mutable = true;
+      } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && !allow_unaligned()) {
+        illegal_unaligned = true;
+      } else {
+        cdr_encapsulation();
+        decoding_modes_.insert(encoding_kind);
       }
+    } else if (DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: "
+                  "DataReaderImpl::setup_deserialization: "
+                  "Encountered unsupported or unknown data representation: %u\n",
+                  repIds[i]));
     }
-  } else {
-    decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
   }
   if (decoding_modes_.empty()) {
     if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                 ACE_TEXT("Could not find a valid data representation.%C\n"),
-                 xcdr1_mutable ? " Unsupported combination of XCDR1 and mutable" : ""));
+      DCPS::String error_message;
+      if (xcdr1_mutable) {
+        error_message = " Unsupported combination of XCDR1 and mutable";
+      } else if (illegal_unaligned) {
+        error_message = " Unaligned CDR is not allowed in rtps_udp transport";
+      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+                 "DataReaderImpl::setup_deserialization: "
+                 "Could not find a valid data representation.%C\n",
+                 error_message));
     }
     return DDS::RETCODE_ERROR;
   }

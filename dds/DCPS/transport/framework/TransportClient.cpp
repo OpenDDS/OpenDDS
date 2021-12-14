@@ -37,6 +37,7 @@ TransportClient::TransportClient()
   , max_transaction_tail_(0)
   , swap_bytes_(false)
   , cdr_encapsulation_(false)
+  , allow_unaligned_(true)
   , reliable_(false)
   , durable_(false)
   , reverse_lock_(lock_)
@@ -127,6 +128,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
   cdr_encapsulation_ = tc->cdr_encapsulation_;
+  allow_unaligned_ = tc->allow_unaligned_;
   reliable_ = reliable;
   durable_ = durable;
   unsigned long duration = tc->passive_connect_duration_;
@@ -159,6 +161,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 #endif
 
         cdr_encapsulation_ |= inst->requires_cdr_encapsulation();
+        allow_unaligned_ |= inst->allow_unaligned();
       }
     }
   }

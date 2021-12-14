@@ -253,6 +253,8 @@ module DDS {
     const DataRepresentationId_t XCDR_DATA_REPRESENTATION = 0;
     const DataRepresentationId_t XML_DATA_REPRESENTATION = 1;
     const DataRepresentationId_t XCDR2_DATA_REPRESENTATION = 2;
+    const DataRepresentationId_t UNALIGNED_CDR_DATA_REPRESENTATION =
+      -12140;
 
     typedef sequence<DataRepresentationId_t> DataRepresentationIdSeq;
 

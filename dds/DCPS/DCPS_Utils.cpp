@@ -252,10 +252,20 @@ compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
     increment_incompatibility_count(readerStatus,
                                     OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
   }
-
+  bool allow_unaligned = true;
+  for (CORBA::ULong i = 0; i < pubTLS.length(); ++i) {
+    for (CORBA::ULong j = 0; j < subTLS.length(); ++j) {
+      if (0 == std::strcmp(pubTLS[i].transport_type, subTLS[j].transport_type)) {
+        if (pubTLS[i].transport_type == "rtps_udp") {
+          allow_unaligned = false;
+        }
+        break;
+      }
+    }
+  }
   // Verify compatibility of DataWriterQos and DataReaderQos
   compatible = compatible && compatibleQOS(writerQos, readerQos,
-                                           writerStatus, readerStatus);
+                                           writerStatus, readerStatus, allow_unaligned);
 
   // Verify compatibility of PublisherQos and SubscriberQos
   compatible = compatible && compatibleQOS(pubQos, subQos,
@@ -304,7 +314,8 @@ bool
 compatibleQOS(const DDS::DataWriterQos * writerQos,
               const DDS::DataReaderQos * readerQos,
               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
-              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus)
+              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus,
+              bool allow_unaligned)
 {
   bool compatible = true;
 
@@ -386,9 +397,9 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     // Find a common data representation
     bool found = false;
     DDS::DataRepresentationIdSeq readerIds =
-      get_effective_data_rep_qos(readerQos->representation.value, true);
+      get_effective_data_rep_qos(readerQos->representation.value, true, allow_unaligned);
     DDS::DataRepresentationIdSeq writerIds =
-      get_effective_data_rep_qos(writerQos->representation.value, false);
+      get_effective_data_rep_qos(writerQos->representation.value, false, allow_unaligned);
     const CORBA::ULong reader_count = readerIds.length();
     const CORBA::ULong writer_count = writerIds.length();
     for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
@@ -464,20 +475,27 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   case DDS::XCDR2_DATA_REPRESENTATION:
     kind = Encoding::KIND_XCDR2;
     break;
+  case DDS::UNALIGNED_CDR_DATA_REPRESENTATION:
+    kind = Encoding::KIND_UNALIGNED_CDR;
+    break;
   default:
     return false;
   }
   return true;
 }
 
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader)
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos,
+  bool reader, bool allow_unaligned)
 {
   if (qos.length() == 0) {
     DDS::DataRepresentationIdSeq ids;
-    ids.length(reader ? 2 : 1);
-    ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
+    ids.length(reader ? allow_unaligned ? 3 : 2 : 1);
+    ids[0] = allow_unaligned ? DDS::UNALIGNED_CDR_DATA_REPRESENTATION : DDS::XCDR2_DATA_REPRESENTATION;
     if (reader) {
       ids[1] = DDS::XCDR_DATA_REPRESENTATION;
+      if (allow_unaligned) {
+        ids[2] = DDS::XCDR2_DATA_REPRESENTATION;
+      }
     }
     return ids;
   }

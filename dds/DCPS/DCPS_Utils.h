@@ -57,7 +57,8 @@ bool
 compatibleQOS(const DDS::DataWriterQos * writerQos,
               const DDS::DataReaderQos * readerQos,
               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus = 0,
-              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus = 0);
+              OpenDDS::DCPS::IncompatibleQosStatus* readerStatus = 0,
+              bool allow_unaligned = true);
 
 OpenDDS_Dcps_Export
 bool
@@ -102,7 +103,7 @@ OpenDDS_Dcps_Export
 bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind);
 
 OpenDDS_Dcps_Export
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader);
+DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader, bool allow_unaligned);
 
 } // namespace DCPS
 } // namespace OpenDDS

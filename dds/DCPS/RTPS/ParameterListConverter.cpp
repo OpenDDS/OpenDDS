@@ -828,7 +828,8 @@ bool from_param_list(const ParameterList& param_list,
 void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader)
 {
   DDS::DataRepresentationQosPolicy dr_qos;
-  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader);
+  //TODO Clayton: Figure this out
+  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader, false);
   if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
     Parameter param;
     param.representation(dr_qos);

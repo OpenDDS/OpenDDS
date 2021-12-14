@@ -326,11 +326,7 @@ public:
   DDS::ReturnCode_t setup_serialization()
   {
     const DDS::DataRepresentationIdSeq repIds =
-      get_effective_data_rep_qos(qos_.representation.value, false);
-    if (qos_.representation.value.length() > 0) {
-      // If the QoS explicitly sets XCDR, XCDR2, or XML, force encapsulation
-      cdr_encapsulation(true);
-    }
+      get_effective_data_rep_qos(qos_.representation.value, false, allow_unaligned());
     if (cdr_encapsulation()) {
       Encoding::Kind encoding_kind;
       // There should only be one data representation in a DataWriter, so
@@ -340,12 +336,20 @@ public:
         if (encoding_kind == Encoding::KIND_XCDR1 &&
             MarshalTraitsType::max_extensibility_level() == MUTABLE) {
           if (::OpenDDS::DCPS::DCPS_debug_level) {
-            ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-              ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-              ACE_TEXT("Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n"),
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+              "%CDataWriterImpl::setup_serialization: "
+              "Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n",
               TraitsType::type_name()));
           }
           return DDS::RETCODE_ERROR;
+        } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR &&
+                   !allow_unaligned()) {
+          if (::OpenDDS::DCPS::DCPS_debug_level) {
+            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+              "%CDataWriterImpl::setup_serialization: "
+              "Unaligned CDR is not allowed in rtps_udp transport\n",
+              TraitsType::type_name()));
+          }
         }
       } else if (::OpenDDS::DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")

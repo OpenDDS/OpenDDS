@@ -64,6 +64,7 @@ public:
 
   bool swap_bytes() const { return swap_bytes_; }
   bool cdr_encapsulation() const { return cdr_encapsulation_; }
+  bool allow_unaligned() const { return allow_unaligned_; }
   const TransportLocatorSeq& connection_info() const { return conn_info_; }
   void populate_connection_info();
   bool is_reliable() const { return reliable_; }
@@ -326,7 +327,7 @@ private:
 
   // Configuration details:
 
-  bool swap_bytes_, cdr_encapsulation_, reliable_, durable_;
+  bool swap_bytes_, cdr_encapsulation_, allow_unaligned_, reliable_, durable_;
 
   TimeDuration passive_connect_duration_;
 
