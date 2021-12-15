@@ -4,11 +4,13 @@
 #include <dds/DCPS/DCPS_Utils.h>
 
 template<typename T1>
-ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue expected_additional_field_value)
+ReturnCode_t check_additional_field_value(const T1& data,
+  AdditionalFieldValue expected_additional_field_value)
 {
   ReturnCode_t ret = RETCODE_OK;
   if (data[0].additional_field != expected_additional_field_value) {
-    ACE_DEBUG((LM_DEBUG, "reader: expected additional field value: %d, received: %d\n", expected_additional_field_value, data[0].additional_field));
+    ACE_DEBUG((LM_DEBUG, "reader: expected additional field value: %d, received: %d\n",
+               expected_additional_field_value, data[0].additional_field));
     ret = RETCODE_ERROR;
   }
 
@@ -16,7 +18,8 @@ ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue e
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T2& data, const std::string& expected_value)
+ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T2& data,
+                                      const std::string& expected_value)
 {
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
@@ -24,7 +27,8 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
       ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n", expected_value.c_str(), data[0].trim_string.in()));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n",
+                 expected_value.c_str(), data[0].trim_string.in()));
       ret = RETCODE_ERROR;
     } else if (verbose) {
       ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
@@ -45,11 +49,11 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
     if (data.length() != 1) {
       ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
-    } else if (data[0].key != key_value) {
-      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key));
+    } else if (data[0].key_field != key_value) {
+      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key_field));
       ret = RETCODE_ERROR;
     } else if (verbose) {
-      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
+      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key_field));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
@@ -70,13 +74,13 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
     } else {
       switch (data[0]._d()) {
       case E_KEY:
-        if (data[0].key() != key_value) {
+        if (data[0].key_field() != key_value) {
           ACE_ERROR((LM_ERROR, "reader: expected union key value: %d, received: %d\n",
-            key_value, data[0].key()));
+            key_value, data[0].key_field()));
           ret = RETCODE_ERROR;
         }
         if (verbose) {
-          ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key()));
+          ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key_field()));
         }
         break;
       case E_ADDITIONAL_FIELD:
@@ -315,8 +319,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
 
-  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-    DEFAULT_STATUS_MASK);
+  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   if (!sub) {
     ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
     return 1;
@@ -336,8 +339,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dr_qos.representation.value.length(1);
   dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
 
-  DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
-    DEFAULT_STATUS_MASK);
+  DataReader_var dr = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
   if (!dr) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
     return 1;

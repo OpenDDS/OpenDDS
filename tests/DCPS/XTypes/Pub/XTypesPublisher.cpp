@@ -5,13 +5,13 @@
 
 void write_plain_cdr_struct(const DataWriter_var& dw)
 {
-  PlainCdrStructDataWriter_var pdw = PlainCdrStructDataWriter::_narrow(dw);
+  PlainCdrStructDataWriter_var typed_dw = PlainCdrStructDataWriter::_narrow(dw);
 
   PlainCdrStruct pcs;
-  pcs.key = key_value;
-  pcs.value = 1;
+  pcs.key_field = key_value;
+  pcs.value_field = 1;
 
-  const ReturnCode_t ret = pdw->write(pcs, HANDLE_NIL);
+  const ReturnCode_t ret = typed_dw->write(pcs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_plain_cdr_struct returned %C\n",
                OpenDDS::DCPS::retcode_to_string(ret)));
@@ -23,12 +23,12 @@ void write_plain_cdr_struct(const DataWriter_var& dw)
 
 void write_final_struct(const DataWriter_var& dw)
 {
-  FinalStructPubDataWriter_var pdw = FinalStructPubDataWriter::_narrow(dw);
+  FinalStructPubDataWriter_var typed_dw = FinalStructPubDataWriter::_narrow(dw);
 
   FinalStructPub fs;
-  fs.key = key_value;
+  fs.key_field = key_value;
 
-  const ReturnCode_t ret = pdw->write(fs, HANDLE_NIL);
+  const ReturnCode_t ret = typed_dw->write(fs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_final_struct returned %C\n",
                OpenDDS::DCPS::retcode_to_string(ret)));
@@ -40,13 +40,13 @@ void write_final_struct(const DataWriter_var& dw)
 
 void write_modified_final_struct(const DataWriter_var& dw)
 {
-  ModifiedFinalStructDataWriter_var pdw = ModifiedFinalStructDataWriter::_narrow(dw);
+  ModifiedFinalStructDataWriter_var typed_dw = ModifiedFinalStructDataWriter::_narrow(dw);
 
   ModifiedFinalStruct mfs;
-  mfs.key = key_value;
+  mfs.key_field = key_value;
   mfs.additional_field = FINAL_STRUCT_AF;
 
-  const ReturnCode_t ret = pdw->write(mfs, HANDLE_NIL);
+  const ReturnCode_t ret = typed_dw->write(mfs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_modified_final_struct returned %C\n",
                OpenDDS::DCPS::retcode_to_string(ret)));
@@ -61,7 +61,7 @@ void write_appendable_struct_no_xtypes(const DataWriter_var& dw)
   AppendableStructNoXTypesDataWriter_var typed_dw = AppendableStructNoXTypesDataWriter::_narrow(dw);
 
   AppendableStructNoXTypes as;
-  as.key = key_value;
+  as.key_field = key_value;
 
   const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
   if (ret != RETCODE_OK) {
@@ -78,7 +78,7 @@ void write_additional_prefix_field_struct(const DataWriter_var& dw)
   AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
 
   AdditionalPrefixFieldStruct apfs;
-  apfs.key = key_value;
+  apfs.key_field = key_value;
   apfs.additional_field = APPENDABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
@@ -96,7 +96,7 @@ void write_additional_postfix_field_struct(const DataWriter_var& dw)
   AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
 
   AdditionalPostfixFieldStruct apfs;
-  apfs.key = key_value;
+  apfs.key_field = key_value;
   apfs.additional_field = APPENDABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
@@ -114,7 +114,7 @@ void write_modified_mutable_struct(const DataWriter_var& dw)
   ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
 
   ModifiedMutableStruct ams;
-  ams.key = key_value;
+  ams.key_field = key_value;
   ams.additional_field = MUTABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(ams, HANDLE_NIL);
@@ -132,7 +132,8 @@ void write_mutable_base_struct(const DataWriter_var& dw)
   MutableBaseStructDataWriter_var typed_dw = MutableBaseStructDataWriter::_narrow(dw);
 
   MutableBaseStruct mbs;
-  mbs.key = key_value;
+  mbs.key_field = key_value;
+
   const ReturnCode_t ret = typed_dw->write(mbs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_mutable_base_struct returned %C\n",
@@ -148,7 +149,7 @@ void write_modified_mutable_union(const DataWriter_var& dw)
   ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
 
   ModifiedMutableUnion mmu;
-  mmu.key(key_value);
+  mmu.key_field(key_value);
 
   const ReturnCode_t ret = typed_dw->write(mmu, HANDLE_NIL);
   if (ret != RETCODE_OK) {
@@ -182,7 +183,7 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw)
   AppendableStructWithDependencyDataWriter_var typed_dw = AppendableStructWithDependencyDataWriter::_narrow(dw);
 
   AppendableStructWithDependency as;
-  as.key = key_value;
+  as.key_field = key_value;
   as.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
@@ -199,7 +200,7 @@ void write_modified_name_mutable_struct(const DataWriter_var& dw)
 {
   ModifiedNameMutableStructDataWriter_var typed_dw = ModifiedNameMutableStructDataWriter::_narrow(dw);
   ModifiedNameMutableStruct sample;
-  sample.key_modified = key_value;
+  sample.key_field_modified = key_value;
   sample.additional_field_modified = MUTABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
@@ -216,7 +217,7 @@ void write_modified_name_mutable_union(const DataWriter_var& dw)
 {
   ModifiedNameMutableUnionDataWriter_var typed_dw = ModifiedNameMutableUnionDataWriter::_narrow(dw);
   ModifiedNameMutableUnion sample;
-  sample.key_modified(key_value);
+  sample.key_field_modified(key_value);
 
   const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
@@ -487,7 +488,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (!wait_for_reader (true, control_dw)) {
+  if (!wait_for_reader(true, control_dw)) {
     return 1;
   }
 
@@ -501,12 +502,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (!wait_for_reader (false, control_dw)) {
+  if (!wait_for_reader(false, control_dw)) {
     return 1;
   }
-  topic = 0;
   ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
 
+  topic = 0;
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();

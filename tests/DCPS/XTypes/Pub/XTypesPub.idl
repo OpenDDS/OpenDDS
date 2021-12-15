@@ -2,36 +2,34 @@
 
 @topic
 struct ControlStruct {
-  @key long key;
+  @key long key_field;
 };
 
 @topic
 struct PlainCdrStruct {
-  @key long key;
-  long value;
+  @key long key_field;
+  long value_field;
 };
 
 // Final structures
-
 @topic
 @final
 struct FinalStructPub {
-  @key long key;
+  @key long key_field;
 };
 
 @topic
 @final
 struct ModifiedFinalStruct {
-  @key long key;
+  @key long key_field;
   long additional_field;
 };
 
 // Appendable structures
-
 @topic
 @appendable
 struct AdditionalPostfixFieldStruct {
-  @key long key;
+  @key long key_field;
   long additional_field;
 };
 
@@ -39,48 +37,45 @@ struct AdditionalPostfixFieldStruct {
 @appendable
 struct AdditionalPrefixFieldStruct {
   long additional_field;
-  @key long key;
+  @key long key_field;
 };
 
 // Mutable structures
-
 @topic
 @mutable
 struct ModifiedMutableStruct {
   @id(2) long additional_field;
-  @id(1) @key long key;
+  @id(1) @key long key_field;
 };
 
 @topic
 @mutable
 struct MutableBaseStruct {
-  @id(1) @key long key;
+  @id(1) @key long key_field;
 };
 
 @topic
 @mutable
 struct ModifiedIdMutableStruct {
-  @id(1) @key long key;
+  @id(1) @key long key_field;
   @id(3) long additional_field;
 };
 
 @topic
 @mutable
 struct ModifiedTypeMutableStruct {
-  @id(1) @key long key;
+  @id(1) @key long key_field;
   @id(2) string additional_field;
 };
 
 @topic
 @mutable
 struct ModifiedNameMutableStruct {
-  @id(1) @key long key_modified;
+  @id(1) @key long key_field_modified;
   @id(2) long additional_field_modified;
 };
 
-
 // Unions
-
 enum UnionDisc {
   E_KEY,
   E_OCTET_FIELD,
@@ -97,7 +92,7 @@ enum ModifiedUnionDisc {
 @mutable
 union ModifiedMutableUnion switch (UnionDisc) {
 case E_KEY:
-  @id(6) long key;
+  @id(6) long key_field;
 case E_ADDITIONAL_FIELD:
   @id(12) long additional_field;
 };
@@ -106,7 +101,7 @@ case E_ADDITIONAL_FIELD:
 @mutable
 union ModifiedDiscMutableUnion switch (ModifiedUnionDisc) {
 case E_KEY_MODIFIED:
-  @id(6) long key;
+  @id(6) long key_field;
 case E_OCTET_FIELD_MODIFIED:
   @id(8) octet octet_field;
 case E_ADDITIONAL_FIELD_MODIFIED:
@@ -117,7 +112,7 @@ case E_ADDITIONAL_FIELD_MODIFIED:
 @mutable
 union ModifiedTypeMutableUnion switch (UnionDisc) {
 case E_KEY:
-  @id(6) string key;
+  @id(6) string key_field;
 case E_OCTET_FIELD:
   @id(8) string octet_field;
 case E_ADDITIONAL_FIELD:
@@ -128,16 +123,14 @@ case E_ADDITIONAL_FIELD:
 @mutable
 union ModifiedNameMutableUnion switch (UnionDisc) {
 case E_KEY:
-  @id(6) long key_modified;
+  @id(6) long key_field_modified;
 case E_OCTET_FIELD:
   @id(8) octet octet_field_modified;
 case E_ADDITIONAL_FIELD:
   @id(12) long additional_field_modified;
 };
 
-
 // Tryconstruct
-
 typedef string<20> str20;
 typedef string<64> str64;
 
@@ -148,7 +141,6 @@ struct Trim64Struct {
 };
 
 // Dependencies
-
 @appendable
 struct NestedStruct {
   long additional_field;
@@ -157,14 +149,13 @@ struct NestedStruct {
 @topic
 @appendable
 struct AppendableStructWithDependency {
-  @key long key;
+  @key long key_field;
   NestedStruct additional_nested_struct;
 };
 
 // No XTypes Test
-
 @topic
 @appendable
 struct AppendableStructNoXTypes {
-  @key long key;
+  @key long key_field;
 };
