@@ -96,25 +96,35 @@ DomainParticipantImpl::DomainParticipantImpl(
   const DDS::DomainParticipantQos& qos,
   DDS::DomainParticipantListener_ptr a_listener,
   const DDS::StatusMask& mask)
-  : default_topic_qos_(TheServiceParticipant->initial_TopicQos()),
-    default_publisher_qos_(TheServiceParticipant->initial_PublisherQos()),
-    default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos()),
-    qos_(qos),
+  : default_topic_qos_(TheServiceParticipant->initial_TopicQos())
+  , default_publisher_qos_(TheServiceParticipant->initial_PublisherQos())
+  , default_subscriber_qos_(TheServiceParticipant->initial_SubscriberQos())
+  , qos_(qos)
 #ifdef OPENDDS_SECURITY
-    id_handle_(DDS::HANDLE_NIL),
-    perm_handle_(DDS::HANDLE_NIL),
-    part_crypto_handle_(DDS::HANDLE_NIL),
+  , id_handle_(DDS::HANDLE_NIL)
+  , perm_handle_(DDS::HANDLE_NIL)
+  , part_crypto_handle_(DDS::HANDLE_NIL)
 #endif
-    domain_id_(domain_id),
-    dp_id_(GUID_UNKNOWN),
-    federated_(false),
-    handle_waiters_(handle_protector_),
-    shutdown_condition_(shutdown_mutex_),
-    shutdown_complete_(false),
-    participant_handles_(handle_generator),
-    pub_id_gen_(dp_id_),
-    automatic_liveliness_timer_(*this),
-    participant_liveliness_timer_(*this)
+  , domain_id_(domain_id)
+  , dp_id_(GUID_UNKNOWN)
+  , federated_(false)
+  , handle_waiters_(handle_protector_)
+  , shutdown_condition_(shutdown_mutex_)
+  , shutdown_complete_(false)
+  , participant_handles_(handle_generator)
+  , pub_id_gen_(dp_id_)
+  , automatic_liveliness_timer_(make_rch<AutomaticLivelinessTimer>(ref(*this)))
+  , automatic_liveliness_task_(make_rch<AutomaticLivelinessTask>(
+    TheServiceParticipant->time_source(),
+    TheServiceParticipant->interceptor(),
+    automatic_liveliness_timer_,
+    &LivelinessTimer::execute))
+  , participant_liveliness_timer_(make_rch<ParticipantLivelinessTimer>(ref(*this)))
+  , participant_liveliness_task_(make_rch<ParticipantLivelinessTask>(
+    TheServiceParticipant->time_source(),
+    TheServiceParticipant->interceptor(),
+    participant_liveliness_timer_,
+    &LivelinessTimer::execute))
 {
   (void) this->set_listener(a_listener, mask);
   monitor_.reset(TheServiceParticipant->monitor_factory_->create_dp_monitor(this));
@@ -2371,15 +2381,15 @@ DomainParticipantImpl::delete_replayer(Replayer_ptr replayer)
 void
 DomainParticipantImpl::add_adjust_liveliness_timers(DataWriterImpl* writer)
 {
-  automatic_liveliness_timer_.add_adjust(writer);
-  participant_liveliness_timer_.add_adjust(writer);
+  automatic_liveliness_timer_->add_adjust(writer);
+  participant_liveliness_timer_->add_adjust(writer);
 }
 
 void
 DomainParticipantImpl::remove_adjust_liveliness_timers()
 {
-  automatic_liveliness_timer_.remove_adjust();
-  participant_liveliness_timer_.remove_adjust();
+  automatic_liveliness_timer_->remove_adjust();
+  participant_liveliness_timer_->remove_adjust();
 }
 
 DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& impl,
@@ -2393,9 +2403,6 @@ DomainParticipantImpl::LivelinessTimer::LivelinessTimer(DomainParticipantImpl& i
 
 DomainParticipantImpl::LivelinessTimer::~LivelinessTimer()
 {
-  if (scheduled_ && TheServiceParticipant->timer()) {
-    TheServiceParticipant->timer()->cancel_timer(this);
-  }
 }
 
 void
@@ -2413,10 +2420,10 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
 
   // Reschedule or schedule a timer if necessary.
   if (scheduled_ && interval_ < remaining) {
-    TheServiceParticipant->timer()->cancel_timer(this);
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
+    cancel();
+    schedule(interval_);
   } else if (!scheduled_) {
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
+    schedule(interval_);
     scheduled_ = true;
     last_liveliness_check_ = now;
   }
@@ -2430,15 +2437,11 @@ DomainParticipantImpl::LivelinessTimer::remove_adjust()
   recalculate_interval_ = true;
 }
 
-int
-DomainParticipantImpl::LivelinessTimer::handle_timeout(
-  const ACE_Time_Value& tv,
-  const void* /* arg */)
+void DomainParticipantImpl::LivelinessTimer::execute(const MonotonicTimePoint& now)
 {
   ThreadMonitor::GreenLight gl("DomainParticipant");
-  const MonotonicTimePoint now(tv);
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, this->lock_, 0);
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   scheduled_ = false;
 
@@ -2450,11 +2453,9 @@ DomainParticipantImpl::LivelinessTimer::handle_timeout(
   if (!interval_.is_max()) {
     dispatch(now);
     last_liveliness_check_ = now;
-    TheServiceParticipant->timer()->schedule_timer(this, 0, interval_.value());
+    schedule(interval_);
     scheduled_ = true;
   }
-
-  return 0;
 }
 
 DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(DomainParticipantImpl& impl)
@@ -2535,6 +2536,9 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 {
   ThreadMonitor::GreenLight gl("DomainParticipant");
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
+
+  automatic_liveliness_timer_->cancel();
+  participant_liveliness_timer_->cancel();
 
   // delete publishers
   {

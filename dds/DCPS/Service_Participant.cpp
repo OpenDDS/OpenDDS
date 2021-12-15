@@ -225,6 +225,14 @@ Service_Participant::~Service_Participant()
   {
     ACE_GUARD(ACE_Thread_Mutex, guard, factory_lock_);
     if (dp_factory_servant_) {
+      const size_t count = dp_factory_servant_->participant_count();
+      if (count > 0 && log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+          "There are %B remaining domain participant(s). "
+          "It is recommented to delete them before shutdown.\n",
+          count));
+      }
+
       const DDS::ReturnCode_t cleanup_status = dp_factory_servant_->delete_all_participants();
       if (cleanup_status) {
         if (log_level >= LogLevel::Warning) {
