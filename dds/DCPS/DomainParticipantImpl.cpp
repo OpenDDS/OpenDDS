@@ -1075,13 +1075,10 @@ DomainParticipantImpl::delete_contained_entities()
   if (disc)
     disc->fini_bit(this);
 
-  /*
   if (ACE_OS::thr_equal(TheServiceParticipant->reactor_owner(),
                         ACE_Thread::self())) {
-  */
     handle_exception(0);
 
-  /*
   } else {
     TheServiceParticipant->reactor()->notify(this);
 
@@ -1092,7 +1089,6 @@ DomainParticipantImpl::delete_contained_entities()
     shutdown_complete_ = false;
     shutdown_mutex_.release();
   }
-  */
 
   bit_subscriber_ = DDS::Subscriber::_nil();
 

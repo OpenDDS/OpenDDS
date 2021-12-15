@@ -2493,13 +2493,26 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 void TAO_DDS_DCPSInfo_i::cleanup_all_built_in_topics()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
-  in_cleanup_all_built_in_topics_ = true;
-  for (DCPS_IR_Domain_Map::iterator it = domains_.begin(); it != domains_.end(); ++it) {
+  DCPS_IR_Domain_Map copy;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+    if (domains_.empty() || in_cleanup_all_built_in_topics_) {
+      return;
+    }
+    copy = domains_;
+    in_cleanup_all_built_in_topics_ = true;
+  }
+
+  for (DCPS_IR_Domain_Map::iterator it = copy.begin(); it != copy.end(); ++it) {
     it->second->cleanup_built_in_topics();
   }
-  in_cleanup_all_built_in_topics_ = false;
-  domains_.clear();
+
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+    in_cleanup_all_built_in_topics_ = false;
+    copy.clear();
+    domains_.clear();
+  }
 #endif
 }
 

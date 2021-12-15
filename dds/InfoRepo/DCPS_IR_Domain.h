@@ -62,7 +62,7 @@ class DCPS_IR_Publication;
  * system's domain.
  */
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
-: public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Domain>{
+: public OpenDDS::DCPS::RcObject {
 public:
   DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator);
 
