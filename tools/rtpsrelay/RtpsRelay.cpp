@@ -425,7 +425,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Setup relay publisher and subscriber.
-  DDS::Publisher_var relay_publisher = relay_participant->create_publisher(PUBLISHER_QOS_DEFAULT, nullptr,
+  DDS::PublisherQos publisher_qos;
+  relay_participant->get_default_publisher_qos(publisher_qos);
+  publisher_qos.partition.name.length(1);
+  publisher_qos.partition.name[0] = config.relay_id().c_str(); // Publish to dedicated partition.
+
+  DDS::Publisher_var relay_publisher = relay_participant->create_publisher(publisher_qos, nullptr,
                                                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!relay_publisher) {
@@ -433,7 +438,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::Subscriber_var relay_subscriber = relay_participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT, nullptr,
+  DDS::SubscriberQos subscriber_qos;
+  relay_participant->get_default_subscriber_qos(subscriber_qos);
+  subscriber_qos.partition.name.length(1);
+  subscriber_qos.partition.name[0] = "*"; // Subscriber to all partitions.
+
+  DDS::Subscriber_var relay_subscriber = relay_participant->create_subscriber(subscriber_qos, nullptr,
                                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!relay_subscriber) {
