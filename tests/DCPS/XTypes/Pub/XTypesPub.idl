@@ -1,15 +1,4 @@
-#include <tao/OctetSeq.pidl>
-
-@topic
-struct ControlStruct {
-  @key long key_field;
-};
-
-@topic
-struct PlainCdrStruct {
-  @key long key_field;
-  long value_field;
-};
+#include "../Common/Common.idl"
 
 // Final structures
 @topic
@@ -76,18 +65,6 @@ struct ModifiedNameMutableStruct {
 };
 
 // Unions
-enum UnionDisc {
-  E_KEY,
-  E_OCTET_FIELD,
-  E_ADDITIONAL_FIELD
-};
-
-enum ModifiedUnionDisc {
-  E_KEY_MODIFIED,
-  E_OCTET_FIELD_MODIFIED,
-  E_ADDITIONAL_FIELD_MODIFIED
-};
-
 @topic
 @mutable
 union ModifiedMutableUnion switch (UnionDisc) {
@@ -131,9 +108,6 @@ case E_ADDITIONAL_FIELD:
 };
 
 // Tryconstruct
-typedef string<20> str20;
-typedef string<64> str64;
-
 @topic
 @mutable
 struct Trim64Struct {
@@ -141,21 +115,9 @@ struct Trim64Struct {
 };
 
 // Dependencies
-@appendable
-struct NestedStruct {
-  long additional_field;
-};
-
 @topic
 @appendable
 struct AppendableStructWithDependency {
   @key long key_field;
   NestedStruct additional_nested_struct;
-};
-
-// No XTypes Test
-@topic
-@appendable
-struct AppendableStructNoXTypes {
-  @key long key_field;
 };

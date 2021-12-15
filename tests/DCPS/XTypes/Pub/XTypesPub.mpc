@@ -2,7 +2,7 @@ project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transport
 
   exename   = xtypes_publisher
 
-  includes += ..
+  includes += ../Common
 
   TypeSupport_Files {
     XTypesPub.idl

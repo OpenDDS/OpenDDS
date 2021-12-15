@@ -2,7 +2,7 @@ project(XTypes_Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transpor
 
   exename   = xtypes_subscriber
 
-  includes += ..
+  includes += ../Common
 
   TypeSupport_Files {
     XTypesSub.idl
