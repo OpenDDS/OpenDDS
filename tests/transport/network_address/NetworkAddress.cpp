@@ -301,3 +301,8 @@ TEST(dds_DCPS_transport_framework_NetworkAddress, choose_single_coherent_address
   EXPECT_EQ(addr1.get_port_number(), 0);
   EXPECT_EQ(addr2.get_port_number(), 0);
 }
+
+int main(int argc, char* argv[]) {
+  ::testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
