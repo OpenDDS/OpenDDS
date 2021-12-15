@@ -1326,7 +1326,7 @@ DataWriterImpl::enable()
     dp_id_ = participant->get_id();
   }
 
-  if (!topic_servant_->check_data_representation(get_effective_data_rep_qos(qos_.representation.value, false, allow_unaligned()), true)) {
+  if (!topic_servant_->check_data_representation(get_writer_effective_data_rep_qos(qos_.representation.value, allow_unaligned()), true)) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
         ACE_TEXT("none of the data representation QoS is allowed by the ")

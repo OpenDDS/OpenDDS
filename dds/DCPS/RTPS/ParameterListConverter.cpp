@@ -825,11 +825,14 @@ bool from_param_list(const ParameterList& param_list,
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
-void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader)
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader, bool allow_unaligned)
 {
   DDS::DataRepresentationQosPolicy dr_qos;
-  //TODO Clayton: Figure this out
-  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader, false);
+  if (reader) {
+    dr_qos.value = DCPS::get_reader_effective_data_rep_qos(ids);
+  } else {
+    dr_qos.value = DCPS::get_writer_effective_data_rep_qos(ids, allow_unaligned);
+  }
   if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
     Parameter param;
     param.representation(dr_qos);
@@ -964,7 +967,17 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value);
+  bool allow_unaligned = true;
+  //TODO CLAYTON:
+  //if we only have 1 possible transport we are either true or false
+  //if we have multiple transports, we do not know which will be selected, and thus have a problem
+  if (writer_data.writerProxy.allLocators.length() == 1) {
+    if (writer_data.writerProxy.allLocators[0].transport_type == "rtps_udp") {
+      allow_unaligned = false;
+    }
+  }
+  add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value, false,
+    allow_unaligned);
 
   {
     Parameter param;
@@ -1285,7 +1298,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
+  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true, true);
 
   if (not_default(reader_data.ddsSubscriptionData.type_consistency)) {
     Parameter param;

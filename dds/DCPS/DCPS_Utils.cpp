@@ -253,13 +253,14 @@ compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
                                     OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
   }
   bool allow_unaligned = true;
-  for (CORBA::ULong i = 0; i < pubTLS.length(); ++i) {
-    for (CORBA::ULong j = 0; j < subTLS.length(); ++j) {
+  bool exit_loop = false;
+  for (CORBA::ULong i = 0; i < pubTLS.length() && !exit_loop; ++i) {
+    for (CORBA::ULong j = 0; j < subTLS.length() && !exit_loop; ++j) {
       if (0 == std::strcmp(pubTLS[i].transport_type, subTLS[j].transport_type)) {
         if (pubTLS[i].transport_type == "rtps_udp") {
           allow_unaligned = false;
         }
-        break;
+        exit_loop = true;
       }
     }
   }
@@ -397,9 +398,9 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     // Find a common data representation
     bool found = false;
     DDS::DataRepresentationIdSeq readerIds =
-      get_effective_data_rep_qos(readerQos->representation.value, true, allow_unaligned);
+      get_reader_effective_data_rep_qos(readerQos->representation.value);
     DDS::DataRepresentationIdSeq writerIds =
-      get_effective_data_rep_qos(writerQos->representation.value, false, allow_unaligned);
+      get_writer_effective_data_rep_qos(writerQos->representation.value, allow_unaligned);
     const CORBA::ULong reader_count = readerIds.length();
     const CORBA::ULong writer_count = writerIds.length();
     for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
@@ -484,19 +485,26 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   return true;
 }
 
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos,
-  bool reader, bool allow_unaligned)
+DDS::DataRepresentationIdSeq get_writer_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos,
+  bool allow_unaligned)
 {
   if (qos.length() == 0) {
     DDS::DataRepresentationIdSeq ids;
-    ids.length(reader ? allow_unaligned ? 3 : 2 : 1);
+    ids.length(1);
     ids[0] = allow_unaligned ? DDS::UNALIGNED_CDR_DATA_REPRESENTATION : DDS::XCDR2_DATA_REPRESENTATION;
-    if (reader) {
-      ids[1] = DDS::XCDR_DATA_REPRESENTATION;
-      if (allow_unaligned) {
-        ids[2] = DDS::XCDR2_DATA_REPRESENTATION;
-      }
-    }
+    return ids;
+  }
+  return qos;
+}
+
+DDS::DataRepresentationIdSeq get_reader_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos)
+{
+  if (qos.length() == 0) {
+    DDS::DataRepresentationIdSeq ids;
+    ids.length(3);
+    ids[0] = DDS::XCDR_DATA_REPRESENTATION;
+    ids[1] = DDS::XCDR2_DATA_REPRESENTATION;
+    ids[2] =  DDS::UNALIGNED_CDR_DATA_REPRESENTATION;
     return ids;
   }
   return qos;

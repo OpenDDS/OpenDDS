@@ -326,8 +326,8 @@ public:
   DDS::ReturnCode_t setup_serialization()
   {
     const DDS::DataRepresentationIdSeq repIds =
-      get_effective_data_rep_qos(qos_.representation.value, false, allow_unaligned());
-    if (cdr_encapsulation()) {
+      get_writer_effective_data_rep_qos(qos_.representation.value, allow_unaligned());
+    if (cdr_encapsulation() || qos_.representation.value.length() > 0) {
       Encoding::Kind encoding_kind;
       // There should only be one data representation in a DataWriter, so
       // simply use repIds[0].
@@ -400,7 +400,7 @@ public:
         ACE_TEXT("always allocating from heap\n"),
         TraitsType::type_name()));
     }
-
+    cdr_encapsulation(encoding_mode_.encoding().kind() != Encoding::KIND_UNALIGNED_CDR);
     return DDS::RETCODE_OK;
   }
 

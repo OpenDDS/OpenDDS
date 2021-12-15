@@ -1207,7 +1207,7 @@ DataReaderImpl::enable()
 
   if (topic_servant_) {
     if (!topic_servant_->check_data_representation(
-        get_effective_data_rep_qos(qos_.representation.value, true, allow_unaligned()), false)) {
+        get_reader_effective_data_rep_qos(qos_.representation.value), false)) {
       if (DCPS_debug_level) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
           ACE_TEXT("none of the data representation QoS is allowed by the ")
@@ -3415,7 +3415,7 @@ DataReaderImpl::get_ice_endpoint()
 DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
   const DDS::DataRepresentationIdSeq repIds =
-    get_effective_data_rep_qos(qos_.representation.value, true, allow_unaligned());
+    get_reader_effective_data_rep_qos(qos_.representation.value);
   bool xcdr1_mutable = false;
   bool illegal_unaligned = false;
   for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
@@ -3426,7 +3426,6 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
       } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && !allow_unaligned()) {
         illegal_unaligned = true;
       } else {
-        cdr_encapsulation();
         decoding_modes_.insert(encoding_kind);
       }
     } else if (DCPS_debug_level) {

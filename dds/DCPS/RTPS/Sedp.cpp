@@ -7191,18 +7191,19 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
     if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
       if (!writer_local || !reader_local) {
         bool allow_unaligned = true;
-        for (CORBA::ULong i = 0; i < wTls->length(); ++i) {
-          for (CORBA::ULong j = 0; j < rTls->length(); ++j) {
+        bool exit_loop = false;
+        for (CORBA::ULong i = 0; i < wTls->length() && !exit_loop; ++i) {
+          for (CORBA::ULong j = 0; j < rTls->length() && !exit_loop; ++j) {
             if (0 == std::strcmp((*wTls)[i].transport_type, (*rTls)[j].transport_type)) {
               if ((*wTls)[i].transport_type == "rtps_udp") {
                 allow_unaligned = false;
               }
-              break;
+              exit_loop = true;
             }
           }
         }
         const DDS::DataRepresentationIdSeq repIds =
-          DCPS::get_effective_data_rep_qos(tempDwQos.representation.value, false, allow_unaligned);
+          DCPS::get_writer_effective_data_rep_qos(tempDwQos.representation.value, allow_unaligned);
         DCPS::Encoding::Kind encoding_kind;
         if (DCPS::repr_to_encoding_kind(repIds[0], encoding_kind) &&
             encoding_kind == DCPS::Encoding::KIND_XCDR1) {
