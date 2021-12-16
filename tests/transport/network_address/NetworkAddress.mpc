@@ -1,0 +1,3 @@
+project: dcps_test, dcps_tcp, googletest {
+  requires += no_opendds_safety_profile
+}
