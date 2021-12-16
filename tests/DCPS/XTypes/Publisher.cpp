@@ -1,5 +1,5 @@
-#include "XTypes.h"
-#include "XTypesPubTypeSupportImpl.h"
+#include "Common.h"
+#include "PublisherTypeSupportImpl.h"
 #include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>

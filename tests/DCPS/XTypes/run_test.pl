@@ -316,7 +316,7 @@ sub run_test {
   }
 
   push(@reader_args, @test_args);
-  $test->process("reader_$test_name_param", './xtypes_subscriber', join(' ', @reader_args));
+  $test->process("reader_$test_name_param", './subscriber', join(' ', @reader_args));
   $test->start_process("reader_$test_name_param");
 
   my @writer_args = ("-DCPSConfigFile $v->{w_ini} -ORBLogFile publisher_$test_name_param.log --type $v->{writer_type}");
@@ -325,7 +325,7 @@ sub run_test {
   }
 
   push(@writer_args, @test_args);
-  $test->process("writer_$test_name_param", './xtypes_publisher', join(' ', @writer_args));
+  $test->process("writer_$test_name_param", './publisher', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
 
   $status |= $test->wait_kill("reader_$test_name_param", 30);

@@ -1,5 +1,5 @@
-#ifndef XTYPES_H
-#define XTYPES_H
+#ifndef COMMON_H
+#define COMMON_H
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
