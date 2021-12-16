@@ -238,7 +238,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-  // Arguments "--type" and "--expect_to_fail" must be specified
+  // Arguments "--type" must be specified
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
