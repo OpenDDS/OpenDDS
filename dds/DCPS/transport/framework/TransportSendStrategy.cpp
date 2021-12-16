@@ -940,6 +940,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
               "graceful disconnecting, so discard message.\n"));
+        guard.release();
         element->data_dropped(true);
         return;
       }
