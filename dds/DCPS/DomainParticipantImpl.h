@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -20,6 +18,8 @@
 #include "Replayer.h"
 #include "ConditionVariable.h"
 #include "TimeTypes.h"
+#include "GuidUtils.h"
+#include "SporadicTask.h"
 #include "XTypes/TypeLookupService.h"
 #include "transport/framework/TransportImpl_rch.h"
 #include "security/framework/SecurityConfig_rch.h"
@@ -29,7 +29,6 @@
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include "GuidUtils.h"
 #include <dds/DdsDcpsInfrastructureC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
@@ -39,9 +38,9 @@
 #include <ace/Thread_Mutex.h>
 #include <ace/Recursive_Thread_Mutex.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -330,9 +329,10 @@ public:
   GUID_t get_repoid(DDS::InstanceHandle_t id) const;
 
   /**
-   *  Check if the topic is used by any datareader or datawriter.
+   * Check to see if the Participant has any entities left in it.
+   * leftover_entities will be set with a description of what is left.
    */
-  bool is_clean() const;
+  bool is_clean(String* leftover_entities = 0) const;
 
   /**
    * This is used to retrieve the listener for a certain status change.
@@ -563,20 +563,23 @@ private:
   /// Protect the replayers collection.
   ACE_Recursive_Thread_Mutex replayers_protector_;
 
-  class LivelinessTimer : public ACE_Event_Handler {
+  class LivelinessTimer : public RcObject {
   public:
     LivelinessTimer(DomainParticipantImpl& impl, DDS::LivelinessQosPolicyKind kind);
     virtual ~LivelinessTimer();
     void add_adjust(OpenDDS::DCPS::DataWriterImpl* writer);
     void remove_adjust();
-    int handle_timeout(const ACE_Time_Value &tv, const void * /* arg */);
+    void execute(const MonotonicTimePoint& now);
     virtual void dispatch(const MonotonicTimePoint& tv) = 0;
+    virtual void cancel() = 0;
 
   protected:
     DomainParticipantImpl& impl_;
     const DDS::LivelinessQosPolicyKind kind_;
 
     TimeDuration interval () const { return interval_; }
+
+    virtual void schedule(const TimeDuration& interval) = 0;
 
   private:
     TimeDuration interval_;
@@ -590,15 +593,41 @@ private:
   public:
     AutomaticLivelinessTimer(DomainParticipantImpl& impl);
     virtual void dispatch(const MonotonicTimePoint& tv);
+
+    void cancel()
+    {
+      impl_.automatic_liveliness_task_->cancel();
+    }
+
+  private:
+    void schedule(const TimeDuration& interval)
+    {
+      impl_.automatic_liveliness_task_->schedule(interval);
+    }
   };
-  AutomaticLivelinessTimer automatic_liveliness_timer_;
+  RcHandle<AutomaticLivelinessTimer> automatic_liveliness_timer_;
+  typedef PmfSporadicTask<AutomaticLivelinessTimer> AutomaticLivelinessTask;
+  RcHandle<AutomaticLivelinessTask> automatic_liveliness_task_;
 
   class ParticipantLivelinessTimer : public LivelinessTimer {
   public:
     ParticipantLivelinessTimer(DomainParticipantImpl& impl);
     virtual void dispatch(const MonotonicTimePoint& tv);
+
+    void cancel()
+    {
+      impl_.participant_liveliness_task_->cancel();
+    }
+
+  private:
+    void schedule(const TimeDuration& interval)
+    {
+      impl_.participant_liveliness_task_->schedule(interval);
+    }
   };
-  ParticipantLivelinessTimer participant_liveliness_timer_;
+  RcHandle<ParticipantLivelinessTimer> participant_liveliness_timer_;
+  typedef PmfSporadicTask<ParticipantLivelinessTimer> ParticipantLivelinessTask;
+  RcHandle<ParticipantLivelinessTask> participant_liveliness_task_;
 
   TimeDuration liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
   bool participant_liveliness_activity_after(const MonotonicTimePoint& tv);
