@@ -1,5 +1,6 @@
 #include "XTypes.h"
 #include "XTypesSubTypeSupportImpl.h"
+#include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
 

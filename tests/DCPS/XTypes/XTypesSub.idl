@@ -1,4 +1,4 @@
-#include "../Common/Common.idl"
+#include "Common.idl"
 
 // Final structures
 @topic

@@ -1,0 +1,31 @@
+project(XTypes_Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+
+  exename = xtypes_subscriber
+
+  includes += .
+
+  TypeSupport_Files {
+    Common.idl
+    XTypesSub.idl
+  }
+
+  Source_Files {
+    XTypesSubscriber.cpp
+  }
+}
+
+project(XTypes_Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+
+  exename = xtypes_publisher
+
+  includes += .
+
+  TypeSupport_Files {
+    Common.idl
+    XTypesPub.idl
+  }
+
+  Source_Files {
+    XTypesPublisher.cpp
+  }
+}
