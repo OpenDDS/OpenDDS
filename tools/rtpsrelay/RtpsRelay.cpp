@@ -121,6 +121,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-InactivePeriod"))) {
+      config.inactive_period(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-MaxPending"))) {
       config.max_pending(ACE_OS::atoi(arg));
       args.consume_arg();
@@ -313,6 +316,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (!relay_partitions_topic) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partitions topic\n")));
+    return EXIT_FAILURE;
+  }
+
+  RelayParticipantStatusTypeSupport_var relay_participant_status_ts = new RelayParticipantStatusTypeSupportImpl;
+  if (relay_participant_status_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register RelayParticipantStatus type\n")));
+    return EXIT_FAILURE;
+  }
+  CORBA::String_var relay_participant_status_type_name = relay_participant_status_ts->get_type_name();
+
+  DDS::Topic_var relay_participant_status_topic =
+    relay_participant->create_topic(RELAY_PARTICIPANT_STATUS_TOPIC_NAME.c_str(),
+                                    relay_participant_status_type_name,
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!relay_participant_status_topic) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Participant Status topic\n")));
     return EXIT_FAILURE;
   }
 
@@ -612,6 +633,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  DDS::DataWriter_var relay_participant_status_writer_var =
+    relay_publisher->create_datawriter(relay_participant_status_topic, writer_qos, nullptr,
+                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!relay_participant_status_writer_var) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Participant Status data writer\n")));
+    return EXIT_FAILURE;
+  }
+
+  RelayParticipantStatusDataWriter_var relay_participant_status_writer = RelayParticipantStatusDataWriter::_narrow(relay_participant_status_writer_var);
+
+  if (!relay_participant_status_writer) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Participant Status data writer\n")));
+    return EXIT_FAILURE;
+  }
+
   DDS::DataWriterQos replay_writer_qos;
   relay_publisher->get_default_datawriter_qos(replay_writer_qos);
 
@@ -636,7 +673,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
-  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_statistics_reporter);
+  RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
+  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
@@ -728,7 +766,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ParticipantListener* participant_listener =
-    new ParticipantListener(config, guid_addr_set, application_participant_impl, relay_statistics_reporter);
+    new ParticipantListener(application_participant_impl, guid_addr_set, relay_participant_status_reporter);
   DDS::DataReaderListener_var participant_listener_var(participant_listener);
   DDS::ReturnCode_t ret = participant_reader->set_listener(participant_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
