@@ -17,6 +17,9 @@
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_fcntl.h>
+#ifdef ACE_WIN32
+#include <ace/WFMO_Reactor.h>
+#endif
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -274,6 +277,12 @@ public:
   bool add_spawned_process(const SpawnedProcessConfig& config)
   {
     std::lock_guard<std::mutex> guard(mutex_);
+#ifdef ACE_WIN32
+    if (all_spawned_processes_.size() >= ACE_WFMO_Reactor::DEFAULT_SIZE) {
+      std::cerr << "ACE_WFMO_Reactor can't handle waiting (for signals) from more than " << ACE_WFMO_Reactor::DEFAULT_SIZE << " objects" << std::endl;
+      return true;
+    }
+#endif
     if (all_spawned_processes_.count(config.spawned_process_id)) {
       std::cerr << "Received the same spawned process id twice: " << config.spawned_process_id << std::endl;
       return true;
@@ -326,13 +335,21 @@ public:
     // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
+      std::vector<std::shared_ptr<ACE_Process_Options>> spawned_proc_opts;
+      spawned_proc_opts.reserve(all_spawned_processes_.size());
+      std::vector<ACE_HANDLE> log_handles;
+      log_handles.reserve(all_spawned_processes_.size());
       for (auto& spawned_process_i : all_spawned_processes_) {
         auto& spawned_process = spawned_process_i.second;
-        ACE_HANDLE log_handle = ACE_INVALID_HANDLE;
-        std::shared_ptr<ACE_Process_Options> proc_opts = spawned_process->get_proc_opts(log_handle);
-        pid_t pid = process_manager_->spawn(*proc_opts);
-        if (log_handle != ACE_INVALID_HANDLE) {
-          ACE_OS::close(log_handle);
+        log_handles.push_back(ACE_INVALID_HANDLE);
+        spawned_proc_opts.push_back(spawned_process->get_proc_opts(log_handles.back()));
+      }
+      int index = 0;
+      for (auto spawned_process_i : all_spawned_processes_) {
+        auto& spawned_process = spawned_process_i.second;
+        pid_t pid = process_manager_->spawn(*spawned_proc_opts[index]);
+        if (log_handles[index] != ACE_INVALID_HANDLE) {
+          ACE_OS::close(log_handles[index]);
         }
         if (pid != ACE_INVALID_PID) {
           spawned_process->set_pid(pid);
@@ -342,6 +359,7 @@ public:
           std::cerr << "Failed to run spawned process " << spawned_process->id() << std::endl;
           spawned_process_is_finished(spawned_process);
         }
+        ++index;
       }
     }
 
@@ -459,18 +477,27 @@ public:
 
     const pid_t pid = process->getpid();
 
-    std::lock_guard<std::mutex> guard(mutex_);
+    std::stringstream ss_out, ss_err;
+    {
+      std::lock_guard<std::mutex> guard(mutex_);
+      const auto i = pid_to_spawned_process_id_.find(pid);
+      if (i != pid_to_spawned_process_id_.end()) {
+        auto& spawned_process = all_spawned_processes_[i->second];
+        ss_out << "SpawnedProcessManager::handle_exit() - Handling exit of process " << pid << " at " << Bench::iso8601() << " with exit code " << process->exit_code() << std::endl;
+        spawned_process->set_exit_status(process->return_value(), process->exit_code());
+        remaining_spawned_process_count_--;
+        finished_spawned_processes_.push_back(spawned_process);
+        cv_.notify_all();
+      } else {
+        ss_err << "SpawnedProcessManager::handle_exit() received an unknown PID: " << pid << std::endl;
+      }
+    }
 
-    const auto i = pid_to_spawned_process_id_.find(pid);
-    if (i != pid_to_spawned_process_id_.end()) {
-      auto& spawned_process = all_spawned_processes_[i->second];
-      std::cout << "SpawnedProcessManager::handle_exit() - Handling exit of process " << pid << " at " << Bench::iso8601() << " with exit code " << process->exit_code() << std::endl;
-      spawned_process->set_exit_status(process->return_value(), process->exit_code());
-      remaining_spawned_process_count_--;
-      finished_spawned_processes_.push_back(spawned_process);
-      cv_.notify_all();
-    } else {
-      std::cerr << "SpawnedProcessManager::handle_exit() received an unknown PID: " << pid << std::endl;
+    if (!ss_out.str().empty()) {
+      std::cout << ss_out.str() << std::flush;
+    }
+    if (!ss_err.str().empty()) {
+      std::cerr << ss_err.str() << std::flush;
     }
 
     return 0;
