@@ -367,16 +367,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
   get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
+  // For subscribing ack control topic.
   Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                      DEFAULT_STATUS_MASK);
   if (!control_sub) {
     ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
-    return 1;
-  }
-  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-                                                   DEFAULT_STATUS_MASK);
-  if (!control_pub) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
     return 1;
   }
 
@@ -391,6 +386,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
     return 1;
   }
+  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
+
+  // For publishing echo control topic.
+  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
+                                                   DEFAULT_STATUS_MASK);
+  if (!control_pub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
+    return 1;
+  }
 
   DataWriterQos control_dw_qos;
   control_pub->get_default_datawriter_qos(control_dw_qos);
@@ -402,12 +406,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
     return 1;
   }
-
   ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
-  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
 
-  Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-    DEFAULT_STATUS_MASK);
+  // For publishing user topic.
+  Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   if (!pub) {
     ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed\n"));
     return 1;
@@ -419,8 +421,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dw_qos.representation.value.length(1);
   dw_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
 
-  DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
-    DEFAULT_STATUS_MASK);
+  DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   if (!dw) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter failed\n"));
     return 1;
@@ -440,7 +441,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       OpenDDS::DCPS::retcode_to_string(ret)));
     failed = true;
   }
-
   ws->detach_condition(condition);
 
   if (!failed) {
@@ -449,7 +449,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (failed) {
     ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %C\n", type.c_str()));
-  } else if (expect_to_match) {
+    return 1;
+  }
+
+  if (expect_to_match) {
     if (type == "PlainCdrStruct") {
       write_plain_cdr_struct(dw);
     } else if (type == "FinalStructPub") {
@@ -489,6 +492,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  // Send echo when the subscriber's control reader joins.
   if (!wait_for_reader(true, control_dw)) {
     return 1;
   }
@@ -503,16 +507,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  // When the subscriber's control reader leaves, we can leave.
   if (!wait_for_reader(false, control_dw)) {
     return 1;
   }
-  ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
 
+  ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
   topic = 0;
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
 
-  ACE_DEBUG((LM_DEBUG, "writer exiting at %T\n"));
-  return failed ? 1 : 0;
+  ACE_DEBUG((LM_DEBUG, "Writer exiting at %T\n"));
+  return 0;
 }

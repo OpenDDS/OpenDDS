@@ -280,6 +280,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
   get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
+  // For publishing ack control topic.
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                                    DEFAULT_STATUS_MASK);
   if (!control_pub) {
@@ -297,8 +298,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
     return 1;
   }
-
   ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
+
+  // For subscribing echo control topic.
   Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                      DEFAULT_STATUS_MASK);
   if (!control_sub) {
@@ -317,9 +319,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
     return 1;
   }
-
   ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
 
+  // For subscribing user topic.
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   if (!sub) {
     ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
@@ -330,13 +332,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-
   if (disallow_type_coercion) {
     dr_qos.type_consistency.kind = DISALLOW_TYPE_COERCION;
   }
   dr_qos.type_consistency.ignore_member_names = ignore_member_names;
   dr_qos.type_consistency.force_type_validation = force_type_validation;
-
   dr_qos.representation.value.length(1);
   dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
 
@@ -366,9 +366,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     failed = !check_inconsistent_topic_status(topic);
   }
 
-  if (failed) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
-  } else if (expect_to_match) {
+  if (expect_to_match && !failed) {
     if (type == "PlainCdrStruct") {
       failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStruct") {
@@ -390,9 +388,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  if (failed) {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
+    return 1;
+  }
+
   //
   // As the subscriber is now about to exit, let the publisher know it can exit too
   //
+  if (!wait_for_reader(true, control_dw)) {
+    return 1;
+  }
+
   ACE_DEBUG((LM_DEBUG, "Reader sending ack at %T\n"));
 
   ControlStruct cs;
@@ -419,5 +426,5 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
-  return failed ? 1 : 0;
+  return 0;
 }
