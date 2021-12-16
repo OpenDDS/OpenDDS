@@ -441,7 +441,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::SubscriberQos subscriber_qos;
   relay_participant->get_default_subscriber_qos(subscriber_qos);
   subscriber_qos.partition.name.length(1);
-  subscriber_qos.partition.name[0] = "*"; // Subscriber to all partitions.
+  subscriber_qos.partition.name[0] = "*"; // Subscribe to all partitions.
 
   DDS::Subscriber_var relay_subscriber = relay_participant->create_subscriber(subscriber_qos, nullptr,
                                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
