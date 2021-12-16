@@ -448,7 +448,8 @@ Sedp::init(const RepoId& guid,
   rtps_inst->opendds_discovery_default_listener_ = publications_reader_;
   rtps_inst->opendds_discovery_guid_ = guid;
 
-  const_cast<bool&>(use_xtypes_) = disco.config()->use_xtypes();
+  const_cast<bool&>(use_xtypes_) = disco.use_xtypes();
+  const_cast<bool&>(use_xtypes_complete_) = disco.use_xtypes_complete();
 
   reactor_task_ = transport_inst_->reactor_task();
   // One should assume that the transport is configured after this
@@ -563,8 +564,6 @@ Sedp::init(const RepoId& guid,
 #endif
 
   max_type_lookup_service_reply_period_ = disco.config()->max_type_lookup_service_reply_period();
-  const_cast<bool&>(use_xtypes_) = disco.use_xtypes();
-  use_xtypes_complete_ = disco.use_xtypes_complete();
 
   return DDS::RETCODE_OK;
 }
