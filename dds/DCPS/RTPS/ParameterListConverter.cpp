@@ -825,13 +825,13 @@ bool from_param_list(const ParameterList& param_list,
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
-void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader, bool allow_unaligned)
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader, bool encapsulated_only)
 {
   DDS::DataRepresentationQosPolicy dr_qos;
   if (reader) {
     dr_qos.value = DCPS::get_reader_effective_data_rep_qos(ids);
   } else {
-    dr_qos.value = DCPS::get_writer_effective_data_rep_qos(ids, allow_unaligned);
+    dr_qos.value = DCPS::get_writer_effective_data_rep_qos(ids, encapsulated_only);
   }
   if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
     Parameter param;
@@ -967,17 +967,17 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  bool allow_unaligned = true;
+  bool encapsulated_only = false;
   //TODO CLAYTON:
   //if we only have 1 possible transport we are either true or false
   //if we have multiple transports, we do not know which will be selected, and thus have a problem
   if (writer_data.writerProxy.allLocators.length() == 1) {
-    if (writer_data.writerProxy.allLocators[0].transport_type == "rtps_udp") {
-      allow_unaligned = false;
+    if (0 == std::strcmp(writer_data.writerProxy.allLocators[0].transport_type, "rtps_udp")) {
+      encapsulated_only = true;
     }
   }
   add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value, false,
-    allow_unaligned);
+    encapsulated_only);
 
   {
     Parameter param;

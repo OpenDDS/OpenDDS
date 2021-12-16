@@ -124,9 +124,6 @@ public:
   /// Does the transport require a CDR-encapsulated data payload?
   virtual bool requires_cdr_encapsulation() const { return false; }
 
-  /// Does the transport allow unaligned CDR?
-  virtual bool allow_unaligned() const { return true; }
-
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
 

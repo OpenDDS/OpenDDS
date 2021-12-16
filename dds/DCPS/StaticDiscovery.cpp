@@ -1253,20 +1253,20 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
     if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
       if (!writer_local || !reader_local) {
-        bool allow_unaligned = true;
+        bool encapsulated_only = false;
         bool exit_loop = false;
         for (CORBA::ULong i = 0; i < wTls->length() && !exit_loop; ++i) {
           for (CORBA::ULong j = 0; j < rTls->length() && !exit_loop; ++j) {
             if (0 == std::strcmp((*wTls)[i].transport_type, (*rTls)[j].transport_type)) {
-              if ((*wTls)[i].transport_type == "rtps_udp") {
-                allow_unaligned = false;
+              if (0 == std::strcmp((*wTls)[i].transport_type, "rtps_udp")) {
+                encapsulated_only = true;
               }
               exit_loop = true;
             }
           }
         }
         const DDS::DataRepresentationIdSeq repIds =
-          get_writer_effective_data_rep_qos(tempDwQos.representation.value, allow_unaligned);
+          get_writer_effective_data_rep_qos(tempDwQos.representation.value, encapsulated_only);
         Encoding::Kind encoding_kind;
         if (repr_to_encoding_kind(repIds[0], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
           const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;

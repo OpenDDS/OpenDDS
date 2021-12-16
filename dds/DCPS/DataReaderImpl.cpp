@@ -3423,7 +3423,7 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
     if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
       if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
         xcdr1_mutable = true;
-      } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && !allow_unaligned()) {
+      } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && cdr_encapsulation()) {
         illegal_unaligned = true;
       } else {
         decoding_modes_.insert(encoding_kind);

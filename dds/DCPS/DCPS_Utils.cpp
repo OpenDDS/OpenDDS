@@ -252,13 +252,13 @@ compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
     increment_incompatibility_count(readerStatus,
                                     OpenDDS::TRANSPORTTYPE_QOS_POLICY_ID);
   }
-  bool allow_unaligned = true;
+  bool encapsulated_only = false;
   bool exit_loop = false;
   for (CORBA::ULong i = 0; i < pubTLS.length() && !exit_loop; ++i) {
     for (CORBA::ULong j = 0; j < subTLS.length() && !exit_loop; ++j) {
       if (0 == std::strcmp(pubTLS[i].transport_type, subTLS[j].transport_type)) {
-        if (pubTLS[i].transport_type == "rtps_udp") {
-          allow_unaligned = false;
+        if (pubTLS[i].transport_type != "rtps_udp") {
+          encapsulated_only = true;
         }
         exit_loop = true;
       }
@@ -266,7 +266,7 @@ compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
   }
   // Verify compatibility of DataWriterQos and DataReaderQos
   compatible = compatible && compatibleQOS(writerQos, readerQos,
-                                           writerStatus, readerStatus, allow_unaligned);
+                                           writerStatus, readerStatus, encapsulated_only);
 
   // Verify compatibility of PublisherQos and SubscriberQos
   compatible = compatible && compatibleQOS(pubQos, subQos,
@@ -316,7 +316,7 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
               const DDS::DataReaderQos * readerQos,
               OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
               OpenDDS::DCPS::IncompatibleQosStatus* readerStatus,
-              bool allow_unaligned)
+              bool encapsulated_only)
 {
   bool compatible = true;
 
@@ -399,8 +399,9 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
     bool found = false;
     DDS::DataRepresentationIdSeq readerIds =
       get_reader_effective_data_rep_qos(readerQos->representation.value);
+
     DDS::DataRepresentationIdSeq writerIds =
-      get_writer_effective_data_rep_qos(writerQos->representation.value, allow_unaligned);
+      get_writer_effective_data_rep_qos(writerQos->representation.value, encapsulated_only);
     const CORBA::ULong reader_count = readerIds.length();
     const CORBA::ULong writer_count = writerIds.length();
     for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
@@ -486,12 +487,12 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
 }
 
 DDS::DataRepresentationIdSeq get_writer_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos,
-  bool allow_unaligned)
+  bool cdr_encapsulated)
 {
   if (qos.length() == 0) {
     DDS::DataRepresentationIdSeq ids;
     ids.length(1);
-    ids[0] = allow_unaligned ? DDS::UNALIGNED_CDR_DATA_REPRESENTATION : DDS::XCDR2_DATA_REPRESENTATION;
+    ids[0] = cdr_encapsulated ? DDS::XCDR2_DATA_REPRESENTATION : DDS::UNALIGNED_CDR_DATA_REPRESENTATION;
     return ids;
   }
   return qos;

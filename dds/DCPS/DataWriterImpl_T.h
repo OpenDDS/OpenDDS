@@ -321,13 +321,17 @@ public:
   DataAllocator* data_allocator() const
   {
     return data_allocator_.get();
-  };
+  }
 
   DDS::ReturnCode_t setup_serialization()
   {
     const DDS::DataRepresentationIdSeq repIds =
-      get_writer_effective_data_rep_qos(qos_.representation.value, allow_unaligned());
-    if (cdr_encapsulation() || qos_.representation.value.length() > 0) {
+      get_writer_effective_data_rep_qos(qos_.representation.value, cdr_encapsulation());
+    if (qos_.representation.value.length() > 0) {
+      // If the QoS explicitly sets XCDR, XCDR2, or XML, force encapsulation
+      cdr_encapsulation(true);
+    }
+    if (cdr_encapsulation()) {
       Encoding::Kind encoding_kind;
       // There should only be one data representation in a DataWriter, so
       // simply use repIds[0].
@@ -342,8 +346,7 @@ public:
               TraitsType::type_name()));
           }
           return DDS::RETCODE_ERROR;
-        } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR &&
-                   !allow_unaligned()) {
+        } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR) {
           if (::OpenDDS::DCPS::DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
               "%CDataWriterImpl::setup_serialization: "
@@ -400,7 +403,6 @@ public:
         ACE_TEXT("always allocating from heap\n"),
         TraitsType::type_name()));
     }
-    cdr_encapsulation(encoding_mode_.encoding().kind() != Encoding::KIND_UNALIGNED_CDR);
     return DDS::RETCODE_OK;
   }
 
