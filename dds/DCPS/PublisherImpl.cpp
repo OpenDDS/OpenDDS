@@ -1,12 +1,12 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "PublisherImpl.h"
+
 #include "FeatureDisabledQosCheck.h"
 #include "DataWriterImpl.h"
 #include "DomainParticipantImpl.h"
@@ -20,7 +20,6 @@
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/DataLinkSet.h"
 #include "transport/framework/TransportImpl.h"
-#include "tao/debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -58,15 +57,13 @@ PublisherImpl::~PublisherImpl()
     participant->return_handle(handle_);
   }
 
-  //The datawriters should be deleted already before calling delete
-  //publisher.
-  if (!is_clean()) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("PublisherImpl::~PublisherImpl, ")
-          ACE_TEXT("%B datawriters and %B publications still exist.\n"),
-          datawriter_map_.size(), publication_map_.size()));
+  // The datawriters should be deleted already before calling delete
+  // publisher.
+  String leftover_entities;
+  if (!is_clean(&leftover_entities)) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: PublisherImpl::~PublisherImpl: "
+                 "%C still exist\n", leftover_entities.c_str()));
     }
   }
 }
@@ -883,14 +880,28 @@ PublisherImpl::enable()
   return DDS::RETCODE_OK;
 }
 
-bool
-PublisherImpl::is_clean() const
+bool PublisherImpl::is_clean(String* leftover_entities) const
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->pi_lock_,
-      false);
-  return datawriter_map_.empty() && publication_map_.empty();
+  if (leftover_entities) {
+    leftover_entities->clear();
+  }
+
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, pi_lock_, false);
+
+  const size_t writer_count = datawriter_map_.size();
+  if (leftover_entities && writer_count) {
+    *leftover_entities += to_dds_string(writer_count) + " writer(s)";
+  }
+
+  const size_t publication_count = publication_map_.size();
+  if (leftover_entities && publication_count) {
+    if (leftover_entities->size()) {
+      *leftover_entities += ", ";
+    }
+    *leftover_entities += to_dds_string(publication_count) + " publication(s)";
+  }
+
+  return writer_count == 0 && publication_count == 0;
 }
 
 DDS::ReturnCode_t

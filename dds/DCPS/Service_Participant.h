@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -35,9 +33,9 @@
 
 #include <memory>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -114,10 +112,14 @@ public:
   /**
    * Stop being a participant in the service.
    *
-   * @note Required Precondition: all DomainParticipants have been
-   *       deleted.
+   * @note
+   * All Domain Participants have to be deleted before calling or
+   * DDS::RETCODE_PRECONDITION_NOT_MET is returned.
+   *
+   * If the Service Participant has already been shutdown then
+   * DDS::RETCODE_ALREADY_DELETED will be returned.
    */
-  void shutdown();
+  DDS::ReturnCode_t shutdown();
 
   /// Accessor for if the participant has been shutdown
   bool is_shut_down() const;
@@ -545,7 +547,7 @@ private:
 
   /// The lock to serialize DomainParticipantFactory singleton
   /// creation and shutdown.
-  TAO_SYNCH_MUTEX      factory_lock_;
+  ACE_Thread_Mutex factory_lock_;
 
   /// The initial values of qos policies.
   DDS::UserDataQosPolicy              initial_UserDataQosPolicy_;

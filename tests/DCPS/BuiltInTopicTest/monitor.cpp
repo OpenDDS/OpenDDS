@@ -226,10 +226,16 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
       {
         ::DDS::InstanceHandleSeq handles;
-        if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
-          || handles.length () == 0)
-        {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participants test failed.\n"));
+        const DDS::ReturnCode_t discpart_error =
+          participant->get_discovered_participants(handles);
+        if (discpart_error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants failed: %C\n",
+            OpenDDS::DCPS::retcode_to_string(discpart_error)));
+          return 1;
+        }
+        if (handles.length() == 0) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants gave no handles, "
+            "but we expected some\n"));
           return 1;
         }
 
@@ -654,6 +660,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           1);
       }
 
+      participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheServiceParticipant->shutdown ();
 

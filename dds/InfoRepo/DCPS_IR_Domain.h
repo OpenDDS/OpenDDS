@@ -62,7 +62,7 @@ class DCPS_IR_Publication;
  * system's domain.
  */
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
-: public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Domain>{
+: public OpenDDS::DCPS::RcObject {
 public:
   DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator);
 
@@ -80,6 +80,8 @@ public:
   /// or DataReaderRemote.idl.
   int remove_participant(const OpenDDS::DCPS::RepoId& particpantId,
                          CORBA::Boolean    notify_lost);
+
+  DCPS_IR_Participant_rch participant_rch(const OpenDDS::DCPS::RepoId& id) const;
 
   /// Find the participant with the id.
   DCPS_IR_Participant* participant(const OpenDDS::DCPS::RepoId& id) const;

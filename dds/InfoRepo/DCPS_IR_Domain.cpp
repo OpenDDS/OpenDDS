@@ -1,33 +1,32 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "DcpsInfo_pch.h"
-#include /**/ "DCPS_IR_Domain.h"
 
-#include /**/ "DCPS_IR_Participant.h"
-#include /**/ "DCPS_IR_Topic_Description.h"
+#include "DCPS_IR_Domain.h"
+
+#include "DCPS_IR_Participant.h"
+#include "DCPS_IR_Topic_Description.h"
 #include "DomainParticipantListener_i.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#include "dds/DCPS/Marked_Default_Qos.h"
-#include "dds/DCPS/PublisherImpl.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/InfoRepoDiscovery/InfoC.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/RepoIdConverter.h>
+#include <dds/DCPS/Transient_Kludge.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#ifndef DDS_HAS_MINIMUM_BIT
+#  include <dds/DCPS/transport/framework/TransportRegistry.h>
+#  include <dds/DCPS/BuiltInTopicUtils.h>
+#endif
 
-#if !defined (DDS_HAS_MINIMUM_BIT)
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/BuiltInTopicUtils.h"
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#include <dds/DCPS/InfoRepoDiscovery/InfoC.h>
 
-#include "dds/DCPS/Transient_Kludge.h"
-
-#include /**/ "tao/debug.h"
+#include <tao/debug.h>
 
 #include <algorithm>
 #include <sstream>
@@ -52,18 +51,23 @@ DCPS_IR_Domain::participants() const
   return this->participants_;
 }
 
-DCPS_IR_Participant*
-DCPS_IR_Domain::participant(const OpenDDS::DCPS::RepoId& id) const
+DCPS_IR_Participant_rch DCPS_IR_Domain::participant_rch(const OpenDDS::DCPS::RepoId& id) const
 {
-  DCPS_IR_Participant_Map::const_iterator where
-  = this->participants_.find(id);
+  DCPS_IR_Participant_Map::const_iterator where = participants_.find(id);
 
-  if (where != this->participants_.end()) {
-    return where->second.in();
+  if (where != participants_.end()) {
+    return where->second;
 
   } else {
-    return 0;
+    return DCPS_IR_Participant_rch();
   }
+}
+
+
+DCPS_IR_Participant* DCPS_IR_Domain::participant(const OpenDDS::DCPS::RepoId& id) const
+{
+  DCPS_IR_Participant_rch p = participant_rch(id);
+  return p ? p.in() : 0;
 }
 
 int DCPS_IR_Domain::add_participant(DCPS_IR_Participant_rch participant)
@@ -850,11 +854,19 @@ int DCPS_IR_Domain::init_built_in_topics_transport(bool persistent)
 
 int DCPS_IR_Domain::cleanup_built_in_topics()
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (useBIT_ && bitParticipant_) {
+    using OpenDDS::DCPS::retcode_to_string;
 
-  if (useBIT_) {
     // clean up the Built-in Topic objects
-    bitParticipant_->delete_contained_entities();
+    const DDS::ReturnCode_t entities_error = bitParticipant_->delete_contained_entities();
+    if (entities_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DCPS_IR_Domain::cleanup_built_in_topics: "
+                 "failed to delete entities: %C\n",
+                 retcode_to_string(entities_error)));
+      return 1;
+    }
+
     bitPublisher_ = 0;
     bitParticipantDataWriter_ = 0;
     bitTopicDataWriter_ = 0;
@@ -865,14 +877,20 @@ int DCPS_IR_Domain::cleanup_built_in_topics()
     bitSubscriptionTopic_ = 0;
     bitPublicationTopic_ = 0;
 
-    bitParticipantFactory_->delete_participant(bitParticipant_); // deletes this
+    const DDS::ReturnCode_t part_error =
+      bitParticipantFactory_->delete_participant(bitParticipant_);
+    if (part_error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DCPS_IR_Domain::cleanup_built_in_topics: "
+                 "failed to delete participant: %C\n",
+                 retcode_to_string(part_error)));
+      return 1;
+    }
   }
 
   return 0;
-
 #else
   return 1;
-#endif // !defined (DDS_HAS_MINIMUM_BIT)
+#endif
 }
 
 int DCPS_IR_Domain::add_topic_description(OpenDDS::DCPS::unique_ptr<DCPS_IR_Topic_Description> desc)
