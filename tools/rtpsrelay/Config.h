@@ -14,6 +14,7 @@ public:
   Config()
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
+    , inactive_period_(60) // 1 minute
     , max_pending_(0)
     , pending_timeout_(60) // 1 minute
 #ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
@@ -63,6 +64,16 @@ public:
   const OpenDDS::DCPS::TimeDuration& lifespan() const
   {
     return lifespan_;
+  }
+
+  void inactive_period(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    inactive_period_ = value;
+  }
+
+  const OpenDDS::DCPS::TimeDuration& inactive_period() const
+  {
+    return inactive_period_;
   }
 
   void max_pending(size_t value)
@@ -279,6 +290,7 @@ private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
+  OpenDDS::DCPS::TimeDuration inactive_period_;
   size_t max_pending_;
   OpenDDS::DCPS::TimeDuration pending_timeout_;
   int buffer_size_;
