@@ -2,8 +2,6 @@ project(*Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for
 
   exename = subscriber
 
-  includes += .
-
   TypeSupport_Files {
     Common.idl
     Subscriber.idl
@@ -18,8 +16,6 @@ project(*Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_
 
   exename = publisher
   after += *Subscriber
-
-  includes += .
 
   TypeSupport_Files {
     Common.idl
