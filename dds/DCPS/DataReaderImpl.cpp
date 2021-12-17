@@ -1589,7 +1589,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
           iter != instances_.end();
           ++iter) {
-        iter->second->instance_state_->lively(sample.header_.publication_id_);
+        if (iter->second->instance_state_->writes_instance(sample.header_.publication_id_)) {
+          iter->second->instance_state_->lively(sample.header_.publication_id_);
+        }
       }
     }
 
