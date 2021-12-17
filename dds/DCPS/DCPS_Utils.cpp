@@ -257,7 +257,7 @@ compatibleQOS(OpenDDS::DCPS::IncompatibleQosStatus* writerStatus,
   for (CORBA::ULong i = 0; i < pubTLS.length() && !exit_loop; ++i) {
     for (CORBA::ULong j = 0; j < subTLS.length() && !exit_loop; ++j) {
       if (0 == std::strcmp(pubTLS[i].transport_type, subTLS[j].transport_type)) {
-        if (pubTLS[i].transport_type != "rtps_udp") {
+        if (0 == std::strcmp(pubTLS[i].transport_type, "rtps_udp")) {
           encapsulated_only = true;
         }
         exit_loop = true;

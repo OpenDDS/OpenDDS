@@ -3446,7 +3446,7 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
                  "DataReaderImpl::setup_deserialization: "
                  "Could not find a valid data representation.%C\n",
-                 error_message));
+                 error_message.c_str()));
     }
     return DDS::RETCODE_ERROR;
   }
