@@ -1,4 +1,4 @@
-project(Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+project(*Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
 
   exename = subscriber
 
@@ -14,9 +14,10 @@ project(Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_
   }
 }
 
-project(Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+project(*Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
 
   exename = publisher
+  after += *Subscriber
 
   includes += .
 
