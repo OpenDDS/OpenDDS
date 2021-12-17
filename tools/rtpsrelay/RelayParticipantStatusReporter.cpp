@@ -41,7 +41,7 @@ void RelayParticipantStatusReporter::add_participant(GuidAddrSet::Proxy& proxy,
 }
 
 void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& proxy,
-                                                  const OpenDDS::DCPS::GUID_t& repoid)
+                                                        const OpenDDS::DCPS::GUID_t& repoid)
 {
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -75,8 +75,8 @@ void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& prox
 }
 
 void RelayParticipantStatusReporter::set_alive(const GuidAddrSet::Proxy& /*proxy*/,
-                                         const OpenDDS::DCPS::GUID_t& repoid,
-                                         bool alive)
+                                               const OpenDDS::DCPS::GUID_t& repoid,
+                                               bool alive)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -98,8 +98,8 @@ void RelayParticipantStatusReporter::set_alive(const GuidAddrSet::Proxy& /*proxy
 }
 
 void RelayParticipantStatusReporter::set_active(const GuidAddrSet::Proxy& /*proxy*/,
-                                          const OpenDDS::DCPS::GUID_t& repoid,
-                                          bool active)
+                                                const OpenDDS::DCPS::GUID_t& repoid,
+                                                bool active)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -121,9 +121,9 @@ void RelayParticipantStatusReporter::set_active(const GuidAddrSet::Proxy& /*prox
 }
 
 void RelayParticipantStatusReporter::set_alive_active(const GuidAddrSet::Proxy& /*proxy*/,
-                                                const OpenDDS::DCPS::GUID_t& repoid,
-                                                bool alive,
-                                                bool active)
+                                                      const OpenDDS::DCPS::GUID_t& repoid,
+                                                      bool alive,
+                                                      bool active)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
