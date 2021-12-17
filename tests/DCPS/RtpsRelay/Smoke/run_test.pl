@@ -64,10 +64,13 @@ sub get_relay_args {
   );
 }
 
+$test->process("monitor", "monitor", "-DCPSConfigFile monitor.ini");
 $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(1,"AceLog") . $relay_security_opts);
 $test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(2) . $relay_security_opts);
 $test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
+
+$test->start_process("monitor");
 
 if ($test->flag('join')) {
     $test->start_process("relay2");
@@ -91,5 +94,6 @@ $test->stop_process(5, "publisher");
 
 $test->kill_process(5, "relay1");
 $test->kill_process(5, "relay2");
+$test->kill_process(5, "monitor");
 
 exit $test->finish();

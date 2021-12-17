@@ -58,6 +58,16 @@ public:
     }
   }
 
+  void unregister()
+  {
+    if (config->publish_participant_statistics()) {
+      const auto ret = writer->unregister_instance(participant_statistics_, DDS::HANDLE_NIL);
+      if (ret != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: unregistering participant %C statistics\n"), guid_to_string(relay_guid_to_rtps_guid(participant_statistics_.guid())).c_str()));
+      }
+    }
+  }
+
 private:
   ParticipantStatistics participant_statistics_;
   Helper helper_;

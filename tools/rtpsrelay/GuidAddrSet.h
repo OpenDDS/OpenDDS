@@ -23,6 +23,7 @@ struct AddrSetStats {
   ParticipantStatisticsReporter data_stats_reporter;
   OpenDDS::DCPS::Message_Block_Shared_Ptr spdp_message;
   OpenDDS::DCPS::MonotonicTimePoint session_start;
+  OpenDDS::DCPS::MonotonicTimePoint deactivation;
 #ifdef OPENDDS_SECURITY
   std::string common_name;
 #endif
@@ -110,6 +111,7 @@ struct RemoteHash {
 };
 
 class RelayHandler;
+class RelayParticipantStatusReporter;
 
 class GuidAddrSet {
 public:
@@ -117,9 +119,11 @@ public:
 
   GuidAddrSet(const Config& config,
               OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery,
+              RelayParticipantStatusReporter& relay_participant_status_reporter,
               RelayStatisticsReporter& relay_stats_reporter)
     : config_(config)
     , rtps_discovery_(rtps_discovery)
+    , relay_participant_status_reporter_(relay_participant_status_reporter)
     , relay_stats_reporter_(relay_stats_reporter)
     , spdp_vertical_handler_(0)
     , sedp_vertical_handler_(0)
@@ -183,7 +187,7 @@ public:
                     const size_t& msg_len,
                     RelayHandler& handler)
     {
-      return gas_.record_activity(remote_address, now, src_guid, msg_type, msg_len, handler);
+      return gas_.record_activity(*this, remote_address, now, src_guid, msg_type, msg_len, handler);
     }
 
     ParticipantStatisticsReporter&
@@ -214,19 +218,20 @@ public:
     }
 
     void remove(const OpenDDS::DCPS::GUID_t& guid,
-                const OpenDDS::DCPS::MonotonicTimePoint& now)
+                const OpenDDS::DCPS::MonotonicTimePoint& now,
+                RelayParticipantStatusReporter* reporter)
     {
       const auto it = find(guid);
       if (it == end()) {
         return;
       }
 
-      gas_.remove(guid, it, now);
+      gas_.remove(*this, guid, it, now, reporter);
     }
 
     void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
     {
-      gas_.process_expirations(now);
+      gas_.process_expirations(*this, now);
     }
 
     bool admitting() const
@@ -254,14 +259,16 @@ private:
   }
 
   ParticipantStatisticsReporter&
-  record_activity(const AddrPort& remote_address,
+  record_activity(const Proxy& proxy,
+                  const AddrPort& remote_address,
                   const OpenDDS::DCPS::MonotonicTimePoint& now,
                   const OpenDDS::DCPS::GUID_t& src_guid,
                   MessageType msg_type,
                   const size_t& msg_len,
                   RelayHandler& handler);
 
-  void process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now);
+  void process_expirations(const Proxy& proxy,
+                           const OpenDDS::DCPS::MonotonicTimePoint& now);
 
   bool admitting() const
   {
@@ -273,9 +280,11 @@ private:
                    const OpenDDS::DCPS::MonotonicTimePoint& now,
                    bool& admitted);
 
-  void remove(const OpenDDS::DCPS::GUID_t& guid,
+  void remove(const Proxy& proxy,
+              const OpenDDS::DCPS::GUID_t& guid,
               GuidAddrSetMap::iterator it,
-              const OpenDDS::DCPS::MonotonicTimePoint& now);
+              const OpenDDS::DCPS::MonotonicTimePoint& now,
+              RelayParticipantStatusReporter* reporter);
 
   OpenDDS::DCPS::TimeDuration get_session_time(const OpenDDS::DCPS::GUID_t& guid,
                                                const OpenDDS::DCPS::MonotonicTimePoint& now)
@@ -287,6 +296,7 @@ private:
 
   const Config& config_;
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
+  RelayParticipantStatusReporter& relay_participant_status_reporter_;
   RelayStatisticsReporter& relay_stats_reporter_;
   RelayHandler* spdp_vertical_handler_;
   RelayHandler* sedp_vertical_handler_;
@@ -294,6 +304,8 @@ private:
   GuidAddrSetMap guid_addr_set_map_;
   typedef std::unordered_map<Remote, OpenDDS::DCPS::GUID_t, RemoteHash> RemoteMap;
   RemoteMap remote_map_;
+  typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > DeactivationGuidQueue;
+  DeactivationGuidQueue deactivation_guid_queue_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
   GuidSet pending_;

@@ -1,13 +1,15 @@
 #include "GuidAddrSet.h"
 
 #include "RelayHandler.h"
+#include "RelayParticipantStatusReporter.h"
 
 #include <dds/DCPS/LogAddr.h>
 
 namespace RtpsRelay {
 
 ParticipantStatisticsReporter&
-GuidAddrSet::record_activity(const AddrPort& remote_address,
+GuidAddrSet::record_activity(const Proxy& proxy,
+                             const AddrPort& remote_address,
                              const OpenDDS::DCPS::MonotonicTimePoint& now,
                              const OpenDDS::DCPS::GUID_t& src_guid,
                              MessageType msg_type,
@@ -15,6 +17,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
                              RelayHandler& handler)
 {
   const auto expiration = now + config_.lifespan();
+  const auto deactivation = now + config_.inactive_period();
   const auto cass = find_or_create(src_guid, now);
   const bool created = cass.first;
   AddrSetStats& addr_set_stats = cass.second;
@@ -31,7 +34,7 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
       rtps_discovery_->remove_domain_participant(config_.application_domain(), config_.application_participant_guid(), result.first->second);
       const auto pos = guid_addr_set_map_.find(result.first->second);
       if (pos != guid_addr_set_map_.end()) {
-        remove(result.first->second, pos, now);
+        remove(proxy, result.first->second, pos, now, &relay_participant_status_reporter_);
       }
       result.first->second = src_guid;
     }
@@ -45,6 +48,12 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
     }
     relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
   }
+
+  if (addr_set_stats.deactivation == OpenDDS::DCPS::MonotonicTimePoint::zero_value) {
+    deactivation_guid_queue_.push_back(std::make_pair(deactivation, src_guid));
+  }
+  addr_set_stats.deactivation = deactivation;
+  relay_participant_status_reporter_.set_alive_active(proxy, src_guid, true, true);
 
   {
     const auto res = addr_set_stats.select_addr_set(remote_address.port)->insert(std::make_pair(remote_address, expiration));
@@ -67,8 +76,31 @@ GuidAddrSet::record_activity(const AddrPort& remote_address,
   return stats_reporter;
 }
 
-void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& now)
+void GuidAddrSet::process_expirations(const Proxy& proxy,
+                                      const OpenDDS::DCPS::MonotonicTimePoint& now)
 {
+  while (!deactivation_guid_queue_.empty() && deactivation_guid_queue_.front().first <= now) {
+    const OpenDDS::DCPS::MonotonicTimePoint deactivation = deactivation_guid_queue_.front().first;
+    const OpenDDS::DCPS::GUID_t guid = deactivation_guid_queue_.front().second;
+
+    deactivation_guid_queue_.pop_front();
+
+    const auto pos = guid_addr_set_map_.find(guid);
+    if (pos == guid_addr_set_map_.end()) {
+      continue;
+    }
+
+    AddrSetStats& addr_stats = pos->second;
+
+    if (addr_stats.deactivation <= now) {
+      relay_participant_status_reporter_.set_active(proxy, guid, false);
+      addr_stats.deactivation = OpenDDS::DCPS::MonotonicTimePoint::zero_value;
+    } else {
+      deactivation_guid_queue_.push_back(std::make_pair(addr_stats.deactivation, guid));
+      continue;
+    }
+  }
+
   while (!expiration_guid_addr_queue_.empty() && expiration_guid_addr_queue_.front().first <= now) {
     const OpenDDS::DCPS::MonotonicTimePoint expiration = expiration_guid_addr_queue_.front().first;
     const GuidAddr ga = expiration_guid_addr_queue_.front().second;
@@ -106,7 +138,7 @@ void GuidAddrSet::process_expirations(const OpenDDS::DCPS::MonotonicTimePoint& n
     relay_stats_reporter_.expired_address(now);
 
     if (addr_stats.empty()) {
-      remove(ga.guid, pos, now);
+      remove(proxy, ga.guid, pos, now, &relay_participant_status_reporter_);
     }
   }
 
@@ -181,15 +213,20 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
   return false;
 }
 
-void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
+void GuidAddrSet::remove(const Proxy& proxy,
+                         const OpenDDS::DCPS::GUID_t& guid,
                          GuidAddrSetMap::iterator it,
-                         const OpenDDS::DCPS::MonotonicTimePoint& now)
+                         const OpenDDS::DCPS::MonotonicTimePoint& now,
+                         RelayParticipantStatusReporter* reporter)
 {
   AddrSetStats& addr_stats = it->second;
   const auto session_time = addr_stats.get_session_time(now);
   addr_stats.spdp_stats_reporter.report(addr_stats.session_start, now);
+  addr_stats.spdp_stats_reporter.unregister();
   addr_stats.sedp_stats_reporter.report(addr_stats.session_start, now);
+  addr_stats.sedp_stats_reporter.unregister();
   addr_stats.data_stats_reporter.report(addr_stats.session_start, now);
+  addr_stats.data_stats_reporter.unregister();
 
   pending_.erase(guid);
   guid_addr_set_map_.erase(it);
@@ -197,6 +234,10 @@ void GuidAddrSet::remove(const OpenDDS::DCPS::GUID_t& guid,
 
   if (config_.log_activity()) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove_i %C removed %C into session total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), session_time.sec_str().c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+  }
+
+  if (reporter) {
+    reporter->set_alive(proxy, guid, false);
   }
 }
 

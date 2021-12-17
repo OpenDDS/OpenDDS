@@ -63,6 +63,19 @@ module RtpsRelay {
     boolean admitting;
   };
 
+  const string RELAY_PARTICIPANT_STATUS_TOPIC_NAME = "Relay Participant Status";
+
+  @topic
+  @mutable
+  @autoid(HASH)
+  struct RelayParticipantStatus {
+    @key string relay_id;
+    @key GUID_t guid;
+    boolean active;
+    boolean alive;
+    DDS::UserDataQosPolicy user_data;
+  };
+
   const string SPDP_REPLAY_TOPIC_NAME = "SPDP Replay";
   @topic
   struct SpdpReplay {
