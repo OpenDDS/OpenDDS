@@ -967,17 +967,9 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     add_param(param_list, param);
   }
 
-  bool encapsulated_only = false;
-  //TODO CLAYTON:
-  //if we only have 1 possible transport we are either true or false
-  //if we have multiple transports, we do not know which will be selected, and thus have a problem
-  if (writer_data.writerProxy.allLocators.length() == 1) {
-    if (0 == std::strcmp(writer_data.writerProxy.allLocators[0].transport_type, "rtps_udp")) {
-      encapsulated_only = true;
-    }
-  }
-  add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value, false,
-    encapsulated_only);
+  Parameter param;
+  param.representation(writer_data.ddsPublicationData.representation);
+  add_param(param_list, param);
 
   {
     Parameter param;
