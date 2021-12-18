@@ -9877,4 +9877,4 @@ jobs:
         path: OpenDDS
         submodules: true
     - name: Build
-      run: docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
+      run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
