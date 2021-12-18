@@ -298,7 +298,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
     return 1;
   }
+
   ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
+  if (!control_typed_dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow ack datawriter failed\n"));
+    return 1;
+  }
 
   // For subscribing echo control topic.
   Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
@@ -319,7 +324,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
     return 1;
   }
+
   ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
+  if (!control_pdr) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow echo datareader failed\n"));
+    return 1;
+  }
 
   // For subscribing user topic.
   Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);

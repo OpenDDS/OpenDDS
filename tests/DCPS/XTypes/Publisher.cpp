@@ -386,7 +386,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
     return 1;
   }
+
   ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
+  if (!control_pdr) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow ack datareader failed\n"));
+    return 1;
+  }
 
   // For publishing echo control topic.
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
@@ -406,7 +411,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter for control_pub failed\n"));
     return 1;
   }
+
   ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
+  if (!control_typed_dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow echo datawriter failed\n"));
+    return 1;
+  }
 
   // For publishing user topic.
   Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
