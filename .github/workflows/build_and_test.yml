@@ -10126,3 +10126,16 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  build_u14_gcc4:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Build
+      run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
