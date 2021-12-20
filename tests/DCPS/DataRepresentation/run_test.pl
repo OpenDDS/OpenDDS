@@ -10,6 +10,6 @@ use strict;
 my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
 $test->setup_discovery();
-$test->process('test', 'DataRepresentation');
+$test->process('test', 'DataRepresentation', '-DCPSConfigFile rtps_disc.ini');
 $test->start_process('test');
 exit $test->finish(30);
