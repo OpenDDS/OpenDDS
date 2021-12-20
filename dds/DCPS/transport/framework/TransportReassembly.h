@@ -22,6 +22,44 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+#pragma pack(push, 1)
+
+// A FragKey represents the identifier for an original (pre-fragmentation)
+// message.  Since DataSampleHeader sequence numbers are distinct for each
+// "publication" (DataWriter), the partially-received messages need to be
+// stored in a structure that's keyed off of both the PublicationId and the
+// SequenceNumber.
+struct FragKey {
+  FragKey(const PublicationId& pubId, const SequenceNumber& dataSampleSeq);
+
+  bool operator<(const FragKey& rhs) const
+  {
+    if (compare_(this->publication_, rhs.publication_)) return true;
+    if (compare_(rhs.publication_, this->publication_)) return false;
+    return this->data_sample_seq_ < rhs.data_sample_seq_;
+  }
+
+  bool operator==(const FragKey& other) const
+  {
+    return publication_ == other.publication_ && data_sample_seq_ == other.data_sample_seq_;
+  }
+
+  bool operator!=(const FragKey& other) const
+  {
+    return !(*this == other);
+  }
+
+  static GUID_tKeyLessThan compare_;
+  PublicationId publication_;
+  SequenceNumber data_sample_seq_;
+};
+
+#pragma pack(pop)
+
+#if defined ACE_HAS_CPP11
+  OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
+#endif
+
 class OpenDDS_Dcps_Export TransportReassembly : public RcObject {
 public:
   explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
@@ -48,7 +86,15 @@ public:
 
   /// Returns true if this object is storing fragments for the given
   /// DataSampleHeader sequence number from the given publication.
-  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const;
+  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const
+  {
+    ACE_UINT32 total_frags;
+    return has_frags(seq, pub_id, total_frags);
+  }
+
+  /// Returns true if this object is storing fragments for the given
+  /// DataSampleHeader sequence number from the given publication.
+  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id, ACE_UINT32& total_frags) const;
 
   /// Populates bitmap for missing fragment sequence numbers and set numBits
   /// for the given message sequence and publisher ID.
@@ -61,40 +107,6 @@ private:
 
   bool reassemble_i(const SequenceRange& seqRange, bool firstFrag,
                     ReceivedDataSample& data, ACE_UINT32 total_frags);
-
-  // A FragKey represents the identifier for an original (pre-fragmentation)
-  // message.  Since DataSampleHeader sequence numbers are distinct for each
-  // "publication" (DataWriter), the partially-received messages need to be
-  // stored in a structure that's keyed off of both the PublicationId and the
-  // SequenceNumber.
-  struct FragKey {
-    FragKey(const PublicationId& pubId, const SequenceNumber& dataSampleSeq);
-
-    bool operator<(const FragKey& rhs) const
-    {
-      if (compare_(this->publication_, rhs.publication_)) return true;
-      if (compare_(rhs.publication_, this->publication_)) return false;
-      return this->data_sample_seq_ < rhs.data_sample_seq_;
-    }
-
-    bool operator==(const FragKey& other) const
-    {
-      return publication_ == other.publication_ && data_sample_seq_ == other.data_sample_seq_;
-    }
-
-    bool operator!=(const FragKey& other) const
-    {
-      return !(*this == other);
-    }
-
-    static GUID_tKeyLessThan compare_;
-    PublicationId publication_;
-    SequenceNumber data_sample_seq_;
-  };
-
-#if defined ACE_HAS_CPP11
-  OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
-#endif
 
   // A FragRange represents a chunk of a partially-reassembled message.
   // The transport_seq_ range is the range of transport sequence numbers

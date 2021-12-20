@@ -1103,7 +1103,7 @@ RtpsUdpDataLink::MultiSendBuffer::insert(SequenceNumber /*transport_seq*/,
     const RtpsCustomizedElement* const rce =
       dynamic_cast<const RtpsCustomizedElement*>(tqe);
     if (rce) {
-      send_buff->insert_fragment(seq, rce->last_fragment(), q, chain);
+      send_buff->insert_fragment(seq, rce->last_fragment(), rce->is_last_fragment(), q, chain);
     } else if (Transport_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) RtpsUdpDataLink::MultiSendBuffer::insert()"
         " - ERROR: couldn't get fragment number for pub_id %C seq %q\n",
@@ -1179,7 +1179,9 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
 
   const SequenceNumber seq = element->sequence();
   if (seq != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    max_sn_ = std::max(max_sn_, seq);
+    if (!element->is_fragment() || element->is_last_fragment()) {
+      max_sn_ = std::max(max_sn_, seq);
+    }
     if (!durable_ && !is_pvs_writer() &&
         element->subscription_id() == GUID_UNKNOWN &&
         previous_max_sn < max_sn_.previous()) {
@@ -2933,7 +2935,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
   }
   // 1b. larger than the last received seq# but less than the heartbeat.lastSN
   if (!wi->recvd_.empty()) {
-    const SequenceRange range(wi->recvd_.high(), wi->hb_last_);
+    const SequenceRange range(wi->recvd_.high() + 1, wi->hb_last_);
     link->receive_strategy()->has_fragments(range, wi->id_, &frag_info);
   }
   for (size_t i = 0; i < frag_info.size(); ++i) {
@@ -3497,7 +3499,7 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
   }
 
   const SequenceNumber seq = to_opendds_seqnum(nackfrag.writerSN);
-  reader->requested_frags_[seq] = nackfrag.fragmentNumberState;
+  reader->requested_frags_[seq][nackfrag.fragmentNumberState.bitmapBase.value] = nackfrag.fragmentNumberState;
   readers_expecting_data_.insert(reader);
   if (link->config().responsive_mode_) {
     readers_expecting_heartbeat_.insert(reader);
@@ -3576,14 +3578,15 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
         }
       }
 
-      typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet)::const_iterator rf_iter;
-      for (rf_iter rf = reader->requested_frags_.begin(), limit = reader->requested_frags_.end(); rf != limit; ++rf) {
-
-        const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(rf->first);
+      typedef RequestedFragSeqMap::const_iterator rfs_iter;
+      for (rfs_iter rfs = reader->requested_frags_.begin(), limit = reader->requested_frags_.end(); rfs != limit; ++rfs) {
+        const OPENDDS_MAP(SequenceNumber, TransportQueueElement*)::iterator dd_iter = reader->durable_data_.find(rfs->first);
         if (dd_iter != reader->durable_data_.end()) {
-          link->durability_resend(dd_iter->second, rf->second, cumulative_send_count);
-        } else if ((!reader->durable_data_.empty() && rf->first < reader->durable_data_.begin()->first)) {
-          gaps.insert(rf->first);
+          for (RequestedFragMap::const_iterator rf = rfs->second.begin(); rf != rfs->second.end(); ++rf) {
+            link->durability_resend(dd_iter->second, rf->second, cumulative_send_count);
+          }
+        } else if ((!reader->durable_data_.empty() && rfs->first < reader->durable_data_.begin()->first)) {
+          gaps.insert(rfs->first);
         }
       }
 
@@ -3649,15 +3652,17 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
     reader->requests_.reset();
 
-    typedef OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet)::iterator rf_iter;
-    const rf_iter rf_end = reader->requested_frags_.end();
-    for (rf_iter rf = reader->requested_frags_.begin(); rf != rf_end; ++rf) {
-      const SequenceNumber& seq = rf->first;
+    typedef RequestedFragSeqMap::iterator rfs_iter;
+    const rfs_iter rfs_end = reader->requested_frags_.end();
+    for (rfs_iter rfs = reader->requested_frags_.begin(); rfs != rfs_end; ++rfs) {
+      const SequenceNumber& seq = rfs->first;
       RepoId destination;
       if (proxy.contains(seq, destination)) {
         if (destination == GUID_UNKNOWN) {
-          consolidated_fragment_requests[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
-                                                     rf->second.bitmap.get_buffer());
+          for (RequestedFragMap::iterator rf = rfs->second.begin(); rf != rfs->second.end(); ++rf) {
+            consolidated_fragment_requests[seq].insert(rf->second.bitmapBase.value, rf->second.numBits,
+                                                       rf->second.bitmap.get_buffer());
+          }
           consolidated_fragment_request_readers[seq].insert(reader->id_);
           consolidated_fragment_recipients_unicast[seq].insert(addrs.begin(), addrs.end());
           ACE_Guard<ACE_Thread_Mutex> g(link->locators_lock_);
@@ -3669,12 +3674,14 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
           continue;
         } else {
           // Directed at the reader.
-          DisjointSequence x;
-          x.insert(rf->second.bitmapBase.value, rf->second.numBits,
-                   rf->second.bitmap.get_buffer());
           const RtpsUdpSendStrategy::OverrideToken ot =
             link->send_strategy()->override_destinations(addrs);
-          proxy.resend_fragments_i(seq, x, cumulative_send_count);
+          for (RequestedFragMap::iterator rf = rfs->second.begin(); rf != rfs->second.end(); ++rf) {
+            DisjointSequence x;
+            x.insert(rf->second.bitmapBase.value, rf->second.numBits,
+                     rf->second.bitmap.get_buffer());
+            proxy.resend_fragments_i(seq, x, cumulative_send_count);
+          }
           continue;
         }
       } else if (proxy.pre_contains(seq)) {
@@ -3698,6 +3705,11 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
   }
 
   {
+    for (FragmentInfo::const_iterator pos = consolidated_fragment_requests.begin(),
+           limit = consolidated_fragment_requests.end(); pos != limit; ++pos) {
+      consolidated_requests.erase(pos->first);
+    }
+
     // Send the consolidated requests.
     const OPENDDS_VECTOR(SequenceRange) ranges = consolidated_requests.present_sequence_ranges();
     for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = ranges.begin(), limit = ranges.end();
@@ -3714,8 +3726,8 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
         const RtpsUdpSendStrategy::OverrideToken ot =
           link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
-          proxy.resend_i(SequenceRange(seq, seq));
-          ++cumulative_send_count;
+        proxy.resend_i(SequenceRange(seq, seq));
+        ++cumulative_send_count;
       }
     }
 

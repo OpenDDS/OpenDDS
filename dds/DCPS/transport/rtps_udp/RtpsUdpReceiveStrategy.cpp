@@ -1016,11 +1016,14 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
     }
 
     const CORBA::ULong mask = 1 << (31 - bit);
-    if ((x & mask) && reassembly_.has_frags(base + i, pub_id)) {
-      x &= ~mask;
-      bitmap[i / 32] = x;
-      modified = true;
-      --cumulative_bits_added;
+    if (x & mask) {
+      const bool has_frags = reassembly_.has_frags(base + i, pub_id);
+      if (has_frags) {
+        x &= ~mask;
+        bitmap[i / 32] = x;
+        modified = true;
+        --cumulative_bits_added;
+      }
     }
   }
   return modified;
@@ -1047,19 +1050,46 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
                                       FragmentInfo* frag_info)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
-    if (reassembly_.has_frags(sn, pub_id)) {
+    ACE_UINT32 total_frags = 0;
+    if (reassembly_.has_frags(sn, pub_id, total_frags)) {
       if (frag_info) {
-        std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
-        p.first = sn;
-        frag_info->push_back(p);
-        RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
-        missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
-        missing_frags.bitmap.length(8); // start at max length
-        missing_frags.bitmapBase.value =
-          reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),
-                               8, missing_frags.numBits);
-        // reduce length in case get_gaps() didn't need all that room
-        missing_frags.bitmap.length((missing_frags.numBits + 31) / 32);
+        if (total_frags > 256) {
+          CORBA::Long empty_buffer[8];
+          memset(empty_buffer, 0, sizeof (empty_buffer));
+          OPENDDS_VECTOR(CORBA::Long) buffer(total_frags + 31/ 32, 0);
+          ACE_UINT32 numBits = 0;
+          size_t idx = 0;
+          const ACE_UINT32 base = reassembly_.get_gaps(sn, pub_id, &buffer[0], buffer.size(), numBits);
+          for (size_t i = base; i <= numBits; i += 256) {
+            const size_t remain = numBits + 1 - base;
+            const size_t len = std::min(remain, static_cast<size_t>(256));
+            const size_t len32 = (len + 31) / 32;
+            const size_t len8 = len32 * 4;
+            if (memcmp(&buffer[idx], empty_buffer, len8) != 0) {
+              std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
+              p.first = sn;
+              frag_info->push_back(p);
+              RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+              missing_frags.numBits = len;
+              missing_frags.bitmapBase.value = i;
+              missing_frags.bitmap.length(len32);
+              memcpy(missing_frags.bitmap.get_buffer(), &buffer[idx], len8);
+            }
+            idx += 8;
+          }
+        } else {
+          std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
+          p.first = sn;
+          frag_info->push_back(p);
+          RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+          missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
+          missing_frags.bitmap.length(8); // start at max length
+          missing_frags.bitmapBase.value =
+            reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),
+                                 8, missing_frags.numBits);
+          // reduce length in case get_gaps() didn't need all that room
+          missing_frags.bitmap.length((missing_frags.numBits + 31) / 32);
+        }
       } else {
         return true;
       }
