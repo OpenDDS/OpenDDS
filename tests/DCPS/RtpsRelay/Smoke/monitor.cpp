@@ -7,6 +7,8 @@
 
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/WaitSet.h>
+
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 
 #include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
