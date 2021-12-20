@@ -74,7 +74,7 @@ public:
                                       int n,
                                       const ACE_SOCK_Dgram& socket,
                                       ACE_INET_Addr& remote_address,
-                                      ICE::Endpoint* endpoint,
+                                      DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
                                       RtpsUdpTransport& tport,
                                       bool& stop);
 

@@ -1,14 +1,17 @@
-#include "XTypes.h"
-#include "XTypesSubTypeSupportImpl.h"
+#include "Common.h"
+#include "SubscriberTypeSupportImpl.h"
+#include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
 
 template<typename T1>
-ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue expected_additional_field_value)
+ReturnCode_t check_additional_field_value(const T1& data,
+  AdditionalFieldValue expected_additional_field_value)
 {
   ReturnCode_t ret = RETCODE_OK;
   if (data[0].additional_field != expected_additional_field_value) {
-    ACE_DEBUG((LM_DEBUG, "reader: expected additional field value: %d, received: %d\n", expected_additional_field_value, data[0].additional_field));
+    ACE_DEBUG((LM_DEBUG, "reader: expected additional field value: %d, received: %d\n",
+               expected_additional_field_value, data[0].additional_field));
     ret = RETCODE_ERROR;
   }
 
@@ -16,7 +19,8 @@ ReturnCode_t check_additional_field_value(const T1& data, AdditionalFieldValue e
 }
 
 template<typename T1, typename T2>
-ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T2& data, const std::string& expected_value)
+ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T2& data,
+                                      const std::string& expected_value)
 {
   ReturnCode_t ret = RETCODE_OK;
   if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
@@ -24,7 +28,8 @@ ReturnCode_t read_tryconstruct_struct(const DataReader_var& dr, const T1& pdr, T
       ACE_ERROR((LM_ERROR, "ERROR: reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
     } else if (ACE_OS::strcmp(data[0].trim_string, expected_value.c_str()) != 0) {
-      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n", expected_value.c_str(), data[0].trim_string.in()));
+      ACE_ERROR((LM_ERROR, "ERROR: reader: expected key value: %C, received: %C\n",
+                 expected_value.c_str(), data[0].trim_string.in()));
       ret = RETCODE_ERROR;
     } else if (verbose) {
       ACE_ERROR((LM_DEBUG, "reader: %C\n", data[0].trim_string.in()));
@@ -45,11 +50,11 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
     if (data.length() != 1) {
       ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
-    } else if (data[0].key != key_value) {
-      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key));
+    } else if (data[0].key_field != key_value) {
+      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key_field));
       ret = RETCODE_ERROR;
     } else if (verbose) {
-      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key));
+      ACE_DEBUG((LM_DEBUG, "reader: %d\n", data[0].key_field));
     }
   } else {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
@@ -70,13 +75,13 @@ ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
     } else {
       switch (data[0]._d()) {
       case E_KEY:
-        if (data[0].key() != key_value) {
+        if (data[0].key_field() != key_value) {
           ACE_ERROR((LM_ERROR, "reader: expected union key value: %d, received: %d\n",
-            key_value, data[0].key()));
+            key_value, data[0].key_field()));
           ret = RETCODE_ERROR;
         }
         if (verbose) {
-          ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key()));
+          ACE_DEBUG((LM_DEBUG, "reader: union key %d\n", data[0].key_field()));
         }
         break;
       case E_ADDITIONAL_FIELD:
@@ -170,7 +175,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-  // Arguments "--type" and "--expect_to_fail" must be specified
+  // Arguments "--type" must be specified
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
@@ -277,6 +282,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
   get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
+  // For publishing ack control topic.
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
                                                    DEFAULT_STATUS_MASK);
   if (!control_pub) {
@@ -296,6 +302,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
+  if (!control_typed_dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow ack datawriter failed\n"));
+    return 1;
+  }
+
+  // For subscribing echo control topic.
   Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                      DEFAULT_STATUS_MASK);
   if (!control_sub) {
@@ -316,9 +328,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
+  if (!control_pdr) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow echo datareader failed\n"));
+    return 1;
+  }
 
-  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-    DEFAULT_STATUS_MASK);
+  // For subscribing user topic.
+  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   if (!sub) {
     ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
     return 1;
@@ -328,18 +344,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-  if (expect_incompatible_qos) {
-    dr_qos.representation.value.length(1);
-    dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
-  }
+
   if (disallow_type_coercion) {
     dr_qos.type_consistency.kind = DISALLOW_TYPE_COERCION;
   }
   dr_qos.type_consistency.ignore_member_names = ignore_member_names;
   dr_qos.type_consistency.force_type_validation = force_type_validation;
+  if (expect_incompatible_qos) {
+    dr_qos.representation.value.length(1);
+    dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
+  }
 
-  DataReader_var dr = sub->create_datareader(topic, dr_qos, 0,
-    DEFAULT_STATUS_MASK);
+  DataReader_var dr = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
   if (!dr) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datareader failed\n"));
     return 1;
@@ -376,9 +392,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       failed = !check_inconsistent_topic_status(topic);
     }
 
-    if (failed) {
-      ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
-    } else if (expect_to_match) {
+    if (!failed) {
+      failed = !check_inconsistent_topic_status(topic);
+    }
+
+    if (expect_to_match && !failed) {
       if (type == "PlainCdrStruct") {
         failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
       } else if (type == "AppendableStruct") {
@@ -392,43 +410,46 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         if (topic_name == "MutableBaseStructT") {
           afv = FINAL_STRUCT_AF;
         }
-        failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
-      } else if (type == "MutableUnion") {
-        failed = (read_mutable_union(dr) != RETCODE_OK);
-      } else if (type == "Trim20Struct") {
-        failed = (read_trim20_struct(dr) != RETCODE_OK);
       }
     }
+
+    if (failed) {
+      ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
+      return 1;
+    }
+
+    //
+    // As the subscriber is now about to exit, let the publisher know it can exit too
+    //
+    if (!wait_for_reader(true, control_dw)) {
+      return 1;
+    }
+
+    ACE_DEBUG((LM_DEBUG, "Reader sending ack at %T\n"));
+
+    ControlStruct cs;
+    ret = control_typed_dw->write(cs, HANDLE_NIL);
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
+        OpenDDS::DCPS::retcode_to_string(ret)));
+      return 1;
+    }
+
+    ACE_DEBUG((LM_DEBUG, "Reader waiting for echo at %T\n"));
+
+    ::ControlStructSeq control_data;
+    ret = read_i(control_dr, control_pdr, control_data, true);
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
+        OpenDDS::DCPS::retcode_to_string(ret)));
+      return 1;
+    }
+
+    ACE_DEBUG((LM_DEBUG, "Reader cleanup at %T\n"));
   }
-
-  //
-  // As the subscriber is now about to exit, let the publisher know it can exit too
-  //
-  ACE_DEBUG((LM_DEBUG, "Reader sending ack at %T\n"));
-
-  ControlStruct cs;
-  ret = control_typed_dw->write(cs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
-    return 1;
-  }
-
-  ACE_DEBUG((LM_DEBUG, "Reader waiting for echo at %T\n"));
-
-  ::ControlStructSeq control_data;
-  ret = read_i(control_dr, control_pdr, control_data, true);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
-    return 1;
-  }
-
-  ACE_DEBUG((LM_DEBUG, "Reader cleanup at %T\n"));
-
   topic = 0;
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
-  return failed ? 1 : 0;
+  return 0;
 }

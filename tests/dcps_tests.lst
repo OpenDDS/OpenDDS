@@ -176,6 +176,8 @@ tests/transport/simple/run_test.pl shmem: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM 
 
 tests/transport/error_handling/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 
+tests/transport/network_address/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA !OPENDDS_SAFETY_PROFILE
 
 performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
@@ -246,6 +248,10 @@ tests/DCPS/EntityLifecycleStress/run_test.pl publishers 10 subscribers 10: !OPEN
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers 10: RTPS
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples publishers 10 subscribers 10: !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc publishers 10 subscribers 10: RTPS
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/LivelinessKeepAliveTest/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTimeout/run_test.pl: !DCPS_MIN

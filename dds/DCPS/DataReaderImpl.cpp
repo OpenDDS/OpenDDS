@@ -1589,7 +1589,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
           iter != instances_.end();
           ++iter) {
-        iter->second->instance_state_->lively(sample.header_.publication_id_);
+        if (iter->second->instance_state_->writes_instance(sample.header_.publication_id_)) {
+          iter->second->instance_state_->lively(sample.header_.publication_id_);
+        }
       }
     }
 
@@ -3406,7 +3408,7 @@ DataReaderImpl::update_locators(const RepoId& writerId,
   TransportClient::update_locators(writerId, locators);
 }
 
-ICE::Endpoint*
+WeakRcHandle<ICE::Endpoint>
 DataReaderImpl::get_ice_endpoint()
 {
   return TransportClient::get_ice_endpoint();

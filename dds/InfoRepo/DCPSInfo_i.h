@@ -33,8 +33,7 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 // typedef declarations
-typedef std::map<DDS::DomainId_t,
-                 OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Domain> > DCPS_IR_Domain_Map;
+typedef std::map<DDS::DomainId_t, OpenDDS::DCPS::RcHandle<DCPS_IR_Domain> > DCPS_IR_Domain_Map;
 
 // Forward declaration
 namespace Update {
@@ -409,6 +408,8 @@ public:
   /// Cleanup state for shutdown.
   void finalize();
 
+  void cleanup_all_built_in_topics();
+
 private:
   DCPS_IR_Domain_Map domains_;
   CORBA::ORB_var orb_;
@@ -432,7 +433,7 @@ private:
   struct BIT_Cleanup_Handler : ACE_Event_Handler
   {
     BIT_Cleanup_Handler(TAO_DDS_DCPSInfo_i* parent, DDS::DomainId_t domain)
-      : parent_(parent), domain_(domain)
+      : parent_(parent), domain_(domain), cv_(parent_->lock_), done_(false)
     {
       reference_counting_policy().value(Reference_Counting_Policy::ENABLED);
       parent->_add_ref();
@@ -442,7 +443,11 @@ private:
 
     PortableServer::Servant_var<TAO_DDS_DCPSInfo_i> parent_;
     DDS::DomainId_t domain_;
+    OpenDDS::DCPS::ConditionVariable<ACE_Recursive_Thread_Mutex> cv_;
+    bool done_;
   };
+
+  bool in_cleanup_all_built_in_topics_;
 #endif
 };
 

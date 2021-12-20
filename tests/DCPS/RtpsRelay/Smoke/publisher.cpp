@@ -54,6 +54,8 @@ void append(DDS::PropertySeq& props, const char* name, const char* value, bool p
 bool check_lease_recovery = false;
 bool expect_unmatch = false;
 
+const char USER_DATA[] = "The Publisher";
+
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   DDS::DomainParticipantFactory_var dpf;
@@ -76,6 +78,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
+      part_qos.user_data.value.length(std::strlen(USER_DATA));
+      std::memcpy(part_qos.user_data.value.get_buffer(), USER_DATA, std::strlen(USER_DATA));
 
 #if defined(OPENDDS_SECURITY)
       if (TheServiceParticipant->get_security()) {

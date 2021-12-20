@@ -27,9 +27,10 @@ my $default_remote = "origin";
 my $default_branch = "master";
 my $release_branch_prefix = "branch-";
 my $repo_name = "OpenDDS";
-my $default_download_url = "https://download.ociweb.com/OpenDDS";
+my $oci_download = "https://download.objectcomputing.com";
+my $default_download_url = "$oci_download/OpenDDS";
 my $ace_tao_filename = "ACE+TAO-2.2a_with_latest_patches_NO_makefiles.tar.gz";
-my $ace_tao_url = "https://download.ociweb.com/TAO-2.2a/$ace_tao_filename";
+my $ace_tao_url = "$oci_download/TAO-2.2a/$ace_tao_filename";
 my $ace_root = "ACE_wrappers";
 my $git_name_prefix = "DDS-";
 my $default_post_release_metadata = "dev";
@@ -393,6 +394,19 @@ sub write_releases {
   write_json_file($path, compress_releases($releases_ref));
 }
 
+sub write_workspace_info {
+  my $settings = shift();
+
+  write_json_file($settings->{workspace_info_file_path}, {
+    mock => $settings->{mock},
+    micro => $settings->{micro},
+    version => $settings->{version},
+    next_version => $settings->{next_version},
+    is_highest_version => $settings->{is_highest_version},
+    release_occurred => $settings->{release_occurred},
+  });
+}
+
 sub compare_workspace_info {
   my $settings = shift();
   my $info = shift();
@@ -441,15 +455,7 @@ sub check_workspace {
       version_greater_equal($settings->{parsed_version},
         $previous_releases->[0]->{version});
     $settings->{release_occurred} = 0;
-
-    write_json_file($settings->{workspace_info_file_path}, {
-      mock => $settings->{mock},
-      micro => $settings->{micro},
-      version => $settings->{version},
-      next_version => $settings->{next_version},
-      is_highest_version => $settings->{is_highest_version},
-      release_occurred => $settings->{release_occurred},
-    });
+    write_workspace_info($settings);
   }
 }
 
@@ -711,6 +717,9 @@ sub get_releases {
     my %parsed = parse_release_tag($release->{tag_name});
     my @assets = ();
     for my $asset (@{$release->{assets}}) {
+      if ($asset->{name} !~ /tar\.gz|zip$/) {
+        next;
+      }
       push(@assets, {
         name => $asset->{name},
         browser_download_url => $asset->{browser_download_url},
@@ -1748,7 +1757,9 @@ sub remedy_zip_source {
 
   return !$result;
 }
+
 ############################################################################
+
 sub verify_md5_checksum {
   my $settings = shift();
   my $orig_dir = getcwd();
@@ -1767,10 +1778,38 @@ sub remedy_md5_checksum {
   print "Creating file $settings->{md5_src}\n";
   my $orig_dir = getcwd();
   chdir($settings->{workspace});
-  my $status = run_command("md5sum $settings->{tgz_src} $settings->{zip_src} > $settings->{md5_src}");
+  my $files = join(' ', get_source_release_files($settings));
+  my $status = run_command("md5sum $files > $settings->{md5_src}");
   chdir($orig_dir);
   return $status;
 }
+
+############################################################################
+
+sub verify_sha256_checksum {
+  my $settings = shift();
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $status = run_command("sha256sum --check --quiet $settings->{sha256_src}");
+  chdir($orig_dir);
+  return $status;
+}
+
+sub message_sha256_checksum {
+  return "Generate the sha256 checksum file";
+}
+
+sub remedy_sha256_checksum {
+  my $settings = shift();
+  print "Creating file $settings->{sha256_src}\n";
+  my $orig_dir = getcwd();
+  chdir($settings->{workspace});
+  my $files = join(' ', get_source_release_files($settings));
+  my $status = run_command("sha256sum $files > $settings->{sha256_src}");
+  chdir($orig_dir);
+  return $status;
+}
+
 ############################################################################
 
 sub verify_download_ace_tao {
@@ -1976,13 +2015,29 @@ sub remedy_devguide {
 
 ############################################################################
 
-sub get_release_files {
+sub get_source_release_files {
   my $settings = shift();
   my @files = (
       $settings->{tgz_src},
       $settings->{zip_src},
-      $settings->{md5_src},
   );
+
+  return @files;
+}
+
+sub get_github_release_files {
+  my $settings = shift();
+
+  my @files = get_source_release_files($settings);
+  push(@files, $settings->{md5_src}, $settings->{sha256_src});
+  return @files;
+}
+
+sub get_all_release_files {
+  my $settings = shift();
+
+  my @files = get_github_release_files($settings);
+
   if (!$settings->{skip_devguide}) {
     push(@files, $settings->{devguide_ver});
     push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
@@ -2007,7 +2062,7 @@ sub verify_ftp_upload {
     return 0;
   }
 
-  foreach my $file (get_release_files($settings)) {
+  foreach my $file (get_all_release_files($settings)) {
     if ($content !~ /$file/) {
       print "$file not found in $url\n";
       return 0;
@@ -2039,7 +2094,7 @@ sub remedy_ftp_upload {
     or die "Cannot ls() $FTP_DIR ", $ftp->message();
   $ftp->binary();
 
-  my @new_release_files = get_release_files($settings);
+  my @new_release_files = get_all_release_files($settings);
 
   if ($settings->{is_highest_version}) {
     # Identify Old Versioned Release Files Using the New Ones
@@ -2138,12 +2193,12 @@ sub remedy_github_upload {
           body => $text
       }
   );
+  my @assets = get_github_release_files($settings);
   unless ( $release->success ) {
     printf "error accessing github: %s\n", $release->response->status_line;
     $rc = 0;
   } else {
-    for my $f ($settings->{tgz_src},
-               $settings->{zip_src}) {
+    for my $f (@assets) {
       my $p = "$settings->{workspace}/$f";
       open(my $fh, $p) or die "Can't open";
       binmode $fh;
@@ -2243,7 +2298,7 @@ sub remedy_website_release {
 
   # Merge releases with the same major and minor versions, keeping one with the
   # highest micro version.
-  my $releases = get_releases(shift);
+  my $releases = get_releases($settings);
   my $latest_ver = $releases->[0]->{version};
   my $major = $latest_ver->{major} + 1;
   my $minor = $latest_ver->{minor};
@@ -2535,6 +2590,7 @@ my %global_settings = (
     tgz_src      => "${base_name}.tar.gz",
     zip_src      => "${base_name}.zip",
     md5_src      => "${base_name}.md5",
+    sha256_src => "${base_name}.sha256",
     tar_dox      => "${base_name}-doxygen.tar",
     tgz_dox      => "${base_name}-doxygen.tar.gz",
     zip_dox      => "${base_name}-doxygen.zip",
@@ -2719,6 +2775,16 @@ my @release_steps = (
     verify  => sub{verify_md5_checksum(@_)},
     message => sub{message_md5_checksum(@_)},
     remedy  => sub{remedy_md5_checksum(@_)},
+  },
+  {
+    name => 'Create sha256 Checksum File',
+    prereqs => [
+      'Create Unix Release Archive',
+      'Create Windows Release Archive',
+    ],
+    verify  => sub{verify_sha256_checksum(@_)},
+    message => sub{message_sha256_checksum(@_)},
+    remedy  => sub{remedy_sha256_checksum(@_)},
   },
   {
     name    => 'Download OCI ACE/TAO',

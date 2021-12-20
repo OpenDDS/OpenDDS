@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -19,9 +17,9 @@
 
 #include <ace/Recursive_Thread_Mutex.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -108,11 +106,12 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-  /** This method is not defined in the IDL and is defined for
-  *  internal use.
-  *  Check if there is any datareader associated with it.
-  */
-  bool is_clean() const;
+  /**
+   * This method is not defined in the IDL and is defined for
+   * internal use.
+   * Check if there is any datareader associated with it.
+   */
+  bool is_clean(String* leftover_entities = 0) const;
 
   // called by DataReaderImpl::data_received
   void data_received(DataReaderImpl* reader);

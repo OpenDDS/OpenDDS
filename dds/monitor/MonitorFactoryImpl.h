@@ -68,6 +68,8 @@ public:
 
   virtual void initialize();
 
+  virtual void deinitialize();
+
   ServiceParticipantReportDataWriter_ptr get_sp_writer();
 
   static int service_initialize();
@@ -79,6 +81,7 @@ private:
                                          const char* topic_name,
                                          const DDS::DataWriterQos& dw_qos);
 
+  DDS::DomainParticipant_var participant_;
   ServiceParticipantReportDataWriter_var  sp_writer_;
   DomainParticipantReportDataWriter_var   dp_writer_;
   TopicReportDataWriter_var               topic_writer_;

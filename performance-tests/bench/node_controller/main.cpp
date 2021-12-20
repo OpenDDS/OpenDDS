@@ -92,6 +92,7 @@ public:
     log_filename_ = join_path(output_dir, file_base_name_ + "_log.txt");
     executable_name_ = config.executable.in();
     spawned_process_command_ = config.command.in();
+    ignore_errors_ = config.ignore_errors;
   }
 
   ~SpawnedProcess()
@@ -191,9 +192,9 @@ public:
 // It's possible we need to do something similar on other platforms and we will
 // probably want to expand this to do the correct thing on windows / android / macos
 #ifdef ACE_LINUX
-    exit_status_ = exit_code ? exit_code : return_code;
+    exit_status_ = ignore_errors_ ? 0 : (exit_code ? exit_code : return_code);
 #else
-    exit_status_ = return_code;
+    exit_status_ = ignore_errors_ ? 0 : return_code;
     ACE_UNUSED_ARG(exit_code);
 #endif
     running_ = false;
@@ -217,6 +218,7 @@ private:
   std::string log_filename_;
   std::string executable_name_;
   std::string spawned_process_command_;
+  bool ignore_errors_;
 };
 
 using SpawnedProcessPtr = std::shared_ptr<SpawnedProcess>;

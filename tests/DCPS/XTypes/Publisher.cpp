@@ -1,17 +1,18 @@
-#include "XTypes.h"
-#include "XTypesPubTypeSupportImpl.h"
+#include "Common.h"
+#include "PublisherTypeSupportImpl.h"
+#include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
 
 void write_plain_cdr_struct(const DataWriter_var& dw)
 {
-  PlainCdrStructDataWriter_var pdw = PlainCdrStructDataWriter::_narrow(dw);
+  PlainCdrStructDataWriter_var typed_dw = PlainCdrStructDataWriter::_narrow(dw);
 
   PlainCdrStruct pcs;
-  pcs.key = key_value;
-  pcs.value = 1;
+  pcs.key_field = key_value;
+  pcs.value_field = 1;
 
-  const ReturnCode_t ret = pdw->write(pcs, HANDLE_NIL);
+  const ReturnCode_t ret = typed_dw->write(pcs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_plain_cdr_struct returned %C\n",
                OpenDDS::DCPS::retcode_to_string(ret)));
@@ -23,12 +24,12 @@ void write_plain_cdr_struct(const DataWriter_var& dw)
 
 void write_final_struct(const DataWriter_var& dw)
 {
-  FinalStructPubDataWriter_var pdw = FinalStructPubDataWriter::_narrow(dw);
+  FinalStructPubDataWriter_var typed_dw = FinalStructPubDataWriter::_narrow(dw);
 
   FinalStructPub fs;
-  fs.key = key_value;
+  fs.key_field = key_value;
 
-  const ReturnCode_t ret = pdw->write(fs, HANDLE_NIL);
+  const ReturnCode_t ret = typed_dw->write(fs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_final_struct returned %C\n",
                OpenDDS::DCPS::retcode_to_string(ret)));
@@ -40,13 +41,13 @@ void write_final_struct(const DataWriter_var& dw)
 
 void write_modified_final_struct(const DataWriter_var& dw)
 {
-  ModifiedFinalStructDataWriter_var pdw = ModifiedFinalStructDataWriter::_narrow(dw);
+  ModifiedFinalStructDataWriter_var typed_dw = ModifiedFinalStructDataWriter::_narrow(dw);
 
   ModifiedFinalStruct mfs;
-  mfs.key = key_value;
+  mfs.key_field = key_value;
   mfs.additional_field = FINAL_STRUCT_AF;
 
-  const ReturnCode_t ret = pdw->write(mfs, HANDLE_NIL);
+  const ReturnCode_t ret = typed_dw->write(mfs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_modified_final_struct returned %C\n",
                OpenDDS::DCPS::retcode_to_string(ret)));
@@ -61,7 +62,7 @@ void write_appendable_struct_no_xtypes(const DataWriter_var& dw)
   AppendableStructNoXTypesDataWriter_var typed_dw = AppendableStructNoXTypesDataWriter::_narrow(dw);
 
   AppendableStructNoXTypes as;
-  as.key = key_value;
+  as.key_field = key_value;
 
   const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
   if (ret != RETCODE_OK) {
@@ -78,7 +79,7 @@ void write_additional_prefix_field_struct(const DataWriter_var& dw)
   AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
 
   AdditionalPrefixFieldStruct apfs;
-  apfs.key = key_value;
+  apfs.key_field = key_value;
   apfs.additional_field = APPENDABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
@@ -96,7 +97,7 @@ void write_additional_postfix_field_struct(const DataWriter_var& dw)
   AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
 
   AdditionalPostfixFieldStruct apfs;
-  apfs.key = key_value;
+  apfs.key_field = key_value;
   apfs.additional_field = APPENDABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
@@ -114,7 +115,7 @@ void write_modified_mutable_struct(const DataWriter_var& dw)
   ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
 
   ModifiedMutableStruct ams;
-  ams.key = key_value;
+  ams.key_field = key_value;
   ams.additional_field = MUTABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(ams, HANDLE_NIL);
@@ -132,7 +133,8 @@ void write_mutable_base_struct(const DataWriter_var& dw)
   MutableBaseStructDataWriter_var typed_dw = MutableBaseStructDataWriter::_narrow(dw);
 
   MutableBaseStruct mbs;
-  mbs.key = key_value;
+  mbs.key_field = key_value;
+
   const ReturnCode_t ret = typed_dw->write(mbs, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_mutable_base_struct returned %C\n",
@@ -148,7 +150,7 @@ void write_modified_mutable_union(const DataWriter_var& dw)
   ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
 
   ModifiedMutableUnion mmu;
-  mmu.key(key_value);
+  mmu.key_field(key_value);
 
   const ReturnCode_t ret = typed_dw->write(mmu, HANDLE_NIL);
   if (ret != RETCODE_OK) {
@@ -182,7 +184,7 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw)
   AppendableStructWithDependencyDataWriter_var typed_dw = AppendableStructWithDependencyDataWriter::_narrow(dw);
 
   AppendableStructWithDependency as;
-  as.key = key_value;
+  as.key_field = key_value;
   as.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
@@ -199,7 +201,7 @@ void write_modified_name_mutable_struct(const DataWriter_var& dw)
 {
   ModifiedNameMutableStructDataWriter_var typed_dw = ModifiedNameMutableStructDataWriter::_narrow(dw);
   ModifiedNameMutableStruct sample;
-  sample.key_modified = key_value;
+  sample.key_field_modified = key_value;
   sample.additional_field_modified = MUTABLE_STRUCT_AF;
 
   const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
@@ -216,7 +218,7 @@ void write_modified_name_mutable_union(const DataWriter_var& dw)
 {
   ModifiedNameMutableUnionDataWriter_var typed_dw = ModifiedNameMutableUnionDataWriter::_narrow(dw);
   ModifiedNameMutableUnion sample;
-  sample.key_modified(key_value);
+  sample.key_field_modified(key_value);
 
   const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
   if (ret != RETCODE_OK) {
@@ -236,7 +238,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-  // Arguments "--type" and "--expect_to_fail" must be specified
+  // Arguments "--type" must be specified
   for (int i = 1; i < argc; ++i) {
     ACE_TString arg(argv[i]);
     if (arg == ACE_TEXT("--verbose")) {
@@ -367,16 +369,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
   get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
+  // For subscribing ack control topic.
   Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
                                                      DEFAULT_STATUS_MASK);
   if (!control_sub) {
     ACE_ERROR((LM_ERROR, "ERROR: create_subscriber failed\n"));
-    return 1;
-  }
-  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-                                                   DEFAULT_STATUS_MASK);
-  if (!control_pub) {
-    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
     return 1;
   }
 
@@ -392,6 +389,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
+  if (!control_pdr) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow ack datareader failed\n"));
+    return 1;
+  }
+
+  // For publishing echo control topic.
+  Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
+                                                   DEFAULT_STATUS_MASK);
+  if (!control_pub) {
+    ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed for control_pub\n"));
+    return 1;
+  }
+
   DataWriterQos control_dw_qos;
   control_pub->get_default_datawriter_qos(control_dw_qos);
   control_dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
@@ -404,10 +415,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ControlStructDataWriter_var control_typed_dw = ControlStructDataWriter::_narrow(control_dw);
-  ControlStructDataReader_var control_pdr = ControlStructDataReader::_narrow(control_dr);
+  if (!control_typed_dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: _narrow echo datawriter failed\n"));
+    return 1;
+  }
 
-  Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-    DEFAULT_STATUS_MASK);
+  // For publishing user topic.
+  Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
   if (!pub) {
     ACE_ERROR((LM_ERROR, "ERROR: create_publisher failed\n"));
     return 1;
@@ -421,8 +435,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     dw_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
   }
 
-  DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0,
-    DEFAULT_STATUS_MASK);
+  DataWriter_var dw = pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
   if (!dw) {
     ACE_ERROR((LM_ERROR, "ERROR: create_datawriter failed\n"));
     return 1;
@@ -459,8 +472,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       OpenDDS::DCPS::retcode_to_string(ret)));
     failed = true;
   }
-
   ws->detach_condition(condition);
+
   if (!expect_incompatible_qos) {
     if (!failed) {
       failed = !check_inconsistent_topic_status(topic);
@@ -468,7 +481,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     if (failed) {
       ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %C\n", type.c_str()));
-    } else if (expect_to_match) {
+      return 1;
+    }
+
+    if (expect_to_match) {
       if (type == "PlainCdrStruct") {
         write_plain_cdr_struct(dw);
       } else if (type == "FinalStructPub") {
@@ -497,42 +513,43 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         write_mutable_base_struct(dw);
       }
     }
+
+    ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
+
+    ::ControlStructSeq control_data;
+    ret = read_i(control_dr, control_pdr, control_data);
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
+        OpenDDS::DCPS::retcode_to_string(ret)));
+      return 1;
+    }
+
+    // Send echo when the subscriber's control reader joins.
+    if (!wait_for_reader(true, control_dw)) {
+      return 1;
+    }
+
+    ACE_DEBUG((LM_DEBUG, "Writer sending echo at %T\n"));
+
+    ControlStruct cs;
+    ret = control_typed_dw->write(cs, HANDLE_NIL);
+    if (ret != RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
+        OpenDDS::DCPS::retcode_to_string(ret)));
+      return 1;
+    }
+
+    // When the subscriber's control reader leaves, we can leave.
+    if (!wait_for_reader(false, control_dw)) {
+      return 1;
+    }
   }
-
-  ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
-
-  ::ControlStructSeq control_data;
-  ret = read_i(control_dr, control_pdr, control_data);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
-    return 1;
-  }
-
-  if (!wait_for_reader (true, control_dw)) {
-    return 1;
-  }
-
-  ACE_DEBUG((LM_DEBUG, "Writer sending echo at %T\n"));
-
-  ControlStruct cs;
-  ret = control_typed_dw->write(cs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
-      OpenDDS::DCPS::retcode_to_string(ret)));
-    return 1;
-  }
-
-  if (!wait_for_reader (false, control_dw)) {
-    return 1;
-  }
-  topic = 0;
   ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
-
+  topic = 0;
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
   TheServiceParticipant->shutdown();
 
-  ACE_DEBUG((LM_DEBUG, "writer exiting at %T\n"));
-  return failed ? 1 : 0;
+  ACE_DEBUG((LM_DEBUG, "Writer exiting at %T\n"));
+  return 0;
 }

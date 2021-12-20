@@ -1,5 +1,5 @@
-#ifndef XTYPES_H
-#define XTYPES_H
+#ifndef COMMON_H
+#define COMMON_H
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -40,7 +40,7 @@ template<typename T>
 bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_name,
   Topic_var& topic, const std::string& registered_type_name)
 {
-  if (ts->register_type(dp, registered_type_name.empty() ? "" : registered_type_name.c_str()) != DDS::RETCODE_OK) {
+  if (ts->register_type(dp, registered_type_name.empty() ? "" : registered_type_name.c_str()) != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: register_type failed\n"));
     return false;
   }
@@ -63,20 +63,21 @@ bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_na
 }
 
 bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
-  DDS::WaitSet_var ws = new DDS::WaitSet;
-  DDS::StatusCondition_var condition = dw->get_statuscondition();
+  WaitSet_var ws = new DDS::WaitSet;
+  StatusCondition_var condition = dw->get_statuscondition();
   condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
-  bool success = true;
-  DDS::ConditionSeq conditions;
-  ReturnCode_t ret = RETCODE_OK;
   ws->attach_condition(condition);
-  DDS::Duration_t p = { 5, 0 };
-  DDS::PublicationMatchedStatus pms;
+
+  bool success = true;
+  Duration_t timeout = { 5, 0 };
+  PublicationMatchedStatus pms;
   dw->get_publication_matched_status(pms);
-  ACE_DEBUG((LM_DEBUG,"Starting wait for reader %C count = %d at %T\n", (tojoin ? "startup":"shutdown"), pms.current_count));
+
+  ACE_DEBUG((LM_DEBUG,"Starting wait for reader %C -- Count = %d at %T\n",
+             (tojoin ? "startup" : "shutdown"), pms.current_count));
   for (int retries = 3; retries > 0 && (tojoin == (pms.current_count == 0)); --retries) {
-    conditions.length(0);
-    ret = ws->wait(conditions, p);
+    ConditionSeq conditions;
+    const ReturnCode_t ret = ws->wait(conditions, timeout);
     if (ret != RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "ERROR: wait on control_dw condition returned %C\n",
                  OpenDDS::DCPS::retcode_to_string(ret)));
@@ -85,51 +86,49 @@ bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
     }
     dw->get_publication_matched_status(pms);
   }
+
   if (success) {
-    ACE_DEBUG((LM_DEBUG, "After wait for reader %C count = %d at %T\n", (tojoin
-                                                                         ? "startup"
-                                                                         : "shutdown"), pms.current_count));
+    ACE_DEBUG((LM_DEBUG, "After wait for reader %C -- Count = %d at %T\n",
+               (tojoin ? "startup" : "shutdown"), pms.current_count));
     if (tojoin != (pms.current_count > 0)) {
-      ACE_ERROR((LM_ERROR, "Data reader %C not detected at %T\n", (tojoin
-                                                                   ? "startup"
-                                                                   : "shutdown")));
+      ACE_ERROR((LM_ERROR, "Data reader %C not detected at %T\n",
+                 (tojoin ? "startup" : "shutdown")));
     }
   }
   ws->detach_condition(condition);
   return success;
 }
+
 bool check_inconsistent_topic_status(Topic_var topic)
 {
-  DDS::InconsistentTopicStatus status;
-  DDS::ReturnCode_t retcode;
-
-  retcode = topic->get_inconsistent_topic_status(status);
+  InconsistentTopicStatus status;
+  const ReturnCode_t retcode = topic->get_inconsistent_topic_status(status);
   if (retcode != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
     return false;
-  } else if (expect_to_match !=  (status.total_count == 0)) {
+  } else if (expect_to_match != (status.total_count == 0)) {
     ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
     return false;
   }
   return true;
 }
 
-void append(DDS::PropertySeq& props, const char* name, const char* value)
+void append(PropertySeq& props, const char* name, const char* value)
 {
-  const DDS::Property_t prop = { name, value, false /*propagate*/ };
+  const Property_t prop = { name, value, false /*propagate*/ };
   const unsigned int len = props.length();
   props.length(len + 1);
   props[len] = prop;
 }
 
 void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp) {
-  DDS::DomainParticipantQos part_qos;
+  DomainParticipantQos part_qos;
   dpf->get_default_participant_qos(part_qos);
 
 #if defined(OPENDDS_SECURITY)
   if (TheServiceParticipant->get_security()) {
     using namespace DDS::Security::Properties;
-    DDS::PropertySeq& props = part_qos.property.value;
+    PropertySeq& props = part_qos.property.value;
 
     append(props, AuthIdentityCA, "file:../../security/certs/identity/identity_ca_cert.pem");
     append(props, AuthIdentityCertificate, "file:../../security/certs/identity/test_participant_02_cert.pem");
@@ -160,10 +159,9 @@ ReturnCode_t read_i(const DataReader_var& dr, const T1& pdr, T2& data, bool igno
     ACE_ERROR((LM_ERROR, "ERROR: reader timedout\n"));
   } else if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader: wait returned %C\n",
-          OpenDDS::DCPS::retcode_to_string(ret)));
+               OpenDDS::DCPS::retcode_to_string(ret)));
   } else {
     SampleInfoSeq info;
-
     ret = pdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_rc);
     if (ignore_no_data && ret == RETCODE_NO_DATA) {
         ret = RETCODE_OK;

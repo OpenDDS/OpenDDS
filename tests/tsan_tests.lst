@@ -27,4 +27,8 @@ tests/DCPS/EntityLifecycleStress/run_test.pl publishers 10 subscribers 10: !OPEN
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers 10: RTPS
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples publishers 10 subscribers 10: !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc publishers 10 subscribers 10: RTPS
+tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 

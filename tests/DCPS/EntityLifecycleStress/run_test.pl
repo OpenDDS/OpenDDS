@@ -22,6 +22,7 @@ $test->setup_discovery();
 my $pub_count = 0;
 my $sub_count = 0;
 my $rtps_disc = 0;
+my $large_samples = 0;
 
 my $ai = 0;
 foreach $a(@ARGV) {
@@ -30,6 +31,9 @@ foreach $a(@ARGV) {
   }
   if ($a eq "rtps_disc_tcp") {
     $rtps_disc = 1;
+  }
+  if ($a eq "large_samples") {
+    $large_samples = 1;
   }
   if ($a eq "publishers") {
     $pub_count = @ARGV[$ai + 1];
@@ -53,18 +57,27 @@ my $total_count = $pub_count + $sub_count;
 my $pub_index = 1;
 my $sub_index = 1;
 
+my $pub_args = "";
+if ($large_samples) {
+  $pub_args = $pub_args . " -l";
+}
+$pub_args = $pub_args . " -DCPSPendingTimeout 3";
+
+my $sub_args = "";
+$sub_args = $sub_args . " -DCPSPendingTimeout 3";
+
 for (my $i = 0; $i < $total_count; $i++) {
   if (0 == $i % 2) {
     if ($pub_index <= $pub_count) {
-      $test->process("pub_" . $pub_index++, "publisher", "-DCPSPendingTimeout 3");
+      $test->process("pub_" . $pub_index++, "publisher", $pub_args);
     } elsif ($sub_index <= $sub_count) {
-      $test->process("sub_" . $sub_index++, "subscriber", "-DCPSPendingTimeout 3");
+      $test->process("sub_" . $sub_index++, "subscriber", $sub_args);
     }
   } else {
     if ($sub_index <= $sub_count) {
-      $test->process("sub_" . $sub_index++, "subscriber", "-DCPSPendingTimeout 3");
+      $test->process("sub_" . $sub_index++, "subscriber", $sub_args);
     } elsif ($pub_index <= $pub_count) {
-      $test->process("pub_" . $pub_index++, "publisher", "-DCPSPendingTimeout 3");
+      $test->process("pub_" . $pub_index++, "publisher", $pub_args);
     }
   }
 }

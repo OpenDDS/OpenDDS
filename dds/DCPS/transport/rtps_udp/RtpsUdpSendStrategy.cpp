@@ -118,8 +118,11 @@ RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
   }
 
   if (addrs.empty()) {
-    errno = ENOTCONN;
-    return -1;
+    ssize_t result = 0;
+    for (int i = 0; i < n; ++i) {
+      result += iov[i].iov_len;
+    }
+    return result;
   }
 
   return send_multi_i(iov, n, addrs);

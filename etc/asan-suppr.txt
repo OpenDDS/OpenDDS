@@ -1,0 +1,5 @@
+# Address sanitizer suppressions
+# See here for how this works:
+#   https://clang.llvm.org/docs/AddressSanitizer.html#issue-suppression
+
+leak:getaddrinfo

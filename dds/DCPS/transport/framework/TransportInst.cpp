@@ -177,11 +177,11 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
   addr_str = result;
 }
 
-OpenDDS::ICE::Endpoint*
+OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>
 OpenDDS::DCPS::TransportInst::get_ice_endpoint()
 {
   const OpenDDS::DCPS::TransportImpl_rch temp = impl();
-  return temp ? temp->get_ice_endpoint() : 0;
+  return temp ? temp->get_ice_endpoint() : OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>();
 }
 
 void

@@ -410,7 +410,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_MySeq)
   td.kind = XTypes::TK_SEQUENCE;
   td.name = "Sequence";
   td.bound.length(1);
-  td.bound[0] = ACE_UINT32_MAX;
+  td.bound[0] = 0;
   td.extensibility_kind = XTypes::FINAL;
   XTypes::DynamicType_rch long_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor long_td;
@@ -504,7 +504,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_CircularStruct)
   XTypes::TypeDescriptor struct_seq_td;
   struct_seq_td.kind = XTypes::TK_SEQUENCE;
   struct_seq_td.bound.length(1);
-  struct_seq_td.bound[0] = ACE_UINT32_MAX;
+  struct_seq_td.bound[0] = 0;
   struct_seq_td.name = "";
   XTypes::DynamicType_rch struct2_expected_dt = DCPS::make_rch<XTypes::DynamicType>();
   XTypes::TypeDescriptor struct2_td;
@@ -524,7 +524,7 @@ TEST_F(dds_DCPS_XTypes_DynamicType, CompleteToDynamicType_CircularStruct)
   XTypes::TypeDescriptor struct2_seq_td;
   struct2_seq_td.kind = XTypes::TK_SEQUENCE;
   struct2_seq_td.bound.length(1);
-  struct2_seq_td.bound[0] = ACE_UINT32_MAX;
+  struct2_seq_td.bound[0] = 0;
   struct2_seq_td.name = "";
 
   struct2_seq_md.type = struct2_seq_dt;
