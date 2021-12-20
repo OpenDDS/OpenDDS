@@ -1,0 +1,42 @@
+#include "Common.idl"
+
+// Final structures
+@topic
+@final
+struct FinalStructSub {
+  @key long key_field;
+};
+
+// Appendable structures
+@topic
+@appendable
+struct AppendableStruct {
+  @key long key_field;
+};
+
+// Mutable structures
+@topic
+@mutable
+struct MutableStruct {
+  @id(1) @key long key_field;
+  @id(2) long additional_field;
+};
+
+// Unions
+@topic
+@mutable
+union MutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key_field;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
+};
+
+// Tryconstruct
+@topic
+@mutable
+struct Trim20Struct {
+  @try_construct(TRIM) str20 trim_string;
+};
