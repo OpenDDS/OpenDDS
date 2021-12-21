@@ -566,7 +566,9 @@ module DDS {
 };
 
 module OpenDDS {
-  const DDS::DataRepresentationId_t UNALIGNED_CDR_DATA_REPRESENTATION = -12140;
+  module DCPS {
+    const DDS::DataRepresentationId_t UNALIGNED_CDR_DATA_REPRESENTATION = -12140;
+  };
 };
 
 #undef BUILT_IN_TOPIC_TYPE

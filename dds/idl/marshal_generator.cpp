@@ -2402,7 +2402,7 @@ namespace {
       values.push_back("DDS::XML_DATA_REPRESENTATION");
     }
     if (repr.unaligned) {
-      values.push_back("OpenDDS::UNALIGNED_CDR_DATA_REPRESENTATION");
+      values.push_back("OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION");
     }
 
     std::ostringstream ss;
