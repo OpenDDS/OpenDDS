@@ -3432,9 +3432,9 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
       }
     } else if (DCPS_debug_level) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: "
-                  "DataReaderImpl::setup_deserialization: "
-                  "Encountered unsupported or unknown data representation: %u\n",
-                  repIds[i]));
+                 "DataReaderImpl::setup_deserialization: "
+                 "Encountered unsupported or unknown data representation: %u\n",
+                 repIds[i]));
     }
   }
   if (decoding_modes_.empty()) {

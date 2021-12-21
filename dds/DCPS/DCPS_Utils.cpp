@@ -505,7 +505,7 @@ DDS::DataRepresentationIdSeq get_reader_effective_data_rep_qos(const DDS::DataRe
     ids.length(3);
     ids[0] = DDS::XCDR_DATA_REPRESENTATION;
     ids[1] = DDS::XCDR2_DATA_REPRESENTATION;
-    ids[2] =  DDS::UNALIGNED_CDR_DATA_REPRESENTATION;
+    ids[2] = DDS::UNALIGNED_CDR_DATA_REPRESENTATION;
     return ids;
   }
   return qos;

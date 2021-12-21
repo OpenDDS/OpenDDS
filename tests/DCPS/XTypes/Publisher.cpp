@@ -474,7 +474,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   ws->detach_condition(condition);
 
-  if (!expect_incompatible_qos) {
+  if (!expect_incompatible_qos || failed) {
     if (!failed) {
       failed = !check_inconsistent_topic_status(topic);
     }
@@ -513,37 +513,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         write_mutable_base_struct(dw);
       }
     }
-
-    ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
-
-    ::ControlStructSeq control_data;
-    ret = read_i(control_dr, control_pdr, control_data);
-    if (ret != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
-        OpenDDS::DCPS::retcode_to_string(ret)));
-      return 1;
-    }
-
-    // Send echo when the subscriber's control reader joins.
-    if (!wait_for_reader(true, control_dw)) {
-      return 1;
-    }
-
-    ACE_DEBUG((LM_DEBUG, "Writer sending echo at %T\n"));
-
-    ControlStruct cs;
-    ret = control_typed_dw->write(cs, HANDLE_NIL);
-    if (ret != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
-        OpenDDS::DCPS::retcode_to_string(ret)));
-      return 1;
-    }
-
-    // When the subscriber's control reader leaves, we can leave.
-    if (!wait_for_reader(false, control_dw)) {
-      return 1;
-    }
   }
+  ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
+
+  ::ControlStructSeq control_data;
+  ret = read_i(control_dr, control_pdr, control_data);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  // Send echo when the subscriber's control reader joins.
+  if (!wait_for_reader(true, control_dw)) {
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Writer sending echo at %T\n"));
+
+  ControlStruct cs;
+  ret = control_typed_dw->write(cs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  // When the subscriber's control reader leaves, we can leave.
+  if (!wait_for_reader(false, control_dw)) {
+    return 1;
+  }
+
   ACE_DEBUG((LM_DEBUG, "Writer cleanup at %T\n"));
   topic = 0;
   dp->delete_contained_entities();

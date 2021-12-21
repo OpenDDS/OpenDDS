@@ -392,10 +392,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       failed = !check_inconsistent_topic_status(topic);
     }
 
-    if (!failed) {
-      failed = !check_inconsistent_topic_status(topic);
-    }
-
     if (expect_to_match && !failed) {
       if (type == "PlainCdrStruct") {
         failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
@@ -410,43 +406,48 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         if (topic_name == "MutableBaseStructT") {
           afv = FINAL_STRUCT_AF;
         }
+        failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
+      } else if (type == "MutableUnion") {
+        failed = (read_mutable_union(dr) != RETCODE_OK);
+      } else if (type == "Trim20Struct") {
+        failed = (read_trim20_struct(dr) != RETCODE_OK);
       }
     }
-
-    if (failed) {
-      ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
-      return 1;
-    }
-
-    //
-    // As the subscriber is now about to exit, let the publisher know it can exit too
-    //
-    if (!wait_for_reader(true, control_dw)) {
-      return 1;
-    }
-
-    ACE_DEBUG((LM_DEBUG, "Reader sending ack at %T\n"));
-
-    ControlStruct cs;
-    ret = control_typed_dw->write(cs, HANDLE_NIL);
-    if (ret != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
-        OpenDDS::DCPS::retcode_to_string(ret)));
-      return 1;
-    }
-
-    ACE_DEBUG((LM_DEBUG, "Reader waiting for echo at %T\n"));
-
-    ::ControlStructSeq control_data;
-    ret = read_i(control_dr, control_pdr, control_data, true);
-    if (ret != RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
-        OpenDDS::DCPS::retcode_to_string(ret)));
-      return 1;
-    }
-
-    ACE_DEBUG((LM_DEBUG, "Reader cleanup at %T\n"));
   }
+  if (failed) {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
+    return 1;
+  }
+
+  //
+  // As the subscriber is now about to exit, let the publisher know it can exit too
+  //
+  if (!wait_for_reader(true, control_dw)) {
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Reader sending ack at %T\n"));
+
+  ControlStruct cs;
+  ret = control_typed_dw->write(cs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control write returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Reader waiting for echo at %T\n"));
+
+  ::ControlStructSeq control_data;
+  ret = read_i(control_dr, control_pdr, control_data, true);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: control read returned %C\n",
+      OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  ACE_DEBUG((LM_DEBUG, "Reader cleanup at %T\n"));
+
   topic = 0;
   dp->delete_contained_entities();
   dpf->delete_participant(dp);
