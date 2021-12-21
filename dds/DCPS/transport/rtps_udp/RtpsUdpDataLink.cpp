@@ -2934,7 +2934,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
     link->receive_strategy()->has_fragments(missing[i], wi->id_, &frag_info);
   }
   // 1b. larger than the last received seq# but less than the heartbeat.lastSN
-  if (!wi->recvd_.empty()) {
+  if (!wi->recvd_.empty() && wi->recvd_.high() < wi->hb_last_) {
     const SequenceRange range(wi->recvd_.high() + 1, wi->hb_last_);
     link->receive_strategy()->has_fragments(range, wi->id_, &frag_info);
   }
