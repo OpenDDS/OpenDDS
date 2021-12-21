@@ -98,18 +98,13 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
-    - name: Fix qt5 base projects for static build
-      shell: cmd
-      run: |
-        cd OpenDDS\ACE_TAO\ACE\MPC\config
-        for %%f in (qt5_*.mpb) do @perl -i.bak -p -e"s/libs/lit_libs/" %%f
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        call configure --optimize --no-debug --static --tests --qt=%VCPKG_ROOT%/installed/x64-windows "--mpcopts=-value_template platforms=x64" "--mpcopts=-value_template configurations=Release" "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
+        perl configure --optimize --no-debug --static --tests --qt=%VCPKG_ROOT%/installed/x64-windows "--mpcopts=-value_template platforms=x64" "--mpcopts=-value_template configurations=Release" "--mpcopts=-value_template Release::runtime_library=MultiThreadedDLL"
         tools\scripts\show_build_config.pl
     - name: build
       shell: cmd
