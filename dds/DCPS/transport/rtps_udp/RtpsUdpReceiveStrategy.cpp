@@ -1054,8 +1054,8 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
     if (reassembly_.has_frags(sn, pub_id, total_frags)) {
       if (frag_info) {
         if (total_frags > 256) {
-          const CORBA::Long empty_buffer[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
-          OPENDDS_VECTOR(CORBA::Long) buffer(total_frags + 31/ 32, 0);
+          static const CORBA::Long empty_buffer[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+          OPENDDS_VECTOR(CORBA::Long) buffer(total_frags + 31 / 32, 0);
           ACE_UINT32 numBits = 0;
           size_t idx = 0;
           const ACE_UINT32 base = reassembly_.get_gaps(sn, pub_id, &buffer[0], static_cast<CORBA::ULong>(buffer.size()), numBits);
