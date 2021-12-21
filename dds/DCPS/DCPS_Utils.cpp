@@ -477,7 +477,7 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   case DDS::XCDR2_DATA_REPRESENTATION:
     kind = Encoding::KIND_XCDR2;
     break;
-  case DDS::UNALIGNED_CDR_DATA_REPRESENTATION:
+  case OpenDDS::UNALIGNED_CDR_DATA_REPRESENTATION:
     kind = Encoding::KIND_UNALIGNED_CDR;
     break;
   default:
@@ -492,7 +492,7 @@ DDS::DataRepresentationIdSeq get_writer_effective_data_rep_qos(const DDS::DataRe
   if (qos.length() == 0) {
     DDS::DataRepresentationIdSeq ids;
     ids.length(1);
-    ids[0] = cdr_encapsulated ? DDS::XCDR2_DATA_REPRESENTATION : DDS::UNALIGNED_CDR_DATA_REPRESENTATION;
+    ids[0] = cdr_encapsulated ? DDS::XCDR2_DATA_REPRESENTATION : OpenDDS::UNALIGNED_CDR_DATA_REPRESENTATION;
     return ids;
   }
   return qos;
@@ -505,7 +505,7 @@ DDS::DataRepresentationIdSeq get_reader_effective_data_rep_qos(const DDS::DataRe
     ids.length(3);
     ids[0] = DDS::XCDR_DATA_REPRESENTATION;
     ids[1] = DDS::XCDR2_DATA_REPRESENTATION;
-    ids[2] = DDS::UNALIGNED_CDR_DATA_REPRESENTATION;
+    ids[2] = OpenDDS::UNALIGNED_CDR_DATA_REPRESENTATION;
     return ids;
   }
   return qos;
