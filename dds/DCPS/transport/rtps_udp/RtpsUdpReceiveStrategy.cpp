@@ -1054,17 +1054,17 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
     if (reassembly_.has_frags(sn, pub_id, total_frags)) {
       if (frag_info) {
         if (total_frags > 256) {
-          const CORBA::Long empty_buffer[8] { 0, 0, 0, 0, 0, 0, 0, 0};
+          const CORBA::Long empty_buffer[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
           OPENDDS_VECTOR(CORBA::Long) buffer(total_frags + 31/ 32, 0);
           ACE_UINT32 numBits = 0;
           size_t idx = 0;
-          const ACE_UINT32 base = reassembly_.get_gaps(sn, pub_id, &buffer[0], buffer.size(), numBits);
-          const size_t end = base + numBits;
-          for (size_t i = base; i <= end; i += 256) {
-            const size_t remain = end - i;
-            const size_t len = std::min(remain, static_cast<size_t>(256));
-            const size_t len32 = (len + 31) / 32;
-            const size_t len8 = len32 * 4;
+          const ACE_UINT32 base = reassembly_.get_gaps(sn, pub_id, &buffer[0], static_cast<CORBA::ULong>(buffer.size()), numBits);
+          const CORBA::ULong end = base + numBits;
+          for (CORBA::ULong i = base; i <= end; i += 256) {
+            const CORBA::ULong remain = end - i;
+            const CORBA::ULong len = std::min(remain, static_cast<CORBA::ULong>(256));
+            const CORBA::ULong len32 = (len + 31) / 32;
+            const CORBA::ULong len8 = len32 * 4;
             if (memcmp(&buffer[idx], &empty_buffer[0], len8) != 0) {
               std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
               p.first = sn;
