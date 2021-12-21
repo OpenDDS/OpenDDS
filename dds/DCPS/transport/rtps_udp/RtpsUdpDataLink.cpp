@@ -3705,11 +3705,6 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
   }
 
   {
-    for (FragmentInfo::const_iterator pos = consolidated_fragment_requests.begin(),
-           limit = consolidated_fragment_requests.end(); pos != limit; ++pos) {
-      consolidated_requests.erase(pos->first);
-    }
-
     // Send the consolidated requests.
     const OPENDDS_VECTOR(SequenceRange) ranges = consolidated_requests.present_sequence_ranges();
     for (OPENDDS_VECTOR(SequenceRange)::const_iterator pos = ranges.begin(), limit = ranges.end();

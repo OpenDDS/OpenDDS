@@ -346,7 +346,8 @@ private:
 
   // RTPS reliability support for local writers:
 
-  typedef OPENDDS_MAP(CORBA::ULong, RTPS::FragmentNumberSet) RequestedFragMap;
+  typedef CORBA::ULong FragmentNumberValue;
+  typedef OPENDDS_MAP(FragmentNumberValue, RTPS::FragmentNumberSet) RequestedFragMap;
   typedef OPENDDS_MAP(SequenceNumber, RequestedFragMap) RequestedFragSeqMap;
 
   struct ReaderInfo : public RcObject {
