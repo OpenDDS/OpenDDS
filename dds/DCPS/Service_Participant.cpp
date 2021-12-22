@@ -2895,6 +2895,8 @@ ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()
 
 NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
 {
+  reactor_task_.wait_for_startup();
+
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
 
   if (!network_config_monitor_) {
