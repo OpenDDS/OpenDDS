@@ -78,7 +78,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       DDS::DomainParticipantQos part_qos;
       dpf->get_default_participant_qos(part_qos);
-      part_qos.user_data.value.length(std::strlen(USER_DATA));
+      part_qos.user_data.value.length(static_cast<unsigned int>(std::strlen(USER_DATA)));
       std::memcpy(part_qos.user_data.value.get_buffer(), USER_DATA, std::strlen(USER_DATA));
 
 #if defined(OPENDDS_SECURITY)
