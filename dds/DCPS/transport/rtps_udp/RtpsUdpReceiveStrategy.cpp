@@ -1065,7 +1065,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
             const CORBA::ULong len = std::min(remain, static_cast<CORBA::ULong>(256));
             const CORBA::ULong len32 = (len + 31) / 32;
             const CORBA::ULong len8 = len32 * 4;
-            if (memcmp(&buffer[idx], &empty_buffer[0], len8) != 0) {
+            if (std::memcmp(&buffer[idx], &empty_buffer[0], len8) != 0) {
               std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
               p.first = sn;
               frag_info->push_back(p);
@@ -1073,7 +1073,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
               missing_frags.numBits = len;
               missing_frags.bitmapBase.value = i;
               missing_frags.bitmap.length(len32);
-              memcpy(missing_frags.bitmap.get_buffer(), &buffer[idx], len8);
+              std::memcpy(missing_frags.bitmap.get_buffer(), &buffer[idx], len8);
             }
             idx += 8;
           }
