@@ -305,6 +305,7 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
 void
 SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                   SequenceNumber fragment,
+                                  bool is_last_fragment,
                                   TransportSendStrategy::QueueType* queue,
                                   ACE_Message_Block* chain)
 {
@@ -322,7 +323,9 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                       static_cast<ACE_Message_Block*>(0));
 
   BufferType& buffer = fragments_[sequence][fragment];
-  pre_seq_.erase(sequence);
+  if (is_last_fragment) {
+    pre_seq_.erase(sequence);
+  }
   insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level > 5) {

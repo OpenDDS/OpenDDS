@@ -49,6 +49,8 @@ public:
 
   const TransportSendElement* original_send_element() const;
 
+  virtual bool is_last_fragment() const;
+
 protected:
   virtual void release_element(bool dropped_by_transport);
 
