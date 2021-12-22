@@ -107,7 +107,7 @@ bool from_param_list(const ParameterList& param_list,
 // OpenDDS::DCPS::DiscoveredWriterData
 
 OpenDDS_Rtps_Export
-void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader = false, bool encapsulated_only = false);
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids);
 
 OpenDDS_Rtps_Export
 bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,

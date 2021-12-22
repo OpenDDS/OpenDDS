@@ -1464,8 +1464,8 @@ DataWriterImpl::enable()
   }
 
   // Must be done after transport enabled.
-  if (!topic_servant_->check_data_representation(get_writer_effective_data_rep_qos(
-      qos_.representation.value, cdr_encapsulation()), true)) {
+  set_writer_effective_data_rep_qos(qos_.representation.value, cdr_encapsulation());
+  if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
     if (DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::enable: ")
         ACE_TEXT("none of the data representation QoS is allowed by the ")

@@ -325,17 +325,16 @@ public:
 
   DDS::ReturnCode_t setup_serialization()
   {
-    const DDS::DataRepresentationIdSeq repIds =
-      get_writer_effective_data_rep_qos(qos_.representation.value, cdr_encapsulation());
-    if (qos_.representation.value.length() > 0) {
+    if (qos_.representation.value.length() > 0 &&
+        qos_.representation.value[0]!= OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION) {
       // If the QoS explicitly sets XCDR, XCDR2, or XML, force encapsulation
       cdr_encapsulation(true);
     }
     if (cdr_encapsulation()) {
       Encoding::Kind encoding_kind;
       // There should only be one data representation in a DataWriter, so
-      // simply use repIds[0].
-      if (repr_to_encoding_kind(repIds[0], encoding_kind)) {
+      // simply use qos_.representation.value[0].
+      if (repr_to_encoding_kind(qos_.representation.value[0], encoding_kind)) {
         encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
         if (encoding_kind == Encoding::KIND_XCDR1 &&
             MarshalTraitsType::max_extensibility_level() == MUTABLE) {
@@ -350,7 +349,7 @@ public:
           if (::OpenDDS::DCPS::DCPS_debug_level) {
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
               "%CDataWriterImpl::setup_serialization: "
-              "Unaligned CDR is not allowed in rtps_udp transport\n",
+              "Unaligned CDR is not supported by transport types that require encapsulation\n",
               TraitsType::type_name()));
           }
         }
@@ -359,7 +358,7 @@ public:
                     ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
                     ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
                     TraitsType::type_name(),
-                    repIds[0]));
+                    qos_.representation.value[0]));
       }
     } else {
       // Pick unaligned CDR as it is the implicit representation for non-encapsulated
