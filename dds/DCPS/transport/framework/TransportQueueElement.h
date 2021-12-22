@@ -169,6 +169,9 @@ public:
   /// Is this QueueElement the result of fragmentation?
   virtual bool is_fragment() const { return false; }
 
+  /// Is this QueueElement the last result of fragmentation?
+  virtual bool is_last_fragment() const { return false; }
+
   virtual bool is_request_ack() const { return false; }
 
   virtual bool is_retained_replaced() const { return false; }

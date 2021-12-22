@@ -17,14 +17,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportReassembly::FragKey::FragKey(const PublicationId& pubId,
+FragKey::FragKey(const PublicationId& pubId,
                                       const SequenceNumber& dataSampleSeq)
   : publication_(pubId)
   , data_sample_seq_(dataSampleSeq)
 {
 }
 
-GUID_tKeyLessThan TransportReassembly::FragKey::compare_;
+GUID_tKeyLessThan FragKey::compare_;
 
 TransportReassembly::FragRange::FragRange(const SequenceRange& seqRange,
                                           const ReceivedDataSample& data)
@@ -189,10 +189,16 @@ TransportReassembly::insert(FragRangeList& flist,
 
 bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
-                               const RepoId& pub_id) const
+                               const RepoId& pub_id,
+                               ACE_UINT32& total_frags) const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  return fragments_.count(FragKey(pub_id, seq));
+  const FragInfoMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
+  if (iter != fragments_.end()) {
+    total_frags = iter->second.total_frags_;
+    return true;
+  }
+  return false;
 }
 
 void

@@ -87,6 +87,12 @@ TransportCustomizedElement::original_send_element() const
   return original_send_element_;
 }
 
+bool
+TransportCustomizedElement::is_last_fragment() const
+{
+  return original_send_element_ ? original_send_element_->is_last_fragment() : false;
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

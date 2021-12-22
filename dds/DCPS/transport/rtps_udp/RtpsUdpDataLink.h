@@ -346,12 +346,16 @@ private:
 
   // RTPS reliability support for local writers:
 
+  typedef CORBA::ULong FragmentNumberValue;
+  typedef OPENDDS_MAP(FragmentNumberValue, RTPS::FragmentNumberSet) RequestedFragMap;
+  typedef OPENDDS_MAP(SequenceNumber, RequestedFragMap) RequestedFragSeqMap;
+
   struct ReaderInfo : public RcObject {
     const RepoId id_;
     const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
     DisjointSequence requests_;
-    OPENDDS_MAP(SequenceNumber, RTPS::FragmentNumberSet) requested_frags_;
+    RequestedFragSeqMap requested_frags_;
     SequenceNumber cur_cumulative_ack_;
     const bool durable_;
     const ACE_CDR::ULong participant_flags_;

@@ -93,6 +93,7 @@ public:
               ACE_Message_Block* chain);
   void insert_fragment(SequenceNumber sequence,
                        SequenceNumber fragment,
+                       bool is_last_fragment,
                        TransportSendStrategy::QueueType* queue,
                        ACE_Message_Block* chain);
 
