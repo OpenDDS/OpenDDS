@@ -15,5 +15,5 @@ RUN apt-get update && apt-get install -y \
 ADD . /opt/OpenDDS
 
 RUN cd /opt/OpenDDS && \
-    ./configure --compiler 'g++-4.4' --security && \
+    ./configure --compiler 'g++-4.4' --security --tests && \
     make -j $(($(nproc)+1))
