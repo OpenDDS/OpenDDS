@@ -1646,6 +1646,9 @@ if ($build_gtest) {
      '-DCMAKE_CXX_FLAGS=/D_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING=1',
      '-G', '"' . win32_cmake_generator($opts{'compiler_version'}) . '"',
      '-A', $opts{'compiler_target_architecture'}) : ();
+  if ($opts{'nonstdcompiler'}) {
+    push @cmake_platform_args, "-DCMAKE_CXX_COMPILER=$opts{'compiler'}";
+  }
   my @cmake_cmds = ([$cmake,
                      "-DCMAKE_INSTALL_PREFIX=$install_dir",
                      '-DCMAKE_INSTALL_LIBDIR=lib',
