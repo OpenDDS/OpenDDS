@@ -16,5 +16,5 @@ RUN cd /opt && \
     tar xzf cmake-3.22.1-linux-x86_64.tar.gz
 
 RUN cd /opt/OpenDDS && \
-    ./configure --compiler 'g++-4.4' --security --tests --cmake=/opt/cmake-3.22.1-linux-x86_64/bin/cmake && \
+    ./configure --compiler 'g++-4.4' --security --tests --no-rapidjson --cmake=/opt/cmake-3.22.1-linux-x86_64/bin/cmake && \
     make -j $(($(nproc)+1))
