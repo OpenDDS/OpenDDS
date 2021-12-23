@@ -27,6 +27,9 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+class ACE_Reactor;
+class ACE_Event_Handler;
+
 namespace OpenDDS {
 namespace DCPS {
 
