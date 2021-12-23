@@ -126,12 +126,12 @@ public:
     return writer_id_;
   }
 
-  CORBA::ULong writer_qos_ownership_strength() const {
+  CORBA::Long writer_qos_ownership_strength() const {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return writer_qos_.ownership_strength.value;
   }
 
-  void writer_qos_ownership_strength(const CORBA::ULong writer_qos_ownership_strength) {
+  void writer_qos_ownership_strength(const CORBA::Long writer_qos_ownership_strength) {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     writer_qos_.ownership_strength.value = writer_qos_ownership_strength;
   }

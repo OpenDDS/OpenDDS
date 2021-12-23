@@ -175,7 +175,7 @@ WriterInfo::schedule_remove_association_timer(ACE_Reactor* reactor, ACE_Event_Ha
 }
 
 void
-WriterInfo::cancel_remove_association_timer(ACE_Reactor* reactor, ACE_Event_Handler* handler, const void** arg)
+WriterInfo::cancel_remove_association_timer(ACE_Reactor* reactor, ACE_Event_Handler*, const void** arg)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (remove_association_timer_ != WriterInfo::NO_TIMER) {
@@ -253,7 +253,9 @@ WriterInfo::check_activity(const MonotonicTimePoint& now)
 
     if (expires_at <= now) {
       // let all instances know this write is not alive.
-      reader_->writer_became_dead(*this);
+      WriterInfoListener* reader = reader_;
+      guard.release();
+      reader->writer_became_dead(*this);
       expires_at = MonotonicTimePoint::max_value;
     }
   }
