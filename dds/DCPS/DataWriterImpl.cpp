@@ -283,6 +283,9 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     return;
   }
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+
   if (DCPS_debug_level) {
     const GuidConverter writer_conv(publication_id_);
     const GuidConverter conv(remote_id);
@@ -292,9 +295,8 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
                OPENDDS_STRING(writer_conv).c_str(),
                OPENDDS_STRING(conv).c_str()));
   }
-  if (flags & ASSOC_ACTIVE) {
 
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+  if (flags & ASSOC_ACTIVE) {
 
     // Have we already received an association_complete() callback?
     if (DCPS_debug_level) {
@@ -367,17 +369,6 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
-  if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(this->publication_id_);
-    GuidConverter reader_converter(remote_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
-  }
-
   bool reader_durable = false;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   OPENDDS_STRING filterClassName;
@@ -386,6 +377,17 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 #endif
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
+
+    if (DCPS_debug_level >= 1) {
+      GuidConverter writer_converter(this->publication_id_);
+      GuidConverter reader_converter(remote_id);
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
+                 ACE_TEXT("bit %d local %C remote %C\n"),
+                 is_bit_,
+                 OPENDDS_STRING(writer_converter).c_str(),
+                 OPENDDS_STRING(reader_converter).c_str()));
+    }
 
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
       GuidConverter converter(remote_id);
@@ -1017,6 +1019,7 @@ DataWriterImpl::should_ack() const
 DataWriterImpl::AckToken
 DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::create_ack_token() - ")
@@ -1492,7 +1495,7 @@ DataWriterImpl::enable()
   typesupport->add_types(type_lookup_service);
   typesupport->populate_dependencies(type_lookup_service);
 
-  this->publication_id_ =
+  RepoId publication_id =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
@@ -1501,6 +1504,10 @@ DataWriterImpl::enable()
                            trans_conf_info,
                            pub_qos,
                            type_info);
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+  publication_id_ = publication_id;
+
   if (publication_id_ == GUID_UNKNOWN) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
@@ -1518,6 +1525,8 @@ DataWriterImpl::enable()
   }
 
   this->data_container_->publication_id_ = this->publication_id_;
+
+  guard.release();
 
   const DDS::ReturnCode_t writer_enabled_result =
     publisher->writer_enabled(topic_name_.in(), this);

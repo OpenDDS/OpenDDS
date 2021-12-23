@@ -123,7 +123,6 @@ public:
 
 #endif
 
-
 // Class to cleanup in case EndHistoricSamples is missed
 class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
 public:
@@ -152,7 +151,7 @@ private:
   public:
     CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
                 RcHandle<WriterInfo>& info)
-      : sweeper_ (sweeper)
+      : sweeper_(sweeper)
       , info_(info)
     { }
 
@@ -582,16 +581,7 @@ public:
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  const RepoId& get_repo_id() const
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
-    while (!has_subscription_id_ && !get_deleted()) {
-      subscription_id_condition_.wait();
-    }
-    return subscription_id_;
-  }
-
-  RepoId get_repo_id_copy() const
+  const RepoId get_repo_id() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
     while (!has_subscription_id_ && !get_deleted()) {

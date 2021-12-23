@@ -195,7 +195,7 @@ bool RecorderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-const RepoId& RecorderImpl::get_repo_id() const
+const RepoId RecorderImpl::get_repo_id() const
 {
   return this->subscription_id_;
 }
@@ -497,7 +497,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-      this->writers_[writer.writerId]->handle_ = handle;
+      this->writers_[writer.writerId]->handle(handle);
     }
   }
 
@@ -562,7 +562,7 @@ RecorderImpl::remove_publication(const PublicationId& pub_id)
     WriterInfo& info = *where->second;
     WriterIdSeq writers;
     push_back(writers, pub_id);
-    const bool notify = info.notify_lost_;
+    const bool notify = info.notify_lost();
     write_guard.release();
     remove_associations_i(writers, notify);
   }

@@ -98,7 +98,7 @@ Writer::svc ()
   int count = 0;
   Test::DataDataWriter_var dataWriter
     = Test::DataDataWriter::_narrow( this->writer_.in());
-  while( this->done_ == false) {
+  while( this->done_.value() == false) {
     Test::Data sample;
     sample.pid = this->index_;
     sample.seq = ++count;

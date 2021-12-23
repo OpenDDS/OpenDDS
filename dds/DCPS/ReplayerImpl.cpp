@@ -766,7 +766,7 @@ ReplayerImpl::check_transport_qos(const TransportInst&)
   return true;
 }
 
-const RepoId&
+const RepoId
 ReplayerImpl::get_repo_id() const
 {
   return this->publication_id_;

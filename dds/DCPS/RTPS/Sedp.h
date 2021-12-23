@@ -126,7 +126,7 @@ public:
     , flags_(flags)
   {}
 
-  const GUID_t& local_id() const
+  const GUID_t local_id() const
   {
     return transport_client_->get_repo_id();
   }
@@ -793,7 +793,7 @@ private:
       return true;
     }
 
-    const DCPS::RepoId& get_repo_id() const
+    const DCPS::RepoId get_repo_id() const
     {
       return repo_id_;
     }

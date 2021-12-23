@@ -127,7 +127,7 @@ public:
   bool remove_all_msgs();
 
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
-  virtual const RepoId& get_repo_id() const = 0;
+  virtual const RepoId get_repo_id() const = 0;
   virtual DDS::Subscriber_var get_builtin_subscriber() const { return DDS::Subscriber_var(); }
 
   void terminate_send_if_suspended();

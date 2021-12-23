@@ -31,7 +31,7 @@ struct Predicate {
   explicit Predicate(const PublicationId& writer_id) : writer_id_(writer_id) {}
   PublicationId writer_id_;
   bool operator() (const RcHandle<WriterInfo>& info) const {
-    return writer_id_ == info->writer_id_;
+    return writer_id_ == info->writer_id();
   }
 };
 
@@ -122,10 +122,7 @@ RemoveAssociationSweeper<T>::~RemoveAssociationSweeper()
 template <typename T>
 void RemoveAssociationSweeper<T>::schedule_timer(RcHandle<WriterInfo>& info, bool callback)
 {
-  info->scheduled_for_removal_ = true;
-  info->notify_lost_ = callback;
-  info->removal_deadline_ = MonotonicTimePoint(MonotonicTimePoint::now() +
-    std::min(info->activity_wait_period(), TimeDuration(10)));
+  info->set_scheduled_for_removal(callback, TimeDuration(10));
   execute_or_enqueue(make_rch<ScheduleCommand>(rchandle_from(this), info));
 }
 
@@ -133,8 +130,7 @@ template <typename T>
 ReactorInterceptor::CommandPtr
 RemoveAssociationSweeper<T>::cancel_timer(RcHandle<WriterInfo>& info)
 {
-  info->scheduled_for_removal_ = false;
-  info->removal_deadline_ = MonotonicTimePoint::zero_value;
+  info->unset_scheduled_for_removal();
   return execute_or_enqueue(make_rch<CancelCommand>(rchandle_from(this), info));
 }
 
@@ -192,8 +188,8 @@ int RemoveAssociationSweeper<T>::handle_timeout(
     return 0;
   }
 
-  info->remove_association_timer_ = WriterInfo::NO_TIMER;
-  const PublicationId pub_id = info->writer_id_;
+  info->clear_remove_association_timer();
+  const PublicationId pub_id = info->writer_id();
 
   RcHandle<T> reader = reader_.lock();
   if (!reader)
@@ -223,22 +219,14 @@ void RemoveAssociationSweeper<T>::ScheduleCommand::execute()
     return;
   }
 
-  RcHandle<WriterInfo>& info = this->info_;
+  CommandBase::info_->schedule_remove_association_timer(sweeper->reactor(), sweeper.in(), new TimerArg(sweeper, CommandBase::info_));
+  sweeper->info_set_.push_back(CommandBase::info_);
 
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(sweeper->mutex_);
-    sweeper->info_set_.push_back(info);
-  }
-
-  info->remove_association_timer_ =
-    sweeper->reactor()->schedule_timer(
-      sweeper.get(), new TimerArg(sweeper, info),
-      (info->removal_deadline_ - MonotonicTimePoint::now()).value());
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_INFO,
       ACE_TEXT("(%P|%t) RemoveAssociationSweeper::ScheduleCommand::execute() - ")
-      ACE_TEXT("Scheduled sweeper %d\n"),
-      info->remove_association_timer_));
+      ACE_TEXT("Scheduled sweeper %@\n"),
+      CommandBase::info_.in()));
   }
 }
 
@@ -250,20 +238,16 @@ void RemoveAssociationSweeper<T>::CancelCommand::execute()
     return;
   }
 
-  RcHandle<WriterInfo>& info = this->info_;
+  const void* arg = 0;
+  CommandBase::info_->cancel_remove_association_timer(sweeper->reactor(), sweeper.in(), &arg);
+  sweeper->remove_info(CommandBase::info_.in());
+  const TimerArg* ta = reinterpret_cast<const TimerArg*>(arg);
+  delete ta;
 
-  if (info->remove_association_timer_ != WriterInfo::NO_TIMER) {
-    const void *arg = 0;
-    sweeper->reactor()->cancel_timer(info->remove_association_timer_, &arg);
-    const TimerArg* ta = reinterpret_cast<const TimerArg*>(arg);
-    delete ta;
-    if (DCPS_debug_level) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - ")
-        ACE_TEXT("Unscheduled sweeper %d\n"),
-        info->remove_association_timer_));
-    }
-    info->remove_association_timer_ = WriterInfo::NO_TIMER;
-    sweeper->remove_info(info.in());
+  if (DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RemoveAssociationSweeper::CancelCommand::execute() - ")
+      ACE_TEXT("Unscheduled sweeper %@\n"),
+      CommandBase::info_.in()));
   }
 }
 //End RemoveAssociationSweeper

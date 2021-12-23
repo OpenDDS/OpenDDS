@@ -399,8 +399,8 @@ public:
   void notify_publication_lost(const ReaderIdSeq& subids);
 
   /// Statistics counter.
-  int         data_dropped_count_;
-  int         data_delivered_count_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_dropped_count_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_delivered_count_;
 
   MessageTracker controlTracker;
 
@@ -460,7 +460,7 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  const RepoId& get_repo_id() const {
+  const RepoId get_repo_id() const {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
     return publication_id_;
   }
