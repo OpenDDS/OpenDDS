@@ -1505,7 +1505,7 @@ DataWriterImpl::enable()
                            pub_qos,
                            type_info);
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   publication_id_ = publication_id;
 
   if (publication_id_ == GUID_UNKNOWN) {
