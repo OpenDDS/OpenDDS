@@ -2006,9 +2006,11 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     ACE_READ_GUARD(ACE_RW_Thread_Mutex,
         read_guard,
         data_reader->writers_lock_);
+    WriterMapType writers = data_reader->writers_;
+    read_guard.release();
 
-    for (WriterMapType::iterator iter = data_reader->writers_.begin();
-        iter != data_reader->writers_.end();
+    for (WriterMapType::iterator iter = writers.begin();
+        iter != writers.end();
         ++iter) {
       // deal with possibly not being alive or
       // tell when it will not be alive next (if no activity)
