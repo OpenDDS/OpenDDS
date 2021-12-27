@@ -461,12 +461,12 @@ public:
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   const RepoId get_repo_id() const {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
     return publication_id_;
   }
 
   SequenceNumber get_max_sn() const {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
     return sequence_number_;
   }
 

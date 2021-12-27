@@ -1826,10 +1826,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    DDS::RETCODE_ERROR);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
 
   // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
   GUIDSeq_var filter_out_var(filter_out);
@@ -1840,6 +1837,11 @@ DataWriterImpl::write(Message_Block_Ptr data,
                       ACE_TEXT("Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    dc_guard,
+                    get_lock(),
+                    DDS::RETCODE_ERROR);
 
   DataSampleElement* element = 0;
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
@@ -1905,6 +1907,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
     this->available_data_list_.enqueue_tail(list);
 
   } else {
+    dc_guard.release();
     guard.release();
     this->send(list, transaction_id);
   }
@@ -2443,6 +2446,8 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
   const MonotonicTimePoint now(tv);
   bool liveliness_lost = false;
 
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+
   TimeDuration elapsed = now - last_liveliness_activity_time_;
 
   // Do we need to send a liveliness message?
@@ -2501,7 +2506,11 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
       listener_for(DDS::LIVELINESS_LOST_STATUS);
 
     if (!CORBA::is_nil(listener.in())) {
-      listener->on_liveliness_lost(this, this->liveliness_lost_status_);
+      {
+        ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> rev_lock(lock_);
+        ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
+        listener->on_liveliness_lost(this, this->liveliness_lost_status_);
+      }
       this->liveliness_lost_status_.total_count_change = 0;
     }
   }

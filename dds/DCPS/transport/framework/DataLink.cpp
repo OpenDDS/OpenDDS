@@ -540,6 +540,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                 ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
                 ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
 
+      guard.release();
       impl_.release_datalink(this);
     }
   }
