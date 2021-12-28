@@ -9572,7 +9572,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        nice $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        nice -n 20 $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -9854,7 +9854,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        nice $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+        nice -n 20 $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
