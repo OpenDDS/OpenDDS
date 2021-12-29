@@ -284,7 +284,7 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     return;
   }
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
 
   if (DCPS_debug_level) {
     const GuidConverter writer_conv(publication_id_);
@@ -535,6 +535,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       this->controlTracker.message_sent();
       guard.release();
+      ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> rev_lock(lock_);
+      ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
       SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")

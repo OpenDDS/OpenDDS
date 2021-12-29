@@ -2870,7 +2870,12 @@ void DataReaderImpl::notify_liveliness_change()
   = listener_for(DDS::LIVELINESS_CHANGED_STATUS);
 
   if (!CORBA::is_nil(listener.in())) {
-    listener->on_liveliness_changed(this, liveliness_changed_status_);
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+      DDS::LivelinessChangedStatus status = liveliness_changed_status_;
+      guard.release();
+      listener->on_liveliness_changed(this, status);
+    }
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
