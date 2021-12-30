@@ -155,7 +155,13 @@ template <typename T>
 RcHandle<WriterInfo> RemoveAssociationSweeper<T>::remove_info(WriterInfo* info)
 {
   RcHandle<WriterInfo> result;
+
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+  if (info_set_.empty()) {
+    return result;
+  }
+
   OPENDDS_VECTOR(RcHandle<WriterInfo>)::iterator itr, last = --info_set_.end();
   // find the RcHandle holds the pointer info in info_set_
   // and then swap the found element with the last element in the
