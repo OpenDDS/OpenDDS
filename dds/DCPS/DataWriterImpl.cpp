@@ -2816,10 +2816,15 @@ void DataWriterImpl::transport_discovery_change()
 {
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   const RepoId dp_id_copy = dp_id_;
   const RepoId publication_id_copy = publication_id_;
-  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-  disco->update_publication_locators(domain_id_,
+  const int domain_id = domain_id_;
+  guard.release();
+
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
+  disco->update_publication_locators(domain_id,
                                      dp_id_copy,
                                      publication_id_copy,
                                      trans_conf_info);
