@@ -539,7 +539,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
       SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
-        ACE_ERROR((LM_WARING, ACE_TEXT("(%P|%t) WARNING: ")
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
                              ACE_TEXT("send_w_control failed.\n")));
         this->controlTracker.message_dropped();
