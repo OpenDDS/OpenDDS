@@ -11,6 +11,7 @@ race_top:^ACE_Thread_Exit::instance
 race_top:^ACE_Thread_Manager::wait_task
 race_top:^ACE_TSS<*>::ts_get
 race_top:^ACE_TSS_Singleton<*>::instance
+race:^ACE_Log_Msg::default_priority_mask_$
 
 race_top:^TAO_Leader_Follower::wait_for_event
 race_top:^TAO_ORB_Core::*shutdown
