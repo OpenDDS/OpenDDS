@@ -66,7 +66,8 @@ plugin_reg_handoff()
 }
 
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 5, 0)
-extern "C" dissector_Export void plugin_register() {
+extern "C" dissector_Export void plugin_register()
+{
   static proto_plugin opendds_plugin;
   opendds_plugin.register_protoinfo = register_opendds;
   opendds_plugin.register_handoff = reg_handoff_opendds;
