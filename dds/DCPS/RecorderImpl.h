@@ -21,6 +21,8 @@
 #include "transport/framework/TransportReceiveListener.h"
 #include "transport/framework/TransportClient.h"
 
+#include <dds/DCPS/DCPS_Utils.h>
+
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>
 #include <dds/DdsDcpsDomainC.h>

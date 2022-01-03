@@ -975,6 +975,16 @@ RecorderImpl::enable()
     Discovery_rch disco =
       TheServiceParticipant->get_discovery(this->domain_id_);
 
+    DCPS::set_reader_effective_data_rep_qos(this->qos_.representation.value);
+    if (!topic_servant_->check_data_representation(this->qos_.representation.value, false)) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::enable: "
+          "none of the data representation QoS is allowed by the "
+          "topic type IDL annotations\n"));
+      }
+      return DDS::RETCODE_ERROR;
+    }
+
     if (DCPS_debug_level >= 2) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::enable: add_subscription\n"));
     }

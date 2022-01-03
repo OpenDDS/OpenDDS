@@ -360,6 +360,15 @@ ReplayerImpl::enable()
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
 
+  set_writer_effective_data_rep_qos(qos_.representation.value, cdr_encapsulation());
+  if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReplayerImpl::enable: "
+        "none of the data representation QoS is allowed by the "
+        "topic type IDL annotations\n"));
+    }
+    return DDS::RETCODE_ERROR;
+  }
 
   XTypes::TypeInformation type_info;
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;

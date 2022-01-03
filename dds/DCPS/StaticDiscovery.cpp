@@ -2709,7 +2709,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datareaderqos.user_data.value[0] = entity_id.entityKey[0];
       datareaderqos.user_data.value[1] = entity_id.entityKey[1];
       datareaderqos.user_data.value[2] = entity_id.entityKey[2];
-
+      set_reader_effective_data_rep_qos(datareaderqos.representation.value);
       if (!registry.reader_map.insert(std::make_pair(id,
             EndpointRegistry::Reader(topic_name, datareaderqos, subscriberqos, config_name, trans_info))).second) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -2725,6 +2725,14 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datawriterqos.user_data.value[0] = entity_id.entityKey[0];
       datawriterqos.user_data.value[1] = entity_id.entityKey[1];
       datawriterqos.user_data.value[2] = entity_id.entityKey[2];
+      bool encapsulated_only = false;
+      for (CORBA::ULong i = 0; i < trans_info.length(); ++i) {
+        if (0 == std::strcmp(trans_info[i].transport_type, "rtps_udp")) {
+          encapsulated_only = true;
+          break;
+        }
+      }
+      set_writer_effective_data_rep_qos(datawriterqos.representation.value, encapsulated_only);
 
       if (!registry.writer_map.insert(std::make_pair(id,
             EndpointRegistry::Writer(topic_name, datawriterqos, publisherqos, config_name, trans_info))).second) {

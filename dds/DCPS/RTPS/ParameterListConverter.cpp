@@ -829,7 +829,7 @@ void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataReprese
 {
   DDS::DataRepresentationQosPolicy dr_qos;
   dr_qos.value = ids;
-
+  DCPS::set_reader_effective_data_rep_qos(dr_qos.value);
   if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
     Parameter param;
     param.representation(dr_qos);

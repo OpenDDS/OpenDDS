@@ -876,13 +876,15 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
-  if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+  DDS::DataReaderQos new_qos = qos;
+  new_qos.representation.value = qos_.representation.value;
+  if (Qos_Helper::valid(new_qos) && Qos_Helper::consistent(new_qos)) {
 
-    if (qos_ == qos)
+    if (qos_ == new_qos)
       return DDS::RETCODE_OK;
 
     if (enabled_ == true) {
-      if (!Qos_Helper::changeable(qos_, qos)) {
+      if (!Qos_Helper::changeable(qos_, new_qos)) {
         return DDS::RETCODE_IMMUTABLE_POLICY;
 
       } else {
@@ -898,7 +900,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
               domain_id_,
               dp_id_,
               subscription_id_,
-              qos,
+              new_qos,
               subscriberQos);
         }
         if (!status) {
@@ -910,8 +912,8 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
       }
     }
 
-    qos_change(qos);
-    qos_ = qos;
+    qos_change(new_qos);
+    qos_ = new_qos;
 
     const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
     if (observer) {
@@ -1208,10 +1210,10 @@ DataReaderImpl::enable()
   if (topic_servant_) {
     set_reader_effective_data_rep_qos(qos_.representation.value);
     if (!topic_servant_->check_data_representation(qos_.representation.value, false)) {
-      if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
-          ACE_TEXT("none of the data representation QoS is allowed by the ")
-          ACE_TEXT("topic type IDL annotations\n")));
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderImpl::enable: "
+          "none of the data representation QoS is allowed by the "
+          "topic type IDL annotations\n"));
       }
       return DDS::RETCODE_ERROR;
     }
