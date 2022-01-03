@@ -99,6 +99,7 @@ public:
   bool to_bitmap(ACE_CDR::Long bitmap[],
                  ACE_CDR::ULong length,
                  ACE_CDR::ULong& num_bits,
+                 ACE_CDR::ULong& cumulative_bits_added,
                  bool invert = false) const;
 
   /// Returns missing ranges of SequenceNumbers (internal gaps in the sequence)
@@ -284,7 +285,7 @@ public:
   /// Set the bits in range [low, high] in the bitmap, updating num_bits.
   static bool fill_bitmap_range(ACE_CDR::ULong low, ACE_CDR::ULong high,
                                 ACE_CDR::Long bitmap[], ACE_CDR::ULong length,
-                                ACE_CDR::ULong& num_bits);
+                                ACE_CDR::ULong& num_bits, ACE_CDR::ULong& cumulative_bits_added);
 
   /// Return the number of CORBA::Longs required for the bitmap representation of
   /// sequence numbers between low and high, inclusive (maximum 8 longs).

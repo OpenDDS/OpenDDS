@@ -115,9 +115,9 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_getInstance(JNIEnv *jni,
 
 // TheServiceParticipant
 
-void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown(JNIEnv *, jclass)
+jint JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown(JNIEnv *, jclass)
 {
-  TheServiceParticipant->shutdown();
+  return TheServiceParticipant->shutdown();
 }
 
 jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_domain_1to_1repo

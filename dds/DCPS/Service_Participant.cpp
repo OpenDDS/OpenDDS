@@ -170,60 +170,87 @@ static bool got_log_level = false;
 Service_Participant::Service_Participant()
   :
 #ifndef OPENDDS_SAFETY_PROFILE
-    ORB_argv_(false /*substitute_env_args*/),
+  ORB_argv_(false /*substitute_env_args*/),
 #endif
-    time_source_(),
-    reactor_task_(false),
-    defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
-    n_chunks_(DEFAULT_NUM_CHUNKS),
-    association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
-    liveliness_factor_(80),
-    bit_transport_port_(0),
-    bit_enabled_(
+  time_source_()
+  , reactor_task_(false)
+  , defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD)
+  , n_chunks_(DEFAULT_NUM_CHUNKS)
+  , association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER)
+  , liveliness_factor_(80)
+  , bit_transport_port_(0)
+  , bit_enabled_(
 #ifdef DDS_HAS_MINIMUM_BIT
       false
 #else
       true
 #endif
-    ),
-#if defined(OPENDDS_SECURITY)
-    security_enabled_(false),
+    )
+#ifdef OPENDDS_SECURITY
+  , security_enabled_(false)
 #endif
-    bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
-    global_transport_config_(ACE_TEXT("")),
-    monitor_factory_(0),
-    federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
-    federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
-    federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
-    federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
+  , bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC)
+  , global_transport_config_(ACE_TEXT(""))
+  , monitor_factory_(0)
+  , federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION)
+  , federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS)
+  , federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER)
+  , federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS)
 #if OPENDDS_POOL_ALLOCATOR
-    pool_size_(1024*1024*16),
-    pool_granularity_(8),
+  , pool_size_(1024 * 1024 * 16)
+  , pool_granularity_(8)
 #endif
-    scheduler_(-1),
-    priority_min_(0),
-    priority_max_(0),
-    publisher_content_filter_(true),
+  , scheduler_(-1)
+  , priority_min_(0)
+  , priority_max_(0)
+  , publisher_content_filter_(true)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
+  , persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR)
 #endif
-    bidir_giop_(true),
-    monitor_enabled_(false),
-    shut_down_(false),
-    shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT("")),
-    type_object_encoding_(Encoding_Normal)
+  , bidir_giop_(true)
+  , monitor_enabled_(false)
+  , shut_down_(false)
+  , default_configuration_file_(ACE_TEXT(""))
+  , type_object_encoding_(Encoding_Normal)
 {
   initialize();
 }
 
 Service_Participant::~Service_Participant()
 {
-  shutdown();
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::~Service_Participant\n"));
+  }
 
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Service_Participant::~Service_Participant()\n"));
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, factory_lock_);
+    if (dp_factory_servant_) {
+      const size_t count = dp_factory_servant_->participant_count();
+      if (count > 0 && log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+          "There are %B remaining domain participant(s). "
+          "It is recommented to delete them before shutdown.\n",
+          count));
+      }
+
+      const DDS::ReturnCode_t cleanup_status = dp_factory_servant_->delete_all_participants();
+      if (cleanup_status) {
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+            "delete_all_participants returned %C\n",
+            retcode_to_string(cleanup_status)));
+        }
+      }
+    }
+  }
+
+  const DDS::ReturnCode_t shutdown_status = shutdown();
+  if (shutdown_status != DDS::RETCODE_OK && shutdown_status != DDS::RETCODE_ALREADY_DELETED) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+        "shutdown returned %C\n",
+        retcode_to_string(shutdown_status)));
+    }
   }
 }
 
@@ -272,32 +299,50 @@ Service_Participant::job_queue() const
   return job_queue_;
 }
 
-void
-Service_Participant::shutdown()
+DDS::ReturnCode_t Service_Participant::shutdown()
 {
-  // When we are already shutdown just let the shutdown be a noop
   if (shut_down_) {
-    return;
+    return DDS::RETCODE_ALREADY_DELETED;
+  }
+
+  if (monitor_factory_) {
+    monitor_factory_->deinitialize();
+    monitor_factory_ = 0;
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+    if (dp_factory_servant_) {
+      const size_t count = dp_factory_servant_->participant_count();
+      if (count > 0) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
+            "there are %B domain participant(s) that must be deleted before shutdown can occur\n",
+            count));
+        }
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+    }
   }
 
   if (shutdown_listener_) {
     shutdown_listener_->notify_shutdown();
   }
 
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
     {
-      ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
 
-      if (dp_factory_servant_)
-        dp_factory_servant_->cleanup();
       dp_factory_servant_.reset();
 
       domainRepoMap_.clear();
 
       {
-        ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_,
+          DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();
           network_config_monitor_.reset();
@@ -310,21 +355,25 @@ Service_Participant::shutdown()
 
       discoveryMap_.clear();
 
-  #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       transient_data_cache_.reset();
       persistent_data_cache_.reset();
-  #endif
+#endif
 
       discovery_types_.clear();
-      monitor_factory_ = 0;
     }
     TransportRegistry::close();
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     OpenDDS::Security::SecurityRegistry::close();
 #endif
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception("ERROR: Service_Participant::shutdown");
+    if (log_level >= LogLevel::Error) {
+      ex._tao_print_exception("ERROR: Service_Participant::shutdown");
+    }
+    rc = DDS::RETCODE_ERROR;
   }
+
+  return rc;
 }
 
 #ifdef ACE_USES_WCHAR
@@ -343,10 +392,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
                                                     ACE_TCHAR *argv[])
 {
   if (!dp_factory_servant_) {
-    ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                     guard,
-                     this->factory_lock_,
-                     DDS::DomainParticipantFactory::_nil());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
     shut_down_ = false;
     if (!dp_factory_servant_) {
@@ -2688,10 +2734,7 @@ Service_Participant::get_data_durability_cache(
 
   if (kind == DDS::TRANSIENT_DURABILITY_QOS) {
     {
-      ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                       guard,
-                       this->factory_lock_,
-                       0);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
       if (!this->transient_data_cache_) {
         this->transient_data_cache_.reset(new DataDurabilityCache(kind));
@@ -2702,10 +2745,7 @@ Service_Participant::get_data_durability_cache(
 
   } else if (kind == DDS::PERSISTENT_DURABILITY_QOS) {
     {
-      ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                       guard,
-                       this->factory_lock_,
-                       0);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
       try {
         if (!this->persistent_data_cache_) {
@@ -2742,7 +2782,7 @@ Service_Participant::add_discovery(Discovery_rch discovery)
 }
 
 void
-Service_Participant::set_shutdown_listener(ShutdownListener* listener)
+Service_Participant::set_shutdown_listener(RcHandle<ShutdownListener> listener)
 {
   shutdown_listener_ = listener;
 }
@@ -2928,6 +2968,36 @@ void
 Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
 {
   bit_autopurge_disposed_samples_delay_ = duration;
+}
+
+XTypes::TypeInformation
+Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant,
+                                          const DDS::BuiltinTopicKey_t& key) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_info(key);
+    }
+  }
+
+  return XTypes::TypeInformation();
+}
+
+XTypes::TypeObject
+Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_object(ti);
+    }
+  }
+
+  return XTypes::TypeObject();
 }
 
 void

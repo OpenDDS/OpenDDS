@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -35,9 +33,9 @@
 
 #include <memory>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -50,7 +48,7 @@ class DataDurabilityCache;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
-class ShutdownListener {
+class ShutdownListener : public virtual RcObject {
 public:
   virtual ~ShutdownListener() {}
   virtual void notify_shutdown() = 0;
@@ -94,7 +92,7 @@ public:
 
   JobQueue_rch job_queue() const;
 
-  void set_shutdown_listener(ShutdownListener* listener);
+  void set_shutdown_listener(RcHandle<ShutdownListener> listener);
 
   /**
    * Initialize the DDS client environment and get the
@@ -114,10 +112,14 @@ public:
   /**
    * Stop being a participant in the service.
    *
-   * @note Required Precondition: all DomainParticipants have been
-   *       deleted.
+   * @note
+   * All Domain Participants have to be deleted before calling or
+   * DDS::RETCODE_PRECONDITION_NOT_MET is returned.
+   *
+   * If the Service Participant has already been shutdown then
+   * DDS::RETCODE_ALREADY_DELETED will be returned.
    */
-  void shutdown();
+  DDS::ReturnCode_t shutdown();
 
   /// Accessor for if the participant has been shutdown
   bool is_shut_down() const;
@@ -440,6 +442,18 @@ public:
   DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
   void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
+  /**
+   * Get TypeInformation of a remote entity given the corresponding BuiltinTopicKey_t.
+   */
+  XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
+                                               const DDS::BuiltinTopicKey_t& key) const;
+
+  /**
+   * Get TypeObject for a given TypeIdentifier.
+   */
+  XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const;
+
   enum TypeObjectEncoding { Encoding_Normal, Encoding_WriteOldFormat, Encoding_ReadOldFormat };
   TypeObjectEncoding type_object_encoding() const;
   void type_object_encoding(TypeObjectEncoding encoding);
@@ -538,7 +552,7 @@ private:
 
   /// The lock to serialize DomainParticipantFactory singleton
   /// creation and shutdown.
-  TAO_SYNCH_MUTEX      factory_lock_;
+  ACE_Thread_Mutex factory_lock_;
 
   /// The initial values of qos policies.
   DDS::UserDataQosPolicy              initial_UserDataQosPolicy_;
@@ -745,7 +759,7 @@ private:
   /// Used to track state of service participant
   bool shut_down_;
 
-  ShutdownListener* shutdown_listener_;
+  RcHandle<ShutdownListener> shutdown_listener_;
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;

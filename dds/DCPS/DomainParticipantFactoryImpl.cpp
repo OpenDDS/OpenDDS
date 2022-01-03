@@ -1,11 +1,10 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "DomainParticipantFactoryImpl.h"
 
 #include "DomainParticipantImpl.h"
@@ -14,7 +13,7 @@
 #include "Service_Participant.h"
 #include "Qos_Helper.h"
 #include "Util.h"
-
+#include "DCPS_Utils.h"
 #include "transport/framework/TransportRegistry.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -87,8 +86,8 @@ DomainParticipantFactoryImpl::create_participant(
     }
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-                   tao_mon,
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
@@ -151,23 +150,19 @@ DomainParticipantFactoryImpl::delete_participant(
   RcHandle<DomainParticipantImpl> servant_rch = rchandle_from(the_servant);
 
   TransportConfig_rch tr_cfg = servant_rch->transport_config();
-
   if (tr_cfg) {
     // check for and remove tranport template instance
-    OPENDDS_STRING dyn_cfg_name = tr_cfg->name();
-    TheTransportRegistry->remove_transport_template_instance(dyn_cfg_name);
+    TheTransportRegistry->remove_transport_template_instance(tr_cfg->name());
   }
 
   //xxx servant rc = 4 (servant::DP::Entity::ServantBase::ref_count_
-  if (!the_servant->is_clean()) {
-    const RepoId id = the_servant->get_id();
-    GuidConverter converter(id);
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG, // not an ERROR, tests may be doing this on purpose
-                ACE_TEXT("(%P|%t) WARNING: ")
-                ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")
-                ACE_TEXT("the participant %C is not empty.\n"),
-                OPENDDS_STRING(converter).c_str()));
+  String leftover_entities;
+  if (!the_servant->is_clean(&leftover_entities)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: "
+                "DomainParticipantFactoryImpl::delete_participant: "
+                "the participant %C is not empty. %C leftover\n",
+                LogGuid(the_servant->get_id()).c_str(), leftover_entities.c_str()));
     }
     return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
@@ -175,14 +170,13 @@ DomainParticipantFactoryImpl::delete_participant(
   const DDS::DomainId_t domain_id = the_servant->get_domain_id();
   const RepoId dp_id = the_servant->get_id();
 
-  DPSet* entry = 0;
-
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex,
-                     tao_mon,
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
                      participants_protector_,
                      DDS::RETCODE_ERROR);
 
+    DPSet* entry = 0;
     if (find(participants_, domain_id, entry) == -1) {
       if (DCPS_debug_level > 0) {
         GuidConverter converter(dp_id);
@@ -245,8 +239,8 @@ DDS::DomainParticipant_ptr
 DomainParticipantFactoryImpl::lookup_participant(
   DDS::DomainId_t domainId)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-                   tao_mon,
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
                    participants_protector_,
                    DDS::DomainParticipant::_nil());
 
@@ -325,28 +319,68 @@ DomainParticipantFactoryImpl::get_qos(
 DomainParticipantFactoryImpl::DPMap
 DomainParticipantFactoryImpl::participants() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex,
-                   tao_mon,
-                   participants_protector_,
-                   DomainParticipantFactoryImpl::DPMap());
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, participants_protector_, DPMap());
 
   return participants_;
 }
 
-void DomainParticipantFactoryImpl::cleanup()
+DDS::ReturnCode_t DomainParticipantFactoryImpl::delete_all_participants()
 {
-  ACE_GUARD(ACE_Thread_Mutex,
-            tao_mon,
-            participants_protector_);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, participants_protector_,
+    DDS::RETCODE_OUT_OF_RESOURCES);
 
+  /*
+   * Create a copy of the participants because we need to run
+   * delete_participants on them, but delete_participants removes them from the
+   * object's map.
+   */
+  DPMap copy = participants();
+
+  DDS::ReturnCode_t rv = DDS::RETCODE_OK;
   DPMap::iterator itr;
-  for (itr = participants_.begin(); itr != participants_.end(); ++itr) {
+  for (itr = copy.begin(); itr != copy.end(); ++itr) {
     DPSet& dp_set = itr->second;
     DPSet::iterator dp_set_itr;
     for (dp_set_itr = dp_set.begin(); dp_set_itr != dp_set.end(); ++dp_set_itr) {
-      (*dp_set_itr)->delete_contained_entities();
+      DomainParticipantImpl* const dp = &**dp_set_itr;
+      DDS::ReturnCode_t tmp = dp->delete_contained_entities();
+      if (tmp) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: "
+            "DomainParticipantFactoryImpl::delete_all_participants: "
+            "delete_contained_entities returned %C\n",
+            retcode_to_string(tmp)));
+        }
+        rv = DDS::RETCODE_ERROR;
+      }
+
+      tmp = delete_participant(dp);
+      if (tmp) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: "
+            "DomainParticipantFactoryImpl::delete_all_participants: "
+            "delete_participant returned %C\n",
+            retcode_to_string(tmp)));
+        }
+        rv = DDS::RETCODE_ERROR;
+      }
     }
   }
+
+  // Remove Empty Domain Id Sets
+  participants_.clear();
+
+  return rv;
+}
+
+size_t DomainParticipantFactoryImpl::participant_count() const
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, participants_protector_, 0);
+  size_t count = 0;
+  for (DPMap::const_iterator it = participants_.begin(); it != participants_.end(); ++it) {
+    count += it->second.size();
+  }
+  return count;
 }
 
 } // namespace DCPS

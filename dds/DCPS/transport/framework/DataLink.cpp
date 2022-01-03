@@ -212,9 +212,11 @@ DataLink::invoke_on_start_callbacks(bool success)
     }
 
     guard.release();
-    TransportClient_rch client_lock = client.lock();
-    if (client_lock) {
-      client_lock->use_datalink(remote, link);
+    if (success) {
+      TransportClient_rch client_lock = client.lock();
+      if (client_lock) {
+        client_lock->use_datalink(remote, link);
+      }
     }
   }
 }
@@ -246,9 +248,11 @@ DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, b
     }
   }
 
-  TransportClient_rch client_lock = client.lock();
-  if (client_lock) {
-    client_lock->use_datalink(remote, link);
+  if (success) {
+    TransportClient_rch client_lock = client.lock();
+    if (client_lock) {
+      client_lock->use_datalink(remote, link);
+    }
   }
 }
 
@@ -325,21 +329,21 @@ DataLink::notify_reactor()
 void
 DataLink::stop()
 {
-  this->pre_stop_i();
+  pre_stop_i();
 
   TransportSendStrategy_rch send_strategy;
   TransportStrategy_rch recv_strategy;
 
   {
-    GuardType guard(this->strategy_lock_);
+    GuardType guard(strategy_lock_);
 
-    if (this->stopped_) return;
+    if (stopped_) return;
 
-    send_strategy = this->send_strategy_;
-    this->send_strategy_.reset();
+    send_strategy = send_strategy_;
+    send_strategy_.reset();
 
-    recv_strategy = this->receive_strategy_;
-    this->receive_strategy_.reset();
+    recv_strategy = receive_strategy_;
+    receive_strategy_.reset();
   }
 
   if (!send_strategy.is_nil()) {
@@ -350,16 +354,19 @@ DataLink::stop()
     recv_strategy->stop();
   }
 
-  this->stop_i();
-  this->stopped_ = true;
+  stop_i();
+  stopped_ = true;
   scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
 }
 
 void
 DataLink::resume_send()
 {
-  if (!this->send_strategy_->isDirectMode())
-    this->send_strategy_->resume_send();
+  TransportSendStrategy_rch strategy = get_send_strategy();
+
+  if (strategy && strategy->isDirectMode()) {
+    strategy->resume_send();
+  }
 }
 
 int
@@ -380,13 +387,12 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
                OPENDDS_STRING(remote).c_str()));
   }
 
-  {
-    GuardType guard(strategy_lock_);
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
-    if (!send_strategy_.is_nil()) {
-      send_strategy_->link_released(false);
-    }
+  if (strategy) {
+    strategy->link_released(false);
   }
+
   {
     GuardType guard(pub_sub_maps_lock_);
 
@@ -421,13 +427,12 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
                OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
   }
 
-  {
-    GuardType guard(strategy_lock_);
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
-    if (!send_strategy_.is_nil()) {
-      send_strategy_->link_released(false);
-    }
+  if (strategy) {
+    strategy->link_released(false);
   }
+
   {
     GuardType guard(pub_sub_maps_lock_);
 
@@ -551,12 +556,14 @@ DataLink::schedule_delayed_release()
   // The samples have to be removed at this point, otherwise the samples
   // can not be delivered when new association is added and still use
   // this connection/datalink.
-  if (!this->send_strategy_.is_nil()) {
-    this->send_strategy_->clear(TransportSendStrategy::MODE_DIRECT);
+  TransportSendStrategy_rch strategy = get_send_strategy();
+
+  if (strategy) {
+    strategy->clear(TransportSendStrategy::MODE_DIRECT);
   }
 
   const MonotonicTimePoint future_release_time(MonotonicTimePoint::now() + datalink_release_delay_);
-  this->schedule_stop(future_release_time);
+  schedule_stop(future_release_time);
 }
 
 bool
@@ -1221,8 +1228,11 @@ operator<<(std::ostream& str, const DataLink& value)
 void
 DataLink::terminate_send_if_suspended()
 {
-  if (send_strategy_)
-    send_strategy_->terminate_send_if_suspended();
+  TransportSendStrategy_rch strategy = get_send_strategy();
+
+  if (strategy) {
+    strategy->terminate_send_if_suspended();
+  }
 }
 
 }

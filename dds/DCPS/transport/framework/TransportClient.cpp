@@ -17,6 +17,7 @@
 #include <dds/DCPS/SendStateDataSampleList.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/RTPS/ICE/Ice.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 
@@ -199,9 +200,11 @@ TransportClient::populate_connection_info()
 bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
+  RepoId repo_id = get_repo_id();
+
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
-  repo_id_ = get_repo_id();
+  repo_id_ = repo_id;
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
@@ -821,25 +824,25 @@ TransportClient::update_locators(const RepoId& remote,
   }
 }
 
-ICE::Endpoint*
+WeakRcHandle<ICE::Endpoint>
 TransportClient::get_ice_endpoint()
 {
   // The one-to-many relationship with impls implies that this should
   // return a set of endpoints instead of a single endpoint or null.
   // For now, we will assume a single impl.
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, WeakRcHandle<ICE::Endpoint>());
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
     RcHandle<TransportImpl> impl = pos->lock();
     if (impl) {
-      ICE::Endpoint* endpoint = impl->get_ice_endpoint();
+      WeakRcHandle<ICE::Endpoint> endpoint = impl->get_ice_endpoint();
       if (endpoint) { return endpoint; }
     }
   }
 
-  return 0;
+  return WeakRcHandle<ICE::Endpoint>();
 }
 
 bool
@@ -1127,13 +1130,17 @@ bool TransportClient::pending_association_with(const GUID_t& remote) const
 
 void TransportClient::data_acked(const GUID_t& remote)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-  if (!guard.locked()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
-      "lock failed\n"));
-    return;
+  TransportSendListener_rch send_listener;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+    if (!guard.locked()) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
+        "lock failed\n"));
+      return;
+    }
+    send_listener = get_send_listener();
   }
-  get_send_listener()->data_acked(remote);
+  send_listener->data_acked(remote);
 }
 
 bool TransportClient::is_leading(const GUID_t& reader_id) const

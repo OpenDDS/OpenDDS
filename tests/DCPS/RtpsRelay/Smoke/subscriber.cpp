@@ -8,13 +8,15 @@
 #include "MessengerTypeSupportImpl.h"
 #include "../../common/ConnectionRecordLogger.h"
 
+#include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-#include <dds/DCPS/transport/framework/TransportConfig.h>
-#include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
+
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -25,8 +27,6 @@
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
-
-#include <dds/DdsDcpsInfrastructureC.h>
 
 #include <iostream>
 
@@ -53,6 +53,8 @@ bool expect_unmatch = false;
 bool reliable = false;
 bool wait_for_acks = false;
 
+const char USER_DATA[] = "The Subscriber";
+
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -67,8 +69,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       return status;
     }
 
+    OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> transport_inst = TheTransportRegistry->get_inst("sub_rtps");
+    if (transport_inst) {
+      transport_inst->count_messages(true);
+    }
+
     DDS::DomainParticipantQos part_qos;
     dpf->get_default_participant_qos(part_qos);
+    part_qos.user_data.value.length(static_cast<unsigned int>(std::strlen(USER_DATA)));
+    std::memcpy(part_qos.user_data.value.get_buffer(), USER_DATA, std::strlen(USER_DATA));
 
 #if defined(OPENDDS_SECURITY)
     if (TheServiceParticipant->get_security()) {
@@ -94,6 +103,14 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT("%N:%l main()")
                         ACE_TEXT(" ERROR: create_participant() failed!\n")), 1);
     }
+
+      OpenDDS::DCPS::DomainParticipantImpl* dp_impl =
+        dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+
+      OpenDDS::DCPS::RcHandle<OpenDDS::RTPS::RtpsDiscovery> disc = OpenDDS::DCPS::static_rchandle_cast<OpenDDS::RTPS::RtpsDiscovery>(TheServiceParticipant->get_discovery(42));
+      const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
+      OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
+      discovery_inst->count_messages(true);
 
     OpenDDS::Test::install_connection_record_logger(participant);
 
@@ -201,6 +218,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     status = listener_servant->is_valid(check_lease_recovery, expect_unmatch) ? EXIT_SUCCESS : EXIT_FAILURE;
 
     ws->detach_condition(condition);
+
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+    std::cout << "Subscriber Guid: " << OpenDDS::DCPS::LogGuid(guid).c_str() << std::endl;
+    OpenDDS::DCPS::TransportStatisticsSequence stats;
+    disc->append_transport_statistics(42, guid, stats);
+    if (transport_inst) {
+      transport_inst->append_transport_statistics(stats);
+    }
+
+    for (unsigned int i = 0; i != stats.length(); ++i) {
+      std::cout << "Subscriber Transport Statistics: " << OpenDDS::DCPS::to_json(stats[i]) << std::endl;
+    }
+#endif
 
     // Clean-up!
     participant->delete_contained_entities();

@@ -52,7 +52,7 @@ public:
 private:
   typedef typename OpenDDS::DCPS::DDSTraits<Type> Traits;
   typedef typename Traits::TypeSupportType::_var_type TypeSupportVar;
-  typedef typename Traits::TypeSupportTypeImpl TypeSupportImpl;
+  typedef typename Traits::TypeSupportImplType TypeSupportImpl;
   TypeSupportVar type_support_;
   DDS::DomainParticipant* participant_;
 };

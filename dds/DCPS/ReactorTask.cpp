@@ -8,10 +8,10 @@
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "ReactorTask.h"
-
 #if !defined (__ACE_INLINE__)
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
+#include "ThreadMonitor.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -265,6 +265,21 @@ const char* ThreadStatusManager::status_to_string(ThreadStatus status)
   }
 }
 
+bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
+{
+  const SystemTimePoint now = SystemTimePoint::now();
+  ThreadStatus status = ThreadStatus_Running;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  Map::iterator it = map_.find(thread_key);
+  if (it != map_.end()) {
+    it->second.timestamp = now;
+    it->second.utilization = pbusy;
+  } else {
+    map_[thread_key] = Thread(now, status, pbusy);
+  }
+  return true;
+}
+
 bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
@@ -291,7 +306,10 @@ bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
     break;
 
   default:
-    map_[thread_key] = Thread(now, status);
+    if (map_.find(thread_key) == map_.end() && ThreadMonitor::installed_monitor_) {
+      ThreadMonitor::installed_monitor_->preset(this, thread_key.c_str());
+    }
+    map_[thread_key] = Thread(now, status, 0.0);
   }
 
   return true;

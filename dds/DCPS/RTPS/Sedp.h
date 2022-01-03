@@ -570,13 +570,14 @@ public:
 
   bool send_type_lookup_request(const XTypes::TypeIdentifierSeq& type_ids,
                                 const DCPS::RepoId& reader,
-                                bool is_discovery_protected, bool send_get_types);
+                                bool is_discovery_protected, bool send_get_types,
+                                const SequenceNumber& seq_num);
 
 #ifdef OPENDDS_SECURITY
   void signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind);
 #endif
 
-  ICE::Endpoint* get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   void rtps_relay_only_now(bool f);
   void use_rtps_relay_now(bool f);
@@ -588,7 +589,7 @@ public:
 
   DCPS::JobQueue_rch job_queue() const { return job_queue_; }
 
-  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& counts);
+  void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
   void ignore(const GUID_t& to_ignore);
 
@@ -655,7 +656,7 @@ public:
     type_lookup_service_ = type_lookup_service;
   }
 
-  bool should_drop(ssize_t length) const;
+  RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
@@ -912,7 +913,7 @@ private:
     typedef OPENDDS_MAP(GUID_t, PerReaderDeferredSamples) DeferredSamples;
     DeferredSamples deferred_samples_;
 
-    void send_sample(const ACE_Message_Block& data,
+    void send_sample(DCPS::Message_Block_Ptr payload,
                      size_t size,
                      const DCPS::RepoId& reader,
                      DCPS::SequenceNumber& sequence,
@@ -1369,17 +1370,17 @@ private:
 
 
   DDS::ReturnCode_t write_subscription_data(const DCPS::RepoId& rid,
-                                            LocalSubscription& pub,
+                                            LocalSubscription& sub,
                                             const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::RepoId& rid,
-                                                   LocalSubscription& pub,
+                                                   LocalSubscription& sub,
                                                    const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 #endif
 
   DDS::ReturnCode_t write_subscription_data_unsecure(const DCPS::RepoId& rid,
-                                                     LocalSubscription& pub,
+                                                     LocalSubscription& sub,
                                                      const DCPS::RepoId& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_participant_message_data(const DCPS::RepoId& rid,
@@ -1518,9 +1519,23 @@ protected:
   void remove_assoc(const GUID_t& remove_from, const GUID_t& removing);
 
   struct MatchingData {
-    GUID_t writer;
-    GUID_t reader;
-    SequenceNumber rpc_sequence_number;
+    MatchingData()
+      : got_minimal(false), got_complete(false)
+    {}
+
+    /// Sequence number of the first request for remote minimal types.
+    SequenceNumber rpc_seqnum_minimal;
+
+    /// Whether all minimal types are obtained.
+    bool got_minimal;
+
+    /// Sequence number of the first request for remote complete types.
+    /// Set to SEQUENCENUMBER_UNKNOWN if there is no such request.
+    SequenceNumber rpc_seqnum_complete;
+
+    /// Whether all complete types are obtained.
+    bool got_complete;
+
     MonotonicTimePoint time_added_to_map;
   };
 
@@ -1552,19 +1567,22 @@ protected:
 
   void match(const GUID_t& writer, const GUID_t& reader);
 
+  void need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
+                                          bool& need_minimal,
+                                          bool& need_complete) const;
+
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
 
   void match_continue(const GUID_t& writer, const GUID_t& reader);
 
-  /// This assumes that lock_ is being held
-  void match_continue(SequenceNumber rpc_sequence_number);
-
-  void save_matching_data_and_get_typeobjects(
-    const XTypes::TypeInformation* type_info,
-    MatchingData& md, const MatchingPair& mp,
-    const GUID_t& remote_id,
-    bool is_discovery_protected);
-
+  void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
+                                              MatchingData& md, const MatchingPair& mp,
+                                              const DCPS::RepoId& remote_id,
+                                              bool is_discovery_protected,
+                                              bool get_minimal, bool get_complete);
+  void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
+                               MatchingData& md, bool get_minimal, const DCPS::RepoId& remote_id,
+                               bool is_discovery_protected);
 #ifdef OPENDDS_SECURITY
   void match_continue_security_enabled(
     const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader);
@@ -1673,6 +1691,7 @@ protected:
   TimeDuration max_type_lookup_service_reply_period_;
   DCPS::SequenceNumber type_lookup_service_sequence_number_;
   const bool use_xtypes_;
+  const bool use_xtypes_complete_;
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
@@ -1736,8 +1755,8 @@ protected:
 #endif
 
 #ifdef OPENDDS_SECURITY
-  PublicationAgentInfoListener publication_agent_info_listener_;
-  SubscriptionAgentInfoListener subscription_agent_info_listener_;
+  RcHandle<PublicationAgentInfoListener> publication_agent_info_listener_;
+  RcHandle<SubscriptionAgentInfoListener> subscription_agent_info_listener_;
 #endif
 
   void cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,

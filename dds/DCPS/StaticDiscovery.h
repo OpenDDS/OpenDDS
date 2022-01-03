@@ -418,9 +418,23 @@ public:
 
 private:
   struct MatchingData {
-    GUID_t writer;
-    GUID_t reader;
-    SequenceNumber rpc_sequence_number;
+    MatchingData()
+      : got_minimal(false), got_complete(false)
+    {}
+
+    /// Sequence number of the first request for remote minimal types.
+    SequenceNumber rpc_seqnum_minimal;
+
+    /// Whether all minimal types are obtained.
+    bool got_minimal;
+
+    /// Sequence number of the first request for remote complete types.
+    /// Set to SEQUENCENUMBER_UNKNOWN if there is no such request.
+    SequenceNumber rpc_seqnum_complete;
+
+    /// Whether all complete types are obtained.
+    bool got_complete;
+
     MonotonicTimePoint time_added_to_map;
   };
 
@@ -448,14 +462,11 @@ private:
   typedef MatchingDataMap::iterator MatchingDataIter;
 
   void match(const GUID_t& writer, const GUID_t& reader);
+  void need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
+                                          bool& need_minimal,
+                                          bool& need_complete) const;
   void remove_expired_endpoints(const MonotonicTimePoint& /*now*/);
-  /// This assumes that lock_ is being held
-  void match_continue(SequenceNumber rpc_sequence_number);
   void match_continue(const GUID_t& writer, const GUID_t& reader);
-  void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
-                                              MatchingData& md, const MatchingPair& mp,
-                                              const GUID_t& remote_id,
-                                              bool is_discovery_protected);
 
   void remove_from_bit(const DiscoveredPublication& pub)
   {

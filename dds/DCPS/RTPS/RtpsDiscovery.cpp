@@ -89,13 +89,16 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , periodic_directed_spdp_(false)
   , secure_participant_user_data_(false)
   , max_type_lookup_service_reply_period_(5, 0)
-  , use_xtypes_(true)
+  , use_xtypes_(XTYPES_MINIMAL)
   , sedp_heartbeat_period_(0, 200*1000 /*microseconds*/)
   , sedp_nak_response_delay_(0, 100*1000 /*microseconds*/)
   , sedp_send_delay_(0, 10 * 1000)
   , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
   , participant_flags_(PFLAGS_THIS_VERSION)
   , sedp_responsive_mode_(false)
+  , sedp_receive_preallocated_message_blocks_(0)
+  , sedp_receive_preallocated_data_blocks_(0)
+  , check_source_ip_(true)
 {}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
@@ -789,15 +792,19 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
         } else if (name == "UseXTypes") {
           const OPENDDS_STRING& value = it->second;
-          int smInt;
-          if (!DCPS::convertToInteger(value, smInt)) {
-            ACE_ERROR_RETURN((LM_ERROR,
-              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
-              ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
-              ACE_TEXT("[rtps_discovery/%C] section.\n"),
-              value.c_str(), rtps_name.c_str()), -1);
+          if (value.size() == 1) {
+            int smInt;
+            if (!DCPS::convertToInteger(value, smInt) || smInt < 0 || smInt > 2) {
+              ACE_ERROR_RETURN((LM_ERROR,
+                                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                                ACE_TEXT("Invalid entry (%C) for UseXTypes in ")
+                                ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                                value.c_str(), rtps_name.c_str()), -1);
+            }
+            config->use_xtypes(static_cast<RtpsDiscoveryConfig::UseXTypes>(smInt));
+          } else {
+            config->use_xtypes(value.c_str());
           }
-          config->use_xtypes(bool(smInt));
         } else if (name == "SedpResponsiveMode") {
           const OPENDDS_STRING& value = it->second;
           int smInt;
@@ -809,6 +816,41 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                               value.c_str(), rtps_name.c_str()), -1);
           }
           config->sedp_responsive_mode(bool(smInt));
+        } else if (name == "SedpReceivePreallocatedMessageBlocks") {
+          const String& string_value = it->second;
+          size_t value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_receive_preallocated_message_blocks(value);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              "(%P|%t) RtpsDiscovery::Config::discovery_config(): "
+                              "Invalid entry (%C) for SedpReceivePreallocatedMessageBlocks in "
+                              "[rtps_discovery/%C] section.\n",
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "SedpReceivePreallocatedDataBlocks") {
+          const String& string_value = it->second;
+          size_t value;
+          if (DCPS::convertToInteger(string_value, value)) {
+            config->sedp_receive_preallocated_data_blocks(value);
+          } else {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              "(%P|%t) RtpsDiscovery::Config::discovery_config(): "
+                              "Invalid entry (%C) for SedpReceivePreallocatedDataBlocks in "
+                              "[rtps_discovery/%C] section.\n",
+                              string_value.c_str(), rtps_name.c_str()), -1);
+          }
+        } else if (name == "CheckSourceIp") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for CheckSourceIp in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->check_source_ip(bool(smInt));
         } else {
           ACE_ERROR_RETURN((LM_ERROR,
             ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -1104,14 +1146,13 @@ RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
 }
 
 void
-RtpsDiscovery::get_and_reset_relay_message_counts(DDS::DomainId_t domain,
-                                                  const DCPS::RepoId& local_participant,
-                                                  DCPS::RelayMessageCounts& spdp,
-                                                  DCPS::RelayMessageCounts& sedp)
+RtpsDiscovery::append_transport_statistics(DDS::DomainId_t domain,
+                                           const DCPS::RepoId& local_participant,
+                                           DCPS::TransportStatisticsSequence& seq)
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
-    p->get_and_reset_relay_message_counts(spdp, sedp);
+    p->append_transport_statistics(seq);
   }
 }
 
@@ -1412,6 +1453,12 @@ void RtpsDiscovery::update_subscription_locators(
   const DCPS::TransportLocatorSeq& transInfo)
 {
   get_part(domainId, partId)->update_subscription_locators(subId, transInfo);
+}
+
+RcHandle<DCPS::TransportInst> RtpsDiscovery::sedp_transport_inst(DDS::DomainId_t domainId,
+                                                                 const GUID_t& partId) const
+{
+  return get_part(domainId, partId)->sedp_transport_inst();
 }
 
 ParticipantHandle RtpsDiscovery::get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const

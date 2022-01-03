@@ -32,7 +32,7 @@ namespace ICE {
 
 typedef std::vector<FoundationType> FoundationList;
 
-class AgentImpl : public Agent, public DCPS::ReactorInterceptor, public DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener {
+class AgentImpl : public virtual Agent, public virtual DCPS::ReactorInterceptor, public virtual DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener {
 public:
   AgentImpl();
 
@@ -40,33 +40,33 @@ public:
 
   void notify_shutdown();
 
-  void add_endpoint(Endpoint* a_endpoint);
+  void add_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint);
 
-  void remove_endpoint(Endpoint* a_endpoint);
+  void remove_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint);
 
-  AgentInfo get_local_agent_info(Endpoint* a_endpoint) const;
+  AgentInfo get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoint) const;
 
-  void add_local_agent_info_listener(Endpoint* a_endpoint,
+  void add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                      const DCPS::RepoId& a_local_guid,
-                                     AgentInfoListener* a_agent_info_listener);
+                                     DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener);
 
-  void remove_local_agent_info_listener(Endpoint* a_endpoint,
+  void remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                         const DCPS::RepoId& a_local_guid);
 
-  void start_ice(Endpoint* a_endpoint,
+  void start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                  const DCPS::RepoId& a_local_guid,
                  const DCPS::RepoId& a_remote_guid,
                  const AgentInfo& a_remote_agent_info);
 
-  void stop_ice(Endpoint* a_endpoint,
+  void stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                 const DCPS::RepoId& a_local_guid,
                 const DCPS::RepoId& a_remote_guid);
 
-  ACE_INET_Addr get_address(Endpoint* a_endpoint,
+  ACE_INET_Addr get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                             const DCPS::RepoId& a_local_guid,
                             const DCPS::RepoId& a_remote_guid) const;
 
-  void receive(Endpoint* a_endpoint,
+  void receive(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                const ACE_INET_Addr& a_local_address,
                const ACE_INET_Addr& a_remote_address,
                const STUN::Message& a_message);
@@ -107,7 +107,7 @@ private:
   bool unfreeze_;
   bool ncm_listener_added_;
   size_t remote_peer_reflexive_counter_;
-  typedef std::map<Endpoint*, EndpointManagerPtr> EndpointManagerMapType;
+  typedef std::map<DCPS::WeakRcHandle<Endpoint>, EndpointManagerPtr> EndpointManagerMapType;
   EndpointManagerMapType endpoint_managers_;
   struct Item {
     DCPS::MonotonicTimePoint release_time_;

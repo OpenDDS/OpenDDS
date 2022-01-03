@@ -51,6 +51,9 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , shutdown_(shutdown)
   , reassociate_timer_id_(-1)
   , dispatch_check_timer_id_(-1)
+#ifndef DDS_HAS_MINIMUM_BIT
+  , in_cleanup_all_built_in_topics_(false)
+#endif
 {
   if (!TheServiceParticipant->use_bidir_giop()) {
     int argc = 0;
@@ -74,8 +77,8 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
       if (this->dispatchingOrb_->work_pending())
       {
         // Ten microseconds
-        ACE_Time_Value small(0,10);
-        this->dispatchingOrb_->perform_work(small);
+        ACE_Time_Value smallval(0,10);
+        this->dispatchingOrb_->perform_work(smallval);
       }
     }
   }
@@ -1451,9 +1454,8 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
-  DCPS_IR_Participant* participant = where->second->participant(participantId);
-
-  if (participant == 0) {
+  DCPS_IR_Participant_rch participant = where->second->participant_rch(participantId);
+  if (!participant) {
     OpenDDS::DCPS::RepoIdConverter converter(participantId);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: (bool)TAO_DDS_DCPSInfo_i::remove_domain_participant: ")
@@ -1465,8 +1467,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
 
   // Determine if we should propagate this event;  we need to cache this
   // result as the participant will be gone by the time we use the result.
-  bool sendUpdate = (participant->isOwner() == true)
-                    && (participant->isBitPublisher() == false);
+  bool sendUpdate = participant->isOwner() && !participant->isBitPublisher();
 
   CORBA::Boolean dont_notify_lost = 0;
   int status = where->second->remove_participant(participantId, dont_notify_lost);
@@ -1494,10 +1495,17 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     }
   }
 
-  if (where->second->participants().empty()) {
+  if (where->second->participants().empty()
+#ifndef DDS_HAS_MINIMUM_BIT
+    && !(participant->isOwner() && participant->isBitPublisher() && in_cleanup_all_built_in_topics_)
+    // If this is false, we're running as part of cleanup_all_built_in_topics
+    // and we can't remove the domain because we would invalid the iterator
+    // we're using in cleanup_all_built_in_topics. cleanup_all_built_in_topics
+    // will clear the domains once it's done.
+#endif
+    ) {
     domains_.erase(where);
   }
-
 #ifndef DDS_HAS_MINIMUM_BIT
   else if (where->second->useBIT() &&
            where->second->participants().size() == 1) {
@@ -1505,8 +1513,16 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     // It can be removed now since no user participants exist in this domain,
     // but it has to be removed on the Service Participant's reactor thread
     // in order to make the locking work properly in delete_participant().
-    const ACE_Event_Handler_var eh = new BIT_Cleanup_Handler(this, domainId);
+    BIT_Cleanup_Handler* eh_impl = new BIT_Cleanup_Handler(this, domainId);
+    const ACE_Event_Handler_var eh = eh_impl;
     TheServiceParticipant->reactor()->notify(eh.handler());
+
+    // Wait for that to be finished
+    using OpenDDS::DCPS::CvStatus_NoTimeout;
+    OpenDDS::DCPS::CvStatus status = CvStatus_NoTimeout;
+    while (status == CvStatus_NoTimeout && !eh_impl->done_) {
+      status = eh_impl->cv_.wait();
+    }
   }
 #endif
 }
@@ -1518,13 +1534,12 @@ int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 
   const DCPS_IR_Domain_Map::iterator where = parent_->domains_.find(domain_);
 
-  if (where == parent_->domains_.end()) {
-    return 0;
-  }
-
-  if (where->second->participants().size() == 1) {
+  if (where != parent_->domains_.end() && where->second->participants().size() == 1) {
     where->second->cleanup_built_in_topics();
   }
+
+  done_ = true;
+  cv_.notify_all();
 
   return 0;
 }
@@ -2473,6 +2488,32 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 #endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
   return CORBA::string_dup(dump.c_str());
 
+}
+
+void TAO_DDS_DCPSInfo_i::cleanup_all_built_in_topics()
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS_IR_Domain_Map copy;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+    if (domains_.empty() || in_cleanup_all_built_in_topics_) {
+      return;
+    }
+    copy = domains_;
+    in_cleanup_all_built_in_topics_ = true;
+  }
+
+  for (DCPS_IR_Domain_Map::iterator it = copy.begin(); it != copy.end(); ++it) {
+    it->second->cleanup_built_in_topics();
+  }
+
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+    in_cleanup_all_built_in_topics_ = false;
+    copy.clear();
+    domains_.clear();
+  }
+#endif
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

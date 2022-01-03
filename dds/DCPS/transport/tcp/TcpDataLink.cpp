@@ -66,6 +66,45 @@ OpenDDS::DCPS::TcpDataLink::stop_i()
 }
 
 void
+OpenDDS::DCPS::TcpDataLink::send_i(TransportQueueElement* element, bool relink)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  if (stopped_clients_.count(element->publication_id())) {
+    element->data_dropped(true);
+  } else {
+    DCPS::DataLink::send_i(element, relink);
+  }
+}
+
+void
+OpenDDS::DCPS::TcpDataLink::send_stop_i(RepoId repoId)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  if (!stopped_clients_.count(repoId)) {
+    DCPS::DataLink::send_stop_i(repoId);
+  }
+}
+
+bool
+OpenDDS::DCPS::TcpDataLink::check_active_client(const RepoId& local_id)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  return stopped_clients_.count(local_id) == 0;
+}
+
+void
+OpenDDS::DCPS::TcpDataLink::client_stop(const RepoId& local_id)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+  stopped_clients_.insert(local_id);
+
+  TcpSendStrategy_rch strategy = send_strategy();
+  if (strategy) {
+    strategy->remove_all_msgs(local_id);
+  }
+}
+
+void
 OpenDDS::DCPS::TcpDataLink::pre_stop_i()
 {
   DBG_ENTRY_LVL("TcpDataLink","pre_stop_i",6);
@@ -104,7 +143,10 @@ OpenDDS::DCPS::TcpDataLink::connect(
 {
   DBG_ENTRY_LVL("TcpDataLink","connect",6);
 
-  this->connection_ = connection;
+  {
+    GuardType guard(strategy_lock_);
+    this->connection_ = connection;
+  }
 
   if (connection->peer().enable(ACE_NONBLOCK) == -1) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -395,7 +437,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() found matching element %@\n"),
         elem));
     }
-    this->send_strategy_->deliver_ack_request(elem);
+    send_strategy()->deliver_ack_request(elem);
   }
   else {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received unknown sequence number %q\n"),
@@ -454,10 +496,6 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 void
 OpenDDS::DCPS::TcpDataLink::do_association_actions()
 {
-  if (!connection_ || !send_strategy_) {
-    return;
-  }
-
   // We have a connection.
   // Invoke callbacks for readers so we can receive messages and let writers know we are ready.
   typedef std::vector<std::pair<RepoId, RepoId> > PairVec;
@@ -465,6 +503,10 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
   {
     GuardType guard(strategy_lock_);
+
+    if (!connection_ || !send_strategy_) {
+      return;
+    }
 
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
@@ -547,6 +589,10 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_i
                                              const TransportSendListener_wrch& send_listener,
                                              bool reliable)
 {
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+    stopped_clients_.erase(local_publication_id);
+  }
   const int result = DataLink::make_reservation(remote_subscription_id, local_publication_id, send_listener, reliable);
   send_association_msg(local_publication_id, remote_subscription_id);
   return result;
@@ -558,6 +604,10 @@ OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_publication_id
                                              const TransportReceiveListener_wrch& receive_listener,
                                              bool reliable)
 {
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(stopped_clients_mutex_);
+    stopped_clients_.erase(local_subscription_id);
+  }
   const int result = DataLink::make_reservation(remote_publication_id, local_subscription_id, receive_listener, reliable);
   send_association_msg(local_subscription_id, remote_publication_id);
 

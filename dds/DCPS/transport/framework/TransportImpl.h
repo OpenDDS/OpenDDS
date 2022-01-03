@@ -10,7 +10,7 @@
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/RcObject.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+#include "dds/OpenddsDcpsExtC.h"
 #include "dds/DdsDcpsSubscriptionC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -106,7 +106,7 @@ public:
                                const TransportLocatorSeq& /*locators*/) { }
 
   virtual void rtps_relay_address_change() {}
-  virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;
@@ -163,7 +163,7 @@ public:
     DataLink_rch link_;
   };
 
-  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
   virtual void rtps_relay_only_now(bool /*flag*/) {}
   virtual void use_rtps_relay_now(bool /*flag*/) {}
   virtual void use_ice_now(bool /*flag*/) {}
@@ -300,7 +300,7 @@ public:
 
 protected:
   /// Id of the last link established.
-  std::size_t last_link_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> last_link_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> is_shut_down_;
 };
 

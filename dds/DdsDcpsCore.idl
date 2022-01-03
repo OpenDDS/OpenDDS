@@ -565,69 +565,6 @@ module DDS {
 
 };
 
-module OpenDDS {
-
-  module DCPS {
-    // Make the IDL compiler produce include of zero-copy read info
-    // sequence template.
-    #pragma DCPS_SUPPORT_ZERO_COPY_READ
-
-    // OpenDDS extension built-in topic for participant
-    // network location/connection details.
-    typedef unsigned long ParticipantLocation;
-
-    const ParticipantLocation LOCATION_LOCAL = 0x0001 << 0;
-    const ParticipantLocation LOCATION_ICE = 0x0001 << 1;
-    const ParticipantLocation LOCATION_RELAY = 0x0001 << 2;
-    const ParticipantLocation LOCATION_LOCAL6 = 0x0001 << 3;
-    const ParticipantLocation LOCATION_ICE6 = 0x0001 << 4;
-    const ParticipantLocation LOCATION_RELAY6 = 0x0001 << 5;
-
-    BUILT_IN_TOPIC_TYPE
-    struct ParticipantLocationBuiltinTopicData {
-            BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
-            ParticipantLocation location;
-            ParticipantLocation change_mask;
-            string local_addr;
-            DDS::Time_t local_timestamp;
-            string ice_addr;
-            DDS::Time_t ice_timestamp;
-            string relay_addr;
-            DDS::Time_t relay_timestamp;
-            string local6_addr;
-            DDS::Time_t local6_timestamp;
-            string ice6_addr;
-            DDS::Time_t ice6_timestamp;
-            string relay6_addr;
-            DDS::Time_t relay6_timestamp;
-    };
-
-    const string RTPS_RELAY_STUN_PROTOCOL = "RtpsRelay:STUN";
-
-    BUILT_IN_TOPIC_TYPE
-    struct ConnectionRecord {
-            BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
-            BUILT_IN_TOPIC_KEY string address;
-            BUILT_IN_TOPIC_KEY string protocol;
-    };
-
-    // OpenDDS extension built-in topic for thread
-    // status monitoring.
-    BUILT_IN_TOPIC_TYPE
-    struct InternalThreadBuiltinTopicData {
-      BUILT_IN_TOPIC_KEY string thread_id;
-      DDS::OctetArray16 participant_guid;
-    };
-
-    struct MonotonicTime_t {
-      long sec;
-      unsigned long nanosec;
-    };
-
-  };// End of module DCPS
-
-}; // End of module OpenDDS
-
 #undef BUILT_IN_TOPIC_TYPE
 #undef BUILT_IN_TOPIC_KEY
 

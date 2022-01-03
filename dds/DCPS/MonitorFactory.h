@@ -88,6 +88,8 @@ public:
   /// Initialize the monitor (required to report data)
   virtual void initialize();
 
+  virtual void deinitialize();
+
   static int service_initialize();
 };
 

@@ -9,7 +9,7 @@
 
 #include <dds/DCPS/ReactorTask.h>
 
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <ace/streams.h>
 
@@ -49,8 +49,9 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
 
     if (si.valid_data) {
       OpenDDS::DCPS::RepoId guid;
+      double util = thread_info.utilization;
       std::memcpy(&guid, &thread_info.participant_guid, sizeof(guid));
-      std::cout << " guid: " << guid << std::endl;
+      std::cout << " guid: " << guid << "\n utilization: " << util << std::endl;
       ++count_;
     } else if (si.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
       std::cout << " DISPOSE" << std::endl;

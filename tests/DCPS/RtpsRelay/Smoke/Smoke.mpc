@@ -27,3 +27,14 @@ project(RtpsRelaySubscriber): dcps_test, dcps_cm, opendds_optional_security, dcp
     DataReaderListener.cpp
   }
 }
+
+project(RtpsRelayMonitor): dcps_test, opendds_optional_security, dcps_rtps_udp, opendds_cxx11, rtps_relay_lib {
+  exename   = monitor
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    monitor.cpp
+  }
+}

@@ -1,0 +1,374 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ULongSeq.pidl>
+#include <tao/Int8Seq.pidl>
+#include <tao/UInt8Seq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/UShortSeq.pidl>
+#include <tao/LongLongSeq.pidl>
+#include <tao/ULongLongSeq.pidl>
+#include <tao/FloatSeq.pidl>
+#include <tao/DoubleSeq.pidl>
+#include <tao/LongDoubleSeq.pidl>
+#include <tao/CharSeq.pidl>
+#include <tao/WCharSeq.pidl>
+#include <tao/OctetSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/StringSeq.pidl>
+#include <tao/WStringSeq.pidl>
+
+enum SomeEnum {
+  E_INT32, // 0
+  E_UINT32, // 1
+  E_INT8, // 2
+  E_UINT8, // 3
+  E_INT16, // 4
+  E_UINT16, // 5
+  E_INT64, // 6
+  E_UINT64, // 7
+  E_FLOAT32, // 8
+  E_FLOAT64, // 9
+  E_FLOAT128, // 10
+  E_CHAR8, // 11
+  E_CHAR16, // 12
+  E_BYTE, // 13
+  E_BOOL, // 14
+  E_STRING8, // 15
+  E_STRING16 // 16
+};
+
+typedef sequence<SomeEnum> SomeEnumSeq;
+typedef sequence<long> Int32Seq;
+typedef sequence<unsigned long> UInt32Seq;
+typedef sequence<int8> Int8Seq;
+typedef sequence<uint8> UInt8Seq;
+typedef sequence<short> Int16Seq;
+typedef sequence<unsigned short> UInt16Seq;
+typedef sequence<long long> Int64Seq;
+typedef sequence<unsigned long long> UInt64Seq;
+typedef sequence<float> Float32Seq;
+typedef sequence<double> Float64Seq;
+typedef sequence<long double> Float128Seq;
+typedef sequence<char> Char8Seq;
+typedef sequence<wchar> Char16Seq;
+typedef sequence<octet> ByteSeq;
+typedef sequence<boolean> BoolSeq;
+typedef sequence<string> StringSeq;
+typedef sequence<wstring> WStringSeq;
+
+#define SINGLE_VALUE_MEMBERS \
+  @id(0) SomeEnum my_enum; \
+  @id(1) long int_32; \
+  @id(2) unsigned long uint_32; \
+  @id(3) int8 int_8; \
+  @id(4) uint8 uint_8; \
+  @id(5) short int_16; \
+  @id(6) unsigned short uint_16; \
+  @id(7) long long int_64; \
+  @id(8) unsigned long long uint_64; \
+  @id(9) float float_32; \
+  @id(10) double float_64; \
+  @id(11) long double float_128; \
+  @id(12) char char_8; \
+  @id(13) wchar char_16; \
+  @id(14) octet byte; \
+  @id(15) boolean bool; \
+  @id(16) FinalNestedStructInner nested_struct; \
+  @id(17) string str; \
+  @id(18) wstring wstr;
+
+#define SINGLE_VALUE_BRANCHES \
+  case E_INT32: \
+    @id(1) long int_32; \
+  case E_UINT32: \
+    @id(2) unsigned long uint_32; \
+  case E_INT8: \
+    @id(3) int8 int_8; \
+  case E_UINT8: \
+    @id(4) uint8 uint_8; \
+  case E_INT16: \
+    @id(5) short int_16; \
+  case E_UINT16: \
+    @id(6) unsigned short uint_16; \
+  case E_INT64: \
+    @id(7) long long int_64; \
+  case E_UINT64: \
+    @id(8) unsigned long long uint_64; \
+  case E_FLOAT32: \
+    @id(9) float float_32; \
+  case E_FLOAT64: \
+    @id(10) double float_64; \
+  case E_FLOAT128: \
+    @id(11) long double float_128; \
+  case E_CHAR8: \
+    @id(12) char char_8; \
+  case E_CHAR16: \
+    @id(13) wchar char_16; \
+  case E_BYTE: \
+    @id(14) octet byte_; \
+  case E_BOOL: \
+    @id(15) boolean bool_; \
+  case E_STRING8: \
+    @id(16) string str; \
+  case E_STRING16: \
+    @id(17) wstring wstr; \
+  default: \
+    @id(18) SomeEnum my_enum;
+
+#define SEQUENCE_VALUE_MEMBERS \
+  @id(0) SomeEnumSeq my_enums; \
+  @id(1) Int32Seq int_32s; \
+  @id(2) UInt32Seq uint_32s; \
+  @id(3) Int8Seq int_8s; \
+  @id(4) UInt8Seq uint_8s; \
+  @id(5) Int16Seq int_16s; \
+  @id(6) UInt16Seq uint_16s; \
+  @id(7) Int64Seq int_64s; \
+  @id(8) UInt64Seq uint_64s; \
+  @id(9) Float32Seq float_32s; \
+  @id(10) Float64Seq float_64s; \
+  @id(11) Float128Seq float_128s; \
+  @id(12) Char8Seq char_8s; \
+  @id(13) Char16Seq char_16s; \
+  @id(14) ByteSeq byte_s; \
+  @id(15) BoolSeq bool_s; \
+  @id(16) StringSeq str_s; \
+  @id(17) WStringSeq wstr_s;
+
+
+@final
+struct FinalNestedStructInner {
+  @id(0) long l;
+};
+
+// Reading single value from struct.
+@mutable
+struct MutableSingleValueStruct {
+  SINGLE_VALUE_MEMBERS
+};
+
+@appendable
+struct AppendableSingleValueStruct {
+  SINGLE_VALUE_MEMBERS
+};
+
+@final
+struct FinalSingleValueStruct {
+  SINGLE_VALUE_MEMBERS
+};
+
+// Reading single value from union.
+@mutable
+union MutableSingleValueUnion switch (SomeEnum) {
+  SINGLE_VALUE_BRANCHES
+};
+
+@appendable
+union AppendableSingleValueUnion switch (SomeEnum) {
+  SINGLE_VALUE_BRANCHES
+};
+
+@final
+union FinalSingleValueUnion switch (SomeEnum) {
+  SINGLE_VALUE_BRANCHES
+};
+
+// Reading single value from sequence and reading sequence from struct.
+@mutable
+struct MutableSequenceStruct {
+  SEQUENCE_VALUE_MEMBERS
+};
+
+@appendable
+struct AppendableSequenceStruct {
+  SEQUENCE_VALUE_MEMBERS
+};
+
+@final
+struct FinalSequenceStruct {
+  SEQUENCE_VALUE_MEMBERS
+};
+
+// Test skipping nested aggregated members.
+@appendable
+struct AppendableNestedStructInner {
+  @id(0) long l;
+};
+
+@mutable
+struct MutableNestedStructInner {
+  @id(0) long l;
+};
+
+@final
+struct FinalNestedStructOuter {
+  @id(0) long l;
+  @id(1) AppendableNestedStructInner inner;
+  @id(2) short s;
+};
+
+@appendable
+struct AppendableNestedStructOuter {
+  @id(0) unsigned long ul;
+  @id(1) MutableNestedStructInner inner;
+  @id(2) unsigned short us;
+};
+
+@mutable
+struct MutableNestedStructOuter {
+  @id(0) octet o;
+  @id(1) FinalNestedStructInner inner;
+  @id(2) boolean b;
+};
+
+#define NESTED_UNION_BRANCHES \
+  case E_INT32: \
+    @id(0) long l; \
+  case E_UINT32: \
+    @id(1) unsigned long ul; \
+  case E_CHAR8: \
+    @id(2) char c;
+
+@final
+union FinalNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@appendable
+union AppendableNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@mutable
+union MutableNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@final
+struct FinalNestedStructOuterXCDR1 {
+  @id(0) unsigned long ul;
+  @id(1) FinalNestedStructInner inner;
+  @id(2) unsigned short us;
+};
+
+@final
+struct FinalStructXCDR1 {
+  @id(0) char c;
+  @id(1) FinalNestedStructOuterXCDR1 outer;
+  @id(2) short s;
+  @id(3) FinalNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@appendable
+struct AppendableNestedStructOuterXCDR1 {
+  @id(0) unsigned long ul;
+  @id(1) AppendableNestedStructInner inner;
+  @id(2) unsigned short us;
+};
+
+@appendable
+struct AppendableStructXCDR1 {
+  @id(0) char c;
+  @id(1) AppendableNestedStructOuterXCDR1 outer;
+  @id(2) short s;
+  @id(3) AppendableNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@final
+struct FinalStruct {
+  @id(0) char c;
+  @id(1) AppendableNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) AppendableNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@appendable
+struct AppendableStruct {
+  @id(0) char c;
+  @id(1) MutableNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) MutableNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@mutable
+struct MutableStruct {
+  @id(0) char c;
+  @id(1) FinalNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) FinalNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+#define SEQUENCE_VALUE_BRANCHES \
+  case E_INT32: \
+    @id(1) Int32Seq int_32s; \
+  case E_UINT32: \
+    @id(2) UInt32Seq uint_32s; \
+  case E_INT8: \
+    @id(3) Int8Seq int_8s; \
+  case E_UINT8: \
+    @id(4) UInt8Seq uint_8s; \
+  case E_INT16: \
+    @id(5) Int16Seq int_16s; \
+  case E_UINT16: \
+    @id(6) UInt16Seq uint_16s; \
+  case E_INT64: \
+    @id(7) Int64Seq int_64s; \
+  case E_UINT64: \
+    @id(8) UInt64Seq uint_64s; \
+  case E_FLOAT32: \
+    @id(9) Float32Seq float_32s; \
+  case E_FLOAT64: \
+    @id(10) Float64Seq float_64s; \
+  case E_FLOAT128: \
+    @id(11) Float128Seq float_128s; \
+  case E_CHAR8: \
+    @id(12) Char8Seq char_8s; \
+  case E_CHAR16: \
+    @id(13) Char16Seq char_16s; \
+  case E_BYTE: \
+    @id(14) ByteSeq byte_s; \
+  case E_BOOL: \
+    @id(15) BoolSeq bool_s; \
+  case E_STRING8: \
+    @id(16) StringSeq str_s; \
+  case E_STRING16: \
+    @id(17) WStringSeq wstr_s;
+
+@final
+union FinalSequenceUnion switch (SomeEnum) {
+  SEQUENCE_VALUE_BRANCHES
+};
+
+@appendable
+union AppendableSequenceUnion switch (SomeEnum) {
+  SEQUENCE_VALUE_BRANCHES
+};
+
+@mutable
+union MutableSequenceUnion switch (SomeEnum) {
+  SEQUENCE_VALUE_BRANCHES
+};
+
+#define ARRAY_MEMBERS \
+  @id(0) long int_32a[2]; \
+  @id(1) unsigned long uint_32a[2]; \
+  @id(2) int8 int_8a[2];
+
+@final
+struct FinalArrayStruct {
+  ARRAY_MEMBERS
+};
+
+@appendable
+struct AppendableArrayStruct {
+  ARRAY_MEMBERS
+};
+
+@mutable
+struct MutableArrayStruct {
+  ARRAY_MEMBERS
+};

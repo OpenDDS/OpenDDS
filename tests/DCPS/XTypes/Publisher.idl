@@ -1,0 +1,123 @@
+#include "Common.idl"
+
+// Final structures
+@topic
+@final
+struct FinalStructPub {
+  @key long key_field;
+};
+
+@topic
+@final
+struct ModifiedFinalStruct {
+  @key long key_field;
+  long additional_field;
+};
+
+// Appendable structures
+@topic
+@appendable
+struct AdditionalPostfixFieldStruct {
+  @key long key_field;
+  long additional_field;
+};
+
+@topic
+@appendable
+struct AdditionalPrefixFieldStruct {
+  long additional_field;
+  @key long key_field;
+};
+
+// Mutable structures
+@topic
+@mutable
+struct ModifiedMutableStruct {
+  @id(2) long additional_field;
+  @id(1) @key long key_field;
+};
+
+@topic
+@mutable
+struct MutableBaseStruct {
+  @id(1) @key long key_field;
+};
+
+@topic
+@mutable
+struct ModifiedIdMutableStruct {
+  @id(1) @key long key_field;
+  @id(3) long additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedTypeMutableStruct {
+  @id(1) @key long key_field;
+  @id(2) string additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedNameMutableStruct {
+  @id(1) @key long key_field_modified;
+  @id(2) long additional_field_modified;
+};
+
+// Unions
+@topic
+@mutable
+union ModifiedMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+union ModifiedDiscMutableUnion switch (ModifiedUnionDisc) {
+case E_KEY_MODIFIED:
+  @id(6) long key_field;
+case E_OCTET_FIELD_MODIFIED:
+  @id(8) octet octet_field;
+case E_ADDITIONAL_FIELD_MODIFIED:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+union ModifiedTypeMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) string key_field;
+case E_OCTET_FIELD:
+  @id(8) string octet_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) string additional_field;
+};
+
+@topic
+@mutable
+union ModifiedNameMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key_field_modified;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field_modified;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field_modified;
+};
+
+// Tryconstruct
+@topic
+@mutable
+struct Trim64Struct {
+  @try_construct(TRIM) str64 trim_string;
+};
+
+// Dependencies
+@topic
+@appendable
+struct AppendableStructWithDependency {
+  @key long key_field;
+  NestedStruct additional_nested_struct;
+};

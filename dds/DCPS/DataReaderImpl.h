@@ -580,7 +580,7 @@ public:
   virtual void update_locators(const RepoId& remote,
                                const TransportLocatorSeq& locators);
 
-  virtual ICE::Endpoint* get_ice_endpoint();
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
   const RepoId& get_repo_id() const
   {
@@ -588,7 +588,16 @@ public:
     while (!has_subscription_id_ && !get_deleted()) {
       subscription_id_condition_.wait();
     }
-    return this->subscription_id_;
+    return subscription_id_;
+  }
+
+  RepoId get_repo_id_copy() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
+    while (!has_subscription_id_ && !get_deleted()) {
+      subscription_id_condition_.wait();
+    }
+    return subscription_id_;
   }
 
   void return_handle(DDS::InstanceHandle_t handle);
@@ -605,6 +614,7 @@ protected:
 
   /// Setup deserialization options
   DDS::ReturnCode_t setup_deserialization();
+
   virtual Extensibility get_max_extensibility() = 0;
 
   RcHandle<SubscriberImpl> get_subscriber_servant();
@@ -694,6 +704,7 @@ protected:
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
+  mutable ACE_Thread_Mutex content_filtered_topic_mutex_;
   TopicDescriptionPtr<ContentFilteredTopicImpl> content_filtered_topic_;
 #endif
 
@@ -892,7 +903,7 @@ private:
   bool always_get_history_;
 
   /// Flag indicating status of statistics gathering.
-  bool statistics_enabled_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> statistics_enabled_;
 
   /// publications writing to this reader.
   typedef OPENDDS_MAP_CMP(PublicationId, RcHandle<WriterInfo>,
@@ -905,6 +916,7 @@ private:
 
   /// Statistics for this reader, collected for each writer.
   StatsMapType statistics_;
+  ACE_Recursive_Thread_Mutex statistics_lock_;
 
   /// Bound (or initial reservation) of raw latency buffer.
   unsigned int raw_latency_buffer_size_;

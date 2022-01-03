@@ -1,18 +1,16 @@
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
-
 #include <dds/DCPS/security/framework/Properties.h>
 #include <dds/DCPS/security/AuthenticationBuiltInImpl.h>
-
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/security/BuiltInPlugins.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
-
-#include <dds/DCPS/LogAddr.h>
 
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>
@@ -50,25 +48,6 @@ bool receive(const OpenDDS::DCPS::GUID_t& participant_guid,
   }
 
   return make_part_guid(header.guidPrefix) == participant_guid;
-}
-
-void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
-{
-#ifdef ACE_HAS_IPV6
-  if (addr.get_type() == AF_INET6) {
-    locator.kind = LOCATOR_KIND_UDPv6;
-    locator.port = addr.get_port_number();
-    struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
-    ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
-    return;
-  }
-#endif
-
-  locator.kind = LOCATOR_KIND_UDPv4;
-  locator.port = addr.get_port_number();
-  struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
-  std::memset(locator.address, 0, 12);
-  ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
 }
 
 OpenDDS::Security::SPDPdiscoveredParticipantData
@@ -109,15 +88,10 @@ participant_data(DDS::DomainId_t domain,
     DDS::Security::TYPE_LOOKUP_SERVICE_REQUEST_READER_SECURE |
     DDS::Security::TYPE_LOOKUP_SERVICE_REPLY_READER_SECURE;
 
+  ACE_INET_Addr bogus(12345, "127.0.0.1");
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
-  nonEmptyList[0].port = 12345;
-  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
-  std::memset(nonEmptyList[0].address, 0, 12);
-  nonEmptyList[0].address[12] = 127;
-  nonEmptyList[0].address[13] = 0;
-  nonEmptyList[0].address[14] = 0;
-  nonEmptyList[0].address[15] = 1;
+  address_to_locator(nonEmptyList[0], bogus);
 
   size_t addr_count;
   ACE_INET_Addr* addr_array = 0;
@@ -132,15 +106,16 @@ participant_data(DDS::DomainId_t domain,
     throw std::runtime_error("ACE::get_ip_interfaces failed");
   }
 
-  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count);
-  unicastLocators.length(addr_count);
-  for (size_t i = 0; i < addr_count; ++i) {
+  const ACE_CDR::ULong addr_count_ulong = static_cast<ACE_CDR::ULong>(addr_count);
+  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count_ulong);
+  unicastLocators.length(addr_count_ulong);
+  for (ACE_CDR::ULong i = 0; i < addr_count_ulong; ++i) {
     // Set a port number to avoid send errors.
     addr_array[i].set_port_number(addr.get_port_number());
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) addr_array[%d]: %C\n"), i, LogAddr(addr_array[i]).c_str()));
     }
-    to_locator(addr_array[i], unicastLocators[i]);
+    address_to_locator(unicastLocators[i], addr_array[i]);
   }
 
 

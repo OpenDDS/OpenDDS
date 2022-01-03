@@ -1,4 +1,4 @@
-project: ../bench_builder_exe, ../bench_exe {
+project: ../bench_builder_exe, ../bench_exe, opendds_optional_security {
   exename = worker
 
   libs  += OpenDDS_Rtps_Udp OpenDDS_Udp OpenDDS_Tcp OpenDDS_Multicast

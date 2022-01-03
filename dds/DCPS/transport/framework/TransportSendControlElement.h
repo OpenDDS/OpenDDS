@@ -73,6 +73,8 @@ public:
 
   virtual bool is_request_ack() const { return header_.message_id_ == REQUEST_ACK; }
 
+  virtual bool is_last_fragment() const { return !header_.more_fragments(); }
+
 protected:
 
   virtual void release_element(bool dropped_by_transport);

@@ -284,7 +284,7 @@ public:
 
   virtual void send_final_acks (const RepoId& readerid);
 
-  virtual ICE::Endpoint* get_ice_endpoint() const { return 0; }
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const { return WeakRcHandle<ICE::Endpoint>(); }
 
   virtual bool is_leading(const GUID_t& /*writer*/,
                           const GUID_t& /*reader*/) const { return false; }
@@ -438,8 +438,10 @@ protected:
 
   /// The transport send strategy object for this DataLink.
   TransportSendStrategy_rch send_strategy_;
-
   LockType strategy_lock_;
+
+  TransportSendStrategy_rch get_send_strategy();
+
   typedef OPENDDS_MAP_CMP(RepoId, TransportClient_wrch, GUID_tKeyLessThan) RepoToClientMap;
   typedef OPENDDS_MAP_CMP(RepoId, RepoToClientMap, GUID_tKeyLessThan) OnStartCallbackMap;
   OnStartCallbackMap on_start_callbacks_;

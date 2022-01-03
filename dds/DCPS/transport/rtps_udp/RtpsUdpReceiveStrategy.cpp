@@ -18,6 +18,7 @@
 #include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
+#include "dds/DCPS/ThreadMonitor.h"
 
 #include "ace/Reactor.h"
 
@@ -34,7 +35,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
-  : link_(link)
+  : BaseReceiveStrategy(link->config())
+  , link_(link)
   , last_received_()
   , recvd_sample_(0)
   , total_frags_(0)
@@ -54,6 +56,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
 int
 RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
+  ThreadMonitor::GreenLight tmgl("RtpsUdpReceiveStrategy");
   return handle_simple_dds_input(fd);
 }
 
@@ -62,7 +65,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              int n,
                                              const ACE_SOCK_Dgram& socket,
                                              ACE_INET_Addr& remote_address,
-                                             ICE::Endpoint* endpoint,
+                                             DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
                                              RtpsUdpTransport& tport,
                                              bool& stop)
 {
@@ -83,9 +86,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   }
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
-    if (remote_address == tport.config().rtps_relay_address()) {
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.relay_message_counts_mutex_, -1);
-      ++tport.relay_message_counts_.rtps_recv;
+    if (tport.config().count_messages()) {
+      const InternalMessageCountKey key(remote_address, MCK_RTPS, remote_address == tport.config().rtps_relay_address());
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
+      tport.transport_statistics_.message_count[key].recv(ret);
     }
     return ret;
   }
@@ -121,9 +125,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
-    if (remote_address == tport.config().rtps_relay_address()) {
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.relay_message_counts_mutex_, -1);
-      ++tport.relay_message_counts_.stun_recv;
+    if (tport.config().count_messages()) {
+      const InternalMessageCountKey key(remote_address, MCK_STUN, remote_address == tport.config().rtps_relay_address());
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
+      tport.transport_statistics_.message_count[key].recv(ret);
     }
 
     if (tport.relay_srsm().is_response(message)) {
@@ -990,7 +995,8 @@ bool
 RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
                                                  CORBA::ULong num_bits,
                                                  const SequenceNumber& base,
-                                                 const RepoId& pub_id)
+                                                 const RepoId& pub_id,
+                                                 ACE_CDR::ULong& cumulative_bits_added)
 {
   bool modified = false;
   for (CORBA::ULong i = 0, x = 0, bit = 0; i < num_bits; ++i, ++bit) {
@@ -1010,10 +1016,14 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
     }
 
     const CORBA::ULong mask = 1 << (31 - bit);
-    if ((x & mask) && reassembly_.has_frags(base + i, pub_id)) {
-      x &= ~mask;
-      bitmap[i / 32] = x;
-      modified = true;
+    if (x & mask) {
+      const bool has_frags = reassembly_.has_frags(base + i, pub_id);
+      if (has_frags) {
+        x &= ~mask;
+        bitmap[i / 32] = x;
+        modified = true;
+        --cumulative_bits_added;
+      }
     }
   }
   return modified;
@@ -1040,19 +1050,46 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
                                       FragmentInfo* frag_info)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
-    if (reassembly_.has_frags(sn, pub_id)) {
+    ACE_UINT32 total_frags = 0;
+    if (reassembly_.has_frags(sn, pub_id, total_frags)) {
       if (frag_info) {
-        std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
-        p.first = sn;
-        frag_info->push_back(p);
-        RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
-        missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
-        missing_frags.bitmap.length(8); // start at max length
-        missing_frags.bitmapBase.value =
-          reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),
-                               8, missing_frags.numBits);
-        // reduce length in case get_gaps() didn't need all that room
-        missing_frags.bitmap.length((missing_frags.numBits + 31) / 32);
+        if (total_frags > 256) {
+          static const CORBA::Long empty_buffer[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };
+          OPENDDS_VECTOR(CORBA::Long) buffer(total_frags + 31 / 32, 0);
+          ACE_UINT32 numBits = 0;
+          size_t idx = 0;
+          const ACE_UINT32 base = reassembly_.get_gaps(sn, pub_id, &buffer[0], static_cast<CORBA::ULong>(buffer.size()), numBits);
+          const CORBA::ULong end = base + numBits;
+          for (CORBA::ULong i = base; i <= end; i += 256) {
+            const CORBA::ULong remain = end - i;
+            const CORBA::ULong len = std::min(remain, static_cast<CORBA::ULong>(256));
+            const CORBA::ULong len32 = (len + 31) / 32;
+            const CORBA::ULong len8 = len32 * 4;
+            if (std::memcmp(&buffer[idx], &empty_buffer[0], len8) != 0) {
+              std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
+              p.first = sn;
+              frag_info->push_back(p);
+              RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+              missing_frags.numBits = len;
+              missing_frags.bitmapBase.value = i;
+              missing_frags.bitmap.length(len32);
+              std::memcpy(missing_frags.bitmap.get_buffer(), &buffer[idx], len8);
+            }
+            idx += 8;
+          }
+        } else {
+          std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
+          p.first = sn;
+          frag_info->push_back(p);
+          RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
+          missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
+          missing_frags.bitmap.length(8); // start at max length
+          missing_frags.bitmapBase.value =
+            reassembly_.get_gaps(sn, pub_id, missing_frags.bitmap.get_buffer(),
+                                 8, missing_frags.numBits);
+          // reduce length in case get_gaps() didn't need all that room
+          missing_frags.bitmap.length((missing_frags.numBits + 31) / 32);
+        }
       } else {
         return true;
       }
@@ -1093,14 +1130,12 @@ RtpsUdpReceiveStrategy::MessageReceiver::reset(const ACE_INET_Addr& addr,
   directed_ = false;
 
   unicast_reply_locator_list_.length(1);
-  unicast_reply_locator_list_[0].kind = address_to_kind(addr);
+  address_to_locator(unicast_reply_locator_list_[0], addr);
   unicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
-  RTPS::address_to_bytes(unicast_reply_locator_list_[0].address, addr);
 
   multicast_reply_locator_list_.length(1);
-  multicast_reply_locator_list_[0].kind = address_to_kind(addr);
+  address_to_locator(multicast_reply_locator_list_[0], addr);
   multicast_reply_locator_list_[0].port = LOCATOR_PORT_INVALID;
-  RTPS::assign(multicast_reply_locator_list_[0].address, LOCATOR_ADDRESS_INVALID);
 
   have_timestamp_ = false;
   timestamp_ = TIME_INVALID;

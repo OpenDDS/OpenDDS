@@ -17,14 +17,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportReassembly::FragKey::FragKey(const PublicationId& pubId,
+FragKey::FragKey(const PublicationId& pubId,
                                       const SequenceNumber& dataSampleSeq)
   : publication_(pubId)
   , data_sample_seq_(dataSampleSeq)
 {
 }
 
-GUID_tKeyLessThan TransportReassembly::FragKey::compare_;
+GUID_tKeyLessThan FragKey::compare_;
 
 TransportReassembly::FragRange::FragRange(const SequenceRange& seqRange,
                                           const ReceivedDataSample& data)
@@ -189,10 +189,16 @@ TransportReassembly::insert(FragRangeList& flist,
 
 bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
-                               const RepoId& pub_id) const
+                               const RepoId& pub_id,
+                               ACE_UINT32& total_frags) const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  return fragments_.count(FragKey(pub_id, seq));
+  const FragInfoMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
+  if (iter != fragments_.end()) {
+    total_frags = iter->second.total_frags_;
+    return true;
+  }
+  return false;
 }
 
 void
@@ -233,18 +239,21 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
   if (first != 1) {
     // Represent the "gap" before the first list element.
     // base == 1 and the first 2 args to fill_bitmap_range() are deltas of base
+    ACE_CDR::ULong bits_added = 0;
     DisjointSequence::fill_bitmap_range(0, first.getLow() - 2,
-                                        bitmap, length, numBits);
+                                        bitmap, length, numBits, bits_added);
   } else if (flist.size() == 1) {
     // No gaps, but we know there are (at least 1) more_fragments
     if (iter->second.total_frags_ == 0) {
-      DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits);
+      ACE_CDR::ULong bits_added = 0;
+      DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits, bits_added);
     } else {
       const size_t rlimit = static_cast<size_t>(flist.back().transport_seq_.second.getValue() - 1);
       const CORBA::ULong ulimit = static_cast<CORBA::ULong>(iter->second.total_frags_ - (base < rlimit ? rlimit : base));
+      ACE_CDR::ULong bits_added = 0;
       DisjointSequence::fill_bitmap_range(0,
                                           ulimit,
-                                          bitmap, length, numBits);
+                                          bitmap, length, numBits, bits_added);
     }
     // NOTE: this could send a nack for fragments that are in flight
     // need to defer setting bitmap till heartbeat extending logic
@@ -260,7 +269,8 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
     }
     const CORBA::ULong low = it->transport_seq_.second.getLow() + 1 - base,
                        high = it_next->transport_seq_.first.getLow() - 1 - base;
-    DisjointSequence::fill_bitmap_range(low, high, bitmap, length, numBits);
+    ACE_CDR::ULong bits_added = 0;
+    DisjointSequence::fill_bitmap_range(low, high, bitmap, length, numBits, bits_added);
   }
 
   return base;

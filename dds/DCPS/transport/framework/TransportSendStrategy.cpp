@@ -885,6 +885,7 @@ TransportSendStrategy::stop()
                    ACE_TEXT("terminating with %d unsent bytes.\n"),
                    size));
       }
+      pkt_chain_ = 0;
     }
 
     if (elems_.size()) {
@@ -939,6 +940,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "
               "graceful disconnecting, so discard message.\n"));
+        guard.release();
         element->data_dropped(true);
         return;
       }
@@ -1920,7 +1922,12 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)
 {
-  GuardType guard(lock_);
+  const TransportQueueElement::MatchOnElement moe(element);
+  {
+    GuardType guard(lock_);
+    do_remove_sample(GUID_UNKNOWN, moe);
+  }
+
   element->data_delivered();
 }
 

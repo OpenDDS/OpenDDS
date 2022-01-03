@@ -157,6 +157,8 @@ module Bench {
       SpawnedProcessId spawned_process_id;
       // Whether we expect a WorkerReport from this process
       boolean expect_worker_report;
+      // Whether we ignore exit errors from this process
+      boolean ignore_errors;
     };
     typedef sequence<SpawnedProcessConfig> SpawnedProcessConfigs;
 
@@ -202,6 +204,8 @@ module Bench {
       string command;
       // Whether the test controller should not expect a report from this worker instance. Defaults to false.
       boolean no_report;
+      // Whether the test controller should ignore exit errors from this worker instance. Defaults to false.
+      boolean ignore_errors;
       // Filename of the JSON Serialized Bench::WorkerConfig. Required. Config is modified
       // and transferred to node_controllers as dictated by the scenario.
       string config;

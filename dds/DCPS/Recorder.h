@@ -10,9 +10,13 @@
 #define OPENDDS_DCPS_RECORDER_H
 
 #include "LocalObject.h"
-#include "RcHandle_T.h"
+#include "PoolAllocator.h"
 #include "RawDataSample.h"
-#include "dds/DdsDcpsInfrastructureC.h"
+#include "RcHandle_T.h"
+
+#include <dds/DdsDcpsInfrastructureC.h>
+
+#include "XTypes/DynamicData.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -98,6 +102,10 @@ public:
    *
    */
   virtual RecorderListener_rch get_listener() = 0;
+
+  virtual XTypes::DynamicData get_dynamic_data(const RawDataSample& sample) = 0;
+  virtual void check_encap(bool b) = 0;
+  virtual bool check_encap() const = 0;
 };
 
 }
@@ -114,8 +122,7 @@ struct OpenDDS_Dcps_Export Objref_Traits< ::OpenDDS::DCPS::Recorder> {
   static ::OpenDDS::DCPS::Recorder_ptr duplicate( ::OpenDDS::DCPS::Recorder_ptr p);
   static void release(::OpenDDS::DCPS::Recorder_ptr p);
   static ::OpenDDS::DCPS::Recorder_ptr nil();
-  static ::CORBA::Boolean marshal(const ::OpenDDS::DCPS::Recorder_ptr p,
-                                TAO_OutputCDR& cdr);
+  static bool marshal(const ::OpenDDS::DCPS::Recorder_ptr p, TAO_OutputCDR& cdr);
 };
 
 } // namespace TAO

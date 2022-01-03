@@ -84,7 +84,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
           }
 
           if (parse_parameters.tags.empty()) {
-            std::cout << "Missing tag types";
+            std::cout << "Missing tag types" << std::endl;
             return false;
           }
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--stats"))) {
@@ -105,7 +105,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
           }
 
           if (parse_parameters.stats.empty()) {
-            std::cout << "Missing stat types";
+            std::cout << "Missing stat types" << std::endl;
             return false;
           }
         } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--values"))) {
@@ -126,7 +126,7 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
           }
 
           if (parse_parameters.values.empty()) {
-            std::cout << "Missing value types";
+            std::cout << "Missing value types" << std::endl;
             return false;
           }
         } else {
@@ -202,10 +202,12 @@ void ArgumentParser::show_usage()
     << "     Options:" << std::endl
     << "            single-statistic: Parses out single statistic" << std::endl
     << "            time-series:      Parses out time-series data" << std::endl
+    << "            summary:          Parses out summary data" << std::endl
     << "--output-format <format>      Specifies format of output." << std::endl
     << "     Options:" << std::endl
     << "            stat-block:       Formats output for printing a single consolidated stat block" << std::endl
     << "            gnuplot:          Formats output for plotting with gnuplot" << std::endl
+    << "            json:             Formats output for json" << std::endl
     << "--tags   <list of tags>       Specifies the status block types to output." << std::endl
     << "--stats  <list of stats>      Specifies the status block value types to output." << std::endl
     << "--values <list of values>     Specifies the status block values to output." << std::endl;
@@ -254,7 +256,9 @@ void ArgumentParser::check_for_iperf(Bench::TestController::Report& report)
             char latency_units[16];
             char pps_units[16];
 
-            std::sscanf(line.c_str(), "[ %lu] %lf-%lf %s %lf %s %lf %s %lf %s %lf/ %lf (%lf%%) %lf/ %lf/ %lf/ %lf %s %lf %s %lf", &id, &interval_start, &interval_end, interval_units, &transfer, transfer_units, &bandwidth, bandwidth_units, &jitter, jitter_units, &lost, &total, &lost_pct, &latency_avg, &latency_min, &latency_max, &latency_stdev, latency_units, &pps, pps_units, &netpwr);
+            if (std::sscanf(line.c_str(), "[ %lu] %lf-%lf %s %lf %s %lf %s %lf %s %lf/ %lf (%lf%%) %lf/ %lf/ %lf/ %lf %s %lf %s %lf", &id, &interval_start, &interval_end, interval_units, &transfer, transfer_units, &bandwidth, bandwidth_units, &jitter, jitter_units, &lost, &total, &lost_pct, &latency_avg, &latency_min, &latency_max, &latency_stdev, latency_units, &pps, pps_units, &netpwr) == 0) {
+              continue;
+            }
 
             if (interval_start > 0.001 || is_first_interval) {
               //std::cout << line << std::endl;

@@ -1,11 +1,9 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "RecorderImpl.h"
 
@@ -68,7 +66,8 @@ RecorderImpl::RecorderImpl()
     make_rch<RemoveAssociationSweeper<RecorderImpl> >(TheServiceParticipant->reactor(),
                                          TheServiceParticipant->reactor_owner(),
                                          this)),
-  is_bit_(false)
+  is_bit_(false),
+  check_encap_(true)
 {
   requested_incompatible_qos_status_.total_count = 0;
   requested_incompatible_qos_status_.total_count_change = 0;
@@ -114,11 +113,11 @@ RecorderImpl::cleanup()
   if (!disco->remove_subscription(this->domain_id_,
                                   participant_servant_->get_id(),
                                   this->subscription_id_)) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RecorderImpl::cleanup: ")
-                      ACE_TEXT(" could not remove subscription from discovery.\n")),
-                     DDS::RETCODE_ERROR);
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::cleanup: "
+        "could not remove subscription from discovery\n"));
+    }
+    return DDS::RETCODE_ERROR;
   }
 
   // Call remove association before unregistering the datareader from the transport,
@@ -154,11 +153,8 @@ void RecorderImpl::init(
   DomainParticipantImpl*     participant,
   DDS::SubscriberQos         subqos)
 {
-  //
-  if (DCPS_debug_level >= 1) {
-
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) RecorderImpl::init\n")));
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::init\n"));
   }
 
 
@@ -168,12 +164,6 @@ void RecorderImpl::init(
   }
 
   CORBA::String_var topic_name = a_topic_desc->get_name();
-
-#if !defined (DDS_HAS_MINIMUM_BIT)
-  CORBA::String_var type_name = a_topic_desc->get_type_name();
-  is_bit_ = topicIsBIT(topic_name.in(), type_name);
-#endif   // !defined (DDS_HAS_MINIMUM_BIT)
-
   qos_ = qos;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -224,23 +214,33 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
   // or statuses related to samples.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-  if (DCPS_debug_level > 9) {
+  if (DCPS_debug_level >= 8) {
     ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) RecorderImpl::data_received: ")
-               ACE_TEXT("%C received sample: %C.\n"),
+               "(%P|%t) RecorderImpl::data_received: "
+               "%C received sample: %C\n",
                LogGuid(subscription_id_).c_str(),
                to_string(sample.header_).c_str()));
   }
 
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    Encoding::Kind kind = Encoding::KIND_UNALIGNED_CDR;
+    if (sample.header_.cdr_encapsulation_ && check_encap_) {
+      Encoding enc;
+      Serializer ser(sample.sample_.get(), enc);
+      EncapsulationHeader encap;
+      if (ser >> encap && encap.to_any_encoding(enc)) {
+        kind = enc.kind();
+      }
+    }
     RawDataSample rawSample(sample.header_,
                             static_cast<MessageId> (sample.header_.message_id_),
                             sample.header_.source_timestamp_sec_,
                             sample.header_.source_timestamp_nanosec_,
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
-                            sample.sample_.get());
+                            sample.sample_.get(),
+                            kind);
     listener_->on_sample_data_received(this, rawSample);
   }
 }
@@ -263,18 +263,27 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 }
 
 void
+RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti)
+{
+  XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
+  XTypes::TypeObject cto = tls->get_type_object(ti);
+  XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, pub_id);
+  if (DCPS_debug_level >= 4) {
+    ACE_DEBUG((LM_DEBUG,
+               "(%P|%t) RecorderImpl::add_association: "
+               "DynamicType added to map with guid: %C\n", LogGuid(pub_id).c_str()));
+  }
+  dt_map_.insert(std::make_pair(pub_id, dt));
+}
+
+void
 RecorderImpl::add_association(const RepoId&            yourId,
                               const WriterAssociation& writer,
                               bool                     active)
 {
-    ACE_DEBUG((LM_DEBUG, "RecorderImpl::add_association\n"));
-  //
-  // The following block is for diagnostic purposes only.
-  //
-  if (DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) RecorderImpl::add_association - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
+  if (DCPS_debug_level >= 4) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::add_association: "
+               "bit %d local %C remote %C\n",
                is_bit_,
                LogGuid(yourId).c_str(),
                LogGuid(writer.writerId).c_str()));
@@ -373,10 +382,9 @@ RecorderImpl::add_association(const RepoId&            yourId,
       (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
     if (!this->associate(data, active)) {
-      if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
-                   ACE_TEXT("ERROR: transport layer failed to associate.\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::add_association: "
+                   "transport layer failed to associate\n"));
       }
       return;
     }
@@ -507,7 +515,7 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
     return;
   }
 
-  if (DCPS_debug_level >= 1) {
+  if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
@@ -570,7 +578,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     return;
   }
 
-  if (DCPS_debug_level >= 1) {
+  if (DCPS_debug_level >= 4) {
     GuidConverter reader_converter(subscription_id_);
     GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
@@ -604,15 +612,21 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     for (CORBA::ULong i = 0; i < wr_len; i++) {
       PublicationId writer_id = writers[i];
 
-      WriterMapType::iterator it = this->writers_.find(writer_id);
+      if (dt_map_.erase(writer_id) == 0) {
+        if (DCPS_debug_level >= 4) {
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::remove_associations_i: -"
+            "failed to find writer_id in the DynamicTypeByPubId map.\n"));
+        }
+      }
 
+      WriterMapType::iterator it = this->writers_.find(writer_id);
       if (it != this->writers_.end()) {
         it->second->removed();
         remove_association_sweeper_->cancel_timer(it->second);
       }
 
       if (this->writers_.erase(writer_id) == 0) {
-        if (DCPS_debug_level >= 1) {
+        if (DCPS_debug_level >= 4) {
           GuidConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
@@ -846,10 +860,10 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
           qos,
           subscriber_qos);
       if (!status) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) RecorderImpl::set_qos, ")
-                          ACE_TEXT("qos not updated.\n")),
-                         DDS::RETCODE_ERROR);
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::set_qos: qos not updated\n"));
+        }
+        return DDS::RETCODE_ERROR;
       }
     }
 
@@ -920,7 +934,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
 DDS::ReturnCode_t
 RecorderImpl::enable()
 {
-  if (DCPS_debug_level >= 1) {
+  if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::enable\n")));
   }
@@ -938,16 +952,17 @@ RecorderImpl::enable()
 
   // if (topic_servant_ && !transport_disabled_) {
   if (topic_servant_) {
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) RecorderImpl::enable_transport\n")));
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::enable: enable_transport\n"));
+    }
 
     try {
       this->enable_transport(this->qos_.reliability.kind == DDS::RELIABLE_RELIABILITY_QOS,
                              this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
     } catch (const Transport::Exception&) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: RecorderImpl::enable, ")
-                 ACE_TEXT("Transport Exception.\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: Transport Exception\n"));
+      }
       return DDS::RETCODE_ERROR;
     }
 
@@ -960,14 +975,11 @@ RecorderImpl::enable()
     Discovery_rch disco =
       TheServiceParticipant->get_discovery(this->domain_id_);
 
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) RecorderImpl::add_subscription\n")));
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::enable: add_subscription\n"));
+    }
 
     XTypes::TypeInformation type_info;
-    type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
-    type_info.minimal.dependent_typeid_count = 0;
-    type_info.complete.typeid_with_size.typeobject_serialized_size = 0;
-    type_info.complete.dependent_typeid_count = 0;
 
     this->subscription_id_ =
       disco->add_subscription(this->domain_id_,
@@ -983,9 +995,10 @@ RecorderImpl::enable()
                               type_info);
 
     if (this->subscription_id_ == OpenDDS::DCPS::GUID_UNKNOWN) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: RecorderImpl::enable, ")
-                 ACE_TEXT("add_subscription returned invalid id.\n")));
+      if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RecorderImpl::enable: "
+          "add_subscription returned invalid id\n"));
+      }
       return DDS::RETCODE_ERROR;
     }
   }
@@ -1044,6 +1057,30 @@ RecorderImpl::repoid_to_bit_key(const GUID_t& id,
   return ret;
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
+
+XTypes::DynamicData RecorderImpl::get_dynamic_data(const RawDataSample& sample)
+{
+  const Encoding enc(sample.encoding_kind_, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
+  const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);
+  if (dt_found == dt_map_.end()) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::get_dynamic_data: "
+        "failed to find GUID: %C in DynamicTypeByPubId.\n", LogGuid(sample.publication_id_).c_str()));
+    }
+    return XTypes::DynamicData();
+  }
+
+  const XTypes::DynamicType_rch dt = dt_found->second;
+  XTypes::DynamicData dd(sample.sample_.get(), enc, dt);
+  if (!dd.check_xcdr1_mutable(dt)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::get_dynamic_data: "
+        "Encountered unsupported combination of XCDR1 encoding and mutable extensibility.\n"));
+    }
+    return XTypes::DynamicData();
+  }
+  return dd;
+}
 
 } // namespace DCPS
 } // namespace

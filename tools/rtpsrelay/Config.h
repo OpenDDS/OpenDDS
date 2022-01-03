@@ -5,6 +5,8 @@
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 
+#include <list>
+
 namespace RtpsRelay {
 
 class Config {
@@ -12,6 +14,7 @@ public:
   Config()
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
+    , inactive_period_(60) // 1 minute
     , max_pending_(0)
     , pending_timeout_(60) // 1 minute
 #ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
@@ -28,6 +31,9 @@ public:
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
+    , thread_monitor_period_(5)
+    , thread_monitor_history_depth_(1)
+    , thread_monitor_output_(0)
   {}
 
   void relay_id(const std::string& value)
@@ -58,6 +64,16 @@ public:
   const OpenDDS::DCPS::TimeDuration& lifespan() const
   {
     return lifespan_;
+  }
+
+  void inactive_period(const OpenDDS::DCPS::TimeDuration& value)
+  {
+    inactive_period_ = value;
+  }
+
+  const OpenDDS::DCPS::TimeDuration& inactive_period() const
+  {
+    return inactive_period_;
   }
 
   void max_pending(size_t value)
@@ -240,10 +256,41 @@ public:
     return restart_detection_;
   }
 
+  void thread_monitor_period(OpenDDS::DCPS::TimeDuration tmp)
+  {
+    thread_monitor_period_ = tmp;
+  }
+
+  OpenDDS::DCPS::TimeDuration thread_monitor_period() const
+  {
+    return thread_monitor_period_;
+  }
+
+  void thread_monitor_history_depth(int tmp)
+  {
+    thread_monitor_history_depth_ = tmp;
+  }
+
+  int thread_monitor_history_depth() const
+  {
+    return thread_monitor_history_depth_;
+  }
+
+  void thread_monitor_output(const char *name)
+  {
+    thread_monitor_output_.emplace_back(name);
+  }
+
+  const std::list<std::string>& thread_monitor_output()
+  {
+    return thread_monitor_output_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
+  OpenDDS::DCPS::TimeDuration inactive_period_;
   size_t max_pending_;
   OpenDDS::DCPS::TimeDuration pending_timeout_;
   int buffer_size_;
@@ -262,6 +309,9 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
+  OpenDDS::DCPS::TimeDuration thread_monitor_period_;
+  int thread_monitor_history_depth_;
+  std::list<std::string> thread_monitor_output_;
 };
 
 }

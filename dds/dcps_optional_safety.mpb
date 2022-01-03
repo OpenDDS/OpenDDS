@@ -18,6 +18,7 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
   IDL_Files {
     DdsDcpsGuid.idl
     DdsDcpsCore.idl
+    OpenddsDcpsExt.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsConditionSeq.idl
     DdsDcpsDataReaderSeq.idl
@@ -28,12 +29,14 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
   TypeSupport_Files {
     DdsDcpsGuid.idl
     DdsDcpsCore.idl
+    OpenddsDcpsExt.idl
     DdsDcpsInfrastructure.idl
   }
 
   IDL_Files {
     DdsDcpsGuidTypeSupport.idl
     DdsDcpsCoreTypeSupport.idl
+    OpenddsDcpsExtTypeSupport.idl
     DdsDcpsInfrastructureTypeSupport.idl
   }
 
@@ -44,23 +47,14 @@ feature(no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support, 
     DdsSecurityCore.idl
   }
 
-  // Special for CorbaSeq directory.
-  TypeSupport_Files {
-    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
-    gendir = CorbaSeq
-    CorbaSeq/*.idl
-  }
-
-  verbatim(gnuace, bottom, 1) {
-    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
-  }
-
   Header_Files {
     DdsDcpsConditionSeqS.h
     DdsDcpsCoreS.h
+    OpenddsDcpsExtS.h
     DdsDcpsDataReaderSeqS.h
     DdsDcpsGuidTypeSupportS.h
     DdsDcpsCoreTypeSupportS.h
+    OpenddsDcpsExtTypeSupportS.h
     DdsDcpsInfrastructureTypeSupportS.h
   }
 }
@@ -71,6 +65,7 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
   IDL_Files {
     DdsDcpsGuid.idl
     DdsDcpsCore.idl
+    OpenddsDcpsExt.idl
     DdsDcpsInfoUtils.idl
     DdsDcpsConditionSeq.idl
     DdsDcpsDataReaderSeq.idl
@@ -82,6 +77,7 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
     dcps_ts_flags += -SI
     DdsDcpsGuid.idl
     DdsDcpsCore.idl
+    OpenddsDcpsExt.idl
     DdsDcpsInfoUtils.idl
     DdsSecurityParams.idl
     DdsSecurityCore.idl
@@ -95,20 +91,10 @@ feature(no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support,
     DdsDcpsInfrastructureTypeSupport.idl
   }
 
-  // Special for CorbaSeq directory.
-  TypeSupport_Files {
-    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
-    gendir = CorbaSeq
-    CorbaSeq/*.idl
-  }
-
-  verbatim(gnuace, bottom, 1) {
-    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
-  }
-
   Header_Files {
     DdsDcpsConditionSeqS.h
     DdsDcpsCoreS.h
+    OpenddsDcpsExtS.h
     DdsDcpsDataReaderSeqS.h
     DdsDcpsInfrastructureTypeSupportS.h
   }
@@ -135,10 +121,12 @@ feature(!no_opendds_safety_profile, built_in_topics) : dds_suppress_any_support,
   TypeSupport_Files {
     dcps_ts_flags += -Lspcpp
     DdsDcpsCore.idl
+    OpenddsDcpsExt.idl
   }
 
   IDL_Files {
     DdsDcpsCoreTypeSupport.idl
+    OpenddsDcpsExtTypeSupport.idl
   }
 
   Header_Files {
@@ -153,6 +141,7 @@ feature(!no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support
     DdsDcpsInfoUtils.idl
     DdsSecurityParams.idl
     DdsDcpsCore.idl
+    OpenddsDcpsExt.idl
   }
 
   TypeSupport_Files {
@@ -163,5 +152,16 @@ feature(!no_opendds_safety_profile, !built_in_topics) : dds_suppress_any_support
   TypeSupport_Files {
     dcps_ts_flags += -SI -Sx -Lspcpp -Wb,ts_cpp_include=DdsDcpsSubscriptionC.h
     DdsDcpsDataReaderSeq.idl
+  }
+}
+
+feature(no_opendds_safety_profile) {
+  TypeSupport_Files {
+    dcps_ts_flags += -o CorbaSeq -SI -Wb,tao_include_prefix=tao/
+    gendir = CorbaSeq
+    CorbaSeq/*.idl
+  }
+  verbatim(gnuace, bottom, 1) {
+    idl_stubs: $(foreach f,$(wildcard CorbaSeq/*.idl),$(f:.idl=TypeSupportImpl.h))
   }
 }

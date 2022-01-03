@@ -15,6 +15,7 @@
 #include "RelayPartitionsListener.h"
 #include "RelayStatisticsReporter.h"
 #include "RelayStatusReporter.h"
+#include "RelayThreadMonitor.h"
 #include "SpdpReplayListener.h"
 #include "SubscriptionListener.h"
 
@@ -22,11 +23,17 @@
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-
 #include <dds/DCPS/transport/framework/NetworkAddress.h>
-
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  ifdef OPENDDS_SECURITY
+#    include <dds/DCPS/security/BuiltInPlugins.h>
+#  endif
+#endif
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/security/framework/Properties.h>
+#  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
 
 #include <ace/Arg_Shifter.h>
@@ -36,11 +43,6 @@
 
 #include <cstdlib>
 #include <algorithm>
-
-#ifdef OPENDDS_SECURITY
-#include <dds/DCPS/security/framework/Properties.h>
-#include <dds/DCPS/security/framework/SecurityRegistry.h>
-#endif
 
 using namespace RtpsRelay;
 
@@ -118,6 +120,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-Lifespan"))) {
       config.lifespan(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-InactivePeriod"))) {
+      config.inactive_period(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-MaxPending"))) {
       config.max_pending(ACE_OS::atoi(arg));
@@ -202,6 +207,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Id"))) {
       config.relay_id(arg);
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ThreadMonitorPeriod"))) {
+      config.thread_monitor_period(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ThreadMonitorHistoryDepth"))) {
+      config.thread_monitor_history_depth(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-ThreadMonitorOutput"))) {
+      config.thread_monitor_output(arg);
+      args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return 1;
@@ -268,6 +282,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
+  RelayThreadMonitor thread_mon(config.thread_monitor_period(),
+                                config.thread_monitor_history_depth());
+  for (auto o : config.thread_monitor_output()) {
+    thread_mon.add_reporter(o.c_str());
+  }
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
@@ -297,6 +316,24 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (!relay_partitions_topic) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Partitions topic\n")));
+    return EXIT_FAILURE;
+  }
+
+  RelayParticipantStatusTypeSupport_var relay_participant_status_ts = new RelayParticipantStatusTypeSupportImpl;
+  if (relay_participant_status_ts->register_type(relay_participant, "") != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to register RelayParticipantStatus type\n")));
+    return EXIT_FAILURE;
+  }
+  CORBA::String_var relay_participant_status_type_name = relay_participant_status_ts->get_type_name();
+
+  DDS::Topic_var relay_participant_status_topic =
+    relay_participant->create_topic(RELAY_PARTICIPANT_STATUS_TOPIC_NAME.c_str(),
+                                    relay_participant_status_type_name,
+                                    TOPIC_QOS_DEFAULT, nullptr,
+                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!relay_participant_status_topic) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Participant Status topic\n")));
     return EXIT_FAILURE;
   }
 
@@ -409,7 +446,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Setup relay publisher and subscriber.
-  DDS::Publisher_var relay_publisher = relay_participant->create_publisher(PUBLISHER_QOS_DEFAULT, nullptr,
+  DDS::PublisherQos publisher_qos;
+  relay_participant->get_default_publisher_qos(publisher_qos);
+  publisher_qos.partition.name.length(1);
+  publisher_qos.partition.name[0] = config.relay_id().c_str(); // Publish to dedicated partition.
+
+  DDS::Publisher_var relay_publisher = relay_participant->create_publisher(publisher_qos, nullptr,
                                                                            OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!relay_publisher) {
@@ -417,7 +459,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  DDS::Subscriber_var relay_subscriber = relay_participant->create_subscriber(SUBSCRIBER_QOS_DEFAULT, nullptr,
+  DDS::SubscriberQos subscriber_qos;
+  relay_participant->get_default_subscriber_qos(subscriber_qos);
+  subscriber_qos.partition.name.length(1);
+  subscriber_qos.partition.name[0] = "*"; // Subscribe to all partitions.
+
+  DDS::Subscriber_var relay_subscriber = relay_participant->create_subscriber(subscriber_qos, nullptr,
                                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!relay_subscriber) {
@@ -586,6 +633,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  DDS::DataWriter_var relay_participant_status_writer_var =
+    relay_publisher->create_datawriter(relay_participant_status_topic, writer_qos, nullptr,
+                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+  if (!relay_participant_status_writer_var) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Relay Participant Status data writer\n")));
+    return EXIT_FAILURE;
+  }
+
+  RelayParticipantStatusDataWriter_var relay_participant_status_writer = RelayParticipantStatusDataWriter::_narrow(relay_participant_status_writer_var);
+
+  if (!relay_participant_status_writer) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to narrow Relay Participant Status data writer\n")));
+    return EXIT_FAILURE;
+  }
+
   DDS::DataWriterQos replay_writer_qos;
   relay_publisher->get_default_datawriter_qos(replay_writer_qos);
 
@@ -610,7 +673,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
-  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_statistics_reporter);
+  RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
+  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
@@ -702,7 +766,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ParticipantListener* participant_listener =
-    new ParticipantListener(config, guid_addr_set, application_participant_impl, relay_statistics_reporter);
+    new ParticipantListener(application_participant_impl, guid_addr_set, relay_participant_status_reporter);
   DDS::DataReaderListener_var participant_listener_var(participant_listener);
   DDS::ReturnCode_t ret = participant_reader->set_listener(participant_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
@@ -809,8 +873,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
-
+  if (thread_mon.start() == -1) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to activate Thread Load Monitor\n")));
+    return EXIT_FAILURE;
+  }
   reactor->run_reactor_event_loop();
+  thread_mon.stop();
 
   spdp_vertical_handler.stop();
   sedp_vertical_handler.stop();

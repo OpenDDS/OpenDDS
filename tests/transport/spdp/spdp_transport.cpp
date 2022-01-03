@@ -257,13 +257,13 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 {
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
-    locator.kind = LOCATOR_KIND_UDPv6;
+    locator.kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv6;
     struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
   } else
 #endif
   {
-    locator.kind = LOCATOR_KIND_UDPv4;
+    locator.kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
     struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
     std::memset(locator.address, 0, 12);
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
@@ -347,7 +347,7 @@ bool run_test()
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
-  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
+  nonEmptyList[0].kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
   std::memset(nonEmptyList[0].address, 0, 12);
   nonEmptyList[0].address[12] = 127;
   nonEmptyList[0].address[13] = 0;

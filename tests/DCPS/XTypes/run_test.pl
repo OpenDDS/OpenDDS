@@ -69,6 +69,11 @@ if ($secure) {
       expect_to_fail => 0, topic => "MutableStructT", key_val => 6,
       r_ini => "tcp.ini", w_ini => "tcp.ini",
     },
+    "Tcp_MutableBaseStruct" => {
+      reader_type => "MutableStruct", writer_type => "MutableBaseStruct",
+      expect_to_fail => 0, topic => "MutableBaseStructT", key_val => 7,
+      r_ini => "tcp.ini", w_ini => "tcp.ini",
+    },
     "Tcp_MutableStructNoMatchName" => {
       reader_type => "MutableStruct", writer_type => "ModifiedNameMutableStruct",
       expect_to_fail => 1, topic => "MutableStructT_NoMatchName", key_val => 9,
@@ -311,7 +316,7 @@ sub run_test {
   }
 
   push(@reader_args, @test_args);
-  $test->process("reader_$test_name_param", './Sub/xtypes_subscriber', join(' ', @reader_args));
+  $test->process("reader_$test_name_param", './subscriber', join(' ', @reader_args));
   $test->start_process("reader_$test_name_param");
 
   my @writer_args = ("-DCPSConfigFile $v->{w_ini} -ORBLogFile publisher_$test_name_param.log --type $v->{writer_type}");
@@ -320,7 +325,7 @@ sub run_test {
   }
 
   push(@writer_args, @test_args);
-  $test->process("writer_$test_name_param", './Pub/xtypes_publisher', join(' ', @writer_args));
+  $test->process("writer_$test_name_param", './publisher', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
 
   $status |= $test->wait_kill("reader_$test_name_param", 30);

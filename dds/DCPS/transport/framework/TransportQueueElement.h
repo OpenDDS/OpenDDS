@@ -88,6 +88,16 @@ public:
     const char* data_;
   };
 
+  class OpenDDS_Dcps_Export MatchOnElement : public MatchCriteria {
+  public:
+    explicit MatchOnElement(const TransportQueueElement* element) : element_(element) {}
+    virtual ~MatchOnElement();
+    virtual bool matches(const TransportQueueElement& candidate) const;
+    virtual bool unique() const { return true; }
+  private:
+    const TransportQueueElement* element_;
+  };
+
   /// Invoked when the sample is dropped from a DataLink due to a
   /// remove_sample() call.
   /// The dropped_by_transport flag true indicates the data dropping is initiated
@@ -158,6 +168,9 @@ public:
 
   /// Is this QueueElement the result of fragmentation?
   virtual bool is_fragment() const { return false; }
+
+  /// Is this QueueElement the last result of fragmentation?
+  virtual bool is_last_fragment() const { return false; }
 
   virtual bool is_request_ack() const { return false; }
 

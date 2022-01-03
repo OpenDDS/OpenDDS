@@ -55,11 +55,11 @@ public:
 
 #if defined ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef OPENDDS_VECTOR(Key) KeyVec;
+  typedef OPENDDS_VECTOR(RcHandle<Key>) KeyVec;
   typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeyVec) IdMapType;
 #else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef OPENDDS_VECTOR(Key) KeyVec;
+  typedef OPENDDS_VECTOR(RcHandle<Key>) KeyVec;
   typedef OPENDDS_MAP_T(GUID_t, KeyVec) IdMapType;
 #endif
 
@@ -76,10 +76,11 @@ public:
       if (pos == cache.map_.end()) {
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
+        const RcHandle<Key> key_rch = make_rch<Key>(key);
         GuidSet set;
         key.get_contained_guids(set);
         for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
-          cache.id_map_[*it].push_back(key);
+          cache.id_map_[*it].push_back(key_rch);
         }
         is_new_ = true;
       } else {
@@ -138,10 +139,11 @@ public:
       rch->expires_ = expires;
     } else {
       rch = make_rch<AddressCacheEntry>(addrs, expires);
+      const RcHandle<Key> key_rch = make_rch<Key>(key);
       GuidSet set;
       key.get_contained_guids(set);
       for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
-        id_map_[*it].push_back(key);
+        id_map_[*it].push_back(key_rch);
       }
     }
   }
@@ -158,7 +160,7 @@ public:
     typename IdMapType::iterator pos = id_map_.find(val);
     if (pos != id_map_.end()) {
       for (typename KeyVec::iterator it = pos->second.begin(); it != pos->second.end(); ++it) {
-        map_.erase(*it);
+        map_.erase(**it);
       }
       id_map_.erase(pos);
     }

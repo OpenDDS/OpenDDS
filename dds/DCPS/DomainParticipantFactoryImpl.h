@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -17,8 +15,8 @@
 
 #include <ace/Thread_Mutex.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -80,7 +78,9 @@ public:
   /// Make a copy of the participants map for reading.
   DPMap participants() const;
 
-  void cleanup();
+  DDS::ReturnCode_t delete_all_participants();
+
+  size_t participant_count() const;
 
 private:
   DDS::DomainParticipantFactoryQos qos_;
@@ -92,7 +92,7 @@ private:
   DPMap participants_;
 
   /// Protect the participant collection.
-  mutable ACE_Thread_Mutex participants_protector_;
+  mutable ACE_Recursive_Thread_Mutex participants_protector_;
 
   /// Instance handle generators for non-repo backed entities
   /// (i.e. subscribers and publishers).

@@ -8,6 +8,7 @@
 #ifndef OPENDDS_DCPS_RTPS_RTPSCORE_IDL
 #define OPENDDS_DCPS_RTPS_RTPSCORE_IDL
 
+#include "dds/OpenddsDcpsExt.idl"
 #include "dds/DdsDcpsInfoUtils.idl"
 #include "dds/DdsDcpsInfrastructure.idl"
 
@@ -104,11 +105,11 @@ module OpenDDS {
       unsigned long fraction;
     };
 
-    const long LOCATOR_KIND_INVALID = -1;
-    const long LOCATOR_KIND_RESERVED = 0;
-    const long LOCATOR_KIND_UDPv4 = 1;
-    const long LOCATOR_KIND_UDPv6 = 2;
-    const unsigned long LOCATOR_PORT_INVALID = 0;
+    const long LOCATOR_KIND_INVALID = DCPS::LOCATOR_KIND_INVALID;
+    const long LOCATOR_KIND_RESERVED = DCPS::LOCATOR_KIND_RESERVED;
+    const long LOCATOR_KIND_UDPv4 = DCPS::LOCATOR_KIND_UDPv4;
+    const long LOCATOR_KIND_UDPv6 = DCPS::LOCATOR_KIND_UDPv6;
+    const unsigned long LOCATOR_PORT_INVALID = DCPS::LOCATOR_PORT_INVALID;
     // see LOCATOR_* constants in BaseMessageTypes.h
 
     /* Specialization of Locator_t used to hold UDP IPv4 locators using a more
@@ -146,7 +147,7 @@ module OpenDDS {
     };
 
     struct KeyHash_t {
-      DCPS::OctetArray16 value;
+      DDS::OctetArray16 value;
     };
 
     struct StatusInfo_t {

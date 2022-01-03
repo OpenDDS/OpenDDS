@@ -83,12 +83,7 @@ DataLink::send_start_i()
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     strategy->send_start();
@@ -128,12 +123,7 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (strategy) {
     strategy->send(element, relink);
@@ -161,12 +151,7 @@ DataLink::send_stop_i(RepoId repoId)
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     strategy->send_stop(repoId);
@@ -193,12 +178,7 @@ DataLink::remove_sample(const DataSampleElement* sample)
     }
   }
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     return strategy->remove_sample(sample);
@@ -215,12 +195,7 @@ DataLink::remove_all_msgs(const RepoId& pub_id)
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     strategy->remove_all_msgs(pub_id);
@@ -304,7 +279,10 @@ ACE_INLINE
 void
 DataLink::terminate_send()
 {
-  this->send_strategy_->terminate_send(false);
+  TransportSendStrategy_rch strategy = get_send_strategy();
+  if (strategy) {
+    strategy->terminate_send(false);
+  }
 }
 
 ACE_INLINE
@@ -390,6 +368,14 @@ ACE_INLINE
 void
 DataLink::send_final_acks (const RepoId& /*readerid*/)
 {
+}
+
+ACE_INLINE
+TransportSendStrategy_rch
+DataLink::get_send_strategy()
+{
+  GuardType guard(strategy_lock_);
+  return send_strategy_;
 }
 
 }

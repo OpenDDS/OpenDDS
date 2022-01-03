@@ -1,0 +1,28 @@
+project(*Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+
+  exename = subscriber
+
+  TypeSupport_Files {
+    Common.idl
+    Subscriber.idl
+  }
+
+  Source_Files {
+    Subscriber.cpp
+  }
+}
+
+project(*Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_test, opendds_optional_security {
+
+  exename = publisher
+  after += *Subscriber
+
+  TypeSupport_Files {
+    Common.idl
+    Publisher.idl
+  }
+
+  Source_Files {
+    Publisher.cpp
+  }
+}

@@ -256,6 +256,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
   pub_participant->delete_contained_entities();
   sub_participant->delete_contained_entities();
   dpf->delete_participant(pub_participant.in());
+  dpf->delete_participant(sub_participant.in());
 
   TheServiceParticipant->shutdown();
 

@@ -38,12 +38,14 @@ enum ThreadStatus {
 struct OpenDDS_Dcps_Export ThreadStatusManager {
   struct Thread {
     Thread() {}
-    Thread(const SystemTimePoint& time, ThreadStatus status)
+    Thread(const SystemTimePoint& time, ThreadStatus status, double util)
       : timestamp(time)
       , status(status)
+      , utilization(util)
     {}
     SystemTimePoint timestamp;
     ThreadStatus status;
+    double utilization;
     // TODO(iguessthislldo): Add Participant GUID
   };
   typedef OPENDDS_MAP(String, Thread) Map;
@@ -54,6 +56,9 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   /// safety_profile_tid is the thread id under safety profile, otherwise unused.
   /// name is for a more human-friendly name that will be appended to the key.
   static String get_key(const char* safety_profile_tid = "", const String& name = "");
+
+  /// Update the busy percent for the identified thread
+  bool update_busy(const String& key, double pbusy);
 
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.

@@ -84,16 +84,17 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
   return 0;
 }
 
-AgentImpl::AgentImpl() :
-  ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
-  unfreeze_(false),
-  ncm_listener_added_(false),
-  remote_peer_reflexive_counter_(0)
-  {
-    TheServiceParticipant->set_shutdown_listener(this);
-  }
+AgentImpl::AgentImpl()
+  : ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , unfreeze_(false)
+  , ncm_listener_added_(false)
+  , remote_peer_reflexive_counter_(0)
+{
+  // Bind the lifetime of this to the service participant.
+  TheServiceParticipant->set_shutdown_listener(DCPS::static_rchandle_cast<ShutdownListener>(rchandle_from(this)));
+}
 
-void AgentImpl::add_endpoint(Endpoint* a_endpoint)
+void AgentImpl::add_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
@@ -115,7 +116,7 @@ void AgentImpl::add_endpoint(Endpoint* a_endpoint)
   }
 }
 
-void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
+void AgentImpl::remove_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
@@ -140,7 +141,7 @@ void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
   }
 }
 
-AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
+AgentInfo AgentImpl::get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoint) const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, AgentInfo());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
@@ -148,9 +149,9 @@ AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
   return pos->second->agent_info();
 }
 
-void AgentImpl::add_local_agent_info_listener(Endpoint* a_endpoint,
+void AgentImpl::add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                               const DCPS::RepoId& a_local_guid,
-                                              AgentInfoListener* a_agent_info_listener)
+                                              DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
@@ -158,7 +159,7 @@ void AgentImpl::add_local_agent_info_listener(Endpoint* a_endpoint,
   pos->second->add_agent_info_listener(a_local_guid, a_agent_info_listener);
 }
 
-void AgentImpl::remove_local_agent_info_listener(Endpoint* a_endpoint,
+void AgentImpl::remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                                  const DCPS::RepoId& a_local_guid)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
@@ -167,7 +168,7 @@ void AgentImpl::remove_local_agent_info_listener(Endpoint* a_endpoint,
   pos->second->remove_agent_info_listener(a_local_guid);
 }
 
-void  AgentImpl::start_ice(Endpoint* a_endpoint,
+void  AgentImpl::start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                            const DCPS::RepoId& a_local_guid,
                            const DCPS::RepoId& a_remote_guid,
                            const AgentInfo& a_remote_agent_info)
@@ -180,7 +181,7 @@ void  AgentImpl::start_ice(Endpoint* a_endpoint,
   check_invariants();
 }
 
-void AgentImpl::stop_ice(Endpoint* a_endpoint,
+void AgentImpl::stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                          const DCPS::RepoId& a_local_guid,
                          const DCPS::RepoId& a_remote_guid)
 {
@@ -192,7 +193,7 @@ void AgentImpl::stop_ice(Endpoint* a_endpoint,
   check_invariants();
 }
 
-ACE_INET_Addr  AgentImpl::get_address(Endpoint* a_endpoint,
+ACE_INET_Addr  AgentImpl::get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                       const DCPS::RepoId& a_local_guid,
                                       const DCPS::RepoId& a_remote_guid) const
 {
@@ -203,7 +204,7 @@ ACE_INET_Addr  AgentImpl::get_address(Endpoint* a_endpoint,
 }
 
 // Receive a STUN message.
-void  AgentImpl::receive(Endpoint* a_endpoint,
+void  AgentImpl::receive(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                          const ACE_INET_Addr& a_local_address,
                          const ACE_INET_Addr& a_remote_address,
                          const STUN::Message& a_message)

@@ -96,6 +96,8 @@ public:
 
   virtual const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getMinimalTypeMap() const = 0;
+  virtual const XTypes::TypeIdentifier& getCompleteTypeIdentifier() const = 0;
+  virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
   virtual Extensibility getExtensibility() const = 0;
 
@@ -105,10 +107,22 @@ public:
   void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
 
 private:
+  static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
+
   virtual const char* default_type_name() const = 0;
 
+  void to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,
+                      const XTypes::TypeIdentifier& ti,
+                      const XTypes::TypeMap& type_map) const;
+
+  void populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
+                               XTypes::EquivalenceKind ek) const;
+
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
+
 };
+
+const char* kind_to_string(const XTypes::EquivalenceKind ek);
 
 } // namespace DCPS
 } // namespace OpenDDS

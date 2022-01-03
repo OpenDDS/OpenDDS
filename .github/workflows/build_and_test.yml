@@ -1388,7 +1388,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps --cmake -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -2711,8 +2711,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        echo "leak:getaddrinfo" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        export LSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        export LSAN_OPTIONS=suppressions=$DDS_ROOT/etc/asan-suppr.txt
         export ASAN_OPTIONS=detect_leaks=1:fast_unwind_on_malloc=0
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
@@ -2960,17 +2959,7 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        echo "deadlock:ACE_Data_Block::release_no_delete" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "deadlock:CORBA::ORB_init" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "deadlock:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "race:ACE_Dynamic::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "race:ACE_Event_Handler::reactor" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "race:ACE_Thread_Exit::instance" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "race:TAO::Invocation_Adapter::invoke" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "race:TAO_IIOP_Connection_Handler" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "race:TAO_Leader_Follower" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        echo "race:TAO_ORB_Core" >> $GITHUB_WORKSPACE/OpenDDS/suppr.txt
-        export TSAN_OPTIONS=suppressions=$GITHUB_WORKSPACE/OpenDDS/suppr.txt
+        export TSAN_OPTIONS="history_size=7 suppressions=$DDS_ROOT/etc/tsan-suppr.txt"
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
@@ -8537,15 +8526,15 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
-    - name: Build CMake Tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build .
+#    - name: Build CMake Tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        mkdir tests\cmake\build
+#        cd tests\cmake\build
+#        cmake ..
+#        cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -8669,7 +8658,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -Config GH_ACTIONS_W16 --security --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config RTPS -Config WIN32 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS -Config GH_ACTIONS_W16 --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -8882,7 +8871,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -9876,3 +9865,16 @@ jobs:
       run: |
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  build_u14_gcc4:
+
+    runs-on: ubuntu-18.04
+
+    steps:
+    - name: Checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: Build
+      run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .

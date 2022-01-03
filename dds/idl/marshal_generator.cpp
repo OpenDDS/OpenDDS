@@ -810,8 +810,9 @@ namespace {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
         if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
             be_global->language_mapping() != BE_GlobalData::LANGMAP_SP_CXX) {
-          be_global->add_include(("dds/CorbaSeq/" + nameOfSeqHeader(elem)
-                                  + "SeqTypeSupportImpl.h").c_str(), BE_GlobalData::STREAM_CPP);
+          const std::string hdr = "dds/CorbaSeq/" + nameOfSeqHeader(elem) + "SeqTypeSupportImpl.h";
+          be_global->conditional_include(hdr.c_str(), BE_GlobalData::STREAM_CPP,
+                                         "#ifndef OPENDDS_SAFETY_PROFILE");
         }
       } else {
         be_global->add_referenced(elem->file_name().c_str());

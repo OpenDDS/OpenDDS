@@ -29,6 +29,7 @@
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -65,9 +66,9 @@ const char SEDP_AGENT_INFO_KEY[] = "SEDP";
 /// Each instance of class Spdp represents the implementation of the RTPS
 /// Simple Participant Discovery Protocol for a single local DomainParticipant.
 class OpenDDS_Rtps_Export Spdp
-  : public DCPS::RcObject
+  : public virtual DCPS::RcObject
 #ifdef OPENDDS_SECURITY
-  , public ICE::AgentInfoListener
+  , public virtual ICE::AgentInfoListener
 #endif
 {
 public:
@@ -215,7 +216,7 @@ public:
   }
 #endif
 
-  ICE::Endpoint* get_ice_endpoint_if_added();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint_if_added();
 
   ParticipantData_t build_local_pdata(
 #ifdef OPENDDS_SECURITY
@@ -227,8 +228,7 @@ public:
   DCPS::RcHandle<RtpsDiscoveryConfig> config() const { return config_; }
   void spdp_rtps_relay_address_change();
 
-  void get_and_reset_relay_message_counts(DCPS::RelayMessageCounts& spdp,
-                                          DCPS::RelayMessageCounts& sedp);
+  void append_transport_statistics(DCPS::TransportStatisticsSequence& seq);
 
   void ignore_domain_participant(const GUID_t& ignoreId);
 
@@ -353,6 +353,11 @@ public:
     return bit_subscriber_;
   }
 
+  RcHandle<DCPS::TransportInst> sedp_transport_inst() const
+  {
+    return sedp_->transport_inst();
+  }
+
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
@@ -438,6 +443,8 @@ private:
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
+  DCPS::TimeDuration lease_duration_;
+  DCPS::TimeDuration lease_extension_;
 
   // Participant:
   const DDS::DomainId_t domain_;
@@ -460,7 +467,7 @@ private:
    */
   bool secure_part_user_data() const;
 
-  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter);
+  void update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter, bool new_participant);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t send_handshake_message(const DCPS::RepoId& guid,
@@ -477,7 +484,7 @@ private:
     : public virtual DCPS::RcEventHandler
     , public virtual DCPS::NetworkConfigListener
 #ifdef OPENDDS_SECURITY
-    , public ICE::Endpoint
+    , public virtual ICE::Endpoint
 #endif
   {
     typedef size_t WriteFlags;
@@ -527,7 +534,7 @@ private:
     void write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags);
     void send(WriteFlags flags, const ACE_INET_Addr& local_address = ACE_INET_Addr());
     const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
-    ssize_t send(const ACE_INET_Addr& addr);
+    ssize_t send(const ACE_INET_Addr& addr, bool relay);
     void close(const DCPS::ReactorTask_rch& reactor_task);
     void dispose_unregister();
     bool open_unicast_socket(u_short port_common, u_short participant_id);
@@ -538,12 +545,12 @@ private:
     void join_multicast_group(const DCPS::NetworkInterface& nic,
                               bool all_interfaces = false);
     void leave_multicast_group(const DCPS::NetworkInterface& nic);
-    void add_address(const DCPS::NetworkInterface& interface,
+    void add_address(const DCPS::NetworkInterface& nic,
                      const ACE_INET_Addr& address);
-    void remove_address(const DCPS::NetworkInterface& interface,
+    void remove_address(const DCPS::NetworkInterface& nic,
                         const ACE_INET_Addr& address);
 
-    ICE::Endpoint* get_ice_endpoint();
+    DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
 #ifdef OPENDDS_SECURITY
     ICE::AddressListType host_addresses() const;
@@ -559,7 +566,6 @@ private:
     Header hdr_;
     DataSubmessage data_;
     DCPS::SequenceNumber seq_;
-    DCPS::TimeDuration lease_duration_;
     u_short uni_port_;
     ACE_SOCK_Dgram unicast_socket_;
     OPENDDS_STRING multicast_interface_;
@@ -608,7 +614,7 @@ private:
     bool network_is_unreachable_;
     bool ice_endpoint_added_;
 
-    DCPS::RelayMessageCounts relay_message_counts_;
+    DCPS::InternalTransportStatistics transport_statistics_;
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;
@@ -727,10 +733,10 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
-  void start_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+  void start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
                  DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                  const ICE::AgentInfo& agent_info);
-  void stop_ice(ICE::Endpoint* endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
+  void stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
                 DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail);
 
   void purge_handshake_deadlines(DiscoveredParticipantIter iter);

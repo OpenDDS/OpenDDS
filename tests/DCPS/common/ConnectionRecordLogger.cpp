@@ -3,6 +3,7 @@
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/JsonValueWriter.h>
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

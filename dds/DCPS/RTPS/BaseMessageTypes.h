@@ -51,7 +51,7 @@ namespace OpenDDS {
 
     const OpenDDS::DCPS::Locator_t LOCATOR_INVALID =
       { LOCATOR_KIND_INVALID, LOCATOR_PORT_INVALID, { 0 } };
-    const OpenDDS::DCPS::OctetArray16 LOCATOR_ADDRESS_INVALID = { 0 };
+    const DDS::OctetArray16 LOCATOR_ADDRESS_INVALID = { 0 };
 
     const LocatorUDPv4_t LOCATORUDPv4_INVALID = { 0, 0 };
 

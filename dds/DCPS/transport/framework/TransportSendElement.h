@@ -44,6 +44,8 @@ public:
 
   virtual bool owned_by_transport();
 
+  virtual bool is_last_fragment() const { return !element_->get_header().more_fragments(); }
+
 protected:
 
   virtual void release_element(bool dropped_by_transport);

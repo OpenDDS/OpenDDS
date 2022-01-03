@@ -305,6 +305,7 @@ SingleSendBuffer::insert_buffer(BufferType& buffer,
 void
 SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                   SequenceNumber fragment,
+                                  bool is_last_fragment,
                                   TransportSendStrategy::QueueType* queue,
                                   ACE_Message_Block* chain)
 {
@@ -322,7 +323,9 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
                                       static_cast<ACE_Message_Block*>(0));
 
   BufferType& buffer = fragments_[sequence][fragment];
-  pre_seq_.erase(sequence);
+  if (is_last_fragment) {
+    pre_seq_.erase(sequence);
+  }
   insert_buffer(buffer, queue, chain);
 
   if (Transport_debug_level > 5) {
@@ -432,7 +435,8 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
 
 void
 SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
-                                     const DisjointSequence& requested_frags)
+                                     const DisjointSequence& requested_frags,
+                                     size_t& cumulative_send_count)
 {
   if (fragments_.empty() || requested_frags.empty()) {
     return;
@@ -463,6 +467,7 @@ SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
       // Either way, we will increment the fragment now to avoid duplicate resends
       if (it->first >= psr[i].first) {
         resend_one(it->second); // overlap - resend fragment buffer
+        ++cumulative_send_count;
       }
       frag_min = it->first + 1; // increment fragment buffer
       ++it;

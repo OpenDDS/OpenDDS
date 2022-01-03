@@ -15,6 +15,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/ConditionVariable.h>
 #include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/ThreadMonitor.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -116,11 +117,14 @@ public:
       TheServiceParticipant->get_thread_status_manager();
     const bool update_thread_status = thread_status_manager && !interval.is_zero();
     const String thread_key = ThreadStatusManager::get_key("QueueTaskBase", name_);
+    ThreadMonitor::GreenLight gl(thread_key.c_str());
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
       T req;
       {
+        ThreadMonitor::RedLight gl(thread_key.c_str());
+
         GuardType guard(this->lock_);
 
         if (this->queue_.is_empty() && !shutdown_initiated_) {

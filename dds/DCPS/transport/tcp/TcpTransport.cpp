@@ -379,6 +379,21 @@ TcpTransport::configure_i(TcpInst& config)
   return true;
 }
 
+void
+TcpTransport::client_stop(const RepoId& local_id)
+{
+  GuardType guard(links_lock_);
+
+  AddrLinkMap::ENTRY* entry;
+
+  for (AddrLinkMap::ITERATOR itr(links_); itr.next(entry); itr.advance()) {
+    entry->int_id_->client_stop(local_id);
+  }
+
+  for (AddrLinkMap::ITERATOR itr(pending_release_links_); itr.next(entry); itr.advance()) {
+    entry->int_id_->client_stop(local_id);
+  }
+}
 
 void
 TcpTransport::shutdown_i()
@@ -655,13 +670,13 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpTransport::connect_tcp_datalink() [%d] - ")
                ACE_TEXT("creating send strategy with priority %d.\n"),
-               last_link_, link.transport_priority()));
+               last_link_.value(), link.transport_priority()));
   }
 
-  connection->id() = last_link_;
+  connection->id() = last_link_.value();
 
   TcpSendStrategy_rch send_strategy (
-    make_rch<TcpSendStrategy>(last_link_, ref(link),
+    make_rch<TcpSendStrategy>(last_link_.value(), ref(link),
                              new TcpSynchResource(link,
                                                   this->config().max_output_pause_period_),
                              this->reactor_task(), link.transport_priority()));

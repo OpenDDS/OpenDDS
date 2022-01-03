@@ -19,6 +19,11 @@ module OpenDDS
     // They are also the InstanceHandle_t in Sample_Info for built-in Topics
     typedef GUID_t RepoId;
 
+    struct MonotonicTime_t {
+      long sec;
+      unsigned long nanosec;
+    };
+
     typedef DDS::OctetSeq TransportBLOB;
 
     struct TransportLocator {
@@ -84,18 +89,6 @@ module OpenDDS
 
     typedef sequence<RepoId> ReaderIdSeq;
 
-    typedef octet OctetArray16[16];
-
-    /* Type used to represent the addressing information needed to send a
-       message to an RTPS Endpoint */
-    struct Locator_t {
-      long kind;
-      unsigned long _port;
-      OctetArray16 address;
-    };
-
-    typedef sequence<Locator_t> LocatorSeq;
-
     typedef string<256> String256;
 
     /* information to enable content filtering */
@@ -132,7 +125,7 @@ module OpenDDS
       WriterProxy_t writerProxy;
     };
 
-  }; // module DDS
+  }; // module DCPS
 }; // module OpenDDS
 
 #endif /* OPENDDS_DCPS_INFO_UTILS_IDL */
