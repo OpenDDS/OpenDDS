@@ -326,7 +326,7 @@ public:
   DDS::ReturnCode_t setup_serialization()
   {
     if (qos_.representation.value.length() > 0 &&
-        qos_.representation.value[0]!= OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION) {
+        qos_.representation.value[0] != OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION) {
       // If the QoS explicitly sets XCDR, XCDR2, or XML, force encapsulation
       cdr_encapsulation(true);
     }
