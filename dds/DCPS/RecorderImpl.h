@@ -17,11 +17,10 @@
 #include "EntityImpl.h"
 #include "TopicImpl.h"
 #include "OwnershipManager.h"
+#include "DCPS_Utils.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/TransportReceiveListener.h"
 #include "transport/framework/TransportClient.h"
-
-#include <dds/DCPS/DCPS_Utils.h>
 
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>

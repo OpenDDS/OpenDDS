@@ -18,14 +18,13 @@
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "unique_ptr.h"
+#include "DCPS_Utils.h"
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #  include "FilterEvaluator.h"
 #endif
 #include "ConditionVariable.h"
 #include "transport/framework/TransportSendListener.h"
 #include "transport/framework/TransportClient.h"
-
-#include <dds/DCPS/DCPS_Utils.h>
 
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsTopicC.h>
