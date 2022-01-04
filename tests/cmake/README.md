@@ -5,6 +5,17 @@ CMake interoperability with the MPC-Generated OpenDDS codebase.
 
 ## Building and Running All the CMake Tests
 
+If you have a new enough CMake, this can be down with:
+
+```bash
+cmake -S . -B build
+cmake --build build
+cd build
+ctest
+```
+
+or with an older CMake:
+
 ```bash
 mkdir build
 cd build

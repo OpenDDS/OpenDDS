@@ -14,10 +14,10 @@ use lib "$ACE_ROOT/bin";
 use lib "$DDS_ROOT/bin";
 use PerlDDS::Run_Test;
 
+use lib "$DDS_ROOT/tools/scripts/modules/";
+use command_utils qw//;
+
 use Getopt::Long;
-use Cwd;
-use POSIX qw(SIGINT);
-use File::Temp qw(tempfile);
 
 use constant windows => $^O eq "MSWin32";
 
@@ -26,72 +26,15 @@ sub cd {
     chdir($dir) or die "auto_run_tests.pl: Error: Cannot chdir to $dir: $!";
 }
 
+my $dry_run = 0;
+
 sub run_command {
-    my $what = shift;
-    my $command = shift;
-    my %args = (
-        capture_stdout => undef,
-        verbose => undef,
-        dry_run => undef,
-        @_,
+    my $test_name = shift;
+    return command_utils::run_command(@_,
+        name => $test_name,
+        script_name => 'auto_run_tests',
+        dry_run => $dry_run,
     );
-    my $capture_stdout = $args{capture_stdout};
-    my $verbose = $args{verbose} // $args{dry_run};
-    my $dry_run = $args{dry_run};
-
-    if ($verbose) {
-        my $cwd = getcwd();
-        print "In \"$cwd\" ", $dry_run ? "would run" : "running", ":\n    $command\n";
-        return (0, 0) if ($dry_run);
-    }
-
-    my $saved_stdout;
-    my $tmp_fd;
-    my $tmp_path;
-
-    if (defined($capture_stdout)) {
-        ($tmp_fd, $tmp_path) = File::Temp::tempfile(UNLINK => 1);
-        open($saved_stdout, '>&', STDOUT);
-        open(STDOUT, '>&', $tmp_fd);
-    }
-
-    my $failed = system($command) ? 1 : 0;
-    my $system_status = $?;
-    my $system_error = $!;
-    my $ran = $system_status != -1;
-
-    if (defined($capture_stdout)) {
-        open(STDOUT, '>&', $saved_stdout);
-        close($tmp_fd);
-    }
-
-    my $exit_status = 0;
-    if ($failed) {
-        $exit_status = $system_status >> 8;
-        my $signal = $system_status & 127;
-        die("auto_run_tests.pl: \"$what\" was interrupted") if ($signal == SIGINT);
-        my $coredump = $system_status & 128;
-        my $error_message;
-        if (!$ran) {
-            $error_message = "failed to run: $system_error";
-        }
-        elsif ($signal) {
-            $error_message = sprintf("exited on signal %d", ($signal));
-            $error_message .= " and created coredump" if ($coredump);
-        }
-        else {
-            $error_message = sprintf("returned with status %d", $exit_status);
-        }
-        print STDERR "auto_run_tests.pl: Error: \"$what\" $error_message\n";
-    }
-
-    if (defined($capture_stdout) && $ran) {
-        open($tmp_fd, $tmp_path);
-        ${$capture_stdout} = do { local $/; <$tmp_fd> };
-        close($tmp_fd);
-    }
-
-    return ($failed, $exit_status);
 }
 
 sub mark_test_start {
@@ -221,7 +164,6 @@ my $cmake_tests = "$DDS_ROOT/tests/cmake";
 # Parse Options
 my $help = 0;
 my $sandbox = '';
-my $dry_run = 0;
 my $show_configs = 0;
 my $show_all_configs = 0;
 my $list_configs = 0;
@@ -387,42 +329,41 @@ foreach my $test_lst (@file_list) {
             $cmd = $subdir.$cmd if ($progNoArgs !~ /\.pl$/);
         }
 
-        run_test($test, $cmd, dry_run => $dry_run);
+        run_test($test, $cmd);
     }
 }
 
 if ($cmake) {
     cd($cmake_build_dir);
 
-    my $fake_name = "Run CMake Tests";
-    mark_test_start($fake_name) unless ($list_tests);
-    my @cmd = ("$ctest");
-    if ($dry_run || $list_tests) {
-        push(@cmd, "--show-only");
-    } else {
-        push(@cmd, "--no-compress-output -T Test");
-    }
-    if ($ctest_args) {
-        push(@cmd, $ctest_args);
-    }
-    if ($ctest_args !~ /--build-config/ && defined($cmake_build_cfg)) {
-        push(@cmd, "--build-config $cmake_build_cfg");
-    }
+    my $fake_name;
+    my $process_name;
+    my $process_func;
+    my $cmake_tests = "$DDS_ROOT/tests/cmake";
+    my @process_cmd = ($python, "$cmake_tests/ctest-to-auto-run-tests.py", $cmake_tests, '.');
     if ($list_tests) {
-        run_command($fake_name, join(' ', @cmd));
-    } else {
-        run_test($fake_name,  join(' ', @cmd), verbose => 1);
-
-        $fake_name = "Process CMake Test Results";
-        mark_test_start($fake_name);
-        my $tests = "$DDS_ROOT/tests/cmake";
-        my $output = "";
-        run_test($fake_name, "$python $tests/ctest-to-auto-run-tests.py $tests .",
-            dry_run => $dry_run,
-            verbose => 1,
-            capture_stdout => \$output);
-        print($output);
+        $process_name = "List CMake Tests";
+        $process_func = \&run_command;
+        push(@process_cmd, '--list');
     }
+    else {
+        $fake_name = "Run CMake Tests";
+        $process_name = "Process CMake Test Results";
+        $process_func = \&run_test;
+        mark_test_start($fake_name);
+        my @run_test_cmd = ($ctest, '--no-compress-output', '-T', 'Test');
+        if ($ctest_args) {
+            push(@run_test_cmd, $ctest_args);
+        }
+        if ($ctest_args !~ /--build-config/ && defined($cmake_build_cfg)) {
+            push(@run_test_cmd, "--build-config $cmake_build_cfg");
+        }
+        run_test($fake_name, \@run_test_cmd, verbose => 1);
+        mark_test_start($process_name);
+    }
+    my $output = "";
+    $process_func->($process_name, \@process_cmd, capture_stdout => \$output);
+    print($output);
 }
 
 # vim: expandtab:ts=4:sw=4
