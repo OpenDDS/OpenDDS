@@ -58,8 +58,8 @@ sub run_test {
     my $command = shift;
 
     my $start_time = time();
-    my ($failed, $exit_status) = run_command($name, $command, @_);
-    mark_test_finish($name, time() - $start_time, $exit_status);
+    my $failed = run_command($name, $command, @_);
+    mark_test_finish($name, time() - $start_time, $failed);
     exit(1) if ($failed && $stop_on_fail);
 }
 

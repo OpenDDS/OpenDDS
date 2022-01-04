@@ -41,7 +41,7 @@ if ($help) {
 
 my $tshark_stdout;
 sub tshark {
-  my ($failed, $exit_status) = command_utils::run_command(
+  my $failed = command_utils::run_command(
     [$tshark_cmd, @_],
     capture_stdout => \$tshark_stdout,
     verbose => 1,
