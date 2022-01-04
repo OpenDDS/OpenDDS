@@ -964,6 +964,7 @@ RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
 void
 RtpsDiscovery::rtps_relay_only_now(bool after)
 {
+  ACE_DEBUG((LM_DEBUG,"RTPS relay only now called with after = %d\n", after));
   const bool before = config_->rtps_relay_only();
   config_->rtps_relay_only(after);
 
@@ -981,6 +982,7 @@ RtpsDiscovery::rtps_relay_only_now(bool after)
 void
 RtpsDiscovery::use_rtps_relay_now(bool after)
 {
+    ACE_DEBUG((LM_DEBUG,"Use RTPS relay now called with after = %d\n", after));
   const bool before = config_->use_rtps_relay();
   config_->use_rtps_relay(after);
 

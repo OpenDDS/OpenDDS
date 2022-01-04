@@ -43,7 +43,6 @@ sub get_relay_args {
   my $n = shift;
   my $o = shift;
   my $port_digit = 3 + $n;
-  my $ps = 1 + ($n - 1) * 4;
   my $outputarg = "";
   $outputarg = "-ThreadMonitorOutput ${o}" if (length($o));
   return join(' ',
@@ -53,7 +52,6 @@ sub get_relay_args {
     "-DCPSSecurityDebugLevel 2",
     "-LogDiscovery 1",
     "-LogActivity 1",
-    "-ThreadMonitorPeriod ${ps}",
     "-LogRelayStatistics 3",
     "-LogParticipantStatistics 1",
     "-DCPSConfigFile relay${n}.ini",

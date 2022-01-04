@@ -73,6 +73,7 @@ module OpenDDS
       BUILT_IN_TOPIC_KEY string thread_id;
       DDS::OctetArray16 participant_guid;
       double utilization;
+      boolean saturated;
     };
 
     const long LOCATOR_KIND_INVALID = -1;

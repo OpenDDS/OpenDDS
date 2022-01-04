@@ -18,6 +18,7 @@
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
+#include "ThreadStatusManager.h"
 #include "../Version.h"
 #ifdef OPENDDS_SECURITY
 #  include "security/framework/SecurityRegistry.h"
@@ -208,6 +209,8 @@ Service_Participant::Service_Participant()
   , persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR)
 #endif
   , bidir_giop_(true)
+  , thread_status_interval_(0)
+  , thread_status_manager_(new ThreadStatusManager)
   , monitor_enabled_(false)
   , shut_down_(false)
   , default_configuration_file_(ACE_TEXT(""))
@@ -242,6 +245,7 @@ Service_Participant::~Service_Participant()
         }
       }
     }
+    delete thread_status_manager_;
   }
 
   const DDS::ReturnCode_t shutdown_status = shutdown();
@@ -512,7 +516,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
       reactor_task_.open_reactor_task(
-        0, thread_status_interval_, &thread_status_manager_, "Service_Participant");
+        0, thread_status_interval_, thread_status_manager_, "Service_Participant");
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
@@ -2885,7 +2889,7 @@ Service_Participant::set_thread_status_interval(TimeDuration interval)
 
 ThreadStatusManager* Service_Participant::get_thread_status_manager()
 {
-  return &thread_status_manager_;
+  return thread_status_manager_;
 }
 
 ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()

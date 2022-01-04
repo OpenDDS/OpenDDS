@@ -32,19 +32,24 @@ struct LoadSummary {
 typedef std::deque<struct Sample> LoadSamples;
 typedef std::deque<struct LoadSummary> LoadHistory;
 typedef std::map<const char*, double> BusyMap;
-typedef std::map<std::string, OpenDDS::DCPS::ThreadStatusManager*> registrants;
+//typedef std::map<std::string, OpenDDS::DCPS::ThreadStatusManager*> registrants;
 
 class ThreadDescriptor : public OpenDDS::DCPS::RcObject
 {
 public:
   ThreadDescriptor(const char *alias, OpenDDS::DCPS::MonotonicTimePoint tnow);
+  bool add_sample(Sample s);
+  void reset_current();
   mutable ACE_Thread_Mutex queue_lock_;
   std::string alias_;
-  OpenDDS::DCPS::ThreadStatusManager *tsm_;
   LoadSamples samples_;
   std::stack<OpenDDS::DCPS::ThreadMonitor::UpdateMode> nested_;
   OpenDDS::DCPS::MonotonicTimePoint last_;
   LoadHistory summaries_;
+  ACE_UINT64 current_busy_;
+  ACE_UINT64 current_idle_;
+  static double high_water_mark;
+  static double low_water_mark;
 };
 
 
@@ -77,8 +82,10 @@ public:
   virtual int svc();
   int start();
   void stop();
+  void force_update();
 private:
   bool running_;
+  bool forced_;
   OpenDDS::DCPS::TimeDuration period_;
 
   typedef ACE_SYNCH_MUTEX LockType;
@@ -98,15 +105,17 @@ private:
  */
 class RelayThreadMonitor : public OpenDDS::DCPS::ThreadMonitor {
 public:
-  explicit RelayThreadMonitor (OpenDDS::DCPS::TimeDuration perd, size_t depth = 1);
+  explicit RelayThreadMonitor (OpenDDS::DCPS::TimeDuration perd,
+                               OpenDDS::DCPS::ThreadStatusManager* tsm);
   ~RelayThreadMonitor() noexcept;
-  virtual void preset(OpenDDS::DCPS::ThreadStatusManager*, const char*);
+  //virtual void preset(OpenDDS::DCPS::ThreadStatusManager*, const char*);
   virtual void update(UpdateMode, const char* = "");
   virtual double get_utilization(const char* key) const;
-
+  virtual void set_levels(double hwm, double lwm);
   size_t thread_count();
   int add_reporter (const char* name);
   void summarize();
+  void summarize_thread(ThreadDescriptor_rch& );
   void report();
 
   int start();
@@ -115,12 +124,13 @@ public:
 protected:
 
   Summarizer summarizer_;
-  registrants pending_reg_;
+  //registrants pending_reg_;
   DescriptorMap descs_;
+  ThreadDescriptor_rch forced_;
   size_t history_depth_;
   BusyMap busy_map_;
   ReporterList reporters_;
-
+  OpenDDS::DCPS::ThreadStatusManager *tsm_;
 };
 
 }

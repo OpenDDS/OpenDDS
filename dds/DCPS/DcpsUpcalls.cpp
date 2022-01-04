@@ -3,7 +3,7 @@
 #include "DcpsUpcalls.h"
 
 #include "Service_Participant.h"
-
+#include "ThreadStatusManager.h"
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -53,6 +53,7 @@ int DcpsUpcalls::svc()
               ACE_DEBUG((LM_DEBUG,
                          "(%P|%t) DcpsUpcalls::svc: Updating thread status\n"));
             }
+
             if (!thread_status_manager_->update(thread_key_)) {
               if (DCPS_debug_level) {
                 ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::svc: "

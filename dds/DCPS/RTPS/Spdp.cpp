@@ -2727,6 +2727,7 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     return;
   }
 
+  local_thread_status_manager_.rtps_flow_control();
 #ifdef OPENDDS_SECURITY
   if (!outer->is_security_enabled()) {
     ICE::AgentInfoMap ai_map;
@@ -4457,6 +4458,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
         data.utilization = 0.0;
+        data.saturated = false;
         bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
       }
 
@@ -4465,6 +4467,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& /*n
         assign(data.participant_guid, guid);
         data.thread_id = i->first.c_str();
         data.utilization = i->second.utilization;
+        data.saturated = i->second.saturated;
         bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->second.timestamp);
       }
     } else if (DCPS::DCPS_debug_level >= 2) {

@@ -867,7 +867,6 @@ namespace OpenDDS {
     using namespace OpenDDS::DCPS;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                      DDS::HANDLE_NIL);
-
 #ifndef OPENDDS_NO_MULTI_TOPIC
     DDS::TopicDescription_var descr = get_topicdescription();
     if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {

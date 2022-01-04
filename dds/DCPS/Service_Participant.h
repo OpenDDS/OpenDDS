@@ -45,6 +45,7 @@ namespace DCPS {
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
+struct ThreadStatusManager;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
@@ -748,7 +749,7 @@ private:
   /// Enable Internal Thread Status Monitoring
   TimeDuration thread_status_interval_;
 
-  ThreadStatusManager thread_status_manager_;
+  ThreadStatusManager* thread_status_manager_;
 
   /// Thread mutex used to protect the static initialization of XTypes data structures
   ACE_Thread_Mutex xtypes_lock_;

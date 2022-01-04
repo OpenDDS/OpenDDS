@@ -44,9 +44,9 @@ public:
 
   virtual void preset(ThreadStatusManager*, const char*);
 
-/**
- * identify a thread as being busy or idle at a specific time.
- */
+  /**
+   * identify a thread as being busy or idle at a specific time.
+   */
   virtual void update(UpdateMode, const char* = "");
 
   /**
@@ -54,6 +54,8 @@ public:
    * of the measured time span. Range is 0.0 to 100.0
    */
   virtual double get_utilization(const char* alias) const;
+
+  virtual void set_levels(double hwm, double lwm);
 
   static ThreadMonitor* installed_monitor_;
 

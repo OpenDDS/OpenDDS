@@ -16,6 +16,7 @@
 #include <dds/DCPS/ConditionVariable.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/ThreadMonitor.h>
+#include <dds/DCPS/ThreadStatusManager.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

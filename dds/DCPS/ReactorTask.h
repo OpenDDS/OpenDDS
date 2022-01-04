@@ -14,7 +14,6 @@
 #include "ReactorInterceptor.h"
 #include "SafetyProfileStreams.h"
 #include "ConditionVariable.h"
-
 #include <ace/Task.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Timer_Heap_T.h>
@@ -30,56 +29,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-enum ThreadStatus {
-  ThreadStatus_Running,
-  ThreadStatus_Finished
-};
-
-struct OpenDDS_Dcps_Export ThreadStatusManager {
-  struct Thread {
-    Thread() {}
-    Thread(const SystemTimePoint& time, ThreadStatus status, double util)
-      : timestamp(time)
-      , status(status)
-      , utilization(util)
-    {}
-    SystemTimePoint timestamp;
-    ThreadStatus status;
-    double utilization;
-    // TODO(iguessthislldo): Add Participant GUID
-  };
-  typedef OPENDDS_MAP(String, Thread) Map;
-
-  static const char* status_to_string(ThreadStatus status);
-
-  /// Get key for map and update.
-  /// safety_profile_tid is the thread id under safety profile, otherwise unused.
-  /// name is for a more human-friendly name that will be appended to the key.
-  static String get_key(const char* safety_profile_tid = "", const String& name = "");
-
-  /// Update the busy percent for the identified thread
-  bool update_busy(const String& key, double pbusy);
-
-  /// Update the status of a thread to indicate it was able to check in at the
-  /// given time. Returns false if failed.
-  bool update(const String& key, ThreadStatus status = ThreadStatus_Running);
-
-  /// To support multiple readers determining that a thread finished without
-  /// having to do something more complicated to cleanup that fact, have a
-  /// Manager for each reader use this to get the information the readers need.
-  bool sync_with_parent(ThreadStatusManager& parent, Map& running, Map& finished);
-
-#ifdef ACE_HAS_GETTID
-  static inline pid_t gettid()
-  {
-    return syscall(SYS_gettid);
-  }
-#endif
-
-private:
-  ACE_Thread_Mutex lock_;
-  Map map_;
-};
+struct ThreadStatusManager;
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
 public virtual RcObject {

@@ -207,12 +207,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Id"))) {
       config.relay_id(arg);
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ThreadMonitorPeriod"))) {
-      config.thread_monitor_period(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ThreadMonitorHistoryDepth"))) {
-      config.thread_monitor_history_depth(ACE_OS::atoi(arg));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-ThreadMonitorOutput"))) {
       config.thread_monitor_output(arg);
       args.consume_arg();
@@ -282,11 +276,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
 
-  RelayThreadMonitor thread_mon(config.thread_monitor_period(),
-                                config.thread_monitor_history_depth());
+  RelayThreadMonitor thread_mon(TheServiceParticipant->get_thread_status_interval(),
+                                TheServiceParticipant->get_thread_status_manager());
   for (auto o : config.thread_monitor_output()) {
     thread_mon.add_reporter(o.c_str());
   }
+
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;
   factory->get_default_participant_qos(participant_qos);
@@ -873,10 +868,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
+
   if (thread_mon.start() == -1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to activate Thread Load Monitor\n")));
     return EXIT_FAILURE;
   }
+
   reactor->run_reactor_event_loop();
   thread_mon.stop();
 

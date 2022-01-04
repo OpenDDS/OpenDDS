@@ -12,6 +12,7 @@
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 #include "ThreadMonitor.h"
+#include "ThreadStatusManager.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -244,139 +245,6 @@ void ReactorTask::stop()
     // Reset the thread manager in case it goes away before the next open.
     this->thr_mgr(0);
   }
-}
-
-const char* ThreadStatusManager::status_to_string(ThreadStatus status)
-{
-  switch (status) {
-  case ThreadStatus_Running:
-    return "Running";
-
-  case ThreadStatus_Finished:
-    return "Finished";
-
-  default:
-    if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ThreadStatusManager::status_to_string: ")
-        ACE_TEXT("%d is either invalid or not recognized.\n"),
-        status));
-    }
-    return "<Invalid thread status>";
-  }
-}
-
-bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
-{
-  const SystemTimePoint now = SystemTimePoint::now();
-  ThreadStatus status = ThreadStatus_Running;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  Map::iterator it = map_.find(thread_key);
-  if (it != map_.end()) {
-    it->second.timestamp = now;
-    it->second.utilization = pbusy;
-  } else {
-    map_[thread_key] = Thread(now, status, pbusy);
-  }
-  return true;
-}
-
-bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  const SystemTimePoint now = SystemTimePoint::now();
-  if (DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "update for thread \"%C\" %C @ %d\n",
-      thread_key.c_str(), status_to_string(status), now.value().sec()));
-  }
-  switch (status) {
-  case ThreadStatus_Finished:
-    {
-      Map::iterator it = map_.find(thread_key);
-      if (it == map_.end()) {
-        if (DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadStatus::update: "
-            "Trying to remove \"%C\", but it's not an existing thread!\n",
-            thread_key.c_str()));
-        }
-        return false;
-      }
-      map_.erase(it);
-    }
-    break;
-
-  default:
-    if (map_.find(thread_key) == map_.end() && ThreadMonitor::installed_monitor_) {
-      ThreadMonitor::installed_monitor_->preset(this, thread_key.c_str());
-    }
-    map_[thread_key] = Thread(now, status, 0.0);
-  }
-
-  return true;
-}
-
-String ThreadStatusManager::get_key(const char* safety_profile_tid, const String& name)
-{
-  String key;
-#ifdef OPENDDS_SAFETY_PROFILE
-  key = safety_profile_tid;
-#else
-  ACE_UNUSED_ARG(safety_profile_tid);
-#  ifdef ACE_HAS_MAC_OSX
-  unsigned long tid = 0;
-  uint64_t u64_tid;
-  if (!pthread_threadid_np(0, &u64_tid)) {
-    tid = static_cast<unsigned long>(u64_tid);
-  } else if (DCPS_debug_level) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: pthread_threadid_np failed\n")));
-  }
-#  elif defined ACE_HAS_GETTID
-  const pid_t tid = gettid();
-#  else
-  const ACE_thread_t tid = ACE_OS::thr_self();
-#  endif
-
-  key = to_dds_string(tid);
-#endif
-
-  if (name.length()) {
-    key += " (" + name + ")";
-  }
-
-  return key;
-}
-
-bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
-  ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
-{
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
-    running = parent.map_;
-  }
-
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
-
-  // Figure out what threads were removed from parent.map_
-  Map::iterator mi = map_.begin();
-  Map::iterator ri = running.begin();
-  while (mi != map_.end() || ri != running.end()) {
-    const int cmp = mi != map_.end() && ri != running.end() ?
-      std::strcmp(mi->first.c_str(), ri->first.c_str()) :
-      ri != running.end() ? 1 : -1;
-    if (cmp < 0) { // We're behind, this thread was removed
-      finished.insert(*mi);
-      ++mi;
-    } else if (cmp > 0) { // We're ahead, this thread was added
-      ++ri;
-    } else { // Same thread, continue
-      ++mi;
-      ++ri;
-    }
-  }
-
-  map_ = running;
-
-  return true;
 }
 
 } // namespace DCPS

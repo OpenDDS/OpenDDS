@@ -1,6 +1,7 @@
 #include "RelayThreadMonitor.h"
 
-#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ThreadStatusManager.h>
+
 #include <ace/Thread.h>
 #include <ace/OS_NS_strings.h>
 
@@ -9,21 +10,28 @@
 using namespace OpenDDS::DCPS;
 namespace RtpsRelay {
 
-RelayThreadMonitor::RelayThreadMonitor(TimeDuration perd, size_t depth)
+RelayThreadMonitor::RelayThreadMonitor(TimeDuration perd,
+                                       ThreadStatusManager *tsm)
 : summarizer_(*this, perd)
-, history_depth_(depth)
+, history_depth_(1)
+, tsm_(tsm)
 {
   ThreadMonitor::installed_monitor_ = this;
+  ThreadStatusManager::get_levels(ThreadDescriptor::high_water_mark,
+                                  ThreadDescriptor::low_water_mark);
 }
 
 RelayThreadMonitor::~RelayThreadMonitor() noexcept
 {
   for (auto r : reporters_) delete r;
 }
+/*
 void RelayThreadMonitor::preset(ThreadStatusManager *tsm, const char *alias)
 {
+  ACE_DEBUG((LM_DEBUG,"RTM preset called for alias = %s\n", alias));
   pending_reg_[alias] = tsm;
 }
+*/
 
 void RelayThreadMonitor::update(ThreadMonitor::UpdateMode mode,
                                 const char* alias)
@@ -31,18 +39,24 @@ void RelayThreadMonitor::update(ThreadMonitor::UpdateMode mode,
   MonotonicTimePoint tnow = MonotonicTimePoint::now();
   Sample s = { mode, tnow };
   ACE_thread_t key = ACE_OS::thr_self();
+  bool force_update = false;
   try {
     ThreadDescriptor_rch& td = descs_.at(key);
     ACE_Guard<ACE_Thread_Mutex> g(td->queue_lock_);
-    td->samples_.emplace_back(std::move(s));
+    force_update = td->add_sample(s);
+    if (force_update) {
+      forced_ = td;
+    }
   } catch (const std::out_of_range&) {
     LoadSamples samps;
     LoadHistory hist;
     ThreadDescriptor_rch td = make_rch<ThreadDescriptor>(alias, tnow);
-    td->tsm_ = pending_reg_[alias];
-    pending_reg_.erase(alias);
-    td->samples_.emplace_back(std::move(s));
+    ACE_DEBUG((LM_DEBUG,"RTM::upddate creating new entry for alias %s\n", alias));
+    td->add_sample(s);
     descs_.emplace(key, std::move(td));
+  }
+  if (force_update) {
+    summarizer_.force_update();
   }
 }
 
@@ -55,84 +69,136 @@ double RelayThreadMonitor::get_utilization(const char* key) const
   }
 }
 
+double ThreadDescriptor::high_water_mark = 0.5;
+double ThreadDescriptor::low_water_mark = 0.5;
+
 ThreadDescriptor::ThreadDescriptor(const char* alias, MonotonicTimePoint tnow)
 : alias_(alias)
-, tsm_(nullptr)
 , last_(tnow)
+, current_busy_(0)
+, current_idle_(0)
 {
+}
+
+void ThreadDescriptor::reset_current()
+{
+  current_busy_ = current_idle_ = 0;
+}
+
+bool ThreadDescriptor::add_sample(Sample s)
+{
+  bool trigger_update = false;
+  if (samples_.size() > 0) {
+    auto prior = samples_.rbegin();
+    ACE_UINT64 udiff = 0;
+    TimeDuration tdiff = s.at_ - prior->at_;
+    tdiff.value().to_usec(udiff);
+    if (prior->mode_.idle_) {
+      current_idle_ += udiff;
+    } else {
+      current_busy_ += udiff;
+    }
+    trigger_update = (current_busy_ > current_idle_);
+  } else {
+    auto prior = summaries_.rbegin();
+    if (prior != summaries_.rend()) {
+      ACE_UINT64 udiff = 0;
+      TimeDuration tdiff = s.at_ - prior->recorded_;
+      tdiff.value().to_usec(udiff);
+      if (s.mode_.idle_) {
+        current_busy_ = udiff;
+      } else {
+        current_idle_ = udiff;
+      }
+    }
+  }
+  samples_.emplace_back(std::move(s));
+  return trigger_update;
+}
+
+void RelayThreadMonitor::summarize_thread(ThreadDescriptor_rch &td)
+{
+  MonotonicTimePoint tnow = MonotonicTimePoint::now();
+  std::deque<Sample> local;
+  {
+    ACE_Guard<ACE_Thread_Mutex> g(td->queue_lock_);
+    td->reset_current();
+    local.swap(td->samples_);
+  }
+  LoadSummary ls;
+  ls.accum_idle_ = ls.accum_busy_ = 0;
+  ls.recorded_ = tnow;
+  ls.samples_ = local.size();
+
+  while (!local.empty()) {
+    auto& s = local.front();
+    ACE_UINT64* bucket = s.mode_.idle_ && s.mode_.stacked_ ? &ls.accum_busy_ : &ls.accum_idle_;
+    if (s.mode_.stacked_) {
+      if (td->nested_.size()) {
+        UpdateMode prev = td->nested_.top();
+        if (s.mode_.implicit_) {
+          td->nested_.pop();
+        } else {
+          if (prev.idle_ == s.mode_.idle_) {
+            bucket = s.mode_.idle_ ? &ls.accum_idle_ : &ls.accum_busy_;
+          }
+          td->nested_.push(s.mode_);
+        }
+      } else {
+        td->nested_.push(s.mode_);
+      }
+
+    }
+    if (bucket) {
+      ACE_UINT64 udiff = 0;
+      TimeDuration tdiff = s.at_ - td->last_;
+      tdiff.value().to_usec(udiff);
+      *bucket += udiff;
+      td->last_ = s.at_;
+    }
+    local.pop_front();
+  }
+  {
+    UpdateMode mode = {true, true, false};
+    if (td->nested_.size()) {
+      mode = td->nested_.top();
+    }
+    ACE_UINT64* bucket = mode.idle_ ? &ls.accum_idle_ : &ls.accum_busy_;
+    ACE_UINT64 udiff = 0;
+    TimeDuration tdiff = tnow - td->last_;
+    tdiff.value().to_usec(udiff);
+    ++ls.samples_;
+    *bucket += udiff;
+    td->last_ = tnow;
+  }
+
+  double dbusy = static_cast<double>(ls.accum_busy_);
+  double uspan = static_cast<double>(ls.accum_idle_ + ls.accum_busy_);
+  if (uspan != 0.0) {
+    double pbusy = dbusy/uspan;
+    if (tsm_) {
+      tsm_->update_busy(td->alias_.c_str(), pbusy);
+    } else {
+      ACE_DEBUG((LM_DEBUG,"TLM::summarie_thread, cannot update thread %C, pbusy = %g\n", td->alias_.c_str(), pbusy));
+      busy_map_[td->alias_.c_str()] = pbusy;
+    }
+  }
+
+  if (td->summaries_.size() >= history_depth_) {
+    td->summaries_.pop_front();
+  }
+  td->summaries_.emplace_back(std::move(ls));
 }
 
 void RelayThreadMonitor::summarize()
 {
-  MonotonicTimePoint tnow = MonotonicTimePoint::now();
-  for (auto d = descs_.begin(); d != descs_.end(); d++) {
-    std::deque<Sample> local;
-    auto& td = d->second;
-    {
-      ACE_Guard<ACE_Thread_Mutex> g(td->queue_lock_);
-      local.swap(td->samples_);
+  if (forced_) {
+    summarize_thread(forced_);
+    forced_.reset();
+  } else {
+    for (auto d = descs_.begin(); d != descs_.end(); d++) {
+      summarize_thread(d->second);
     }
-    LoadSummary ls;
-    ls.accum_idle_ = ls.accum_busy_ = 0;
-    ls.recorded_ = tnow;
-    ls.samples_ = local.size();
-
-    while (!local.empty()) {
-      auto& s = local.front();
-      ACE_UINT64* bucket = s.mode_.idle_ && s.mode_.stacked_ ? &ls.accum_busy_ : &ls.accum_idle_;
-      if (s.mode_.stacked_) {
-        if (td->nested_.size()) {
-          UpdateMode prev = td->nested_.top();
-          if (s.mode_.implicit_) {
-            td->nested_.pop();
-          } else {
-            if (prev.idle_ == s.mode_.idle_) {
-              bucket = s.mode_.idle_ ? &ls.accum_idle_ : &ls.accum_busy_;
-            }
-            td->nested_.push(s.mode_);
-          }
-        } else {
-          td->nested_.push(s.mode_);
-        }
-
-      }
-      if (bucket) {
-        ACE_UINT64 udiff = 0;
-        TimeDuration tdiff = s.at_ - td->last_;
-        tdiff.value().to_usec(udiff);
-        *bucket += udiff;
-        td->last_ = s.at_;
-      }
-      local.pop_front();
-    }
-    {
-      UpdateMode mode = {true, true, false};
-      if (td->nested_.size()) {
-        mode = td->nested_.top();
-      }
-      ACE_UINT64* bucket = mode.idle_ ? &ls.accum_idle_ : &ls.accum_busy_;
-      ACE_UINT64 udiff = 0;
-      TimeDuration tdiff = tnow - td->last_;
-      tdiff.value().to_usec(udiff);
-      ++ls.samples_;
-      *bucket += udiff;
-      td->last_ = tnow;
-    }
-
-    double pbusy = 0.0;
-    double uspan = static_cast<double>(ls.accum_idle_ + ls.accum_busy_);
-    if (uspan != 0.0) {
-      if (td->tsm_) {
-        td->tsm_->update_busy(td->alias_.c_str(), pbusy);
-      } else {
-        busy_map_[td->alias_.c_str()] = pbusy;
-      }
-    }
-
-    if (td->summaries_.size() >= history_depth_) {
-      td->summaries_.pop_front();
-    }
-    td->summaries_.emplace_back(std::move(ls));
   }
 }
 
@@ -184,6 +250,12 @@ void AceLogReporter::report_thread(ThreadDescriptor_rch td) const
   }
 }
 
+void RelayThreadMonitor::set_levels(double hwm, double lwm)
+{
+  ThreadDescriptor::low_water_mark = lwm;
+  ThreadDescriptor::high_water_mark = hwm;
+}
+
 size_t RelayThreadMonitor::thread_count()
 {
   return descs_.size();
@@ -231,6 +303,7 @@ void RelayThreadMonitor::stop()
 
 Summarizer::Summarizer(ThreadMonitor& owner, TimeDuration perd)
 : running_(false)
+, forced_(false)
 , period_(perd)
 , lock_()
 , condition_(lock_)
@@ -246,17 +319,27 @@ Summarizer::~Summarizer()
 int Summarizer::svc()
 {
   GuardType guard(lock_);
-  running_ = true;
+  running_ = !period_.is_zero();
   condition_.notify_all();
   while (running_) {
     MonotonicTimePoint expire = MonotonicTimePoint::now() + period_;
     condition_.wait_until(expire);
     if (running_) {
       owner_.summarize();
-      owner_.report();
+      if (!forced_) {
+        owner_.report();
+      }
+      forced_ = false;
     }
   }
   return 0;
+}
+
+void Summarizer::force_update()
+{
+  GuardType guoard(lock_);
+  forced_ = true;
+  condition_.notify_all();
 }
 
 int Summarizer::start()
@@ -271,7 +354,7 @@ int Summarizer::start()
                      "itself.\n"),
                      -1);
   }
-  while (!running_) {
+  while (!running_ && !period_.is_zero()) {
     condition_.wait();
   }
   return 0;
