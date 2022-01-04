@@ -1210,11 +1210,6 @@ DataReaderImpl::enable()
   if (topic_servant_) {
     set_reader_effective_data_rep_qos(qos_.representation.value);
     if (!topic_servant_->check_data_representation(qos_.representation.value, false)) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataReaderImpl::enable: "
-          "none of the data representation QoS is allowed by the "
-          "topic type IDL annotations\n"));
-      }
       return DDS::RETCODE_ERROR;
     }
   }

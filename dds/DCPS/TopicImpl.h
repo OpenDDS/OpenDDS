@@ -84,6 +84,7 @@ public:
 
   void inconsistent_topic(int count);
 
+  DCPS::String repr_to_string(const DDS::DataRepresentationIdSeq& id_seq, bool is_data_writer = false);
   /**
    * Compare the QoS of the IDL Type and the Topic/DataWriter/DataReader to see
    * whether the type matches all values in the QoS.
