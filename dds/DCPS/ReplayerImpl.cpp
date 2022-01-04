@@ -362,8 +362,8 @@ ReplayerImpl::enable()
 
   set_writer_effective_data_rep_qos(qos_.representation.value, cdr_encapsulation());
   if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReplayerImpl::enable: "
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: ReplayerImpl::enable: "
         "none of the data representation QoS is allowed by the "
         "topic type IDL annotations\n"));
     }
