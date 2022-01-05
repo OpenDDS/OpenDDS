@@ -2871,7 +2871,7 @@ void DataReaderImpl::notify_liveliness_change()
 
   if (!CORBA::is_nil(listener.in())) {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(sample_lock_);
-    DDS::LivelinessChangedStatus status = liveliness_changed_status_;
+    const DDS::LivelinessChangedStatus status = liveliness_changed_status_;
     liveliness_changed_status_.alive_count_change = 0;
     liveliness_changed_status_.not_alive_count_change = 0;
     guard.release();
