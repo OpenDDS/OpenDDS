@@ -94,7 +94,7 @@ public:
 
     for (;;) {
       if (set_.count(key)) {
-        return;
+        break;
       }
       condition_.wait();
     }
