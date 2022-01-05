@@ -675,7 +675,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_thread_status_interval = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRelayThreadKey"))) != 0) {
-      relay_thread_key_ = currentArg;
+      relay_thread_key_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
       arg_shifter.consume_arg();
       got_relay_thread_key = true;
 
