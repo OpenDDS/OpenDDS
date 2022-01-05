@@ -266,10 +266,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1 ;
       }
 
-      copied_from_topic.representation.value.length(3);
-      copied_from_topic.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
-      copied_from_topic.representation.value[1] = DDS::XCDR_DATA_REPRESENTATION;
-      copied_from_topic.representation.value[2] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
       if (!(dr_qos_use_topic_qos == copied_from_topic))
       {
         ACE_ERROR ((LM_ERROR,

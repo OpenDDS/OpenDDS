@@ -191,6 +191,7 @@ void DataReaderImpl::init(
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  passed_qos_ = qos;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
@@ -914,6 +915,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
 
     qos_change(new_qos);
     qos_ = new_qos;
+    passed_qos_ = qos;
 
     const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
     if (observer) {
@@ -957,7 +959,7 @@ DDS::ReturnCode_t
 DataReaderImpl::get_qos(
     DDS::DataReaderQos & qos)
 {
-  qos = qos_;
+  qos = passed_qos_;
   return DDS::RETCODE_OK;
 }
 

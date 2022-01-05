@@ -165,6 +165,7 @@ void RecorderImpl::init(
 
   CORBA::String_var topic_name = a_topic_desc->get_name();
   qos_ = qos;
+  passed_qos_ = qos;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
@@ -882,7 +883,7 @@ RecorderImpl::get_qos(
   DDS::SubscriberQos & subscriber_qos,
   DDS::DataReaderQos & qos)
 {
-  qos = qos_;
+  qos = passed_qos_;
   subscriber_qos = subqos_;
   return DDS::RETCODE_OK;
 }

@@ -220,8 +220,6 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
 
   ::DDS::DataWriterQos new_default_dw_qos = default_dw_qos;
   new_default_dw_qos.reliability.kind  = ::DDS::BEST_EFFORT_RELIABILITY_QOS;
-  new_default_dw_qos.representation.value.length(1);
-  new_default_dw_qos.representation.value[0] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
 
   TEST_CHECK (! (new_default_dw_qos == default_dw_qos));
   TEST_CHECK (publisher_->set_default_datawriter_qos (new_default_dw_qos)
@@ -240,10 +238,7 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   datawriter_->get_qos (dw_qos_use_topic_qos);
 
   ::DDS::DataWriterQos copied_from_topic = default_dw_qos;
-
   ret = publisher_->copy_from_topic_qos (copied_from_topic, new_topic_qos);
-  copied_from_topic.representation.value.length(1);
-  copied_from_topic.representation.value[0] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
   TEST_CHECK (dw_qos_use_topic_qos == copied_from_topic);

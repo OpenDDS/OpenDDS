@@ -143,6 +143,7 @@ DataWriterImpl::init(
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  passed_qos_ = qos;
 
   set_listener(a_listener, mask);
 
@@ -956,6 +957,7 @@ DDS::ReturnCode_t DataWriterImpl::set_qos(const DDS::DataWriterQos& qos)
     }
 
     qos_ = new_qos;
+    passed_qos_ = qos;
 
     const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
     if (observer) {
@@ -972,7 +974,7 @@ DDS::ReturnCode_t DataWriterImpl::set_qos(const DDS::DataWriterQos& qos)
 DDS::ReturnCode_t
 DataWriterImpl::get_qos(DDS::DataWriterQos & qos)
 {
-  qos = qos_;
+  qos = passed_qos_;
   return DDS::RETCODE_OK;
 }
 

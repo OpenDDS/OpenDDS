@@ -192,6 +192,9 @@ private:
 
   /// The qos policy list of this datawriter.
   DDS::DataWriterQos qos_;
+  /// The qos policy passed in by the user.
+  /// Differs from qos_ because representation has been interpreted.
+  DDS::DataWriterQos passed_qos_;
 
   /// The participant servant which creats the publisher that
   /// creates this datawriter.

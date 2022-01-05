@@ -684,6 +684,7 @@ protected:
 
   unique_ptr<ReceivedDataAllocator> rd_allocator_;
   DDS::DataReaderQos qos_;
+  DDS::DataReaderQos passed_qos_;
 
   // Status conditions accessible by subclasses.
   DDS::SampleRejectedStatus sample_rejected_status_;
