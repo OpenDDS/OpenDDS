@@ -28,8 +28,11 @@ void ThreadStatusManager::init(const String& key, double high_water_mark, double
   rtps_thr_key_ = key;
   rtps_util_hwm_ = high_water_mark;
   rtps_util_lwm_ = low_water_mark;
-  rtps_max_wait_ = TimeDuration(secs,0);
-  ThreadMonitor::installed_monitor_->set_levels(rtps_util_hwm_,rtps_util_lwm_);
+  rtps_max_wait_ = TimeDuration(secs, 0);
+  if (ThreadMonitor::installed_monitor_) {
+    ThreadMonitor::installed_monitor_->set_levels(rtps_util_hwm_,
+                                                  rtps_util_lwm_);
+  }
 }
 
 void ThreadStatusManager::get_levels(double& hwm, double& lwm)
