@@ -751,6 +751,12 @@ private:
 
   ThreadStatusManager* thread_status_manager_;
 
+  String relay_thread_key_;
+
+  double relay_thread_hwm_;
+
+  double relay_thread_lwm_;
+
   /// Thread mutex used to protect the static initialization of XTypes data structures
   ACE_Thread_Mutex xtypes_lock_;
 

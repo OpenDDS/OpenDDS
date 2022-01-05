@@ -36,7 +36,7 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
 
     InternalThreadBuiltinTopicDataHolder info =
       new InternalThreadBuiltinTopicDataHolder(
-        new InternalThreadBuiltinTopicData("", new byte[16], 0.0));
+        new InternalThreadBuiltinTopicData("", new byte[16], 0.0, false));
 
     SampleInfoHolder si = new SampleInfoHolder(new SampleInfo(0, 0, 0,
       new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
