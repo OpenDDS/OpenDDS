@@ -157,7 +157,7 @@ void DataReaderListenerImpl::on_subscription_matched(
     if (status == ::DDS::RETCODE_OK) {
       for (CORBA::ULong i = 0 ; i < si.length() ; ++i) {
         ACE_DEBUG((LM_DEBUG,
-          "%T %C foo[%d]: x = %f y = %f, key = %d\n",
+          "(%P|%t) %T %C foo[%d]: x = %f y = %f, key = %d\n",
           use_take ? "took": "read", i, foo[i].x, foo[i].y, foo[i].key));
         PrintSampleInfo(si[i]) ;
         last_si_ = si[i] ;
