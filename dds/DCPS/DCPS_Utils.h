@@ -102,6 +102,12 @@ OpenDDS_Dcps_Export
 bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kind);
 
 OpenDDS_Dcps_Export
+DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr);
+
+OpenDDS_Dcps_Export
+DCPS::String repr_seq_to_string(const DDS::DataRepresentationIdSeq& id_seq, bool is_data_writer = false);
+
+OpenDDS_Dcps_Export
 void set_writer_effective_data_rep_qos(DDS::DataRepresentationIdSeq& qos, bool encapsulated_only);
 
 OpenDDS_Dcps_Export

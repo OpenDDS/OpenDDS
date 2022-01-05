@@ -223,31 +223,6 @@ TopicImpl::inconsistent_topic(int count)
   notify_status_condition();
 }
 
-DCPS::String TopicImpl::repr_to_string(const DDS::DataRepresentationIdSeq& id_seq, bool is_data_writer) {
-  DCPS::String repr_string;
-  ACE_CDR::ULong length = is_data_writer ? 1 : id_seq.length();
-  for (ACE_CDR::ULong i = 0; i < length; ++i) {
-    if (i > 0) {
-      repr_string += ", ";
-    }
-    switch (id_seq[i]) {
-    case 0:
-      repr_string += "XCDR_DATA_REPRESENTATION";
-      break;
-    case 1:
-      repr_string += "XML_DATA_REPRESENTATION";
-      break;
-    case 2:
-      repr_string += "XCDR2_DATA_REPRESENTATION";
-      break;
-    case -12140:
-      repr_string += "UNALIGNED_CDR_DATA_REPRESENTATION";
-      break;
-    }
-  }
-  return repr_string;
-}
-
 bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qos_ids, bool is_data_writer)
 {
   if (!type_support_) {
@@ -286,7 +261,7 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
   if (log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TopicImpl::check_data_representation: "
       "none of the data representation QoS: %C is allowed by the "
-      "topic type IDL annotations: %C\n", repr_to_string(qos_ids, is_data_writer).c_str(), repr_to_string(type_allowed_reprs).c_str()));
+      "topic type IDL annotations: %C\n", repr_seq_to_string(qos_ids, is_data_writer).c_str(), repr_seq_to_string(type_allowed_reprs).c_str()));
   }
   return false;
 }

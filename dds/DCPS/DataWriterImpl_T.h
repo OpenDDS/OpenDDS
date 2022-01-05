@@ -356,9 +356,9 @@ public:
       } else if (::OpenDDS::DCPS::DCPS_debug_level) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                     ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                    ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
+                    ACE_TEXT("Encountered unsupported or unknown data representation: %C\n"),
                     TraitsType::type_name(),
-                    qos_.representation.value[0]));
+                    repr_to_string(qos_.representation.value[0]).c_str()));
       }
     } else {
       // Pick unaligned CDR as it is the implicit representation for non-encapsulated

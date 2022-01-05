@@ -19,6 +19,7 @@
 #endif
 
 #include <cstring>
+#include <sstream>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -467,6 +468,43 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
     return false;
   }
   return true;
+}
+
+DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
+{
+  DCPS::String repr_string;
+  std::stringstream ss;
+  switch(repr) {
+  case DDS::XCDR_DATA_REPRESENTATION:
+    repr_string = "XCDR_DATA_REPRESENTATION";
+    break;
+  case DDS::XML_DATA_REPRESENTATION:
+    repr_string = "XML_DATA_REPRESENTATION";
+    break;
+  case DDS::XCDR2_DATA_REPRESENTATION:
+    repr_string = "XCDR2_DATA_REPRESENTATION";
+    break;
+  case OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION:
+    repr_string = "UNALIGNED_CDR_DATA_REPRESENTATION";
+    break;
+  default:
+    ss << repr;
+    repr_string = ss.str();
+  }
+  return repr_string;
+}
+
+DCPS::String repr_seq_to_string(const DDS::DataRepresentationIdSeq& id_seq, bool is_data_writer)
+{
+  DCPS::String repr_string;
+  ACE_CDR::ULong length = is_data_writer ? 1 : id_seq.length();
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
+    if (i > 0) {
+      repr_string += ", ";
+    }
+    repr_string += repr_to_string(id_seq[i]);
+  }
+  return repr_string;
 }
 
 void set_writer_effective_data_rep_qos(DDS::DataRepresentationIdSeq& qos,
