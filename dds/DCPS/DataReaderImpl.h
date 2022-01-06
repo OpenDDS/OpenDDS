@@ -544,11 +544,11 @@ public:
                         DDS::ViewStateMask view_states,
                         DDS::InstanceStateMask instance_states);
 
-  void accept_coherent (PublicationId& writer_id,
-                        RepoId& publisher_id);
-  void reject_coherent (PublicationId& writer_id,
-                        RepoId& publisher_id);
-  void coherent_change_received (RepoId publisher_id, Coherent_State& result);
+  void accept_coherent (const PublicationId& writer_id,
+                        const RepoId& publisher_id);
+  void reject_coherent (const PublicationId& writer_id,
+                        const RepoId& publisher_id);
+  void coherent_change_received (const RepoId& publisher_id, Coherent_State& result);
 
   void coherent_changes_completed (DataReaderImpl* reader);
 

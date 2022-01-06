@@ -7,7 +7,6 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "dcps_export.h"
 
-#include "GuidConverter.h"
 #include "WriterInfo.h"
 #include "Time_Helper.h"
 #include "Service_Participant.h"
@@ -74,13 +73,11 @@ WriterInfo::WriterInfo(WriterInfoListener* reader,
 #endif
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter writer_converter(writer_id);
-    GuidConverter reader_converter(reader->subscription_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) WriterInfo::WriterInfo: ")
                ACE_TEXT("writer %C added to reader %C.\n"),
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
+               LogGuid(writer_id).c_str(),
+               LogGuid(reader->subscription_id_).c_str()));
   }
 }
 
@@ -354,13 +351,11 @@ WriterInfo::set_group_info(const CoherentChangeControl& info)
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!(publisher_id_ == info.publisher_id_)
       || group_coherent_ != info.group_coherent_) {
-    GuidConverter sub_id(reader_->subscription_id_);
-    GuidConverter pub_id(writer_id_);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: WriterInfo::set_group_info()")
                ACE_TEXT(" reader %C writer %C incorrect coherent info !\n"),
-               OPENDDS_STRING(sub_id).c_str(),
-               OPENDDS_STRING(pub_id).c_str()));
+               LogGuid(reader_->subscription_id_).c_str(),
+               LogGuid(writer_id_).c_str()));
   }
 
   writer_coherent_samples_ = info.coherent_samples_;

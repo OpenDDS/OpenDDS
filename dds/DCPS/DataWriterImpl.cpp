@@ -379,22 +379,19 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
     if (DCPS_debug_level >= 1) {
-      GuidConverter writer_converter(this->publication_id_);
-      GuidConverter reader_converter(remote_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
                  ACE_TEXT("bit %d local %C remote %C\n"),
                  is_bit_,
-                 OPENDDS_STRING(writer_converter).c_str(),
-                 OPENDDS_STRING(reader_converter).c_str()));
+                 LogGuid(this->publication_id_).c_str(),
+                 LogGuid(remote_id).c_str()));
     }
 
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
-      GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(remote_id).c_str()));
     }
   }
   {
@@ -1497,7 +1494,7 @@ DataWriterImpl::enable()
   typesupport->add_types(type_lookup_service);
   typesupport->populate_dependencies(type_lookup_service);
 
-  RepoId publication_id =
+  const RepoId publication_id =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),

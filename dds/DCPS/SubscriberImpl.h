@@ -148,7 +148,7 @@ public:
 #endif
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  void coherent_change_received(RepoId& publisher_id,
+  void coherent_change_received(const RepoId& publisher_id,
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);
 #endif

@@ -502,7 +502,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
-        PublicationId writer_id = writers[i];
+        const PublicationId writer_id = writers[i];
         {
           ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
           statistics_.erase(writer_id);
@@ -581,7 +581,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     wr_len = writers.length();
 
     for (CORBA::ULong i = 0; i < wr_len; i++) {
-      PublicationId writer_id = writers[i];
+      const PublicationId writer_id = writers[i];
 
       WriterMapType::iterator it = this->writers_.find(writer_id);
 
@@ -1323,7 +1323,7 @@ DataReaderImpl::enable()
     typesupport->add_types(type_lookup_service);
     typesupport->populate_dependencies(type_lookup_service);
 
-    RepoId subscription_id =
+    const RepoId subscription_id =
       disco->add_subscription(domain_id_,
         dp_id_,
         topic_servant_->get_id(),
@@ -2134,7 +2134,7 @@ std::ostream& OpenDDS::DCPS::WriterStats::raw_data(std::ostream& str) const
 void
 DataReaderImpl::writer_removed(WriterInfo& info)
 {
-  PublicationId info_writer_id = info.writer_id();
+  const PublicationId info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(get_repo_id());
@@ -2159,7 +2159,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-    WriterInfo::WriterState info_state = info.state();
+    const WriterInfo::WriterState info_state = info.state();
 
     if (info_state == WriterInfo::ALIVE) {
       --liveliness_changed_status_.alive_count;
@@ -2187,7 +2187,7 @@ void
 DataReaderImpl::writer_became_alive(WriterInfo& info,
     const MonotonicTimePoint& /* when */)
 {
-  PublicationId info_writer_id = info.writer_id();
+  const PublicationId info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(get_repo_id());
@@ -2206,7 +2206,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 
   bool liveliness_changed = false;
 
-  WriterInfo::WriterState info_state = info.state();
+  const WriterInfo::WriterState info_state = info.state();
 
   if (info_state != WriterInfo::ALIVE) {
     liveliness_changed_status_.alive_count++;
@@ -2264,7 +2264,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info,
 void
 DataReaderImpl::writer_became_dead(WriterInfo& info)
 {
-  PublicationId info_writer_id = info.writer_id();
+  const PublicationId info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(get_repo_id());
@@ -2288,7 +2288,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
   // caller should already have the sample_lock_ !!!
   bool liveliness_changed = false;
 
-  WriterInfo::WriterState info_state = info.state();
+  const WriterInfo::WriterState info_state = info.state();
 
   if (info_state == OpenDDS::DCPS::WriterInfo::NOT_SET) {
     liveliness_changed_status_.not_alive_count++;
@@ -2890,7 +2890,7 @@ void DataReaderImpl::notify_liveliness_change()
     for (WriterMapType::iterator current = this->writers_.begin();
         current != this->writers_.end();
         ++current) {
-      RepoId id = current->first;
+      const RepoId id = current->first;
       output_str += "\n\tNOTIFY: writer[ ";
       output_str += OPENDDS_STRING(GuidConverter(id));
       output_str += "] == ";
@@ -3015,8 +3015,8 @@ bool DataReaderImpl::verify_coherent_changes_completion(WriterInfo* writer)
   Coherent_State state = COMPLETED;
   bool accept_here = true;
 
-  PublicationId writer_id = writer->writer_id();
-  RepoId publisher_id = writer->publisher_id();
+  const PublicationId writer_id = writer->writer_id();
+  const RepoId publisher_id = writer->publisher_id();
 
   if (subqos_.presentation.access_scope != ::DDS::INSTANCE_PRESENTATION_QOS &&
       subqos_.presentation.coherent_access) {
@@ -3046,8 +3046,8 @@ bool DataReaderImpl::verify_coherent_changes_completion(WriterInfo* writer)
 }
 
 
-void DataReaderImpl::accept_coherent(PublicationId& writer_id,
-    RepoId& publisher_id)
+void DataReaderImpl::accept_coherent(const PublicationId& writer_id,
+    const RepoId& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
     GuidConverter reader (get_repo_id());
@@ -3076,8 +3076,8 @@ void DataReaderImpl::accept_coherent(PublicationId& writer_id,
 }
 
 
-void DataReaderImpl::reject_coherent(PublicationId& writer_id,
-    RepoId& publisher_id)
+void DataReaderImpl::reject_coherent(const PublicationId& writer_id,
+    const RepoId& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
     GuidConverter reader (get_repo_id());
@@ -3125,7 +3125,7 @@ void DataReaderImpl::reset_coherent_info(const PublicationId& writer_id,
 
 
 void
-DataReaderImpl::coherent_change_received(RepoId publisher_id, Coherent_State& result)
+DataReaderImpl::coherent_change_received(const RepoId& publisher_id, Coherent_State& result)
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
