@@ -104,11 +104,13 @@ public:
 
     ~AckToken() {}
 
-    MonotonicTimePoint deadline() const {
+    MonotonicTimePoint deadline() const
+    {
       return tstamp_ + TimeDuration(max_wait_);
     }
 
-    bool deadline_is_infinite() const {
+    bool deadline_is_infinite() const
+    {
       return max_wait_.sec == DDS::DURATION_INFINITE_SEC && max_wait_.nanosec == DDS::DURATION_INFINITE_NSEC;
     }
   };
@@ -274,7 +276,8 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-   ACE_UINT64 get_unsent_data(SendStateDataSampleList& list) {
+   ACE_UINT64 get_unsent_data(SendStateDataSampleList& list)
+  {
     return data_container_->get_unsent_data(list);
   }
 
@@ -448,7 +451,8 @@ public:
                   const DDS::StringSeq& expression_params) const;
 #endif
 
-  DataBlockLockPool::DataBlockLock* get_db_lock() {
+  DataBlockLockPool::DataBlockLock* get_db_lock()
+  {
     return db_lock_pool_->get_lock();
   }
 
@@ -460,12 +464,14 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  RepoId get_repo_id() const {
+  RepoId get_repo_id() const
+  {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
     return publication_id_;
   }
 
-  SequenceNumber get_max_sn() const {
+  SequenceNumber get_max_sn() const
+  {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
     return sequence_number_;
   }
