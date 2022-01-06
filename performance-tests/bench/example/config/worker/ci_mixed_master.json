@@ -6,7 +6,7 @@
 
   "properties": [
     { "name": "default_stat_median_buffer_size",
-      "value": { "_d": "PVK_ULL", "ull_prop": 2000 }
+      "value": { "$discriminator": "PVK_ULL", "ull_prop": 2000 }
     }
   ],
 
@@ -131,7 +131,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 6 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 6 }
                   }
                 ],
 
@@ -160,7 +160,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 6 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 6 }
                   }
                 ],
 
@@ -205,7 +205,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 6 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 6 }
                   }
                 ],
 
@@ -218,7 +218,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 6 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 6 }
                   }
                 ],
 
@@ -241,7 +241,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 6 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 6 }
                   }
                 ],
 
@@ -254,7 +254,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 6 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 6 }
                   }
                 ],
 
@@ -274,13 +274,13 @@
       "writers": [ "datawriter_A1_T1" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 123 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 123 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 3.21 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 3.21 }
         },
         { "name": "max_count",
-          "value": { "_d": "PVK_ULL", "double_prop": 10 }
+          "value": { "$discriminator": "PVK_ULL", "double_prop": 10 }
         }
       ]
     },
@@ -290,13 +290,13 @@
       "writers": [ "datawriter_A2_T2" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 321 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 321 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 1.23 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 1.23 }
         },
         { "name": "max_count",
-          "value": { "_d": "PVK_ULL", "double_prop": 10 }
+          "value": { "$discriminator": "PVK_ULL", "double_prop": 10 }
         }
       ]
     },
@@ -306,10 +306,10 @@
       "writers": [ "datawriter_A2_T4" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 222 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 222 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.22 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.22 }
         }
       ]
     }

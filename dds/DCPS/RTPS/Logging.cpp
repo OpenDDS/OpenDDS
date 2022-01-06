@@ -37,7 +37,9 @@ void log_message(const char* format,
                  const Message& message)
 {
 #if OPENDDS_HAS_JSON_VALUE_WRITER
-  DCPS::JsonValueWriter<> jvw;
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
   jvw.begin_struct();
   jvw.begin_struct_member("guidPrefix");
   vwrite(jvw, prefix);
@@ -49,7 +51,8 @@ void log_message(const char* format,
   vwrite(jvw, message);
   jvw.end_struct_member();
   jvw.end_struct();
-  ACE_DEBUG((LM_DEBUG, format, jvw.buffer().GetString()));
+  writer.Flush();
+  ACE_DEBUG((LM_DEBUG, format, buffer.GetString()));
 #else
   ACE_UNUSED_ARG(format);
   ACE_UNUSED_ARG(prefix);

@@ -6,7 +6,7 @@
 
   "properties": [
     { "name": "default_stat_median_buffer_size",
-      "value": { "_d": "PVK_ULL", "ull_prop": 2000 }
+      "value": { "$discriminator": "PVK_ULL", "ull_prop": 2000 }
     }
   ],
 
@@ -180,10 +180,10 @@
       "writers": [ "datawriter_C1_T3" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 321 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 321 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 1.23 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 1.23 }
         }
       ]
     },
@@ -193,10 +193,10 @@
       "writers": [ "datawriter_C1_T4" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 222 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 222 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.22 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.22 }
         }
       ]
     }

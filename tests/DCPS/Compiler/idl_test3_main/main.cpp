@@ -15,15 +15,19 @@
 #if OPENDDS_HAS_JSON_VALUE_WRITER
 // Helper class to test if the correct number of elements got written
 // by our ValueWriter
-class TestWriter : public ::OpenDDS::DCPS::JsonValueWriter<>
+typedef rapidjson::Writer<rapidjson::StringBuffer> Writer;
+class TestWriter : public ::OpenDDS::DCPS::JsonValueWriter<Writer>
 {
 public:
-  TestWriter () : elements_ (0) {}
+  explicit TestWriter(Writer& writer)
+    : JsonValueWriter(writer)
+    , elements_ (0)
+  {}
   virtual void write_int16_array(const ACE_CDR::Short*, size_t length)
   {
     elements_ += length;
   }
-  virtual void write_string(const ACE_CDR::Char*)
+  virtual void write_string(const ACE_CDR::Char*, size_t)
   {
     ++elements_;
   }
@@ -697,35 +701,45 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     , pad = 631;
 
 #if OPENDDS_HAS_JSON_VALUE_WRITER
-  TestWriter test_writer1;
+  rapidjson::StringBuffer buffer1;
+  Writer writer1(buffer1);
+  TestWriter test_writer1(writer1);
   ::Xyz::s_vwrite1 aos;
   OpenDDS::DCPS::vwrite (test_writer1, aos);
   if (test_writer1.elements_ != 5u) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite1\n")));
     failed = true;
   }
-  TestWriter test_writer2;
+  rapidjson::StringBuffer buffer2;
+  Writer writer2(buffer2);
+  TestWriter test_writer2(writer2);
   ::Xyz::s_vwrite2 taos;
   OpenDDS::DCPS::vwrite (test_writer2, taos);
   if (test_writer2.elements_ != (3u * 4u)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite2\n")));
     failed = true;
   }
-  TestWriter test_writer3;
+  rapidjson::StringBuffer buffer3;
+  Writer writer3(buffer3);
+  TestWriter test_writer3(writer3);
   ::Xyz::s_vwrite3 mdaofs;
   OpenDDS::DCPS::vwrite (test_writer3, mdaofs);
   if (test_writer3.elements_ != (2u * 3u * 4u)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite3\n")));
     failed = true;
   }
-  TestWriter test_writer4;
+  rapidjson::StringBuffer buffer4;
+  Writer writer4(buffer4);
+  TestWriter test_writer4(writer4);
   ::Xyz::s_vwrite4 stringarray;
   OpenDDS::DCPS::vwrite (test_writer4, stringarray);
   if (test_writer4.elements_ != (2u * 3u * 4u * 5u)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Number of elements written by vwrite not correct for ::Xyz::s_vwrite4\n")));
     failed = true;
   }
-  TestWriter test_writer5;
+  rapidjson::StringBuffer buffer5;
+  Writer writer5(buffer5);
+  TestWriter test_writer5(writer5);
   ::Xyz::s_vwrite5 shortseq;
   shortseq.a.length(2);
   shortseq.a[0] = 77;

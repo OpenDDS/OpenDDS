@@ -1,4 +1,4 @@
-project: dcpslib, dcps_rapidjson {
+project: dcpslib, dcps_ts_defaults, rapidjson {
   dcps_ts_flags += -Sdefault \
                    -Wb,export_include=Bench_Core_Idl_Json_Export.h \
                    -Wb,export_macro=Bench_Core_Idl_Json_Export \

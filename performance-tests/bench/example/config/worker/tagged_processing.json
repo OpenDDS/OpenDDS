@@ -122,11 +122,11 @@
       "params": [
         {
           "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 65536 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 65536 }
         },
         {
           "name": "write_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 10.0 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 10.0 }
         }
       ]
     }

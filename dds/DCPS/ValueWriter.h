@@ -12,6 +12,7 @@
 #include <FACE/Fixed.h>
 
 #include <ace/CDR_Base.h>
+#include <tao/String_Manager_T.h>
 
 #include <cstddef>
 
@@ -78,10 +79,22 @@ public:
   virtual void write_fixed(const OpenDDS::FaceTypes::Fixed& /*value*/) = 0;
   virtual void write_char8(ACE_CDR::Char /*value*/) = 0;
   virtual void write_char16(ACE_CDR::WChar /*value*/) = 0;
-  virtual void write_string(const ACE_CDR::Char* /*value*/) = 0;
-  void write_string(const std::string& value) { write_string(value.c_str()); }
-  virtual void write_wstring(const ACE_CDR::WChar* /*value*/) = 0;
-  void write_wstring(const std::wstring& value) { write_wstring(value.c_str()); }
+  virtual void write_string(const ACE_CDR::Char* /*value*/, size_t /*length*/) = 0;
+  void write_string(const ACE_CDR::Char* value) { write_string(value, strlen(value)); }
+  void write_string(const std::string& value) { write_string(value.c_str(), value.length()); }
+  virtual void write_wstring(const ACE_CDR::WChar* /*value*/, size_t /*length*/) = 0;
+  void write_wstring(const ACE_CDR::WChar* value)
+  {
+#ifdef DDS_HAS_WCHAR
+    write_wstring(value, wcslen(value));
+#endif
+  }
+  void write_wstring(const std::wstring& value)
+  {
+#ifdef DDS_HAS_WCHAR
+    write_wstring(value.c_str(), value.length());
+#endif
+  }
 
   virtual void write_enum(const char* /*name*/, ACE_CDR::Long /*value*/) = 0;
   template <typename T>

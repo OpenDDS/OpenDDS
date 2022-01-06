@@ -77,10 +77,10 @@
       "writers": [ "datawriter_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 512 }
         },
         { "name": "write_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.0 }
         }
       ]
     }

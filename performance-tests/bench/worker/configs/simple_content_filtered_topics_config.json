@@ -83,19 +83,19 @@
       "writers": [ "datawriter_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 512 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 512 }
         },
         { "name": "write_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.0 }
         },
         { "name": "filter_class_start_value",
-          "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
         },
         { "name": "filter_class_stop_value",
-          "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
         },
         { "name": "filter_class_increment",
-          "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
         }
       ]
     },
@@ -103,22 +103,22 @@
       "type": "set_cft_parameters",
       "params": [
         { "name": "content_filtered_topic_name",
-          "value": { "_d": "PVK_STRING", "string_prop": "cft_1" }
+          "value": { "$discriminator": "PVK_STRING", "string_prop": "cft_1" }
         },
         { "name": "max_count",
-          "value": { "_d": "PVK_ULL", "ull_prop": 3 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 3 }
         },
         { "name": "param_count",
-          "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
         },
         { "name": "set_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.0 }
         },
         { "name": "random_order",
-          "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
         },
         { "name": "acceptable_param_values",
-          "value": { "_d": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
+          "value": { "$discriminator": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
         }
       ]
     }
