@@ -581,7 +581,7 @@ public:
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  const RepoId get_repo_id() const
+  RepoId get_repo_id() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
     while (!has_subscription_id_ && !get_deleted()) {

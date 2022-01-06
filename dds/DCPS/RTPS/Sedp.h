@@ -793,7 +793,7 @@ private:
       return true;
     }
 
-    const DCPS::RepoId get_repo_id() const
+    DCPS::RepoId get_repo_id() const
     {
       return repo_id_;
     }

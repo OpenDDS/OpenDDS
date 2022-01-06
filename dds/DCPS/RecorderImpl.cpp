@@ -195,7 +195,7 @@ bool RecorderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-const RepoId RecorderImpl::get_repo_id() const
+RepoId RecorderImpl::get_repo_id() const
 {
   return this->subscription_id_;
 }

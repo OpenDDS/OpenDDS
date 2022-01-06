@@ -179,7 +179,7 @@ public:
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)
     { return true; }
-  const RepoId get_repo_id() const
+  RepoId get_repo_id() const
     { return pub_id_; }
   DDS::DomainId_t domain_id() const
     { return 0; }

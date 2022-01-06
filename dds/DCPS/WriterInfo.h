@@ -101,67 +101,80 @@ public:
   void received_activity(const MonotonicTimePoint& when);
 
   /// returns 1 if the DataWriter is lively; 2 if dead; otherwise returns 0.
-  WriterState state() const {
+  WriterState state() const
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return state_;
   };
 
-  void state(WriterState state) {
+  void state(WriterState state)
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     state_ = state;
   };
 
-  DDS::InstanceHandle_t handle() const {
+  DDS::InstanceHandle_t handle() const
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return handle_;
   }
 
-  void handle(DDS::InstanceHandle_t handle) {
+  void handle(DDS::InstanceHandle_t handle)
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     handle_ = handle;
   };
 
-  PublicationId writer_id() const {
+  PublicationId writer_id() const
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return writer_id_;
   }
 
-  CORBA::Long writer_qos_ownership_strength() const {
+  CORBA::Long writer_qos_ownership_strength() const
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return writer_qos_.ownership_strength.value;
   }
 
-  void writer_qos_ownership_strength(const CORBA::Long writer_qos_ownership_strength) {
+  void writer_qos_ownership_strength(const CORBA::Long writer_qos_ownership_strength)
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     writer_qos_.ownership_strength.value = writer_qos_ownership_strength;
   }
 
-  bool waiting_for_end_historic_samples() const {
+  bool waiting_for_end_historic_samples() const
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return waiting_for_end_historic_samples_;
   }
 
-  void waiting_for_end_historic_samples(bool waiting_for_end_historic_samples) {
+  void waiting_for_end_historic_samples(bool waiting_for_end_historic_samples)
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     waiting_for_end_historic_samples_ = waiting_for_end_historic_samples;
   }
 
-  SequenceNumber last_historic_seq() const {
+  SequenceNumber last_historic_seq() const
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return last_historic_seq_;
   }
 
-  void last_historic_seq(const SequenceNumber& last_historic_seq) {
+  void last_historic_seq(const SequenceNumber& last_historic_seq)
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     last_historic_seq_ = last_historic_seq;
   }
 
-  bool notify_lost() const {
+  bool notify_lost() const
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return notify_lost_;
   }
 
-  void notify_lost(bool notify_lost) {
+  void notify_lost(bool notify_lost)
+  {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     notify_lost_ = notify_lost;
   }
