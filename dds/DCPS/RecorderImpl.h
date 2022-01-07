@@ -13,7 +13,6 @@
 #include "Definitions.h"
 #include "DataReaderCallbacks.h"
 #include "Recorder.h"
-#include "RemoveAssociationSweeper.h"
 #include "EntityImpl.h"
 #include "TopicImpl.h"
 #include "OwnershipManager.h"
@@ -143,7 +142,6 @@ public:
 
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
-  void remove_publication(const PublicationId& pub_id);
 
 private:
 
@@ -173,15 +171,12 @@ private:
 
   DDS::SubscriberQos subqos_;
 
-  friend class RemoveAssociationSweeper<RecorderImpl>;
-
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var topic_desc_;
   DDS::StatusMask listener_mask_;
   RecorderListener_rch listener_;
   DDS::DomainId_t domain_id_;
-  RcHandle<RemoveAssociationSweeper<RecorderImpl> > remove_association_sweeper_;
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 
