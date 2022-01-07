@@ -18,9 +18,8 @@ public:
     , produce_xtypes_complete_(false)
     , index_(0)
     , get_type_map_declared_(false)
+    , typeid_encoding_(0)
   {}
-
-  void gen_prologue() {}
 
   void gen_epilogue();
 
@@ -48,6 +47,8 @@ public:
   {
     produce_xtypes_complete_ = flag;
   }
+
+  void use_old_typeobject_encoding();
 
 private:
 
@@ -118,6 +119,7 @@ private:
   Stack stack_;
   std::map<AST_Type*, Element> element_;
   bool get_type_map_declared_;
+  OpenDDS::DCPS::Encoding* typeid_encoding_;
 };
 
 #endif
