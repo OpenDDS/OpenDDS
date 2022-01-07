@@ -4,8 +4,6 @@ project: dcpslib, ../bench_builder_idl_lib, dcps_ts_defaults, rapidjson, msvc_bi
                    -I$(DDS_ROOT)/dds \
                    -I$(BENCH_BUILDER_ROOT)/builder_idl
   dcps_ts_flags += -Wb,export_macro=Bench_Idl_Export \
-                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/core_idl_json/DdsDcpsCoreTypeSupportImpl.h \
-                   -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/core_idl_json/DdsDcpsGuidTypeSupportImpl.h \
                    -Wb,cpp_include=$(BENCH_BUILDER_ROOT)/builder_idl_json/BuilderTypeSupportImpl.h \
                    -I$(BENCH_BUILDER_ROOT)/builder_idl
   dynamicflags  += BENCH_IDL_BUILD_DLL
@@ -21,8 +19,6 @@ project: dcpslib, ../bench_builder_idl_lib, dcps_ts_defaults, rapidjson, msvc_bi
 
   after += Bench_Builder_Idl_Json
   libs += Bench_Builder_Idl_Json
-  after += Bench_Core_Idl_Json
-  libs += Bench_Core_Idl_Json
 
   Idl_Files {
     Bench.idl
