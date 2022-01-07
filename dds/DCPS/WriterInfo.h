@@ -107,13 +107,6 @@ public:
   /// update liveliness when remove_association is called.
   void removed();
 
-  TimeDuration activity_wait_period() const;
-
-  /// Checks to see if writer has registered activity in either
-  /// liveliness_lease_duration or DCPSPendingTimeout duration
-  /// to allow it to finish before reader removes it
-  bool active() const;
-
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received ();
   void reset_coherent_info ();
@@ -131,8 +124,6 @@ public:
 
   // Non-negative if this a durable writer which has a timer scheduled
   long historic_samples_timer_;
-  long remove_association_timer_;
-  MonotonicTimePoint removal_deadline_;
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
@@ -142,9 +133,6 @@ public:
   SequenceNumber last_historic_seq_;
 
   bool waiting_for_end_historic_samples_;
-
-  bool scheduled_for_removal_;
-  bool notify_lost_;
 
   /// State of the writer.
   WriterState state_;

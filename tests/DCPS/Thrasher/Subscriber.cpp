@@ -2,6 +2,7 @@
 #include "FooTypeTypeSupportImpl.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/StaticIncludes.h>

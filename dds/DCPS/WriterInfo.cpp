@@ -55,18 +55,15 @@ WriterInfoListener::writer_removed(WriterInfo&)
 WriterInfo::WriterInfo(WriterInfoListener* reader,
                        const PublicationId& writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
-  : last_liveliness_activity_time_(MonotonicTimePoint::now()),
-  historic_samples_timer_(NO_TIMER),
-  remove_association_timer_(NO_TIMER),
-  last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
-  waiting_for_end_historic_samples_(false),
-  scheduled_for_removal_(false),
-  notify_lost_(false),
-  state_(NOT_SET),
-  reader_(reader),
-  writer_id_(writer_id),
-  writer_qos_(writer_qos),
-  handle_(DDS::HANDLE_NIL)
+  : last_liveliness_activity_time_(MonotonicTimePoint::now())
+  , historic_samples_timer_(NO_TIMER)
+  , last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , waiting_for_end_historic_samples_(false)
+  , state_(NOT_SET)
+  , reader_(reader)
+  , writer_id_(writer_id)
+  , writer_qos_(writer_qos)
+  , handle_(DDS::HANDLE_NIL)
 {
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   this->reset_coherent_info();
@@ -151,45 +148,6 @@ WriterInfo::removed()
 {
   reader_->writer_removed(*this);
 }
-
-TimeDuration
-WriterInfo::activity_wait_period() const
-{
-  TimeDuration activity_wait_period(TheServiceParticipant->pending_timeout());
-  if (!reader_->liveliness_lease_duration_.is_zero()) {
-    activity_wait_period = reader_->liveliness_lease_duration_;
-  }
-  if (activity_wait_period.is_zero()) {
-    activity_wait_period = TimeDuration(writer_qos_.reliability.max_blocking_time);
-  }
-
-  return activity_wait_period;
-}
-
-
-bool
-WriterInfo::active() const
-{
-  // Need some period of time by which to decide if a writer the
-  // DataReaderImpl knows about has gone 'inactive'.  Used to determine
-  // if a remove_associations should remove immediately or wait to let
-  // reader process more information that may have queued up from the writer
-  // Over-arching max wait time for removal is controlled in the
-  // RemoveAssociationSweeper (10 seconds), but on a per writer basis set
-  // activity_wait_period based on:
-  //     1) Reader's liveliness_lease_duration
-  //     2) DCPSPendingTimeout value (if not zero)
-  //     3) Writer's max blocking time (could be infinite, in which case
-  //        RemoveAssociationSweeper will remove after its max wait)
-  //     4) Zero - don't wait, simply remove association
-  const TimeDuration period = activity_wait_period();
-
-  if (period.is_zero()) {
-    return false;
-  }
-  return (MonotonicTimePoint::now() - last_liveliness_activity_time_) <= period;
-}
-
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 Coherent_State
