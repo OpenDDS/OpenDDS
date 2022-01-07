@@ -13,6 +13,11 @@ use lib "$FindBin::Bin/../../tools/scripts/modules/";
 use command_utils;
 use version_utils;
 
+# Just needed to get rid of auto_run_test options
+use lib "$ENV{ACE_ROOT}/bin";
+use lib "$ENV{DDS_ROOT}/bin";
+use PerlDDS::Run_Test;
+
 my $no_install = 0;
 my $help = 0;
 my $tshark_cmd = $ENV{TSHARK} // 'tshark';
@@ -21,17 +26,16 @@ my $pcap = "$FindBin::Bin/messenger.pcap";
 $ENV{OPENDDS_DISSECTORS} = "$FindBin::Bin";
 
 my $help_message = "usage: run_test.pl [-h|--help] [--no-install]\n";
-my $invalid_args = not GetOptions(
+if (!GetOptions(
   "no-install!" => \$no_install,
   "tshark=s" => \$tshark_cmd,
   "help|h!" => \$help,
-);
+)) {
+  print STDERR ("ERROR: Invalid options(s)\n$help_message");
+  exit 1;
+}
 if (scalar(grep {length($_)} @ARGV)) {
   print STDERR ("ERROR: Invalid positional argument(s) passed: ", join(' ', @ARGV), "\n");
-  $invalid_args = 1;
-}
-if ($invalid_args) {
-  print STDERR ("ERROR: Invalid Command Line Argument(s)\n$help_message");
   exit 1;
 }
 if ($help) {

@@ -29,7 +29,8 @@ our @EXPORT_OK = qw(
 #   command_utils::run_command('do-the-thing');
 #
 # The rational for this is that `run_command` can be wrapped in another
-# `run_command` function to set settings that are specific to the local script.
+# `run_command` function to pass arguments that are specific to the local
+# script.
 #
 # The arguments are the command, which can either be a string of the command or
 # a reference to an array of the `argv` elements of the command, followed by
@@ -57,9 +58,9 @@ our @EXPORT_OK = qw(
 #     my $exit_status
 #     run_command('do-the-thing', exit_status => \$exit_status);
 #     if (defined($exit_status)) {
-#         print("Command ran\nexit status: $exit_status\n");
+#       print("Command ran\nexit status: $exit_status\n");
 #     } else {
-#         print("Command failed to run\n");
+#       print("Command failed to run\n");
 #     }
 #
 # capture_stdout
@@ -89,105 +90,105 @@ our @EXPORT_OK = qw(
 #     Boolean that when true prints error messages. Defaults to true.
 #
 sub run_command {
-    my $command = shift;
-    my @command_list;
-    my $command_str;
-    my $use_list = ref($command);
+  my $command = shift;
+  my @command_list;
+  my $command_str;
+  my $use_list = ref($command);
+  if ($use_list) {
+    @command_list = @{$command};
+    $command_str = join(' ', @command_list);
+  }
+  else {
+    @command_list = split(/ /, $command);
+    $command_str = $command;
+  }
+
+  my %args = (
+    name => undef,
+    capture_stdout => undef,
+    verbose => undef,
+    dry_run => undef,
+    script_name => undef,
+    print_error => 1,
+    exit_status => undef,
+    @_,
+  );
+  my $name = $args{name} // $command_list[0];
+  my $capture_stdout = $args{capture_stdout};
+  my $verbose = $args{verbose} // $args{dry_run};
+  my $dry_run = $args{dry_run};
+  my $script_name = $args{script_name} ? "$args{script_name}: " : "";
+  my $print_error = $args{print_error};
+  my $exit_status_ref = $args{exit_status};
+
+  if ($verbose) {
+    my $cwd = getcwd();
+    print "In \"$cwd\" ", $dry_run ? "would run" : "running ";
     if ($use_list) {
-        @command_list = @{$command};
-        $command_str = join(' ', @command_list);
+      print("(list):\n");
+      for my $i (@command_list) {
+        print(" - \"$i\"\n");
+      }
     }
     else {
-        @command_list = split(/ /, $command);
-        $command_str = $command;
+      print("(string): \"$command_str\"\n");
     }
+    return (0, 0) if ($dry_run);
+  }
 
-    my %args = (
-        name => undef,
-        capture_stdout => undef,
-        verbose => undef,
-        dry_run => undef,
-        script_name => undef,
-        print_error => 1,
-        exit_status => undef,
-        @_,
-    );
-    my $name = $args{name} // $command_list[0];
-    my $capture_stdout = $args{capture_stdout};
-    my $verbose = $args{verbose} // $args{dry_run};
-    my $dry_run = $args{dry_run};
-    my $script_name = $args{script_name} ? "$args{script_name}: " : "";
-    my $print_error = $args{print_error};
-    my $exit_status_ref = $args{exit_status};
+  my $saved_stdout;
+  my $tmp_fd;
+  my $tmp_path;
 
-    if ($verbose) {
-        my $cwd = getcwd();
-        print "In \"$cwd\" ", $dry_run ? "would run" : "running ";
-        if ($use_list) {
-            print("(list):\n");
-            for my $i (@command_list) {
-                print(" - \"$i\"\n");
-            }
-        }
-        else {
-            print("(string): \"$command_str\"\n");
-        }
-        return (0, 0) if ($dry_run);
+  if (defined($capture_stdout)) {
+    ($tmp_fd, $tmp_path) = File::Temp::tempfile(UNLINK => 1);
+    open($saved_stdout, '>&', STDOUT);
+    open(STDOUT, '>&', $tmp_fd);
+  }
+
+  my $failed = ($use_list ? system(@command_list) : system($command)) ? 1 : 0;
+  my $system_status = $?;
+  my $system_error = $!;
+  my $ran = $system_status != -1;
+
+  if (defined($capture_stdout)) {
+    open(STDOUT, '>&', $saved_stdout);
+    close($tmp_fd);
+  }
+
+  my $exit_status = 0;
+  if ($failed) {
+    $exit_status = $system_status >> 8;
+    my $signal = $system_status & 127;
+    die("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
+    my $coredump = $system_status & 128;
+    my $error_message;
+    if (!$ran) {
+      $error_message = "failed to run: $system_error";
     }
-
-    my $saved_stdout;
-    my $tmp_fd;
-    my $tmp_path;
-
-    if (defined($capture_stdout)) {
-        ($tmp_fd, $tmp_path) = File::Temp::tempfile(UNLINK => 1);
-        open($saved_stdout, '>&', STDOUT);
-        open(STDOUT, '>&', $tmp_fd);
+    elsif ($signal) {
+      $error_message = sprintf("exited on signal %d", ($signal));
+      $error_message .= " and created coredump" if ($coredump);
     }
-
-    my $failed = ($use_list ? system(@command_list) : system($command)) ? 1 : 0;
-    my $system_status = $?;
-    my $system_error = $!;
-    my $ran = $system_status != -1;
-
-    if (defined($capture_stdout)) {
-        open(STDOUT, '>&', $saved_stdout);
-        close($tmp_fd);
+    else {
+      $error_message = sprintf("returned with status %d", $exit_status);
     }
-
-    my $exit_status = 0;
-    if ($failed) {
-        $exit_status = $system_status >> 8;
-        my $signal = $system_status & 127;
-        die("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
-        my $coredump = $system_status & 128;
-        my $error_message;
-        if (!$ran) {
-            $error_message = "failed to run: $system_error";
-        }
-        elsif ($signal) {
-            $error_message = sprintf("exited on signal %d", ($signal));
-            $error_message .= " and created coredump" if ($coredump);
-        }
-        else {
-            $error_message = sprintf("returned with status %d", $exit_status);
-        }
-        if ($print_error) {
-          print STDERR "${script_name}ERROR: \"$name\" $error_message\n";
-        }
+    if ($print_error) {
+      print STDERR "${script_name}ERROR: \"$name\" $error_message\n";
     }
+  }
 
-    if (defined($capture_stdout) && $ran) {
-        open($tmp_fd, $tmp_path);
-        ${$capture_stdout} = do { local $/; <$tmp_fd> };
-        close($tmp_fd);
-    }
+  if (defined($capture_stdout) && $ran) {
+    open($tmp_fd, $tmp_path);
+    ${$capture_stdout} = do { local $/; <$tmp_fd> };
+    close($tmp_fd);
+  }
 
-    if (defined($exit_status_ref)) {
-      ${$exit_status_ref} = $ran ? $exit_status : undef;
-    }
+  if (defined($exit_status_ref)) {
+    ${$exit_status_ref} = $ran ? $exit_status : undef;
+  }
 
-    return $failed;
+  return $failed;
 }
 
 1;
