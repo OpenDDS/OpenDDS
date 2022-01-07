@@ -9876,5 +9876,6 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: Build
       run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
