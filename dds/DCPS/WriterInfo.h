@@ -200,15 +200,7 @@ public:
   bool check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver);
   bool check_historic(const SequenceNumber& seq, const ReceivedDataSample& sample, SequenceNumber& last_historic_seq);
 
-  TimeDuration activity_wait_period() const
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    return activity_wait_period_i();
-  }
-
 private:
-
-  TimeDuration activity_wait_period_i() const;
 
   mutable ACE_Thread_Mutex mutex_;
 
