@@ -7,10 +7,11 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "dcps_export.h"
 
-#include "WriterInfo.h"
-#include "Time_Helper.h"
-#include "Service_Participant.h"
 #include "DataReaderImpl.h"
+#include "GuidConverter.h"
+#include "Service_Participant.h"
+#include "Time_Helper.h"
+#include "WriterInfo.h"
 
 #include "ace/OS_NS_sys_time.h"
 
@@ -55,18 +56,15 @@ WriterInfoListener::writer_removed(WriterInfo&)
 WriterInfo::WriterInfo(WriterInfoListener* reader,
                        const PublicationId& writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
-  : last_liveliness_activity_time_(MonotonicTimePoint::now()),
-  historic_samples_timer_(NO_TIMER),
-  remove_association_timer_(NO_TIMER),
-  last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
-  waiting_for_end_historic_samples_(false),
-  scheduled_for_removal_(false),
-  notify_lost_(false),
-  state_(NOT_SET),
-  reader_(reader),
-  writer_id_(writer_id),
-  writer_qos_(writer_qos),
-  handle_(DDS::HANDLE_NIL)
+  : last_liveliness_activity_time_(MonotonicTimePoint::now())
+  , historic_samples_timer_(NO_TIMER)
+  , last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , waiting_for_end_historic_samples_(false)
+  , state_(NOT_SET)
+  , reader_(reader)
+  , writer_id_(writer_id)
+  , writer_qos_(writer_qos)
+  , handle_(DDS::HANDLE_NIL)
 {
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   reset_coherent_info();
@@ -144,41 +142,6 @@ WriterInfo::check_historic(const SequenceNumber& seq, const ReceivedDataSample& 
     return true;
   }
   return false;
-}
-
-void
-WriterInfo::set_scheduled_for_removal(bool callback, const TimeDuration& duration)
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  scheduled_for_removal_ = true;
-  notify_lost_ = callback;
-  removal_deadline_ = MonotonicTimePoint(MonotonicTimePoint::now() +
-    std::min(activity_wait_period_i(), duration));
-}
-
-void
-WriterInfo::unset_scheduled_for_removal()
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  scheduled_for_removal_ = false;
-  removal_deadline_ = MonotonicTimePoint::zero_value;
-}
-
-void
-WriterInfo::schedule_remove_association_timer(ACE_Reactor* reactor, ACE_Event_Handler* handler, const void* arg)
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  remove_association_timer_ = reactor->schedule_timer(handler, arg, (removal_deadline_ - MonotonicTimePoint::now()).value());
-}
-
-void
-WriterInfo::cancel_remove_association_timer(ACE_Reactor* reactor, ACE_Event_Handler*, const void** arg)
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (remove_association_timer_ != WriterInfo::NO_TIMER) {
-    reactor->cancel_timer(remove_association_timer_, arg);
-    remove_association_timer_ = WriterInfo::NO_TIMER;
-  }
 }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -268,46 +231,6 @@ WriterInfo::removed()
   guard.release();
   reader->writer_removed(*this);
 }
-
-TimeDuration
-WriterInfo::activity_wait_period_i() const
-{
-  TimeDuration activity_wait_period(TheServiceParticipant->pending_timeout());
-  if (!reader_->liveliness_lease_duration_.is_zero()) {
-    activity_wait_period = reader_->liveliness_lease_duration_;
-  }
-  if (activity_wait_period.is_zero()) {
-    activity_wait_period = TimeDuration(writer_qos_.reliability.max_blocking_time);
-  }
-
-  return activity_wait_period;
-}
-
-
-bool
-WriterInfo::active() const
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  // Need some period of time by which to decide if a writer the
-  // DataReaderImpl knows about has gone 'inactive'.  Used to determine
-  // if a remove_associations should remove immediately or wait to let
-  // reader process more information that may have queued up from the writer
-  // Over-arching max wait time for removal is controlled in the
-  // RemoveAssociationSweeper (10 seconds), but on a per writer basis set
-  // activity_wait_period based on:
-  //     1) Reader's liveliness_lease_duration
-  //     2) DCPSPendingTimeout value (if not zero)
-  //     3) Writer's max blocking time (could be infinite, in which case
-  //        RemoveAssociationSweeper will remove after its max wait)
-  //     4) Zero - don't wait, simply remove association
-  const TimeDuration period = activity_wait_period_i();
-
-  if (period.is_zero()) {
-    return false;
-  }
-  return (MonotonicTimePoint::now() - last_liveliness_activity_time_) <= period;
-}
-
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 Coherent_State

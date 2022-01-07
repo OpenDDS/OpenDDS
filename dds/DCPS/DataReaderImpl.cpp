@@ -75,8 +75,6 @@ DataReaderImpl::DataReaderImpl()
   domain_id_(0),
   end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(
     TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-  remove_association_sweeper_(make_rch<RemoveAssociationSweeper<DataReaderImpl> >(
-    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
   n_chunks_(TheServiceParticipant->n_chunks()),
   reverse_pub_handle_lock_(publication_handle_lock_),
   reactor_(0),
@@ -279,8 +277,6 @@ DataReaderImpl::add_association(const RepoId& yourId,
     if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
       info->waiting_for_end_historic_samples(true);
     }
-
-    remove_association_sweeper_->cancel_timer(writer_id);
 
     {
       ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
@@ -494,9 +490,6 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
 
-    // writers which are considered non-active and can
-    // be removed immediately
-    WriterIdSeq non_active_writers;
     {
       CORBA::ULong wr_len = writers.length();
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
@@ -507,35 +500,11 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
           ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
           statistics_.erase(writer_id);
         }
-
-        WriterMapType::iterator it = this->writers_.find(writer_id);
-        if (it != this->writers_.end()) {
-          remove_association_sweeper_->schedule_timer(it->second, notify_lost);
-        } else {
-          push_back(non_active_writers, writer_id);
-        }
       }
     }
-    remove_associations_i(non_active_writers, notify_lost);
-  } else {
-    remove_associations_i(writers, notify_lost);
   }
-}
 
-void
-DataReaderImpl::remove_publication(const PublicationId& pub_id)
-{
-  WriterIdSeq writers;
-  bool notify = false;
-  {
-    ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-    WriterMapType::iterator where = writers_.find(pub_id);
-    if (writers_.end() != where) {
-      notify = where->second->notify_lost();
-      push_back(writers, pub_id);
-    }
-  }
-  remove_associations_i(writers, notify);
+  remove_associations_i(writers, notify_lost);
 }
 
 void
@@ -588,7 +557,6 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
       if (it != this->writers_.end()) {
         removed_writers.insert(*it);
         end_historic_sweeper_->cancel_timer(it->second);
-        remove_association_sweeper_->cancel_timer(it->second);
       }
 
       if (this->writers_.erase(writer_id) == 0) {

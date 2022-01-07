@@ -167,27 +167,10 @@ public:
     last_historic_seq_ = last_historic_seq;
   }
 
-  bool notify_lost() const
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    return notify_lost_;
-  }
-
-  void notify_lost(bool notify_lost)
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    notify_lost_ = notify_lost;
-  }
-
   const char* get_state_str() const;
 
   /// update liveliness when remove_association is called.
   void removed();
-
-  /// Checks to see if writer has registered activity in either
-  /// liveliness_lease_duration or DCPSPendingTimeout duration
-  /// to allow it to finish before reader removes it
-  bool active() const;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   Coherent_State coherent_change_received();
@@ -217,18 +200,6 @@ public:
   bool check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver);
   bool check_historic(const SequenceNumber& seq, const ReceivedDataSample& sample, SequenceNumber& last_historic_seq);
 
-  void set_scheduled_for_removal(bool callback, const TimeDuration& duration);
-  void unset_scheduled_for_removal();
-
-  void schedule_remove_association_timer(ACE_Reactor* reactor, ACE_Event_Handler* handler, const void* arg);
-  void cancel_remove_association_timer(ACE_Reactor* reactor, ACE_Event_Handler* handler, const void** arg);
-
-  void clear_remove_association_timer()
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    remove_association_timer_ = NO_TIMER;
-  }
-
   TimeDuration activity_wait_period() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -246,8 +217,6 @@ private:
 
   // Non-negative if this a durable writer which has a timer scheduled
   long historic_samples_timer_;
-  long remove_association_timer_;
-  MonotonicTimePoint removal_deadline_;
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
@@ -257,9 +226,6 @@ private:
   SequenceNumber last_historic_seq_;
 
   bool waiting_for_end_historic_samples_;
-
-  bool scheduled_for_removal_;
-  bool notify_lost_;
 
   /// State of the writer.
   WriterState state_;

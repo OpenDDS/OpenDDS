@@ -62,10 +62,6 @@ RecorderImpl::RecorderImpl()
   topic_desc_(0),
   listener_mask_(DEFAULT_STATUS_MASK),
   domain_id_(0),
-  remove_association_sweeper_(
-    make_rch<RemoveAssociationSweeper<RecorderImpl> >(TheServiceParticipant->reactor(),
-                                         TheServiceParticipant->reactor_owner(),
-                                         this)),
   is_bit_(false),
   check_encap_(true)
 {
@@ -86,22 +82,6 @@ RecorderImpl::RecorderImpl()
 RecorderImpl::~RecorderImpl()
 {
   DBG_ENTRY_LVL("RecorderImpl","~RecorderImpl",6);
-  ReactorInterceptor::CommandPtr command;
-
-  {
-    ACE_READ_GUARD(ACE_RW_Thread_Mutex,
-                   read_guard,
-                   this->writers_lock_);
-    // Cancel any uncancelled sweeper timers to decrement reference count.
-    WriterMapType::iterator writer;
-    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      command = remove_association_sweeper_->cancel_timer(writer->second);
-    }
-  }
-
-  if (command) {
-    command->wait();
-  }
 }
 
 
@@ -125,23 +105,6 @@ RecorderImpl::cleanup()
 
   this->remove_all_associations();
 
-  ReactorInterceptor::CommandPtr command;
-
-  {
-    ACE_READ_GUARD_RETURN(ACE_RW_Thread_Mutex,
-                   read_guard,
-                   this->writers_lock_,
-                   0);
-    // Cancel any uncancelled sweeper timers
-    WriterMapType::iterator writer;
-    for (writer = writers_.begin(); writer != writers_.end(); ++writer) {
-      command = remove_association_sweeper_->cancel_timer(writer->second);
-    }
-  }
-
-  if (command) {
-    command->wait();
-  }
   return DDS::RETCODE_OK;
 }
 
@@ -527,45 +490,9 @@ RecorderImpl::remove_associations(const WriterIdSeq& writers,
   if (!get_deleted()) {
     // stop pending associations for these writer ids
     this->stop_associating(writers.get_buffer(), writers.length());
-
-    // writers which are considered non-active and can
-    // be removed immediately
-    WriterIdSeq non_active_writers;
-    {
-      const CORBA::ULong wr_len = writers.length();
-      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-
-      for (CORBA::ULong i = 0; i < wr_len; i++) {
-        const PublicationId writer_id = writers[i];
-
-        WriterMapType::iterator it = this->writers_.find(writer_id);
-        if (it != this->writers_.end() &&
-            it->second->active()) {
-          remove_association_sweeper_->schedule_timer(it->second, notify_lost);
-        } else {
-          push_back(non_active_writers, writer_id);
-        }
-      }
-    }
-    remove_associations_i(non_active_writers, notify_lost);
-  } else {
-    remove_associations_i(writers, notify_lost);
   }
-}
 
-void
-RecorderImpl::remove_publication(const PublicationId& pub_id)
-{
-  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-  WriterMapType::iterator where = writers_.find(pub_id);
-  if (writers_.end() != where) {
-    WriterInfo& info = *where->second;
-    WriterIdSeq writers;
-    push_back(writers, pub_id);
-    const bool notify = info.notify_lost();
-    write_guard.release();
-    remove_associations_i(writers, notify);
-  }
+  remove_associations_i(writers, notify_lost);
 }
 
 void
@@ -622,7 +549,6 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
       WriterMapType::iterator it = this->writers_.find(writer_id);
       if (it != this->writers_.end()) {
         it->second->removed();
-        remove_association_sweeper_->cancel_timer(it->second);
       }
 
       if (this->writers_.erase(writer_id) == 0) {
