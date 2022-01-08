@@ -2382,7 +2382,7 @@ jobs:
     - name: update apt
       run: sudo apt-get update
     - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
+      run: sudo apt-get -y install wireshark-dev tshark
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC

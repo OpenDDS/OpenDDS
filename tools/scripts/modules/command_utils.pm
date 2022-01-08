@@ -146,7 +146,11 @@ sub run_command {
     open(STDOUT, '>&', $tmp_fd);
   }
 
-  my $failed = ($use_list ? system(@command_list) : system($command)) ? 1 : 0;
+  my $failed;
+  {
+    no warnings 'exec';
+    $failed = ($use_list ? system(@command_list) : system($command)) ? 1 : 0;
+  }
   my $system_status = $?;
   my $system_error = $!;
   my $ran = $system_status != -1;
