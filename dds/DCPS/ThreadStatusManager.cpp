@@ -52,7 +52,7 @@ int ThreadStatusManager::parse_args(int &argc, ACE_TCHAR *argv[])
   return 0;
 }
 
-int ThreadStatusManager::load_common_configuration(ACE_Configuration_Heap& cf)
+int ThreadStatusManager::load_configuration(ACE_Configuration_Heap& cf)
 {
   const ACE_Configuration_Section_Key& root = cf.root_section();
   ACE_Configuration_Section_Key sect;

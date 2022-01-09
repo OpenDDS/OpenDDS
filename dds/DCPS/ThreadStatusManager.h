@@ -91,8 +91,8 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   {
   }
 
-    int parse_args(int &argc, ACE_TCHAR *argv[]);
-  int load_common_configuration(ACE_Configuration_Heap& cf);
+  int parse_args(int &argc, ACE_TCHAR *argv[]);
+  int load_configuration(ACE_Configuration_Heap& cf);
 
 private:
   Map map_;

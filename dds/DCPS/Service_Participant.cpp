@@ -1563,7 +1563,7 @@ Service_Participant::load_configuration(
                      -1);
   }
 
-  status = thread_status_manager_->load_common_configuration(config);
+  status = thread_status_manager_->load_configuration(config);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,

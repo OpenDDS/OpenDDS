@@ -48,7 +48,7 @@ int RelayThreadMonitor::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_rtps_thread_lwm = true;
 
-    } else if ((currentArg = arg_shifter.get_the_parameter("-ThreadMonitorOutput"))) {
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ThreadMonitorOutput")))) {
       add_reporter(ACE_TEXT_ALWAYS_CHAR(currentArg));
       arg_shifter.consume_arg();
     } else {
