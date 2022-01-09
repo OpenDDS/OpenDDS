@@ -31,7 +31,6 @@ public:
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
-    , thread_monitor_output_(0)
   {}
 
   void relay_id(const std::string& value)
@@ -254,16 +253,6 @@ public:
     return restart_detection_;
   }
 
-  void thread_monitor_output(const char *name)
-  {
-    thread_monitor_output_.emplace_back(name);
-  }
-
-  const std::list<std::string>& thread_monitor_output()
-  {
-    return thread_monitor_output_;
-  }
-
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -287,7 +276,6 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
-  std::list<std::string> thread_monitor_output_;
 };
 
 }

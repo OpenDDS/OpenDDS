@@ -9,6 +9,11 @@
 
 #include "ThreadStatusManager.h"
 #include "ThreadMonitor.h"
+#include "Service_Participant.h"
+
+#include <ace/Arg_Shifter.h>
+#include <ace/Configuration_Import_Export.h>
+#include <ace/Argv_Type_Converter.h>
 
 #include <exception>
 #include <cstring>
@@ -18,27 +23,70 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-String ThreadStatusManager::rtps_thr_key_("VSEDP");
-double ThreadStatusManager::rtps_util_hwm_(0.500);
-double ThreadStatusManager::rtps_util_lwm_(0.500);
-TimeDuration ThreadStatusManager::rtps_max_wait_(10,0);
+static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
+static bool got_rtps_thread_key = false;
+static bool got_rtps_max_wait = false;
 
-void ThreadStatusManager::init(const String& key, double high_water_mark, double low_water_mark, ACE_UINT64 secs)
+int ThreadStatusManager::parse_args(int &argc, ACE_TCHAR *argv[])
 {
-  rtps_thr_key_ = key;
-  rtps_util_hwm_ = high_water_mark;
-  rtps_util_lwm_ = low_water_mark;
-  rtps_max_wait_ = TimeDuration(secs, 0);
-  if (ThreadMonitor::installed_monitor_) {
-    ThreadMonitor::installed_monitor_->set_levels(rtps_util_hwm_,
-                                                  rtps_util_lwm_);
+  ACE_Arg_Shifter arg_shifter(argc, argv);
+
+  while (arg_shifter.is_anything_left()) {
+    const ACE_TCHAR* currentArg = 0;
+
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-RTPSThreadKey"))) != 0) {
+      rtps_thr_key_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
+      arg_shifter.consume_arg();
+      got_rtps_thread_key = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-RTPSMaxDelay"))) != 0) {
+      rtps_max_wait_ = ACE_OS::atoi(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+      got_rtps_max_wait = true;
+
+    } else {
+      arg_shifter.ignore_arg();
+    }
   }
+
+  return 0;
 }
 
-void ThreadStatusManager::get_levels(double& hwm, double& lwm)
+int ThreadStatusManager::load_common_configuration(ACE_Configuration_Heap& cf)
 {
-  hwm = rtps_util_hwm_;
-  lwm = rtps_util_lwm_;
+  const ACE_Configuration_Section_Key& root = cf.root_section();
+  ACE_Configuration_Section_Key sect;
+
+  if (cf.open_section(root, COMMON_SECTION_NAME, false, sect) != 0) {
+    if (DCPS_debug_level > 0) {
+      // This is not an error if the configuration file does not have
+      // a common section. The code default configuration will be used.
+      ACE_DEBUG((LM_NOTICE, ACE_TEXT(
+      "(%P|%t) NOTICE: Service_Participant::load_common_configuration ")
+      ACE_TEXT("failed to open section %s\n"), COMMON_SECTION_NAME));
+    }
+
+    return 0;
+
+  } else {
+    const ACE_TCHAR* message = ACE_TEXT("(%P|%t) NOTICE: using %s value from command option (overrides value if it's in config file)\n");
+    if (got_rtps_thread_key) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("RTPSThreadKey")));
+    } else {
+      ACE_TString key(ACE_TEXT("VSEDP"));
+      GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("RTPSThreadKey"), key);
+      rtps_thr_key_ = ACE_TEXT_ALWAYS_CHAR(key.c_str());
+    }
+    if (got_rtps_max_wait) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("RTPSMaxWait")));
+    } else {
+      int delay = 0;
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RTPSMaxWait"), delay, int)
+      rtps_max_wait_ = TimeDuration(delay);
+    }
+  }
+
+  return 0;
 }
 
 const char* ThreadStatusManager::status_to_string(ThreadStatus status)
@@ -60,7 +108,7 @@ const char* ThreadStatusManager::status_to_string(ThreadStatus status)
   }
 }
 
-bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
+bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy, bool saturated)
 {
   const SystemTimePoint now = SystemTimePoint::now();
   ThreadStatus status = ThreadStatus_Running;
@@ -69,17 +117,14 @@ bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
   Map::iterator it = map_.find(thread_key);
   if (it != map_.end()) {
     sat = it->second.saturated;
-    if (pbusy >= rtps_util_hwm_) {
-      sat = true;
-    } else if (pbusy <= rtps_util_lwm_) {
-      sat = false;
+    if (saturated != sat) {
+      sat = saturated;
     }
     it->second.timestamp = now;
     it->second.utilization = pbusy;
-    it->second.saturated = sat;
+    it->second.saturated = saturated;
   } else {
-    sat = pbusy >= rtps_util_hwm_;
-    map_[thread_key] = Thread(now, status, pbusy, sat);
+    map_[thread_key] = Thread(now, status, pbusy, saturated);
   }
   if (thread_key == rtps_thr_key_) {
     rtps_set_flow_control(sat);
@@ -168,7 +213,6 @@ bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
   }
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
-  ACE_DEBUG((LM_DEBUG, "%T TSM::sync_with_parent called\n"));
   // Figure out what threads were removed from parent.map_
   Map::iterator mi = map_.begin();
   Map::iterator ri = running.begin();
@@ -193,7 +237,6 @@ bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
 
 void ThreadStatusManager::rtps_set_flow_control(bool sat)
 {
-  ACE_DEBUG((LM_DEBUG, "%T rtps set flow_control, sat = %d\n", sat));
   if (!rtps_paused_) {
     if (sat) {
       GuardType g(rtps_lock_);

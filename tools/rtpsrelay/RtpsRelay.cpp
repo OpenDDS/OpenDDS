@@ -83,6 +83,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to initialize participant factory\n")));
     return EXIT_FAILURE;
   }
+  RelayThreadMonitor thread_mon(argc, argv);
 
   DDS::DomainId_t relay_domain = 0;
   ACE_INET_Addr nic_horizontal, nic_vertical;
@@ -207,9 +208,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-Id"))) {
       config.relay_id(arg);
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-ThreadMonitorOutput"))) {
-      config.thread_monitor_output(arg);
-      args.consume_arg();
     } else {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Invalid option: %C\n", args.get_current()));
       return 1;
@@ -275,12 +273,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   TheServiceParticipant->bit_autopurge_nowriter_samples_delay(one_minute);
   TheServiceParticipant->bit_autopurge_disposed_samples_delay(one_minute);
-
-  RelayThreadMonitor thread_mon(TheServiceParticipant->get_thread_status_interval(),
-                                TheServiceParticipant->get_thread_status_manager());
-  for (auto o : config.thread_monitor_output()) {
-    thread_mon.add_reporter(o.c_str());
-  }
 
   // Set up the relay participant.
   DDS::DomainParticipantQos participant_qos;

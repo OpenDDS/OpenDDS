@@ -4,7 +4,7 @@
   "any_node": [
     {
       "executable": "RtpsRelay",
-      "command" : "%executable% -Id relay1 -UserData relay1 -DCPSDebugLevel 1 -DCPSSecurityDebugLevel 2 -LogDiscovery 1 -LogActivity 1 -ThreadMonitorPeriod 1 -LogRelayStatistics 3 -LogParticipantStatistics 1 -DCPSConfigFile %bench_root%%ds%example%ds%config%ds%relay%ds%ci_disco_relay.ini -ApplicationDomain 7 -VerticalAddress 4444 -ORBLogFile %log% -DCPSPendingTimeout 3",
+      "command" : "%executable% -Id relay1 -UserData relay1 -DCPSDebugLevel 1 -DCPSSecurityDebugLevel 2 -LogDiscovery 1 -LogActivity 1 -DCPSThreadStatusInterval 1 -LogRelayStatistics 3 -LogParticipantStatistics 1 -DCPSConfigFile %bench_root%%ds%example%ds%config%ds%relay%ds%ci_disco_relay.ini -ApplicationDomain 7 -VerticalAddress 4444 -ORBLogFile %log% -DCPSPendingTimeout 3",
       "no_report": true,
       "ignore_errors": true,
       "count": 1

@@ -1,40 +1,102 @@
 #include "RelayThreadMonitor.h"
 
 #include <dds/DCPS/ThreadStatusManager.h>
-
+#include <dds/DCPS/Service_Participant.h>
 #include <ace/Thread.h>
 #include <ace/OS_NS_strings.h>
+#include <ace/Arg_Shifter.h>
+#include <ace/Configuration_Import_Export.h>
+#include <ace/Argv_Type_Converter.h>
 
 #include <stdexcept>
 
 using namespace OpenDDS::DCPS;
 namespace RtpsRelay {
 
-RelayThreadMonitor::RelayThreadMonitor(TimeDuration perd,
-                                       ThreadStatusManager *tsm)
-: summarizer_(*this, perd)
+static const ACE_TCHAR RELAY_SECTION_NAME[] = ACE_TEXT("relay");
+static bool got_rtps_thread_hwm = false;
+static bool got_rtps_thread_lwm = false;
+
+RelayThreadMonitor::RelayThreadMonitor(int &argc, ACE_TCHAR* argv[])
+: summarizer_(*this, TheServiceParticipant->get_thread_status_interval())
 , history_depth_(1)
-, tsm_(tsm)
+, tsm_(TheServiceParticipant->get_thread_status_manager())
 {
+  parse_args(argc, argv);
+  load_configuration(TheServiceParticipant->get_configuration());
   ThreadMonitor::installed_monitor_ = this;
-  ThreadStatusManager::get_levels(ThreadDescriptor::high_water_mark,
-                                  ThreadDescriptor::low_water_mark);
 }
 
 RelayThreadMonitor::~RelayThreadMonitor() noexcept
 {
   for (auto r : reporters_) delete r;
 }
-/*
-void RelayThreadMonitor::preset(ThreadStatusManager *tsm, const char *alias)
-{
-  ACE_DEBUG((LM_DEBUG,"RTM preset called for alias = %s\n", alias));
-  pending_reg_[alias] = tsm;
-}
-*/
 
-void RelayThreadMonitor::update(ThreadMonitor::UpdateMode mode,
-                                const char* alias)
+int RelayThreadMonitor::parse_args(int &argc, ACE_TCHAR *argv[])
+{
+  ACE_Arg_Shifter arg_shifter(argc, argv);
+
+  while (arg_shifter.is_anything_left()) {
+    const ACE_TCHAR* currentArg = 0;
+    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ThreadHighWaterMark"))) != 0) {
+      ThreadDescriptor::high_water_mark = ACE_OS::atof(currentArg);
+      arg_shifter.consume_arg();
+      got_rtps_thread_hwm = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ThreadLowWaterMark"))) != 0) {
+      ThreadDescriptor::low_water_mark = ACE_OS::atof(currentArg);
+      arg_shifter.consume_arg();
+      got_rtps_thread_lwm = true;
+
+    } else if ((currentArg = arg_shifter.get_the_parameter("-ThreadMonitorOutput"))) {
+      add_reporter(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+    } else {
+      arg_shifter.ignore_arg();
+    }
+  }
+
+  return 0;
+}
+
+int RelayThreadMonitor::load_configuration(ACE_Configuration_Heap& cf)
+{
+  const ACE_Configuration_Section_Key& root = cf.root_section();
+  ACE_Configuration_Section_Key sect;
+
+  if (cf.open_section(root, RELAY_SECTION_NAME, false, sect) != 0) {
+    if (DCPS_debug_level > 0) {
+      // This is not an error if the configuration file does not have
+      // a common section. The code default configuration will be used.
+      ACE_DEBUG((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: Service_Participant::load_common_configuration ")
+      ACE_TEXT("failed to open section %s\n"), RELAY_SECTION_NAME));
+    }
+
+    return 0;
+
+  } else {
+    const ACE_TCHAR* message = ACE_TEXT("(%P|%t) NOTICE: using %s value from command option (overrides value if it's in config file)\n");
+
+    if (got_rtps_thread_hwm) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("ThreadHighWaterMark")));
+    } else {
+      double hwm = 0.5;
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ThreadHighWaterMark"), hwm, double)
+      ThreadDescriptor::high_water_mark = hwm;
+    }
+
+    if (got_rtps_thread_hwm) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("ThreadLowWaterMark")));
+    } else {
+      double lwm = 0.5;
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("ThreadLowWaterMark"), lwm, double)
+      ThreadDescriptor::low_water_mark = lwm;
+    }
+  }
+  return 0;
+}
+
+void RelayThreadMonitor::update(ThreadMonitor::UpdateMode mode, const char* alias)
 {
   MonotonicTimePoint tnow = MonotonicTimePoint::now();
   Sample s = { mode, tnow };
@@ -176,8 +238,15 @@ void RelayThreadMonitor::summarize_thread(ThreadDescriptor_rch &td)
   double uspan = static_cast<double>(ls.accum_idle_ + ls.accum_busy_);
   if (uspan != 0.0) {
     double pbusy = dbusy/uspan;
+    bool sat = td->saturated_;
     if (tsm_) {
-      tsm_->update_busy(td->alias_.c_str(), pbusy);
+      if (pbusy >= ThreadDescriptor::high_water_mark) {
+        sat = true;
+      } else if (pbusy <= ThreadDescriptor::low_water_mark) {
+        sat = false;
+      }
+      td->saturated_ = sat;
+      tsm_->update_busy(td->alias_.c_str(), pbusy, sat);
     } else {
       ACE_DEBUG((LM_DEBUG,"TLM::summarie_thread, cannot update thread %C, pbusy = %g\n", td->alias_.c_str(), pbusy));
       busy_map_[td->alias_.c_str()] = pbusy;
@@ -248,12 +317,6 @@ void AceLogReporter::report_thread(ThreadDescriptor_rch td) const
   if (td->nested_.size()) {
     ACE_DEBUG((LM_INFO, "     TLM nesting level is %d\n", td->nested_.size()));
   }
-}
-
-void RelayThreadMonitor::set_levels(double hwm, double lwm)
-{
-  ThreadDescriptor::low_water_mark = lwm;
-  ThreadDescriptor::high_water_mark = hwm;
 }
 
 size_t RelayThreadMonitor::thread_count()

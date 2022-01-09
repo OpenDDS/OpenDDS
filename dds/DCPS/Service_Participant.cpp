@@ -164,9 +164,6 @@ static bool got_log_verbose = false;
 static bool got_default_address = false;
 static bool got_bidir_giop = false;
 static bool got_thread_status_interval = false;
-static bool got_relay_thread_key = false;
-static bool got_relay_thread_hwm = false;
-static bool got_relay_thread_lwm = false;
 static bool got_monitor = false;
 static bool got_type_object_encoding = false;
 static bool got_log_level = false;
@@ -214,9 +211,6 @@ Service_Participant::Service_Participant()
   , bidir_giop_(true)
   , thread_status_interval_(0)
   , thread_status_manager_(new ThreadStatusManager)
-  , relay_thread_key_("VSEDP")
-  , relay_thread_hwm_(0.5)
-  , relay_thread_lwm_(0.5)
   , monitor_enabled_(false)
   , shut_down_(false)
   , default_configuration_file_(ACE_TEXT(""))
@@ -453,6 +447,10 @@ Service_Participant::get_domain_participant_factory(int &argc,
         return DDS::DomainParticipantFactory::_nil();
       }
 
+      if (thread_status_manager_->parse_args(argc, argv) != 0) {
+        return DDS::DomainParticipantFactory::_nil();
+      }
+
       if (config_fname.is_empty() && !default_configuration_file_.is_empty()) {
         config_fname = default_configuration_file_;
       }
@@ -494,10 +492,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
           }
         }
       }
-      ThreadStatusManager::init(relay_thread_key_,
-                                relay_thread_hwm_,
-                                relay_thread_lwm_,
-                                thread_status_interval_.value().sec());
 #if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
@@ -674,21 +668,6 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_thread_status_interval = true;
 
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRelayThreadKey"))) != 0) {
-      relay_thread_key_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
-      arg_shifter.consume_arg();
-      got_relay_thread_key = true;
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRelayThreadHighWaterMark"))) != 0) {
-      relay_thread_hwm_ = ACE_OS::atof(currentArg);
-      arg_shifter.consume_arg();
-      got_relay_thread_hwm = true;
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSRelayThreadLowWaterMark"))) != 0) {
-      relay_thread_lwm_ = ACE_OS::atof(currentArg);
-      arg_shifter.consume_arg();
-      got_relay_thread_lwm = true;
-
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationRecoveryDuration"))) != 0) {
       this->federation_recovery_duration_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
@@ -768,7 +747,6 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.ignore_arg();
     }
   }
-
   // Indicates successful parsing of the command line
   return 0;
 }
@@ -1585,6 +1563,16 @@ Service_Participant::load_configuration(
                      -1);
   }
 
+  status = thread_status_manager_->load_common_configuration(config);
+
+  if (status != 0) {
+    ACE_ERROR_RETURN((LM_ERROR,
+    ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
+    ACE_TEXT("load_common_configuration () returned %d\n"),
+    status),
+    -1);
+  }
+
   // Register static discovery.
   this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
 
@@ -1909,30 +1897,6 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       int interval = 0;
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int)
       thread_status_interval_ = TimeDuration(interval);
-    }
-
-    if (got_relay_thread_key) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSRelayThreadKey")));
-    } else {
-      ACE_TString key(ACE_TEXT("VSEDP"));
-      GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSRelayThreadKey"), key);
-      relay_thread_key_ = ACE_TEXT_ALWAYS_CHAR(key.c_str());
-    }
-
-    if (got_relay_thread_hwm) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSRelayThreadHighWaterMark")));
-    } else {
-      double hwm = 0.5;
-      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRelayThreadHighWaterMark"), hwm, double)
-      relay_thread_hwm_ = hwm;
-    }
-
-    if (got_relay_thread_lwm) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSRelayThreadLowWaterMark")));
-    } else {
-      double lwm = 0.5;
-      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSRelayThreadLowWaterMark"), lwm, double)
-      relay_thread_lwm_ = lwm;
     }
 
     ACE_Configuration::VALUETYPE type;
@@ -2921,6 +2885,12 @@ DDS::Topic_ptr Service_Participant::create_typeless_topic(
 void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
 {
   default_configuration_file_ = path;
+}
+
+ACE_Configuration_Heap&
+Service_Participant::get_configuration()
+{
+  return cf_;
 }
 
 TimeDuration

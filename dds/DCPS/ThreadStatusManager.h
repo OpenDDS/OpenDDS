@@ -14,6 +14,8 @@
 #include "ConditionVariable.h"
 #include "SafetyProfileStreams.h"
 
+#include <ace/Configuration.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -49,7 +51,7 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   static String get_key(const char* safety_profile_tid = "", const String& name = "");
 
   /// Update the busy percent for the identified thread
-  bool update_busy(const String& key, double pbusy);
+  bool update_busy(const String& key, double pbusy, bool saturated);
 
   /// Update the status of a thread to indicate it was able to check in at the
   /// given time. Returns false if failed.
@@ -84,21 +86,15 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   , rtps_lock_()
   , rtps_pauser_(rtps_lock_)
   , rtps_paused_(false)
+  , rtps_thr_key_("VSEDP")
+  , rtps_max_wait_(10)
   {
-
   }
 
-  static void init(const String& key, double hwm, double lwm, ACE_UINT64 secs);
-
-  static void get_levels(double& hwm, double& lwm);
-
+    int parse_args(int &argc, ACE_TCHAR *argv[]);
+  int load_common_configuration(ACE_Configuration_Heap& cf);
 
 private:
-  static String rtps_thr_key_;
-  static double rtps_util_hwm_;
-  static double rtps_util_lwm_;
-  static TimeDuration rtps_max_wait_;
-
   Map map_;
 
   typedef ACE_SYNCH_MUTEX LockType;
@@ -109,6 +105,8 @@ private:
   LockType rtps_lock_;
   ConditionVariableType rtps_pauser_;
   bool rtps_paused_;
+  String rtps_thr_key_;
+  TimeDuration rtps_max_wait_;
 };
 
 } // namespace DCPS

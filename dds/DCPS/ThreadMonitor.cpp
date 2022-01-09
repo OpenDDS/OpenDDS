@@ -25,10 +25,6 @@ ThreadMonitor::~ThreadMonitor()
 {
 }
 
-void ThreadMonitor::set_levels(double, double)
-{
-}
-
 void ThreadMonitor::preset(ThreadStatusManager*, const char*)
 {
 }

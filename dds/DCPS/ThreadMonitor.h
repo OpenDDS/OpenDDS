@@ -55,8 +55,6 @@ public:
    */
   virtual double get_utilization(const char* alias) const;
 
-  virtual void set_levels(double hwm, double lwm);
-
   static ThreadMonitor* installed_monitor_;
 
   /**

@@ -6,6 +6,7 @@
 #include <dds/DCPS/ThreadMonitor.h>
 #include <dds/DCPS/TimeTypes.h>
 
+#include <ace/Configuration.h>
 #include <ace/Task.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Log_Msg.h>
@@ -32,7 +33,6 @@ struct LoadSummary {
 typedef std::deque<struct Sample> LoadSamples;
 typedef std::deque<struct LoadSummary> LoadHistory;
 typedef std::map<const char*, double> BusyMap;
-//typedef std::map<std::string, OpenDDS::DCPS::ThreadStatusManager*> registrants;
 
 class ThreadDescriptor : public OpenDDS::DCPS::RcObject
 {
@@ -48,6 +48,7 @@ public:
   LoadHistory summaries_;
   ACE_UINT64 current_busy_;
   ACE_UINT64 current_idle_;
+  bool saturated_;
   static double high_water_mark;
   static double low_water_mark;
 };
@@ -105,13 +106,13 @@ private:
  */
 class RelayThreadMonitor : public OpenDDS::DCPS::ThreadMonitor {
 public:
-  explicit RelayThreadMonitor (OpenDDS::DCPS::TimeDuration perd,
-                               OpenDDS::DCPS::ThreadStatusManager* tsm);
+  explicit RelayThreadMonitor (int &argc, ACE_TCHAR *argv[]);
   ~RelayThreadMonitor() noexcept;
-  //virtual void preset(OpenDDS::DCPS::ThreadStatusManager*, const char*);
+  int parse_args(int &argc, ACE_TCHAR *argv[]);
+  int load_configuration(ACE_Configuration_Heap& cf);
+
   virtual void update(UpdateMode, const char* = "");
   virtual double get_utilization(const char* key) const;
-  virtual void set_levels(double hwm, double lwm);
   size_t thread_count();
   int add_reporter (const char* name);
   void summarize();
@@ -124,7 +125,6 @@ public:
 protected:
 
   Summarizer summarizer_;
-  //registrants pending_reg_;
   DescriptorMap descs_;
   ThreadDescriptor_rch forced_;
   size_t history_depth_;
