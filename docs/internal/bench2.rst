@@ -633,7 +633,7 @@ Note, actual messages will be slightly larger than this value.
 
 ::
 
-            "value": { "_d": "PVK_ULL", "ull_prop": 512 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 512 }
           },
           { "name": "write_frequency",
 
@@ -642,19 +642,19 @@ In this case, twice a second.
 
 ::
 
-            "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+            "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.0 }
           },
 
 ::
 
           { "name": "filter_class_start_value",
-            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
           },
           { "name": "filter_class_stop_value",
-            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
           },
           { "name": "filter_class_increment",
-            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
           }
 
 Value range and increment for ``"filter_class"`` data variable, used when writing data.
@@ -669,10 +669,10 @@ This variable is an unsigned integer intended to be used for content filtered to
         "type": "set_cft_parameters",
         "params": [
           { "name": "content_filtered_topic_name",
-            "value": { "_d": "PVK_STRING", "string_prop": "cft_1" }
+            "value": { "$discriminator": "PVK_STRING", "string_prop": "cft_1" }
           },
           { "name": "max_count",
-            "value": { "_d": "PVK_ULL", "ull_prop": 3 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 3 }
           },
 
 Maximum count of "Set" actions to be taken.
@@ -680,7 +680,7 @@ Maximum count of "Set" actions to be taken.
 ::
 
           { "name": "param_count",
-            "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
           },
 
 Number of parameters to be set
@@ -688,7 +688,7 @@ Number of parameters to be set
 ::
 
           { "name": "set_frequency",
-            "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+            "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.0 }
           },
 
 The frequency for set action, per second
@@ -696,7 +696,7 @@ The frequency for set action, per second
 ::
 
           { "name": "acceptable_param_values",
-            "value": { "_d": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
+            "value": { "$discriminator": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
           },
 
 Lists of allowed values to set to, for each parameter. Worker will iterate thought the list sequentially unless ``"random_order"`` flag (below) is specified
@@ -704,7 +704,7 @@ Lists of allowed values to set to, for each parameter. Worker will iterate thoug
 ::
 
           { "name": "random_order",
-            "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
           }
         ]
     }

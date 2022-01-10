@@ -1,27 +1,24 @@
 #include "gtest/gtest.h"
 
-#include "RapidJsonTestC.h"
-#include "RapidJsonTestTypeSupportImpl.h"
+#include "VreadVwriteTestC.h"
+#include "VreadVwriteTestTypeSupportImpl.h"
 
-#include <dds/DCPS/RapidJsonWrapper.h>
+#include <dds/DCPS/JsonValueReader.h>
+#include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Definitions.h>
 
 #include <fstream>
 
-TEST(RapidJsonTest, ParseTest)
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+TEST(VreadVwriteTest, ParseTest)
 {
-  std::ifstream ifs("RapidJsonTest.json", std::ios_base::in | std::ios_base::binary);
+  std::ifstream ifs("VreadVwriteTest.json", std::ios_base::in | std::ios_base::binary);
 
   ASSERT_EQ(ifs.good(), true);
 
-  rapidjson::Document doc;
   rapidjson::IStreamWrapper isw(ifs);
-
-  doc.ParseStream<rapidjson::kParseDefaultFlags , rapidjson::UTF8<>, rapidjson::IStreamWrapper>(isw);
-  ASSERT_EQ(doc.IsObject(), true);
-
   Mod::Sample sample;
-  OpenDDS::DCPS::copyFromRapidJson(doc, sample);
+  OpenDDS::DCPS::from_json(sample, isw);
 
   ASSERT_EQ(sample.id, 5);
   ASSERT_EQ(std::string(sample.data.in()), "The most rapid of JSONs");
@@ -98,7 +95,7 @@ TEST(RapidJsonTest, ParseTest)
   ASSERT_EQ(std::string(sample.sa[3].in()), "west");
 }
 
-TEST(RapidJsonTest, SerializeTest)
+TEST(VreadVwriteTest, SerializeTest)
 {
   Mod::Sample sample;
 
@@ -159,9 +156,16 @@ TEST(RapidJsonTest, SerializeTest)
   sample.sa[2] = "south";
   sample.sa[3] = "west";
 
-  rapidjson::Value val(rapidjson::kObjectType);
-  rapidjson::MemoryPoolAllocator<rapidjson::CrtAllocator> alloc;
-  OpenDDS::DCPS::copyToRapidJson(sample, val, alloc);
+  // Serialize to JSON string.
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+  OpenDDS::DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer>> jvw(writer);
+  vwrite(jvw, sample);
+
+  // Then parse.
+  rapidjson::Document document;
+  document.Parse(buffer.GetString());
+  rapidjson::Value& val = document;
 
   ASSERT_EQ(val.IsObject(), true);
   ASSERT_EQ(val["id"], 5);
@@ -213,7 +217,7 @@ TEST(RapidJsonTest, SerializeTest)
   ASSERT_EQ(val["ns"][1][1], "donatello");
   ASSERT_EQ(val["ns"][1][2], "michelangelo");
   ASSERT_EQ(val["ns"][1][3], "raphael");
-  ASSERT_EQ(val["mu"]["_d"], "three");
+  ASSERT_EQ(val["mu"]["$discriminator"], "three");
   ASSERT_EQ(val["mu"]["d"], 5678);
   ASSERT_EQ(val["ca"][0], "f");
   ASSERT_EQ(val["ca"][1], "e");
@@ -232,3 +236,4 @@ TEST(RapidJsonTest, SerializeTest)
   //std::string output(buffer.GetString());
   //std::cout << output << std::endl;
 }
+#endif

@@ -49,7 +49,7 @@
     ]
   ],
   "mu": {
-    "_d": "four",
+    "$discriminator": "four",
     "s": [
       [
         "alpha",

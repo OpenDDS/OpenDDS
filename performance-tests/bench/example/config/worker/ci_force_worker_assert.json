@@ -9,7 +9,7 @@
 
   "properties": [
     { "name": "force_worker_assert",
-      "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+      "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
     }
   ]
 }

@@ -144,8 +144,8 @@ TEST(dds_DCPS_JsonValueReader, struct_max)
     "\"float32\":1.25,"
     "\"float64\":1.25,"
     "\"float128\":1.25,"
-    "\"char8\":97,"
-    "\"char16\":97,"
+    "\"char8\":\"a\","
+    "\"char16\":\"a\","
     "\"string\":\"a string\","
     "\"enum\":\"kValue1\""
     "}";
@@ -307,7 +307,7 @@ TEST(dds_DCPS_JsonValueReader, array_min)
 #if OPENDDS_HAS_EXPLICIT_INTS
     "-128,0,"
 #endif
-    "-32768,0,-2147483648,0,-9223372036854775808,0,-1.25,-1.25,-1.25,97,97,\"a string\",\"kValue2\"]";
+    "-32768,0,-2147483648,0,-9223372036854775808,0,-1.25,-1.25,-1.25,\"a\",\"a\",\"a string\",\"kValue2\"]";
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;
@@ -428,7 +428,7 @@ TEST(dds_DCPS_JsonValueReader, sequence_zero)
 #if OPENDDS_HAS_EXPLICIT_INTS
     "0,0,"
 #endif
-    "0,0,0,0,0,0,0,0,0,0,0,\"\",\"kValue1\"]";
+    "0,0,0,0,0,0,0,0,0,\"\\u0000\",\"\\u0000\",\"\",\"kValue1\"]";
   StringStream ss(json);
   JsonValueReader<> jvr(ss);
   ACE_CDR::Boolean bool_value;

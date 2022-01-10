@@ -147,10 +147,10 @@
       "writers": [ "datawriter_E" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 123 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 123 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 32.1 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 32.1 }
         }
       ]
     },
@@ -160,10 +160,10 @@
       "writers": [ "datawriter_F" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 321 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 321 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 12.3 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 12.3 }
         }
       ]
     }

@@ -7,7 +7,7 @@ use lib "$ACE_ROOT/bin";
 use PerlACE::Run_Test;
 use strict;
 
-my $name = "RapidJsonTest";
+my $name = "VreadVwriteTest";
 my $test = new PerlACE::Process($name, "");
 print $test->CommandLine () . "\n";
 $test->Spawn ();

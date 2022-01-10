@@ -219,10 +219,10 @@
       "writers": [ "datawriter_01_01_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 190 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 190 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 20000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 20000000 } }
         }
       ]
     },
@@ -232,10 +232,10 @@
       "writers": [ "datawriter_01_01_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 170 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 170 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 30000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 30000000 } }
         }
       ]
     },
@@ -245,10 +245,10 @@
       "writers": [ "datawriter_01_02_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 130 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 130 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 50000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 50000000 } }
         }
       ]
     },
@@ -258,10 +258,10 @@
       "writers": [ "datawriter_01_02_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 110 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 110 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 70000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 70000000 } }
         }
       ]
     },
@@ -271,10 +271,10 @@
       "writers": [ "datawriter_02_01_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 70 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 70 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 110000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 110000000 } }
         }
       ]
     },
@@ -284,10 +284,10 @@
       "writers": [ "datawriter_02_01_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 50 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 50 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 130000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 130000000 } }
         }
       ]
     },
@@ -297,10 +297,10 @@
       "writers": [ "datawriter_02_02_01" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 30 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 30 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 170000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 170000000 } }
         }
       ]
     },
@@ -310,10 +310,10 @@
       "writers": [ "datawriter_02_02_02" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 20 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 190000000 } }
+          "value": { "$discriminator": "PVK_TIME", "time_prop": { "sec": 0, "nsec": 190000000 } }
         }
       ]
     }
