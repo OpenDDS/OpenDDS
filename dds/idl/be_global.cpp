@@ -64,6 +64,7 @@ BE_GlobalData::BE_GlobalData()
   , default_extensibility_(extensibilitykind_appendable)
   , root_default_autoid_(autoidkind_sequential)
   , default_try_construct_(tryconstructfailaction_discard)
+  , old_typeobject_encoding_(false)
 {
   default_data_representation_.set_all(true);
 
@@ -366,7 +367,6 @@ void invalid_option(char* option)
 void
 BE_GlobalData::parse_args(long& i, char** av)
 {
-  // This flag is provided for CIAO compatibility
   static const char EXPORT_FLAG[] = "--export=";
   static const size_t EXPORT_FLAG_SIZE = sizeof(EXPORT_FLAG) - 1;
 
@@ -513,6 +513,8 @@ BE_GlobalData::parse_args(long& i, char** av)
           ACE_TEXT("Invalid argument to --default-try-construct: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
+    } else if (!strcmp(av[i], "--old-typeobject-encoding")) {
+      old_typeobject_encoding_ = true;
     } else {
       invalid_option(av[i]);
     }

@@ -152,6 +152,9 @@ public:
   bool xtypes_complete() const;
   void xtypes_complete(bool b);
 
+  bool old_typeobject_encoding() const { return old_typeobject_encoding_; }
+  void old_typeobject_encoding(bool b) { old_typeobject_encoding_ = b; }
+
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
 
@@ -172,7 +175,7 @@ public:
   bool suppress_typecode() const { return suppress_typecode_; }
   bool suppress_xtypes() const { return suppress_xtypes_; }
 
-  static bool writeFile(const char* fileName, const std::string &content);
+  static bool writeFile(const char* fileName, const std::string& content);
 
   /**
    * Based on annotations and global_default_nested_, determine if a type is a
@@ -269,6 +272,7 @@ private:
   std::set<std::string> platforms_;
   typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
   MemberIdMap member_id_map_;
+  bool old_typeobject_encoding_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;
