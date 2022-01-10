@@ -60,7 +60,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 20 }
                   }
                 ],
 
@@ -73,7 +73,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 20 }
                   }
                 ],
 
@@ -92,7 +92,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 20 }
                   }
                 ]
               },
@@ -102,7 +102,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 20 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 20 }
                   }
                 ]
               }

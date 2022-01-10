@@ -1,4 +1,4 @@
-project: dcpsexe, dcps_test, dcps_rapidjson, googletest {
+project: dcpsexe, dcps_test, googletest, rapidjson {
 
   exename = *
 
@@ -6,10 +6,10 @@ project: dcpsexe, dcps_test, dcps_rapidjson, googletest {
   avoids += no_cxx11
 
   Idl_Files {
-    RapidJsonTest.idl
+    VreadVwriteTest.idl
   }
 
   TypeSupport_Files {
-    RapidJsonTest.idl
+    VreadVwriteTest.idl
   }
 }

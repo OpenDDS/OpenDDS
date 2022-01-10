@@ -4618,7 +4618,7 @@ jobs:
         rm -rf key_annotation
         rm -rf keywords
         rm -rf namespace_conflict
-        rm -rf rapidjson_generator
+        rm -rf vread_vwrite
         rm -rf sequence_conflict
         rm -rf TryConstruct
         rm -rf typecode
@@ -5848,7 +5848,7 @@ jobs:
         rm -rf key_annotation
         rm -rf keywords
         rm -rf namespace_conflict
-        rm -rf rapidjson_generator
+        rm -rf vread_vwrite
         rm -rf sequence_conflict
         rm -rf TryConstruct
         rm -rf typecode
@@ -6723,7 +6723,7 @@ jobs:
         rm -rf key_annotation
         rm -rf keywords
         rm -rf namespace_conflict
-        rm -rf rapidjson_generator
+        rm -rf vread_vwrite
         rm -rf sequence_conflict
         rm -rf TryConstruct
         rm -rf typecode

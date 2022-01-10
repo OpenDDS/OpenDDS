@@ -51,7 +51,6 @@ BE_GlobalData::BE_GlobalData()
   , no_default_gen_(false)
   , generate_itl_(false)
   , generate_v8_(false)
-  , generate_rapidjson_(false)
   , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
   , face_ts_(false)
@@ -245,16 +244,6 @@ bool BE_GlobalData::v8() const
   return this->generate_v8_;
 }
 
-void BE_GlobalData::rapidjson(bool b)
-{
-  this->generate_rapidjson_ = b;
-}
-
-bool BE_GlobalData::rapidjson() const
-{
-  return this->generate_rapidjson_;
-}
-
 void BE_GlobalData::value_reader_writer(bool b)
 {
   this->generate_value_reader_writer_ = b;
@@ -406,8 +395,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gv8")) {
       v8(true);
-    } else if (0 == ACE_OS::strcasecmp(av[i], "-Grapidjson")) {
-      rapidjson(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gprinter")) {
       printer(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {

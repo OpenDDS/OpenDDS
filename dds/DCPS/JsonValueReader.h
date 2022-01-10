@@ -96,7 +96,12 @@ public:
   bool Uint64(uint64_t i) { token_type_ = kUint64; uint64_value_ = i; return true; }
   bool Double(double d) { token_type_ = kDouble; double_value_ = d; return true; }
   bool RawNumber(const Ch* /* str */, rapidjson::SizeType /* length */, bool /* copy */) { token_type_ = kRawNumber; return true; }
-  bool String(const Ch* str, rapidjson::SizeType /* length */, bool /* copy */) { token_type_ = kString; string_value_ = str; return true; }
+  bool String(const Ch* str, rapidjson::SizeType length, bool /* copy */)
+  {
+    token_type_ = kString;
+    string_value_ = std::string(str, length);
+    return true;
+  }
   bool StartObject() { token_type_ = kStartObject; return true; }
   bool Key(const Ch* str, rapidjson::SizeType /* length */, bool /* copy */) { token_type_ = kKey; key_value_ = str; return true; }
   bool EndObject(rapidjson::SizeType /* memberCount */) { token_type_ = kEndObject; return true; }
@@ -515,31 +520,34 @@ bool JsonValueReader<InputStream>::read_fixed(OpenDDS::FaceTypes::Fixed& /*value
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char8(ACE_CDR::Char& value)
 {
-  switch (peek()) {
-  case kInt:
-    value = int_value_;
-    return consume(kInt);
-  case kUint:
-    value = uint_value_;
-    return consume(kUint);
-  default:
-    return false;
+  if (peek() == kString) {
+    if (string_value_.length() == 1) {
+      value = string_value_[0];
+      return consume(kString);
+    }
   }
+  return false;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_char16(ACE_CDR::WChar& value)
 {
-  switch (peek()) {
-  case kInt:
-    value = int_value_;
-    return consume(kInt);
-  case kUint:
-    value = uint_value_;
-    return consume(kUint);
-  default:
-    return false;
+  if (peek() == kString) {
+    rapidjson::StringStream source(string_value_.c_str());
+    rapidjson::GenericStringBuffer<rapidjson::UTF16<> > target;
+
+    while (source.Tell() != string_value_.size()) {
+      if (!rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(source, target)) {
+        return false;
+      }
+    }
+
+    if (target.GetLength() == 1) {
+      value = target.GetString()[0];
+      return consume(kString);
+    }
   }
+  return false;
 }
 
 template <typename InputStream>
@@ -553,11 +561,19 @@ bool JsonValueReader<InputStream>::read_string(std::string& value)
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::read_wstring(std::wstring& /*value*/)
+bool JsonValueReader<InputStream>::read_wstring(std::wstring& value)
 {
-  // TODO
   if (peek() == kString) {
-    //value = string_value_;
+    rapidjson::StringStream source(string_value_.c_str());
+    rapidjson::GenericStringBuffer<rapidjson::UTF16<> > target;
+
+    while (source.Tell() != string_value_.size()) {
+      if (!rapidjson::Transcoder<rapidjson::UTF8<>, rapidjson::UTF16<> >::Transcode(source, target)) {
+        return false;
+      }
+    }
+
+    value = target.GetString();
     return consume(kString);
   }
   return false;
@@ -566,17 +582,29 @@ bool JsonValueReader<InputStream>::read_wstring(std::wstring& /*value*/)
 template <typename InputStream>
 bool JsonValueReader<InputStream>::read_long_enum(ACE_CDR::Long& value, const EnumHelper& helper)
 {
-  if (peek() == kString && helper.get_value(value, string_value_.c_str())) {
-    return consume(kString);
+  switch (peek()) {
+  case kString:
+    if (helper.get_value(value, string_value_.c_str())) {
+      return consume(kString);
+    }
+    return false;
+    break;
+  case kInt:
+    value = int_value_;
+    return consume(kInt);
+  case kUint:
+    value = uint_value_;
+    return consume(kUint);
+  default:
+    return false;
   }
-  return false;
 }
 
 template<typename T, typename InputStream>
-bool from_json(T& value, InputStream& sample)
+bool from_json(T& value, InputStream& stream)
 {
   set_default(value);
-  JsonValueReader<InputStream> jvr(sample);
+  JsonValueReader<InputStream> jvr(stream);
   return vread(jvr, value);
 }
 

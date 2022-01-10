@@ -209,10 +209,10 @@
       "writers": [ "datawriter_B1_T1" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 123 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 123 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 32.1 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 32.1 }
         }
       ]
     },
@@ -222,10 +222,10 @@
       "writers": [ "datawriter_B2_T2" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 321 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 321 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 12.3 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 12.3 }
         }
       ]
     },
@@ -235,10 +235,10 @@
       "writers": [ "datawriter_B2_T3" ],
       "params": [
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 222 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 222 }
         },
         { "name": "write_period",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 22.2 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 22.2 }
         }
       ]
     }

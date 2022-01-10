@@ -60,10 +60,10 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 10 }
                   },
                   { "name": "expected_sample_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 100 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 100 }
                   }
                 ],
 
@@ -82,7 +82,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 10 }
                   }
                 ]
               }
@@ -99,16 +99,16 @@
       "writers": [ "datawriter_01" ],
       "params": [
         { "name": "max_count",
-          "value": { "_d": "PVK_ULL", "ull_prop": 10 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 10 }
         },
         { "name": "total_hops",
-          "value": { "_d": "PVK_ULL", "ull_prop": 2 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 2 }
         },
         { "name": "data_buffer_bytes",
-          "value": { "_d": "PVK_ULL", "ull_prop": 256000 }
+          "value": { "$discriminator": "PVK_ULL", "ull_prop": 256000 }
         },
         { "name": "write_frequency",
-          "value": { "_d": "PVK_DOUBLE", "double_prop": 1.0 }
+          "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 1.0 }
         }
       ]
     }
