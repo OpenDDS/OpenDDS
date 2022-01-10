@@ -172,6 +172,21 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
     return 1;
   }
 
+  int ret = -1;
+  DDS::PublicationMatchedStatus ms = { 0, 0, 0, 0, 0 };
+  while (ret != 0) {
+    if (dw->get_publication_matched_status(ms) == DDS::RETCODE_OK) {
+      if (ms.total_count == 2 && ms.current_count == 1) {
+        ret = 0;
+      } else { // wait for a change
+        ACE_OS::sleep(1);
+      }
+    } else {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() - get_publication_matched_status failed!\n")));
+      break;
+    }
+  }
+
   ::DDS::InstanceHandle_t reader_handle_2 = -1;
   {
     listener_impl_2->reset(EXPECTED_READS_1, 10);
