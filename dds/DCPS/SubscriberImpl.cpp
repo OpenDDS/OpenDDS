@@ -1036,7 +1036,7 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
-SubscriberImpl::coherent_change_received (RepoId&         publisher_id,
+SubscriberImpl::coherent_change_received (const RepoId& publisher_id,
                                           DataReaderImpl* reader,
                                           Coherent_State& group_state)
 {
