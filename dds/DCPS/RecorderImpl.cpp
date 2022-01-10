@@ -25,6 +25,7 @@
 #include "SafetyProfileStreams.h"
 #include "TypeSupportImpl.h"
 #include "PoolAllocator.h"
+#include "DCPS_Utils.h"
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
 #endif

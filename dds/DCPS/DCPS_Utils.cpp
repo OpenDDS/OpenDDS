@@ -19,7 +19,9 @@
 #endif
 
 #include <cstring>
-#include <sstream>
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <sstream>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -473,7 +475,9 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
 DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
 {
   DCPS::String repr_string;
+#ifndef OPENDDS_SAFETY_PROFILE
   std::stringstream ss;
+#endif
   switch(repr) {
   case DDS::XCDR_DATA_REPRESENTATION:
     repr_string = "XCDR_DATA_REPRESENTATION";
@@ -487,9 +491,11 @@ DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
   case OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION:
     repr_string = "UNALIGNED_CDR_DATA_REPRESENTATION";
     break;
+#ifndef OPENDDS_SAFETY_PROFILE
   default:
     ss << repr;
     repr_string = ss.str();
+#endif
   }
   return repr_string;
 }

@@ -21,6 +21,7 @@
 #include "DataDurabilityCache.h"
 #include "MonitorFactory.h"
 #include "TypeSupportImpl.h"
+#include "DCPS_Utils.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif

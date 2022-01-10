@@ -18,7 +18,6 @@
 #include "CoherentChangeControl.h"
 #include "GuidUtils.h"
 #include "unique_ptr.h"
-#include "DCPS_Utils.h"
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 #  include "FilterEvaluator.h"
 #endif
