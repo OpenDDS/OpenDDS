@@ -166,13 +166,14 @@ DataLink::remove_startup_callbacks(const RepoId& local, const RepoId& remote)
 void
 DataLink::remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
 {
-  GuardType guard(strategy_lock_);
-
   TransportClient_rch client_lock = client.lock();
   if (client_lock) {
+    const RepoId id = client_lock->get_repo_id();
+
+    GuardType guard(strategy_lock_);
     OnStartCallbackMap::iterator it = on_start_callbacks_.find(remote);
     if (it != on_start_callbacks_.end()) {
-      RepoToClientMap::iterator it2 = it->second.find(client_lock->get_repo_id());
+      RepoToClientMap::iterator it2 = it->second.find(id);
       if (it2 != it->second.end()) {
         it->second.erase(it2);
         if (it->second.empty()) {
@@ -539,6 +540,7 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                 ACE_TEXT("(%P|%t) DataLink::release_reservations: ")
                 ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
 
+      guard.release();
       impl_.release_datalink(this);
     }
   }

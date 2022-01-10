@@ -283,6 +283,9 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 
     return;
   }
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+
   if (DCPS_debug_level) {
     const GuidConverter writer_conv(publication_id_);
     const GuidConverter conv(remote_id);
@@ -292,9 +295,8 @@ DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
                OPENDDS_STRING(writer_conv).c_str(),
                OPENDDS_STRING(conv).c_str()));
   }
-  if (flags & ASSOC_ACTIVE) {
 
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+  if (flags & ASSOC_ACTIVE) {
 
     // Have we already received an association_complete() callback?
     if (DCPS_debug_level) {
@@ -367,17 +369,6 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
-  if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(this->publication_id_);
-    GuidConverter reader_converter(remote_id);
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
-               ACE_TEXT("bit %d local %C remote %C\n"),
-               is_bit_,
-               OPENDDS_STRING(writer_converter).c_str(),
-               OPENDDS_STRING(reader_converter).c_str()));
-  }
-
   bool reader_durable = false;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   OPENDDS_STRING filterClassName;
@@ -387,12 +378,20 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 ACE_TEXT("(%P|%t) DataWriterImpl::association_complete_i - ")
+                 ACE_TEXT("bit %d local %C remote %C\n"),
+                 is_bit_,
+                 LogGuid(this->publication_id_).c_str(),
+                 LogGuid(remote_id).c_str()));
+    }
+
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
-      GuidConverter converter(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(remote_id).c_str()));
     }
   }
   {
@@ -533,9 +532,11 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
 
       this->controlTracker.message_sent();
       guard.release();
+      ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> rev_lock(lock_);
+      ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
       SendControlStatus ret = send_w_control(list, header, move(end_historic_samples), remote_id);
       if (ret == SEND_CONTROL_ERROR) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
                              ACE_TEXT("DataWriterImpl::association_complete_i: ")
                              ACE_TEXT("send_w_control failed.\n")));
         this->controlTracker.message_dropped();
@@ -1017,6 +1018,7 @@ DataWriterImpl::should_ack() const
 DataWriterImpl::AckToken
 DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::create_ack_token() - ")
@@ -1492,7 +1494,7 @@ DataWriterImpl::enable()
   typesupport->add_types(type_lookup_service);
   typesupport->populate_dependencies(type_lookup_service);
 
-  this->publication_id_ =
+  const RepoId publication_id =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
@@ -1501,6 +1503,10 @@ DataWriterImpl::enable()
                            trans_conf_info,
                            pub_qos,
                            type_info);
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+  publication_id_ = publication_id;
+
   if (publication_id_ == GUID_UNKNOWN) {
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::enable: "
@@ -1518,6 +1524,8 @@ DataWriterImpl::enable()
   }
 
   this->data_container_->publication_id_ = this->publication_id_;
+
+  guard.release();
 
   const DDS::ReturnCode_t writer_enabled_result =
     publisher->writer_enabled(topic_name_.in(), this);
@@ -1817,10 +1825,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
 {
   DBG_ENTRY_LVL("DataWriterImpl","write",6);
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    guard,
-                    get_lock (),
-                    DDS::RETCODE_ERROR);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
 
   // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
   GUIDSeq_var filter_out_var(filter_out);
@@ -1831,6 +1836,11 @@ DataWriterImpl::write(Message_Block_Ptr data,
                       ACE_TEXT("Entity is not enabled.\n")),
                      DDS::RETCODE_NOT_ENABLED);
   }
+
+  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
+                    dc_guard,
+                    get_lock(),
+                    DDS::RETCODE_ERROR);
 
   DataSampleElement* element = 0;
   DDS::ReturnCode_t ret = this->data_container_->obtain_buffer(element, handle);
@@ -1896,6 +1906,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
     this->available_data_list_.enqueue_tail(list);
 
   } else {
+    dc_guard.release();
     guard.release();
     this->send(list, transaction_id);
   }
@@ -2434,6 +2445,8 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
   const MonotonicTimePoint now(tv);
   bool liveliness_lost = false;
 
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+
   TimeDuration elapsed = now - last_liveliness_activity_time_;
 
   // Do we need to send a liveliness message?
@@ -2492,7 +2505,11 @@ DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
       listener_for(DDS::LIVELINESS_LOST_STATUS);
 
     if (!CORBA::is_nil(listener.in())) {
-      listener->on_liveliness_lost(this, this->liveliness_lost_status_);
+      {
+        ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> rev_lock(lock_);
+        ACE_Guard<ACE_Reverse_Lock<ACE_Recursive_Thread_Mutex> > rev_guard(rev_lock);
+        listener->on_liveliness_lost(this, this->liveliness_lost_status_);
+      }
       this->liveliness_lost_status_.total_count_change = 0;
     }
   }
@@ -2796,10 +2813,15 @@ void DataWriterImpl::transport_discovery_change()
 {
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
+
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   const RepoId dp_id_copy = dp_id_;
   const RepoId publication_id_copy = publication_id_;
-  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
-  disco->update_publication_locators(domain_id_,
+  const int domain_id = domain_id_;
+  guard.release();
+
+  Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id);
+  disco->update_publication_locators(domain_id,
                                      dp_id_copy,
                                      publication_id_copy,
                                      trans_conf_info);

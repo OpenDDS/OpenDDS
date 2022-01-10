@@ -122,7 +122,6 @@ public:
 
 #endif
 
-
 // Class to cleanup in case EndHistoricSamples is missed
 class EndHistoricSamplesMissedSweeper : public ReactorInterceptor {
 public:
@@ -151,7 +150,7 @@ private:
   public:
     CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
                 RcHandle<WriterInfo>& info)
-      : sweeper_ (sweeper)
+      : sweeper_(sweeper)
       , info_(info)
     { }
 
@@ -544,11 +543,11 @@ public:
                         DDS::ViewStateMask view_states,
                         DDS::InstanceStateMask instance_states);
 
-  void accept_coherent (PublicationId& writer_id,
-                        RepoId& publisher_id);
-  void reject_coherent (PublicationId& writer_id,
-                        RepoId& publisher_id);
-  void coherent_change_received (RepoId publisher_id, Coherent_State& result);
+  void accept_coherent (const PublicationId& writer_id,
+                        const RepoId& publisher_id);
+  void reject_coherent (const PublicationId& writer_id,
+                        const RepoId& publisher_id);
+  void coherent_change_received (const RepoId& publisher_id, Coherent_State& result);
 
   void coherent_changes_completed (DataReaderImpl* reader);
 
@@ -581,16 +580,7 @@ public:
 
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  const RepoId& get_repo_id() const
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
-    while (!has_subscription_id_ && !get_deleted()) {
-      subscription_id_condition_.wait();
-    }
-    return subscription_id_;
-  }
-
-  RepoId get_repo_id_copy() const
+  RepoId get_repo_id() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
     while (!has_subscription_id_ && !get_deleted()) {

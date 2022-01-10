@@ -64,7 +64,7 @@ public:
 
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&) { return true; }
-  const RepoId& get_repo_id() const { return config.getSubRdrId(index); }
+  RepoId get_repo_id() const { return config.getSubRdrId(index); }
   DDS::DomainId_t domain_id() const { return 0; }
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
 

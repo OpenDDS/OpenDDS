@@ -158,7 +158,7 @@ bool RecorderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-const RepoId& RecorderImpl::get_repo_id() const
+RepoId RecorderImpl::get_repo_id() const
 {
   return this->subscription_id_;
 }
@@ -460,7 +460,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-      this->writers_[writer.writerId]->handle_ = handle;
+      this->writers_[writer.writerId]->handle(handle);
     }
   }
 
