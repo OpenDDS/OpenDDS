@@ -1412,6 +1412,14 @@ typeobject_generator::declare_get_type_map()
 }
 
 void
+typeobject_generator::use_old_typeobject_encoding()
+{
+  static OpenDDS::DCPS::Encoding enc = OpenDDS::XTypes::get_typeobject_encoding();
+  enc.skip_sequence_dheader(true);
+  typeid_encoding_ = &enc;
+}
+
+void
 typeobject_generator::gen_epilogue()
 {
   be_global->add_include("dds/DCPS/Service_Participant.h");
@@ -1824,8 +1832,8 @@ typeobject_generator::update_maps(AST_Type* type,
   // each individual type's type identifier by hashing the corresponding type object.
   // On the other hand, type identifier is computed if the type is not part of a SCC.
   if (hash_type_identifier_map_.count(type) == 0) {
-    const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to);
-    const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to);
+    const OpenDDS::XTypes::TypeIdentifier minimal_ti = makeTypeIdentifier(minimal_to, typeid_encoding_);
+    const OpenDDS::XTypes::TypeIdentifier complete_ti = makeTypeIdentifier(complete_to, typeid_encoding_);
     const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
     hash_type_identifier_map_[type] = ti_pair;
 
