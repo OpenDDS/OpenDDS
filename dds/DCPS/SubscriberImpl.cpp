@@ -656,8 +656,7 @@ SubscriberImpl::set_qos(
              iter != endIter; ++iter) {
           DataReaderImpl_rch reader = iter->second;
           reader->set_subscriber_qos (qos);
-          DDS::DataReaderQos qos;
-          reader->get_qos(qos);
+          DDS::DataReaderQos qos = reader->qos_;
           RepoId id = reader->get_repo_id();
           std::pair<DrIdToQosMap::iterator, bool> pair
             = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
