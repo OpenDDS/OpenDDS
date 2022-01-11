@@ -10,6 +10,7 @@
 
 #include "Qos_Helper.h"
 #include "Definitions.h"
+#include "SafetyProfileStreams.h"
 
 #include <ace/ACE.h> /* For ACE::wild_match() */
 #include <ace/OS_NS_string.h>
@@ -19,9 +20,6 @@
 #endif
 
 #include <cstring>
-#ifndef OPENDDS_SAFETY_PROFILE
-#  include <sstream>
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -475,9 +473,6 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
 DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
 {
   DCPS::String repr_string;
-#ifndef OPENDDS_SAFETY_PROFILE
-  std::stringstream ss;
-#endif
   switch(repr) {
   case DDS::XCDR_DATA_REPRESENTATION:
     repr_string = "XCDR_DATA_REPRESENTATION";
@@ -491,11 +486,8 @@ DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
   case OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION:
     repr_string = "UNALIGNED_CDR_DATA_REPRESENTATION";
     break;
-#ifndef OPENDDS_SAFETY_PROFILE
   default:
-    ss << repr;
-    repr_string = ss.str();
-#endif
+    repr_string = to_dds_string(repr);
   }
   return repr_string;
 }
@@ -503,7 +495,7 @@ DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
 DCPS::String repr_seq_to_string(const DDS::DataRepresentationIdSeq& id_seq, bool is_data_writer)
 {
   DCPS::String repr_string;
-  ACE_CDR::ULong length = is_data_writer ? 1 : id_seq.length();
+  const ACE_CDR::ULong length = is_data_writer ? 1 : id_seq.length();
   for (ACE_CDR::ULong i = 0; i < length; ++i) {
     if (i > 0) {
       repr_string += ", ";
