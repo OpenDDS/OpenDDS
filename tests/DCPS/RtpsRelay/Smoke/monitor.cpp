@@ -1,18 +1,21 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
+#include <dds/rtpsrelaylib/Utility.h>
+
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/WaitSet.h>
-
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
-
-#include <dds/rtpsrelaylib/RelayTypeSupportImpl.h>
-#include <dds/rtpsrelaylib/Utility.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  ifdef OPENDDS_SECURITY
+#    include <dds/DCPS/security/BuiltInPlugins.h>
+#  endif
+#endif
 
 void append(DDS::PropertySeq& props, const char* name, const std::string& value, bool propagate = false)
 {
