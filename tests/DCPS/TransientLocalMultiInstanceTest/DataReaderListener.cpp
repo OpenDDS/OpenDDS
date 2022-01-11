@@ -22,6 +22,8 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
   try {
     MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
     if (CORBA::is_nil(message_dr)) {
@@ -107,6 +109,8 @@ void DataReaderListenerImpl::on_sample_lost(
 
 long DataReaderListenerImpl::num_reads() const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
   long num_reads = 0;
   std::map<int, int>::const_iterator map_iter = read_intances_message_count_.begin();
   for (; map_iter != read_intances_message_count_.end(); ++map_iter) {
@@ -117,6 +121,8 @@ long DataReaderListenerImpl::num_reads() const
 
 bool DataReaderListenerImpl::received_all_expected_messages() const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
   for (int i = 0; i < 4; ++i) {
     int message_instance = i + 1;
     if (!read_intances_message_count_.count(message_instance))

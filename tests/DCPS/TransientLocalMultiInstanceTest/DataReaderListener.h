@@ -49,9 +49,15 @@ public:
 
   bool received_all_expected_messages() const;
 
-  bool ok_;
+  bool ok() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return ok_;
+  }
 
 private:
+  mutable ACE_Thread_Mutex mutex_;
+  bool ok_;
   std::map<int, int> read_intances_message_count_;
 };
 
