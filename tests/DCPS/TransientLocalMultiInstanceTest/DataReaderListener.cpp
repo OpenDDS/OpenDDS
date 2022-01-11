@@ -22,8 +22,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl ()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-
   try {
     MessageDataReader_var message_dr = MessageDataReader::_narrow(reader);
     if (CORBA::is_nil(message_dr)) {
@@ -34,6 +32,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Messenger::Message message;
     DDS::SampleInfo si;
     DDS::ReturnCode_t status = message_dr->take_next_sample(message, si);
+
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
     if (si.valid_data) {
       if (status == DDS::RETCODE_OK) {
