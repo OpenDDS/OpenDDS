@@ -18,8 +18,13 @@ use Net::FTP::File;
 use Time::Piece;
 use Pithub;
 
-use lib dirname (__FILE__) . "/modules";
+use FindBin;
+use lib "$FindBin::RealBin/modules";
 use ConvertFiles;
+use version_utils;
+use command_utils;
+
+my $zero_version = parse_version("0.0.0");
 
 my $base_name_prefix = "OpenDDS-";
 my $default_github_user = "objectcomputing";
@@ -274,31 +279,13 @@ sub email_announce_contents {
   return $result;
 }
 
-# Run command, returns 0 if there was an error
-sub run_command ($;$) {
-  my $command = shift;
-  my $ignore_failure = shift;
-  if (!defined $ignore_failure) {
-      $ignore_failure = 0;
-  }
-
-  print "$command\n";
-  if (system ($command)) {
-      if (!$ignore_failure) {
-        my $error_message;
-        if ($? == -1) {
-            $error_message = "Failed to Run: $!";
-        } elsif ($? & 127) {
-            $error_message = sprintf ("Exited on Signal %d, %s coredump",
-              ($? & 127),  ($? & 128) ? 'with' : 'without');
-        } else {
-            $error_message = sprintf ("Returned %d", $? >> 8);
-        }
-        print STDERR "Command \"$command\" $error_message\n";
-      }
-      return $ignore_failure;
-  }
-  return 1;
+sub run_command {
+  my $test_name = shift;
+  return !command_utils::run_command(@_,
+    name => $test_name,
+    script_name => 'auto_run_tests',
+    dry_run => $dry_run,
+  );
 }
 
 sub yes_no {
@@ -371,7 +358,7 @@ sub write_json_file {
 sub expand_releases {
   my $releases = shift();
   for my $release (@{$releases}) {
-    $release->{version} = \parse_version($release->{version});
+    $release->{version} = parse_version($release->{version});
   }
   return $releases;
 }
@@ -575,132 +562,18 @@ sub parse_step_expr {
   return @steps;
 }
 
-sub parse_version {
-  my $version = shift;
-  my %result = ();
-  my $field = qr/0|[1-9]\d*/;
-  my $metafield = qr/(?:$field|\d*[a-zA-Z-][0-9a-zA-Z-]*)/;
-  if ($version =~ /^($field)\.($field)(?:\.($field))?(?:-($metafield(?:\.$metafield)*))?$/) {
-    $result{major} = $1;
-    $result{minor} = $2;
-    $result{micro} = $3 || "0";
-    $result{metadata} = $4 || "";
-    my $metadata_maybe = $result{metadata} ? "-$result{metadata}" : "";
-
-    $result{series_string} = "$result{major}.$result{minor}";
-    $result{release_string} = "$result{series_string}.$result{micro}";
-    $result{string} = "$result{release_string}$metadata_maybe";
-    if ($result{micro} eq "0") {
-      $result{tag_string} = $result{series_string};
-    } else {
-      $result{tag_string} = $result{release_string};
-    }
-
-    # For Version Comparison
-    my @metadata_fields = split(/\./, $result{metadata});
-    $result{metadata_fields} = \@metadata_fields;
-  }
-  return %result;
-}
-
-my %zero_version = parse_version("0.0.0");
-
-# Compare Versions According To Semver
-sub version_greater_equal {
-  my $left = shift();
-  my $right = shift();
-
-  # Compare X.Y.Z fields
-  if ($left->{major} > $right->{major}) {
-    return 1;
-  }
-  elsif ($left->{major} < $right->{major}) {
-    return 0;
-  }
-  if ($left->{minor} > $right->{minor}) {
-    return 1;
-  }
-  elsif ($left->{minor} < $right->{minor}) {
-    return 0;
-  }
-  if ($left->{micro} > $right->{micro}) {
-    return 1;
-  }
-  elsif ($left->{micro} < $right->{micro}) {
-    return 0;
-  }
-
-  # If they are equal in the normal fields, compare the metadata fields, which
-  # are the dot-delimited fields after "-". See
-  # https://semver.org/#spec-item-11 for an explanation.
-  my @lfields = @{$left->{metadata_fields}};
-  my @rfields = @{$right->{metadata_fields}};
-  my $llen = scalar(@lfields);
-  my $rlen = scalar(@rfields);
-  return 1 if ($llen == 0 && $rlen > 0);
-  return 0 if ($llen > 0 && $rlen == 0);
-  my $mlen = $llen > $rlen ? $llen : $rlen;
-  for (my $i = 0; $i < $mlen; $i += 1) {
-    my $morel = $i < $llen;
-    my $morer = $i < $rlen;
-    return 1 if ($morel && !$morer);
-    return 0 if (!$morel && $morer);
-    my $li = $lfields[$i];
-    my $lnum = $li =~ /^\d+$/ ? 1 : 0;
-    my $ri = $rfields[$i];
-    my $rnum = $ri =~ /^\d+$/ ? 1 : 0;
-    return 1 if (!$lnum && $rnum);
-    return 0 if ($lnum && !$rnum);
-    if ($lnum) {
-      return 1 if $li > $ri;
-      return 0 if $li < $ri;
-    }
-    else {
-      return 1 if $li gt $ri;
-      return 0 if $li lt $ri;
-    }
-  }
-  return 1;
-}
-
-sub version_not_equal {
-  my $left = shift();
-  my $right = shift();
-  return $left->{string} ne $right->{string};
-}
-
-sub version_greater {
-  my $left = shift();
-  my $right = shift();
-  return version_greater_equal($left, $right) && version_not_equal($left, $right);
-}
-
-sub version_lesser {
-  my $left = shift();
-  my $right = shift();
-  return !version_greater_equal($left, $right);
-}
-
-sub version_cmp {
-  my $left = shift();
-  my $right = shift();
-
-  return 0 if $left->{string} eq $right->{string};
-  return version_lesser($left, $right) ? -1 : 1;
-}
-
 sub parse_release_tag {
   my $tag = shift();
 
-  my %parsed = ();
+  my $parsed;
   if ($tag =~ /^DDS-(.*)$/) {
-    %parsed = parse_version($1) if $1;
-    $parsed{tag_name} = $tag if %parsed;
+    $parsed = parse_version($1) if $1;
+    $parsed->{tag_name} = $tag if $parsed;
   }
-  if (!%parsed) {
+  if (!$parsed) {
     die("Invalid release tag name: $tag");
   }
-  return %parsed;
+  return $parsed;
 }
 
 sub get_releases {
@@ -714,7 +587,7 @@ sub get_releases {
   my @releases = ();
   while (my $release = $release_list->next) {
     next if $release->{prerelease};
-    my %parsed = parse_release_tag($release->{tag_name});
+    my $parsed = parse_release_tag($release->{tag_name});
     my @assets = ();
     for my $asset (@{$release->{assets}}) {
       if ($asset->{name} !~ /tar\.gz|zip$/) {
@@ -728,7 +601,7 @@ sub get_releases {
     # Sort by reverse name to put zip files first for the website
     @assets = sort { $b->{name} cmp $a->{name} } @assets;
     push(@releases, {
-      version => \%parsed,
+      version => $parsed,
       published_at => $release->{published_at},
       html_url => $release->{html_url},
       assets => \@assets,
@@ -876,19 +749,19 @@ sub find_previous_tag {
   my $remote = $settings->{remote};
   my $release_version = $settings->{parsed_version};
   my $prev_version_tag = "";
-  my %prev_version = %zero_version;
+  my $prev_version = $zero_version;
 
   open(GITTAG, "git tag --list |") or die "Opening $!";
   while (<GITTAG>) {
     chomp;
     next unless /^$git_name_prefix([\d\.]*)$/;
     my $version = $1;
-    my %tag_version = parse_version($version);
+    my $tag_version = parse_version($version);
     # If this is less than the release version, but the largest seen yet
-    if (version_lesser(\%tag_version, $release_version) &&
-        version_greater(\%tag_version, \%prev_version)) {
+    if (version_lesser($tag_version, $release_version) &&
+        version_greater($tag_version, $prev_version)) {
       $prev_version_tag = $_;
-      %prev_version = %tag_version;
+      $prev_version = $tag_version;
     }
   }
   close(GITTAG);
@@ -2493,15 +2366,15 @@ if ($print_list_all) {
 }
 
 my $workspace = "";
-my %parsed_version = ();
-my %parsed_next_version = ();
+my $parsed_version;
+my $parsed_next_version;
 my $version = "";
 my $base_name = "";
 my $release_branch = "";
 
 if ($ignore_args) {
-  %parsed_version = %zero_version;
-  %parsed_next_version = %zero_version;
+  $parsed_version = $zero_version;
+  $parsed_next_version = $zero_version;
 }
 else {
   if (scalar(@ARGV) != 2) {
@@ -2526,34 +2399,34 @@ else {
   }
 
   # Process VERSION Argument
-  %parsed_version = parse_version($ARGV[1] || "");
-  if (%parsed_version) {
-    $version = $parsed_version{string};
+  $parsed_version = parse_version($ARGV[1] || "");
+  if ($parsed_version) {
+    $version = $parsed_version->{string};
     print("Version to release is $version\n");
-    $base_name = "${base_name_prefix}$parsed_version{tag_string}";
+    $base_name = "${base_name_prefix}$parsed_version->{tag_string}";
     if (!$micro) {
       $release_branch =
-        "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
-      if ($parsed_version{micro} != 0) {
+        "${release_branch_prefix}${git_name_prefix}$parsed_version->{series_string}";
+      if ($parsed_version->{micro} != 0) {
         exit(0) if (!yes_no(
           "Version looks like a micro release, but --micro wasn't passed! Continue?"));
       }
     }
-    elsif ($parsed_version{micro} == 0) {
+    elsif ($parsed_version->{micro} == 0) {
       exit(0) if (!yes_no(
         "Version looks like a major or minor release, but --micro was passed! Continue?"));
     }
     if (!$next_version) {
-      my $next_minor = int($parsed_version{minor}) + ($micro ? 0 : 1);
-      my $next_micro = $micro ? (int($parsed_version{micro}) + 1) : 0;
-      $next_version = sprintf("%s.%d.%d", $parsed_version{major}, $next_minor, $next_micro);
+      my $next_minor = int($parsed_version->{minor}) + ($micro ? 0 : 1);
+      my $next_micro = $micro ? (int($parsed_version->{micro}) + 1) : 0;
+      $next_version = sprintf("%s.%d.%d", $parsed_version->{major}, $next_minor, $next_micro);
     }
     $next_version .= "-${metadata}";
-    %parsed_next_version = parse_version($next_version);
-    if (!%parsed_next_version) {
+    $parsed_next_version = parse_version($next_version);
+    if (!$parsed_next_version) {
       arg_error("Invalid next version: $next_version");
     }
-    $next_version = $parsed_next_version{string};
+    $next_version = $parsed_next_version->{string};
     print("Next after this version is going to be $next_version\n");
   }
   else {
@@ -2570,41 +2443,41 @@ my $release_timestamp = POSIX::strftime($release_timestamp_fmt, gmtime);
 $release_timestamp =~ s/  / /g; # Single digit days of the month result in an extra space
 
 my %global_settings = (
-    list         => $print_list,
-    list_all     => $print_list_all,
-    remedy       => $remedy,
-    force        => $force,
-    micro        => $micro,
-    remote       => $remote,
-    branch       => $branch,
+    list => $print_list,
+    list_all => $print_list_all,
+    remedy => $remedy,
+    force => $force,
+    micro => $micro,
+    remote => $remote,
+    branch => $branch,
     release_branch => $release_branch,
-    github_user  => $github_user,
-    version      => $version,
-    parsed_version => \%parsed_version,
+    github_user => $github_user,
+    version => $version,
+    parsed_version => $parsed_version,
     next_version => $next_version,
-    parsed_next_version => \%parsed_next_version,
-    base_name    => $base_name,
-    git_tag      => "${git_name_prefix}$parsed_version{tag_string}",
-    clone_dir    => join("/", $workspace, ${base_name}),
-    tar_src      => "${base_name}.tar",
-    tgz_src      => "${base_name}.tar.gz",
-    zip_src      => "${base_name}.zip",
-    md5_src      => "${base_name}.md5",
+    parsed_next_version => $parsed_next_version,
+    base_name => $base_name,
+    git_tag => "${git_name_prefix}$parsed_version->{tag_string}",
+    clone_dir => join("/", $workspace, ${base_name}),
+    tar_src => "${base_name}.tar",
+    tgz_src => "${base_name}.tar.gz",
+    zip_src => "${base_name}.zip",
+    md5_src => "${base_name}.md5",
     sha256_src => "${base_name}.sha256",
-    tar_dox      => "${base_name}-doxygen.tar",
-    tgz_dox      => "${base_name}-doxygen.tar.gz",
-    zip_dox      => "${base_name}-doxygen.zip",
-    devguide_ver => "${base_name_prefix}$parsed_version{series_string}.pdf",
+    tar_dox => "${base_name}-doxygen.tar",
+    tgz_dox => "${base_name}-doxygen.tar.gz",
+    zip_dox => "${base_name}-doxygen.zip",
+    devguide_ver => "${base_name_prefix}$parsed_version->{series_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
-    timestamp    => $release_timestamp,
-    git_url      => "git\@github.com:${github_user}/${repo_name}.git",
-    github_repo  => $repo_name,
+    timestamp => $release_timestamp,
+    git_url => "git\@github.com:${github_user}/${repo_name}.git",
+    github_repo => $repo_name,
     github_token => $ENV{GITHUB_TOKEN},
-    ftp_user     => $ENV{FTP_USERNAME},
+    ftp_user => $ENV{FTP_USERNAME},
     ftp_password => $ENV{FTP_PASSWD},
-    ftp_host     => $ENV{FTP_HOST},
-    changelog    => "docs/history/ChangeLog-$version",
-    modified     => {
+    ftp_host => $ENV{FTP_HOST},
+    changelog => "docs/history/ChangeLog-$version",
+    modified => {
         "NEWS.md" => 1,
         "PROBLEM-REPORT-FORM" => 1,
         "VERSION.txt" => 1,
@@ -3043,7 +2916,7 @@ sub run_step {
   $step->{verified} = 1;
 }
 
-if ($ignore_args || ($workspace && %parsed_version)) {
+if ($ignore_args || ($workspace && $parsed_version)) {
   my @steps_to_do;
   my $no_steps = scalar(@release_steps);
   if ($step_expr) {
