@@ -1,6 +1,3 @@
-project: ../bench_builder_exe, ../bench_exe, opendds_optional_security {
+project: ../bench_builder_exe, ../bench_exe, opendds_optional_security, dcps_rtps_udp, dcps_tcp, dcps_udp, dcps_multicast {
   exename = worker
-
-  libs  += OpenDDS_Rtps_Udp OpenDDS_Udp OpenDDS_Tcp OpenDDS_Multicast
-  after += OpenDDS_Rtps_Udp OpenDDS_Udp OpenDDS_Tcp OpenDDS_Multicast
 }
