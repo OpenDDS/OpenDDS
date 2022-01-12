@@ -102,7 +102,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_OS::sleep(1);
     }
 
-    ok = listener_servant->ok_;
+    ok = listener_servant->ok();
     if (ok)
     {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Reader received all samples.\n")));
