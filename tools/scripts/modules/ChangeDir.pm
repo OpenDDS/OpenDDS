@@ -9,9 +9,9 @@ use warnings;
 use Cwd qw(getcwd);
 
 sub cd {
-    my $self = shift;
-    my $dir = shift;
-    my $back = shift ? ' back' : '';
+    my $self = shift();
+    my $dir = shift();
+    my $back = shift() ? ' back' : '';
 
     if (defined($dir)) {
       print("Changing$back to $dir\n") if $self->{verbose};
@@ -20,9 +20,9 @@ sub cd {
 }
 
 sub new {
-    my $proto = shift;
+    my $proto = shift();
     my $class = ref($proto) || $proto;
-    my $dir = shift;
+    my $dir = shift();
     my %opt_args = @_;
 
     $dir = undef if ($dir eq '.');
@@ -40,7 +40,7 @@ sub new {
 
 sub DESTROY {
     local($., $@, $!, $^E, $?);
-    my $self = shift;
+    my $self = shift();
     if (defined($self->{dir}) && $self->{original_dir}) {
       $self->cd($self->{original_dir}, 1);
     }
