@@ -8,19 +8,24 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 # Distributed under the OpenDDS License.
 # See: http://www.opendds.org/license.html
 
+use strict;
+use warnings;
+
 use Getopt::Long;
 use Dumpvalue;
 use File::Spec;
 use File::Basename;
 use File::Copy;
 use File::Path;
-require File::Temp;
 use File::Temp ();
 use FileHandle;
 use Cwd;
 use POSIX qw(strftime);
-use strict;
-use warnings;
+
+use FindBin;
+use lib "$FindBin::RealBin/tools/scripts/modules";
+use command_utils;
+use ChangeDir;
 
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
@@ -405,75 +410,14 @@ sub addCurLibPathRef {
 }
 
 sub run_command {
-  my $command_ref = shift;
-  my @command = @{$command_ref};
-  my $command_str = join(' ', @command);
-  my %args = (
-    DUMP_OUTPUT_ON_ERROR => 0,
+  my $command = shift;
+  return command_utils::run_command(
+    $command,
+    script_name => 'configure',
+    dry_run => $opts{'dry-run'},
+    debug => $opts{'verbose'},
     @_,
   );
-
-  if ($opts{'dry-run'}) {
-    print "Dry-run: Would run \"$command_str\"\n";
-    return 0;
-  }
-
-  print "Running \"$command_str\"\n" if $opts{'verbose'};
-  my $saved_stdout;
-  my $saved_stderr;
-  my $tmp_fd;
-  my $tmp_path;
-
-  if ($args{DUMP_OUTPUT_ON_ERROR}) {
-    ($tmp_fd, $tmp_path) = File::Temp::tempfile();
-    open($saved_stdout, '>&', STDOUT);
-    open(STDOUT, '>&', $tmp_fd);
-    open($saved_stderr, '>&', STDERR);
-    open(STDERR, '>&', $tmp_fd);
-  }
-
-  my $failed = system(@command) ? 1 : 0;
-  my $system_status = $?;
-  my $system_error = $!;
-
-  if ($args{DUMP_OUTPUT_ON_ERROR}) {
-    open(STDOUT, '>&', $saved_stdout);
-    open(STDERR, '>&', $saved_stderr);
-    close($tmp_fd);
-  }
-
-  if ($failed) {
-    my $error_message;
-    my $ran = 1;
-    if ($system_status == -1) {
-      $error_message = "Failed to Run: $system_error";
-      $ran = 0;
-    }
-    elsif ($system_status & 127) {
-      $error_message = sprintf("Exited on Signal %d", ($system_status & 127));
-      $error_message .= " and Created Coredump" if ($system_status & 128);
-    }
-    else {
-      $error_message = sprintf("Returned %d", $system_status >> 8);
-    }
-    print STDERR "Command \"$command_str\" $error_message\n";
-
-    if ($ran and $args{DUMP_OUTPUT_ON_ERROR}) {
-      open($tmp_fd, $tmp_path);
-      print STDERR "Dumping Output from Failed Command\n";
-      while (my $line = <$tmp_fd>) {
-        print STDERR "$line";
-      }
-      print STDERR "\nEnd of Dumped Output from Failed Command\n";
-      close($tmp_fd);
-    }
-  }
-
-  if ($args{DUMP_OUTPUT_ON_ERROR}) {
-    unlink($tmp_path);
-  }
-
-  return $failed;
 }
 
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
@@ -796,10 +740,7 @@ if (!$ace_src || !$tao_src) {
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
-    my $cur_dir = getcwd;
-    chdir('ACE_TAO');
-    run_command(['git', '--no-pager', 'log', '-1', '--oneline']);
-    chdir($cur_dir);
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => 'ACE_TAO');
 
     print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
     $err = run_command(['git', 'clone', '-q', '--depth=1', "$urlbase/MPC", 'ACE_TAO/ACE/MPC']);
@@ -807,9 +748,7 @@ if (!$ace_src || !$tao_src) {
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
 
-    chdir('ACE_TAO/ACE/MPC');
-    run_command(['git', '--no-pager', 'log', '-1', '--oneline']);
-    chdir($cur_dir);
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => 'ACE_TAO/ACE/MPC');
 
     $ace_src = normalizePath('ACE_TAO/ACE');
     $tao_src = normalizePath('ACE_TAO/TAO');
@@ -946,16 +885,11 @@ print "Using tao_src: $tao_src\n" if $opts{'verbose'};
 sub clone_host_and_target {
   my $source_dir = shift;
   locate_mpc($ace_src);
-  my $cur_dir = getcwd;
-  if ($source_dir ne '.') {
-    print "Changing dir to $source_dir\n" if $opts{'verbose'};
-    chdir($source_dir);
-  }
   print "cloning build tree\n" if $opts{'verbose'};
-  run_command(["$targetEnv{'MPC_ROOT'}/clone_build_tree.pl", 'host', 'target']);
-  if ($source_dir ne '.') {
-    print "Changing dir back to $cur_dir\n" if $opts{'verbose'};
-    chdir($cur_dir);
+  if (run_command(
+      ["$targetEnv{'MPC_ROOT'}/clone_build_tree.pl", 'host', 'target'],
+      chdir => $source_dir)) {
+    die("Failed to clone tree");
   }
 }
 
@@ -1662,16 +1596,11 @@ if ($build_gtest) {
     or die "ERROR '$!': failed to make directory $install_dir from $cwd.\nStopped"
       if ! -d $install_dir;
 
-  chdir($build_dir)
-    or  die "ERROR '$!': failed to change into $build_dir from $cwd.\nStopped";
-
+  my $cd_build_dir = ChangeDir->new($build_dir);
   for my $cmd (@cmake_cmds) {
-    run_command($cmd, DUMP_OUTPUT_ON_ERROR => !$opts{'verbose'}) == 0
+    run_command($cmd, capture => [undef, dump_on_failure => 1]) == 0
       or die "ERROR: Invoking @{$cmd} failed.\nStopped";
   }
-
-  chdir($cwd)
-    or die "ERROR '$!': failed to change back to $cwd.\nStopped";
 
   print("Done Building Google Test\n");
 }
