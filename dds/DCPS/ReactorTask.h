@@ -14,6 +14,8 @@
 #include "ReactorInterceptor.h"
 #include "SafetyProfileStreams.h"
 #include "ConditionVariable.h"
+#include "ThreadStatusManager.h"
+
 #include <ace/Task.h>
 #include <ace/Synch_Traits.h>
 #include <ace/Timer_Heap_T.h>
@@ -40,8 +42,9 @@ public:
   virtual ~ReactorTask();
 
 public:
-  int open_reactor_task(void*, TimeDuration timeout = TimeDuration(0),
-    ThreadStatusManager* thread_status_manager = 0, const String& name = "");
+  int open_reactor_task(void*,
+                        ThreadStatusManager* thread_status_manager = 0,
+                        const String& name = "");
   virtual int open(void* ptr) {
     return open_reactor_task(ptr);
   }
@@ -58,7 +61,13 @@ public:
   ACE_Proactor* get_proactor();
   const ACE_Proactor* get_proactor() const;
 
-  void wait_for_startup() { while (state_ != STATE_RUNNING) { condition_.wait(); } }
+  void wait_for_startup()
+  {
+    while (state_ != STATE_RUNNING) {
+      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
+      condition_.wait();
+    }
+  }
 
   bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
 
@@ -109,11 +118,10 @@ private:
   TimerQueueType* timer_queue_;
 
   // thread status reporting
-  ThreadStatusManager* thread_status_manager_;
-  TimeDuration timeout_;
   String name_;
 
   ReactorInterceptor_rch interceptor_;
+  ThreadStatusManager* thread_status_manager_;
 };
 
 } // namespace DCPS

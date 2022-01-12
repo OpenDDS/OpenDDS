@@ -354,6 +354,8 @@ int
 TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
                                               const void* arg)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   RcHandle<TransportClient> client;
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

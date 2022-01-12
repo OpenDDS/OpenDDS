@@ -64,6 +64,8 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
 {
   DBG_ENTRY_LVL("PerConnectionSynch","svc",6);
 
+  // FUTURE: ThreadStatus.
+
   // Ignore all signals to avoid
   // ERROR: ACE::handle_write_ready return -1 while waiting  to unclog. handle_write_ready: Interrupted system call
   // The main thread will handle signals.
@@ -196,5 +198,6 @@ OpenDDS::DCPS::PerConnectionSynch::unregister_worker_i()
 
   // Wait for all threads running this task (there should just be one thread)
   // to finish.
+  // FUTURE: ThreadStatus.
   this->wait();
 }

@@ -35,6 +35,8 @@ UdpReceiveStrategy::get_handle() const
 int
 UdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   return this->handle_dds_input(fd);
 }
 

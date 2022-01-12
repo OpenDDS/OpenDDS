@@ -68,6 +68,8 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
 int
 OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
   DataReaderImpl_rch reader = this->reader_impl_.lock();
   if (reader) {

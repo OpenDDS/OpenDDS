@@ -121,6 +121,8 @@ ACE_HANDLE LinuxNetworkConfigMonitor::get_handle() const
 
 int LinuxNetworkConfigMonitor::handle_input(ACE_HANDLE)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   read_messages();
   return 0;
 }

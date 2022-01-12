@@ -33,11 +33,6 @@ public:
 
   void writer_done();
 
-  bool has_timeout()
-  {
-    return interval_ > TimeDuration(0);
-  }
-
 private:
   DataReaderCallbacks_wrch drr_;
   const GUID_t& reader_;
@@ -47,13 +42,6 @@ private:
   bool reader_done_, writer_done_;
   ACE_Thread_Mutex mtx_;
   ConditionVariable<ACE_Thread_Mutex> cnd_;
-
-  /// thread reporting
-  ///@{
-  const TimeDuration interval_;
-  ThreadStatusManager* const thread_status_manager_;
-  const String thread_key_;
-  ///@}
 };
 
 } // namespace OpenDDS

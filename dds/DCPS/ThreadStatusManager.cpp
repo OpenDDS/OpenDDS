@@ -8,7 +8,6 @@
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "ThreadStatusManager.h"
-#include "ThreadMonitor.h"
 #include "Service_Participant.h"
 
 #include <ace/Arg_Shifter.h>
@@ -23,253 +22,200 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-static const ACE_TCHAR COMMON_SECTION_NAME[] = ACE_TEXT("common");
-static bool got_rtps_thread_key = false;
-static bool got_rtps_max_wait = false;
-
-int ThreadStatusManager::parse_args(int &argc, ACE_TCHAR *argv[])
+void ThreadStatusManager::Thread::update(const MonotonicTimePoint& m_now,
+                                         const SystemTimePoint& s_now,
+                                         ThreadStatus next_status,
+                                         const TimeDuration& bucket_limit,
+                                         bool nested)
 {
-  ACE_Arg_Shifter arg_shifter(argc, argv);
+  timestamp_ = s_now;
 
-  while (arg_shifter.is_anything_left()) {
-    const ACE_TCHAR* currentArg = 0;
-
-    if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-RTPSThreadKey"))) != 0) {
-      rtps_thr_key_ = ACE_TEXT_ALWAYS_CHAR(currentArg);
-      arg_shifter.consume_arg();
-      got_rtps_thread_key = true;
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-RTPSMaxDelay"))) != 0) {
-      rtps_max_wait_ = ACE_OS::atoi(ACE_TEXT_ALWAYS_CHAR(currentArg));
-      arg_shifter.consume_arg();
-      got_rtps_max_wait = true;
-
-    } else {
-      arg_shifter.ignore_arg();
+  if (nested) {
+    switch(next_status) {
+    case ThreadStatus_Active:
+      ++nesting_depth_;
+      break;
+    case ThreadStatus_Idle:
+      --nesting_depth_;
+      break;
     }
   }
 
+  if (!nested ||
+      (next_status == ThreadStatus_Active && nesting_depth_ == 1) ||
+      (next_status == ThreadStatus_Idle && nesting_depth_ == 0)) {
+    if (bucket_[current_bucket_].active_time + bucket_[current_bucket_].idle_time > bucket_limit) {
+      current_bucket_ = (current_bucket_ + 1) % bucket_count;
+      total_.active_time -= bucket_[current_bucket_].active_time;
+      bucket_[current_bucket_].active_time = 0;
+      total_.idle_time -= bucket_[current_bucket_].idle_time;
+      bucket_[current_bucket_].idle_time = 0;
+    }
+
+    const TimeDuration t = m_now - last_update_;
+
+    switch (status_) {
+    case ThreadStatus_Active:
+      bucket_[current_bucket_].active_time += t;
+      total_.active_time += t;
+      break;
+    case ThreadStatus_Idle:
+      bucket_[current_bucket_].idle_time += t;
+      total_.idle_time += t;
+      break;
+    }
+
+    last_update_ = m_now;
+    status_ = next_status;
+  }
+}
+
+double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) const
+{
+  const TimeDuration active_bonus = (now > last_update_ && status_ == ThreadStatus_Active) ? (now - last_update_) : TimeDuration::zero_value;
+  const TimeDuration idle_bonus = (now > last_update_ && status_ == ThreadStatus_Idle) ? (now - last_update_) : TimeDuration::zero_value;
+  const TimeDuration denom = total_.active_time + active_bonus + total_.idle_time + idle_bonus;
+
+  if (!denom.is_zero()) {
+    return (total_.active_time + active_bonus) / denom;
+  }
   return 0;
 }
 
-int ThreadStatusManager::load_configuration(ACE_Configuration_Heap& cf)
+ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
 {
-  const ACE_Configuration_Section_Key& root = cf.root_section();
-  ACE_Configuration_Section_Key sect;
-
-  if (cf.open_section(root, COMMON_SECTION_NAME, false, sect) != 0) {
-    if (DCPS_debug_level > 0) {
-      // This is not an error if the configuration file does not have
-      // a common section. The code default configuration will be used.
-      ACE_DEBUG((LM_NOTICE, ACE_TEXT(
-      "(%P|%t) NOTICE: Service_Participant::load_common_configuration ")
-      ACE_TEXT("failed to open section %s\n"), COMMON_SECTION_NAME));
-    }
-
-    return 0;
-
-  } else {
-    const ACE_TCHAR* message = ACE_TEXT("(%P|%t) NOTICE: using %s value from command option (overrides value if it's in config file)\n");
-    if (got_rtps_thread_key) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("RTPSThreadKey")));
-    } else {
-      ACE_TString key(ACE_TEXT("VSEDP"));
-      GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("RTPSThreadKey"), key);
-      rtps_thr_key_ = ACE_TEXT_ALWAYS_CHAR(key.c_str());
-    }
-    if (got_rtps_max_wait) {
-      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("RTPSMaxWait")));
-    } else {
-      int delay = 0;
-      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("RTPSMaxWait"), delay, int)
-      rtps_max_wait_ = TimeDuration(delay);
-    }
-  }
-
-  return 0;
-}
-
-const char* ThreadStatusManager::status_to_string(ThreadStatus status)
-{
-  switch (status) {
-  case ThreadStatus_Running:
-    return "Running";
-
-  case ThreadStatus_Finished:
-    return "Finished";
-
-  default:
-    if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ThreadStatusManager::status_to_string: ")
-        ACE_TEXT("%d is either invalid or not recognized.\n"),
-        status));
-    }
-    return "<Invalid thread status>";
-  }
-}
-
-bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy, bool saturated)
-{
-  const SystemTimePoint now = SystemTimePoint::now();
-  ThreadStatus status = ThreadStatus_Running;
-  bool sat = false;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  Map::iterator it = map_.find(thread_key);
-  if (it != map_.end()) {
-    sat = it->second.saturated;
-    if (saturated != sat) {
-      sat = saturated;
-    }
-    it->second.timestamp = now;
-    it->second.utilization = pbusy;
-    it->second.saturated = saturated;
-  } else {
-    map_[thread_key] = Thread(now, status, pbusy, saturated);
-  }
-  if (thread_key == rtps_thr_key_) {
-    rtps_set_flow_control(sat);
-  }
-  return true;
-}
-
-bool ThreadStatusManager::update(const String& thread_key,
-                                 ThreadStatus status,
-                                 double utilization,
-                                 bool saturated)
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  const SystemTimePoint now = SystemTimePoint::now();
-  if (DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "update for thread \"%C\" %C @ %d, utilization = %F saturated = %d\n",
-      thread_key.c_str(), status_to_string(status), now.value().sec(), utilization, saturated));
-  }
-  switch (status) {
-  case ThreadStatus_Finished:
-    {
-      Map::iterator it = map_.find(thread_key);
-      if (it == map_.end()) {
-        if (DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadStatus::update: "
-            "Trying to remove \"%C\", but it's not an existing thread!\n",
-            thread_key.c_str()));
-        }
-        return false;
-      }
-      map_.erase(it);
-    }
-    break;
-
-  default:
-    if (map_.find(thread_key) == map_.end() && ThreadMonitor::installed_monitor_) {
-      ThreadMonitor::installed_monitor_->preset(this, thread_key.c_str());
-    }
-    map_[thread_key] = Thread(now, status, utilization, saturated);
-    if (thread_key == rtps_thr_key_) {
-      rtps_set_flow_control(saturated);
-    }
-  }
-
-  return true;
-}
-
-String ThreadStatusManager::get_key(const char* safety_profile_tid, const String& name)
-{
-  String key;
-#ifdef OPENDDS_SAFETY_PROFILE
-  key = safety_profile_tid;
-#else
-  ACE_UNUSED_ARG(safety_profile_tid);
-#  ifdef ACE_HAS_MAC_OSX
-  unsigned long tid = 0;
+#ifdef ACE_HAS_MAC_OSX
+  ThreadId thread_id = 0;
   uint64_t u64_tid;
   if (!pthread_threadid_np(0, &u64_tid)) {
-    tid = static_cast<unsigned long>(u64_tid);
+    thread_id = static_cast<unsigned long>(u64_tid);
   } else if (DCPS_debug_level) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: pthread_threadid_np failed\n")));
   }
-#  elif defined ACE_HAS_GETTID
-  const pid_t tid = gettid();
-#  else
-  const ACE_thread_t tid = ACE_OS::thr_self();
-#  endif
-
-  key = to_dds_string(tid);
+  return thread_id;
+#elif defined ACE_HAS_GETTID
+  return gettid();
+#else
+  return ACE_OS::thr_self();
 #endif
+}
+
+void ThreadStatusManager::add_thread(const String& name)
+{
+  if (!update_thread_status()) {
+    return;
+  }
+
+  const ThreadId thread_id = get_thread_id();
+
+  String bit_key = to_dds_string(thread_id);
 
   if (name.length()) {
-    key += " (" + name + ")";
+    bit_key += " (" + name + ")";
   }
 
-  return key;
+  if (DCPS_debug_level > 4) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatusManager::add_thread: "
+               "adding thread %C\n", bit_key.c_str()));
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  map_.insert(std::make_pair(thread_id, Thread(bit_key)));
 }
 
-bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
-  ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
+void ThreadStatusManager::active(bool nested)
 {
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
-    running = parent.map_;
+  if (!update_thread_status()) {
+    return;
   }
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
-  // Figure out what threads were removed from parent.map_
-  Map::iterator mi = map_.begin();
-  Map::iterator ri = running.begin();
-  while (mi != map_.end() || ri != running.end()) {
-    const int cmp = mi != map_.end() && ri != running.end() ?
-      std::strcmp(mi->first.c_str(), ri->first.c_str()) :
-      ri != running.end() ? 1 : -1;
-    if (cmp < 0) { // We're behind, this thread was removed
-      finished.insert(*mi);
-      ++mi;
-    } else if (cmp > 0) { // We're ahead, this thread was added
-      ++ri;
-    } else { // Same thread, continue
-      ++mi;
-      ++ri;
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  const MonotonicTimePoint m_now = MonotonicTimePoint::now();
+  const SystemTimePoint s_now = SystemTimePoint::now();
+  const ThreadId thread_id = get_thread_id();
+
+  const Map::iterator pos = map_.find(thread_id);
+  if (pos != map_.end()) {
+    pos->second.update(m_now, s_now, Thread::ThreadStatus_Active, bucket_limit_, nested);
+  }
+
+  cleanup(m_now);
+}
+
+void ThreadStatusManager::idle(bool nested)
+{
+  if (!update_thread_status()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  const MonotonicTimePoint m_now = MonotonicTimePoint::now();
+  const SystemTimePoint s_now = SystemTimePoint::now();
+  const ThreadId thread_id = get_thread_id();
+
+  const Map::iterator pos = map_.find(thread_id);
+  if (pos != map_.end()) {
+    pos->second.update(m_now, s_now, Thread::ThreadStatus_Idle, bucket_limit_, nested);
+  }
+
+  cleanup(m_now);
+}
+
+void ThreadStatusManager::finished()
+{
+  if (!update_thread_status()) {
+    return;
+  }
+
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  const MonotonicTimePoint m_now = MonotonicTimePoint::now();
+  const SystemTimePoint s_now = SystemTimePoint::now();
+  const ThreadId thread_id = get_thread_id();
+
+  const Map::iterator pos = map_.find(thread_id);
+  if (pos != map_.end()) {
+    pos->second.update(m_now, s_now, Thread::ThreadStatus_Idle, bucket_limit_, false);
+
+    list_.push_back(pos->second);
+    map_.erase(pos);
+  }
+
+  cleanup(m_now);
+}
+
+void ThreadStatusManager::harvest(const MonotonicTimePoint& start,
+                                  ThreadStatusManager::List& running,
+                                  ThreadStatusManager::List& finished) const
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+
+  for (Map::const_iterator pos = map_.begin(), limit = map_.end(); pos != limit; ++pos) {
+    if (pos->second.last_update() > start) {
+      running.push_back(pos->second);
     }
   }
 
-  map_ = running;
-  return true;
-}
-
-void ThreadStatusManager::rtps_set_flow_control(bool sat)
-{
-  if (!rtps_paused_) {
-    if (sat) {
-      GuardType g(rtps_lock_);
-      rtps_paused_ = true;
-    }
-  } else if (!sat) {
-    GuardType g(rtps_lock_);
-    rtps_paused_ = false;
-    rtps_pauser_.notify_all();
-  }
-}
-
-void ThreadStatusManager::rtps_flow_control()
-{
-  GuardType g(rtps_lock_);
-  while (rtps_paused_) {
-    MonotonicTimePoint expire = MonotonicTimePoint::now() + rtps_max_wait_;
-    CvStatus res = rtps_pauser_.wait_until(expire);
-    if (res == CvStatus_Timeout) {
-      if (DCPS::DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) RTPS flow control wait timed out.\n")));
-      }
-      break;
-    } else if (res == CvStatus_Error) {
-      if (DCPS::DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) Rtps flow control error, cannot wait.\n")));
-      }
-      break;
+  for (List::const_iterator pos = list_.begin(), limit = list_.end(); pos != limit; ++pos) {
+    if (pos->last_update() > start) {
+      finished.push_back(*pos);
     }
   }
 }
+
+void ThreadStatusManager::cleanup(const MonotonicTimePoint& now)
+{
+  const MonotonicTimePoint cutoff = now - 10 * thread_status_interval_;
+
+  while (!list_.empty() && list_.front().last_update() < cutoff) {
+    list_.pop_front();
+  }
+}
+
 
 } // namespace DCPS
 } // namespace OpenDDS

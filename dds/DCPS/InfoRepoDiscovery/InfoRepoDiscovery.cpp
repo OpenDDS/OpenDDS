@@ -989,7 +989,11 @@ void
 InfoRepoDiscovery::OrbRunner::shutdown()
 {
   orb_->shutdown();
-  wait();
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  {
+    ThreadStatusManager::Sleeper s(thread_status_manager);
+    wait();
+  }
   orb_->destroy();
 }
 
@@ -999,6 +1003,8 @@ ACE_Thread_Mutex InfoRepoDiscovery::mtx_orb_runner_;
 int
 InfoRepoDiscovery::OrbRunner::svc()
 {
+  // FUTURE: ThreadStatus.
+
   // this method was originally Service_Participant::svc()
   bool done = false;
 

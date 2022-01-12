@@ -15,7 +15,6 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/ConditionVariable.h>
 #include <dds/DCPS/TimeTypes.h>
-#include <dds/DCPS/ThreadMonitor.h>
 #include <dds/DCPS/ThreadStatusManager.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -111,41 +110,32 @@ public:
   virtual int svc() {
     DBG_ENTRY("QueueTaskBase","svc");
 
-    thr_id_ = ACE_OS::thr_self();
+    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+    const TimeDuration thread_status_interval = thread_status_manager.thread_status_interval();
 
-    const TimeDuration interval = TheServiceParticipant->get_thread_status_interval();
-    ThreadStatusManager* const thread_status_manager =
-      TheServiceParticipant->get_thread_status_manager();
-    const bool update_thread_status = thread_status_manager && !interval.is_zero();
-    const String thread_key = ThreadStatusManager::get_key("QueueTaskBase", name_);
-    ThreadMonitor::GreenLight gl(thread_key.c_str());
+    ThreadStatusManager::Start s(thread_status_manager, name_);
+
+    thr_id_ = ACE_OS::thr_self();
 
     // Start the "GetWork-And-PerformWork" loop for the current worker thread.
     while (!this->shutdown_initiated_) {
       T req;
       {
-        ThreadMonitor::RedLight gl(thread_key.c_str());
-
         GuardType guard(this->lock_);
 
         if (this->queue_.is_empty() && !shutdown_initiated_) {
-          if (update_thread_status) {
-            MonotonicTimePoint expire = MonotonicTimePoint::now() + interval;
+          if (thread_status_manager.update_thread_status()) {
+            MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
 
             do {
-              work_available_.wait_until(expire);
+              {
+                ThreadStatusManager::Sleeper sleeper(thread_status_manager);
+                work_available_.wait_until(expire);
+              }
 
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
-                expire = now + interval;
-                if (DCPS_debug_level > 4) {
-                  ACE_DEBUG((LM_DEBUG,
-                             "(%P|%t) QueueTaskBase::svc. Updating thread status.\n"));
-                }
-                if (!thread_status_manager->update(thread_key) && DCPS_debug_level) {
-                  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: QueueTaskBase::svc: "
-                    "thread update failed\n"));
-                }
+                expire = now + thread_status_interval;
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);
           } else {
@@ -172,17 +162,6 @@ public:
       this->execute(req);
     }
 
-    if (update_thread_status) {
-      if (DCPS_debug_level > 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) QueueTaskBase::svc: "
-          "Updating thread status for the last time\n"));
-      }
-      if (!thread_status_manager->update(thread_key, ThreadStatus_Finished) &&
-          DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) QueueTaskBase::svc: final update failed\n"));
-      }
-    }
-
     // This will never get executed.
     return 0;
   }
@@ -205,8 +184,11 @@ public:
       work_available_.notify_one();
     }
 
-    if (this->opened_ && !ACE_OS::thr_equal(this->thr_id_, ACE_OS::thr_self()))
+    if (this->opened_ && !ACE_OS::thr_equal(this->thr_id_, ACE_OS::thr_self())) {
+      ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
       this->wait();
+    }
 
     return 0;
   }

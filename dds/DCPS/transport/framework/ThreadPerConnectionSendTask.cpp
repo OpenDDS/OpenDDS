@@ -128,6 +128,7 @@ int ThreadPerConnectionSendTask::open(void*)
 
 int ThreadPerConnectionSendTask::svc()
 {
+  // FUTURE: ThreadStatus.
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "svc", 6);
 
   thr_id_ = ACE_OS::thr_self();
@@ -206,6 +207,7 @@ int ThreadPerConnectionSendTask::close(u_long flag)
   }
 
   if (opened_ && !ACE_OS::thr_equal(thr_id_, ACE_OS::thr_self())) {
+    // FUTURE: ThreadStatus
     wait();
   }
 

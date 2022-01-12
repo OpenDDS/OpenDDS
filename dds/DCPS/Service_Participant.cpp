@@ -209,8 +209,6 @@ Service_Participant::Service_Participant()
   , persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR)
 #endif
   , bidir_giop_(true)
-  , thread_status_interval_(0)
-  , thread_status_manager_(new ThreadStatusManager)
   , monitor_enabled_(false)
   , shut_down_(false)
   , default_configuration_file_(ACE_TEXT(""))
@@ -245,7 +243,6 @@ Service_Participant::~Service_Participant()
         }
       }
     }
-    delete thread_status_manager_;
   }
 
   const DDS::ReturnCode_t shutdown_status = shutdown();
@@ -447,10 +444,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
         return DDS::DomainParticipantFactory::_nil();
       }
 
-      if (thread_status_manager_->parse_args(argc, argv) != 0) {
-        return DDS::DomainParticipantFactory::_nil();
-      }
-
       if (config_fname.is_empty() && !default_configuration_file_.is_empty()) {
         config_fname = default_configuration_file_;
       }
@@ -518,8 +511,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(
-        0, thread_status_interval_, thread_status_manager_, "Service_Participant");
+      reactor_task_.open_reactor_task(0,
+                                      &thread_status_manager_,
+                                      "Service_Participant");
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
@@ -664,7 +658,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_bidir_giop = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSThreadStatusInterval"))) != 0) {
-      thread_status_interval_ = TimeDuration(ACE_OS::atoi(currentArg));
+      thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(currentArg)));
       arg_shifter.consume_arg();
       got_thread_status_interval = true;
 
@@ -1563,8 +1557,6 @@ Service_Participant::load_configuration(
                      -1);
   }
 
-  status = thread_status_manager_->load_configuration(config);
-
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
     ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
@@ -1895,8 +1887,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSThreadStatusInterval")));
     } else {
       int interval = 0;
-      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int)
-      thread_status_interval_ = TimeDuration(interval);
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int);
+      thread_status_manager_.thread_status_interval(TimeDuration(interval));
     }
 
     ACE_Configuration::VALUETYPE type;
@@ -2893,19 +2885,7 @@ Service_Participant::get_configuration()
   return cf_;
 }
 
-TimeDuration
-Service_Participant::get_thread_status_interval()
-{
-  return thread_status_interval_;
-}
-
-void
-Service_Participant::set_thread_status_interval(TimeDuration interval)
-{
-  thread_status_interval_ = interval;
-}
-
-ThreadStatusManager* Service_Participant::get_thread_status_manager()
+ThreadStatusManager& Service_Participant::get_thread_status_manager()
 {
   return thread_status_manager_;
 }

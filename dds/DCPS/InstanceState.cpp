@@ -102,6 +102,8 @@ void InstanceState::sample_info(DDS::SampleInfo& si, const ReceivedDataElement* 
 
 int InstanceState::handle_timeout(const ACE_Time_Value&, const void*)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   if (DCPS_debug_level) {
     ACE_DEBUG((LM_NOTICE,
                ACE_TEXT("(%P|%t) NOTICE:")

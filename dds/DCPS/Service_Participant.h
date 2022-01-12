@@ -675,15 +675,11 @@ private:
   bool is_discovery_template(const OPENDDS_STRING& name);
 
 public:
-  // thread status reporting
-  TimeDuration get_thread_status_interval();
-  void set_thread_status_interval(TimeDuration interval);
-
   /// getter for lock that protects the static initialization of XTypes related data structures
   ACE_Thread_Mutex& get_static_xtypes_lock();
 
   /// Get the service participant's thread status manager.
-  ThreadStatusManager* get_thread_status_manager();
+  ThreadStatusManager& get_thread_status_manager();
 
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.
@@ -751,10 +747,7 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
-  /// Enable Internal Thread Status Monitoring
-  TimeDuration thread_status_interval_;
-
-  ThreadStatusManager* thread_status_manager_;
+  ThreadStatusManager thread_status_manager_;
 
   /// Thread mutex used to protect the static initialization of XTypes data structures
   ACE_Thread_Mutex xtypes_lock_;

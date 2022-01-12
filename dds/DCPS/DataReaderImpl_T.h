@@ -2347,6 +2347,8 @@ private:
 
   int handle_timeout(const ACE_Time_Value&, const void* act)
   {
+    ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
     DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
 
     RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());

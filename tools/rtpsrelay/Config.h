@@ -28,6 +28,8 @@ public:
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
+    , log_thread_status_(false)
+    , thread_status_safety_factor_(3)
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
@@ -163,6 +165,26 @@ public:
     return log_activity_;
   }
 
+  void log_thread_status(bool flag)
+  {
+    log_thread_status_ = flag;
+  }
+
+  bool log_thread_status() const
+  {
+    return log_thread_status_;
+  }
+
+  void thread_status_safety_factor(int value)
+  {
+    thread_status_safety_factor_ = value;
+  }
+
+  int thread_status_safety_factor() const
+  {
+    return thread_status_safety_factor_;
+  }
+
   void log_relay_statistics(OpenDDS::DCPS::TimeDuration value)
   {
     log_relay_statistics_ = value;
@@ -267,6 +289,8 @@ private:
   bool log_entries_;
   bool log_discovery_;
   bool log_activity_;
+  bool log_thread_status_;
+  int thread_status_safety_factor_;
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
   bool log_participant_statistics_;

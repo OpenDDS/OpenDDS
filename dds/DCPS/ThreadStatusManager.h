@@ -21,57 +21,137 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-enum ThreadStatus {
-  ThreadStatus_Running,
-  ThreadStatus_Finished
-};
-
 struct OpenDDS_Dcps_Export ThreadStatusManager {
-  struct Thread {
-    Thread() {}
-    Thread(const SystemTimePoint& time, ThreadStatus status, double util, bool sat)
-      : timestamp(time)
-      , status(status)
-      , utilization(util)
-      , saturated(sat)
+#ifdef ACE_HAS_MAC_OSX
+    typedef unsigned long ThreadId;
+#elif defined ACE_HAS_GETTID
+    typedef pid_t ThreadId;
+#else
+    typedef ACE_thread_t ThreadId;
+#endif
+
+  class Thread {
+  public:
+    enum ThreadStatus {
+      ThreadStatus_Active,
+      ThreadStatus_Idle,
+    };
+
+    Thread(const String& bit_key)
+      : bit_key_(bit_key)
+      , timestamp_(SystemTimePoint::now())
+      , status_(ThreadStatus_Active)
+      , last_update_(MonotonicTimePoint::now())
+      , current_bucket_(0)
+      , nesting_depth_(0)
     {}
-    SystemTimePoint timestamp;
-    ThreadStatus status;
-    double utilization;
-    bool saturated;
-    // TODO(iguessthislldo): Add Participant GUID
+
+    const String& bit_key() const { return bit_key_; }
+    const SystemTimePoint& timestamp() const { return timestamp_; }
+    const MonotonicTimePoint& last_update() const { return last_update_; }
+
+    void update(const MonotonicTimePoint& m_now,
+                const SystemTimePoint& s_now,
+                ThreadStatus next_status,
+                const TimeDuration& bucket_limit,
+                bool nested);
+    double utilization(const MonotonicTimePoint& now) const;
+
+    static const size_t bucket_count = 8;
+
+  private:
+    const String bit_key_;
+    SystemTimePoint timestamp_;
+    ThreadStatus status_;
+
+    struct Bucket {
+      TimeDuration active_time;
+      TimeDuration idle_time;
+    };
+    MonotonicTimePoint last_update_;
+    Bucket total_;
+    Bucket bucket_[bucket_count];
+    size_t current_bucket_;
+    size_t nesting_depth_;
   };
-  typedef OPENDDS_MAP(String, Thread) Map;
+  typedef OPENDDS_MAP(ThreadId, Thread) Map;
+  typedef OPENDDS_LIST(Thread) List;
 
-  static const char* status_to_string(ThreadStatus status);
+  void thread_status_interval(const TimeDuration& thread_status_interval)
+  {
+    thread_status_interval_ = thread_status_interval;
+    bucket_limit_ = thread_status_interval / Thread::bucket_count;
+  }
 
-  /// Get key for map and update.
-  /// safety_profile_tid is the thread id under safety profile, otherwise unused.
-  /// name is for a more human-friendly name that will be appended to the key.
-  static String get_key(const char* safety_profile_tid = "", const String& name = "");
+  const TimeDuration& thread_status_interval() const
+  {
+    return thread_status_interval_;
+  }
 
-  /// Update the busy percent for the identified thread
-  bool update_busy(const String& key, double pbusy, bool saturated);
+  bool update_thread_status() const
+  {
+    return thread_status_interval_ > TimeDuration::zero_value;
+  }
 
-  /// Update the status of a thread to indicate it was able to check in at the
-  /// given time. Returns false if failed.
-  bool update(const String& key,
-              ThreadStatus status = ThreadStatus_Running,
-              double utilization = 0.0,
-              bool saturated = false);
+  /// Add the calling thread with the manager.
+  /// name is for a more human-friendly name that will be appended to the BIT key.
+  /// Implicitly makes the thread active and finishes the thread on destruction.
+  class Start {
+  public:
+    Start(ThreadStatusManager& thread_status_manager, const String& name)
+      : thread_status_manager_(thread_status_manager)
+    {
+      thread_status_manager_.add_thread(name);
+    }
 
-  /// To support multiple readers determining that a thread finished without
-  /// having to do something more complicated to cleanup that fact, have a
-  /// Manager for each reader use this to get the information the readers need.
-  bool sync_with_parent(ThreadStatusManager& parent, Map& running, Map& finished);
+    ~Start()
+    {
+      thread_status_manager_.finished();
+    }
 
-  /// Pauses caller when the rtpsrelay thread utilization exceeds the high
-  /// water mark until it drops below the low water mark.
-  void rtps_flow_control();
+  private:
+    ThreadStatusManager& thread_status_manager_;
+  };
 
-  /// update the flow control setting based on the rtps relay thread saturation
-  /// status.
-  void rtps_set_flow_control(bool saturated);
+  class Event {
+  public:
+    Event(ThreadStatusManager& thread_status_manager)
+      : thread_status_manager_(thread_status_manager)
+    {
+      thread_status_manager_.active(true);
+    }
+
+    ~Event()
+    {
+      thread_status_manager_.idle(true);
+    }
+
+  private:
+    ThreadStatusManager& thread_status_manager_;
+  };
+
+  class Sleeper {
+  public:
+    Sleeper(ThreadStatusManager& thread_status_manager)
+      : thread_status_manager_(thread_status_manager)
+    {
+      thread_status_manager_.idle();
+    }
+
+    ~Sleeper()
+    {
+      thread_status_manager_.active();
+    }
+
+  private:
+    ThreadStatusManager& thread_status_manager_;
+  };
+
+  /// Copy active and idle threads to running and finished threads to
+  /// finished.  Only threads updated after start are considered.
+  void harvest(const MonotonicTimePoint& start,
+               List& running,
+               List& finished) const;
 
 #ifdef ACE_HAS_GETTID
   static inline pid_t gettid()
@@ -80,33 +160,21 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
   }
 #endif
 
-  ThreadStatusManager()
-  : map_()
-  , lock_()
-  , rtps_lock_()
-  , rtps_pauser_(rtps_lock_)
-  , rtps_paused_(false)
-  , rtps_thr_key_("VSEDP")
-  , rtps_max_wait_(10)
-  {
-  }
-
-  int parse_args(int &argc, ACE_TCHAR *argv[]);
-  int load_configuration(ACE_Configuration_Heap& cf);
-
 private:
+  static ThreadId get_thread_id();
+  void add_thread(const String& name);
+  void active(bool nested = false);
+  void idle(bool nested = false);
+  void finished();
+
+  void cleanup(const MonotonicTimePoint& now);
+
+  TimeDuration thread_status_interval_;
+  TimeDuration bucket_limit_;
   Map map_;
+  List list_;
 
-  typedef ACE_SYNCH_MUTEX LockType;
-  typedef ACE_Guard<LockType> GuardType;
-  typedef ConditionVariable<LockType> ConditionVariableType;
-
-  LockType lock_;
-  LockType rtps_lock_;
-  ConditionVariableType rtps_pauser_;
-  bool rtps_paused_;
-  String rtps_thr_key_;
-  TimeDuration rtps_max_wait_;
+  mutable ACE_Thread_Mutex lock_;
 };
 
 } // namespace DCPS

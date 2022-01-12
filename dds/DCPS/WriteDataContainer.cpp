@@ -1036,6 +1036,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
 
   //max_num_samples_ covers ResourceLimitsQosPolicy max_samples and
   //max_instances and max_instances * depth
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while ((instance_list.size() >= max_samples_per_instance_) ||
          ((this->max_num_samples_ > 0) &&
          ((CORBA::Long) this->num_all_samples () >= this->max_num_samples_))) {
@@ -1067,7 +1068,12 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         }
 
         waiting_on_release_ = true;
-        switch (condition_.wait_until(timeout)) {
+        CvStatus status;
+        {
+          ThreadStatusManager::Sleeper sleeper(thread_status_manager);
+          status = condition_.wait_until(timeout);
+        }
+        switch (status) {
         case CvStatus_NoTimeout:
           remove_excess_durable();
           break;
@@ -1371,8 +1377,14 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
   }
 
   bool loop = true;
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (loop && pending_data()) {
-    switch (empty_condition_.wait_until(deadline)) {
+    CvStatus status;
+    {
+      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
+      status = empty_condition_.wait_until(deadline);
+    }
+    switch (status) {
     case CvStatus_NoTimeout:
       break;
 
@@ -1431,8 +1443,14 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
 
   guard.release();
 
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged(sequence)) {
-    switch (deadline_is_infinite ? wfa_condition_.wait() : wfa_condition_.wait_until(deadline)) {
+    CvStatus status;
+    {
+      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
+      status = deadline_is_infinite ? wfa_condition_.wait() : wfa_condition_.wait_until(deadline);
+    }
+    switch (status) {
     case CvStatus_NoTimeout:
       break;
     case CvStatus_Timeout:

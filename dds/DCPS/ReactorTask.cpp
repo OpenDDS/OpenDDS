@@ -11,8 +11,6 @@
 #if !defined (__ACE_INLINE__)
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
-#include "ThreadMonitor.h"
-#include "ThreadStatusManager.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -40,7 +38,6 @@ ReactorTask::ReactorTask(bool useAsyncSend)
 #endif
   , timer_queue_(0)
   , thread_status_manager_(0)
-  , timeout_(TimeDuration(0))
 {
   ACE_UNUSED_ARG(useAsyncSend);
 }
@@ -68,8 +65,9 @@ void ReactorTask::cleanup()
   timer_queue_ = 0;
 }
 
-int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
-  ThreadStatusManager* thread_status_manager, const String& name)
+int ReactorTask::open_reactor_task(void*,
+                                   ThreadStatusManager* thread_status_manager,
+                                   const String& name)
 {
   GuardType guard(lock_);
 
@@ -77,7 +75,6 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
   cleanup();
 
   // thread status reporting support
-  timeout_ = timeout;
   thread_status_manager_ = thread_status_manager;
   name_ = name;
 
@@ -112,6 +109,7 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
   }
 
   while (state_ != STATE_RUNNING) {
+    ThreadStatusManager::Sleeper sleeper(*thread_status_manager);
     condition_.wait();
   }
 
@@ -120,6 +118,8 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
 
 int ReactorTask::svc()
 {
+  ThreadStatusManager::Start s(*thread_status_manager_, name_);
+
   {
     GuardType guard(lock_);
 
@@ -150,22 +150,13 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  const bool update_thread_status = thread_status_manager_ && !timeout_.is_zero();
-  const String thread_key = ThreadStatusManager::get_key("ReactorTask", name_);
-
   try {
     // Tell the reactor to handle events.
-    if (update_thread_status) {
+    if (thread_status_manager_->update_thread_status()) {
       while (state_ == STATE_RUNNING) {
-        ACE_Time_Value t = timeout_.value();
+        ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
+        ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
         reactor_->run_reactor_event_loop(t, 0);
-        if (DCPS_debug_level > 4) {
-          ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
-        }
-        if (!thread_status_manager_->update(thread_key) && DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
-        }
       }
 
     } else {
@@ -180,17 +171,6 @@ int ReactorTask::svc()
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
     throw;
-  }
-
-  if (update_thread_status) {
-    if (DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ReactorTask::svc: "
-        "Updating thread status for the last time\n"));
-    }
-    if (!thread_status_manager_->update(thread_key, ThreadStatus_Finished) &&
-        DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: final update failed\n"));
-    }
   }
 
   return 0;
@@ -240,6 +220,7 @@ void ReactorTask::stop()
 
     // Let's wait for the reactor task's thread to complete before we
     // leave this stop method.
+    ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
     wait();
 
     // Reset the thread manager in case it goes away before the next open.

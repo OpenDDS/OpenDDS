@@ -18,7 +18,6 @@
 #include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/transport/framework/TransportDebug.h"
-#include "dds/DCPS/ThreadMonitor.h"
 
 #include "ace/Reactor.h"
 
@@ -56,7 +55,8 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
 int
 RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  ThreadMonitor::GreenLight tmgl("RtpsUdpReceiveStrategy");
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   return handle_simple_dds_input(fd);
 }
 

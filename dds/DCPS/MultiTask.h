@@ -11,6 +11,7 @@
 #include "RcEventHandler.h"
 #include "ReactorInterceptor.h"
 #include "TimeTypes.h"
+#include "Service_Participant.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -93,6 +94,8 @@ private:
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
   {
+    ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
     const MonotonicTimePoint now(tv);
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

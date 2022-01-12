@@ -107,6 +107,7 @@ OpenDDS_Dcps_Export TimeDuration operator-(const TimeDuration& x);
 OpenDDS_Dcps_Export TimeDuration operator*(double x, const TimeDuration& y);
 OpenDDS_Dcps_Export TimeDuration operator*(const TimeDuration& x, double y);
 OpenDDS_Dcps_Export TimeDuration operator/(const TimeDuration& x, double y);
+OpenDDS_Dcps_Export double operator/(const TimeDuration& x, const TimeDuration& y);
 OpenDDS_Dcps_Export bool operator<(const TimeDuration& x, const TimeDuration& y);
 OpenDDS_Dcps_Export bool operator>(const TimeDuration& x, const TimeDuration& y);
 OpenDDS_Dcps_Export bool operator<=(const TimeDuration& x, const TimeDuration& y);

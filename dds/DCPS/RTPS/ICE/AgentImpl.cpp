@@ -55,6 +55,8 @@ bool AgentImpl::reactor_is_shut_down() const
 
 int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 {
+  DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   const MonotonicTimePoint now(a_now);
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, 0);
   check_invariants();

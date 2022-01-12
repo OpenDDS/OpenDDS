@@ -2442,6 +2442,8 @@ int
 DataWriterImpl::handle_timeout(const ACE_Time_Value& tv,
                                const void* /* arg */)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   const MonotonicTimePoint now(tv);
   bool liveliness_lost = false;
 
@@ -2800,6 +2802,8 @@ void DataWriterImpl::set_wait_pending_deadline(const MonotonicTimePoint& deadlin
 
 int LivenessTimer::handle_timeout(const ACE_Time_Value& tv, const void* arg)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   DataWriterImpl_rch writer = this->writer_.lock();
   if (writer) {
     writer->handle_timeout(tv, arg);

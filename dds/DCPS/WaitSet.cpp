@@ -12,6 +12,7 @@
 #include "ConditionImpl.h"
 #include "Time_Helper.h"
 #include "TimeTypes.h"
+#include "Service_Participant.h"
 
 namespace {
 
@@ -140,8 +141,10 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   }
 
   CvStatus status = CvStatus_NoTimeout;
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while ((attached_conditions_.empty() || signaled_conditions_.empty()) &&
       status == CvStatus_NoTimeout) {
+    ThreadStatusManager::Sleeper sleeper(thread_status_manager);
     status = use_deadline ? cond_.wait_until(deadline) : cond_.wait();
   }
 
