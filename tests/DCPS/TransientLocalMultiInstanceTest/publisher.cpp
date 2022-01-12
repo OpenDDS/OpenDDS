@@ -227,7 +227,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_OS::sleep(1);
     }
 
-    ok = listener_servant1->ok_;
+    ok = listener_servant1->ok();
     if (ok) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Reader 1 in pub process received all samples\n")));
     } else {
@@ -267,7 +267,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     if (ok) {
-      ok = listener_servant2->ok_;
+      ok = listener_servant2->ok();
       if (ok) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Reader 2 in pub process received all samples\n")));
       } else {
