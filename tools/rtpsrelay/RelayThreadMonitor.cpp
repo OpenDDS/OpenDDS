@@ -35,15 +35,14 @@ void RelayThreadMonitor::stop()
   condition_.notify_all();
 
   OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  thread_status_manager.idle();
+  ThreadStatusManager::Sleeper s(thread_status_manager);
   wait();
-  thread_status_manager.active();
 }
 
 int RelayThreadMonitor::svc()
 {
   OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  thread_status_manager.add_thread("RtpsRelay RelayThreadMonitor");
+  ThreadStatusManager::Start s(thread_status_manager, "RtpsRelay RelayThreadMonitor");
   const TimeDuration thread_status_interval = thread_status_manager.thread_status_interval();
   const int safety_factor = config_.thread_status_safety_factor();
 
@@ -53,9 +52,10 @@ int RelayThreadMonitor::svc()
 
   while (running_) {
     const MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
-    thread_status_manager.idle();
-    condition_.wait_until(expire);
-    thread_status_manager.active();
+    {
+      ThreadStatusManager::Sleeper s(thread_status_manager);
+      condition_.wait_until(expire);
+    }
     if (running_) {
       OpenDDS::DCPS::InternalThreadBuiltinTopicDataSeq datas;
       DDS::SampleInfoSeq infos;
@@ -92,6 +92,32 @@ int RelayThreadMonitor::svc()
   }
 
   return 0;
+}
+
+void RelayThreadMonitor::on_data_available(DDS::DataReader_ptr /*reader*/)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+  OpenDDS::DCPS::InternalThreadBuiltinTopicDataSeq datas;
+  DDS::SampleInfoSeq infos;
+  DDS::ReturnCode_t ret = thread_status_reader_->read(datas,
+                                                      infos,
+                                                      DDS::LENGTH_UNLIMITED,
+                                                      DDS::NOT_READ_SAMPLE_STATE,
+                                                      DDS::ANY_VIEW_STATE,
+                                                      DDS::ANY_INSTANCE_STATE);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RelayThreadMonitor::one_data_available failed to read %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
+    return;
+  }
+
+  for (CORBA::ULong idx = 0; idx != infos.length(); ++idx) {
+    if (infos[idx].valid_data) {
+      utilization_[datas[idx].thread_id.in()] = datas[idx].utilization;
+    } else if (infos[idx].instance_state != DDS::ALIVE_INSTANCE_STATE) {
+      utilization_.erase(datas[idx].thread_id.in());
+    }
+  }
 }
 
 }

@@ -20,7 +20,7 @@ RelayStatusReporter::RelayStatusReporter(const Config& config,
 
 int RelayStatusReporter::handle_timeout(const ACE_Time_Value& /*now*/, const void* /*token*/)
 {
-  TheServiceParticipant->get_thread_status_manager().active();
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   GuidAddrSet::Proxy proxy(guid_addr_set_);
   relay_status_.admitting(proxy.admitting());

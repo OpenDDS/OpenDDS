@@ -115,7 +115,7 @@ int RelayHandler::open(const ACE_INET_Addr& address)
 
 int RelayHandler::handle_input(ACE_HANDLE handle)
 {
-  TheServiceParticipant->get_thread_status_manager().active();
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -170,7 +170,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
 
 int RelayHandler::handle_output(ACE_HANDLE)
 {
-  TheServiceParticipant->get_thread_status_manager().active();
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -978,7 +978,7 @@ CORBA::ULong SpdpHandler::send_to_application_participant(GuidAddrSet::Proxy& pr
 
 int SpdpHandler::handle_exception(ACE_HANDLE /*fd*/)
 {
-  TheServiceParticipant->get_thread_status_manager().active();
+  OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   ReplayQueue q;
 

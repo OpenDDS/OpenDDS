@@ -124,12 +124,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-InactivePeriod"))) {
       config.inactive_period(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-MaxPending"))) {
-      config.max_pending(ACE_OS::atoi(arg));
-      args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-PendingTimeout"))) {
-      config.pending_timeout(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-BufferSize"))) {
       config.buffer_size(ACE_OS::atoi(arg));
       args.consume_arg();
@@ -156,6 +150,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-ThreadStatusSafetyFactor"))) {
       config.thread_status_safety_factor(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-UtilizationLimit"))) {
+      config.utilization_limit(ACE_OS::atof(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogRelayStatistics"))) {
       config.log_relay_statistics(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
@@ -666,7 +663,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   RelayStatisticsReporter relay_statistics_reporter(config, relay_statistics_writer);
   RelayParticipantStatusReporter relay_participant_status_reporter(config, relay_participant_status_writer, relay_statistics_reporter);
-  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter);
+  RelayThreadMonitor* relay_thread_monitor = new RelayThreadMonitor(config);
+  GuidAddrSet guid_addr_set(config, rtps_discovery, relay_participant_status_reporter, relay_statistics_reporter, *relay_thread_monitor);
   ACE_Reactor reactor_(new ACE_Select_Reactor, true);
   const auto reactor = &reactor_;
   GuidPartitionTable guid_partition_table(config, guid_addr_set, spdp_horizontal_addr, relay_partitions_writer, spdp_replay_writer);
@@ -716,9 +714,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR:failed to narrow InternalThreadBuiltinTopicDataDataReader\n")));
     return EXIT_FAILURE;
   }
-  RelayThreadMonitor thread_monitor(config, thread_status_reader);
 
-  DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+  relay_thread_monitor->set_reader(thread_status_reader);
+  DDS::DataReaderListener_var relay_thread_monitor_var(relay_thread_monitor);
+  DDS::ReturnCode_t ret = thread_status_reader->set_listener(relay_thread_monitor_var, DDS::DATA_AVAILABLE_STATUS);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on InternalThreadBuiltinTopicDataDataReader\n")));
+    return EXIT_FAILURE;
+  }
 
   DDS::DataReaderListener_var relay_partition_listener =
     new RelayPartitionsListener(relay_partition_table, relay_statistics_reporter);
@@ -765,10 +768,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  DDS::DataReader_var participant_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
   ParticipantListener* participant_listener =
     new ParticipantListener(application_participant_impl, guid_addr_set, relay_participant_status_reporter);
   DDS::DataReaderListener_var participant_listener_var(participant_listener);
-  DDS::ReturnCode_t ret = participant_reader->set_listener(participant_listener_var, DDS::DATA_AVAILABLE_STATUS);
+  ret = participant_reader->set_listener(participant_listener_var, DDS::DATA_AVAILABLE_STATUS);
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on ParticipantBuiltinTopicDataDataReader\n")));
     return EXIT_FAILURE;
@@ -877,20 +881,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
 
   if (thread_status_manager.update_thread_status()) {
-    if (thread_monitor.start() == -1) {
+    if (relay_thread_monitor->start() == -1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to activate Thread Load Monitor\n")));
       return EXIT_FAILURE;
     }
 
-    thread_status_manager.add_thread("RtpsRelay Main");
+    OpenDDS::DCPS::ThreadStatusManager::Start s(thread_status_manager, "RtpsRelay Main");
 
     for (;;) {
       ACE_Time_Value t = thread_status_manager.thread_status_interval().value();
-      thread_status_manager.idle();
+      OpenDDS::DCPS::ThreadStatusManager::Sleeper s(thread_status_manager);
       reactor->run_reactor_event_loop(t, 0);
     }
 
-    thread_monitor.stop();
+    relay_thread_monitor->stop();
   } else {
     reactor->run_reactor_event_loop();
   }

@@ -3,6 +3,7 @@
 
 #include "ParticipantStatisticsReporter.h"
 #include "RelayStatisticsReporter.h"
+#include "RelayThreadMonitor.h"
 
 #include <dds/rtpsrelaylib/Utility.h>
 
@@ -120,11 +121,13 @@ public:
   GuidAddrSet(const Config& config,
               OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery,
               RelayParticipantStatusReporter& relay_participant_status_reporter,
-              RelayStatisticsReporter& relay_stats_reporter)
+              RelayStatisticsReporter& relay_stats_reporter,
+              RelayThreadMonitor& relay_thread_monitor)
     : config_(config)
     , rtps_discovery_(rtps_discovery)
     , relay_participant_status_reporter_(relay_participant_status_reporter)
     , relay_stats_reporter_(relay_stats_reporter)
+    , relay_thread_monitor_(relay_thread_monitor)
     , spdp_vertical_handler_(0)
     , sedp_vertical_handler_(0)
     , data_vertical_handler_(0)
@@ -212,11 +215,6 @@ public:
       return gas_.get_session_time(guid, now);
     }
 
-    void remove_pending(const OpenDDS::DCPS::GUID_t& guid)
-    {
-      gas_.pending_.erase(guid);
-    }
-
     void remove(const OpenDDS::DCPS::GUID_t& guid,
                 const OpenDDS::DCPS::MonotonicTimePoint& now,
                 RelayParticipantStatusReporter* reporter)
@@ -272,7 +270,7 @@ private:
 
   bool admitting() const
   {
-    return pending_.size() < config_.max_pending();
+    return relay_thread_monitor_.threads_okay();
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -298,6 +296,7 @@ private:
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
   RelayParticipantStatusReporter& relay_participant_status_reporter_;
   RelayStatisticsReporter& relay_stats_reporter_;
+  RelayThreadMonitor& relay_thread_monitor_;
   RelayHandler* spdp_vertical_handler_;
   RelayHandler* sedp_vertical_handler_;
   RelayHandler* data_vertical_handler_;
@@ -308,9 +307,6 @@ private:
   DeactivationGuidQueue deactivation_guid_queue_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
-  GuidSet pending_;
-  typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, OpenDDS::DCPS::GUID_t> > PendingExpirationQueue;
-  PendingExpirationQueue pending_expiration_queue_;
   mutable ACE_Thread_Mutex mutex_;
 };
 
