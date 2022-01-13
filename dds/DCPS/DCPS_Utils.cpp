@@ -473,7 +473,7 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
 DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
 {
   DCPS::String repr_string;
-  switch(repr) {
+  switch (repr) {
   case DDS::XCDR_DATA_REPRESENTATION:
     repr_string = "XCDR_DATA_REPRESENTATION";
     break;
