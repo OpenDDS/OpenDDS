@@ -15,6 +15,8 @@
 #include <tao/String_Manager_T.h>
 
 #include <cstddef>
+#include <cstring>
+#include <cwchar>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -80,13 +82,13 @@ public:
   virtual void write_char8(ACE_CDR::Char /*value*/) = 0;
   virtual void write_char16(ACE_CDR::WChar /*value*/) = 0;
   virtual void write_string(const ACE_CDR::Char* /*value*/, size_t /*length*/) = 0;
-  void write_string(const ACE_CDR::Char* value) { write_string(value, strlen(value)); }
+  void write_string(const ACE_CDR::Char* value) { write_string(value, std::strlen(value)); }
   void write_string(const std::string& value) { write_string(value.c_str(), value.length()); }
   virtual void write_wstring(const ACE_CDR::WChar* /*value*/, size_t /*length*/) = 0;
   void write_wstring(const ACE_CDR::WChar* value)
   {
 #ifdef DDS_HAS_WCHAR
-    write_wstring(value, wcslen(value));
+    write_wstring(value, std::wcslen(value));
 #endif
   }
   void write_wstring(const std::wstring& value)
