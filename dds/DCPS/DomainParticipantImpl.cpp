@@ -1084,8 +1084,7 @@ DomainParticipantImpl::delete_contained_entities()
     shutdown_mutex_.acquire();
     ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
     while (!shutdown_complete_) {
-      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      shutdown_condition_.wait();
+      shutdown_condition_.wait(thread_status_manager);
     }
     shutdown_complete_ = false;
     shutdown_mutex_.release();
@@ -1947,10 +1946,7 @@ DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id,
   CvStatus res = CvStatus_NoTimeout;
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (res == CvStatus_NoTimeout && iter == handles_.end()) {
-    {
-      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      res = max_wait.is_zero() ? handle_waiters_.wait() : handle_waiters_.wait_until(expire_at);
-    }
+    res = max_wait.is_zero() ? handle_waiters_.wait(thread_status_manager) : handle_waiters_.wait_until(expire_at, thread_status_manager);
     iter = handles_.find(id);
   }
   return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;

@@ -87,12 +87,16 @@ public:
   {
 #ifdef DDS_HAS_WCHAR
     write_wstring(value, wcslen(value));
+#else
+    ACE_UNUSED_ARG(value);
 #endif
   }
   void write_wstring(const std::wstring& value)
   {
 #ifdef DDS_HAS_WCHAR
     write_wstring(value.c_str(), value.length());
+#else
+    ACE_UNUSED_ARG(value);
 #endif
   }
 

@@ -29,6 +29,7 @@ OpenDDS_Dcps_Export String to_dds_string(long long to_convert);
 OpenDDS_Dcps_Export String to_dds_string(unsigned long long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(unsigned long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(const unsigned char* array, size_t length);
+OpenDDS_Dcps_Export String to_dds_string(const String& to_convert);
 
 //@{
 /**

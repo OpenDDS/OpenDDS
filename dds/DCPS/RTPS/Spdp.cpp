@@ -423,8 +423,7 @@ Spdp::shutdown()
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
     while (!eh_shutdown_) {
-      DCPS::ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      shutdown_cond_.wait();
+      shutdown_cond_.wait(thread_status_manager);
     }
   }
 }
@@ -4421,7 +4420,7 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  if (true || DCPS::DCPS_debug_level > 4) {
+  if (DCPS::DCPS_debug_level > 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) Spdp::SpdpTransport::thread_status_task(): Updating internal thread status BIT.\n"));
   }

@@ -90,12 +90,7 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
   bool loop = true;
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (loop && pending_messages()) {
-    CvStatus status;
-    {
-      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      status = done_condition_.wait_until(deadline);
-    }
-    switch (status) {
+    switch (done_condition_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_Timeout:
       if (DCPS_debug_level && pending_messages()) {
         ACE_DEBUG((LM_INFO,

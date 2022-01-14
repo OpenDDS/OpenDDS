@@ -1557,14 +1557,6 @@ Service_Participant::load_configuration(
                      -1);
   }
 
-  if (status != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-    ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
-    ACE_TEXT("load_common_configuration () returned %d\n"),
-    status),
-    -1);
-  }
-
   // Register static discovery.
   this->add_discovery(static_rchandle_cast<Discovery>(StaticDiscovery::instance()));
 

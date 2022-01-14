@@ -10,6 +10,7 @@
 
 #include "RcEventHandler.h"
 #include "PoolAllocator.h"
+#include "dcps_export.h"
 
 #include <ace/Reactor.h>
 #include <ace/Thread_Mutex.h>
@@ -20,7 +21,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class JobQueue : public RcEventHandler {
+class OpenDDS_Dcps_Export JobQueue : public RcEventHandler {
 public:
   class Job : public RcObject {
   public:

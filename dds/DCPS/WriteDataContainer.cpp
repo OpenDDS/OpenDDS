@@ -1068,12 +1068,7 @@ WriteDataContainer::obtain_buffer(DataSampleElement*& element,
         }
 
         waiting_on_release_ = true;
-        CvStatus status;
-        {
-          ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-          status = condition_.wait_until(timeout);
-        }
-        switch (status) {
+        switch (condition_.wait_until(timeout, thread_status_manager)) {
         case CvStatus_NoTimeout:
           remove_excess_durable();
           break;
@@ -1379,12 +1374,7 @@ void WriteDataContainer::wait_pending(const MonotonicTimePoint& deadline)
   bool loop = true;
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (loop && pending_data()) {
-    CvStatus status;
-    {
-      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      status = empty_condition_.wait_until(deadline);
-    }
-    switch (status) {
+    switch (empty_condition_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_NoTimeout:
       break;
 
@@ -1445,12 +1435,7 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
 
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged(sequence)) {
-    CvStatus status;
-    {
-      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      status = deadline_is_infinite ? wfa_condition_.wait() : wfa_condition_.wait_until(deadline);
-    }
-    switch (status) {
+    switch (deadline_is_infinite ? wfa_condition_.wait(thread_status_manager) : wfa_condition_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_NoTimeout:
       break;
     case CvStatus_Timeout:

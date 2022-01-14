@@ -112,8 +112,7 @@ ReplayerImpl::cleanup()
     // and unregistering the publication.
     ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
     while (this->pending_write_count_) {
-      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      this->empty_condition_.wait();
+      this->empty_condition_.wait(thread_status_manager);
     }
 
     // Call remove association before unregistering the datawriter

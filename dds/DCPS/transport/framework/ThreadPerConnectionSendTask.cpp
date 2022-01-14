@@ -128,7 +128,9 @@ int ThreadPerConnectionSendTask::open(void*)
 
 int ThreadPerConnectionSendTask::svc()
 {
-  // FUTURE: ThreadStatus.
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  ThreadStatusManager::Start s(thread_status_manager, "ThreadPerConnectionSendTask");
+
   DBG_ENTRY_LVL("ThreadPerConnectionSendTask", "svc", 6);
 
   thr_id_ = ACE_OS::thr_self();
@@ -150,7 +152,7 @@ int ThreadPerConnectionSendTask::svc()
   while (!shutdown_initiated_) {
 
     if (queue_.size() == 0) {
-      work_available_.wait();
+      work_available_.wait(thread_status_manager);
     }
 
     if (shutdown_initiated_) {
@@ -207,7 +209,7 @@ int ThreadPerConnectionSendTask::close(u_long flag)
   }
 
   if (opened_ && !ACE_OS::thr_equal(thr_id_, ACE_OS::thr_self())) {
-    // FUTURE: ThreadStatus
+    ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
     wait();
   }
 

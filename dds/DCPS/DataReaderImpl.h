@@ -585,8 +585,7 @@ public:
     ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
     ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
     while (!has_subscription_id_ && !get_deleted()) {
-      ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-      subscription_id_condition_.wait();
+      subscription_id_condition_.wait(thread_status_manager);
     }
     return subscription_id_;
   }

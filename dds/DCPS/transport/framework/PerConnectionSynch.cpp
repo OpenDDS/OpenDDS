@@ -9,6 +9,7 @@
 
 #include "PerConnectionSynch.h"
 
+#include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/debug.h>
 
 #if !defined (__ACE_INLINE__)
@@ -62,9 +63,10 @@ OpenDDS::DCPS::PerConnectionSynch::open(void*)
 int
 OpenDDS::DCPS::PerConnectionSynch::svc()
 {
-  DBG_ENTRY_LVL("PerConnectionSynch","svc",6);
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  ThreadStatusManager::Start s(thread_status_manager, "PerConnectionSynch");
 
-  // FUTURE: ThreadStatus.
+  DBG_ENTRY_LVL("PerConnectionSynch","svc",6);
 
   // Ignore all signals to avoid
   // ERROR: ACE::handle_write_ready return -1 while waiting  to unclog. handle_write_ready: Interrupted system call
@@ -107,7 +109,7 @@ OpenDDS::DCPS::PerConnectionSynch::svc()
              (this->shutdown_       == 0)) {
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "No work to do.  Just wait on the condition.\n"));
-        this->condition_.wait();
+        this->condition_.wait(thread_status_manager);
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "We are awake from waiting on the condition.\n"));
       }
@@ -198,6 +200,7 @@ OpenDDS::DCPS::PerConnectionSynch::unregister_worker_i()
 
   // Wait for all threads running this task (there should just be one thread)
   // to finish.
-  // FUTURE: ThreadStatus.
+
+  ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
   this->wait();
 }

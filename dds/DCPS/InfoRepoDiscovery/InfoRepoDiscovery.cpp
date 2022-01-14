@@ -1003,7 +1003,7 @@ ACE_Thread_Mutex InfoRepoDiscovery::mtx_orb_runner_;
 int
 InfoRepoDiscovery::OrbRunner::svc()
 {
-  // FUTURE: ThreadStatus.
+  ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "OrbRunner");
 
   // this method was originally Service_Participant::svc()
   bool done = false;

@@ -116,6 +116,11 @@ String to_dds_string(const unsigned char* array, size_t length)
   return ret;
 }
 
+String to_dds_string(const String& to_convert)
+{
+  return to_convert;
+}
+
 String to_hex_dds_string(
   const unsigned char* data, const size_t size, const char delim, const size_t delim_every)
 {

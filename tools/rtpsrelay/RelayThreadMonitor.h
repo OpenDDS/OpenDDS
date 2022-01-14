@@ -13,7 +13,7 @@ namespace RtpsRelay {
 
 class RelayThreadMonitor : public virtual ACE_Task_Base, public ListenerBase {
 public:
-  RelayThreadMonitor(const Config& config)
+  explicit RelayThreadMonitor(const Config& config)
     : config_(config)
     , running_(false)
     , condition_(mutex_)

@@ -748,7 +748,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
           vertical_handler_->venqueue_message(
             addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
           ++sent;
-      }
+        }
       }
     }
   } else {

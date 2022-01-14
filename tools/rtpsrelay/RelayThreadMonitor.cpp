@@ -52,10 +52,7 @@ int RelayThreadMonitor::svc()
 
   while (running_) {
     const MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
-    {
-      ThreadStatusManager::Sleeper s(thread_status_manager);
-      condition_.wait_until(expire);
-    }
+    condition_.wait_until(expire, thread_status_manager);
     if (running_) {
       OpenDDS::DCPS::InternalThreadBuiltinTopicDataSeq datas;
       DDS::SampleInfoSeq infos;

@@ -8,14 +8,8 @@
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "ThreadStatusManager.h"
-#include "Service_Participant.h"
-
-#include <ace/Arg_Shifter.h>
-#include <ace/Configuration_Import_Export.h>
-#include <ace/Argv_Type_Converter.h>
-
-#include <exception>
-#include <cstring>
+#include "SafetyProfileStreams.h"
+#include "debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -84,20 +78,17 @@ double ThreadStatusManager::Thread::utilization(const MonotonicTimePoint& now) c
 
 ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
 {
-#ifdef ACE_HAS_MAC_OSX
-  ThreadId thread_id = 0;
-  uint64_t u64_tid;
-  if (!pthread_threadid_np(0, &u64_tid)) {
-    thread_id = static_cast<unsigned long>(u64_tid);
-  } else if (DCPS_debug_level) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: pthread_threadid_np failed\n")));
-  }
-  return thread_id;
-#elif defined ACE_HAS_GETTID
-  return gettid();
+#if defined (ACE_WIN32)
+  return static_cast<unsigned>(ACE_Thread::self());
 #else
-  return ACE_OS::thr_self();
-#endif
+#  ifdef ACE_HAS_GETTID
+  return ACE_OS::thr_gettid;
+#  else
+  char buffer[32];
+  const size_t len = ACE_OS::thr_id(buffer, 32);
+  return String(buffer, len);
+#  endif
+#endif /* ACE_WIN32 */
 }
 
 void ThreadStatusManager::add_thread(const String& name)

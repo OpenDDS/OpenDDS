@@ -891,7 +891,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     for (;;) {
       ACE_Time_Value t = thread_status_manager.thread_status_interval().value();
       OpenDDS::DCPS::ThreadStatusManager::Sleeper s(thread_status_manager);
-      reactor->run_reactor_event_loop(t, 0);
+      if (reactor->run_reactor_event_loop(t, 0) != 0) {
+        break;
+      }
     }
 
     relay_thread_monitor->stop();

@@ -48,12 +48,7 @@ int DcpsUpcalls::svc()
     cnd_.notify_one();
     while (!writer_done_) {
       if (update_thread_status) {
-        CvStatus cv_status;
-        {
-          ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-          cv_status = cnd_.wait_until(expire);
-        }
-        switch (cv_status) {
+        switch (cnd_.wait_until(expire, thread_status_manager)) {
         case CvStatus_NoTimeout:
           break;
 
@@ -67,7 +62,7 @@ int DcpsUpcalls::svc()
           }
           return -1;
         }
-      } else if (cnd_.wait() == CvStatus_Error) {
+      } else if (cnd_.wait(thread_status_manager) == CvStatus_Error) {
         if (DCPS_debug_level) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DcpsUpcalls::svc: error in wait\n"));
         }

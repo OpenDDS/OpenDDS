@@ -109,8 +109,7 @@ int ReactorTask::open_reactor_task(void*,
   }
 
   while (state_ != STATE_RUNNING) {
-    ThreadStatusManager::Sleeper sleeper(*thread_status_manager);
-    condition_.wait();
+    condition_.wait(*thread_status_manager);
   }
 
   return 0;

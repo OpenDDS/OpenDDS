@@ -44,7 +44,6 @@ public:
   , shutdown_initiated_(false)
   , opened_(false)
   , thr_id_(ACE_OS::NULL_thread)
-  , name_("QueueTaskBase")
   {
     DBG_ENTRY("QueueTaskBase","QueueTaskBase");
   }
@@ -113,7 +112,7 @@ public:
     ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
     const TimeDuration thread_status_interval = thread_status_manager.thread_status_interval();
 
-    ThreadStatusManager::Start s(thread_status_manager, name_);
+    ThreadStatusManager::Start s(thread_status_manager, "QueueTaskBase");
 
     thr_id_ = ACE_OS::thr_self();
 
@@ -128,10 +127,7 @@ public:
             MonotonicTimePoint expire = MonotonicTimePoint::now() + thread_status_interval;
 
             do {
-              {
-                ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-                work_available_.wait_until(expire);
-              }
+              work_available_.wait_until(expire, thread_status_manager);
 
               MonotonicTimePoint now = MonotonicTimePoint::now();
               if (now > expire) {
@@ -139,7 +135,7 @@ public:
               }
             } while (this->queue_.is_empty() && !shutdown_initiated_);
           } else {
-            this->work_available_.wait();
+            this->work_available_.wait(thread_status_manager);
           }
         }
 
@@ -230,9 +226,6 @@ private:
 
   /// The id of the thread created by this task.
   ACE_thread_t thr_id_;
-
-  /// name for thread monitoring BIT
-  String name_;
 };
 
 } // namespace DCPS

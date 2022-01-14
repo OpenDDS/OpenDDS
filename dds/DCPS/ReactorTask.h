@@ -64,8 +64,7 @@ public:
   void wait_for_startup()
   {
     while (state_ != STATE_RUNNING) {
-      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-      condition_.wait();
+      condition_.wait(*thread_status_manager_);
     }
   }
 

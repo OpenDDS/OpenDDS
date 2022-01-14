@@ -31,8 +31,7 @@ void ReactorInterceptor::Command::wait() const
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (!executed_) {
-    ThreadStatusManager::Sleeper sleeper(thread_status_manager);
-    condition_.wait();
+    condition_.wait(thread_status_manager);
   }
 }
 

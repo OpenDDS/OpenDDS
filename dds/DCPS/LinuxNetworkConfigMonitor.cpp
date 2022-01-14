@@ -13,6 +13,8 @@
 
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 
+#include "ThreadStatusManager.h"
+
 #include <ace/Netlink_Addr.h>
 
 #include <linux/rtnetlink.h>

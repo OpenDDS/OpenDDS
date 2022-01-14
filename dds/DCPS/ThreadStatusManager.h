@@ -9,12 +9,7 @@
 #define OPENDDS_DCPS_THREADSTATUSMANAGER_H
 
 #include "dcps_export.h"
-#include "RcObject.h"
 #include "TimeTypes.h"
-#include "ConditionVariable.h"
-#include "SafetyProfileStreams.h"
-
-#include <ace/Configuration.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -22,13 +17,17 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct OpenDDS_Dcps_Export ThreadStatusManager {
-#ifdef ACE_HAS_MAC_OSX
-    typedef unsigned long ThreadId;
-#elif defined ACE_HAS_GETTID
-    typedef pid_t ThreadId;
+
+#if defined (ACE_WIN32)
+  typedef unsigned ThreadId;
 #else
-    typedef ACE_thread_t ThreadId;
-#endif
+
+#  ifdef ACE_HAS_GETTID
+  typedef pid_t ThreadId;
+#  else
+  typedef String ThreadId;
+#  endif
+#endif /* ACE_WIN32 */
 
   class Thread {
   public:
