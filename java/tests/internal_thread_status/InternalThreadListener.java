@@ -46,10 +46,9 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
       status = bitDataReader.read_next_sample(info, si)) {
 
       System.out.println("== " + id + " Thread Info ==");
-      String guid = guidFormatter(info.value.participant_guid);
-      System.out.println("  guid: " + guid);
-      System.out.println("   tid: " + info.value.thread_id);
-      System.out.println("  time: " + si.value.source_timestamp.sec);
+      System.out.println("        tid: " + info.value.thread_id);
+      System.out.println("utilization: " + info.value.utilization);
+      System.out.println("       time: " + si.value.source_timestamp.sec);
     }
   }
 
