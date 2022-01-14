@@ -28,7 +28,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler {
 public:
 
-  class Command
+  class OpenDDS_Dcps_Export Command
   : public RcObject {
   public:
     Command();
