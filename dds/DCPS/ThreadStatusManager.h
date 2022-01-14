@@ -16,7 +16,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct OpenDDS_Dcps_Export ThreadStatusManager {
+class OpenDDS_Dcps_Export ThreadStatusManager {
+public:
 
 #if defined (ACE_WIN32)
   typedef unsigned ThreadId;
@@ -29,7 +30,7 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
 #  endif
 #endif /* ACE_WIN32 */
 
-  class Thread {
+  class OpenDDS_Dcps_Export Thread {
   public:
     enum ThreadStatus {
       ThreadStatus_Active,
@@ -63,7 +64,7 @@ struct OpenDDS_Dcps_Export ThreadStatusManager {
     SystemTimePoint timestamp_;
     ThreadStatus status_;
 
-    struct Bucket {
+    struct OpenDDS_Dcps_Export Bucket {
       TimeDuration active_time;
       TimeDuration idle_time;
     };
