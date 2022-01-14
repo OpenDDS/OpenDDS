@@ -189,6 +189,7 @@ void DataReaderImpl::init(
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  passed_qos_ = qos;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
@@ -844,13 +845,15 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
   OPENDDS_NO_OWNERSHIP_PROFILE_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
   OPENDDS_NO_DURABILITY_KIND_TRANSIENT_PERSISTENT_COMPATIBILITY_CHECK(qos, DDS::RETCODE_UNSUPPORTED);
 
-  if (Qos_Helper::valid(qos) && Qos_Helper::consistent(qos)) {
+  DDS::DataReaderQos new_qos = qos;
+  new_qos.representation.value = qos_.representation.value;
+  if (Qos_Helper::valid(new_qos) && Qos_Helper::consistent(new_qos)) {
 
-    if (qos_ == qos)
+    if (qos_ == new_qos)
       return DDS::RETCODE_OK;
 
     if (enabled_ == true) {
-      if (!Qos_Helper::changeable(qos_, qos)) {
+      if (!Qos_Helper::changeable(qos_, new_qos)) {
         return DDS::RETCODE_IMMUTABLE_POLICY;
 
       } else {
@@ -866,7 +869,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
               domain_id_,
               dp_id_,
               subscription_id_,
-              qos,
+              new_qos,
               subscriberQos);
         }
         if (!status) {
@@ -878,8 +881,9 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
       }
     }
 
-    qos_change(qos);
-    qos_ = qos;
+    qos_change(new_qos);
+    qos_ = new_qos;
+    passed_qos_ = qos;
 
     const Observer_rch observer = get_observer(Observer::e_QOS_CHANGED);
     if (observer) {
@@ -923,7 +927,7 @@ DDS::ReturnCode_t
 DataReaderImpl::get_qos(
     DDS::DataReaderQos & qos)
 {
-  qos = qos_;
+  qos = passed_qos_;
   return DDS::RETCODE_OK;
 }
 
@@ -1174,13 +1178,8 @@ DataReaderImpl::enable()
   }
 
   if (topic_servant_) {
-    if (!topic_servant_->check_data_representation(
-        get_effective_data_rep_qos(qos_.representation.value, true), false)) {
-      if (DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::enable: ")
-          ACE_TEXT("none of the data representation QoS is allowed by the ")
-          ACE_TEXT("topic type IDL annotations\n")));
-      }
+    set_reader_effective_data_rep_qos(qos_.representation.value);
+    if (!topic_servant_->check_data_representation(qos_.representation.value, false)) {
       return DDS::RETCODE_ERROR;
     }
   }
@@ -3389,34 +3388,37 @@ DataReaderImpl::get_ice_endpoint()
 
 DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
 {
-  const DDS::DataRepresentationIdSeq repIds =
-    get_effective_data_rep_qos(qos_.representation.value, true);
   bool xcdr1_mutable = false;
-  if (cdr_encapsulation() || qos_.representation.value.length() > 0) {
-    for (CORBA::ULong i = 0; i < repIds.length(); ++i) {
-      Encoding::Kind encoding_kind;
-      if (repr_to_encoding_kind(repIds[i], encoding_kind)) {
-        if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
-          xcdr1_mutable = true;
-        } else {
-          decoding_modes_.insert(encoding_kind);
-        }
-      } else if (DCPS_debug_level) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                   ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                   ACE_TEXT("Encountered unsupported or unknown data representation: %u\n"),
-                   repIds[i]));
+  bool illegal_unaligned = false;
+  for (CORBA::ULong i = 0; i < qos_.representation.value.length(); ++i) {
+    Encoding::Kind encoding_kind;
+    if (repr_to_encoding_kind(qos_.representation.value[i], encoding_kind)) {
+      if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
+        xcdr1_mutable = true;
+      } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && cdr_encapsulation()) {
+        illegal_unaligned = true;
+      } else {
+        decoding_modes_.insert(encoding_kind);
       }
+    } else if (DCPS_debug_level) {
+      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: "
+                 "DataReaderImpl::setup_deserialization: "
+                 "Encountered unsupported or unknown data representation: %C\n",
+                 repr_to_string(qos_.representation.value[i]).c_str()));
     }
-  } else {
-    decoding_modes_.insert(Encoding::KIND_UNALIGNED_CDR);
   }
   if (decoding_modes_.empty()) {
     if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("DataReaderImpl::setup_deserialization: ")
-                 ACE_TEXT("Could not find a valid data representation.%C\n"),
-                 xcdr1_mutable ? " Unsupported combination of XCDR1 and mutable" : ""));
+      DCPS::String error_message;
+      if (xcdr1_mutable) {
+        error_message = " Unsupported combination of XCDR1 and mutable";
+      } else if (illegal_unaligned) {
+        error_message = " Unaligned CDR is not allowed in rtps_udp transport";
+      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+                 "DataReaderImpl::setup_deserialization: "
+                 "Could not find a valid data representation.%C\n",
+                 error_message.c_str()));
     }
     return DDS::RETCODE_ERROR;
   }

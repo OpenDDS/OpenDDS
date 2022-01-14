@@ -210,6 +210,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     } else if (arg == ACE_TEXT("--expect_to_fail")) {
       expect_to_match = false;
+    } else if (arg == ACE_TEXT("--expect_incompatible_qos")) {
+      expect_incompatible_qos = true;
     } else if (arg == ACE_TEXT("--disallow_type_coercion")) {
       disallow_type_coercion =  true;
     } else if (arg == ACE_TEXT("--ignore_member_names")) {
@@ -342,13 +344,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
+
   if (disallow_type_coercion) {
     dr_qos.type_consistency.kind = DISALLOW_TYPE_COERCION;
   }
   dr_qos.type_consistency.ignore_member_names = ignore_member_names;
   dr_qos.type_consistency.force_type_validation = force_type_validation;
-  dr_qos.representation.value.length(1);
-  dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
+  if (expect_incompatible_qos) {
+    dr_qos.representation.value.length(1);
+    dr_qos.representation.value[0] = XCDR2_DATA_REPRESENTATION;
+  }
 
   DataReader_var dr = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
   if (!dr) {
@@ -357,47 +362,58 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   DDS::StatusCondition_var condition = expect_to_match ? dr->get_statuscondition() : topic->get_statuscondition();
-  condition->set_enabled_statuses(expect_to_match ? DDS::SUBSCRIPTION_MATCHED_STATUS : DDS::INCONSISTENT_TOPIC_STATUS);
+  condition->set_enabled_statuses(expect_to_match ?
+    expect_incompatible_qos ? DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS : DDS::SUBSCRIPTION_MATCHED_STATUS :
+    DDS::INCONSISTENT_TOPIC_STATUS);
   DDS::WaitSet_var ws = new DDS::WaitSet;
   ws->attach_condition(condition);
 
   DDS::ConditionSeq conditions;
   DDS::Duration_t timeout = { 10, 0 };
   ReturnCode_t ret = ws->wait(conditions, timeout);
-  if (ret != DDS::RETCODE_OK) {
+
+  if (expect_incompatible_qos) {
+    DDS::RequestedIncompatibleQosStatus qos_status;
+    dr->get_requested_incompatible_qos_status(qos_status);
+    const CORBA::ULong cnt = qos_status.policies.length();
+    if (cnt != 1 || qos_status.policies[0].policy_id != DDS::DATA_REPRESENTATION_QOS_POLICY_ID) {
+      ACE_ERROR((LM_ERROR, "ERROR: %C QoS that was expected to fail did not.\n", type.c_str()));
+      failed = true;
+    }
+  } else if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
       expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
       OpenDDS::DCPS::retcode_to_string(ret)));
     failed = true;
   }
   ws->detach_condition(condition);
+  if (!expect_incompatible_qos) {
+    if (!failed) {
+      failed = !check_inconsistent_topic_status(topic);
+    }
 
-  if (!failed) {
-    failed = !check_inconsistent_topic_status(topic);
-  }
-
-  if (expect_to_match && !failed) {
-    if (type == "PlainCdrStruct") {
-      failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
-    } else if (type == "AppendableStruct") {
-      failed = (read_appendable_struct(dr) != RETCODE_OK);
-    } else if (type == "AppendableStructNoXTypes") {
-      failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
-    } else if (type == "FinalStructSub") {
-      failed = (read_final_struct(dr) != RETCODE_OK);
-    } else if (type == "MutableStruct") {
-      AdditionalFieldValue afv = MUTABLE_STRUCT_AF;
-      if (topic_name == "MutableBaseStructT") {
-        afv = FINAL_STRUCT_AF;
+    if (expect_to_match && !failed) {
+      if (type == "PlainCdrStruct") {
+        failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
+      } else if (type == "AppendableStruct") {
+        failed = (read_appendable_struct(dr) != RETCODE_OK);
+      } else if (type == "AppendableStructNoXTypes") {
+        failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
+      } else if (type == "FinalStructSub") {
+        failed = (read_final_struct(dr) != RETCODE_OK);
+      } else if (type == "MutableStruct") {
+        AdditionalFieldValue afv = MUTABLE_STRUCT_AF;
+        if (topic_name == "MutableBaseStructT") {
+          afv = FINAL_STRUCT_AF;
+        }
+        failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
+      } else if (type == "MutableUnion") {
+        failed = (read_mutable_union(dr) != RETCODE_OK);
+      } else if (type == "Trim20Struct") {
+        failed = (read_trim20_struct(dr) != RETCODE_OK);
       }
-      failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
-    } else if (type == "MutableUnion") {
-      failed = (read_mutable_union(dr) != RETCODE_OK);
-    } else if (type == "Trim20Struct") {
-      failed = (read_trim20_struct(dr) != RETCODE_OK);
     }
   }
-
   if (failed) {
     ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
     return 1;

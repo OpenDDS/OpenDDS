@@ -22,6 +22,8 @@ using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
 bool verbose = false;
 bool expect_to_match = true;
+bool expect_incompatible_qos = false;
+
 int key_value = -1;
 
 enum AdditionalFieldValue {

@@ -127,7 +127,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 {
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
-  cdr_encapsulation_ = tc->cdr_encapsulation_;
   reliable_ = reliable;
   durable_ = durable;
   unsigned long duration = tc->passive_connect_duration_;

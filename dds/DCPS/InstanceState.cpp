@@ -189,7 +189,7 @@ void InstanceState::schedule_release()
   DDS::DataReaderQos qos;
   RcHandle<DataReaderImpl> reader = reader_.lock();
   if (reader) {
-    reader->get_qos(qos);
+    qos = reader->qos_;
   } else {
     cancel_release();
     return;

@@ -156,6 +156,7 @@ private:
   bool check_encap() const { return check_encap_; }
 
   DDS::DataReaderQos qos_;
+  DDS::DataReaderQos passed_qos_;
 
   /// lock protecting sample container as well as statuses.
   ACE_Recursive_Thread_Mutex sample_lock_;
