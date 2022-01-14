@@ -54,6 +54,11 @@ if ($secure) {
 
 } elsif ($tcp) {
   %params = (
+    "Tcp_MutableUnionNoMatchQos" => {
+      reader_type => "MutableUnion", writer_type => "ModifiedMutableUnion",
+      expect_to_fail => 0, topic => "MutableUnionT", key_val => 10,
+      r_ini => "tcp.ini", w_ini => "tcp.ini", expect_incompatible_qos => 1
+    },
     "Tcp_AppendableMatch" => {
       reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct",
       expect_to_fail => 0, topic => "AppendableStructT", key_val => 4,
@@ -252,7 +257,6 @@ if ($secure) {
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
       reader_args => "--disallow_type_coercion",
     },
-
     "ForceTypeValidation_NoXTypesNoMatch_nn" => {
       reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
       expect_to_fail => 1, topic => "NoXTypes_FTV_nn", key_val => 1,
@@ -301,6 +305,14 @@ sub run_test {
 
   if ($v->{expect_to_fail} > 0) {
     push(@test_args, "--expect_to_fail");
+  }
+  # This is used to check that a writer with no representation QoS and a reader who specifies XCDR2
+  # will not match on a non rtps_udp transport. The writer should default to UnalignedCDR, and this should
+  # be caught in the QoS consistency checks. Otherwise, the --tcp version of this test will ensure that a
+  # writer with XCDR2 in a non rtps_udp transport is properly associating with a reader who does not specify
+  # representation QoS and is notifying the reader that cdr_encapsulation() is enabled.
+  if ($v->{expect_incompatible_qos} > 0) {
+    push(@test_args, "--expect_incompatible_qos");
   }
 
   if ($v->{key_val} >= 0) {

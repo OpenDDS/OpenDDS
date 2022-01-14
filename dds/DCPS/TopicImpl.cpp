@@ -235,6 +235,10 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
     return true;
   }
   if (qos_ids.length() == 0) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TopicImpl::check_data_representation: "
+        "representation qos is blank.\n"));
+    }
     return false;
   }
   //Data Writer will only use the 1st QoS declared
@@ -253,6 +257,11 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
         }
       }
     }
+  }
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TopicImpl::check_data_representation: "
+      "none of the data representation QoS: %C is allowed by the "
+      "topic type IDL annotations: %C\n", repr_seq_to_string(qos_ids, is_data_writer).c_str(), repr_seq_to_string(type_allowed_reprs).c_str()));
   }
   return false;
 }

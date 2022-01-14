@@ -21,9 +21,6 @@
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  ifdef OPENDDS_SAFETY_PROFILE
 #    include <dds/DCPS/StaticDiscovery.h>
-#  else
-#    include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
-#    include <dds/DCPS/transport/tcp/Tcp.h>
 #  endif
 #endif
 

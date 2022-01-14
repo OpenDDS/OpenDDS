@@ -168,6 +168,14 @@ Parser::parse(const char* filename)
         qos.user_data.value[0] = (conn.connection_id_ >> 0) & 0xFF;
         qos.user_data.value[1] = (conn.connection_id_ >> 8) & 0xFF;
         qos.user_data.value[2] = (conn.connection_id_ >> 16) & 0xFF;
+        bool encapsulated_only = false;
+        for (CORBA::ULong i = 0; i < trans_info.length(); ++i) {
+          if (0 == std::strcmp(trans_info[i].transport_type, "rtps_udp")) {
+            encapsulated_only = true;
+            break;
+          }
+        }
+        DCPS::set_writer_effective_data_rep_qos(qos.representation.value, encapsulated_only);
 
         OpenDDS::DCPS::EndpointRegistry::Writer w(topic_name, qos, publisher_qos, conn.config_name(), trans_info);
         OpenDDS::DCPS::StaticDiscovery::instance()->registry.writer_map.insert(std::make_pair(id, w));
@@ -236,6 +244,7 @@ Parser::parse(const char* filename)
         qos.user_data.value[1] = (conn.connection_id_ >> 8) & 0xFF;
         qos.user_data.value[2] = (conn.connection_id_ >> 16) & 0xFF;
 
+        DCPS::set_reader_effective_data_rep_qos(qos.representation.value);
         OpenDDS::DCPS::EndpointRegistry::Reader r(topic_name, qos, subscriber_qos, conn.config_name(), trans_info);
         OpenDDS::DCPS::StaticDiscovery::instance()->registry.reader_map.insert(std::make_pair(id, r));
       }

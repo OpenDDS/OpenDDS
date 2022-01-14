@@ -21,6 +21,7 @@
 #include "DataDurabilityCache.h"
 #include "MonitorFactory.h"
 #include "TypeSupportImpl.h"
+#include "DCPS_Utils.h"
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 #include "CoherentChangeControl.h"
 #endif
@@ -163,6 +164,7 @@ ReplayerImpl::init(
 #endif   // !defined (DDS_HAS_MINIMUM_BIT)
 
   qos_ = qos;
+  passed_qos_ = qos;
 
   //Note: OK to _duplicate(nil).
   listener_ = a_listener;
@@ -271,7 +273,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
 DDS::ReturnCode_t ReplayerImpl::get_qos (DDS::PublisherQos &  publisher_qos,
                                          DDS::DataWriterQos & qos)
 {
-  qos = qos_;
+  qos = passed_qos_;
   publisher_qos = publisher_qos_;
   return DDS::RETCODE_OK;
 }
@@ -360,6 +362,10 @@ ReplayerImpl::enable()
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
 
+  set_writer_effective_data_rep_qos(qos_.representation.value, cdr_encapsulation());
+  if (!topic_servant_->check_data_representation(qos_.representation.value, true)) {
+    return DDS::RETCODE_ERROR;
+  }
 
   XTypes::TypeInformation type_info;
   type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;

@@ -825,10 +825,11 @@ bool from_param_list(const ParameterList& param_list,
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
-void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader)
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids)
 {
   DDS::DataRepresentationQosPolicy dr_qos;
-  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader);
+  dr_qos.value = ids;
+  DCPS::set_reader_effective_data_rep_qos(dr_qos.value);
   if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
     Parameter param;
     param.representation(dr_qos);
@@ -1284,7 +1285,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     add_param(param_list, param);
   }
 
-  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
+  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value);
 
   if (not_default(reader_data.ddsSubscriptionData.type_consistency)) {
     Parameter param;
