@@ -14,6 +14,7 @@
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 
 #include "ThreadStatusManager.h"
+#include "Service_Participant.h"
 
 #include <ace/Netlink_Addr.h>
 

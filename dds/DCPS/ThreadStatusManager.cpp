@@ -82,7 +82,7 @@ ThreadStatusManager::ThreadId ThreadStatusManager::get_thread_id()
   return static_cast<unsigned>(ACE_Thread::self());
 #else
 #  ifdef ACE_HAS_GETTID
-  return ACE_OS::thr_gettid;
+  return ACE_OS::thr_gettid();
 #  else
   char buffer[32];
   const size_t len = ACE_OS::thr_id(buffer, 32);
