@@ -2117,7 +2117,7 @@ bool DomainParticipantImpl::is_clean(String* leftover_entities) const
     if (leftover_entities->size()) {
       *leftover_entities += ", ";
     }
-    *leftover_entities += to_dds_string(pub_count) + " topic(s)";
+    *leftover_entities += to_dds_string(pub_count) + " publisher(s)";
   }
 
   return topic_count == 0 && sub_count == 0 && pub_count == 0;
