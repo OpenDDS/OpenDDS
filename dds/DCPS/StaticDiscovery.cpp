@@ -1253,10 +1253,10 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
     if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
       if (!writer_local || !reader_local) {
-        const DDS::DataRepresentationIdSeq repIds =
-          get_effective_data_rep_qos(tempDwQos.representation.value, false);
         Encoding::Kind encoding_kind;
-        if (repr_to_encoding_kind(repIds[0], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
+        if (tempDwQos.representation.value.length() > 0 &&
+            repr_to_encoding_kind(tempDwQos.representation.value[0], encoding_kind) &&
+            encoding_kind == Encoding::KIND_XCDR1) {
           const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
           if (type_lookup_service_->extensibility(extensibility_mask, writer_type_id)) {
             if (DCPS_debug_level) {
@@ -2709,7 +2709,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datareaderqos.user_data.value[0] = entity_id.entityKey[0];
       datareaderqos.user_data.value[1] = entity_id.entityKey[1];
       datareaderqos.user_data.value[2] = entity_id.entityKey[2];
-
+      set_reader_effective_data_rep_qos(datareaderqos.representation.value);
       if (!registry.reader_map.insert(std::make_pair(id,
             EndpointRegistry::Reader(topic_name, datareaderqos, subscriberqos, config_name, trans_info))).second) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -2725,6 +2725,14 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datawriterqos.user_data.value[0] = entity_id.entityKey[0];
       datawriterqos.user_data.value[1] = entity_id.entityKey[1];
       datawriterqos.user_data.value[2] = entity_id.entityKey[2];
+      bool encapsulated_only = false;
+      for (CORBA::ULong i = 0; i < trans_info.length(); ++i) {
+        if (0 == std::strcmp(trans_info[i].transport_type, "rtps_udp")) {
+          encapsulated_only = true;
+          break;
+        }
+      }
+      set_writer_effective_data_rep_qos(datawriterqos.representation.value, encapsulated_only);
 
       if (!registry.writer_map.insert(std::make_pair(id,
             EndpointRegistry::Writer(topic_name, datawriterqos, publisherqos, config_name, trans_info))).second) {

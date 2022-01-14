@@ -10,6 +10,7 @@
 
 #include "Qos_Helper.h"
 #include "Definitions.h"
+#include "SafetyProfileStreams.h"
 
 #include <ace/ACE.h> /* For ACE::wild_match() */
 #include <ace/OS_NS_string.h>
@@ -385,15 +386,11 @@ compatibleQOS(const DDS::DataWriterQos * writerQos,
   {
     // Find a common data representation
     bool found = false;
-    DDS::DataRepresentationIdSeq readerIds =
-      get_effective_data_rep_qos(readerQos->representation.value, true);
-    DDS::DataRepresentationIdSeq writerIds =
-      get_effective_data_rep_qos(writerQos->representation.value, false);
-    const CORBA::ULong reader_count = readerIds.length();
-    const CORBA::ULong writer_count = writerIds.length();
+    const CORBA::ULong reader_count = readerQos->representation.value.length();
+    const CORBA::ULong writer_count = writerQos->representation.value.length();
     for (CORBA::ULong wi = 0; !found && wi < writer_count; ++wi) {
       for (CORBA::ULong ri = 0; !found && ri < reader_count; ++ri) {
-        if (readerIds[ri] == writerIds[wi]) {
+        if (readerQos->representation.value[ri] == writerQos->representation.value[wi]) {
           found = true;
           break;
         }
@@ -464,24 +461,67 @@ bool repr_to_encoding_kind(DDS::DataRepresentationId_t repr, Encoding::Kind& kin
   case DDS::XCDR2_DATA_REPRESENTATION:
     kind = Encoding::KIND_XCDR2;
     break;
+  case OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION:
+    kind = Encoding::KIND_UNALIGNED_CDR;
+    break;
   default:
     return false;
   }
   return true;
 }
 
-DDS::DataRepresentationIdSeq get_effective_data_rep_qos(const DDS::DataRepresentationIdSeq& qos, bool reader)
+DCPS::String repr_to_string(const DDS::DataRepresentationId_t& repr)
+{
+  DCPS::String repr_string;
+  switch (repr) {
+  case DDS::XCDR_DATA_REPRESENTATION:
+    repr_string = "XCDR_DATA_REPRESENTATION";
+    break;
+  case DDS::XML_DATA_REPRESENTATION:
+    repr_string = "XML_DATA_REPRESENTATION";
+    break;
+  case DDS::XCDR2_DATA_REPRESENTATION:
+    repr_string = "XCDR2_DATA_REPRESENTATION";
+    break;
+  case OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION:
+    repr_string = "UNALIGNED_CDR_DATA_REPRESENTATION";
+    break;
+  default:
+    repr_string = to_dds_string(repr);
+  }
+  return repr_string;
+}
+
+DCPS::String repr_seq_to_string(const DDS::DataRepresentationIdSeq& id_seq, bool is_data_writer)
+{
+  DCPS::String repr_string;
+  const ACE_CDR::ULong length = is_data_writer ? 1 : id_seq.length();
+  for (ACE_CDR::ULong i = 0; i < length; ++i) {
+    if (i > 0) {
+      repr_string += ", ";
+    }
+    repr_string += repr_to_string(id_seq[i]);
+  }
+  return repr_string;
+}
+
+void set_writer_effective_data_rep_qos(DDS::DataRepresentationIdSeq& qos,
+  bool cdr_encapsulated)
 {
   if (qos.length() == 0) {
-    DDS::DataRepresentationIdSeq ids;
-    ids.length(reader ? 2 : 1);
-    ids[0] = DDS::XCDR2_DATA_REPRESENTATION;
-    if (reader) {
-      ids[1] = DDS::XCDR_DATA_REPRESENTATION;
-    }
-    return ids;
+    qos.length(1);
+    qos[0] = cdr_encapsulated ? DDS::XCDR2_DATA_REPRESENTATION : OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
   }
-  return qos;
+}
+
+void set_reader_effective_data_rep_qos(DDS::DataRepresentationIdSeq& qos)
+{
+  if (qos.length() == 0) {
+    qos.length(3);
+    qos[0] = DDS::XCDR2_DATA_REPRESENTATION;
+    qos[1] = DDS::XCDR_DATA_REPRESENTATION;
+    qos[2] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
+  }
 }
 
 } // namespace DCPS
