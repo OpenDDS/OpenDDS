@@ -39,8 +39,9 @@ int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
   using namespace OpenDDS::DCPS;
+  ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
-  reactor_task.open(0);
+  reactor_task.open_reactor_task(0, &tsm);
   TestObj obj;
   {
     PmfMultiTask<TestObj> multi(reactor_task.interceptor(), TimeDuration::from_msec(2000), obj, &TestObj::execute);

@@ -47,8 +47,9 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 {
   using namespace OpenDDS::DCPS;
   TimeSource time_source;
+  ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
-  reactor_task.open(0);
+  reactor_task.open_reactor_task(0, &tsm);
 
   RcHandle<TestObj> obj = make_rch<TestObj>(time_source, reactor_task.interceptor());
   obj->sporadic_->schedule(TimeDuration::from_msec(2000));
