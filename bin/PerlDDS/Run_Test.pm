@@ -603,7 +603,7 @@ sub process {
   my $debug_logging = 1;
 
   if ($params !~ /-DCPSLogLevel / && $self->{dcps_log_level}) {
-    $params .=  " -DCPSLogLevel $self->{dcps_log_level}";
+    $params .= " -DCPSLogLevel $self->{dcps_log_level}";
     $debug_logging = $self->{dcps_log_level} eq "debug";
   }
 
@@ -644,7 +644,7 @@ sub process {
     $file_name =~ s/ /_/g;
     $file_name =~ s/#//g;
 
-    $params = "-ORBLogFile $file_name.log $params"
+    $params = "-ORBLogFile $file_name.log $params";
   }
 
   if ($self->{add_transport_config} &&

@@ -30,6 +30,7 @@ using namespace std;
 using OpenDDS::DCPS::TransportConfig_rch;
 using OpenDDS::DCPS::TransportRegistry;
 using OpenDDS::DCPS::String;
+using OpenDDS::DCPS::retcode_to_string;
 
 TransportConfig_rch create_transport(const String& transport, const String& suffix)
 {
@@ -106,10 +107,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 #endif
     TheServiceParticipant->set_default_discovery(OpenDDS::DCPS::Discovery::DEFAULT_RTPS);
 
-    DDS::DomainParticipant_var participant1 = dpf->create_participant(11,
-      PARTICIPANT_QOS_DEFAULT,
-      DDS::DomainParticipantListener::_nil(),
-      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DomainParticipant_var participant1 =
+      dpf->create_participant(11, PARTICIPANT_QOS_DEFAULT, 0, 0);
     if (!participant1) {
       cerr << "create_participant failed." << endl;
       return 1;
@@ -118,20 +117,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         participant1->get_instance_handle()));
     }
     try {
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config1, participant1.in());
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config1, participant1);
     } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: TransportRegistry::bind_config() throws"
-        " Transport::MiscProblem exception\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: TransportRegistry::bind_config() throws"
+        " Transport::MiscProblem exception\n"));
+      return 1;
     } catch (const OpenDDS::DCPS::Transport::NotFound&) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: "
-        "TransportRegistry::bind_config() throws Transport::NotFound exception\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: "
+        "TransportRegistry::bind_config() throws Transport::NotFound exception\n"));
+      return 1;
     }
 
-    DDS::DomainParticipant_var participant2 = dpf->create_participant(11,
-      PARTICIPANT_QOS_DEFAULT,
-      DDS::DomainParticipantListener::_nil(),
-      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (!participant2.in()) {
+    DDS::DomainParticipant_var participant2 =
+      dpf->create_participant(11, PARTICIPANT_QOS_DEFAULT, 0, 0);
+    if (!participant2) {
       cerr << "create_participant failed." << endl;
       return 1;
     } else {
@@ -141,81 +140,78 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     try {
-      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config2, participant2.in());
+      OpenDDS::DCPS::TransportRegistry::instance()->bind_config(config2, participant2);
     } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: TransportRegistry::bind_config() throws "
-        "Transport::MiscProblem exception\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: TransportRegistry::bind_config() throws "
+        "Transport::MiscProblem exception\n"));
+      return 1;
     } catch (const OpenDDS::DCPS::Transport::NotFound&) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: TransportRegistry::bind_config() throws"
-        " Transport::NotFound exception\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: TransportRegistry::bind_config() throws"
+        " Transport::NotFound exception\n"));
+      return 1;
     }
 
     if (participant1->get_instance_handle() == participant2->get_instance_handle()) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: "
-        "participant1 and participant2 do have the same instance handle!\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: "
+        "participant1 and participant2 do have the same instance handle!\n"));
+      return 1;
     }
 
     // Register TypeSupport (Messenger::Message)
     Messenger::MessageTypeSupport_var mts = new Messenger::MessageTypeSupportImpl();
-    if (mts->register_type(participant1.in(), "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: register_type failed!\n"), 1);
+    if (mts->register_type(participant1, "") != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: register_type failed!\n"));
+      return 1;
     }
 
     // Create Topic
     CORBA::String_var type_name = mts->get_type_name();
-    DDS::Topic_var topic1 = participant1->create_topic("Movie Discussion List",
-      type_name.in(),
-      TOPIC_QOS_DEFAULT,
-      DDS::TopicListener::_nil(),
-      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::Topic_var topic1 =
+      participant1->create_topic("Movie Discussion List", type_name, TOPIC_QOS_DEFAULT, 0, 0);
     if (!topic1) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_topic topic1 failed!\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: create_topic topic1 failed!\n"));
+      return 1;
     }
 
     // Create Publisher
-    DDS::Publisher_var pub = participant1->create_publisher(
-      PUBLISHER_QOS_DEFAULT, DDS::PublisherListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::Publisher_var pub = participant1->create_publisher(PUBLISHER_QOS_DEFAULT, 0, 0);
     if (!pub) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_publisher failed!\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: create_publisher failed!\n"));
+      return 1;
     }
 
     // Create DataWriter
-    DDS::DataWriter_var dw = pub->create_datawriter(topic1.in(),
-      DATAWRITER_QOS_DEFAULT,
-      DDS::DataWriterListener::_nil(),
-      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DataWriter_var dw = pub->create_datawriter(topic1, DATAWRITER_QOS_DEFAULT, 0, 0);
     if (!dw) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_datawriter failed!\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: create_datawriter failed!\n"));
+      return 1;
     }
 
-    if (mts->register_type(participant2.in(), "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: register_type failed!\n"), 1);
+    if (mts->register_type(participant2, "") != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: register_type failed!\n"));
+      return 1;
     }
 
     // Create Topic2
-    DDS::Topic_var topic2 = participant2->create_topic("Movie Discussion List",
-      type_name.in(),
-      TOPIC_QOS_DEFAULT,
-      DDS::TopicListener::_nil(),
-      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::Topic_var topic2 =
+      participant2->create_topic("Movie Discussion List", type_name, TOPIC_QOS_DEFAULT, 0, 0);
     if (!topic2) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_topic for topic2 failed!\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: create_topic for topic2 failed!\n"));
+      return 1;
     }
 
     // Create Subscriber
-    DDS::Subscriber_var sub = participant2->create_subscriber(
-      SUBSCRIBER_QOS_DEFAULT, DDS::SubscriberListener::_nil(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::Subscriber_var sub = participant2->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, 0);
     if (!sub) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_subscriber failed!\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: create_subscriber failed!\n"));
+      return 1;
     }
 
     // Create DataReader
-    DDS::DataReader_var dr = sub->create_datareader(topic2.in(),
-      DATAREADER_QOS_DEFAULT,
-      DDS::DataReaderListener::_nil(),
-      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::DataReader_var dr = sub->create_datareader(topic2, DATAREADER_QOS_DEFAULT, 0, 0);
     if (!dr) {
-      ACE_ERROR_RETURN((LM_ERROR, "%N:%l: main() ERROR: create_datareader failed!\n"), 1);
+      ACE_ERROR((LM_ERROR, "%N:%l: main() ERROR: create_datareader failed!\n"));
+      return 1;
     }
 
     // Try to shutdown, but participant1 and participant2 still exist
@@ -223,7 +219,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 1st shutdown attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -235,7 +231,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 1st delete participant1 attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -247,7 +243,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 1st delete publisher attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -255,21 +251,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) { // dw still exists
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 2nd delete publisher attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = pub->delete_datawriter(dw);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: Failed to delete datawriter: %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = participant1->delete_publisher(pub);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: 3rd delete publisher attempt failed: %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -277,21 +273,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) { // topic1 still exists
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 2nd delete participant1 attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = participant1->delete_topic(topic1);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: failed to delete topic1: %C",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = dpf->delete_participant(participant1);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: 3nd delete participant1 attempt failed: %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -300,7 +296,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 2nd shutdown attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -312,7 +308,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 1st delete participant2 attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -324,7 +320,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 1st delete subscriber attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -332,21 +328,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) { // dr still exists
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 2nd delete subscriber attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = sub->delete_datareader(dr);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: Failed to delete datareader: %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = participant2->delete_subscriber(sub);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: 3rd delete subscriber attempt failed: %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -354,21 +350,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_PRECONDITION_NOT_MET) { // topic2 still exists
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected precondition not met from 2nd delete participant2 attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = participant2->delete_topic(topic2);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: failed to delete topic2: %C",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
     rc = dpf->delete_participant(participant2);
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: 3nd delete participant2 attempt failed: %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -376,7 +372,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     rc = TheServiceParticipant->shutdown();
     if (rc != DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: 3rd shutdown attempt failed: %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
 
@@ -385,7 +381,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (rc != DDS::RETCODE_ALREADY_DELETED) {
       ACE_ERROR((LM_ERROR, "%N:%l: ERROR: "
         "Expected already deleted from 4th shutdown attempt, but got %C\n",
-        OpenDDS::DCPS::retcode_to_string(rc)));
+        retcode_to_string(rc)));
       return 1;
     }
   } catch (CORBA::Exception& e) {
