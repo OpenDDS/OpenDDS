@@ -4416,6 +4416,7 @@ Spdp::SpdpTransport::process_lease_expirations(const DCPS::MonotonicTimePoint& n
 
 void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now)
 {
+  ACE_UNUSED_ARG(now);
 #ifndef DDS_HAS_MINIMUM_BIT
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;

@@ -31,7 +31,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct ThreadStatusManager;
+class ThreadStatusManager;
 
 class OpenDDS_Dcps_Export ReactorTask : public virtual ACE_Task_Base,
 public virtual RcObject {

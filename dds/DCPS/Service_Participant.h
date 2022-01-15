@@ -45,7 +45,7 @@ namespace DCPS {
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
-struct ThreadStatusManager;
+class ThreadStatusManager;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
