@@ -17,7 +17,7 @@ PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
 
 my $test = new PerlDDS::TestFramework();
 
-if ($test->flags('all')) {
+if ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
     my @tests = ('', qw/udp multicast default_tcp default_udp default_multicast
                         nobits stack shmem
