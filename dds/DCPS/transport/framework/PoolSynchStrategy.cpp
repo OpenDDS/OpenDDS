@@ -47,6 +47,7 @@ OpenDDS::DCPS::PoolSynchStrategy::open(void*)
 int
 OpenDDS::DCPS::PoolSynchStrategy::svc()
 {
+  // Future: ThreadStatus.
   DBG_ENTRY_LVL("PoolSynchStrategy","svc",6);
   // TBD
   return 0;

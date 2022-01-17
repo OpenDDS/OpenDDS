@@ -1520,8 +1520,9 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     // Wait for that to be finished
     using OpenDDS::DCPS::CvStatus_NoTimeout;
     OpenDDS::DCPS::CvStatus status = CvStatus_NoTimeout;
+    OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
     while (status == CvStatus_NoTimeout && !eh_impl->done_) {
-      status = eh_impl->cv_.wait();
+      status = eh_impl->cv_.wait(thread_status_manager);
     }
   }
 #endif

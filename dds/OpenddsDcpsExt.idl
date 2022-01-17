@@ -71,7 +71,6 @@ module OpenDDS
     BUILT_IN_TOPIC_TYPE
     struct InternalThreadBuiltinTopicData {
       BUILT_IN_TOPIC_KEY string thread_id;
-      DDS::OctetArray16 participant_guid;
       double utilization;
     };
 

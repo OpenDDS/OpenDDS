@@ -28,10 +28,10 @@ namespace DCPS {
 class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler {
 public:
 
-  class Command
+  class OpenDDS_Dcps_Export Command
   : public RcObject {
   public:
-    Command() : executed_(false), on_queue_(false), condition_(mutex_), reactor_(0) {}
+    Command();
     virtual ~Command() { }
 
     bool reset()
@@ -58,13 +58,7 @@ public:
       condition_.notify_all();
     }
 
-    void wait() const
-    {
-      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      while (!executed_) {
-        condition_.wait();
-      }
-    }
+    void wait() const;
 
   protected:
     const ACE_Reactor* reactor() const { return reactor_; }

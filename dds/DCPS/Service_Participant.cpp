@@ -18,6 +18,7 @@
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
+#include "ThreadStatusManager.h"
 #include "../Version.h"
 #ifdef OPENDDS_SECURITY
 #  include "security/framework/SecurityRegistry.h"
@@ -484,7 +485,6 @@ Service_Participant::get_domain_participant_factory(int &argc,
           }
         }
       }
-
 #if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
@@ -511,8 +511,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(
-        0, thread_status_interval_, &thread_status_manager_, "Service_Participant");
+      reactor_task_.open_reactor_task(0,
+                                      &thread_status_manager_,
+                                      "Service_Participant");
 
       job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
@@ -657,7 +658,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_bidir_giop = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSThreadStatusInterval"))) != 0) {
-      thread_status_interval_ = TimeDuration(ACE_OS::atoi(currentArg));
+      thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(currentArg)));
       arg_shifter.consume_arg();
       got_thread_status_interval = true;
 
@@ -740,7 +741,6 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.ignore_arg();
     }
   }
-
   // Indicates successful parsing of the command line
   return 0;
 }
@@ -1879,8 +1879,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSThreadStatusInterval")));
     } else {
       int interval = 0;
-      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int)
-      thread_status_interval_ = TimeDuration(interval);
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int);
+      thread_status_manager_.thread_status_interval(TimeDuration(interval));
     }
 
     ACE_Configuration::VALUETYPE type;
@@ -2871,21 +2871,15 @@ void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
   default_configuration_file_ = path;
 }
 
-TimeDuration
-Service_Participant::get_thread_status_interval()
+ACE_Configuration_Heap&
+Service_Participant::get_configuration()
 {
-  return thread_status_interval_;
+  return cf_;
 }
 
-void
-Service_Participant::set_thread_status_interval(TimeDuration interval)
+ThreadStatusManager& Service_Participant::get_thread_status_manager()
 {
-  thread_status_interval_ = interval;
-}
-
-ThreadStatusManager* Service_Participant::get_thread_status_manager()
-{
-  return &thread_status_manager_;
+  return thread_status_manager_;
 }
 
 ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()

@@ -170,6 +170,13 @@ TimeDuration operator/(const TimeDuration& x, double y)
 }
 
 ACE_INLINE
+double operator/(const TimeDuration& x, const TimeDuration& y)
+{
+  return (double(x.value().sec()) * 1000000 + x.value().usec()) /
+         (double(y.value().sec()) * 1000000 + y.value().usec());
+}
+
+ACE_INLINE
 bool
 operator<(const TimeDuration& x, const TimeDuration& y)
 {

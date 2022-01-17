@@ -25,8 +25,6 @@ void RelayParticipantStatusReporter::add_participant(GuidAddrSet::Proxy& proxy,
 
     const auto p = guids_.insert(std::make_pair(repoid, status));
 
-    proxy.remove_pending(repoid);
-
     if (p.second) {
       if (config_.log_discovery()) {
         ACE_DEBUG((LM_INFO, "(%P|%t) INFO: RelayParticipantStatusReporter::add_participant "

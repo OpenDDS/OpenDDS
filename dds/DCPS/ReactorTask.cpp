@@ -11,7 +11,6 @@
 #if !defined (__ACE_INLINE__)
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
-#include "ThreadMonitor.h"
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
@@ -39,7 +38,6 @@ ReactorTask::ReactorTask(bool useAsyncSend)
 #endif
   , timer_queue_(0)
   , thread_status_manager_(0)
-  , timeout_(TimeDuration(0))
 {
   ACE_UNUSED_ARG(useAsyncSend);
 }
@@ -67,8 +65,9 @@ void ReactorTask::cleanup()
   timer_queue_ = 0;
 }
 
-int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
-  ThreadStatusManager* thread_status_manager, const String& name)
+int ReactorTask::open_reactor_task(void*,
+                                   ThreadStatusManager* thread_status_manager,
+                                   const String& name)
 {
   GuardType guard(lock_);
 
@@ -76,7 +75,6 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
   cleanup();
 
   // thread status reporting support
-  timeout_ = timeout;
   thread_status_manager_ = thread_status_manager;
   name_ = name;
 
@@ -111,7 +109,7 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
   }
 
   while (state_ != STATE_RUNNING) {
-    condition_.wait();
+    condition_.wait(*thread_status_manager);
   }
 
   return 0;
@@ -119,6 +117,8 @@ int ReactorTask::open_reactor_task(void*, TimeDuration timeout,
 
 int ReactorTask::svc()
 {
+  ThreadStatusManager::Start s(*thread_status_manager_, name_);
+
   {
     GuardType guard(lock_);
 
@@ -149,22 +149,13 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  const bool update_thread_status = thread_status_manager_ && !timeout_.is_zero();
-  const String thread_key = ThreadStatusManager::get_key("ReactorTask", name_);
-
   try {
     // Tell the reactor to handle events.
-    if (update_thread_status) {
+    if (thread_status_manager_->update_thread_status()) {
       while (state_ == STATE_RUNNING) {
-        ACE_Time_Value t = timeout_.value();
+        ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
+        ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
         reactor_->run_reactor_event_loop(t, 0);
-        if (DCPS_debug_level > 4) {
-          ACE_DEBUG((LM_DEBUG,
-                     "(%P|%t) ReactorTask::svc. Updating thread status.\n"));
-        }
-        if (!thread_status_manager_->update(thread_key) && DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: updated failed\n"));
-        }
       }
 
     } else {
@@ -179,17 +170,6 @@ int ReactorTask::svc()
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
     throw;
-  }
-
-  if (update_thread_status) {
-    if (DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) ReactorTask::svc: "
-        "Updating thread status for the last time\n"));
-    }
-    if (!thread_status_manager_->update(thread_key, ThreadStatus_Finished) &&
-        DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ReactorTask::svc: final update failed\n"));
-    }
   }
 
   return 0;
@@ -239,144 +219,12 @@ void ReactorTask::stop()
 
     // Let's wait for the reactor task's thread to complete before we
     // leave this stop method.
+    ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
     wait();
 
     // Reset the thread manager in case it goes away before the next open.
     this->thr_mgr(0);
   }
-}
-
-const char* ThreadStatusManager::status_to_string(ThreadStatus status)
-{
-  switch (status) {
-  case ThreadStatus_Running:
-    return "Running";
-
-  case ThreadStatus_Finished:
-    return "Finished";
-
-  default:
-    if (DCPS_debug_level) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ThreadStatusManager::status_to_string: ")
-        ACE_TEXT("%d is either invalid or not recognized.\n"),
-        status));
-    }
-    return "<Invalid thread status>";
-  }
-}
-
-bool ThreadStatusManager::update_busy(const String& thread_key, double pbusy)
-{
-  const SystemTimePoint now = SystemTimePoint::now();
-  ThreadStatus status = ThreadStatus_Running;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  Map::iterator it = map_.find(thread_key);
-  if (it != map_.end()) {
-    it->second.timestamp = now;
-    it->second.utilization = pbusy;
-  } else {
-    map_[thread_key] = Thread(now, status, pbusy);
-  }
-  return true;
-}
-
-bool ThreadStatusManager::update(const String& thread_key, ThreadStatus status)
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  const SystemTimePoint now = SystemTimePoint::now();
-  if (DCPS_debug_level > 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) ThreadStatus::update: "
-      "update for thread \"%C\" %C @ %d\n",
-      thread_key.c_str(), status_to_string(status), now.value().sec()));
-  }
-  switch (status) {
-  case ThreadStatus_Finished:
-    {
-      Map::iterator it = map_.find(thread_key);
-      if (it == map_.end()) {
-        if (DCPS_debug_level) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ThreadStatus::update: "
-            "Trying to remove \"%C\", but it's not an existing thread!\n",
-            thread_key.c_str()));
-        }
-        return false;
-      }
-      map_.erase(it);
-    }
-    break;
-
-  default:
-    if (map_.find(thread_key) == map_.end() && ThreadMonitor::installed_monitor_) {
-      ThreadMonitor::installed_monitor_->preset(this, thread_key.c_str());
-    }
-    map_[thread_key] = Thread(now, status, 0.0);
-  }
-
-  return true;
-}
-
-String ThreadStatusManager::get_key(const char* safety_profile_tid, const String& name)
-{
-  String key;
-#ifdef OPENDDS_SAFETY_PROFILE
-  key = safety_profile_tid;
-#else
-  ACE_UNUSED_ARG(safety_profile_tid);
-#  ifdef ACE_HAS_MAC_OSX
-  unsigned long tid = 0;
-  uint64_t u64_tid;
-  if (!pthread_threadid_np(0, &u64_tid)) {
-    tid = static_cast<unsigned long>(u64_tid);
-  } else if (DCPS_debug_level) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: pthread_threadid_np failed\n")));
-  }
-#  elif defined ACE_HAS_GETTID
-  const pid_t tid = gettid();
-#  else
-  const ACE_thread_t tid = ACE_OS::thr_self();
-#  endif
-
-  key = to_dds_string(tid);
-#endif
-
-  if (name.length()) {
-    key += " (" + name + ")";
-  }
-
-  return key;
-}
-
-bool ThreadStatusManager::sync_with_parent(ThreadStatusManager& parent,
-  ThreadStatusManager::Map& running, ThreadStatusManager::Map& finished)
-{
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g2, parent.lock_, false);
-    running = parent.map_;
-  }
-
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g1, lock_, false);
-
-  // Figure out what threads were removed from parent.map_
-  Map::iterator mi = map_.begin();
-  Map::iterator ri = running.begin();
-  while (mi != map_.end() || ri != running.end()) {
-    const int cmp = mi != map_.end() && ri != running.end() ?
-      std::strcmp(mi->first.c_str(), ri->first.c_str()) :
-      ri != running.end() ? 1 : -1;
-    if (cmp < 0) { // We're behind, this thread was removed
-      finished.insert(*mi);
-      ++mi;
-    } else if (cmp > 0) { // We're ahead, this thread was added
-      ++ri;
-    } else { // Same thread, continue
-      ++mi;
-      ++ri;
-    }
-  }
-
-  map_ = running;
-
-  return true;
 }
 
 } // namespace DCPS

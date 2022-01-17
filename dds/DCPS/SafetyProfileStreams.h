@@ -29,6 +29,11 @@ OpenDDS_Dcps_Export String to_dds_string(long long to_convert);
 OpenDDS_Dcps_Export String to_dds_string(unsigned long long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(unsigned long to_convert, bool as_hex = false);
 OpenDDS_Dcps_Export String to_dds_string(const unsigned char* array, size_t length);
+// Pass-through for conditional compilation situtations, i.e., type may be an integer or string.
+inline String to_dds_string(const String& to_convert)
+{
+  return to_convert;
+}
 
 //@{
 /**

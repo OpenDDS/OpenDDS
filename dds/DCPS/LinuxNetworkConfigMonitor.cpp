@@ -13,6 +13,9 @@
 
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 
+#include "ThreadStatusManager.h"
+#include "Service_Participant.h"
+
 #include <ace/Netlink_Addr.h>
 
 #include <linux/rtnetlink.h>
@@ -121,6 +124,8 @@ ACE_HANDLE LinuxNetworkConfigMonitor::get_handle() const
 
 int LinuxNetworkConfigMonitor::handle_input(ACE_HANDLE)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   read_messages();
   return 0;
 }

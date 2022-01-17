@@ -1909,6 +1909,8 @@ int
 DataReaderImpl::LivelinessTimer::handle_timeout(const ACE_Time_Value& tv,
                                                 const void * /*arg*/)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   check_liveliness_i(false, MonotonicTimePoint(tv));
   return 0;
 }
@@ -3534,6 +3536,7 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
     const ACE_Time_Value& ,
     const void* arg)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   WriterInfo* const info =
     const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));

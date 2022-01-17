@@ -261,6 +261,8 @@ DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, b
 int
 DataLink::handle_exception(ACE_HANDLE /* fd */)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   if (scheduled_to_stop_at_.is_zero()) {
     if (DCPS_debug_level > 0) {
@@ -1044,6 +1046,8 @@ void DataLink::clear_associations()
 int
 DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   if (!scheduled_to_stop_at_.is_zero()) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
     impl_.unbind_link(this);
@@ -1058,6 +1062,8 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 int
 DataLink::handle_close(ACE_HANDLE h, ACE_Reactor_Mask m)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   if (h == ACE_INVALID_HANDLE && m == TIMER_MASK) {
     // Reactor is shutting down with this timer still pending.
     // Take the same cleanup actions as if the timeout had expired.

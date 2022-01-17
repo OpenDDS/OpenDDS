@@ -12,11 +12,28 @@
 #include "ace/Synch.h"
 
 #include "ReactorInterceptor.h"
+#include "Service_Participant.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+ReactorInterceptor::Command::Command()
+  : executed_(false)
+  , on_queue_(false)
+  , condition_(mutex_)
+  , reactor_(0)
+{}
+
+void ReactorInterceptor::Command::wait() const
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  while (!executed_) {
+    condition_.wait(thread_status_manager);
+  }
+}
 
 ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
@@ -38,6 +55,8 @@ bool ReactorInterceptor::should_execute_immediately()
 
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   process_command_queue_i();
   return 0;
 }
