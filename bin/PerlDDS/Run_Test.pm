@@ -365,7 +365,7 @@ sub new {
   my $self = bless {}, $class;
 
   $self->{processes} = {};
-  $self->{flags} = {};
+  $self->{_flags} = {};
   $self->{status} = 0;
   $self->{log_files} = [];
   $self->{temp_files} = [];
@@ -409,7 +409,7 @@ sub new {
     my $flag_value = $3;
     my $flag_value_str = defined($flag_value) ? "\"$flag_value\"" : 'undef';
     $self->_info("TestFramework storing \"$flag_name\"=$flag_value_str\n");
-    $self->{flags}->{$flag_name} = $flag_value;
+    $self->{_flags}->{$flag_name} = $flag_value;
     my $transport = _is_transport($arg);
     if ($transport && $self->{transport} eq "") {
       $self->{transport} = $arg;
@@ -439,7 +439,7 @@ sub new {
     } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
-      $self->{flags}->{unused}->{$flag_name} = $flag_value;
+      $self->{_flags}->{unused}->{$flag_name} = $flag_value;
     }
     ++$index;
   }
@@ -532,10 +532,10 @@ sub flag {
   my $flag_name = shift;
   my $flag_value_ref = shift;
 
-  my $present = exists($self->{flags}->{$flag_name});
+  my $present = exists($self->{_flags}->{$flag_name});
   $self->_info("TestFramework::flag $flag_name present=$present\n");
   if ($present) {
-    my $flag_value = $self->{flags}->{$flag_name};
+    my $flag_value = $self->{_flags}->{$flag_name};
     if (defined($flag_value_ref)) {
       die("Flag \"$flag_name\" is missing required value!") if (!defined($flag_value));
       ${$flag_value_ref} = $flag_value;
@@ -543,7 +543,7 @@ sub flag {
     else {
       die("Flag \"$flag_name\" was passed a value, but it isn't used") if (defined($flag_value));
     }
-    delete($self->{flags}->{unused}->{$flag_name});
+    delete($self->{_flags}->{unused}->{$flag_name});
   }
   return $present;
 }
@@ -554,7 +554,7 @@ sub report_unused_flags {
   $exit_if_unidentified = 0 if !defined($exit_if_unidentified);
 
   $self->_info("TestFramework::report_unused_flags\n");
-  my @unused = keys(%{$self->{flags}->{unused}});
+  my @unused = keys(%{$self->{_flags}->{unused}});
   if (scalar(@unused) == 0) {
     return;
   }
@@ -577,7 +577,7 @@ sub report_unused_flags {
 sub unused_flags {
   my $self = shift;
 
-  return keys(%{$self->{flags}->{unused}});
+  return keys(%{$self->{_flags}->{unused}});
 }
 
 sub process {

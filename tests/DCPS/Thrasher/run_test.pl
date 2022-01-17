@@ -20,29 +20,29 @@ my $debug_level = 0;
 my $opts = "";
 # $opts .= "-DCPSChunks 1 ";
 
-if ($test->{'flags'}->{'low'}) {
+if ($test->flag('low')) {
   $opts .= "-t 8 -s 128 -n 1024";
-} elsif ($test->{'flags'}->{'medium'}) {
+} elsif ($test->flag('medium')) {
   $opts .= "-t 16 -s 64 -n 1024";
-} elsif ($test->{'flags'}->{'high'}) {
+} elsif ($test->flag('high')) {
   $opts .= "-t 32 -s 32 -n 1024";
-} elsif ($test->{'flags'}->{'aggressive'}) {
+} elsif ($test->flag('aggressive')) {
   $opts .= "-t 64 -s 16 -n 1024";
-} elsif ($test->{'flags'}->{'triangle'}) {
+} elsif ($test->flag('triangle')) {
   $opts .= "-t 3 -s 3 -n 9";
-} elsif ($test->{'flags'}->{'double'}) {
+} elsif ($test->flag('double')) {
   $opts .= "-t 2 -s 1 -n 2";
-} elsif ($test->{'flags'}->{'single'}) {
+} elsif ($test->flag('single')) {
   $opts .= "-t 1 -s 1 -n 1";
-} elsif ($test->{'flags'}->{'superlow'}) {
+} elsif ($test->flag('superlow')) {
   $opts .= "-t 4 -s 256 -n 1024";
-} elsif ($test->{'flags'}->{'megalow'}) {
+} elsif ($test->flag('megalow')) {
   $opts .= "-t 2 -s 512 -n 1024";
 } else { # default (i.e. lazy)
   $opts .= "-t 1 -s 1024 -n 1024";
 }
 
-if ($test->{'flags'}->{'durable'}) {
+if ($test->flag('durable')) {
   $opts .= " -d";
 }
 
@@ -52,7 +52,7 @@ if ($debug_level) {
 }
 
 my $ini_file = "thrasher.ini";
-if ($test->{'flags'}->{'rtps'}) {
+if ($test->flag('rtps')) {
   $ini_file = "thrasher_rtps.ini";
 }
 $opts .= " -DCPSConfigFile $ini_file";

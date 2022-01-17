@@ -11,7 +11,7 @@ my $test = new PerlDDS::TestFramework();
 $test->{dcps_security_debug} = 'auth_debug';
 
 $test->process('ConcurrentAuthLimit', 'ConcurrentAuthLimit', "");
-if ($test->{flags}->{"no_limit"}) {
+if ($test->flag('no_limit')) {
     $ENV{'no_limit'} = 'true';
 }
 $test->start_process('ConcurrentAuthLimit');
