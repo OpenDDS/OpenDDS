@@ -12,7 +12,7 @@ use lib "$FindBin::RealBin/..";
 use ChangeDir;
 
 sub assert_file_exists {
-  my $path = shift;
+  my $path = shift();
   if (!-e $path) {
     die("$path does not exist in " . getcwd());
   }

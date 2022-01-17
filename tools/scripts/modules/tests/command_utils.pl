@@ -13,14 +13,14 @@ use command_utils;
 my $test_exit_status = 0;
 
 sub repr {
-  my $x = shift;
+  my $x = shift();
   return defined($x) ? perlstring($x) : 'undef';
 }
 
 sub check_value {
-  my $what = shift;
-  my $expected = shift;
-  my $actual = shift;
+  my $what = shift();
+  my $expected = shift();
+  my $actual = shift();
 
   my $expected_repr = repr($expected);
   my $actual_repr = repr($actual);
@@ -36,9 +36,9 @@ sub check_value {
 }
 
 sub check_boolean {
-  my $what = shift;
-  my $expected = shift ? "true" : "false";
-  my $actual = shift ? "true" : "false";
+  my $what = shift();
+  my $expected = shift() ? "true" : "false";
+  my $actual = shift() ? "true" : "false";
 
   check_value($what, $expected, $actual);
 }
@@ -46,10 +46,10 @@ sub check_boolean {
 my $cmd_name = 'test-command';
 
 sub run_command {
-  my $expected_failure = shift;
-  my $expected_exit_status = shift;
+  my $expected_failure = shift();
+  my $expected_exit_status = shift();
   my $exit_status;
-  my $command = shift;
+  my $command = shift();
   check_boolean('failure', $expected_failure,
     command_utils::run_command($command,
       debug => 1,
@@ -62,7 +62,7 @@ sub run_command {
 }
 
 sub perl {
-  my $perl_source = shift;
+  my $perl_source = shift();
   return [$^X, '-e', $perl_source];
 }
 

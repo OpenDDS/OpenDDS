@@ -25,7 +25,7 @@ sub new {
     my $dir = shift();
     my %opt_args = @_;
 
-    $dir = undef if ($dir eq '.');
+    $dir = undef if (defined($dir) && $dir eq '.');
 
     my $self = bless({
         dir => $dir,
