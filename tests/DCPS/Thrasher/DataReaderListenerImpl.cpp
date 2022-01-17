@@ -1,5 +1,6 @@
 #include "DataReaderListenerImpl.h"
 #include "FooTypeTypeSupportC.h"
+#include <dds/DCPS/Service_Participant.h>
 
 DataReaderListenerImpl::DataReaderListenerImpl(const std::size_t expected_samples, const char* progress_fmt)
   : mutex_()
@@ -25,7 +26,8 @@ void DataReaderListenerImpl::wait_received() const
 #ifdef ACE_HAS_CPP11
     condition_.wait(lock);
 #else
-    condition_.wait();
+    OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+    condition_.wait(thread_status_manager);
 #endif
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub condition_.wait returned\n")));
   }

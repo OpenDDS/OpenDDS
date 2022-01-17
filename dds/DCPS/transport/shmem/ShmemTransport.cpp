@@ -177,6 +177,7 @@ ShmemTransport::shutdown_i()
   GuardType guard(links_lock_);
   if (read_task_) {
     read_task_->stop();
+    ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
     read_task_->wait();
   }
 
@@ -250,6 +251,8 @@ ShmemTransport::ReadTask::ReadTask(ShmemTransport* outer, ACE_sema_t semaphore)
 int
 ShmemTransport::ReadTask::svc()
 {
+  ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "ShmemTransport");
+
   while (!stopped_.value()) {
     ACE_OS::sema_wait(&semaphore_);
     if (stopped_.value()) {
@@ -268,6 +271,7 @@ ShmemTransport::ReadTask::stop()
   }
   stopped_ = true;
   ACE_OS::sema_post(&semaphore_);
+  ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());;
   wait();
 }
 

@@ -59,7 +59,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
     const auto res = addr_set_stats.select_addr_set(remote_address.port)->insert(std::make_pair(remote_address, expiration));
     if (res.second) {
       if (config_.log_activity()) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C %C into session total=%B pending=%B/%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), addr_set_stats.get_session_time(now).sec_str().c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::record_activity %C %C is at %C %C into session total=%B\n"), handler.name().c_str(), guid_to_string(src_guid).c_str(), OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(), addr_set_stats.get_session_time(now).sec_str().c_str(), guid_addr_set_map_.size()));
       }
       relay_stats_reporter_.new_address(now);
 
@@ -130,27 +130,16 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     if (config_.log_activity()) {
       const auto ago = now - expiration;
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
-        "%C %C expired %C ago %C into session total=%B pending=%B/%B\n",
+        "%C %C expired %C ago %C into session total=%B\n",
         guid_to_string(ga.guid).c_str(), OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(),
         ago.str().c_str(), get_session_time(ga.guid, now).sec_str().c_str(),
-        guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+        guid_addr_set_map_.size()));
     }
     relay_stats_reporter_.expired_address(now);
 
     if (addr_stats.empty()) {
       remove(proxy, ga.guid, pos, now, &relay_participant_status_reporter_);
     }
-  }
-
-  while (!pending_expiration_queue_.empty() && pending_expiration_queue_.front().first <= now) {
-    const auto& expiration = pending_expiration_queue_.front().first;
-    const auto& guid = pending_expiration_queue_.front().second;
-    if (config_.log_activity()) {
-      ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::process_expirations %C pending expired at %d.%d now=%d.%d %C into session total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), expiration.value().sec(), expiration.value().usec(), now.value().sec(), now.value().usec(), get_session_time(guid, now).sec_str().c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
-    }
-    relay_stats_reporter_.expired_pending(now);
-    pending_.erase(guid);
-    pending_expiration_queue_.pop_front();
   }
 }
 
@@ -187,19 +176,11 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     return true;
   }
 
-  if (config_.max_pending() == 0) {
-    pos->second.allow_rtps = true;
-    admitted = true;
-    return false;
-  }
-
   if (!admitting()) {
     // Too many new clients to admit another.
     return true;
   }
 
-  pending_.insert(guid);
-  pending_expiration_queue_.push_back(std::make_pair(now + config_.pending_timeout(), guid));
   pos->second.allow_rtps = true;
   admitted = true;
 
@@ -228,12 +209,11 @@ void GuidAddrSet::remove(const Proxy& proxy,
   addr_stats.data_stats_reporter.report(addr_stats.session_start, now);
   addr_stats.data_stats_reporter.unregister();
 
-  pending_.erase(guid);
   guid_addr_set_map_.erase(it);
   relay_stats_reporter_.local_active_participants(guid_addr_set_map_.size(), now);
 
   if (config_.log_activity()) {
-    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove_i %C removed %C into session total=%B pending=%B/%B\n"), guid_to_string(guid).c_str(), session_time.sec_str().c_str(), guid_addr_set_map_.size(), pending_.size(), config_.max_pending()));
+    ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: GuidAddrSet::remove_i %C removed %C into session total=%B\n"), guid_to_string(guid).c_str(), session_time.sec_str().c_str(), guid_addr_set_map_.size()));
   }
 
   if (reporter) {

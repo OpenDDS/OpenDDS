@@ -626,6 +626,8 @@ RtpsUdpTransport::IceEndpoint::choose_recv_socket(ACE_HANDLE fd) const
 int
 RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   struct iovec iov[1];
   char buffer[0x10000];
   iov[0].iov_base = buffer;

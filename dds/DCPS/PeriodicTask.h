@@ -100,6 +100,8 @@ private:
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
   {
+    ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
     const MonotonicTimePoint now(tv);
     execute(now);
     return 0;

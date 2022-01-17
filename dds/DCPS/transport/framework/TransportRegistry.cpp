@@ -518,8 +518,9 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
   GuardType guard(lock_);
   TransportType_rch type;
 
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (wait_for_pending_load && load_pending_) {
-    load_condition_.wait();
+    load_condition_.wait(thread_status_manager);
   }
 
   if (find(type_map_, transport_type, type) != 0) {
@@ -704,8 +705,9 @@ TransportRegistry::fix_empty_default()
 {
   DBG_ENTRY_LVL("TransportRegistry", "fix_empty_default", 6);
   GuardType guard(lock_);
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (load_pending_) {
-    load_condition_.wait();
+    load_condition_.wait(thread_status_manager);
   }
   if (global_config_.is_nil()
       || !global_config_->instances_.empty()

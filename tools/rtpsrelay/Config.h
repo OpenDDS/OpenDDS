@@ -15,8 +15,6 @@ public:
     : application_participant_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
     , lifespan_(60) // 1 minute
     , inactive_period_(60) // 1 minute
-    , max_pending_(0)
-    , pending_timeout_(60) // 1 minute
 #ifdef ACE_DEFAULT_MAX_SOCKET_BUFSIZ
     , buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
 #else
@@ -28,12 +26,12 @@ public:
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
+    , log_thread_status_(false)
+    , thread_status_safety_factor_(3)
+    , utilization_limit_(.95)
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
-    , thread_monitor_period_(5)
-    , thread_monitor_history_depth_(1)
-    , thread_monitor_output_(0)
   {}
 
   void relay_id(const std::string& value)
@@ -74,26 +72,6 @@ public:
   const OpenDDS::DCPS::TimeDuration& inactive_period() const
   {
     return inactive_period_;
-  }
-
-  void max_pending(size_t value)
-  {
-    max_pending_ = value;
-  }
-
-  size_t max_pending() const
-  {
-    return max_pending_;
-  }
-
-  void pending_timeout(const OpenDDS::DCPS::TimeDuration& value)
-  {
-    pending_timeout_ = value;
-  }
-
-  const OpenDDS::DCPS::TimeDuration& pending_timeout() const
-  {
-    return pending_timeout_;
   }
 
   void buffer_size(int value)
@@ -164,6 +142,36 @@ public:
   bool log_activity() const
   {
     return log_activity_;
+  }
+
+  void log_thread_status(bool flag)
+  {
+    log_thread_status_ = flag;
+  }
+
+  bool log_thread_status() const
+  {
+    return log_thread_status_;
+  }
+
+  void thread_status_safety_factor(int value)
+  {
+    thread_status_safety_factor_ = value;
+  }
+
+  int thread_status_safety_factor() const
+  {
+    return thread_status_safety_factor_;
+  }
+
+  void utilization_limit(double value)
+  {
+    utilization_limit_ = value;
+  }
+
+  double utilization_limit() const
+  {
+    return utilization_limit_;
   }
 
   void log_relay_statistics(OpenDDS::DCPS::TimeDuration value)
@@ -256,43 +264,11 @@ public:
     return restart_detection_;
   }
 
-  void thread_monitor_period(OpenDDS::DCPS::TimeDuration tmp)
-  {
-    thread_monitor_period_ = tmp;
-  }
-
-  OpenDDS::DCPS::TimeDuration thread_monitor_period() const
-  {
-    return thread_monitor_period_;
-  }
-
-  void thread_monitor_history_depth(int tmp)
-  {
-    thread_monitor_history_depth_ = tmp;
-  }
-
-  int thread_monitor_history_depth() const
-  {
-    return thread_monitor_history_depth_;
-  }
-
-  void thread_monitor_output(const char *name)
-  {
-    thread_monitor_output_.emplace_back(name);
-  }
-
-  const std::list<std::string>& thread_monitor_output()
-  {
-    return thread_monitor_output_;
-  }
-
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
   OpenDDS::DCPS::TimeDuration lifespan_;
   OpenDDS::DCPS::TimeDuration inactive_period_;
-  size_t max_pending_;
-  OpenDDS::DCPS::TimeDuration pending_timeout_;
   int buffer_size_;
   DDS::DomainId_t application_domain_;
   bool allow_empty_partition_;
@@ -300,6 +276,9 @@ private:
   bool log_entries_;
   bool log_discovery_;
   bool log_activity_;
+  bool log_thread_status_;
+  int thread_status_safety_factor_;
+  double utilization_limit_;
   OpenDDS::DCPS::TimeDuration log_relay_statistics_;
   OpenDDS::DCPS::TimeDuration log_handler_statistics_;
   bool log_participant_statistics_;
@@ -309,9 +288,6 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
-  OpenDDS::DCPS::TimeDuration thread_monitor_period_;
-  int thread_monitor_history_depth_;
-  std::list<std::string> thread_monitor_output_;
 };
 
 }

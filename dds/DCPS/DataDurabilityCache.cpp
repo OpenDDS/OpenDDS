@@ -85,7 +85,10 @@ public:
   }
 
   virtual int handle_timeout(const ACE_Time_Value& /* current_time */,
-                             const void* /* act */) {
+                             const void* /* act */)
+  {
+    OpenDDS::DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
     if (OpenDDS::DCPS::DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) OpenDDS - Cleaning up ")

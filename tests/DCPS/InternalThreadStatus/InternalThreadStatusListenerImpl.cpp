@@ -48,10 +48,7 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
     std::cout << "== " << id_ << " Thread Info ==" << std::endl;
 
     if (si.valid_data) {
-      OpenDDS::DCPS::RepoId guid;
-      double util = thread_info.utilization;
-      std::memcpy(&guid, &thread_info.participant_guid, sizeof(guid));
-      std::cout << " guid: " << guid << "\n utilization: " << util << std::endl;
+      std::cout << " util: " << thread_info.utilization << std::endl;
       ++count_;
     } else if (si.instance_state & DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
       std::cout << " DISPOSE" << std::endl;
@@ -60,7 +57,7 @@ void InternalThreadStatusListenerImpl::on_data_available(DDS::DataReader_ptr rea
     }
 
     std::cout
-      << "  tid: " << thread_info.thread_id << std::endl
+      << "  tid: " << thread_info.thread_id << "\n"
       << " time: " << si.source_timestamp.sec << std::endl;
   }
 }

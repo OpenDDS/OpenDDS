@@ -283,6 +283,8 @@ OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE fd)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_input",6);
 
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   if (passive_setup_) {
     return handle_setup_input(fd);
   }
@@ -298,6 +300,9 @@ int
 OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_output",6);
+
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   TcpSendStrategy_rch send_strategy = this->send_strategy();
   if (send_strategy) {
     if (DCPS_debug_level > 9) {
@@ -364,6 +369,8 @@ OpenDDS::DCPS::TcpConnection::config_name() const
 int
 OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   DBG_ENTRY_LVL("TcpConnection","handle_close",6);
 
   if (DCPS_debug_level >= 1) {
@@ -658,6 +665,8 @@ int
 OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
                                              const void *)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   DBG_ENTRY_LVL("TcpConnection","handle_timeout",6);
   ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, this->reconnect_state_=%C\n",reconnect_state_string() ));
   GuardType guard(this->reconnect_lock_);

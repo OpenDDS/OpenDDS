@@ -42,6 +42,8 @@ public:
   }
 
   int handle_timeout(const ACE_Time_Value& now_time_value, const void* arg) {
+    ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
     const MonotonicTimePoint now(now_time_value);
     TimeDuration timeout_in = next_timeout();
 

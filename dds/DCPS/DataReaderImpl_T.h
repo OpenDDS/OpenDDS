@@ -867,7 +867,6 @@ namespace OpenDDS {
     using namespace OpenDDS::DCPS;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_,
                      DDS::HANDLE_NIL);
-
 #ifndef OPENDDS_NO_MULTI_TOPIC
     DDS::TopicDescription_var descr = get_topicdescription();
     if (MultiTopicImpl* mt = dynamic_cast<MultiTopicImpl*>(descr.in())) {
@@ -2348,6 +2347,8 @@ private:
 
   int handle_timeout(const ACE_Time_Value&, const void* act)
   {
+    ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
     DDS::InstanceHandle_t handle = static_cast<DDS::InstanceHandle_t>(reinterpret_cast<intptr_t>(act));
 
     RcHandle<DataReaderImpl_T<MessageType> > data_reader_impl(data_reader_impl_.lock());

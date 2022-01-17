@@ -134,6 +134,19 @@ operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
   return t;
 }
 
+ACE_INLINE DDS::Time_t
+operator-(const DDS::Time_t& t1, const DDS::Duration_t& t2)
+{
+  DDS::Time_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
+
+  if (t2.nanosec > t1.nanosec) {
+      t.nanosec = (t1.nanosec + ACE_ONE_SECOND_IN_NSECS) - t2.nanosec;
+      t.sec = (t1.sec - 1) - t2.sec;
+    }
+
+  return t;
+}
+
 ACE_INLINE DDS::Duration_t
 operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
 {

@@ -101,6 +101,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Duration_t& t2);
+
+ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export

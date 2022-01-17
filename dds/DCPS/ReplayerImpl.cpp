@@ -111,8 +111,10 @@ ReplayerImpl::cleanup()
 
     // Wait for pending samples to drain prior to removing associations
     // and unregistering the publication.
-    while (this->pending_write_count_)
-      this->empty_condition_.wait();
+    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+    while (this->pending_write_count_) {
+      this->empty_condition_.wait(thread_status_manager);
+    }
 
     // Call remove association before unregistering the datawriter
     // with the transport, otherwise some callbacks resulted from

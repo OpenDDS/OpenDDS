@@ -113,8 +113,9 @@ TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name
 
   this->reactor_task_= make_rch<ReactorTask>(useAsyncSend);
 
-  if (reactor_task_->open_reactor_task(0, TheServiceParticipant->get_thread_status_interval(),
-      TheServiceParticipant->get_thread_status_manager(), name.c_str())) {
+  if (reactor_task_->open_reactor_task(0,
+                                       &TheServiceParticipant->get_thread_status_manager(),
+                                       name)) {
     throw Transport::MiscProblem(); // error already logged by TRT::open()
   }
 }

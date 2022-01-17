@@ -28,7 +28,6 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 #include "BuiltInTopicUtils.h"
-#include "ThreadMonitor.h"
 #include "transport/framework/TransportRegistry.h"
 #include "transport/framework/TransportExceptions.h"
 #ifdef OPENDDS_SECURITY
@@ -1083,8 +1082,9 @@ DomainParticipantImpl::delete_contained_entities()
     TheServiceParticipant->reactor()->notify(this);
 
     shutdown_mutex_.acquire();
+    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
     while (!shutdown_complete_) {
-      shutdown_condition_.wait();
+      shutdown_condition_.wait(thread_status_manager);
     }
     shutdown_complete_ = false;
     shutdown_mutex_.release();
@@ -1944,8 +1944,9 @@ DDS::InstanceHandle_t DomainParticipantImpl::await_handle(const GUID_t& id,
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::HANDLE_NIL);
   CountedHandleMap::const_iterator iter = handles_.find(id);
   CvStatus res = CvStatus_NoTimeout;
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (res == CvStatus_NoTimeout && iter == handles_.end()) {
-    res = max_wait.is_zero() ? handle_waiters_.wait() : handle_waiters_.wait_until(expire_at);
+    res = max_wait.is_zero() ? handle_waiters_.wait(thread_status_manager) : handle_waiters_.wait_until(expire_at, thread_status_manager);
     iter = handles_.find(id);
   }
   return iter == handles_.end() ? DDS::HANDLE_NIL : iter->second.first;
@@ -2435,8 +2436,6 @@ DomainParticipantImpl::LivelinessTimer::remove_adjust()
 
 void DomainParticipantImpl::LivelinessTimer::execute(const MonotonicTimePoint& now)
 {
-  ThreadMonitor::GreenLight gl("DomainParticipant");
-
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   scheduled_ = false;
@@ -2530,7 +2529,8 @@ DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& c
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 {
-  ThreadMonitor::GreenLight gl("DomainParticipant");
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   DDS::ReturnCode_t ret = DDS::RETCODE_OK;
 
   automatic_liveliness_timer_->cancel();
