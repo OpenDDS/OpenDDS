@@ -30,7 +30,7 @@ $test->enable_console_logging();
 
 $test->process('sub', 'subscriber', '-DCPSConfigFile sub.ini -v');
 
-my $verbose_opt = $test->{'flags'}->{'verbose'} ? '-v ' : '';
+my $verbose_opt = $test->flag('verbose') ? '-v ' : '';
 $test->process('pub', 'publisher', "-DCPSConfigFile pub.ini $verbose_opt");
 
 $test->start_process('sub');

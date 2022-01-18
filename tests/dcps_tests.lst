@@ -54,10 +54,10 @@ tests/DCPS/Inconsistent_Qos/run_test.pl: RTPS XERCES3 !STATIC !DDS_NO_PERSISTENC
 tests/DCPS/InconsistentTopic/run_test.pl rtps_disc: RTPS !NO_BUILT_IN_TOPICS
 tests/DCPS/TopicReuse/run_test.pl: RTPS
 tests/DCPS/DpShutdown/run_test.pl: RTPS
-tests/DCPS/DpShutdown/run_test.pl tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/DpShutdown/run_test.pl shmem: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_SHMEM
-tests/DCPS/DpShutdown/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/DpShutdown/run_test.pl multicast: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_MCAST
+tests/DCPS/DpShutdown/run_test.pl t=tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/DpShutdown/run_test.pl t=shmem: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_SHMEM
+tests/DCPS/DpShutdown/run_test.pl t=udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/DpShutdown/run_test.pl t=multicast: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_MCAST
 
 tests/DCPS/ContainsEntity/run_test.pl: RTPS
 

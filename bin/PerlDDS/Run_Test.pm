@@ -5,14 +5,13 @@
 use strict;
 use warnings;
 
+package PerlDDS;
+
 use PerlACE::Run_Test;
 use PerlDDS::Process;
 use PerlDDS::ProcessFactory;
 use Cwd;
 use POSIX qw(strftime);
-
-package PerlDDS;
-
 use File::Spec::Functions qw(catfile catdir);
 
 sub is_executable {
@@ -366,7 +365,7 @@ sub new {
   my $self = bless {}, $class;
 
   $self->{processes} = {};
-  $self->{flags} = {};
+  $self->{_flags} = {};
   $self->{status} = 0;
   $self->{log_files} = [];
   $self->{temp_files} = [];
@@ -384,6 +383,7 @@ sub new {
   $self->{transport} = "";
   $self->{ini} = "";
   $self->{report_errors_in_log_file} = 1;
+  $self->{dcps_log_level} = $ENV{DCPSLogLevel} // "";
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
   $self->{dcps_security_debug} = defined $ENV{DCPSSecurityDebug} ?
@@ -406,15 +406,10 @@ sub new {
         " pair with an empty name.\n";
       $flag_name = "<No Name Provided>";
     }
-    my $flag_value;
-    if (defined($3)) {
-      $flag_value = $3;
-    }
-    else {
-      $flag_value = "<FLAG>";
-    }
-    $self->_info("TestFramework storing \"$flag_name\"=\"$flag_value\"\n");
-    $self->{flags}->{$flag_name} = $flag_value;
+    my $flag_value = $3;
+    my $flag_value_str = defined($flag_value) ? "\"$flag_value\"" : 'undef';
+    $self->_info("TestFramework storing \"$flag_name\"=$flag_value_str\n");
+    $self->{_flags}->{$flag_name} = $flag_value;
     my $transport = _is_transport($arg);
     if ($transport && $self->{transport} eq "") {
       $self->{transport} = $arg;
@@ -432,7 +427,7 @@ sub new {
       $self->_time_info("Test starting ($left arguments remaining)\n");
     } elsif (lc($arg) eq "nobits") {
       $self->{nobits} = 1;
-    } elsif ($flag_name eq "ini") {
+    } elsif ($flag_name eq "ini" && defined($flag_value)) {
       $flag_value =~ /^([^_]+)_([^_]+).ini/;
       if ($1 eq "inforepo") {
         $self->{discovery} = "info_repo";
@@ -444,7 +439,7 @@ sub new {
     } elsif (!$transport) {
       # also keep a copy to delete so we can see which parameters
       # are unused (above args are already "used")
-      $self->{flags}->{unused}->{$flag_name} = $flag_value;
+      $self->{_flags}->{unused}->{$flag_name} = $flag_value;
     }
     ++$index;
   }
@@ -534,54 +529,21 @@ sub finish {
 
 sub flag {
   my $self = shift;
-  my $flag_passed = shift;
+  my $flag_name = shift;
+  my $flag_value_ref = shift;
 
-  my $present = defined($self->{flags}->{$flag_passed});
-  $self->_info("TestFramework::flag $flag_passed present=$present\n");
+  my $present = exists($self->{_flags}->{$flag_name});
+  $self->_info("TestFramework::flag $flag_name present=$present\n");
   if ($present) {
-    if ($self->{flags}->{$flag_passed} ne "<FLAG>") {
-      print STDERR "WARNING: you are treating a name-value pair as a flag, should call value_flag. \"$flag_passed=" .
-        $self->{flags}->{$flag_passed} . "\"\n";
+    my $flag_value = $self->{_flags}->{$flag_name};
+    if (defined($flag_value_ref)) {
+      die("Flag \"$flag_name\" is missing required value!") if (!defined($flag_value));
+      ${$flag_value_ref} = $flag_value;
     }
-    delete($self->{flags}->{unused}->{$flag_passed});
-  }
-  return $present;
-}
-
-sub value_flag {
-  my $self = shift;
-  my $flag_passed = shift;
-
-  my $present = defined($self->{flags}->{$flag_passed});
-  $self->_info("TestFramework::value_flag $flag_passed present=$present\n");
-  if ($present) {
-    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
-      # this is indicating if a flag with a value is present, but this is just a flag
-      return 0;
+    else {
+      die("Flag \"$flag_name\" was passed a value, but it isn't used") if (defined($flag_value));
     }
-    delete($self->{flags}->{unused}->{$flag_passed});
-  }
-  return $present;
-}
-
-sub get_value_flag {
-  my $self = shift;
-  my $flag_passed = shift;
-
-  my $present = defined($self->{flags}->{$flag_passed});
-  $self->_info("TestFramework::get_value_flag $flag_passed present=$present\n");
-  if ($present) {
-    if ($self->{flags}->{$flag_passed} eq "<FLAG>") {
-      print STDERR "ERROR: $flag_passed does not have a value, should not call get_value_flag\n";
-    }
-    if (defined($self->{flags}->{unused}->{$flag_passed})) {
-      print STDERR "WARNING: calling get_value_flag($flag_passed) without first verifying that "
-        . "it is present with value_flag($flag_passed)\n";
-      delete($self->{flags}->{unused}->{$flag_passed});
-    }
-  }
-  else {
-    print STDERR "ERROR: $flag_passed is not present, should have called value_flag before calling get_value_flag\n";
+    delete($self->{_flags}->{unused}->{$flag_name});
   }
   return $present;
 }
@@ -592,7 +554,7 @@ sub report_unused_flags {
   $exit_if_unidentified = 0 if !defined($exit_if_unidentified);
 
   $self->_info("TestFramework::report_unused_flags\n");
-  my @unused = keys(%{$self->{flags}->{unused}});
+  my @unused = keys(%{$self->{_flags}->{unused}});
   if (scalar(@unused) == 0) {
     return;
   }
@@ -615,7 +577,7 @@ sub report_unused_flags {
 sub unused_flags {
   my $self = shift;
 
-  return keys(%{$self->{flags}->{unused}});
+  return keys(%{$self->{_flags}->{unused}});
 }
 
 sub process {
@@ -638,34 +600,40 @@ sub process {
     return;
   }
 
-  if (defined $ENV{DCPSDebugLevel}) {
-    $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
+  my $debug_logging = 1;
+
+  if ($params !~ /-DCPSLogLevel / && $self->{dcps_log_level}) {
+    $params .= " -DCPSLogLevel $self->{dcps_log_level}";
+    $debug_logging = $self->{dcps_log_level} eq "debug";
   }
 
-  if ($params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
-    my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
-    if ($params !~ /-ORBVerboseLogging /) {
-      $debug .= " -ORBVerboseLogging 1";
+  if ($debug_logging) {
+    if (defined $ENV{DCPSDebugLevel}) {
+      $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
     }
-    $params .= $debug;
-  }
-
-  if (defined $ENV{DCPSTransportDebugLevel}) {
-    $self->{dcps_transport_debug_level} = $ENV{DCPSTransportDebugLevel};
-  }
-
-  if ($params !~ /-DCPSTransportDebugLevel / &&
-      $self->{dcps_transport_debug_level}) {
-    my $debug = " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
-    $params .= $debug;
-  }
-
-  if ($params !~ /-DCPSSecurityDebug(?:Level)? /) {
-    if ($self->{dcps_security_debug}) {
-      $params .=  " -DCPSSecurityDebug $self->{dcps_security_debug}";
+    if ($params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
+      my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
+      if ($params !~ /-ORBVerboseLogging /) {
+        $debug .= " -ORBVerboseLogging 1";
+      }
+      $params .= $debug;
     }
-    elsif ($self->{dcps_security_debug_level}) {
-      $params .=  " -DCPSSecurityDebugLevel $self->{dcps_security_debug_level}";
+
+    if (defined $ENV{DCPSTransportDebugLevel}) {
+      $self->{dcps_transport_debug_level} = $ENV{DCPSTransportDebugLevel};
+    }
+    if ($params !~ /-DCPSTransportDebugLevel / &&
+        $self->{dcps_transport_debug_level}) {
+      $params .= " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
+    }
+
+    if ($params !~ /-DCPSSecurityDebug(?:Level)? /) {
+      if ($self->{dcps_security_debug}) {
+        $params .=  " -DCPSSecurityDebug $self->{dcps_security_debug}";
+      }
+      elsif ($self->{dcps_security_debug_level}) {
+        $params .=  " -DCPSSecurityDebugLevel $self->{dcps_security_debug_level}";
+      }
     }
   }
 
@@ -676,8 +644,7 @@ sub process {
     $file_name =~ s/ /_/g;
     $file_name =~ s/#//g;
 
-    my $debug = " -ORBLogFile $file_name.log";
-    $params .= $debug;
+    $params = "-ORBLogFile $file_name.log $params";
   }
 
   if ($self->{add_transport_config} &&
