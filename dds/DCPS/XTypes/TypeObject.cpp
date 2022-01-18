@@ -247,8 +247,9 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet k, const StronglyConnectedComponen
   sc_component_id() = id;
 }
 
-TypeIdentifier makeTypeIdentifier(const TypeObject& type_object)
+TypeIdentifier makeTypeIdentifier(const TypeObject& type_object, const DCPS::Encoding* encoding_option)
 {
+  OPENDDS_ASSERT(!encoding_option); // not yet supported on this branch
   OPENDDS_ASSERT(type_object.kind == EK_MINIMAL || type_object.kind == EK_COMPLETE);
 
   const Encoding& encoding = get_typeobject_encoding();

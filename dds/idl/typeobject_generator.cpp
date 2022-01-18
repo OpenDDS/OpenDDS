@@ -1415,7 +1415,8 @@ void
 typeobject_generator::use_old_typeobject_encoding()
 {
   static OpenDDS::DCPS::Encoding enc = OpenDDS::XTypes::get_typeobject_encoding();
-  enc.skip_sequence_dheader(true);
+  // not yet supported on this branch
+  // enc.skip_sequence_dheader(true);
   typeid_encoding_ = &enc;
 }
 

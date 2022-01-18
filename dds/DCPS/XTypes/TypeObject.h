@@ -2325,7 +2325,8 @@ namespace XTypes {
   typedef Sequence<TypeInformation> TypeInformationSeq;
 
   OpenDDS_Dcps_Export
-  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object);
+  TypeIdentifier makeTypeIdentifier(const TypeObject& type_object,
+                                    const DCPS::Encoding* encoding_option = 0);
 
   template <typename T>
   void serialize_type_info(const TypeInformation& type_info, T& seq)
