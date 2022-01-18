@@ -20,7 +20,7 @@ my $test = new PerlDDS::TestFramework();
 $test->enable_console_logging();
 $test->{'add_transport_config'} = 0;
 
-if ($test->{'flags'}->{'rtps'}) {
+if ($test->flag('rtps')) {
     $opts .= 'rtps';
 }
 

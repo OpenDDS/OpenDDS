@@ -230,7 +230,7 @@ Service_Participant::~Service_Participant()
       if (count > 0 && log_level >= LogLevel::Warning) {
         ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
           "There are %B remaining domain participant(s). "
-          "It is recommented to delete them before shutdown.\n",
+          "It is recommended to delete them before shutdown.\n",
           count));
       }
 
