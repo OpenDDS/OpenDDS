@@ -52,7 +52,7 @@ sub run_command {
   my $command = shift();
   check_boolean('failure', $expected_failure,
     command_utils::run_command($command,
-      debug => 1,
+      verbose => 1,
       error_fh => undef,
       exit_status => \$exit_status,
       name => $cmd_name,

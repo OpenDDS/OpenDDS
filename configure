@@ -415,7 +415,7 @@ sub run_command {
     $command,
     script_name => 'configure',
     dry_run => $opts{'dry-run'},
-    debug => $opts{'verbose'},
+    verbose => $opts{'verbose'},
     @_,
   );
 }

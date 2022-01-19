@@ -48,7 +48,7 @@ sub tshark {
   my $failed = command_utils::run_command(
     [$tshark_cmd, @_],
     capture => {stdout => \$tshark_stdout},
-    debug => 1,
+    verbose => 1,
   );
   if (length($tshark_stdout) == 0) {
     print("(No stdout)\n");

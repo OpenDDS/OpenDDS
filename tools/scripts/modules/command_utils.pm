@@ -128,6 +128,16 @@ sub get_dump_output {
     $end . ("-" x (80 - length($end))) . "\n";
 }
 
+sub die_with_stack_trace {
+  my $i = 1;
+  print STDERR ("ERROR: ", @_, " STACK TRACE:\n");
+  while (my @call_details = (caller($i++)) ){
+      print STDERR "ERROR: STACK TRACE[", $i - 2, "] " .
+        "$call_details[1]:$call_details[2] in function $call_details[3]\n";
+  }
+  die();
+}
+
 # `run_command` runs a command using the `system` function built into Perl, but
 # with extra features. It automatically prints out the exit status of a command
 # that returned something other than zero. It also checks if the program died
@@ -162,7 +172,7 @@ sub get_dump_output {
 # The optional arguments are passed as a hash key value elements directly
 # inside the arguments. Example:
 #
-#   run_command('do-the-thing', debug => 1, script_name => 'doer');
+#   run_command('do-the-thing', verbose => 1, script_name => 'doer');
 #
 # The optional arguments are:
 #
@@ -218,12 +228,12 @@ sub get_dump_output {
 #     String of the name of the command to report in errors. Defaults to the
 #     first element of the command array.
 #
-# debug
+# verbose
 #     Boolean that when true prints the command and current working directory
 #     before running. Defaults to false.
 #
 # dry_run
-#     The same as debug, but doesn't run the command. Defaults to false.
+#     The same as verbose, but doesn't run the command. Defaults to false.
 #
 # script_name
 #     String of the name of the perl script running the command to report in
@@ -250,8 +260,8 @@ sub run_command {
   my %valid_args = (
     name => undef,
     capture => {},
-    debug => 0,
-    debug_fh => *STDERR,
+    verbose => 0,
+    verbose_fh => *STDERR,
     dry_run => 0,
     script_name => undef,
     error_fh => *STDERR,
@@ -260,30 +270,31 @@ sub run_command {
   );
 
   my %args = (%valid_args, @_);
-  die("invalid arguments") if (scalar(keys(%args)) > scalar(keys(%valid_args)));
+  my @invalid_args = grep { !exists($valid_args{$_}) } keys(%args);
+  die_with_stack_trace("invalid arguments: ", join(', ', @invalid_args)) if (scalar(@invalid_args));
 
   my $chdir = ChangeDir->new($args{chdir});
 
   my $name = $args{name} // $command_list[0];
   my @capture_directives = process_capture_arguments($args{capture});
-  my $debug = $args{debug} // $args{dry_run};
-  my $debug_fh = $args{debug_fh};
+  my $verbose = $args{verbose} // $args{dry_run};
+  my $verbose_fh = $args{verbose_fh};
   my $dry_run = $args{dry_run};
   my $script_name = $args{script_name} ? "$args{script_name}: " : "";
   my $error_fh = $args{error_fh};
   my $exit_status_ref = $args{exit_status};
 
-  if ($debug && defined($debug_fh)) {
+  if ($verbose && defined($verbose_fh)) {
     my $cwd = getcwd();
-    print $debug_fh ("In \"$cwd\" ", $dry_run ? "would run" : "running ");
+    print $verbose_fh ("In \"$cwd\" ", $dry_run ? "would run" : "running ");
     if ($use_list) {
-      print $debug_fh ("(list):\n");
+      print $verbose_fh ("(list):\n");
       for my $i (@command_list) {
-        print $debug_fh (" - \"$i\"\n");
+        print $verbose_fh (" - \"$i\"\n");
       }
     }
     else {
-      print $debug_fh ("(string): \"$command_str\"\n");
+      print $verbose_fh ("(string): \"$command_str\"\n");
     }
     return 0 if ($dry_run);
   }
@@ -297,15 +308,16 @@ sub run_command {
     }
     elsif (defined($capture_directive->{dest_fh})) {
       if ($capture_directive->{dump_on_failure}) {
-        die("dump_on_failure requires a variable, path, or undef destination, not a file handle");
+        die_with_stack_trace(
+          "dump_on_failure requires a variable, path, or undef destination, not a file handle");
       }
     }
     elsif (defined($capture_directive->{dest_path})) {
       open($capture_directive->{dest_fh}, '>', $capture_directive->{dest_path})
-          or die("failed to open $capture_directive->{dest_path}: $!");
+          or die_with_stack_trace("failed to open $capture_directive->{dest_path}: $!");
     }
     else {
-      die("capture_directive is invalid");
+      die_with_stack_trace("capture_directive is invalid");
     }
     for my $std_fh (@{$capture_directive->{std_fhs}}) {
       open(my $saved_fh, '>&', $std_fh);
@@ -354,7 +366,7 @@ sub run_command {
 
     $exit_status = $system_status >> 8;
     my $signal = $system_status & 127;
-    die("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
+    die_with_stack_trace("${script_name}\"$name\" was interrupted") if ($signal == SIGINT);
     my $coredump = $system_status & 128;
     my $error_message;
     if (!$ran) {

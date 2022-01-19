@@ -361,9 +361,7 @@ if ($cmake) {
         run_test($fake_name, \@run_test_cmd, verbose => 1);
         mark_test_start($process_name);
     }
-    my $output = "";
-    $process_func->($process_name, \@process_cmd, capture_stdout => \$output);
-    print($output);
+    $process_func->($process_name, \@process_cmd);
 }
 
 # vim: expandtab:ts=4:sw=4
