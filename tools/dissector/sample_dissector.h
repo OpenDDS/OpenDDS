@@ -6,19 +6,25 @@
 #ifndef OPENDDS_DISSECTOR_SAMPLE_DISSECTOR_H_
 #define OPENDDS_DISSECTOR_SAMPLE_DISSECTOR_H_
 
+// Wireshark headers need to come before OpenDDS and ACE headers.
+// On Windows, config.h from the Wireshark build directory assumes that
+// the macros for Windows SDK versions (NTDDI_VERSION, _WIN32_WINNT) are not
+// yet defined.  That won't be the case if ACE comes first.
 
-#include "dissector_export.h"
 #include "ws_common.h"
 #include "ws-wrapper-headers/packet-tcp.h"
 
+#include <epan/value_string.h>
+#include <epan/ipproto.h>
+
+// OpenDDS and ACE headers, and others that include OpenDDS/ACE headers start here:
+
+#include "dissector_export.h"
 #include <FACE/Fixed.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/DataSampleHeader.h>
 
 #include <ace/Message_Block.h>
-
-#include <epan/value_string.h>
-#include <epan/ipproto.h>
 
 #include <glib.h>
 #include <gmodule.h>
