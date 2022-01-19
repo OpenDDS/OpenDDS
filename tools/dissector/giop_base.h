@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _GIOP_BASE_H_
-#define _GIOP_BASE_H_
+#ifndef OPENDDS_DISSECTOR_GIOP_BASE_H_
+#define OPENDDS_DISSECTOR_GIOP_BASE_H_
 
 #include "ws-wrapper-headers/config.h"
 #include "ws-wrapper-headers/tvbuff.h"
@@ -100,4 +100,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _GIOP_BASE_H_
+#endif

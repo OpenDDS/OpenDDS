@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _PACKET_DATA_WRITER_H_
-#define _PACKET_DATA_WRITER_H_
+#ifndef OPENDDS_DISSECTOR_PACKET_DATA_WRITER_H_
+#define OPENDDS_DISSECTOR_PACKET_DATA_WRITER_H_
 
 #include "giop_base.h"
 #include "ws_common.h"
@@ -62,4 +62,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _PACKET_DATA_WRITER_H_
+#endif

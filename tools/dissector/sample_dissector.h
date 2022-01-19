@@ -3,8 +3,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _SAMPLE_DISSECTOR_H_
-#define _SAMPLE_DISSECTOR_H_
+#ifndef OPENDDS_DISSECTOR_SAMPLE_DISSECTOR_H_
+#define OPENDDS_DISSECTOR_SAMPLE_DISSECTOR_H_
+
 
 #include "dissector_export.h"
 #include "ws_common.h"
@@ -565,4 +566,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _SAMPLE_DISSECTOR_H_
+#endif
