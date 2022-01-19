@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use strict;
 use warnings;
@@ -23,7 +23,7 @@ my $help = 0;
 my $tshark_cmd = $ENV{TSHARK} // 'tshark';
 my $xdg_config_home = $ENV{XDG_CONFIG_HOME} // "$ENV{HOME}/.config";
 my $pcap = "$FindBin::Bin/messenger.pcap";
-$ENV{OPENDDS_DISSECTORS} = "$FindBin::Bin";
+$ENV{OPENDDS_DISSECTORS} = $FindBin::Bin;
 
 my $help_message = "usage: run_test.pl [-h|--help] [--no-install]\n";
 if (!GetOptions(
@@ -47,8 +47,8 @@ my $tshark_stdout;
 sub tshark {
   my $failed = command_utils::run_command(
     [$tshark_cmd, @_],
-    capture_stdout => \$tshark_stdout,
-    verbose => 1,
+    capture => {stdout => \$tshark_stdout},
+    debug => 1,
   );
   if (length($tshark_stdout) == 0) {
     print("(No stdout)\n");
