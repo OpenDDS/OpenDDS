@@ -1,7 +1,4 @@
-// -*- C++ -*-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,43 +6,32 @@
 #ifndef _PACKET_OPENDDS_H_
 #define _PACKET_OPENDDS_H_
 
+#include "ws_common.h"
+#include "dissector_export.h"
+#include "ws-wrapper-headers/packet-tcp.h"
 
-extern "C" {
+#include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/transport/framework/TransportHeader.h>
 
-#include "ws_config.h"
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include <glib.h>
-#include <gmodule.h>
+#include <ace/Hash_Map_Manager.h>
 
 #include <epan/value_string.h>
 #include <epan/ipproto.h>
-#include <epan/packet.h>
-#include <epan/dissectors/packet-tcp.h>
-  //#include <epan/dissectors/packet-giop.h>
-} // extern "C"
-
-#include "dissector_export.h"
-
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/TransportHeader.h"
-#include "ws_common.h"
-
-extern "C" {
 #if WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(2, 4, 0)
-#include <wsutil/report_message.h>
+#  include <wsutil/report_message.h>
 #elif WIRESHARK_VERSION >= WIRESHARK_VERSION_NUMBER(1, 12, 0)
-#include <wsutil/report_err.h>
+#  include <wsutil/report_err.h>
 #else // Before 1.12
-#include <epan/report_err.h>
+#  include <epan/report_err.h>
 #endif
-
 #ifndef NO_EXPERT
-#include <epan/expert.h>
+#  include <epan/expert.h>
 #endif
-}
 
-#include "ace/Hash_Map_Manager.h"
+#include <glib.h>
+#include <gmodule.h>
 
 #include <string>
 

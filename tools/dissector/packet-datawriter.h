@@ -1,7 +1,4 @@
-// -*- C++ -*-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,23 +6,17 @@
 #ifndef _PACKET_DATA_WRITER_H_
 #define _PACKET_DATA_WRITER_H_
 
-extern "C" {
+#include "giop_base.h"
+#include "ws_common.h"
+#include "dissector_export.h"
 
-#include "ws_config.h"
+#include <ace/Synch.h>
+#include <ace/Hash_Map_Manager.h>
 
 #include <glib.h>
 #include <gmodule.h>
 
 #include <epan/packet.h>
-#include <epan/dissectors/packet-giop.h>
-} // extern "C"
-
-#include "dissector_export.h"
-#include "giop_base.h"
-#include "ws_common.h"
-
-#include "ace/Synch.h"
-#include "ace/Hash_Map_Manager.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -1,0 +1,41 @@
+{
+  "types" :
+    [
+      {
+        "kind" : "alias",
+        "name" : "IDL:Messenger/Message:1.0",
+        "note" : { "is_dcps_data_type" : true },
+        "type" :
+          {
+            "kind" : "record",
+            "fields" :
+              [
+                {
+                  "name" : "from",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "subject_id",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ,
+                {
+                  "name" : "text",
+                  "type" : { "kind" : "string" }
+                }
+              ,
+                {
+                  "name" : "count",
+                  "type" : { "kind" : "int", "bits" : 32 }
+                }
+              ]
+          }
+      }
+    ]
+}

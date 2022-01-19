@@ -1,16 +1,15 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "packet-opendds.h"
+
 #include "packet-repo.h"
 #include "sample_manager.h"
 
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/Serializer.h"
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/Serializer.h>
 
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
@@ -20,7 +19,6 @@
 #include <ace/Signal.h>
 
 #include <cstring>
-
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
