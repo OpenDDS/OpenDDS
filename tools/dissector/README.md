@@ -141,7 +141,7 @@ On UNIX-like systems it will be named `OpenDDS_Dissector.so`.
 See [Wireshark User's Guide Page on Plugins Folders](
 https://www.wireshark.org/docs/wsug_html_chunked/ChPluginFolders.html)
 for details on where Wireshark looks for plugins. This page, if working,
-will be accurate for the latest stable version, but maybe not previous
+will be accurate for the latest stable version, but maybe not for previous
 versions.
 
 <a name="usage"></a>

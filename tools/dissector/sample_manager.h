@@ -1,7 +1,4 @@
-// -*- C++ -*-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,28 +6,21 @@
 #ifndef _SAMPLE_MANAGER_H_
 #define _SAMPLE_MANAGER_H_
 
+#include "sample_dissector.h"
+#include "ws_common.h"
+#include "dissector_export.h"
+#include "ws-wrapper-headers/packet-tcp.h"
 
-extern "C" {
+#include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/transport/framework/TransportHeader.h>
 
-#include "ws_config.h"
-
-#include <glib.h>
-#include <gmodule.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
 #include <epan/value_string.h>
 #include <epan/ipproto.h>
-#include <epan/packet.h>
-#include <epan/dissectors/packet-tcp.h>
-} // extern "C"
 
-#include "dissector_export.h"
-
-#include "dds/DCPS/DataSampleHeader.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
-#include "dds/DCPS/transport/framework/TransportHeader.h"
-
-#include "sample_dissector.h"
-#include "ws_common.h"
+#include <glib.h>
+#include <gmodule.h>
 
 #include <string>
 #include <map>

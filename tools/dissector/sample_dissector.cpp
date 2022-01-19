@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,7 +7,7 @@
 #include "sample_manager.h"
 #include "ws_common.h"
 
-#include "dds/DCPS/Serializer.h"
+#include <dds/DCPS/Serializer.h>
 
 #include <ace/Basic_Types.h>
 #include <ace/CDR_Base.h>
@@ -19,19 +17,16 @@
 
 #include <tao/String_Manager_T.h>
 
-#include <cstring>
+#ifndef NO_EXPERT
+#  include <epan/expert.h>
+#endif
 
+#include <cstring>
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
 #include <string>
 #include <vector>
-
-#ifndef NO_EXPERT
-extern "C" {
-#include <epan/expert.h>
-}
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

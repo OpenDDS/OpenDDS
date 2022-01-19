@@ -2383,7 +2383,7 @@ jobs:
     - name: update apt
       run: sudo apt-get update
     - name: install wireshark
-      run: sudo apt-get -y install wireshark-dev
+      run: sudo apt-get -y install wireshark-dev tshark
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout MPC
@@ -2459,7 +2459,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS --java --modeling --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config RTPS -Config XERCES3 -Config CXX11 -Config RAPIDJSON -Config WIRESHARK -Config GH_ACTIONS --java --modeling --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>

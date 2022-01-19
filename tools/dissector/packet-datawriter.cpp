@@ -1,22 +1,22 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "packet-datawriter.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
 
-#include "ace/Basic_Types.h"
-#include "ace/CDR_Base.h"
-#include "ace/Message_Block.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS_NS_string.h"
-#include "ace/ACE.h"
+#include "ws-wrapper-headers/packet-giop.h"
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Basic_Types.h>
+#include <ace/CDR_Base.h>
+#include <ace/Message_Block.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_string.h>
+#include <ace/ACE.h>
 
 #include <cstring>
-
 #include <algorithm>
 #include <iomanip>
 #include <sstream>
