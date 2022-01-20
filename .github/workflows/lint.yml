@@ -21,6 +21,8 @@ jobs:
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2
+      with:
+        path: ${{ env.DDS_ROOT }}
     - name: checkout ACE_TAO
       uses: actions/checkout@v2
       with:
