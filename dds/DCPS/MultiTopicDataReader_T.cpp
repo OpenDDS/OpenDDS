@@ -245,7 +245,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
           }
           DDS::ReturnCode_t ret = join(join_result, starting[i], keys,
             other_key.ptr_, other_dr, other_meta);
-          if (ret == DDS::RETCODE_NO_DATA) {
+          if (ret != DDS::RETCODE_OK) {
             return ret;
           }
         }
@@ -253,7 +253,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
         if (!join_result.empty() && !seen.count(other_topic)) {
           // recurse
           DDS::ReturnCode_t ret = process_joins(partialResults, join_result, withJoin, other_qp);
-          if (ret == DDS::RETCODE_NO_DATA) {
+          if (ret != DDS::RETCODE_OK) {
             return ret;
           }
         }
@@ -294,7 +294,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
       for (typename SampleVec::iterator i = iterPR->second.begin();
         i != iterPR->second.end(); ++i) {
         DDS::ReturnCode_t ret = join(resulting, *i, no_keys, NULL, qp.data_reader_, other_meta);
-        if (ret == DDS::RETCODE_NO_DATA) {
+        if (ret != DDS::RETCODE_OK) {
           return ret;
         }
       }
@@ -305,7 +305,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
     partialResults[withJoin].swap(partialResults[seen]);
     partialResults.erase(seen);
     DDS::ReturnCode_t ret = process_joins(partialResults, partialResults[withJoin], withJoin, qp);
-    if (ret == DDS::RETCODE_NO_DATA) {
+    if (ret != DDS::RETCODE_OK) {
       partialResults.erase(withJoin);
       return ret;
     }
@@ -332,40 +332,44 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   assign_fields(sample, partialResults[seen].back().sample_, qp, meta);
 
   DDS::ReturnCode_t ret = process_joins(partialResults, partialResults[seen], seen, qp);
-  if (ret == DDS::RETCODE_OK) {
-    // Any topic we haven't seen needs to be cross-joined
-    for (std::map<OPENDDS_STRING, QueryPlan>::iterator iter = query_plans_.begin();
-        iter != query_plans_.end(); ++iter) {
-      typename std::map<TopicSet, SampleVec>::iterator found =
-        find_if(partialResults.begin(), partialResults.end(),
-                Contains(iter->first));
-      if (found == partialResults.end()) {
-        cross_join(partialResults, seen, iter->second);
+  if (ret != DDS::RETCODE_OK) {
+    return;
+  }
+  // Any topic we haven't seen needs to be cross-joined
+  for (std::map<OPENDDS_STRING, QueryPlan>::iterator iter = query_plans_.begin();
+      iter != query_plans_.end(); ++iter) {
+    typename std::map<TopicSet, SampleVec>::iterator found =
+      find_if(partialResults.begin(), partialResults.end(),
+              Contains(iter->first));
+    if (found == partialResults.end()) {
+      DDS::ReturnCode_t cj_ret = cross_join(partialResults, seen, iter->second);
+      if (cj_ret != DDS::RETCODE_OK) {
+        return;
       }
     }
+  }
 
-    TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
+  TypedDataReader* tdr = dynamic_cast<TypedDataReader*>(typed_reader_.in());
 
-    if (!tdr) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("MultiTopicDataReader_T::incoming_sample, ")
-        ACE_TEXT("Failed to get TypedDataReader.\n")));
-      return;
-    }
+  if (!tdr) {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("(%P|%t) ERROR: ")
+      ACE_TEXT("MultiTopicDataReader_T::incoming_sample, ")
+      ACE_TEXT("Failed to get TypedDataReader.\n")));
+    return;
+  }
 
-    for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
-        partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
-      for (typename SampleVec::iterator i = iterPR->second.begin();
-          i != iterPR->second.end(); ++i) {
-        InstanceHandle_t ih = tdr->store_synthetic_data(i->sample_, i->view_);
-        if (ih != HANDLE_NIL) {
-          typedef std::map<OPENDDS_STRING, InstanceHandle_t>::iterator mapiter_t;
-          for (mapiter_t iterMap = i->info_.begin(); iterMap != i->info_.end();
-              ++iterMap) {
-            query_plans_[iterMap->first].instances_.insert(
-              make_pair(iterMap->second, ih));
-          }
+  for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
+      partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
+    for (typename SampleVec::iterator i = iterPR->second.begin();
+        i != iterPR->second.end(); ++i) {
+      InstanceHandle_t ih = tdr->store_synthetic_data(i->sample_, i->view_);
+      if (ih != HANDLE_NIL) {
+        typedef std::map<OPENDDS_STRING, InstanceHandle_t>::iterator mapiter_t;
+        for (mapiter_t iterMap = i->info_.begin(); iterMap != i->info_.end();
+            ++iterMap) {
+          query_plans_[iterMap->first].instances_.insert(
+            make_pair(iterMap->second, ih));
         }
       }
     }
