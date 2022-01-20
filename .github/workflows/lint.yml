@@ -29,8 +29,9 @@ jobs:
         path: ${{ env.DOC_ROOT }}
     - name: Install Perl Dependencies
       uses: shogo82148/actions-setup-perl@v1
-      install-modules: |
-        YAML
+      with:
+        install-modules: |
+          YAML
     - name: Run lint.pl
       run: perl $DDS_ROOT/tools/scripts/lint.pl --color --ace
     - name: Run lint_build_and_test.pl
