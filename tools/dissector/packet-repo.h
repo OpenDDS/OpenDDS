@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _PACKET_REPO_H_
-#define _PACKET_REPO_H_
+#ifndef OPENDDS_DISSECTOR_PACKET_REPO_H_
+#define OPENDDS_DISSECTOR_PACKET_REPO_H_
 
 #include "ws_common.h"
 #include "dissector_export.h"
@@ -138,4 +138,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _PACKET_REPO_H_
+#endif
