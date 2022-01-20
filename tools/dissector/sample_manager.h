@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _SAMPLE_MANAGER_H_
-#define _SAMPLE_MANAGER_H_
+#ifndef OPENDDS_DISSECTOR_SAMPLE_MANAGER_H_
+#define OPENDDS_DISSECTOR_SAMPLE_MANAGER_H_
 
 #include "sample_dissector.h"
 #include "ws_common.h"
@@ -80,4 +80,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _SAMPLE_MANAGE_H_
+#endif
