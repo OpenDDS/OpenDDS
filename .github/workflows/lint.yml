@@ -28,9 +28,9 @@ jobs:
         ref: ace6tao2
         path: ${{ env.DOC_ROOT }}
     - name: Install Perl Dependencies
-      run: |
-        curl -L https://cpanmin.us | perl - --sudo App::cpanminus
-        cpanm YAML
+      uses: shogo82148/actions-setup-perl@v1
+      install-modules: |
+        YAML
     - name: Run lint.pl
       run: perl $DDS_ROOT/tools/scripts/lint.pl --color --ace
     - name: Run lint_build_and_test.pl
