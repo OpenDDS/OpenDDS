@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DDS_ROOT: ${{github.workspace}}
+  DDS_ROOT: ${{github.workspace}}/OpenDDS
   DOC_ROOT: ${{github.workspace}}/ACE_TAO
   ACE_ROOT: ${{github.workspace}}/ACE_TAO/ACE
 
