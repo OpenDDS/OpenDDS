@@ -36,7 +36,7 @@ sub text {
     $esc = 0;
   }
   my $line = $_[0];
-  chomp $line;
+  $line =~ s/\R//g;
   print $line;
   print color 'reset' if $esc;
 }
