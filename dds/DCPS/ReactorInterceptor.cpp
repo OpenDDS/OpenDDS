@@ -39,6 +39,7 @@ ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
   , state_(NONE)
+  , recursion_(0)
 {
   RcEventHandler::reactor(reactor);
 }
@@ -67,8 +68,13 @@ void ReactorInterceptor::process_command_queue_i()
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+  ++recursion_;
+  OPENDDS_ASSERT(recursion_ == 1);
   state_ = PROCESSING;
-  if (!command_queue_.empty()) {
+  int pass = ACE_OS::thr_equal(owner_, ACE_Thread::self()) ? -1 : 1;
+
+  while (pass-- && !command_queue_.empty()) {
     cq.swap(command_queue_);
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
@@ -76,13 +82,28 @@ void ReactorInterceptor::process_command_queue_i()
       (*pos)->execute();
       (*pos)->executed();
     }
+    cq.clear();
   }
-  if (!command_queue_.empty()) {
+
+  if (!pass && !command_queue_.empty()) {
     state_ = NOTIFIED;
-    reactor()->notify(this);
+    ACE_Event_Handler::reactor()->notify(this);
   } else {
     state_ = NONE;
   }
+  --recursion_;
+}
+
+void ReactorInterceptor::reactor(ACE_Reactor *reactor)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  ACE_Event_Handler::reactor(reactor);
+}
+
+ACE_Reactor* ReactorInterceptor::reactor() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return ACE_Event_Handler::reactor();
 }
 
 }
