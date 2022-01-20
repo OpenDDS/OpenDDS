@@ -35,6 +35,6 @@ jobs:
         install-modules: |
           YAML
     - name: Run lint.pl
-      run: cd OpenDDS ; perl $DDS_ROOT/tools/scripts/lint.pl --color --ace
+      run: cd $DDS_ROOT ; perl tools/scripts/lint.pl --color --ace
     - name: Run lint_build_and_test.pl
       run: perl $DDS_ROOT/.github/workflows/lint_build_and_test.pl
