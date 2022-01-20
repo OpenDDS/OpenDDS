@@ -97,10 +97,10 @@
                 "listener_status_mask": 4294966271,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
                   },
                   { "name": "expected_sample_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 10 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 10 }
                   }
                 ],
 
@@ -123,7 +123,7 @@
                 "listener_status_mask": 4294967295,
                 "listener_properties": [
                   { "name": "expected_match_count",
-                    "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
                   }
                 ],
 
@@ -153,7 +153,7 @@
       "readers": [ "datareader_01" ],
       "params": [
         { "name": "read_period",
-          "value": { "_d": "PVK_TIMESTAMP", "timestamp_prop": { "sec": 3, "nsec": 0 } }
+          "value": { "$discriminator": "PVK_TIME", "timestamp_prop": { "sec": 3, "nsec": 0 } }
         }
       ]
     }

@@ -61,6 +61,7 @@
 #  include <ace/POSIX_CB_Proactor.h>
 #endif
 
+#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iomanip>
@@ -125,7 +126,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
       std::cerr << "Must pass a configuration file" << std::endl;
       throw 1;
     }
-  } catch(int value) {
+  } catch (int value) {
     std::cerr << "See DDS_ROOT/performance-tests/bench/README.md for usage" << std::endl;
     return value;
   }
@@ -262,11 +263,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     max_decimal_places = static_cast<int>(max_decimal_places_prop->value.ull_prop());
   }
 
-  uint64_t action_thread_pool_size = DEFAULT_THREAD_POOL_SIZE;
+  size_t action_thread_pool_size = std::min(static_cast<size_t>(config.actions.length()), DEFAULT_THREAD_POOL_SIZE);
   Builder::ConstPropertyIndex action_thread_pool_size_prop =
     get_property(config.properties, "action_thread_pool_size", Builder::PVK_ULL);
   if (action_thread_pool_size_prop) {
-    action_thread_pool_size = action_thread_pool_size_prop->value.ull_prop();
+    action_thread_pool_size = static_cast<size_t>(action_thread_pool_size_prop->value.ull_prop());
   }
 
   size_t redirect_ace_log = 1;
