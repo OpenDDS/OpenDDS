@@ -16,7 +16,7 @@ env:
   ACE_ROOT: ${{github.workspace}}/ACE_TAO/ACE
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
@@ -27,6 +27,11 @@ jobs:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: ${{ env.DOC_ROOT }}
-    - name: Run lint.pl
+    - name: Install Perl Dependencies
       run: |
-        perl $DDS_ROOT/tools/scripts/lint.pl --color --ace
+        curl -L https://cpanmin.us | perl - --sudo App::cpanminus
+        cpanm YAML
+    - name: Run lint.pl
+      run: perl $DDS_ROOT/tools/scripts/lint.pl --color --ace
+    - name: Run lint_build_and_test.pl
+      run: perl $DDS_ROOT/.github/workflows/lint_build_and_test.pl

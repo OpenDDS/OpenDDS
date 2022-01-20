@@ -330,6 +330,7 @@ jobs:
           --no-debug \
           --features=versioned_namespace=1 \
           --tests
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: make OpenDDS
       run: |
         cd OpenDDS
@@ -340,7 +341,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: make install OpenDDS
       shell: bash
       run: |
@@ -368,7 +368,7 @@ jobs:
         export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/lib:\$LD_LIBRARY_PATH"
         export PERL5LIB=$(realpath bin):$(realpath $ACE_ROOT/bin)
         EOF
-    - name: make install build messenger
+    - name: build make install messenger
       shell: bash
       run: |
         cd OpenDDS
@@ -377,7 +377,7 @@ jobs:
         git clean -dfx .
         $ACE_ROOT/bin/mwc.pl -type gnuace .
         make
-    - name: make install build cmake
+    - name: build make install cmake
       shell: bash
       run: |
         cd OpenDDS
@@ -388,7 +388,7 @@ jobs:
         cd build
         cmake -DCMAKE_PREFIX_PATH=$DDS_ROOT ..
         cmake --build .
-    - name: make install build java
+    - name: build make install java
       shell: bash
       run: |
         cd OpenDDS
@@ -518,6 +518,7 @@ jobs:
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build everything
       run: |
         cd OpenDDS
@@ -608,6 +609,7 @@ jobs:
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build everything
       run: |
         cd OpenDDS
@@ -2188,6 +2190,7 @@ jobs:
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build everything
       run: |
         cd OpenDDS
@@ -4198,13 +4201,14 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: build messenger tests
+    - name: configure messenger tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Messenger
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0 -features no_cxx11=0
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: make messenger tests
       shell: bash
       run: |
@@ -4212,7 +4216,7 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Messenger
         make
-    - name: build C++11 messenger test
+    - name: configure C++11 messenger test
       shell: bash
       run: |
         cd OpenDDS
@@ -4339,7 +4343,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: bash
       run: |
         cd OpenDDS
@@ -4357,6 +4361,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: make compiler tests
       shell: bash
       run: |
@@ -4477,7 +4482,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: bash
       run: |
         cd OpenDDS
@@ -4497,6 +4502,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: make compiler tests
       shell: bash
       run: |
@@ -4617,13 +4623,14 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: build unit tests
+    - name: configure unit tests
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         cd tests/unit-tests
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: make unit tests
       shell: bash
       run: |
@@ -4742,6 +4749,7 @@ jobs:
         . setenv.sh
         cd tests/security/attributes
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build security tests
       shell: bash
       run: |
@@ -5186,7 +5194,6 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w19_p1_stat_js0.tar.xz
         rm -f ACE_TAO_w19_p1_stat_js0.tar.xz
-    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -5211,6 +5218,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -5290,6 +5298,7 @@ jobs:
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.9.0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -5431,13 +5440,14 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build messenger tests
+    - name: configure messenger tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make messenger tests
       shell: cmd
       run: |
@@ -5445,7 +5455,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         msbuild -p:Configuration=Debug,Platform=x64 -m Messenger.sln
-    - name: build C++11 messenger test
+    - name: configure C++11 messenger test
       shell: cmd
       run: |
         cd OpenDDS
@@ -5578,7 +5588,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: cmd
       run: |
         cd OpenDDS
@@ -5596,6 +5606,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make compiler tests
       shell: cmd
       run: |
@@ -5723,7 +5734,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: cmd
       run: |
         cd OpenDDS
@@ -5743,6 +5754,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make compiler tests
       shell: cmd
       run: |
@@ -5876,13 +5888,14 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build unit tests
+    - name: configure unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make unit tests
       shell: cmd
       run: |
@@ -6061,7 +6074,6 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
         rm -f ACE_TAO_w19_re_p1_stat_FM-08.tar.xz
-    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -6086,6 +6098,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -6165,6 +6178,7 @@ jobs:
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.9.0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -6306,13 +6320,14 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build messenger tests
+    - name: configure messenger tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make messenger tests
       shell: cmd
       run: |
@@ -6320,7 +6335,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         msbuild -p:Configuration=Release,Platform=x64 -m Messenger.sln
-    - name: build C++11 messenger test
+    - name: configure C++11 messenger test
       shell: cmd
       run: |
         cd OpenDDS
@@ -6453,7 +6468,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: cmd
       run: |
         cd OpenDDS
@@ -6471,6 +6486,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make compiler tests
       shell: cmd
       run: |
@@ -6597,7 +6613,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: cmd
       run: |
         cd OpenDDS
@@ -6617,6 +6633,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make compiler tests
       shell: cmd
       run: |
@@ -6749,13 +6766,14 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build unit tests
+    - name: configure unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make unit tests
       shell: cmd
       run: |
@@ -6935,7 +6953,6 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w19_re_o1p1_sec.tar.xz
         rm -f ACE_TAO_w19_re_o1p1_sec.tar.xz
-    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -6960,6 +6977,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -7192,13 +7210,14 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: build messenger tests
+    - name: configure messenger tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make messenger tests
       shell: cmd
       run: |
@@ -7206,7 +7225,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         msbuild -p:Configuration=Release,Platform=x64 -m Messenger.sln
-    - name: build C++11 messenger test
+    - name: configure C++11 messenger test
       shell: cmd
       run: |
         cd OpenDDS
@@ -7345,13 +7364,14 @@ jobs:
         mkdir install
         cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7484,13 +7504,14 @@ jobs:
         mkdir install
         cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
-    - name: build unit tests
+    - name: configure unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make unit tests
       shell: cmd
       run: |
@@ -7753,8 +7774,6 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
         rm -f ACE_TAO_w19_re_j_ws_FM-1f.tar.xz
-    - name: set up MSVC problem matcher
-      uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -7779,8 +7798,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -7995,13 +8013,14 @@ jobs:
         mkdir install
         cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
-    - name: build messenger tests
+    - name: configure messenger tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make messenger tests
       shell: cmd
       run: |
@@ -8009,7 +8028,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         msbuild -p:Configuration=Release,Platform=x64 -m Messenger.sln
-    - name: build C++11 messenger test
+    - name: configure C++11 messenger test
       shell: cmd
       run: |
         cd OpenDDS
@@ -8148,13 +8167,14 @@ jobs:
         mkdir install
         cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install --config Release
-    - name: build compiler tests
+    - name: configure compiler tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8294,13 +8314,14 @@ jobs:
         dir
         cd lib
         dir
-    - name: build unit tests
+    - name: configure unit tests
       shell: cmd
       run: |
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make unit tests
       shell: cmd
       run: |
@@ -8493,7 +8514,6 @@ jobs:
       run: |
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
-    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -8520,6 +8540,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
+    - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
