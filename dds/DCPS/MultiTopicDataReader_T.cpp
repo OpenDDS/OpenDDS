@@ -360,14 +360,14 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   }
 
   for (typename std::map<TopicSet, SampleVec>::iterator iterPR =
-      partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
+       partialResults.begin(); iterPR != partialResults.end(); ++iterPR) {
     for (typename SampleVec::iterator i = iterPR->second.begin();
-        i != iterPR->second.end(); ++i) {
+         i != iterPR->second.end(); ++i) {
       InstanceHandle_t ih = tdr->store_synthetic_data(i->sample_, i->view_);
       if (ih != HANDLE_NIL) {
         typedef std::map<OPENDDS_STRING, InstanceHandle_t>::iterator mapiter_t;
         for (mapiter_t iterMap = i->info_.begin(); iterMap != i->info_.end();
-            ++iterMap) {
+             ++iterMap) {
           query_plans_[iterMap->first].instances_.insert(
             make_pair(iterMap->second, ih));
         }
