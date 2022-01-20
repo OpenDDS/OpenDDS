@@ -337,7 +337,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   }
   // Any topic we haven't seen needs to be cross-joined
   for (std::map<OPENDDS_STRING, QueryPlan>::iterator iter = query_plans_.begin();
-      iter != query_plans_.end(); ++iter) {
+       iter != query_plans_.end(); ++iter) {
     typename std::map<TopicSet, SampleVec>::iterator found =
       find_if(partialResults.begin(), partialResults.end(),
               Contains(iter->first));
