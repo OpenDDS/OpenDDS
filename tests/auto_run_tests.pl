@@ -381,7 +381,7 @@ if ($cmake) {
             push(@run_test_cmd, $ctest_args);
         }
         if ($ctest_args !~ /--build-config/ && defined($cmake_build_cfg)) {
-            push(@run_test_cmd, "--build-config $cmake_build_cfg");
+            push(@run_test_cmd, "--build-config", $cmake_build_cfg);
         }
         run_test($fake_name, \@run_test_cmd, verbose => 1);
         mark_test_start($process_name);
