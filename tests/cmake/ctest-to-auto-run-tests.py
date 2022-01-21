@@ -64,7 +64,6 @@ def get_art_name(root, build_path, source_path, test_path, command):
     # Find the relative path to the directory with the test's CMakeLists
     # file from source_path.
     rel_test_path = relative_to(test_path, build_path)
-    what = ''
     if is_relative(rel_test_path):
         real_test_path = source_path / rel_test_path
         what = 'relative'
