@@ -21,7 +21,7 @@ using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
 
 bool verbose = false;
-bool expect_to_match = true;
+bool expect_inconsistent_topic = false;
 bool expect_incompatible_qos = false;
 
 int key_value = -1;
@@ -99,16 +99,113 @@ bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
   return success;
 }
 
+bool wait_helper(DDS::WaitSet_var ws, DDS::StatusKind kind)
+{
+  DDS::ConditionSeq active;
+  DDS::Duration_t infinite = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+  DDS::ReturnCode_t ret = ws->wait(active, infinite);
+  if (ret != DDS::RETCODE_OK) {
+    const char* kind_str = kind == DDS::INCONSISTENT_TOPIC_STATUS ? "INCONSISTENT_TOPIC_STATUS" :
+      (kind == DDS::OFFERED_INCOMPATIBLE_QOS_STATUS ? "OFFERED_INCOMPATIBLE_QOS_STATUS" :
+       "PUBLICATION_MATCHED_STATUS");
+    ACE_ERROR((LM_ERROR, "ERROR wait_helper - %C condition wait failed: %C\n",
+               kind_str, OpenDDS::DCPS::retcode_to_string(ret)));
+    return false;
+  }
+  return true;
+}
+
+bool wait_inconsistent_topic(DDS::WaitSet_var ws, DDS::Topic_var topic)
+{
+  while (true) {
+    DDS::InconsistentTopicStatus status;
+    DDS::ReturnCode_t ret = topic->get_inconsistent_topic_status(status);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR wait_inconsistent_topic - get_inconsistent_topic_status failed: %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
+    }
+
+    if (status.total_count > 0) {
+      return true;
+    }
+    if (!wait_helper(ws, DDS::INCONSISTENT_TOPIC_STATUS)) {
+      return false;
+    }
+  }
+}
+
+bool wait_offered_incompatible_qos(DDS::WaitSet_var ws, DDS::DataWriter_var dw)
+{
+  while (true) {
+    DDS::OfferedIncompatibleQosStatus status;
+    DDS::ReturnCode_t ret = dw->get_offered_incompatible_qos_status(status);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR wait_offered_incompatible_qos - get_offered_incompatible_qos_status failed: %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
+    }
+
+    if (status.total_count > 0) {
+      return true;
+    }
+    if (!wait_helper(ws, DDS::OFFERED_INCOMPATIBLE_QOS_STATUS)) {
+      return false;
+    }
+  }
+}
+
+bool wait_publication_matched(DDS::WaitSet_var ws, DDS::DataWriter_var dw)
+{
+  while (true) {
+    DDS::PublicationMatchedStatus status;
+    DDS::ReturnCode_t ret = dw->get_publication_matched_status(status);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR wait_publication_matched - get_publication_matched_status failed: %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
+    }
+
+    if (status.total_count > 0) {
+      return true;
+    }
+    if (!wait_helper(ws, DDS::PUBLICATION_MATCHED_STATUS)) {
+      return false;
+    }
+  }
+}
+
 bool check_inconsistent_topic_status(Topic_var topic)
 {
   InconsistentTopicStatus status;
   const ReturnCode_t retcode = topic->get_inconsistent_topic_status(status);
   if (retcode != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: get_inconsistent_topic_status failed\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: check_inconsistent_topic_status - get_inconsistent_topic_status failed: %C\n",
+               OpenDDS::DCPS::retcode_to_string(retcode)));
     return false;
-  } else if (expect_to_match != (status.total_count == 0)) {
-    ACE_ERROR((LM_ERROR, "ERROR: inconsistent topic count is %d\n", status.total_count));
+  } else if (expect_inconsistent_topic != (status.total_count > 0)) {
+    ACE_ERROR((LM_ERROR, "ERROR: check_inconsistent_topic_status - inconsistent topic count is %d\n", status.total_count));
     return false;
+  }
+  return true;
+}
+
+bool check_offered_incompatible_qos_status(DDS::DataWriter_var dw, const std::string& type)
+{
+  if (expect_incompatible_qos) {
+    DDS::OfferedIncompatibleQosStatus qos_status;
+    const DDS::ReturnCode_t ret = dw->get_offered_incompatible_qos_status(qos_status);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_offered_incompatible_qos_status - get_offer_incompatible_qos_status failed: %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
+    }
+    if (qos_status.policies.length() != 1 ||
+        qos_status.policies[0].policy_id != DDS::DATA_REPRESENTATION_QOS_POLICY_ID) {
+      ACE_ERROR((LM_ERROR, "ERROR: %C QoS that was expected to fail did not.\n", type.c_str()));
+      return false;
+    }
   }
   return true;
 }

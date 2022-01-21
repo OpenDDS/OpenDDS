@@ -271,8 +271,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--expect_to_fail")) {
-      expect_to_match = false;
+    } else if (arg == ACE_TEXT("--expect_inconsistent_topic")) {
+      expect_inconsistent_topic = true;
     } else if (arg == ACE_TEXT("--expect_incompatible_qos")) {
       expect_incompatible_qos = true;
     } else {
@@ -441,77 +441,69 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  DDS::StatusCondition_var condition = expect_to_match ? dw->get_statuscondition() : topic->get_statuscondition();
-  condition->set_enabled_statuses(expect_to_match ?
-    expect_incompatible_qos ? DDS::OFFERED_INCOMPATIBLE_QOS_STATUS : DDS::PUBLICATION_MATCHED_STATUS :
-    DDS::INCONSISTENT_TOPIC_STATUS);
-  DDS::WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(condition);
-
-  DDS::ConditionSeq conditions;
-  DDS::Duration_t timeout = { 10, 0 };
-  ReturnCode_t ret = ws->wait(conditions, timeout);
-  if (expect_incompatible_qos) {
-    DDS::OfferedIncompatibleQosStatus qos_status;
-    dw->get_offered_incompatible_qos_status(qos_status);
-    const CORBA::ULong cnt = qos_status.policies.length();
-    if (cnt != 1 || qos_status.policies[0].policy_id != DDS::DATA_REPRESENTATION_QOS_POLICY_ID) {
-      ACE_ERROR((LM_ERROR, "ERROR: %C QoS that was expected to fail did not.\n", type.c_str()));
-      failed = true;
-    }
-  } else if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
-      expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
-      OpenDDS::DCPS::retcode_to_string(ret)));
-    failed = true;
+  DDS::StatusCondition_var condition = expect_inconsistent_topic ? topic->get_statuscondition() : dw->get_statuscondition();
+  DDS::StatusMask status_mask = expect_inconsistent_topic ? DDS::INCONSISTENT_TOPIC_STATUS :
+    (expect_incompatible_qos ? DDS::OFFERED_INCOMPATIBLE_QOS_STATUS : DDS::PUBLICATION_MATCHED_STATUS);
+  DDS::ReturnCode_t ret = condition->set_enabled_statuses(status_mask);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: set_enabled_statuses failed: %C\n", OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
   }
 
+  DDS::WaitSet_var ws = new DDS::WaitSet;
+  ret = ws->attach_condition(condition);
   if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
-      expect_to_match ? "PUBLICATION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
-      OpenDDS::DCPS::retcode_to_string(ret)));
-    failed = true;
+    ACE_ERROR((LM_ERROR, "ERROR: attach_condition failed: %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
+  if (status_mask == DDS::INCONSISTENT_TOPIC_STATUS) {
+    failed = !wait_inconsistent_topic(ws, topic);
+  } else if (status_mask == DDS::OFFERED_INCOMPATIBLE_QOS_STATUS) {
+    failed = !wait_offered_incompatible_qos(ws, dw);
+  } else {
+    failed = !wait_publication_matched(ws, dw);
   }
   ws->detach_condition(condition);
 
-  if (!expect_incompatible_qos || failed) {
-    if (!failed) {
-      failed = !check_inconsistent_topic_status(topic);
-    }
+  if (failed) {
+    ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %C\n", type.c_str()));
+    return 1;
+  }
 
-    if (failed) {
-      ACE_ERROR((LM_ERROR, "ERROR: Writer failed for type %C\n", type.c_str()));
-      return 1;
-    }
+  if (!check_inconsistent_topic_status(topic) ||
+      !check_offered_incompatible_qos_status(dw, type)) {
+    return 1;
+  }
 
-    if (expect_to_match) {
-      if (type == "PlainCdrStruct") {
-        write_plain_cdr_struct(dw);
-      } else if (type == "FinalStructPub") {
-        write_final_struct(dw);
-      } else if (type == "ModifiedFinalStruct") {
-        write_modified_final_struct(dw);
-      } else if (type == "AppendableStructNoXTypes") {
-        write_appendable_struct_no_xtypes(dw);
-      } else if (type == "AdditionalPrefixFieldStruct") {
-        write_additional_prefix_field_struct(dw);
-      } else if (type == "AdditionalPostfixFieldStruct") {
-        write_additional_postfix_field_struct(dw);
-      } else if (type == "ModifiedMutableStruct") {
-        write_modified_mutable_struct(dw);
-      } else if (type == "ModifiedMutableUnion") {
-        write_modified_mutable_union(dw);
-      } else if (type == "Trim64Struct") {
-        write_trim64_struct(dw);
-      } else if (type == "AppendableStructWithDependency") {
-        write_appendable_struct_with_dependency(dw);
-      } else if (type == "ModifiedNameMutableStruct") {
-        write_modified_name_mutable_struct(dw);
-      } else if (type == "ModifiedNameMutableUnion") {
-        write_modified_name_mutable_union(dw);
-      } else if (type == "MutableBaseStruct") {
-        write_mutable_base_struct(dw);
-      }
+  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
+    if (type == "PlainCdrStruct") {
+      write_plain_cdr_struct(dw);
+    } else if (type == "FinalStructPub") {
+      write_final_struct(dw);
+    } else if (type == "ModifiedFinalStruct") {
+      write_modified_final_struct(dw);
+    } else if (type == "AppendableStructNoXTypes") {
+      write_appendable_struct_no_xtypes(dw);
+    } else if (type == "AdditionalPrefixFieldStruct") {
+      write_additional_prefix_field_struct(dw);
+    } else if (type == "AdditionalPostfixFieldStruct") {
+      write_additional_postfix_field_struct(dw);
+    } else if (type == "ModifiedMutableStruct") {
+      write_modified_mutable_struct(dw);
+    } else if (type == "ModifiedMutableUnion") {
+      write_modified_mutable_union(dw);
+    } else if (type == "Trim64Struct") {
+      write_trim64_struct(dw);
+    } else if (type == "AppendableStructWithDependency") {
+      write_appendable_struct_with_dependency(dw);
+    } else if (type == "ModifiedNameMutableStruct") {
+      write_modified_name_mutable_struct(dw);
+    } else if (type == "ModifiedNameMutableUnion") {
+      write_modified_name_mutable_union(dw);
+    } else if (type == "MutableBaseStruct") {
+      write_mutable_base_struct(dw);
     }
   }
   ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
