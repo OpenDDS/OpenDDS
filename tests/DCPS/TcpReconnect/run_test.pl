@@ -37,9 +37,9 @@ if ($test->flag('thread_per')) {
 # stub parameters
 #
 my $stubPubSideHost  = "localhost";
-my $stubPubSidePort = PerlACE::random_port();;
+my $stubPubSidePort = PerlACE::random_port();
 my $stubSubSideHost = "localhost";
-my $stubSubSidePort = PerlACE::random_port();;
+my $stubSubSidePort = PerlACE::random_port();
 my $stubKillDelay = 4;
 my $stubKillCount = 2;
 

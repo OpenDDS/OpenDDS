@@ -30,7 +30,7 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
     InternalThreadBuiltinTopicDataDataReader bitDataReader =
       InternalThreadBuiltinTopicDataDataReaderHelper.narrow(reader);
     if (bitDataReader == null) {
-      System.err.println("InternalThreadStatusListener on_data_available: narrow failed.");;
+      System.err.println("InternalThreadStatusListener on_data_available: narrow failed.");
       System.exit(1);
     }
 
