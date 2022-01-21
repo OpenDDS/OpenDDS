@@ -22,7 +22,7 @@ for my $job_name (keys(%{$gha->{jobs}})) {
     $expected_matcher = 'msvc-problem-matcher';
     push(@expected_build_commands, qr/(?<!\w)msbuild/);
   }
-  elsif ($job->{'runs-on'} =~ /^ubuntu/ || $job->{'runs-on'} =~ /^macos/) {
+  elsif ($job->{'runs-on'} =~ /^ubuntu|macos/) {
     $expected_matcher = 'gcc-problem-matcher';
     push(@expected_build_commands, qr/(?<!\w)make(?!( install|include))/);
   }
@@ -54,7 +54,7 @@ for my $job_name (keys(%{$gha->{jobs}})) {
       }
     }
     elsif (exists($step->{run})) {
-      die("Expected $job_name step $step_i to have name!") if (!exists($step->{name}));
+      die("Expected $job_name step $step_i to have name!") unless (exists($step->{name}));
       my $what = "Job $job_name step \"$step->{name}\"";
       # print("---- $what\n");
 
@@ -68,7 +68,7 @@ for my $job_name (keys(%{$gha->{jobs}})) {
 
       if ($avoids_problem_matcher) {
         if ($job_has_problem_matcher) {
-          print STDERR ("$what shouldn't have problem matcher, remove it or move it down!\n");
+          print STDERR ("$what shouldn't have a problem matcher, remove it or move it down!\n");
           $error_steps = 1;
         }
         next;
@@ -88,9 +88,9 @@ for my $job_name (keys(%{$gha->{jobs}})) {
           $job_has_build_command = 1;
           $step_has_build_command = 1;
           die("$what unexpected build command: based on run string: $1")
-            if (!$build_command_expected);
+            unless ($build_command_expected);
           if (!$job_has_problem_matcher) {
-            print STDERR ("$what needs a $expected_matcher problem matcher, based on run string: $1\n");
+            print STDERR ("$what needs $expected_matcher, based on string found in run: $1\n");
             $error_steps += 1;
           }
           last;
@@ -100,7 +100,7 @@ for my $job_name (keys(%{$gha->{jobs}})) {
         if (!$step_has_build_command && $build_command_expected);
     }
     else {
-      die("$job_name step $step_i is confusing me");
+      die("$job_name step index $step_i doesn't have use or run");
     }
   }
 
@@ -108,6 +108,6 @@ for my $job_name (keys(%{$gha->{jobs}})) {
 }
 
 if ($error_jobs) {
-  print STDERR ("ERROR: $error_jobs out of ", scalar(keys(%{$gha->{jobs}})), " have has issues\n");
+  print STDERR ("ERROR: $error_jobs out of ", scalar(keys(%{$gha->{jobs}})), " jobs have has issues\n");
   exit(1);
 }
