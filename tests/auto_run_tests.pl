@@ -21,6 +21,14 @@ use Getopt::Long;
 
 use constant windows => $^O eq "MSWin32";
 
+my $gh_actions = ($ENV{GITHUB_ACTIONS} // "") eq "true";
+
+my %os_configs = (
+    MSWin32 => 'Win32',
+    darwin => 'macOS',
+    linux => 'Linux',
+);
+
 sub cd {
     my $dir = shift;
     chdir($dir) or die "auto_run_tests.pl: Error: Cannot chdir to $dir: $!";
@@ -107,7 +115,10 @@ sub print_help {
         "<list_file> can be a path or - to use stdin.\n" .
         "\n" .
         "Options:\n" .
-        "    --help | -h              Display this help\n";
+        "    --help | -h              Display this help\n" .
+        "    --no-auto-config         Don't set common options by default. This includes\n" .
+        "                             the RTPS and per-OS configs and the default test\n" .
+        "                             lists below.\n";
 
     my $indent = 29;
     foreach my $list (@builtin_test_lists) {
@@ -163,6 +174,7 @@ my $cmake_tests = "$DDS_ROOT/tests/cmake";
 
 # Parse Options
 my $help = 0;
+my $auto_config = 1;
 my $sandbox = '';
 my $show_configs = 0;
 my $show_all_configs = 0;
@@ -180,6 +192,7 @@ my $ctest_args = '';
 my $python = windows ? 'python' : 'python3';
 my %opts = (
     'help|h' => \$help,
+    'auto-config!' => \$auto_config,
     'sandbox|s=s' => \$sandbox,
     'dry-run|z' => \$dry_run,
     'show-configs' => \$show_configs,
@@ -226,10 +239,22 @@ my $query = $show_configs || $list_configs || $list_tests;
 
 # Determine what test list files to use
 my @file_list = ();
-foreach my $list (@builtin_test_lists) {
-    push(@file_list, "$DDS_ROOT/$list->{file}") if ($query_all || $list->{enabled});
+if ($auto_config) {
+    foreach my $list (@builtin_test_lists) {
+        push(@file_list, "$DDS_ROOT/$list->{file}") if ($query_all || $list->{enabled});
+    }
 }
 push(@file_list, @ARGV);
+
+if ($auto_config) {
+    die("auto_run_tests.pl: Error: unknown perl OS: $^O") if (!exists($os_configs{$^O}));
+    push(@PerlACE::ConfigList::Configs, $os_configs{$^O});
+
+    push(@PerlACE::ConfigList::Configs, "RTPS");
+    if ($gh_actions) {
+        push(@PerlACE::ConfigList::Configs, 'GH_ACTIONS');
+    }
+}
 
 if ($show_configs) {
     foreach my $test_list (@file_list) {
@@ -356,7 +381,7 @@ if ($cmake) {
             push(@run_test_cmd, $ctest_args);
         }
         if ($ctest_args !~ /--build-config/ && defined($cmake_build_cfg)) {
-            push(@run_test_cmd, "--build-config $cmake_build_cfg");
+            push(@run_test_cmd, "--build-config", $cmake_build_cfg);
         }
         run_test($fake_name, \@run_test_cmd, verbose => 1);
         mark_test_start($process_name);

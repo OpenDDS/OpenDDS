@@ -11,22 +11,30 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  DDS_ROOT: ${{github.workspace}}
+  DDS_ROOT: ${{github.workspace}}/OpenDDS
   DOC_ROOT: ${{github.workspace}}/ACE_TAO
   ACE_ROOT: ${{github.workspace}}/ACE_TAO/ACE
 
 jobs:
-  build:
+  lint:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v2
+      with:
+        path: ${{ env.DDS_ROOT }}
     - name: checkout ACE_TAO
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: ${{ env.DOC_ROOT }}
+    - name: Install Perl Dependencies
+      uses: shogo82148/actions-setup-perl@v1
+      with:
+        install-modules: |
+          YAML
     - name: Run lint.pl
-      run: |
-        perl $DDS_ROOT/tools/scripts/lint.pl --color --ace
+      run: cd $DDS_ROOT ; perl tools/scripts/lint.pl --color --ace
+    - name: Run lint_build_and_test.pl
+      run: perl $DDS_ROOT/.github/workflows/lint_build_and_test.pl

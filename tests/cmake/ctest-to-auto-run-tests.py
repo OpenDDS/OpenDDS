@@ -65,15 +65,23 @@ def get_art_name(root, build_path, source_path, test_path, command):
     # file from source_path.
     rel_test_path = relative_to(test_path, build_path)
     if is_relative(rel_test_path):
-        test_path = source_path / rel_test_path
+        real_test_path = source_path / rel_test_path
+        condition = 1
     elif not test_path.is_absolute():
-        test_path = source_path / test_path
+        real_test_path = source_path / test_path
+        condition = 2
     elif test_path.name == 'build':
-        test_path = test_path.parent
-    cmakelists = test_path / 'CMakeLists.txt'
+        real_test_path = test_path.parent
+        condition = 3
+    else:
+        real_test_path = test_path
+        condition = 4
+    cmakelists = real_test_path / 'CMakeLists.txt'
     if not cmakelists.is_file():
         raise FileNotFoundError(
-            '"{}" was not found (test_path was "{}")'.format(cmakelists, test_path))
+            '"{}" was not found (test_path was "{}", rel_test_path was "{}", '
+            'condition was {})'.format(
+                cmakelists, test_path, rel_test_path, condition))
     cmakelists = str(relative_to(cmakelists, root).as_posix())
 
     # Normalize the command to something like what auto_run_tests prints
@@ -85,7 +93,8 @@ def get_art_name(root, build_path, source_path, test_path, command):
         index = command_parts.index('-ExeSubDir')
         command_parts.pop(index)
         command_parts.pop(index)
-    except ValueError: # from index, no -ExeSubDir
+    except ValueError:
+        # from index, just means there's no -ExeSubDir
         pass
 
     return '{} {}'.format(cmakelists, ' '.join(command_parts))
@@ -124,15 +133,15 @@ def generate_test_results(build_path, source_path, debug=False):
             elif encoding is None:
                 output_text = decoded_bytes
         if output_text is None:
-            sys.exit(('ERROR: Test output in XML file is not usable, ' +
-                'encoding is {} and compression is {}. ' +
+            sys.exit(('ERROR: Test output in XML file is not usable, '
+                'encoding is {} and compression is {}. '
                 'Pass --no-compress-output to ctest').format(
                     repr(encoding), repr(compression)))
 
         status = get_named_measurement(test_node, 'Completion Status')
         if status == "Missing Configuration":
-            sys.exit('ERROR: Build has a configuration and ctest needs to know it. ' +
-                'Pass --cmake-build-cfg with the config if using auto_run_tests.pl. ' +
+            sys.exit('ERROR: Build has a configuration and ctest needs to know it. '
+                'Pass --cmake-build-cfg with the config if using auto_run_tests.pl. '
                 'Pass --build-config with the config if using ctest directly')
 
         results = dict(
