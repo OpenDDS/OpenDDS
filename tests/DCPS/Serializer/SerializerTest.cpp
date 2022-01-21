@@ -373,6 +373,22 @@ displayChain(ACE_Message_Block* chain)
   }
 }
 
+#if defined DDS_HAS_WCHAR && defined ACE_HAS_CPP20
+std::string wstringConvert(const ACE_CDR::WChar* in)
+{
+  std::string out = "{";
+  for (; *in; ++in) {
+    out += std::to_string(int(*in));
+    if (in[1]) {
+      out += ", ";
+    }
+  }
+  return out + "}";
+}
+#else
+#define wstringConvert(X) X
+#endif
+
 void
 checkValues(const Values& expected, const Values& observed)
 {
@@ -453,8 +469,8 @@ checkValues(const Values& expected, const Values& observed)
     ACE::format_hexdump((char*)&(expected.wcharValue), sizeof(ACE_CDR::WChar), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump((char*)&(observed.wcharValue), sizeof(ACE_CDR::WChar), obuffer, sizeof(obuffer));
     std::cout << "wchar values not correct after insertion and extraction." << std::endl;
-    std::cout << "(expected: " << expected.wcharValue << "/" << ebuffer;
-    std::cout << ", observed: " << observed.wcharValue << "/" << obuffer;
+    std::cout << "(expected: " << int(expected.wcharValue) << "/" << ebuffer;
+    std::cout << ", observed: " << int(observed.wcharValue) << "/" << obuffer;
     std::cout << ")." << std::endl;
     failed = true;
   }
@@ -483,8 +499,8 @@ checkValues(const Values& expected, const Values& observed)
     ACE::format_hexdump(reinterpret_cast<char*>(expected.wstringValue), ACE_OS::strlen(expected.wstringValue), ebuffer, sizeof(ebuffer));
     ACE::format_hexdump(reinterpret_cast<char*>(observed.wstringValue), ACE_OS::strlen(observed.wstringValue), obuffer, sizeof(obuffer));
     std::cout << "wstring values not correct after insertion and extraction." << std::endl;
-    std::cout << "(expected: " << expected.wstringValue << "/" << ebuffer;
-    std::cout << ", observed: " << observed.wstringValue << "/" << obuffer;
+    std::cout << "(expected: " << wstringConvert(expected.wstringValue) << "/" << ebuffer;
+    std::cout << ", observed: " << wstringConvert(observed.wstringValue) << "/" << obuffer;
     std::cout << ")." << std::endl;
     failed = true;
   }
@@ -611,8 +627,8 @@ checkArrayValues(const ArrayValues& expected, const ArrayValues& observed)
       ACE::format_hexdump((char*)&(expected.wcharValue[i]), sizeof(ACE_CDR::WChar), ebuffer, sizeof(ebuffer));
       ACE::format_hexdump((char*)&(observed.wcharValue[i]), sizeof(ACE_CDR::WChar), obuffer, sizeof(obuffer));
       std::cout << "wchar[" << i << "] values not correct after insertion and extraction." << std::endl;
-      std::cout << "(expected: " << expected.wcharValue[i] << "/" << ebuffer;
-      std::cout << ", observed: " << observed.wcharValue[i] << "/" << obuffer;
+      std::cout << "(expected: " << int(expected.wcharValue[i]) << "/" << ebuffer;
+      std::cout << ", observed: " << int(observed.wcharValue[i]) << "/" << obuffer;
       std::cout << ")." << std::endl;
       failed = true;
     }

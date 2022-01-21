@@ -358,8 +358,64 @@ ACE_CDR::LongLong ju_ll(ACE_CDR::ULongLong u)
          ? -static_cast<ACE_CDR::LongLong>(~u+1) : u;
 }
 
-ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
+string unicode_escape(int in, bool char_literal = false)
 {
+  switch (in) {
+  case '\'':
+  case '\"':
+  case '\\':
+    return string("\\") + static_cast<char>(in);
+  case '\b':
+    return "\\b";
+  case '\f':
+    return "\\f";
+  case '\n':
+    return "\\n";
+  case '\r':
+    return "\\r";
+  case '\t':
+    return "\\t";
+  }
+
+  if (in <= UCHAR_MAX && isprint(in)) {
+    return string(1, static_cast<char>(in));
+  }
+
+  if (in > 0x10ffff) {
+    return "error: out-of-range character";
+  }
+
+  if (in <= 0xffff) {
+    string escaped = "\\u____";
+    ACE_OS::snprintf(&escaped[2], 5, "%04x", in);
+    return escaped;
+  }
+
+  if (char_literal) {
+    return "error: char literals larger than \\uffff are not valid in Java";
+  }
+
+  // Java uses a UTF-16 Surrogate Pair to represent larger characters, with
+  // each surrogate represented as its own \uXXXX escape in the source code.
+  const unsigned int lead = 0xd7c0 + (in >> 10);
+  const unsigned int trail = 0xdc0 + (in & 0x3ff);
+  string escaped(13, '\0');
+  ACE_OS::snprintf(&escaped[0], escaped.size(), "\\u%04x\\u%04x", lead, trail);
+  return escaped;
+}
+
+string unicode_escape(const char* in)
+{
+  string result;
+  for (const char* i = in; *i; ++i) {
+    result += unicode_escape(*i);
+  }
+  return result;
+}
+
+ostream& operator<<(ostream& o, const AST_Expression::AST_ExprValue& expr)
+{
+  const AST_Expression::AST_ExprValue* ev = &expr;
   switch (ev->et) {
   case AST_Expression::EV_short:
     o << ev->u.sval;
@@ -386,10 +442,10 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
     o << ev->u.dval;
     break;
   case AST_Expression::EV_char:
-    o << '\'' << ev->u.cval << '\'';
+    o << '\'' << unicode_escape(ev->u.cval, true) << '\'';
     break;
   case AST_Expression::EV_wchar:
-    o << ev->u.wcval;
+    o << '\'' << unicode_escape(ev->u.wcval, true) << '\'';
     break;
 #if OPENDDS_HAS_EXPLICIT_INTS
   case AST_Expression::EV_int8:
@@ -404,10 +460,10 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
     o << boolalpha << static_cast<bool>(ev->u.bval);
     break;
   case AST_Expression::EV_string:
-    o << '"' << ev->u.strval->get_string() << '"';
+    o << '"' << unicode_escape(ev->u.strval->get_string()) << '"';
     break;
   case AST_Expression::EV_wstring:
-    o << '"' << ev->u.wstrval << '"';
+    o << '"' << unicode_escape(ev->u.wstrval) << '"';
     break;
   case AST_Expression::EV_enum:
     o << ev->u.eval;
@@ -502,7 +558,7 @@ bool idl_mapping_java::gen_const(UTL_ScopedName *name, bool nestedInInteface,
   }
 
   ostringstream oss;
-  oss << "  " << type_str << " value = (" << type_str << ") (" << ev << ");\n";
+  oss << "  " << type_str << " value = (" << type_str << ") (" << *ev << ");\n";
 
   return java_class_gen(JavaName(name), JINTERFACE,
                         oss.str().c_str());
@@ -800,7 +856,7 @@ void writeUnionDefaultValue(ostream &os, AST_Expression::ExprType udisc_type,
     os << dv.u.char_val;
     break;
   case AST_Expression::EV_wchar:
-    os << dv.u.wchar_val;
+    os << unicode_escape(dv.u.wchar_val);
     break;
   case AST_Expression::EV_bool:
     os << boolalpha << static_cast<bool>(dv.u.bool_val);
@@ -851,7 +907,7 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
         disc_check = "<%default_disc_check%>";
 
       } else {
-        oss << ul->label_val()->ev();
+        oss << *ul->label_val()->ev();
         disc_check += "_discriminator" + disc_val + " != " + oss.str()
                       + ((j == n_labels - 1) ? "" : " && ");
         default_disc_check += (default_disc_check.size() ? " || " : "")

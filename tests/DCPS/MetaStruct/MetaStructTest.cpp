@@ -68,6 +68,16 @@ bool checkVal(const T& lhs, const T& rhs, const char* name)
   return true;
 }
 
+bool checkVal(const ACE_CDR::WChar& lhs, const ACE_CDR::WChar& rhs, const char* name)
+{
+  if (lhs != rhs) {
+    std::cout << "ERROR: target's " << name << " " << int(lhs) << " != "
+              << int(rhs) << std::endl;
+    return false;
+  }
+  return true;
+}
+
 template<typename T, typename T2>
 bool check(const T& lhs, const T& rhs, const char* name, ACE_Message_Block* amb, Value::Type type,
           const MetaStruct& ms, T2 Value::*ptrmbr, Encoding::Kind e)
