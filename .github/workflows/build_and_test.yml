@@ -2968,7 +2968,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/tsan_tests.lst"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_TSAN --no-dcps tests/tsan_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
