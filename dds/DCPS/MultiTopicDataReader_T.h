@@ -129,22 +129,23 @@ private:
 
   // Process all joins (recursively) in the QueryPlan 'qp'.
   DDS::ReturnCode_t process_joins(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
-                     SampleVec starting, const TopicSet& seen,
-                     const QueryPlan& qp);
+                                  SampleVec starting, const TopicSet& seen,
+                                  const QueryPlan& qp);
 
   // Starting with a 'prototype' sample, fill a 'resulting' vector with all
   // data from 'other_dr' (with MetaStruct 'other_meta') such that all key
   // fields named in 'key_names' match the values in 'key_data'.  The struct
   // pointed-to by 'key_data' is of the type used by the 'other_dr'.
   DDS::ReturnCode_t join(SampleVec& resulting, const SampleWithInfo& prototype,
-            const std::vector<OPENDDS_STRING>& key_names, const void* key_data,
-            DDS::DataReader_ptr other_dr, const MetaStruct& other_meta);
+                         const std::vector<OPENDDS_STRING>& key_names,
+                         const void* key_data, DDS::DataReader_ptr other_dr,
+                         const MetaStruct& other_meta);
 
   // When no common keys are found, natural join devolves to a cross-join where
   // each instance in the joined-to-topic (qp) is combined with the results so
   // far (partialResults).
   DDS::ReturnCode_t cross_join(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
-                  const TopicSet& seen, const QueryPlan& qp);
+                               const TopicSet& seen, const QueryPlan& qp);
 
   // Combine two vectors of data, 'resulting' and 'other', with the results of
   // the combination going into 'resulting'.  Use the keys in 'key_names' to
