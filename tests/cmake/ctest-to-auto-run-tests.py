@@ -64,24 +64,24 @@ def get_art_name(root, build_path, source_path, test_path, command):
     # Find the relative path to the directory with the test's CMakeLists
     # file from source_path.
     rel_test_path = relative_to(test_path, build_path)
+    what = ''
     if is_relative(rel_test_path):
         real_test_path = source_path / rel_test_path
-        condition = 1
+        what = 'relative'
     elif not test_path.is_absolute():
         real_test_path = source_path / test_path
-        condition = 2
-    elif test_path.name == 'build':
-        real_test_path = test_path.parent
-        condition = 3
+        what = 'not absolute'
     else:
         real_test_path = test_path
-        condition = 4
+        what = 'normal'
+    if test_path.name == 'build':
+        real_test_path = real_test_path.parent
+        what += ', has build'
     cmakelists = real_test_path / 'CMakeLists.txt'
     if not cmakelists.is_file():
         raise FileNotFoundError(
             '"{}" was not found (test_path was "{}", rel_test_path was "{}", '
-            'condition was {})'.format(
-                cmakelists, test_path, rel_test_path, condition))
+            '"{}")'.format(cmakelists, test_path, rel_test_path, what))
     cmakelists = str(relative_to(cmakelists, root).as_posix())
 
     # Normalize the command to something like what auto_run_tests prints
