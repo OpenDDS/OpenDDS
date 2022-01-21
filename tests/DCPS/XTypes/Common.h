@@ -176,6 +176,46 @@ bool wait_publication_matched(DDS::WaitSet_var ws, DDS::DataWriter_var dw)
   }
 }
 
+bool wait_requested_incompatible_qos(DDS::WaitSet_var ws, DDS::DataReader_var dr)
+{
+  while (true) {
+    DDS::RequestedIncompatibleQosStatus status;
+    DDS::ReturnCode_t ret = dr->get_requested_incompatible_qos_status(status);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: wait_requested_incompatible_qos - get_requested_incompatible_qos_status failed: %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
+    }
+
+    if (status.total_count > 0) {
+      return true;
+    }
+    if (!wait_helper(ws, DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS)) {
+      return false;
+    }
+  }
+}
+
+bool wait_subscription_matched(DDS::WaitSet_var ws, DDS::DataReader_var dr)
+{
+  while (true) {
+    DDS::SubscriptionMatchedStatus status;
+    DDS::ReturnCode_t ret = dr->get_subscription_matched_status(status);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR wait_subscription_matched - get_subscription_matched_status failed: %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
+    }
+
+    if (status.total_count > 0) {
+      return true;
+    }
+    if (!wait_helper(ws, DDS::SUBSCRIPTION_MATCHED_STATUS)) {
+      return false;
+    }
+  }
+}
+
 bool check_inconsistent_topic_status(Topic_var topic)
 {
   InconsistentTopicStatus status;
@@ -203,7 +243,26 @@ bool check_offered_incompatible_qos_status(DDS::DataWriter_var dw, const std::st
     }
     if (qos_status.policies.length() != 1 ||
         qos_status.policies[0].policy_id != DDS::DATA_REPRESENTATION_QOS_POLICY_ID) {
-      ACE_ERROR((LM_ERROR, "ERROR: %C QoS that was expected to fail did not.\n", type.c_str()));
+      ACE_ERROR((LM_ERROR, "ERROR: check_offered_incompatible_qos_status - %C QoS that was expected to fail did not.\n", type.c_str()));
+      return false;
+    }
+  }
+  return true;
+}
+
+bool check_requested_incompatible_qos_status(DDS::DataReader_var dr, const std::string& type)
+{
+  if (expect_incompatible_qos) {
+    DDS::RequestedIncompatibleQosStatus qos_status;
+    const DDS::ReturnCode_t ret = dr->get_requested_incompatible_qos_status(qos_status);
+    if (ret != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_requested_incompatible_qos_status - get_requested_incompatible_qos_status failed: %C\n",
+                 OpenDDS::DCPS::retcode_to_string(ret)));
+      return false;
+    }
+    if (qos_status.policies.length() != 1 ||
+        qos_status.policies[0].policy_id != DDS::DATA_REPRESENTATION_QOS_POLICY_ID) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_requested_incompatible_qos_status - %C QoS that was expected to fail did not.\n", type.c_str()));
       return false;
     }
   }

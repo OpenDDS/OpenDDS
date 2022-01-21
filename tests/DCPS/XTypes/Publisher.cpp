@@ -442,7 +442,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   DDS::StatusCondition_var condition = expect_inconsistent_topic ? topic->get_statuscondition() : dw->get_statuscondition();
-  DDS::StatusMask status_mask = expect_inconsistent_topic ? DDS::INCONSISTENT_TOPIC_STATUS :
+  const DDS::StatusMask status_mask = expect_inconsistent_topic ? DDS::INCONSISTENT_TOPIC_STATUS :
     (expect_incompatible_qos ? DDS::OFFERED_INCOMPATIBLE_QOS_STATUS : DDS::PUBLICATION_MATCHED_STATUS);
   DDS::ReturnCode_t ret = condition->set_enabled_statuses(status_mask);
   if (ret != DDS::RETCODE_OK) {
