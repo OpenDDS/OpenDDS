@@ -48,6 +48,10 @@ if ($test->flag('disco')) {
   $tc_opts .= " ci_disco";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('disco_long')) {
+  $tc_opts .= " ci_disco_long";
+  $is_rtps_disc = 1;
+}
 elsif ($test->flag('disco_relay')) {
   $tc_opts .= " ci_disco_relay";
   $is_rtps_disc = 1;
