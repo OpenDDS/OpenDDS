@@ -78,7 +78,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::assign_resulting_fields(
 }
 
 template<typename Sample, typename TypedDataReader>
-void
+DDS::ReturnCode_t
 MultiTopicDataReader_T<Sample, TypedDataReader>::join(
   SampleVec& resulting, const SampleWithInfo& prototype,
   const std::vector<OPENDDS_STRING>& key_names, const void* key_data,
@@ -89,7 +89,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
   if (!other_dri) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::join: ")
       ACE_TEXT("Failed to get DataReaderImpl.\n")));
-    return;
+    return DDS::RETCODE_ERROR;
   }
 
   TopicDescription_var other_td = other_dri->get_topicdescription();
@@ -102,7 +102,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
     if (ih != HANDLE_NIL) {
       GenericData other_data(other_meta, false);
       SampleInfo info;
-      ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
+      const ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
         throw std::runtime_error(
@@ -114,6 +114,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
         assign_fields(other_data.ptr_, resulting.back().sample_,
                       other_qp, other_meta);
       }
+    } else {
+      return DDS::RETCODE_NO_DATA;
     }
   } else { // incomplete key or cross-join (0 key fields)
     SampleVec new_resulting;
@@ -121,7 +123,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
     for (InstanceHandle_t ih = HANDLE_NIL; ret != RETCODE_NO_DATA;) {
       GenericData other_data(other_meta, false);
       SampleInfo info;
-      ret = other_dri->read_next_instance_generic(other_data.ptr_, info, ih,
+      const ReturnCode_t ret = other_dri->read_next_instance_generic(other_data.ptr_, info, ih,
         READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
         std::ostringstream ss;
@@ -150,6 +152,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       }
     }
   }
+  return DDS::RETCODE_OK;
 }
 
 template<typename Sample, typename TypedDataReader>
@@ -197,7 +200,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::combine(
 }
 
 template<typename Sample, typename TypedDataReader>
-void
+DDS::ReturnCode_t
 MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
   std::map<TopicSet, SampleVec>& partialResults, SampleVec starting,
   const TopicSet& seen, const QueryPlan& qp)
@@ -206,7 +209,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
   const MetaStruct& resulting_meta = getResultingMeta();
   OPENDDS_STRING this_topic;
   {
-    ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, qp_lock_);
+    ACE_GUARD_RETURN(ACE_RW_Thread_Mutex, read_guard, qp_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
     this_topic = topicNameFor(qp.data_reader_);
   }
   typedef multimap<OPENDDS_STRING, OPENDDS_STRING>::const_iterator iter_t;
@@ -240,13 +243,19 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
             other_meta.assign(other_key.ptr_, keys[j].c_str(),
               &starting[i], keys[j].c_str(), resulting_meta);
           }
-          join(join_result, starting[i], keys,
+          const DDS::ReturnCode_t ret = join(join_result, starting[i], keys,
             other_key.ptr_, other_dr, other_meta);
+          if (ret != DDS::RETCODE_OK) {
+            return ret;
+          }
         }
 
         if (!join_result.empty() && !seen.count(other_topic)) {
           // recurse
-          process_joins(partialResults, join_result, withJoin, other_qp);
+          const DDS::ReturnCode_t ret = process_joins(partialResults, join_result, withJoin, other_qp);
+          if (ret != DDS::RETCODE_OK) {
+            return ret;
+          }
         }
 
       } else if (!found->first.count(this_topic) /*avoid looping back*/) {
@@ -266,10 +275,11 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::process_joins: %C\n"), e.what()));
     }
   }
+  return DDS::RETCODE_OK;
 }
 
 template<typename Sample, typename TypedDataReader>
-void
+DDS::ReturnCode_t
 MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
   std::map<TopicSet, SampleVec>& partialResults, const TopicSet& seen,
   const QueryPlan& qp)
@@ -283,7 +293,10 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
       SampleVec resulting;
       for (typename SampleVec::iterator i = iterPR->second.begin();
         i != iterPR->second.end(); ++i) {
-        join(resulting, *i, no_keys, NULL, qp.data_reader_, other_meta);
+        const DDS::ReturnCode_t ret = join(resulting, *i, no_keys, 0, qp.data_reader_, other_meta);
+        if (ret != DDS::RETCODE_OK) {
+          return ret;
+        }
       }
       resulting.swap(iterPR->second);
     }
@@ -291,10 +304,15 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
     withJoin.insert(topicNameFor(qp.data_reader_));
     partialResults[withJoin].swap(partialResults[seen]);
     partialResults.erase(seen);
-    process_joins(partialResults, partialResults[withJoin], withJoin, qp);
+    const DDS::ReturnCode_t ret = process_joins(partialResults, partialResults[withJoin], withJoin, qp);
+    if (ret != DDS::RETCODE_OK) {
+      partialResults.erase(withJoin);
+      return ret;
+    }
   } catch (const std::runtime_error& e) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::cross_join: %C\n"), e.what()));
   }
+  return DDS::RETCODE_OK;
 }
 
 template<typename Sample, typename TypedDataReader>
@@ -313,8 +331,10 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
   partialResults[seen].push_back(SampleWithInfo(topic, info));
   assign_fields(sample, partialResults[seen].back().sample_, qp, meta);
 
-  process_joins(partialResults, partialResults[seen], seen, qp);
-
+  const DDS::ReturnCode_t ret = process_joins(partialResults, partialResults[seen], seen, qp);
+  if (ret != DDS::RETCODE_OK) {
+    return;
+  }
   // Any topic we haven't seen needs to be cross-joined
   for (std::map<OPENDDS_STRING, QueryPlan>::iterator iter = query_plans_.begin();
        iter != query_plans_.end(); ++iter) {
@@ -322,7 +342,10 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::incoming_sample(void* sample,
       find_if(partialResults.begin(), partialResults.end(),
               Contains(iter->first));
     if (found == partialResults.end()) {
-      cross_join(partialResults, seen, iter->second);
+      const DDS::ReturnCode_t cj_ret = cross_join(partialResults, seen, iter->second);
+      if (cj_ret != DDS::RETCODE_OK) {
+        return;
+      }
     }
   }
 
