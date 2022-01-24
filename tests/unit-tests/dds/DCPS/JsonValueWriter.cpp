@@ -17,9 +17,9 @@ typedef rapidjson::Writer<Buffer> Writer;
 class TestWriter : public JsonValueWriter<Writer>
 {
 public:
-  explicit TestWriter (Writer& writer)
+  explicit TestWriter(Writer& writer)
     : JsonValueWriter(writer)
-    , elements_ (0)
+    , elements_(0)
   {}
   virtual void write_int16_array(const ACE_CDR::Short* x, size_t length)
   {
@@ -492,7 +492,7 @@ TEST(dds_DCPS_JsonValueWriter, write_float32)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.write_float32(1.2f);
-  EXPECT_STREQ(buffer.GetString(), "1.2000000476837159");
+  EXPECT_STREQ(buffer.GetString(), "1.2000000476837158");
 }
 
 TEST(dds_DCPS_JsonValueWriter, write_float64)
