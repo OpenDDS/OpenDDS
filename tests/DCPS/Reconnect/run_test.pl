@@ -207,7 +207,7 @@ if ($num_reads_before_crash > 0)
          . " -r $num_reads_deviation"
          . " $client_args -ORBLogFile $sub2_log");
 
-  print "\n\n!!! Restart subscriber !!!\n\n";;
+  print "\n\n!!! Restart subscriber !!!\n\n";
   print $Subscriber->CommandLine () . "\n";
   $Subscriber->Spawn ();
 }
@@ -227,7 +227,7 @@ if ($num_writes_before_crash > 0) {
 
   sleep($restart_delay);
 
-  print "\n\n!!! Restart publisher !!!\n\n";;
+  print "\n\n!!! Restart publisher !!!\n\n";
   print $Publisher->CommandLine () . "\n";
   $Publisher->Spawn ();
 }
