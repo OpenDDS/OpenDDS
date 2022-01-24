@@ -58,6 +58,7 @@ To manually configure what tests to run:
 
     * This is included by default.
       Use ``--no-dcps`` to exclude this list.
+    * If ``--no-auto-config`` was passed, then ``--dcps`` will have to be passed to include this.
 
   * :ghfile:`tests/security/security_tests.lst`
 
@@ -76,6 +77,16 @@ To manually configure what tests to run:
 * Passing ``-Exclude RTPS`` will exclude all tests that have ``RTPS`` in the entry.
   This option matches using RegEx, so a test with ``SUPER_DUPER_RTPS`` will also be excluded.
   It also ignores inverse entries, so it will not exclude a test with ``!SUPER_DUPER_RTPS``.
+* There are ``-Config`` options that are added automatically if ``--no-auto-config`` wasn't passed:
+
+  * ``-Config RTPS``
+  * ``-Config GH_ACTIONS`` if running on :ref:`GitHub Actions <github-actions-art>`
+  * These are based on the OS ``auto_run_tests.pl`` is running under:
+
+    * ``-Config Win32``
+    * ``-Config macOS``
+    * ``-Config Linux``
+
 * Assuming they were built, CMake tests are ran if ``--cmake`` is passed.
   This uses CTest, which is a system that is separate from the one previously described.
 * See ``--help`` for all the available options.
