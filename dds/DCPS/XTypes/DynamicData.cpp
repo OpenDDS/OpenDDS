@@ -100,10 +100,12 @@ DynamicData& DynamicData::operator=(const DynamicData& other)
 DynamicData::~DynamicData()
 {
   ACE_Message_Block::release(chain_);
+  /*
   for (ACE_CDR::ULong i = 0; i < chains_to_release.size(); ++i) {
     ACE_Message_Block::release(chains_to_release[i]);
   }
   chains_to_release.clear();
+  */
 }
 
 void DynamicData::copy(const DynamicData& other)
@@ -297,6 +299,7 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
               break;
             }
           }
+          release_chains();
           return id;
         }
       } else { // Mutable
@@ -335,6 +338,7 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
         if (!good || !strm_.read_parameter_id(member_id, member_size, must_understand)) {
           member_id = MEMBER_ID_INVALID;
         }
+        release_chains();
         return member_id;
       }
     }
@@ -467,6 +471,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
           ++actual_count;
         }
       }
+      release_chains();
       return actual_count;
     }
   case TK_UNION:
@@ -551,6 +556,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
         }
         ++length;
       }
+      release_chains();
       return length;
     }
   }
@@ -987,6 +993,8 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
     }
   }
 
+  release_chains();
+
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_single_value -")
                ACE_TEXT(" Failed to read a value of %C from a DynamicData object of type %C\n"),
@@ -1120,6 +1128,8 @@ DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
     break;
   }
 
+  release_chains();
+
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_char_common -")
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
@@ -1225,6 +1235,8 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
     good = false;
     break;
   }
+
+  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_boolean_value -")
@@ -1350,6 +1362,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
     break;
   }
 
+  release_chains();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1608,6 +1621,8 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     }
     return DDS::RETCODE_ERROR;
   }
+
+  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
@@ -2133,6 +2148,14 @@ bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
   return true;
 }
 
+void DynamicData::release_chains()
+{
+  for (ACE_CDR::ULong i = 0; i < chains_to_release.size(); ++i) {
+    ACE_Message_Block::release(chains_to_release[i]);
+  }
+  chains_to_release.clear();
+}
+
 bool DynamicData::read_discriminator(const DynamicType_rch& disc_type, ExtensibilityKind union_ek, ACE_CDR::Long& label)
 {
   if (union_ek == MUTABLE) {
@@ -2283,6 +2306,7 @@ bool DynamicData::skip_all()
           break;
         }
       }
+      release_chains();
       return good;
     } else { // Union
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
@@ -2303,6 +2327,7 @@ bool DynamicData::skip_all()
           if (label == labels[i]) {
             const DynamicType_rch selected_member = md.type.lock();
             bool good = selected_member && skip_member(selected_member);
+            release_chains();
             return good;
           }
         }
@@ -2316,6 +2341,7 @@ bool DynamicData::skip_all()
       if (has_default) {
         const DynamicType_rch default_dt = default_member.type.lock();
         bool good = default_dt && skip_member(default_dt);
+        release_chains();
         return good;
       }
       if (DCPS::DCPS_debug_level >= 1) {
