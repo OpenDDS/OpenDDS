@@ -120,7 +120,7 @@ The third step is the *test_* job, which runs the appropriate tests for the asso
 
 Certain builds do not follow this 3 step model.
 Safety Profile builds are done in one step due to cross-compile issues.
-Static and Release builds have a large footprint and therefore cannot fit the entire test suite onto a Github Actions runner.
+Static and Release builds have a large footprint and therefore cannot fit the entire test suite onto a GitHub Actions runner.
 As a result, they only build and run a subset of the tests in their final jobs, but then have multiple final jobs to increase test coverage.
 These jobs are prefixed by:
 
@@ -133,19 +133,20 @@ To shorten the runtime of the continuous integration, some other builds will not
 All builds with safety profile disabled and ownership profile enabled, will run the :ghfile:`tests/cmake` tests.
 Test runs which only contain CMake tests are prefixed by ``cmake_``.
 
+.. _github-actions-art:
+
 .lst Files
 ==========
 
 .lst files contain a list of tests with configuration options that will turn tests on or off.
 The *test_* jobs pass in :ghfile:`tests/dcps_tests.lst`.
 Static and Release builds instead use :ghfile:`tests/static_ci_tests.lst`.
-This seperation of .lst files is due to how excluding all but a few tests in the dcps_tests.lst would require adding a new config option to every test we didn't want to run.
-There is a seperate security test list, :ghfile:`tests/security/security_tests.lst`, which governs the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``.
+This separation of .lst files is due to how excluding all but a few tests in the ``dcps_tests.lst`` would require adding a new config option to every test we didn't want to run.
+There is a separate security test list, :ghfile:`tests/security/security_tests.lst`, which governs the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``.
 The last list file used by ``build_and_test.yml`` is :ghfile:`tools/modeling/tests/modeling_tests.lst`, which is included by passing ``--modeling`` to ``auto_run_tests.pl``.
 
 To disable a test in GitHub Actions, ``!GH_ACTIONS`` must be added next to the test in the .lst file.
-These tests will not run when ``-Config GH_ACTIONS`` is passed alongside the lst file.
-There are similar test blockers which only block for specific github actions configurations from running marked tests:
+There are similar test blockers which only block for specific GitHub Actions configurations from running marked tests:
 
 * ``!GH_ACTIONS_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds
 
@@ -156,11 +157,27 @@ There are similar test blockers which only block for specific github actions con
 * ``!GH_ACTIONS_W16`` blocks the Windows2016 runner
 
 These blocks are necessary because certain tests cannot properly run on GitHub Actions due to how the runners are configured.
+``-Config GH_ACTIONS`` is assumed by ``auto_run_tests.pl`` when running on GitHub Actions, but the other test configurations must be passed using ``-Config``.
 
 .. seealso::
 
   :doc:`running_tests`
-    For how ``auto_run_tests.pl`` works in general.
+    For how ``auto_run_tests.pl`` and the lst files work in general.
+
+Workflow Checks
+===============
+
+The :ghfile:`.github/workflows/lint.yml` workflow runs :ghfile:`.github/workflows/lint_build_and_test.pl`, which checks that the :ghfile:`.github/workflows/build_and_test.yml` workflow has `gcc-problem-matcher <https://github.com/ammaraskar/gcc-problem-matcher>`_ and `msvc-problem-matcher <https://github.com/ammaraskar/msvc-problem-matcher>`_ in the correct places.
+
+Running this script requires the `YAML CPAN module <https://metacpan.org/pod/YAML>`_.
+As a safety measure, it has some picky rules about how steps are named and ordered.
+In simplified terms, these rules include:
+
+  * If used, the problem matcher must be appropriate for the platform the job is running on.
+  * The problem matcher must not be declared before steps that are named "setup gtest" or named like "build ACE/TAO".
+    This should reduce any warnings from Google Test or ACE/TAO.
+  * A problem matcher should be declared before steps that start with "build" or contain "make".
+    These steps should also contain ``cmake --build``, ``make``, or ``msbuild`` in their ``run`` string.
 
 Blocked Tests
 =============
@@ -304,7 +321,7 @@ This can be used for debugging as a way to quickly set up a problematic build.
 Using Artifacts to View More Test Information
 ---------------------------------------------
 
-Tests failures which are recorded on github only contain a brief capture of output surrounding a failure.
+Tests failures which are recorded on GitHub only contain a brief capture of output surrounding a failure.
 This is useful for some tests, but it can often be helpful to view more of a test run.
 This can be done by downloading the artifact for a test step you are viewing.
 This test step artifact contains a number of files including ``output.log_Full.html``.
