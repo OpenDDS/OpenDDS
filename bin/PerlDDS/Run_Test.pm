@@ -644,7 +644,7 @@ sub process {
     $file_name =~ s/ /_/g;
     $file_name =~ s/#//g;
 
-    $params = "-ORBLogFile $file_name.log $params";
+    $params .= " -ORBLogFile $file_name.log";
   }
 
   if ($self->{add_transport_config} &&

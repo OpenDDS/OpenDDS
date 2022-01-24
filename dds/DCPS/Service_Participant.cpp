@@ -551,13 +551,32 @@ Service_Participant::get_domain_participant_factory(int &argc,
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
 }
 
-int
-Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
+int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
 {
-  ACE_Arg_Shifter arg_shifter(argc, argv);
+  // Process logging options first, so they are in effect if we need to log
+  // while processing other options.
+  ACE_Arg_Shifter log_arg_shifter(argc, argv);
+  while (log_arg_shifter.is_anything_left()) {
+    const ACE_TCHAR* currentArg = 0;
 
+    if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
+      set_log_file_name(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      log_arg_shifter.consume_arg();
+      got_log_fname = true;
+
+    } else if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBVerboseLogging"))) != 0) {
+      set_log_verbose(ACE_OS::atoi(currentArg));
+      log_arg_shifter.consume_arg();
+      got_log_verbose = true;
+
+    } else {
+      log_arg_shifter.ignore_arg();
+    }
+  }
+
+  ACE_Arg_Shifter arg_shifter(argc, argv);
   while (arg_shifter.is_anything_left()) {
-    const ACE_TCHAR *currentArg = 0;
+    const ACE_TCHAR* currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDebugLevel"))) != 0) {
       set_DCPS_debug_level(ACE_OS::atoi(currentArg));
@@ -677,16 +696,6 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-FederationLivelinessDuration"))) != 0) {
       this->federation_liveliness_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
-      set_log_file_name(ACE_TEXT_ALWAYS_CHAR(currentArg));
-      arg_shifter.consume_arg();
-      got_log_fname = true;
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ORBVerboseLogging"))) != 0) {
-      set_log_verbose(ACE_OS::atoi(currentArg));
-      arg_shifter.consume_arg();
-      got_log_verbose = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultAddress"))) != 0) {
       if (default_address_.set(u_short(0), currentArg)) {
