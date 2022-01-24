@@ -47,14 +47,14 @@ template<> struct hash<TestKey>
 }
 #endif
 
-TEST(address_cache_test, load_fail)
+TEST(dds_DCPS_AddressCache, load_fail)
 {
   AddressCache<TestKey> test_cache_;
   AddrSet addrs;
   ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
 }
 
-TEST(address_cache_test, store_load_success)
+TEST(dds_DCPS_AddressCache, store_load_success)
 {
   AddressCache<TestKey> test_cache_;
   AddrSet addrs;
@@ -68,7 +68,7 @@ TEST(address_cache_test, store_load_success)
   ASSERT_EQ(*(addrs.begin()),ACE_INET_Addr("127.0.0.1:1234"));
 }
 
-TEST(address_cache_test, store_remove_load_fail)
+TEST(dds_DCPS_AddressCache, store_remove_load_fail)
 {
   AddressCache<TestKey> test_cache_;
   AddrSet addrs;
@@ -82,7 +82,7 @@ TEST(address_cache_test, store_remove_load_fail)
   ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
 }
 
-TEST(address_cache_test, store_remove_id_load_fail)
+TEST(dds_DCPS_AddressCache, store_remove_id_load_fail)
 {
   AddressCache<TestKey> test_cache_;
   AddrSet addrs;
@@ -96,7 +96,7 @@ TEST(address_cache_test, store_remove_id_load_fail)
   ASSERT_FALSE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
 }
 
-TEST(address_cache_test, scoped_access_load_success)
+TEST(dds_DCPS_AddressCache, scoped_access_load_success)
 {
   AddressCache<TestKey> test_cache_;
   {
@@ -112,4 +112,50 @@ TEST(address_cache_test, scoped_access_load_success)
   ASSERT_EQ(addrs.size(), 2u);
   ASSERT_EQ(*(addrs.begin()),ACE_INET_Addr("127.0.0.1:1234"));
   ASSERT_EQ(*(++(addrs.begin())),ACE_INET_Addr("127.0.1.1:4321"));
+}
+
+TEST(dds_DCPS_AddressCache, scoped_access_cache_hit)
+{
+  AddressCache<TestKey> test_cache_;
+  AddrSet addrs;
+  addrs.insert(ACE_INET_Addr("127.0.0.1:1234"));
+
+  test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs);
+
+  AddressCache<TestKey>::ScopedAccess entry(test_cache_, TestKey(GUID_UNKNOWN, GUID_UNKNOWN));
+
+  ASSERT_EQ(entry.value().addrs_.count(ACE_INET_Addr("127.0.0.1:1234")), 1u);
+}
+
+TEST(dds_DCPS_AddressCache, store_twice)
+{
+  AddrSet addrs1;
+  addrs1.insert(ACE_INET_Addr("127.0.0.1:1234"));
+
+  AddrSet addrs2;
+  addrs2.insert(ACE_INET_Addr("127.0.0.1:5678"));
+
+  AddressCache<TestKey> test_cache_;
+  test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs1);
+  test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs2);
+
+  AddrSet addrs;
+
+  ASSERT_TRUE(test_cache_.load(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs));
+  ASSERT_EQ(addrs.size(), 1u);
+  ASSERT_EQ(addrs.count(ACE_INET_Addr("127.0.0.1:5678")), 1u);
+}
+
+TEST(dds_DCPS_AddressCache, scoped_access_expired)
+{
+  AddressCache<TestKey> test_cache_;
+  AddrSet addrs;
+  addrs.insert(ACE_INET_Addr("127.0.0.1:1234"));
+
+  test_cache_.store(TestKey(GUID_UNKNOWN, GUID_UNKNOWN), addrs, MonotonicTimePoint(ACE_Time_Value(0, 0)));
+
+  AddressCache<TestKey>::ScopedAccess entry(test_cache_, TestKey(GUID_UNKNOWN, GUID_UNKNOWN));
+
+  ASSERT_TRUE(entry.value().addrs_.empty());
+  ASSERT_TRUE(entry.is_new_);
 }
