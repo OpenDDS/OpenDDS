@@ -208,8 +208,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--expect_to_fail")) {
-      expect_to_match = false;
+    } else if (arg == ACE_TEXT("--expect_inconsistent_topic")) {
+      expect_inconsistent_topic = true;
     } else if (arg == ACE_TEXT("--expect_incompatible_qos")) {
       expect_incompatible_qos = true;
     } else if (arg == ACE_TEXT("--disallow_type_coercion")) {
@@ -361,61 +361,64 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  DDS::StatusCondition_var condition = expect_to_match ? dr->get_statuscondition() : topic->get_statuscondition();
-  condition->set_enabled_statuses(expect_to_match ?
-    expect_incompatible_qos ? DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS : DDS::SUBSCRIPTION_MATCHED_STATUS :
-    DDS::INCONSISTENT_TOPIC_STATUS);
+  DDS::StatusCondition_var condition = expect_inconsistent_topic ? topic->get_statuscondition() : dr->get_statuscondition();
+  const DDS::StatusMask status_mask = expect_inconsistent_topic ? DDS::INCONSISTENT_TOPIC_STATUS :
+    (expect_incompatible_qos ? DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS : DDS::SUBSCRIPTION_MATCHED_STATUS);
+  DDS::ReturnCode_t ret = condition->set_enabled_statuses(status_mask);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: set_enabled_statuses failed: %C\n", OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
+
   DDS::WaitSet_var ws = new DDS::WaitSet;
-  ws->attach_condition(condition);
+  ret = ws->attach_condition(condition);
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: attach_condition failed: %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+    return 1;
+  }
 
-  DDS::ConditionSeq conditions;
-  DDS::Duration_t timeout = { 10, 0 };
-  ReturnCode_t ret = ws->wait(conditions, timeout);
-
-  if (expect_incompatible_qos) {
-    DDS::RequestedIncompatibleQosStatus qos_status;
-    dr->get_requested_incompatible_qos_status(qos_status);
-    const CORBA::ULong cnt = qos_status.policies.length();
-    if (cnt != 1 || qos_status.policies[0].policy_id != DDS::DATA_REPRESENTATION_QOS_POLICY_ID) {
-      ACE_ERROR((LM_ERROR, "ERROR: %C QoS that was expected to fail did not.\n", type.c_str()));
-      failed = true;
-    }
-  } else if (ret != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: %C condition wait failed for type %C: %C\n",
-      expect_to_match ? "SUBSCRIPTION_MATCHED_STATUS" : "INCONSISTENT_TOPIC_STATUS", type.c_str(),
-      OpenDDS::DCPS::retcode_to_string(ret)));
-    failed = true;
+  if (status_mask == DDS::INCONSISTENT_TOPIC_STATUS) {
+    failed = !wait_inconsistent_topic(ws, topic);
+  } else if (status_mask == DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS) {
+    failed = !wait_requested_incompatible_qos(ws, dr);
+  } else {
+    failed = !wait_subscription_matched(ws, dr);
   }
   ws->detach_condition(condition);
-  if (!expect_incompatible_qos) {
-    if (!failed) {
-      failed = !check_inconsistent_topic_status(topic);
-    }
 
-    if (expect_to_match && !failed) {
-      if (type == "PlainCdrStruct") {
-        failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
-      } else if (type == "AppendableStruct") {
-        failed = (read_appendable_struct(dr) != RETCODE_OK);
-      } else if (type == "AppendableStructNoXTypes") {
-        failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
-      } else if (type == "FinalStructSub") {
-        failed = (read_final_struct(dr) != RETCODE_OK);
-      } else if (type == "MutableStruct") {
-        AdditionalFieldValue afv = MUTABLE_STRUCT_AF;
-        if (topic_name == "MutableBaseStructT") {
-          afv = FINAL_STRUCT_AF;
-        }
-        failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
-      } else if (type == "MutableUnion") {
-        failed = (read_mutable_union(dr) != RETCODE_OK);
-      } else if (type == "Trim20Struct") {
-        failed = (read_trim20_struct(dr) != RETCODE_OK);
+  if (failed) {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
+    return 1;
+  }
+
+  if (!check_inconsistent_topic_status(topic) ||
+      !check_requested_incompatible_qos_status(dr, type)) {
+    return 1;
+  }
+
+  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
+    if (type == "PlainCdrStruct") {
+      failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
+    } else if (type == "AppendableStruct") {
+      failed = (read_appendable_struct(dr) != RETCODE_OK);
+    } else if (type == "AppendableStructNoXTypes") {
+      failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
+    } else if (type == "FinalStructSub") {
+      failed = (read_final_struct(dr) != RETCODE_OK);
+    } else if (type == "MutableStruct") {
+      AdditionalFieldValue afv = MUTABLE_STRUCT_AF;
+      if (topic_name == "MutableBaseStructT") {
+        afv = FINAL_STRUCT_AF;
       }
+      failed = (read_mutable_struct(dr, afv) != RETCODE_OK);
+    } else if (type == "MutableUnion") {
+      failed = (read_mutable_union(dr) != RETCODE_OK);
+    } else if (type == "Trim20Struct") {
+      failed = (read_trim20_struct(dr) != RETCODE_OK);
     }
   }
   if (failed) {
-    ACE_ERROR((LM_ERROR, "ERROR: Reader failed for type %C\n", type.c_str()));
     return 1;
   }
 
