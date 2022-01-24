@@ -7111,7 +7111,9 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
   const DDS::SubscriberQos* subQos = 0;
   DCPS::TransportLocatorSeq* rTls = 0;
   ACE_CDR::ULong rTransportContext = 0;
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   const DCPS::ContentFilterProperty_t* cfProp = 0;
+#endif
   XTypes::TypeInformation* reader_type_info = 0;
   DCPS::MonotonicTime_t reader_participant_discovered_at;
 
@@ -7128,7 +7130,9 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       tempCfp.filterExpression = lsi->second.filterProperties.filterExpression;
       tempCfp.expressionParameters = lsi->second.filterProperties.expressionParameters;
     }
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     cfProp = &tempCfp;
+#endif
     if (!already_matched) {
       already_matched = lsi->second.matched_endpoints_.count(writer);
     }
@@ -7166,7 +7170,9 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       TheServiceParticipant->initial_EntityFactoryQosPolicy();
     subQos = &tempSubQos;
 
+#ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
     cfProp = &dsi->second.reader_data_.contentFilterProperty;
+#endif
     reader_type_info = &dsi->second.type_info_;
     reader_participant_discovered_at = dsi->second.participant_discovered_at_;
   } else {
