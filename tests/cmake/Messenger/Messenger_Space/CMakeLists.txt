@@ -20,7 +20,7 @@ set(target_prefix "${PROJECT_NAME}_")
 set(publisher "${target_prefix}publisher")
 
 set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
-set(dst "${CMAKE_CURRENT_BINARY_DIR} Space")
+set(dst "${CMAKE_CURRENT_BINARY_DIR}/ Space")
 set(all_targets ${publisher})
 
 foreach(file
