@@ -178,7 +178,7 @@ private:
   int flags_;
 };
 
-class WriterAssociationRecord {
+class WriterAssociationRecord : public DCPS::RcObject {
 public:
   WriterAssociationRecord(DCPS::DataWriterCallbacks_wrch callbacks,
                           const GUID_t& writer_id,
@@ -195,8 +195,9 @@ public:
   const GUID_t writer_id_;
   const DCPS::ReaderAssociation reader_association_;
 };
+typedef RcHandle<WriterAssociationRecord> WriterAssociationRecord_rch;
 
-class ReaderAssociationRecord {
+class ReaderAssociationRecord : public DCPS::RcObject {
 public:
   ReaderAssociationRecord(DCPS::DataReaderCallbacks_wrch callbacks,
                           const GUID_t& reader_id,
@@ -213,6 +214,7 @@ public:
   const GUID_t reader_id_;
   const DCPS::WriterAssociation writer_association_;
 };
+typedef RcHandle<ReaderAssociationRecord> ReaderAssociationRecord_rch;
 
 struct DiscoveredParticipant {
 
@@ -321,10 +323,10 @@ struct DiscoveredParticipant {
   typedef OPENDDS_LIST(BuiltinAssociationRecord) BuiltinAssociationRecords;
   BuiltinAssociationRecords builtin_pending_records_;
   BuiltinAssociationRecords builtin_associated_records_;
-  typedef OPENDDS_LIST(WriterAssociationRecord) WriterAssociationRecords;
+  typedef OPENDDS_LIST(WriterAssociationRecord_rch) WriterAssociationRecords;
   WriterAssociationRecords writer_pending_records_;
   WriterAssociationRecords writer_associated_records_;
-  typedef OPENDDS_LIST(ReaderAssociationRecord) ReaderAssociationRecords;
+  typedef OPENDDS_LIST(ReaderAssociationRecord_rch) ReaderAssociationRecords;
   ReaderAssociationRecords reader_pending_records_;
   ReaderAssociationRecords reader_associated_records_;
 #ifdef OPENDDS_SECURITY
@@ -1329,11 +1331,11 @@ private:
 
   virtual bool shutting_down() const;
 
-  virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& tls,
+  virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq& tls,
                                                    DiscoveredSubscriptionIter& iter,
                                                    const DCPS::RepoId& reader);
 
-  virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq*& tls,
+  virtual void populate_transport_locator_sequence(DCPS::TransportLocatorSeq& tls,
                                                    DiscoveredPublicationIter& iter,
                                                    const DCPS::RepoId& writer);
 
@@ -1770,50 +1772,50 @@ protected:
 
   class WriterAddAssociation : public DCPS::JobQueue::Job {
   public:
-    explicit WriterAddAssociation(const WriterAssociationRecord& record)
+    explicit WriterAddAssociation(const WriterAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
     virtual void execute();
 
-    const WriterAssociationRecord record_;
+    const WriterAssociationRecord_rch record_;
   };
 
   class WriterRemoveAssociations : public DCPS::JobQueue::Job {
   public:
-    explicit WriterRemoveAssociations(const WriterAssociationRecord& record)
+    explicit WriterRemoveAssociations(const WriterAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
     virtual void execute();
 
-    const WriterAssociationRecord record_;
+    const WriterAssociationRecord_rch record_;
   };
 
   class ReaderAddAssociation : public DCPS::JobQueue::Job {
   public:
-    explicit ReaderAddAssociation(const ReaderAssociationRecord& record)
+    explicit ReaderAddAssociation(const ReaderAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
     virtual void execute();
 
-    const ReaderAssociationRecord record_;
+    const ReaderAssociationRecord_rch record_;
   };
 
   class ReaderRemoveAssociations : public DCPS::JobQueue::Job {
   public:
-    explicit ReaderRemoveAssociations(const ReaderAssociationRecord& record)
+    explicit ReaderRemoveAssociations(const ReaderAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
     virtual void execute();
 
-    const ReaderAssociationRecord record_;
+    const ReaderAssociationRecord_rch record_;
   };
 
 };
