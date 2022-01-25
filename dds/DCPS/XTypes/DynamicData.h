@@ -158,6 +158,26 @@ public:
   const IntermediateChains& get_intermediate_chains() { return chains_to_release; }
 
 private:
+
+  class ScopedChainManager {
+  public:
+    ScopedChainManager(DynamicData& dd)
+      : dd_(dd)
+      , dup_(dd_.chain_->duplicate())
+    {
+      dd_.setup_stream(dup_.get());
+    }
+
+    ~ScopedChainManager()
+    {
+      dd_.release_chains();
+    }
+
+  private:
+    DynamicData& dd_;
+    DCPS::Message_Block_Ptr dup_;
+  };
+
   void copy(const DynamicData& other);
 
   /// Skip the whole data corresponding to this type if it is a struct or union.

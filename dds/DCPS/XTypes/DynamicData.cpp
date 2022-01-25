@@ -80,6 +80,8 @@ DynamicData::DynamicData(DCPS::Serializer& ser, const DynamicType_rch& type)
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
     throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
   }
+
+  strm_.rdstate(align_state_);
 }
 
 DynamicData::DynamicData(const DynamicData& other)
@@ -231,8 +233,9 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
 
   // TODO: Create a scoped memory management object that release the chains when it goes
   // out of scope. Then we don't need to remember calling release_chains() every time.
-  DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  setup_stream(dup.get());
+  //  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  //  setup_stream(dup.get());
+  ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
   switch (tk) {
@@ -301,7 +304,7 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
               break;
             }
           }
-          release_chains();
+          //release_chains();
           return id;
         }
       } else { // Mutable
@@ -340,7 +343,7 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
         if (!good || !strm_.read_parameter_id(member_id, member_size, must_understand)) {
           member_id = MEMBER_ID_INVALID;
         }
-        release_chains();
+        //release_chains();
         return member_id;
       }
     }
@@ -372,8 +375,9 @@ ACE_CDR::ULong DynamicData::get_item_count()
     return item_count_;
   }
 
-  DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  setup_stream(dup.get());
+  //  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  //  setup_stream(dup.get());
+  ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
   switch (tk) {
@@ -473,7 +477,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
           ++actual_count;
         }
       }
-      release_chains();
+      //release_chains();
       return actual_count;
     }
   case TK_UNION:
@@ -558,7 +562,7 @@ ACE_CDR::ULong DynamicData::get_item_count()
         }
         ++length;
       }
-      release_chains();
+      //release_chains();
       return length;
     }
   }
@@ -960,8 +964,9 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
     return DDS::RETCODE_ERROR;
   }
 
-  DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  setup_stream(dup.get());
+  //  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  //  setup_stream(dup.get());
+  ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -995,7 +1000,7 @@ DDS::ReturnCode_t DynamicData::get_single_value(ValueType& value, MemberId id,
     }
   }
 
-  release_chains();
+  //  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_single_value -")
@@ -1067,8 +1072,9 @@ DDS::ReturnCode_t DynamicData::get_float128_value(ACE_CDR::LongDouble& value, Me
 template<TypeKind CharKind, TypeKind StringKind, typename ToCharT, typename CharT>
 DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
 {
-  DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  setup_stream(dup.get());
+  //  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  //  setup_stream(dup.get());
+  ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -1130,7 +1136,7 @@ DDS::ReturnCode_t DynamicData::get_char_common(CharT& value, MemberId id)
     break;
   }
 
-  release_chains();
+  //  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_char_common -")
@@ -1171,8 +1177,9 @@ bool DynamicData::get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolea
 
 DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, MemberId id)
 {
-  DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  setup_stream(dup.get());
+  //  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  //  setup_stream(dup.get());
+  ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -1238,7 +1245,7 @@ DDS::ReturnCode_t DynamicData::get_boolean_value(ACE_CDR::Boolean& value, Member
     break;
   }
 
-  release_chains();
+  //  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_boolean_value -")
@@ -1261,8 +1268,9 @@ DDS::ReturnCode_t DynamicData::get_wstring_value(ACE_CDR::WChar*& value, MemberI
 
 DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id)
 {
-  DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  setup_stream(dup.get());
+  //  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  //  setup_stream(dup.get());
+  ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -1364,7 +1372,7 @@ DDS::ReturnCode_t DynamicData::get_complex_value(DynamicData& value, MemberId id
     break;
   }
 
-  release_chains();
+  //  release_chains();
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
@@ -1593,8 +1601,9 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     return DDS::RETCODE_ERROR;
   }
 
-  DCPS::Message_Block_Ptr dup(chain_->duplicate());
-  setup_stream(dup.get());
+  //  DCPS::Message_Block_Ptr dup(chain_->duplicate());
+  //  setup_stream(dup.get());
+  ScopedChainManager chain_manager(*this);
 
   const TypeKind tk = type_->get_kind();
   bool good = true;
@@ -1624,7 +1633,7 @@ DDS::ReturnCode_t DynamicData::get_sequence_values(SequenceType& value, MemberId
     return DDS::RETCODE_ERROR;
   }
 
-  release_chains();
+  //  release_chains();
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicData::get_sequence_values -")
@@ -2290,9 +2299,9 @@ bool DynamicData::skip_all()
   }
 
   // TODO: Move this if block to the constructor where Serializer is passed?
-  if (reset_align_state_) {
-    strm_.rdstate(align_state_);
-  }
+  //  if (reset_align_state_) {
+  //    strm_.rdstate(align_state_);
+  //  }
 
   const ExtensibilityKind extensibility = descriptor_.extensibility_kind;
   if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2 && (extensibility == APPENDABLE || extensibility == MUTABLE)) {
