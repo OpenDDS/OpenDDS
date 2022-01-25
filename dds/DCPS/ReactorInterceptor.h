@@ -150,7 +150,6 @@ protected:
   typedef OPENDDS_VECTOR(CommandPtr) Queue;
   Queue command_queue_;
   ReactorState state_;
-  int recursion_;
 };
 
 typedef RcHandle<ReactorInterceptor> ReactorInterceptor_rch;
