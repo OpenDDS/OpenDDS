@@ -1232,6 +1232,7 @@ DataWriterImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind kind)
 bool
 DataWriterImpl::participant_liveliness_activity_after(const MonotonicTimePoint& tv)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   if (this->qos_.liveliness.kind == DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS) {
     return last_liveliness_activity_time_ > tv;
   } else {
