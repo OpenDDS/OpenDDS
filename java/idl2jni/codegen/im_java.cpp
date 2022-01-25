@@ -13,9 +13,10 @@
 
 #include <dds/DCPS/Definitions.h>
 
-#include "ace/OS_NS_sys_stat.h"
-#include "ace/OS_NS_string.h"
-#include "ace/Version.h"
+#include <ace/OS_NS_stdio.h>
+#include <ace/OS_NS_string.h>
+#include <ace/OS_NS_sys_stat.h>
+#include <ace/Version.h>
 
 #include <iostream>
 #include <sstream>
