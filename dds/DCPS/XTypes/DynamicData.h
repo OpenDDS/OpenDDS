@@ -154,14 +154,11 @@ public:
 
   bool check_xcdr1_mutable(const DynamicType_rch& dt);
 
-  typedef OPENDDS_VECTOR(ACE_Message_Block*) IntermediateChains;
-  const IntermediateChains& get_intermediate_chains() { return chains_to_release; }
-
 private:
 
   class ScopedChainManager {
   public:
-    ScopedChainManager(DynamicData& dd)
+    explicit ScopedChainManager(DynamicData& dd)
       : dd_(dd)
       , dup_(dd_.chain_->duplicate())
     {
@@ -349,6 +346,9 @@ private:
   /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
   typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;
   bool check_xcdr1_mutable_i(const DynamicType_rch& dt, DynamicTypeNameSet& dtns);
+
+  typedef OPENDDS_VECTOR(ACE_Message_Block*) IntermediateChains;
+  const IntermediateChains& get_intermediate_chains() const { return chains_to_release; }
 
   /// A duplicate of the original message block chain passed from the constructor.
   /// This is released in the destructor.
