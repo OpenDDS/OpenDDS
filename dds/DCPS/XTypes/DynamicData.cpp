@@ -229,6 +229,8 @@ MemberId DynamicData::get_member_id_at_index(ACE_CDR::ULong index)
     return MEMBER_ID_INVALID;
   }
 
+  // TODO: Create a scoped memory management object that release the chains when it goes
+  // out of scope. Then we don't need to remember calling release_chains() every time.
   DCPS::Message_Block_Ptr dup(chain_->duplicate());
   setup_stream(dup.get());
 
@@ -2140,6 +2142,14 @@ bool DynamicData::skip_aggregated_member(const DynamicType_rch& member_type)
     return false;
   }
 
+  // TODO: Get chains_to_release from nested_data that was the result of the call to
+  // skip_all on nested_data. Push them to this object's chains_to_release.
+  // Eventually, the top-level chains_to_release that has all chains need to be released
+  // will be released at the end of the top-level interface method like get_*_value,
+  // get_*_values, etc.
+  const IntermediateChains& chains = nested_data.get_intermediate_chains();
+  chains_to_release.insert(chains_to_release.end(), chains.begin(), chains.end());
+
   ACE_Message_Block* const result_chain = nested_data.strm_.current()->duplicate();
   strm_ = DCPS::Serializer(result_chain, encoding_);
   const DCPS::Serializer::RdState curr_state = nested_data.strm_.rdstate();
@@ -2279,6 +2289,7 @@ bool DynamicData::skip_all()
     return false;
   }
 
+  // TODO: Move this if block to the constructor where Serializer is passed?
   if (reset_align_state_) {
     strm_.rdstate(align_state_);
   }
@@ -2306,7 +2317,7 @@ bool DynamicData::skip_all()
           break;
         }
       }
-      release_chains();
+      //release_chains();
       return good;
     } else { // Union
       const DynamicType_rch disc_type = get_base_type(descriptor_.discriminator_type);
@@ -2327,7 +2338,7 @@ bool DynamicData::skip_all()
           if (label == labels[i]) {
             const DynamicType_rch selected_member = md.type.lock();
             bool good = selected_member && skip_member(selected_member);
-            release_chains();
+            //release_chains();
             return good;
           }
         }
@@ -2341,7 +2352,7 @@ bool DynamicData::skip_all()
       if (has_default) {
         const DynamicType_rch default_dt = default_member.type.lock();
         bool good = default_dt && skip_member(default_dt);
-        release_chains();
+        //release_chains();
         return good;
       }
       if (DCPS::DCPS_debug_level >= 1) {
