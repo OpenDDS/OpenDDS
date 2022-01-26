@@ -65,7 +65,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
                                              int n,
                                              const ACE_SOCK_Dgram& socket,
                                              ACE_INET_Addr& remote_address,
+#ifdef OPENDDS_SECURITY
+                                             DCPS::RcHandle<ICE::Agent> ice_agent,
                                              DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
+#endif
                                              RtpsUdpTransport& tport,
                                              bool& stop)
 {
@@ -133,14 +136,15 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
     if (tport.relay_srsm().is_response(message)) {
       tport.process_relay_sra(tport.relay_srsm().receive(message));
+#ifdef OPENDDS_SECURITY
     } else if (endpoint) {
-      ICE::Agent::instance()->receive(endpoint, local_address, remote_address, message);
+      ice_agent->receive(endpoint, local_address, remote_address, message);
+#endif
     }
   }
   head->release();
 # endif
 #else
-  ACE_UNUSED_ARG(endpoint);
   ACE_UNUSED_ARG(stop);
 #endif
 
@@ -202,7 +206,11 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
   }
   const ssize_t ret = (scatter < 0) ? scatter : (iter - buffer);
 #else
-  const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address, link_->get_ice_endpoint(), link_->transport(), stop);
+  const ssize_t ret = receive_bytes_helper(iov, n, socket, remote_address,
+#ifdef OPENDDS_SECURITY
+                                           link_->get_ice_agent(), link_->get_ice_endpoint(),
+#endif
+                                           link_->transport(), stop);
 #endif
   remote_address_ = remote_address;
 

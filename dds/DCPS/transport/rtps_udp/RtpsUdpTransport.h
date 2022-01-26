@@ -29,6 +29,9 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
   RtpsUdpTransport(RtpsUdpInst& inst);
   RtpsUdpInst& config() const;
+#ifdef OPENDDS_SECURITY
+  DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
+#endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
   virtual void rtps_relay_only_now(bool flag);
   virtual void use_rtps_relay_now(bool flag);
@@ -187,6 +190,7 @@ private:
   void start_ice();
   void stop_ice();
 
+  RcHandle<ICE::Agent> ice_agent_;
 #endif
 
   InternalTransportStatistics transport_statistics_;
