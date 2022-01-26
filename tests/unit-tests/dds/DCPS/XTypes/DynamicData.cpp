@@ -1329,6 +1329,22 @@ TEST(DDS_DCPS_XTypes_DynamicData, Mutable_SkipNestedMembers)
   ret = data.get_int8_value(i, 4);
   EXPECT_EQ(DDS::RETCODE_OK, ret);
   EXPECT_EQ(expected.i, i);
+
+  // Test the validity of inner DynamicData when the outer one no longer exists.
+  XTypes::DynamicData nested;
+  {
+    XTypes::DynamicData enclosing(&msg, xcdr2, dt);
+    ret = enclosing.get_complex_value(nested, 1);
+    EXPECT_EQ(DDS::RETCODE_OK, ret);
+  }
+  ACE_CDR::Long l_val;
+  ret = nested.get_int32_value(l_val, 0);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.l, l_val);
+  ACE_CDR::Short s_val;
+  ret = nested.get_int16_value(s_val, 2);
+  EXPECT_EQ(DDS::RETCODE_OK, ret);
+  EXPECT_EQ(expected.outer.s, s_val);
 }
 
 /////////////////////////////// Appendable tests ////////////////////////////
