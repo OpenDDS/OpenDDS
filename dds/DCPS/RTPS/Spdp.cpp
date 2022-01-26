@@ -2472,6 +2472,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
 
   DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
   if (outer->config_->use_ncm() && ncm) {
+    reactor(reactor_task->reactor());
     ncm->add_listener(*this);
   } else {
     DCPS::NetworkInterface nic(0, multicast_interface_, true);
