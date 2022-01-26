@@ -155,6 +155,26 @@ public:
   bool check_xcdr1_mutable(const DynamicType_rch& dt);
 
 private:
+
+  class ScopedChainManager {
+  public:
+    explicit ScopedChainManager(DynamicData& dd)
+      : dd_(dd)
+      , dup_(dd_.chain_->duplicate())
+    {
+      dd_.setup_stream(dup_.get());
+    }
+
+    ~ScopedChainManager()
+    {
+      dd_.release_chains();
+    }
+
+  private:
+    DynamicData& dd_;
+    DCPS::Message_Block_Ptr dup_;
+  };
+
   void copy(const DynamicData& other);
 
   /// Skip the whole data corresponding to this type if it is a struct or union.
@@ -312,6 +332,8 @@ private:
   /// Skip a member which is a structure or a union.
   bool skip_aggregated_member(const DynamicType_rch& type);
 
+  void release_chains();
+
   DynamicType_rch get_base_type(const DynamicType_rch& alias_type) const;
   bool is_primitive(TypeKind tk) const;
   bool get_primitive_size(const DynamicType_rch& dt, ACE_CDR::ULong& size) const;
@@ -324,6 +346,9 @@ private:
   /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
   typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;
   bool check_xcdr1_mutable_i(const DynamicType_rch& dt, DynamicTypeNameSet& dtns);
+
+  typedef OPENDDS_VECTOR(ACE_Message_Block*) IntermediateChains;
+  const IntermediateChains& get_intermediate_chains() const { return chains_to_release; }
 
   /// A duplicate of the original message block chain passed from the constructor.
   /// This is released in the destructor.
@@ -347,7 +372,7 @@ private:
   /// execution that need to be released when the method ends. Those chains are created
   /// when the method skips a nested aggregated type (i.e., struct and union) by
   /// calling skip_aggregated_member().
-  OPENDDS_VECTOR(ACE_Message_Block*) chains_to_release;
+  IntermediateChains chains_to_release;
 
   /// This DynamicData object holds data for this type.
   DynamicType_rch type_;
