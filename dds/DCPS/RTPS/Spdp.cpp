@@ -3454,7 +3454,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
       throw std::runtime_error("failed to open unicast port for SPDP");
     }
     if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_WARNING,
+      ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Spdp::SpdpTransport::open_unicast_socket() - ")
                  ACE_TEXT("failed to open %C %p.  ")
                  ACE_TEXT("Trying next participantId...\n"),
