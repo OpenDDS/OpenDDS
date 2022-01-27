@@ -1302,8 +1302,11 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
       dp.auth_state_, dp.handshake_state_));
   }
 
+  dp.handshake_resend_falloff_.set(config_->auth_resend_period());
+
   if (!from_discovery && dp.handshake_state_ != HANDSHAKE_STATE_DONE) {
     // Ignore auth reqs when already in progress.
+    schedule_handshake_resend(DCPS::TimeDuration::zero_value, guid);
     return;
   }
 
@@ -1346,7 +1349,7 @@ Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_di
                    OPENDDS_STRING(DCPS::GuidConverter(guid)).c_str()));
       }
     }
-    schedule_handshake_resend(config_->auth_resend_period(), guid);
+    schedule_handshake_resend(dp.handshake_resend_falloff_.get(), guid);
   }
 
   switch (vr) {
@@ -1460,6 +1463,8 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   // We have received a handshake message from the remote which means
   // we don't need to send the auth req.
   dp.have_auth_req_msg_ = false;
+
+  dp.handshake_resend_falloff_.set(config_->auth_resend_period());
 
   if (dp.handshake_state_ == HANDSHAKE_STATE_DONE && !dp.is_requester_) {
     // Remote is still sending a reply, so resend the final.
@@ -1798,7 +1803,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
           }
         }
       }
-      pit->second.handshake_resend_falloff_.advance();
+      pit->second.handshake_resend_falloff_.advance(config_->max_auth_time());
 
       handshake_resends_.insert(std::make_pair(pit->second.stateless_msg_deadline_, pit->first));
       if (pit->second.stateless_msg_deadline_ < handshake_resends_.begin()->first) {
@@ -1888,7 +1893,7 @@ Spdp::send_handshake_message(const DCPS::RepoId& guid,
   const DCPS::RepoId reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
   const DDS::ReturnCode_t retval = sedp_->write_stateless_message(dp.handshake_msg_, reader);
   dp.have_handshake_msg_ = true;
-  dp.stateless_msg_deadline_ = schedule_handshake_resend(config_->auth_resend_period(), guid);
+  dp.stateless_msg_deadline_ = schedule_handshake_resend(dp.handshake_resend_falloff_.get(), guid);
   return retval;
 }
 
