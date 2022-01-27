@@ -177,6 +177,7 @@ sub help {
     "                         doxygen docs\n" .
     "  --skip-website         Skip updating the website\n" .
     "  --skip-ftp             Skip the FTP upload\n" .
+    "  --ignore-github-token  Don't require GITHUB_TOKEN\n" .
     "  --ftp-active           Use an active FTP connection. (default is passive)\n" .
     "\n" .
     "Environment Variables:\n" .
@@ -279,11 +280,8 @@ sub email_announce_contents {
 }
 
 sub run_command {
-  my $test_name = shift;
   return !command_utils::run_command(@_,
-    name => $test_name,
-    script_name => 'auto_run_tests',
-    dry_run => $dry_run,
+    script_name => 'gitrelease.pl',
   );
 }
 
@@ -322,14 +320,16 @@ sub touch_file {
 sub new_pithub {
   my $settings = shift();
 
+  return undef if ($settings->{ignore_github_token});
+
   if (!defined($settings->{github_token})) {
     die("GITHUB_TOKEN must be defined");
   }
 
   return Pithub->new(
-      user => $settings->{github_user},
-      repo => $settings->{github_repo},
-      token => $settings->{github_token},
+    user => $settings->{github_user},
+    repo => $settings->{github_repo},
+    token => $settings->{github_token},
   );
 }
 
@@ -572,6 +572,15 @@ sub parse_release_tag {
 
 sub get_releases {
   my $settings = shift();
+
+  if (!defined($settings->{pithub})) {
+    return [{
+      version => $zero_version,
+      published_at => '2001-09-09T01:46:40',
+      html_url => 'https://opendds.org',
+      assets => [],
+    }];
+  }
 
   my $release_list = $settings->{pithub}->repos->releases->list();
   unless ($release_list->success) {
@@ -2274,6 +2283,7 @@ my $skip_devguide = 0;
 my $skip_doxygen = 0;
 my $skip_website = 0;
 my $skip_ftp = 0;
+my $ignore_github_token = 0;
 my $ftp_active = 0;
 my $ftp_port = 0;
 
@@ -2298,6 +2308,7 @@ GetOptions(
   'skip-ftp' => \$skip_ftp,
   'ftp-active' => \$ftp_active,
   'ftp-port=s' => \$ftp_port,
+  'ignore-github-token' => \$ignore_github_token,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2439,6 +2450,7 @@ my %global_settings = (
     ftp_active => $ftp_active,
     ftp_port => $ftp_port,
     mock => $mock,
+    ignore_github_token => $ignore_github_token,
 );
 
 if (!$ignore_args) {
