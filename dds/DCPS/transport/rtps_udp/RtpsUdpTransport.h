@@ -112,9 +112,14 @@ private:
 #if defined(OPENDDS_SECURITY)
   void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
   {
-    local_crypto_handle_ = pch;
-    if (link_) {
-      link_->local_crypto_handle(pch);
+    RtpsUdpDataLink_rch link;
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(links_lock_);
+      local_crypto_handle_ = pch;
+      link = link_;
+    }
+    if (link) {
+      link->local_crypto_handle(pch);
     }
   }
 #endif

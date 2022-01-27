@@ -79,10 +79,24 @@ void ReactorInterceptor::process_command_queue_i()
   }
   if (!command_queue_.empty()) {
     state_ = NOTIFIED;
-    reactor()->notify(this);
+    ACE_Reactor* const reactor = ACE_Event_Handler::reactor();
+    guard.release();
+    reactor->notify(this);
   } else {
     state_ = NONE;
   }
+}
+
+void ReactorInterceptor::reactor(ACE_Reactor *reactor)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  ACE_Event_Handler::reactor(reactor);
+}
+
+ACE_Reactor* ReactorInterceptor::reactor() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return ACE_Event_Handler::reactor();
 }
 
 }

@@ -173,7 +173,7 @@ get_property(
   const std::string& name, Builder::PropertyValueKind kind)
 {
   for (uint32_t i = 0; i < seq.length(); ++i) {
-    if (std::string(seq[i].name.in()) == name) {
+    if (name == seq[i].name.in()) {
       if (seq[i].value._d() == kind) {
         return ConstPropertyIndex(seq, i);
       } else {

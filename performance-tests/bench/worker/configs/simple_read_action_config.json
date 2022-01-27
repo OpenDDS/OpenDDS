@@ -96,7 +96,7 @@
       "readers": [ "datareader_01" ],
       "params": [
         { "name": "read_period",
-          "value": { "$discriminator": "PVK_TIMESTAMP", "timestamp_prop": { "sec": 3, "nsec": 0 } }
+          "value": { "$discriminator": "PVK_TIME", "timestamp_prop": { "sec": 3, "nsec": 0 } }
         }
       ]
     }

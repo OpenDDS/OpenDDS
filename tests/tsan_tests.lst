@@ -43,3 +43,12 @@ tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps publishers 10 su
 tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc publishers 10 subscribers 10: RTPS
 tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 
+performance-tests/bench/run_test.pl disco show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
+performance-tests/bench/run_test.pl echo show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl echo_frag show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl fan show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl fan_ws show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl fan_frag show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
+performance-tests/bench/run_test.pl fan_frag_ws show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
+performance-tests/bench/run_test.pl mixed show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+
