@@ -579,6 +579,15 @@ sub parse_release_tag {
 sub get_releases {
   my $settings = shift();
 
+  if (!defined($settings->{pithub})) {
+    return [{
+      version => $zero_version,
+      published_at => '2001-09-09T01:46:40',
+      html_url => 'https://opendds.org',
+      assets => [],
+    }];
+  }
+
   my $release_list = $settings->{pithub}->repos->releases->list();
   unless ($release_list->success) {
     die("error accessing github: $release_list->response->status_line");
