@@ -17,6 +17,9 @@
 #include <ace/Process_Manager.h>
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_fcntl.h>
+#ifdef ACE_WIN32
+#include <ace/WFMO_Reactor.h>
+#endif
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsPublicationC.h>
@@ -70,6 +73,23 @@ std::string create_config(const std::string& file_base_name, const char* content
     std::cerr << "Could not write " << filename << std::endl;
   }
   return filename;
+}
+
+void read_file(std::ifstream& ifs, ::TAO::String_Manager& str)
+{
+  ifs.seekg(0, ios::end);
+  const std::ifstream::pos_type end_pos = ifs.tellg();
+  ifs.seekg(0, ios::beg);
+  const std::ifstream::pos_type beg_pos = ifs.tellg();
+
+  const auto file_length = end_pos - beg_pos;
+
+  std::vector<char> temp(static_cast<std::vector<char>::size_type>(file_length + 1));
+  ifs.read(temp.data(), file_length);
+  temp[static_cast<std::vector<char>::size_type>(file_length)] = '\0';
+
+  const char* ptr = temp.data();
+  str = ptr;
 }
 
 class SpawnedProcess {
@@ -127,14 +147,12 @@ public:
     if (!report.failed) {
       std::ifstream report_file(report_filename_);
       if (report_file.good()) {
-        std::string str((std::istreambuf_iterator<char>(report_file)), std::istreambuf_iterator<char>());
-        report.details = str.c_str();
+        read_file(report_file, report.details);
       }
     }
     std::ifstream log_file(log_filename_);
     if (log_file.good()) {
-      std::string str((std::istreambuf_iterator<char>(log_file)), std::istreambuf_iterator<char>());
-      report.log = str.c_str();
+      read_file(log_file, report.log);
     }
   }
 
@@ -259,6 +277,12 @@ public:
   bool add_spawned_process(const SpawnedProcessConfig& config)
   {
     std::lock_guard<std::mutex> guard(mutex_);
+#ifdef ACE_WIN32
+    if (all_spawned_processes_.size() >= ACE_WFMO_Reactor::DEFAULT_SIZE) {
+      std::cerr << "ACE_WFMO_Reactor can't handle waiting (for signals) from more than " << ACE_WFMO_Reactor::DEFAULT_SIZE << " objects" << std::endl;
+      return true;
+    }
+#endif
     if (all_spawned_processes_.count(config.spawned_process_id)) {
       std::cerr << "Received the same spawned process id twice: " << config.spawned_process_id << std::endl;
       return true;
@@ -288,7 +312,7 @@ public:
       all_spawned_processes = all_spawned_processes_;
     }
 
-    for (auto spawned_process_i : all_spawned_processes) {
+    for (auto& spawned_process_i : all_spawned_processes) {
       auto& spawned_process = spawned_process_i.second;
       if (spawned_process->running()) {
 #ifndef ACE_WIN32
@@ -311,13 +335,21 @@ public:
     // Spawn Processes
     {
       std::lock_guard<std::mutex> guard(mutex_);
+      std::vector<std::shared_ptr<ACE_Process_Options>> spawned_proc_opts;
+      spawned_proc_opts.reserve(all_spawned_processes_.size());
+      std::vector<ACE_HANDLE> log_handles;
+      log_handles.reserve(all_spawned_processes_.size());
+      for (auto& spawned_process_i : all_spawned_processes_) {
+        auto& spawned_process = spawned_process_i.second;
+        log_handles.push_back(ACE_INVALID_HANDLE);
+        spawned_proc_opts.push_back(spawned_process->get_proc_opts(log_handles.back()));
+      }
+      int index = 0;
       for (auto spawned_process_i : all_spawned_processes_) {
         auto& spawned_process = spawned_process_i.second;
-        ACE_HANDLE log_handle = ACE_INVALID_HANDLE;
-        std::shared_ptr<ACE_Process_Options> proc_opts = spawned_process->get_proc_opts(log_handle);
-        pid_t pid = process_manager_->spawn(*proc_opts);
-        if (log_handle != ACE_INVALID_HANDLE) {
-          ACE_OS::close(log_handle);
+        pid_t pid = process_manager_->spawn(*spawned_proc_opts[index]);
+        if (log_handles[index] != ACE_INVALID_HANDLE) {
+          ACE_OS::close(log_handles[index]);
         }
         if (pid != ACE_INVALID_PID) {
           spawned_process->set_pid(pid);
@@ -327,6 +359,7 @@ public:
           std::cerr << "Failed to run spawned process " << spawned_process->id() << std::endl;
           spawned_process_is_finished(spawned_process);
         }
+        ++index;
       }
     }
 
@@ -341,7 +374,7 @@ public:
     report.node_name = node_name_.c_str();
     report.node_id = node_id_;
 
-    bool running = true;
+    std::atomic<bool> running(true);
 
     std::thread stat_collector([&](){
 
@@ -352,7 +385,7 @@ public:
         double mem_sum = 0.0;
         double virtual_mem_sum = 0.0;
 
-        for (auto it = spawned_process_process_stat_collectors_.begin(); it != spawned_process_process_stat_collectors_.end(); it++) {
+        for (auto it = spawned_process_process_stat_collectors_.cbegin(); it != spawned_process_process_stat_collectors_.cend(); it++) {
           cpu_sum += it->second->get_cpu_usage();
           mem_sum += it->second->get_mem_usage();
           virtual_mem_sum += it->second->get_virtual_mem_usage();
@@ -367,6 +400,37 @@ public:
     bool spawned_processes_killed = false;
     while (running) {
       // Check to see if any spawned_processs are done and write their reports
+      std::list<exited_process> exited_processes;
+      {
+        std::lock_guard<std::mutex> guard(exited_processes_mutex_);
+        exited_processes.swap(exited_processes_);
+      }
+
+      for (auto& ep : exited_processes) {
+        std::stringstream ss_out, ss_err;
+        {
+          std::lock_guard<std::mutex> guard(mutex_);
+          const auto i = pid_to_spawned_process_id_.find(ep.pid);
+          if (i != pid_to_spawned_process_id_.end()) {
+            auto& spawned_process = all_spawned_processes_[i->second];
+            ss_out << "SpawnedProcessManager::handle_exit() - Handling exit of process " << ep.pid << " at " << Bench::iso8601() << " with exit code " << ep.exit_code << std::endl;
+            spawned_process->set_exit_status(ep.return_value, ep.exit_code);
+            remaining_spawned_process_count_--;
+            finished_spawned_processes_.push_back(spawned_process);
+            cv_.notify_all();
+          } else {
+            ss_err << "SpawnedProcessManager::handle_exit() received an unknown PID: " << ep.pid << std::endl;
+          }
+        }
+
+        if (!ss_out.str().empty()) {
+          std::cout << ss_out.str() << std::flush;
+        }
+        if (!ss_err.str().empty()) {
+          std::cerr << ss_err.str() << std::flush;
+        }
+      }
+
       std::list<SpawnedProcessPtr> finished_spawned_processes;
       {
         std::lock_guard<std::mutex> guard(mutex_);
@@ -442,22 +506,13 @@ public:
   {
     assert(process != nullptr);
 
-    const pid_t pid = process->getpid();
-
-    std::lock_guard<std::mutex> guard(mutex_);
-
-    const auto i = pid_to_spawned_process_id_.find(pid);
-    if (i != pid_to_spawned_process_id_.end()) {
-      auto& spawned_process = all_spawned_processes_[i->second];
-      std::cout << "SpawnedProcessManager::handle_exit() - Handling exit of process " << pid << " at " << Bench::iso8601() << " with exit code " << process->exit_code() << std::endl;
-      spawned_process->set_exit_status(process->return_value(), process->exit_code());
-      remaining_spawned_process_count_--;
-      finished_spawned_processes_.push_back(spawned_process);
-      cv_.notify_all();
-    } else {
-      std::cerr << "SpawnedProcessManager::handle_exit() received an unknown PID: " << pid << std::endl;
+    const exited_process ep = { process->getpid(), process->return_value(), process->exit_code() };
+    {
+      std::lock_guard<std::mutex> guard(exited_processes_mutex_);
+      exited_processes_.push_back(ep);
     }
 
+    cv_.notify_all();
     return 0;
   }
 
@@ -480,6 +535,15 @@ public:
   }
 
 private:
+
+  struct exited_process {
+    pid_t pid;
+    int return_value;
+    ACE_exitcode exit_code;
+  };
+  std::mutex exited_processes_mutex_;
+  std::list<exited_process> exited_processes_;
+
   unsigned timeout_ = 0;
   std::mutex mutex_;
   std::condition_variable cv_;
@@ -676,17 +740,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  ACE_Reactor* reactor = ACE_Reactor::instance();
+  ACE_Thread_Manager* thread_manager = ACE_Thread_Manager::instance();
+
   // Wait For and Run Node Configurations
-  std::thread reactor_thread([]() {
-    if (ACE_Reactor::instance()->owner(ACE_Thread_Manager::instance()->thr_self())) {
+  std::thread reactor_thread([&]() {
+    if (reactor->owner(thread_manager->thr_self())) {
       std::cerr << "Error setting Reactor Thread" << std::endl;
     }
-    ACE_Reactor::instance()->run_reactor_event_loop();
+    reactor->run_reactor_event_loop();
   });
 
   int exit_status = 0;
   {
-    ProcessManagerPtr process_manager = std::make_shared<ACE_Process_Manager>(ACE_Process_Manager::DEFAULT_SIZE, ACE_Reactor::instance());
+    ProcessManagerPtr process_manager = std::make_shared<ACE_Process_Manager>(ACE_Process_Manager::DEFAULT_SIZE, reactor);
     while (true) {
       exit_status = run_cycle(name, process_manager, participant,
         status_writer_impl, allocated_scenario_reader_impl, report_writer_impl);
@@ -698,7 +765,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   // Clean up
-  ACE_Reactor::instance()->end_reactor_event_loop();
+  reactor->end_reactor_event_loop();
   reactor_thread.join();
 
   participant->delete_contained_entities();

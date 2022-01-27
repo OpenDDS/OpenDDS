@@ -104,6 +104,9 @@ public:
 
   virtual bool reactor_is_shut_down() const = 0;
 
+  virtual void reactor(ACE_Reactor *reactor);
+  virtual ACE_Reactor* reactor() const;
+
 protected:
 
   enum ReactorState {
@@ -143,7 +146,7 @@ protected:
   void process_command_queue_i();
 
   ACE_thread_t owner_;
-  ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex mutex_;
   typedef OPENDDS_VECTOR(CommandPtr) Queue;
   Queue command_queue_;
   ReactorState state_;
