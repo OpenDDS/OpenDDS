@@ -13,6 +13,7 @@
 #include "fe_private.h"
 
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/ValueHelper.h>
 
 #include <iostream>
 #include <fstream>
@@ -1636,8 +1637,9 @@ bool idl_mapping_jni::gen_native(UTL_ScopedName *name, const char *)
 }
 
 namespace {
-ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
+ostream& operator<<(ostream& o, const AST_Expression::AST_ExprValue& expr)
 {
+  const AST_Expression::AST_ExprValue* ev = &expr;
   switch (ev->et) {
   case AST_Expression::EV_short:
     o << ev->u.sval;
@@ -1657,17 +1659,11 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   case AST_Expression::EV_ulonglong:
     o << ev->u.ullval << "ULL";
     break;
-  case AST_Expression::EV_float:
-    o << ev->u.fval << 'F';
-    break;
-  case AST_Expression::EV_double:
-    o << ev->u.dval;
-    break;
   case AST_Expression::EV_char:
-    o << '\'' << ev->u.cval << '\'';
+    OpenDDS::DCPS::char_helper<ACE_CDR::Char>(o << '\'', ev->u.cval) << '\'';
     break;
   case AST_Expression::EV_wchar:
-    o << "L\'" << ev->u.wcval << '\'';
+    OpenDDS::DCPS::char_helper<ACE_CDR::WChar>(o << "L'", ev->u.wcval) << '\'';
     break;
 #if OPENDDS_HAS_EXPLICIT_INTS
   case AST_Expression::EV_int8:
@@ -1681,23 +1677,12 @@ ostream &operator<< (ostream &o, AST_Expression::AST_ExprValue *ev)
   case AST_Expression::EV_bool:
     o << boolalpha << static_cast<bool>(ev->u.bval);
     break;
-  case AST_Expression::EV_string:
-    o << '"' << ev->u.strval->get_string() << '"';
-    break;
-  case AST_Expression::EV_wstring:
-    o << "L\"" << ev->u.wstrval << '"';
-    break;
   case AST_Expression::EV_enum:
     o << ev->u.eval;
     break;
-  case AST_Expression::EV_longdouble:
-  case AST_Expression::EV_any:
-  case AST_Expression::EV_object:
-  case AST_Expression::EV_void:
-  case AST_Expression::EV_none:
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
-         << " is not supported\n";
+         << " is not supported as a union case label\n";
     BE_abort();
   }
   }
@@ -1735,7 +1720,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
 
       } else {
         ostringstream oss;
-        oss << ul->label_val()->ev();
+        oss << *ul->label_val()->ev();
         string ccasename(oss.str());
 
         if (ccasename == "true") ccasename = "JNI_TRUE";

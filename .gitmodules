@@ -4,4 +4,5 @@
 	branch = version1.1.0
 [submodule "tests/googletest"]
 	path = tests/googletest
-	url = https://github.com/google/googletest
+	url = https://github.com/oci-labs/googletest
+	branch = v1.8.x
