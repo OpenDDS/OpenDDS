@@ -1915,14 +1915,14 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u18_gcc10_i0w1_xer0:
+  ACE_TAO_u18_gcc11_i0_xer0:
 
     runs-on: ubuntu-18.04
 
     steps:
     - name: install gcc and g++
       run: |
-        sudo apt-get install g++-10
+        sudo apt-get install g++-11
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -1943,7 +1943,7 @@ jobs:
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(g++-10 --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(g++-11 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1961,7 +1961,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-10 --no-inline --features=uses_wchar=1 --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1987,16 +1987,16 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_gcc10_i0w1_xer0:
+  build_u18_gcc11_i0_xer0:
 
     runs-on: ubuntu-18.04
 
-    needs: ACE_TAO_u18_gcc10_i0w1_xer0
+    needs: ACE_TAO_u18_gcc11_i0_xer0
 
     steps:
     - name: install gcc and g++
       run: |
-        sudo apt-get install g++-10
+        sudo apt-get install g++-11
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -2011,13 +2011,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u18_gcc10_i0w1_xer0_artifact
+        name: ACE_TAO_u18_gcc11_i0_xer0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_gcc10_i0w1_xer0.tar.xz
+        tar xvfJ ACE_TAO_u18_gcc11_i0_xer0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -2026,7 +2026,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=g++-10 --no-inline --features=uses_wchar=1 --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --compiler=g++-11 --std=c++20 --no-inline --tests --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -2045,7 +2045,7 @@ jobs:
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
-        cmake -DCMAKE_CXX_COMPILER=g++-10 ..
+        cmake -DCMAKE_CXX_COMPILER=g++-11 ..
         cmake --build . -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -2062,11 +2062,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_u18_gcc10_i0w1_xer0:
+  cmake_u18_gcc11_i0_xer0:
 
     runs-on: ubuntu-18.04
 
-    needs: build_u18_gcc10_i0w1_xer0
+    needs: build_u18_gcc11_i0_xer0
 
     steps:
     - name: checkout MPC
@@ -2088,13 +2088,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_u18_gcc10_i0w1_xer0_artifact
+        name: ACE_TAO_u18_gcc11_i0_xer0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_gcc10_i0w1_xer0.tar.xz
+        tar xvfJ ACE_TAO_u18_gcc11_i0_xer0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -2103,13 +2103,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_u18_gcc10_i0w1_xer0_artifact
+        name: build_u18_gcc11_i0_xer0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_gcc10_i0w1_xer0.tar.xz
+        tar xvfJ build_u18_gcc11_i0_xer0.tar.xz
     - name: check build configuration
       shell: bash
       run: |

@@ -11,8 +11,8 @@
 
 #include "tests/Utils/Safety.h"
 
-volatile bool callbackHappened = false;
-volatile int callback_count = 0;
+ACE_Atomic_Op<ACE_Thread_Mutex, bool> callbackHappened = false;
+ACE_Atomic_Op<ACE_Thread_Mutex, int> callback_count = 0;
 
 void callback(FACE::TRANSACTION_ID_TYPE,
               Messenger::Message& msg,
@@ -24,7 +24,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
   ++callback_count;
   ACE_DEBUG((LM_INFO, "In callback() (the %d time): %C\t%d\t"
              "message_type_id: %Ld\tmessage_size: %d\n",
-             callback_count, msg.text.in(), msg.count,
+             callback_count.value(), msg.text.in(), msg.count,
              message_type_id, message_size));
   callbackHappened = true;
   return_code = FACE::RC_NO_ERROR;
@@ -80,9 +80,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (useCallback) {
     ACE_OS::sleep(5);
-    if (!callbackHappened || callback_count != 1) {
+    if (!callbackHappened.value() || callback_count != 1) {
       ACE_ERROR((LM_ERROR, "ERROR: number callbacks seen incorrect (seen: %d "
-        "expected: 1)\n", callback_count));
+                 "expected: 1)\n", callback_count.value()));
       testPassed = false;
     }
     FACE::TS::Unregister_Callback(connId, status);
