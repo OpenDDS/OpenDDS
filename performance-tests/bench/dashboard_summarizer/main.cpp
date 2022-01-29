@@ -130,7 +130,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     // Determine Scenario Name
     std::string scn;
     for (auto it = known_scenario_names.begin(); scn.empty() && it != known_scenario_names.end(); ++it) {
-      if (file_names[i].find(*it) == 0) {
+      const std::string with_underscore = *it + '_';
+      if (file_names[i].find(with_underscore) == 0) {
         scn = *it;
       }
     }
