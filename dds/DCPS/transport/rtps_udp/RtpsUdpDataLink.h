@@ -203,6 +203,9 @@ public:
 
   virtual void pre_stop_i();
 
+#ifdef OPENDDS_SECURITY
+  DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
+#endif
   virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const;
 
   virtual bool is_leading(const GUID_t& writer_id,
@@ -917,6 +920,7 @@ private:
   Security::SecurityConfig_rch security_config_;
   Security::HandleRegistry_rch handle_registry_;
   DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
+  RcHandle<ICE::Agent> ice_agent_;
 #endif
 
   void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_unicast = false) const;

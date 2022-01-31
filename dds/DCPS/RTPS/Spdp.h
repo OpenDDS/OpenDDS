@@ -732,6 +732,8 @@ private:
 
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
+  DCPS::RcHandle<ICE::Agent> ice_agent_;
+
   void start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId remote, BuiltinEndpointSet_t avail,
                  DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                  const ICE::AgentInfo& agent_info);

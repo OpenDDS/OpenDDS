@@ -36,6 +36,7 @@ RtpsUdpTransport::RtpsUdpTransport(RtpsUdpInst& inst)
 #ifdef OPENDDS_SECURITY
   , ice_endpoint_(make_rch<IceEndpoint>(ref(*this)))
   , relay_stun_task_falloff_(TimeDuration::zero_value)
+  , ice_agent_(ICE::Agent::instance())
 #endif
   , transport_statistics_(inst.name())
 {
@@ -50,6 +51,14 @@ RtpsUdpTransport::config() const
 {
   return static_cast<RtpsUdpInst&>(TransportImpl::config());
 }
+
+#ifdef OPENDDS_SECURITY
+DCPS::RcHandle<ICE::Agent>
+RtpsUdpTransport::get_ice_agent() const
+{
+  return ice_agent_;
+}
+#endif
 
 DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpTransport::get_ice_endpoint()
@@ -635,7 +644,11 @@ RtpsUdpTransport::IceEndpoint::handle_input(ACE_HANDLE fd)
   ACE_INET_Addr remote_address;
 
   bool stop;
-  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address, transport.get_ice_endpoint(), transport, stop);
+  RtpsUdpReceiveStrategy::receive_bytes_helper(iov, 1, choose_recv_socket(fd), remote_address,
+#ifdef OPENDDS_SECURITY
+                                               transport.get_ice_agent(), transport.get_ice_endpoint(),
+#endif
+                                               transport, stop);
 
   return 0;
 }
@@ -797,7 +810,7 @@ RtpsUdpTransport::start_ice()
     ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpTransport::start_ice\n"));
   }
 
-  ICE::Agent::instance()->add_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
+  ice_agent_->add_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
 
   if (!link_) {
     if (reactor()->register_handler(unicast_socket_.get_handle(), ice_endpoint_.get(),
@@ -851,7 +864,7 @@ RtpsUdpTransport::stop_ice()
 #endif
   }
 
-  ICE::Agent::instance()->remove_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
+  ice_agent_->remove_endpoint(static_rchandle_cast<ICE::Endpoint>(ice_endpoint_));
 }
 
 void
