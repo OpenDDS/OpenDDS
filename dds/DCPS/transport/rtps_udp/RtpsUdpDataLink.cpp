@@ -94,6 +94,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 #ifdef OPENDDS_SECURITY
   , security_config_(Security::SecurityRegistry::instance()->default_config())
   , local_crypto_handle_(DDS::HANDLE_NIL)
+  , ice_agent_(ICE::Agent::instance())
 #endif
 {
 #ifdef OPENDDS_SECURITY
@@ -4701,7 +4702,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 #ifdef OPENDDS_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
-    ice_addr = ICE::Agent::instance()->get_address(endpoint, local, remote);
+    ice_addr = ice_agent_->get_address(endpoint, local, remote);
   }
 #endif
 
@@ -4727,6 +4728,14 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   entry.value().addrs_.insert(normal_addrs.begin(), normal_addrs.end());
   entry.value().expires_ = normal_addrs_expires;
 }
+
+#ifdef OPENDDS_SECURITY
+DCPS::RcHandle<ICE::Agent>
+RtpsUdpDataLink::get_ice_agent() const
+{
+  return ice_agent_;
+}
+#endif
 
 DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {

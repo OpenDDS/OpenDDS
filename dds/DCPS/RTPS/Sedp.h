@@ -1757,6 +1757,7 @@ protected:
 #endif
 
 #ifdef OPENDDS_SECURITY
+  DCPS::RcHandle<ICE::Agent> ice_agent_;
   RcHandle<PublicationAgentInfoListener> publication_agent_info_listener_;
   RcHandle<SubscriptionAgentInfoListener> subscription_agent_info_listener_;
 #endif
