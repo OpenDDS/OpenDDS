@@ -116,6 +116,7 @@ TopicImpl::get_listener()
 DDS::ReturnCode_t
 TopicImpl::get_inconsistent_topic_status(DDS::InconsistentTopicStatus& a_status)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(status_mutex_);
   set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, false);
   a_status = inconsistent_topic_status_;
   inconsistent_topic_status_.total_count_change = 0;
@@ -201,6 +202,7 @@ TopicImpl::transport_config(const TransportConfig_rch&)
 void
 TopicImpl::inconsistent_topic(int count)
 {
+  ACE_Guard<ACE_Thread_Mutex> status_guard(status_mutex_);
   inconsistent_topic_status_.total_count_change += count - inconsistent_topic_status_.total_count;
   inconsistent_topic_status_.total_count = count;
 
@@ -216,8 +218,12 @@ TopicImpl::inconsistent_topic(int count)
     }
   }
   if (listener) {
-    listener->on_inconsistent_topic(this, inconsistent_topic_status_);
+    const DDS::InconsistentTopicStatus status = inconsistent_topic_status_;
     inconsistent_topic_status_.total_count_change = 0;
+    status_guard.release();
+    listener->on_inconsistent_topic(this, status);
+  } else {
+    status_guard.release();
   }
 
   notify_status_condition();
