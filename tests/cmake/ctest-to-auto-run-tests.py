@@ -99,7 +99,7 @@ def get_art_name(root, build_path, source_path, test_path, command):
     return '{} {}'.format(cmakelists, ' '.join(command_parts))
 
 
-def generate_test_results(build_path, source_path, debug=False):
+def generate_test_results(build_path, source_path, art_output, debug=False):
     testing_path = build_path.resolve() / 'Testing'
     if debug:
         print('testing_path:', testing_path)
@@ -109,7 +109,11 @@ def generate_test_results(build_path, source_path, debug=False):
         print('test_path_prefix:', test_path_prefix)
 
     # Get first line in TAG file
-    test_run_name = (testing_path / 'TAG').read_text().split('\n')[0].strip()
+    tag_path = testing_path / 'TAG'
+    if not tag_path.is_file():
+        sys.exit('ERROR: {} not found, please run the tests: '
+            'ctest -T Test--no-compress-output'.format(tag_path))
+    test_run_name = tag_path.read_text().split('\n')[0].strip()
     if debug:
         print('test_run_name =', test_run_name)
 
@@ -168,7 +172,7 @@ def generate_test_results(build_path, source_path, debug=False):
             for k, v in copy.items():
                 print('   ', k, '=', repr(v))
         else:
-            print(template.format(**results))
+            print(template.format(**results), file=art_output)
 
 
 def list_tests(build_path, source_path, debug=False):
@@ -183,12 +187,24 @@ def list_tests(build_path, source_path, debug=False):
         print(get_art_name(root, build_path, source_path, path, command))
 
 
+# Like a normal file, stdout itself can be used as a context manger, but
+# like a normal file __exit__ will close it.
+class StdoutContextManager:
+
+    def __enter__(self):
+        return sys.stdout
+
+    def __exit__(self, *args):
+        pass
+
+
 if __name__ == "__main__":
     arg_parser = ArgumentParser(description=__doc__)
     arg_parser.add_argument('source_path', metavar='SOURCE_PATH', type=Path)
     arg_parser.add_argument('build_path', metavar='BUILD_PATH', type=Path)
     arg_parser.add_argument('--debug', action='store_true')
     arg_parser.add_argument('--list', action='store_true')
+    arg_parser.add_argument('--art-output', metavar='ART_OUTPUT_FILE', type=Path)
     args = arg_parser.parse_args()
 
     args.source_path = args.source_path.resolve()
@@ -197,7 +213,13 @@ if __name__ == "__main__":
     if args.list:
         list_tests(args.build_path, args.source_path)
     else:
-        generate_test_results(args.build_path, args.source_path, args.debug)
+        if args.art_output is not None:
+            art_output_cm = args.art_output.resolve().open('w')
+        else:
+            art_output_cm = StdoutContextManager();
+
+        with art_output_cm as art_output:
+            generate_test_results(args.build_path, args.source_path, art_output, args.debug)
 
 
 # vim: expandtab:ts=4:sw=4
