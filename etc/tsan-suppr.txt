@@ -14,13 +14,13 @@ race_top:^ACE_Proactor_Timer_Handler::destroy
 race_top:^ACE_Refcounted_Auto_Ptr_Rep<ACE_Handler::Proxy, ACE_Thread_Mutex>::attach
 race_top:^ACE_Thread_Manager::wait_task
 race_top:^ACE_TSS<*>::ts_get
-race_top:^ACE_TSS_Singleton<*>::instance
 race_top:^ACE_Timer_Heap_T<*>::is_empty
 race:^ACE_Log_Msg::default_priority_mask_$
 race:^ACE_Sig_Handler::sig_pending_$
 race:^ACE_Proactor::cancel_timer
 race:^ACE_Proactor::schedule_timer
 race:^ACE_Thread_Exit::instance
+race:^ACE_TSS_Singleton<*>::instance
 
 race_top:^TAO_Leader_Follower::wait_for_event
 race_top:^TAO_ORB_Core::*shutdown

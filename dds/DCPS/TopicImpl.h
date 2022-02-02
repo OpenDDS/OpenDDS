@@ -105,6 +105,8 @@ private:
   /// The id given by discovery.
   RepoId                       id_;
 
+  /// Mutex to protect status info
+  ACE_Thread_Mutex             status_mutex_;
   /// Count of discovered (readers/writers using) topics with the same
   /// topic name but different characteristics (typename)
   DDS::InconsistentTopicStatus inconsistent_topic_status_;
