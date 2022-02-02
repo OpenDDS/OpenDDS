@@ -472,11 +472,27 @@ public:
 
   SequenceNumber get_max_sn() const
   {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+    ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
     return sequence_number_;
   }
 
 protected:
+
+  SequenceNumber get_next_sn()
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
+    return get_next_sn_i();
+  }
+
+  SequenceNumber get_next_sn_i()
+  {
+    if (sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+      sequence_number_ = SequenceNumber();
+    } else {
+      ++sequence_number_;
+    }
+    return sequence_number_;
+  }
 
   // Perform cast to get extended version of listener (otherwise nil)
   DataWriterListener_ptr get_ext_listener();
@@ -620,6 +636,8 @@ private:
   PublicationId                   publication_id_;
   /// The sequence number unique in DataWriter scope.
   SequenceNumber                  sequence_number_;
+  /// Mutex for sequence_number_
+  mutable ACE_Thread_Mutex        sn_lock_;
   /// Flag indicating DataWriter current belongs to
   /// a coherent change set.
   bool                            coherent_;

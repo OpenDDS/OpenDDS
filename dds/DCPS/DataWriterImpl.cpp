@@ -1022,14 +1022,14 @@ DataWriterImpl::should_ack() const
 DataWriterImpl::AckToken
 DataWriterImpl::create_ack_token(DDS::Duration_t max_wait) const
 {
-  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(get_lock());
+  const SequenceNumber sn = get_max_sn();
   if (DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::create_ack_token() - ")
                ACE_TEXT("for sequence %q\n"),
-               this->sequence_number_.getValue()));
+               sn.getValue()));
   }
-  return AckToken(max_wait, this->sequence_number_);
+  return AckToken(max_wait, sn);
 }
 
 
@@ -1927,6 +1927,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
 void
 DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
 {
+  const SequenceNumber sn = get_max_sn();
   ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
 
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1942,7 +1943,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
        end = reader_info_.end(); iter != end; ++iter) {
     // If not excluding this reader, update expected sequence
     if (excluded.count(iter->first) == 0) {
-      iter->second.expected_sequence_ = sequence_number_;
+      iter->second.expected_sequence_ = sn;
     }
   }
 
@@ -1950,7 +1951,7 @@ DataWriterImpl::track_sequence_number(GUIDSeq* filter_out)
   ACE_UNUSED_ARG(filter_out);
   for (RepoIdToReaderInfoMap::iterator iter = reader_info_.begin(),
        end = reader_info_.end(); iter != end; ++iter) {
-    iter->second.expected_sequence_ = sequence_number_;
+    iter->second.expected_sequence_ = sn;
   }
 
 #endif // OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -2089,6 +2090,8 @@ DataWriterImpl::create_control_message(MessageId message_id,
 
   header_data.publisher_id_ = publisher->publisher_id_;
 
+  ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
+  SequenceNumber sequence = sequence_number_;
   if (message_id == INSTANCE_REGISTRATION
       || message_id == DISPOSE_INSTANCE
       || message_id == UNREGISTER_INSTANCE
@@ -2096,19 +2099,11 @@ DataWriterImpl::create_control_message(MessageId message_id,
       || message_id == REQUEST_ACK) {
 
     header_data.sequence_repair_ = need_sequence_repair();
-
-    // Use the sequence number here for the sake of RTPS (where these
-    // control messages map onto the Data Submessage).
-    if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-      this->sequence_number_ = SequenceNumber();
-
-    } else {
-      ++this->sequence_number_;
-    }
-
-    header_data.sequence_ = this->sequence_number_;
+    header_data.sequence_ = get_next_sn_i();
     header_data.key_fields_only_ = true;
+    sequence = sequence_number_;
   }
+  guard.release();
 
   ACE_Message_Block* message = 0;
   ACE_NEW_MALLOC_RETURN(message,
@@ -2137,7 +2132,7 @@ DataWriterImpl::create_control_message(MessageId message_id,
     RepoIdToReaderInfoMap::iterator reader;
 
     for (reader = reader_info_.begin(); reader != reader_info_.end(); ++reader) {
-      reader->second.expected_sequence_ = sequence_number_;
+      reader->second.expected_sequence_ = sequence;
     }
   }
   if (DCPS_debug_level >= 4) {
@@ -2188,16 +2183,11 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
   header_data.content_filter_ = content_filter;
   header_data.cdr_encapsulation_ = this->cdr_encapsulation();
   header_data.message_length_ = static_cast<ACE_UINT32>(data->total_length());
-  header_data.sequence_repair_ = need_sequence_repair();
-
-  if (this->sequence_number_ == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    this->sequence_number_ = SequenceNumber();
-
-  } else {
-    ++this->sequence_number_;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
+    header_data.sequence_repair_ = need_sequence_repair();
+    header_data.sequence_ = get_next_sn_i();
   }
-
-  header_data.sequence_ = this->sequence_number_;
   header_data.source_timestamp_sec_ = source_timestamp.sec;
   header_data.source_timestamp_nanosec_ = source_timestamp.nanosec;
 
@@ -2354,7 +2344,7 @@ DataWriterImpl::end_coherent_changes(const GroupCoherentSamples& group_samples)
 
   CoherentChangeControl end_msg;
   end_msg.coherent_samples_.num_samples_ = this->coherent_samples_;
-  end_msg.coherent_samples_.last_sample_ = this->sequence_number_;
+  end_msg.coherent_samples_.last_sample_ = get_max_sn();
 
   RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
 

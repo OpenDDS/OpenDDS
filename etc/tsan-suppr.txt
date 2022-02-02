@@ -5,10 +5,13 @@
 deadlock:^CORBA::ORB_init
 deadlock:^ACE_Data_Block::release_no_delete
 
+race_top:^ACE_Data_Block::ACE_Data_Block
+race_top:^ACE_Data_Block::release_i
 race_top:^ACE_Event_Handler::reactor
 race_top:^ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<*>, ACE_Thread_Mutex>::size
 race_top:^ACE_Proactor::proactor_end_event_loop
 race_top:^ACE_Proactor_Timer_Handler::destroy
+race_top:^ACE_Refcounted_Auto_Ptr_Rep<ACE_Handler::Proxy, ACE_Thread_Mutex>::attach
 race_top:^ACE_Thread_Manager::wait_task
 race_top:^ACE_TSS<*>::ts_get
 race_top:^ACE_TSS_Singleton<*>::instance
