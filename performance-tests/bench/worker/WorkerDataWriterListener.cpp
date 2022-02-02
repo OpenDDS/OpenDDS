@@ -95,6 +95,8 @@ WorkerDataWriterListener::set_datawriter(Builder::DataWriter& datawriter)
 void
 WorkerDataWriterListener::unset_datawriter(Builder::DataWriter& datawriter)
 {
+  std::unique_lock<std::mutex> lock(mutex_);
+
   if (datawriter_ == &datawriter) {
     discovery_delta_stat_block_->finalize();
     datawriter_ = nullptr;
