@@ -37,6 +37,11 @@ public:
   static TimeDuration from_msec(const ACE_UINT64& ms);
 
   /**
+   * Return a TimeDuration from fractional seconds.
+   */
+  static TimeDuration from_double(double duration);
+
+  /**
    * Initialized to zero
    */
   TimeDuration();

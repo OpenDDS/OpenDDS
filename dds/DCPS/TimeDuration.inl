@@ -17,6 +17,15 @@ TimeDuration::from_msec(const ACE_UINT64& ms)
 }
 
 ACE_INLINE
+TimeDuration
+TimeDuration::from_double(double duration)
+{
+  ACE_Time_Value rv;
+  rv.set(duration);
+  return TimeDuration(rv);
+}
+
+ACE_INLINE
 TimeDuration::TimeDuration()
 : value_(zero_value.value())
 {
