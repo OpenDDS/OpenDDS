@@ -106,10 +106,10 @@ print("Check that putting the output in a file works ===========================
       stderr => [$tmp_stderr_path],
     },
   );
-  seek($tmp_stdout_fh, 0, 0) or die("seek failed: $?");
+  seek($tmp_stdout_fh, 0, 0) or die("seek failed: $!");
   check_value('capture stdout', $expected_stdout, do { local $/; <$tmp_stdout_fh> });
   close($expected_stdout);
-  seek($tmp_stderr_fh, 0, 0) or die("seek failed: $?");
+  seek($tmp_stderr_fh, 0, 0) or die("seek failed: $!");
   check_value('capture stderr', $expected_stderr, do { local $/; <$tmp_stderr_fh> });
   close($expected_stderr);
 }
@@ -125,7 +125,7 @@ my $output_fail_perl = $output_perl . 'exit(1);';
     },
     error_fh => $tmp_fd,
   );
-  seek($tmp_fd, 0, 0) or die("seek failed: $?");
+  seek($tmp_fd, 0, 0) or die("seek failed: $!");
   my $expected_dump = command_utils::get_dump_output($cmd_name, ['stderr'], \$expected_stderr) .
     command_utils::get_dump_output($cmd_name, ['stdout'], \$expected_stdout);
   # Cut off exit status error
