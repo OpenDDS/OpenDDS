@@ -40,7 +40,7 @@ sub run_command {
     my $test_name = shift;
     return command_utils::run_command(@_,
         name => $test_name,
-        script_name => 'auto_run_tests',
+        script_name => 'auto_run_tests.pl',
         dry_run => $dry_run,
     );
 }
@@ -364,8 +364,8 @@ if ($cmake) {
     my $fake_name;
     my $process_name;
     my $process_func;
-    my $cmake_tests = "$DDS_ROOT/tests/cmake";
     my @process_cmd = ($python, "$cmake_tests/ctest-to-auto-run-tests.py", $cmake_tests, '.');
+    my $art_output = 'art-output';
     if ($list_tests) {
         $process_name = "List CMake Tests";
         $process_func = \&run_command;
@@ -373,8 +373,6 @@ if ($cmake) {
     }
     else {
         $fake_name = "Run CMake Tests";
-        $process_name = "Process CMake Test Results";
-        $process_func = \&run_test;
         mark_test_start($fake_name);
         my @run_test_cmd = ($ctest, '--no-compress-output', '-T', 'Test');
         if ($ctest_args) {
@@ -384,9 +382,20 @@ if ($cmake) {
             push(@run_test_cmd, "--build-config", $cmake_build_cfg);
         }
         run_test($fake_name, \@run_test_cmd, verbose => 1);
+        $process_name = "Process CMake Test Results";
+        $process_func = \&run_test;
+        push(@process_cmd, '--art-output', $art_output);
         mark_test_start($process_name);
     }
     $process_func->($process_name, \@process_cmd);
+
+    if (!$list_tests) {
+        open(my $fh, $art_output) or die("Couldn't open $art_output: $!");
+        while(<$fh>){
+            print($_);
+        }
+        close($fh);
+    }
 }
 
 # vim: expandtab:ts=4:sw=4
