@@ -149,27 +149,16 @@ int ReactorTask::svc()
     condition_.notify_all();
   }
 
-  try {
-    // Tell the reactor to handle events.
-    if (thread_status_manager_->update_thread_status()) {
-      while (state_ == STATE_RUNNING) {
-        ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
-        ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-        reactor_->run_reactor_event_loop(t, 0);
-      }
-
-    } else {
-      reactor_->run_reactor_event_loop();
+  // Tell the reactor to handle events.
+  if (thread_status_manager_->update_thread_status()) {
+    while (state_ == STATE_RUNNING) {
+      ACE_Time_Value t = thread_status_manager_->thread_status_interval().value();
+      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
+      reactor_->run_reactor_event_loop(t, 0);
     }
-  } catch (const std::exception& e) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: ReactorTask::svc caught exception - %C.\n",
-               e.what()));
-    throw;
-  } catch (...) {
-    ACE_ERROR((LM_ERROR,
-               "(%P|%t) ERROR: ReactorTask::svc caught exception.\n"));
-    throw;
+
+  } else {
+    reactor_->run_reactor_event_loop();
   }
 
   return 0;
