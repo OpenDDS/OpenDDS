@@ -644,9 +644,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "AuthResendPeriod") {
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
-          int int_value;
-          if (DCPS::convertToInteger(string_value, int_value)) {
-            config->auth_resend_period(TimeDuration(int_value));
+          double double_value;
+          if (DCPS::convertToDouble(string_value, double_value)) {
+            config->auth_resend_period(TimeDuration::from_double(double_value));
           } else {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
