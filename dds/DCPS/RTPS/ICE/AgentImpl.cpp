@@ -273,13 +273,13 @@ void AgentImpl::network_change() const
   }
 }
 
-void AgentImpl::add_address(const DCPS::NetworkInterface&,
+void AgentImpl::add_address(const DCPS::NetworkInterface_rch&,
                             const ACE_INET_Addr&)
 {
   network_change();
 }
 
-void AgentImpl::remove_address(const DCPS::NetworkInterface&,
+void AgentImpl::remove_address(const DCPS::NetworkInterface_rch&,
                                const ACE_INET_Addr&)
 {
   network_change();

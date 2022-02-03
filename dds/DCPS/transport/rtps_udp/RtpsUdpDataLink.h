@@ -236,12 +236,12 @@ public:
   void disable_response_queue();
 
 private:
-  void join_multicast_group(const NetworkInterface& nic,
+  void join_multicast_group(const NetworkInterface_rch& nic,
                             bool all_interfaces = false);
-  void leave_multicast_group(const NetworkInterface& nic);
-  void add_address(const NetworkInterface& nic,
+  void leave_multicast_group(const NetworkInterface_rch& nic);
+  void add_address(const NetworkInterface_rch& nic,
                    const ACE_INET_Addr& address);
-  void remove_address(const NetworkInterface& nic,
+  void remove_address(const NetworkInterface_rch& nic,
                       const ACE_INET_Addr& address);
 
   // Internal non-locking versions of the above
@@ -929,7 +929,7 @@ private:
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
 
     ChangeMulticastGroup(RcHandle<RtpsUdpDataLink> link,
-                         const NetworkInterface& nic, CmgAction action)
+                         const NetworkInterface_rch& nic, CmgAction action)
       : link_(link)
       , nic_(nic)
       , action_(action)
@@ -945,7 +945,7 @@ private:
     }
 
     RcHandle<RtpsUdpDataLink> link_;
-    NetworkInterface nic_;
+    NetworkInterface_rch nic_;
     CmgAction action_;
   };
 
