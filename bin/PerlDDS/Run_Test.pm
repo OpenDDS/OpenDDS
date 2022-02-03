@@ -1105,4 +1105,15 @@ sub _info {
 sub _write_tcp_ini {
 }
 
+sub generate_governance {
+    my $self = shift;
+    my $key = shift;
+    my @parts = split /_/, $key;
+    my $output = shift;
+
+    my $process = PerlACE::Process->new("$ENV{DDS_ROOT}/tests/security/attributes/gov_gen", "-aup $parts[0] -ejac $parts[1] -dpk $parts[2] -lpk $parts[3] -rpk $parts[4] -o $output -cert $ENV{DDS_ROOT}/tests/security/certs/permissions/permissions_ca_cert.pem -key $ENV{DDS_ROOT}/tests/security/certs/permissions/permissions_ca_private_key.pem");
+    $process->Spawn();
+    $process->WaitKill(5);
+}
+
 1;

@@ -52,6 +52,8 @@ if ($secure) {
     },
   );
 
+  $test->generate_governance("AU_UA_ND_NL_NR", "governance.xml.p7s");
+
 } elsif ($tcp) {
   %params = (
     "Tcp_MutableUnionNoMatchQos" => {
