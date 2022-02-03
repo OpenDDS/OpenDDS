@@ -10,6 +10,7 @@ use PerlDDS::Run_Test;
 use strict;
 
 my $test = new PerlDDS::TestFramework();
+$test->generate_governance("PU_PA_ED_EL_EOR", "governance.xml.p7s");
 $test->process('test', 'Security_TopicWithoutPermissions', "-DCPSConfigFile Parameters.ini -DCPSSecurity 1");
 $test->start_process('test');
 exit $test->finish(60);

@@ -14,7 +14,7 @@ use strict;
 use Getopt::Long;
 
 my $scenario;
-my @gov_files;
+my @gov_keys;
 my $pub_cfg_file = "sec_base.ini";
 my $sub_cfg_file = "sec_base.ini";
 my $pub_cert_file = "../certs/identity/test_participant_01_cert.pem";
@@ -40,7 +40,7 @@ GetOptions(
   'sub_cert=s' => \$sub_cert_file,
   'pub_key=s' => \$pub_key_file,
   'sub_key=s' => \$sub_key_file,
-  'gov=s' => \@gov_files,
+  'gov=s' => \@gov_keys,
   'pub_perm=s' => \@pub_perm_files,
   'sub_perm=s' => \@sub_perm_files,
   'topic=s' => \@topic_names,
@@ -64,26 +64,26 @@ if ($scenario) {
   if ($scenario eq "SC0_sec_off") { #SC0 (open domain interop w/ unsecure) : unsecure -> unsecure
     $pub_cfg_file = "unsec_base.ini";
     $sub_cfg_file = "unsec_base.ini";
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC0_sec_sub") { #SC0 (open domain interop w/ unsecure) : unsecure -> secure
     $sub_cfg_file = "unsec_base.ini";
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
     $pub_timeout = $sub_timeout = 20;
   } elsif ($scenario eq "SC0_sec_pub") { #SC0 (open domain interop w/ unsecure) : secure -> unsecure
     $pub_cfg_file = "unsec_base.ini";
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
     $pub_timeout = $sub_timeout = 20;
   } elsif ($scenario eq "SC0_sec_on") { #SC0 (open domain interop w/ unsecure) : secure -> secure
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -91,7 +91,7 @@ if ($scenario) {
     # SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve cert for pub)
     $pub_cert_file = "../certs/identity/test_participant_03_cert.pem";
     $pub_key_file = "../certs/identity/test_participant_03_private_key.pem";
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_03_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -99,7 +99,7 @@ if ($scenario) {
     # SC0 (open domain interop w/ unsecure) : secure -> secure (eliptical curve certs for sub)
     $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
     $sub_key_file = "../certs/identity/test_participant_04_private_key.pem";
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_04_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -109,7 +109,7 @@ if ($scenario) {
     $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
     $pub_key_file = "../certs/identity/test_participant_03_private_key.pem";
     $sub_key_file = "../certs/identity/test_participant_04_private_key.pem";
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_03_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_04_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -117,7 +117,7 @@ if ($scenario) {
     # SC1 (join controlled domain) : unsecure participants won't check governance
     $pub_cfg_file = "unsec_base.ini";
     $sub_cfg_file = "unsec_base.ini";
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -125,7 +125,7 @@ if ($scenario) {
     # SC1 (join controlled domain) :
     #   unsecure participants won't authenticate, secure participant ignores unauthenticated
     $pub_cfg_file = "unsec_base.ini";
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -135,7 +135,7 @@ if ($scenario) {
     # SC1 (join controlled domain) :
     #   unsecure participants won't authenticate, secure participant ignores unauthenticated
     $sub_cfg_file = "unsec_base.ini";
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -147,7 +147,7 @@ if ($scenario) {
       "../certs/identity/test_participant_02_private_key.pem"; # This won't match cert (01)
     $sub_key_file =
       "../certs/identity/test_participant_01_private_key.pem"; # This won't match cert (02)
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
@@ -155,7 +155,7 @@ if ($scenario) {
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_bad_perm_1_failure") {
     # SC1 (join controlled domain) : secure participants with wrong permissions fail to validate
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     # permissions domain doesn't match governance
     @pub_perm_files = ("permissions/permissions_test_participant_01_join_wrong_signed.p7s");
     # permissions domain doesn't match governance
@@ -166,7 +166,7 @@ if ($scenario) {
   } elsif ($scenario eq "SC1_sec_on_bad_perm_2_failure") {
     # SC1 (join controlled domain) :
     #   secure participants with insufficient permissions fail to pass access control checks
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     # doesn't have permission to write
     @pub_perm_files = ("permissions/permissions_test_participant_01_join_signed.p7s");
     # doesn't have permission to read
@@ -176,27 +176,27 @@ if ($scenario) {
     $sub_expect = "~27";
   } elsif ($scenario eq "SC1_sec_on_success") {
     #SC1 (join controlled domain) : valid participants join and send
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "SC2") {
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_EM_OD");
   } elsif ($scenario eq "SC3") {
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_ED");
   } elsif ($scenario eq "SC4") {
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("OD_OL_OA_SM_OD");
   } elsif ($scenario eq "SC5") {
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_OD");
@@ -206,112 +206,112 @@ if ($scenario) {
     $sub_cert_file = "../certs/identity/test_participant_04_cert.pem";
     $pub_key_file = "../certs/identity/test_participant_03_private_key.pem";
     $sub_key_file = "../certs/identity/test_participant_04_private_key.pem";
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_multi_p_01_02_03_04_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_multi_p_01_02_03_04_readwrite_signed.p7s");
     @topic_names = ("PD_OL_RWA_EM_ED");
   } elsif ($scenario eq "TEST_8_8_5_SUCCESS") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_write_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_read_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
   } elsif ($scenario eq "TEST_8_8_5_FAILURE") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_read_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_write_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
     $pub_expect = "~15";
     $sub_expect = "~25";
   } elsif ($scenario eq "FullMsgSign") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_SR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_OD");
   } elsif ($scenario eq "FullMsgEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_ER_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_ER");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_OD");
   } elsif ($scenario eq "FullMsgSign_SubMsgSign") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_SR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_SM_OD");
   } elsif ($scenario eq "FullMsgSign_SubMsgEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_SR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_EM_OD");
   } elsif ($scenario eq "FullMsgEncrypt_SubMsgSign") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_ER_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_ER");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_SM_OD");
   } elsif ($scenario eq "FullMsgEncrypt_SubMsgEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_ER_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_ER");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_EM_OD");
   } elsif ($scenario eq "FullMsgSign_PayloadEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_SR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_ED");
   } elsif ($scenario eq "FullMsgEncrypt_PayloadEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_ER_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_ER");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_ED");
   } elsif ($scenario eq "FullMsgSign_SubMsgSign_PayloadEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_SR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_SM_ED");
   } elsif ($scenario eq "FullMsgSign_SubMsgEncrypt_PayloadEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_SR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_EM_ED");
   } elsif ($scenario eq "FullMsgEncrypt_SubMsgSign_PayloadEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_ER_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_ER");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_SM_ED");
   } elsif ($scenario eq "FullMsgEncrypt_SubMsgEncrypt_PayloadEncrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_ER_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_ER");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_EM_ED");
   } elsif ($scenario eq "NetProfiling_sec_off") {
     $pub_cfg_file = "unsec_base.ini";
     $sub_cfg_file = "unsec_base.ini";
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_OA_OM_OD");
   } elsif ($scenario eq "NetProfiling_auth_acc") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
   } elsif ($scenario eq "NetProfiling_encrypt") {
-    @gov_files = ("governance/governance_PU_PA_ED_EL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_EL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_allowall_signed.p7s");
     @topic_names = ("PD_OL_RWA_EM_ED");
   } elsif ($scenario eq "FullMsgSign_PayloadEncrypt_Frag") {
-    @gov_files = ("governance/governance_PU_PA_ED_NL_SR_signed.p7s");
+    @gov_keys = ("PU_PA_ED_NL_SR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_readwrite_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_readwrite_signed.p7s");
     @topic_names = ("PD_OL_OA_OM_ED");
     $pub_extra_space = "100000";
   } elsif ($scenario eq "Partitions_DefaultQoS") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
   } elsif ($scenario eq "Partitions_Denied") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
@@ -319,19 +319,19 @@ if ($scenario) {
     $pub_expect = "~15";
     $sub_expect = "~25";
   } elsif ($scenario eq "Partitions_Match") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
-    @partition = ("foo", "bar");
+    @partition = ("foo_bar");
   } elsif ($scenario eq "Partitions_Reordered") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
-    @partition = ("bar", "foo");
+    @partition = ("bar_foo");
   } elsif ($scenario eq "Partitions_Subset") {
-    @gov_files = ("governance/governance_PU_PA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
@@ -339,7 +339,7 @@ if ($scenario) {
   } elsif ($scenario =~ /^(un)?secure-part-user-data$/) {
     $pub_timeout = $sub_timeout = 20;
     my $secure_sub = $1 ? 0 : 1;
-    @gov_files = ("governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    @gov_keys = ("AU_UA_ND_NL_NR");
     @topic_names = ('OD_OL_OA_OM_OD');
     @pub_perm_files = ("permissions/permissions_test_participant_01_allowall_signed.p7s");
     # The publisher will set and try to protect its participant user data.
@@ -364,23 +364,23 @@ if ($scenario) {
   }
 
   # Figure out what governance files to use
-  if (scalar @gov_files == 0) {
+  if (scalar @gov_keys == 0) {
     print "Using governance files from governance directory.\n";
     opendir(my $gov_dh, "governance");
-    @gov_files = map {"governance/" . $_} (sort grep(/\.p7s$/,readdir($gov_dh)));
+    @gov_keys = map {"governance/" . $_} (sort grep(/\.p7s$/,readdir($gov_dh)));
     closedir($gov_dh);
 
     # Filter out allow unauth + protected disc and prohibit unauth + unprotected discovery
-    @gov_files = grep(!/_AU_PA/, @gov_files);
-    @gov_files = grep(!/_PU_UA/, @gov_files);
+    @gov_keys = grep(!/_AU_PA/, @gov_keys);
+    @gov_keys = grep(!/_PU_UA/, @gov_keys);
 
-    @gov_files = grep(!/_E.*_E./, @gov_files); # eliminate more than one encryption attribute
+    @gov_keys = grep(!/_E.*_E./, @gov_keys); # eliminate more than one encryption attribute
 
-    @gov_files = grep(!/_S/, @gov_files); # eliminate signed stuff
-    @gov_files = grep(!/_SO/, @gov_files); # eliminate origin authenticated signed stuff
-    @gov_files = grep(!/_EO/, @gov_files); # eliminate origin authenticated encrypted stuff
+    @gov_keys = grep(!/_S/, @gov_keys); # eliminate signed stuff
+    @gov_keys = grep(!/_SO/, @gov_keys); # eliminate origin authenticated signed stuff
+    @gov_keys = grep(!/_EO/, @gov_keys); # eliminate origin authenticated encrypted stuff
   } else {
-    print_using_array("governance file", @gov_files);
+    print_using_array("governance file", @gov_keys);
   }
 
   # Figure out which permissions files to use
@@ -435,12 +435,16 @@ if ($scenario) {
 #open my $status_file, '>', "expected_status_results.txt";
 
 my $total_test_count =
-  scalar(@gov_files) * scalar(@pub_perm_files) * scalar(@sub_perm_files) * scalar(@topic_names);
+  scalar(@gov_keys) * scalar(@pub_perm_files) * scalar(@sub_perm_files) * scalar(@topic_names);
 my $current_test_num = 0;
 
 my $final_status = 0;
 
-foreach my $gov_file (@gov_files) {
+my $super_test = new PerlDDS::TestFramework();
+
+foreach my $gov_key (@gov_keys) {
+  $super_test->generate_governance($gov_key, "governance.xml.p7s");
+
   foreach my $pub_perm_file (@pub_perm_files) {
     foreach my $sub_perm_file (@sub_perm_files) {
       foreach my $topic_name (@topic_names) {
@@ -464,7 +468,7 @@ foreach my $gov_file (@gov_files) {
         $test->{add_transport_config} = 0;
 
         my @common_args = (
-          "-Governance $gov_file",
+          "-Governance governance.xml.p7s",
           "-Topic $topic_name",
           "-IdentityCA ../certs/identity/identity_ca_cert.pem",
           "-PermissionsCA ../certs/permissions/permissions_ca_cert.pem",
@@ -509,7 +513,7 @@ foreach my $gov_file (@gov_files) {
           $sub_opts .= " -Partition $p";
         }
 
-        #print "$gov_file $pub_perm_file $sub_perm_file\n";
+        #print "$gov_key $pub_perm_file $sub_perm_file\n";
 
         $test->process("publisher", "publisher", $pub_opts);
         $test->process("subscriber", "subscriber", $sub_opts);
@@ -528,8 +532,8 @@ foreach my $gov_file (@gov_files) {
             print "\ntest #$current_test_num of $total_test_count.\n";
           }
 
-          #print "$gov_file $pub_perm_file $sub_perm_file $topic_name $status\n\n-----------\n\n";
-          #print $status_file "$gov_file $pub_perm_file $sub_perm_file $topic_name $status\n";
+          #print "$gov_key $pub_perm_file $sub_perm_file $topic_name $status\n\n-----------\n\n";
+          #print $status_file "$gov_key $pub_perm_file $sub_perm_file $topic_name $status\n";
 
           #exit $status;
         #}

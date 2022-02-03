@@ -41,3 +41,14 @@ project(DDS*Subscriber): dcps_test, opendds_security, dcps_rtps_udp {
     DataReaderListener.cpp
   }
 }
+
+project(gov_gen): dcps_test, opendds_security {
+
+  Idl_Files {
+  }
+
+  Source_Files {
+    gov_gen.cpp
+  }
+
+}

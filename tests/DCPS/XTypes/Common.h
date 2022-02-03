@@ -290,7 +290,7 @@ void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipa
     append(props, AuthIdentityCertificate, "file:../../security/certs/identity/test_participant_02_cert.pem");
     append(props, AuthPrivateKey, "file:../../security/certs/identity/test_participant_02_private_key.pem");
     append(props, AccessPermissionsCA, "file:../../security/certs/permissions/permissions_ca_cert.pem");
-    append(props, AccessGovernance, "file:../../security/attributes/governance/governance_AU_UA_ND_NL_NR_signed.p7s");
+    append(props, AccessGovernance, "file:./governance.xml.p7s");
     append(props, AccessPermissions, "file:../../security/attributes/permissions/permissions_test_participant_02_allowall_signed.p7s");
   }
 #endif
