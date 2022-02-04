@@ -598,7 +598,7 @@ jobs:
       run: |
         cd OpenDDS
         ./configure \
-          --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
+          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
@@ -614,12 +614,16 @@ jobs:
     - name: build OpenDDS
       run: |
         cd OpenDDS
-        . setenv.sh
         make -j4
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        TODO(sonndinh)
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -627,11 +631,60 @@ jobs:
         path: ${{ github.job }}.tar.xz
 
   test_u18_esafe_js0:
+
+    runs-on: ubuntu-18.04
+
+    needs: build_u18_esafe_js0
+
+    steps:
+    - name: checkout MPC
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_esafe_js0_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u18_esafe_js0.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v2
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: build_u18_esafe_js0.tar.xz
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u18_esafe_js0.tar.xz
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
     - name: checkout autobuild
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/autobuild
         path: autobuild
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS/build/target
+        . setenv.sh
+        tools/scripts/show_build_config.pl
     - name: run OpenDDS tests
       shell: bash
       run: |
