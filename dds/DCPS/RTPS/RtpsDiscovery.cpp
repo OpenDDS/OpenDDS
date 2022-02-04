@@ -1370,7 +1370,7 @@ bool RtpsDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t doma
   if (part) {
     return part->update_topic_qos(topicId, qos);
   }
-  return DCPS::INTERNAL_ERROR;
+  return false;
 }
 
 GUID_t RtpsDiscovery::add_publication(
