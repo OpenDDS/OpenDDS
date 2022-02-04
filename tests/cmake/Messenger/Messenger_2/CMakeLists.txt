@@ -34,8 +34,8 @@ add_library(${messenger})
 set_target_properties(${messenger}
   PROPERTIES OUTPUT_NAME messenger
 )
-OPENDDS_TARGET_SOURCES(${messenger} "${dst}/Messenger.idl")
-target_link_libraries(${messenger} OpenDDS::Dcps)
+OPENDDS_TARGET_SOURCES(${messenger} PUBLIC "${dst}/Messenger.idl")
+target_link_libraries(${messenger} PUBLIC OpenDDS::Dcps)
 
 # Publisher
 add_executable(${publisher}

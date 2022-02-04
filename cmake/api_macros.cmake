@@ -57,7 +57,7 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
       list(APPEND ${libs} ${arg})
 
     elseif("${arg}" MATCHES "\\.idl$")
-      list(APPEND ${idl_prefix}_PRIVATE ${arg})
+      list(APPEND ${idl_prefix}_${OPENDDS_DEFAULT_SCOPE} ${arg})
 
     else()
       if(${_non_idl_file_warning})
@@ -66,15 +66,19 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
         set(_non_idl_file_warning OFF)
       endif()
 
-      list(APPEND ${src_prefix}_PRIVATE ${arg})
+      list(APPEND ${src_prefix}_${OPENDDS_DEFAULT_SCOPE} ${arg})
     endif()
   endforeach()
 endmacro()
 
-macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
-  set(_bin_dir ${CMAKE_CURRENT_BINARY_DIR})
-  set(_src_dir ${CMAKE_CURRENT_SOURCE_DIR})
-  set(_output_file "${_bin_dir}/${target}_export.h")
+function(opendds_get_target_export_header target export_header_var)
+  get_target_property(export_header ${target} OPENDDS_EXPORT_HEADER)
+  if(export_header)
+    set(${export_header_var} ${export_header} PARENT_SCOPE)
+    return()
+  endif()
+
+  opendds_get_generated_file_path(${target} "${target}_export.h" export_header)
 
   find_file(_gen_script "generate_export_file.pl" HINTS ${ACE_BIN_DIR})
   if(NOT EXISTS ${_gen_script})
@@ -83,14 +87,25 @@ macro(_OPENDDS_GENERATE_EXPORT_MACRO_COMMAND  target  output)
 
   if (NOT EXISTS ${_output_file})
     execute_process(COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_ROOT}"
-      perl ${_gen_script} ${target} OUTPUT_FILE ${_output_file} RESULT_VARIABLE _export_script_exit_status)
+      perl ${_gen_script} ${target} OUTPUT_FILE ${export_header} RESULT_VARIABLE _export_script_exit_status)
     if(NOT _export_script_exit_status EQUAL "0")
       message(FATAL_ERROR "Export header script for ${target} exited with ${_export_script_status}")
     endif()
   endif()
 
-  set(${output} ${_output_file})
-endmacro()
+  set_target_properties(${target}
+    PROPERTIES
+      OPENDDS_EXPORT_HEADER ${export_header})
+
+  opendds_add_idl_or_header_files(${target} PUBLIC TRUE ${export_header})
+
+  string(TOUPPER "${target}" _target_upper)
+  target_compile_definitions(${target}
+    PRIVATE
+      ${_target_upper}_BUILD_DLL)
+
+  set(${export_header_var} ${export_header} PARENT_SCOPE)
+endfunction()
 
 macro(OPENDDS_TARGET_SOURCES target)
 
@@ -162,25 +177,10 @@ macro(OPENDDS_TARGET_SOURCES target)
 
   get_target_property(_target_type ${target} TYPE)
   if(_target_type STREQUAL "SHARED_LIBRARY")
-
-    get_target_property(_export_generated ${target} OPENDDS_EXPORT_GENERATED)
-    if(NOT _export_generated)
-      _OPENDDS_GENERATE_EXPORT_MACRO_COMMAND(${target} _export_generated)
-
-      set_target_properties(${target}
-        PROPERTIES
-          OPENDDS_EXPORT_GENERATED ${_export_generated})
-
-      target_sources(${target} PUBLIC ${_export_generated})
-
-      string(TOUPPER "${target}" _target_upper)
-      target_compile_definitions(${target}
-        PRIVATE
-          ${_target_upper}_BUILD_DLL)
-    endif()
+    opendds_get_target_export_header(${target} _export_header)
 
     if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
-      list(APPEND _tao_options "-Wb,stub_export_include=${_export_generated}")
+      list(APPEND _tao_options "-Wb,stub_export_include=${_export_header}")
     endif()
 
     if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_macro")
@@ -192,7 +192,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     endif()
 
     if(NOT "${_opendds_options}" MATCHES "-Wb,export_include")
-      list(APPEND _opendds_options "-Wb,export_include=${_export_generated}")
+      list(APPEND _opendds_options "-Wb,export_include=${_export_header}")
     endif()
   endif()
 
@@ -233,5 +233,33 @@ macro(OPENDDS_TARGET_SOURCES target)
     # regular c/cpp/h files specified by the user are added.
     target_sources(${target} ${scope} ${_sources_${scope}})
 
+  endforeach()
+
+  opendds_get_generated_output_dir(${target} _generated_directory)
+  set_target_properties(${target} PROPERTIES OPENDDS_GENERATED_DIRECTORY ${_generated_directory})
+
+  set(_is_include_arg FALSE)
+  foreach(_opendds_idl_arg ${_opendds_options})
+    if(_is_include_arg)
+      list(APPEND _raw_includes "${_opendds_idl_arg}")
+      set(_is_include_arg FALSE)
+    elseif(_opendds_idl_arg STREQUAL "-I")
+      set(_is_include_arg TRUE)
+    elseif(_opendds_idl_arg MATCHES "-I(.+)")
+      list(APPEND _raw_includes "${CMAKE_MATCH_1}")
+    endif()
+  endforeach()
+
+  set(_includes "${_generated_directory}")
+  foreach(_raw_include ${_raw_includes})
+    if(NOT IS_ABSOLUTE ${_raw_include})
+      set(_raw_include "${CMAKE_CURRENT_SOURCE_DIR}/${_raw_include}")
+    endif()
+    list(APPEND _includes "${_raw_include}")
+  endforeach()
+  list(REMOVE_DUPLICATES _includes)
+
+  foreach(_include ${_includes})
+    target_include_directories(${target} PUBLIC $<BUILD_INTERFACE:${_include}>)
   endforeach()
 endmacro()

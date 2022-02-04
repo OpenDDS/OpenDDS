@@ -1,0 +1,11 @@
+#include "a.idl"
+
+module ModuleB {
+
+@topic
+struct StructB {
+  ModuleA::StructA StructInstance;
+  string ValueB;
+};
+
+};

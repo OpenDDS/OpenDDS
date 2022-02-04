@@ -2524,6 +2524,7 @@ sub write_cmake_file {
 
     my %disabled_by_default = map {$_, 0} qw(
       security
+      static
     );
 
     my %ignore = map {$_, 0} qw(
