@@ -86,11 +86,6 @@ DomainParticipantFactoryImpl::create_participant(
     }
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   participants_protector_,
-                   DDS::DomainParticipant::_nil());
-
   // if the specified transport is a transport template then create a new transport
   // instance for the new participant if per_participant is set (checked before creating instance).
   ACE_TString transport_base_config_name;
@@ -116,6 +111,11 @@ DomainParticipantFactoryImpl::create_participant(
       return DDS::DomainParticipant::_nil();
     }
   }
+
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   participants_protector_,
+                   DDS::DomainParticipant::_nil());
 
   participants_[domainId].insert(dp);
   return dp._retn();
@@ -176,8 +176,8 @@ DomainParticipantFactoryImpl::delete_participant(
                      participants_protector_,
                      DDS::RETCODE_ERROR);
 
-    DPSet* entry = 0;
-    if (find(participants_, domain_id, entry) == -1) {
+    DPMap::iterator pos = participants_.find(domain_id);
+    if (pos == participants_.end()) {
       if (DCPS_debug_level > 0) {
         GuidConverter converter(dp_id);
         ACE_ERROR((LM_ERROR,
@@ -189,35 +189,35 @@ DomainParticipantFactoryImpl::delete_participant(
                    OPENDDS_STRING(converter).c_str()));
       }
       return DDS::RETCODE_ERROR;
-    } else {
-      const DDS::ReturnCode_t result = the_servant->delete_contained_entities();
-      if (result != DDS::RETCODE_OK) {
-        return result;
-      }
+    }
 
-      if (OpenDDS::DCPS::remove(*entry, servant_rch) == -1) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: ")
-                     ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                     ACE_TEXT(" %p.\n"),
-                     ACE_TEXT("remove")));
-        }
-        return DDS::RETCODE_ERROR;
+    if (pos->second.erase(servant_rch) == 0) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
+                   ACE_TEXT(" %p.\n"),
+                   ACE_TEXT("remove")));
       }
+      return DDS::RETCODE_ERROR;
+    }
 
-      if (entry->empty()) {
-        if (unbind(participants_, domain_id) == -1) {
-          if (DCPS_debug_level > 0) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: ")
-                       ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
-                       ACE_TEXT(" %p.\n"),
-                       ACE_TEXT("unbind")));
-          }
-          return DDS::RETCODE_ERROR;
-        }
+    if (pos->second.empty() && participants_.erase(domain_id) == 0) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: ")
+                   ACE_TEXT("DomainParticipantFactoryImpl::delete_participant, ")
+                   ACE_TEXT(" %p.\n"),
+                   ACE_TEXT("unbind")));
       }
+      return DDS::RETCODE_ERROR;
+    }
+
+    guard.release();
+
+    const DDS::ReturnCode_t result = the_servant->delete_contained_entities();
+    if (result != DDS::RETCODE_OK) {
+      return result;
     }
   }
 
