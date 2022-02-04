@@ -28,7 +28,7 @@ public:
     : index_(-1)
     , can_multicast_(false)
   {}
-  NetworkInterface(const NetworkInterface& val) { *this = val; }
+  NetworkInterface(const NetworkInterface& val) : RcObject() { *this = val; }
   NetworkInterface(int index,
                    const OPENDDS_STRING& name,
                    bool can_multicast)
