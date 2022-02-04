@@ -900,22 +900,25 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
                                       XTypes::TypeLookupService_rch tls)
 {
   DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
-  const OPENDDS_STRING guid_interface = config_->guid_interface();
-  if (!guid_interface.empty()) {
-    if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
-      if (DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
-                   " - attempt to use specific network interface %C MAC addr for"
-                   " GUID generation failed.\n", guid_interface.c_str()));
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
+    const OPENDDS_STRING guid_interface = config_->guid_interface();
+    if (!guid_interface.empty()) {
+      if (guid_gen_.interfaceName(guid_interface.c_str()) != 0) {
+        if (DCPS::DCPS_debug_level) {
+          ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsDiscovery::add_domain_participant()"
+                     " - attempt to use specific network interface %C MAC addr for"
+                     " GUID generation failed.\n", guid_interface.c_str()));
+        }
       }
     }
+    guid_gen_.populate(ads.id);
   }
-  guid_gen_.populate(ads.id);
   ads.id.entityId = ENTITYID_PARTICIPANT;
   try {
     const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(domain, ref(ads.id), qos, this, tls));
     // ads.id may change during Spdp constructor
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
@@ -942,6 +945,7 @@ RtpsDiscovery::add_domain_participant_secure(
   try {
     const DCPS::RcHandle<Spdp> spdp(DCPS::make_rch<Spdp>(
       domain, ads.id, qos, this, tls, id, perm, part_crypto));
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, ads);
     participants_[domain][ads.id] = spdp;
   } catch (const std::exception& e) {
     ads.id = GUID_UNKNOWN;
@@ -964,11 +968,12 @@ RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
 void
 RtpsDiscovery::rtps_relay_only_now(bool after)
 {
-  const bool before = config_->rtps_relay_only();
-  config_->rtps_relay_only(after);
+  RtpsDiscoveryConfig_rch config = get_config();
+  const bool before = config->rtps_relay_only();
+  config->rtps_relay_only(after);
 
   if (before != after) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
     for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
          dom_pos != dom_limit; ++dom_pos) {
       for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
@@ -981,11 +986,12 @@ RtpsDiscovery::rtps_relay_only_now(bool after)
 void
 RtpsDiscovery::use_rtps_relay_now(bool after)
 {
-  const bool before = config_->use_rtps_relay();
-  config_->use_rtps_relay(after);
+  RtpsDiscoveryConfig_rch config = get_config();
+  const bool before = config->use_rtps_relay();
+  config->use_rtps_relay(after);
 
   if (before != after) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
     for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
          dom_pos != dom_limit; ++dom_pos) {
       for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
@@ -998,11 +1004,12 @@ RtpsDiscovery::use_rtps_relay_now(bool after)
 void
 RtpsDiscovery::use_ice_now(bool after)
 {
-  const bool before = config_->use_ice();
-  config_->use_ice(after);
+  RtpsDiscoveryConfig_rch config = get_config();
+  const bool before = config->use_ice();
+  config->use_ice(after);
 
   if (before != after) {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
     for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
          dom_pos != dom_limit; ++dom_pos) {
       for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
@@ -1091,18 +1098,19 @@ RtpsDiscovery::get_ipv6_sedp_port(DDS::DomainId_t domain,
 void
 RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
 {
-  const ACE_INET_Addr prev = config_->spdp_rtps_relay_address();
+  RtpsDiscoveryConfig_rch config = get_config();
+  const ACE_INET_Addr prev = config->spdp_rtps_relay_address();
   if (prev == address) {
     return;
   }
 
-  config_->spdp_rtps_relay_address(address);
+  config->spdp_rtps_relay_address(address);
 
   if (address == ACE_INET_Addr()) {
     return;
   }
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
   for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
     for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
@@ -1114,9 +1122,10 @@ RtpsDiscovery::spdp_rtps_relay_address(const ACE_INET_Addr& address)
 void
 RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
 {
-  config_->sedp_rtps_relay_address(address);
+  RtpsDiscoveryConfig_rch config = get_config();
+  config->sedp_rtps_relay_address(address);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
   for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
     for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
@@ -1128,15 +1137,15 @@ RtpsDiscovery::sedp_rtps_relay_address(const ACE_INET_Addr& address)
 void
 RtpsDiscovery::spdp_stun_server_address(const ACE_INET_Addr& address)
 {
-  config_->spdp_stun_server_address(address);
+  get_config()->spdp_stun_server_address(address);
 }
 
 void
 RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
 {
-  config_->sedp_stun_server_address(address);
+  get_config()->sedp_stun_server_address(address);
 
-  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+  ACE_GUARD(ACE_Thread_Mutex, g, participants_lock_);
   for (DomainParticipantMap::const_iterator dom_pos = participants_.begin(), dom_limit = participants_.end();
        dom_pos != dom_limit; ++dom_pos) {
     for (ParticipantMap::const_iterator part_pos = dom_pos->second.begin(), part_limit = dom_pos->second.end(); part_pos != part_limit; ++part_pos) {
@@ -1270,6 +1279,7 @@ bool RtpsDiscovery::remove_domain_participant(
   if (domain->second.empty()) {
     participants_.erase(domain);
   }
+  g.release();
 
   participant->shutdown();
   return true;
@@ -1310,11 +1320,13 @@ DCPS::TopicStatus RtpsDiscovery::assert_topic(
   bool hasDcpsKey,
   DCPS::TopicCallbacks* topic_callbacks)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-  // Verified its safe to hold lock during call to assert_topic
-  return participants_[domainId][participantId]->assert_topic(topicId, topicName,
-                                                              dataTypeName, qos,
-                                                              hasDcpsKey, topic_callbacks);
+  ParticipantHandle part = get_part(domainId, participantId);
+  if (part) {
+    return part->assert_topic(topicId, topicName,
+                              dataTypeName, qos,
+                              hasDcpsKey, topic_callbacks);
+  }
+  return DCPS::INTERNAL_ERROR;
 }
 
 DCPS::TopicStatus RtpsDiscovery::find_topic(
@@ -1325,8 +1337,11 @@ DCPS::TopicStatus RtpsDiscovery::find_topic(
   DDS::TopicQos_out qos,
   GUID_t& topicId)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-  return participants_[domainId][participantId]->find_topic(topicName, dataTypeName, qos, topicId);
+  ParticipantHandle part = get_part(domainId, participantId);
+  if (part) {
+    return part->find_topic(topicName, dataTypeName, qos, topicId);
+  }
+  return DCPS::INTERNAL_ERROR;
 }
 
 DCPS::TopicStatus RtpsDiscovery::remove_topic(
@@ -1334,9 +1349,11 @@ DCPS::TopicStatus RtpsDiscovery::remove_topic(
   const GUID_t& participantId,
   const GUID_t& topicId)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, DCPS::INTERNAL_ERROR);
-  // Safe to hold lock while calling remove topic
-  return participants_[domainId][participantId]->remove_topic(topicId);
+  ParticipantHandle part = get_part(domainId, participantId);
+  if (part) {
+    return part->remove_topic(topicId);
+  }
+  return DCPS::INTERNAL_ERROR;
 }
 
 bool RtpsDiscovery::ignore_topic(DDS::DomainId_t domainId, const GUID_t& myParticipantId,
@@ -1349,9 +1366,11 @@ bool RtpsDiscovery::ignore_topic(DDS::DomainId_t domainId, const GUID_t& myParti
 bool RtpsDiscovery::update_topic_qos(const GUID_t& topicId, DDS::DomainId_t domainId,
                                     const GUID_t& participantId, const DDS::TopicQos& qos)
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
-  // Safe to hold lock while calling update_topic_qos
-  return participants_[domainId][participantId]->update_topic_qos(topicId, qos);
+  ParticipantHandle part = get_part(domainId, participantId);
+  if (part) {
+    return part->update_topic_qos(topicId, qos);
+  }
+  return false;
 }
 
 GUID_t RtpsDiscovery::add_publication(
@@ -1463,16 +1482,22 @@ RcHandle<DCPS::TransportInst> RtpsDiscovery::sedp_transport_inst(DDS::DomainId_t
 
 ParticipantHandle RtpsDiscovery::get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ParticipantHandle());
-  DomainParticipantMap::const_iterator domain = participants_.find(domain_id);
+  ACE_Guard<ACE_Thread_Mutex> guard(participants_lock_);
+  const DomainParticipantMap::const_iterator domain = participants_.find(domain_id);
   if (domain == participants_.end()) {
     return ParticipantHandle();
   }
-  ParticipantMap::const_iterator part = domain->second.find(part_id);
+  const ParticipantMap::const_iterator part = domain->second.find(part_id);
   if (part == domain->second.end()) {
     return ParticipantHandle();
   }
   return part->second;
+}
+
+RtpsDiscoveryConfig_rch RtpsDiscovery::get_config() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+  return config_;
 }
 
 void RtpsDiscovery::create_bit_dr(DDS::TopicDescription_ptr topic,
