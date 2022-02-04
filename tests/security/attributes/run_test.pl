@@ -323,13 +323,13 @@ if ($scenario) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
-    @partition = ("foo_bar");
+    @partition = ("foo", "bar");
   } elsif ($scenario eq "Partitions_Reordered") {
     @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
     @sub_perm_files = ("permissions/permissions_test_participant_02_partitions_signed.p7s");
     @topic_names = ("OD_OL_RWA_OM_OD");
-    @partition = ("bar_foo");
+    @partition = ("bar", "foo");
   } elsif ($scenario eq "Partitions_Subset") {
     @gov_keys = ("PU_PA_ND_NL_NR");
     @pub_perm_files = ("permissions/permissions_test_participant_01_partitions_signed.p7s");
