@@ -64,7 +64,7 @@ bool NetworkConfigModifier::open()
 
         std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, make_rch<NetworkInterface>(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK))));
 
-        p.first->second.add_address(address);
+        p.first->second->add_address(address);
       }
     }
 # if defined (ACE_HAS_IPV6)
@@ -77,7 +77,7 @@ bool NetworkConfigModifier::open()
 
         std::pair<Nics::iterator, bool> p = nics.insert(std::make_pair(p_if->ifa_name, make_rch<NetworkInterface>(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK))));
 
-        p.first->second.add_address(address);
+        p.first->second->add_address(address);
       }
     }
 # endif /* ACE_HAS_IPV6 */
@@ -152,9 +152,9 @@ void NetworkConfigModifier::update_interfaces()
   // Add interfaces that are new
   nis = get_interfaces();
   for (Names::iterator iter = names.begin(); iter != names.end(); ++iter) {
-    NetworkInterfaces::iterator pos = std::find_if(nis.begin(), nis.end(), NetworkInterfaceName((*iter)->first));
+    NetworkInterfaces::iterator pos = std::find_if(nis.begin(), nis.end(), NetworkInterfaceName(iter->first));
     if (pos == nis.end()) {
-      ifaddrs* ifa = (*iter)->second;
+      ifaddrs* ifa = iter->second;
       ACE_INET_Addr address;
       const bool can_multicast = ifa->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK);
       if (ifa->ifa_addr->sa_family == AF_INET) {
