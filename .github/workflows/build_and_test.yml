@@ -528,9 +528,9 @@ jobs:
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
-        cd OpenDDS
+        cd OpenDDS/build/target
         . setenv.sh
-        cd ACE_TAO/ACE
+        cd ../../ACE_TAO/ACE
         make -j4
         cd ../TAO
         make -j4
@@ -780,9 +780,9 @@ jobs:
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
-        cd OpenDDS
+        cd OpenDDS/build/target
         . setenv.sh
-        cd ACE_TAO/ACE
+        cd ../../ACE_TAO/ACE
         make -j4
         cd ../TAO
         make -j4
