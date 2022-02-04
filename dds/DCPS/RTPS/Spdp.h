@@ -542,12 +542,12 @@ private:
     bool open_unicast_ipv6_socket(u_short port);
 #endif
 
-    void join_multicast_group(const DCPS::NetworkInterface& nic,
+    void join_multicast_group(const DCPS::NetworkInterface_rch& nic,
                               bool all_interfaces = false);
-    void leave_multicast_group(const DCPS::NetworkInterface& nic);
-    void add_address(const DCPS::NetworkInterface& nic,
+    void leave_multicast_group(const DCPS::NetworkInterface_rch& nic);
+    void add_address(const DCPS::NetworkInterface_rch& nic,
                      const ACE_INET_Addr& address);
-    void remove_address(const DCPS::NetworkInterface& nic,
+    void remove_address(const DCPS::NetworkInterface_rch& nic,
                         const ACE_INET_Addr& address);
 
     DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
@@ -622,7 +622,7 @@ private:
     enum CmgAction {CMG_JOIN, CMG_LEAVE};
 
     ChangeMulticastGroup(const DCPS::RcHandle<SpdpTransport>& tport,
-                         const DCPS::NetworkInterface& nic, CmgAction action,
+                         const DCPS::NetworkInterface_rch& nic, CmgAction action,
                          bool all_interfaces = false)
       : tport_(tport)
       , nic_(nic)
@@ -645,7 +645,7 @@ private:
     }
 
     DCPS::WeakRcHandle<SpdpTransport> tport_;
-    DCPS::NetworkInterface nic_;
+    DCPS::NetworkInterface_rch nic_;
     CmgAction action_;
     bool all_interfaces_;
   };
