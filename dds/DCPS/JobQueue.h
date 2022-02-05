@@ -21,7 +21,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export JobQueue : public RcEventHandler {
+class OpenDDS_Dcps_Export JobQueue : public virtual RcEventHandler {
 public:
   class Job : public virtual RcObject {
   public:

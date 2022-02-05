@@ -23,14 +23,17 @@ namespace OpenDDS {
 namespace DCPS {
 
 template <typename T>
-class InternalDataWriter : public RcObject {
+class InternalDataWriter : public InternalEntity {
 public:
   typedef RcHandle<InternalDataReader<T> > InternalDataReader_rch;
+  typedef WeakRcHandle<InternalDataReader<T> > InternalDataReader_wrch;
 
-  InternalDataWriter(bool durable)
+  explicit InternalDataWriter(bool durable)
     : durable_(durable)
   {}
 
+  /// @name InternalTopic Interface
+  /// @{
   void add_reader(InternalDataReader_rch reader)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -40,9 +43,9 @@ public:
       for (typename InstanceMap::const_iterator pos = instance_map_.begin(), limit = instance_map_.end();
            pos != limit; ++pos) {
         if (pos->second.valid_data) {
-          reader->write(this, pos->second.sample);
+          reader->write(static_rchandle_cast<InternalEntity>(rchandle_from(this)), pos->second.sample);
         } else {
-          reader->register_instance(this, pos->first);
+          reader->register_instance(static_rchandle_cast<InternalEntity>(rchandle_from(this)), pos->first);
         }
       }
     }
@@ -52,7 +55,7 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     if (readers_.erase(reader)) {
-      reader->remove_publication(this);
+      reader->remove_publication(static_rchandle_cast<InternalEntity>(rchandle_from(this)));
     }
   }
 
@@ -62,6 +65,14 @@ public:
     return readers_.count(reader);
   }
 
+  InternalEntity_wrch publication_handle()
+  {
+    return static_rchandle_cast<InternalEntity>(rchandle_from(this));
+  }
+  /// @}
+
+  /// @name User Interface
+  /// @{
   void register_instance(const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -71,7 +82,10 @@ public:
     }
 
     for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      (*pos)->register_instance(this, sample);
+      InternalDataReader_rch reader = pos->lock();
+      if (reader) {
+        reader->register_instance(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
+      }
     }
   }
 
@@ -86,7 +100,10 @@ public:
     }
 
     for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      (*pos)->write(this, sample);
+      InternalDataReader_rch reader = pos->lock();
+      if (reader) {
+        reader->write(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
+      }
     }
   }
 
@@ -99,7 +116,10 @@ public:
     }
 
     for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      (*pos)->unregister_instance(this, sample);
+      InternalDataReader_rch reader = pos->lock();
+      if (reader) {
+        reader->unregister_instance(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
+      }
     }
   }
 
@@ -112,19 +132,18 @@ public:
     }
 
     for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      (*pos)->dispose(this, sample);
+      InternalDataReader_rch reader = pos->lock();
+      if (reader) {
+        reader->dispose(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
+      }
     }
   }
-
-  const void* publication_handle() const
-  {
-    return this;
-  }
+  /// @}
 
 private:
   const bool durable_;
 
-  typedef OPENDDS_SET(InternalDataReader_rch) ReaderSet;
+  typedef OPENDDS_SET(InternalDataReader_wrch) ReaderSet;
   ReaderSet readers_;
 
   struct SampleHolder {
@@ -136,7 +155,7 @@ private:
     {}
   };
 
-  typedef OPENDDS_MAP(T, SampleHolder) InstanceMap;
+  typedef OPENDDS_MAP_T(T, SampleHolder) InstanceMap;
   InstanceMap instance_map_;
 
   ACE_Thread_Mutex mutex_;

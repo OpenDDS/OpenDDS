@@ -541,15 +541,6 @@ public:
     use_ice_ = ui;
   }
 
-  bool use_ncm() const
-  {
-    return use_ncm_.value();
-  }
-  void use_ncm(bool ui)
-  {
-    use_ncm_ = ui;
-  }
-
   size_t sedp_max_message_size() const
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, size_t());
@@ -780,7 +771,6 @@ private:
   ACE_INET_Addr spdp_stun_server_address_;
   ACE_INET_Addr sedp_stun_server_address_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_ice_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_ncm_;
   size_t sedp_max_message_size_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> undirected_spdp_;
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> periodic_directed_spdp_;

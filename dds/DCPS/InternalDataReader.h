@@ -25,6 +25,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class InternalEntity : public RcObject {};
+typedef WeakRcHandle<InternalEntity> InternalEntity_wrch;
+
 enum InternalSampleInfoKind {
   ISIK_REGISTER,
   ISIK_SAMPLE,
@@ -34,10 +37,10 @@ enum InternalSampleInfoKind {
 
 struct InternalSampleInfo {
   InternalSampleInfoKind kind;
-  const void* publication_handle;
+  InternalEntity_wrch publication_handle;
 
   InternalSampleInfo(InternalSampleInfoKind a_kind,
-                     const void* a_publication_handle)
+                     InternalEntity_wrch a_publication_handle)
     : kind(a_kind)
     , publication_handle(a_publication_handle)
   {}
@@ -52,33 +55,41 @@ struct InternalSampleInfo {
 typedef OPENDDS_VECTOR(InternalSampleInfo) InternalSampleInfoSequence;
 
 template <typename T>
-class InternalDataReader : public RcObject {
+class InternalDataReader : public InternalEntity {
 public:
   typedef OPENDDS_VECTOR(T) SampleSequence;
   typedef RcHandle<InternalDataReaderListener<T> > Listener_rch;
   typedef WeakRcHandle<InternalDataReaderListener<T> > Listener_wrch;
 
-  InternalDataReader(bool durable = false,
-                     Listener_rch listener = Listener_rch())
+  explicit InternalDataReader(bool durable = false,
+                              Listener_rch listener = Listener_rch())
     : durable_(durable)
     , listener_(listener)
   {}
 
+  /// @name InternalTopic and InternalWriter Interface
+  /// @{
   bool durable() const { return durable_; }
 
-  void set_listener(Listener_rch listener)
+  void remove_publication(InternalEntity_wrch publication_handle)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    listener_ = listener;
+
+    // FUTURE: Index by publication_handle to avoid the loop.
+    bool schedule = false;
+    for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ++pos) {
+      if (pos->second.unregister_instance(pos->first, publication_handle)) {
+        schedule = true;
+      }
+    }
+
+    const Listener_rch listener = listener_.lock();
+    if (schedule && listener) {
+      listener->schedule(rchandle_from(this));
+    }
   }
 
-  Listener_rch get_listener() const
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, Listener_rch());
-    return listener_.lock();
-  }
-
-  void register_instance(const void* publication_handle, const T& sample)
+  void register_instance(InternalEntity_wrch publication_handle, const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -89,7 +100,7 @@ public:
       p.first->second.samples.push_back(sample);
       p.first->second.infos.push_back(InternalSampleInfo(ISIK_REGISTER, publication_handle));
 
-      Listener_rch listener = listener_.lock();
+      const Listener_rch listener = listener_.lock();
       if (listener) {
         listener->schedule(rchandle_from(this));
       }
@@ -101,7 +112,7 @@ public:
     p.first->second.instance_state = DDS::ALIVE_INSTANCE_STATE;
   }
 
-  void write(const void* publication_handle, const T& sample)
+  void write(InternalEntity_wrch publication_handle, const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -110,7 +121,7 @@ public:
     p.first->second.samples.push_back(sample);
     p.first->second.infos.push_back(InternalSampleInfo(ISIK_SAMPLE, publication_handle));
 
-    Listener_rch listener = listener_.lock();
+    const Listener_rch listener = listener_.lock();
     if (listener) {
       listener->schedule(rchandle_from(this));
     }
@@ -124,7 +135,7 @@ public:
     p.first->second.instance_state = DDS::ALIVE_INSTANCE_STATE;
   }
 
-  void unregister_instance(const void* publication_handle, const T& sample)
+  void unregister_instance(InternalEntity_wrch publication_handle, const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -133,13 +144,13 @@ public:
       return;
     }
 
-    Listener_rch listener = listener_.lock();
+    const Listener_rch listener = listener_.lock();
     if (pos->second.unregister_instance(sample, publication_handle) && listener) {
       listener->schedule(rchandle_from(this));
     }
   }
 
-  void dispose(const void* publication_handle, const T& sample)
+  void dispose(InternalEntity_wrch publication_handle, const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -152,28 +163,25 @@ public:
     pos->second.infos.push_back(InternalSampleInfo(ISIK_DISPOSE, publication_handle));
     pos->second.instance_state = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
 
-    Listener_rch listener = listener_.lock();
+    const Listener_rch listener = listener_.lock();
     if (listener) {
       listener->schedule(rchandle_from(this));
     }
   }
+  /// @}
 
-  void remove_publication(const void* publication_handle)
+  /// @name User Interface
+  /// @{
+  void set_listener(Listener_rch listener)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    listener_ = listener;
+  }
 
-    // FUTURE: Index by publication_handle to avoid the loop.
-    bool schedule = false;
-    for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ++pos) {
-      if (pos->second.unregister_instance(pos->first, publication_handle)) {
-        schedule = true;
-      }
-    }
-
-    Listener_rch listener = listener_.lock();
-    if (schedule && listener) {
-      listener->schedule(rchandle_from(this));
-    }
+  Listener_rch get_listener() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, Listener_rch());
+    return listener_.lock();
   }
 
   void take(SampleSequence& samples, InternalSampleInfoSequence& infos)
@@ -197,6 +205,7 @@ public:
       }
     }
   }
+  /// @}
 
 private:
   const bool durable_;
@@ -205,7 +214,7 @@ private:
   // destroyed.
   Listener_wrch listener_;
 
-  typedef OPENDDS_SET(const void*) PublicationSet;
+  typedef OPENDDS_SET(InternalEntity_wrch) PublicationSet;
 
   struct Instance {
     OPENDDS_LIST(T) samples;
@@ -216,7 +225,7 @@ private:
     DDS::ViewStateKind view_state;
     DDS::InstanceStateKind instance_state;
 
-    bool unregister_instance(const T& sample, const void* publication_handle)
+    bool unregister_instance(const T& sample, InternalEntity_wrch publication_handle)
     {
       if (publication_set.erase(publication_handle)) {
         samples.push_back(sample);
@@ -233,8 +242,7 @@ private:
     }
   };
 
-  typedef T KeyType;
-  typedef OPENDDS_MAP(KeyType, Instance) InstanceMap;
+  typedef OPENDDS_MAP_T(T, Instance) InstanceMap;
   InstanceMap instance_map_;
 
   mutable ACE_Thread_Mutex mutex_;

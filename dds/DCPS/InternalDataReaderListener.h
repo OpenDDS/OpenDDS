@@ -25,15 +25,17 @@ template <typename T>
 class InternalDataReader;
 
 template <typename T>
-class InternalDataReaderListener : public JobQueue::Job {
+class InternalDataReaderListener : public virtual RcObject {
 public:
   typedef RcHandle<InternalDataReader<T> > InternalDataReader_rch;
 
   InternalDataReaderListener()
+    : job_(make_rch<Job>(rchandle_from(this)))
   {}
 
   explicit InternalDataReaderListener(JobQueue_rch job_queue)
-    : job_queue_(job_queue)
+    : job_(make_rch<Job>(rchandle_from(this)))
+    , job_queue_(job_queue)
   {}
 
   void job_queue(JobQueue_rch job_queue)
@@ -43,20 +45,42 @@ public:
 
   virtual void on_data_available(InternalDataReader_rch reader) = 0;
 
+  /// @name InternalDataReader Interface
+  /// @{
   void schedule(InternalDataReader_rch reader)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     JobQueue_rch lock = job_queue_.lock();
     if (lock) {
-      bool enqueue = readers_.empty();
+      const bool enqueue = readers_.empty();
       readers_.insert(reader);
       if (enqueue) {
-        lock->enqueue(rchandle_from(this));
+        lock->enqueue(job_);
       }
     }
   }
+  /// @}
 
 private:
+  class Job : public JobQueue::Job {
+  public:
+    explicit Job(RcHandle<InternalDataReaderListener> listener)
+      : listener_(listener)
+    {}
+
+    void execute()
+    {
+      RcHandle<InternalDataReaderListener> listener = listener_.lock();
+      if (listener) {
+        listener->execute();
+      }
+    }
+
+  private:
+    WeakRcHandle<InternalDataReaderListener> listener_;
+  };
+
+  JobQueue::JobPtr job_;
   JobQueue_wrch job_queue_;
   typedef WeakRcHandle<InternalDataReader<T> > Reader;
   typedef OPENDDS_SET(Reader) ReaderSet;
@@ -66,19 +90,19 @@ private:
 
   void execute()
   {
-    Reader reader;
+    ReaderSet readers;
 
     {
       ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-      typename ReaderSet::iterator pos = readers_.begin();
-      reader = *pos;
-      readers_.erase(pos);
+      std::swap(readers, readers_);
     }
 
-    InternalDataReader_rch lock = reader.lock();
-    if (lock) {
-      on_data_available(lock);
+    for (typename ReaderSet::const_iterator pos = readers.begin(), limit = readers.end();
+         pos != limit; ++pos) {
+      InternalDataReader_rch reader = pos->lock();
+      if (reader) {
+        on_data_available(reader);
+      }
     }
   }
 };
