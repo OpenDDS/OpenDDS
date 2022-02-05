@@ -179,21 +179,26 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
 
+    const DDS::Duration_t infinite = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    const DDS::Duration_t one_second = { 1, 0 };
+
+    bool wait_forever = false;
     DDS::Duration_t timeout;
     if (my_args.timeout_ == 0) {
-      timeout.sec = DDS::DURATION_INFINITE_SEC;
-      timeout.nanosec = DDS::DURATION_INFINITE_NSEC;
+      timeout = infinite;
+      wait_forever = true;
     } else {
       timeout.sec = my_args.timeout_;
       timeout.nanosec = 0;
     }
-    ACE_Time_Value deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout, ACE_OS::gettimeofday());
+
+    const ACE_Time_Value deadline = OpenDDS::DCPS::duration_to_absolute_time_value(timeout, ACE_OS::gettimeofday());
 
     DDS::ConditionSeq conditions;
     DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
 
     ACE_Time_Value current_time = ACE_OS::gettimeofday();
-    while (current_time < deadline) {
+    while (wait_forever || current_time < deadline) {
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         CLEAN2_ERROR_RETURN((LM_WARNING,
                              ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
@@ -203,17 +208,18 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
         break;
       }
 
-      DDS::ReturnCode_t rc = ws->wait(conditions, timeout);
-      if (rc == DDS::RETCODE_TIMEOUT) {
-        CLEAN2_ERROR_RETURN((LM_WARNING,
-                             ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
-                             ACE_TEXT("main() - wait() timed out!\n")), -27);
-      } else if (rc != DDS::RETCODE_OK) {
+      DDS::ReturnCode_t rc = ws->wait(conditions, one_second);
+      if (rc != DDS::RETCODE_TIMEOUT && rc != DDS::RETCODE_OK) {
         CLEAN2_ERROR_RETURN((LM_WARNING,
                              ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
                              ACE_TEXT("main() - wait() failed!\n")), -28);
       }
       current_time = ACE_OS::gettimeofday();
+    }
+    if (!wait_forever && deadline <= current_time && !(matches.current_count == 0 && matches.total_count > 0)) {
+      CLEAN2_ERROR_RETURN((LM_WARNING,
+                           ACE_TEXT("(%P|%t) %N:%l - WARNING: ")
+                           ACE_TEXT("main() - wait() timed out!\n")), -27);
     }
 
     status = listener_servant->is_valid() ? 0 : -29;
