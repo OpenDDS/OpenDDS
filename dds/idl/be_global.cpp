@@ -637,8 +637,8 @@ namespace {
 
   string make_relative(const string& absolute, bool filename_only_includes)
   {
-    for (vector<string>::const_reverse_iterator iter = inc_path_vector_.crbegin(),
-        end = inc_path_vector_.crend(); iter != end; ++iter) {
+    for (vector<string>::reverse_iterator iter = inc_path_vector_.rbegin(),
+        end = inc_path_vector_.rend(); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
 
