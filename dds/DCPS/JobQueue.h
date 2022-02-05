@@ -23,7 +23,7 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export JobQueue : public RcEventHandler {
 public:
-  class Job : public RcObject {
+  class Job : public virtual RcObject {
   public:
     virtual ~Job() { }
     virtual void execute() = 0;
@@ -52,6 +52,7 @@ private:
 };
 
 typedef RcHandle<JobQueue> JobQueue_rch;
+typedef WeakRcHandle<JobQueue> JobQueue_wrch;
 
 } // namespace DCPS
 } // namespace OpenDDS
