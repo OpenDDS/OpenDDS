@@ -624,6 +624,9 @@ jobs:
       run: |
         cd OpenDDS/build/target
         find . -iname "*\.o" | xargs rm
+        # Debug start
+        git clean -xdfn | cut -d ' ' -f 3-
+        # Debug end
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../../../${{ github.job }}.tar
         xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
