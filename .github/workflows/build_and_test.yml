@@ -905,7 +905,6 @@ jobs:
         git clean -xdfn | cat > gitclean.out
         echo "== Git clean output:"
         cat gitclean.out
-        input="./gitclean.out"
         while read -r line
         do
           tokens_count=$(echo $line | wc -w)
@@ -913,7 +912,7 @@ jobs:
           then
             echo $line | cut -d ' ' -f 3- >> fileslist.in
           fi
-        done < $input
+        done < gitclean.out
         echo "== List of files to archive:"
         cat fileslist.in
         cat fileslist.in | xargs tar cvf ../../../${{ github.job }}.tar
