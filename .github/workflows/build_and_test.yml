@@ -920,6 +920,8 @@ jobs:
         xz -3 ../../../${{ github.job }}.tar
         rm gitclean.out fileslist.in
         EOF
+        echo "== Create artifact script:"
+        cat create_artifact.sh
         . create_artifact.sh
         rm create_artifact.sh
     - name: upload OpenDDS artifact
