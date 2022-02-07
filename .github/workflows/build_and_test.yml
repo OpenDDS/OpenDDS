@@ -897,8 +897,27 @@ jobs:
         git clean -xdfn | cut -d ' ' -f 3-
         echo "End debugging..."
         # Debug end
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../../../${{ github.job }}.tar
+        #git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../../../${{ github.job }}.tar
+        #xz -3 ../../../${{ github.job }}.tar
+
+        cat > create_artifact.sh <<EOF
+        #!/bin/bash
+        git clean -xdfn | cat > gitclean.out
+        input="./gitclean.out"
+        while read -r line
+        do
+          tokens_count=$(echo $line | wc -w)
+          if [ $tokens_count -eq 3 ]
+          then
+            echo $line | cut -d ' ' -f 3- >> fileslist.in
+          fi
+        done < $input
+        cat fileslist.in | xargs tar cvf ../../../${{ github.job }}.tar
         xz -3 ../../../${{ github.job }}.tar
+        rm gitclean.out fileslist.in
+        EOF
+        . create_artifact.sh
+        rm create_artifact.sh
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
