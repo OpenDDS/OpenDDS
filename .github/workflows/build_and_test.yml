@@ -888,7 +888,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build/target
-        find . -iname "*\.o" | xargs rm
+        #find . -iname "*\.o" | xargs rm
         # Debug start
         #echo "Start debugging..."
         #echo "  Git clean output:"
