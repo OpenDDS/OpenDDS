@@ -746,6 +746,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
         path: OpenDDS/ACE_TAO
     - name: get ACE_TAO commit
       shell: bash
@@ -763,7 +764,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
@@ -784,22 +785,23 @@ jobs:
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build/host
         . setenv.sh
-        cd ../../ACE_TAO/ACE
         make -j4
-        cd ../TAO
+        cd ../target
+        . setenv.sh
+        cd ACE_TAO/ACE/ace
         make -j4
     - name: create ACE_TAO tar.xz artifact
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        cd OpenDDS/ACE_TAO
+        cd OpenDDS/build/target/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
-        xz -3 ../../${{ github.job }}.tar
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
       with:
@@ -818,26 +820,22 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
+        path: OpenDDS
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: setup gtest
@@ -854,13 +852,18 @@ jobs:
       run: |
         cd OpenDDS
         ./configure \
-          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
+          --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile=base \
           --no-built-in-topics \
           --tests
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -870,16 +873,16 @@ jobs:
     - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       run: |
-        cd OpenDDS
+        cd OpenDDS/build/target
+        . setenv.sh
         make -j4
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS
+        cd OpenDDS/build/target
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
-        xz -3 ../${{ github.job }}.tar
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../../../${{ github.job }}.tar
+        xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -898,35 +901,36 @@ jobs:
       with:
         repository: DOCGroup/MPC
         path: MPC
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v2
-      with:
-        repository: DOCGroup/ACE_TAO
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
         path: OpenDDS
         submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v2
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
+        path: OpenDDS
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
         name: build_u18_bsafe_js0_FM-1f.tar.xz
-        path: OpenDDS
+        path: OpenDDS/build
     - name: extract OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS
+        cd OpenDDS/build
         tar xvfJ build_u18_bsafe_js0_FM-1f.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -5032,7 +5036,6 @@ jobs:
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-    #timeout-minutes: 150
 
     steps:
     - name: install xerces
