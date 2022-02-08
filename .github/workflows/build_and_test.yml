@@ -544,6 +544,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
+        rm build/target/setenv.sh
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
@@ -800,6 +801,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
+        rm build/target/setenv.sh
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
@@ -2566,6 +2568,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
+        rm build/target/setenv.sh
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
