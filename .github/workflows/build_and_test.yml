@@ -839,11 +839,6 @@ jobs:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
         path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
-        path: OpenDDS
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: setup gtest
@@ -867,6 +862,11 @@ jobs:
           --safety-profile=base \
           --no-built-in-topics \
           --tests
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
+        path: OpenDDS
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
@@ -900,29 +900,30 @@ jobs:
         #git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../../../${{ github.job }}.tar
         #xz -3 ../../../${{ github.job }}.tar
 
-        cat > create_artifact.sh <<EOF
-        #!/bin/bash
-        git clean -xdfn | cat > gitclean.out
-        echo "== Git clean output:"
-        cat gitclean.out
-        while read -r line
-        do
-          tokens_count="$(echo $line | wc -w)"
-          if [ "$tokens_count" -eq 3 ]
-          then
-            echo "$line" | cut -d ' ' -f 3- >> fileslist.in
-          fi
-        done < gitclean.out
-        echo "== List of files to archive:"
-        cat fileslist.in
-        cat fileslist.in | xargs tar cvf ../../../${{ github.job }}.tar
-        xz -3 ../../../${{ github.job }}.tar
-        rm gitclean.out fileslist.in
-        EOF
-        echo "== Create artifact script:"
-        cat create_artifact.sh
-        . create_artifact.sh
-        rm create_artifact.sh
+        #cat > create_artifact.sh <<EOF
+        ##!/bin/bash
+        #git clean -xdfn | cat > gitclean.out
+        #echo "== Git clean output:"
+        #cat gitclean.out
+        #while read -r line
+        #do
+        #  tokens_count="$(echo $line | wc -w)"
+        #  if [ "$tokens_count" -eq 3 ]
+        #  then
+        #    echo "$line" | cut -d ' ' -f 3- >> fileslist.in
+        #  fi
+        #done < gitclean.out
+        #echo "== List of files to archive:"
+        #cat fileslist.in
+        #cat fileslist.in | xargs tar cvf ../../../${{ github.job }}.tar
+        #xz -3 ../../../${{ github.job }}.tar
+        #rm gitclean.out fileslist.in
+        #EOF
+        #echo "== Create artifact script:"
+        #cat create_artifact.sh
+        #. create_artifact.sh
+        #rm create_artifact.sh
+        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -966,11 +967,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: build_u18_bsafe_js0_FM-1f.tar.xz
-        path: OpenDDS/build
+        path: OpenDDS/build/target
     - name: extract OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build
+        cd OpenDDS/build/target
         tar xvfJ build_u18_bsafe_js0_FM-1f.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
