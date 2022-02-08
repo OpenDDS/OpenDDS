@@ -625,6 +625,7 @@ jobs:
         cd OpenDDS/build/target
         find . -iname "*\.o" | xargs rm
         tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
+        xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -881,6 +882,7 @@ jobs:
         cd OpenDDS/build/target
         find . -iname "*\.o" | xargs rm
         tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
+        xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -2651,6 +2653,7 @@ jobs:
         cd OpenDDS/build/target
         find . -iname "*\.o" | xargs rm
         tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
+        xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
