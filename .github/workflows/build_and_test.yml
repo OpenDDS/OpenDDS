@@ -668,7 +668,7 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_u18_esafe_js0.tar.xz
+        name: build_u18_esafe_js0_artifact
         path: OpenDDS/build/target
     - name: extract OpenDDS artifact
       shell: bash
