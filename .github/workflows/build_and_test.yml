@@ -907,10 +907,10 @@ jobs:
         cat gitclean.out
         while read -r line
         do
-          tokens_count=$(echo $line | wc -w)
-          if [ $tokens_count -eq 3 ]
+          tokens_count="$(echo $line | wc -w)"
+          if [ "$tokens_count" -eq 3 ]
           then
-            echo $line | cut -d ' ' -f 3- >> fileslist.in
+            echo "$line" | cut -d ' ' -f 3- >> fileslist.in
           fi
         done < gitclean.out
         echo "== List of files to archive:"
