@@ -266,8 +266,9 @@ set(OPENDDS_RTPS_UDP_DEPS
   OpenDDS::Rtps
 )
 
+set(OPENDDS_SECURITY_DEPS "")
 if(OPENDDS_SECURITY)
-  set(OPENDDS_SECURITY_DEPS
+  list(APPEND OPENDDS_SECURITY_DEPS
     OpenDDS::Rtps
     ACE::XML_Utils
     OpenSSL::SSL
@@ -349,6 +350,18 @@ include(SelectLibraryConfigurations)
 foreach(_lib ${_all_libs})
   string(TOUPPER ${_lib} _LIB_VAR)
   select_library_configurations(${_LIB_VAR})
+
+  # These paths might can be symlinks and IMPORTED_RUNTIME_ARTIFACTS seems to
+  # not work correctly with symlinks.
+  if(${_LIB_VAR}_LIBRARY)
+    get_filename_component(${_LIB_VAR}_LIBRARY "${${_LIB_VAR}_LIBRARY}" REALPATH)
+  endif()
+  if(${_LIB_VAR}_LIBRARY_DEBUG)
+    get_filename_component(${_LIB_VAR}_LIBRARY_DEBUG "${${_LIB_VAR}_LIBRARY_DEBUG}" REALPATH)
+  endif()
+  if(${_LIB_VAR}_LIBRARY_RELEASE)
+    get_filename_component(${_LIB_VAR}_LIBRARY_RELEASE "${${_LIB_VAR}_LIBRARY_RELEASE}" REALPATH)
+  endif()
 endforeach()
 
 list(APPEND _opendds_required_deps
@@ -430,9 +443,44 @@ macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
     endif()
 
     list(APPEND OPENDDS_LIBRARIES ${target})
-
   endif()
 endmacro()
+
+function(opendds_get_library_var_prefix scoped_name var_prefix_var)
+  if(scoped_name STREQUAL "ACE::ACE")
+    set(var_prefix "ACE")
+  elseif(scoped_name STREQUAL "TAO::TAO")
+    set(var_prefix "TAO")
+  else()
+    string(TOUPPER ${scoped_name} var_prefix)
+    string(REPLACE "::" "_" var_prefix "${var_prefix}")
+  endif()
+
+  set(${var_prefix_var} ${var_prefix} PARENT_SCOPE)
+endfunction()
+
+function(opendds_get_library_dependencies deps_var lib)
+  set(libs "${lib}")
+  list(APPEND libs ${ARGN})
+  set(deps "${${deps_var}}")
+  foreach(lib ${libs})
+    if(NOT ${lib} IN_LIST deps)
+      string(REGEX MATCH "^(OpenDDS|ACE|TAO)::" re_out "${lib}")
+      if (CMAKE_MATCH_1)
+        set(ace_tao_opendds ${CMAKE_MATCH_1})
+        opendds_get_library_var_prefix(${lib} var_prefix)
+        set(dep_list_name "${var_prefix}_DEPS")
+        if(DEFINED ${dep_list_name})
+          opendds_get_library_dependencies(deps ${${dep_list_name}})
+        endif()
+        list(APPEND deps ${lib})
+      endif()
+    endif()
+  endforeach()
+
+  list(REMOVE_DUPLICATES deps)
+  set(${deps_var} "${deps}" PARENT_SCOPE)
+endfunction()
 
 if(OPENDDS_FOUND)
   include("${CMAKE_CURRENT_LIST_DIR}/options.cmake")
@@ -469,6 +517,10 @@ if(OPENDDS_FOUND)
   foreach(_lib ${_opendds_libs})
     string(TOUPPER ${_lib} _VAR_PREFIX)
     string(REPLACE "OpenDDS_" "OpenDDS::" _target ${_lib})
+
+    if(NOT DEFINED "${_VAR_PREFIX}_DEPS")
+      message(FATAL_ERROR "OpenDDS lib ${_lib} is missing a dependency list! (${_VAR_PREFIX}_DEPS)")
+    endif()
 
     _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${OPENDDS_INCLUDE_DIR}")
 

@@ -2,8 +2,8 @@
 #define OPENDDS_INSTALL_LIBRARY_SUBDIR_VECTOR_IDL
 
 struct Vector {
-  long x;
-  long y;
+  double x;
+  double y;
 };
 
 #endif

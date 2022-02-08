@@ -1,7 +1,7 @@
 #ifndef OPENDDS_INSTALL_LIBRARY_MOVING_OBJECT_IDL
 #define OPENDDS_INSTALL_LIBRARY_MOVING_OBJECT_IDL
 
-#include "Vector.idl"
+#include <Vector.idl>
 
 @topic
 struct MovingObject {
