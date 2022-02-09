@@ -2,10 +2,11 @@
 layout: page
 title: News
 categories: [opendds]
-order: 15
+order: 14
 ---
 
 {% for post in site.categories.news %}
+<summary class='news-summary-card'>
   <h3>{{ post.title }}</h3>
 
   {{ post.excerpt }}
@@ -13,4 +14,5 @@ order: 15
   <a href="{{ post.url }}">Continue Reading...</a>
 
   <i class="post-date">Posted on {{ post.date | date_to_long_string }}</i>
+</summary>
 {% endfor %}

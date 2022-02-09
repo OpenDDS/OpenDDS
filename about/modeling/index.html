@@ -29,13 +29,13 @@ order: 70
         UML Profile For Data Distribution Specification</a> (OMG: ptc/2010-05-17).
       In turn, this specification reflects the DDS Platform
       Independent Model (PIM) defined in
-      (<a href="http://www.omg.org/cgi-bin/doc?formal/07-01-01">Data Distribution Service for Real-time Systems</a>
-      (OMG: formal/07-01-01</a>).
+      <a href="http://www.omg.org/cgi-bin/doc?formal/07-01-01">Data Distribution Service for Real-time Systems</a>
+      (OMG: formal/07-01-01).
   </p>
 
   <p>
     Once a model has been <a href="#Capture">captured</a>,
-    it is used to <a href="#Generate">generate source code</a>.
+    it is used to <a href="#Generation">generate source code</a>.
     That source code is then compiled into
     link libraries that can be <a href="#Programming">linked into a user application</a>.
     Applications access the DDS API by instantiating classes
@@ -82,18 +82,24 @@ order: 70
     <p>
       To install the plug-ins, use the standard installation mechanism for Eclipse,
       an installation site is available for the tools at:
+    </p>
       <ul>
         <li>for Eclipse 3.x: <a href="http://download.opendds.org/modeling/eclipse">http://download.opendds.org/modeling/eclipse</a></li>
         <li>for Eclipse 4.4: <a href="http://download.opendds.org/modeling/eclipse_44">http://download.opendds.org/modeling/eclipse_44</a></li>
       </ul>
+    <p>
       The feature to install from that site is:
+    </p>
       <ul><li><em>OpenDDS Modeling SDK</em></li></ul>
+    <p>
       To simplify installation where a full Internet connection
       may not be available, the file:
+    </p>
       <ul>
         <li>for Eclipse 3.x: <a href="http://download.opendds.org/modeling/eclipse/opendds_modeling_site.zip">http://download.opendds.org/modeling/eclipse/opendds_modeling_site.zip</a></li>
         <li>for Eclipse 4.4: <a href="http://download.opendds.org/modeling/eclipse_44/opendds_modeling_site.zip">http://download.opendds.org/modeling/eclipse_44/opendds_modeling_site.zip</a></li>
       </ul>
+    <p>
       is available for download as well.  This can be used as
       a local archive for installation by Eclipse.
     </p>
@@ -116,7 +122,7 @@ order: 70
   <p>
     Different diagram types are used to capture information
     in the model, including:
-  <p>
+  </p>
     <table border>
       <tr><th>Diagram</th><th>Description</th></tr>
 
@@ -149,8 +155,6 @@ order: 70
           will be transported by the DDS service.</td>
       </tr>
     </table>
-  </p>
-  </p>
   <p>
     Opening a new OpenDDS model within the plug-ins begins
     with a top level <em>main</em> diagram.  This diagram
@@ -173,7 +177,6 @@ order: 70
     See <a href="modeling_capture.html">Model Capture</a>
     for more detailed information on capturing a model.
   </p>
-</span>
 </div>
 
 
@@ -195,6 +198,7 @@ order: 70
       customization and generation instructions to be created for
       any single model.  The forms used to capture information
       about customization and code generation are:
+    </p>
       <table border>
         <tr><th>Form</th><th>Description</th></tr>
 
@@ -224,7 +228,6 @@ order: 70
             an environment variable with a path relative to
             the value of that variable.</td></tr>
       </table>
-    </p>
 
     <p>
       Specifics of code generation are unique to the individual
@@ -248,7 +251,7 @@ order: 70
 
     <p>
       The files generated from a model include:
-    <p>
+    </p>
       <table border>
         <tr><th>File</th><th>Description</th></tr>
 
@@ -282,7 +285,7 @@ order: 70
         </td></tr>
 
       </table>
-    </p>
+    <p>
     The build support files are based on the
     <a href="http://www.objectcomputing.com/products/MPC">MPC</a>
     portable build system used by OpenDDS itself.  It can be used to
@@ -337,7 +340,7 @@ order: 70
           Course Offerings - Distributed Computing</a> for
         descriptions of these and other Distributed Computing course offerings
         from OCI.</li>
-      <li>The <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">
+      <li>The <a href="{{ site.data.opendds.latest_devguide_url }}">
           OpenDDS Developer's Guide</a> contains information on installing and
         getting started with the SDK, along with details on developing applications
         that use the SDK.</li>
@@ -349,3 +352,4 @@ order: 70
   </span>
 </div>
 
+</div>

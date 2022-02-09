@@ -1,0 +1,97 @@
+.main {
+  flex: 3;
+}
+
+.main article {
+  padding-right: 2rem;
+  max-width: 80ch;
+}
+
+.post.minutes-post h1 {
+  font-size: 2.5rem;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+
+.post.minutes-post h4 {
+  font-size: 1.3rem;
+}
+
+.minutes-content {
+  display: flex;
+  flex-wrap: wrap;
+  padding-top: 1rem;
+}
+
+.minutes-content table {
+  border: 1px solid darkgray;
+  border-collapse: collapse;
+}
+
+.minutes-content tbody {
+  text-align: center;
+}
+
+.minutes-content tbody td:first-child {
+  background-color: lightgrey;
+}
+
+.minutes-content tbody td:last-child {
+  text-align: right;
+}
+
+.minutes-content td {
+  padding: 8px;
+  text-align: left;
+  border-bottom: 1px solid darkgray;
+}
+
+.minutes-sidebar {
+  flex: 1;
+  min-width: 350px;
+}
+
+.minutes-sidebar ul {
+  padding: 0;
+  margin: 0;
+  text-decoration: none;
+}
+
+.minutes-sidebar li {
+  list-style-type: none;
+}
+
+.minutes-sidebar p {
+  font-size: 0.825rem;
+}
+
+.minutes-sidebar a.page-link {
+  color: var(--opendds-brick) !important;
+}
+
+.minutes-sidebar-content {
+  border-top: 3px solid var(--opendds-brick);
+  background-color: var(--bg-gray-panel);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+.minutes-sidebar-content h2,
+.minutes-sidebar-content h4 {
+  white-space: nowrap;
+}
+
+.minutes-sidebar-content h4 {
+  font-size: 1.15rem;
+  line-height: 1.5rem;
+  font-weight: 500;
+}
+
+.minutes-sidebar-content h2 {
+  color: var(--opendds-brick);
+  text-transform: uppercase;
+  font-size: 1.1em;
+  font-weight: 400;
+  white-space: nowrap;
+  margin-bottom: 1rem;
+}

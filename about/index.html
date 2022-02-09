@@ -16,9 +16,9 @@ redirect_from: /about.html
       that Java applications can use OpenDDS.
     </p>
     <p>
-      OpenDDS is built on the <a href="http://www.theaceorb.com/product/aboutace.html">ACE</a>
+      OpenDDS is built on the <a href="{{ site.data.oci.tao_base_url }}/about/aboutace.html">ACE</a>
       abstraction layer to provide platform portability.  OpenDDS also leverages
-      capabilities of <a href="http://www.theaceorb.com/">TAO</a>, such as its IDL compiler
+      capabilities of <a href="{{ site.data.oci.tao_base_url }}">TAO</a>, such as its IDL compiler
       and as the basis of the OpenDDS DCPS Information Repository (DCPSInfoRepo).
     </p>
     <p>
@@ -34,10 +34,13 @@ redirect_from: /about.html
       <br />
       <p>
 	OpenDDS is based on version 1.4 of OMG Data Distribution Service (DDS) for Real-Time Systems specification (formal/2015-04-10)
-	and version 2.2 of the Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) (formal/2014-09-01).
+	and version 2.3 of the Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) (formal/2019-04-03)
+	and version 1.1 of the DDS Security specification (formal/2018-04-01)
+	and version 1.3 of the DDS XTypes specification (formal/2020-02-04)
       </p>
       <p>
 	It offers the following default transport protocols (IPv4 and IPv6):
+      </p>
 	<ul>
 	  <li>
 	    TCP/IP
@@ -52,6 +55,7 @@ redirect_from: /about.html
 	    IP multicast
 	  </li>
 	</ul>
+      <p>
 	The <a href="transport.html">pluggable transport framework</a> allows anyone to create a
 	transport to fit custom requirements.
       </p>
@@ -87,6 +91,7 @@ redirect_from: /about.html
     <a name="Compliance"><span class="headertext">Compliance with the DDS-RTPS Specification</span></a>
     <p>
       OpenDDS supports the following capabilities defined in the DDS-RTPS Specification:
+    </p>
       <ul>
 	<li>
 	  Support of all RTPS Messages
@@ -105,7 +110,6 @@ redirect_from: /about.html
 	  Support of all required RTPS QoS functionality
 	</li>
       </ul>
-    </p>
   </div>
   <div class="panel" align="justify">
     <a name="Performance"><span class="headertext">Peformance Testing</span></a>
@@ -191,5 +195,4 @@ redirect_from: /about.html
 	these investments will yield a commensurate return.
     </p> </span>
   </div>
-</div>
 </div>

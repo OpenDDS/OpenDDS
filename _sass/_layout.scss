@@ -1,251 +1,279 @@
 .site-header {
-    font-weight: bold;
-    background-color: $brand-color;
-    position: relative;
-    a { color: white; text-decoration: none; }
+  font-weight: bold;
+  background-color: $brand-color;
+  position: relative;
+  a {
+    color: white;
+    text-decoration: none;
+  }
 }
 
 .site-title {
-    font-size: 18px;
-    line-height: 20px;
-    height: 20px;
-    margin-bottom: 0;
-    float: left;
-    padding: $spacing-unit;
+  font-size: 18px;
+  line-height: 20px;
+  height: 20px;
+  margin-bottom: 0;
+  float: left;
+  padding: $spacing-unit;
 }
 
 .sidebar {
-    width: 20%;
-    float: right;
+  width: 20%;
+  float: right;
 }
 
 .sidebar:after {
-    clear: both;
+  clear: both;
 }
 .above-nav-bg {
-    width: 100%;
-    margin-right: auto;
-    margin-left: auto;
-    background-color: #FFF;
-    @extend %clearfix;
-    padding: 1em 0;
+  width: 100%;
+  margin-right: auto;
+  margin-left: auto;
+  background-color: #fff;
+  @extend %clearfix;
+  padding: 1em 0;
 }
 
 .above-nav {
-    .opendds-logo {
-        width: 200px;
-    
-        img {
-            width: 50%;
-            float: left;
-        }
-    
-        h1 {
-            color: $text-color;
-            width: 50%;
-            float: right;
-            margin-top: 8px;
-        }
+  .opendds-logo {
+    img {
+      max-width: 250px;
+      min-height: 80px;
     }
+
+    h1 {
+      color: $text-color;
+      width: 50%;
+      float: right;
+      margin-top: 8px;
+    }
+  }
 }
 
 .above-nav-main-content {
-    width: 98%;
-    margin-left: auto;
-    margin-right: auto;
+  width: 98%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .site-nav {
-    float: left;
-    line-height: normal;
-    margin: 0px auto;
-    box-sizing: border-box;
+  float: left;
+  line-height: normal;
+  margin: 0px auto;
+  box-sizing: border-box;
 
-    .menu-icon { display: none; }
+  .menu-icon {
+    display: none;
+  }
 
-    .toggle, [id^="drop"] { display: none; }
+  .toggle,
+  [id^="drop"] {
+    display: none;
+  }
 
-    a {
-        color: white;
-        text-decoration: none;
+  a {
+    color: white;
+    text-decoration: none;
+  }
+
+  .arrow {
+    font-size: 11px;
+  }
+
+  ul {
+    padding: 0 10px;
+    line-height: 18px;
+    list-style: none;
+    position: relative;
+    display: inline-table;
+    li {
+      display: inline-block;
     }
+  }
 
-    .arrow { font-size: 11px; }
+  .trigger {
+    line-height: 20px;
+    margin-bottom: 0;
+    margin-left: 0;
+    display: block;
+    > li > a {
+      padding-top: 12px;
+      padding-bottom: 15px;
+      padding-left: 15px;
+      padding-right: 15px;
+      border-top: 3px solid transparent;
+      font-weight: bold;
+      position: relative;
+    }
+  }
 
+  .sub-menu {
+    opacity: 0;
+    position: absolute;
+    visibility: hidden;
+    transition: visibility 0.25s, opacity 0.25s linear;
+    z-index: 1;
+    display: none;
+    background: #fff;
+    padding: 0;
+    margin-left: 0;
+    box-shadow: 0 6px 12px hsla(0, 0, 0, 0.4);
+    font-size: 14px;
+    li {
+      display: block;
+      padding: 3px 20px;
+      position: relative;
+      white-space: nowrap;
+      a {
+        color: $brand-color;
+      }
+    }
     ul {
-        padding: 0 10px;
-        line-height: 18px;
-        list-style: none;
-        position:relative;
-        display:inline-table;
-        li { display: inline-block; }
+      position: absolute;
+      left: 100%;
+      top: 0;
+    }
+  }
+
+  @include anti-media-query($on-palm) {
+    ul li:hover > ul {
+      opacity: 1;
+      visibility: visible;
+      transition: visibility 0s, opacity 0.15s linear;
     }
 
     .trigger {
-        line-height: 20px;
-        margin-bottom: 0;
-        margin-left: 0;
-        display: block;
-        > li > a {
-            padding-top: 12px;
-            padding-bottom: 15px;
-            padding-left: 15px;
-            padding-right: 15px;
-            border-top: 3px solid transparent;
-            font-weight: bold;
-            position: relative;
+      li > a {
+        display: inline-block;
+      }
+
+      > li:hover {
+        > a {
+          background-color: white;
+          border-top-color: $brand-color2;
+          color: $brand-color;
         }
+        > a:hover {
+          color: $brand-color;
+        }
+        .sub-menu {
+          display: block;
+        }
+      }
     }
 
     .sub-menu {
-        opacity: 0;
-        position: absolute;
-        visibility: hidden;
-        transition: visibility 0.25s, opacity 0.25s linear;
-        z-index: 1;
+      li:hover > a {
+        color: $brand-color2;
+      }
+      .mobile {
         display: none;
-        background: #FFF;
-        padding: 0;
-        margin-left: 0;
-        box-shadow: 0 6px 12px hsla(0, 0, 0, 0.4);
-        font-size: 14px;
-        li {
-            display: block;
-            padding: 3px 20px;
-            position: relative;
-            white-space: nowrap;
-            a { color: $brand-color; }
+      }
+    }
+  }
+
+  @include media-query($on-palm) {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    background-color: $background-color;
+    border: 1px solid $grey-color-light;
+    border-radius: 5px;
+    text-align: right;
+
+    .menu-icon {
+      display: block;
+      float: right;
+      width: 36px;
+      height: 26px;
+      line-height: 0;
+      padding-top: 10px;
+      text-align: center;
+
+      > svg {
+        width: 18px;
+        height: 15px;
+        path {
+          fill: $brand-color;
         }
-        ul {
-            position: absolute;
-            left: 100%;
-            top: 0;
-        }
+      }
     }
 
-    @include anti-media-query($on-palm) {
-
-        ul li:hover > ul {
-            opacity: 1;
-            visibility: visible;
-            transition: visibility 0s, opacity 0.15s linear;
-        }
-
-        .trigger {
-            li > a { display: inline-block; }
-
-            > li:hover {
-                > a {
-                    background-color: white;
-                    border-top-color: $brand-color2;
-                    color: $brand-color;
-                }
-                > a:hover { color: $brand-color; }
-                .sub-menu { display: block; }
-            }
-        }
-
-        .sub-menu {
-            li:hover > a { color: $brand-color2; }
-            .mobile { display: none; }
-        }
+    #drop:checked ~ label path {
+      fill: $brand-color2;
     }
 
-    @include media-query($on-palm) {
-        position: absolute;
-        top: 7px;
-        right: 7px;
-        background-color: $background-color;
-        border: 1px solid $grey-color-light;
-        border-radius: 5px;
+    .toggle ~ a {
+      display: none;
+    }
+
+    .toggle {
+      display: block;
+      color: $brand-color;
+    }
+
+    [id^="drop"]:checked {
+      ~ ul {
+        display: block;
+        visibility: visible;
+        opacity: 1;
+      }
+      ~ label {
+        color: $brand-color2;
+      }
+    }
+
+    .trigger {
+      clear: both;
+      display: none;
+      margin-bottom: 5px;
+      margin-left: 0;
+      > li {
+        clear: left;
+        display: block;
         text-align: right;
-
-        .menu-icon {
-            display: block;
-            float: right;
-            width: 36px;
-            height: 26px;
-            line-height: 0;
-            padding-top: 10px;
-            text-align: center;
-
-            > svg {
-                width: 18px;
-                height: 15px;
-                path { fill: $brand-color; }
-            }
+        line-height: 1.25;
+        padding: 5px 10px;
+        margin: 0;
+        a {
+          color: $brand-color;
+          border-top: 0;
+          padding: 0;
         }
-
-        #drop:checked ~ label path { fill: $brand-color2; }
-
-        .toggle ~ a { display: none; }
-
-        .toggle {
-            display: block;
-            color: $brand-color;
-        }
-
-        [id^="drop"]:checked {
-            ~ ul {
-                display: block;
-                visibility: visible;
-                opacity: 1;
-            }
-            ~ label { color: $brand-color2; }
-        }
-
-        .trigger {
-            clear: both;
-            display: none;
-            margin-bottom: 5px;
-            margin-left: 0;
-            > li {
-                clear: left;
-                display: block;
-                text-align: right;
-                line-height: 1.25;
-                padding: 5px 10px;
-                margin: 0;
-                a {
-                    color: $brand-color;
-                    border-top: 0;
-                    padding: 0;
-                }
-            }
-        }
-
-        .sub-menu {
-            position: static;
-            box-shadow: 6px 6px 12px hsla(0, 0, 0, 0.4);
-            ul {
-                position: static;
-            }
-        }
-
-        .page-link {
-            display: block;
-            padding: 5px 10px;
-        }
+      }
     }
+
+    .sub-menu {
+      position: static;
+      box-shadow: 6px 6px 12px hsla(0, 0, 0, 0.4);
+      ul {
+        position: static;
+      }
+    }
+
+    .page-link {
+      display: block;
+      padding: 5px 10px;
+    }
+  }
 }
 
-
 .faq_wrap {
-    max-width: 820px;
+  max-width: 820px;
 }
 
 .faq_cat_hdr {
-    padding-top: 10px;
+  padding-top: 10px;
 }
 
 .faq_q {
-    margin: 10px 0;
-    font-weight: bold;
-    color: $brand-color;
+  margin: 10px 0;
+  font-weight: bold;
+  color: $brand-color;
 }
 
 .faq_a {
-    padding-bottom: 10px;
+  padding-bottom: 10px;
 }
 
 /**
@@ -253,257 +281,259 @@
  */
 
 .site-footer {
-    border-top: 5px solid $grey-color;
-    border-bottom: 5px solid $grey-color;
-    padding: $spacing-unit 0;
+  border-top: 5px solid $grey-color;
+  border-bottom: 5px solid $grey-color;
+  padding: $spacing-unit 0;
 }
 
 .site-footer a[href] {
-    @extend %link-baseline;
+  @extend %link-baseline;
 }
 
 .footer-heading {
-    font-size: 18px;
-    margin-bottom: $spacing-unit / 2;
+  font-size: 18px;
+  margin-bottom: $spacing-unit / 2;
 }
 
 .contact-list,
 .social-media-list,
 .footer-resources-list {
-    list-style: none;
-    margin-left: 0;
+  list-style: none;
+  margin-left: 0;
 }
 
 .footer-resources-list {
-    i {
-        font-size: 0.9em;
-    }
+  i {
+    font-size: 0.9em;
+  }
 }
 
 .footer-col-wrapper {
-    font-size: 15px;
-    color: $grey-color;
-    width: 98%;
-    margin-left: auto;
-    margin-right: auto;
-    @extend %clearfix;
+  font-size: 15px;
+  color: $grey-color;
+  width: 98%;
+  margin-left: auto;
+  margin-right: auto;
+  @extend %clearfix;
 }
 
 .footer-col {
-    float: left;
-    margin-bottom: $spacing-unit / 2;
-    padding-left: $spacing-unit / 2;
+  float: left;
+  margin-bottom: $spacing-unit / 2;
+  padding-left: $spacing-unit / 2;
 }
 
 .footer-col-1 {
-    width: -webkit-calc(30% - (#{$spacing-unit} / 2));
-    width:         calc(30% - (#{$spacing-unit} / 2));
+  width: -webkit-calc(30% - (#{$spacing-unit} / 2));
+  width: calc(30% - (#{$spacing-unit} / 2));
 
+  a {
+    img {
+      width: 80%;
+      margin-bottom: 5%;
+    }
+  }
+
+  @include media-query($on-palm) {
     a {
-        img {
-            width: 80%;
-            margin-bottom: 5%;
-        }
+      img {
+        width: 50%;
+        margin-bottom: 5%;
+      }
     }
-
-    @include media-query($on-palm) {
-        a {
-            img {
-                width: 50%;
-                margin-bottom: 5%;
-            }
-        }
-    }
+  }
 }
 
 .footer-col-2 {
-    width: -webkit-calc(20% - (#{$spacing-unit} / 2));
-    width:         calc(20% - (#{$spacing-unit} / 2));
+  width: -webkit-calc(20% - (#{$spacing-unit} / 2));
+  width: calc(20% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-3 {
-    width: -webkit-calc(20% - (#{$spacing-unit} / 2));
-    width:         calc(20% - (#{$spacing-unit} / 2));
+  width: -webkit-calc(20% - (#{$spacing-unit} / 2));
+  width: calc(20% - (#{$spacing-unit} / 2));
 }
 
 .footer-col-4 {
-    width: -webkit-calc(30% - (#{$spacing-unit} / 2));
-    width:         calc(30% - (#{$spacing-unit} / 2));
+  width: -webkit-calc(30% - (#{$spacing-unit} / 2));
+  width: calc(30% - (#{$spacing-unit} / 2));
 }
 
 @include media-query($on-laptop) {
-    .footer-col-1,
-    .footer-col-2 {
-        width: -webkit-calc(50% - (#{$spacing-unit} / 2));
-        width:         calc(50% - (#{$spacing-unit} / 2));
-    }
+  .footer-col-1,
+  .footer-col-2 {
+    width: -webkit-calc(50% - (#{$spacing-unit} / 2));
+    width: calc(50% - (#{$spacing-unit} / 2));
+  }
 
-    .footer-col-3,
-    .footer-col-4 {
-        width: -webkit-calc(100% - (#{$spacing-unit} / 2));
-        width:         calc(100% - (#{$spacing-unit} / 2));
-    }
+  .footer-col-3,
+  .footer-col-4 {
+    width: -webkit-calc(100% - (#{$spacing-unit} / 2));
+    width: calc(100% - (#{$spacing-unit} / 2));
+  }
 }
 
 @include media-query($on-palm) {
-    .footer-col {
-        float: none;
-        width: -webkit-calc(100% - (#{$spacing-unit} / 2));
-        width:         calc(100% - (#{$spacing-unit} / 2));
-    }
+  .footer-col {
+    float: none;
+    width: -webkit-calc(100% - (#{$spacing-unit} / 2));
+    width: calc(100% - (#{$spacing-unit} / 2));
+  }
 }
 
 .footer-end-matter {
-    font-size: 15px;
-    color: $grey-color;
-    margin-left: -$spacing-unit / 2;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    text-align: center;
-    
-    .wrapper {
-        width: 50%;
-    }
+  font-size: 15px;
+  color: $grey-color;
+  margin-left: -$spacing-unit / 2;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
 
-    @include media-query($on-palm) {
-        .wrapper {
-            width: 90%;
-        }
+  .wrapper {
+    width: 50%;
+  }
+
+  @include media-query($on-palm) {
+    .wrapper {
+      width: 90%;
     }
+  }
 }
 
 .footer-end-matter a[href] {
-    @extend %link-baseline;
+  @extend %link-baseline;
 }
-
-
-
 
 /**
  * Page content
  */
 .page-content {
-    padding: $spacing-unit 0;
+  padding: $spacing-unit 0;
 }
 
 .page-heading {
-    font-size: 20px;
+  font-size: 20px;
 }
 
 .post {
-    width: 95%;
-    margin-left: auto;
-    margin-right: auto;
+  width: 95%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .post-list {
-    margin-left: 0;
-    list-style: none;
+  margin-left: 0;
+  list-style: none;
 
-    > li {
-        margin-bottom: $spacing-unit;
-    }
+  > li {
+    margin-bottom: $spacing-unit;
+  }
 }
 
 .post-meta {
-    font-size: $small-font-size;
-    color: $grey-color;
+  font-size: $small-font-size;
+  color: $grey-color;
 }
 
 .post-link {
-    display: block;
-    font-size: 24px;
+  display: block;
+  font-size: 24px;
 }
-
-
 
 /**
  * Posts
  */
 .post-header {
-    margin-bottom: $spacing-unit;
+  margin-bottom: $spacing-unit;
 }
 
 .post-title {
-    font-size: 42px;
-    letter-spacing: -1px;
-    line-height: 1;
+  font-size: 2.5rem;
+  letter-spacing: -1px;
+  line-height: 1;
 
-    @include media-query($on-laptop) {
-        font-size: 36px;
-    }
+  @include media-query($on-laptop) {
+    font-size: 2rem;
+  }
 }
 
 .post-content {
-    margin-bottom: $spacing-unit;
+  margin-bottom: $spacing-unit;
 
-    h2 {
-        font-size: 32px;
+  h2 {
+    font-size: 32px;
 
-        @include media-query($on-laptop) {
-            font-size: 28px;
-        }
+    @include media-query($on-laptop) {
+      font-size: 28px;
     }
+  }
 
-    h3 {
-        font-size: 26px;
+  h3 {
+    font-size: 26px;
 
-        @include media-query($on-laptop) {
-            font-size: 22px;
-        }
+    @include media-query($on-laptop) {
+      font-size: 22px;
     }
+  }
 
-    h4 {
-        font-size: 20px;
+  h4 {
+    font-size: 20px;
 
-        @include media-query($on-laptop) {
-            font-size: 18px;
-        }
+    @include media-query($on-laptop) {
+      font-size: 18px;
     }
+  }
+}
+
+.news-summary-card {
+  margin-bottom: 1.5em;
+}
+.news-summary-card p {
+  margin-bottom: 3px;
 }
 
 .news-summary {
-    float: left;
-    width: 50%;
+  float: left;
+  width: 50%;
 
-    .news-item {
-        margin-bottom: 1em;
-    }
+  .news-item {
+    margin-bottom: 1em;
+  }
 }
 
 .release-summary {
-    float: right;
-    width: 45%;
+  float: right;
+  width: 45%;
 
-    .download-note {
-        font-size: 0.95em;
-    }
+  .download-note {
+    font-size: 0.95em;
+  }
 
-    .more-release-notes {
-        margin-top: 1.5em;
-    }
+  .more-release-notes {
+    margin-top: 1.5em;
+  }
 }
 
 .post-date {
-    display: block;
-    color: $grey-color;
-    font-size: 0.9em;
-    margin-top: 3px;
+  display: block;
+  color: $grey-color;
+  font-size: 0.9em;
+  margin-top: 3px;
 }
 
 .more-news {
-    margin-top: 1em;
+  margin-top: 1em;
 }
 
 @include media-query($on-palm) {
-    .news-summary {
-        float: none;
-        width: 90%;
-        margin-bottom: 1.5em;
-    }
-    
-    .release-summary {
-        float: none;
-        width: 90%;
-    }
+  .news-summary {
+    float: none;
+    width: 90%;
+    margin-bottom: 1.5em;
+  }
+
+  .release-summary {
+    float: none;
+    width: 90%;
+  }
 }

@@ -21,7 +21,7 @@ design time, and may change through the execution lifetime of the
 application. Typically, the data-centric paradigm is most
 efficiently realized by a publish/subscribe communication model
 rather than a request/response model.</p>
-<p>The OMG <a href="http://www.omg.org/docs/formal/05-12-04">Data Distribution
+<p>The OMG <a href="{{ site.data.omg.dds_spec_url }}">Data Distribution
 Service (DDS) for Real-Time Systems</a> addresses the performance requirements and hard real-time
 requirements of distributed data-centric applications.
 DDS increases the range of publish/subscribe options available to
@@ -34,12 +34,12 @@ decides on the underlying communication mechanism that moves data from a
 publisher to a subscriber -- via TCP, UDP, UDP multicast, shared memory,
 etc. An implementation of the DDS specification is not required to use
 CORBA or the IIOP protocol to transfer data from a publisher to a subscriber.</p>
-<p><a href="..">OpenDDS</a> is an open source, C++ implementation of the OMG Data Distribution
+<p><a href="{{ site.baseurl }}">OpenDDS</a> is an open source, C++ implementation of the OMG Data Distribution
 Service specification. OpenDDS includes a file-based configuration mechanism. Through a
 configuration file, an OpenDDS user may configure a publisher's or
 subscriber's transport(s), debugging output, memory allocation, the
 location of the <code>DCPSInfoRepo</code> broker process, and many other settings.
-The complete set of configuration settings is described in the Configuration Chapter of the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">OpenDDS Developer's Guide</a>.</p>
+The complete set of configuration settings is described in the Configuration Chapter of the <a href="{{ site.data.opendds.latest_devguide_url }}">OpenDDS Developer's Guide</a>.</p>
 <p>
 <a name="Table_of_Contents"></a>In this article, we cover the following topics:
 </p>
@@ -131,7 +131,7 @@ data sink.</p>
 <img src="{{site.baseurl}}/images/CORBANewsBrief/Domain.jpeg" alt="">
 </div>
 <p>
-For more information on DCPS terminology, please see the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">OpenDDS Developer's Guide</a>.
+For more information on DCPS terminology, please see the <a href="{{ site.data.opendds.latest_devguide_url }}">OpenDDS Developer's Guide</a>.
 </p>
 <p>
 The DDS specification defines a number of Quality of Service (QoS)
@@ -191,9 +191,6 @@ service can use to meet other QoS requirements<br>
     </tr>
   </tbody>
 </table>
-<p>See the Object Management Group's <a href="http://www.omg.org/news/whitepapers/Intro_To_DDS.pdf">Introduction to DDS</a> Whitepaper,
-Appendix A, for a more complete list of Quality-of-Service policies and
-more detailed Quality-of-Service definitions.</p>
 <h3>Data-Local Reconstruction Layer - DLRL
 </h3>
 <p>The Data-Local Reconstruction Layer (DLRL) is an object-oriented layer
@@ -252,25 +249,22 @@ without making any code changes.</p>
 #include "orbsvcs/TimeBase.idl"
 module StockQuoter
 {
-#pragma DCPS_DATA_TYPE "StockQuoter::Quote"
-#pragma DCPS_DATA_KEY "StockQuoter::Quote ticker"
+  @topic  
   struct Quote {
-    string ticker;
+    @key string ticker;
     string exchange;
     string full_name;
     double value;
     TimeBase::TimeT timestamp;
   };
 
-#pragma DCPS_DATA_TYPE "StockQuoter::ExchangeEvent"
-#pragma DCPS_DATA_KEY "StockQuoter::ExchangeEvent exchange"
-
   enum ExchangeEventType { TRADING_OPENED,
                            TRADING_CLOSED,
                            TRADING_SUSPENDED,
                            TRADING_RESUMED };
+  @topic
   struct ExchangeEvent {
-    string exchange;
+    @key string exchange;
     ExchangeEventType event;
     TimeBase::TimeT timestamp;
   };
@@ -279,8 +273,8 @@ module StockQuoter
 <p>We publish two data types: a <em>Quote</em> type for each
 stock quote, and an <em>ExchangeEvent</em> type to indicate when
 the stock exchange is opened, closed, and when trading is suspended or
-resumed. The <code>DCPS_DATA_TYPE</code> pragma marks a type for use with DDS. The
-<code>DCPS_DATA_KEY</code> defined for each type is a unique identifier for each
+resumed. The <code>@topic</code> annotation marks a type for use with DDS. The
+<code>@key</code> annotation defined for each type is a unique identifier for each
 <em>instance</em> of the data type. Our Quote type's key is the ticker
 symbol of the stock.
 Throughout the day, we would expect to publish many values, or samples,
@@ -452,7 +446,7 @@ type of data writer for the topic.
     if (DDS::RETCODE_OK !=
           quote_servant->register_type(participant.in (),
                                        QUOTER_QUOTE_TYPE))
-             {
+    {
       cerr << "register_type for " << QUOTER_QUOTE_TYPE
            << " failed." << endl;
       ACE_OS::exit(1);
@@ -609,8 +603,7 @@ We have two Quote instances, for tickers symbols "SPY" (S&amp;P
 Depository Receipts, i.e. the S&amp;P 500) and "MDY" (S&amp;P Midcap
 Depository Receipts, i.e. the S&amp;P Midcap 400), and one
 ExchangeEvent instance, for the "Test Stock Exchange". We register each
-instance with the appropriate data writer. The registration method is
-actually called <code>_cxx_register</code> because <code>register</code> is a reserved word in C++.
+instance with the appropriate data writer.
 </p>
 {% highlight C++ %}
     // Register the Exchange Event and the two
@@ -620,17 +613,17 @@ actually called <code>_cxx_register</code> because <code>register</code> is a re
     StockQuoter::Quote spy;
     spy.ticker = CORBA::string_dup("SPY");
     DDS::InstanceHandle_t spy_handle =
-      quote_dw->_cxx_register(spy);
+      quote_dw->register_instance(spy);
 
     StockQuoter::Quote mdy;
     mdy.ticker = CORBA::string_dup("MDY");
     DDS::InstanceHandle_t mdy_handle =
-      quote_dw->_cxx_register(mdy);
+      quote_dw->register_instance(mdy);
 
     StockQuoter::ExchangeEvent ex_evt;
     ex_evt.exchange = STOCK_EXCHANGE_NAME;
     DDS::InstanceHandle_t exchange_handle =
-      exchange_evt_dw->_cxx_register(ex_evt);
+      exchange_evt_dw->register_instance(ex_evt);
 {% endhighlight %}
 <p>
 Finally, we publish. First, we publish a <code>TRADING_OPENED</code> event on the "Stock Exchange Event" topic.
@@ -1131,7 +1124,6 @@ public:
   // DDS calls on_data_available on the listener for each
   // received Quote sample.
   virtual void on_data_available(DDS::DataReader_ptr reader)
-    throw (CORBA::SystemException)
   {
     try
     {
@@ -1250,7 +1242,6 @@ DDS calls <code>on_data_available</code> on the listener for each received Excha
 </p>
 {% highlight C++ %}
   virtual void on_data_available(DDS::DataReader_ptr reader)
-    throw (CORBA::SystemException)
   {
     try
     {
@@ -1539,7 +1530,7 @@ Attribute2=value2
 Attribute1=value1
 Attribute2=value2
 {% endhighlight %}
-<p>The complete set of configuration settings is described in the Configuration Chapter of the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">OpenDDS Developer's Guide</a>.</p>
+<p>The complete set of configuration settings is described in the Configuration Chapter of the <a href="{{ site.data.opendds.latest_devguide_url }}">OpenDDS Developer's Guide</a>.</p>
 <p>
 Our TCP-based example uses one configuration file, <code>dds_tcp_conf.ini</code>, for both the publisher and the subscriber:
 </p>
@@ -1631,7 +1622,7 @@ subscriber with built-in-topic on which is the default case. We can
 also run these processes with the built-in-topic off. The <code>-NOBITS</code>
 is used by DCPSInfoRepo to turn off built-in-topic and the <code>"-DCPSBit 0"</code>
 is used by other DDS applications. The command lines are as follows:
-
+</p>
 <pre>$DDS_ROOT/bin/DCPSInfoRepo -NOBITS -ORBListenEndpoints iiop://localhost:12345
 
 subscriber -DCPSBit 0 -DCPSConfigFile dds_tcp_conf.ini
@@ -1640,7 +1631,7 @@ subscriber -DCPSBit 0 -DCPSConfigFile dds_tcp_conf.ini
 
 publisher -DCPSBit 0 -DCPSConfigFile dds_tcp_conf.ini
 </pre>
-</p>
+
 <p>The publisher publishes 20 stock quotes for each the SPY and MDY
 ticker symbols, and each subscriber receives them. When the publisher
 is finished, it publishes a "TRADING_CLOSED" message, which causes the
@@ -1702,7 +1693,7 @@ publisher -DCPSConfigFile dds_udp_conf.ini
 <p>
 We can also run each process with the built-in-topic off.
 The command-lines are as follows:
-
+</p>
 <pre>$DDS_ROOT/bin/DCPSInfoRepo -NOBITS -ORBListenEndpoints iiop://localhost:12345
 
 subscriber -DCPSBit 0 -DCPSConfigFile dds_udp_conf.ini
@@ -1711,7 +1702,7 @@ subscriber -DCPSBit 0 -DCPSConfigFile dds_udp_conf.ini
 
 publisher -DCPSBit 0 -DCPSConfigFile dds_udp_conf.ini
 </pre>
-</p>
+
 <p>
 As before, the publisher publishes 20 stock quotes for each the SPY and
 MDY ticker symbols, and each subscriber receives them. When the
@@ -1723,14 +1714,14 @@ transport required no code changes.
 <p><a href="#Table_of_Contents">Table of Contents</a></p>
 <h2><a name="Summary"></a>Summary</h2>
 <p>
-The <a href="http://www.omg.org/docs/formal/07-05-02.pdf">OMG Data Distribution Service (DDS) for Real-Time Systems</a>
+The <a href="{{ site.data.omg.dds_spec_url }}">OMG Data Distribution Service (DDS) for Real-Time Systems</a>
 is a specification for a high-performance, type-safe,
 publish-and-subscribe communication middleware. DDS addresses
 data-centric applications, i.e. those for which dissemination of
 application data is a significant requirement.
 </p>
 <p>
-<a href="..">OpenDDS</a> is an open source implementation of the OMG Data Distribution
+<a href="{{ site.baseurl }}">OpenDDS</a> is an open source implementation of the OMG Data Distribution
 Service specification, providing users with an efficient
 publish-and-subscribe framework with the advantages of the open-source
 software development model.
@@ -1745,11 +1736,11 @@ without making any code changes.
 <h2><a name="References"></a>References</h2>
 <ul>
 <li>Sample Code is located in the OpenDDS source code distribution at examples/DCPS/IntroductionToOpenDDS</li>
-<li>OMG Data Distribution Service (DDS) for Real-Time Systems (<a href="https://www.omg.org/spec/DDS/">https://www.omg.org/spec/DDS/</a>)</li>
+<li>OMG Data Distribution Service (DDS) for Real-Time Systems (<a href="{{ site.data.omg.dds_spec_url }}">{{ site.data.omg.dds_spec_url }}</a>)</li>
 <li>OMG DDS Portal (<a href="https://www.omgwiki.org/dds/#">https://www.omgwiki.org/dds</a>)</li>
-<li>OpenDDS Home Page (<a href="..">http://www.opendds.org</a>)</li>
-<li>TAO Developer's Guide Home Page (<a href="http://www.theaceorb.com/product/index.html#TAO%20Developers%20Guide">http://www.theaceorb.com/product/index.html</a></li>
-<li>OpenDDS Developer's Guide (<a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf</a>)</li>
+<li>OpenDDS Home Page (<a href="{{ site.baseurl }}">http://www.opendds.org</a>)</li>
+<li>TAO Developer's Guide Home Page (<a href="{{ site.data.oci.tao_devguide_url }}">{{ site.data.oci.tao_devguide_url }}</a></li>
+<li>OpenDDS Developer's Guide (<a href="{{ site.data.opendds.latest_devguide_url }}">{{ site.data.opendds.latest_devguide_url }}</a>)</li>
 <li>MPC (<a href="https://github.com/objectcomputing/MPC">https://github.com/objectcomputing/MPC</a>)</li>
 </ul>
 

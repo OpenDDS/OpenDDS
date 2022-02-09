@@ -5,7 +5,7 @@
     <div class="footer-col-wrapper">
 
       <div class="footer-col footer-col-1">
-        <a href="{{ site.data.oci.homepage }}"><img src="/images/oci-logo-01.svg"/></a>
+        <a href="{{ site.data.oci.homepage }}"><img src="/images/ObjectComputingLogo_version2_color.png"/></a>
 
         <ul class="social-media-list">
           <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
@@ -47,7 +47,7 @@
           <li><a href="/support.html">Support</a></li>
           <li><a href="{{ site.data.opendds.mailing_lists_uri }}">Mailing lists</a></li>
           <li><a href="/faq.html">FAQ</a></li>
-          <li><a href="https://www.omgwiki.org/dds/">DDS Standard</a></li>
+          <li><a href="https://www.dds-foundation.org/">DDS Foundation</a></li>
         </ul>
       </div>
 
@@ -68,7 +68,7 @@
             {% assign post_limit = 6 %}
             {% assign posts = site.categories.news %}
             {% for post in posts limit: post_limit %}
-              <li><a href="{{ post.url }}">{{ post.title }}</a></li>              
+              <li><a href="{{ post.url }}">{{ post.title }}</a></li>
             {% endfor %}
             {% if posts.size > post_limit %}
               <div class="more-news">
@@ -85,6 +85,7 @@
   <div class="wrapper">
     <p>{{ site.description }}</p>
     <a href="{{ site.github.repository_url }}/blob/gh-pages/{{ page.path }}">Edit this page on GitHub</a>
+    <p>&copy; 2022 OpenDDS Foundation. All rights reserved.</p>
   </div>
 </footer>
 

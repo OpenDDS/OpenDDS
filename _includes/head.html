@@ -7,6 +7,11 @@
     <meta name="description" content="{{ site.description }}">
 
     <link rel="stylesheet" href="{{ "/css/main.css" | prepend: site.baseurl }}">
+
+    {% if page.CSS %}
+    <link rel="stylesheet" href="{{ page.CSS | prepend: site.baseurl }}">
+    {% endif %}
+    
     <link rel="canonical" href="{{ page.url | replace:'index.html','' | prepend: site.baseurl | prepend: site.url }}">
     <link rel="icon" type="image/png" href="{{"/images/opendds_favicon.png" | prepend: site.baseurl}}"/>
 </head>

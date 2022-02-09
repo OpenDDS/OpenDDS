@@ -7,25 +7,30 @@ order: 103
 ---
 <div id="contenttext">
   <div class="bodytext" align="justify">
+    <a name="Note"><span class="headertext">Note</span></a>
+    Details on this page correspond to the current release of OpenDDS, not to
+    the latest state of the GitHub repository's master branch.
+  </div>
+  <div class="bodytext" align="justify">
     <a name="Dependencies"><span class="headertext">Dependencies</span></a>
     <ul>
       <li>
         TAO
-        <p>OpenDDS requires TAO. If you will be using the <code>configure</code> script for OpenDDS (see the <code>INSTALL</code> file for details), you do not need to download TAO first -- the <code>configure</code> script will download it for you.</p><p>
+        <p>OpenDDS requires TAO. If you will be using the <code>configure</code> script for OpenDDS (see the <code>INSTALL.md</code> file for details), you do not need to download TAO first -- the <code>configure</code> script will download it for you.</p><p>
           OpenDDS has been tested against the
           versions of TAO given below. Note that the _._a releases are from OCI and can
-          be obtained from <a href="http://www.theaceorb.com/">http://www.theaceorb.com/</a>.
-          The DOC Group releases can be obtained from <a href="http://download.dre.vanderbilt.edu/">
-            http://download.dre.vanderbilt.edu/</a>. For responsive support from OCI it
+          be obtained from <a href="https://www.theaceorb.com/">https://www.theaceorb.com/</a>.
+          The DOC Group releases can be obtained from <a href="https://github.com/DOCGroup/ACE_TAO/releases">
+            https://github.com/DOCGroup/ACE_TAO/releases</a>. For responsive support from OCI it
           is recommended that the latest version of the OCI release of TAO used for OpenDDS
           development and testing be used.
+        </p>
           <ul>
             <li>
-              OCI TAO 2.2a patch 15</li>
+              OCI TAO 2.2a patch 21</li>
             <li>
-              DOC Group TAO 2.5.1</li>
+              DOC Group TAO 2.5.14</li>
           </ul>
-        </p>
         <br />
       </li>
       <li>
@@ -38,7 +43,7 @@ order: 103
            included in this source tree and for generating Makefiles or
            Visual Studio project files.</p>
         <p>The "configure" script also uses Perl.</p>
-        <p>On Windows platforms, we recommend the use of ActiveState Perl.</p>
+        <p>On Windows platforms, we recommend the use of Strawberry Perl.</p>
       </li>
     </ul>
   </div>
@@ -48,17 +53,16 @@ order: 103
     <p>This release of OpenDDS has been tested under the following platforms:</p>
     <ul>
       <li>Windows 7 (32-bit, 64-bit), Windows Server 2012 R2 (64-bit), Windows 10 (64-bit)</li>
-      <li>Red Hat EL and CentOS 6.6 and 6.9 (x86_64), Red Hat EL and CentOS 7.2 and 7.3 (x86_64), Fedora 24 and 28 (x86_64), Debian 9.4 (i686),
-        Ubuntu 16.04 LTS (x86_64), openSUSE 42.1 and 42.2 (x86_64)</li>
-      <li>macOS 10.13 (High Sierra)</li>
-      <li>LynxOS-178</li>
-      <li>Android NDK r12b (ARM)</li>
+      <li>Red Hat EL and CentOS 6.6, 6.8 and 6.9 (x86_64), Red Hat EL and CentOS 7.2, 7.3, 7.4, and 7.5 (x86_64), Fedora 24 and 33 (x86_64), Debian 9.4 (i686),
+        Ubuntu 18.04 LTS (x86_64), openSUSE 42.1 (x86_64)</li>
+      <li>macOS 10.15.2 (Catalina)</li>
+      <li>Android NDK r18b (ARM)</li>
       <li>Linux on Raspberry Pi</li>
       <li>We have also built OpenDDS for VxWorks 6.9 and 7 and have run basic
         system and performance tests (but not the entire regression test suite).
         Please contact sales@objectcomputing.com or opendds-main@lists.sourceforge.net for
         more information on support for ACE, TAO, and OpenDDS on VxWorks.<br/>
-        OCI's packages for ACE, TAO, and OpenDDS are available from  
+        OCI's packages for ACE, TAO, and OpenDDS are available from
         <a href="https://objectcomputing.com/products/opendds/vxworks">our website</a>
       </li>
     </ul>
@@ -73,21 +77,20 @@ order: 103
       <li>Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4</li>
       <li>Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5</li>
       <li>Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3</li>
-      <li>Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.12.25835</li>
-      <li>gcc 4.4.7, 4.8, 4.9</li>
-      <li>gcc 5.4</li>
-      <li>gcc 6.2, 6.3</li>
+      <li>Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27044</li>
+      <li>Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.24.29335</li>
+      <li>gcc 4.4.7, 4.8.5</li>
+      <li>gcc 6.3</li>
       <li>gcc 7.2</li>
-      <li>gcc 8.1, 8.2</li>
-      <li>Clang 6.0 (llvm.org) and 9.0 (Apple)</li>
+      <li>gcc 11.1</li>
+      <li>Clang 12.0.1 (llvm.org) and 11.0.3 (Apple)</li>
     </ul>
   </div>
 
   <div class="bodytext" align="justify">
     <a name="DetailedInstructions"><span class="headertext">Detailed Instructions</span></a>
-{% assign latest_rel = site.github.releases | sort: "created_at" | last %}
-    <p>Please see the file <a href="http://raw.githubusercontent.com/objectcomputing/OpenDDS/{{latest_rel.tag_name}}/INSTALL"><code>INSTALL</code></a> for detailed instructions
-      on building DDS on a number of platforms.</p>
+    <p>Please see the file <a href="{{ site.github.repository_url }}/blob/latest-release/INSTALL.md"><code>INSTALL.md</code></a> for detailed instructions
+      on building OpenDDS on a number of platforms.</p>
   </div>
 
 </div>

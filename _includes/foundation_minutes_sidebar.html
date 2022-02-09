@@ -1,0 +1,21 @@
+{% assign sorted_pages = site.pages | where:"type","foundation-minutes" |
+reverse %}
+<div class="minutes-sidebar">
+  <div class="minutes-sidebar-content">
+    <h2>MINUTES ARCHIVE</h2>
+    <ul>
+      {% assign groups = sorted_pages | group_by_exp:"item", 'item.date | date:
+      "%Y"' %} {% for group in groups %}
+
+      <h4>{{ group.name }}</h4>
+      {% for p in group.items %}
+      <li>
+        <a class="page-link" href="{{p.url | prepend: site.baseurl}}">
+          {{ p.date | date_to_long_string }}
+        </a>
+      </li>
+      {% endfor %}
+    </ul>
+    {% endfor %}
+  </div>
+</div>

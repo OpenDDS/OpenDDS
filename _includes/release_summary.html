@@ -1,39 +1,27 @@
 
 <h2>Releases</h2>
 
-{% assign sorted_rel = site.github.releases | sort: "created_at" | reverse %}
-{% assign latest_rel = sorted_rel | first %}
+{% include latest_releases.html %}
 
-<h3><a href="{{latest_rel.html_url}}">{{latest_rel.name}}</a></h3>
+<h3><a href="{{ latest_release.html_url }}">OpenDDS {{ latest_release.version }}</a></h3>
 
-{% assign assets = latest_rel.assets | sort: "name" | reverse %}
-{% for a in assets %}
-  {% capture tn %}Open{{latest_rel.tag_name}}{% endcapture %}
-  
-  {% assign ext = a.name | remove: tn %}
-  {% if ext == '.zip' %}
-    {% assign note = 'Windows' %}
-  {% else %}
-    {% assign note = 'Linux/Solaris/MacOSX' %}
-  {% endif %}
+{{ latest_release_downloads }}
 
-  <p><a href="{{ a.browser_download_url }}">Download {{a.name}}</a> <span class="download-note">({{ note }})</span></p>
+<i class="post-date">Released on {{ latest_release.published_at | date_to_long_string }}</i>
+
+<h3>Previous Releases:</h3>
+
+<ul>
+{% for release in previous_releases %}
+  <li>
+    <a href="{{ release.html_url }}">OpenDDS {{ release.version }}</a>
+    <i class="post-date">Released on {{ release.published_at | date_to_long_string }}</i>
+  </li>
 {% endfor %}
+</ul>
 
-<i class="post-date">Released on {{ latest_rel.published_at | date_to_long_string }}</i>
+<p><a href="{{ site.github.releases_url }}">See all releases on GitHub</a></p>
 
-{% if site.github.releases.size > 1 %}
-  <h3>Previous Releases:</h3>
-
-  <ul>
-    {% for r in sorted_rel limit:5 offset:1 %}
-      <li><a href="{{ r.html_url }}">{{ r.name }}</a></li>
-    {% endfor %}
-    {% if site.github.releases.size > 6 %}
-      <li><a href="{{ site.github.releases_url }}">See all releases on GitHub</a></li>
-    {% endif %}
-  </ul>
-  <div class="more-release-notes">
-    <p>Release notes for all previous releases can be found in the <a href="{{ site.data.opendds.github_raw_base_uri }}/{{ latest_rel.tag_name }}/NEWS.md">NEWS</a> file.</p>
-  </div>
-{% endif %}
+<div class="more-release-notes">
+  <p>Release notes for all previous releases can be found in the <a href="{{ site.github.repository_url }}/blob/latest-release/NEWS.md">NEWS.md</a> file.</p>
+</div>

@@ -12,25 +12,22 @@ OCI hosts a <a href="https://objectcomputing.com/products/opendds/getting-starte
 <div class="bodytext" align="justify">
   <a name="Environment Prerequisites"><span class="headertext">Environment Prerequisites</span></a>
   <ol>
-    <li><p>Ensure that your environment has:</p>
+    <li><p>Ensure that your environment has Qt5 libraries available:</p>
       <ul>
-        <li>Qt 4</li>
-          <ul>
-            <li>Windows: Download and install <b>qt-opensource-windows-x86-vs2010-4.8.6.exe</b> from the <a href="https://download.qt.io/archive/qt/4.8/4.8.6/">archived Qt downloads site</a>.  Make sure that the directory containing <code>QtCore4.dll</code> and <code>QtGui4.dll</code> (by default, <code>C:\Qt\4.8.6\bin</code>) is included in the <code>PATH</code> environment variable.  Alternatively, those libraries may be copied into the directory where <code>ishapes.exe</code> is downloaded.</li>
-            <li>Ubuntu 16.04 LTS: Install by running <code>sudo apt install libqtgui4</code></li>
-          </ul>
+        <li>Windows (x64): Use the <a href="https://www.qt.io/download-thank-you?os=windows&hsLang=en">Qt Installer</a>, or install the qt5 package from <a href="https://github.com/Microsoft/vcpkg">vcpkg</a>.  The Visual C++ runtime <a href="https://aka.ms/vs/17/release/vc_redist.x64.exe">redistributable</a> is also required.</li>
+        <li>Ubuntu 18.04 LTS (x86_64): Install the <code>libqt5gui5</code> package.</li>
       </ul>
     </li>
     <li>Download or compile the latest Shapes demo for your operating system:</li>
       <ul>
-        <li><a href="http://download.objectcomputing.com/OpenDDS/ShapesDemo/">Shapes Demo downloads</a>
+        <li><a href="{{ site.data.opendds.downloads_base_url }}/ShapesDemo/">Shapes Demo downloads</a>
           <ul>
-            <li>Windows: <a href="http://download.objectcomputing.com/OpenDDS/ShapesDemo/ShapesDemo-OpenDDS-3.13-Windows.zip">ShapesDemo-OpenDDS-3.13-Windows.zip</a></li>
-            <li>Linux (64-bit): <a href="http://download.objectcomputing.com/OpenDDS/ShapesDemo/ShapesDemo-OpenDDS-3.13-x64Linux.tar.gz">ShapesDemo-OpenDDS-3.13-x64Linux.tar.gz</a></li>
+            <li>Windows: <a href="{{ site.data.opendds.downloads_base_url }}/ShapesDemo/ShapesDemo-OpenDDS-3.19.0-Windows.zip">ShapesDemo-OpenDDS-3.19.0-Windows.zip</a></li>
+            <li>Linux (64-bit): <a href="{{ site.data.opendds.downloads_base_url }}/ShapesDemo/ShapesDemo-OpenDDS-3.19.0-x64Linux.tar.gz">ShapesDemo-OpenDDS-3.19.0-x64Linux.tar.gz</a></li>
           </ul>
         </li>
       </ul>
-    <ul><li>Alternatively, the Shapes demo can be run from a build from source of OpenDDS with Qt and Boost enabled. Boost is not required if building with a compiler that supports C++11. The demo resides in the <code>examples/DCPS/ishapes</code> directory. See <a href="../documents/building.html">Building</a> for a complete list of dependencies and supported platforms.</li></ul>
+    <ul><li>Alternatively, the Shapes demo can be run from a build from source of OpenDDS with Qt enabled. The demo resides in the <code>examples/DCPS/ishapes</code> directory. See <a href="../documents/building.html">Building</a> for a complete list of dependencies and supported platforms.</li></ul>
   </ol>
 </div>
 
@@ -102,8 +99,8 @@ OCI hosts a <a href="https://objectcomputing.com/products/opendds/getting-starte
   <ul>
     <li>Work through downloading and building OpenDDS and running a simple example through the <a href="{{ site.baseurl }}/quickstart">Quick Start Guides</a> </li>
     <li>Find more support information about dependencies and detailed build instructions <a href="../documents/building.html">here</a>.</li>
-    <li>Learn more about OpenDDS features and how to set up your own DDS infrastructure through the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide</a>.</li>
+    <li>Learn more about OpenDDS features and how to set up your own DDS infrastructure through the <a href="{{ site.data.opendds.latest_devguide_url }}">Developer's Guide</a>.</li>
     <li>Need help? Curious about training? See <a href="{{ site.baseurl }}/support.html">Support</a>.</li>
-    <li>Visit the OpenDDS project on <a href="http://github.com/objectcomputing/OpenDDS">GitHub</a></li>
+    <li>Visit <a href="{{ site.github.repository_url }}">the OpenDDS project on GitHub</a></li>
   </ul>
 </div>
