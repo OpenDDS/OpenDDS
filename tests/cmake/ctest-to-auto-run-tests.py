@@ -19,8 +19,11 @@ from base64 import b64decode
 import zlib
 import subprocess
 import json
+import re
 
 
+py_source_dir = Path(__file__).resolve().parent
+opendds_root = Path(os.environ['DDS_ROOT'])
 template = '''\
 
 ==============================================================================
@@ -60,33 +63,77 @@ def fix_ctest_path(source_path, path):
     return path
 
 
-def get_art_name(root, build_path, source_path, test_path, command):
-    # Find the relative path to the directory with the test's CMakeLists
-    # file from source_path.
-    rel_test_path = relative_to(test_path, build_path)
-    if is_relative(rel_test_path):
-        real_test_path = source_path / rel_test_path
-        what = 'relative'
-    elif not test_path.is_absolute():
-        real_test_path = source_path / test_path
-        what = 'not absolute'
-    else:
-        real_test_path = test_path
-        what = 'normal'
-    if test_path.name == 'build':
-        real_test_path = real_test_path.parent
-        what += ', has build'
-    cmakelists = real_test_path / 'CMakeLists.txt'
-    if not cmakelists.is_file():
-        raise FileNotFoundError(
-            '"{}" was not found (test_path was "{}", rel_test_path was "{}", '
-            '"{}")'.format(cmakelists, test_path, rel_test_path, what))
-    cmakelists = str(relative_to(cmakelists, root).as_posix())
+def cmake_list(value):
+    return value.split(';')
 
-    # Normalize the command to something like what auto_run_tests prints
-    command_parts = command.split(' ') if isinstance(command, str) else command
-    command_parts = [s.strip('"') for s in command_parts[1:]]
-    command_parts = [p for p in command_parts if p]
+
+source_dir_re = re.compile(r'# Source directory: (.*)')
+
+
+def get_cmakelists_from_testfile(testfile):
+    with testfile.open() as f:
+        for line in f:
+            line = line.rstrip('\n\r')
+            m = source_dir_re.fullmatch(line)
+            if m:
+                cmakelists = Path(m.group(1)) / 'CMakeLists.txt'
+                break
+    if not cmakelists.is_file():
+        raise FileNotFoundError('CMakeLists {} from {} is invalid'.format(cmakelists, testfile))
+    return cmakelists
+
+
+dump_line_re = re.compile(r'.*?DUMP\[(?P<name>\w+)\]: (?P<value>.*)')
+
+
+def dump_ctest_info(cmake, build_path):
+    # This uses the scripts cmake sets up for ctest to run to get the CMakeList
+    # files for the tests.
+
+    lines = subprocess.check_output([cmake, '-P', py_source_dir / 'dump_ctest_info.cmake'],
+        cwd=str(build_path)).decode('utf-8').splitlines()
+    tests = {}
+    stack = []
+    for index, line in enumerate(lines):
+        line = line.rstrip('\n\r')
+        m = dump_line_re.fullmatch(line)
+        if m:
+            name = m['name']
+            value = m['value']
+            if name == 'START_SUBDIRS':
+                stack.append(dict(
+                    test_file=value,
+                    cmakelists=get_cmakelists_from_testfile(Path(value)),
+                ))
+            elif name == 'TEST':
+                test_name, *cmd = cmake_list(value)
+                if test_name in tests:
+                    raise ValueError('Multiple tests called ' + test_name)
+                tests[test_name] = dict(
+                    cmakelists=stack[-1]['cmakelists'],
+                    cmd=cmd,
+                )
+            elif name == 'SET_TESTS_PROPERTIES':
+                pass  # Nothing to do with this at the moment
+            elif name == 'END_SUBDIRS':
+                current = stack.pop()
+                if current['test_file'] != value:
+                    raise ValueError(
+                        'Got END_SUBDIRS {}, but {} is what was at the top of the stack!'.format(
+                            value, current['test_file']))
+            else:
+                raise ValueError('Unexpected info name: {}'.format(name))
+        else:
+            raise ValueError('Unexpected line in ctest info dump: {}'.format(repr(line)))
+    if stack:
+        raise ValueError('Reached end of output, but stack is not empty: {}'.format(stack))
+
+    return tests
+
+
+def get_art_name(test_info):
+    cmakelists = relative_to(test_info['cmakelists'], opendds_root).as_posix()
+    command_parts = [p for p in test_info['cmd'][1:] if p]
     try:
         # Remove -ExeSubDir DIR to make the output consistent
         index = command_parts.index('-ExeSubDir')
@@ -99,12 +146,11 @@ def get_art_name(root, build_path, source_path, test_path, command):
     return '{} {}'.format(cmakelists, ' '.join(command_parts))
 
 
-def generate_test_results(build_path, source_path, art_output, debug=False):
+def generate_test_results(tests, build_path, source_path, art_output, debug=False):
     testing_path = build_path.resolve() / 'Testing'
     if debug:
         print('testing_path:', testing_path)
-    root = Path(os.environ['DDS_ROOT'])
-    test_path_prefix = relative_to(source_path, root)
+    test_path_prefix = relative_to(source_path, opendds_root)
     if debug:
         print('test_path_prefix:', test_path_prefix)
 
@@ -112,7 +158,7 @@ def generate_test_results(build_path, source_path, art_output, debug=False):
     tag_path = testing_path / 'TAG'
     if not tag_path.is_file():
         sys.exit('ERROR: {} not found, please run the tests: '
-            'ctest -T Test--no-compress-output'.format(tag_path))
+            'ctest -T Test --no-compress-output'.format(tag_path))
     test_run_name = tag_path.read_text().split('\n')[0].strip()
     if debug:
         print('test_run_name =', test_run_name)
@@ -157,8 +203,7 @@ def generate_test_results(build_path, source_path, art_output, debug=False):
             command=get_named_measurement(test_node, 'Command Line'),
         )
 
-        results['art_name'] = get_art_name(
-            root, build_path, source_path, Path(results['path']), results['command'])
+        results['art_name'] = get_art_name(tests[results['cmake_name']])
 
         # Exit Value isn't included if the test passed
         results['art_result'] = 0 if results['passed'] else results['exit_value']
@@ -173,18 +218,6 @@ def generate_test_results(build_path, source_path, art_output, debug=False):
                 print('   ', k, '=', repr(v))
         else:
             print(template.format(**results), file=art_output)
-
-
-def list_tests(build_path, source_path, debug=False):
-    test_info = json.loads(subprocess.check_output(
-        ['ctest', '--show-only=json-v1'], cwd=str(build_path)).decode('utf-8'))
-    root = Path(os.environ['DDS_ROOT'])
-    for test in test_info['tests']:
-        command = test['command']
-        for prop in test['properties']:
-            if prop['name'] == 'WORKING_DIRECTORY':
-                path = Path(prop['value'])
-        print(get_art_name(root, build_path, source_path, path, command))
 
 
 # Like a normal file, stdout itself can be used as a context manger, but
@@ -205,13 +238,17 @@ if __name__ == "__main__":
     arg_parser.add_argument('--debug', action='store_true')
     arg_parser.add_argument('--list', action='store_true')
     arg_parser.add_argument('--art-output', metavar='ART_OUTPUT_FILE', type=Path)
+    arg_parser.add_argument('--cmake', metavar='CMAKE_CMD', default='cmake')
     args = arg_parser.parse_args()
 
     args.source_path = args.source_path.resolve()
     args.build_path = args.build_path.resolve()
 
+    tests = dump_ctest_info(args.cmake, args.build_path)
+
     if args.list:
-        list_tests(args.build_path, args.source_path)
+        for name, info in tests.items():
+            print(get_art_name(info))
     else:
         if args.art_output is not None:
             art_output_cm = args.art_output.resolve().open('w')
@@ -219,7 +256,7 @@ if __name__ == "__main__":
             art_output_cm = StdoutContextManager();
 
         with art_output_cm as art_output:
-            generate_test_results(args.build_path, args.source_path, art_output, args.debug)
+            generate_test_results(tests, args.build_path, args.source_path, art_output, args.debug)
 
 
 # vim: expandtab:ts=4:sw=4
