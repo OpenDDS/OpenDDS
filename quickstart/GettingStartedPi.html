@@ -10,8 +10,8 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
   <a name="Build Directions"><span class="headertext">Build Directions</span></a>
   <ol>
     <p>
-      For this guide you need a Raspberry Pi set up with Raspbian Stretch Linux (the Lite variant works) and connected to a local network.
-      You will also need a Linux host system (or virtual machine) connected to the same network where we will build OpenDDS.  We have tested with Ubuntu 18.04 x86_64 and RHEL/CentOS 7 x86_64.
+      For this guide you need a Raspberry Pi set up with Raspbian Bullseye Linux (the Lite variant works) and connected to a local network.
+      You will also need a Linux host system (or virtual machine) connected to the same network where we will build OpenDDS.  We have tested with Ubuntu 20.04 x86_64 and CentOS Stream 8 x86_64.
       This guide assumes you know the address and user credentials of the Pi.
       Perform these all these steps on the host computer:
     </p>
@@ -24,16 +24,16 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
         <li>Optional Java SDK 1.5 through 1.8 for Java binding support</li>
       </ul>
     </li>
-    <li>Download and extract the latest tar.gz file from the <a href="http://download.objectcomputing.com/OpenDDS/">download site</a>.</li>
+    <li>Download and extract the latest tar.gz file from the <a href="{{ site.data.opendds.downloads_base_url }}/">download site</a>.</li>
     <li>
-      Download and extract the <a href="http://download.objectcomputing.com/OpenDDS/resources/gcc-8.2.0-rpi.tar.bz2">Raspberry Pi GCC 8.2 toolchain</a>.
-      Rename the resulting directory from <code>cross-pi-gcc-8.2.0</code> to <code>cross-pi-gcc</code> and move it to <code>/opt</code>.
+      Download and extract the <a href="https://developer.arm.com/-/media/Files/downloads/gnu-a/10.2-2020.11/binrel/gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf.tar.xz?revision=d0b90559-3960-4e4b-9297-7ddbc3e52783&hash=6F50B04F08298881CA3596CE99E5ABB3925DEB24">Linux GCC 10.2 cross-compiler toolchain</a> from the <a href="https://developer.arm.com/">ARM Developer website</a>.
+      Rename the resulting directory from <code>gcc-arm-10.2-2020.11-x86_64-arm-none-linux-gnueabihf</code> to <code>cross-pi-gcc</code> and move it to <code>/opt</code>.
     </li>
     <li>If building with DDS Security, follow <a href="#thirdparty">the steps below</a> to build OpenSSL and Xerces-C++ for the Pi.</li>
     <li>Enter the OpenDDS-&lt;version&gt; directory</li>
     <li>
       Run the following as a single command.<br/>
-      <pre><code>./configure --target=linux-cross --target-compiler=/opt/cross-pi-gcc/bin/arm-linux-gnueabihf-g++ (additional options)</code></pre>
+      <pre><code>./configure --target=linux-cross --target-compiler=/opt/cross-pi-gcc/bin/arm-none-linux-gnueabihf-g++ (additional options)</code></pre>
       Additional options:
       <ul>
         <li>If using DDS Security:<br/>
@@ -86,7 +86,7 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
 
 <div class="bodytext" align="justify">
   <a name="Next Steps"><span class="headertext">Next Steps</span></a>
-  <p>See Chapter 2 of the <a href="http://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf">Developer's Guide</a> for a detailed explanation of the Messenger C++ Example or Chapter 10 for the Java Example.</p>
+  <p>See Chapter 2 of the <a href="{{ site.data.opendds.latest_devguide_url }}">Developer's Guide</a> for a detailed explanation of the Messenger C++ Example or Chapter 10 for the Java Example.</p>
 </div>
 
 <div class="bodytext" align="justify">
@@ -94,39 +94,43 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
   <div class="subheadertext">Setup</div>
   <ol>
     <li>Create and enter a directory to perform the build.</li>
-    <li>Set the BUILD_ROOT shell variable to the working directory.</li>
+    <li>Set the <code>BUILD_ROOT</code> shell variable to the working directory.</li>
     <li>This will be the parent directory for the source repos and "staged"
       installation directories for the cross-compiled software.</li>
   </ol>
   <div class="subheadertext">OpenSSL</div>
   <ol>
-    <li>In BUILD_ROOT, download and extract the
-      <a href="https://www.openssl.org/source/openssl-1.1.1a.tar.gz">
-        OpenSSL 1.1.1a source archive</a>, and change to that extracted
-      directory.</li>
-    <li><code>./Configure --cross-compile-prefix=/opt/cross-pi-gcc/bin/arm-linux-gnueabihf-
+    <li>In <code>$BUILD_ROOT</code>, download and extract the
+      <a href="https://www.openssl.org/source/">
+        OpenSSL source archive</a>, and change to that extracted
+      directory. See <a href="https://github.com/objectcomputing/OpenDDS/blob/latest-release/docs/dependencies.md#openssl">
+      here</a> for any version requirements for OpenSSL.
+    </li>
+    <li><code>./Configure --cross-compile-prefix=/opt/cross-pi-gcc/bin/arm-none-linux-gnueabihf-
         linux-armv4</code></li>
     <li><code>make</code></li>
     <li><code>make install DESTDIR=$BUILD_ROOT/pi-openssl</code></li>
   </ol>
   <div class="subheadertext">Xerces-C++</div>
   <ol>
-    <li>In BUILD_ROOT, create the file <code>PiToolchain.cmake</code> with the
+    <li>In <code>$BUILD_ROOT</code>, create the file <code>PiToolchain.cmake</code> with the
       contents:<pre>
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
-set(CMAKE_C_COMPILER /opt/cross-pi-gcc/bin/arm-linux-gnueabihf-gcc)
-set(CMAKE_CXX_COMPILER /opt/cross-pi-gcc/bin/arm-linux-gnueabihf-g++)
-set(CMAKE_FIND_ROOT_PATH /opt/cross-pi-gcc/arm-linux-gnueabihf)
+set(CMAKE_C_COMPILER /opt/cross-pi-gcc/bin/arm-none-linux-gnueabihf-gcc)
+set(CMAKE_CXX_COMPILER /opt/cross-pi-gcc/bin/arm-none-linux-gnueabihf-g++)
+set(CMAKE_FIND_ROOT_PATH /opt/cross-pi-gcc/arm-none-linux-gnueabihf)
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 set(THREADS_PTHREAD_ARG 2)</pre></li>
-    <li>In BUILD_ROOT, download and extract the
-      <a href="http://apache.cs.utah.edu/xerces/c/3/sources/xerces-c-3.2.2.tar.gz">
-        Xerces-C++ 3.2.2 source archive</a>, and change to that extracted
-      directory.</li>
+    <li>In <code>$BUILD_ROOT</code>, download and extract the
+      <a href="https://xerces.apache.org/xerces-c/download.cgi">
+        Xerces-C++ source archive</a>, and change to that extracted
+      directory. See <a href="https://github.com/objectcomputing/OpenDDS/blob/latest-release/docs/dependencies.md#xerces">
+      here</a> for any version requirements for Xerces.
+    </li>
     <li><code>mkdir build-pi; cd build-pi</code></li>
     <li><code>cmake -DCMAKE_TOOLCHAIN_FILE=$BUILD_ROOT/PiToolchain.cmake
         -DCMAKE_INSTALL_PREFIX=$BUILD_ROOT/pi-xerces ..</code></li>
