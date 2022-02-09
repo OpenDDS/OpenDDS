@@ -7,22 +7,36 @@ find_package(OpenDDS REQUIRED)
 
 include(ExternalProject)
 
+set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS TRUE)
+if(${CMAKE_VERSION} VERSION_LESS "3.21.0" OR OPENDDS_STATIC)
+  set(INSTALL_IMPORTED_RUNTIME_ARTIFACTS FALSE)
+endif()
+
 set(prefix "${CMAKE_CURRENT_BINARY_DIR}/the-install-prefix")
+set(common_cmake_args
+  "-DCMAKE_INSTALL_PREFIX:PATH=${prefix}"
+  "-DCMAKE_PREFIX_PATH:PATH=${prefix}"
+  "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
+  "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
+)
+if(DEFINED CMAKE_CXX_STANDARD)
+  list(APPEND common_cmake_args "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
+endif()
 
 set(lib "${PROJECT_NAME}_library")
 ExternalProject_Add(
   ${lib}
   SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/library"
-  CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX:PATH=${prefix}"
+  CMAKE_ARGS
+    "-DINSTALL_IMPORTED_RUNTIME_ARTIFACTS=${INSTALL_IMPORTED_RUNTIME_ARTIFACTS}"
+    "${common_cmake_args}"
 )
 
 set(user "${PROJECT_NAME}_user")
 ExternalProject_Add(
   ${user}
   SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/user"
-  CMAKE_ARGS
-    "-DCMAKE_PREFIX_PATH:PATH=${prefix}"
-    "-DCMAKE_INSTALL_PREFIX:PATH=${prefix}"
+  CMAKE_ARGS "${common_cmake_args}"
   DEPENDS ${lib}
 )
 
@@ -34,7 +48,7 @@ add_test(NAME "${PROJECT_NAME}_current_env"
   COMMAND perl run_test.pl
 )
 
-if(UNIX AND NOT ${CMAKE_VERSION} VERSION_LESS "3.21.0")
+if(UNIX AND INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
   # IMPORTED_RUNTIME_ARTIFACTS was introduced in CMake 3.21, and to test it we
   # need to create a clean environment.
   configure_file("run_in_prefix.sh" "." COPYONLY)

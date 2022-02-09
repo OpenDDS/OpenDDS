@@ -351,8 +351,8 @@ foreach(_lib ${_all_libs})
   string(TOUPPER ${_lib} _LIB_VAR)
   select_library_configurations(${_LIB_VAR})
 
-  # These paths might can be symlinks and IMPORTED_RUNTIME_ARTIFACTS seems to
-  # not work correctly with symlinks.
+  # These paths might be symlinks and IMPORTED_RUNTIME_ARTIFACTS seems to not
+  # work correctly with symlinks, so resolve them now.
   if(${_LIB_VAR}_LIBRARY)
     get_filename_component(${_LIB_VAR}_LIBRARY "${${_LIB_VAR}_LIBRARY}" REALPATH)
   endif()

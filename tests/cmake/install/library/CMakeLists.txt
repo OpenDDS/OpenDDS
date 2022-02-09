@@ -66,7 +66,7 @@ configure_package_config_file(
 )
 install(FILES ${build_config_cmake} DESTINATION ${cmake_dest})
 
-if(NOT ${CMAKE_VERSION} VERSION_LESS "3.21.0")
+if(INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
   opendds_get_library_dependencies(opendds_dep_libs ${opendds_libs})
   install(IMPORTED_RUNTIME_ARTIFACTS
     ${opendds_dep_libs}
