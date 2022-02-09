@@ -8,7 +8,7 @@ class Circle : public Shape {
 public:
 
     Circle(const QRect& bounds,
-           shared_ptr<ShapeDynamics> dynamics,
+           std::shared_ptr<ShapeDynamics> dynamics,
            const QPen& pen,
            const QBrush& brush,
            bool targeted = false);
@@ -23,7 +23,7 @@ private:
     Circle& operator=(Circle&);
 
 private:
-    shared_ptr<ShapeDynamics> dynamics_;
+    std::shared_ptr<ShapeDynamics> dynamics_;
 };
 
 #endif /* _CIRCLE_HPP */
