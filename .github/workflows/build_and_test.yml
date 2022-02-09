@@ -2613,6 +2613,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: check ip addresses
+      shell: bash
+      run: |
+        ip addr
     - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       shell: bash
@@ -3553,6 +3557,10 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: check ip addresses
+      shell: bash
+      run: |
+        ip addr
     - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       shell: bash
