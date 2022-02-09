@@ -1,6 +1,0 @@
-feature(boost): boost_base {
-}
-
-feature(no_cxx11) {
-  requires += boost
-}

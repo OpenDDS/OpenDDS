@@ -14,7 +14,6 @@
   * [Qt](#qt)
   * [Wireshark](#wireshark)
   * [RapidJSON](#rapidjson)
-  * [Boost](#boost)
   * [Xerces](#xerces)
   * [OpenSSL](#openssl)
   * [Python](#python)
@@ -176,12 +175,6 @@ manually.**
 
 RapidJSON is also available as package, at least in Debian-based Linux
 distributions.
-
-### Boost
-
-Boost, as of writing, is just an optional dependency of the
-[ishapes](../examples/DCPS/ishapes) RTPS demo and only if C++11 is not
-available.
 
 ### Xerces
 

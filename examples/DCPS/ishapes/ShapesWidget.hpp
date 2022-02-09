@@ -12,7 +12,7 @@ class ShapesWidget  : public QWidget
 {
   Q_OBJECT
   public:
-  typedef std::vector<shared_ptr<Shape> > ShapeList;
+  typedef std::vector<std::shared_ptr<Shape> > ShapeList;
   typedef std::vector<QRect> FilterList;
 public:
 
@@ -25,7 +25,7 @@ public:
 
 public slots:
   void nextAnimationFrame();
-  void addShape(shared_ptr<Shape> shape);
+  void addShape(std::shared_ptr<Shape> shape);
 
 protected:
   void paintEvent(QPaintEvent *event);

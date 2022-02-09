@@ -3,7 +3,7 @@
 #include "Triangle.hpp"
 
 Triangle::Triangle(const QRect& bounds,
-                   shared_ptr<ShapeDynamics> dynamics,
+                   std::shared_ptr<ShapeDynamics> dynamics,
                    const QPen& pen,
                    const QBrush& brush,
                    bool targeted)

@@ -32,7 +32,7 @@ public:
   virtual ~DDSShapeDynamics();
 
 public:
-  void setShape(shared_ptr<Shape> shape) {
+  void setShape(std::shared_ptr<Shape> shape) {
     shape_ = shape;
   }
 
@@ -40,7 +40,7 @@ public:
 private:
   DDSShapeDynamics(const DDSShapeDynamics& orig);
 
-  shared_ptr<Shape> shape_;
+  std::shared_ptr<Shape> shape_;
   int x0_;
   int y0_;
   org::omg::dds::demo::ShapeTypeDataReader_var shapeReader_;
