@@ -509,13 +509,23 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -523,6 +533,7 @@ jobs:
         ./configure \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile \
           --tests
@@ -578,23 +589,23 @@ jobs:
         path: OpenDDS/ACE_TAO
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    #- name: setup gtest
-    #  run: |
-    #    cd OpenDDS/tests/googletest
-    #    git submodule init
-    #    git submodule update
-    #    mkdir build
-    #    cd build
-    #    mkdir install
-    #    cmake -DCMAKE_INSTALL_PREFIX=./install ..
-    #    cmake --build . --target install
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       run: |
         cd OpenDDS
         ./configure \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
-          #--gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile \
           --tests
@@ -765,13 +776,23 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -779,6 +800,7 @@ jobs:
         ./configure \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile=base \
           --no-built-in-topics \
@@ -2529,13 +2551,23 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
+    - name: setup gtest
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake --build . --target install
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2544,6 +2576,7 @@ jobs:
           --compiler=g++-10 \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile=base \
           --no-content-subscription \
@@ -2622,6 +2655,7 @@ jobs:
           --compiler=g++-10 \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
           --no-rapidjson \
           --safety-profile=base \
           --no-content-subscription \
