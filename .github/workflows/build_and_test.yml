@@ -9184,11 +9184,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_w16_x86_i0_sec:
+  test_w22_x86_i0_sec:
 
-    runs-on: windows-2016
+    runs-on: windows-2022
 
-    needs: build_w16_x86_i0_sec
+    needs: build_w22_x86_i0_sec
 
     steps:
     - name: install openssl & xerces-c
@@ -9221,14 +9221,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w16_x86_i0_artifact
+        name: ACE_TAO_w22_x86_i0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w16_x86_i0.tar.xz
-        rm -f ACE_TAO_w16_x86_i0.tar.xz
+        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
+        rm -f ACE_TAO_w22_x86_i0.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
@@ -9238,14 +9238,14 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w16_x86_i0_sec_artifact
+        name: build_w22_x86_i0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w16_x86_i0_sec.tar.xz
-        rm -f build_w16_x86_i0_sec.tar.xz
+        tar xvfJ build_w22_x86_i0_sec.tar.xz
+        rm -f build_w22_x86_i0_sec.tar.xz
     - name: setup gtest
       shell: cmd
       run: |
