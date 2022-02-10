@@ -414,6 +414,7 @@ macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
     )
 
     if (EXISTS "${_release_lib}")
+      message(STATUS "ADD RELEASE LIB ${target} ${_release_lib}")
       set_property(TARGET ${target}
         APPEND PROPERTY
         IMPORTED_CONFIGURATIONS RELEASE
@@ -426,6 +427,7 @@ macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
     endif()
 
     if (EXISTS "${_debug_lib}")
+      message(STATUS "ADD DEBUG LIB ${target} ${_debug_lib}")
       set_property(TARGET ${target}
         APPEND PROPERTY
         IMPORTED_CONFIGURATIONS DEBUG
