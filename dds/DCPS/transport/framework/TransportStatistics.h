@@ -105,8 +105,7 @@ struct InternalTransportStatistics {
 
 inline void append(TransportStatisticsSequence& seq, const InternalTransportStatistics& istats)
 {
-  const ACE_CDR::ULong idx = seq.length();
-  seq.length(idx + 1);
+  const ACE_CDR::ULong idx = grow(seq) - 1;
   TransportStatistics& stats = seq[idx];
   stats.transport = istats.transport.c_str();
   for (InternalTransportStatistics::MessageCountMap::const_iterator pos = istats.message_count.begin(),

@@ -5204,9 +5204,7 @@ Sedp::set_inline_qos(DCPS::TransportLocatorSeq& locators)
   const OPENDDS_STRING rtps_udp = "rtps_udp";
   for (CORBA::ULong i = 0; i < locators.length(); ++i) {
     if (locators[i].transport_type.in() == rtps_udp) {
-      const CORBA::ULong len = locators[i].data.length();
-      locators[i].data.length(len + 1);
-      locators[i].data[len] = CORBA::Octet(1);
+      DCPS::push_back(locators[i].data, CORBA::Octet(1));
     }
   }
 }

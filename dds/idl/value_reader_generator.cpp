@@ -116,7 +116,7 @@ namespace {
     if (use_cxx11) {
       be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
     } else {
-      be_global->impl_ << indent << "  " << expression << ".length(" << expression << ".length() + 1);\n";
+      be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
     }
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_element()) return false;\n";
@@ -215,6 +215,7 @@ bool value_reader_generator::gen_enum(AST_Enum*,
                                       const std::vector<AST_EnumVal*>& contents,
                                       const char*)
 {
+  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
@@ -261,6 +262,7 @@ bool value_reader_generator::gen_struct(AST_Structure*,
                                         AST_Type::SIZE_TYPE,
                                         const char*)
 {
+  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
@@ -326,6 +328,7 @@ bool value_reader_generator::gen_union(AST_Union* u,
                                        AST_Type* discriminator,
                                        const char*)
 {
+  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
   be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);

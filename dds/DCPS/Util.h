@@ -136,8 +136,26 @@ template <typename Seq>
 void push_back(Seq& seq, const typename Seq::value_type& val)
 {
   const CORBA::ULong len = seq.length();
+  // Grow by factor of 2 when length is a power of 2 in order to prevent every call to length(+1)
+  // allocating a new buffer & copying previous results. The maximum is kept when length is reduced.
+  if (len && !(len & (len - 1))) {
+    seq.length(2 * len);
+  }
   seq.length(len + 1);
   seq[len] = val;
+}
+
+template <typename Seq>
+typename Seq::size_type grow(Seq& seq)
+{
+  const CORBA::ULong len = seq.length();
+  // Grow by factor of 2 when length is a power of 2 in order to prevent every call to length(+1)
+  // allocating a new buffer & copying previous results. The maximum is kept when length is reduced.
+  if (len && !(len & (len - 1))) {
+    seq.length(2 * len);
+  }
+  seq.length(len + 1);
+  return len + 1;
 }
 
 // Constructs a sorted intersect of the given two sorted ranges [a,aEnd) and [b,bEnd).

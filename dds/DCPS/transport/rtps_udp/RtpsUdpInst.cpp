@@ -197,70 +197,66 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
 
   // multicast first so it's preferred by remote peers
   if ((flags & CONNINFO_MULTICAST) && use_multicast_ && multicast_group_address_ != ACE_INET_Addr()) {
-    idx = locators.length();
-    locators.length(idx + 1);
-    address_to_locator(locators[idx], this->multicast_group_address_);
+    grow(locators);
+    address_to_locator(locators[idx++], this->multicast_group_address_);
   }
 #ifdef ACE_HAS_IPV6
   if ((flags & CONNINFO_MULTICAST) && use_multicast_ && ipv6_multicast_group_address_ != ACE_INET_Addr()) {
-    idx = locators.length();
-    locators.length(idx + 1);
-    address_to_locator(locators[idx], this->ipv6_multicast_group_address_);
+    grow(locators);
+    address_to_locator(locators[idx++], this->ipv6_multicast_group_address_);
   }
 #endif
 
   if (flags & CONNINFO_UNICAST) {
     if (local_address() != ACE_INET_Addr()) {
       if (advertised_address() != ACE_INET_Addr()) {
-        idx = locators.length();
-        locators.length(idx + 1);
+        grow(locators);
         address_to_locator(locators[idx], advertised_address());
         if (locators[idx].port == 0) {
           locators[idx].port = local_address().get_port_number();
         }
+        ++idx;
       } else if (local_address().is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);
         for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
           if (*adr_it != ACE_INET_Addr() && adr_it->get_type() == AF_INET) {
-            idx = locators.length();
-            locators.length(idx + 1);
+            grow(locators);
             address_to_locator(locators[idx], *adr_it);
             locators[idx].port = local_address().get_port_number();
+            ++idx;
           }
         }
       } else {
-        idx = locators.length();
-        locators.length(idx + 1);
-        address_to_locator(locators[idx], local_address());
+        grow(locators);
+        address_to_locator(locators[idx++], local_address());
       }
     }
 #ifdef ACE_HAS_IPV6
     if (ipv6_local_address() != ACE_INET_Addr()) {
       if (ipv6_advertised_address() != ACE_INET_Addr()) {
-        idx = locators.length();
-        locators.length(idx + 1);
+        grow(locators);
         address_to_locator(locators[idx], ipv6_advertised_address());
         if (locators[idx].port == 0) {
           locators[idx].port = ipv6_local_address().get_port_number();
         }
+        ++idx;
       } else if (ipv6_local_address().is_any()) {
         typedef OPENDDS_VECTOR(ACE_INET_Addr) AddrVector;
         AddrVector addrs;
         get_interface_addrs(addrs);
         for (AddrVector::iterator adr_it = addrs.begin(); adr_it != addrs.end(); ++adr_it) {
           if (*adr_it != ACE_INET_Addr() && adr_it->get_type() == AF_INET6) {
-            idx = locators.length();
-            locators.length(idx + 1);
+            grow(locators);
             address_to_locator(locators[idx], *adr_it);
             locators[idx].port = ipv6_local_address().get_port_number();
+            ++idx;
           }
         }
       } else {
-        idx = locators.length();
-        locators.length(idx + 1);
-        address_to_locator(locators[idx], ipv6_local_address());
+        grow(locators);
+        address_to_locator(locators[idx++], ipv6_local_address());
       }
     }
 #endif
