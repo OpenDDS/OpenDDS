@@ -2167,6 +2167,7 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
       const SingleSendBuffer::Proxy proxy(*send_buff_);
       initialize_heartbeat(proxy, meta_submessage);
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+      g.release();
       link->queue_submessages(meta_submessages);
     }
 
@@ -2269,7 +2270,7 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
     if (link->config().responsive_mode_) {
       MetaSubmessageVec meta_submessages;
       gather_preassociation_acknack_i(meta_submessages, writer);
-      RtpsUdpDataLink_rch link = link_.lock();
+      g.release();
       link->queue_submessages(meta_submessages);
     }
 
