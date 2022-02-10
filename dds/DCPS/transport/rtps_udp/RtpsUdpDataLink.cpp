@@ -1608,9 +1608,8 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   gap.smHeader.submessageLength =
       static_cast<CORBA::UShort>(size) - SMHDR_SZ;
 
-  const CORBA::ULong i = msg.length();
-  msg.length(i + 1);
-  msg[i].gap_sm(gap);
+  const CORBA::ULong idx = grow(msg) - 1;
+  msg[idx].gap_sm(gap);
 }
 
 void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr)

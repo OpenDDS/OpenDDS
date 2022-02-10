@@ -34,7 +34,7 @@ void AllocationHelper::alloc_exclusive_node_configs(AllocatedScenario& allocated
 
             // Update the allocated scenario to add a config for this node controller
             CORBA::ULong old_len = allocated_scenario.configs.length();
-            allocated_scenario.configs.length(old_len + 1);
+            OpenDDS::DCPS::grow(allocated_scenario.configs);
             allocated_scenario.configs[old_len].node_id = top.id;
             allocated_scenario.configs[old_len].timeout = scenario_prototype.timeout;
             allocated_scenario.configs[old_len].spawned_processes.length(0);
@@ -74,7 +74,7 @@ void AllocationHelper::alloc_nonexclusive_node_configs(AllocatedScenario& alloca
             my_ncs.insert(std::make_pair(id, nonexclusive_ncs[id]));
           } else {
             unsigned next_idx = allocated_scenario.configs.length();
-            allocated_scenario.configs.length(next_idx + 1);
+            OpenDDS::DCPS::grow(allocated_scenario.configs);
             allocated_scenario.configs[next_idx].node_id = id;
             allocated_scenario.configs[next_idx].timeout = scenario_prototype.timeout;
             allocated_scenario.configs[next_idx].spawned_processes.length(0);
@@ -193,9 +193,8 @@ void AllocationHelper::add_single_worker_to_node(const WorkerPrototype& protowor
   const std::map<std::string, std::string>& worker_configs,
   NodeController::Config& node)
 {
-  unsigned worker_i = node.spawned_processes.length();
+  unsigned worker_i = OpenDDS::DCPS::grow(node.spawned_processes) - 1;
   NodeController::SpawnedProcessId spawned_process_id = worker_i ? (node.spawned_processes[worker_i - 1].spawned_process_id + node.spawned_processes[worker_i - 1].count) : 1;
-  node.spawned_processes.length(node.spawned_processes.length() + 1);
   auto& process = node.spawned_processes[worker_i];
   process.executable = protoworker.executable.in();
   process.command = protoworker.command.in();

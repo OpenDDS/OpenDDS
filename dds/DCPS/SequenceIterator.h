@@ -6,10 +6,10 @@
 #ifndef OPENDDS_DCPS_SEQUENCEITERATOR_H
 #define OPENDDS_DCPS_SEQUENCEITERATOR_H
 
+#include "Util.h"
 #include "dds/Versioned_Namespace.h"
 
 #include "tao/Unbounded_Value_Sequence_T.h"
-
 #include <iterator>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -31,9 +31,7 @@ public:
 
   SequenceBackInsertIterator& operator=(const typename Sequence::value_type& value)
   {
-    const unsigned int len = seq_->length();
-    seq_->length(len + 1);
-    (*seq_)[len] = value;
+    push_back(*seq_, value);
     return *this;
   }
 
