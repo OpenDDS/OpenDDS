@@ -405,12 +405,7 @@ macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
   if (NOT TARGET ${target} AND
       (EXISTS "${_debug_lib}" OR EXISTS "${_release_lib}"))
 
-    if(OPENDDS_STATIC)
-      set(library_type STATIC)
-    else()
-      set(library_type SHARED)
-    endif()
-    add_library(${target} ${library_type} IMPORTED)
+    add_library(${target} ${OPENDDS_LIBRARY_TYPE} IMPORTED)
     set_target_properties(${target}
       PROPERTIES
         INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}"

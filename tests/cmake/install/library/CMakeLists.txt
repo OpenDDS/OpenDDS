@@ -6,7 +6,7 @@ include(CMakePackageConfigHelpers)
 
 find_package(OpenDDS REQUIRED)
 
-add_library(${PROJECT_NAME} SHARED "install_library.cpp")
+add_library(${PROJECT_NAME} ${OPENDDS_LIBRARY_TYPE} "install_library.cpp")
 target_include_directories(${PROJECT_NAME}
   PUBLIC
     "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
