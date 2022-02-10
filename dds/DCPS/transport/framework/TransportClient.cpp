@@ -182,9 +182,8 @@ TransportClient::populate_connection_info()
     if (check_transport_qos(*inst)) {
       TransportImpl_rch impl = inst->impl();
       if (impl) {
-        const CORBA::ULong len = conn_info_.length();
-        conn_info_.length(len + 1);
-        impl->connection_info(conn_info_[len], CONNINFO_ALL);
+        const CORBA::ULong idx = DCPS::grow(conn_info_) - 1;
+        impl->connection_info(conn_info_[idx], CONNINFO_ALL);
       }
     }
   }
