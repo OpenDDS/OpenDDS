@@ -10,6 +10,6 @@ Systems powered by DDS run the world's most complex systems. This complimentary,
 - WHEN: Tuesday, March 24, 2020, 8:30 am - 12:00 pm
 - WHERE: [Hyatt Regency Town Center, Reston, VA, USA](https://www.omg.org/events/va-20/hotel.htm)
 
-The event is free and open to the public. [REGISTRATION](https://www.omg.org/meetings/va-2020/index6.cgi?noid=yes) is required.
+The event is free and open to the public.
 
 Members of the [Object Computing, Inc. (OCI)](https://www.objectcomputing.com) OpenDDS team will be in attendance. *We hope to see you there!*
