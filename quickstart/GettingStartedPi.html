@@ -21,7 +21,7 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
         <li>GNU Make</li>
         <li>Perl</li>
         <li>If building with DDS Security: CMake</li>
-        <li>Optional Java SDK 1.5 through 1.8 for Java binding support</li>
+        <li>Optional Java SDK 1.5 or later for Java binding support</li>
       </ul>
     </li>
     <li>Download and extract the latest tar.gz file from the <a href="{{ site.data.opendds.downloads_base_url }}/">download site</a>.</li>
@@ -53,17 +53,17 @@ The goal of this guide is help you download and compile OpenDDS for Linux on the
 
 <div class="bodytext" align="justify">
   <a name="Copying OpenDDS to the Pi"><span class="headertext">Copying OpenDDS to the Pi</span></a>
-  <p>There are multiple ways to do this, including using a flash drive. This method uses the network.</p>
+  <p>There are multiple ways to do this, including using a flash drive. We do not recommend copying the entire build tree, since it can be 2+ GB. The following steps copy the OpenDDS runtime libraries, support scripts, and test executables over the network.</p>
   <ol>
     <li>Leave the OpenDDS-&lt;version&gt; directory: <code>cd ..</code></li>
-    <li><code>tar czf OpenDDS.tar.gz OpenDDS-&lt;version&gt;</code></li>
+    <li><code>tar czhf OpenDDS-&lt;version&gt;.tar.gz OpenDDS-&lt;version&gt;/build/target/ACE_wrappers/lib OpenDDS-&lt;version&gt;/build/target/lib OpenDDS-&lt;version&gt;/build/target/bin OpenDDS-&lt;version&gt;/build/target/ACE_wrappers/bin/PerlACE OpenDDS-&lt;version&gt;/build/target/DevGuideExamples/DCPS/Messenger</code></li>
     <li>
       <code>scp OpenDDS.tar.gz USER@ADDRESS:</code>
       where USER and ADDRESS are the username and IP address of your Raspberry Pi.
       It will ask you for the password for the user on the Pi.
     </li>
     <li><code>ssh USER@ADDRESS</code> to access the Pi, taking the same information as the previous command.</li>
-    <li><code>tar xzf OpenDDS.tar.gz</code></li>
+    <li><code>tar xzf OpenDDSOpenDDS-&lt;version&gt;.tar.gz</code></li>
   </ol>
 </div>
 
