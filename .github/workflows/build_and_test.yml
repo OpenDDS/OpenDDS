@@ -9160,15 +9160,15 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
-#    - name: Build CMake Tests
-#      shell: cmd
-#      run: |
-#        cd OpenDDS
-#        call setenv.cmd
-#        mkdir tests\cmake\build
-#        cd tests\cmake\build
-#        cmake ..
-#        cmake --build .
+    - name: Build CMake Tests
+      shell: cmd
+      run: |
+        cd OpenDDS
+        call setenv.cmd
+        mkdir tests\cmake\build
+        cd tests\cmake\build
+        cmake ..
+        cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -9317,11 +9317,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  build_w16_x86_i0_j_FM-1f:
+  build_w22_x86_i0_j_FM-1f:
 
-    runs-on: windows-2016
+    runs-on: windows-2022
 
-    needs: ACE_TAO_w16_x86_i0
+    needs: ACE_TAO_w22_x86_i0
 
     steps:
     - name: install xerces-c
@@ -9349,14 +9349,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w16_x86_i0_artifact
+        name: ACE_TAO_w22_x86_i0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w16_x86_i0.tar.xz
-        rm -f ACE_TAO_w16_x86_i0.tar.xz
+        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
+        rm -f ACE_TAO_w22_x86_i0.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
@@ -9409,11 +9409,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w16_x86_i0_j_FM-1f:
+  cmake_w22_x86_i0_j_FM-1f:
 
-    runs-on: windows-2016
+    runs-on: windows-2022
 
-    needs: build_w16_x86_i0_j_FM-1f
+    needs: build_w22_x86_i0_j_FM-1f
 
     steps:
     - name: install openssl & xerces-c
@@ -9446,14 +9446,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w16_x86_i0_artifact
+        name: ACE_TAO_w22_x86_i0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w16_x86_i0.tar.xz
-        rm -f ACE_TAO_w16_x86_i0.tar.xz
+        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
+        rm -f ACE_TAO_w22_x86_i0.tar.xz
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
     - name: Move ACE and MPC to C Drive
       shell: bash
@@ -9463,14 +9463,14 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w16_x86_i0_j_FM-1f_artifact
+        name: build_w22_x86_i0_j_FM-1f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w16_x86_i0_j_FM-1f.tar.xz
-        rm -f build_w16_x86_i0_j_FM-1f.tar.xz
+        tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
+        rm -f build_w22_x86_i0_j_FM-1f.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.9.0
     - name: check build configuration
