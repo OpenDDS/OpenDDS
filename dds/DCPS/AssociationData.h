@@ -8,10 +8,11 @@
 #ifndef OPENDDS_DCPS_ASSOCIATIONDATA_H
 #define OPENDDS_DCPS_ASSOCIATIONDATA_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "transport/framework/NetworkAddress.h"
-#include "transport/framework/TransportDefs.h"
-#include "ace/INET_Addr.h"
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/TransportDefs.h>
+
+#include <ace/INET_Addr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -38,18 +39,18 @@ struct AssociationData {
   static ACE_INET_Addr get_remote_address(const TransportBLOB& remote)
   {
     ACE_INET_Addr remote_address;
-    NetworkAddress network_order_address;
+    NetworkResource network_resource;
 
     // Get the remote address from the "blob" in the remote_info struct.
     ACE_InputCDR cdr((const char*)remote.get_buffer(),
                                   remote.length());
 
-    if ((cdr >> network_order_address) == 0) {
+    if ((cdr >> network_resource) == 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: AssociationData::get_remote_address")
-                 ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+                 ACE_TEXT(" failed to de-serialize the NetworkResource\n")));
     } else {
-      network_order_address.to_addr(remote_address);
+      network_resource.to_addr(remote_address);
     }
 
     return remote_address;

@@ -45,6 +45,8 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
+  NetworkAddress get_last_recv_addr(const RepoId& local_id, const RepoId& remote_id);
+
   void rtps_relay_address_change();
   void append_transport_statistics(TransportStatisticsSequence& seq);
 

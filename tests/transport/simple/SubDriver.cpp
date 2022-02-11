@@ -8,10 +8,10 @@
 #include "dds/DCPS/transport/tcp/TcpInst.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
 #include "dds/DCPS/transport/framework/EntryExit.h"
 
 #include "dds/DCPS/AssociationData.h"
+#include "dds/DCPS/NetworkResource.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
@@ -259,11 +259,11 @@ SubDriver::run()
   } else { // tcp
     publication.remote_data_[0].transport_type = "tcp";
 
-    OpenDDS::DCPS::NetworkAddress network_order_address(
+    OpenDDS::DCPS::NetworkResource network_resource(
       ACE_TEXT_ALWAYS_CHAR(this->pub_addr_str_.c_str()));
 
     ACE_OutputCDR cdr;
-    cdr << network_order_address;
+    cdr << network_resource;
     CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
 
     publication.remote_data_[0].data =

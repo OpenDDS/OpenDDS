@@ -10,11 +10,10 @@
 #include "MulticastTransport.h"
 
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/TransportDefs.h>
 
-#include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-
-#include "ace/Configuration.h"
+#include <ace/Configuration.h>
 
 #include <iostream>
 #include <sstream>
@@ -192,12 +191,12 @@ MulticastInst::dump_to_str() const
 size_t
 MulticastInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
-  if (this->group_address_ != ACE_INET_Addr()) {
-    NetworkAddress network_address(this->group_address_);
+  if (group_address_ != ACE_INET_Addr()) {
+    NetworkResource network_resource(group_address_);
 
     ACE_OutputCDR cdr;
-    cdr << network_address;
-    cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (this->is_reliable ()));
+    cdr << network_resource;
+    cdr << ACE_OutputCDR::from_boolean (ACE_CDR::Boolean (is_reliable()));
 
     const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
     char* buffer = const_cast<char*>(cdr.buffer()); // safe

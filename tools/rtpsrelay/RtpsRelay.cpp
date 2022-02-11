@@ -23,7 +23,7 @@
 #include <dds/DCPS/DomainParticipantImpl.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/NetworkResource.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>

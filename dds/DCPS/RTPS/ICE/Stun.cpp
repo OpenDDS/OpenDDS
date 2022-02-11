@@ -12,7 +12,7 @@
 #include "dds/DCPS/security/framework/SecurityRegistry.h"
 #include "dds/DCPS/security/framework/SecurityConfig.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include "dds/DCPS/NetworkResource.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

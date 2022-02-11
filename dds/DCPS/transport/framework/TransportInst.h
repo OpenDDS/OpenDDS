@@ -17,6 +17,7 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ReactorTask_rch.h"
+#include "dds/DCPS/NetworkAddress.h"
 #include "dds/DCPS/TimeDuration.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -134,6 +135,8 @@ public:
 
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
+
+  virtual NetworkAddress get_last_recv_addr(const RepoId& local_id, const RepoId& remote_id) { return NetworkAddress(); }
 
   virtual void rtps_relay_address_change() {}
 

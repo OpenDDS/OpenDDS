@@ -9,10 +9,10 @@
 #include "UdpLoader.h"
 
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include <dds/DCPS/transport/framework/TransportDefs.h>
+#include <dds/DCPS/NetworkResource.h>
 
-#include "ace/Configuration.h"
+#include <ace/Configuration.h>
 
 #include <iostream>
 #include <sstream>
@@ -77,14 +77,14 @@ size_t
 UdpInst::populate_locator(OpenDDS::DCPS::TransportLocator& info, ConnectionInfoFlags) const
 {
   if (this->local_address() != ACE_INET_Addr()) {
-    NetworkAddress network_address;
+    NetworkResource network_resource;
     if (!this->local_address_string().empty()) {
-      network_address = NetworkAddress(this->local_address_string());
+      network_resource = NetworkResource(this->local_address_string());
     } else {
-      network_address = NetworkAddress(get_fully_qualified_hostname());
+      network_resource = NetworkResource(get_fully_qualified_hostname());
     }
     ACE_OutputCDR cdr;
-    cdr << network_address;
+    cdr << network_resource;
 
     const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
     char* buffer = const_cast<char*>(cdr.buffer()); // safe

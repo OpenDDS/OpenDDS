@@ -17,8 +17,8 @@
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 #include "dds/DCPS/RcEventHandler.h"
+#include "dds/DCPS/NetworkAddress.h"
 
-#include "ace/INET_Addr.h"
 #include "ace/SOCK_Dgram.h"
 
 #include <cstring>
@@ -102,7 +102,7 @@ private:
 
   void deliver_sample_i(ReceivedDataSample& sample,
                         const RTPS::Submessage& submessage,
-                        const ACE_INET_Addr& remote_addr);
+                        const NetworkAddress& remote_addr);
 
   virtual int start_i();
   virtual void stop_i();
@@ -119,7 +119,7 @@ private:
                             const RTPS::Submessage& postfix);
 
   void deliver_from_secure(const RTPS::Submessage& submessage,
-                           const ACE_INET_Addr& remote_addr);
+                           const NetworkAddress& remote_addr);
 
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);

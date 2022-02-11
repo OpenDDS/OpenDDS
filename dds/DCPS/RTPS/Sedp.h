@@ -36,6 +36,7 @@
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/RcHandle_T.h>
 #include <dds/DCPS/Registered_Data_Types.h>
+#include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/TopicDetails.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
@@ -493,11 +494,11 @@ public:
 
   // @brief return the ip address we have bound to.
   // Valid after init() call
-  const ACE_INET_Addr& local_address() const;
+  const DCPS::NetworkAddress& local_address() const;
 #ifdef ACE_HAS_IPV6
-  const ACE_INET_Addr& ipv6_local_address() const;
+  const DCPS::NetworkAddress& ipv6_local_address() const;
 #endif
-  const ACE_INET_Addr& multicast_group() const;
+  const DCPS::NetworkAddress& multicast_group() const;
 
   void associate(DiscoveredParticipant& participant
 #ifdef OPENDDS_SECURITY

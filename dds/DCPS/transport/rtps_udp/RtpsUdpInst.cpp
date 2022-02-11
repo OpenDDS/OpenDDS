@@ -10,11 +10,12 @@
 #include "RtpsUdpTransport.h"
 
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/transport/framework/TransportDefs.h"
-#include "ace/Configuration.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/transport/framework/TransportDefs.h>
+#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+
+#include <ace/Configuration.h>
 
 #include <cstring>
 
@@ -43,11 +44,11 @@ RtpsUdpInst::RtpsUdpInst(const OPENDDS_STRING& name)
   , responsive_mode_(false)
   , send_delay_(0, 10 * 1000)
   , opendds_discovery_guid_(GUID_UNKNOWN)
-  , multicast_group_address_(7401, "239.255.0.2")
-  , local_address_(u_short(0), "0.0.0.0")
+  , multicast_group_address_(ACE_INET_Addr(7401, "239.255.0.2"))
+  , local_address_(ACE_INET_Addr(u_short(0), "0.0.0.0"))
 #ifdef ACE_HAS_IPV6
-  , ipv6_multicast_group_address_(7401, "FF03::2")
-  , ipv6_local_address_(u_short(0), "::")
+  , ipv6_multicast_group_address_(ACE_INET_Addr(7401, "FF03::2"))
+  , ipv6_local_address_(ACE_INET_Addr(u_short(0), "::"))
 #endif
   , rtps_relay_only_(false)
   , use_rtps_relay_(false)
@@ -70,7 +71,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
   if (!local_address_s.is_empty()) {
-    ACE_INET_Addr addr(local_address_s.c_str());
+    NetworkAddress addr(ACE_INET_Addr(local_address_s.c_str()));
     local_address(addr);
   }
 
@@ -78,7 +79,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("advertised_address"),
                            advertised_address_s);
   if (!advertised_address_s.is_empty()) {
-    ACE_INET_Addr addr(advertised_address_s.c_str());
+    NetworkAddress addr(ACE_INET_Addr(advertised_address_s.c_str()));
     advertised_address(addr);
   }
 
@@ -87,7 +88,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_local_address"),
                            ipv6_local_address_s);
   if (!ipv6_local_address_s.is_empty()) {
-    ACE_INET_Addr addr(ipv6_local_address_s.c_str());
+    NetworkAddress addr(ACE_INET_Addr(ipv6_local_address_s.c_str()));
     ipv6_local_address(addr);
   }
 
@@ -95,14 +96,14 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("ipv6_advertised_address"),
                            ipv6_advertised_address_s);
   if (!ipv6_advertised_address_s.is_empty()) {
-    ACE_INET_Addr addr(ipv6_advertised_address_s.c_str());
+    NetworkAddress addr(ACE_INET_Addr(ipv6_advertised_address_s.c_str()));
     ipv6_advertised_address(addr);
   }
 #endif
 
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), this->send_buffer_size_, ACE_UINT32);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("send_buffer_size"), send_buffer_size_, ACE_UINT32);
 
-  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"), this->rcv_buffer_size_, ACE_UINT32);
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("rcv_buffer_size"), rcv_buffer_size_, ACE_UINT32);
 
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("use_multicast"), use_multicast_, bool);
 
@@ -114,7 +115,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
       // Concatenate a port number if the user does not supply one.
       group_address_s += ACE_TEXT(":7401");
     }
-    ACE_INET_Addr addr(group_address_s.c_str());
+    NetworkAddress addr(ACE_INET_Addr(group_address_s.c_str()));
     multicast_group_address(addr);
   }
 
@@ -140,7 +141,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataRtpsRelayAddress"),
                            rtps_relay_address_s);
   if (!rtps_relay_address_s.is_empty()) {
-    ACE_INET_Addr addr(rtps_relay_address_s.c_str());
+    NetworkAddress addr(ACE_INET_Addr(rtps_relay_address_s.c_str()));
     rtps_relay_address(addr);
   }
 
@@ -151,7 +152,7 @@ RtpsUdpInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DataStunServerAddress"),
                            stun_server_address_s);
   if (!stun_server_address_s.is_empty()) {
-    ACE_INET_Addr addr(stun_server_address_s.c_str());
+    NetworkAddress addr(ACE_INET_Addr(stun_server_address_s.c_str()));
     stun_server_address(addr);
   }
 
@@ -196,22 +197,21 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
   CORBA::ULong idx = 0;
 
   // multicast first so it's preferred by remote peers
-  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && multicast_group_address_ != ACE_INET_Addr()) {
+  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && multicast_group_address_ != NetworkAddress()) {
     grow(locators);
-    address_to_locator(locators[idx++], this->multicast_group_address_);
+    address_to_locator(locators[idx++], multicast_group_address_.to_addr());
   }
 #ifdef ACE_HAS_IPV6
-  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && ipv6_multicast_group_address_ != ACE_INET_Addr()) {
+  if ((flags & CONNINFO_MULTICAST) && use_multicast_ && ipv6_multicast_group_address_ != NetworkAddress()) {
     grow(locators);
-    address_to_locator(locators[idx++], this->ipv6_multicast_group_address_);
+    address_to_locator(locators[idx++], ipv6_multicast_group_address_.to_addr());
   }
 #endif
 
   if (flags & CONNINFO_UNICAST) {
-    if (local_address() != ACE_INET_Addr()) {
-      if (advertised_address() != ACE_INET_Addr()) {
+    if (local_address() != NetworkAddress()) {
+      if (advertised_address() != NetworkAddress()) {
         grow(locators);
-        address_to_locator(locators[idx], advertised_address());
         if (locators[idx].port == 0) {
           locators[idx].port = local_address().get_port_number();
         }
@@ -230,14 +230,13 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
         }
       } else {
         grow(locators);
-        address_to_locator(locators[idx++], local_address());
+        address_to_locator(locators[idx++], local_address().to_addr());
       }
     }
 #ifdef ACE_HAS_IPV6
-    if (ipv6_local_address() != ACE_INET_Addr()) {
-      if (ipv6_advertised_address() != ACE_INET_Addr()) {
+    if (ipv6_local_address() != NetworkAddress()) {
+      if (ipv6_advertised_address() != NetworkAddress()) {
         grow(locators);
-        address_to_locator(locators[idx], ipv6_advertised_address());
         if (locators[idx].port == 0) {
           locators[idx].port = ipv6_local_address().get_port_number();
         }
@@ -256,7 +255,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
         }
       } else {
         grow(locators);
-        address_to_locator(locators[idx++], ipv6_local_address());
+        address_to_locator(locators[idx++], ipv6_local_address().to_addr());
       }
     }
 #endif
@@ -289,6 +288,17 @@ RtpsUdpInst::update_locators(const RepoId& remote_id,
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->update_locators(remote_id, locators);
   }
+}
+
+NetworkAddress
+RtpsUdpInst::get_last_recv_addr(const RepoId& local_id, const RepoId& remote_id)
+{
+  TransportImpl_rch imp = impl();
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    return rtps_impl->get_last_recv_addr(local_id, remote_id);
+  }
+  return NetworkAddress();
 }
 
 void

@@ -14,10 +14,10 @@
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Util.h>
 #include <dds/DCPS/Logging.h>
+#include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
 #include <dds/DCPS/transport/framework/TransportSendElement.h>
 #include <dds/DCPS/transport/framework/TransportSendControlElement.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
 #include <dds/DCPS/transport/framework/RemoveAllVisitor.h>
 #include <dds/DCPS/RTPS/BaseMessageUtils.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
@@ -463,7 +463,7 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface_rch& nic,
                  nic->name().c_str()));
     }
 
-    if (0 == multicast_socket_.join(config().multicast_group_address(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+    if (0 == multicast_socket_.join(config().multicast_group_address().to_addr(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
       joined_interfaces_.insert(nic->name());
 
       if (get_reactor()->register_handler(multicast_socket_.get_handle(),
@@ -492,7 +492,7 @@ RtpsUdpDataLink::join_multicast_group(const NetworkInterface_rch& nic,
                  nic->name().c_str()));
     }
 
-    if (0 == ipv6_multicast_socket_.join(config().ipv6_multicast_group_address(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+    if (0 == ipv6_multicast_socket_.join(config().ipv6_multicast_group_address().to_addr(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
       ipv6_joined_interfaces_.insert(nic->name());
 
       if (get_reactor()->register_handler(ipv6_multicast_socket_.get_handle(),
@@ -525,7 +525,7 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface_rch& nic)
                  nic->name().c_str()));
     }
 
-    if (0 == multicast_socket_.leave(config().multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+    if (0 == multicast_socket_.leave(config().multicast_group_address().to_addr(), ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
       joined_interfaces_.erase(nic->name());
     } else {
       if (DCPS_debug_level > 0) {
@@ -546,7 +546,7 @@ RtpsUdpDataLink::leave_multicast_group(const NetworkInterface_rch& nic)
                  nic->name().c_str()));
     }
 
-    if (0 == ipv6_multicast_socket_.leave(config().ipv6_multicast_group_address(), ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+    if (0 == ipv6_multicast_socket_.leave(config().ipv6_multicast_group_address().to_addr(), ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
       ipv6_joined_interfaces_.erase(nic->name());
     } else {
       if (DCPS_debug_level > 0) {
@@ -609,6 +609,20 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
                  LogGuid(remote_id).c_str(), DCPS::LogAddr(*pos).c_str()));
     }
   }
+}
+
+NetworkAddress
+RtpsUdpDataLink::get_last_recv_addr(const RepoId&, const RepoId& remote_id)
+{
+  NetworkAddress result;
+  ACE_Guard<ACE_Thread_Mutex> guard(locators_lock_);
+  const RemoteInfoMap::iterator pos = locators_.find(remote_id);
+  if (pos != locators_.end()) {
+    if (MonotonicTimePoint::now() - pos->second.last_recv_time_ <= config().receive_address_duration_) {
+      result = pos->second.last_recv_addr_;
+    }
+  }
+  return result;
 }
 
 void RtpsUdpDataLink::filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld)
@@ -1612,7 +1626,68 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   msg[idx].gap_sm(gap);
 }
 
-void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr)
+namespace
+{
+bool allow_addr_update(const RepoId& src, const NetworkAddress& current, const NetworkAddress& incoming)
+{
+  // The question to answer here: "Is incoming the same (or better) than current?"
+  if (current == incoming || current == NetworkAddress()) {
+    return true;
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (current.get_type() == AF_INET) {
+    if (incoming.get_type() == AF_INET6) {
+      return true;
+    }
+#endif /* ACE_HAS_IPV6 */
+    if (current.is_loopback()) {
+      return false;
+    } else if (incoming.is_loopback()) {
+      return true;
+    }
+
+    if (current.is_private()) {
+      return false;
+    } else if (incoming.is_private()) {
+      return true;
+    }
+#ifdef ACE_HAS_IPV6
+  } else if (current.get_type() == AF_INET6) {
+    if (incoming.get_type() == AF_INET) {
+      return false;
+    }
+
+    if (current.is_loopback()) {
+      return false;
+    } else if (incoming.is_loopback()) {
+      return true;
+    }
+
+    if (current.is_linklocal()) {
+      return false;
+    } else if (incoming.is_linklocal()) {
+      return true;
+    }
+
+    if (current.is_uniquelocal()) {
+      return false;
+    } else if (incoming.is_uniquelocal()) {
+      return true;
+    }
+
+    if (current.is_sitelocal()) {
+      return false;
+    } else if (incoming.is_sitelocal()) {
+      return true;
+    }
+  }
+#endif /* ACE_HAS_IPV6 */
+  return false;
+}
+}
+
+void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddress& addr)
 {
   if (addr == config().rtps_relay_address()) {
     return;
@@ -1623,22 +1698,12 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Ad
     ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
     const RemoteInfoMap::iterator pos = locators_.find(src);
     if (pos != locators_.end()) {
-#ifdef ACE_HAS_IPV6
-      const bool allow_update =
-        addr.get_type() == AF_INET6 ||
-        pos->second.last_recv_addr_.get_type() == AF_INET ||
-        pos->second.last_recv_addr_ == ACE_INET_Addr();
-
+      const bool allow_update = allow_addr_update(src, pos->second.last_recv_addr_, addr);
       if (allow_update) {
         remove_cache = pos->second.last_recv_addr_ != addr;
         pos->second.last_recv_addr_ = addr;
         pos->second.last_recv_time_ = MonotonicTimePoint::now();
       }
-#else
-      remove_cache = pos->second.last_recv_addr_ != addr;
-      pos->second.last_recv_addr_ = addr;
-      pos->second.last_recv_time_ = MonotonicTimePoint::now();
-#endif
     }
   }
   if (remove_cache) {
@@ -1651,7 +1716,7 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const ACE_INET_Ad
 void
 RtpsUdpDataLink::received(const RTPS::DataSubmessage& data,
                           const GuidPrefix_t& src_prefix,
-                          const ACE_INET_Addr& remote_addr)
+                          const NetworkAddress& remote_addr)
 {
   const RepoId local = make_id(local_prefix_, data.readerId);
   const RepoId src = make_id(src_prefix, data.writerId);
@@ -1855,7 +1920,7 @@ void
 RtpsUdpDataLink::received(const RTPS::GapSubmessage& gap,
                           const GuidPrefix_t& src_prefix,
                           bool directed,
-                          const ACE_INET_Addr& remote_addr)
+                          const NetworkAddress& remote_addr)
 {
   update_last_recv_addr(make_id(src_prefix, gap.writerId), remote_addr);
   datareader_dispatch(gap, src_prefix, directed, &RtpsReader::process_gap_i);
@@ -1970,7 +2035,7 @@ void
 RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
                           const GuidPrefix_t& src_prefix,
                           bool directed,
-                          const ACE_INET_Addr& remote_addr)
+                          const NetworkAddress& remote_addr)
 {
   const RepoId src = make_id(src_prefix, heartbeat.writerId);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
@@ -2065,8 +2130,10 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   // Only valid heartbeats (see spec) will be "fully" applied to writer info
   if (!(hb_first < 1 || hb_last < 0 || hb_last < hb_first.previous())) {
+    ACE_CDR::ULong cumulative_bits_added = 0;
     if (writer->recvd_.empty() && (directed || !writer->sends_directed_hb())) {
       OPENDDS_ASSERT(preassociation_writers_.count(writer));
+      gather_ack_nacks_i(writer, link, false, meta_submessages, cumulative_bits_added);
       preassociation_writers_.erase(writer);
       if (transport_debug.log_progress) {
         DCPS::log_progress("RTPS reader/writer association complete", id_, writer->id_, writer->participant_discovered_at_);
@@ -2085,7 +2152,6 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       first_ever_hb = true;
     }
 
-    ACE_CDR::ULong cumulative_bits_added = 0;
     if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !(heartbeat.smHeader.flags & RTPS::FLAG_F), meta_submessages, cumulative_bits_added);
@@ -2094,7 +2160,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       ++cumulative_bits_added;
     }
     if (cumulative_bits_added && link->config().count_messages()) {
-      ACE_GUARD(ACE_Thread_Mutex, g, link->transport_statistics_mutex_);
+      ACE_Guard<ACE_Thread_Mutex> tsg(link->transport_statistics_mutex_);
       link->transport_statistics_.reader_nack_count[id_] += cumulative_bits_added;
     }
   } else {
@@ -2508,7 +2574,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
 
 #ifdef OPENDDS_SECURITY
 namespace {
-  const ACE_INET_Addr BUNDLING_PLACEHOLDER;
+  const NetworkAddress BUNDLING_PLACEHOLDER;
 }
 #endif
 
@@ -2804,7 +2870,7 @@ RtpsUdpDataLink::disable_response_queue()
 }
 
 void
-RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in)
+RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in, double scale)
 {
   if (in.empty()) {
     return;
@@ -2829,7 +2895,7 @@ RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in)
   }
 
   if (schedule) {
-    flush_send_queue_task_->schedule(config().send_delay_);
+    flush_send_queue_task_->schedule(config().send_delay_ * scale);
   }
 }
 
@@ -3025,7 +3091,7 @@ void
 RtpsUdpDataLink::received(const RTPS::HeartBeatFragSubmessage& hb_frag,
                           const GuidPrefix_t& src_prefix,
                           bool directed,
-                          const ACE_INET_Addr& remote_addr)
+                          const NetworkAddress& remote_addr)
 {
   update_last_recv_addr(make_id(src_prefix, hb_frag.writerId), remote_addr);
   datareader_dispatch(hb_frag, src_prefix, directed, &RtpsReader::process_heartbeat_frag_i);
@@ -3093,7 +3159,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_frag_i(const RTPS::HeartBeatFragS
 void
 RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
                           const GuidPrefix_t& src_prefix,
-                          const ACE_INET_Addr& remote_addr)
+                          const NetworkAddress& remote_addr)
 {
   // local side is DW
   const RepoId local = make_id(local_prefix_, acknack.writerId); // can't be ENTITYID_UNKNOWN
@@ -3449,7 +3515,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 void
 RtpsUdpDataLink::received(const RTPS::NackFragSubmessage& nackfrag,
                           const GuidPrefix_t& src_prefix,
-                          const ACE_INET_Addr& remote_addr)
+                          const NetworkAddress& remote_addr)
 {
   update_last_recv_addr(make_id(src_prefix, nackfrag.readerId), remote_addr);
   datawriter_dispatch(nackfrag, src_prefix, &RtpsWriter::process_nackfrag);
@@ -4610,16 +4676,13 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
 
 bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
 {
-  if (last_recv_addr_ == ACE_INET_Addr()) {
+  if (last_recv_addr_ == NetworkAddress()) {
     return false;
   }
-  ACE_INET_Addr recv_no_port(last_recv_addr_);
+  NetworkAddress recv_no_port(last_recv_addr_);
   recv_no_port.set_port_number(0);
-  const AddrSet::const_iterator it = unicast_addrs_.lower_bound(recv_no_port);
-  if (it != unicast_addrs_.end() &&
-      it->get_type() == last_recv_addr_.get_type() &&
-      it->get_addr_size() == last_recv_addr_.get_addr_size() &&
-      std::memcmp(it->get_addr(), last_recv_addr_.get_addr(), it->get_addr_size()) == 0) {
+  const AddrSet::const_iterator it = unicast_addrs_.lower_bound(NetworkAddress(recv_no_port));
+  if (it != unicast_addrs_.end() && *it == last_recv_addr_) {
     aset.insert(last_recv_addr_);
     return true;
   }
@@ -4641,7 +4704,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   }
 
   if (config().rtps_relay_only() && std::memcmp(&local.guidPrefix, &remote.guidPrefix, sizeof(GuidPrefix_t)) != 0) {
-    if (config().rtps_relay_address() != ACE_INET_Addr()) {
+    if (NetworkAddress() != config().rtps_relay_address()) {
       addresses.insert(config().rtps_relay_address());
       entry.value().addrs_.insert(config().rtps_relay_address());
     }
@@ -4650,9 +4713,9 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 
   AddrSet normal_addrs;
   MonotonicTimePoint normal_addrs_expires = MonotonicTimePoint::max_value;
-  ACE_INET_Addr ice_addr;
+  NetworkAddress ice_addr;
   bool valid_last_recv_addr = false;
-  static const ACE_INET_Addr NO_ADDR;
+  static const NetworkAddress NO_ADDR;
 
   const RemoteInfoMap::const_iterator pos = locators_.find(remote);
   if (pos != locators_.end()) {
@@ -4710,7 +4773,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
     addresses.insert(normal_addrs.begin(), normal_addrs.end());
     entry.value().addrs_.insert(normal_addrs.begin(), normal_addrs.end());
     entry.value().expires_ = normal_addrs_expires;
-    const ACE_INET_Addr relay_addr = config().rtps_relay_address();
+    const NetworkAddress relay_addr = config().rtps_relay_address();
     if (!valid_last_recv_addr && relay_addr != NO_ADDR) {
       addresses.insert(relay_addr);
       entry.value().addrs_.insert(relay_addr);

@@ -2972,7 +2972,7 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr, bool relay)
   }
   if (res < 0) {
     if (outer->sedp_->transport_inst()->count_messages()) {
-      const DCPS::InternalMessageCountKey key(addr, DCPS::MCK_RTPS, relay);
+      const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(addr), DCPS::MCK_RTPS, relay);
       transport_statistics_.message_count[key].send_fail(wbuff_.length());
     }
     const int err = errno;
@@ -2989,7 +2989,7 @@ Spdp::SpdpTransport::send(const ACE_INET_Addr& addr, bool relay)
     }
   } else {
     if (outer->sedp_->transport_inst()->count_messages()) {
-      const DCPS::InternalMessageCountKey key(addr, DCPS::MCK_RTPS, relay);
+      const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(addr), DCPS::MCK_RTPS, relay);
       transport_statistics_.message_count[key].send(wbuff_.length());
     }
     network_is_unreachable_ = false;
@@ -3103,7 +3103,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
     }
 
     if (outer->sedp_->transport_inst()->count_messages()) {
-      const DCPS::InternalMessageCountKey key(remote, DCPS::MCK_RTPS, from_relay);
+      const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(remote), DCPS::MCK_RTPS, from_relay);
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
       transport_statistics_.message_count[key].recv(bytes);
     }
@@ -3251,7 +3251,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
   message.block = &buff_;
   if (serializer >> message) {
     if (outer->sedp_->transport_inst()->count_messages()) {
-      const DCPS::InternalMessageCountKey key(remote, DCPS::MCK_STUN, from_relay);
+      const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(remote), DCPS::MCK_STUN, from_relay);
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, outer->lock_, -1);
       transport_statistics_.message_count[key].recv(bytes);
     }
@@ -3364,7 +3364,7 @@ Spdp::SendStun::execute()
   if (res < 0) {
     if (outer->sedp_->transport_inst()->count_messages()) {
       // Have the lock.
-      const DCPS::InternalMessageCountKey key(address_, DCPS::MCK_STUN, address_ == outer->config_->spdp_stun_server_address());
+      const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(address_), DCPS::MCK_STUN, address_ == outer->config_->spdp_stun_server_address());
       tport->transport_statistics_.message_count[key].send_fail(tport->wbuff_.length());
     }
     const int err = errno;
@@ -3382,7 +3382,7 @@ Spdp::SendStun::execute()
   } else {
     if (outer->sedp_->transport_inst()->count_messages()) {
       // Have the lock.
-      const DCPS::InternalMessageCountKey key(address_, DCPS::MCK_STUN, address_ == outer->config_->spdp_stun_server_address());
+      const DCPS::InternalMessageCountKey key(DCPS::NetworkAddress(address_), DCPS::MCK_STUN, address_ == outer->config_->spdp_stun_server_address());
       tport->transport_statistics_.message_count[key].send(tport->wbuff_.length());
     }
     tport->network_is_unreachable_ = false;

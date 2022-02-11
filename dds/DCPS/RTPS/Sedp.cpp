@@ -31,7 +31,7 @@
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/DcpsUpcalls.h>
 #include <dds/DCPS/Util.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
@@ -918,7 +918,7 @@ Sedp::multicast_locators() const
   return transport_locator_to_locator_seq(trans_info);
 }
 
-const ACE_INET_Addr&
+const DCPS::NetworkAddress&
 Sedp::local_address() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =
@@ -927,7 +927,7 @@ Sedp::local_address() const
 }
 
 #ifdef ACE_HAS_IPV6
-const ACE_INET_Addr&
+const DCPS::NetworkAddress&
 Sedp::ipv6_local_address() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =
@@ -936,7 +936,7 @@ Sedp::ipv6_local_address() const
 }
 #endif
 
-const ACE_INET_Addr&
+const DCPS::NetworkAddress&
 Sedp::multicast_group() const
 {
   DCPS::RtpsUdpInst_rch rtps_inst =

@@ -10,11 +10,11 @@
 #include "ShmemSendStrategy.h"
 #include "ShmemReceiveStrategy.h"
 
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
 
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 #include <sstream>
 #include <cstring>

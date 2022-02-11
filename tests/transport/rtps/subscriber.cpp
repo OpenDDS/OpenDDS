@@ -16,6 +16,7 @@
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
@@ -246,7 +247,7 @@ ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 #endif
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
-    rtps_inst->local_address(addr);
+    rtps_inst->local_address(OpenDDS::DCPS::NetworkAddress(addr));
     rtps_inst->datalink_release_delay_ = 0;
 
     TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");

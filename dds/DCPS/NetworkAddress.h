@@ -1,0 +1,75 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DCPS_NETWORKADDRESS_H
+#define OPENDDS_DCPS_NETWORKADDRESS_H
+
+#include "dcps_export.h"
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif /* ACE_LACKS_PRAGMA_ONCE */
+
+#include "Definitions.h"
+#include "PoolAllocator.h"
+
+#include "ace/INET_Addr.h"
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace OpenDDS {
+namespace DCPS {
+
+class NetworkAddress {
+public:
+  NetworkAddress();
+  NetworkAddress(const NetworkAddress& addr);
+
+  explicit NetworkAddress(const ACE_INET_Addr& addr);
+
+  NetworkAddress& operator=(const NetworkAddress& rhs);
+  NetworkAddress& operator=(const ACE_INET_Addr& rhs);
+
+  bool operator==(const NetworkAddress& rhs) const;
+  bool operator!=(const NetworkAddress& rhs) const;
+
+  bool operator<(const NetworkAddress& rhs) const;
+
+  ACE_INET_Addr to_addr() const;
+
+  int16_t get_type() const;
+
+  uint16_t get_port_number() const;
+  void set_port_number(uint16_t port);
+
+  bool is_any() const;
+  bool is_loopback() const;
+
+  bool is_private() const; // IPv4 only
+
+  bool is_uniquelocal() const; // IPv6 only
+  bool is_linklocal() const; // IPv6 only
+  bool is_sitelocal() const; // IPv6 only
+  
+private:
+  union ip46
+  {
+    sockaddr_in  in4_;
+#if defined (ACE_HAS_IPV6)
+    sockaddr_in6 in6_;
+#endif /* ACE_HAS_IPV6 */
+  } inet_addr_;
+};
+
+typedef OPENDDS_SET(NetworkAddress) AddrSet;
+
+} // namespace DCPS
+} // namespace OpenDDS
+
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif /*OPENDDS_DCPS_NETWORKADDRESS_H*/

@@ -8,7 +8,8 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSTATISTICS_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSTATISTICS_H
 
-#include "NetworkAddress.h"
+#include "dds/DCPS/NetworkAddress.h"
+#include "dds/DCPS/NetworkResource.h"
 
 #include <dds/OpenddsDcpsExtC.h>
 
@@ -18,11 +19,11 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct InternalMessageCountKey {
-  ACE_INET_Addr address;
+  NetworkAddress address;
   MessageCountKind kind;
   bool relay;
 
-  InternalMessageCountKey(const ACE_INET_Addr& a_address,
+  InternalMessageCountKey(const NetworkAddress& a_address,
                           MessageCountKind a_kind,
                           bool a_relay)
     : address(a_address)
@@ -111,7 +112,7 @@ inline void append(TransportStatisticsSequence& seq, const InternalTransportStat
   for (InternalTransportStatistics::MessageCountMap::const_iterator pos = istats.message_count.begin(),
          limit = istats.message_count.end(); pos != limit; ++pos) {
     MessageCount mc;
-    address_to_locator(mc.locator, pos->first.address);
+    address_to_locator(mc.locator, pos->first.address.to_addr());
     mc.kind = pos->first.kind;
     mc.relay = pos->first.relay;
     mc.send_count = static_cast<ACE_CDR::ULong>(pos->second.send_count());

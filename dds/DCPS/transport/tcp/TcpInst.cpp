@@ -8,9 +8,9 @@
 #include "Tcp_pch.h"
 #include "TcpInst.h"
 
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
+#include <dds/DCPS/NetworkResource.h>
 
-#include "ace/Configuration.h"
+#include <ace/Configuration.h>
 
 #include <iostream>
 #include <sstream>
@@ -92,12 +92,12 @@ OpenDDS::DCPS::TcpInst::dump_to_str() const
 size_t
 OpenDDS::DCPS::TcpInst::populate_locator(OpenDDS::DCPS::TransportLocator& local_info, ConnectionInfoFlags) const
 {
-  if (this->local_address() != ACE_INET_Addr() || !pub_address_str_.empty()) {
+  if (local_address() != ACE_INET_Addr() || !pub_address_str_.empty()) {
     // Get the public address string from the inst (usually the local address)
-    NetworkAddress network_order_address(this->get_public_address());
+    NetworkResource network_resource(get_public_address());
 
     ACE_OutputCDR cdr;
-    cdr << network_order_address;
+    cdr << network_resource;
     const CORBA::ULong len = static_cast<CORBA::ULong>(cdr.total_length());
     char* buffer = const_cast<char*>(cdr.buffer()); // safe
 

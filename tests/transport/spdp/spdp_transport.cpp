@@ -5,8 +5,6 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
-
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
@@ -17,6 +15,7 @@
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/NetworkResource.h>
 
 #include <ace/Configuration.h>
 #include <ace/Reactor.h>

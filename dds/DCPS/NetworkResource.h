@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_NETWORKADDRESS_H
-#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_NETWORKADDRESS_H
+#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_NETWORKRESOURCE_H
+#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_NETWORKRESOURCE_H
 
 #include "dds/DCPS/dcps_export.h"
 #include "dds/DCPS/PoolAllocator.h"
@@ -34,19 +34,19 @@ struct HostnameInfo {
 typedef OPENDDS_VECTOR(HostnameInfo) HostnameInfoVector;
 
 /**
- * @struct NetworkAddress
+ * @struct NetworkResource
  *
  * @brief Defines a wrapper around address info which is used for advertise.
  *
  *
  * This is used to send/receive an address information through transport.
  */
-struct OpenDDS_Dcps_Export NetworkAddress {
-  NetworkAddress();
-  explicit NetworkAddress(const ACE_INET_Addr& addr);
-  explicit NetworkAddress(const String& addr);
+struct OpenDDS_Dcps_Export NetworkResource {
+  NetworkResource();
+  explicit NetworkResource(const ACE_INET_Addr& addr);
+  explicit NetworkResource(const String& addr);
 
-  ~NetworkAddress();
+  ~NetworkResource();
 
   void dump() const;
 
@@ -146,17 +146,17 @@ ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 /// Marshal into a buffer.
 extern OpenDDS_Dcps_Export
 ACE_CDR::Boolean
-operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value);
+operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkResource& value);
 
 /// Demarshal from a buffer.
 extern OpenDDS_Dcps_Export
 ACE_CDR::Boolean
-operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value);
+operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkResource& value);
 
 ACE_END_VERSIONED_NAMESPACE_DECL
 
 #if defined (__ACE_INLINE__)
-# include "NetworkAddress.inl"
+# include "NetworkResource.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif /* OPENDDS_DCPS_NETWORKADDRESS_H */
+#endif /* OPENDDS_DCPS_NETWORKRESOURCE_H */

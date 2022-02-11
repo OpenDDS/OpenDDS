@@ -12,11 +12,11 @@
 #include "UdpReceiveStrategy.h"
 
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/DirectPriorityMapper.h"
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/DirectPriorityMapper.h>
 
-#include "ace/Default_Constants.h"
-#include "ace/Log_Msg.h"
+#include <ace/Default_Constants.h>
+#include <ace/Log_Msg.h>
 
 #ifndef __ACE_INLINE__
 # include "UdpDataLink.inl"
