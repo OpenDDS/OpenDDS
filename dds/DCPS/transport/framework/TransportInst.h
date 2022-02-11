@@ -136,8 +136,6 @@ public:
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
 
-  virtual NetworkAddress get_last_recv_addr(const RepoId& local_id, const RepoId& remote_id) { return NetworkAddress(); }
-
   virtual void rtps_relay_address_change() {}
 
   ReactorTask_rch reactor_task();

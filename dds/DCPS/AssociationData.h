@@ -8,9 +8,10 @@
 #ifndef OPENDDS_DCPS_ASSOCIATIONDATA_H
 #define OPENDDS_DCPS_ASSOCIATIONDATA_H
 
+#include "NetworkResource.h"
+#include "transport/framework/TransportDefs.h"
+
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include <dds/DCPS/NetworkResource.h>
-#include <dds/DCPS/transport/framework/TransportDefs.h>
 
 #include <ace/INET_Addr.h>
 

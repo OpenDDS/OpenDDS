@@ -157,8 +157,6 @@ public:
                        bool requires_inline_qos,
                        bool add_ref);
 
-  NetworkAddress get_last_recv_addr(const RepoId& local_id, const RepoId& remote_id);
-
   /// Given a 'local' id and a 'remote' id of a publication or
   /// subscription, return the set of addresses of the remote peers.
   AddrSet get_addresses(const RepoId& local, const RepoId& remote) const;

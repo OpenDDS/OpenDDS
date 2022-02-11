@@ -53,6 +53,16 @@ NetworkAddress::NetworkAddress(const NetworkAddress& val)
   *this = val;
 }
 
+NetworkAddress::NetworkAddress(const char* str)
+{
+  *this = ACE_INET_Addr(str);
+}
+
+NetworkAddress::NetworkAddress(uint16_t port, const char* str)
+{
+  *this = ACE_INET_Addr(port, str);
+}
+
 NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr)
 {
   // We want to take care here to make sure that our NetworkAddress can be used with memcmp
@@ -111,8 +121,13 @@ bool NetworkAddress::operator<(const NetworkAddress& rhs) const
 ACE_INET_Addr NetworkAddress::to_addr() const
 {
   ACE_INET_Addr result;
-  result.set_addr(&inet_addr_, sizeof (inet_addr_));
+  result.set_addr(const_cast<ip46*>(&inet_addr_), sizeof (inet_addr_));
   return result;
+}
+
+void NetworkAddress::to_addr(ACE_INET_Addr& addr) const
+{
+  addr.set_addr(const_cast<ip46*>(&inet_addr_), sizeof (inet_addr_));
 }
 
 int16_t NetworkAddress::get_type() const

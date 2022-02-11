@@ -6,13 +6,16 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "NetworkResource.h"
-#include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/TimeTypes.h"
-#include "ace/OS_NS_netdb.h"
-#include "ace/Sock_Connect.h"
-#include "ace/OS_NS_sys_socket.h" // For setsockopt()
-#include "ace/OS_NS_arpa_inet.h"
+
+#include "LogAddr.h"
+#include "TimeTypes.h"
+
+#include <ace/OS_NS_netdb.h>
+#include <ace/Sock_Connect.h>
+#include <ace/OS_NS_sys_socket.h> // For setsockopt()
+#include <ace/OS_NS_arpa_inet.h>
 
 #include <cstdlib>
 #include <cstring>

@@ -5,10 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/DCPS/transport/framework/EntryExit.h>
+#include "transport/framework/EntryExit.h"
 
-#include "ace/CDR_Stream.h"
-#include "ace/OS_NS_netdb.h"
+#include <ace/CDR_Stream.h>
+#include <ace/OS_NS_netdb.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

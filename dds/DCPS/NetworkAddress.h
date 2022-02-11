@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_NETWORKADDRESS_H
-#define OPENDDS_DCPS_NETWORKADDRESS_H
+#ifndef OPENDDS_DCPS_NETWORK_ADDRESS_H
+#define OPENDDS_DCPS_NETWORK_ADDRESS_H
 
 #include "dcps_export.h"
 
@@ -29,6 +29,9 @@ public:
   NetworkAddress();
   NetworkAddress(const NetworkAddress& addr);
 
+  explicit NetworkAddress(const char*);
+  NetworkAddress(uint16_t port, const char*);
+
   explicit NetworkAddress(const ACE_INET_Addr& addr);
 
   NetworkAddress& operator=(const NetworkAddress& rhs);
@@ -40,6 +43,7 @@ public:
   bool operator<(const NetworkAddress& rhs) const;
 
   ACE_INET_Addr to_addr() const;
+  void to_addr(ACE_INET_Addr&) const;
 
   int16_t get_type() const;
 
@@ -54,7 +58,7 @@ public:
   bool is_uniquelocal() const; // IPv6 only
   bool is_linklocal() const; // IPv6 only
   bool is_sitelocal() const; // IPv6 only
-  
+
 private:
   union ip46
   {
@@ -72,4 +76,4 @@ typedef OPENDDS_SET(NetworkAddress) AddrSet;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /*OPENDDS_DCPS_NETWORKADDRESS_H*/
+#endif /*OPENDDS_DCPS_NETWORK_ADDRESS_H*/

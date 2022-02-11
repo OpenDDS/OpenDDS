@@ -611,20 +611,6 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
   }
 }
 
-NetworkAddress
-RtpsUdpDataLink::get_last_recv_addr(const RepoId&, const RepoId& remote_id)
-{
-  NetworkAddress result;
-  ACE_Guard<ACE_Thread_Mutex> guard(locators_lock_);
-  const RemoteInfoMap::iterator pos = locators_.find(remote_id);
-  if (pos != locators_.end()) {
-    if (MonotonicTimePoint::now() - pos->second.last_recv_time_ <= config().receive_address_duration_) {
-      result = pos->second.last_recv_addr_;
-    }
-  }
-  return result;
-}
-
 void RtpsUdpDataLink::filterBestEffortReaders(const ReceivedDataSample& ds, RepoIdSet& selected, RepoIdSet& withheld)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, readers_lock_);

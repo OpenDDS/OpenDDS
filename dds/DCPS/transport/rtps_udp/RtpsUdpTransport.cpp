@@ -438,22 +438,6 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
   }
 }
 
-NetworkAddress
-RtpsUdpTransport::get_last_recv_addr(const RepoId& local_id, const RepoId& remote_id)
-{
-  if (is_shut_down()) {
-    return NetworkAddress();
-  }
-
-  GuardThreadType guard_links(links_lock_);
-
-  if (link_) {
-    return link_->get_last_recv_addr(local_id, remote_id);
-  }
-
-  return NetworkAddress();
-}
-
 void
 RtpsUdpTransport::rtps_relay_address_change()
 {

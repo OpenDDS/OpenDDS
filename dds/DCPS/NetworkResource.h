@@ -5,19 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_NETWORKRESOURCE_H
-#define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_NETWORKRESOURCE_H
+#ifndef OPENDDS_DCPS_NETWORK_RESOURCE_H
+#define OPENDDS_DCPS_NETWORK_RESOURCE_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/OpenddsDcpsExtC.h"
+#include "dcps_export.h"
+#include "PoolAllocator.h"
 
-#include "tao/Basic_Types.h"
+#include <dds/OpenddsDcpsExtC.h>
 
-#include "ace/INET_Addr.h"
-#include "ace/CDR_Stream.h"
-#include "ace/SString.h"
-#include "ace/SOCK_Dgram.h"
+#include <tao/Basic_Types.h>
+
+#include <ace/INET_Addr.h>
+#include <ace/CDR_Stream.h>
+#include <ace/SString.h>
+#include <ace/SOCK_Dgram.h>
 
 #include <cstring>
 
@@ -159,4 +160,4 @@ ACE_END_VERSIONED_NAMESPACE_DECL
 # include "NetworkResource.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif /* OPENDDS_DCPS_NETWORKRESOURCE_H */
+#endif /* OPENDDS_DCPS_NETWORK_RESOURCE_H */
