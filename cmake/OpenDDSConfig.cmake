@@ -423,6 +423,7 @@ macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
         PROPERTIES
           IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
           IMPORTED_LOCATION_RELEASE "${_release_lib}"
+          IMPORTED_IMPLIB_RELEASE "${_release_lib}"
       )
     endif()
 
@@ -436,6 +437,7 @@ macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
         PROPERTIES
           IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
           IMPORTED_LOCATION_DEBUG "${_debug_lib}"
+          IMPORTED_IMPLIB_DEBUG "${_debug_lib}"
       )
     endif()
 
