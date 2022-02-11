@@ -40,7 +40,6 @@ function(opendds_add_idl_or_header_files target scope is_generated files)
 endfunction()
 
 function(opendds_target_generated_dependencies target idl_file scope)
-
   get_source_file_property(idl_ts_files ${idl_file} OPENDDS_TYPESUPPORT_IDLS)
   set(all_idl_files ${idl_file} ${idl_ts_files})
 
@@ -85,6 +84,16 @@ function(opendds_target_generated_dependencies target idl_file scope)
   target_sources(${target} PRIVATE ${cpp_files})
 endfunction()
 
+function(opendds_export_target_property target property_name)
+  if(NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    get_property(target_export_properties TARGET ${target} PROPERTY "EXPORT_PROPERTIES")
+    if(NOT property_name IN_LIST target_export_properties)
+      list(APPEND target_export_properties ${property_name})
+      set_property(TARGET ${target} PROPERTY "EXPORT_PROPERTIES" "${target_export_properties}")
+    endif()
+  endif()
+endfunction()
+
 function(opendds_target_idl_sources target)
   set(oneValueArgs SCOPE SKIP_TAO_IDL)
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
@@ -94,16 +103,7 @@ function(opendds_target_idl_sources target)
   # existing OPENDDS_LANGUAGE_MAPPINGS value on the target.
   get_property(language_mappings TARGET ${target}
     PROPERTY "OPENDDS_LANGUAGE_MAPPINGS")
-  # Make sure OPENDDS_LANGUAGE_MAPPINGS is exported if supported
-  if(NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
-    get_property(target_export_properties TARGET ${target}
-      PROPERTY "EXPORT_PROPERTIES")
-    if(NOT ("OPENDDS_LANGUAGE_MAPPINGS" IN_LIST target_export_properties))
-      list(APPEND target_export_properties "OPENDDS_LANGUAGE_MAPPINGS")
-      set_property(TARGET ${target} PROPERTY "EXPORT_PROPERTIES"
-        "${target_export_properties}")
-    endif()
-  endif()
+  opendds_export_target_property(${target} "OPENDDS_LANGUAGE_MAPPINGS")
 
   foreach(idl_file ${_arg_IDL_FILES})
     if (NOT IS_ABSOLUTE ${idl_file})

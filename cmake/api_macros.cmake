@@ -4,19 +4,23 @@
 include(${CMAKE_CURRENT_LIST_DIR}/dds_idl_sources.cmake)
 
 macro(OPENDDS_GET_SOURCES_AND_OPTIONS
-  src_prefix
-  idl_prefix
-  libs
-  tao_options
-  opendds_options
-  suppress_anys)
+    src_prefix
+    idl_prefix
+    libs
+    tao_options
+    opendds_options
+    suppress_anys
+    always_generate_lib_export_header)
 
-  set(_options_n
+  set(_single_value_options
+    SUPPRESS_ANYS
+    ALWAYS_GENERATE_LIB_EXPORT_HEADER
+  )
+  set(_multi_value_options
     PUBLIC PRIVATE INTERFACE
     TAO_IDL_OPTIONS OPENDDS_IDL_OPTIONS
-    SUPPRESS_ANYS)
-
-  cmake_parse_arguments(_arg "" "" "${_options_n}" ${ARGN})
+  )
+  cmake_parse_arguments(_arg "" "${_single_value_options}" "${_multi_value_options}" ${ARGN})
 
   # Handle explicit sources per scope
   set(_non_idl_file_warning ON)
@@ -46,8 +50,16 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
 
-  if (${_arg_SUPPRESS_ANYS} OR ${_arg_SUPPRESS_ANYS} MATCHES OFF)
+  if(DEFINED _arg_SUPPRESS_ANYS)
     set(${suppress_anys} ${_arg_SUPPRESS_ANYS})
+  else()
+    set(${suppress_anys} ${OPENDDS_SUPPRESS_ANYS})
+  endif()
+
+  if(DEFINED _arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER)
+    set(${always_generate_lib_export_header} ${_arg_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
+  else()
+    set(${always_generate_lib_export_header} ${OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER})
   endif()
 
   foreach(arg ${_arg_UNPARSED_ARGUMENTS})
@@ -152,8 +164,6 @@ macro(OPENDDS_TARGET_SOURCES target)
     list(APPEND _extra_idl_flags "--filename-only-includes")
   endif()
 
-  set(_suppress_anys ${OPENDDS_SUPPRESS_ANYS})
-
   OPENDDS_GET_SOURCES_AND_OPTIONS(
     _sources
     _idl_sources
@@ -161,6 +171,7 @@ macro(OPENDDS_TARGET_SOURCES target)
     _tao_options
     _opendds_options
     _suppress_anys
+    _always_generate_lib_export_header
     ${arglist})
 
   if(NOT _opendds_options MATCHES "--(no-)?default-nested")
@@ -176,7 +187,8 @@ macro(OPENDDS_TARGET_SOURCES target)
   endif()
 
   get_target_property(_target_type ${target} TYPE)
-  if(_target_type STREQUAL "SHARED_LIBRARY")
+  if(_target_type STREQUAL "SHARED_LIBRARY"
+      OR (_always_generate_lib_export_header AND _target_type MATCHES "LIBRARY"))
     opendds_get_target_export_header(${target} _export_header)
 
     if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
