@@ -319,7 +319,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
     iter += iov[i].iov_len;
   }
-  const ssize_t result = socket.send(buffer, iter - buffer, addr);
+  const ssize_t result = socket.send(buffer, iter - buffer, addr.to_addr());
 #else
   const ssize_t result = socket.send(iov, n, addr.to_addr());
 #endif
