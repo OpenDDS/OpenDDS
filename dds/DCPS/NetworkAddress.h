@@ -24,7 +24,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class NetworkAddress {
+class OpenDDS_Dcps_Export NetworkAddress {
 public:
   NetworkAddress();
   NetworkAddress(const NetworkAddress& addr);
