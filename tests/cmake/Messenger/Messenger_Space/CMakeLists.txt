@@ -15,7 +15,7 @@ find_package(OpenDDS REQUIRED)
 if (NOT OPENDDS_OWNERSHIP_PROFILE)
   message(FATAL_ERROR "This test requires OpenDDS to be built with Ownership Profile enabled")
 endif()
-if (CMAKE_GENERATOR STREQUAL "Visual Studio 10 2010")
+if (CMAKE_GENERATOR STREQUAL "Visual Studio 10 2010 Win64")
   message(FATAL_ERROR "This test does not support Visual Studio 2010")
 endif()
 
