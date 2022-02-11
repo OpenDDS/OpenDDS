@@ -1530,8 +1530,8 @@ sub win32_cmake_generator {
              'vc12' => 'Visual Studio 12 2013',
              'vc14' => 'Visual Studio 14 2015',
              'vs2017' => 'Visual Studio 15 2017',
-             'vs2019' => 'Visual Studio 16 2019'),
-             'vs2022' => 'Visual Studio 22 2022';
+             'vs2019' => 'Visual Studio 16 2019',
+             'vs2022' => 'Visual Studio 22 2022');
 
   die "ERROR: Unsupported Visual Studio version '$ver' supplied.\nStopped"
     if ! exists $map{$ver};
