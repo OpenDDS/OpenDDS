@@ -1110,7 +1110,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setLocalAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  NetworkAddress addr(jsm_val.c_str());
+  OpenDDS::DCPS::NetworkAddress addr(jsm_val.c_str());
   inst->local_address(addr);
 }
 
@@ -1144,7 +1144,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setMulticastGroupAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  NetworkAddress addr(jsm_val.c_str());
+  OpenDDS::DCPS::NetworkAddress addr(jsm_val.c_str());
   inst->multicast_group_address(addr);
 }
 
