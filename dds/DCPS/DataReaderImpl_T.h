@@ -86,7 +86,7 @@ namespace OpenDDS {
       ACE_New_Allocator* allocator_;
     };
 
-    typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageTypeMemoryBlock, ACE_Null_Mutex>  DataAllocator;
+    typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageTypeMemoryBlock, ACE_Thread_Mutex>  DataAllocator;
 
     typedef typename TraitsType::DataReaderType Interface;
 
