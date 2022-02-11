@@ -3,6 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DCPS/DdsDcps_pch.h"
+
 #include <DCPS/NetworkAddress.h>
 
 #include <DCPS/Hash.h>
@@ -62,6 +64,20 @@ NetworkAddress::NetworkAddress(uint16_t port, const char* str)
 {
   *this = ACE_INET_Addr(port, str);
 }
+
+#if defined (ACE_HAS_WCHAR)
+
+NetworkAddress::NetworkAddress(const wchar_t* str)
+{
+  *this = ACE_INET_Addr(str);
+}
+
+NetworkAddress::NetworkAddress(uint16_t port, const wchar_t* str)
+{
+  *this = ACE_INET_Addr(port, str);
+}
+
+#endif
 
 NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr)
 {

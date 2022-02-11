@@ -32,6 +32,11 @@ public:
   explicit NetworkAddress(const char*);
   NetworkAddress(uint16_t port, const char*);
 
+#if defined (ACE_HAS_WCHAR)
+  explicit NetworkAddress(const wchar_t*);
+  NetworkAddress(uint16_t port, const wchar_t*);
+#endif
+
   explicit NetworkAddress(const ACE_INET_Addr& addr);
 
   NetworkAddress& operator=(const NetworkAddress& rhs);
