@@ -1265,7 +1265,7 @@ bool RtpsDiscovery::remove_domain_participant(
   // Use reference counting to ensure participant
   // does not get deleted until lock as been released.
   ParticipantHandle participant;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, participants_lock_, false);
   DomainParticipantMap::iterator domain = participants_.find(domain_id);
   if (domain == participants_.end()) {
     return false;
