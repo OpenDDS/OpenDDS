@@ -190,7 +190,7 @@ bool NetworkAddress::is_loopback() const
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
     // RFC 3330 defines loopback as any address with 127.x.x.x
-    return (inet_addr_.in4_.sin_addr.s_addr & 0xFF000000) == (INADDR_LOOPBACK & 0XFF000000);
+    return (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFF000000) == (INADDR_LOOPBACK & 0XFF000000);
 #if defined (ACE_HAS_IPV6)
   } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
     return IN6_IS_ADDR_LOOPBACK(&inet_addr_.in6_.sin6_addr);
@@ -203,9 +203,9 @@ bool NetworkAddress::is_private() const
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
     // private address classes are10.x.x.x/8
-    return ((inet_addr_.in4_.sin_addr.s_addr & 0xFF000000) == 0x0A000000 ||
-            (inet_addr_.in4_.sin_addr.s_addr & 0xFFF00000) == 0xAC100000 ||
-            (inet_addr_.in4_.sin_addr.s_addr & 0xFFFF0000) == 0xC0A80000);
+    return ((ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFF000000) == 0x0A000000 ||
+            (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFFF00000) == 0xAC100000 ||
+            (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFFFF0000) == 0xC0A80000);
   }
   return false;
 }
@@ -214,7 +214,7 @@ bool NetworkAddress::is_uniquelocal() const
 {
 #if defined (ACE_HAS_IPV6)
   if (inet_addr_.in6_.sin6_family == AF_INET6) {
-    return inet_addr_.in6_.sin6_addr.s6_addr[0] == 0xFD;
+    return (inet_addr_.in6_.sin6_addr.s6_addr[0] & 0xFE) == 0xFC;
   }
 #endif
   return false;
