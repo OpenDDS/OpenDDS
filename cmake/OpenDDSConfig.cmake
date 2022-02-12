@@ -288,9 +288,12 @@ set(OPENDDS_UDP_DEPS
   OpenDDS::Dcps
 )
 
-set(_dds_lib_hints  ${OPENDDS_LIB_DIR})
-set(_ace_lib_hints  ${ACE_LIB_DIR})
-set(_tao_lib_hints  ${TAO_LIB_DIR})
+foreach(_lib ${_opendds_libs})
+  string(TOUPPER ${_lib} _lib)
+  if(NOT DEFINED "${_lib}_DEPS")
+    message(FATAL_ERROR "OpenDDS lib ${_lib} is missing a dependency list!")
+  endif()
+endforeach()
 
 macro(opendds_vs_force_static)
   # See https://gitlab.kitware.com/cmake/community/wikis/FAQ#dynamic-replace
@@ -303,47 +306,57 @@ macro(opendds_vs_force_static)
   endforeach()
 endmacro()
 
-set(_suffix_RELEASE "")
-set(_suffix_DEBUG d)
-
 if(MSVC AND OPENDDS_STATIC)
   opendds_vs_force_static()
-
-  set(_suffix_RELEASE s${_suffix_RELEASE})
-  set(_suffix_DEBUG s${_suffix_DEBUG})
 endif()
 
-foreach(_cfg  RELEASE  DEBUG)
-  set(_sfx ${_suffix_${_cfg}})
+function(opendds_find_our_libraries_for_config config suffix)
+  if(MSVC AND OPENDDS_STATIC)
+    set(suffix "s${suffix}")
+  endif()
 
-  foreach(_lib ${_ace_libs})
-    string(TOUPPER ${_lib} _LIB_VAR)
+  macro(find_library_group lib_group_name libs)
+    set(lib_dir "${${lib_group_name}_LIB_DIR}")
 
-    find_library(${_LIB_VAR}_LIBRARY_${_cfg}
-      ${_lib}${_sfx}
-      HINTS ${_ace_lib_hints}
-    )
-  endforeach()
+    foreach(lib ${libs})
+      set(lib_file_base "${lib}${suffix}")
+      string(TOUPPER ${lib} var_prefix)
+      set(lib_var "${var_prefix}_LIBRARY_${config}")
 
-  foreach(_lib ${_tao_libs})
-    string(TOUPPER ${_lib} _LIB_VAR)
+      find_library(${lib_var} "${lib_file_base}" HINTS "${lib_dir}")
+      set(${lib_var} "${${lib_var}}" PARENT_SCOPE)
+      set(found_var "${var_prefix}_LIBRARY_FOUND")
+      if(${lib_var})
+        set(${found_var} TRUE PARENT_SCOPE)
+      elseif(NOT DEFINED ${found_var})
+        set(${found_var} FALSE PARENT_SCOPE)
+      endif()
 
-    find_library(${_LIB_VAR}_LIBRARY_${_cfg}
-      ${_lib}${_sfx}
-      HINTS ${_tao_lib_hints}
-    )
-  endforeach()
+      if(MSVC AND NOT OPENDDS_STATIC)
+        # find_library finds the ".lib" file on Windows, but if OpenDDS is
+        # static we also need the ".dll" file.
+        unset(dll)
+        find_file(dll "${lib_file_base}.dll" HINTS "${lib_dir}")
+        if(dll)
+          set("${lib_var}_DLL" "${dll}" PARENT_SCOPE)
+        endif()
+      endif()
+    endforeach()
+  endmacro()
 
-  foreach(_lib ${_opendds_libs})
-    string(TOUPPER ${_lib} _LIB_VAR)
+  find_library_group("ACE" "${_ace_libs}")
+  find_library_group("TAO" "${_tao_libs}")
+  find_library_group("OPENDDS" "${_opendds_libs}")
+endfunction()
 
-    find_library(${_LIB_VAR}_LIBRARY_${_cfg}
-      ${_lib}${_sfx}
-      HINTS ${_dds_lib_hints}
-    )
-  endforeach()
-
-endforeach()
+if(MSVC)
+  opendds_find_our_libraries_for_config("RELEASE" "")
+  opendds_find_our_libraries_for_config("DEBUG" "d")
+elseif(OPENDDS_DEBUG)
+  opendds_find_our_libraries_for_config("DEBUG" "")
+else()
+  opendds_find_our_libraries_for_config("RELEASE" "")
+endif()
 
 include(SelectLibraryConfigurations)
 
@@ -397,53 +410,112 @@ macro(_OPENDDS_ADD_TARGET_BINARY  target  path)
   endif()
 endmacro()
 
-macro(_OPENDDS_ADD_TARGET_LIB target var_prefix include_dirs)
-  set(_debug_lib "${${var_prefix}_LIBRARY_DEBUG}")
-  set(_release_lib "${${var_prefix}_LIBRARY_RELEASE}")
-  set(_deps "${${var_prefix}_DEPS}")
+function(opendds_add_library_group lib_group_name libs has_mononym)
+  string(TOUPPER ${lib_group_name} lib_group_var_prefix)
 
-  if (NOT TARGET ${target} AND
-      (EXISTS "${_debug_lib}" OR EXISTS "${_release_lib}"))
+  macro(add_target_library_config target var_prefix config)
+    set(lib_var "${var_prefix}_LIBRARY_${config}")
+    set(lib_file "${${lib_var}}")
+    if(EXISTS "${lib_file}")
+      set_property(TARGET ${target}
+        APPEND PROPERTY
+        IMPORTED_CONFIGURATIONS ${config}
+      )
+      set_target_properties(${target}
+        PROPERTIES
+          "IMPORTED_LINK_INTERFACE_LANGUAGES_${config}" "CXX"
+      )
+      set(imploc "${lib_file}")
+      if(MSVC)
+        set_target_properties(${target}
+          PROPERTIES
+            "IMPORTED_IMPLIB_${config}" "${lib_file}"
+        )
+        set(dll "${lib_var}_DLL")
+        if(DEFINED "${dll}")
+          set(imploc "${${dll}}")
+        endif()
+      endif()
+      set_target_properties(${target}
+        PROPERTIES
+          "IMPORTED_LOCATION_${config}" "${imploc}"
+      )
+    endif()
+  endmacro()
 
-    add_library(${target} ${OPENDDS_LIBRARY_TYPE} IMPORTED)
-    set_target_properties(${target}
+  macro(add_target_library target var_prefix include_dirs)
+    if(NOT TARGET ${target} AND ${var_prefix}_LIBRARY_FOUND)
+      add_library(${target} ${OPENDDS_LIBRARY_TYPE} IMPORTED)
+      set_target_properties(${target}
+        PROPERTIES
+          INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}"
+          INTERFACE_LINK_LIBRARIES "${${var_prefix}_DEPS}"
+          INTERFACE_COMPILE_DEFINITIONS "${OPENDDS_DCPS_COMPILE_DEFS}"
+      )
+
+      add_target_library_config(${target} ${var_prefix} "RELEASE")
+      add_target_library_config(${target} ${var_prefix} "DEBUG")
+    endif()
+  endmacro()
+
+  foreach(lib ${libs})
+    string(TOUPPER ${lib} var_prefix)
+
+    if(has_mononym AND lib STREQUAL "${lib_group_name}")
+      set(target "${lib_group_name}::${lib_group_name}")
+    else()
+      string(REPLACE "${lib_group_name}_" "${lib_group_name}::" target "${lib}")
+    endif()
+
+    add_target_library(${target} ${var_prefix} "${${lib_group_var_prefix}_INCLUDE_DIRS}")
+  endforeach()
+endfunction()
+
+if(OPENDDS_FOUND)
+  include("${CMAKE_CURRENT_LIST_DIR}/options.cmake")
+
+  _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
+  _OPENDDS_ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
+  _OPENDDS_ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
+  _OPENDDS_ADD_TARGET_BINARY(perl "${PERL}")
+
+  opendds_add_library_group("ACE" "${_ace_libs}" TRUE)
+  opendds_add_library_group("TAO" "${_tao_libs}" TRUE)
+  opendds_add_library_group("OpenDDS" "${_opendds_libs}" FALSE)
+
+  if(NOT TARGET OpenDDS::OpenDDS)
+    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
+
+    set(_opendds_core_libs
+      OpenDDS::Dcps
+      OpenDDS::Multicast
+      OpenDDS::Rtps
+      OpenDDS::Rtps_Udp
+      OpenDDS::InfoRepoDiscovery
+      OpenDDS::Shmem
+      OpenDDS::Tcp
+      OpenDDS::Udp)
+
+    if(OPENDDS_SECURITY)
+      list(APPEND _opendds_core_libs OpenDDS::Security)
+    endif()
+
+    set_target_properties(OpenDDS::OpenDDS
       PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${include_dirs}"
-        INTERFACE_LINK_LIBRARIES "${_deps}"
-        INTERFACE_COMPILE_DEFINITIONS "${OPENDDS_DCPS_COMPILE_DEFS}"
-    )
+        INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
 
-    if (EXISTS "${_release_lib}")
-      message(STATUS "ADD RELEASE LIB ${target} ${_release_lib}")
-      set_property(TARGET ${target}
-        APPEND PROPERTY
-        IMPORTED_CONFIGURATIONS RELEASE
-      )
-      set_target_properties(${target}
-        PROPERTIES
-          IMPORTED_LINK_INTERFACE_LANGUAGES_RELEASE "CXX"
-          IMPORTED_LOCATION_RELEASE "${_release_lib}"
-          IMPORTED_IMPLIB_RELEASE "${_release_lib}"
-      )
-    endif()
-
-    if (EXISTS "${_debug_lib}")
-      message(STATUS "ADD DEBUG LIB ${target} ${_debug_lib}")
-      set_property(TARGET ${target}
-        APPEND PROPERTY
-        IMPORTED_CONFIGURATIONS DEBUG
-      )
-      set_target_properties(${target}
-        PROPERTIES
-          IMPORTED_LINK_INTERFACE_LANGUAGES_DEBUG "CXX"
-          IMPORTED_LOCATION_DEBUG "${_debug_lib}"
-          IMPORTED_IMPLIB_DEBUG "${_debug_lib}"
-      )
-    endif()
-
-    list(APPEND OPENDDS_LIBRARIES ${target})
   endif()
-endmacro()
+
+  include(${CMAKE_CURRENT_LIST_DIR}/api_macros.cmake)
+
+  if(OPENDDS_CMAKE_VERBOSE)
+    message(STATUS "Loaded OpenDDS targets:")
+    foreach(_target ${OPENDDS_LIBRARIES})
+      get_target_property(_target_location ${_target} LOCATION)
+      message(STATUS "${_target} -> ${_target_location}")
+    endforeach()
+  endif()
+endif()
 
 function(opendds_get_library_var_prefix scoped_name var_prefix_var)
   if(scoped_name STREQUAL "ACE::ACE")
@@ -480,81 +552,3 @@ function(opendds_get_library_dependencies deps_var lib)
   list(REMOVE_DUPLICATES deps)
   set(${deps_var} "${deps}" PARENT_SCOPE)
 endfunction()
-
-if(OPENDDS_FOUND)
-  include("${CMAKE_CURRENT_LIST_DIR}/options.cmake")
-
-  _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
-  _OPENDDS_ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
-  _OPENDDS_ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
-  _OPENDDS_ADD_TARGET_BINARY(perl "${PERL}")
-
-  foreach(_lib ${_ace_libs})
-    string(TOUPPER ${_lib} _VAR_PREFIX)
-
-    if("${_lib}" STREQUAL "ACE")
-      set(_target "ACE::ACE")
-    else()
-      string(REPLACE "ACE_" "ACE::" _target ${_lib})
-    endif()
-
-    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${ACE_INCLUDE_DIR}")
-  endforeach()
-
-  foreach(_lib ${_tao_libs})
-    string(TOUPPER ${_lib} _VAR_PREFIX)
-
-    if("${_lib}" STREQUAL "TAO")
-      set(_target "TAO::TAO")
-    else()
-      string(REPLACE "TAO_" "TAO::" _target ${_lib})
-    endif()
-
-    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${TAO_INCLUDE_DIRS}")
-  endforeach()
-
-  foreach(_lib ${_opendds_libs})
-    string(TOUPPER ${_lib} _VAR_PREFIX)
-    string(REPLACE "OpenDDS_" "OpenDDS::" _target ${_lib})
-
-    if(NOT DEFINED "${_VAR_PREFIX}_DEPS")
-      message(FATAL_ERROR "OpenDDS lib ${_lib} is missing a dependency list! (${_VAR_PREFIX}_DEPS)")
-    endif()
-
-    _OPENDDS_ADD_TARGET_LIB(${_target} ${_VAR_PREFIX} "${OPENDDS_INCLUDE_DIR}")
-
-  endforeach()
-
-  if(NOT TARGET OpenDDS::OpenDDS)
-    add_library(OpenDDS::OpenDDS INTERFACE IMPORTED)
-
-    set(_opendds_core_libs
-      OpenDDS::Dcps
-      OpenDDS::Multicast
-      OpenDDS::Rtps
-      OpenDDS::Rtps_Udp
-      OpenDDS::InfoRepoDiscovery
-      OpenDDS::Shmem
-      OpenDDS::Tcp
-      OpenDDS::Udp)
-
-    if(OPENDDS_SECURITY)
-      list(APPEND _opendds_core_libs OpenDDS::Security)
-    endif()
-
-    set_target_properties(OpenDDS::OpenDDS
-      PROPERTIES
-        INTERFACE_LINK_LIBRARIES "${_opendds_core_libs}")
-
-  endif()
-
-  include(${CMAKE_CURRENT_LIST_DIR}/api_macros.cmake)
-
-  if(OPENDDS_CMAKE_VERBOSE)
-    message(STATUS "Loaded OpenDDS targets:")
-    foreach(_target ${OPENDDS_LIBRARIES})
-      get_target_property(_target_location ${_target} LOCATION)
-      message(STATUS "${_target} -> ${_target_location}")
-    endforeach()
-  endif()
-endif()

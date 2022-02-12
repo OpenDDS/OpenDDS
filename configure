@@ -2487,8 +2487,18 @@ sub write_cmake_file {
         feature => 'versioned_namespace',
       },
       {
-        name => 'suppress_anys',
+        name => 'SUPPRESS_ANYS',
         feature => 'dds_suppress_anys',
+        default => 1,
+      },
+      {
+        name => 'STATIC',
+        feature => 'static',
+        default => 0,
+      },
+      {
+        name => 'DEBUG',
+        feature => 'debug',
         default => 1,
       },
     );
@@ -2524,7 +2534,6 @@ sub write_cmake_file {
 
     my %disabled_by_default = map {$_, 0} qw(
       security
-      static
     );
 
     my %ignore = map {$_, 0} qw(
@@ -2541,6 +2550,8 @@ sub write_cmake_file {
       ace
       tao
       mpc
+      static
+      debug
     );
 
     # Merge the hashes together; the user-supplied %opts will override
