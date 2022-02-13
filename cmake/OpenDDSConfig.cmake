@@ -332,8 +332,9 @@ function(opendds_find_our_libraries_for_config config suffix)
       endif()
 
       if(MSVC AND NOT OPENDDS_STATIC)
-        # find_library finds the ".lib" file on Windows, but if OpenDDS is
-        # static we also need the ".dll" file.
+        # find_library finds the ".lib" file on Windows, but if OpenDDS is not
+        # static we also need the ".dll" file for IMPORTED_LOCATION and
+        # IMPORTED_RUNTIME_ARTIFACTS to work correctly.
         find_file("${lib_var}_DLL" "${lib_file_base}.dll" HINTS "${lib_dir}")
       endif()
     endforeach()

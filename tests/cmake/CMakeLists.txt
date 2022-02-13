@@ -16,7 +16,6 @@ if (OPENDDS_QT AND OPENDDS_CXX11)
     "../../examples/DCPS/ishapes"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")
 endif()
-add_subdirectory(install)
 
 if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   if(OPENDDS_OWNERSHIP_PROFILE)
@@ -30,3 +29,6 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   endif()
   add_subdirectory(Nested_IDL)
 endif()
+
+add_subdirectory(include_subdir)
+add_subdirectory(install)

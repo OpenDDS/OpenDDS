@@ -23,7 +23,6 @@ which simplifies IDL compilation.
     * [Windows](#windows)
     * [Example Using Installed OpenDDS (Unix only)](#example-using-installed-opendds-unix-only)
 * [Adding IDL Sources with `OPENDDS_TARGET_SOURCES`](#adding-idl-sources-with-opendds_target_sources)
-  * [Usage Summary](#usage-summary)
   * [Example](#example)
 * [Advanced Usage](#advanced-usage)
   * [Manually Creating config.cmake](#manually-creating-configcmake)
@@ -50,7 +49,7 @@ However, to run the Messenger examples, version 3.8.2 or greater is required
 ### Developer's Guide Messenger Example
 
 For a simple quick-start example of an `CMakeLists.txt` using OpenDDS see the
-[Developer's Guide Messenger example]
+[Developer's Guide Messenger example].
 
 ### Advanced Examples
 
@@ -116,7 +115,7 @@ using CMake 3.12 or later).
 Consult the `find_package` documentation for your CMake version for all the
 details on how CMake could find OpenDDS.
 [Here](https://cmake.org/cmake/help/latest/command/find_package.html#config-mode-search-procedure)
-is documentation for the latest version of CMake
+is the documentation for the latest version of CMake
 
 ### Cache Variables/Options Understood by OpenDDS
 
@@ -129,6 +128,7 @@ the OpenDDS CMake package.
 | `OPENDDS_DEFAULT_NESTED`         | [Topic types must be declared explicitly.](#opendds_default_nested)          | `ON`      |
 | `OPENDDS_FILENAME_ONLY_INCLUDES` | [No directory info in generated #includes.](#opendds_filename_only_includes) | `OFF`     |
 | `OPENDDS_DEFAULT_SCOPE`          | Default scope of unscoped files in `OPENDDS_TARGET_SOURCES`                  | `PRIVATE` |
+| `OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER` | Default for `ALWAYS_GENERATE_LIB_EXPORT_HEADER` in `OPENDDS_TARGET_SOURCES` | `OFF`|
 
 ### Libraries
 
@@ -201,62 +201,65 @@ specified directory. See the [INSTALL.md](../INSTALL.md) document for details.
 OPENDDS_PREFIX="$PWD/opendds-install"
 DDS_ROOT="$PWD/OpenDDS"
 ACE_ROOT="$DDS_ROOT/ACE_wrappers"
+export PERL5LIB="$DDS_ROOT/bin:$ACE_ROOT/bin"
 cd OpenDDS
 ./configure --prefix="$OPENDDS_PREFIX"
-make
+make -j $(getconf _NPROCESSORS_ONLN)
 make install
 cd DevGuideExamples/DCPS/Messenger
 mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH="$OPENDDS_PREFIX" ..
 cmake --build .
-LD_LIBRARY_PATH="$OPENDDS_PREFIX/lib:$LD_LIBRARY_PATH" PERL5LIB="$DDS_ROOT/bin:$ACE_ROOT/bin" perl run_test.pl
+LD_LIBRARY_PATH="$OPENDDS_PREFIX/lib:$LD_LIBRARY_PATH" perl run_test.pl
 ```
 
 ## Adding IDL Sources with `OPENDDS_TARGET_SOURCES`
 
 Aside from importing the various OpenDDS targets, the OpenDDS Config Package
 provides an easy way to add IDL sources to CMake targets. This is achieved by
-the `OPENDDS_TARGET_SOURCES` macro, which behaves similarly to the
-built-in [`target_sources`](https://cmake.org/cmake/help/latest/command/target_sources.html)
-command except for the following:
+the `OPENDDS_TARGET_SOURCES` macro, which was inspired by the built-in
+`target_sources`:
 
-  - Items are IDL sources instead of C/C++ sources.
-  - The scope-qualifier (`PUBLIC`, `PRIVATE`, `INTERFACE`) is not required.
-    When it is omitted, `OPENDDS_DEFAULT_SCOPE` is used, which is `PRIVATE` by
-    default.
-  - Command-line options can be supplied to the TAO/OpenDDS IDL compilers
-    using `TAO_IDL_OPTIONS` and/or `OPENDDS_IDL_OPTIONS` (if the default
-    behavior is not suitable).
-    - Add `OPENDDS_IDL_OPTIONS -Lc++11` to use the C++11 IDL Mapping.
-  - An option is available to force creation of typecodes by using
-    `SUPPRESS_ANYS OFF`.  This value will overrule the one received from
-    config.cmake `OPENDDS_SUPPRESS_ANYS`.
+```
+OPENDDS_TARGET_SOURCES(<target>
+  [<idl file>...]
+  [INTERFACE|PUBLIC|PRIVATE <idl file>...]...
+  [TAO_IDL_OPTIONS <option>...]
+  [OPENDDS_IDL_OPTIONS <option>...]
+  [SUPPRESS_ANYS ON|OFF]
+  [ALWAYS_GENERATE_LIB_EXPORT_HEADER ON|OFF]
+)
+```
 
-When IDL sources are supplied, custom commands are generated which will
-be invoked to compile the IDL sources into their component cpp/h files.
+`<idl file>...` are IDL files that can be absolute or relative to
+`CMAKE_CURRENT_SOURCE_DIR`. Each one will generate code using `tao_idl` and
+`opendds_idl` that is added to the target. C/C++ items can also be accepted and
+added to the target, but passing non-IDL sources was deprecated in OpenDDS
+3.15. The scope-qualifier (`PUBLIC`, `PRIVATE`, `INTERFACE`) sets the scope of
+the generated files. When it is omitted, `OPENDDS_DEFAULT_SCOPE` is used, which
+is `PRIVATE` by default.
 
-**NOTE:** C/C++ items can also be accepted and added to the target, but passing
-non-IDL sources was deprecated in OpenDDS 3.15.
+Command-line options can be supplied to the TAO/OpenDDS IDL compilers using
+`TAO_IDL_OPTIONS` and/or `OPENDDS_IDL_OPTIONS` (if the default behavior is not
+suitable). Add `OPENDDS_IDL_OPTIONS -Lc++11` to use the C++11 IDL Mapping.
+
+An option is available to force creation of typecodes by using `SUPPRESS_ANYS
+OFF`. This value will overrule the one received from config.cmake
+`OPENDDS_SUPPRESS_ANYS`.
 
 If the passed-in target is a shared library, a custom command will also be
 added to generate the required IDL export header file (`TARGET_export.h`),
 which is necessary to properly export symbols for the IDL-Generated sources.
+The `ALWAYS_GENERATE_LIB_EXPORT_HEADER` argument forces this to be true for all
+libraries types. This is only really useful if the target is a library that
+uses the export header itself and also needs to be built as a static library as
+well. This way the export library can be included unconditionally. The default
+for this is set by the `OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER`, which
+defaults to `OFF`.
 
 See ["`OPENDDS_TARGET_SOURCES` Target Properties"](#opendds_target_sources-target-properties)
-for the target properties that are set on the property.
-
-### Usage Summary
-
-```
-OPENDDS_TARGET_SOURCES(target
-  [items...]
-  [<INTERFACE|PUBLIC|PRIVATE> items...]
-  [TAO_IDL_OPTIONS options...]
-  [OPENDDS_IDL_OPTIONS options...]
-  [SUPPRESS_ANYS ON|OFF]
-)
-```
+for the target properties that are set on the target.
 
 ### Example
 
@@ -297,8 +300,8 @@ that require the IDL. Additionally if the library is a shared library,
 executables can share that file and this reduces the size of the executable
 files.
 
-*Note:* This may issue a warning in earlier versions of CMake due to the messenger library
-not having any sources added with it in the call to `add_library`.
+*Note:* CMake version 3.10 and below will issue a harmless warning if
+`add_library` is called without any sources.
 
 ## Advanced Usage
 
@@ -360,7 +363,7 @@ The following values impact the build in one way or another.
 
 `OPENDDS_INLINE` should be explicitly set to `ON` or `OFF` (based on the ACE `platform_macros.GNU` variable `inline`) in `config.cmake` unless you will only be using a CMake Microsoft Visual Studio Generator.
 
-[Developer's Guide Messenger example](../DevGuideExamples/DCPS/Messenger/CMakeLists.txt).
+[Developer's Guide Messenger example]: ../DevGuideExamples/DCPS/Messenger/CMakeLists.txt
 [Messenger with direct IDL inclusion]: ../tests/cmake/Messenger/Messenger_1/CMakeLists.txt
 [Messenger with auxiliary IDL library]: ../tests/cmake/Messenger/Messenger_2/CMakeLists.txt
 [OpenDDS Dev Guide]: http://opendds.org/documents/
@@ -435,8 +438,8 @@ that were passed in the files generated based on those.
 
 Some things to note about these:
 - All paths are absolute.
-- All the generated files will somewhere within the
-  `OPENDDS_GENERATED_DIRECTORY` of the target.
+- All the generated files will be somewhere within the path from the
+  `OPENDDS_GENERATED_DIRECTORY` target property of the target.
 - All the properties have the `INTERFACE` in their name, but this includes
   `PUBLIC` scoped files as `PUBLIC` implies `INTERFACE` in CMake. `PRIVATE`
   scoped files are excluded from these lists as they shouldn't have a use
@@ -444,8 +447,8 @@ Some things to note about these:
 - These properties are not exported with the target because the those paths may
   not be valid any more if the build directory has been removed or the export
   is being used on another machine.
-- As passing non-IDL files passed to `OPENDDS_TARGET_SOURCES` is deprecated,
-  those files don't show up in these lists even if they are given `PUBLIC` or
+- As passing non-IDL files to `OPENDDS_TARGET_SOURCES` is deprecated, those
+  files don't show up in these lists even if they are given `PUBLIC` or
   `INTERFACE` scope.
 
 The properties are:
@@ -454,7 +457,8 @@ The properties are:
   - The `PUBLIC` and `INTERFACE` scoped IDL files passed to
     `OPENDDS_TARGET_SOURCES`.
 - `OPENDDS_GENERATED_IDL_INTERFACE_FILES`
-  - The IDL generated from the IDL in `OPENDDS_PASSED_IDL_INTERFACE_FILES`.
+  - The IDL generated from the IDL files in
+    `OPENDDS_PASSED_IDL_INTERFACE_FILES`.
 - `OPENDDS_ALL_IDL_INTERFACE_FILES`
   - Combination of `OPENDDS_PASSED_IDL_INTERFACE_FILES` and
     `OPENDDS_GENERATED_IDL_INTERFACE_FILES`.
@@ -480,6 +484,17 @@ OpenDDS, ACE, and TAO in CMake along side the application using
 This will just install shared libraries, not any development dependencies like
 `opendds_idl` or static libraries.
 
+A function called `opendds_get_library_dependencies` is provided to help find
+out what libraries need to be installed:
+
+```
+opendds_get_library_dependencies(<output_list_var_name> <lib>...)
+```
+
+`<lib>...` are the [libraries](#libraries) as individual arguments or lists.
+The result will contain all targets passed and their OpenDDS, ACE, and TAO
+dependencies. The result is put in a list named by `output_list_var_name`.
+
 See the [install Test] for an example of using this.
 
 #### Installing Generated Interface Files
@@ -489,11 +504,11 @@ It is possible to install files from
 for downstream projects to use. See the [install Test] for an example of
 installing these files. It uses
 [`install(FILES)`](https://cmake.org/cmake/help/latest/command/install.html#files),
-but there's not any restriction on what installation method can be used. For
-example, one could set the
+but there isn't any restriction on what installation method can be used. For
+example, the
 [`PUBLIC_HEADER`](https://cmake.org/cmake/help/latest/prop_tgt/PUBLIC_HEADER.html#prop_tgt:PUBLIC_HEADER)
-target property on the target to the desired files from the interface files
-lists and then install those using
+target property could be set on target to the desired files from the interface
+lists. Then they installed using
 [`install(TARGETS ... PUBLIC_HEADER ...)`](https://cmake.org/cmake/help/latest/command/install.html#installing-targets).
 
 [install Test]: ../tests/cmake/install/library/CMakeLists.txt
