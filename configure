@@ -2491,15 +2491,6 @@ sub write_cmake_file {
         feature => 'dds_suppress_anys',
         default => 1,
       },
-      {
-        name => 'STATIC',
-        feature => 'static_libs_only',
-      },
-      {
-        name => 'DEBUG',
-        feature => 'debug',
-        default => 1,
-      },
     );
     my %features = get_features($buildEnv);
     for my $config (@configs) {
@@ -2520,37 +2511,49 @@ sub write_cmake_file {
     # These flags only appear in the %opts map when specified by the user.
     my %enabled_by_default = map {$_, 1} qw(
       built-in-topics
-      content-subscription
       content-filtered-topic
-      multi-topic
-      query-condition
-      ownership-profile
-      ownership-kind-exclusive
-      object-model-profile
-      persistence-profile
+      content-subscription
+      debug
       inline
+      multi-topic
+      object-model-profile
+      ownership-kind-exclusive
+      ownership-profile
+      persistence-profile
+      query-condition
     );
 
     my %disabled_by_default = map {$_, 0} qw(
+      ipv6
       security
+      static
     );
 
     my %ignore = map {$_, 0} qw(
-      backup
-      solution_file
-      ipv6
-      safety-profile
-      no-opendds-safety-profile
-      target
-      host
-      tests
-      cmake
-      verbose
       ace
-      tao
+      ace-github-latest
+      backup
+      cmake
+      doc-group
+      doc-group3
+      doc_group
+      doc_group3
+      dry-run
+      force-ace-tao
+      host
+      host-ace
+      host-tools
+      host-tools-only
       mpc
-      static
-      debug
+      no-opendds-safety-profile
+      optimize
+      safety-profile
+      solution_file
+      tao
+      target
+      tests
+      verbose
+      workspace
     );
 
     # Merge the hashes together; the user-supplied %opts will override
