@@ -45,7 +45,7 @@ public:
   static GuardCondition_ptr _narrow(CORBA::Object_ptr obj);
 
 private:
-  CORBA::Boolean trigger_value_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, CORBA::Boolean> trigger_value_;
 };
 
 } // namespace DDS
