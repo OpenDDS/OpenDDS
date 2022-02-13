@@ -324,7 +324,6 @@ function(opendds_find_our_libraries_for_config config suffix)
       set(lib_var "${var_prefix}_LIBRARY_${config}")
 
       find_library(${lib_var} "${lib_file_base}" HINTS "${lib_dir}")
-      set(${lib_var} "${${lib_var}}" PARENT_SCOPE)
       set(found_var "${var_prefix}_LIBRARY_FOUND")
       if(${lib_var})
         set(${found_var} TRUE PARENT_SCOPE)
@@ -335,11 +334,7 @@ function(opendds_find_our_libraries_for_config config suffix)
       if(MSVC AND NOT OPENDDS_STATIC)
         # find_library finds the ".lib" file on Windows, but if OpenDDS is
         # static we also need the ".dll" file.
-        unset(dll)
-        find_file(dll "${lib_file_base}.dll" HINTS "${lib_dir}")
-        if(dll)
-          set("${lib_var}_DLL" "${dll}" PARENT_SCOPE)
-        endif()
+        find_file("${lib_var}_DLL" "${lib_file_base}.dll" HINTS "${lib_dir}")
       endif()
     endforeach()
   endmacro()
@@ -421,10 +416,6 @@ function(opendds_add_library_group lib_group_name libs has_mononym)
         APPEND PROPERTY
         IMPORTED_CONFIGURATIONS ${config}
       )
-      set_target_properties(${target}
-        PROPERTIES
-          "IMPORTED_LINK_INTERFACE_LANGUAGES_${config}" "CXX"
-      )
       set(imploc "${lib_file}")
       if(MSVC)
         set_target_properties(${target}
@@ -438,6 +429,7 @@ function(opendds_add_library_group lib_group_name libs has_mononym)
       endif()
       set_target_properties(${target}
         PROPERTIES
+          "IMPORTED_LINK_INTERFACE_LANGUAGES_${config}" "CXX"
           "IMPORTED_LOCATION_${config}" "${imploc}"
       )
     endif()

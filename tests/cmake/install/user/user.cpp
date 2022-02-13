@@ -6,7 +6,7 @@
 #  endif
 #endif
 
-int main(int argc, const char* argv[])
+int main(int argc, char* argv[])
 {
   MovingObject earth = {0};
   earth.acc.x = 2.5;

@@ -2493,8 +2493,7 @@ sub write_cmake_file {
       },
       {
         name => 'STATIC',
-        feature => 'static',
-        default => 0,
+        feature => 'static_libs_only',
       },
       {
         name => 'DEBUG',
