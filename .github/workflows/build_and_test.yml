@@ -9131,22 +9131,22 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
-    - name: setup gtest
-      shell: cmd
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -A x86 ..
-        cmake --build . --target install
+#    - name: setup gtest
+#      shell: cmd
+#      run: |
+#        cd OpenDDS/tests/googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -A x86 ..
+#        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY"
+        configure --tests --gtest="$GITHUB_WORKSPACE\OpenDDS\tests\googletest" --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY"
     - name: check build configuration
       shell: cmd
       run: |
