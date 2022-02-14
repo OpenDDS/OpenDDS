@@ -8,130 +8,120 @@
 #ifndef OPENDDS_DCPS_INTERNAL_DATA_WRITER_H
 #define OPENDDS_DCPS_INTERNAL_DATA_WRITER_H
 
-#include "InternalDataReader.h"
+#include "TimeTypes.h"
+#include "RcObject.h"
+#include "DurabilityService.h"
+#include "dds/DdsDcpsInfrastructureC.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
+template <class Sample> class InternalTopic;
+template <class Sample> class InternalDataReader;
+
 template<typename Sample>
 class InternalDataWriter : public RcObject {
 public:
+  typedef RcHandle<InternalTopic<Sample> > InternalTopicPtr;
   typedef RcHandle<InternalDataWriter> InternalDataWriterPtr;
-  typedef InternalDataReader<Sample> InternalDataReader;
-  typedef RcHandle<InternalDataReader> InternalDataReaderPtr;
+  typedef RcHandle<InternalDataReader<Sample> > InternalDataReaderPtr;
 
-  InternalDataWriter(DDS::InstanceHandle_t publication_handle,
-                     size_t depth)
-    : publication_handle_(publication_handle)
+  InternalDataWriter(InternalTopicPtr topic,
+                     DDS::InstanceHandle_t publication_handle,
+                     const DDS::DataWriterQos& qos)
+    : topic_(topic)
+    , publication_handle_(publication_handle)
+    , qos_(qos)
   {
-    durability_sink_ = make_rch<InternalDataReaderType>(depth);
-    sinks_.insert(durability_sink_);
+    switch (qos_.durability.kind) {
+    case DDS::VOLATILE_DURABILITY_QOS:
+      durability_service_ = make_rch<VolatileDurabilityService<Sample> >();
+      break;
+    case DDS::TRANSIENT_LOCAL_DURABILITY_QOS:
+      durability_service_ = make_rch<TransientLocalDurabilityService<Sample> >();
+      break;
+    case DDS::TRANSIENT_DURABILITY_QOS:
+      durability_service_ = make_rch<TransientDurabilityService<Sample> >();
+      break;
+    case DDS::PERSISTENT_DURABILITY_QOS:
+      durability_service_ = make_rch<PersistentDurabilityService<Sample> >();
+      break;
+    }
+    OPENDDS_ASSERT(durability_service_);
   }
 
   DDS::InstanceHandle_t get_publication_handle() const { return publication_handle_; }
 
+  void add_reader(InternalDataReaderPtr reader)
+  {
+    durability_service_->add_reader(reader, publication_handle_);
+  }
+
   void register_instance(const Sample& sample, const DDS::Time_t& source_timestamp)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    for (typename InternalDataReaders::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
-      InternalDataReaderPtr sink = *pos;
-      sink->register_instance(sample, source_timestamp, get_publication_handle());
-    }
-    process_updates();
+    durability_service_->register_instance(publication_handle_, sample, source_timestamp);
+    topic_->register_instance(sample, source_timestamp, get_publication_handle());
   }
 
   void write(const Sample& sample, const DDS::Time_t& source_timestamp)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    for (typename InternalDataReaders::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
-      InternalDataReaderPtr sink = *pos;
-      sink->write(sample, source_timestamp, get_publication_handle());
-    }
-    process_updates();
+    durability_service_->store(sample, source_timestamp);
+    topic_->store(sample, source_timestamp, get_publication_handle());
   }
 
   void unregister_instance(const Sample& sample, const DDS::Time_t& source_timestamp)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    for (typename InternalDataReaders::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
-      InternalDataReaderPtr sink = *pos;
-      sink->unregister_instance(sample, source_timestamp, get_publication_handle());
-    }
-    process_updates();
+    durability_service_->unregister_instance(publication_handle_, sample, source_timestamp);
+    topic_->unregister_instance(sample, source_timestamp, get_publication_handle());
   }
 
   void dispose_instance(const Sample& sample, const DDS::Time_t& source_timestamp)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    for (typename InternalDataReaders::const_iterator pos = sinks_.begin(), limit = sinks_.end(); pos != limit; ++pos) {
-      InternalDataReaderPtr sink = *pos;
-      sink->dispose_instance(sample, source_timestamp, get_publication_handle());
-    }
-    process_updates();
-  }
-
-  void connect(InternalDataReaderPtr sink)
-  {
-    {
-      ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
-      to_insert_.insert(sink);
-      to_erase_.erase(sink);
-    }
-    if (mutex_.tryacquire() == 0) {
-      process_updates();
-      mutex_.release();
-    }
-  }
-
-  void disconnect(InternalDataReaderPtr sink)
-  {
-    {
-      ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
-      to_erase_.insert(sink);
-      to_insert_.erase(sink);
-    }
-    if (mutex_.tryacquire() == 0) {
-      process_updates();
-      mutex_.release();
-    }
+    durability_service_->dispose_instance(publication_handle_, sample, source_timestamp);
+    topic_->dispose_instance(sample, source_timestamp, get_publication_handle());
   }
 
 private:
-  typedef std::set<InternalDataReaderPtr> InternalDataReaders;
-  mutable ACE_Thread_Mutex update_mutex_; // Second in locking order.
-  InternalDataReaders to_insert_;
-  InternalDataReaders to_erase_;
-  mutable ACE_Thread_Mutex mutex_; // First in locking order.
-  InternalDataReaders sinks_;
-  InternalDataReaderPtr durability_sink_;
+  InternalTopicPtr topic_;
+  RcHandle<DurabilityService<Sample> > durability_service_;
   const DDS::InstanceHandle_t publication_handle_;
-
-  void process_updates()
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, update_mutex_);
-    for (typename InternalDataReaders::const_iterator pos = to_erase_.begin(), limit = to_erase_.end(); pos != limit; ++pos) {
-      InternalDataReaderPtr sink = *pos;
-
-      SampleList sample_list;
-      DDS::SampleInfoSeq sample_info_list;
-      DDS::InstanceHandle_t instance_handle = 0;
-      while (durability_sink_->read_next_instance(sample_list, sample_info_list, 1, instance_handle, DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE)) {
-        sink->unregister_instance(sample_list[0], source_timestamp, get_publication_handle());
-        instance_handle = sample_info_list[0].instance_handle;
-      }
-
-      sinks_.erase(sink);
-    }
-    sinks_.insert(to_insert_.begin(), to_insert_.end());
-    for (typename InternalDataReaders::const_iterator pos = to_insert_.begin(), limit = to_insert_.end(); pos != limit; ++pos) {
-      (*pos)->initialize(*durability_sink_);
-    }
-    to_erase_.clear();
-    to_insert_.clear();
-  }
+  const DDS::DataWriterQos qos_;
 };
+
+void assign_default_internal_data_writer_qos(DDS::DataWriterQos& qos)
+{
+  const DDS::Duration_t zero = { DDS::DURATION_ZERO_SEC, DDS::DURATION_ZERO_NSEC };
+  const DDS::Duration_t infinity = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+  qos.durability.kind = DDS::VOLATILE_DURABILITY_QOS;
+  qos.durability_service.service_cleanup_delay = zero;
+  qos.durability_service.history_kind = DDS::KEEP_LAST_HISTORY_QOS;
+  qos.durability_service.history_depth = 1;
+  qos.durability_service.max_samples = DDS::LENGTH_UNLIMITED;
+  qos.durability_service.max_instances = DDS::LENGTH_UNLIMITED;
+  qos.durability_service.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
+  qos.deadline.period = infinity;
+  qos.latency_budget.duration = zero;
+  qos.liveliness.kind = DDS::AUTOMATIC_LIVELINESS_QOS;
+  qos.liveliness.lease_duration = infinity;
+  qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+  qos.reliability.max_blocking_time = { 0, 100000000 }; // 100ms
+  qos.destination_order.kind = DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS;
+  qos.history.kind = DDS::KEEP_LAST_HISTORY_QOS;
+  qos.history.depth = 1;
+  qos.resource_limits.max_samples = DDS::LENGTH_UNLIMITED;
+  qos.resource_limits.max_instances = DDS::LENGTH_UNLIMITED;
+  qos.resource_limits.max_samples_per_instance = DDS::LENGTH_UNLIMITED;
+  qos.transport_priority.value = 0;
+  qos.lifespan.duration = infinity;
+  //qos.user_data;
+  qos.ownership.kind = DDS::SHARED_OWNERSHIP_QOS;
+  qos.ownership_strength.value = 0;
+  qos.writer_data_lifecycle.autodispose_unregistered_instances = true;
+  //qos.representation;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -5,15 +5,21 @@ project(*DataSampleHeader): dcps_test, googletest {
   }
 }
 
-project(InternalDataReader): dcps_test {
+project(InternalDataReader): dcps_test, googletest {
   Source_Files {
     InternalDataReader.cpp
   }
 }
 
-project(InternalDataWriter): dcps_test {
+project(InternalDataWriter): dcps_test, googletest {
   Source_Files {
     InternalDataWriter.cpp
+  }
+}
+
+project(InternalTopic): dcps_test, googletest {
+  Source_Files {
+    InternalTopic.cpp
   }
 }
 
@@ -30,7 +36,7 @@ project(*SafetyProfilePool) : dcps, opendds_face, dcps_test {
   }
 }
 
-project(SampleCache): dcps_test {
+project(SampleCache): dcps_test, googletest {
   Source_Files {
     SampleCache.cpp
   }

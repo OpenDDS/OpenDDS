@@ -1,5 +1,6 @@
 /InternalDataReader
 /InternalDataWriter
+/InternalTopic
 /JobQueue
 /SafetyProfilePoolTest
 /SampleCache

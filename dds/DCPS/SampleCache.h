@@ -12,6 +12,7 @@
 
 #include "RcObject.h"
 #include "Util.h"
+#include "Time_Helper.h"
 
 #include <list>
 #include <set>
@@ -20,20 +21,15 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace DDS {
-  const SampleStateKind NO_SAMPLE_STATE = 0;
 
-  bool operator==(const DDS::Time_t& x, const DDS::Time_t& y)
-  {
-    return x.sec == y.sec &&
-      x.nanosec == y.nanosec;
-  }
+  const SampleStateKind NO_SAMPLE_STATE = 0;
 
   bool operator==(const DDS::SampleInfo& x, const DDS::SampleInfo& y)
   {
     return x.sample_state == y.sample_state &&
       x.view_state == y.view_state &&
       x.instance_state == y.instance_state &&
-      x.source_timestamp == y.source_timestamp &&
+      OpenDDS::DCPS::operator==(x.source_timestamp, y.source_timestamp) &&
       x.instance_handle == y.instance_handle &&
       x.publication_handle == y.publication_handle &&
       x.disposed_generation_count == y.disposed_generation_count &&
@@ -75,33 +71,270 @@ DDS::SampleInfo make_sample_info(DDS::SampleStateKind sample_state,
   si.generation_rank = generation_rank;
   si.absolute_generation_rank = absolute_generation_rank;
   si.valid_data = valid_data;
+  si.opendds_reserved_publication_seq = 0;
   return si;
 }
 
-struct SampleCacheState {
+template<typename Key, typename Sample = Key>
+class SampleCache {
+private:
+    class ConstSampleIterator;
+
+public:
+  SampleCache()
+  {}
+
+  void register_instance(DDS::InstanceHandle_t publication_handle, const Key& key, const DDS::Time_t& /*source_timestamp*/)
+  {
+    typename InstanceMap::const_iterator pos = instance_map_.find(key);
+    if (pos == instance_map_.end()) {
+      Instance* instance = new Instance();
+      instance->publication_handles_.insert(publication_handle);
+      instance_map_.insert(pos, std::make_pair(key, instance));
+      insert(instance);
+    } else {
+      Instance* instance = pos->second;
+      instance->publication_handles_.insert(publication_handle);
+      if (instance->instance_state_ != DDS::ALIVE_INSTANCE_STATE) {
+        erase(instance);
+        instance->view_state_ = DDS::NEW_VIEW_STATE;
+        insert(instance);
+      }
+    }
+  }
+
+  size_t instance_count() const
+  {
+    return instance_map_.size();
+  }
+
+  bool instance_state(const Key& key, DDS::ViewStateKind& view_state,
+                      DDS::InstanceStateKind& instance_state) const
+  {
+    typename InstanceMap::const_iterator pos = instance_map_.find(key);
+    if (pos != instance_map_.end()) {
+      view_state = pos->second->view_state_;
+      instance_state = pos->second->instance_state_;
+      return true;
+    }
+
+    return false;
+  }
+
+  void store(const Sample& sample, const DDS::Time_t& source_timestamp)
+  {
+    // TODO
+
+    // TODO: Enforce resource limits.
+
+    // Element* element;
+    // if (free_) {
+    //   element = free_;
+    //   free_ = free_->next_;
+    //   element->next_ = 0;
+    // } else {
+    //   element = new Element;
+    // }
+    // element->payload_.sample = sample;
+    // element->payload_.source_timestamp = source_timestamp;
+
+    // element->prev_ = *tail_;
+    // tail_ = &element->next_;
+  }
+
+  void unregister_instance(DDS::InstanceHandle_t publication_handle, const Key& key, const DDS::Time_t& source_timestamp)
+  {
+    typename InstanceMap::const_iterator pos = instance_map_.find(key);
+    if (pos != instance_map_.end()) {
+      Instance* instance = pos->second;
+      const bool alive = instance->instance_state_ == DDS::ALIVE_INSTANCE_STATE;
+      if (instance->publication_handles_.erase(publication_handle) &&
+          instance->publication_handles_.empty() &&
+          alive) {
+        erase(instance);
+        instance->instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+        insert(instance);
+      }
+    }
+  }
+
+  void dispose_instance(DDS::InstanceHandle_t publication_handle, const Key& key, const DDS::Time_t& source_timestamp)
+  {
+    typename InstanceMap::const_iterator pos = instance_map_.find(key);
+    if (pos != instance_map_.end()) {
+      Instance* instance = pos->second;
+      // Sanity check.
+      if (instance->publication_handles_.count(publication_handle)) {
+        const bool disposed = instance->instance_state_ == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+        if (!disposed) {
+          erase(instance);
+          instance->instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+          insert(instance);
+        }
+      }
+    }
+  }
+
+  typedef ConstSampleIterator const_sample_iterator;
+
+  const_sample_iterator sample_begin() const
+  {
+    return ConstSampleIterator(global_elements_.head_);
+  }
+
+  const_sample_iterator sample_end() const
+  {
+    return ConstSampleIterator(0);
+  }
+
+private:
+  struct Instance;
+
+  struct Payload {
+    Sample sample;
+    DDS::Time_t source_timestamp;
+  };
+
+  struct Element {
+    Payload payload_;
+    Element* global_prev_;
+    Element* global_next_;
+    Element* instance_prev_;
+    Element* instance_next_;
+    Instance* instance_;
+
+    Element()
+      : prev_(0)
+      , next_(0)
+      , instance_prev_(0)
+      , instance_next_(0)
+      , instance_(0)
+    {}
+  };
+
+  struct ElementList {
+    Element* head_;
+    Element** tail_;
+
+    ElementList()
+      : head_(0)
+      , tail_(&head_)
+    {}
+  };
+
+  struct Instance {
+    Instance* prev_;
+    Instance* next_;
+
+    ElementList not_read_;
+    ElementList read_;
+
+    DDS::ViewStateKind view_state_;
+    DDS::InstanceStateKind instance_state_;
+    typedef std::set<DDS::InstanceHandle_t> PublicationHandleSet;
+    PublicationHandleSet publication_handles_;
+
+    Instance()
+      : prev_(0)
+      , next_(0)
+      , view_state_(DDS::NEW_VIEW_STATE)
+      , instance_state_(DDS::ALIVE_INSTANCE_STATE)
+    {}
+  };
+
+  struct InstanceList {
+    Instance* head_;
+    Instance** tail_;
+
+    InstanceList()
+      : head_(0)
+      , tail_(&head_)
+    {}
+  };
+
+  class ConstSampleIterator {
+  public:
+    ConstSampleIterator(Element* element)
+      : element_(element)
+    {}
+
+    ConstSampleIterator& operator++()
+    {
+      element_ = element_->global_next_;
+      return *this;
+    }
+
+    bool operator!=(const ConstSampleIterator& other) const
+    {
+      return element_ != other.element_;
+    }
+
+    const Payload& operator*()
+    {
+      return element_->payload_;
+    }
+
+    const Payload* operator->()
+    {
+      return &element_->payload_;
+    }
+
+  private:
+    Element* element_;
+  };
+
+  void insert(Instance* instance)
+  {
+    // TODO
+  }
+
+  void erase(Instance* instance)
+  {
+    // TODO
+  }
+
+  Element* free_elements_; // A singly linked list of free elements through the next_ member.
+  ElementList global_elements_;
+  typedef std::map<Key, Instance*> InstanceMap;
+  InstanceMap instance_map_;
+  InstanceList not_read_new_alive_;
+  InstanceList not_read_new_not_alive_no_writers_;
+  InstanceList not_read_new_not_alive_disposed_;
+  InstanceList not_read_not_new_alive_;
+  InstanceList not_read_not_new_not_alive_no_writers_;
+  InstanceList not_read_not_new_not_alive_disposed_;
+  InstanceList read_new_alive_;
+  InstanceList read_new_not_alive_no_writers_;
+  InstanceList read_new_not_alive_disposed_;
+  InstanceList read_not_new_alive_;
+  InstanceList read_not_new_not_alive_no_writers_;
+  InstanceList read_not_new_not_alive_disposed_;
+};
+
+struct SampleCache2State {
   DDS::SampleStateKind sample_state;
   DDS::ViewStateKind view_state;
   DDS::InstanceStateKind instance_state;
 
-  SampleCacheState(DDS::SampleStateKind a_sample_state,
-                   DDS::ViewStateKind a_view_state,
-                   DDS::InstanceStateKind a_instance_state)
+  SampleCache2State(DDS::SampleStateKind a_sample_state,
+                    DDS::ViewStateKind a_view_state,
+                    DDS::InstanceStateKind a_instance_state)
     : sample_state(a_sample_state)
     , view_state(a_view_state)
     , instance_state(a_instance_state)
   {}
 
-  bool operator==(const SampleCacheState& other) const
+  bool operator==(const SampleCache2State& other) const
   {
     return sample_state == other.sample_state && view_state == other.view_state && instance_state == other.instance_state;
   }
 
-  bool operator!=(const SampleCacheState& other) const
+  bool operator!=(const SampleCache2State& other) const
   {
     return !(*this == other);
   }
 
-  bool operator<(const SampleCacheState& other) const
+  bool operator<(const SampleCache2State& other) const
   {
     if (sample_state != other.sample_state) {
       return sample_state > other.sample_state;
@@ -115,12 +348,12 @@ struct SampleCacheState {
 
 // A collection of samples belonging to the same instance.
 template<typename Sample>
-class SampleCache : public RcObject {
+class SampleCache2 : public RcObject {
 public:
   typedef std::vector<Sample> SampleList;
-  typedef RcHandle<SampleCache> SampleCachePtr;
+  typedef RcHandle<SampleCache2> SampleCache2Ptr;
 
-  SampleCache(DDS::InstanceHandle_t instance_handle)
+  SampleCache2(DDS::InstanceHandle_t instance_handle)
     : instance_handle_(instance_handle)
     , view_state_(DDS::NEW_VIEW_STATE)
     , instance_state_(DDS::ALIVE_INSTANCE_STATE)
@@ -129,7 +362,7 @@ public:
     , no_writers_generation_count_(0)
   { }
 
-  void initialize(const SampleCache& other)
+  void initialize(const SampleCache2& other)
   {
     // All of the samples are new.
     new_samples_.insert(new_samples_.end(), other.not_new_samples_.begin(), other.not_new_samples_.end());
@@ -173,7 +406,7 @@ public:
     }
   }
 
-  void write(const Sample& sample, const DDS::Time_t& source_timestamp, const DDS::InstanceHandle_t publication_handle)
+  void store(const Sample& sample, const DDS::Time_t& source_timestamp, const DDS::InstanceHandle_t publication_handle)
   {
     register_instance(sample, source_timestamp, publication_handle);
     new_samples_.push_back(Element(sample, disposed_generation_count_, no_writers_generation_count_, source_timestamp, publication_handle));
@@ -345,12 +578,12 @@ public:
   size_t new_size() const { return new_samples_.size(); }
   size_t writer_count() const { return publication_handles_.size(); }
 
-  SampleCacheState state() const
+  SampleCache2State state() const
   {
     const int sample_state =
       ((instance_element_state_ == NOT_READ || !new_samples_.empty()) ? DDS::NOT_READ_SAMPLE_STATE : 0) |
       ((instance_element_state_ == READ || !not_new_samples_.empty()) ? DDS::READ_SAMPLE_STATE : 0);
-    return SampleCacheState(sample_state, view_state_, instance_state_);
+    return SampleCache2State(sample_state, view_state_, instance_state_);
   }
 
 private:
