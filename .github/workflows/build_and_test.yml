@@ -8447,7 +8447,7 @@ jobs:
     - name: checkout Wireshark
       shell: cmd
       run: |
-        git clone -q -b release-3.4 --depth=1 https://gitlab.com/wireshark/wireshark.git
+        git clone -q -b release-3.6 --depth=1 https://gitlab.com/wireshark/wireshark.git
         cd wireshark
         for /f %%x in ('git rev-parse HEAD') do @echo WIRESHARK_COMMIT=%%x>> %GITHUB_ENV%
     - name: get compiler version
@@ -8476,6 +8476,7 @@ jobs:
       with:
         repository: lexxmark/winflexbison
         path: winflexbison
+        ref: v2.5.24
     - name: set up msvc env
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
@@ -8488,7 +8489,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
-        echo WIRESHARK_LIB_DIR=%CD%\wireshark-win64-libs-3.4>> %GITHUB_ENV%
+        echo WIRESHARK_LIB_DIR=%CD%\wireshark-win64-libs-3.6>> %GITHUB_ENV%
         echo QT5_BASE_DIR=${{ steps.runvcpkg.outputs.RUNVCPKG_VCPKG_ROOT_OUT }}\installed\x64-windows>> %GITHUB_ENV%
         type %GITHUB_ENV%
     - name: build Wireshark
@@ -8498,14 +8499,14 @@ jobs:
         cmakeListsTxtPath: wireshark/CMakeLists.txt
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
         buildDirectory: ${{ github.workspace }}/wsbuild
-        cmakeAppendedArgs: '-GNinja -DLEX_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_flex.exe -DYACC_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_bison.exe'
+        cmakeAppendedArgs: '-GNinja -DLEX_EXECUTABLE=${{ github.workspace }}\winflexbison\bin\Debug\win_flex.exe'
         buildWithCMakeArgs: '-t epan'
     - name: create Wireshark artifact
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         find -iname "*\.obj" -delete
-        tar cvhf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.4
+        tar cvhf ${{ github.job }}.tar wireshark wsbuild wireshark-win64-libs-3.6
         xz -3 ${{ github.job }}.tar
     - name: upload Wireshark artifact
       uses: actions/upload-artifact@v2
@@ -8661,7 +8662,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --optimize --java --no-built-in-topics --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --wireshark-cmake=%GITHUB_WORKSPACE%\wireshark --wireshark-build=%GITHUB_WORKSPACE%\wsbuild --wireshark-lib=run --glib=%GITHUB_WORKSPACE%\wireshark-win64-libs-3.4\vcpkg-export-20190318-win64ws\installed\x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --optimize --java --no-built-in-topics --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --wireshark-cmake=%GITHUB_WORKSPACE%\wireshark --wireshark-build=%GITHUB_WORKSPACE%\wsbuild --wireshark-lib=run --glib=%GITHUB_WORKSPACE%\wireshark-win64-libs-3.6\vcpkg-export-20210609-1-win64ws\installed\x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: check build configuration
       shell: cmd
       run: |
