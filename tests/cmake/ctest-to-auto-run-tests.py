@@ -90,7 +90,7 @@ def dump_ctest_info(cmake, build_path):
     # This uses the scripts cmake sets up for ctest to run to get the CMakeList
     # files for the tests.
 
-    lines = subprocess.check_output([cmake, '-P', py_source_dir / 'dump_ctest_info.cmake'],
+    lines = subprocess.check_output([cmake, '-P', str(py_source_dir / 'dump_ctest_info.cmake')],
         cwd=str(build_path)).decode('utf-8').splitlines()
     tests = {}
     stack = []
