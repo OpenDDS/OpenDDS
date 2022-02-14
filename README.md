@@ -54,12 +54,28 @@ Other documentation can be found in [`docs` directory](docs).
 
 ## Support
 
-If you encounter any problems with this release please fill out the
-[PROBLEM-REPORT-FORM](PROBLEM-REPORT-FORM) file found in this directory and use
-it when posting to the [mailing list](http://opendds.org/support.html) or
-creating a [GitHub Issue](https://github.com/objectcomputing/OpenDDS/issues).
+For commercial support, please see https://opendds.org/support.html.
 
-For commercial support please see https://opendds.org/support.html.
+Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/objectcomputing/OpenDDS/discussions) or the [mailing list](http://opendds.org/support.html).
+
+If you wish to file a bug report:
+
+1. [Fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo) OpenDDS on GitHub.
+2. Add a [minimum working example](#mwe) that demonstrates the problem.
+3. Create a pull request.
+4. Fill out the [PROBLEM-REPORT-FORM](PROBLEM-REPORT-FORM) and attach it to the pull request.
+
+### <a id="mwe">How to make a minimum working example</a>
+
+1. Create a directory `tests/DCPS/MyExample` (`MyExample` is a placeholder.)
+2. Add the IDL, code, and configuration files for the example programs.  Be sure to exclude any proprietary information as the submitted example will be public.
+3. Add an MPC file that builds the test programs.
+4. Add a launcher script `run_test.pl`.  Be sure to document the options.  See `tests/DCPS/HelloWorld/run_test.pl` for inspiration.
+5. Add a `README.rst` file that gives a high-level overview of the example and the problem that it illustrates.
+
+It should be possible to build and run the example using `run_test.pl` as in the quickstarts for [Windows](https://opendds.org/quickstart/GettingStartedWindows.html) and [Linux](https://opendds.org/quickstart/GettingStartedLinux.html).
+If the problem lies in the example, then GitHub's Pull Request interface will allow people to discuss, comment on, and propose changes to get the example working.
+If the problem lies in OpenDDS, then the example is a new test case.
 
 ## Features
 
