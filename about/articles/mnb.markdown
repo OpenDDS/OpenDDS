@@ -6,7 +6,9 @@ categories: [opendds]
 ---
 OCI publishes Middleware News Brief and SETT (Software Engineering Tech Trends) articles on a number of topics.  The following are related to OpenDDS:
 
+- [Converting a Restful Webservice to OpenDDS](https://objectcomputing.com/resources/publications/mnb/2022/01/25/converting-restful-webservice-data-centric-publish-subscribe)
 - [Using Wireshark to Monitor and Debug OpenDDS Systems](https://objectcomputing.com/resources/publications/sett/october-2021-wireshark-and-opendds)
+- [Logging Samples as JSON in OpenDDS Applications](https://objectcomputing.com/resources/publications/mnb/2021/06/09/logging-samples-json-opendds-apps)
 - [Using OpenDDS in a .NET Application with OpenDDSharp](https://objectcomputing.com/resources/publications/sett/october-2020-opendds-in-a-net-application-with-openddsharp)
 - [OMG DDS For Extremely Resource-Constrained Environments (DDS-XRCE)](https://objectcomputing.com/resources/publications/sett/october-2019-dds-for-extremely-resource-constrained-environments)
 - [Interoperable Internet-Enabled DDS Applications](https://objectcomputing.com/resources/publications/mnb/interoperable-internet-enabled-dds-applications)
