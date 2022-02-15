@@ -159,6 +159,12 @@ TEST(dds_DCPS_NetworkAddress, OperatorsIpFour)
   EXPECT_LT(sa2, sa3);
   EXPECT_LT(sa2, sa4);
   EXPECT_LT(sa3, sa4);
+
+  EXPECT_TRUE(sa1.addr_bytes_equal(sa3));
+  EXPECT_TRUE(sa2.addr_bytes_equal(sa4));
+
+  EXPECT_FALSE(sa1.addr_bytes_equal(sa2));
+  EXPECT_FALSE(sa3.addr_bytes_equal(sa4));
 }
 
 #if defined (ACE_HAS_IPV6)
@@ -202,6 +208,15 @@ TEST(dds_DCPS_NetworkAddress, OperatorsIpSix)
   EXPECT_LT(sa3, sa4);
   EXPECT_LT(sa3, sa5);
   EXPECT_LT(sa4, sa5);
+
+  EXPECT_TRUE(sa2.addr_bytes_equal(sa4));
+  EXPECT_TRUE(sa3.addr_bytes_equal(sa5));
+
+  EXPECT_FALSE(sa2.addr_bytes_equal(sa3));
+  EXPECT_FALSE(sa4.addr_bytes_equal(sa5));
+
+  EXPECT_FALSE(sa1.addr_bytes_equal(sa2));
+  EXPECT_FALSE(sa3.addr_bytes_equal(sa1));
 }
 
 #endif
