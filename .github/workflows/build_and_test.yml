@@ -9146,7 +9146,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --gtest="$GITHUB_WORKSPACE\OpenDDS\tests\googletest\build\install" --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY"
+        configure --tests --gtest="%GITHUB_WORKSPACE%\OpenDDS\tests\googletest\build\install" --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY"
     - name: check build configuration
       shell: cmd
       run: |
@@ -9531,7 +9531,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_w22_p1_stat_js0:
+  ACE_TAO_w22_p1_js0:
 
     runs-on: windows-2022
 
@@ -9585,7 +9585,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --tests --ipv6 --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9612,11 +9612,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w22_p1_stat_js0:
+  build_w22_p1_js0:
 
     runs-on: windows-2022
 
-    needs: ACE_TAO_w22_p1_stat_js0
+    needs: ACE_TAO_w22_p1_js0
 
     steps:
     - name: install openssl & xerces-c
@@ -9644,14 +9644,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w22_p1_stat_js0_artifact
+        name: ACE_TAO_w22_p1_js0_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1_stat_js0.tar.xz
-        rm -f ACE_TAO_w22_p1_stat_js0.tar.xz
+        tar xvfJ ACE_TAO_w22_p1_js0.tar.xz
+        rm -f ACE_TAO_w22_p1_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
@@ -9669,7 +9669,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --static --no-rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --tests --ipv6 --no-rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -9697,6 +9697,10 @@ jobs:
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
+
+#  test_w22_p1_js0:
+
+#    runs-on: windows-2022
 
   # macOS 11.0
 
