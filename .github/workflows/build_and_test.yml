@@ -1316,7 +1316,7 @@ jobs:
           --std=c++11 \
           --no-inline \
           --features=uses_wchar=1 \
-          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\)
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security
     - name: build ACE and TAO
@@ -1392,7 +1392,7 @@ jobs:
           --std=c++11 \
           --no-inline \
           --features=uses_wchar=1 \
-          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\)
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --tests \
           --security \
           --rapidjson
