@@ -9131,22 +9131,22 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
-    - name: setup gtest
-      shell: cmd
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -A Win32 ..
-        cmake --build . --target install
+#    - name: setup gtest
+#      shell: cmd
+#      run: |
+#        cd OpenDDS/tests/googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -A Win32 ..
+#        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --gtest="%GITHUB_WORKSPACE%\OpenDDS\tests\googletest\build\install" --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY"
+        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY"
     - name: check build configuration
       shell: cmd
       run: |
@@ -9167,7 +9167,7 @@ jobs:
         call setenv.cmd
         mkdir tests\cmake\build
         cd tests\cmake\build
-        cmake ..
+        cmake -A Win32 ..
         cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -9246,17 +9246,17 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_sec.tar.xz
         rm -f build_w22_x86_i0_sec.tar.xz
-    - name: setup gtest
-      shell: cmd
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -A x86 ..
-        cmake --build . --target install
+#    - name: setup gtest
+#      shell: cmd
+#      run: |
+#        cd OpenDDS/tests/googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -A Win32 ..
+#        cmake --build . --target install
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -9292,7 +9292,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W16 --security"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -9392,7 +9392,7 @@ jobs:
         call setenv.cmd
         mkdir tests\cmake\build
         cd tests\cmake\build
-        cmake ..
+        cmake -A Win32 ..
         cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -9654,17 +9654,17 @@ jobs:
         rm -f ACE_TAO_w22_p1_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - name: setup gtest
-      shell: cmd
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-        cmake --build . --target install
+#    - name: setup gtest
+#      shell: cmd
+#      run: |
+#        cd OpenDDS/tests/googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install -A Win32 ..
+#        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
@@ -9682,7 +9682,7 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        msbuild -p:Configuration=Debug,Platform=x64 -m DDS_no_tests.sln
+        msbuild -p:Configuration=Debug,Platform=x64 -m DDS.sln
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
