@@ -132,7 +132,7 @@ sub print_help {
     print
         "    --cmake                  Run CMake Tests\n" .
         "                             Not included by default\n" .
-        "    --cmake-cmd              CMake command that is used internally\n" .
+        "    --cmake-cmd <cmd>        CMake command that is used internally\n" .
         "                             Tests still have to be built before hand\n" .
         "                             Default is `cmake`\n" .
         "    --cmake-build-dir <path> Path to the CMake tests binary directory\n" .
