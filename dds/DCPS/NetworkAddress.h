@@ -47,10 +47,13 @@ public:
 
   bool operator<(const NetworkAddress& rhs) const;
 
+  bool addr_bytes_equal(const NetworkAddress& rhs) const;
+
   ACE_INET_Addr to_addr() const;
   void to_addr(ACE_INET_Addr&) const;
 
   int16_t get_type() const;
+  void set_type(int16_t type);
 
   uint16_t get_port_number() const;
   void set_port_number(uint16_t port);

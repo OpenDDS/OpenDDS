@@ -134,6 +134,18 @@ bool NetworkAddress::operator<(const NetworkAddress& rhs) const
   return memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) < 0;
 }
 
+bool NetworkAddress::addr_bytes_equal(const NetworkAddress& rhs) const
+{
+  if (inet_addr_.in4_.sin_family == AF_INET) {
+    return memcmp(&inet_addr_.in4_.sin_addr, &rhs.inet_addr_.in4_.sin_addr, sizeof (inet_addr_.in4_.sin_addr)) == 0;
+#if defined (ACE_HAS_IPV6)
+  } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
+    return memcmp(&inet_addr_.in6_.sin6_addr, &rhs.inet_addr_.in6_.sin6_addr, sizeof (inet_addr_.in6_.sin6_addr)) == 0;
+#endif
+  }
+  return 0;
+}
+
 ACE_INET_Addr NetworkAddress::to_addr() const
 {
   ACE_INET_Addr result;
@@ -149,6 +161,11 @@ void NetworkAddress::to_addr(ACE_INET_Addr& addr) const
 int16_t NetworkAddress::get_type() const
 {
   return static_cast<int16_t>(inet_addr_.in4_.sin_family);
+}
+
+void NetworkAddress::set_type(int16_t type)
+{
+  inet_addr_.in4_.sin_family = type;
 }
 
 uint16_t NetworkAddress::get_port_number() const

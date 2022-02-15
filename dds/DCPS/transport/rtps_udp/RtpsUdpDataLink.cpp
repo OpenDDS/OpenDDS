@@ -1684,11 +1684,13 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddr
     ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
     const RemoteInfoMap::iterator pos = locators_.find(src);
     if (pos != locators_.end()) {
-      const bool allow_update = allow_addr_update(src, pos->second.last_recv_addr_, addr);
+      const MonotonicTimePoint now = MonotonicTimePoint::now();
+      const bool expired = config().receive_address_duration_ < (MonotonicTimePoint::now() - pos->second.last_recv_time_);
+      const bool allow_update = expired || allow_addr_update(src, pos->second.last_recv_addr_, addr);
       if (allow_update) {
         remove_cache = pos->second.last_recv_addr_ != addr;
         pos->second.last_recv_addr_ = addr;
-        pos->second.last_recv_time_ = MonotonicTimePoint::now();
+        pos->second.last_recv_time_ = now;
       }
     }
   }
@@ -4665,12 +4667,16 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
   if (last_recv_addr_ == NetworkAddress()) {
     return false;
   }
-  NetworkAddress recv_no_port(last_recv_addr_);
-  recv_no_port.set_port_number(0);
-  const AddrSet::const_iterator it = unicast_addrs_.lower_bound(NetworkAddress(recv_no_port));
-  if (it != unicast_addrs_.end() && *it == last_recv_addr_) {
-    aset.insert(last_recv_addr_);
-    return true;
+  const uint16_t last_addr_type = last_recv_addr_.get_type();
+  NetworkAddress limit;
+  limit.set_type(last_recv_addr_.get_type());
+  AddrSet::const_iterator it = unicast_addrs_.lower_bound(limit);
+  while (it != unicast_addrs_.end() && it->get_type() == last_addr_type) {
+    if (it->addr_bytes_equal(last_recv_addr_)) {
+      aset.insert(*it);
+      return true;
+    }
+    ++it;
   }
   return false;
 }
