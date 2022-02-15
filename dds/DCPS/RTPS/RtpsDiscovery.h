@@ -1078,20 +1078,27 @@ public:
                                                     const GUID_t& partId) const;
 
 private:
+
+  // This mutex only protects the participants map
+  mutable ACE_Thread_Mutex participants_lock_;
+
+  DomainParticipantMap participants_;
+
   ParticipantHandle get_part(const DDS::DomainId_t domain_id, const GUID_t& part_id) const;
+
+  // This mutex protects everything else
+  mutable ACE_Thread_Mutex lock_;
+
+  RtpsDiscoveryConfig_rch config_;
+
+  RtpsDiscoveryConfig_rch get_config() const;
+
+  /// Guids will be unique within this RTPS configuration
+  GuidGenerator guid_gen_;
 
   void create_bit_dr(DDS::TopicDescription_ptr topic, const char* type,
                      DCPS::SubscriberImpl* sub,
                      const DDS::DataReaderQos& qos);
-
-  mutable ACE_Thread_Mutex lock_;
-
-  DomainParticipantMap participants_;
-
-  RtpsDiscoveryConfig_rch config_;
-
-  /// Guids will be unique within this RTPS configuration
-  GuidGenerator guid_gen_;
 
 public:
   class Config : public Discovery::Config {

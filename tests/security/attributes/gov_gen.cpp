@@ -100,7 +100,7 @@ const std::string single_indent = "  ";
 
 const std::string prefix =
                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-               "<dds xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_governance.xsd\">\n"
+               "<dds xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"http://www.omg.org/spec/DDS-SECURITY/20170901/omg_shared_ca_governance.xsd\">\n"
                "  <domain_access_rules>\n"
                "    <domain_rule>\n"
                "      <domains>\n"
@@ -376,7 +376,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     key = PEM_read_bio_PrivateKey(filebuf, NULL, NULL, NULL);
     if (!key) {
-      std::cerr << "ERROR: could not key " << certpath << std::endl;
+      std::cerr << "ERROR: could not key " << keypath << std::endl;
       return EXIT_FAILURE;
     }
 

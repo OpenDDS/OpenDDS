@@ -8,7 +8,7 @@
 class Square : public Shape {
 public:
     Square(const QRect& bounds,
-           shared_ptr<ShapeDynamics> dynamics,
+           std::shared_ptr<ShapeDynamics> dynamics,
            const QPen& pen,
            const QBrush& brush,
            bool targeted = false);
@@ -23,7 +23,7 @@ private:
     Square& operator=(const Square&);
 
 private:
-    shared_ptr<ShapeDynamics> dynamics_;
+    std::shared_ptr<ShapeDynamics> dynamics_;
 
 };
 

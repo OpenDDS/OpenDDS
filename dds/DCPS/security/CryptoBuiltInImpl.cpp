@@ -17,6 +17,7 @@
 #include "dds/DCPS/GuidUtils.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/Serializer.h"
+#include "dds/DCPS/Util.h"
 
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
@@ -134,14 +135,6 @@ namespace {
     return k;
   }
 
-  template <typename T, typename TSeq>
-  void push_back(TSeq& seq, const T& t)
-  {
-    const unsigned int i = seq.length();
-    seq.length(i + 1);
-    seq[i] = t;
-  }
-
   const unsigned submessage_key_index = 0;
 }
 
@@ -169,7 +162,7 @@ ParticipantCryptoHandle CryptoBuiltInImpl::register_local_participant(
   const KeyMaterial key = make_key(h,
     participant_security_attributes.plugin_participant_attributes & PLUGIN_PARTICIPANT_SECURITY_ATTRIBUTES_FLAG_IS_RTPS_ENCRYPTED);
   KeySeq keys;
-  push_back(keys, key);
+  DCPS::push_back(keys, key);
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   keys_[h] = keys;
@@ -334,7 +327,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
   KeySeq keys;
 
   if (is_builtin_volatile(properties)) {
-    push_back(keys, make_volatile_placeholder());
+    DCPS::push_back(keys, make_volatile_placeholder());
 
   } else {
     // See Table 70 "register_local_datawriter" for the use of the key sequence
@@ -342,7 +335,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     bool used_h = false;
     if (security_attributes.is_submessage_protected) {
       const KeyMaterial key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
-      push_back(keys, key);
+      DCPS::push_back(keys, key);
       used_h = true;
       if (security_debug.bookkeeping && !security_debug.showkeys) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datawriter ")
@@ -358,7 +351,7 @@ DatawriterCryptoHandle CryptoBuiltInImpl::register_local_datawriter(
     if (security_attributes.is_payload_protected) {
       const unsigned int key_id = used_h ? generate_handle() : h;
       const KeyMaterial_AES_GCM_GMAC key = make_key(key_id, plugin_attribs & FLAG_IS_PAYLOAD_ENCRYPTED);
-      push_back(keys, key);
+      DCPS::push_back(keys, key);
       if (security_debug.bookkeeping && !security_debug.showkeys) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} CryptoBuiltInImpl::register_local_datawriter ")
           ACE_TEXT("created payload key with id %C for LDWCH %d\n"),
@@ -510,7 +503,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
   KeySeq keys;
 
   if (is_builtin_volatile(properties)) {
-    push_back(keys, make_volatile_placeholder());
+    DCPS::push_back(keys, make_volatile_placeholder());
 
   } else if (security_attributes.is_submessage_protected) {
     const KeyMaterial key = make_key(h, plugin_attribs & FLAG_IS_SUBMESSAGE_ENCRYPTED);
@@ -524,7 +517,7 @@ DatareaderCryptoHandle CryptoBuiltInImpl::register_local_datareader(
         ACE_TEXT("created submessage key for LDRCH %d:\n%C"), h,
         to_dds_string(key).c_str()));
     }
-    push_back(keys, key);
+    DCPS::push_back(keys, key);
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -765,7 +758,7 @@ namespace {
       ACE_Message_Block mb(to_mb(p.value.get_buffer()), size);
       Serializer ser(&mb, common_encoding);
       if (ser << keys[i]) {
-        push_back(tokens, t);
+        DCPS::push_back(tokens, t);
       } else {
         ACE_ERROR((LM_ERROR,
           "(%P|%t) ERROR: keys_to_tokens: Failed to serialize\n"));
@@ -788,7 +781,7 @@ namespace {
             Serializer ser(&mb, common_encoding);
             KeyMaterial_AES_GCM_GMAC key;
             if (ser >> key) {
-              push_back(keys, key);
+              DCPS::push_back(keys, key);
             } else {
               ACE_ERROR((LM_ERROR,
                 "(%P|%t) ERROR: tokens_to_keys: Failed to deserialize\n"));

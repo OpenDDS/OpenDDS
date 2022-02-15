@@ -96,9 +96,9 @@ public:
 
 private:
   void network_change() const;
-  void add_address(const DCPS::NetworkInterface& interface,
+  void add_address(const DCPS::NetworkInterface_rch& interface,
                    const ACE_INET_Addr& address);
-  void remove_address(const DCPS::NetworkInterface& interface,
+  void remove_address(const DCPS::NetworkInterface_rch& interface,
                       const ACE_INET_Addr& address);
   void process_deferred();
 

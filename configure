@@ -232,8 +232,6 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'qt:s', 'Qt5 (use QTDIR or system pkg)',
     'qt-include:s', 'Qt include dir (use QT5_INCDIR, QTDIR/include,' .
       $argIndent . 'or sysytem package)',
-    'boost:s', 'Boost (use BOOST_ROOT or system pkg)',
-    'boost-version:s', 'Boost version (only if needed to find headers)',
     'xerces3:s', 'Xerces-C++ 3 for QoS XML handling, DDS Security',
     'openssl:s', 'OpenSSL for DDS Security',
     'cmake:s', 'Path to cmake binary for compiling Google Test' .
@@ -463,6 +461,10 @@ if (exists($opts{'workspace'})) {
     die "ERROR: workspace file $opts{'workspace'} isn't a readable file, stopped";
   }
   $opts{'workspace'} = Cwd::realpath($opts{'workspace'});
+}
+
+if (exists($opts{'prefix'}) && !File::Spec->file_name_is_absolute($opts{'prefix'})) {
+  die("ERROR: --prefix argument $opts{'prefix'} is not an absolute path, stopped");
 }
 
 # Set initial libpath
@@ -1126,7 +1128,6 @@ my %optdep = (
     mpc => 'no_rapidjson=0',
   },
   'qt' => {env => 'QTDIR', sanity => '', mpc => 'qt5'},
-  'boost' => {env => 'BOOST_ROOT', sanity => 'include/boost/version.hpp', mpc => 'boost'},
   'xerces3' => {
     env => 'XERCESCROOT',
     sanity => 'include/xercesc/dom/DOM.hpp',
@@ -1174,7 +1175,6 @@ if (exists $opts{'java'}) {
 
 my $try_to_use_qt_system_pkg =
   exists $opts{'qt'} && !length($opts{'qt'}) && !exists $opts{'qt-include'};
-$opts{'boost'} = '' if exists $opts{'boost-version'} && !exists $opts{'boost'};
 
 # Default to Wireshark Development Package if installed and a path wasn't
 # supplied.
@@ -1338,10 +1338,9 @@ if (exists $opts{'rapidjson'}) {
   }
 }
 
-my %use_system_pkg = map {$_, 1} qw/ant glib qt boost xerces3 openssl/;
+my %use_system_pkg = map {$_, 1} qw/ant glib qt xerces3 openssl/;
 
 my %use_win_default = (
-    'boost' => 'c:\\Boost',
     'openssl' => system_default_install_dir() . '/OpenSSL',
     'xerces3' => system_default_install_dir() . '/xerces-c');
 
@@ -1452,31 +1451,6 @@ sub env_from_opt {
   my $notdir = shift;
   if ($opts{$key}) {
     setEnv($e, $opts{$key}, $notdir);
-  }
-}
-
-if (exists $opts{'boost'} && !exists $opts{'boost-version'}) {
-  if (!-r $opts{'boost'} . '/' . $optdep{'boost'}->{sanity}
-      && -d $opts{'boost'} . '/include') {
-    opendir DIR, $opts{'boost'} . '/include';
-    my @dirs = sort {$b cmp $a} grep {/boost-/} readdir DIR;
-    closedir DIR;
-    if (scalar @dirs && -r $opts{'boost'} . '/include/' . $dirs[0]
-        . '/boost/version.hpp') {
-      $opts{'boost-version'} = $dirs[0];
-      print "Found boost-version = $dirs[0]\n" if $opts{'verbose'};
-    }
-  }
-}
-
-if (exists $opts{'boost'} && exists $opts{'boost-version'}) {
-  env_from_opt('boost', $optdep{'boost'}->{env});
-  env_from_opt('boost-version', 'BOOST_VERSION', 1);
-  if ($targetEnv{'BOOST_VERSION'}
-      && !-r $targetEnv{'BOOST_ROOT'} . '/' . $optdep{'boost'}->{sanity}
-      && -r $targetEnv{'BOOST_ROOT'} . '/include/' . $targetEnv{'BOOST_VERSION'}
-      . '/boost/version.hpp') {
-    $optdep{'boost'}->{sanity} = ''; # skip sanity check in for-loop below
   }
 }
 

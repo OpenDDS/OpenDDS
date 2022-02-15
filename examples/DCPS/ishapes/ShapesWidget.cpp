@@ -28,7 +28,7 @@ ShapesWidget::~ShapesWidget() {
 }
 
 void
-ShapesWidget::addShape(shared_ptr<Shape> shape) {
+ShapesWidget::addShape(std::shared_ptr<Shape> shape) {
     shapeList_.push_back(shape);
 }
 

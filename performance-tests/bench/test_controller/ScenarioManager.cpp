@@ -340,13 +340,13 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
 
     for (CORBA::ULong r = 0; r < reports.length(); r++) {
       if (info[r].valid_data) {
-        report.node_reports.length(report.node_reports.length() + 1);
-        Bench::TestController::NodeReport& node_report = report.node_reports[report.node_reports.length() - 1];
+        const CORBA::ULong nr_idx = OpenDDS::DCPS::grow(report.node_reports) - 1;
+        Bench::TestController::NodeReport& node_report = report.node_reports[nr_idx];
         const NodeController::SpawnedProcessReports& spawned_process_reports = reports[r].spawned_process_reports;
         for (CORBA::ULong wr = 0; wr < spawned_process_reports.length(); wr++) {
           ++process_report_count;
-          node_report.spawned_process_ids.length(node_report.spawned_process_ids.length() + 1);
-          node_report.spawned_process_ids[node_report.spawned_process_ids.length() - 1] = spawned_process_reports[wr].spawned_process_id;
+          const CORBA::ULong spi_idx = OpenDDS::DCPS::grow(node_report.spawned_process_ids) - 1;
+          node_report.spawned_process_ids[spi_idx] = spawned_process_reports[wr].spawned_process_id;
           if (spawned_process_reports[wr].failed) {
             ++worker_failures;
             std::stringstream ss;
@@ -360,8 +360,8 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
             ss << spawned_process_reports[wr].details << std::flush;
             if (!ss.str().empty()) {
               if (json_2_idl(ss, worker_report)) {
-                node_report.worker_reports.length(node_report.worker_reports.length() + 1);
-                node_report.worker_reports[node_report.worker_reports.length() - 1] = worker_report;
+                const CORBA::ULong wr_idx = OpenDDS::DCPS::grow(node_report.worker_reports) - 1;
+                node_report.worker_reports[wr_idx] = worker_report;
                 ++parsed_worker_report_count;
               } else {
                 ++parse_failures;
@@ -372,8 +372,8 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
               }
             }
             if (spawned_process_reports[wr].log.in() && spawned_process_reports[wr].log.in()[0]) {
-              node_report.spawned_process_logs.length(node_report.spawned_process_logs.length() + 1);
-              node_report.spawned_process_logs[node_report.spawned_process_logs.length() - 1] = spawned_process_reports[wr].log;
+              const CORBA::ULong spl_idx = OpenDDS::DCPS::grow(node_report.spawned_process_logs) - 1;
+              node_report.spawned_process_logs[spl_idx] = spawned_process_reports[wr].log;
             }
           }
           std::stringstream ss;
