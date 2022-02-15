@@ -484,6 +484,16 @@ OpenDDS, ACE, and TAO in CMake along side the application using
 This will just install shared libraries, not any development dependencies like
 `opendds_idl` or static libraries.
 
+If OpenDDS and ACE/TAO is built with `clang`, the shared libraries might be
+missing an `SONAME` entry. Is is
+[an issue with ACE/TAO](https://github.com/DOCGroup/ACE_TAO/issues/1790).
+If trying to use `install(IMPORTED_RUNTIME_ARTIFACTS)` in this case, it causes
+the dynamic linker to ignore the libraries and report that they could not be
+found. One workaround is to add `SOFLAGS+=-Wl,-h,$(SONAME)` to
+`$ACE_ROOT/include/makeinclude/platform_macros.GNU` before building. This can
+be done mannually after running the configure script or by passing
+`--macros=SOFLAGS+=-Wl,-h,\$\(SONAME\)` to the configure script.
+
 A function called `opendds_get_library_dependencies` is provided to help find
 out what libraries need to be installed:
 
