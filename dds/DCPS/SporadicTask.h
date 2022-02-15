@@ -78,30 +78,6 @@ public:
     }
   }
 
-  void cancel_and_wait()
-  {
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      if (!desired_scheduled_) {
-        return;
-      }
-
-      desired_scheduled_ = false;
-    }
-
-    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
-    if (interceptor) {
-      ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(sporadic_command_);
-      if (command) {
-        command->wait();
-      }
-    } else if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR,
-                 "(%P|%t) ERROR: SporadicTask::cancel_and_wait: "
-                 "failed to receive ReactorInterceptor handle\n"));
-    }
-  }
-
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:

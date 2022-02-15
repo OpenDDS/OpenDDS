@@ -86,8 +86,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , multi_buff_(this, config.nak_depth_)
   , flush_send_queue_task_(make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(), rchandle_from(this), &RtpsUdpDataLink::flush_send_queue))
   , best_effort_heartbeat_count_(0)
-  , heartbeat_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats)
-  , heartbeatchecker_(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats)
+  , heartbeat_(make_rch<Periodic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats))
+  , heartbeatchecker_(make_rch<Periodic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats))
   , max_bundle_size_(config.max_message_size_ - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , transport_statistics_(transport_statistics)
   , transport_statistics_mutex_(transport_statistics_mutex)
@@ -109,7 +109,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 
 RtpsUdpDataLink::~RtpsUdpDataLink()
 {
-  flush_send_queue_task_->cancel_and_wait();
+  flush_send_queue_task_->cancel();
 }
 
 RtpsUdpInst&
@@ -775,7 +775,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   }
   g.release();
   if (enableheartbeat) {
-    heartbeat_.enable(false, config().heartbeat_period_);
+    heartbeat_->enable(false, config().heartbeat_period_);
   }
 }
 
@@ -810,7 +810,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
       InterestingRemote(readerid, addresses, listener)));
   g.release();
   if (enableheartbeatchecker) {
-    heartbeatchecker_.enable(false, config().heartbeat_period_);
+    heartbeatchecker_->enable(false, config().heartbeat_period_);
   }
 }
 
@@ -932,8 +932,8 @@ RtpsUdpDataLink::RtpsWriter::pre_stop_helper(TqeVector& to_drop, bool true_stop)
   g.release();
 
   if (stopping_) {
-    heartbeat_->cancel_and_wait();
-    nack_response_->cancel_and_wait();
+    heartbeat_->cancel();
+    nack_response_->cancel();
   }
 }
 
@@ -1048,8 +1048,8 @@ RtpsUdpDataLink::stop_i()
     ncm->remove_listener(*this);
   }
 
-  heartbeat_.disable_and_wait();
-  heartbeatchecker_.disable_and_wait();
+  heartbeat_->disable();
+  heartbeatchecker_->disable();
   unicast_socket_.close();
   multicast_socket_.close();
 #ifdef ACE_HAS_IPV6
@@ -1729,7 +1729,7 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
   guard.release();
   g.release();
 
-  preassociation_task_->cancel_and_wait();
+  preassociation_task_->cancel();
 }
 
 RtpsUdpDataLink::RtpsReader::~RtpsReader()
