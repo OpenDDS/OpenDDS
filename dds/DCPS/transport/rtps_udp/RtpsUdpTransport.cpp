@@ -598,7 +598,7 @@ RtpsUdpTransport::shutdown_i()
     stop_ice();
   }
 
-  relay_stun_task_->cancel_and_wait();
+  relay_stun_task_->cancel();
 #endif
 
   job_queue_.reset();

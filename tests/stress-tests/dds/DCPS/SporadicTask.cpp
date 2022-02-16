@@ -75,7 +75,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   ACE_OS::sleep(5);
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
   TEST_CHECK(total_count == prev_total_count + 1);
-  obj->sporadic_->cancel_and_wait();
+  obj->sporadic_->cancel();
 
   reactor_task.stop();
   return 0;

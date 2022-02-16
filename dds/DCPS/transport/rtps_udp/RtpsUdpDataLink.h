@@ -847,8 +847,8 @@ private:
   CORBA::Long best_effort_heartbeat_count_;
 
   typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
-  Periodic heartbeat_;
-  Periodic heartbeatchecker_;
+  RcHandle<Periodic> heartbeat_;
+  RcHandle<Periodic> heartbeatchecker_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {

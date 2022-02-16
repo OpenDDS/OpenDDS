@@ -2443,7 +2443,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif
 
-  local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), ref(*this), &SpdpTransport::send_local);
+  local_send_task_ = DCPS::make_rch<SpdpMulti>(reactor_task->interceptor(), outer->config_->resend_period(), rchandle_from(this), &SpdpTransport::send_local);
 
   if (outer->config_->periodic_directed_spdp()) {
     directed_send_task_ =
@@ -2639,29 +2639,29 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   }
 
   if (handshake_deadline_task_) {
-    handshake_deadline_task_->cancel_and_wait();
+    handshake_deadline_task_->cancel();
   }
   if (handshake_resend_task_) {
-    handshake_resend_task_->cancel_and_wait();
+    handshake_resend_task_->cancel();
   }
   if (relay_spdp_task_) {
-    relay_spdp_task_->cancel_and_wait();
+    relay_spdp_task_->cancel();
   }
   if (relay_stun_task_) {
-    relay_stun_task_->cancel_and_wait();
+    relay_stun_task_->cancel();
   }
 #endif
   if (local_send_task_) {
-    local_send_task_->disable_and_wait();
+    local_send_task_->disable();
   }
   if (directed_send_task_) {
-    directed_send_task_->cancel_and_wait();
+    directed_send_task_->cancel();
   }
   if (lease_expiration_task_) {
-    lease_expiration_task_->cancel_and_wait();
+    lease_expiration_task_->cancel();
   }
   if (thread_status_task_) {
-    thread_status_task_->disable_and_wait();
+    thread_status_task_->disable();
   }
 
   ACE_Reactor* reactor = reactor_task->get_reactor();

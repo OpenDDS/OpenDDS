@@ -683,7 +683,7 @@ private:
   void type_lookup_fini()
   {
     if (type_lookup_reply_deadline_processor_) {
-      type_lookup_reply_deadline_processor_->cancel_and_wait();
+      type_lookup_reply_deadline_processor_->cancel();
       type_lookup_reply_deadline_processor_.reset();
     }
   }

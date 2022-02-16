@@ -40,25 +40,25 @@ public:
       worth_passing_along = (timer_ == -1) || ((MonotonicTimePoint::now() + delay + cancel_estimate_) < next_time_);
     }
     if (worth_passing_along) {
-      interceptor_->execute_or_enqueue(make_rch<ScheduleEnableCommand>(this, delay));
+      RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+      if (interceptor) {
+        interceptor->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), delay));
+      }
     }
   }
 
   void disable()
   {
-    interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
-  }
-
-  void disable_and_wait()
-  {
-    ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
-    command->wait();
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      interceptor->execute_or_enqueue(make_rch<ScheduleDisableCommand>(rchandle_from(this)));
+    }
   }
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
 private:
-  RcHandle<ReactorInterceptor> interceptor_;
+  WeakRcHandle<ReactorInterceptor> interceptor_;
   const TimeDuration delay_;
   long timer_;
   MonotonicTimePoint next_time_;
@@ -66,30 +66,36 @@ private:
   mutable ACE_Thread_Mutex mutex_;
 
   struct ScheduleEnableCommand : public ReactorInterceptor::Command {
-    ScheduleEnableCommand(MultiTask* multi_task, const TimeDuration& delay)
+    ScheduleEnableCommand(WeakRcHandle<MultiTask> multi_task, const TimeDuration& delay)
       : multi_task_(multi_task), delay_(delay)
     { }
 
     virtual void execute()
     {
-      multi_task_->enable_i(delay_);
+      RcHandle<MultiTask> multi_task = multi_task_.lock();
+      if (multi_task) {
+        multi_task->enable_i(delay_);
+      }
     }
 
-    MultiTask* const multi_task_;
+    WeakRcHandle<MultiTask> const multi_task_;
     const TimeDuration delay_;
   };
 
   struct ScheduleDisableCommand : public ReactorInterceptor::Command {
-    explicit ScheduleDisableCommand(MultiTask* multi_task)
+    explicit ScheduleDisableCommand(WeakRcHandle<MultiTask> multi_task)
       : multi_task_(multi_task)
     { }
 
     virtual void execute()
     {
-      multi_task_->disable_i();
+      RcHandle<MultiTask> multi_task = multi_task_.lock();
+      if (multi_task) {
+        multi_task->disable_i();
+      }
     }
 
-    MultiTask* const multi_task_;
+    WeakRcHandle<MultiTask> const multi_task_;
   };
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
@@ -152,7 +158,10 @@ class PmfMultiTask : public MultiTask {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
-  PmfMultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& delay, Delegate& delegate, PMF function)
+  PmfMultiTask(RcHandle<ReactorInterceptor> interceptor,
+               const TimeDuration& delay,
+               RcHandle<Delegate> delegate,
+               PMF function)
     : MultiTask(interceptor, delay)
     , delegate_(delegate)
     , function_(function) {}
