@@ -47,11 +47,8 @@ if (NOT TAO_HAS_OPTIMIZE_COLLOCATED_INVOCATIONS)
 endif()
 
 function(opendds_get_generated_output_dir target output_dir_var)
-  set(subdir "/${target}")
-  if(OPENDDS_GLOBAL_GENERATION)
-    set(subdir "")
-  endif()
-  set(${output_dir_var} "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated${subdir}" PARENT_SCOPE)
+  # TODO base output_dir_var on target
+  set(${output_dir_var} "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated" PARENT_SCOPE)
 endfunction()
 
 function(opendds_ensure_generated_output_dir target file o_arg output_dir_var)
