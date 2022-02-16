@@ -463,6 +463,10 @@ if (exists($opts{'workspace'})) {
   $opts{'workspace'} = Cwd::realpath($opts{'workspace'});
 }
 
+if (exists($opts{'prefix'}) && !File::Spec->file_name_is_absolute($opts{'prefix'})) {
+  die("ERROR: --prefix argument $opts{'prefix'} is not an absolute path, stopped");
+}
+
 # Set initial libpath
 addCurLibPathRef(\%hostEnv);
 addCurLibPathRef(\%targetEnv);

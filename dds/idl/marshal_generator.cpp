@@ -642,17 +642,12 @@ namespace {
       extraction.endArgs();
       be_global->impl_ <<
         "  while (true) {\n"
-        "    const CORBA::ULong len = seq.length();\n"
-        "    // Improves growth behavior. See note in ParameterListConverter's add_param()\n"
-        "    if (len && !(len & (len - 1))) {\n"
-        "      seq.length(2 * len);\n"
-        "    }\n"
-        "    seq.length(len + 1);\n"
-        "    if (!(strm >> seq[len])) {\n"
+        "    const CORBA::ULong idx = OpenDDS::DCPS::grow(seq) - 1;\n"
+        "    if (!(strm >> seq[idx])) {\n"
         "      return false;\n"
         "    }\n"
-        "    if (seq[len]._d() == OpenDDS::RTPS::PID_SENTINEL) {\n"
-        "      seq.length(len);\n"
+        "    if (seq[idx]._d() == OpenDDS::RTPS::PID_SENTINEL) {\n"
+        "      seq.length(idx);\n"
         "      return true;\n"
         "    }\n"
         "  }\n";
@@ -782,6 +777,7 @@ namespace {
   void gen_sequence_i(
     UTL_ScopedName* tdname, AST_Sequence* seq, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
+    be_global->add_include("dds/DCPS/Util.h");
     be_global->add_include("dds/DCPS/Serializer.h");
     if (anonymous) {
       seq = dynamic_cast<AST_Sequence*>(anonymous->type_);
