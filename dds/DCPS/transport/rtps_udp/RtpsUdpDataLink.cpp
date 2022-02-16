@@ -1614,7 +1614,7 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
 
 namespace
 {
-bool allow_addr_update(const RepoId& src, const NetworkAddress& current, const NetworkAddress& incoming)
+bool allow_addr_update(const NetworkAddress& current, const NetworkAddress& incoming)
 {
   // The question to answer here: "Is incoming the same (or better) than current?"
   if (current == incoming || current == NetworkAddress()) {
@@ -1686,7 +1686,7 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddr
     if (pos != locators_.end()) {
       const MonotonicTimePoint now = MonotonicTimePoint::now();
       const bool expired = config().receive_address_duration_ < (MonotonicTimePoint::now() - pos->second.last_recv_time_);
-      const bool allow_update = expired || allow_addr_update(src, pos->second.last_recv_addr_, addr);
+      const bool allow_update = expired || allow_addr_update(pos->second.last_recv_addr_, addr);
       if (allow_update) {
         remove_cache = pos->second.last_recv_addr_ != addr;
         pos->second.last_recv_addr_ = addr;
