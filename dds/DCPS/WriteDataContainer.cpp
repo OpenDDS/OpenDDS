@@ -123,7 +123,7 @@ WriteDataContainer::WriteDataContainer(
 
 WriteDataContainer::~WriteDataContainer()
 {
-  deadline_task_->cancel_and_wait();
+  deadline_task_->cancel();
 
   if (this->unsent_data_.size() > 0) {
     ACE_DEBUG((LM_WARNING,

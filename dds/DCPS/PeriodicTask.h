@@ -34,7 +34,10 @@ public:
       ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
       user_enabled_ = true;
     }
-    interceptor_->execute_or_enqueue(make_rch<ScheduleEnableCommand>(this, reenable, period));
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      interceptor->execute_or_enqueue(make_rch<ScheduleEnableCommand>(rchandle_from(this), reenable, period));
+    }
   }
 
   void disable()
@@ -43,17 +46,10 @@ public:
       ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
       user_enabled_ = false;
     }
-    interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
-  }
-
-  void disable_and_wait()
-  {
-    {
-      ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-      user_enabled_ = false;
+    RcHandle<ReactorInterceptor> interceptor = interceptor_.lock();
+    if (interceptor) {
+      interceptor->execute_or_enqueue(make_rch<ScheduleDisableCommand>(rchandle_from(this)));
     }
-    ReactorInterceptor::CommandPtr command = interceptor_->execute_or_enqueue(make_rch<ScheduleDisableCommand>(this));
-    command->wait();
   }
 
   bool enabled() const
@@ -67,35 +63,41 @@ public:
 private:
   mutable ACE_Thread_Mutex mutex_;
   bool user_enabled_;
-  RcHandle<ReactorInterceptor> interceptor_;
+  WeakRcHandle<ReactorInterceptor> interceptor_;
   bool enabled_;
 
   struct ScheduleEnableCommand : public ReactorInterceptor::Command {
-    ScheduleEnableCommand(PeriodicTask* hb, bool reenable, const TimeDuration& period)
+    ScheduleEnableCommand(WeakRcHandle<PeriodicTask> hb, bool reenable, const TimeDuration& period)
       : periodic_task_(hb), reenable_(reenable), period_(period)
     { }
 
     virtual void execute()
     {
-      periodic_task_->enable_i(reenable_, period_);
+      RcHandle<PeriodicTask> periodic_task = periodic_task_.lock();
+      if (periodic_task) {
+        periodic_task->enable_i(reenable_, period_);
+      }
     }
 
-    PeriodicTask* const periodic_task_;
+    WeakRcHandle<PeriodicTask> const periodic_task_;
     const bool reenable_;
     const TimeDuration period_;
   };
 
   struct ScheduleDisableCommand : public ReactorInterceptor::Command {
-    explicit ScheduleDisableCommand(PeriodicTask* hb)
+    explicit ScheduleDisableCommand(WeakRcHandle<PeriodicTask> hb)
       : periodic_task_(hb)
     { }
 
     virtual void execute()
     {
-      periodic_task_->disable_i();
+      RcHandle<PeriodicTask> periodic_task = periodic_task_.lock();
+      if (periodic_task) {
+        periodic_task->disable_i();
+      }
     }
 
-    PeriodicTask* const periodic_task_;
+    WeakRcHandle<PeriodicTask> const periodic_task_;
   };
 
   int handle_timeout(const ACE_Time_Value& tv, const void*)
