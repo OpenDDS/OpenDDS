@@ -5,10 +5,10 @@
 
 #include "DCPS/DdsDcps_pch.h"
 
-#include <DCPS/NetworkAddress.h>
+#include "NetworkAddress.h"
 
-#include <DCPS/Hash.h>
-#include <DCPS/LogAddr.h>
+#include "Hash.h"
+#include "LogAddr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
