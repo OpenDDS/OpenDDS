@@ -1612,67 +1612,6 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   msg[idx].gap_sm(gap);
 }
 
-namespace
-{
-bool allow_addr_update(const NetworkAddress& current, const NetworkAddress& incoming)
-{
-  // The question to answer here: "Is incoming the same (or better) than current?"
-  if (current == incoming || current == NetworkAddress()) {
-    return true;
-  }
-
-#ifdef ACE_HAS_IPV6
-  if (current.get_type() == AF_INET) {
-    if (incoming.get_type() == AF_INET6) {
-      return true;
-    }
-#endif /* ACE_HAS_IPV6 */
-    if (current.is_loopback()) {
-      return false;
-    } else if (incoming.is_loopback()) {
-      return true;
-    }
-
-    if (current.is_private()) {
-      return false;
-    } else if (incoming.is_private()) {
-      return true;
-    }
-#ifdef ACE_HAS_IPV6
-  } else if (current.get_type() == AF_INET6) {
-    if (incoming.get_type() == AF_INET) {
-      return false;
-    }
-
-    if (current.is_loopback()) {
-      return false;
-    } else if (incoming.is_loopback()) {
-      return true;
-    }
-
-    if (current.is_linklocal()) {
-      return false;
-    } else if (incoming.is_linklocal()) {
-      return true;
-    }
-
-    if (current.is_uniquelocal()) {
-      return false;
-    } else if (incoming.is_uniquelocal()) {
-      return true;
-    }
-
-    if (current.is_sitelocal()) {
-      return false;
-    } else if (incoming.is_sitelocal()) {
-      return true;
-    }
-  }
-#endif /* ACE_HAS_IPV6 */
-  return false;
-}
-}
-
 void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddress& addr)
 {
   if (addr == config().rtps_relay_address()) {
@@ -1686,7 +1625,9 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddr
     if (pos != locators_.end()) {
       const MonotonicTimePoint now = MonotonicTimePoint::now();
       const bool expired = config().receive_address_duration_ < (MonotonicTimePoint::now() - pos->second.last_recv_time_);
-      const bool allow_update = expired || allow_addr_update(pos->second.last_recv_addr_, addr);
+      const bool allow_update = expired ||
+                                pos->second.last_recv_addr_ == addr ||
+                                DCPS::is_more_local(pos->second.last_recv_addr_, addr);
       if (allow_update) {
         remove_cache = pos->second.last_recv_addr_ != addr;
         pos->second.last_recv_addr_ = addr;
@@ -2118,10 +2059,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   // Only valid heartbeats (see spec) will be "fully" applied to writer info
   if (!(hb_first < 1 || hb_last < 0 || hb_last < hb_first.previous())) {
-    ACE_CDR::ULong cumulative_bits_added = 0;
     if (writer->recvd_.empty() && (directed || !writer->sends_directed_hb())) {
       OPENDDS_ASSERT(preassociation_writers_.count(writer));
-      gather_ack_nacks_i(writer, link, false, meta_submessages, cumulative_bits_added);
       preassociation_writers_.erase(writer);
       if (transport_debug.log_progress) {
         DCPS::log_progress("RTPS reader/writer association complete", id_, writer->id_, writer->participant_discovered_at_);
@@ -2140,6 +2079,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       first_ever_hb = true;
     }
 
+    ACE_CDR::ULong cumulative_bits_added = 0;
     if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !(heartbeat.smHeader.flags & RTPS::FLAG_F), meta_submessages, cumulative_bits_added);
@@ -4669,7 +4609,7 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
   }
   const uint16_t last_addr_type = last_recv_addr_.get_type();
   NetworkAddress limit;
-  limit.set_type(last_recv_addr_.get_type());
+  limit.set_type(last_addr_type);
   AddrSet::const_iterator it = unicast_addrs_.lower_bound(limit);
   while (it != unicast_addrs_.end() && it->get_type() == last_addr_type) {
     if (it->addr_bytes_equal(last_recv_addr_)) {

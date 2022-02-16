@@ -16,9 +16,9 @@
 
 #include "Definitions.h"
 #include "GuidUtils.h"
+#include "NetworkAddress.h"
 #include "PoolAllocator.h"
 #include "RcObject.h"
-#include "NetworkAddress.h"
 #include "TimeTypes.h"
 
 #include "ace/INET_Addr.h"

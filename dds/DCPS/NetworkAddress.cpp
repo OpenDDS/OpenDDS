@@ -136,14 +136,15 @@ bool NetworkAddress::operator<(const NetworkAddress& rhs) const
 
 bool NetworkAddress::addr_bytes_equal(const NetworkAddress& rhs) const
 {
-  if (inet_addr_.in4_.sin_family == AF_INET) {
+  if (inet_addr_.in4_.sin_family == AF_INET && rhs.inet_addr_.in4_.sin_family == AF_INET) {
     return memcmp(&inet_addr_.in4_.sin_addr, &rhs.inet_addr_.in4_.sin_addr, sizeof (inet_addr_.in4_.sin_addr)) == 0;
 #if defined (ACE_HAS_IPV6)
-  } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
+  } else if (inet_addr_.in6_.sin6_family == AF_INET6 && rhs.inet_addr_.in6_.sin6_family == AF_INET6) {
     return memcmp(&inet_addr_.in6_.sin6_addr, &rhs.inet_addr_.in6_.sin6_addr, sizeof (inet_addr_.in6_.sin6_addr)) == 0;
 #endif
   }
-  return 0;
+  // Don't worry about ipv4 mapped / compatible ipv6 addresses for now
+  return false;
 }
 
 ACE_INET_Addr NetworkAddress::to_addr() const
@@ -207,7 +208,7 @@ bool NetworkAddress::is_loopback() const
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
     // RFC 3330 defines loopback as any address with 127.x.x.x
-    return (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFF000000) == (INADDR_LOOPBACK & 0XFF000000);
+    return (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFF000000) == 0x7F000000;
 #if defined (ACE_HAS_IPV6)
   } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
     return IN6_IS_ADDR_LOOPBACK(&inet_addr_.in6_.sin6_addr);
@@ -219,7 +220,7 @@ bool NetworkAddress::is_loopback() const
 bool NetworkAddress::is_private() const
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
-    // private address classes are10.x.x.x/8
+    // private address classes are 10.x.x.x/8, 172.16.x.x/16, 192.168.x.x/24
     return ((ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFF000000) == 0x0A000000 ||
             (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFFF00000) == 0xAC100000 ||
             (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xFFFF0000) == 0xC0A80000);
@@ -254,6 +255,65 @@ bool NetworkAddress::is_sitelocal() const
     return IN6_IS_ADDR_SITELOCAL(&inet_addr_.in6_.sin6_addr);
   }
 #endif
+  return false;
+}
+
+bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming)
+{
+  // The question to answer here: "Is the incoming address 'more local' than the current address?"
+
+  if (current == NetworkAddress()) {
+    return true;
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (current.get_type() == AF_INET) {
+    if (incoming.get_type() == AF_INET6) {
+      return true;
+    }
+#endif /* ACE_HAS_IPV6 */
+    if (current.is_loopback()) {
+      return false;
+    } else if (incoming.is_loopback()) {
+      return true;
+    }
+
+    if (current.is_private()) {
+      return false;
+    } else if (incoming.is_private()) {
+      return true;
+    }
+#ifdef ACE_HAS_IPV6
+  } else if (current.get_type() == AF_INET6) {
+    if (incoming.get_type() == AF_INET) {
+      return false;
+    }
+
+    if (current.is_loopback()) {
+      return false;
+    } else if (incoming.is_loopback()) {
+      return true;
+    }
+
+    if (current.is_linklocal()) {
+      return false;
+    } else if (incoming.is_linklocal()) {
+      return true;
+    }
+
+    if (current.is_uniquelocal()) {
+      return false;
+    } else if (incoming.is_uniquelocal()) {
+      return true;
+    }
+
+    if (current.is_sitelocal()) {
+      return false;
+    } else if (incoming.is_sitelocal()) {
+      return true;
+    }
+  }
+#endif /* ACE_HAS_IPV6 */
   return false;
 }
 

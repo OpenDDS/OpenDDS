@@ -389,3 +389,254 @@ TEST(dds_DCPS_NetworkAddress, IsSiteLocalIpSix)
 }
 
 #endif
+
+TEST(dds_DCPS_NetworkAddress, IsMoreLocalIpFour)
+{
+  NetworkAddress sa1(1234, "127.0.0.1");
+  NetworkAddress sa2(1234, "127.0.1.1");
+  NetworkAddress sa3(1234, "192.168.0.127");
+  NetworkAddress sa4(1234, "10.11.12.13");
+  NetworkAddress sa5(1234, "1.2.3.4");
+  NetworkAddress sa6(1234, "2.3.4.5");
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa1, sa1));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa2, sa1));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa3, sa1));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa4, sa1));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa5, sa1));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa6, sa1));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa1, sa2));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa2, sa2));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa3, sa2));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa4, sa2));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa5, sa2));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa6, sa2));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa1, sa3));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa2, sa3));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa3, sa3));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa4, sa3));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa5, sa3));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa6, sa3));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa1, sa4));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa2, sa4));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa3, sa4));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa4, sa4));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa5, sa4));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa6, sa4));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa1, sa5));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa2, sa5));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa3, sa5));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa4, sa5));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa5, sa5));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa6, sa5));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa1, sa6));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa2, sa6));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa3, sa6));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa4, sa6));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa5, sa6));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa6, sa6));
+}
+
+TEST(dds_DCPS_NetworkAddress, IsMoreLocalIpSix)
+{
+  NetworkAddress sa01(1234, "::1"); // loopback
+  NetworkAddress sa02(1234, "fe80::1"); // link local
+  NetworkAddress sa03(1234, "fe80:1::1");
+  NetworkAddress sa04(1234, "fe80::1:1");
+  NetworkAddress sa05(1234, "fc03::1"); // unique local
+  NetworkAddress sa06(1234, "fd01::2");
+  NetworkAddress sa07(1234, "fec0::1"); // site local
+  NetworkAddress sa08(1234, "fec2:1::1");
+  NetworkAddress sa09(1234, "fed0::1:1");
+  NetworkAddress sa10(1234, "0101::"); // global
+  NetworkAddress sa11(1234, "2600:6c40:6100:4f4:1def:d066:90c:3371");
+  NetworkAddress sa12(1234, "1.2.3.4");
+  NetworkAddress sa13(1234, "2.3.4.5");
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa02, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa03, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa04, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa05, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa06, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa07, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa08, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa09, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa01));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa01));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa02));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa02));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa02));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa05, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa06, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa07, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa08, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa09, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa02));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa02));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa03));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa03));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa03));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa05, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa06, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa07, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa08, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa09, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa03));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa03));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa04));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa04));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa04));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa05, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa06, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa07, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa08, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa09, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa04));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa04));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa05));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa05));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa05));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa05));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa05));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa05));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa07, sa05));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa08, sa05));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa09, sa05));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa05));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa05));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa05));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa05));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa06));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa06));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa06));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa06));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa06));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa06));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa07, sa06));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa08, sa06));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa09, sa06));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa06));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa06));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa06));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa06));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa07, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa08, sa07));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa09, sa07));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa07));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa07));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa07));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa07));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa07, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa08, sa08));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa09, sa08));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa08));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa08));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa08));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa08));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa07, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa08, sa09));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa09, sa09));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa10, sa09));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa11, sa09));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa09));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa09));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa07, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa08, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa09, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa10, sa10));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa11, sa10));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa10));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa10));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa07, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa08, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa09, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa10, sa11));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa11, sa11));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa12, sa11));
+  EXPECT_TRUE (OpenDDS::DCPS::is_more_local(sa13, sa11));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa07, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa08, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa09, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa10, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa11, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa12, sa12));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa13, sa12));
+
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa01, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa02, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa03, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa04, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa05, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa06, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa07, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa08, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa09, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa10, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa11, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa12, sa13));
+  EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa13, sa13));
+}

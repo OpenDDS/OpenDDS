@@ -63,9 +63,9 @@ public:
 
   bool is_private() const; // IPv4 only
 
-  bool is_uniquelocal() const; // IPv6 only
-  bool is_linklocal() const; // IPv6 only
-  bool is_sitelocal() const; // IPv6 only
+  bool is_linklocal() const; // IPv6 only (can't be routed)
+  bool is_uniquelocal() const; // IPv6 only (only one routing domain)
+  bool is_sitelocal() const; // IPv6 only (deprecated)
 
 private:
   union ip46
@@ -78,6 +78,8 @@ private:
 };
 
 typedef OPENDDS_SET(NetworkAddress) AddrSet;
+
+bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming);
 
 } // namespace DCPS
 } // namespace OpenDDS
