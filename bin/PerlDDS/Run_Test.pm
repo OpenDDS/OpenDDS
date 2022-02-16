@@ -105,7 +105,7 @@ sub wait_kill {
   my $result = $process->WaitKill($wait_time);
   my $time_str = formatted_time();
   if ($result != 0) {
-      my $ext = ($verbose ? "" : "(started at $start_time)");
+      my $ext = ($verbose ? "" : "(started waiting for termination at $start_time)");
       print STDERR "$time_str: ERROR: $desc returned $result $ext\n";
       $ret_status = 1;
   } elsif ($verbose) {
@@ -774,7 +774,8 @@ sub start_process {
 
   print $process->CommandLine() . "\n";
   $process->Spawn();
-  print "$name PID: " . _getpid($process) . "\n";
+  my $start_time = PerlDDS::formatted_time();
+  print "$name PID: " . _getpid($process) . " started at $start_time\n";
 }
 
 sub stop_process {

@@ -71,8 +71,7 @@ const OPENDDS_STRING TransportRegistry::CUSTOM_ADD_DOMAIN_TO_PORT = "add_domain_
 TransportRegistry::TransportRegistry()
   : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
   , released_(false)
-  , load_pending_(false)
-  , load_condition_(lock_)
+  , load_complete_(lock_)
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
@@ -481,64 +480,73 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
 }
 
 void
-TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type)
+TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type,
+                                      bool wait)
 {
   GuardType guard(lock_);
-  load_transport_lib_i(transport_type);
+  if (!load_transport_lib_i(transport_type, wait)) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_lib: ")
+               ACE_TEXT("could not load transport_type=%C.\n"),
+               transport_type.c_str()));
+  }
 }
 
-void
-TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type)
+TransportType_rch
+TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type,
+                                        bool wait)
 {
-#if defined(ACE_AS_STATIC_LIBS)
-  ACE_UNUSED_ARG(transport_type);
-#else
+  TransportType_rch type;
+  if (find(type_map_, transport_type, type) == 0) {
+    return type;
+  }
+
+#if !defined(ACE_AS_STATIC_LIBS)
+  // Attempt to load it.
   LibDirectiveMap::iterator lib_iter = lib_directive_map_.find(transport_type);
-  if (lib_iter != lib_directive_map_.end()) {
-    ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
-    // Release the lock, because loading a transport library will
-    // recursively call this function to add its default inst.
-    load_pending_ = true;
-    ACE_Reverse_Lock<LockType> rev_lock(lock_);
-    {
-      ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
-      ACE_Service_Config::process_directive(directive.c_str());
-    }
-    load_pending_ = false;
-    load_condition_.notify_all();
+  if (lib_iter == lib_directive_map_.end()) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_lib_i: ")
+               ACE_TEXT("no directive for transport_type=%C.\n"),
+               transport_type.c_str()));
+    return type;
+  }
+
+  ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
+  // Release the lock because the transport will call back into the registry.
+  ACE_Reverse_Lock<LockType> rev_lock(lock_);
+  {
+    ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+    ACE_Service_Config::process_directive(directive.c_str());
   }
 #endif
+
+  if (wait) {
+    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+    while (find(type_map_, transport_type, type) != 0) {
+      load_complete_.wait(thread_status_manager);
+    }
+    return type;
+  }
+
+  find(type_map_, transport_type, type);
+  return type;
 }
 
 TransportInst_rch
 TransportRegistry::create_inst(const OPENDDS_STRING& name,
                                const OPENDDS_STRING& transport_type,
-                               bool wait_for_pending_load)
+                               bool wait)
 {
   GuardType guard(lock_);
-  TransportType_rch type;
 
-  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  while (wait_for_pending_load && load_pending_) {
-    load_condition_.wait(thread_status_manager);
-  }
-
-  if (find(type_map_, transport_type, type) != 0) {
-#if !defined(ACE_AS_STATIC_LIBS)
-    // Not present, try to load library
-    load_transport_lib_i(transport_type);
-
-    // Try to find it again
-    if (find(type_map_, transport_type, type) != 0) {
-#endif
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
-                 ACE_TEXT("transport_type=%C is not registered.\n"),
-                 transport_type.c_str()));
-      return TransportInst_rch();
-#if !defined(ACE_AS_STATIC_LIBS)
-    }
-#endif
+  TransportType_rch type = load_transport_lib_i(transport_type, wait);
+  if (!type) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
+               ACE_TEXT("transport_type=%C is not registered.\n"),
+               transport_type.c_str()));
+    return TransportInst_rch();
   }
 
   if (inst_map_.count(name)) {
@@ -674,8 +682,8 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
 void
 TransportRegistry::remove_transport_template_instance(const OPENDDS_STRING& config_name)
 {
-  ConfigTemplateToInstanceMap::iterator i = config_template_to_instance_map.find(config_name);
-  if (i == config_template_to_instance_map.end()) {
+  ConfigTemplateToInstanceMap::iterator i = config_template_to_instance_map_.find(config_name);
+  if (i == config_template_to_instance_map_.end()) {
     if (DCPS_debug_level > 4) {
       ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportRegistry::remove_transport_template_instance: ")
@@ -696,7 +704,7 @@ TransportRegistry::remove_transport_template_instance(const OPENDDS_STRING& conf
                config_name.c_str(), inst_name.c_str()));
   }
 
-  config_template_to_instance_map.erase(i);
+  config_template_to_instance_map_.erase(i);
 }
 
 
@@ -705,60 +713,36 @@ TransportRegistry::fix_empty_default()
 {
   DBG_ENTRY_LVL("TransportRegistry", "fix_empty_default", 6);
   GuardType guard(lock_);
-  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  while (load_pending_) {
-    load_condition_.wait(thread_status_manager);
-  }
   if (global_config_.is_nil()
       || !global_config_->instances_.empty()
       || global_config_->name() != DEFAULT_CONFIG_NAME) {
     return global_config_;
   }
   TransportConfig_rch global_config = global_config_;
-#if !defined(ACE_AS_STATIC_LIBS)
-  load_transport_lib_i(FALLBACK_TYPE);
-#endif
+  load_transport_lib_i(FALLBACK_TYPE, true);
   return global_config;
 }
 
 
-void
+bool
 TransportRegistry::register_type(const TransportType_rch& type)
 {
   DBG_ENTRY_LVL("TransportRegistry", "register_type", 6);
-  int result;
   const OPENDDS_STRING name = type->name();
 
-  {
-    GuardType guard(this->lock_);
-    result = OpenDDS::DCPS::bind(type_map_, name, type);
+  GuardType guard(this->lock_);
+  if (type_map_.count(name)) {
+    return false;
   }
 
-  // Check to see if it worked.
-  //
-  // 0 means it worked, 1 means it is a duplicate (and didn't work), and
-  // -1 means something bad happened.
-  if (result == 1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: transport type=%C already registered ")
-               ACE_TEXT("with TransportRegistry.\n"), name.c_str()));
-    throw Transport::Duplicate();
+  type_map_[name] = type;
 
-  } else if (result == -1) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) ERROR: Failed to bind transport type=%C to ")
-               ACE_TEXT("type_map_.\n"),
-               name.c_str()));
-    throw Transport::MiscProblem();
+  if (name == "rtps_udp") {
+    type_map_["rtps_discovery"] = type;
   }
-}
 
-bool TransportRegistry::has_type(const TransportType_rch& type) const
-{
-  DBG_ENTRY_LVL("TransportRegistry", "has_type", 6);
-  const OPENDDS_STRING name = type->name();
-  GuardType guard(lock_);
-  return type_map_.count(name);
+  load_complete_.notify_all();
+  return true;
 }
 
 bool
@@ -846,7 +830,7 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
 void
 TransportRegistry::update_config_template_instance_info(const OPENDDS_STRING& config_name, const OPENDDS_STRING& inst_name)
 {
-  config_template_to_instance_map[config_name] = inst_name;
+  config_template_to_instance_map_[config_name] = inst_name;
 }
 
 void
@@ -860,7 +844,7 @@ TransportRegistry::release()
     iter->second->shutdown();
   }
 
-  config_template_to_instance_map.clear();
+  config_template_to_instance_map_.clear();
   transport_templates_.clear();
   transports_.clear();
   type_map_.clear();
