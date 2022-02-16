@@ -79,6 +79,7 @@ private:
 
 typedef OPENDDS_SET(NetworkAddress) AddrSet;
 
+OpenDDS_Dcps_Export
 bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming);
 
 } // namespace DCPS

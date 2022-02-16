@@ -30,7 +30,10 @@ public:
 
   const String& str() const { return addr_; }
   const char* c_str() const { return addr_.c_str(); }
+
 private:
+  void init_addr(const ACE_INET_Addr& addr, Option opt);
+
   String addr_;
 };
 

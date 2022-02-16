@@ -31,6 +31,16 @@ const String LogAddr::host(const ACE_INET_Addr& addr)
 
 LogAddr::LogAddr(const ACE_INET_Addr& addr, Option opt)
 {
+  init_addr(addr, opt);
+}
+
+LogAddr::LogAddr(const NetworkAddress& addr, Option opt)
+{
+  init_addr(addr.to_addr(), opt);
+}
+
+void LogAddr::init_addr(const ACE_INET_Addr& addr, Option opt)
+{
   switch (opt) {
     case IpPort:
       addr_ = ip(addr) + ':' + port(addr);
@@ -52,10 +62,6 @@ LogAddr::LogAddr(const ACE_INET_Addr& addr, Option opt)
     default:
       break;
   }
-}
-
-LogAddr::LogAddr(const NetworkAddress& sa, Option opt) : LogAddr(sa.to_addr(), opt)
-{
 }
 
 } // namespace DCPS
