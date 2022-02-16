@@ -9131,24 +9131,11 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
-#    - name: setup gtest
-#      shell: cmd
-#      run: |
-#        cd OpenDDS/tests/googletest
-#        git submodule init
-#        git submodule update
-#        mkdir build
-#        cd build
-#        mkdir install
-#        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON -A Win32 ..
-#        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
         configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows"
-#
-#        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY"
     - name: check build configuration
       shell: cmd
       run: |
@@ -9162,15 +9149,15 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
-    - name: Build CMake Tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake -A Win32 ..
-        cmake --build .
+#    - name: Build CMake Tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        mkdir tests\cmake\build
+#        cd tests\cmake\build
+#        cmake -A Win32 ..
+#        cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
