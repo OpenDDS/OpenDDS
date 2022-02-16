@@ -480,5 +480,5 @@ tests/DCPS/RtpsDurableReplay/run_test.pl: RTPS OPENDDS_TESTING_FEATURES
 
 tests/dissector/run_test.pl: RAPIDJSON WIRESHARK
 
-tests/DCPS/HelloWorld/run_test.pl: !OPENDDS_SAFETY_PROFILE
-tests/DCPS/HelloWorld/run_test.pl ini=rtps.ini: RTPS !OPENDDS_SAFETY_PROFILE
+#tests/DCPS/HelloWorld/run_test.pl: !OPENDDS_SAFETY_PROFILE
+#tests/DCPS/HelloWorld/run_test.pl ini=rtps.ini: RTPS !OPENDDS_SAFETY_PROFILE
