@@ -7,7 +7,7 @@ Overview
 ********
 
 GitHub Actions is the continuous integration solution currently being used to evaluate the readiness of pull requests.
-\It builds OpenDDS and runs the test suite across a wide variety of operation systems and build configurations.
+It builds OpenDDS and runs the test suite across a wide variety of operation systems and build configurations.
 
 *************************************
 Legend for GitHub Actions Build Names
