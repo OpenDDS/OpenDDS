@@ -28,8 +28,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 ReactorTask::ReactorTask(bool useAsyncSend)
-  : state_(STATE_NOT_RUNNING)
-  , condition_(lock_)
+  : condition_(lock_)
+  , state_(STATE_NOT_RUNNING)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)

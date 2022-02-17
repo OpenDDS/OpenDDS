@@ -19,25 +19,60 @@ ACE_Reactor* ReactorTask::get_reactor()
 ACE_INLINE
 const ACE_Reactor* ReactorTask::get_reactor() const
 {
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
   return reactor_;
 }
 
 ACE_INLINE
 ACE_thread_t ReactorTask::get_reactor_owner() const
 {
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
+  wait_for_startup_i();
   return reactor_owner_;
 }
 
 ACE_INLINE
 ACE_Proactor* ReactorTask::get_proactor()
 {
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
   return proactor_;
 }
 
 ACE_INLINE
 const ACE_Proactor* ReactorTask::get_proactor() const
 {
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
   return proactor_;
+}
+
+ACE_INLINE
+void ReactorTask::wait_for_startup() const
+{
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
+  wait_for_startup_i();
+}
+
+ACE_INLINE
+void ReactorTask::wait_for_startup_i() const
+{
+  while (state_ != STATE_RUNNING) {
+    condition_.wait(*thread_status_manager_);
+  }
+}
+
+ACE_INLINE
+bool ReactorTask::is_shut_down() const
+{
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
+  return state_ == STATE_NOT_RUNNING;
+}
+
+ACE_INLINE
+ReactorInterceptor_rch ReactorTask::interceptor() const
+{
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
+  wait_for_startup_i();
+  return interceptor_;
 }
 
 } // namespace DCPS
