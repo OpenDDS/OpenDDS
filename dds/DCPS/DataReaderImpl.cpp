@@ -2143,8 +2143,8 @@ DataReaderImpl::writer_removed(WriterInfo& info)
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-    instances_liveliness_update(info_writer_id);
   }
+  instances_liveliness_update(info_writer_id);
 
   if (liveliness_changed) {
     set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2324,7 +2324,6 @@ DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
     }
   }
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
     set_instance_state(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
   }
