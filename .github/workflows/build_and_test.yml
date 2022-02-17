@@ -9401,7 +9401,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -9761,17 +9761,6 @@ jobs:
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-#    - name: setup gtest
-#      shell: cmd
-#      run: |
-#        cd OpenDDS/tests/googletest
-#        git submodule init
-#        git submodule update
-#        mkdir build
-#        cd build
-#        mkdir install
-#        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-#        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
