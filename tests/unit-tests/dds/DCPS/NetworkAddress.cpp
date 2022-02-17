@@ -442,6 +442,8 @@ TEST(dds_DCPS_NetworkAddress, IsMoreLocalIpFour)
   EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa6, sa6));
 }
 
+#if defined (ACE_HAS_IPV6)
+
 TEST(dds_DCPS_NetworkAddress, IsMoreLocalIpSix)
 {
   NetworkAddress sa01(1234, "::1"); // loopback
@@ -640,3 +642,5 @@ TEST(dds_DCPS_NetworkAddress, IsMoreLocalIpSix)
   EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa12, sa13));
   EXPECT_FALSE(OpenDDS::DCPS::is_more_local(sa13, sa13));
 }
+
+#endif
