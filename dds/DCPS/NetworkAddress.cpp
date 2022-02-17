@@ -60,7 +60,7 @@ NetworkAddress::NetworkAddress(const char* str)
   *this = ACE_INET_Addr(str);
 }
 
-NetworkAddress::NetworkAddress(uint16_t port, const char* str)
+NetworkAddress::NetworkAddress(ACE_UINT16 port, const char* str)
 {
   *this = ACE_INET_Addr(port, str);
 }
@@ -72,7 +72,7 @@ NetworkAddress::NetworkAddress(const wchar_t* str)
   *this = ACE_INET_Addr(str);
 }
 
-NetworkAddress::NetworkAddress(uint16_t port, const wchar_t* str)
+NetworkAddress::NetworkAddress(ACE_UINT16 port, const wchar_t* str)
 {
   *this = ACE_INET_Addr(port, str);
 }
@@ -159,17 +159,17 @@ void NetworkAddress::to_addr(ACE_INET_Addr& addr) const
   addr.set_addr(const_cast<ip46*>(&inet_addr_), sizeof (inet_addr_));
 }
 
-int16_t NetworkAddress::get_type() const
+ACE_INT16 NetworkAddress::get_type() const
 {
-  return static_cast<int16_t>(inet_addr_.in4_.sin_family);
+  return static_cast<ACE_INT16>(inet_addr_.in4_.sin_family);
 }
 
-void NetworkAddress::set_type(int16_t type)
+void NetworkAddress::set_type(ACE_INT16 type)
 {
   inet_addr_.in4_.sin_family = type;
 }
 
-uint16_t NetworkAddress::get_port_number() const
+ACE_UINT16 NetworkAddress::get_port_number() const
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
     return ACE_NTOHS(inet_addr_.in4_.sin_port);
@@ -181,7 +181,7 @@ uint16_t NetworkAddress::get_port_number() const
   return 0;
 }
 
-void NetworkAddress::set_port_number(uint16_t port)
+void NetworkAddress::set_port_number(ACE_UINT16 port)
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
     inet_addr_.in4_.sin_port = ACE_HTONS(port);

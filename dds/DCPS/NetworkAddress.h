@@ -30,11 +30,11 @@ public:
   NetworkAddress(const NetworkAddress& addr);
 
   explicit NetworkAddress(const char*);
-  NetworkAddress(uint16_t port, const char*);
+  NetworkAddress(ACE_UINT16 port, const char*);
 
 #if defined (ACE_HAS_WCHAR)
   explicit NetworkAddress(const wchar_t*);
-  NetworkAddress(uint16_t port, const wchar_t*);
+  NetworkAddress(ACE_UINT16 port, const wchar_t*);
 #endif
 
   explicit NetworkAddress(const ACE_INET_Addr& addr);
@@ -52,11 +52,11 @@ public:
   ACE_INET_Addr to_addr() const;
   void to_addr(ACE_INET_Addr&) const;
 
-  int16_t get_type() const;
-  void set_type(int16_t type);
+  ACE_INT16 get_type() const;
+  void set_type(ACE_INT16 type);
 
-  uint16_t get_port_number() const;
-  void set_port_number(uint16_t port);
+  ACE_UINT16 get_port_number() const;
+  void set_port_number(ACE_UINT16 port);
 
   bool is_any() const;
   bool is_loopback() const;
