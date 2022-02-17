@@ -434,6 +434,9 @@ public:
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
 
+  // Take appropriate actions upon learning instance or view state has been updated
+  void state_updated(DDS::InstanceHandle_t handle);
+
   /// Release all instances held by the reader.
   virtual void release_all_instances() = 0;
 
@@ -635,6 +638,7 @@ protected:
   virtual void purge_data(SubscriptionInstance_rch instance) = 0;
 
   virtual void release_instance_i(DDS::InstanceHandle_t handle) = 0;
+  virtual void state_updated_i(DDS::InstanceHandle_t handle) = 0;
 
   bool has_readcondition(DDS::ReadCondition_ptr a_condition);
 

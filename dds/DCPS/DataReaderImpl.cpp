@@ -2058,6 +2058,11 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
   }
 }
 
+void
+DataReaderImpl::state_updated(DDS::InstanceHandle_t handle)
+{
+  state_updated_i(handle);
+}
 
 OpenDDS::DCPS::WriterStats::WriterStats(
     int amount,

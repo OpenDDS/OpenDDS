@@ -27,6 +27,7 @@ OpenDDS::DCPS::InstanceState::accessed()
   //
   if (view_state_ & DDS::ANY_VIEW_STATE) {
     view_state_ = DDS::NOT_NEW_VIEW_STATE;
+    state_updated();
   }
 }
 
@@ -83,11 +84,13 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   case DDS::NOT_NEW_VIEW_STATE:
     if (instance_state_ & DDS::NOT_ALIVE_INSTANCE_STATE) {
       view_state_ = DDS::NEW_VIEW_STATE;
+      state_updated();
     }
     break;
 
   default:
     view_state_ = DDS::NEW_VIEW_STATE;
+    state_updated();
     break;
   }
 
@@ -105,6 +108,7 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   }
 
   instance_state_ = DDS::ALIVE_INSTANCE_STATE;
+  state_updated();
 }
 
 ACE_INLINE
@@ -124,6 +128,7 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
 
     ++no_writers_generation_count_;
     instance_state_ = DDS::ALIVE_INSTANCE_STATE;
+    state_updated();
   }
 }
 

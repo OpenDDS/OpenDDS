@@ -54,6 +54,9 @@ namespace OpenDDS {
 
     typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
                               typename TraitsType::LessThanType) InstanceMap;
+    typedef OPENDDS_MAP(DDS::InstanceHandle_t, typename InstanceMap::iterator) ReverseInstanceMap;
+    typedef OPENDDS_SET(DDS::InstanceHandle_t) HandleSet;
+    typedef OPENDDS_MAP(CORBA::ULong, HandleSet) LookupMap;
 
     class SharedInstanceMap
       : public RcObject
@@ -94,6 +97,7 @@ namespace OpenDDS {
     : filter_delayed_handler_(make_rch<FilterDelayedHandler>(ref(*this)))
     , marshal_skip_serialize_(false)
     {
+      initialize_lookup_maps();
     }
 
     virtual ~DataReaderImpl_T (void)
@@ -668,42 +672,29 @@ namespace OpenDDS {
     return DDS::RETCODE_OK;
   }
 
-  virtual DDS::ReturnCode_t get_key_value (
-                                             MessageType & key_holder,
-                                             DDS::InstanceHandle_t handle)
+  virtual DDS::ReturnCode_t get_key_value(MessageType& key_holder,
+                                          DDS::InstanceHandle_t handle)
   {
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                      guard,
-                      sample_lock_,
-                      DDS::RETCODE_ERROR);
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(sample_lock_);
 
-    typename InstanceMap::iterator const the_end = instance_map_.end ();
-    for (typename InstanceMap::iterator it = instance_map_.begin ();
-         it != the_end;
-         ++it)
-      {
-        if (it->second == handle)
-          {
-            key_holder = it->first;
-            return DDS::RETCODE_OK;
-          }
-      }
+    const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(handle);
+    if (pos != reverse_instance_map_.end()) {
+      key_holder = pos->second->first;
+      return DDS::RETCODE_OK;
+    }
 
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
-  virtual DDS::InstanceHandle_t lookup_instance (const MessageType & instance_data)
+  virtual DDS::InstanceHandle_t lookup_instance(const MessageType& instance_data)
   {
-    typename InstanceMap::const_iterator const it = instance_map_.find(instance_data);
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(sample_lock_);
 
-    if (it == instance_map_.end())
-      {
-        return DDS::HANDLE_NIL;
-      }
-    else
-      {
-        return it->second;
-      }
+    const typename InstanceMap::const_iterator it = instance_map_.find(instance_data);
+    if (it != instance_map_.end()) {
+      return it->second;
+    }
+    return DDS::HANDLE_NIL;
   }
 
   virtual DDS::ReturnCode_t auto_return_loan(void* seq)
@@ -738,22 +729,23 @@ namespace OpenDDS {
     const bool filter_has_non_key_fields =
       evaluator.has_non_key_fields(getMetaStruct<MessageType>());
 
-    for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), end = instances_.end(); iter != end; ++iter) {
-      SubscriptionInstance& inst = *iter->second;
+    HandleSet matches;
+    lookup_matching_instances(view_states, instance_states, matches);
+    for (HandleSet::iterator it = matches.begin(); it != matches.end(); ++it) {
+      const DDS::InstanceHandle_t handle = *it;
+      const SubscriptionInstance_rch inst = get_handle_instance(handle);
 
-      if (inst.instance_state_->match(view_states, instance_states)) {
-        for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
-          if ((item->sample_state_ & sample_states)
+      for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
+        if ((item->sample_state_ & sample_states)
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-              && !item->coherent_change_
+            && !item->coherent_change_
 #endif
-              && item->registered_data_) {
-            if (!item->valid_data_ && filter_has_non_key_fields) {
-              continue;
-            }
-            if (evaluator.eval(*static_cast<MessageType*>(item->registered_data_), params)) {
-              return true;
-            }
+            && item->registered_data_) {
+          if (!item->valid_data_ && filter_has_non_key_fields) {
+            continue;
+          }
+          if (evaluator.eval(*static_cast<MessageType*>(item->registered_data_), params)) {
+            return true;
           }
         }
       }
@@ -1085,6 +1077,62 @@ namespace OpenDDS {
 
 protected:
 
+  // Update max flag if the spec ever changes
+  const CORBA::ULong MAX_VIEW_STATE_FLAG = DDS::NOT_NEW_VIEW_STATE;
+  const CORBA::ULong MAX_VIEW_STATE_MASK = (MAX_VIEW_STATE_FLAG << 1) - 1;
+
+  // Update max flag if the spec ever changes
+  const CORBA::ULong MAX_INSTANCE_STATE_FLAG = DDS::ALIVE_INSTANCE_STATE;
+  const CORBA::ULong MAX_INSTANCE_STATE_MASK = (MAX_INSTANCE_STATE_FLAG << 1) - 1;
+
+  void initialize_lookup_maps()
+  {
+    for (CORBA::ULong i = 0; i < MAX_VIEW_STATE_MASK; ++i) {
+      view_state_lookup_[i] = HandleSet();
+    }
+
+    for (CORBA::ULong i = 0; i < MAX_INSTANCE_STATE_MASK; ++i) {
+      instance_state_lookup_[i] = HandleSet();
+    }
+  }
+
+  void update_lookup_maps(const typename SubscriptionInstanceMapType::iterator& input)
+  {
+    for (LookupMap::iterator it = view_state_lookup_.begin(), the_end = view_state_lookup_.end(); it != the_end; ++it) {
+      if (input->second->instance_state_->match(it->first, DDS::ANY_INSTANCE_STATE)) {
+        it->second.insert(input->first);
+      }
+      else {
+        it->second.erase(input->first);
+      }
+    }
+
+    for (LookupMap::iterator it = instance_state_lookup_.begin(), the_end = instance_state_lookup_.end(); it != the_end; ++it) {
+      if (input->second->instance_state_->match(DDS::ANY_VIEW_STATE, it->first)) {
+        it->second.insert(input->first);
+      }
+      else {
+        it->second.erase(input->first);
+      }
+    }
+  }
+
+  void lookup_matching_instances(CORBA::ULong view_states, CORBA::ULong instance_states, HandleSet& output)
+  {
+    view_states &= MAX_VIEW_STATE_MASK;
+    instance_states &= MAX_INSTANCE_STATE_MASK;
+
+    LookupMap::iterator vi = view_state_lookup_.find(view_states);
+    OPENDDS_ASSERT(vi != view_state_lookup_.end());
+    const HandleSet& vset = vi->second;
+
+    LookupMap::iterator ii = instance_state_lookup_.find(instance_states);
+    OPENDDS_ASSERT(ii != instance_state_lookup_.end());
+    const HandleSet& iset = ii->second;
+
+    std::set_intersection(vset.begin(), vset.end(), iset.begin(), iset.end(), std::inserter<HandleSet>(output, output.end()));
+  }
+
   virtual RcHandle<MessageHolder> dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
                                                 OpenDDS::DCPS::SubscriptionInstance_rch& instance,
                                                 bool& just_registered,
@@ -1249,21 +1297,21 @@ protected:
       }
   }
 
-  virtual void release_instance_i (DDS::InstanceHandle_t handle)
+  virtual void release_instance_i(DDS::InstanceHandle_t handle)
   {
-    typename InstanceMap::iterator const the_end = instance_map_.end ();
-    typename InstanceMap::iterator it = instance_map_.begin ();
-    while (it != the_end)
-      {
-        if (it->second == handle)
-          {
-            typename InstanceMap::iterator curIt = it;
-            ++ it;
-            instance_map_.erase (curIt);
-          }
-        else
-          ++ it;
-      }
+    const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
+    if (pos != reverse_instance_map_.end()) {
+      instance_map_.erase(pos->second);
+      reverse_instance_map_.erase(pos);
+    }
+  }
+
+  virtual void state_updated_i(DDS::InstanceHandle_t handle)
+  {
+    const typename SubscriptionInstanceMapType::iterator pos = instances_.find(handle);
+    if (pos != instances_.end()) {
+      update_lookup_maps(pos);
+    }
   }
 
 private:
@@ -1309,27 +1357,25 @@ private:
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (!group_coherent_ordered) {
 #endif
-    for (typename InstanceMap::iterator it = instance_map_.begin(),
-         the_end = instance_map_.end(); it != the_end; ++it) {
-
-      const DDS::InstanceHandle_t handle = it->second;
+    HandleSet matches;
+    lookup_matching_instances(view_states, instance_states, matches);
+    for (HandleSet::iterator it = matches.begin(); it != matches.end(); ++it) {
+      const DDS::InstanceHandle_t handle = *it;
       const SubscriptionInstance_rch inst = get_handle_instance(handle);
 
-      if (inst->instance_state_->match(view_states, instance_states)) {
-        size_t i(0);
-        for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
-          if ((item->sample_state_ & sample_states)
+      size_t i(0);
+      for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
+        if ((item->sample_state_ & sample_states)
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-              && !item->coherent_change_
+            && !item->coherent_change_
 #endif
-              ) {
-            results.insert_sample(item, inst, ++i);
+            ) {
+          results.insert_sample(item, inst, ++i);
 
-            const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-            if (observer && item->registered_data_ && vwd) {
-              Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
-              observer->on_sample_read(this, s);
-            }
+          const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+          if (observer && item->registered_data_ && vwd) {
+            Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
+            observer->on_sample_read(this, s);
           }
         }
       }
@@ -1402,28 +1448,25 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (!group_coherent_ordered) {
 #endif
+    HandleSet matches;
+    lookup_matching_instances(view_states, instance_states, matches);
+    for (HandleSet::iterator it = matches.begin(); it != matches.end(); ++it) {
+      const DDS::InstanceHandle_t handle = *it;
+      const SubscriptionInstance_rch inst = get_handle_instance(handle);
 
-    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-         iter != instances_.end();
-         ++iter) {
-      const DDS::InstanceHandle_t handle = iter->first;
-      const SubscriptionInstance_rch inst = iter->second;
-
-      if (inst->instance_state_->match(view_states, instance_states)) {
-        size_t i(0);
-        for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
-          if ((item->sample_state_ & sample_states)
+      size_t i(0);
+      for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
+        if ((item->sample_state_ & sample_states)
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-              && !item->coherent_change_
+            && !item->coherent_change_
 #endif
-              ) {
-            results.insert_sample(item, inst, ++i);
+            ) {
+          results.insert_sample(item, inst, ++i);
 
-            const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-            if (observer && item->registered_data_ && vwd) {
-              Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
-              observer->on_sample_taken(this, s);
-            }
+          const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+          if (observer && item->registered_data_ && vwd) {
+            Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
+            observer->on_sample_taken(this, s);
           }
         }
       }
@@ -1546,7 +1589,8 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
 #endif
                                            DDS_OPERATION_TAKE);
 
-  if (inst->instance_state_->match(view_states, instance_states)) {
+  const InstanceState_rch state_obj = inst->instance_state_;
+  if (state_obj->match(view_states, instance_states)) {
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
     size_t i(0);
     for (ReceivedDataElement* item = inst->rcvd_samples_.head_; item; item = item->next_data_sample_) {
@@ -1597,18 +1641,13 @@ DDS::ReturnCode_t read_next_instance_i(MessageSequenceType& received_data,
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
   typename InstanceMap::iterator it;
-  const typename InstanceMap::iterator the_end = instance_map_.end ();
+  const typename InstanceMap::iterator the_end = instance_map_.end();
+  const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
 
-  if (a_handle == DDS::HANDLE_NIL) {
-      it = instance_map_.begin();
-
+  if (pos != reverse_instance_map_.end()) {
+    it = pos->second;
   } else {
-    for (it = instance_map_.begin(); it != the_end; ++it) {
-      if (a_handle == it->second) {
-        ++it;
-        break;
-      }
-    }
+    it = the_end;
   }
 
   for (; it != the_end; ++it) {
@@ -1648,17 +1687,13 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
 
   typename InstanceMap::iterator it;
   const typename InstanceMap::iterator the_end = instance_map_.end ();
+  const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
 
-  if (a_handle == DDS::HANDLE_NIL) {
-    it = instance_map_.begin();
-
-  } else {
-    for (it = instance_map_.begin(); it != the_end; ++it) {
-      if (a_handle == it->second) {
-        ++it;
-        break;
-      }
-    }
+  if (pos != reverse_instance_map_.end()) {
+    it = pos->second;
+  }
+  else {
+    it = the_end;
   }
 
   DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
@@ -1785,19 +1820,19 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         handle, owns_handle);
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
-      const int ret = OpenDDS::DCPS::bind(instances_, handle, instance);
-
-      if (ret != 0)
-      {
+      const std::pair<typename SubscriptionInstanceMapType::iterator, bool> bpair =
+        instances_.insert(typename SubscriptionInstanceMapType::value_type(handle, instance));
+      if (bpair.second == false) {
         if (DCPS_debug_level > 0) {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%CDataReaderImpl::")
-                      ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("insert handle failed, ret = %d.\n"), TraitsType::type_name(), ret));
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("(%P|%t) ")
+                     ACE_TEXT("%CDataReaderImpl::")
+                     ACE_TEXT("store_instance_data, ")
+                     ACE_TEXT("insert handle failed.\n"), TraitsType::type_name()));
         }
         return;
       }
+      update_lookup_maps(bpair.first);
     }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -1813,7 +1848,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
 
       if (new_handle) {
-        std::pair<typename InstanceMap::iterator, bool> bpair =
+        const std::pair<typename InstanceMap::iterator, bool> bpair =
           inst->insert(typename InstanceMap::value_type(*instance_data,
             handle));
         if (bpair.second == false)
@@ -1856,6 +1891,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
       return;
     }
+    reverse_instance_map_[handle] = bpair.first;
   }
   else
   {
@@ -2469,6 +2505,9 @@ unique_ptr<DataAllocator>& data_allocator() { return filter_delayed_handler_->da
 RcHandle<FilterDelayedHandler> filter_delayed_handler_;
 
 InstanceMap instance_map_;
+ReverseInstanceMap reverse_instance_map_;
+LookupMap instance_state_lookup_;
+LookupMap view_state_lookup_;
 
 bool marshal_skip_serialize_;
 
