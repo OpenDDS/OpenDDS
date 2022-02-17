@@ -7,7 +7,7 @@ Overview
 ********
 
 GitHub Actions is the continuous integration solution currently being used to evaluate the readiness of pull requests.
-It builds OpenDDS and runs the test suite across a wide variety of operation systems and build configurations.
+\It builds OpenDDS and runs the test suite across a wide variety of operation systems and build configurations.
 
 *************************************
 Legend for GitHub Actions Build Names
@@ -17,7 +17,7 @@ Operating System
 ================
 
 * u18/u20 - Ubuntu 18.04/Ubuntu 20.04
-* w16/w19 - Windows Server 2016 (Visual Studio 2017)/Windows Server 2019 (Visual Studio 2019)
+* w19/w22 - Windows Server 2019 (Visual Studio 2019)/Windows Server 2022 (Visual Studio 2022)
 * m10 - MacOS 10.15
 
 .. seealso::
@@ -119,12 +119,11 @@ This job will then export an artifact to be used in the third step.
 The third step is the *test_* job, which runs the appropriate tests for the associated OpenDDS configuration.
 
 Certain builds do not follow this 3 step model.
-Safety Profile builds are done in one step due to cross-compile issues.
 Static and Release builds have a large footprint and therefore cannot fit the entire test suite onto a GitHub Actions runner.
 As a result, they only build and run a subset of the tests in their final jobs, but then have multiple final jobs to increase test coverage.
 These jobs are prefixed by:
 
-- *compiler_* which runs the :ghfile:`tests/DCPS/Compiler` tests.
+- *compiler_* (and for some build configurations, *compiler2_*) which runs the :ghfile:`tests/DCPS/Compiler` tests.
 - *unit_* which runs the unit tests located in :ghfile:`tests/unit-tests`.
 - *messenger_* which runs the tests in :ghfile:`tests/DCPS/Messenger` and :ghfile:`tests/DCPS/C++11/Messenger`.
 
@@ -154,7 +153,7 @@ There are similar test blockers which only block for specific GitHub Actions con
 
 * ``!GH_ACTIONS_ASAN`` blocks the Address Sanitizer builds
 
-* ``!GH_ACTIONS_W16`` blocks the Windows2016 runner
+* ``!GH_ACTIONS_W22`` blocks the Windows Server 2022 runner
 
 These blocks are necessary because certain tests cannot properly run on GitHub Actions due to how the runners are configured.
 ``-Config GH_ACTIONS`` is assumed by ``auto_run_tests.pl`` when running on GitHub Actions, but the other test configurations must be passed using ``-Config``.
@@ -194,7 +193,7 @@ Only Failing on CI
 
 * tests/DCPS/StringKey/run_test.pl
 
-  * A timeout occurs during the writer writing.  Fails on ``u18_bsafe_js0_FM-1f``.
+  * A timeout occurs during the writer writing.  Fails on ``test_u18_bsafe_js0_FM-1f``.
 
 * tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
 
@@ -220,7 +219,7 @@ Each test has a list of the builds it was failing on before being blocked.
 
 * tests/DCPS/BuiltInTopicTest/run_test.pl
 
-  * ``u18_esafe_js0``
+  * ``test_u18_esafe_js0``
 
 * tests/DCPS/CompatibilityTest/run_test.pl rtps_disc
 
@@ -248,25 +247,25 @@ Each test has a list of the builds it was failing on before being blocked.
 
 * tests/DCPS/Instances/run_test.pl [Multiple Configurations]
 
-  * ``u18_bsafe_js0_FM-1f``
+  * ``test_u18_bsafe_js0_FM-1f``
 
-  * ``u18_esafe_js0``
+  * ``test_u18_esafe_js0``
 
 * tests/DCPS/MultiDPTest/run_test.pl
 
-  * ``u18_bsafe_js0_FM-1f``
+  * ``test_u18_bsafe_js0_FM-1f``
 
-  * ``u18_esafe_js0``
+  * ``test_u18_esafe_js0``
 
 * tests/DCPS/NotifyTest/run_test.pl
 
 * tests/DCPS/Reconnect/run_test.pl restart_pub
 
-  * ``test_w16_x86_i0_sec``
+  * ``test_w22_x86_i0_sec``
 
 * tests/DCPS/Reconnect/run_test.pl restart_sub
 
-  * ``test_w16_x86_i0_sec``
+  * ``test_w22_x86_i0_sec``
 
 * tests/DCPS/ReliableBestEffortReaders/run_test.pl
 
@@ -280,9 +279,9 @@ Each test has a list of the builds it was failing on before being blocked.
 
 * tests/DCPS/TimeBasedFilter/run_test.pl -reliable
 
-  * ``u18_bsafe_js0_FM-1f``
+  * ``test_u18_bsafe_js0_FM-1f``
 
-  * ``u18_esafe_js0``
+  * ``test_u18_esafe_js0``
 
 Test Results
 ============
