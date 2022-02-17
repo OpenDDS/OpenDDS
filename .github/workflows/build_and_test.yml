@@ -9638,7 +9638,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_w22_p1_js0:
+  ACE_TAO_w22_p1:
 
     runs-on: windows-2022
 
@@ -9692,7 +9692,7 @@ jobs:
       shell: cmd
       run: |
         cd OpenDDS
-        configure --tests --ipv6 --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        configure --tests --ipv6 --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
@@ -9719,11 +9719,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_w22_p1_js0:
+  build_w22_p1:
 
     runs-on: windows-2022
 
-    needs: ACE_TAO_w22_p1_js0
+    needs: ACE_TAO_w22_p1
 
     steps:
     - name: install openssl & xerces-c
@@ -9751,32 +9751,32 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w22_p1_js0_artifact
+        name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1_js0.tar.xz
-        rm -f ACE_TAO_w22_p1_js0.tar.xz
+        tar xvfJ ACE_TAO_w22_p1.tar.xz
+        rm -f ACE_TAO_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - name: setup gtest
-      shell: cmd
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-        cmake --build . --target install
+#    - name: setup gtest
+#      shell: cmd
+#      run: |
+#        cd OpenDDS/tests/googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+#        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --no-rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -9805,11 +9805,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w22_p1_js0:
+  cmake_w22_p1:
 
     runs-on: windows-2022
 
-    needs: build_w22_p1_js0
+    needs: build_w22_p1
 
     steps:
     - name: install openssl & xerces-c
@@ -9842,25 +9842,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w22_p1_js0_artifact
+        name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1_js0.tar.xz
-        rm -f ACE_TAO_w22_p1_js0.tar.xz
+        tar xvfJ ACE_TAO_w22_p1.tar.xz
+        rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w22_p1_js0_artifact
+        name: build_w22_p1_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w22_p1_js0.tar.xz
-        rm -f build_w22_p1_js0.tar.xz
+        tar xvfJ build_w22_p1.tar.xz
+        rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.1
@@ -9931,11 +9931,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  messenger_w22_p1_js0:
+  messenger_w22_p1:
 
     runs-on: windows-2022
 
-    needs: build_w22_p1_js0
+    needs: build_w22_p1
 
     steps:
     - name: install openssl & xerces-c
@@ -9968,25 +9968,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w22_p1_js0_artifact
+        name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1_js0.tar.xz
-        rm -f ACE_TAO_w22_p1_js0.tar.xz
+        tar xvfJ ACE_TAO_w22_p1.tar.xz
+        rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w22_p1_js0_artifact
+        name: build_w22_p1_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w22_p1_js0.tar.xz
-        rm -f build_w22_p1_js0.tar.xz
+        tar xvfJ build_w22_p1.tar.xz
+        rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -10001,7 +10001,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make messenger tests
       shell: cmd
@@ -10016,7 +10016,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
     - name: make C++11 messenger test
       shell: cmd
       run: |
@@ -10050,7 +10050,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -10075,11 +10075,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  compiler_w22_p1_js0:
+  compiler_w22_p1:
 
     runs-on: windows-2022
 
-    needs: build_w22_p1_js0
+    needs: build_w22_p1
 
     steps:
     - name: install openssl & xerces-c
@@ -10112,25 +10112,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w22_p1_js0_artifact
+        name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1_js0.tar.xz
-        rm -f ACE_TAO_w22_p1_js0.tar.xz
+        tar xvfJ ACE_TAO_w22_p1.tar.xz
+        rm -f ACE_TAO_w22_p1.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w22_p1_js0_artifact
+        name: build_w22_p1_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w22_p1_js0.tar.xz
-        rm -f build_w22_p1_js0.tar.xz
+        tar xvfJ build_w22_p1.tar.xz
+        rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
@@ -10148,7 +10148,7 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install
     - name: configure compiler tests
       shell: cmd
@@ -10156,7 +10156,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\DCPS\Compiler
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=1 -features ssl=1
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make compiler tests
       shell: cmd
@@ -10191,7 +10191,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -10216,11 +10216,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  unit_w22_p1_js0:
+  unit_w22_p1:
 
     runs-on: windows-2022
 
-    needs: build_w22_p1_js0
+    needs: build_w22_p1
 
     steps:
     - name: install openssl & xerces-c
@@ -10253,27 +10253,27 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
-        name: ACE_TAO_w22_p1_js0_artifact
+        name: ACE_TAO_w22_p1_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1_js0.tar.xz
-        rm -f ACE_TAO_w22_p1_js0.tar.xz
+        tar xvfJ ACE_TAO_w22_p1.tar.xz
+        rm -f ACE_TAO_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
-        name: build_w22_p1_js0_artifact
+        name: build_w22_p1_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_w22_p1_js0.tar.xz
-        rm -f build_w22_p1_js0.tar.xz
+        tar xvfJ build_w22_p1.tar.xz
+        rm -f build_w22_p1.tar.xz
     - name: check build configuration
       shell: cmd
       run: |
@@ -10289,7 +10289,7 @@ jobs:
         mkdir build
         cd build
         mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
         cmake --build . --target install
     - name: configure unit tests
       shell: cmd
@@ -10297,7 +10297,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         cd tests\unit-tests
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=1 -features ssl=1
+        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: make unit tests
       shell: cmd
@@ -10332,7 +10332,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config CXX11"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_UNIT_TESTS -Config IPV6 -Config XERCES3 -Config CXX11 -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
