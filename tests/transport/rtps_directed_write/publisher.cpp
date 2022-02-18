@@ -11,7 +11,7 @@
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/DataSampleElement.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/NetworkResource.h>
 
 #include <ace/OS_main.h>
 #include <ace/Basic_Types.h>

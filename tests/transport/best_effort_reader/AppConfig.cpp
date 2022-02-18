@@ -74,7 +74,7 @@ bool AppConfig::configureTransport(){
     }
     rtpsUdp->datalink_release_delay_ = 0;
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
-    rtpsUdp->local_address(addr);
+    rtpsUdp->local_address(OpenDDS::DCPS::NetworkAddress(addr));
 
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
     cfg->instances_.push_back(transpt);

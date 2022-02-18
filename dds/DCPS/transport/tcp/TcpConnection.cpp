@@ -244,8 +244,8 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
     if (passive_setup_buffer_.length() >= hlen + sizeof(nprio)) {
 
       const std::string bufstr(passive_setup_buffer_.rd_ptr());
-      const NetworkAddress network_order_address(bufstr);
-      network_order_address.to_addr(remote_address_);
+      const NetworkResource network_resource(bufstr);
+      network_resource.to_addr(remote_address_);
 
       ACE_OS::memcpy(&nprio, passive_setup_buffer_.rd_ptr() + hlen, sizeof(nprio));
       transport_priority_ = ntohl(nprio);
@@ -258,7 +258,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
             LogAddr(remote_address_).c_str(), LogAddr(local_address_).c_str(),
             transport_priority_, reconnect_state_string()));
       if (DCPS_debug_level > 9) {
-        network_order_address.dump();
+        network_resource.dump();
       }
 
       // remove from reactor, normal recv strategy setup will add us back

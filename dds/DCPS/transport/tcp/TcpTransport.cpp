@@ -14,17 +14,18 @@
 #include "TcpDataLink.h"
 #include "TcpSynchResource.h"
 #include "TcpConnection.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/debug.h"
-#include "dds/DCPS/GuidConverter.h"
+
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/transport/framework/EntryExit.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/AssociationData.h>
+#include <dds/DCPS/debug.h>
+#include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/RcHandle_T.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/RcHandle_T.h>
 
 #include <sstream>
 

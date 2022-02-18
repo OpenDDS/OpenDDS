@@ -13,15 +13,15 @@
 #include "BestEffortSessionFactory.h"
 #include "ReliableSessionFactory.h"
 
+#include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/RepoIdConverter.h"
-#include "dds/DCPS/AssociationData.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/RepoIdConverter.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
 
-#include "ace/Log_Msg.h"
-#include "ace/Truncate.h"
+#include <ace/Log_Msg.h>
+#include <ace/Truncate.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -130,14 +130,14 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
 static bool
 get_remote_reliability(const TransportImpl::RemoteTransport& remote)
 {
-  NetworkAddress network_address;
+  NetworkResource network_resource;
   ACE_CDR::Boolean reliable;
 
   const size_t len = remote.blob_.length();
   const char* buffer = reinterpret_cast<const char*>(remote.blob_.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);
-  cdr >> network_address;
+  cdr >> network_resource;
   cdr >> ACE_InputCDR::to_boolean(reliable);
 
   return reliable;

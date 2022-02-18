@@ -90,7 +90,8 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
     if (tport.config().count_messages()) {
-      const InternalMessageCountKey key(remote_address, MCK_RTPS, remote_address == tport.config().rtps_relay_address());
+      const NetworkAddress ra(remote_address);
+      const InternalMessageCountKey key(ra, MCK_RTPS, ra == tport.config().rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
       tport.transport_statistics_.message_count[key].recv(ret);
     }
@@ -129,7 +130,8 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   message.block = head;
   if (serializer >> message) {
     if (tport.config().count_messages()) {
-      const InternalMessageCountKey key(remote_address, MCK_STUN, remote_address == tport.config().rtps_relay_address());
+      const NetworkAddress ra(remote_address);
+      const InternalMessageCountKey key(ra, MCK_STUN, ra == tport.config().rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
       tport.transport_statistics_.message_count[key].recv(ret);
     }
@@ -388,7 +390,7 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
   encoded_submsg_ = false;
 #endif
 
-  deliver_sample_i(sample, rsh.submessage_, remote_address);
+  deliver_sample_i(sample, rsh.submessage_, NetworkAddress(remote_address));
 }
 
 void
@@ -402,7 +404,7 @@ RtpsUdpReceiveStrategy::finish_message()
 void
 RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
                                          const RTPS::Submessage& submessage,
-                                         const ACE_INET_Addr& remote_addr)
+                                         const NetworkAddress& remote_addr)
 {
   using namespace RTPS;
   const SubmessageKind kind = submessage._d();
@@ -605,7 +607,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
 #ifdef OPENDDS_SECURITY
 void
 RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
-                                            const ACE_INET_Addr& remote_addr)
+                                            const NetworkAddress& remote_addr)
 {
   using namespace DDS::Security;
 

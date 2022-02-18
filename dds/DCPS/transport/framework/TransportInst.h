@@ -17,6 +17,7 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ReactorTask_rch.h"
+#include "dds/DCPS/NetworkAddress.h"
 #include "dds/DCPS/TimeDuration.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>

@@ -12,6 +12,7 @@
 
 #include "dds/DCPS/transport/framework/TransportInst.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+#include "dds/DCPS/NetworkAddress.h"
 
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 
@@ -57,8 +58,8 @@ public:
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const;
   const TransportBLOB* get_blob(const OpenDDS::DCPS::TransportLocatorSeq& trans_info) const;
 
-  ACE_INET_Addr multicast_group_address() const { return multicast_group_address_; }
-  void multicast_group_address(const ACE_INET_Addr& addr)
+  NetworkAddress multicast_group_address() const { return multicast_group_address_; }
+  void multicast_group_address(const NetworkAddress& addr)
   {
     if (addr.get_type() == AF_INET) {
       multicast_group_address_ = addr;
@@ -67,8 +68,8 @@ public:
     }
   }
 
-  ACE_INET_Addr local_address() const { return local_address_; }
-  void local_address(const ACE_INET_Addr& addr)
+  NetworkAddress local_address() const { return local_address_; }
+  void local_address(const NetworkAddress& addr)
   {
     if (addr.get_type() == AF_INET) {
       local_address_ = addr;
@@ -77,8 +78,8 @@ public:
     }
   }
 
-  ACE_INET_Addr advertised_address() const { return advertised_address_; }
-  void advertised_address(const ACE_INET_Addr& addr)
+  NetworkAddress advertised_address() const { return advertised_address_; }
+  void advertised_address(const NetworkAddress& addr)
   {
     if (addr.get_type() == AF_INET) {
       advertised_address_ = addr;
@@ -88,8 +89,8 @@ public:
   }
 
 #ifdef ACE_HAS_IPV6
-  ACE_INET_Addr ipv6_multicast_group_address() const { return ipv6_multicast_group_address_; }
-  void ipv6_multicast_group_address(const ACE_INET_Addr& addr)
+  NetworkAddress ipv6_multicast_group_address() const { return ipv6_multicast_group_address_; }
+  void ipv6_multicast_group_address(const NetworkAddress& addr)
   {
     if (addr.get_type() == AF_INET6) {
       ipv6_multicast_group_address_ = addr;
@@ -98,8 +99,8 @@ public:
     }
   }
 
-  ACE_INET_Addr ipv6_local_address() const { return ipv6_local_address_; }
-  void ipv6_local_address(const ACE_INET_Addr& addr)
+  NetworkAddress ipv6_local_address() const { return ipv6_local_address_; }
+  void ipv6_local_address(const NetworkAddress& addr)
   {
     if (addr.get_type() == AF_INET6) {
       ipv6_local_address_ = addr;
@@ -108,8 +109,8 @@ public:
     }
   }
 
-  ACE_INET_Addr ipv6_advertised_address() const { return ipv6_advertised_address_; }
-  void ipv6_advertised_address(const ACE_INET_Addr& addr)
+  NetworkAddress ipv6_advertised_address() const { return ipv6_advertised_address_; }
+  void ipv6_advertised_address(const NetworkAddress& addr)
   {
     if (addr.get_type() == AF_INET6) {
       ipv6_advertised_address_ = addr;
@@ -125,12 +126,12 @@ public:
   bool rtps_relay_only() const;
   void use_rtps_relay(bool flag);
   bool use_rtps_relay() const;
-  void rtps_relay_address(const ACE_INET_Addr& address);
-  ACE_INET_Addr rtps_relay_address() const;
+  void rtps_relay_address(const NetworkAddress& address);
+  NetworkAddress rtps_relay_address() const;
   void use_ice(bool flag);
   bool use_ice() const;
-  void stun_server_address(const ACE_INET_Addr& address);
-  ACE_INET_Addr stun_server_address() const;
+  void stun_server_address(const NetworkAddress& address);
+  NetworkAddress stun_server_address() const;
   ///}
 
   void update_locators(const RepoId& remote_id,
@@ -152,21 +153,21 @@ private:
   TransportReceiveListener_rch opendds_discovery_default_listener_;
   RepoId opendds_discovery_guid_;
 
-  ACE_INET_Addr multicast_group_address_;
-  ACE_INET_Addr local_address_;
-  ACE_INET_Addr advertised_address_;
+  NetworkAddress multicast_group_address_;
+  NetworkAddress local_address_;
+  NetworkAddress advertised_address_;
 #ifdef ACE_HAS_IPV6
-  ACE_INET_Addr ipv6_multicast_group_address_;
-  ACE_INET_Addr ipv6_local_address_;
-  ACE_INET_Addr ipv6_advertised_address_;
+  NetworkAddress ipv6_multicast_group_address_;
+  NetworkAddress ipv6_local_address_;
+  NetworkAddress ipv6_advertised_address_;
 #endif
 
   mutable ACE_SYNCH_MUTEX config_lock_;
   bool rtps_relay_only_;
   bool use_rtps_relay_;
-  ACE_INET_Addr rtps_relay_address_;
+  NetworkAddress rtps_relay_address_;
   bool use_ice_;
-  ACE_INET_Addr stun_server_address_;
+  NetworkAddress stun_server_address_;
 };
 
 inline void RtpsUdpInst::rtps_relay_only(bool flag)
@@ -199,15 +200,15 @@ inline bool RtpsUdpInst::use_rtps_relay() const
   return use_rtps_relay_;
 }
 
-inline void RtpsUdpInst::rtps_relay_address(const ACE_INET_Addr& address)
+inline void RtpsUdpInst::rtps_relay_address(const NetworkAddress& address)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
   rtps_relay_address_ = address;
 }
 
-inline ACE_INET_Addr RtpsUdpInst::rtps_relay_address() const
+inline NetworkAddress RtpsUdpInst::rtps_relay_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, NetworkAddress());
   return rtps_relay_address_;
 }
 
@@ -226,15 +227,15 @@ inline bool RtpsUdpInst::use_ice() const
   return use_ice_;
 }
 
-inline void RtpsUdpInst::stun_server_address(const ACE_INET_Addr& address)
+inline void RtpsUdpInst::stun_server_address(const NetworkAddress& address)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
   stun_server_address_ = address;
 }
 
-inline ACE_INET_Addr RtpsUdpInst::stun_server_address() const
+inline NetworkAddress RtpsUdpInst::stun_server_address() const
 {
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, ACE_INET_Addr());
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, NetworkAddress());
   return stun_server_address_;
 }
 

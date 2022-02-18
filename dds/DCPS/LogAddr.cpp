@@ -31,18 +31,36 @@ const String LogAddr::host(const ACE_INET_Addr& addr)
 
 LogAddr::LogAddr(const ACE_INET_Addr& addr, Option opt)
 {
-  if (opt == IpPort) {
-    addr_ = ip(addr) + ':' + port(addr);
-  } else if (opt == HostPort) {
-    addr_ = host(addr) + ':' + port(addr);
-  } else if (opt == Ip) {
-    addr_ = ip(addr);
-  } else if (opt == Port) {
-    addr_ = port(addr);
-  } else if (opt == Host) {
-    addr_ = host(addr);
-  } else if (opt == IpPortHost) {
-    addr_ = ip(addr) + ':' + port(addr) + " (" + host(addr) + ')';
+  init_addr(addr, opt);
+}
+
+LogAddr::LogAddr(const NetworkAddress& addr, Option opt)
+{
+  init_addr(addr.to_addr(), opt);
+}
+
+void LogAddr::init_addr(const ACE_INET_Addr& addr, Option opt)
+{
+  switch (opt) {
+    case IpPort:
+      addr_ = ip(addr) + ':' + port(addr);
+      break;
+    case HostPort:
+      addr_ = host(addr) + ':' + port(addr);
+      break;
+    case Ip:
+      addr_ = ip(addr);
+      break;
+    case Port:
+      addr_ = port(addr);
+      break;
+    case Host:
+      addr_ = host(addr);
+      break;
+    case IpPortHost:
+      addr_ = ip(addr) + ':' + port(addr) + " (" + host(addr) + ')';
+    default:
+      break;
   }
 }
 

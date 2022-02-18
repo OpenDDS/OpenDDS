@@ -21,28 +21,29 @@
 #include "idl2jni_runtime.h"
 #include "OpenDDS_jni_helpers.h"
 
-#include "dds/DCPS/Service_Participant.h"
+#include <dds/DCPS/Service_Participant.h>
 
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
-#include "dds/DCPS/transport/framework/PoolSynchStrategy.h"
-#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/udp/UdpInst.h"
-#include "dds/DCPS/transport/multicast/MulticastInst.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
-#include "dds/DCPS/transport/tcp/TcpInst_rch.h"
-#include "dds/DCPS/transport/udp/UdpInst_rch.h"
-#include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/PerConnectionSynchStrategy.h>
+#include <dds/DCPS/transport/framework/PoolSynchStrategy.h>
+#include <dds/DCPS/transport/framework/NullSynchStrategy.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
+#include <dds/DCPS/transport/udp/UdpInst.h>
+#include <dds/DCPS/transport/multicast/MulticastInst.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
+#include <dds/DCPS/transport/tcp/TcpInst_rch.h>
+#include <dds/DCPS/transport/udp/UdpInst_rch.h>
+#include <dds/DCPS/transport/multicast/MulticastInst_rch.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
+#include <dds/DCPS/transport/framework/TransportInst_rch.h>
 
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/EntityImpl.h"
-#include "dds/DCPS/WaitSet.h"
-#include "dds/DCPS/GuardCondition.h"
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/EntityImpl.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
+#include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/LogAddr.h>
 
 #include "DdsDcpsDomainJC.h"
@@ -1109,7 +1110,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setLocalAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  ACE_INET_Addr addr(jsm_val.c_str());
+  OpenDDS::DCPS::NetworkAddress addr(jsm_val.c_str());
   inst->local_address(addr);
 }
 
@@ -1143,7 +1144,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setMulticastGroupAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  ACE_INET_Addr addr(jsm_val.c_str());
+  OpenDDS::DCPS::NetworkAddress addr(jsm_val.c_str());
   inst->multicast_group_address(addr);
 }
 
