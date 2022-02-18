@@ -84,7 +84,7 @@ public:
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch) {}
   virtual void release_instance_i(DDS::InstanceHandle_t) {}
-  virtual void state_updated_i(DDS::InstanceHandle_t handle) {}
+  virtual void state_updated_i(DDS::InstanceHandle_t) {}
   void release_all_instances() {}
   virtual OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>
   dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,

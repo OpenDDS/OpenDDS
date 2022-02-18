@@ -1078,20 +1078,20 @@ namespace OpenDDS {
 protected:
 
   // Update max flag if the spec ever changes
-  const CORBA::ULong MAX_VIEW_STATE_FLAG = DDS::NOT_NEW_VIEW_STATE;
-  const CORBA::ULong MAX_VIEW_STATE_MASK = (MAX_VIEW_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_VIEW_STATE_FLAG = DDS::NOT_NEW_VIEW_STATE;
+  static const CORBA::ULong MAX_VIEW_STATE_MASK = (MAX_VIEW_STATE_FLAG << 1) - 1;
 
   // Update max flag if the spec ever changes
-  const CORBA::ULong MAX_INSTANCE_STATE_FLAG = DDS::ALIVE_INSTANCE_STATE;
-  const CORBA::ULong MAX_INSTANCE_STATE_MASK = (MAX_INSTANCE_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_INSTANCE_STATE_FLAG = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+  static const CORBA::ULong MAX_INSTANCE_STATE_MASK = (MAX_INSTANCE_STATE_FLAG << 1) - 1;
 
   void initialize_lookup_maps()
   {
-    for (CORBA::ULong i = 0; i < MAX_VIEW_STATE_MASK; ++i) {
+    for (CORBA::ULong i = 0; i <= MAX_VIEW_STATE_MASK; ++i) {
       view_state_lookup_[i] = HandleSet();
     }
 
-    for (CORBA::ULong i = 0; i < MAX_INSTANCE_STATE_MASK; ++i) {
+    for (CORBA::ULong i = 0; i <= MAX_INSTANCE_STATE_MASK; ++i) {
       instance_state_lookup_[i] = HandleSet();
     }
   }
