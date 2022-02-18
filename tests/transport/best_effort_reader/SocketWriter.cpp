@@ -12,9 +12,9 @@
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SendStateDataSampleList.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
 
 #include <dds/DdsDcpsGuidC.h>
 

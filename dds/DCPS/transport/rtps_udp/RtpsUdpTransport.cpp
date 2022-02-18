@@ -336,10 +336,10 @@ RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,
     if (locator_to_address(addr, locators[i], false) == 0) {
       if (addr.is_multicast()) {
         if (config().use_multicast_ && mc_addrs) {
-          mc_addrs->insert(addr);
+          mc_addrs->insert(NetworkAddress(addr));
         }
       } else if (uc_addrs) {
-        uc_addrs->insert(addr);
+        uc_addrs->insert(NetworkAddress(addr));
       }
     }
   }
@@ -460,9 +460,9 @@ bool
 RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 {
   // Override with DCPSDefaultAddress.
-  if (config.local_address() == ACE_INET_Addr() &&
+  if (config.local_address() == NetworkAddress() &&
       TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-    config.local_address(TheServiceParticipant->default_address());
+    config.local_address(NetworkAddress(TheServiceParticipant->default_address()));
   }
   if (config.multicast_interface_.empty() &&
     TheServiceParticipant->default_address() != ACE_INET_Addr()) {
@@ -475,7 +475,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   // detect and report errors during DataReader/Writer setup instead
   // of during association.
 
-  ACE_INET_Addr address = config.local_address();
+  ACE_INET_Addr address = config.local_address().to_addr();
 
   if (unicast_socket_.open(address, PF_INET) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -505,7 +505,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
-  config.local_address(address);
+  config.local_address(NetworkAddress(address));
 
 #ifdef ACE_RECVPKTINFO
   int sockopt = 1;
@@ -515,7 +515,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 #endif
 
 #ifdef ACE_HAS_IPV6
-  address = config.ipv6_local_address();
+  address = config.ipv6_local_address().to_addr();
 
   if (ipv6_unicast_socket_.open(address, PF_INET6) != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -545,7 +545,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
-  config.ipv6_local_address(address);
+  config.ipv6_local_address(NetworkAddress(address));
 
 #ifdef ACE_RECVPKTINFO6
   if (ipv6_unicast_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
@@ -713,7 +713,7 @@ ICE::AddressListType
 RtpsUdpTransport::IceEndpoint::host_addresses() const {
   ICE::AddressListType addresses;
 
-  ACE_INET_Addr addr = transport.config().local_address();
+  ACE_INET_Addr addr = transport.config().local_address().to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
@@ -730,7 +730,7 @@ RtpsUdpTransport::IceEndpoint::host_addresses() const {
   }
 
 #ifdef ACE_HAS_IPV6
-  addr = transport.config().ipv6_local_address();
+  addr = transport.config().ipv6_local_address().to_addr();
   if (addr != ACE_INET_Addr()) {
     if (addr.is_any()) {
       ICE::AddressListType addrs;
@@ -782,7 +782,8 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
       for (int i = 0; i < num_blocks; ++i) {
         bytes += iov[i].iov_len;
       }
-      const InternalMessageCountKey key(destination, MCK_STUN, destination == transport.config().rtps_relay_address());
+      const NetworkAddress da(destination);
+      const InternalMessageCountKey key(da, MCK_STUN, da == transport.config().rtps_relay_address());
       ACE_GUARD(ACE_Thread_Mutex, g, transport.transport_statistics_mutex_);
       transport.transport_statistics_.message_count[key].send_fail(bytes);
     }
@@ -792,7 +793,8 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
                  "failed to send STUN message\n"));
     }
   } else if (transport.config().count_messages()) {
-    const InternalMessageCountKey key(destination, MCK_STUN, destination == transport.config().rtps_relay_address());
+    const NetworkAddress da(destination);
+    const InternalMessageCountKey key(da, MCK_STUN, da == transport.config().rtps_relay_address());
     ACE_GUARD(ACE_Thread_Mutex, g, transport.transport_statistics_mutex_);
     transport.transport_statistics_.message_count[key].send(result);
   }
@@ -800,7 +802,7 @@ RtpsUdpTransport::IceEndpoint::send(const ACE_INET_Addr& destination, const STUN
 
 ACE_INET_Addr
 RtpsUdpTransport::IceEndpoint::stun_server_address() const {
-  return transport.config().stun_server_address();
+  return transport.config().stun_server_address().to_addr();
 }
 
 void
@@ -872,7 +874,7 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, relay_stun_mutex_);
 
-  const ACE_INET_Addr relay_address = config().rtps_relay_address();
+  const ACE_INET_Addr relay_address = config().rtps_relay_address().to_addr();
 
   if ((config().use_rtps_relay() || config().rtps_relay_only()) &&
       relay_address != ACE_INET_Addr() &&

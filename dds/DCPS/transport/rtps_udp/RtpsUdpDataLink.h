@@ -122,30 +122,30 @@ public:
 
   void received(const RTPS::DataSubmessage& data,
                 const GuidPrefix_t& src_prefix,
-                const ACE_INET_Addr& remote_addr);
+                const NetworkAddress& remote_addr);
 
   void received(const RTPS::GapSubmessage& gap,
                 const GuidPrefix_t& src_prefix,
                 bool directed,
-                const ACE_INET_Addr& remote_addr);
+                const NetworkAddress& remote_addr);
 
   void received(const RTPS::HeartBeatSubmessage& heartbeat,
                 const GuidPrefix_t& src_prefix,
                 bool directed,
-                const ACE_INET_Addr& remote_addr);
+                const NetworkAddress& remote_addr);
 
   void received(const RTPS::HeartBeatFragSubmessage& hb_frag,
                 const GuidPrefix_t& src_prefix,
                 bool directed,
-                const ACE_INET_Addr& remote_addr);
+                const NetworkAddress& remote_addr);
 
   void received(const RTPS::AckNackSubmessage& acknack,
                 const GuidPrefix_t& src_prefix,
-                const ACE_INET_Addr& remote_addr);
+                const NetworkAddress& remote_addr);
 
   void received(const RTPS::NackFragSubmessage& nackfrag,
                 const GuidPrefix_t& src_prefix,
-                const ACE_INET_Addr& remote_addr);
+                const NetworkAddress& remote_addr);
 
   const GuidPrefix_t& local_prefix() const { return local_prefix_; }
 
@@ -276,7 +276,7 @@ private:
     AddrSet unicast_addrs_;
     AddrSet multicast_addrs_;
     bool requires_inline_qos_;
-    ACE_INET_Addr last_recv_addr_;
+    NetworkAddress last_recv_addr_;
     MonotonicTimePoint last_recv_time_;
     size_t ref_count_;
     bool insert_recv_addr(AddrSet& aset) const;
@@ -289,7 +289,7 @@ private:
 #endif
   RemoteInfoMap locators_;
 
-  void update_last_recv_addr(const RepoId& src, const ACE_INET_Addr& addr);
+  void update_last_recv_addr(const RepoId& src, const NetworkAddress& addr);
 
   mutable LocatorCache locator_cache_;
   mutable BundlingCache bundling_cache_;
@@ -718,7 +718,7 @@ private:
                                OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
                                CountKeeper& counts);
 
-  void queue_submessages(MetaSubmessageVec& meta_submessages);
+  void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
   void bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_submessages);
 
   typedef OPENDDS_MAP(ACE_thread_t, MetaSubmessageVecVec) ThreadSendQueueMap;

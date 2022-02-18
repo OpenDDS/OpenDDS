@@ -6,25 +6,28 @@
  */
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
-#include "NetworkAddress.h"
-#include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/TimeTypes.h"
-#include "ace/OS_NS_netdb.h"
-#include "ace/Sock_Connect.h"
-#include "ace/OS_NS_sys_socket.h" // For setsockopt()
-#include "ace/OS_NS_arpa_inet.h"
+
+#include "NetworkResource.h"
+
+#include "LogAddr.h"
+#include "TimeTypes.h"
+
+#include <ace/OS_NS_netdb.h>
+#include <ace/Sock_Connect.h>
+#include <ace/OS_NS_sys_socket.h> // For setsockopt()
+#include <ace/OS_NS_arpa_inet.h>
 
 #include <cstdlib>
 #include <cstring>
 
 #if !defined (__ACE_INLINE__)
-# include "NetworkAddress.inl"
+# include "NetworkResource.inl"
 #endif /* !__ACE_INLINE__ */
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 
 ACE_CDR::Boolean
-operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
+operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkResource& value)
 {
   return (outCdr << ACE_OutputCDR::from_boolean(ACE_CDR_BYTE_ORDER)) &&
          (outCdr << ACE_OutputCDR::from_octet(value.reserved_)) &&
@@ -32,7 +35,7 @@ operator<< (ACE_OutputCDR& outCdr, OpenDDS::DCPS::NetworkAddress& value)
 }
 
 ACE_CDR::Boolean
-operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkAddress& value)
+operator>> (ACE_InputCDR& inCdr, OpenDDS::DCPS::NetworkResource& value)
 {
   CORBA::Boolean byte_order;
 
@@ -92,7 +95,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
     } else {
       for (size_t i = 0; i < addr_count; i++) {
-        VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkAddress: found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
+        VDBG_LVL((LM_DEBUG, "(%P|%t) NetworkResource: found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
       }
 
 #ifdef ACE_HAS_IPV6

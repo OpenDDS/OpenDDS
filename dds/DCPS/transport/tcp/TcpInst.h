@@ -12,11 +12,12 @@
 #include "TcpTransport.h"
 
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportInst.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "ace/INET_Addr.h"
-#include "ace/SString.h"
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+
+#include <ace/INET_Addr.h>
+#include <ace/SString.h>
 
 #include <string>
 

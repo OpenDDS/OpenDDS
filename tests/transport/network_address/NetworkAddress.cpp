@@ -1,4 +1,4 @@
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/TransportDebug.h>
 
 #include <ace/Init_ACE.h>
@@ -28,7 +28,7 @@ private:
 
 // Tests
 
-TEST(dds_DCPS_transport_framework_NetworkAddress, choose_single_coherent_address_double)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_double)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -48,7 +48,7 @@ TEST(dds_DCPS_transport_framework_NetworkAddress, choose_single_coherent_address
   }
 }
 
-TEST(dds_DCPS_transport_framework_NetworkAddress, choose_single_coherent_address_triple)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_triple)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 

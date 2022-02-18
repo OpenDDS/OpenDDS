@@ -15,10 +15,11 @@
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 #include "Definitions.h"
-#include "PoolAllocator.h"
-#include "TimeTypes.h"
 #include "GuidUtils.h"
+#include "NetworkAddress.h"
+#include "PoolAllocator.h"
 #include "RcObject.h"
+#include "TimeTypes.h"
 
 #include "ace/INET_Addr.h"
 
@@ -27,7 +28,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-typedef OPENDDS_SET(ACE_INET_Addr) AddrSet;
 typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 
 struct AddressCacheEntry : public virtual RcObject {

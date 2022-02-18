@@ -110,9 +110,10 @@ RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
     return -1;
   }
 
-  OPENDDS_SET(ACE_INET_Addr) addrs;
+  AddrSet addrs;
   if (elem->subscription_id() != GUID_UNKNOWN) {
     addrs = link_->get_addresses(elem->publication_id(), elem->subscription_id());
+
   } else {
     addrs = link_->get_addresses(elem->publication_id());
   }
@@ -129,14 +130,14 @@ RtpsUdpSendStrategy::send_bytes_i_helper(const iovec iov[], int n)
 }
 
 RtpsUdpSendStrategy::OverrideToken
-RtpsUdpSendStrategy::override_destinations(const ACE_INET_Addr& destination)
+RtpsUdpSendStrategy::override_destinations(const NetworkAddress& destination)
 {
   override_single_dest_ = &destination;
   return OverrideToken(this);
 }
 
 RtpsUdpSendStrategy::OverrideToken
-RtpsUdpSendStrategy::override_destinations(const OPENDDS_SET(ACE_INET_Addr)& dest)
+RtpsUdpSendStrategy::override_destinations(const AddrSet& dest)
 {
   override_dest_ = &dest;
   return OverrideToken(this);
@@ -175,7 +176,7 @@ namespace {
 void
 RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
                                        ACE_Message_Block& submessages,
-                                       const ACE_INET_Addr& addr)
+                                       const NetworkAddress& addr)
 {
   {
     ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
@@ -215,7 +216,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
 void
 RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
                                        ACE_Message_Block& submessages,
-                                       const OPENDDS_SET(ACE_INET_Addr)& addrs)
+                                       const AddrSet& addrs)
 {
   {
     ACE_GUARD(ACE_Thread_Mutex, g, rtps_message_mutex_);
@@ -263,12 +264,12 @@ RtpsUdpSendStrategy::append_submessages(const RTPS::SubmessageSeq& submessages)
 
 ssize_t
 RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
-                                  const OPENDDS_SET(ACE_INET_Addr)& addrs)
+                                  const AddrSet& addrs)
 {
   ssize_t result = -1;
-  typedef OPENDDS_SET(ACE_INET_Addr)::const_iterator iter_t;
+  typedef AddrSet::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
-    if (*iter == ACE_INET_Addr()) {
+    if (*iter == NetworkAddress()) {
       continue;
     }
     const ssize_t result_per_dest = send_single_i(iov, n, *iter);
@@ -280,7 +281,7 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
 }
 
 const ACE_SOCK_Dgram&
-RtpsUdpSendStrategy::choose_send_socket(const ACE_INET_Addr& addr) const
+RtpsUdpSendStrategy::choose_send_socket(const NetworkAddress& addr) const
 {
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
@@ -293,9 +294,9 @@ RtpsUdpSendStrategy::choose_send_socket(const ACE_INET_Addr& addr) const
 
 ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
-                                   const ACE_INET_Addr& addr)
+                                   const NetworkAddress& addr)
 {
-  OPENDDS_ASSERT(addr != ACE_INET_Addr());
+  OPENDDS_ASSERT(addr != NetworkAddress());
 
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
@@ -318,13 +319,13 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     std::memcpy(iter, iov[i].iov_base, iov[i].iov_len);
     iter += iov[i].iov_len;
   }
-  const ssize_t result = socket.send(buffer, iter - buffer, addr);
+  const ssize_t result = socket.send(buffer, iter - buffer, addr.to_addr());
 #else
-  const ssize_t result = socket.send(iov, n, addr);
+  const ssize_t result = socket.send(iov, n, addr.to_addr());
 #endif
   if (result < 0) {
     if (link_->transport().config().count_messages()) {
-      const InternalMessageCountKey key(addr, MCK_RTPS, addr == link_->transport().config().rtps_relay_address());
+      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(link_->transport().config().rtps_relay_address()));
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().transport_statistics_mutex_, -1);
       link_->transport().transport_statistics_.message_count[key].send_fail(result);
     }
@@ -348,7 +349,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
     errno = err;
   } else {
     if (link_->transport().config().count_messages()) {
-      const InternalMessageCountKey key(addr, MCK_RTPS, addr == link_->transport().config().rtps_relay_address());
+      const InternalMessageCountKey key(addr, MCK_RTPS, addr == NetworkAddress(link_->transport().config().rtps_relay_address()));
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, link_->transport().transport_statistics_mutex_, -1);
       link_->transport().transport_statistics_.message_count[key].send(result);
     }

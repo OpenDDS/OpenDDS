@@ -17,7 +17,7 @@
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
+#include <dds/DCPS/NetworkResource.h>
 
 #include <cstring>
 

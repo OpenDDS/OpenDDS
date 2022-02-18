@@ -9,9 +9,11 @@
 #include "TcpDataLink.h"
 #include "TcpSendStrategy.h"
 #include "TcpReceiveStrategy.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "ace/SOCK_Connector.h"
-#include "dds/DCPS/transport/framework/EntryExit.h"
+
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/EntryExit.h>
+
+#include <ace/SOCK_Connector.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

@@ -12,14 +12,14 @@
 #include "UdpReceiveStrategy.h"
 
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/PriorityKey.h"
-#include "dds/DCPS/transport/framework/TransportClient.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/AssociationData.h"
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/PriorityKey.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/AssociationData.h>
 
-#include "ace/CDR_Base.h"
-#include "ace/Log_Msg.h"
+#include <ace/CDR_Base.h>
+#include <ace/Log_Msg.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -213,14 +213,14 @@ ACE_INET_Addr
 UdpTransport::get_connection_addr(const TransportBLOB& data) const
 {
   ACE_INET_Addr local_address;
-  NetworkAddress network_address;
+  NetworkResource network_resource;
 
   size_t len = data.length();
   const char* buffer = reinterpret_cast<const char*>(data.get_buffer());
 
   ACE_InputCDR cdr(buffer, len);
-  if (cdr >> network_address) {
-    network_address.to_addr(local_address);
+  if (cdr >> network_resource) {
+    network_resource.to_addr(local_address);
   }
 
   return local_address;
@@ -248,17 +248,17 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
                           ACE_INET_Addr local_addr,
                           bool active)
 {
-  NetworkAddress network_order_address;
+  NetworkResource network_resource;
   ACE_InputCDR cdr((const char*)remote.get_buffer(), remote.length());
 
-  if (!(cdr >> network_order_address)) {
+  if (!(cdr >> network_resource)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: UdpTransport::blob_to_key")
-               ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+               ACE_TEXT(" failed to de-serialize the NetworkResource\n")));
   }
 
   ACE_INET_Addr remote_address;
-  network_order_address.to_addr(remote_address);
+  network_resource.to_addr(remote_address);
   const bool is_loopback = remote_address == local_addr;
 
   return PriorityKey(priority, remote_address, is_loopback, active);

@@ -12,18 +12,18 @@
 #include "MulticastSendStrategy.h"
 #include "MulticastReceiveStrategy.h"
 
-#include "ace/Default_Constants.h"
-#include "ace/Global_Macros.h"
-#include "ace/Log_Msg.h"
-#include "ace/Truncate.h"
-#include "ace/OS_NS_sys_socket.h"
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/RepoIdConverter.h>
 
-#include "tao/ORB_Core.h"
+#include <tao/ORB_Core.h>
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/RepoIdConverter.h"
+#include <ace/Default_Constants.h>
+#include <ace/Global_Macros.h>
+#include <ace/Log_Msg.h>
+#include <ace/Truncate.h>
+#include <ace/OS_NS_sys_socket.h>
 
 #ifndef __ACE_INLINE__
 # include "MulticastDataLink.inl"
