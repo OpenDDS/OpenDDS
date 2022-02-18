@@ -26,8 +26,11 @@ OpenDDS::DCPS::InstanceState::accessed()
   // Manage the view state due to data access here.
   //
   if (view_state_ & DDS::ANY_VIEW_STATE) {
+    const bool updated = (view_state_ != DDS::NOT_NEW_VIEW_STATE);
     view_state_ = DDS::NOT_NEW_VIEW_STATE;
-    state_updated();
+    if (updated) {
+      state_updated();
+    }
   }
 }
 
@@ -77,6 +80,9 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   //
   writers_.insert(writer_id);
 
+  const CORBA::ULong old_view_state = view_state_;
+  const CORBA::ULong old_instance_state = instance_state_;
+
   switch (view_state_) {
   case DDS::NEW_VIEW_STATE:
     break;
@@ -84,13 +90,11 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   case DDS::NOT_NEW_VIEW_STATE:
     if (instance_state_ & DDS::NOT_ALIVE_INSTANCE_STATE) {
       view_state_ = DDS::NEW_VIEW_STATE;
-      state_updated();
     }
     break;
 
   default:
     view_state_ = DDS::NEW_VIEW_STATE;
-    state_updated();
     break;
   }
 
@@ -108,7 +112,10 @@ OpenDDS::DCPS::InstanceState::data_was_received(const PublicationId& writer_id)
   }
 
   instance_state_ = DDS::ALIVE_INSTANCE_STATE;
-  state_updated();
+
+  if (view_state_ != old_view_state || instance_state_ != old_instance_state) {
+    state_updated();
+  }
 }
 
 ACE_INLINE
@@ -127,8 +134,11 @@ OpenDDS::DCPS::InstanceState::lively(const PublicationId& writer_id)
     cancel_release(); // cancel unregister
 
     ++no_writers_generation_count_;
+    const bool updated = (instance_state_ != DDS::ALIVE_INSTANCE_STATE);
     instance_state_ = DDS::ALIVE_INSTANCE_STATE;
-    state_updated();
+    if (updated) {
+      state_updated();
+    }
   }
 }
 

@@ -1117,6 +1117,17 @@ protected:
     }
   }
 
+  void remove_from_lookup_maps(DDS::InstanceHandle_t handle)
+  {
+    for (LookupMap::iterator it = view_state_lookup_.begin(), the_end = view_state_lookup_.end(); it != the_end; ++it) {
+      it->second.erase(handle);
+    }
+
+    for (LookupMap::iterator it = instance_state_lookup_.begin(), the_end = instance_state_lookup_.end(); it != the_end; ++it) {
+      it->second.erase(handle);
+    }
+  }
+
   void lookup_matching_instances(CORBA::ULong view_states, CORBA::ULong instance_states, HandleSet& output)
   {
     view_states &= MAX_VIEW_STATE_MASK;
@@ -1301,6 +1312,7 @@ protected:
   {
     const typename ReverseInstanceMap::iterator pos = reverse_instance_map_.find(handle);
     if (pos != reverse_instance_map_.end()) {
+      remove_from_lookup_maps(handle);
       instance_map_.erase(pos->second);
       reverse_instance_map_.erase(pos);
     }
@@ -1636,20 +1648,20 @@ DDS::ReturnCode_t read_next_instance_i(MessageSequenceType& received_data,
   int)
 #endif
 {
-  DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
-
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
-  typename InstanceMap::iterator it;
+  typename InstanceMap::iterator it = instance_map_.begin();
   const typename InstanceMap::iterator the_end = instance_map_.end();
-  const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
-
-  if (pos != reverse_instance_map_.end()) {
-    it = pos->second;
-  } else {
-    it = the_end;
+  if (a_handle != DDS::HANDLE_NIL) {
+    const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
+    if (pos != reverse_instance_map_.end()) {
+      it = pos->second;
+    } else {
+      it = the_end;
+    }
   }
 
+  DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
   for (; it != the_end; ++it) {
     handle = it->second;
     const DDS::ReturnCode_t status =
@@ -1685,15 +1697,15 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
 
-  typename InstanceMap::iterator it;
-  const typename InstanceMap::iterator the_end = instance_map_.end ();
-  const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
-
-  if (pos != reverse_instance_map_.end()) {
-    it = pos->second;
-  }
-  else {
-    it = the_end;
+  typename InstanceMap::iterator it = instance_map_.begin();
+  const typename InstanceMap::iterator the_end = instance_map_.end();
+  if (a_handle != DDS::HANDLE_NIL) {
+    const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
+    if (pos != reverse_instance_map_.end()) {
+      it = pos->second;
+    } else {
+      it = the_end;
+    }
   }
 
   DDS::InstanceHandle_t handle(DDS::HANDLE_NIL);
