@@ -142,7 +142,7 @@ int ReactorTask::svc()
     }
     reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
 
-    interceptor_ = make_rch<Interceptor>(this);
+    interceptor_ = make_rch<Interceptor>(this, reactor_, reactor_owner_);
 
     // Advance the state.
     state_ = STATE_RUNNING;

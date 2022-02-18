@@ -83,8 +83,8 @@ private:
 
   class Interceptor : public DCPS::ReactorInterceptor {
   public:
-    explicit Interceptor(DCPS::ReactorTask* task)
-     : ReactorInterceptor(task->get_reactor(), task->get_reactor_owner())
+    Interceptor(DCPS::ReactorTask* task, ACE_Reactor* reactor, ACE_thread_t owner)
+     : ReactorInterceptor(reactor, owner)
      , task_(task)
      {}
     bool reactor_is_shut_down() const
