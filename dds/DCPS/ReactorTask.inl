@@ -55,7 +55,7 @@ void ReactorTask::wait_for_startup() const
 ACE_INLINE
 void ReactorTask::wait_for_startup_i() const
 {
-  while (state_ != STATE_RUNNING) {
+  while (state_ == STATE_UNINITIALIZED || state_ == STATE_OPENING) {
     condition_.wait(*thread_status_manager_);
   }
 }
@@ -64,7 +64,7 @@ ACE_INLINE
 bool ReactorTask::is_shut_down() const
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
-  return state_ == STATE_NOT_RUNNING;
+  return state_ == STATE_SHUT_DOWN;
 }
 
 ACE_INLINE

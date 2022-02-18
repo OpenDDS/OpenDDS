@@ -79,7 +79,7 @@ private:
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
     ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
 
-  enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
+  enum State { STATE_UNINITIALIZED, STATE_OPENING, STATE_RUNNING, STATE_SHUT_DOWN };
 
   class Interceptor : public DCPS::ReactorInterceptor {
   public:
@@ -107,8 +107,6 @@ private:
 #define OPENDDS_REACTOR_TASK_ASYNC
   bool use_async_send_;
 #endif
-
-  TimerQueueType* timer_queue_;
 
   // thread status reporting
   String name_;

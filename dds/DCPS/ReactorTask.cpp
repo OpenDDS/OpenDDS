@@ -29,14 +29,13 @@ namespace DCPS {
 
 ReactorTask::ReactorTask(bool useAsyncSend)
   : condition_(lock_)
-  , state_(STATE_NOT_RUNNING)
+  , state_(STATE_UNINITIALIZED)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
 #ifdef OPENDDS_REACTOR_TASK_ASYNC
   , use_async_send_(useAsyncSend)
 #endif
-  , timer_queue_(0)
   , thread_status_manager_(0)
 {
   ACE_UNUSED_ARG(useAsyncSend);
@@ -61,8 +60,6 @@ void ReactorTask::cleanup()
 
   delete reactor_;
   reactor_ = 0;
-  delete timer_queue_;
-  timer_queue_ = 0;
 }
 
 int ReactorTask::open_reactor_task(void*,
@@ -91,11 +88,6 @@ int ReactorTask::open_reactor_task(void*,
   if (!reactor_) {
     reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
     proactor_ = 0;
-  }
-
-  if (!timer_queue_) {
-    timer_queue_ = new TimerQueueType();
-    reactor_->timer_queue(timer_queue_);
   }
 
   state_ = STATE_OPENING;
@@ -188,12 +180,12 @@ void ReactorTask::stop()
   {
     GuardType guard(lock_);
 
-    if (state_ == STATE_NOT_RUNNING) {
+    if (state_ == STATE_UNINITIALIZED || state_ == STATE_SHUT_DOWN) {
       // We are already "stopped".  Just return.
       return;
     }
 
-    state_ = STATE_NOT_RUNNING;
+    state_ = STATE_SHUT_DOWN;
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
     // Remove the proactor handler so the reactor stops forwarding messages.
