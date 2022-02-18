@@ -108,6 +108,8 @@ private:
   bool use_async_send_;
 #endif
 
+  TimerQueueType* timer_queue_;
+
   // thread status reporting
   String name_;
 

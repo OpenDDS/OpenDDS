@@ -36,6 +36,7 @@ ReactorTask::ReactorTask(bool useAsyncSend)
 #ifdef OPENDDS_REACTOR_TASK_ASYNC
   , use_async_send_(useAsyncSend)
 #endif
+  , timer_queue_(0)
   , thread_status_manager_(0)
 {
   ACE_UNUSED_ARG(useAsyncSend);
@@ -60,6 +61,8 @@ void ReactorTask::cleanup()
 
   delete reactor_;
   reactor_ = 0;
+  delete timer_queue_;
+  timer_queue_ = 0;
 }
 
 int ReactorTask::open_reactor_task(void*,
@@ -88,6 +91,11 @@ int ReactorTask::open_reactor_task(void*,
   if (!reactor_) {
     reactor_ = new ACE_Reactor(new ACE_Select_Reactor, true);
     proactor_ = 0;
+  }
+
+  if (!timer_queue_) {
+    timer_queue_ = new TimerQueueType();
+    reactor_->timer_queue(timer_queue_);
   }
 
   state_ = STATE_OPENING;
