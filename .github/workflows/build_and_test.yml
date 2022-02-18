@@ -9401,7 +9401,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -9761,11 +9761,22 @@ jobs:
         rm -f ACE_TAO_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
+    - name: setup gtest
+      shell: cmd
+      run: |
+        cd OpenDDS/tests/googletest
+        git submodule init
+        git submodule update
+        mkdir build
+        cd build
+        mkdir install
+        cmake -DCMAKE_INSTALL_PREFIX=./install -DBUILD_SHARED_LIBS=ON ..
+        cmake --build . --target install
     - name: configure OpenDDS
       shell: cmd
       run: |
         cd OpenDDS
-        configure --ipv6 --rapidjson --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --ipv6 --rapidjson --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
     - name: check build configuration
       shell: cmd
       run: |
@@ -10180,7 +10191,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_COMPILER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
