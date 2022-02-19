@@ -1656,6 +1656,7 @@ DDS::ReturnCode_t read_next_instance_i(MessageSequenceType& received_data,
     const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
     if (pos != reverse_instance_map_.end()) {
       it = pos->second;
+      ++it;
     } else {
       it = the_end;
     }
@@ -1703,6 +1704,7 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
     const typename ReverseInstanceMap::const_iterator pos = reverse_instance_map_.find(a_handle);
     if (pos != reverse_instance_map_.end()) {
       it = pos->second;
+      ++it;
     } else {
       it = the_end;
     }
