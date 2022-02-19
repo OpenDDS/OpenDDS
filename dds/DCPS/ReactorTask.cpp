@@ -12,6 +12,8 @@
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
+#include "Service_Participant.h"
+
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
 #include <ace/Proactor.h>
@@ -45,6 +47,15 @@ ReactorTask::ReactorTask(bool useAsyncSend)
 ReactorTask::~ReactorTask()
 {
   cleanup();
+}
+
+void ReactorTask::wait_for_startup_i() const
+{
+  while (state_ == STATE_UNINITIALIZED || state_ == STATE_OPENING) {
+    condition_.wait(thread_status_manager_ ?
+                      *thread_status_manager_ :
+                      TheServiceParticipant->get_thread_status_manager());
+  }
 }
 
 void ReactorTask::cleanup()

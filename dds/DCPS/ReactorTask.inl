@@ -27,7 +27,6 @@ ACE_INLINE
 ACE_thread_t ReactorTask::get_reactor_owner() const
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
-  wait_for_startup_i();
   return reactor_owner_;
 }
 
@@ -50,14 +49,6 @@ void ReactorTask::wait_for_startup() const
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
   wait_for_startup_i();
-}
-
-ACE_INLINE
-void ReactorTask::wait_for_startup_i() const
-{
-  while (state_ == STATE_UNINITIALIZED || state_ == STATE_OPENING) {
-    condition_.wait(*thread_status_manager_);
-  }
 }
 
 ACE_INLINE
