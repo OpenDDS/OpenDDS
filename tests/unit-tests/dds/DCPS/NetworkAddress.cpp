@@ -33,7 +33,12 @@ TEST(dds_DCPS_NetworkAddress, AddrConstructorPortStrIpFour)
   const NetworkAddress sa(ia);
   EXPECT_EQ(sa.get_type(), AF_INET);
   EXPECT_EQ(sa.get_port_number(), 1234);
-  EXPECT_EQ(sa.to_addr(), ia);
+
+  // This is necessary because of a deficiency in ACE_INET_Addr where calling set_addr will not copy / set
+  // the bytes of 'sin_zero' (reserved for system use), but the 2 argument constructor might, depending on the system
+  ACE_INET_Addr ia2;
+  ia2.set_addr(ia.get_addr(), ia.get_addr_size());
+  EXPECT_EQ(sa.to_addr(), ia2);
 }
 
 TEST(dds_DCPS_NetworkAddress, AddrConstructorStrIpFour)
@@ -42,7 +47,12 @@ TEST(dds_DCPS_NetworkAddress, AddrConstructorStrIpFour)
   const NetworkAddress sa(ia);
   EXPECT_EQ(sa.get_type(), AF_INET);
   EXPECT_EQ(sa.get_port_number(), 4321);
-  EXPECT_EQ(sa.to_addr(), ia);
+
+  // This is necessary because of a deficiency in ACE_INET_Addr where calling set_addr will not copy / set
+  // the bytes of 'sin_zero' (reserved for system use), but the 2 argument constructor might, depending on the system
+  ACE_INET_Addr ia2;
+  ia2.set_addr(ia.get_addr(), ia.get_addr_size());
+  EXPECT_EQ(sa.to_addr(), ia2);
 }
 
 #if defined (ACE_HAS_IPV6)
@@ -72,7 +82,14 @@ TEST(dds_DCPS_NetworkAddress, PortStrConstructorIpFour)
   const NetworkAddress sa(1234, "127.0.10.13");
   EXPECT_EQ(sa.get_type(), AF_INET);
   EXPECT_EQ(sa.get_port_number(), 1234);
-  EXPECT_EQ(sa.to_addr(), ACE_INET_Addr(1234, "127.0.10.13"));
+
+  // This is necessary because of a deficiency in ACE_INET_Addr where calling set_addr will not copy / set
+  // the bytes of 'sin_zero' (reserved for system use), but the 2 argument constructor might, depending on the system
+  ACE_INET_Addr ia(1234, "127.0.10.13");
+  ACE_INET_Addr ia2;
+  ia2.set_addr(ia.get_addr(), ia.get_addr_size());
+  EXPECT_EQ(sa.to_addr(), ia2);
+
   EXPECT_EQ(sa, NetworkAddress(1234, "127.0.10.13"));
 }
 
@@ -81,7 +98,14 @@ TEST(dds_DCPS_NetworkAddress, StrConstructorIpFour)
   const NetworkAddress sa("127.0.10.13:4321");
   EXPECT_EQ(sa.get_type(), AF_INET);
   EXPECT_EQ(sa.get_port_number(), 4321);
-  EXPECT_EQ(sa.to_addr(), ACE_INET_Addr(4321, "127.0.10.13"));
+
+  // This is necessary because of a deficiency in ACE_INET_Addr where calling set_addr will not copy / set
+  // the bytes of 'sin_zero' (reserved for system use), but the 2 argument constructor might, depending on the system
+  ACE_INET_Addr ia(4321, "127.0.10.13");
+  ACE_INET_Addr ia2;
+  ia2.set_addr(ia.get_addr(), ia.get_addr_size());
+  EXPECT_EQ(sa.to_addr(), ia2);
+
   EXPECT_EQ(sa, NetworkAddress(4321, "127.0.10.13"));
 }
 
