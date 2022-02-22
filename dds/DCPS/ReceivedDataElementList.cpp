@@ -152,7 +152,11 @@ bool
 OpenDDS::DCPS::ReceivedDataElementList::has_zero_copies() const
 {
   for (ReceivedDataElement* item = head_; item != 0; item = item->next_data_sample_) {
+#ifdef ACE_HAS_CPP11
     if (item->zero_copy_cnt_) {
+#else
+    if (item->zero_copy_cnt_.value()) {
+#endif
       return true;
     }
   }

@@ -221,7 +221,7 @@ public:
   // returns true if the instance was released
   bool remove(ReceivedDataFilter& match, bool eval_all);
 
-  const ReceivedDataElement* const peek_tail() { return tail_; }
+  const ReceivedDataElement* peek_tail() { return tail_; }
 
   ReceivedDataElement* remove_head();
   ReceivedDataElement* remove_tail();

@@ -640,7 +640,7 @@ protected:
   }
 
   void initialize_lookup_maps();
-  void update_lookup_maps(const typename SubscriptionInstanceMapType::iterator& input);
+  void update_lookup_maps(const SubscriptionInstanceMapType::iterator& input);
   void remove_from_lookup_maps(DDS::InstanceHandle_t handle);
   const HandleSet& lookup_matching_instances(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const;
 
