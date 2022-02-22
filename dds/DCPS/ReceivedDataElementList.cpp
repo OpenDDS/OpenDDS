@@ -78,7 +78,6 @@ OpenDDS::DCPS::ReceivedDataElementList::apply_all(
       op(it);
     }
   }
-  OPENDDS_ASSERT(sanity_check());
 }
 
 bool
@@ -139,7 +138,6 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
     }
   }
 
-  OPENDDS_ASSERT(sanity_check());
   return released;
 }
 
@@ -171,7 +169,6 @@ OpenDDS::DCPS::ReceivedDataElement*
 OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev)
 {
   OPENDDS_ASSERT(sanity_check(prev));
-  OPENDDS_ASSERT(sanity_check());
   if (prev == tail_) {
     return NULL;
   }
@@ -187,11 +184,9 @@ OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_state
       && !item->coherent_change_
 #endif
       ) {
-      OPENDDS_ASSERT(sanity_check());
       return item;
     }
   }
-  OPENDDS_ASSERT(sanity_check());
   return NULL;
 }
 
@@ -199,7 +194,6 @@ void
 OpenDDS::DCPS::ReceivedDataElementList::mark_read(ReceivedDataElement* item)
 {
   OPENDDS_ASSERT(sanity_check(item));
-  OPENDDS_ASSERT(sanity_check());
   if (item->sample_state_ & DDS::NOT_READ_SAMPLE_STATE) {
     item->sample_state_ = DDS::READ_SAMPLE_STATE;
     decrement_not_read_count();
@@ -212,7 +206,6 @@ void
 OpenDDS::DCPS::ReceivedDataElementList::accept_coherent_change(OpenDDS::DCPS::ReceivedDataElement* item)
 {
   OPENDDS_ASSERT(sanity_check(item));
-  OPENDDS_ASSERT(sanity_check());
   if (item->coherent_change_) {
     item->coherent_change_ = false;
     increment_not_read_count();

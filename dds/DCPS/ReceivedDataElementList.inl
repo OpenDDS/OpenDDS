@@ -42,7 +42,6 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
   if (instance_state_) {
     instance_state_->empty(false);
   }
-  OPENDDS_ASSERT(sanity_check());
 }
 
 ACE_INLINE
@@ -72,7 +71,6 @@ OpenDDS::DCPS::ReceivedDataElementList::add_by_timestamp(ReceivedDataElement *da
         increment_read_count();
       }
 
-      OPENDDS_ASSERT(sanity_check());
       return;
     }
   }
