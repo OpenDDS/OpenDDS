@@ -136,29 +136,7 @@ SourceDataStrategy::~SourceDataStrategy()
 void
 SourceDataStrategy::add(ReceivedDataElement* data_sample)
 {
-  for (ReceivedDataElement* it = this->rcvd_samples_.head_;
-       it != 0; it = it->next_data_sample_) {
-    if (data_sample->source_timestamp_ < it->source_timestamp_) {
-      data_sample->previous_data_sample_ = it->previous_data_sample_;
-      data_sample->next_data_sample_ = it;
-
-      // Are we replacing the head?
-      if (it->previous_data_sample_ == 0) {
-        this->rcvd_samples_.head_ = data_sample;
-
-      } else {
-        it->previous_data_sample_->next_data_sample_ = data_sample;
-      }
-
-      it->previous_data_sample_ = data_sample;
-
-      ++this->rcvd_samples_.size_;
-
-      return;
-    }
-  }
-
-  this->rcvd_samples_.add(data_sample);
+  rcvd_samples_.add_by_timestamp(data_sample);
 }
 
 } // namespace DCPS

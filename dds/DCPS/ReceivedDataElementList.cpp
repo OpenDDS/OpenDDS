@@ -7,6 +7,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "ReceivedDataElementList.h"
 
+#include "DataReaderImpl.h"
+
 #if !defined (__ACE_INLINE__)
 # include "ReceivedDataElementList.inl"
 #endif /* !__ACE_INLINE__ */
@@ -52,8 +54,10 @@ void OpenDDS::DCPS::ReceivedDataElement::operator delete(void* memory, ACE_New_A
   operator delete(memory);
 }
 
-OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(InstanceState_rch instance_state)
-  : head_(0), tail_(0), size_(0), instance_state_(instance_state)
+OpenDDS::DCPS::ReceivedDataElementList::ReceivedDataElementList(DataReaderImpl* reader, InstanceState_rch instance_state)
+  : reader_(reader), head_(0), tail_(0), size_(0)
+  , read_sample_count_(0), not_read_sample_count_(0), sample_states_(0)
+  , instance_state_(instance_state)
 {
 }
 
@@ -91,7 +95,11 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
        item = item->next_data_sample_) {
     if (match(item)) {
       size_-- ;
-
+      if (item->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
+        decrement_not_read_count();
+      } else {
+        decrement_read_count();
+      }
       if (item == head_) {
         if (head_ == tail_) {
           head_ = tail_ = 0;
@@ -131,8 +139,95 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
 }
 
 bool
-OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement *data_sample)
+OpenDDS::DCPS::ReceivedDataElementList::has_zero_copies() const
+{
+  for (ReceivedDataElement* item = head_; item != 0; item = item->next_data_sample_) {
+    if (item->zero_copy_cnt_) {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool
+OpenDDS::DCPS::ReceivedDataElementList::matches(CORBA::ULong sample_states) const
+{
+  return sample_states_ & sample_states;
+}
+
+OpenDDS::DCPS::ReceivedDataElement*
+OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev)
+{
+  OPENDDS_ASSERT(prev == NULL || prev == tail_ || prev->next_data_sample_->previous_data_sample_ == prev);
+  OPENDDS_ASSERT(prev == NULL || prev == head_ || prev->previous_data_sample_->next_data_sample_ == prev);
+  if (prev == tail_) {
+    return NULL;
+  }
+  ReceivedDataElement* item;
+  if (prev == NULL) {
+    item = head_;
+  } else {
+    item = prev->next_data_sample_;
+  }
+  for (; item != 0; item = item->next_data_sample_) {
+    if (item->sample_state_ & sample_states) {
+      return item;
+    }
+  }
+  return NULL;
+}
+
+bool
+OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement* data_sample)
 {
   IdentityFilter match(data_sample);
   return remove(match, false); // short-circuit evaluation
+}
+
+void
+OpenDDS::DCPS::ReceivedDataElementList::mark_read(ReceivedDataElement* item)
+{
+  if (item->sample_state_ & DDS::NOT_READ_SAMPLE_STATE) {
+    item->sample_state_ = DDS::READ_SAMPLE_STATE;
+    decrement_not_read_count();
+    increment_read_count();
+  }
+}
+
+void OpenDDS::DCPS::ReceivedDataElementList::increment_read_count()
+{
+  if (!read_sample_count_) {
+    sample_states_ |= DDS::READ_SAMPLE_STATE;
+    reader_->state_updated(instance_state_->instance_handle());
+  }
+  ++read_sample_count_;
+}
+
+void OpenDDS::DCPS::ReceivedDataElementList::decrement_read_count()
+{
+  OPENDDS_ASSERT(read_sample_count_);
+  --read_sample_count_;
+  if (!read_sample_count_) {
+    sample_states_ &= (~DDS::READ_SAMPLE_STATE);
+    reader_->state_updated(instance_state_->instance_handle());
+  }
+}
+
+void OpenDDS::DCPS::ReceivedDataElementList::increment_not_read_count()
+{
+  if (!not_read_sample_count_) {
+    sample_states_ |= DDS::NOT_READ_SAMPLE_STATE;
+    reader_->state_updated(instance_state_->instance_handle());
+  }
+  ++not_read_sample_count_;
+}
+
+void OpenDDS::DCPS::ReceivedDataElementList::decrement_not_read_count()
+{
+  OPENDDS_ASSERT(not_read_sample_count_);
+  --not_read_sample_count_;
+  if (!not_read_sample_count_) {
+    sample_states_ &= (~DDS::NOT_READ_SAMPLE_STATE);
+    reader_->state_updated(instance_state_->instance_handle());
+  }
 }

@@ -597,6 +597,94 @@ public:
 
 protected:
 
+  // Update max flag if the spec ever changes
+  static const CORBA::ULong MAX_SAMPLE_STATE_FLAG = DDS::NOT_READ_SAMPLE_STATE;
+  static const CORBA::ULong MAX_SAMPLE_STATE_MASK = (MAX_SAMPLE_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_SAMPLE_STATE_BITS = 2u;
+
+  // Update max flag if the spec ever changes
+  static const CORBA::ULong MAX_VIEW_STATE_FLAG = DDS::NOT_NEW_VIEW_STATE;
+  static const CORBA::ULong MAX_VIEW_STATE_MASK = (MAX_VIEW_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_VIEW_STATE_BITS = 2u;
+
+  // Update max flag if the spec ever changes
+  static const CORBA::ULong MAX_INSTANCE_STATE_FLAG = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+  static const CORBA::ULong MAX_INSTANCE_STATE_MASK = (MAX_INSTANCE_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_INSTANCE_STATE_BITS = 3u;
+
+  // These may need to be updated if the spec ever changes
+  static const CORBA::ULong COMBINED_VIEW_STATE_SHIFT = MAX_INSTANCE_STATE_BITS;
+  static const CORBA::ULong COMBINED_SAMPLE_STATE_SHIFT = COMBINED_VIEW_STATE_SHIFT + MAX_VIEW_STATE_BITS;
+  static const CORBA::ULong MAX_COMBINED_STATE_MASK = (MAX_SAMPLE_STATE_FLAG << (COMBINED_SAMPLE_STATE_SHIFT + MAX_SAMPLE_STATE_BITS)) - 1;
+
+  typedef OPENDDS_SET(DDS::InstanceHandle_t) HandleSet;
+  typedef OPENDDS_MAP(CORBA::ULong, HandleSet) LookupMap;
+
+  static CORBA::ULong to_combined_states(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states)
+  {
+    sample_states &= MAX_SAMPLE_STATE_MASK;
+    view_states &= MAX_VIEW_STATE_MASK;
+    instance_states &= MAX_INSTANCE_STATE_MASK;
+    if (!(sample_states && view_states && instance_states)) {
+      // catch-all for "bogus" lookups
+      return 0;
+    }
+    return (sample_states << COMBINED_SAMPLE_STATE_SHIFT) | (view_states << COMBINED_VIEW_STATE_SHIFT) | instance_states;
+  }
+
+  static void split_combined_states(CORBA::ULong combined, CORBA::ULong& sample_states, CORBA::ULong& view_states, CORBA::ULong& instance_states)
+  {
+    sample_states = (combined >> COMBINED_SAMPLE_STATE_SHIFT) & MAX_SAMPLE_STATE_MASK;
+    view_states = (combined >> COMBINED_VIEW_STATE_SHIFT) & MAX_VIEW_STATE_MASK;
+    instance_states = combined & MAX_INSTANCE_STATE_MASK;
+  }
+
+  void initialize_lookup_maps()
+  {
+    // These all start at 1 (0 mask is bogus) and include the full mask (any)
+    for (CORBA::ULong is = 1; is <= MAX_SAMPLE_STATE_MASK; ++is) {
+      for (CORBA::ULong iv = 1; iv <= MAX_VIEW_STATE_MASK; ++iv) {
+        for (CORBA::ULong ii = 1; ii <= MAX_INSTANCE_STATE_MASK; ++ii) {
+          combined_state_lookup_[to_combined_states(is, iv, ii)] = HandleSet();
+        }
+      }
+    }
+    // catch-all for "bogus" lookups
+    combined_state_lookup_[0] = HandleSet();
+  }
+
+  void update_lookup_maps(const typename SubscriptionInstanceMapType::iterator& input)
+  {
+    for (LookupMap::iterator it = combined_state_lookup_.begin(); it != combined_state_lookup_.end(); ++it) {
+      if (it->first == 0) continue;
+      CORBA::ULong sample_states, view_states, instance_states;
+      split_combined_states(it->first, sample_states, view_states, instance_states);
+      if (input->second->matches(sample_states, view_states, instance_states)) {
+        it->second.insert(input->first);
+      } else {
+        it->second.erase(input->first);
+      }
+    }
+  }
+
+  void remove_from_lookup_maps(DDS::InstanceHandle_t handle)
+  {
+    for (LookupMap::iterator it = combined_state_lookup_.begin(), the_end = combined_state_lookup_.end(); it != the_end; ++it) {
+      if (it->first == 0) continue;
+      it->second.erase(handle);
+    }
+  }
+
+  const HandleSet& lookup_matching_instances(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const
+  {
+    const CORBA::ULong combined_states = to_combined_states(sample_states, view_states, instance_states);
+    LookupMap::const_iterator ci = combined_state_lookup_.find(combined_states);
+    OPENDDS_ASSERT(ci != combined_state_lookup_.end());
+    return ci->second;
+  }
+
+  LookupMap combined_state_lookup_;
+
   // Perform cast to get extended version of listener (otherwise nil)
   DataReaderListener_ptr get_ext_listener();
 

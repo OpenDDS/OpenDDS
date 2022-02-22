@@ -22,6 +22,12 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 
   ++size_ ;
 
+  if (data_sample->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
+    increment_not_read_count();
+  } else {
+    increment_read_count();
+  }
+
   if (!head_) {
     // First sample in the list.
     head_ = tail_ = data_sample ;
@@ -36,6 +42,37 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
   if (instance_state_) {
     instance_state_->empty(false);
   }
+}
+
+ACE_INLINE
+void
+OpenDDS::DCPS::ReceivedDataElementList::add_by_timestamp(ReceivedDataElement *data_sample)
+{
+  for (ReceivedDataElement* it = head_; it != 0; it = it->next_data_sample_) {
+    if (data_sample->source_timestamp_ < it->source_timestamp_) {
+      data_sample->previous_data_sample_ = it->previous_data_sample_;
+      data_sample->next_data_sample_ = it;
+
+      // Are we replacing the head?
+      if (it->previous_data_sample_ == 0) {
+        head_ = data_sample;
+      } else {
+        it->previous_data_sample_->next_data_sample_ = data_sample;
+      }
+      it->previous_data_sample_ = data_sample;
+
+      ++size_;
+      if (data_sample->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
+        increment_not_read_count();
+      } else {
+        increment_read_count();
+      }
+
+      return;
+    }
+  }
+
+  add(data_sample);
 }
 
 ACE_INLINE

@@ -205,7 +205,7 @@ public:
 
 class OpenDDS_Dcps_Export ReceivedDataElementList {
 public:
-  explicit ReceivedDataElementList(InstanceState_rch instance_state = InstanceState_rch());
+  explicit ReceivedDataElementList(DataReaderImpl*, InstanceState_rch instance_state = InstanceState_rch());
 
   ~ReceivedDataElementList();
 
@@ -213,6 +213,7 @@ public:
 
   // adds a data sample to the end of the list
   void add(ReceivedDataElement* data_sample);
+  void add_by_timestamp(ReceivedDataElement* data_sample);
 
   // returns true if the instance was released
   bool remove(ReceivedDataElement* data_sample);
@@ -220,8 +221,21 @@ public:
   // returns true if the instance was released
   bool remove(ReceivedDataFilter& match, bool eval_all);
 
+  const ReceivedDataElement* const peek_tail() { return tail_; }
+
   ReceivedDataElement* remove_head();
   ReceivedDataElement* remove_tail();
+
+  size_t size() const { return size_; }
+
+  bool has_zero_copies() const;
+  bool matches(CORBA::ULong sample_states) const;
+  ReceivedDataElement* get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev);
+
+  void mark_read(ReceivedDataElement* item);
+
+private:
+  DataReaderImpl* reader_;
 
   /// The first element of the list.
   ReceivedDataElement* head_;
@@ -230,10 +244,19 @@ public:
   ReceivedDataElement* tail_;
 
   /// Number of elements in the list.
-  ssize_t size_;
+  size_t size_;
 
-private:
+  CORBA::ULong read_sample_count_;
+  CORBA::ULong not_read_sample_count_;
+  CORBA::ULong sample_states_;
+
+  void increment_read_count();
+  void decrement_read_count();
+  void increment_not_read_count();
+  void decrement_not_read_count();
+
   InstanceState_rch instance_state_;
+
 }; // ReceivedDataElementList
 
 } // namespace DCPS

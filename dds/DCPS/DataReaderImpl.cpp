@@ -1743,67 +1743,24 @@ bool DataReaderImpl::have_sample_states(
     DDS::SampleStateMask sample_states) const
 {
   //!!!caller should have acquired sample_lock_
-  /// @TODO: determine correct failed lock return value.
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_, false);
-
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-      iter != instances_.end();
-      ++iter) {
-    SubscriptionInstance_rch ptr = iter->second;
-
-    for (ReceivedDataElement *item = ptr->rcvd_samples_.head_;
-        item != 0; item = item->next_data_sample_) {
-      if (item->sample_state_ & sample_states
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-          && !item->coherent_change_
-#endif
-                 ) {
-        return true;
-      }
-    }
-  }
-
-  return false;
+  ACE_Guard<ACE_Recursive_Thread_Mutex> instance_guard(instances_lock_);
+  return lookup_matching_instances(sample_states, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE).size();
 }
 
 bool
 DataReaderImpl::have_view_states(DDS::ViewStateMask view_states) const
 {
   //!!!caller should have acquired sample_lock_
-  /// @TODO: determine correct failed lock return value.
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
-
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-      iter != instances_.end();
-      ++iter) {
-    SubscriptionInstance_rch ptr = iter->second;
-
-    if (ptr->instance_state_->view_state() & view_states) {
-      return true;
-    }
-  }
-
-  return false;
+  ACE_Guard<ACE_Recursive_Thread_Mutex> instance_guard(instances_lock_);
+  return lookup_matching_instances(DDS::ANY_SAMPLE_STATE, view_states, DDS::ANY_INSTANCE_STATE).size();
 }
 
 bool DataReaderImpl::have_instance_states(
     DDS::InstanceStateMask instance_states) const
 {
   //!!!caller should have acquired sample_lock_
-  /// @TODO: determine correct failed lock return value.
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_,false);
-
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-      iter != instances_.end();
-      ++iter) {
-    SubscriptionInstance_rch ptr = iter->second;
-
-    if (ptr->instance_state_->instance_state() & instance_states) {
-      return true;
-    }
-  }
-
-  return false;
+  ACE_Guard<ACE_Recursive_Thread_Mutex> instance_guard(instances_lock_);
+  return lookup_matching_instances(DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, instance_states).size();
 }
 
 /// Fold-in the three separate loops of have_sample_states(),
@@ -1811,26 +1768,10 @@ bool DataReaderImpl::have_instance_states(
 bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
     DDS::ViewStateMask view_states, DDS::InstanceStateMask instance_states)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_,false);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> sample_guard(sample_lock_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> instance_guard(instances_lock_);
 
-  for (SubscriptionInstanceMapType::iterator iter = instances_.begin(), end = instances_.end(); iter != end; ++iter) {
-    SubscriptionInstance& inst = *iter->second;
-
-    if (inst.instance_state_->match(view_states, instance_states)) {
-      for (ReceivedDataElement* item = inst.rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
-        if (item->sample_state_ & sample_states
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-            && !item->coherent_change_
-#endif
-        ) {
-          return true;
-        }
-      }
-    }
-  }
-
-  return false;
+  return lookup_matching_instances(sample_states, view_states, instance_states).size();
 }
 
 DDS::DataReaderListener_ptr
@@ -1893,7 +1834,7 @@ CORBA::Long DataReaderImpl::total_samples() const
       ++iter) {
     SubscriptionInstance_rch ptr = iter->second;
 
-    count += static_cast<CORBA::Long>(ptr->rcvd_samples_.size_);
+    count += static_cast<CORBA::Long>(ptr->rcvd_samples_.size());
   }
 
   return count;
@@ -2823,11 +2764,8 @@ DataReaderImpl::has_zero_copies()
       ++iter) {
     SubscriptionInstance_rch ptr = iter->second;
 
-    for (OpenDDS::DCPS::ReceivedDataElement *item = ptr->rcvd_samples_.head_;
-        item != 0; item = item->next_data_sample_) {
-      if (item->zero_copy_cnt_ > 0) {
-        return true;
-      }
+    if (ptr->rcvd_samples_.has_zero_copies()) {
+      return true;
     }
   }
 
@@ -3213,11 +3151,13 @@ void DataReaderImpl::get_ordered_data(GroupRakeData& data,
   for (SubscriptionInstanceSet::iterator iter = localsubs.begin(); iter != localsubs.end(); ++iter) {
     if ((*iter)->instance_state_->match(view_states, instance_states)) {
       size_t i(0);
-      for (ReceivedDataElement* item = (*iter)->rcvd_samples_.head_; item != 0; item = item->next_data_sample_) {
-        if ((item->sample_state_ & sample_states) && !item->coherent_change_) {
-          data.insert_sample(item, *iter, ++i);
-          group_coherent_ordered_data_.insert_sample(item, *iter, ++i);
+      ReceivedDataElement* item = (*iter)->rcvd_samples_.get_next_match(sample_states, 0);
+      while (item) {
+        if (!item->coherent_change_) {
+          data.insert_sample(item, &(*iter)->rcvd_samples_, *iter, ++i);
+          group_coherent_ordered_data_.insert_sample(item, &(*iter)->rcvd_samples_, *iter, ++i);
         }
+        ReceivedDataElement* item = (*iter)->rcvd_samples_.get_next_match(sample_states, item);
       }
     }
   }

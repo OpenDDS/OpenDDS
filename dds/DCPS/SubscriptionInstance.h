@@ -43,6 +43,8 @@ public:
 
   ~SubscriptionInstance();
 
+  bool matches(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const;
+
   /// Instance state for this instance
   const InstanceState_rch instance_state_;
 
@@ -51,6 +53,10 @@ public:
 
   /// Data sample(s) in this instance
   ReceivedDataElementList rcvd_samples_;
+
+  CORBA::ULong read_sample_count_;
+  CORBA::ULong not_read_sample_count_;
+  CORBA::ULong sample_states_;
 
   /// ReceivedDataElementList strategy
   unique_ptr<ReceivedDataStrategy> rcvd_strategy_;
