@@ -3,8 +3,43 @@
 
 include(${CMAKE_CURRENT_LIST_DIR}/tao_idl_sources.cmake)
 
-function(opendds_target_generated_dependencies target idl_file scope)
+function(opendds_add_to_interface_files_prop target kind file)
+  set(prop_name "OPENDDS_${kind}_INTERFACE_FILES")
+  get_target_property(interface_files ${target} ${prop_name})
+  if(NOT interface_files)
+    set(interface_files "")
+  endif()
+  if(NOT ${file} IN_LIST interface_files)
+    list(APPEND interface_files ${file})
+    set_target_properties(${target} PROPERTIES ${prop_name} "${interface_files}")
+  endif()
+endfunction()
 
+function(opendds_add_idl_or_header_files target scope is_generated files)
+  if(is_generated)
+    set(gen_kind "GENERATED")
+  else()
+    set(gen_kind "PASSED")
+  endif()
+  foreach(file ${files})
+    get_filename_component(file ${file} REALPATH)
+    target_sources(${target} ${scope} $<BUILD_INTERFACE:${file}>)
+
+    if(NOT ${scope} STREQUAL "PRIVATE")
+      if(file MATCHES "\\.idl$")
+        set(file_kind IDL)
+      else()
+        set(file_kind HEADER)
+      endif()
+      opendds_add_to_interface_files_prop(${target} "${gen_kind}_${file_kind}" ${file})
+      opendds_add_to_interface_files_prop(${target} "ALL_${gen_kind}" ${file})
+      opendds_add_to_interface_files_prop(${target} "ALL_${file_kind}" ${file})
+      opendds_add_to_interface_files_prop(${target} "ALL" ${file})
+    endif()
+  endforeach()
+endfunction()
+
+function(opendds_target_generated_dependencies target idl_file scope)
   get_source_file_property(idl_ts_files ${idl_file} OPENDDS_TYPESUPPORT_IDLS)
   set(all_idl_files ${idl_file} ${idl_ts_files})
 
@@ -44,17 +79,19 @@ function(opendds_target_generated_dependencies target idl_file scope)
     add_dependencies(${target} ${bridge_target})
   endif()
 
-  target_sources(${target} ${scope} ${all_idl_files} ${hdr_files})
+  opendds_add_idl_or_header_files(${target} ${scope} TRUE "${idl_ts_files};${hdr_files}")
+  opendds_add_idl_or_header_files(${target} ${scope} FALSE "${idl_file}")
   target_sources(${target} PRIVATE ${cpp_files})
+endfunction()
 
-  foreach(file ${hdr_files})
-    get_target_property(target_includes ${target} INCLUDE_DIRECTORIES)
-    get_filename_component(file_path ${file} DIRECTORY)
-
-    if (NOT "${file_path}" IN_LIST target_includes)
-      target_include_directories(${target} PUBLIC ${file_path})
+function(opendds_export_target_property target property_name)
+  if(NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
+    get_property(target_export_properties TARGET ${target} PROPERTY "EXPORT_PROPERTIES")
+    if(NOT property_name IN_LIST target_export_properties)
+      list(APPEND target_export_properties ${property_name})
+      set_property(TARGET ${target} PROPERTY "EXPORT_PROPERTIES" "${target_export_properties}")
     endif()
-  endforeach()
+  endif()
 endfunction()
 
 function(opendds_target_idl_sources target)
@@ -66,16 +103,7 @@ function(opendds_target_idl_sources target)
   # existing OPENDDS_LANGUAGE_MAPPINGS value on the target.
   get_property(language_mappings TARGET ${target}
     PROPERTY "OPENDDS_LANGUAGE_MAPPINGS")
-  # Make sure OPENDDS_LANGUAGE_MAPPINGS is exported if supported
-  if(NOT ${CMAKE_VERSION} VERSION_LESS "3.12.0")
-    get_property(target_export_properties TARGET ${target}
-      PROPERTY "EXPORT_PROPERTIES")
-    if(NOT ("OPENDDS_LANGUAGE_MAPPINGS" IN_LIST target_export_properties))
-      list(APPEND target_export_properties "OPENDDS_LANGUAGE_MAPPINGS")
-      set_property(TARGET ${target} PROPERTY "EXPORT_PROPERTIES"
-        "${target_export_properties}")
-    endif()
-  endif()
+  opendds_export_target_property(${target} "OPENDDS_LANGUAGE_MAPPINGS")
 
   foreach(idl_file ${_arg_IDL_FILES})
     if (NOT IS_ABSOLUTE ${idl_file})
@@ -143,10 +171,10 @@ function(opendds_target_idl_sources target)
   endif ()
 
   foreach(flag ${_arg_DDS_IDL_FLAGS})
-    if ("${flag}" MATCHES "^-I(\\.\\..*)")
-       list(APPEND _converted_dds_idl_flags -I${_rel_path_to_source_tree}${CMAKE_MATCH_1})
-     else()
-       list(APPEND _converted_dds_idl_flags ${flag})
+    if("${flag}" MATCHES "^-I(\\.\\..*)")
+      list(APPEND _converted_dds_idl_flags -I${_rel_path_to_source_tree}${CMAKE_MATCH_1})
+    else()
+      list(APPEND _converted_dds_idl_flags ${flag})
     endif()
   endforeach()
 
@@ -170,11 +198,8 @@ function(opendds_target_idl_sources target)
     get_filename_component(file_ext ${input} EXT)
     get_filename_component(idl_file_dir ${abs_filename} DIRECTORY)
 
-    if (_ddsidl_cmd_arg_-o)
-      set(output_prefix ${_working_binary_dir}/${_ddsidl_cmd_arg_-o}/${noext_name})
-    else()
-      set(output_prefix ${_working_binary_dir}/${noext_name})
-    endif()
+    opendds_get_generated_idl_output(
+      ${target} ${input} "${_idl_cmd_arg_-o}" output_prefix output_dir)
 
     if (NOT _ddsidl_cmd_arg_-SI)
       set(_cur_type_support_idl ${output_prefix}TypeSupport.idl)
@@ -219,9 +244,9 @@ function(opendds_target_idl_sources target)
       MAIN_DEPENDENCY ${abs_filename}
       COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
               "${_tao_extra_lib_dirs}"
-              $<TARGET_FILE:opendds_idl> -I${_working_source_dir}
+              $<TARGET_FILE:opendds_idl> -I${idl_file_dir}
               ${_ddsidl_flags} ${file_dds_idl_flags} ${abs_filename}
-      WORKING_DIRECTORY ${_arg_WORKING_DIRECTORY}
+              -o "${output_dir}"
     )
 
     set_property(SOURCE ${abs_filename} APPEND PROPERTY
@@ -245,6 +270,7 @@ function(opendds_target_idl_sources target)
           -I${DDS_ROOT}
           -I${idl_file_dir} # The type-support IDL will include the primary IDL file
           ${_arg_TAO_IDL_FLAGS}
+          -o "${output_dir}"
         IDL_FILES ${_cur_idl_file} ${_cur_type_support_idl})
     endif()
 

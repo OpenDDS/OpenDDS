@@ -2462,7 +2462,7 @@ sub write_cmake_file {
         feature => 'versioned_namespace',
       },
       {
-        name => 'suppress_anys',
+        name => 'SUPPRESS_ANYS',
         feature => 'dds_suppress_anys',
         default => 1,
       },
@@ -2481,49 +2481,35 @@ sub write_cmake_file {
       print_cmake_config($fh, $config->{name}, $enabled);
     }
 
-    # TODO(iguessthislldo): Remove option-based values or at least reduce to a
-    # FIXED subset of options.
-    # These flags only appear in the %opts map when specified by the user.
-    my %enabled_by_default = map {$_, 1} qw(
-      built-in-topics
-      content-subscription
-      content-filtered-topic
-      multi-topic
-      query-condition
-      ownership-profile
-      ownership-kind-exclusive
-      object-model-profile
-      persistence-profile
-      inline
+    # TODO(iguessthislldo): Move to a smarter system that can use existing
+    # ACE/TAO and that works with cross compiling.
+    my %opts_to_use = (
+      'built-in-topics' => 1,
+      'compiler' => '',
+      'content-filtered-topic' => 1,
+      'content-subscription' => 1,
+      'debug' => 1,
+      'features' => '',
+      'gtest' => '',
+      'inline' => 1,
+      'java' => '',
+      'mpcopts' => '',
+      'multi-topic' => 1,
+      'object-model-profile' => 1,
+      'openssl' => '',
+      'ownership-kind-exclusive' => 1,
+      'ownership-profile' => 1,
+      'persistence-profile' => 1,
+      'qt' => '',
+      'query-condition' => 1,
+      'rapidjson' => '',
+      'security' => 0,
+      'static' => 0,
+      'std' => '',
+      'xerces3' => '',
     );
-
-    my %disabled_by_default = map {$_, 0} qw(
-      security
-    );
-
-    my %ignore = map {$_, 0} qw(
-      backup
-      solution_file
-      ipv6
-      safety-profile
-      no-opendds-safety-profile
-      target
-      host
-      tests
-      cmake
-      verbose
-      ace
-      tao
-      mpc
-    );
-
-    # Merge the hashes together; the user-supplied %opts will override
-    # the enabled-/disabled-defaults.
-    my %opts_ = (%enabled_by_default, %disabled_by_default, %opts);
-    for my $k (sort keys %opts_) {
-      if (!exists($ignore{$k})) {
-        print_cmake_config($fh, $k, $opts_{$k});
-      }
+    for my $opt (sort(keys(%opts_to_use))) {
+      print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
     }
   };
 

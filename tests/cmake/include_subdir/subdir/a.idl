@@ -1,0 +1,7 @@
+module ModuleA {
+
+struct StructA {
+  string ValueA;
+};
+
+};

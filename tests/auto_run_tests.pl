@@ -132,6 +132,9 @@ sub print_help {
     print
         "    --cmake                  Run CMake Tests\n" .
         "                             Not included by default\n" .
+        "    --cmake-cmd <cmd>        CMake command that is used internally\n" .
+        "                             Tests still have to be built before hand\n" .
+        "                             Default is `cmake`\n" .
         "    --cmake-build-dir <path> Path to the CMake tests binary directory\n" .
         "                             Default is \$DDS_ROOT/tests/cmake/build\n" .
         "    --cmake-build-cfg <cfg>  CMake build configuration, like the one passed to\n" .
@@ -183,6 +186,7 @@ my $list_all_configs = 0;
 my $list_tests = 0;
 my $list_all_tests = 0;
 my $cmake = 0;
+my $cmake_cmd = 'cmake';
 my $cmake_build_dir = "$cmake_tests/build";
 my $cmake_build_cfg = windows ? 'Debug' : undef;
 my $ctest = 'ctest';
@@ -203,6 +207,7 @@ my %opts = (
     'list-all-tests' => \$list_all_tests,
     'stop-on-fail|x' => \$stop_on_fail,
     'cmake' => \$cmake,
+    'cmake-cmd=s' => \$cmake_cmd,
     'cmake-build-dir=s' => \$cmake_build_dir,
     'cmake-build-cfg=s' => \$cmake_build_cfg,
     'ctest=s' => \$ctest,
@@ -364,7 +369,12 @@ if ($cmake) {
     my $fake_name;
     my $process_name;
     my $process_func;
-    my @process_cmd = ($python, "$cmake_tests/ctest-to-auto-run-tests.py", $cmake_tests, '.');
+    my @process_cmd = (
+        $python,
+        "$cmake_tests/ctest-to-auto-run-tests.py",
+        '--cmake', $cmake_cmd,
+        $cmake_tests, '.'
+    );
     my $art_output = 'art-output';
     if ($list_tests) {
         $process_name = "List CMake Tests";
