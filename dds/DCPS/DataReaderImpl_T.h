@@ -257,23 +257,20 @@ namespace OpenDDS {
 
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_READ);
 
-    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-         iter != instances_.end();
-         ++iter) {
-      const SubscriptionInstance_rch ptr = iter->second;
+    const CORBA::ULong sample_states = DDS::NOT_READ_SAMPLE_STATE;
+    const HandleSet& matches = lookup_matching_instances(sample_states, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+    for (HandleSet::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+      const DDS::InstanceHandle_t handle = *it;
+      const SubscriptionInstance_rch inst = get_handle_instance(handle);
 
       bool most_recent_generation = false;
-      const CORBA::ULong sample_states = DDS::NOT_READ_SAMPLE_STATE;
-      for (ReceivedDataElement* item = ptr->rcvd_samples_.get_next_match(sample_states, 0);
-           !found_data && item; item = ptr->rcvd_samples_.get_next_match(sample_states, item)) {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-        if (item->coherent_change_) continue;
-#endif
+      for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0);
+           !found_data && item; item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
         if (item->registered_data_) {
           received_data = *static_cast<MessageType*>(item->registered_data_);
         }
-        ptr->instance_state_->sample_info(sample_info_ref, item);
-        ptr->rcvd_samples_.mark_read(item);
+        inst->instance_state_->sample_info(sample_info_ref, item);
+        inst->rcvd_samples_.mark_read(item);
 
         const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
         if (observer && item->registered_data_ && vwd) {
@@ -282,7 +279,7 @@ namespace OpenDDS {
         }
 
         if (!most_recent_generation) {
-          most_recent_generation = ptr->instance_state_->most_recent_generation(item);
+          most_recent_generation = inst->instance_state_->most_recent_generation(item);
         }
 
         found_data = true;
@@ -290,11 +287,11 @@ namespace OpenDDS {
 
       if (found_data) {
         if (most_recent_generation) {
-          ptr->instance_state_->accessed();
+          inst->instance_state_->accessed();
         }
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
-        sample_info(sample_info_ref, ptr->rcvd_samples_.peek_tail());
+        sample_info(sample_info_ref, inst->rcvd_samples_.peek_tail());
 
         break;
       }
@@ -312,24 +309,21 @@ namespace OpenDDS {
 
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
 
-    for (SubscriptionInstanceMapType::iterator iter = instances_.begin();
-         iter != instances_.end();
-         ++iter) {
-      SubscriptionInstance_rch ptr = iter->second;
+    const CORBA::ULong sample_states = DDS::NOT_READ_SAMPLE_STATE;
+    const HandleSet& matches = lookup_matching_instances(sample_states, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
+    for (HandleSet::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+      const DDS::InstanceHandle_t handle = *it;
+      const SubscriptionInstance_rch inst = get_handle_instance(handle);
 
       bool most_recent_generation = false;
-      const CORBA::ULong sample_states = DDS::NOT_READ_SAMPLE_STATE;
       ReceivedDataElement* item = 0;
-      for (item = ptr->rcvd_samples_.get_next_match(sample_states, 0);
-           !found_data && item; item = ptr->rcvd_samples_.get_next_match(sample_states, item)) {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-        if (item->coherent_change_) continue;
-#endif
+      for (item = inst->rcvd_samples_.get_next_match(sample_states, 0);
+           !found_data && item; item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
         if (item->registered_data_) {
           received_data = *static_cast<MessageType*>(item->registered_data_);
         }
-        ptr->instance_state_->sample_info(sample_info_ref, item);
-        ptr->rcvd_samples_.mark_read(item);
+        inst->instance_state_->sample_info(sample_info_ref, item);
+        inst->rcvd_samples_.mark_read(item);
 
         const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
         if (observer && item->registered_data_ && vwd) {
@@ -338,13 +332,13 @@ namespace OpenDDS {
         }
 
         if (!most_recent_generation) {
-          most_recent_generation = ptr->instance_state_->most_recent_generation(item);
+          most_recent_generation = inst->instance_state_->most_recent_generation(item);
         }
 
         found_data = true;
         // If the found item is the tail, we can't delete it just yet
-        if (item != ptr->rcvd_samples_.peek_tail()) {
-          ptr->rcvd_samples_.remove(item);
+        if (item != inst->rcvd_samples_.peek_tail()) {
+          inst->rcvd_samples_.remove(item);
           item->dec_ref();
           item = 0;
         }
@@ -352,15 +346,15 @@ namespace OpenDDS {
 
       if (found_data) {
         if (most_recent_generation) {
-          ptr->instance_state_->accessed();
+          inst->instance_state_->accessed();
         }
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
-        sample_info(sample_info_ref, ptr->rcvd_samples_.peek_tail());
+        sample_info(sample_info_ref, inst->rcvd_samples_.peek_tail());
 
         // Now we can delete the tail
-        if (item == ptr->rcvd_samples_.peek_tail()) {
-          ptr->rcvd_samples_.remove(item);
+        if (item == inst->rcvd_samples_.peek_tail()) {
+          inst->rcvd_samples_.remove(item);
           item->dec_ref();
           item = 0;
         }
