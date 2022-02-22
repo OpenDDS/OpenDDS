@@ -201,7 +201,6 @@ specified directory. See the [INSTALL.md](../INSTALL.md) document for details.
 OPENDDS_PREFIX="$PWD/opendds-install"
 DDS_ROOT="$PWD/OpenDDS"
 ACE_ROOT="$DDS_ROOT/ACE_wrappers"
-export PERL5LIB="$DDS_ROOT/bin:$ACE_ROOT/bin"
 cd OpenDDS
 ./configure --prefix="$OPENDDS_PREFIX"
 make -j $(getconf _NPROCESSORS_ONLN)
@@ -211,7 +210,7 @@ mkdir build
 cd build
 cmake -DCMAKE_PREFIX_PATH="$OPENDDS_PREFIX" ..
 cmake --build .
-LD_LIBRARY_PATH="$OPENDDS_PREFIX/lib:$LD_LIBRARY_PATH" perl run_test.pl
+PERL5LIB="$DDS_ROOT/bin:$ACE_ROOT/bin" LD_LIBRARY_PATH="$OPENDDS_PREFIX/lib:$LD_LIBRARY_PATH" perl run_test.pl
 ```
 
 ## Adding IDL Sources with `OPENDDS_TARGET_SOURCES`
@@ -352,7 +351,6 @@ The following values impact the build in one way or another.
 |---                        | ---                                                                | ---                 |
 |`OPENDDS_ACE`              | Location of ACE root dir.                                          | N/A                 |
 |`OPENDDS_TAO`              | Location of TAO root dir.                                          | N/A                 |
-|`OPENDDS_NO_DEBUG`         | Sets NDEBUG flags on ACE for non-debug builds (Unix only)          | `OFF`                 |
 |`OPENDDS_INLINE`           | ACE's inline build flag                                            | See below           |
 |`OPENDDS_STATIC`           | Use static libraries                                               | `OFF`                 |
 |`OPENDDS_XERCES3`          | Adds dependencies to targets; required when `OPENDDS_SECURITY` is `ON` | `OFF`                 |
@@ -444,9 +442,9 @@ Some things to note about these:
   `PUBLIC` scoped files as `PUBLIC` implies `INTERFACE` in CMake. `PRIVATE`
   scoped files are excluded from these lists as they shouldn't have a use
   outside the target.
-- These properties are not exported with the target because the those paths may
-  not be valid any more if the build directory has been removed or the export
-  is being used on another machine.
+- These properties are not exported with the target because those paths may not
+  be valid any more if the build directory has been removed or the export is
+  being used on another machine.
 - As passing non-IDL files to `OPENDDS_TARGET_SOURCES` is deprecated, those
   files don't show up in these lists even if they are given `PUBLIC` or
   `INTERFACE` scope.
@@ -491,7 +489,7 @@ If trying to use `install(IMPORTED_RUNTIME_ARTIFACTS)` in this case, it causes
 the dynamic linker to ignore the libraries and report that they could not be
 found. One workaround is to add `SOFLAGS+=-Wl,-h,$(SONAME)` to
 `$ACE_ROOT/include/makeinclude/platform_macros.GNU` before building. This can
-be done mannually after running the configure script or by passing
+be done manually after running the configure script or by passing
 `--macros=SOFLAGS+=-Wl,-h,\$\(SONAME\)` to the configure script.
 
 A function called `opendds_get_library_dependencies` is provided to help find

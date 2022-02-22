@@ -271,8 +271,6 @@ function(opendds_target_idl_sources target)
           -I${idl_file_dir} # The type-support IDL will include the primary IDL file
           ${_arg_TAO_IDL_FLAGS}
           -o "${output_dir}"
-          -oA "${output_dir}"
-          -oS "${output_dir}"
         IDL_FILES ${_cur_idl_file} ${_cur_type_support_idl})
     endif()
 

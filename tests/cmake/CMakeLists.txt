@@ -11,7 +11,7 @@ add_subdirectory(
   "../../DevGuideExamples/DCPS/Messenger"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
 
-if (OPENDDS_QT AND OPENDDS_CXX11)
+if(OPENDDS_QT AND OPENDDS_CXX11)
   add_subdirectory(
     "../../examples/DCPS/ishapes"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")

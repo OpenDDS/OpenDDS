@@ -92,14 +92,14 @@ function(tao_idl_command target)
   ## convert all include paths to be relative to binary tree instead of to source tree
   file(RELATIVE_PATH _rel_path_to_source_tree ${_working_binary_dir} ${_working_source_dir})
   foreach(flag ${_arg_IDL_FLAGS})
-    if ("${flag}" MATCHES "^-I(\\.\\..*)")
+    if("${flag}" MATCHES "^-I(\\.\\..*)")
       list(APPEND _converted_flags -I${_rel_path_to_source_tree}/${CMAKE_MATCH_1})
     else()
       list(APPEND _converted_flags ${flag})
       # if the flag is like "-Wb,stub_export_file=filename" then set the varilabe
       # "idl_cmd_arg-wb-stub_export_file" to filename
       string(REGEX MATCH "^-Wb,([^=]+)=(.+)" m "${flag}")
-      if (m)
+      if(m)
         set(idl_cmd_arg-wb-${CMAKE_MATCH_1} ${CMAKE_MATCH_2})
       endif()
     endif()

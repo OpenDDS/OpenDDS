@@ -53,7 +53,8 @@ if(UNIX AND INSTALL_IMPORTED_RUNTIME_ARTIFACTS)
   # need to create a clean environment.
   configure_file("run_in_prefix.sh" "." COPYONLY)
   execute_process(
-    COMMAND perl "${CMAKE_CURRENT_SOURCE_DIR}/install_test_framework.pl" "${prefix}"
+    COMMAND perl
+      "${CMAKE_CURRENT_SOURCE_DIR}/../../../tools/scripts/install_test_framework.pl" "${prefix}"
     RESULT_VARIABLE rc
   )
   if(NOT rc STREQUAL "0")

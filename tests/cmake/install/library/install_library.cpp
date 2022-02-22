@@ -29,5 +29,5 @@ void update(MovingObject& object, double time)
 
 void print(const MovingObject& object, const char* name)
 {
-  printf("%s is at %lf %lf\n", name, object.pos.x, object.pos.y);
+  printf("%s is at %f %f\n", name, object.pos.x, object.pos.y);
 }

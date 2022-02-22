@@ -327,15 +327,23 @@ function(opendds_find_our_libraries_for_config config suffix)
       set(found_var "${var_prefix}_LIBRARY_FOUND")
       if(${lib_var})
         set(${found_var} TRUE PARENT_SCOPE)
+
+        # Workaround https://gitlab.kitware.com/cmake/cmake/-/issues/23249
+        # These paths might be symlinks and IMPORTED_RUNTIME_ARTIFACTS seems to
+        # copy symlinks verbatim, so resolve them now.
+        set(lib_var_real "${lib_var}_REAL")
+        get_filename_component(${lib_var_real} "${${lib_var}}" REALPATH)
+        # find_library makes cache variables, so we have to override it.
+        set(${lib_var} "${${lib_var_real}}" CACHE FILEPATH "" FORCE)
+
+        if(MSVC AND NOT OPENDDS_STATIC)
+          # find_library finds the ".lib" file on Windows, but if OpenDDS is not
+          # static we also need the ".dll" file for IMPORTED_LOCATION and
+          # IMPORTED_RUNTIME_ARTIFACTS to work correctly.
+          find_file("${lib_var}_DLL" "${lib_file_base}.dll" HINTS "${lib_dir}")
+        endif()
       elseif(NOT DEFINED ${found_var})
         set(${found_var} FALSE PARENT_SCOPE)
-      endif()
-
-      if(MSVC AND NOT OPENDDS_STATIC)
-        # find_library finds the ".lib" file on Windows, but if OpenDDS is not
-        # static we also need the ".dll" file for IMPORTED_LOCATION and
-        # IMPORTED_RUNTIME_ARTIFACTS to work correctly.
-        find_file("${lib_var}_DLL" "${lib_file_base}.dll" HINTS "${lib_dir}")
       endif()
     endforeach()
   endmacro()
@@ -359,18 +367,6 @@ include(SelectLibraryConfigurations)
 foreach(_lib ${_all_libs})
   string(TOUPPER ${_lib} _LIB_VAR)
   select_library_configurations(${_LIB_VAR})
-
-  # These paths might be symlinks and IMPORTED_RUNTIME_ARTIFACTS seems to not
-  # work correctly with symlinks, so resolve them now.
-  if(${_LIB_VAR}_LIBRARY)
-    get_filename_component(${_LIB_VAR}_LIBRARY "${${_LIB_VAR}_LIBRARY}" REALPATH)
-  endif()
-  if(${_LIB_VAR}_LIBRARY_DEBUG)
-    get_filename_component(${_LIB_VAR}_LIBRARY_DEBUG "${${_LIB_VAR}_LIBRARY_DEBUG}" REALPATH)
-  endif()
-  if(${_LIB_VAR}_LIBRARY_RELEASE)
-    get_filename_component(${_LIB_VAR}_LIBRARY_RELEASE "${${_LIB_VAR}_LIBRARY_RELEASE}" REALPATH)
-  endif()
 endforeach()
 
 list(APPEND _opendds_required_deps
