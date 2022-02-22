@@ -3590,7 +3590,7 @@ void DataReaderImpl::initialize_lookup_maps()
   combined_state_lookup_[0] = HandleSet();
 }
 
-void DataReaderImpl::update_lookup_maps(const typename SubscriptionInstanceMapType::iterator& input)
+void DataReaderImpl::update_lookup_maps(const SubscriptionInstanceMapType::iterator& input)
 {
   for (LookupMap::iterator it = combined_state_lookup_.begin(); it != combined_state_lookup_.end(); ++it) {
     if (it->first == 0) continue;
