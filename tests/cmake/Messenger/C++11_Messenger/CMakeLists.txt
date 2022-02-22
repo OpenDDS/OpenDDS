@@ -23,7 +23,7 @@ set(opendds_libs
 # IDL Library
 set(idl "${target_prefix}idl")
 add_library(${idl})
-OPENDDS_TARGET_SOURCES(${idl} "${src}/Idl/Messenger.idl" OPENDDS_IDL_OPTIONS "-Lc++11")
+OPENDDS_TARGET_SOURCES(${idl} PUBLIC "${src}/Idl/Messenger.idl" OPENDDS_IDL_OPTIONS "-Lc++11")
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 set_target_properties(${idl} PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${dst}/Idl"
