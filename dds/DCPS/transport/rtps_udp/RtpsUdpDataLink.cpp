@@ -4607,7 +4607,7 @@ bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
   if (last_recv_addr_ == NetworkAddress()) {
     return false;
   }
-  const uint16_t last_addr_type = last_recv_addr_.get_type();
+  const ACE_INT16 last_addr_type = last_recv_addr_.get_type();
   NetworkAddress limit;
   limit.set_type(last_addr_type);
   AddrSet::const_iterator it = unicast_addrs_.lower_bound(limit);
