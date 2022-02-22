@@ -233,6 +233,9 @@ public:
   ReceivedDataElement* get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev);
 
   void mark_read(ReceivedDataElement* item);
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  void accept_coherent_change(ReceivedDataElement* item);
+#endif
 
 private:
   DataReaderImpl* reader_;
@@ -254,9 +257,10 @@ private:
   void decrement_read_count();
   void increment_not_read_count();
   void decrement_not_read_count();
-
   InstanceState_rch instance_state_;
 
+  bool sanity_check();
+  bool sanity_check(ReceivedDataElement* item);
 }; // ReceivedDataElementList
 
 } // namespace DCPS

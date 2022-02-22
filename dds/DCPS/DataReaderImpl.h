@@ -639,49 +639,10 @@ protected:
     instance_states = combined & MAX_INSTANCE_STATE_MASK;
   }
 
-  void initialize_lookup_maps()
-  {
-    // These all start at 1 (0 mask is bogus) and include the full mask (any)
-    for (CORBA::ULong is = 1; is <= MAX_SAMPLE_STATE_MASK; ++is) {
-      for (CORBA::ULong iv = 1; iv <= MAX_VIEW_STATE_MASK; ++iv) {
-        for (CORBA::ULong ii = 1; ii <= MAX_INSTANCE_STATE_MASK; ++ii) {
-          combined_state_lookup_[to_combined_states(is, iv, ii)] = HandleSet();
-        }
-      }
-    }
-    // catch-all for "bogus" lookups
-    combined_state_lookup_[0] = HandleSet();
-  }
-
-  void update_lookup_maps(const typename SubscriptionInstanceMapType::iterator& input)
-  {
-    for (LookupMap::iterator it = combined_state_lookup_.begin(); it != combined_state_lookup_.end(); ++it) {
-      if (it->first == 0) continue;
-      CORBA::ULong sample_states, view_states, instance_states;
-      split_combined_states(it->first, sample_states, view_states, instance_states);
-      if (input->second->matches(sample_states, view_states, instance_states)) {
-        it->second.insert(input->first);
-      } else {
-        it->second.erase(input->first);
-      }
-    }
-  }
-
-  void remove_from_lookup_maps(DDS::InstanceHandle_t handle)
-  {
-    for (LookupMap::iterator it = combined_state_lookup_.begin(), the_end = combined_state_lookup_.end(); it != the_end; ++it) {
-      if (it->first == 0) continue;
-      it->second.erase(handle);
-    }
-  }
-
-  const HandleSet& lookup_matching_instances(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const
-  {
-    const CORBA::ULong combined_states = to_combined_states(sample_states, view_states, instance_states);
-    LookupMap::const_iterator ci = combined_state_lookup_.find(combined_states);
-    OPENDDS_ASSERT(ci != combined_state_lookup_.end());
-    return ci->second;
-  }
+  void initialize_lookup_maps();
+  void update_lookup_maps(const typename SubscriptionInstanceMapType::iterator& input);
+  void remove_from_lookup_maps(DDS::InstanceHandle_t handle);
+  const HandleSet& lookup_matching_instances(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const;
 
   LookupMap combined_state_lookup_;
 

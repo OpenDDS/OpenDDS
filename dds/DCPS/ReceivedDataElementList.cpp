@@ -78,6 +78,7 @@ OpenDDS::DCPS::ReceivedDataElementList::apply_all(
       op(it);
     }
   }
+  OPENDDS_ASSERT(sanity_check());
 }
 
 bool
@@ -126,6 +127,9 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
           item->previous_data_sample_ ;
       }
 
+      item->previous_data_sample_ = 0;
+      item->next_data_sample_ = 0;
+
       if (instance_state_ && size_ == 0) {
         // let the instance know it is empty
         released = released || instance_state_->empty(true);
@@ -135,7 +139,15 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
     }
   }
 
+  OPENDDS_ASSERT(sanity_check());
   return released;
+}
+
+bool
+OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement* data_sample)
+{
+  IdentityFilter match(data_sample);
+  return remove(match, false); // short-circuit evaluation
 }
 
 bool
@@ -158,8 +170,8 @@ OpenDDS::DCPS::ReceivedDataElementList::matches(CORBA::ULong sample_states) cons
 OpenDDS::DCPS::ReceivedDataElement*
 OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_states, ReceivedDataElement* prev)
 {
-  OPENDDS_ASSERT(prev == NULL || prev == tail_ || prev->next_data_sample_->previous_data_sample_ == prev);
-  OPENDDS_ASSERT(prev == NULL || prev == head_ || prev->previous_data_sample_->next_data_sample_ == prev);
+  OPENDDS_ASSERT(sanity_check(prev));
+  OPENDDS_ASSERT(sanity_check());
   if (prev == tail_) {
     return NULL;
   }
@@ -170,29 +182,43 @@ OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_state
     item = prev->next_data_sample_;
   }
   for (; item != 0; item = item->next_data_sample_) {
-    if (item->sample_state_ & sample_states) {
+    if ((item->sample_state_ & sample_states)
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+      && !item->coherent_change_
+#endif
+      ) {
+      OPENDDS_ASSERT(sanity_check());
       return item;
     }
   }
+  OPENDDS_ASSERT(sanity_check());
   return NULL;
-}
-
-bool
-OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement* data_sample)
-{
-  IdentityFilter match(data_sample);
-  return remove(match, false); // short-circuit evaluation
 }
 
 void
 OpenDDS::DCPS::ReceivedDataElementList::mark_read(ReceivedDataElement* item)
 {
+  OPENDDS_ASSERT(sanity_check(item));
+  OPENDDS_ASSERT(sanity_check());
   if (item->sample_state_ & DDS::NOT_READ_SAMPLE_STATE) {
     item->sample_state_ = DDS::READ_SAMPLE_STATE;
     decrement_not_read_count();
     increment_read_count();
   }
 }
+
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+void
+OpenDDS::DCPS::ReceivedDataElementList::accept_coherent_change(OpenDDS::DCPS::ReceivedDataElement* item)
+{
+  OPENDDS_ASSERT(sanity_check(item));
+  OPENDDS_ASSERT(sanity_check());
+  if (item->coherent_change_) {
+    item->coherent_change_ = false;
+    increment_not_read_count();
+  }
+}
+#endif
 
 void OpenDDS::DCPS::ReceivedDataElementList::increment_read_count()
 {
@@ -230,4 +256,21 @@ void OpenDDS::DCPS::ReceivedDataElementList::decrement_not_read_count()
     sample_states_ &= (~DDS::NOT_READ_SAMPLE_STATE);
     reader_->state_updated(instance_state_->instance_handle());
   }
+}
+
+bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check()
+{
+  OPENDDS_ASSERT(head_ == NULL || head_->previous_data_sample_ == NULL);
+  for (ReceivedDataElement* item = head_; item != 0; item = item->next_data_sample_) {
+    sanity_check(item);
+  }
+  OPENDDS_ASSERT(tail_ == NULL || tail_->next_data_sample_ == NULL);
+  return true;
+}
+
+bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check(ReceivedDataElement* item)
+{
+  OPENDDS_ASSERT(item == NULL || (item->next_data_sample_ == NULL && item == tail_) || item->next_data_sample_->previous_data_sample_ == item);
+  OPENDDS_ASSERT(item == NULL || (item->previous_data_sample_ == NULL && item == head_) || item->previous_data_sample_->next_data_sample_ == item);
+  return true;
 }

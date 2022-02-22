@@ -3146,18 +3146,17 @@ void DataReaderImpl::get_ordered_data(GroupRakeData& data,
       localsubs.insert(iter->second);
     }
   }
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
   for (SubscriptionInstanceSet::iterator iter = localsubs.begin(); iter != localsubs.end(); ++iter) {
-    if ((*iter)->instance_state_->match(view_states, instance_states)) {
+    const SubscriptionInstance_rch inst = *iter;
+    if (inst->instance_state_->match(view_states, instance_states)) {
       size_t i(0);
-      ReceivedDataElement* item = (*iter)->rcvd_samples_.get_next_match(sample_states, 0);
-      while (item) {
-        if (!item->coherent_change_) {
-          data.insert_sample(item, &(*iter)->rcvd_samples_, *iter, ++i);
-          group_coherent_ordered_data_.insert_sample(item, &(*iter)->rcvd_samples_, *iter, ++i);
-        }
-        ReceivedDataElement* item = (*iter)->rcvd_samples_.get_next_match(sample_states, item);
+      for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0);
+           item; item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
+          data.insert_sample(item, &inst->rcvd_samples_, *iter, ++i);
+          group_coherent_ordered_data_.insert_sample(item, &inst->rcvd_samples_, *iter, ++i);
       }
     }
   }
@@ -3576,6 +3575,49 @@ void DataReaderImpl::OnDataAvailable::execute()
   if (set_subscriber_status_) {
     subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
   }
+}
+void DataReaderImpl::initialize_lookup_maps()
+{
+  // These all start at 1 (0 mask is bogus) and include the full mask (any)
+  for (CORBA::ULong is = 1; is <= MAX_SAMPLE_STATE_MASK; ++is) {
+    for (CORBA::ULong iv = 1; iv <= MAX_VIEW_STATE_MASK; ++iv) {
+      for (CORBA::ULong ii = 1; ii <= MAX_INSTANCE_STATE_MASK; ++ii) {
+        combined_state_lookup_[to_combined_states(is, iv, ii)] = HandleSet();
+      }
+    }
+  }
+  // catch-all for "bogus" lookups
+  combined_state_lookup_[0] = HandleSet();
+}
+
+void DataReaderImpl::update_lookup_maps(const typename SubscriptionInstanceMapType::iterator& input)
+{
+  for (LookupMap::iterator it = combined_state_lookup_.begin(); it != combined_state_lookup_.end(); ++it) {
+    if (it->first == 0) continue;
+    CORBA::ULong sample_states, view_states, instance_states;
+    split_combined_states(it->first, sample_states, view_states, instance_states);
+    if (input->second->matches(sample_states, view_states, instance_states)) {
+      it->second.insert(input->first);
+    } else {
+      it->second.erase(input->first);
+    }
+  }
+}
+
+void DataReaderImpl::remove_from_lookup_maps(DDS::InstanceHandle_t handle)
+{
+  for (LookupMap::iterator it = combined_state_lookup_.begin(), the_end = combined_state_lookup_.end(); it != the_end; ++it) {
+    if (it->first == 0) continue;
+    it->second.erase(handle);
+  }
+}
+
+const DataReaderImpl::HandleSet& DataReaderImpl::lookup_matching_instances(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const
+{
+  const CORBA::ULong combined_states = to_combined_states(sample_states, view_states, instance_states);
+  LookupMap::const_iterator ci = combined_state_lookup_.find(combined_states);
+  OPENDDS_ASSERT(ci != combined_state_lookup_.end());
+  return ci->second;
 }
 
 } // namespace DCPS

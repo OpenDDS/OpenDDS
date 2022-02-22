@@ -319,7 +319,8 @@ namespace OpenDDS {
 
       bool most_recent_generation = false;
       const CORBA::ULong sample_states = DDS::NOT_READ_SAMPLE_STATE;
-      for (ReceivedDataElement* item = ptr->rcvd_samples_.get_next_match(sample_states, 0);
+      ReceivedDataElement* item = 0;
+      for (item = ptr->rcvd_samples_.get_next_match(sample_states, 0);
            !found_data && item; item = ptr->rcvd_samples_.get_next_match(sample_states, item)) {
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
         if (item->coherent_change_) continue;
@@ -341,9 +342,12 @@ namespace OpenDDS {
         }
 
         found_data = true;
-        ptr->rcvd_samples_.remove(item);
-        item->dec_ref();
-        item = 0;
+        // If the found item is the tail, we can't delete it just yet
+        if (item != ptr->rcvd_samples_.peek_tail()) {
+          ptr->rcvd_samples_.remove(item);
+          item->dec_ref();
+          item = 0;
+        }
       }
 
       if (found_data) {
@@ -353,6 +357,13 @@ namespace OpenDDS {
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
         sample_info(sample_info_ref, ptr->rcvd_samples_.peek_tail());
+
+        // Now we can delete the tail
+        if (item == ptr->rcvd_samples_.peek_tail()) {
+          ptr->rcvd_samples_.remove(item);
+          item->dec_ref();
+          item = 0;
+        }
 
         break;
       }
