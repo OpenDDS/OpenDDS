@@ -1370,7 +1370,7 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
         const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
         if (observer && item->registered_data_ && vwd) {
           Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
-          observer->on_sample_read(this, s);
+          observer->on_sample_taken(this, s);
         }
       }
     }
