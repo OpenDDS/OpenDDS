@@ -72,8 +72,7 @@ OpenDDS::DCPS::ReceivedDataElementList::apply_all(
   ReceivedDataFilter& match,
   ReceivedDataOperation& op)
 {
-  for (ReceivedDataElement* it = head_;
-       it != 0 ; it = it->next_data_sample_) {
+  for (ReceivedDataElement* it = head_; it != 0; it = it->next_data_sample_) {
     if (match(it)) {
       op(it);
     }
@@ -91,54 +90,9 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
 
   bool released = false;
 
-  for (ReceivedDataElement* item = head_ ; item != 0 ;
-       item = item->next_data_sample_) {
+  for (ReceivedDataElement* item = head_; item != 0; item = item->next_data_sample_) {
     if (match(item)) {
-      size_-- ;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-      if (!item->coherent_change_)
-#endif
-      {
-        if (item->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
-          decrement_not_read_count();
-        } else {
-          decrement_read_count();
-        }
-      }
-      if (item == head_) {
-        if (head_ == tail_) {
-          head_ = tail_ = 0;
-
-        } else {
-          head_ = item->next_data_sample_ ;
-
-          if (head_) {
-            head_->previous_data_sample_ = 0 ;
-          }
-        }
-
-      } else if (item == tail_) {
-        tail_ = item->previous_data_sample_ ;
-
-        if (tail_) {
-          tail_->next_data_sample_ = 0 ;
-        }
-
-      } else {
-        item->previous_data_sample_->next_data_sample_ =
-          item->next_data_sample_ ;
-        item->next_data_sample_->previous_data_sample_ =
-          item->previous_data_sample_ ;
-      }
-
-      item->previous_data_sample_ = 0;
-      item->next_data_sample_ = 0;
-
-      if (instance_state_ && size_ == 0) {
-        // let the instance know it is empty
-        released = released || instance_state_->empty(true);
-      }
-
+      released = released || remove(item);
       if (!eval_all) break;
     }
   }
@@ -147,10 +101,62 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
 }
 
 bool
-OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement* data_sample)
+OpenDDS::DCPS::ReceivedDataElementList::remove(ReceivedDataElement* item)
 {
-  IdentityFilter match(data_sample);
-  return remove(match, false); // short-circuit evaluation
+  OPENDDS_ASSERT(sanity_check(item));
+
+  if (!head_) {
+    return false;
+  }
+
+  bool released = false;
+
+  size_--;
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  if (!item->coherent_change_)
+#endif
+  {
+    if (item->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
+      decrement_not_read_count();
+    } else {
+      decrement_read_count();
+    }
+  }
+  if (item == head_) {
+    if (head_ == tail_) {
+      head_ = tail_ = 0;
+
+    } else {
+      head_ = item->next_data_sample_;
+
+      if (head_) {
+        head_->previous_data_sample_ = 0;
+      }
+    }
+
+  } else if (item == tail_) {
+    tail_ = item->previous_data_sample_;
+
+    if (tail_) {
+      tail_->next_data_sample_ = 0;
+    }
+
+  } else {
+    item->previous_data_sample_->next_data_sample_ =
+      item->next_data_sample_;
+    item->next_data_sample_->previous_data_sample_ =
+      item->previous_data_sample_;
+  }
+
+  item->previous_data_sample_ = 0;
+  item->next_data_sample_ = 0;
+
+  if (instance_state_ && size_ == 0) {
+    // let the instance know it is empty
+    released = instance_state_->empty(true);
+  }
+
+  return released;
 }
 
 bool
@@ -179,10 +185,10 @@ OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_state
 {
   OPENDDS_ASSERT(sanity_check(prev));
   if (prev == tail_) {
-    return NULL;
+    return 0;
   }
   ReceivedDataElement* item;
-  if (prev == NULL) {
+  if (prev == 0) {
     item = head_;
   } else {
     item = prev->next_data_sample_;
@@ -196,7 +202,7 @@ OpenDDS::DCPS::ReceivedDataElementList::get_next_match(CORBA::ULong sample_state
       return item;
     }
   }
-  return NULL;
+  return 0;
 }
 
 void
@@ -267,18 +273,18 @@ void OpenDDS::DCPS::ReceivedDataElementList::decrement_not_read_count()
 
 bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check()
 {
-  OPENDDS_ASSERT(head_ == NULL || head_->previous_data_sample_ == NULL);
+  OPENDDS_ASSERT(head_ == 0 || head_->previous_data_sample_ == 0);
   for (ReceivedDataElement* item = head_; item != 0; item = item->next_data_sample_) {
     sanity_check(item);
   }
-  OPENDDS_ASSERT(tail_ == NULL || tail_->next_data_sample_ == NULL);
+  OPENDDS_ASSERT(tail_ == 0 || tail_->next_data_sample_ == 0);
   return true;
 }
 
 bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check(ReceivedDataElement* item)
 {
   ACE_UNUSED_ARG(item);
-  OPENDDS_ASSERT(item == NULL || (item->next_data_sample_ == NULL && item == tail_) || item->next_data_sample_->previous_data_sample_ == item);
-  OPENDDS_ASSERT(item == NULL || (item->previous_data_sample_ == NULL && item == head_) || item->previous_data_sample_->next_data_sample_ == item);
+  OPENDDS_ASSERT(item == 0 || (item->next_data_sample_ == 0 && item == tail_) || item->next_data_sample_->previous_data_sample_ == item);
+  OPENDDS_ASSERT(item == 0 || (item->previous_data_sample_ == 0 && item == head_) || item->previous_data_sample_->next_data_sample_ == item);
   return true;
 }
