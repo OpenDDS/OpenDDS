@@ -95,7 +95,10 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
        item = item->next_data_sample_) {
     if (match(item)) {
       size_-- ;
-      if (!item->coherent_change_) {
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+      if (!item->coherent_change_)
+#endif
+      {
         if (item->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
           decrement_not_read_count();
         } else {
@@ -200,7 +203,10 @@ void
 OpenDDS::DCPS::ReceivedDataElementList::mark_read(ReceivedDataElement* item)
 {
   OPENDDS_ASSERT(sanity_check(item));
-  if (!item->coherent_change_) {
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  if (!item->coherent_change_)
+#endif
+  {
     if (item->sample_state_ & DDS::NOT_READ_SAMPLE_STATE) {
       item->sample_state_ = DDS::READ_SAMPLE_STATE;
       decrement_not_read_count();
