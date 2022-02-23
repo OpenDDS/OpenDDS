@@ -95,10 +95,12 @@ OpenDDS::DCPS::ReceivedDataElementList::remove(
        item = item->next_data_sample_) {
     if (match(item)) {
       size_-- ;
-      if (item->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
-        decrement_not_read_count();
-      } else {
-        decrement_read_count();
+      if (!item->coherent_change_) {
+        if (item->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
+          decrement_not_read_count();
+        } else {
+          decrement_read_count();
+        }
       }
       if (item == head_) {
         if (head_ == tail_) {
@@ -198,10 +200,12 @@ void
 OpenDDS::DCPS::ReceivedDataElementList::mark_read(ReceivedDataElement* item)
 {
   OPENDDS_ASSERT(sanity_check(item));
-  if (item->sample_state_ & DDS::NOT_READ_SAMPLE_STATE) {
-    item->sample_state_ = DDS::READ_SAMPLE_STATE;
-    decrement_not_read_count();
-    increment_read_count();
+  if (!item->coherent_change_) {
+    if (item->sample_state_ & DDS::NOT_READ_SAMPLE_STATE) {
+      item->sample_state_ = DDS::READ_SAMPLE_STATE;
+      decrement_not_read_count();
+      increment_read_count();
+    }
   }
 }
 
@@ -267,6 +271,7 @@ bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check()
 
 bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check(ReceivedDataElement* item)
 {
+  ACE_UNUSED_ARG(item);
   OPENDDS_ASSERT(item == NULL || (item->next_data_sample_ == NULL && item == tail_) || item->next_data_sample_->previous_data_sample_ == item);
   OPENDDS_ASSERT(item == NULL || (item->previous_data_sample_ == NULL && item == head_) || item->previous_data_sample_->next_data_sample_ == item);
   return true;

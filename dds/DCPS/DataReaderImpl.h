@@ -405,10 +405,12 @@ public:
   void process_latency(const ReceivedDataSample& sample);
   void notify_latency(PublicationId writer);
 
-  CORBA::Long get_depth() const {
-    return depth_;
+  size_t get_depth() const
+  {
+    return static_cast<size_t>(depth_);
   }
-  size_t get_n_chunks() const {
+  size_t get_n_chunks() const
+  {
     return n_chunks_;
   }
 
