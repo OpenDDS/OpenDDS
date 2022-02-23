@@ -316,9 +316,8 @@ namespace OpenDDS {
       const SubscriptionInstance_rch inst = get_handle_instance(handle);
 
       bool most_recent_generation = false;
-      ReceivedDataElement* item = 0;
-      for (item = inst->rcvd_samples_.get_next_match(sample_states, 0);
-           !found_data && item; item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
+      ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0);
+      if (item) {
         if (item->registered_data_) {
           received_data = *static_cast<MessageType*>(item->registered_data_);
         }
@@ -335,29 +334,19 @@ namespace OpenDDS {
           most_recent_generation = inst->instance_state_->most_recent_generation(item);
         }
 
-        found_data = true;
-        // If the found item is the tail, we can't delete it just yet
-        if (item != inst->rcvd_samples_.peek_tail()) {
-          inst->rcvd_samples_.remove(item);
-          item->dec_ref();
-          item = 0;
-        }
-      }
-
-      if (found_data) {
         if (most_recent_generation) {
           inst->instance_state_->accessed();
         }
+
         // Get the sample_ranks, generation_ranks, and
         // absolute_generation_ranks for this info_seq
         sample_info(sample_info_ref, inst->rcvd_samples_.peek_tail());
 
-        // Now we can delete the tail
-        if (item == inst->rcvd_samples_.peek_tail()) {
-          inst->rcvd_samples_.remove(item);
-          item->dec_ref();
-          item = 0;
-        }
+        inst->rcvd_samples_.remove(item);
+        item->dec_ref();
+        item = 0;
+
+        found_data = true;
 
         break;
       }
