@@ -617,7 +617,6 @@ protected:
   // These may need to be updated if the spec ever changes
   static const CORBA::ULong COMBINED_VIEW_STATE_SHIFT = MAX_INSTANCE_STATE_BITS;
   static const CORBA::ULong COMBINED_SAMPLE_STATE_SHIFT = COMBINED_VIEW_STATE_SHIFT + MAX_VIEW_STATE_BITS;
-  static const CORBA::ULong MAX_COMBINED_STATE_MASK = (MAX_SAMPLE_STATE_FLAG << (COMBINED_SAMPLE_STATE_SHIFT + MAX_SAMPLE_STATE_BITS)) - 1;
 
   typedef OPENDDS_SET(DDS::InstanceHandle_t) HandleSet;
   typedef OPENDDS_MAP(CORBA::ULong, HandleSet) LookupMap;
