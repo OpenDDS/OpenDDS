@@ -1021,7 +1021,7 @@ my %sanitizers = (
   ubsan => {
     fsanitize => 'undefined',
     env => {
-      UBSAN_OPTIONS => 'print_stacktrace=1',
+      UBSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/ubsan-suppr.txt:print_stacktrace=1",
     },
     configh => ['#define ACE_INITILAIZE_MEMORY_BEFORE_USE'],
     compiler_args => ['-fsanitize-coverage=trace-pc-guard'],
@@ -1054,7 +1054,7 @@ if (scalar(@fsanitize)) {
   if (!$debug) {
     die("ERROR: Using sanitizers requires --debug");
   }
-  my @common = ('-fsanitize=' . join(',', @fsanitize));
+  my @common = ('-ggdb', '-fsanitize=' . join(',', @fsanitize));
   @sanitizer_compiler_args = ('-O1', @common, '-fno-omit-frame-pointer', @sanitizer_compiler_args);
   @sanitizer_linker_args = (@common, @sanitizer_linker_args);
 }
@@ -2212,7 +2212,7 @@ sub write_environment {
 
   for my $key (sort(keys(%buildEnv))) {
     if ($key ne 'build' && $key ne 'mpctype') {
-      print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
+      print $SE "$specific{'export'} $key=\"$buildEnv{$key}\"\n";
       if ($MK) {
         my $value = $buildEnv{$key};
         convert_environment(\$value) if $is_windows;
@@ -2582,8 +2582,7 @@ sub write_cmake_file {
 
     if (scalar(@fsanitize)) {
       print $fh "\n# Options to enable sanitizers\n";
-      # gnuace already puts in -ggdb, while cmake does not.
-      print_cmake_config($fh, 'SANITIZER_COMPILER_ARGS', ['-ggdb', @sanitizer_compiler_args]);
+      print_cmake_config($fh, 'SANITIZER_COMPILER_ARGS', \@sanitizer_compiler_args);
       print_cmake_config($fh, 'SANITIZER_LINKER_ARGS', \@sanitizer_linker_args);
     }
   };
