@@ -1841,7 +1841,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
   if ((qos_.resource_limits.max_samples_per_instance !=
         DDS::LENGTH_UNLIMITED) &&
       (instance_ptr->rcvd_samples_.size() >=
-        qos_.resource_limits.max_samples_per_instance)) {
+        static_cast<size_t>(qos_.resource_limits.max_samples_per_instance))) {
 
     // According to spec 1.2, Samples that contain no data do not
     // count towards the limits imposed by the RESOURCE_LIMITS QoS policy
