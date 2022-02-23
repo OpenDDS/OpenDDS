@@ -50,45 +50,6 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 }
 
 ACE_INLINE
-void
-OpenDDS::DCPS::ReceivedDataElementList::add_by_timestamp(ReceivedDataElement *data_sample)
-{
-  data_sample->previous_data_sample_ = 0;
-  data_sample->next_data_sample_ = 0;
-
-  for (ReceivedDataElement* it = head_; it != 0; it = it->next_data_sample_) {
-    if (data_sample->source_timestamp_ < it->source_timestamp_) {
-      data_sample->previous_data_sample_ = it->previous_data_sample_;
-      data_sample->next_data_sample_ = it;
-
-      // Are we replacing the head?
-      if (it->previous_data_sample_ == 0) {
-        head_ = data_sample;
-      } else {
-        it->previous_data_sample_->next_data_sample_ = data_sample;
-      }
-      it->previous_data_sample_ = data_sample;
-
-      ++size_;
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-      if (!data_sample->coherent_change_)
-#endif
-      {
-        if (data_sample->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
-          increment_not_read_count();
-        } else {
-          increment_read_count();
-        }
-      }
-
-      return;
-    }
-  }
-
-  add(data_sample);
-}
-
-ACE_INLINE
 OpenDDS::DCPS::ReceivedDataElement*
 OpenDDS::DCPS::ReceivedDataElementList::remove_head()
 {
