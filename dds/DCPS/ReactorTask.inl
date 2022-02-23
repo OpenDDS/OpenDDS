@@ -13,6 +13,7 @@ namespace DCPS {
 ACE_INLINE
 ACE_Reactor* ReactorTask::get_reactor()
 {
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
   return reactor_;
 }
 
@@ -27,6 +28,7 @@ ACE_INLINE
 ACE_thread_t ReactorTask::get_reactor_owner() const
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
+  wait_for_startup_i();
   return reactor_owner_;
 }
 
