@@ -191,6 +191,9 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
     'ipv6!', 'IPv6 support (no)',
+    'asan!', 'Address Sanitizer (no)',
+    'tsan!', 'Thread Sanitizer (no)',
+    'ubsan!', 'Undefined Behavior Sanitizer (no)',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -1001,6 +1004,61 @@ sub write_default_features {
   }
 }
 
+my %sanitizers = (
+  asan => {
+    fsanitize => 'address',
+    env => {
+      LSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/asan-suppr.txt",
+      ASAN_OPTIONS => 'detect_leaks=1:fast_unwind_on_malloc=0',
+    },
+  },
+  tsan => {
+    fsanitize => 'thread',
+    env => {
+      TSAN_OPTIONS => "history_size=7 suppressions=$FindBin::RealBin/etc/tsan-suppr.txt",
+    },
+  },
+  ubsan => {
+    fsanitize => 'undefined',
+    env => {
+      UBSAN_OPTIONS => 'print_stacktrace=1',
+    },
+    configh => ['#define ACE_INITILAIZE_MEMORY_BEFORE_USE'],
+    compiler_args => ['-fsanitize-coverage=trace-pc-guard'],
+  },
+);
+my @fsanitize = ();
+my @sanitizer_compiler_args = ();
+my @sanitizer_linker_args = ();
+for my $opt (sort(keys(%sanitizers))) {
+  if ($opts{$opt}) {
+    my $sanitizer = $sanitizers{$opt};
+    push(@fsanitize, $sanitizer->{fsanitize});
+    if (exists($sanitizer->{env})) {
+      for my $env (keys(%{$sanitizer->{env}})) {
+        setEnv($env, $sanitizer->{env}->{$env});
+      }
+    }
+    if (exists($sanitizer->{configh})) {
+      push(@{$opts{'configh'}}, @{$sanitizer->{configh}});
+    }
+    if (exists($sanitizer->{compiler_args})) {
+      push(@sanitizer_compiler_args, @{$sanitizer->{compiler_args}});
+    }
+    if (exists($sanitizer->{linker_args})) {
+      push(@sanitizer_linker_args, @{$sanitizer->{linker_args}});
+    }
+  }
+}
+if (scalar(@fsanitize)) {
+  if (!$debug) {
+    die("ERROR: Using sanitizers requires --debug");
+  }
+  my @common = ('-fsanitize=' . join(',', @fsanitize));
+  @sanitizer_compiler_args = ('-O1', @common, '-fno-omit-frame-pointer', @sanitizer_compiler_args);
+  @sanitizer_linker_args = (@common, @sanitizer_linker_args);
+}
+
 my @ace_macros = ('debug',
                   'optimize',
                   'inline',
@@ -1073,6 +1131,11 @@ sub write_platform_macros {
     }
     if ($opts{'prefix'}) {
       print $PMG "INSTALL_PREFIX=" . $opts{'prefix'} . "\n";
+    }
+    if (scalar(@fsanitize)) {
+      print $PMG
+        'CPPFLAGS += ' . join(' ', @sanitizer_compiler_args) . "\n" .
+        'LDFLAGS += ' . join(' ', @sanitizer_linker_args) . "\n";
     }
     my $plat = $opts{$buildEnv{'build'}};
     if ($pi->{'aceplatform'}) {
@@ -2147,7 +2210,7 @@ sub write_environment {
   print $SE "$specific{'comment'} OpenDDS configure script: $0 $args_\n";
   print $MK "$specific{'comment'} OpenDDS configure script: $0 $args_\n" if $MK;
 
-  for my $key (keys %buildEnv) {
+  for my $key (sort(keys(%buildEnv))) {
     if ($key ne 'build' && $key ne 'mpctype') {
       print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
       if ($MK) {
@@ -2438,6 +2501,7 @@ sub write_cmake_file {
     print_cmake_config($fh, 'ACE', Cwd::abs_path($buildEnv->{'ACE_ROOT'}));
     print_cmake_config($fh, 'TAO', Cwd::abs_path($buildEnv->{'TAO_ROOT'}));
 
+    print $fh "\n# Based on MPC features\n";
     my @configs = (
       {
         name => 'CXX11',
@@ -2483,6 +2547,7 @@ sub write_cmake_file {
 
     # TODO(iguessthislldo): Move to a smarter system that can use existing
     # ACE/TAO and that works with cross compiling.
+    print $fh "\n# Based on configure script options\n";
     my %opts_to_use = (
       'built-in-topics' => 1,
       'compiler' => '',
@@ -2508,8 +2573,18 @@ sub write_cmake_file {
       'std' => '',
       'xerces3' => '',
     );
+    for my $opt (keys(%sanitizers)) {
+      $opts_to_use{$opt} = 0;
+    }
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
+    }
+
+    if (scalar(@fsanitize)) {
+      print $fh "\n# Options to enable sanitizers\n";
+      # gnuace already puts in -ggdb, while cmake does not.
+      print_cmake_config($fh, 'SANITIZER_COMPILER_ARGS', ['-ggdb', @sanitizer_compiler_args]);
+      print_cmake_config($fh, 'SANITIZER_LINKER_ARGS', \@sanitizer_linker_args);
     }
   };
 

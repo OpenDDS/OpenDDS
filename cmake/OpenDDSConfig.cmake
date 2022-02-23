@@ -413,6 +413,14 @@ function(opendds_add_library_group lib_group_name libs has_mononym)
         APPEND PROPERTY
         IMPORTED_CONFIGURATIONS ${config}
       )
+      set_property(TARGET ${target}
+        APPEND PROPERTY
+        INTERFACE_COMPILE_OPTIONS "${OPENDDS_SANITIZER_COMPILER_ARGS}"
+      )
+      set_property(TARGET ${target}
+        APPEND PROPERTY
+        INTERFACE_LINK_OPTIONS "${OPENDDS_SANITIZER_LINKER_ARGS}"
+      )
       set(imploc "${lib_file}")
       if(MSVC)
         set_target_properties(${target}
