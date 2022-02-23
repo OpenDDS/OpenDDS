@@ -15,6 +15,10 @@
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
 
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
+#include "dds/DCPS/transport/framework/TransportType_rch.h"
+
 #include "tao/ORB_Core.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
 #include "ace/Reactor.h"
@@ -24,7 +28,6 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
@@ -1047,9 +1050,20 @@ InfoRepoDiscovery::OrbRunner::svc()
   return 0;
 }
 
+class InfoRepoType : public TransportType {
+public:
+  const char* name() { return "repository"; }
+
+  TransportInst_rch new_inst(const std::string&)
+  {
+    return TransportInst_rch();
+  }
+};
 
 InfoRepoDiscovery::StaticInitializer::StaticInitializer()
 {
+  TransportRegistry* registry = TheTransportRegistry;
+  registry->register_type(make_rch<InfoRepoType>());
   TheServiceParticipant->register_discovery_type("repository", new Config);
 }
 
