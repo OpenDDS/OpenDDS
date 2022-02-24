@@ -179,6 +179,7 @@ tests/transport/simple/run_test.pl shmem: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM 
 
 tests/transport/error_handling/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 
+tests/transport/network_resource/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 performance-tests/DCPS/InfoRepo_population/run_test.pl: !DCPS_MIN !MIN_CORBA !OPENDDS_SAFETY_PROFILE
 
 performance-tests/DCPS/TCPListenerTest/run_test.pl -p 1 -s 1: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
