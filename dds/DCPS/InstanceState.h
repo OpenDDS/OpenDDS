@@ -123,6 +123,7 @@ public:
   }
 
   WeakRcHandle<DataReaderImpl> data_reader() const;
+  void state_updated() const;
 
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);

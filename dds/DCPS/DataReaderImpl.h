@@ -405,10 +405,12 @@ public:
   void process_latency(const ReceivedDataSample& sample);
   void notify_latency(PublicationId writer);
 
-  CORBA::Long get_depth() const {
-    return depth_;
+  size_t get_depth() const
+  {
+    return static_cast<size_t>(depth_);
   }
-  size_t get_n_chunks() const {
+  size_t get_n_chunks() const
+  {
     return n_chunks_;
   }
 
@@ -433,6 +435,9 @@ public:
 
   /// Release the instance with the handle.
   void release_instance(DDS::InstanceHandle_t handle);
+
+  // Take appropriate actions upon learning instance or view state has been updated
+  void state_updated(DDS::InstanceHandle_t handle);
 
   /// Release all instances held by the reader.
   virtual void release_all_instances() = 0;
@@ -594,6 +599,54 @@ public:
 
 protected:
 
+  // Update max flag if the spec ever changes
+  static const CORBA::ULong MAX_SAMPLE_STATE_FLAG = DDS::NOT_READ_SAMPLE_STATE;
+  static const CORBA::ULong MAX_SAMPLE_STATE_MASK = (MAX_SAMPLE_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_SAMPLE_STATE_BITS = 2u;
+
+  // Update max flag if the spec ever changes
+  static const CORBA::ULong MAX_VIEW_STATE_FLAG = DDS::NOT_NEW_VIEW_STATE;
+  static const CORBA::ULong MAX_VIEW_STATE_MASK = (MAX_VIEW_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_VIEW_STATE_BITS = 2u;
+
+  // Update max flag if the spec ever changes
+  static const CORBA::ULong MAX_INSTANCE_STATE_FLAG = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+  static const CORBA::ULong MAX_INSTANCE_STATE_MASK = (MAX_INSTANCE_STATE_FLAG << 1) - 1;
+  static const CORBA::ULong MAX_INSTANCE_STATE_BITS = 3u;
+
+  // These may need to be updated if the spec ever changes
+  static const CORBA::ULong COMBINED_VIEW_STATE_SHIFT = MAX_INSTANCE_STATE_BITS;
+  static const CORBA::ULong COMBINED_SAMPLE_STATE_SHIFT = COMBINED_VIEW_STATE_SHIFT + MAX_VIEW_STATE_BITS;
+
+  typedef OPENDDS_SET(DDS::InstanceHandle_t) HandleSet;
+  typedef OPENDDS_MAP(CORBA::ULong, HandleSet) LookupMap;
+
+  static CORBA::ULong to_combined_states(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states)
+  {
+    sample_states &= MAX_SAMPLE_STATE_MASK;
+    view_states &= MAX_VIEW_STATE_MASK;
+    instance_states &= MAX_INSTANCE_STATE_MASK;
+    if (!(sample_states && view_states && instance_states)) {
+      // catch-all for "bogus" lookups
+      return 0;
+    }
+    return (sample_states << COMBINED_SAMPLE_STATE_SHIFT) | (view_states << COMBINED_VIEW_STATE_SHIFT) | instance_states;
+  }
+
+  static void split_combined_states(CORBA::ULong combined, CORBA::ULong& sample_states, CORBA::ULong& view_states, CORBA::ULong& instance_states)
+  {
+    sample_states = (combined >> COMBINED_SAMPLE_STATE_SHIFT) & MAX_SAMPLE_STATE_MASK;
+    view_states = (combined >> COMBINED_VIEW_STATE_SHIFT) & MAX_VIEW_STATE_MASK;
+    instance_states = combined & MAX_INSTANCE_STATE_MASK;
+  }
+
+  void initialize_lookup_maps();
+  void update_lookup_maps(const SubscriptionInstanceMapType::iterator& input);
+  void remove_from_lookup_maps(DDS::InstanceHandle_t handle);
+  const HandleSet& lookup_matching_instances(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const;
+
+  LookupMap combined_state_lookup_;
+
   // Perform cast to get extended version of listener (otherwise nil)
   DataReaderListener_ptr get_ext_listener();
 
@@ -635,6 +688,7 @@ protected:
   virtual void purge_data(SubscriptionInstance_rch instance) = 0;
 
   virtual void release_instance_i(DDS::InstanceHandle_t handle) = 0;
+  virtual void state_updated_i(DDS::InstanceHandle_t handle) = 0;
 
   bool has_readcondition(DDS::ReadCondition_ptr a_condition);
 

@@ -46,10 +46,12 @@ private:
 class AcceptCoherent : public OpenDDS::DCPS::ReceivedDataOperation {
 public:
   AcceptCoherent(const OpenDDS::DCPS::PublicationId& writer,
-                 const OpenDDS::DCPS::RepoId& publisher)
-  : writer_(writer),
-    publisher_(publisher),
-    group_coherent_(publisher_ != ::OpenDDS::DCPS::GUID_UNKNOWN)
+                 const OpenDDS::DCPS::RepoId& publisher,
+                 OpenDDS::DCPS::ReceivedDataElementList* rdel)
+    : writer_(writer)
+    , publisher_(publisher)
+    , rdel_(rdel)
+    , group_coherent_(publisher_ != ::OpenDDS::DCPS::GUID_UNKNOWN)
   {}
 
   void operator()(OpenDDS::DCPS::ReceivedDataElement* data_sample)
@@ -59,11 +61,11 @@ public:
     if (group_coherent_) {
       if (data_sample->coherent_change_
           && (publisher_ == data_sample->publisher_id_)) {
-        data_sample->coherent_change_ = false;
+        rdel_->accept_coherent_change(data_sample);
       }
     } else {
       if (data_sample->coherent_change_ && (writer_ == data_sample->pub_)) {
-        data_sample->coherent_change_ = false;
+        rdel_->accept_coherent_change(data_sample);
       }
     }
   }
@@ -72,7 +74,9 @@ private:
 
   const OpenDDS::DCPS::PublicationId& writer_;
   const OpenDDS::DCPS::RepoId& publisher_;
+  OpenDDS::DCPS::ReceivedDataElementList* rdel_;
   bool group_coherent_;
+
 };
 
 } // namespace
@@ -104,8 +108,8 @@ ReceivedDataStrategy::accept_coherent(const PublicationId& writer,
                                       const RepoId& publisher)
 {
   CoherentFilter filter(writer, publisher);
-  AcceptCoherent operation(writer, publisher);
-  this->rcvd_samples_.apply_all(filter, operation);
+  AcceptCoherent operation(writer, publisher, &rcvd_samples_);
+  rcvd_samples_.apply_all(filter, operation);
 }
 
 void
@@ -136,29 +140,7 @@ SourceDataStrategy::~SourceDataStrategy()
 void
 SourceDataStrategy::add(ReceivedDataElement* data_sample)
 {
-  for (ReceivedDataElement* it = this->rcvd_samples_.head_;
-       it != 0; it = it->next_data_sample_) {
-    if (data_sample->source_timestamp_ < it->source_timestamp_) {
-      data_sample->previous_data_sample_ = it->previous_data_sample_;
-      data_sample->next_data_sample_ = it;
-
-      // Are we replacing the head?
-      if (it->previous_data_sample_ == 0) {
-        this->rcvd_samples_.head_ = data_sample;
-
-      } else {
-        it->previous_data_sample_->next_data_sample_ = data_sample;
-      }
-
-      it->previous_data_sample_ = data_sample;
-
-      ++this->rcvd_samples_.size_;
-
-      return;
-    }
-  }
-
-  this->rcvd_samples_.add(data_sample);
+  rcvd_samples_.add_by_timestamp(data_sample);
 }
 
 } // namespace DCPS
