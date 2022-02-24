@@ -228,7 +228,7 @@ void ReactorTask::stop()
 
     // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
     // which can be used to delay any potential new calls to open_reactor_task()
-    OPENDDS_ASSERT(state_ = STATE_SHUT_DOWN);
+    OPENDDS_ASSERT(state_ == STATE_SHUT_DOWN);
 
     // Let's wait for the reactor task's thread to complete before we
     // leave this stop method.
