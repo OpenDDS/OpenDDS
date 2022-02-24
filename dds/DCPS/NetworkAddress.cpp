@@ -10,6 +10,8 @@
 #include "Hash.h"
 #include "LogAddr.h"
 
+#include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -17,8 +19,8 @@ namespace DCPS {
 
 NetworkAddress::NetworkAddress()
 {
-  // We want to take care here to make sure that our NetworkAddress can be used with memcmp
-  memset(&inet_addr_, 0, sizeof (inet_addr_));
+  // We want to take care here to make sure that our NetworkAddress can be used with std::memcmp
+  std::memset(&inet_addr_, 0, sizeof (inet_addr_));
 
   // The following is required to achieve equivalence between default-constructed NetworkAddress and ACE_INET_Addr
 #if defined (ACE_HAS_IPV6)
@@ -81,8 +83,8 @@ NetworkAddress::NetworkAddress(ACE_UINT16 port, const wchar_t* str)
 
 NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr)
 {
-  // We want to take care here to make sure that our NetworkAddress can be used with memcmp
-  memset(&inet_addr_, 0, sizeof (inet_addr_));
+  // We want to take care here to make sure that our NetworkAddress can be used with std::memcmp
+  std::memset(&inet_addr_, 0, sizeof (inet_addr_));
 
   const ip46& in = *reinterpret_cast<ip46*>(addr.get_addr());
   if (in.in4_.sin_family == AF_INET) {
@@ -109,7 +111,7 @@ NetworkAddress::NetworkAddress(const ACE_INET_Addr& addr)
 NetworkAddress& NetworkAddress::operator=(const NetworkAddress& rhs)
 {
   if (&rhs != this) {
-    memcpy(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_));
+    std::memcpy(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_));
   }
   return *this;
 }
@@ -121,26 +123,26 @@ NetworkAddress& NetworkAddress::operator=(const ACE_INET_Addr& rhs)
 
 bool NetworkAddress::operator==(const NetworkAddress& rhs) const
 {
-  return memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) == 0;
+  return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) == 0;
 }
 
 bool NetworkAddress::operator!=(const NetworkAddress& rhs) const
 {
-  return memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) != 0;
+  return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) != 0;
 }
 
 bool NetworkAddress::operator<(const NetworkAddress& rhs) const
 {
-  return memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) < 0;
+  return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) < 0;
 }
 
 bool NetworkAddress::addr_bytes_equal(const NetworkAddress& rhs) const
 {
   if (inet_addr_.in4_.sin_family == AF_INET && rhs.inet_addr_.in4_.sin_family == AF_INET) {
-    return memcmp(&inet_addr_.in4_.sin_addr, &rhs.inet_addr_.in4_.sin_addr, sizeof (inet_addr_.in4_.sin_addr)) == 0;
+    return std::memcmp(&inet_addr_.in4_.sin_addr, &rhs.inet_addr_.in4_.sin_addr, sizeof (inet_addr_.in4_.sin_addr)) == 0;
 #if defined (ACE_HAS_IPV6)
   } else if (inet_addr_.in6_.sin6_family == AF_INET6 && rhs.inet_addr_.in6_.sin6_family == AF_INET6) {
-    return memcmp(&inet_addr_.in6_.sin6_addr, &rhs.inet_addr_.in6_.sin6_addr, sizeof (inet_addr_.in6_.sin6_addr)) == 0;
+    return std::memcmp(&inet_addr_.in6_.sin6_addr, &rhs.inet_addr_.in6_.sin6_addr, sizeof (inet_addr_.in6_.sin6_addr)) == 0;
 #endif
   }
   // Don't worry about ipv4 mapped / compatible ipv6 addresses for now
