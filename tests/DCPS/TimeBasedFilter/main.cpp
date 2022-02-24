@@ -72,7 +72,9 @@ public:
   , condition_(lock_)
   , num_samples_(0)
   , expected_num_samples_(expected_num_samples)
+#ifdef OPENDDS_SAFETY_PROFILE
   , first_sample_(true)
+#endif
   {
   }
 
@@ -99,11 +101,13 @@ public:
       DDS::ReturnCode_t error = message_dr->take(foos, info, DDS::LENGTH_UNLIMITED,
         DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
 
+#ifdef OPENDDS_SAFETY_PROFILE
       // discard the first sample. necessary for reliable safety profile.
       if (first_sample_) {
         first_sample_ = false;
         return;
       }
+#endif
 
       ACE_Time_Value now(ACE_OS::gettimeofday());
 
@@ -212,7 +216,9 @@ private:
   ACE_Condition<ACE_SYNCH_MUTEX> condition_;
   size_t num_samples_;
   const size_t expected_num_samples_;
+#ifdef OPENDDS_SAFETY_PROFILE
   bool first_sample_;
+#endif
 };
 
 void validate(const float expected_x, const float actual_x,
@@ -586,6 +592,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     SampleMap send_map;
 
+#ifdef OPENDDS_SAFETY_PROFILE
     // receiving the first safety profile sample takes longer than
     // subsequent samples, so write a throwaway
     Foo f = { 0, 0, 0, 0 };
@@ -598,6 +605,7 @@ ACE_TMAIN(int argc, ACE_TCHAR** argv)
     // and sleep so that the the first sample doesn't
     // affect the timing of the several time-based samples
     ACE_OS::sleep(2 * minimum_separation.sec + 1);
+#endif
 
     // We expect to receive up to one sample per
     // cycle (all others should be filtered).
