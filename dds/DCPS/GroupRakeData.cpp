@@ -22,6 +22,7 @@ GroupRakeData::GroupRakeData()
 
 
 bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
+                                  ReceivedDataElementList* rdel,
                                   SubscriptionInstance_rch instance,
                                   size_t index_in_instance)
 {
@@ -31,7 +32,7 @@ bool GroupRakeData::insert_sample(ReceivedDataElement* sample,
     return false;
   }
 
-  RakeData rd = {sample, instance, index_in_instance};
+  RakeData rd = {sample, rdel, instance, index_in_instance};
   this->sorted_.insert(rd);
 
   this->current_sample_ = this->sorted_.begin();

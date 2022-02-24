@@ -135,6 +135,7 @@ bool InstanceState::dispose_was_received(const PublicationId& writer_id)
         || (owner_manager && owner_manager->is_owner (handle_, writer_id))) {
 #endif
         instance_state_ = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+        state_updated();
         schedule_release();
         return true;
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -172,6 +173,7 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
 
   if (writers_.empty() && (instance_state_ & DDS::ALIVE_INSTANCE_STATE)) {
     instance_state_ = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
+    state_updated();
     schedule_release();
     return true;
   }
@@ -182,6 +184,14 @@ bool InstanceState::unregister_was_received(const PublicationId& writer_id)
 void InstanceState::schedule_pending()
 {
   release_pending_ = true;
+}
+
+void OpenDDS::DCPS::InstanceState::state_updated() const
+{
+  RcHandle<DataReaderImpl> reader = reader_.lock();
+  if (reader) {
+    reader->state_updated(handle_);
+  }
 }
 
 void InstanceState::schedule_release()
