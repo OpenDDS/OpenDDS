@@ -9,6 +9,8 @@
 
 #include <openssl/evp.h>
 #include <openssl/dh.h>
+#include <openssl/core_names.h>
+#include <openssl/param_build.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
 
 #include <cstring>
@@ -26,10 +28,11 @@ namespace {
   }
 }
 
+#ifndef OPENSSL_V_3_0
 struct DH_Handle {
   DH* dh_;
   explicit DH_Handle(EVP_PKEY* key)
-#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
+#if defined OPENSSL_V_1_0
     : dh_(EVP_PKEY_get1_DH(key))
 #else
     : dh_(EVP_PKEY_get0_DH(key))
@@ -43,6 +46,7 @@ struct DH_Handle {
 #endif
   }
 };
+#endif
 
 DHAlgorithm::~DHAlgorithm() { EVP_PKEY_free(k_); }
 
@@ -145,7 +149,6 @@ int DH_2048_MODP_256_PRIME::init()
 
   dh_constructor dh;
   k_ = dh.get_key();
-
   return k_ ? 0 : 1;
 }
 
@@ -154,6 +157,7 @@ int DH_2048_MODP_256_PRIME::pub_key(DDS::OctetSeq& dst)
   int result = 1;
 
   if (k_) {
+#ifndef OPENSSL_V_3_0
     DH_Handle dh(k_);
     if (dh) {
       const BIGNUM *pubkey = 0, *privkey = 0;
@@ -169,6 +173,20 @@ int DH_2048_MODP_256_PRIME::pub_key(DDS::OctetSeq& dst)
         OPENDDS_SSL_LOG_ERR("DH_get0_key failed");
       }
     }
+#else
+    BIGNUM *pubkey = 0;
+    if (EVP_PKEY_get_bn_param(k_, OSSL_PKEY_PARAM_PUB_KEY, &pubkey)) {
+      dst.length(BN_num_bytes(pubkey));
+      if (0 < BN_bn2bin(pubkey, dst.get_buffer())) {
+        result = 0;
+      } else {
+        OPENDDS_SSL_LOG_ERR("BN_bn2bin failed");
+      }
+    } else {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_get_bn_param failed");
+    }
+    BN_free(pubkey);
+#endif
   }
   return result;
 }
@@ -177,14 +195,32 @@ class dh_shared_secret
 {
 public:
   explicit dh_shared_secret(EVP_PKEY* pkey)
-    : keypair(pkey), pubkey(0)
+    : keypair(pkey)
+#ifdef OPENSSL_V_3_0
+    , dh_ctx(0)
+    , peer(0)
+    , param_bld(0)
+    , params(0)
+#endif
+    , pubkey(0)
   {
     if (!keypair) {
+#ifndef OPENSSL_V_3_0
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_DH failed");
+#endif
     }
   }
 
-  ~dh_shared_secret() { BN_free(pubkey); }
+  ~dh_shared_secret()
+  {
+    BN_free(pubkey);
+#ifdef OPENSSL_V_3_0
+    EVP_PKEY_CTX_free(dh_ctx);
+    EVP_PKEY_free(peer);
+    OSSL_PARAM_BLD_free(param_bld);
+    OSSL_PARAM_free(params);
+#endif
+  }
 
   int operator()(const DDS::OctetSeq& pub_key, DDS::OctetSeq& dst)
   {
@@ -195,22 +231,78 @@ public:
       return 1;
     }
 
+#ifndef OPENSSL_V_3_0
     int len = DH_size(keypair);
     dst.length(len);
-
     len = DH_compute_key(dst.get_buffer(), pubkey, keypair);
     if (len < 0) {
       OPENDDS_SSL_LOG_ERR("DH_compute_key failed");
       dst.length(0u);
       return 1;
     }
+#else
+    if ((dh_ctx = EVP_PKEY_CTX_new_from_name(0,"DH",0)) == 0) {
+      OPENDDS_SSL_LOG_ERR("new ctx from name BH failed.");
+      return 1;
+    }
 
+    if (!EVP_PKEY_derive_init(dh_ctx)) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_init failed");
+      return 1;
+    }
+
+    if ((param_bld = OSSL_PARAM_BLD_new()) == 0) {
+      OPENDDS_SSL_LOG_ERR("OSSL_PARAM_BLD_new failed");
+      return 1;
+    }
+
+    if ((OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", "ffdhe2048", 0) == 0)) {
+      OPENDDS_SSL_LOG_ERR("Building prarms list failed");
+      return 1;
+    }
+
+    if ((OSSL_PARAM_BLD_push_BN(param_bld, "pub", pubkey) == 0)) {
+      OPENDDS_SSL_LOG_ERR("Building prarms list failed");
+      return 1;
+    }
+    params = OSSL_PARAM_BLD_to_param(param_bld);
+
+    EVP_PKEY_fromdata_init(dh_ctx);
+
+    if (EVP_PKEY_fromdata(dh_ctx, &peer, EVP_PKEY_PUBLIC_KEY, params) != 1) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_fromdata Failed");
+      return 1;
+    }
+
+    EVP_PKEY_derive_set_peer(dh_ctx, peer);
+
+    int kplen = EVP_PKEY_size(keypair);
+    if (kplen <= 0) {
+      OPENDDS_SSL_LOG_ERR("DH compute_key error getting length");
+      return 1;
+    }
+    dst.length(kplen);
+    size_t len = 0;
+    if (EVP_PKEY_derive(dh_ctx, dst.get_buffer(), &len) <= 0) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive failed");
+      dst.length(0u);
+      return 1;
+    }
+#endif
     dst.length(len);
     return 0;
   }
 
 private:
+#ifndef OPENSSL_V_3_0
   DH_Handle keypair;
+#else
+  EVP_PKEY *keypair;
+  EVP_PKEY_CTX *dh_ctx;
+  EVP_PKEY *peer;
+  OSSL_PARAM_BLD *param_bld;
+  OSSL_PARAM *params;
+#endif
   BIGNUM* pubkey;
 };
 
@@ -220,10 +312,11 @@ int DH_2048_MODP_256_PRIME::compute_shared_secret(const DDS::OctetSeq& pub_key)
   return secret(pub_key, shared_secret_);
 }
 
+#ifndef OPENSSL_V_3_0
 struct EC_Handle {
   EC_KEY* ec_;
   explicit EC_Handle(EVP_PKEY* key)
-#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
+#if defined OPENSSL_V_1_0
     : ec_(EVP_PKEY_get1_EC_KEY(key))
 #else
     : ec_(EVP_PKEY_get0_EC_KEY(key))
@@ -237,6 +330,7 @@ struct EC_Handle {
 #endif
   }
 };
+#endif
 
 ECDH_PRIME_256_V1_CEUM::ECDH_PRIME_256_V1_CEUM() { init(); }
 
@@ -331,6 +425,7 @@ public:
   {
     if (!keypair) return 1;
 
+#ifndef OPENSSL_V_3_0
     EC_Handle keypair_ecdh(keypair);
     if (!keypair_ecdh) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
@@ -352,14 +447,28 @@ public:
     }
 
     dst.length(static_cast<unsigned int>(len));
-
     if (0 == EC_POINT_point2oct(EC_KEY_get0_group(keypair_ecdh), pubkey,
                                 EC_KEY_get_conv_form(keypair_ecdh),
                                 dst.get_buffer(), len, 0)) {
       OPENDDS_SSL_LOG_ERR("EC_POINT_point2oct failed");
       return 1;
     }
+#else
+    size_t len = 0;
+    if (EVP_PKEY_get_size_t_param(keypair, OSSL_PKEY_PARAM_PUB_KEY, &len)) {
+      dst.length(len);
 
+      if (0 == EVP_PKEY_get_octet_string_param(keypair, OSSL_PKEY_PARAM_PUB_KEY,
+        dst.get_buffer(),len,&len)) {
+        OPENDDS_SSL_LOG_ERR("EVP_PEKY_get octet string failed");
+        return 1;
+      }
+    } else {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_get_bn_param failed");
+      return 1;
+    }
+
+#endif
     return 0;
   }
 
@@ -377,7 +486,14 @@ class ecdh_shared_secret_from_octets
 {
 public:
   explicit ecdh_shared_secret_from_octets(EVP_PKEY* pkey)
-    : keypair(pkey), pubkey(0), group(0), bignum_ctx(0)
+    : keypair(pkey)
+#ifdef OPENSSL_V_3_0
+    , ec_ctx(0)
+    , peer(0)
+    , param_bld(0)
+    , params(0)
+#endif
+    , pubkey(0), group(0), bignum_ctx(0)
   {
     if (!keypair) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
@@ -388,6 +504,12 @@ public:
   {
     EC_POINT_free(pubkey);
     BN_CTX_free(bignum_ctx);
+#ifdef OPENSSL_V_3_0
+    EVP_PKEY_CTX_free(ec_ctx);
+    EVP_PKEY_free(peer);
+    OSSL_PARAM_BLD_free(param_bld);
+    OSSL_PARAM_free(params);
+#endif
   }
 
   int operator()(const DDS::OctetSeq& src, DDS::OctetSeq& dst)
@@ -398,7 +520,7 @@ public:
       OPENDDS_SSL_LOG_ERR("BN_CTX_new failed");
       return 1;
     }
-
+#ifndef OPENSSL_V_3_0
     if (0 == (group = EC_KEY_get0_group(keypair))) {
       OPENDDS_SSL_LOG_ERR("EC_KEY_get0_group failed");
       return 1;
@@ -421,12 +543,68 @@ public:
       OPENDDS_SSL_LOG_ERR("ECDH_compute_key failed");
       return 1;
     }
+#else
+    if ((ec_ctx = EVP_PKEY_CTX_new_from_name(0,"ECDH",0)) == 0) {
+      OPENDDS_SSL_LOG_ERR("new ctx from name ECBH failed.");
+      return 1;
+    }
 
+    if (!EVP_PKEY_derive_init(ec_ctx)) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_init failed");
+      return 1;
+    }
+
+    if ((param_bld = OSSL_PARAM_BLD_new()) == 0) {
+      OPENDDS_SSL_LOG_ERR("OSSL_PARAM_BLD_new failed");
+      return 1;
+    }
+
+    if ((OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", "ffdhe2048", 0) == 0)) {
+      OPENDDS_SSL_LOG_ERR("Building prarms list failed");
+      return 1;
+    }
+
+    if ((OSSL_PARAM_BLD_push_octet_string(param_bld, "pub", src.get_buffer(),src.length()) == 0)) {
+      OPENDDS_SSL_LOG_ERR("Building prarms list failed");
+      return 1;
+    }
+    params = OSSL_PARAM_BLD_to_param(param_bld);
+
+    EVP_PKEY_fromdata_init(ec_ctx);
+
+    if (EVP_PKEY_fromdata(ec_ctx, &peer, EVP_PKEY_PUBLIC_KEY, params) != 1) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_fromdata Failed");
+      return 1;
+    }
+
+    EVP_PKEY_derive_set_peer(ec_ctx, peer);
+
+    int kplen = EVP_PKEY_size(keypair);
+    if (kplen <= 0) {
+      OPENDDS_SSL_LOG_ERR("DH compute_key error getting length");
+      return 1;
+    }
+    dst.length(kplen);
+    size_t len = 0;
+    if (EVP_PKEY_derive(ec_ctx, dst.get_buffer(), &len) <= 0) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive failed");
+      dst.length(0u);
+      return 1;
+    }
+#endif
     return 0;
   }
 
 private:
+#ifndef OPENSSL_V_3_0
   EC_Handle keypair;
+#else
+  EVP_PKEY* keypair;
+  EVP_PKEY_CTX *ec_ctx;
+  EVP_PKEY *peer;
+  OSSL_PARAM_BLD *param_bld;
+  OSSL_PARAM *params;
+#endif
   EC_POINT* pubkey;
   const EC_GROUP* group;
   BN_CTX* bignum_ctx;

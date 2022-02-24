@@ -354,6 +354,7 @@ const char* Certificate::keypair_algo() const
 
 struct cache_dsign_algo_impl
 {
+#ifndef OPENSSL_V_3_0
   cache_dsign_algo_impl() : pkey_(NULL), rsa_(NULL), ec_(NULL) {}
   ~cache_dsign_algo_impl()
   {
@@ -361,6 +362,13 @@ struct cache_dsign_algo_impl
     RSA_free(rsa_);
     EC_KEY_free(ec_);
   }
+#else
+cache_dsign_algo_impl() : pkey_(NULL) {}
+~cache_dsign_algo_impl()
+{
+  EVP_PKEY_free(pkey_);
+}
+#endif
 
   int operator() (X509* cert, std::string& dst)
   {
@@ -377,6 +385,7 @@ struct cache_dsign_algo_impl
       return 1;
     }
 
+#ifndef OPENSSL_V_3_0
     rsa_ = EVP_PKEY_get1_RSA(pkey_);
     if (rsa_) {
       dst = "RSASSA-PSS-SHA256";
@@ -388,6 +397,16 @@ struct cache_dsign_algo_impl
       dst = "ECDSA-SHA256";
       return 0;
     }
+#else
+    int ptype = EVP_PKEY_id (pkey_);
+    if (ptype == EVP_PKEY_RSA || ptype == EVP_PKEY_RSA_PSS) {
+      dst = "RSASSA-PSS-SHA256";
+      return 0;
+    } else if (ptype == EVP_PKEY_EC) {
+      dst = "ECDSA-SHA256";
+      return 0;
+    }
+#endif
 
     ACE_ERROR((LM_WARNING,
                "(%P|%t) SSL::Certificate::cache_dsign_algo: WARNING, only RSASSA-PSS-SHA256 or "
@@ -398,8 +417,10 @@ struct cache_dsign_algo_impl
 
 private:
   EVP_PKEY* pkey_;
+#ifndef OPENSSL_V_3_0
   RSA* rsa_;
   EC_KEY* ec_;
+#endif
 };
 
 int Certificate::cache_dsign_algo()
