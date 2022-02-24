@@ -104,6 +104,7 @@ namespace OpenDDS {
            it != instance_map_.end(); ++it)
         {
           OpenDDS::DCPS::SubscriptionInstance_rch ptr = get_handle_instance(it->second);
+          if (!ptr) continue;
           purge_data(ptr);
         }
       //X SHH release the data samples in the instance_map_.
@@ -259,9 +260,11 @@ namespace OpenDDS {
 
     const CORBA::ULong sample_states = DDS::NOT_READ_SAMPLE_STATE;
     const HandleSet& matches = lookup_matching_instances(sample_states, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-    for (HandleSet::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+    for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {
+      ++next; // pre-increment iterator, in case updates cause changes to match set
       const DDS::InstanceHandle_t handle = *it;
       const SubscriptionInstance_rch inst = get_handle_instance(handle);
+      if (!inst) continue;
 
       bool most_recent_generation = false;
       for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0);
@@ -311,9 +314,11 @@ namespace OpenDDS {
 
     const CORBA::ULong sample_states = DDS::NOT_READ_SAMPLE_STATE;
     const HandleSet& matches = lookup_matching_instances(sample_states, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-    for (HandleSet::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+    for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {
+      ++next; // pre-increment iterator, in case updates cause changes to match set
       const DDS::InstanceHandle_t handle = *it;
       const SubscriptionInstance_rch inst = get_handle_instance(handle);
+      if (!inst) continue;
 
       bool most_recent_generation = false;
       ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0);
@@ -686,15 +691,14 @@ namespace OpenDDS {
       evaluator.has_non_key_fields(getMetaStruct<MessageType>());
 
     const HandleSet& matches = lookup_matching_instances(sample_states, view_states, instance_states);
-    for (HandleSet::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+    for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {
+      ++next; // pre-increment iterator, in case updates cause changes to match set
       const DDS::InstanceHandle_t handle = *it;
       const SubscriptionInstance_rch inst = get_handle_instance(handle);
+      if (!inst) continue;
 
       for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0); item;
            item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-        if (item->coherent_change_) continue;
-#endif
         if (!item->registered_data_ || (!item->valid_data_ && filter_has_non_key_fields)) {
           continue;
         }
@@ -1256,16 +1260,15 @@ private:
   if (!group_coherent_ordered) {
 #endif
     const HandleSet& matches = lookup_matching_instances(sample_states, view_states, instance_states);
-    for (HandleSet::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+    for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {
+      ++next; // pre-increment iterator, in case updates cause changes to match set
       const DDS::InstanceHandle_t handle = *it;
       const SubscriptionInstance_rch inst = get_handle_instance(handle);
+      if (!inst) continue;
 
       size_t i(0);
       for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0); item;
            item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-        if (item->coherent_change_) continue;
-#endif
         results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
 
         const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
@@ -1344,16 +1347,15 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
   if (!group_coherent_ordered) {
 #endif
     const HandleSet& matches = lookup_matching_instances(sample_states, view_states, instance_states);
-    for (HandleSet::const_iterator it = matches.begin(); it != matches.end(); ++it) {
+    for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {
+      ++next; // pre-increment iterator, in case updates cause changes to match set
       const DDS::InstanceHandle_t handle = *it;
       const SubscriptionInstance_rch inst = get_handle_instance(handle);
+      if (!inst) continue;
 
       size_t i(0);
       for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0); item;
            item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-        if (item->coherent_change_) continue;
-#endif
         results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
 
         const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
@@ -1414,9 +1416,6 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
     size_t i(0);
     for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0); item;
          item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-      if (item->coherent_change_) continue;
-#endif
       results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
       const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
       if (observer && item->registered_data_ && vwd) {
@@ -1485,9 +1484,6 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
     size_t i(0);
     for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0); item;
          item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
-#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-      if (item->coherent_change_) continue;
-#endif
       results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
       const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
       if (observer && item->registered_data_ && vwd) {
@@ -1792,6 +1788,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
   if (header.message_id_ != OpenDDS::DCPS::INSTANCE_REGISTRATION)
   {
     instance_ptr = get_handle_instance(handle);
+    OPENDDS_ASSERT(instance_ptr);
 
     if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA)
     {
@@ -1820,6 +1817,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
   else
   {
     instance_ptr = get_handle_instance(handle);
+    OPENDDS_ASSERT(instance_ptr);
     instance_ptr->instance_state_->lively(header.publication_id_);
   }
 }
