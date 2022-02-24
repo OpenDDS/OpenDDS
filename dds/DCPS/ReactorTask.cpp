@@ -195,7 +195,7 @@ int ReactorTask::close(u_long flags)
 
 void ReactorTask::stop()
 {
-
+  ACE_Reactor* reactor = 0;
   {
     GuardType guard(lock_);
 
@@ -214,16 +214,31 @@ void ReactorTask::stop()
         ACE_Event_Handler::DONT_CALL);
     }
 #endif
+    reactor = reactor_;
+  }
 
-    reactor_->end_reactor_event_loop();
+  if (reactor) {
+    // We can't hold the lock when we call this, because the reactor threads may need to
+    // access the lock as part of normal execution before they return to the reactor control loop
+    reactor->end_reactor_event_loop();
+  }
+
+  {
+    GuardType guard(lock_);
+
+    // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
+    // which can be used to delay any potential new calls to open_reactor_task()
+    OPENDDS_ASSERT(state_ = STATE_SHUT_DOWN);
 
     // Let's wait for the reactor task's thread to complete before we
     // leave this stop method.
-    ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-    wait();
+    if (thread_status_manager_) {
+      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
+      wait();
 
-    // Reset the thread manager in case it goes away before the next open.
-    this->thr_mgr(0);
+      // Reset the thread manager in case it goes away before the next open.
+      thr_mgr(0);
+    }
   }
 }
 
