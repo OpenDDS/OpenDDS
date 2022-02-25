@@ -113,21 +113,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_TEXT("(%P|%t) ERROR: failed to receive expected number of samples\n")));
     }
 
-    while (true) {
-      DDS::SubscriptionMatchedStatus submatched;
-      if (dr2->get_subscription_matched_status(submatched) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: get_subscription_matched_status\n")));
-        break;
-      }
-      else if (submatched.current_count == 0) {
-        // publisher has come and gone
-        break;
-      }
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) submatched current_count: %d total_count: %d\n"), submatched.current_count, submatched.total_count));
-      ACE_OS::sleep(1);
-    }
-
     if (!CORBA::is_nil(participant)) {
       participant->delete_contained_entities();
     }
