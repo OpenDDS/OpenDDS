@@ -2187,7 +2187,7 @@ sub remedy_github_upload {
     my $fail_msg = "\nThe release on GitHub has to be deleted manually before trying to verify\n" .
       "or remedy this step again";
     for my $filename (@assets) {
-      printf("Upload $filename\n");
+      print("Upload $filename\n");
       my $asset;
       my $asset_detail = $asset_details{$filename};
       eval {
