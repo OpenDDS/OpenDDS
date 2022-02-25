@@ -47,6 +47,8 @@ bool testConnectionErrorHandling()
 
   TheTransportRegistry->global_config(cfg);
 
+  DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
+
   SimpleTransportClient transportClient;
   transportClient.exceptionThrown = false;
   transportClient.enable();
