@@ -5708,6 +5708,8 @@ jobs:
     runs-on: windows-2019
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -5791,6 +5793,8 @@ jobs:
     needs: ACE_TAO_w19_p1_stat_js0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -5877,6 +5881,8 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -6003,6 +6009,8 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -6158,6 +6166,8 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -6305,6 +6315,8 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -6454,6 +6466,8 @@ jobs:
     needs: build_w19_p1_stat_js0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -6593,6 +6607,8 @@ jobs:
     runs-on: windows-2019
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -6676,6 +6692,8 @@ jobs:
     needs: ACE_TAO_w19_re_p1_stat_FM-08
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -6762,6 +6780,8 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -6888,6 +6908,8 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -7043,6 +7065,8 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -7189,6 +7213,8 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout MPC
       uses: actions/checkout@v2
       with:
@@ -7337,6 +7363,8 @@ jobs:
     needs: build_w19_re_p1_stat_FM-08
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -7476,6 +7504,8 @@ jobs:
     runs-on: windows-2019
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -7560,6 +7590,8 @@ jobs:
     needs: ACE_TAO_w19_re_o1p1_sec
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -7662,6 +7694,8 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -7783,6 +7817,8 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -7938,6 +7974,8 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -8079,6 +8117,8 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -8218,6 +8258,8 @@ jobs:
     runs-on: windows-2019
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout Wireshark
       shell: cmd
       run: |
@@ -8293,6 +8335,8 @@ jobs:
     runs-on: windows-2019
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -8376,6 +8420,8 @@ jobs:
     needs: [ACE_TAO_w19_re_j_ws_FM-1f, wireshark_w19-release]
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: download Wireshark artifact
       uses: actions/download-artifact@v2
       with:
@@ -8481,6 +8527,8 @@ jobs:
     needs: build_w19_re_j_ws_FM-1f
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout MPC
       uses: actions/checkout@v2.3.4
       with:
@@ -8591,6 +8639,8 @@ jobs:
     needs: build_w19_re_j_ws_FM-1f
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -8746,6 +8796,8 @@ jobs:
     needs: build_w19_re_j_ws_FM-1f
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -8887,6 +8939,8 @@ jobs:
     needs: build_w19_re_j_ws_FM-1f
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9033,6 +9087,8 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -9119,6 +9175,8 @@ jobs:
     needs: ACE_TAO_w22_x86_i0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9206,6 +9264,8 @@ jobs:
     needs: build_w22_x86_i0_sec
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9337,6 +9397,8 @@ jobs:
     needs: build_w22_x86_i0_sec
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9469,6 +9531,8 @@ jobs:
     needs: ACE_TAO_w22_x86_i0
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9560,6 +9624,8 @@ jobs:
     needs: build_w22_x86_i0_j_FM-1f
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9679,6 +9745,8 @@ jobs:
     runs-on: windows-2022
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -9762,6 +9830,8 @@ jobs:
     needs: ACE_TAO_w22_p1
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9848,6 +9918,8 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9974,6 +10046,8 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -10118,6 +10192,8 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -10259,6 +10335,8 @@ jobs:
     needs: build_w22_p1
 
     steps:
+    - name: Run Get-PSDrive
+      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
