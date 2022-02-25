@@ -52,16 +52,6 @@ make</pre>
       <pre>cd Messenger</pre>
     </li>
     <li>
-      <p>Create an <i>rtps.ini</i> file to control discovery with the following content</p>
-      <pre>
-[common]
-DCPSGlobalTransportConfig=$file
-DCPSDefaultDiscovery=DEFAULT_RTPS
-
-[transport/the_rtps_transport]
-transport_type=rtps_udp</pre>
-    </li>
-    <li>
       <p>Run the Messenger example with RTPS</p>
       <pre>docker-compose up</pre>
     </li>
