@@ -530,9 +530,9 @@ bool run_test()
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
+  DDS::DomainParticipantFactory_var dpf;
   try {
-    ::DDS::DomainParticipantFactory_var dpf =
-        TheServiceParticipant->get_domain_participant_factory();
+    dpf = TheServiceParticipant->get_domain_participant_factory();
     set_DCPS_debug_level(1);
   } catch (const CORBA::BAD_PARAM& ex) {
     ex._tao_print_exception("Exception caught in spdp_transport.cpp:");

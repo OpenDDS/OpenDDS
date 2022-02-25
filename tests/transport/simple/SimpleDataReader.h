@@ -54,6 +54,7 @@ class SimpleDataReader
 
   private:
 
+    mutable ACE_Thread_Mutex mutex_;
     const OpenDDS::DCPS::RepoId& sub_id_;
     int num_messages_expected_;
     int num_messages_received_;

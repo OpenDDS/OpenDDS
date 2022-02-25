@@ -59,7 +59,11 @@ class SimpleDataWriter
       { return 0; }
     void transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote);
 
-    bool associated() const { return associated_; }
+    bool associated() const
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      return associated_;
+    }
 
     int delivered_test_message();
 
@@ -68,6 +72,7 @@ class SimpleDataWriter
 
   protected:
 
+    mutable ACE_Thread_Mutex mutex_;
     const OpenDDS::DCPS::RepoId& pub_id_;
     int num_messages_sent_;
     int num_messages_delivered_;
