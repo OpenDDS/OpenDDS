@@ -135,7 +135,7 @@ int remove(
 template <typename Seq>
 void push_back(Seq& seq, const typename Seq::value_type& val)
 {
-  const CORBA::ULong len = seq.length();
+  const ACE_CDR::ULong len = seq.length();
   // Grow by factor of 2 when length is a power of 2 in order to prevent every call to length(+1)
   // allocating a new buffer & copying previous results. The maximum is kept when length is reduced.
   if (len && !(len & (len - 1))) {
