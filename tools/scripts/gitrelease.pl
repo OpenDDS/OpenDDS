@@ -23,6 +23,7 @@ use lib "$FindBin::RealBin/modules";
 use ConvertFiles;
 use version_utils;
 use command_utils;
+use ChangeDir;
 
 my $zero_version = parse_version("0.0.0");
 
@@ -108,7 +109,7 @@ sub insert_news_template($$) {
 
 sub get_version_line {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
   my $line = "This is OpenDDS version ";
   if ($post_release) {
     $line .= "$settings->{next_version} (NOT A RELEASE)";
@@ -162,6 +163,8 @@ sub help {
     "  --mock                 Enable mock release-specific checks and fake the\n" .
     "                         Doxygen and Devguide steps if they're not being\n" .
     "                         skipped.\n" .
+    "  --mock-with-doxygen    Same as --mock, but with real Doxygen steps if they're\n" .
+    "                         not being skipped\n" .
     "  --micro                Do a patch/micro level release. Requires --branch.\n" .
     "                         (default is no)\n" .
     "                         The difference from a regular release is that anything\n" .
@@ -189,12 +192,11 @@ sub help {
     "  FTP_HOST               FTP Server Address\n" .
     "\n" .
     "Step Expressions\n" .
-    "  The STEPS argument accepts a specific notation for what steps to run.\n" .
-    "  They work like a bit map, with subexpressions enabling or disabling a step.\n" .
-    "  Later subexpressions can overrule earlier ones and the initial list of\n" .
-    "  steps the expression is modifying are all disabled at the beginning unless\n" .
-    "  the first subexpression is negative (starts with ^), then it starts with all\n" .
-    "  steps enabled.\n" .
+    "  The STEPS argument accepts a specific notation for what steps to run. They\n" .
+    "  work like a bitmap, with subexpressions enabling or disabling steps. Later\n" .
+    "  subexpressions can overrule earlier ones. The initial list of steps are all\n" .
+    "  disabled at the beginning unless the first subexpression is negative (starts\n" .
+    "  with ^), then it starts with all steps enabled.\n" .
     "\n" .
     "  If that doesn't make sense, here are some examples:\n" .
     "    5\n" .
@@ -210,7 +212,7 @@ sub help {
     "    ^5-7\n" .
     "      Do all steps except 5, 6, and 7\n" .
     "\n" .
-    "  Finally you can combine subexpressions by delimiting them by commas:\n" .
+    "  Finally you can combine subexpressions by delimiting them with commas:\n" .
     "    1,2,3\n" .
     "      Do steps 1, 2, and 3\n" .
     "    ^5-,10\n" .
@@ -244,7 +246,8 @@ sub news_contents_excerpt($) {
     if (/^## Version $version of OpenDDS/) {
       $saw_version = 1;
       next;
-    } elsif (/^##[^#]/ && $saw_version) { # Until we come to the next h2
+    }
+    elsif (/^##[^#]/ && $saw_version) { # Until we come to the next h2
       last;
     }
     if ($saw_version) {
@@ -293,9 +296,11 @@ sub yes_no {
     chomp;
     if ($_ eq "n") {
       return 0;
-    } elsif ($_ eq "y") {
+    }
+    elsif ($_ eq "y") {
       return 1;
-    } else {
+    }
+    else {
       print "Please answer y or n. ";
     }
   }
@@ -310,12 +315,25 @@ sub touch_file {
   }
 
   if (not -f $path) {
-    open(my $fh, '>', $path) or die "Couldn't open file $path: $!\nStopped";
+    open(my $fh, '>', $path) or die "Couldn't open file $path: $!";
   }
   else {
     my $t = time();
-    utime($t, $t, ($path,)) || die "Couldn't touch file $path: $!\nStopped";
+    utime($t, $t, $path) || die "Couldn't touch file $path: $!";
   }
+}
+
+my %dummy_release_files = ();
+
+sub create_dummy_release_file {
+  my $path = shift();
+
+  my $filename = basename($path);
+  print "Creating dummy $filename because of mock release\n";
+  $dummy_release_files{$filename} = 1;
+  open(my $fh, '>', $path) or die "Couldn't open file $path: $!";
+  print $fh "This is a dummy file because the release was mocked\n";
+  close($fh);
 }
 
 sub new_pithub {
@@ -527,7 +545,8 @@ sub parse_step_expr {
       if ($x > $no_steps) {
         die "$x is greater than the total number of steps, $no_steps";
       }
-    } else {
+    }
+    else {
       $x = 1;
     }
 
@@ -542,9 +561,11 @@ sub parse_step_expr {
       if ($x > $y) {
         die "Invalid range in steps: $x-$y";
       }
-    } elsif ($range) {
+    }
+    elsif ($range) {
       $y = $no_steps;
-    } else {
+    }
+    else {
       $y = $x;
     }
 
@@ -637,7 +658,8 @@ sub verify_git_remote {
   close(GITREMOTE);
   if ($url eq $settings->{git_url}) {
     $result = 1;
-  } else {
+  }
+  else {
     $settings->{alt_url} = $url;
   }
   return $result;
@@ -653,8 +675,11 @@ sub message_git_remote {
 }
 
 ############################################################################
+
 sub verify_git_status_clean {
-  my ($settings, $strict) = @_;
+  my $settings = shift();
+  my $step_options = shift() // {};
+  my $strict = $step_options->{strict} // 0;
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
   my $modified = $settings->{modified};
@@ -705,7 +730,8 @@ sub remedy_git_status_clean {
 
 sub verify_update_version_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $step_options = shift() // {};
+  my $post_release = $step_options->{post_release} // 0;
 
   my $correct = 0;
   my $line = quotemeta(get_version_line($settings, $post_release));
@@ -728,7 +754,7 @@ sub message_update_version_file {
 
 sub remedy_update_version_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
 
   print "  >> Updating VERSION.txt file\n";
 
@@ -822,9 +848,11 @@ sub format_comment {
     my $next_line = shift @comment_lines;
     if (!$next_line) {
       $result .= "\n";
-    } elsif (length($next_line) < 65) {
+    }
+    elsif (length($next_line) < 65) {
       $result .= "          $next_line\n";
-    } else {
+    }
+    else {
       # Break next line into words
       my @comment_words = split(/\s+/, $next_line);
       while (scalar(@comment_words) > 0) {
@@ -885,18 +913,24 @@ sub remedy_changelog {
         $changed = 1;
       }
       $commit = $_;
-    } elsif (/^Merge: *(.*)/) {
+    }
+    elsif (/^Merge: *(.*)/) {
       # Ignore
-    } elsif (/^Author: *(.*)/) {
+    }
+    elsif (/^Author: *(.*)/) {
       $author = $1;
       $author =~ s/</ </;
-    } elsif (/^Date: *([0-9]+)/) {
+    }
+    elsif (/^Date: *([0-9]+)/) {
       $date = POSIX::strftime($timefmt, gmtime($1));
-    } elsif (/^ +(.*) */) {
+    }
+    elsif (/^ +(.*) */) {
       $comment .= "$1\n";
-    } elsif (/^[AMD]\s+(.*) *$/) {
+    }
+    elsif (/^[AMD]\s+(.*) *$/) {
       $file_mod_list .= "        * $1:\n";
-    } elsif (/^[CR][0-9]*\s+(.*) *$/) {
+    }
+    elsif (/^[CR][0-9]*\s+(.*) *$/) {
       $file_mod_list .= "        * $1:\n";
     }
   }
@@ -921,7 +955,8 @@ EOF
   close(GITLOG);
   close(CHANGELOG);
 
-  return $changed;
+  # If doing a mock release, it's okay for the changelog to be empty.
+  return $settings->{mock} ? 1 : $changed;
 }
 ############################################################################
 
@@ -934,8 +969,8 @@ my @global_authors = ();
 
 sub search_authors {
   my @authors = @{shift()};
-  my $email = shift || 0;
-  my $name = shift || 0;
+  my $email = shift() // 0;
+  my $name = shift() // 0;
 
   foreach my $author (@authors) {
     if ($email) {
@@ -1036,7 +1071,8 @@ sub verify_authors {
     print("$command\n");
     print "Authors needs ammending:\n$diff";
     return 0;
-  } else {
+  }
+  else {
     return 1;
   }
 }
@@ -1081,10 +1117,14 @@ sub message_news_file_section {
 sub remedy_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
-  print "  >> Adding $version section to NEWS.md\n";
-  print "  !! Manual update to NEWS.md needed\n";
+  print "  >> Adding $version section template to NEWS.md\n";
+  # If doing a mock release, the template is okay.
+  my $ok = $settings->{mock};
+  if (!$ok) {
+    print "  !! Manual update to NEWS.md needed\n";
+  }
   insert_news_template($settings, 0);
-  return 0;
+  return $ok;
 }
 
 ############################################################################
@@ -1096,12 +1136,15 @@ sub verify_update_news_file {
   my $has_version = 0;
   my $corrected_features = 1;
   my $corrected_fixes = 1;
+  my $real_release = !$settings->{mock};
   while (<NEWS>) {
     if ($_ =~ /^## Version $metaversion of OpenDDS/) {
       $has_version = 1;
-    } elsif ($_ =~ /TODO: Add your features here/) {
+    }
+    elsif ($real_release && $_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
-    } elsif ($_ =~ /TODO: Add your fixes here/) {
+    }
+    elsif ($real_release && $_ =~ /TODO: Add your fixes here/) {
       $corrected_fixes = 0;
     }
   }
@@ -1161,9 +1204,10 @@ sub remedy_news_timestamp {
 
 sub verify_update_version_h_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $step_options = shift() // 0;
+  my $post_release = $step_options->{post_release} // 0;
 
-  if (!$post_release && verify_update_version_h_file($settings, 1)) {
+  if (!$post_release && verify_update_version_h_file($settings, {post_release => 1})) {
     die "ERROR: Version.h already indicates that the post release was done!";
   }
 
@@ -1184,15 +1228,20 @@ sub verify_update_version_h_file {
   while (<VERSION_H>) {
     if ($_ =~ /^#define OPENDDS_MAJOR_VERSION $parsed_version->{major}$/) {
       ++$matched_major;
-    } elsif ($_ =~ /^#define OPENDDS_MINOR_VERSION $parsed_version->{minor}$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_MINOR_VERSION $parsed_version->{minor}$/) {
       ++$matched_minor;
-    } elsif ($_ =~ /^#define OPENDDS_MICRO_VERSION $parsed_version->{micro}$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_MICRO_VERSION $parsed_version->{micro}$/) {
       ++$matched_micro;
-    } elsif ($_ =~ /^#define OPENDDS_VERSION_METADATA "$metadata"$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_VERSION_METADATA "$metadata"$/) {
       ++$matched_metadata;
-    } elsif ($_ =~ /^#define OPENDDS_IS_RELEASE $release$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_IS_RELEASE $release$/) {
       ++$matched_release;
-    } elsif ($_ =~ /^#define OPENDDS_VERSION "$metaversion"$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_VERSION "$metaversion"$/) {
       ++$matched_version;
     }
   }
@@ -1213,7 +1262,7 @@ sub message_update_version_h_file {
 
 sub remedy_update_version_h_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
 
   my $parsed_version = $post_release ?
     $settings->{parsed_next_version} : $settings->{parsed_version};
@@ -1275,10 +1324,13 @@ sub remedy_update_version_h_file {
     $corrected_release == 1 &&
     $corrected_version == 1;
 }
+
 ############################################################################
+
 sub verify_update_prf_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $step_options = shift() // {};
+  my $post_release = $step_options->{post_release} // 0;
 
   my $line = quotemeta(get_version_line($settings, $post_release));
   my $metaversion = quotemeta($post_release ?
@@ -1306,7 +1358,7 @@ sub message_update_prf_file {
 
 sub remedy_update_prf_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
 
   my $version = $post_release ?
     $settings->{next_version} : $settings->{version};
@@ -1501,7 +1553,8 @@ sub message_clone_tag {
   my $settings = shift();
   if (-d $settings->{clone_dir}) {
     return "Directory $settings->{clone_dir} did not clone tag $settings->{git_tag}\n";
-  } else {
+  }
+  else {
     return "Could not see directory $settings->{clone_dir}\n";
   }
 }
@@ -1565,7 +1618,8 @@ sub message_tgz_source {
   my $file = "$settings->{workspace}/$settings->{tgz_src}";
   if (!-f $file) {
     return "Could not find file $file";
-  } else {
+  }
+  else {
     return "File $file is not in the right format";
   }
 }
@@ -1642,13 +1696,31 @@ sub remedy_zip_source {
 
 ############################################################################
 
-sub verify_md5_checksum {
+sub checksum_common {
+  my $type = shift();
+  my $verify = shift();
   my $settings = shift();
-  my $orig_dir = getcwd();
-  chdir($settings->{workspace});
-  my $status = run_command("md5sum --check --quiet $settings->{md5_src}");
-  chdir($orig_dir);
-  return $status;
+  my $step_options = shift() // {};
+
+  my $chdir = ChangeDir->new($settings->{workspace});
+  my $checksum_file = $settings->{"${type}_src"};
+
+  my @cmd = ("${type}sum");
+  my $capture = {};
+  if ($verify) {
+    return 0 unless (-f $checksum_file);
+    push(@cmd, '--check', $step_options->{remedy_verify} ? '--quiet' : '--status', $checksum_file);
+  }
+  else {
+    push(@cmd, get_source_release_files($settings));
+    $capture->{stdout} = $checksum_file;
+  }
+
+  return run_command(\@cmd, capture => $capture);
+}
+
+sub verify_md5_checksum {
+  return checksum_common('md5', 1, @_);
 }
 
 sub message_md5_checksum {
@@ -1656,25 +1728,13 @@ sub message_md5_checksum {
 }
 
 sub remedy_md5_checksum {
-  my $settings = shift();
-  print "Creating file $settings->{md5_src}\n";
-  my $orig_dir = getcwd();
-  chdir($settings->{workspace});
-  my $files = join(' ', get_source_release_files($settings));
-  my $status = run_command("md5sum $files > $settings->{md5_src}");
-  chdir($orig_dir);
-  return $status;
+  return checksum_common('md5', 0, @_);
 }
 
 ############################################################################
 
 sub verify_sha256_checksum {
-  my $settings = shift();
-  my $orig_dir = getcwd();
-  chdir($settings->{workspace});
-  my $status = run_command("sha256sum --check --quiet $settings->{sha256_src}");
-  chdir($orig_dir);
-  return $status;
+  return checksum_common('sha256', 1, @_);
 }
 
 sub message_sha256_checksum {
@@ -1682,14 +1742,7 @@ sub message_sha256_checksum {
 }
 
 sub remedy_sha256_checksum {
-  my $settings = shift();
-  print "Creating file $settings->{sha256_src}\n";
-  my $orig_dir = getcwd();
-  chdir($settings->{workspace});
-  my $files = join(' ', get_source_release_files($settings));
-  my $status = run_command("sha256sum $files > $settings->{sha256_src}");
-  chdir($orig_dir);
-  return $status;
+  return checksum_common('sha256', 0, @_);
 }
 
 ############################################################################
@@ -1739,7 +1792,7 @@ sub message_extract_ace_tao {
 sub remedy_extract_ace_tao {
   my $settings = shift();
 
-  if ($settings->{mock}) {
+  if ($settings->{dummy_doxygen}) {
     my $file = ace_tao_sanity_file($settings);
     print "Touch $file because of mock release\n";
     touch_file($file);
@@ -1771,7 +1824,7 @@ sub message_gen_doxygen {
 sub remedy_gen_doxygen {
   my $settings = shift();
 
-  if ($settings->{mock}) {
+  if ($settings->{dummy_doxygen}) {
     my $file = doxygen_sanity_file($settings);
     print "Touch $file because of mock release\n";
     touch_file($file);
@@ -1881,10 +1934,8 @@ sub remedy_devguide {
   my $lat = "$settings->{workspace}/$settings->{devguide_lat}";
 
   if ($settings->{mock}) {
-    print "Touch $ver because of mock release\n";
-    touch_file($ver);
-    print "Touch $lat because of mock release\n";
-    touch_file($lat);
+    create_dummy_release_file($ver);
+    create_dummy_release_file($lat);
     return 1;
   }
 
@@ -1897,37 +1948,62 @@ sub remedy_devguide {
 
 ############################################################################
 
+sub get_mime_type {
+  my $filename = shift();
+
+  # Offical IANA list: https://www.iana.org/assignments/media-types/media-types.xhtml
+  if ($filename =~ /\.gz$/) {
+    return 'application/gzip';
+  }
+  elsif ($filename =~ /\.zip$/) {
+    return 'application/zip';
+  }
+  elsif ($filename =~ /\.pdf$/) {
+    return 'application/pdf';
+  }
+  elsif ($filename =~ /\.(md5|sha256)$/) {
+    return 'text/plain';
+  }
+  else {
+    die("ERROR: can't determine the MIME type of ${filename}");
+  }
+}
+
 sub get_source_release_files {
   my $settings = shift();
-  my @files = (
-      $settings->{tgz_src},
-      $settings->{zip_src},
-  );
 
-  return @files;
+  return (
+    $settings->{tgz_src},
+    $settings->{zip_src},
+  );
 }
 
 sub get_github_release_files {
   my $settings = shift();
 
   my @files = get_source_release_files($settings);
+
   push(@files, $settings->{md5_src}, $settings->{sha256_src});
+  if (!$settings->{skip_devguide}) {
+    push(@files, $settings->{devguide_ver});
+  };
+
   return @files;
 }
 
-sub get_all_release_files {
+sub get_ftp_release_files {
   my $settings = shift();
 
   my @files = get_github_release_files($settings);
 
   if (!$settings->{skip_devguide}) {
-    push(@files, $settings->{devguide_ver});
     push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
   }
   if (!$settings->{skip_doxygen}) {
     push(@files, $settings->{tgz_dox});
     push(@files, $settings->{zip_dox});
   }
+
   return @files;
 }
 
@@ -1937,6 +2013,9 @@ sub verify_ftp_upload {
   my $settings = shift();
 
   my $url = "$settings->{download_url}/";
+  if ($url !~ /^https?:\/\//) {
+    $url = "http://$url";
+  }
   $url .= $PRIOR_RELEASE_PATH if (!$settings->{is_highest_version});
   my $content;
   if (!download($url, content_ref => \$content)) {
@@ -1944,7 +2023,7 @@ sub verify_ftp_upload {
     return 0;
   }
 
-  foreach my $file (get_all_release_files($settings)) {
+  foreach my $file (get_ftp_release_files($settings)) {
     if ($content !~ /$file/) {
       print "$file not found in $url\n";
       return 0;
@@ -1976,7 +2055,7 @@ sub remedy_ftp_upload {
     or die "Cannot ls() $FTP_DIR ", $ftp->message();
   $ftp->binary();
 
-  my @new_release_files = get_all_release_files($settings);
+  my @new_release_files = get_ftp_release_files($settings);
 
   if ($settings->{is_highest_version}) {
     # Identify Old Versioned Release Files Using the New Ones
@@ -2040,10 +2119,11 @@ sub verify_github_upload {
   my $verified = 0;
 
   my $release_list = $settings->{pithub}->repos->releases->list();
-  unless ( $release_list->success ) {
+  unless ($release_list->success) {
     printf "error accessing github: %s\n", $release_list->response->status_line;
-  } else {
-    while ( my $row = $release_list->next ) {
+  }
+  else {
+    while (my $row = $release_list->next) {
       if ($row->{tag_name} eq $settings->{git_tag}){
         #printf "%d\t[%s]\n",$row->{id},$row->{tag_name};
         $verified = 1;
@@ -2063,39 +2143,66 @@ sub remedy_github_upload {
 
   my $rc = 1;
 
+  # Try to do as much as possible before creating the release. If there's a
+  # fatal issue while uploading the release assets, then the release has to be
+  # manually deleted on GitHub before this step can be run again.
+  my @assets = get_github_release_files($settings);
+  my %asset_details;
+  for my $filename (@assets) {
+    open(my $fh, "$settings->{workspace}/$filename") or die("Can't open \"$filename\": $?");
+    binmode($fh);
+    my $size = stat($fh)->size;
+    my $data;
+    if ($size == 0 && !exists($dummy_release_files{$filename})) {
+      die("$filename is empty and is not supposed to be!");
+    }
+    else {
+      read $fh, $data, $size or die("Can't read \"$filename\": $?");
+    }
+    close($fh);
+
+    $asset_details{$filename} = {
+      content_type => get_mime_type($filename),
+      data => $data,
+    };
+  }
+
   my $releases = $settings->{pithub}->repos->releases;
   my $text =
     "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
       "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
     news_contents_excerpt($settings->{version});
   my $release = $releases->create(
-      data => {
-          name => 'OpenDDS ' . $settings->{version},
-          tag_name => $settings->{git_tag},
-          body => $text
-      }
+    data => {
+      name => "OpenDDS $settings->{version}",
+      tag_name => $settings->{git_tag},
+      body => $text,
+    },
   );
-  my @assets = get_github_release_files($settings);
-  unless ( $release->success ) {
-    printf "error accessing github: %s\n", $release->response->status_line;
+  unless ($release->success) {
+    print STDERR "error accessing github: $release->response->status_line\n";
     $rc = 0;
-  } else {
-    for my $f (@assets) {
-      my $p = "$settings->{workspace}/$f";
-      open(my $fh, $p) or die "Can't open";
-      binmode $fh;
-      my $size = stat($fh)->size;
-      my $data;
-      read $fh, $data, $size or die "Can't read";
-      my $mime = ($f =~ /\.gz$/) ? 'application/gzip' : 'application/x-zip-compressed';
-      my $asset = $releases->assets->create(
+  }
+  else {
+    my $fail_msg = "\nThe release on GitHub has to be deleted manually before trying to verify\n" .
+      "or remedy this step again";
+    for my $filename (@assets) {
+      print("Upload $filename\n");
+      my $asset;
+      my $asset_detail = $asset_details{$filename};
+      eval {
+        $asset = $releases->assets->create(
           release_id => $release->content->{id},
-          name => $f,
-          content_type => $mime,
-          data => $data
-      );
-      unless ( $asset->success ) {
-        printf "error accessing github: %s\n", $asset->response->status_line;
+          name => $filename,
+          content_type => $asset_detail->{content_type},
+          data => $asset_detail->{data}
+        );
+      };
+      if ($@) {
+        die("Issue with \$releases->assets->create:", $@, $fail_msg);
+      }
+      unless ($asset->success) {
+        print STDERR "error accessing github: $asset->response->status_line$fail_msg\n";
         $rc = 0;
       }
     }
@@ -2331,6 +2438,7 @@ my $branch = $default_branch;
 my $github_user = $default_github_user;
 my $download_url = $default_download_url;
 my $mock = 0;
+my $mock_with_doxygen = 0;
 my $micro = 0;
 my $next_version = "";
 my $metadata = $default_post_release_metadata;
@@ -2354,6 +2462,7 @@ GetOptions(
   'github-user=s' => \$github_user,
   'download-url=s' => \$download_url,
   'mock' => \$mock,
+  'mock-with-doxygen' => \$mock_with_doxygen,
   'micro' => \$micro,
   'next-version=s' => \$next_version,
   'metadata=s' => \$metadata,
@@ -2375,6 +2484,8 @@ if ($print_list_all) {
   $print_list = 1;
   $ignore_args = 1;
 }
+
+$mock = 1 if ($mock_with_doxygen);
 
 my $workspace = "";
 my $parsed_version;
@@ -2398,7 +2509,6 @@ else {
     }
     $skip_devguide = 1;
     $skip_doxygen = 1;
-    $skip_website = 1;
   }
 
   $download_url = remove_end_slash($download_url);
@@ -2506,6 +2616,7 @@ my %global_settings = (
     ftp_active => $ftp_active,
     ftp_port => $ftp_port,
     mock => $mock,
+    dummy_doxygen => $mock && !$mock_with_doxygen,
     ignore_github_token => $ignore_github_token,
 );
 
@@ -2594,7 +2705,11 @@ my @release_steps = (
   },
   {
     name    => 'Commit Release Changes',
-    verify  => sub{verify_git_status_clean(@_, 1)},
+    verify  => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_git_status_clean($settings, {%{$step_options}, strict => 1});
+    },
     message => sub{message_commit_git_changes(@_)},
     remedy  => sub{remedy_git_status_clean(@_)}
   },
@@ -2607,7 +2722,7 @@ my @release_steps = (
   {
     name    => 'Push Release Changes',
     prereqs => ['Verify Remote'],
-    verify  => sub{verify_git_changes_pushed(@_, 1)},
+    verify  => sub{verify_git_changes_pushed(@_)},
     message => sub{message_git_changes_pushed(@_)},
     remedy  => sub{remedy_git_changes_pushed(@_)}
   },
@@ -2752,7 +2867,11 @@ my @release_steps = (
   },
   {
     name    => 'Update VERSION.txt for Post-Release',
-    verify  => sub{verify_update_version_file(@_, 1)},
+    verify  => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_update_version_file($settings, {%{$step_options}, post_release => 1});
+    },
     message => sub{message_update_version_file(@_)},
     remedy  => sub{remedy_update_version_file(@_, 1)},
     can_force => 1,
@@ -2760,7 +2879,11 @@ my @release_steps = (
   },
   {
     name    => 'Update Version.h for Post-Release',
-    verify  => sub{verify_update_version_h_file(@_, 1)},
+    verify  => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_update_version_h_file($settings, {%{$step_options}, post_release => 1});
+    },
     message => sub{message_update_version_h_file(@_)},
     remedy  => sub{remedy_update_version_h_file(@_, 1)},
     can_force => 1,
@@ -2768,7 +2891,11 @@ my @release_steps = (
   },
   {
     name    => 'Update PROBLEM-REPORT-FORM for Post-Release',
-    verify  => sub{verify_update_prf_file(@_, 1)},
+    verify  => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_update_prf_file($settings, {%{$step_options}, post_release => 1});
+    },
     message => sub{message_update_prf_file(@_, 1)},
     remedy  => sub{remedy_update_prf_file(@_, 1)},
     can_force => 1,
@@ -2776,7 +2903,11 @@ my @release_steps = (
   },
   {
     name    => 'Commit Post-Release Changes',
-    verify  => sub{verify_git_status_clean(@_, 1)},
+    verify  => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      verify_git_status_clean($settings, {%{$step_options}, strict => 1});
+    },
     message => sub{message_commit_git_changes(@_)},
     remedy  => sub{remedy_git_status_clean(@_, 1)},
     post_release => 1,
@@ -2784,7 +2915,7 @@ my @release_steps = (
   {
     name    => 'Push Post-Release Changes',
     prereqs => ['Verify Remote'],
-    verify  => sub{verify_git_changes_pushed(@_, 1)},
+    verify  => sub{verify_git_changes_pushed(@_)},
     message => sub{message_git_changes_pushed(@_)},
     remedy  => sub{remedy_git_changes_pushed(@_, 0)},
     post_release => 1,
@@ -2869,7 +3000,7 @@ sub run_step {
   }
 
   # Run the verification
-  if (!$step->{verify}($settings)) {
+  if (!$step->{verify}($settings, {remedy_verify => 0})) {
     # Failed
     print "$divider\n";
     print "  " . $step->{message}($settings) . "\n";
@@ -2882,9 +3013,11 @@ sub run_step {
       if (!$step->{remedy}($settings)) {
         print "  !!!! Remediation did not complete\n";
       # Reverify
-      } elsif (!$step->{verify}($settings)) {
+      }
+      elsif (!$step->{verify}($settings, {remedy_verify => 1})) {
         print "  !!!! Remediation did not pass verification\n";
-      } else {
+      }
+      else {
         print "  Done!\n";
         $remedied = 1;
       }
