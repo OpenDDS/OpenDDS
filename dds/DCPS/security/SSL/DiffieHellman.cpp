@@ -32,7 +32,7 @@ namespace {
 struct DH_Handle {
   DH* dh_;
   explicit DH_Handle(EVP_PKEY* key)
-#if defined OPENSSL_V_1_0
+#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
     : dh_(EVP_PKEY_get1_DH(key))
 #else
     : dh_(EVP_PKEY_get0_DH(key))
@@ -198,6 +198,7 @@ public:
     : keypair(pkey)
 #ifdef OPENSSL_V_3_0
     , dh_ctx(0)
+    , fd_ctx(0)
     , peer(0)
     , param_bld(0)
     , params(0)
@@ -216,6 +217,7 @@ public:
     BN_free(pubkey);
 #ifdef OPENSSL_V_3_0
     EVP_PKEY_CTX_free(dh_ctx);
+    EVP_PKEY_CTX_free(fd_ctx);
     EVP_PKEY_free(peer);
     OSSL_PARAM_BLD_free(param_bld);
     OSSL_PARAM_free(params);
@@ -241,22 +243,31 @@ public:
       return 1;
     }
 #else
-    if ((dh_ctx = EVP_PKEY_CTX_new_from_name(0,"DH",0)) == 0) {
-      OPENDDS_SSL_LOG_ERR("new ctx from name BH failed.");
+    const char *grp = 0;
+    if (EVP_PKEY_todata(keypair, EVP_PKEY_PUBLIC_KEY, &params) <= 0) {
+      OPENDDS_SSL_LOG_ERR("pkey to data failed");
       return 1;
+    } else {
+      for (OSSL_PARAM* p = params; grp == 0 && p != 0 && p->key != 0; p++) {
+        if (strcmp(p->key, "group") == 0) {
+          grp = (char *)p->data;
+        }
+      }
+      if (grp == 0) {
+        OPENDDS_SSL_LOG_ERR("could not find group id");
+        return 1;
+      }
     }
 
-    if (!EVP_PKEY_derive_init(dh_ctx)) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_init failed");
-      return 1;
-    }
+    OSSL_PARAM_free(params);
+    params = 0;
 
     if ((param_bld = OSSL_PARAM_BLD_new()) == 0) {
       OPENDDS_SSL_LOG_ERR("OSSL_PARAM_BLD_new failed");
       return 1;
     }
 
-    if ((OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", "ffdhe2048", 0) == 0)) {
+    if ((OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", grp, 0) == 0)) {
       OPENDDS_SSL_LOG_ERR("Building prarms list failed");
       return 1;
     }
@@ -267,29 +278,45 @@ public:
     }
     params = OSSL_PARAM_BLD_to_param(param_bld);
 
-    EVP_PKEY_fromdata_init(dh_ctx);
+    if ((fd_ctx = EVP_PKEY_CTX_new(keypair, 0)) == 0) {
+      OPENDDS_SSL_LOG_ERR("new ctx failed.");
+      return 1;
+    }
 
-    if (EVP_PKEY_fromdata(dh_ctx, &peer, EVP_PKEY_PUBLIC_KEY, params) != 1) {
+    EVP_PKEY_fromdata_init(fd_ctx);
+
+    if (EVP_PKEY_fromdata(fd_ctx, &peer, EVP_PKEY_PUBLIC_KEY, params) != 1) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_fromdata Failed");
       return 1;
     }
 
-    EVP_PKEY_derive_set_peer(dh_ctx, peer);
+    if ((dh_ctx = EVP_PKEY_CTX_new(keypair,0)) == 0) {
+      OPENDDS_SSL_LOG_ERR("new ctx from name BH failed.");
+      return 1;
+    }
 
-    int kplen = EVP_PKEY_size(keypair);
-    if (kplen <= 0) {
+    if (!EVP_PKEY_derive_init(dh_ctx)) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_init failed");
+      return 1;
+    }
+
+    if (EVP_PKEY_derive_set_peer(dh_ctx, peer) <= 0) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_set failed");
+      return 1;
+    }
+
+    size_t len = 0;
+    if (EVP_PKEY_derive(dh_ctx, 0, &len) <= 0) {
       OPENDDS_SSL_LOG_ERR("DH compute_key error getting length");
       return 1;
     }
-    dst.length(kplen);
-    size_t len = 0;
+    dst.length(len);
     if (EVP_PKEY_derive(dh_ctx, dst.get_buffer(), &len) <= 0) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive failed");
       dst.length(0u);
       return 1;
     }
 #endif
-    dst.length(len);
     return 0;
   }
 
@@ -299,6 +326,7 @@ private:
 #else
   EVP_PKEY *keypair;
   EVP_PKEY_CTX *dh_ctx;
+  EVP_PKEY_CTX *fd_ctx;
   EVP_PKEY *peer;
   OSSL_PARAM_BLD *param_bld;
   OSSL_PARAM *params;
@@ -368,7 +396,7 @@ public:
     }
 
     if (1 != EVP_PKEY_CTX_set_ec_paramgen_curve_nid(paramgen_ctx, NID_X9_62_prime256v1)) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_nid failed");
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_CTX_set_ec_paramgen_curve_ni = failed");
       return 0;
     }
 
@@ -489,6 +517,7 @@ public:
     : keypair(pkey)
 #ifdef OPENSSL_V_3_0
     , ec_ctx(0)
+    , fd_ctx(0)
     , peer(0)
     , param_bld(0)
     , params(0)
@@ -506,6 +535,7 @@ public:
     BN_CTX_free(bignum_ctx);
 #ifdef OPENSSL_V_3_0
     EVP_PKEY_CTX_free(ec_ctx);
+    EVP_PKEY_CTX_free(fd_ctx);
     EVP_PKEY_free(peer);
     OSSL_PARAM_BLD_free(param_bld);
     OSSL_PARAM_free(params);
@@ -544,14 +574,20 @@ public:
       return 1;
     }
 #else
-    if ((ec_ctx = EVP_PKEY_CTX_new_from_name(0,"ECDH",0)) == 0) {
-      OPENDDS_SSL_LOG_ERR("new ctx from name ECBH failed.");
+    const char *grp = 0;
+    if (EVP_PKEY_todata(keypair, EVP_PKEY_PUBLIC_KEY, &params) <= 0) {
+      OPENDDS_SSL_LOG_ERR("pkey to data failed");
       return 1;
-    }
-
-    if (!EVP_PKEY_derive_init(ec_ctx)) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_init failed");
-      return 1;
+    } else {
+      for (OSSL_PARAM* p = params; grp == 0 && p != 0 && p->key != 0; p++) {
+        if (strcmp(p->key, "group") == 0) {
+          grp = (char *)p->data;
+        }
+      }
+      if (grp == 0) {
+        OPENDDS_SSL_LOG_ERR("could not find group id");
+        return 1;
+      }
     }
 
     if ((param_bld = OSSL_PARAM_BLD_new()) == 0) {
@@ -559,7 +595,7 @@ public:
       return 1;
     }
 
-    if ((OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", "ffdhe2048", 0) == 0)) {
+    if ((OSSL_PARAM_BLD_push_utf8_string(param_bld, "group", grp, 0) == 0)) {
       OPENDDS_SSL_LOG_ERR("Building prarms list failed");
       return 1;
     }
@@ -570,10 +606,25 @@ public:
     }
     params = OSSL_PARAM_BLD_to_param(param_bld);
 
-    EVP_PKEY_fromdata_init(ec_ctx);
+    if ((fd_ctx = EVP_PKEY_CTX_new(keypair,0)) == 0) {
+      OPENDDS_SSL_LOG_ERR("new ctx from name ECBH failed.");
+      return 1;
+    }
 
-    if (EVP_PKEY_fromdata(ec_ctx, &peer, EVP_PKEY_PUBLIC_KEY, params) != 1) {
+    EVP_PKEY_fromdata_init(fd_ctx);
+
+    if (EVP_PKEY_fromdata(fd_ctx, &peer, EVP_PKEY_PUBLIC_KEY, params) != 1) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_fromdata Failed");
+      return 1;
+    }
+
+    if ((ec_ctx = EVP_PKEY_CTX_new(keypair,0)) == 0) {
+      OPENDDS_SSL_LOG_ERR("new ctx from name ECBH failed.");
+      return 1;
+    }
+
+    if (!EVP_PKEY_derive_init(ec_ctx)) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_init failed");
       return 1;
     }
 
@@ -601,6 +652,7 @@ private:
 #else
   EVP_PKEY* keypair;
   EVP_PKEY_CTX *ec_ctx;
+  EVP_PKEY_CTX *fd_ctx;
   EVP_PKEY *peer;
   OSSL_PARAM_BLD *param_bld;
   OSSL_PARAM *params;
