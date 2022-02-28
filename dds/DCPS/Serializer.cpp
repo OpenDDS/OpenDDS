@@ -13,7 +13,7 @@
 
 #include "SafetyProfileStreams.h"
 
-#ifndef OPENDDS_NO_TAO
+#ifndef OPENDDS_UTIL_BUILD
 #  include <tao/String_Alloc.h>
 #endif
 
@@ -27,7 +27,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
 namespace {
 
 ACE_CDR::Char* string_alloc(ACE_CDR::ULong size)
@@ -519,7 +519,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
                         StrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_alloc = string_alloc;
 #else
     str_alloc = CORBA::string_alloc;
@@ -582,7 +582,7 @@ Serializer::free_string(ACE_CDR::Char* str,
                         StrFree str_free)
 {
   if (str_free == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_free = string_free;
 #else
     str_free = CORBA::string_free;
@@ -597,7 +597,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
                         WStrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_alloc = wstring_alloc;
 #else
     str_alloc = CORBA::wstring_alloc;
@@ -668,7 +668,7 @@ Serializer::free_string(ACE_CDR::WChar* str,
                         WStrFree str_free)
 {
   if (str_free == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_free = wstring_free;
 #else
     str_free = CORBA::wstring_free;

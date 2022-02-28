@@ -6,6 +6,8 @@
 
 #include "TypeLookupService.h"
 
+#include "../debug.h"
+
 #include <sstream>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

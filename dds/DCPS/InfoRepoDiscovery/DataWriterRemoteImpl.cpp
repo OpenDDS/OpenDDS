@@ -6,7 +6,9 @@
  */
 
 #include "DataWriterRemoteImpl.h"
+
 #include "dds/DCPS/DataWriterCallbacks.h"
+#include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

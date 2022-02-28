@@ -6,9 +6,13 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "TypeObject.h"
 
+
+#include "dds/DCPS/debug.h"
 #include "dds/DCPS/Hash.h"
 #include "dds/DCPS/Message_Block_Ptr.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
+
+#include <ace/OS_NS_string.h>
 
 #include <cstring>
 

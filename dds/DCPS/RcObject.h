@@ -7,14 +7,19 @@
 
 
 #include "dds/Versioned_Namespace.h"
+
+#include "dcps_export.h"
+#include "PoolAllocationBase.h"
+#include "RcHandle_T.h"
+
+#include <ace/Guard_T.h>
+#include <ace/Synch_Traits.h>
+
 #ifdef ACE_HAS_CPP11
 #  include <atomic>
 #else
 #  include <ace/Atomic_Op.h>
 #endif
-#include "ace/Synch_Traits.h"
-#include "PoolAllocationBase.h"
-#include "RcHandle_T.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

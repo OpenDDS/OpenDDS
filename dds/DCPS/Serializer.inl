@@ -7,8 +7,11 @@
 #include "debug.h"
 
 #include <ace/Message_Block.h>
+#include <ace/OS_NS_string.h>
 
 #include <algorithm>
+
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -1025,7 +1028,7 @@ operator<<(Serializer& s, const ACE_CDR::Char* x)
   if (x != 0) {
     // Include the null termination in the serialized data.
     const ACE_CDR::ULong stringlen =
-      1 + static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x));
+      1 + static_cast<ACE_CDR::ULong>(std::strlen(x));
     s << stringlen;
     s.buffer_write(reinterpret_cast<const char*>(x), stringlen, false);
 
