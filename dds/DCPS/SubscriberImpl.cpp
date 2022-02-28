@@ -750,22 +750,26 @@ SubscriberImpl::begin_access()
     return DDS::RETCODE_OK;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
+  DataReaderSet temp;
+  bool call_readers = false;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     this->si_lock_,
+                     DDS::RETCODE_ERROR);
 
-  ++this->access_depth_;
+    ++access_depth_;
+    temp = datareader_set_;
+    call_readers = access_depth_ == 1;
+  }
 
   // We should only notify subscription on the first
   // and last change to the current change set:
-  if (this->access_depth_ == 1) {
-    for (DataReaderSet::iterator it = this->datareader_set_.begin();
-         it != this->datareader_set_.end(); ++it) {
+  if (call_readers == 1) {
+    for (DataReaderSet::iterator it = temp.begin(); it != temp.end(); ++it) {
       (*it)->begin_access();
     }
   }
-
   return DDS::RETCODE_OK;
 }
 
@@ -785,27 +789,32 @@ SubscriberImpl::end_access()
     return DDS::RETCODE_OK;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
+  DataReaderSet temp;
+  bool call_readers = false;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     this->si_lock_,
+                     DDS::RETCODE_ERROR);
 
-  if (this->access_depth_ == 0) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
-                ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
+    if (access_depth_ == 0) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                  ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
+      }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
-  }
 
-  --this->access_depth_;
+    --access_depth_;
+    temp = datareader_set_;
+    call_readers = access_depth_ == 0;
+  }
 
   // We should only notify subscription on the first
   // and last change to the current change set:
-  if (this->access_depth_ == 0) {
-    for (DataReaderSet::iterator it = this->datareader_set_.begin();
-         it != this->datareader_set_.end(); ++it) {
+  if (call_readers == 1) {
+    for (DataReaderSet::iterator it = temp.begin(); it != temp.end(); ++it) {
       (*it)->end_access();
     }
   }

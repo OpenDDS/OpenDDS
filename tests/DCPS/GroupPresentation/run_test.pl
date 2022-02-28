@@ -37,54 +37,15 @@ $dcpsrepo_ior = "repo.ior";
 unlink $dcpsrepo_ior;
 unlink <*.log>;
 
-$DCPSREPO = PerlDDS::create_process ("$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-                                     "-ORBDebugLevel 10 -ORBVerboseLogging 1 -DCPSDebugLevel $debuglevel -ORBLogFile DCPSInfoRepo.log -o $dcpsrepo_ior -NOBITS");
+my $test = new PerlDDS::TestFramework();
 
-$Subscriber = PerlDDS::create_process ("subscriber", " $sub_opts -ORBVerboseLogging 1 $testcase");
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+                       "$repo_bit_opt") unless $is_rtps_disc;
 
-$Publisher = PerlDDS::create_process ("publisher", " $pub_opts");
+$test->process("subscriber", "subscriber", "$sub_opts -ORBVerboseLogging 1 $testcase");
+$test->process("publisher", "publisher", $pub_opts);
 
-print $DCPSREPO->CommandLine() . "\n";
-$DCPSREPO->Spawn ();
-if (PerlACE::waitforfile_timed ($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill ();
-    exit 1;
-}
+$test->start_process("subscriber");
+$test->start_process("publisher");
 
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn ();
-
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn ();
-
-
-$PublisherResult = $Publisher->WaitKill (60);
-if ($PublisherResult != 0) {
-    print STDERR "ERROR: publisher returned $PublisherResult\n";
-    $status = 1;
-}
-
-
-$SubscriberResult = $Subscriber->WaitKill (60);
-if ($SubscriberResult != 0) {
-    print STDERR "ERROR: subscriber returned $SubscriberResult\n";
-    $status = 1;
-}
-
-$ir = $DCPSREPO->TerminateWaitKill(5);
-if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-}
-
-unlink $dcpsrepo_ior;
-
-if ($status == 0) {
-  print "test PASSED.\n";
-} else {
-  print STDERR "test FAILED.\n";
-}
-
-exit $status;
+exit $test->finish(120);
