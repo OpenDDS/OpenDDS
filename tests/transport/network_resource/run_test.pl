@@ -11,8 +11,8 @@ use strict;
 my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
-$test->process("na", "NetworkAddress", "");
-$test->start_process("na");
+$test->process("nr", "NetworkResource", "");
+$test->start_process("nr");
 my $retcode = $test->finish(20);
 if ($retcode != 0) {
   $status = 1;

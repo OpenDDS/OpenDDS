@@ -5,8 +5,10 @@
 # include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif
 
-#include "ace/OS_NS_unistd.h"
+#include "ace/Atomic_Op.h"
 #include "ace/Log_Msg.h"
+#include "ace/OS_NS_unistd.h"
+
 #include <cstring>
 
 #include "tests/Utils/Safety.h"

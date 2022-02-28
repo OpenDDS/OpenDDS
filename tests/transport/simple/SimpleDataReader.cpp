@@ -53,6 +53,9 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
   DBG_ENTRY("SimpleDataReader","data_received");
 
   ACE_DEBUG((LM_DEBUG, "(%P|%t) Data has been received:\n"));
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
   if (sample.sample_->length() < 25) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", sample.sample_->rd_ptr()));
   }
@@ -82,12 +85,14 @@ SimpleDataReader::transport_lost()
 int
 SimpleDataReader::received_test_message() const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return (this->num_messages_received_ == this->num_messages_expected_) ? 1 : 0;
 }
 
 void
 SimpleDataReader::print_time()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_Time_Value total = finished_recvd_ - begin_recvd_;
   ACE_DEBUG((LM_INFO,
     "(%P|%t) Total time required is %d.%d seconds.\n",

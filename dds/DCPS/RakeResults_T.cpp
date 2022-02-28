@@ -82,6 +82,7 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
 
 template <class SampleSeq>
 bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
+                                           ReceivedDataElementList* rdel,
                                            SubscriptionInstance_rch instance,
                                            size_t index_in_instance)
 {
@@ -105,13 +106,13 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
     if (cond_ && !sample->registered_data_) return false;
 #endif
 
-    RakeData rd = {sample, instance, index_in_instance};
+    RakeData rd = {sample, rdel, instance, index_in_instance};
     sorted_.insert(rd);
 
   } else {
     if (unsorted_.size() == max_samples_) return false;
 
-    RakeData rd = {sample, instance, index_in_instance};
+    RakeData rd = {sample, rdel, instance, index_in_instance};
     unsorted_.push_back(rd);
   }
 
@@ -133,6 +134,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
   for (CORBA::ULong idx = 0; iter != end && idx < max_samples_; ++idx, ++iter) {
     // 1. Populate the Received Data sequence
     ReceivedDataElement* rde = iter->rde_;
+    ReceivedDataElementList* rdel = iter->rdel_;
 
     if (received_data_.maximum() != 0) {
       if (rde->registered_data_ == 0) {
@@ -150,7 +152,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
     // 2. Per-sample SampleInfo (not the three *_rank variables) and state
     SubscriptionInstance& inst = *iter->si_;
     inst.instance_state_->sample_info(info_seq_[idx], rde);
-    rde->sample_state_ = DDS::READ_SAMPLE_STATE;
+    rdel->mark_read(rde);
 
     // 3. Record some info about per-instance SampleInfo (*_rank) so that
     //    we can fill in the ranks after the loop has completed
@@ -159,7 +161,7 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
     InstanceData& id = result.first->second;
 
     if (result.second) { // first time we've seen this Instance
-      ReceivedDataElement& mrs = *inst.rcvd_samples_.tail_;
+      const ReceivedDataElement& mrs = *inst.rcvd_samples_.peek_tail();
       id.MRS_disposed_gc_ =
         static_cast<CORBA::Long>(mrs.disposed_generation_count_);
       id.MRS_nowriters_gc_ =

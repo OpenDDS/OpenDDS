@@ -59,22 +59,18 @@ public:
   ACE_Proactor* get_proactor();
   const ACE_Proactor* get_proactor() const;
 
-  void wait_for_startup()
-  {
-    while (state_ != STATE_RUNNING) {
-      condition_.wait(*thread_status_manager_);
-    }
-  }
+  void wait_for_startup() const;
 
-  bool is_shut_down() const { return state_ == STATE_NOT_RUNNING; }
+  bool is_shut_down() const;
 
-  ReactorInterceptor_rch interceptor() const { return interceptor_; }
+  ReactorInterceptor_rch interceptor() const;
 
   OPENDDS_POOL_ALLOCATION_FWD
 
 private:
 
   void cleanup();
+  void wait_for_startup_i() const;
 
   typedef ACE_SYNCH_MUTEX LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -83,12 +79,12 @@ private:
     ACE_Event_Handler*, ACE_Event_Handler_Handle_Timeout_Upcall,
     ACE_SYNCH_RECURSIVE_MUTEX, MonotonicClock> TimerQueueType;
 
-  enum State { STATE_NOT_RUNNING, STATE_OPENING, STATE_RUNNING };
+  enum State { STATE_UNINITIALIZED, STATE_OPENING, STATE_RUNNING, STATE_SHUT_DOWN };
 
   class Interceptor : public DCPS::ReactorInterceptor {
   public:
-    explicit Interceptor(DCPS::ReactorTask* task)
-     : ReactorInterceptor(task->get_reactor(), task->get_reactor_owner())
+    Interceptor(DCPS::ReactorTask* task, ACE_Reactor* reactor, ACE_thread_t owner)
+     : ReactorInterceptor(reactor, owner)
      , task_(task)
      {}
     bool reactor_is_shut_down() const
@@ -100,11 +96,11 @@ private:
     DCPS::ReactorTask* const task_;
   };
 
-  LockType      lock_;
-  State         state_;
-  ConditionVariableType condition_;
-  ACE_Reactor*  reactor_;
-  ACE_thread_t  reactor_owner_;
+  mutable LockType lock_;
+  mutable ConditionVariableType condition_;
+  State state_;
+  ACE_Reactor* reactor_;
+  ACE_thread_t reactor_owner_;
   ACE_Proactor* proactor_;
 
 #if defined ACE_WIN32 && defined ACE_HAS_WIN32_OVERLAPPED_IO

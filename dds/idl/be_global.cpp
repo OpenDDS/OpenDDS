@@ -535,6 +535,7 @@ namespace {
   typedef set<pair<string, string> > Includes_t;
   Includes_t inc_h_, inc_c_, inc_idl_, inc_facets_h_, inc_lang_h_;
   set<string> referenced_idl_, inc_path_;
+  vector<string> inc_path_vector_;
 }
 
 void
@@ -551,7 +552,9 @@ BE_GlobalData::reset_includes()
 void
 BE_GlobalData::add_inc_path(const char* path)
 {
-  inc_path_.insert(path);
+  if (inc_path_.insert(path).second) {
+    inc_path_vector_.push_back(path);
+  }
 }
 
 void
@@ -561,9 +564,9 @@ BE_GlobalData::set_inc_paths(const char* cmdline)
   for (int i = 0; i < argv.argc(); ++i) {
     string arg = ACE_TEXT_ALWAYS_CHAR(argv[i]);
     if (arg == "-I" && i + 1 < argv.argc()) {
-      inc_path_.insert(ACE_TEXT_ALWAYS_CHAR(argv[++i]));
+      add_inc_path(ACE_TEXT_ALWAYS_CHAR(argv[++i]));
     } else if (arg.substr(0, 2) == "-I") {
-      inc_path_.insert(arg.c_str() + 2);
+      add_inc_path(arg.c_str() + 2);
     }
   }
 }
@@ -632,10 +635,10 @@ namespace {
     return make_pair(base_name + suffix, "");
   }
 
-  string make_relative(const string& absolute, const bool filename_only_includes)
+  string make_relative(const string& absolute, bool filename_only_includes)
   {
-    for (set<string>::const_iterator iter = inc_path_.begin(),
-        end = inc_path_.upper_bound(absolute); iter != end; ++iter) {
+    for (vector<string>::reverse_iterator iter = inc_path_vector_.rbegin(),
+        end = inc_path_vector_.rend(); iter != end; ++iter) {
       if (absolute.find(*iter) == 0) {
         string rel = absolute.substr(iter->size());
 

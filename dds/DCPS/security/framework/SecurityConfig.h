@@ -14,6 +14,8 @@
 #endif
 
 #include <dds/DCPS/dcps_export.h>
+
+#include <dds/DCPS/debug.h>
 #include <dds/DCPS/RcObject.h>
 #include <dds/DCPS/GuidUtils.h>
 #ifdef OPENDDS_SECURITY

@@ -6,7 +6,7 @@
 #ifndef OPENDDS_DCPS_DEFINITIONS_H
 #define OPENDDS_DCPS_DEFINITIONS_H
 
-#include "Cached_Allocator_With_Overflow_T.h"
+#include "../Versioned_Namespace.h"
 
 #include <ace/Message_Block.h>
 #include <ace/Global_Macros.h>
@@ -78,11 +78,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
-typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex> MessageBlockAllocator;
-typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Thread_Mutex> DataBlockAllocator;
-struct DataSampleHeader;
-typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex> DataSampleHeaderAllocator;
 
 /// This struct holds both object reference and the corresponding servant.
 template <typename T_impl, typename T, typename T_ptr, typename T_var>

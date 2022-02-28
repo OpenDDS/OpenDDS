@@ -7,7 +7,10 @@
 #define OPENDDS_DCPS_DEBUG_H
 
 #include "dcps_export.h"
+
+#ifndef OPENDDS_UTIL_BUILD
 #include "transport/framework/TransportDebug.h"
+#endif
 
 #include <ace/ace_wchar.h>
 
@@ -148,6 +151,7 @@ public:
 extern OpenDDS_Dcps_Export SecurityDebug security_debug;
 #endif
 
+#ifndef OPENDDS_UTIL_BUILD
 class LogRestore {
 public:
   LogRestore()
@@ -181,6 +185,7 @@ private:
   SecurityDebug orig_security_debug_;
 #endif
 };
+#endif // OPENDDS_UTIL_BUILD
 
 } // namespace OpenDDS
 } // namespace DCPS

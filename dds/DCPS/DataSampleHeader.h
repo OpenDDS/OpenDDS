@@ -8,12 +8,14 @@
 #ifndef OPENDDS_DCPS_DATASAMPLEHEADER_H
 #define OPENDDS_DCPS_DATASAMPLEHEADER_H
 
+#include "Cached_Allocator_With_Overflow_T.h"
 #include "Definitions.h"
 #include "GuidUtils.h"
-#include "PoolAllocationBase.h"
-#include "SequenceNumber.h"
-#include "RepoIdTypes.h"
 #include "Message_Block_Ptr.h"
+#include "PoolAllocationBase.h"
+#include "RepoIdTypes.h"
+#include "SequenceNumber.h"
+
 #include <iosfwd>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -264,6 +266,8 @@ private:
   /// Keep track of the amount of data read from a buffer.
   size_t serialized_size_;
 };
+
+typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex> DataSampleHeaderAllocator;
 
 OpenDDS_Dcps_Export
 const char* to_string(MessageId value);
