@@ -6,9 +6,11 @@
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "debug.h"
-
-#include "PoolAllocator.h"
 #include "Util.h"
+
+#ifdef OPENDDS_SECURITY
+#include "PoolAllocator.h"
+#endif
 
 #include <ace/Log_Msg.h>
 
@@ -41,8 +43,10 @@ void LogLevel::set(LogLevel::Value value)
     }
   } else {
     DCPS_debug_level = 0;
+#ifndef OPENDDS_UTIL_BUILD
     Transport_debug_level = 0;
     transport_debug = TransportDebug();
+#endif
   }
 }
 

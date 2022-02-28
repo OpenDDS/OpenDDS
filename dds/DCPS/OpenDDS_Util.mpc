@@ -1,21 +1,33 @@
+// OpenDDS_Util is a small subset of OpenDDS_Dcps that's only used
+// by opendds_idl to have objects of common classes (like TypeObject)
+// instantiated within the IDL compiler.
+
 project: acelib, dds_macros, install {
   requires += no_opendds_safety_profile
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
-  includes += $(DDS_ROOT) $(DDS_ROOT)/dds $(TAO_ROOT)
+  includes += $(DDS_ROOT) $(DDS_ROOT)/dds
+  includes += $(TAO_ROOT) // only for orbconf.h and idl_features.h in our Definitions.h
   libout = $(DDS_ROOT)/lib
   pch_header =
   pch_source =
-  macros += OPENDDS_NO_TAO
+  macros += OPENDDS_UTIL_BUILD
 
   Header_Files {
-    Hash.h
-    SafetyProfileStreams.h
-    Serializer.h
-    debug.h
+    // These headers are included (directly or indirectly) in the translation
+    // units listed below in Source_Files.
+    // Note that headers matching a Source_File but with a .h extension don't
+    // get listed here since MPC adds them for us.
+    dcps_export.h
+    Definitions.h
+    Message_Block_Ptr.h
+    PoolAllocationBase.h
+    PoolAllocator.h
+    unique_ptr.h
+    Util.h
+    ../Version.h
+    ../Versioned_Namespace.h
     XTypes/External.h
-    XTypes/TypeObject.h
-    transport/framework/TransportDebug.h
   }
 
   specific {
@@ -23,15 +35,13 @@ project: acelib, dds_macros, install {
   }
 
   Source_Files {
+    debug.cpp
     Hash.cpp
     SafetyProfileStreams.cpp
     Serializer.cpp
-    debug.cpp
     XTypes/TypeObject.cpp
-    transport/framework/TransportDebug.cpp
   }
 
-  verbatim(gnuace, local, 1) {
-    idl_stubs: all
+  Template_Files {
   }
 }

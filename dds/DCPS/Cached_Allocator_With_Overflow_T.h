@@ -12,11 +12,12 @@
 #include "SafetyProfilePool.h"
 #include "PoolAllocationBase.h"
 
-#include <ace/Malloc_Allocator.h>
-#include <ace/Malloc_T.h>
+#include <ace/Atomic_Op.h>
 #include <ace/Free_List.h>
 #include <ace/Guard_T.h>
-#include <ace/Atomic_Op.h>
+#include <ace/Malloc_Allocator.h>
+#include <ace/Malloc_T.h>
+#include <ace/Message_Block.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
@@ -165,6 +166,9 @@ private:
 
   const size_t n_chunks_;
 };
+
+typedef Cached_Allocator_With_Overflow<ACE_Message_Block, ACE_Thread_Mutex> MessageBlockAllocator;
+typedef Cached_Allocator_With_Overflow<ACE_Data_Block, ACE_Thread_Mutex> DataBlockAllocator;
 
 } // namespace DCPS
 } // namespace OpenDDS
