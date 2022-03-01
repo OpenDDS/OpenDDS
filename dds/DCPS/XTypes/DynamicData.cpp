@@ -9,6 +9,7 @@
 
 #include "DynamicTypeMember.h"
 
+#include <dds/DCPS/debug.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
