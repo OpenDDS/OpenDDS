@@ -873,13 +873,13 @@ namespace OpenDDS {
     return MarshalTraitsType::max_extensibility_level();
   }
 
-  void set_instance_state(DDS::InstanceHandle_t instance,
-                          DDS::InstanceStateKind state,
-                          const SystemTimePoint& timestamp = SystemTimePoint::now(),
-                          const GUID_t& publication_id = GUID_UNKNOWN)
+  void set_instance_state_i(DDS::InstanceHandle_t instance,
+                            DDS::InstanceStateKind state,
+                            const SystemTimePoint& timestamp,
+                            const GUID_t& publication_id)
   {
+    // sample_lock_ must be held.
     using namespace OpenDDS::DCPS;
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
     SubscriptionInstance_rch si = get_handle_instance(instance);
     if (si && state != DDS::ALIVE_INSTANCE_STATE) {

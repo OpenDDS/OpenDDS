@@ -535,10 +535,14 @@ public:
 
 #endif
 
-  virtual void set_instance_state(DDS::InstanceHandle_t instance,
-                                  DDS::InstanceStateKind state,
-                                  const SystemTimePoint& timestamp = SystemTimePoint::now(),
-                                  const GUID_t& = GUID_UNKNOWN) = 0;
+  void set_instance_state(DDS::InstanceHandle_t instance,
+                          DDS::InstanceStateKind state,
+                          const SystemTimePoint& timestamp = SystemTimePoint::now(),
+                          const GUID_t& guid = GUID_UNKNOWN)
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+    set_instance_state_i(instance, state, timestamp, guid)
+  }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   void begin_access();
@@ -768,6 +772,11 @@ protected:
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
+
+  virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
+                                    DDS::InstanceStateKind state,
+                                    const SystemTimePoint& timestamp,
+                                    const GUID_t& guid) = 0;
 
   void notify_subscription_lost(const DDS::InstanceHandleSeq& handles);
 
