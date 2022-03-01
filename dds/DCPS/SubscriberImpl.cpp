@@ -750,25 +750,23 @@ SubscriberImpl::begin_access()
     return DDS::RETCODE_OK;
   }
 
-  DataReaderSet temp;
-  bool call_readers = false;
+  DataReaderSet to_call;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
-                     this->si_lock_,
+                     si_lock_,
                      DDS::RETCODE_ERROR);
 
     ++access_depth_;
-    temp = datareader_set_;
-    call_readers = access_depth_ == 1;
+    // We should only notify subscription on the first
+    // and last change to the current change set:
+    if (access_depth_ == 1) {
+      to_call = datareader_set_;
+    }
   }
 
-  // We should only notify subscription on the first
-  // and last change to the current change set:
-  if (call_readers == 1) {
-    for (DataReaderSet::iterator it = temp.begin(); it != temp.end(); ++it) {
-      (*it)->begin_access();
-    }
+  for (DataReaderSet::iterator it = to_call.begin(); it != to_call.end(); ++it) {
+    (*it)->begin_access();
   }
   return DDS::RETCODE_OK;
 }
@@ -789,12 +787,11 @@ SubscriberImpl::end_access()
     return DDS::RETCODE_OK;
   }
 
-  DataReaderSet temp;
-  bool call_readers = false;
+  DataReaderSet to_call;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
-                     this->si_lock_,
+                     si_lock_,
                      DDS::RETCODE_ERROR);
 
     if (access_depth_ == 0) {
@@ -807,18 +804,16 @@ SubscriberImpl::end_access()
     }
 
     --access_depth_;
-    temp = datareader_set_;
-    call_readers = access_depth_ == 0;
-  }
-
-  // We should only notify subscription on the first
-  // and last change to the current change set:
-  if (call_readers == 1) {
-    for (DataReaderSet::iterator it = temp.begin(); it != temp.end(); ++it) {
-      (*it)->end_access();
+    // We should only notify subscription on the first
+    // and last change to the current change set:
+    if (access_depth_ == 0) {
+      to_call = datareader_set_;
     }
   }
 
+  for (DataReaderSet::iterator it = to_call.begin(); it != to_call.end(); ++it) {
+    (*it)->end_access();
+  }
   return DDS::RETCODE_OK;
 }
 
