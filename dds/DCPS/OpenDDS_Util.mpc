@@ -44,4 +44,9 @@ project: acelib, dds_macros, install {
 
   Template_Files {
   }
+
+  // If the 'idl_stubs' make target is built, this library is needed.
+  verbatim(gnuace, local) {
+    idl_stubs: all
+  }
 }

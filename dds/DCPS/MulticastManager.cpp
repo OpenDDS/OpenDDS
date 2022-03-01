@@ -7,6 +7,7 @@
 
 #include "MulticastManager.h"
 
+#include "debug.h"
 #include "LogAddr.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
