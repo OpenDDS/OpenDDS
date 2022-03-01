@@ -675,22 +675,6 @@ public:
       dst.length(0u);
       return 1;
     }
-#if 0
-    EVP_PKEY_derive_set_peer(ec_ctx, peer);
-
-    int kplen = EVP_PKEY_size(keypair);
-    if (kplen <= 0) {
-      OPENDDS_SSL_LOG_ERR("DH compute_key error getting length");
-      return 1;
-    }
-    dst.length(kplen);
-    size_t len = 0;
-    if (EVP_PKEY_derive(ec_ctx, dst.get_buffer(), &len) <= 0) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive failed");
-      dst.length(0u);
-      return 1;
-    }
-#endif    
 #endif
     return 0;
   }
