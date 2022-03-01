@@ -9,6 +9,8 @@
 
 #include "SafetyProfileSequences.h"
 
+#include "debug.h"
+
 #include <tao/Basic_Types.h>
 #include <tao/CORBA_String.h>
 
