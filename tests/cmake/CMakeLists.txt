@@ -11,7 +11,7 @@ add_subdirectory(
   "../../DevGuideExamples/DCPS/Messenger"
   "${CMAKE_CURRENT_SOURCE_DIR}/../../DevGuideExamples/DCPS/Messenger/build")
 
-if (OPENDDS_QT AND OPENDDS_CXX11)
+if(OPENDDS_QT AND OPENDDS_CXX11)
   add_subdirectory(
     "../../examples/DCPS/ishapes"
     "${CMAKE_CURRENT_SOURCE_DIR}/../../examples/DCPS/ishapes/build")
@@ -29,3 +29,6 @@ if(NOT ${CMAKE_VERSION} VERSION_LESS "3.8.2")
   endif()
   add_subdirectory(Nested_IDL)
 endif()
+
+add_subdirectory(include_subdir)
+add_subdirectory(install)

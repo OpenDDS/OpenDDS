@@ -993,10 +993,9 @@ bool run_test()
 
 int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  try
-  {
-    ::DDS::DomainParticipantFactory_var dpf =
-      TheServiceParticipant->get_domain_participant_factory();
+  DDS::DomainParticipantFactory_var dpf;
+  try {
+    dpf = TheServiceParticipant->get_domain_participant_factory();
   }
   catch (const CORBA::BAD_PARAM& ex)
   {

@@ -4,10 +4,17 @@
 OpenDDS 3.20.0 is currently in development, so this list might change.
 
 ### Additions:
-- TODO: Add your features here
+- CMake Module:
+  - OpenDDS, ACE, and TAO libraries can now be installed using `install(IMPORTED_RUNTIME_ARTIFACTS)` if using CMake 3.21 or later (#3315)
+    - To help facilitate this, a new function called `opendds_get_library_dependencies` has been added.
+  - To help install generated files, `OPENDDS_TARGET_SOURCES` now adds lists of the files that where passed in and generated that are part of the `PUBLIC` and `INTERFACE` scopes as properties on the target (#3315)
+  - Added an `OPENDDS_DEFAULT_SCOPE` option that allows changing the default scope of `OPENDDS_TARGET_SOURCES` (#3315)
+  - See `docs/cmake.md` for details on all of these new features
 
 ### Fixes:
-- TODO: Add your fixes here
+- CMake Module:
+  - Fix issue when using `install(EXPORT)` on a target used with `OPENDDS_TARGET_SOURCES` (#3315)
+  - Fix issue #1297 where `opendds_idl` generates an incorrect include path (#3315)
 
 ### Notes:
 - TODO: Add your notes here

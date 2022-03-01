@@ -57,7 +57,10 @@ TcpLoader::init(int, ACE_TCHAR*[])
     return 0;
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(make_rch<TcpType>());
+  if (!registry->register_type(make_rch<TcpType>())) {
+    return 0;
+  }
+
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           std::string("0500_TCP"), TCP_NAME, false);

@@ -509,7 +509,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c04_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c05_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
@@ -776,7 +776,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c04_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c05_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
@@ -1295,7 +1295,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1309,7 +1309,16 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-5.0 --no-inline --features=uses_wchar=1 --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-5.0 \
+          --std=c++11 \
+          --no-inline \
+          --features=uses_wchar=1 \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
+          --tests \
+          --security
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1376,7 +1385,17 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-5.0 --no-inline --features=uses_wchar=1 --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --rapidjson --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-5.0 \
+          --std=c++11 \
+          --no-inline \
+          --features=uses_wchar=1 \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
+          --tests \
+          --security \
+          --rapidjson
     - name: check build configuration
       shell: bash
       run: |
@@ -1548,7 +1567,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -1562,7 +1581,15 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-10 --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-10 \
+          --std=c++11 \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
+          --tests \
+          --security \
+          --no-rapidjson
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -1629,7 +1656,16 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-10 --std=c++11 --tests --security --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --mpcopts="-features no_opendds_testing_features=0"
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-10 \
+          --std=c++11 \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
+          --tests \
+          --security \
+          --no-rapidjson \
+          --mpcopts="-features no_opendds_testing_features=0"
     - name: check build configuration
       shell: bash
       run: |
@@ -2551,7 +2587,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c04_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c05_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2

@@ -12,6 +12,8 @@
 #include "ReactorTask.inl"
 #endif /* __ACE_INLINE__ */
 
+#include "Service_Participant.h"
+
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
 #include <ace/Proactor.h>
@@ -28,8 +30,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 ReactorTask::ReactorTask(bool useAsyncSend)
-  : state_(STATE_NOT_RUNNING)
-  , condition_(lock_)
+  : condition_(lock_)
+  , state_(STATE_UNINITIALIZED)
   , reactor_(0)
   , reactor_owner_(ACE_OS::NULL_thread)
   , proactor_(0)
@@ -45,6 +47,15 @@ ReactorTask::ReactorTask(bool useAsyncSend)
 ReactorTask::~ReactorTask()
 {
   cleanup();
+}
+
+void ReactorTask::wait_for_startup_i() const
+{
+  while (state_ == STATE_UNINITIALIZED || state_ == STATE_OPENING) {
+    condition_.wait(thread_status_manager_ ?
+                      *thread_status_manager_ :
+                      TheServiceParticipant->get_thread_status_manager());
+  }
 }
 
 void ReactorTask::cleanup()
@@ -142,7 +153,7 @@ int ReactorTask::svc()
     }
     reactor_owner_ = ACE_Thread_Manager::instance()->thr_self();
 
-    interceptor_ = make_rch<Interceptor>(this);
+    interceptor_ = make_rch<Interceptor>(this, reactor_, reactor_owner_);
 
     // Advance the state.
     state_ = STATE_RUNNING;
@@ -184,16 +195,16 @@ int ReactorTask::close(u_long flags)
 
 void ReactorTask::stop()
 {
-
+  ACE_Reactor* reactor = 0;
   {
     GuardType guard(lock_);
 
-    if (state_ == STATE_NOT_RUNNING) {
+    if (state_ == STATE_UNINITIALIZED || state_ == STATE_SHUT_DOWN) {
       // We are already "stopped".  Just return.
       return;
     }
 
-    state_ = STATE_NOT_RUNNING;
+    state_ = STATE_SHUT_DOWN;
 
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
     // Remove the proactor handler so the reactor stops forwarding messages.
@@ -203,16 +214,31 @@ void ReactorTask::stop()
         ACE_Event_Handler::DONT_CALL);
     }
 #endif
+    reactor = reactor_;
+  }
 
-    reactor_->end_reactor_event_loop();
+  if (reactor) {
+    // We can't hold the lock when we call this, because the reactor threads may need to
+    // access the lock as part of normal execution before they return to the reactor control loop
+    reactor->end_reactor_event_loop();
+  }
+
+  {
+    GuardType guard(lock_);
+
+    // In the future, we will likely want to replace this assert with a new "SHUTTING_DOWN" state
+    // which can be used to delay any potential new calls to open_reactor_task()
+    OPENDDS_ASSERT(state_ == STATE_SHUT_DOWN);
 
     // Let's wait for the reactor task's thread to complete before we
     // leave this stop method.
-    ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
-    wait();
+    if (thread_status_manager_) {
+      ThreadStatusManager::Sleeper sleeper(*thread_status_manager_);
+      wait();
 
-    // Reset the thread manager in case it goes away before the next open.
-    this->thr_mgr(0);
+      // Reset the thread manager in case it goes away before the next open.
+      thr_mgr(0);
+    }
   }
 }
 

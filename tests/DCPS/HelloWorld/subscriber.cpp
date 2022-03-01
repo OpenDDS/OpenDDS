@@ -72,7 +72,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::SampleInfoSeq infos;
     message_data_reader->take(messages, infos, DDS::LENGTH_UNLIMITED,
                               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
-    for (size_t idx = 0; idx != messages.length(); ++idx) {
+    for (unsigned int idx = 0; idx != messages.length(); ++idx) {
       if (infos[idx].valid_data) {
         ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].value.in()));
         distributed_condition_set->post(HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_DONE);

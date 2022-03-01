@@ -174,8 +174,8 @@ UdpTransport::configure_i(UdpInst& config)
 
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr() &&
-      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-    config.local_address(TheServiceParticipant->default_address());
+      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+    config.local_address(TheServiceParticipant->default_address().to_addr());
   }
 
   // Our "server side" data link is created here, similar to the acceptor_

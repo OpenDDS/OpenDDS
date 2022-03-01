@@ -83,7 +83,6 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , use_rtps_relay_(false)
   , rtps_relay_only_(false)
   , use_ice_(false)
-  , use_ncm_(true)
   , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
   , undirected_spdp_(true)
   , periodic_directed_spdp_(false)
@@ -150,9 +149,9 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
       RtpsDiscoveryConfig_rch config = discovery->config();
 
       // spdpaddr defaults to DCPSDefaultAddress if set
-      if (TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-        config->spdp_local_address(TheServiceParticipant->default_address());
-        config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address()));
+      if (TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+        config->spdp_local_address(TheServiceParticipant->default_address().to_addr());
+        config->multicast_interface(DCPS::LogAddr::ip(TheServiceParticipant->default_address().to_addr()));
       }
 
       DCPS::ValueMap values;

@@ -14,6 +14,20 @@
 tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
 tests/stress-tests/dds/DCPS/run_test.pl: !DCPS_MIN
 
+tests/transport/simple/run_test.pl bp: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/transport/simple/run_test.pl n: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+
+tests/transport/simple/run_test.pl shmem bp: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
+tests/transport/simple/run_test.pl shmem n: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
+tests/transport/simple/run_test.pl shmem: !NO_DDS_TRANSPORT !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
+
+tests/DCPS/DpShutdown/run_test.pl: RTPS
+tests/DCPS/DpShutdown/run_test.pl t=tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/DpShutdown/run_test.pl t=shmem: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_SHMEM
+tests/DCPS/DpShutdown/run_test.pl t=udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/DpShutdown/run_test.pl t=multicast: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !NO_MCAST
+
 tests/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Messenger/run_test.pl thread_per: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE

@@ -20,7 +20,9 @@ SubscriptionInstance::SubscriptionInstance(DataReaderImpl* reader,
                                            DDS::InstanceHandle_t handle,
                                            bool owns_handle)
   : instance_state_(make_rch<InstanceState>(reader, ref(lock), handle))
-  , rcvd_samples_(instance_state_)
+  , rcvd_samples_(reader, instance_state_)
+  , read_sample_count_(0)
+  , not_read_sample_count_(0)
   , instance_handle_(handle)
   , owns_handle_(owns_handle)
   , deadline_timer_id_(-1)
@@ -50,6 +52,11 @@ SubscriptionInstance::~SubscriptionInstance()
       reader->return_handle(instance_handle_);
     }
   }
+}
+
+bool SubscriptionInstance::matches(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const
+{
+  return instance_state_->match(view_states, instance_states) && rcvd_samples_.matches(sample_states);
 }
 
 }

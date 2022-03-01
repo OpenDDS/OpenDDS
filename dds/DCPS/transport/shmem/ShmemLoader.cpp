@@ -38,7 +38,9 @@ ShmemLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
   if (initialized) return 0;  // already initialized
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(make_rch<ShmemType>());
+  if (!registry->register_type(make_rch<ShmemType>())) {
+    return 0;
+  }
 
   //FUTURE: when we're ready, add a ShmemInst to the default config, like so:
   /*

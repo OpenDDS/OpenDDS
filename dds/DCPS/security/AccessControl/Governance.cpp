@@ -7,6 +7,8 @@
 
 #include "XmlUtils.h"
 
+#include <dds/DCPS/debug.h>
+
 #include <ace/OS_NS_strings.h>
 #include <ace/XML_Utils/XercesString.h>
 
