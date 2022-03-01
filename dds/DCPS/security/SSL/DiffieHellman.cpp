@@ -295,7 +295,7 @@ public:
     }
 
     if (EVP_PKEY_derive_set_peer(dh_ctx, peer) <= 0) {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_set failed");
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_set peer failed");
       return 1;
     }
 
@@ -659,6 +659,23 @@ public:
       return 1;
     }
 
+    if (EVP_PKEY_derive_set_peer(ec_ctx, peer) <= 0) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive_set peer failed");
+      return 1;
+    }
+
+    size_t len = 0;
+    if (EVP_PKEY_derive(ec_ctx, 0, &len) <= 0) {
+      OPENDDS_SSL_LOG_ERR("DH compute_key error getting length");
+      return 1;
+    }
+    dst.length(len);
+    if (EVP_PKEY_derive(ec_ctx, dst.get_buffer(), &len) <= 0) {
+      OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive failed");
+      dst.length(0u);
+      return 1;
+    }
+#if 0
     EVP_PKEY_derive_set_peer(ec_ctx, peer);
 
     int kplen = EVP_PKEY_size(keypair);
@@ -673,6 +690,7 @@ public:
       dst.length(0u);
       return 1;
     }
+#endif    
 #endif
     return 0;
   }
