@@ -5859,6 +5859,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=x64 -m DDS_no_tests.sln
+    - name: Check disk space post-build
+      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -6748,6 +6750,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=x64 -m DDS_no_tests.sln
+    - name: Check disk space post-build
+      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -7645,6 +7649,8 @@ jobs:
         cd tests\cmake\build
         cmake ..
         cmake --build . --config Release
+    - name: Check disk space post-build
+      run: Get-PSDrive
     - name: gitclean
       shell: bash
       run: |
@@ -8475,6 +8481,8 @@ jobs:
         cd tests\cmake\build
         cmake ..
         cmake --build . --config Release
+    - name: Check disk space post-build
+      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -9216,6 +9224,8 @@ jobs:
         cd C:\OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
+    - name: Check disk space post-build
+      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -9581,6 +9591,8 @@ jobs:
         cd tests\cmake\build
         cmake -A Win32 ..
         cmake --build .
+    - name: Check disk space post-build
+      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -9873,6 +9885,8 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=x64 -m DDS_no_tests.sln
+    - name: Check disk space post-build
+      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
