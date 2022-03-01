@@ -257,12 +257,14 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
     locator.kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv6;
+    locator.port = addr.get_port_number();
     struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
   } else
 #endif
   {
     locator.kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
+    locator.port = addr.get_port_number();
     struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
     std::memset(locator.address, 0, 12);
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
@@ -273,7 +275,6 @@ bool run_test()
 {
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
-  rd.config()->use_ncm(false);
   const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
   rd.config()->spdp_local_address(local_addr);
   const DDS::DomainId_t domain = 0;
@@ -370,6 +371,7 @@ bool run_test()
   OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count_ulong);
   unicastLocators.length(addr_count_ulong);
   for (ACE_CDR::ULong i = 0; i < addr_count_ulong; ++i) {
+    addr_array[i].set_port_number(12345);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) spdp_transport.cpp:run_test() addr_array[%d]: %C\n"), i, LogAddr(addr_array[i]).c_str()));
     }

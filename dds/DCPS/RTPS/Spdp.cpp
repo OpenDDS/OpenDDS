@@ -216,7 +216,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
   sedp_->init(guid_, *disco, domain_, tls);
-  tport_->open(sedp_->reactor_task());
+  tport_->open(sedp_->reactor_task(), sedp_->job_queue());
 
 #ifdef OPENDDS_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
@@ -2418,7 +2418,8 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
 }
 
 void
-Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
+Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
+                          const DCPS::JobQueue_rch& job_queue)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
@@ -2478,16 +2479,9 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task)
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-  if (outer->config_->use_ncm() && ncm) {
-    ncm->add_listener(*this);
-  } else {
-    DCPS::NetworkInterface_rch nic = DCPS::make_rch<DCPS::NetworkInterface>(0, multicast_interface_, true);
-    nic->add_default_addrs();
-    const bool all = multicast_interface_.empty();
-    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
-                                                                            ChangeMulticastGroup::CMG_JOIN, all));
-  }
+  this->job_queue(job_queue);
+  network_interface_address_reader_ = DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(true, rchandle_from(this));
+  TheServiceParticipant->network_interface_address_topic()->connect(network_interface_address_reader_);
 }
 
 Spdp::SpdpTransport::~SpdpTransport()
@@ -2626,10 +2620,7 @@ Spdp::SpdpTransport::close(const DCPS::ReactorTask_rch& reactor_task)
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
-  DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-  if (ncm) {
-    ncm->remove_listener(*this);
-  }
+  TheServiceParticipant->network_interface_address_topic()->disconnect(network_interface_address_reader_);
 
 #ifdef OPENDDS_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
@@ -3623,165 +3614,32 @@ Spdp::SpdpTransport::open_unicast_ipv6_socket(u_short port)
 }
 #endif /* ACE_HAS_IPV6 */
 
-void
-Spdp::SpdpTransport::join_multicast_group(const DCPS::NetworkInterface_rch& nic,
-                                          bool all_interfaces)
+void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
-  if (nic->exclude_from_multicast(multicast_interface_.c_str())) {
-    return;
-  }
+  DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
 
-  if (joined_interfaces_.count(nic->name()) == 0 && nic->has_ipv4()) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_INFO,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
-                 ACE_TEXT("joining group %C on %C\n"),
-                 DCPS::LogAddr(multicast_address_).c_str(),
-                 all_interfaces ? "all interfaces" : nic->name().c_str()));
-    }
+  network_interface_address_reader_->take(samples, infos);
 
-    if (0 == multicast_socket_.join(multicast_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
-      joined_interfaces_.insert(nic->name());
-
-      if (reactor()->register_handler(multicast_socket_.get_handle(),
-                                    this, ACE_Event_Handler::READ_MASK) != 0) {
-        if (DCPS::DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast input handler\n")));
-        }
-        return;
-      }
-
-      shorten_local_sender_delay_i();
-    } else {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                  ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
-                  DCPS::LogAddr(multicast_address_).c_str(),
-                  all_interfaces ? "all interfaces" : nic->name().c_str(),
-                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
-      }
-    }
-  }
-
+  if (multicast_manager_.process(samples,
+                                 infos,
+                                 multicast_interface_,
+                                 reactor(),
+                                 this,
+                                 DCPS::NetworkAddress(multicast_address_),
+                                 multicast_socket_
 #ifdef ACE_HAS_IPV6
-  if (joined_ipv6_interfaces_.count(nic->name()) == 0 && nic->has_ipv6()) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_INFO,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group ")
-                 ACE_TEXT("joining group %C on %C\n"),
-                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
-                 all_interfaces ? "all interfaces" : nic->name().c_str()));
-    }
-
-    // Windows 7 has an issue with different threads concurrently calling join for ipv6
-    static ACE_Thread_Mutex ipv6_static_lock;
-    ACE_GUARD(ACE_Thread_Mutex, g3, ipv6_static_lock);
-    if (0 == multicast_ipv6_socket_.join(multicast_ipv6_address_, 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
-      joined_ipv6_interfaces_.insert(nic->name());
-
-      if (reactor()->register_handler(multicast_ipv6_socket_.get_handle(),
-                                    this, ACE_Event_Handler::READ_MASK) != 0) {
-        if (DCPS::DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Spdp::SpdpTransport::join_multicast_group failed to register multicast ipv6 input handler\n")));
-        }
-        return;
-      }
-
-      shorten_local_sender_delay_i();
-    } else {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::join_multicast_group() - ")
-                  ACE_TEXT("failed to join multicast group %C on %C: %p\n"),
-                  DCPS::LogAddr(multicast_ipv6_address_).c_str(),
-                  all_interfaces ? "all interfaces" : nic->name().c_str(),
-                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join")));
-      }
-    }
-  }
+                                 , DCPS::NetworkAddress(multicast_ipv6_address_),
+                                 multicast_ipv6_socket_
 #endif
-}
-
-void
-Spdp::SpdpTransport::leave_multicast_group(const DCPS::NetworkInterface_rch& nic)
-{
-  DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return;
-
-  ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
-
-  if (joined_interfaces_.count(nic->name()) != 0 && !nic->has_ipv4()) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_INFO,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
-                 ACE_TEXT("leaving group %C on %C\n"),
-                 DCPS::LogAddr(multicast_address_).c_str(),
-                 nic->name().c_str()));
-    }
-
-    if (0 != multicast_socket_.leave(multicast_address_, ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                  ACE_TEXT("failed to leave multicast group %C on %C: %p\n"),
-                  DCPS::LogAddr(multicast_address_).c_str(),
-                  nic->name().c_str(),
-                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
-      }
-    }
-    joined_interfaces_.erase(nic->name());
+                                 )) {
+    shorten_local_sender_delay_i();
   }
-
-#ifdef ACE_HAS_IPV6
-  if (joined_ipv6_interfaces_.count(nic->name()) != 0 && !nic->has_ipv6()) {
-    if (DCPS::DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_INFO,
-                 ACE_TEXT("(%P|%t) Spdp::SpdpTransport::leave_multicast_group ")
-                 ACE_TEXT("leaving group %C on %C\n"),
-                 DCPS::LogAddr(multicast_ipv6_address_).c_str(),
-                 nic->name().c_str()));
-    }
-
-    if (0 != multicast_ipv6_socket_.leave(multicast_ipv6_address_, ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
-      if (DCPS::DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: Spdp::SpdpTransport::leave_multicast_group() - ")
-                  ACE_TEXT("failed to leave multicast ipv6 group %C on %C: %p\n"),
-                  DCPS::LogAddr(multicast_ipv6_address_).c_str(),
-                  nic->name().c_str(),
-                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave")));
-      }
-    }
-    joined_ipv6_interfaces_.erase(nic->name());
-  }
-#endif
-}
-
-void
-Spdp::SpdpTransport::add_address(const DCPS::NetworkInterface_rch& nic,
-                                 const ACE_INET_Addr&)
-{
-  DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return;
-
-  outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
-                                                                          ChangeMulticastGroup::CMG_JOIN));
-}
-
-void Spdp::SpdpTransport::remove_address(const DCPS::NetworkInterface_rch& nic,
-                                         const ACE_INET_Addr&)
-{
-  DCPS::RcHandle<Spdp> outer = outer_.lock();
-  if (!outer) return;
-
-  outer->sedp_->job_queue()->enqueue(DCPS::make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
-                                                                          ChangeMulticastGroup::CMG_LEAVE));
 }
 
 bool
