@@ -9,6 +9,7 @@
 
 #include <openssl/evp.h>
 #include <openssl/dh.h>
+#include <openssl/ec.h>
 #include <openssl/core_names.h>
 #include <openssl/param_build.h>
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
@@ -196,12 +197,15 @@ class dh_shared_secret
 public:
   explicit dh_shared_secret(EVP_PKEY* pkey)
     : keypair(pkey)
-#ifdef OPENSSL_V_3_0
+#ifndef OPENSSL_V_3_0
+#else
     , dh_ctx(0)
     , fd_ctx(0)
     , peer(0)
     , param_bld(0)
     , params(0)
+    , glen(32)
+    , grp(new char[glen])
 #endif
     , pubkey(0)
   {
@@ -215,12 +219,14 @@ public:
   ~dh_shared_secret()
   {
     BN_free(pubkey);
-#ifdef OPENSSL_V_3_0
+#ifndef OPENSSL_V_3_0
+#else
     EVP_PKEY_CTX_free(dh_ctx);
     EVP_PKEY_CTX_free(fd_ctx);
     EVP_PKEY_free(peer);
     OSSL_PARAM_BLD_free(param_bld);
     OSSL_PARAM_free(params);
+    delete [] grp;
 #endif
   }
 
@@ -243,22 +249,10 @@ public:
       return 1;
     }
 #else
-    const char *grp = 0;
-    if (EVP_PKEY_todata(keypair, EVP_PKEY_PUBLIC_KEY, &params) <= 0) {
-      OPENDDS_SSL_LOG_ERR("pkey to data failed");
+    if (!EVP_PKEY_get_utf8_string_param(keypair,"group", grp, glen, &glen)) {
+      OPENDDS_SSL_LOG_ERR("Failed to find group name");
       return 1;
-    } else {
-      for (OSSL_PARAM* p = params; grp == 0 && p != 0 && p->key != 0; p++) {
-        if (strcmp(p->key, "group") == 0) {
-          grp = (char *)p->data;
-        }
-      }
-      if (grp == 0) {
-        OPENDDS_SSL_LOG_ERR("could not find group id");
-        return 1;
-      }
     }
-
     OSSL_PARAM_free(params);
     params = 0;
 
@@ -330,6 +324,8 @@ private:
   EVP_PKEY *peer;
   OSSL_PARAM_BLD *param_bld;
   OSSL_PARAM *params;
+  size_t glen;
+  char *grp;
 #endif
   BIGNUM* pubkey;
 };
@@ -344,7 +340,7 @@ int DH_2048_MODP_256_PRIME::compute_shared_secret(const DDS::OctetSeq& pub_key)
 struct EC_Handle {
   EC_KEY* ec_;
   explicit EC_Handle(EVP_PKEY* key)
-#if defined OPENSSL_V_1_0
+#if defined OPENSSL_V_1_0 || defined OPENSSL_V_3_0
     : ec_(EVP_PKEY_get1_EC_KEY(key))
 #else
     : ec_(EVP_PKEY_get0_EC_KEY(key))
@@ -444,10 +440,19 @@ class ecdh_pubkey_as_octets
 public:
   explicit ecdh_pubkey_as_octets(EVP_PKEY* pkey)
     : keypair(pkey)
+#ifndef OPENSSL_V_3_0
+#else
+    , params(0)
+#endif
   {
   }
 
-  ~ecdh_pubkey_as_octets() {}
+  ~ecdh_pubkey_as_octets() {
+    #ifndef OPENSSL_V_3_0
+    #else
+      OSSL_PARAM_free(params);
+    #endif
+  }
 
   int operator()(DDS::OctetSeq& dst)
   {
@@ -482,26 +487,50 @@ public:
       return 1;
     }
 #else
-    size_t len = 0;
-    if (EVP_PKEY_get_size_t_param(keypair, OSSL_PKEY_PARAM_PUB_KEY, &len)) {
-      dst.length(len);
+    if (EVP_PKEY_todata(keypair, EVP_PKEY_KEYPAIR, &params) <= 0) {
+      OPENDDS_SSL_LOG_ERR("pkey to data failed");
+      return 1;
+    } else {
+      const char *gname = 0;
+      const unsigned char *pubbuf = 0;
+      size_t pubbuflen = 0;
+      for (OSSL_PARAM* p = params; p != 0 && p->key != 0; p++) {
+        if (strcasecmp(p->key,"group") == 0) {
+          gname = (char *)p->data;
+        } else if (strcasecmp(p->key, "pub") == 0) {
+          pubbuf = (unsigned char *)p->data;
+          pubbuflen = p->data_size;
+        }
+      }
 
-      if (0 == EVP_PKEY_get_octet_string_param(keypair, OSSL_PKEY_PARAM_PUB_KEY,
-        dst.get_buffer(),len,&len)) {
-        OPENDDS_SSL_LOG_ERR("EVP_PEKY_get octet string failed");
+      int nid = OBJ_txt2nid(gname);
+      if (nid == 0) {
+        OPENDDS_SSL_LOG_ERR("failed to find Nid");
         return 1;
       }
-    } else {
-      OPENDDS_SSL_LOG_ERR("EVP_PKEY_get_bn_param failed");
-      return 1;
+      EC_GROUP *ecg = EC_GROUP_new_by_curve_name(nid);
+      point_conversion_form_t cf = EC_GROUP_get_point_conversion_form(ecg);
+      EC_POINT *ec = EC_POINT_new(ecg);
+      if (!EC_POINT_oct2point(ecg, ec, pubbuf, pubbuflen, 0)) {
+        OPENDDS_SSL_LOG_ERR("failed to extract ec point from octet sequence");
+        EC_POINT_free(ec);
+        return 1;
+      }
+      size_t eclen = EC_POINT_point2oct(ecg, ec, cf, 0, 0u, 0);
+      dst.length(eclen);
+      EC_POINT_point2oct(ecg, ec, cf, dst.get_buffer(), eclen, 0);
+      EC_POINT_free(ec);
     }
-
 #endif
     return 0;
   }
 
 private:
   EVP_PKEY* keypair;
+#ifndef OPENSSL_V_3_0
+#else
+  OSSL_PARAM* params;
+#endif
 };
 
 int ECDH_PRIME_256_V1_CEUM::pub_key(DDS::OctetSeq& dst)
@@ -515,7 +544,8 @@ class ecdh_shared_secret_from_octets
 public:
   explicit ecdh_shared_secret_from_octets(EVP_PKEY* pkey)
     : keypair(pkey)
-#ifdef OPENSSL_V_3_0
+#ifndef OPENSSL_V_3_0
+#else
     , ec_ctx(0)
     , fd_ctx(0)
     , peer(0)
@@ -533,7 +563,8 @@ public:
   {
     EC_POINT_free(pubkey);
     BN_CTX_free(bignum_ctx);
-#ifdef OPENSSL_V_3_0
+#ifndef OPENSSL_V_3_0
+#else
     EVP_PKEY_CTX_free(ec_ctx);
     EVP_PKEY_CTX_free(fd_ctx);
     EVP_PKEY_free(peer);
@@ -665,6 +696,7 @@ private:
 int ECDH_PRIME_256_V1_CEUM::compute_shared_secret(const DDS::OctetSeq& pub_key)
 {
   ecdh_shared_secret_from_octets secret(k_);
+
   return secret(pub_key, shared_secret_);
 }
 
