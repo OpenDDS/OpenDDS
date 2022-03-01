@@ -128,6 +128,8 @@ void init_dcps_objects(int i)
       inst->load(ach, sect_key);
       config->instances_.push_back(inst);
       TheTransportRegistry->bind_config(config_name, participant[i]);
+
+      ACE_OS::sleep(2); // delay to ensure rtps associations complete
     }
   }
 
