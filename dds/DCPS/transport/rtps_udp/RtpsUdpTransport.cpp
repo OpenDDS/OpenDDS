@@ -461,12 +461,12 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 {
   // Override with DCPSDefaultAddress.
   if (config.local_address() == NetworkAddress() &&
-      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-    config.local_address(NetworkAddress(TheServiceParticipant->default_address()));
+      TheServiceParticipant->default_address() != NetworkAddress()) {
+    config.local_address(TheServiceParticipant->default_address());
   }
   if (config.multicast_interface_.empty() &&
-    TheServiceParticipant->default_address() != ACE_INET_Addr()) {
-    config.multicast_interface_ = DCPS::LogAddr::ip(TheServiceParticipant->default_address());
+      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+    config.multicast_interface_ = DCPS::LogAddr::ip(TheServiceParticipant->default_address().to_addr());
   }
 
   // Open the socket here so that any addresses/ports left
