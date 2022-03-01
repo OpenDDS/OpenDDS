@@ -17,6 +17,7 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
+#include "DefaultNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
 #include "ThreadStatusManager.h"
 #include "../Version.h"
@@ -210,6 +211,7 @@ Service_Participant::Service_Participant()
   , monitor_enabled_(false)
   , shut_down_(false)
   , default_configuration_file_(ACE_TEXT(""))
+  , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
 {
   initialize();
 }
@@ -343,6 +345,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
           DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();
+          network_config_monitor_->disconnect(network_interface_address_topic_);
           network_config_monitor_.reset();
         }
       }
@@ -543,6 +546,54 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
     }
+
+#if defined OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
+    }
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+#elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Service_Participant::get_domain_participant_factory: Creating NetworkConfigModifier\n"));
+    }
+    network_config_monitor_ = make_rch<NetworkConfigModifier>();
+#else
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Service_Participant::get_domain_participant_factory: Creating DefaultNetworkConfigMonitor\n"));
+    }
+    network_config_monitor_ = make_rch<DefaultNetworkConfigMonitor>();
+#endif
+
+    network_config_monitor_->connect(network_interface_address_topic_);
+    if (!network_config_monitor_->open()) {
+      bool open_failed = false;
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) Service_Participant::get_domain_participant_factory: Creating NetworkConfigModifier\n"));
+      }
+      network_config_monitor_->disconnect(network_interface_address_topic_);
+      network_config_monitor_ = make_rch<NetworkConfigModifier>();
+      network_config_monitor_->connect(network_interface_address_topic_);
+      if (!network_config_monitor_->open()) {
+        open_failed = true;
+      }
+#else
+      open_failed = true;
+#endif
+      if (open_failed) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: Could not open network config monitor\n"));
+        }
+        network_config_monitor_->close();
+        network_config_monitor_->disconnect(network_interface_address_topic_);
+        network_config_monitor_.reset();
+      }
+    }
   }
 
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
@@ -695,13 +746,15 @@ int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
       arg_shifter.consume_arg();
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultAddress"))) != 0) {
-      if (default_address_.set(u_short(0), currentArg)) {
+      ACE_INET_Addr addr;
+      if (addr.set(u_short(0), currentArg)) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::parse_args: ")
                           ACE_TEXT("failed to parse default address %C\n"),
                           currentArg),
                          -1);
       }
+      default_address_ = NetworkAddress(addr);
       arg_shifter.consume_arg();
       got_default_address = true;
 
@@ -1918,14 +1971,16 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       ACE_TString default_address_str;
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), default_address_str);
+      ACE_INET_Addr addr;
       if (!default_address_str.empty() &&
-          default_address_.set(u_short(0), default_address_str.c_str())) {
+          addr.set(u_short(0), default_address_str.c_str())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_common_configuration: ")
                           ACE_TEXT("failed to parse default address %C\n"),
                           default_address_str.c_str()),
                          -1);
       }
+      default_address_ = NetworkAddress(addr);
     }
 
     if (got_monitor) {
@@ -2884,56 +2939,10 @@ ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()
   return xtypes_lock_;
 }
 
-NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
-
-  if (!network_config_monitor_) {
-#ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
-    }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
-#elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
-    }
-    network_config_monitor_ = make_rch<NetworkConfigModifier>();
-#endif
-    if (network_config_monitor_) {
-      if (!network_config_monitor_->open()) {
-        bool open_failed = false;
-#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n")));
-        }
-        network_config_monitor_ = make_rch<NetworkConfigModifier>();
-        if (network_config_monitor_ && !network_config_monitor_->open()) {
-          open_failed = true;
-        }
-#else
-        open_failed = true;
-#endif
-        if (open_failed) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n")));
-          network_config_monitor_->close();
-          network_config_monitor_.reset();
-        }
-      }
-    }
-  }
-
-  return network_config_monitor_;
-}
-
 #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
 NetworkConfigModifier* Service_Participant::network_config_modifier()
 {
-  return dynamic_cast<NetworkConfigModifier*>(network_config_monitor().get());
+  return dynamic_cast<NetworkConfigModifier*>(network_config_monitor_.get());
 }
 #endif
 

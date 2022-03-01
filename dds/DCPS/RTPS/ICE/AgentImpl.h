@@ -19,6 +19,7 @@
 
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/NetworkConfigMonitor.h"
+#include "dds/DCPS/InternalDataReader.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/Versioned_Namespace.h"
@@ -32,7 +33,12 @@ namespace ICE {
 
 typedef std::vector<FoundationType> FoundationList;
 
-class AgentImpl : public virtual Agent, public virtual DCPS::ReactorInterceptor, public virtual DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener {
+class AgentImpl
+  : public virtual Agent
+  , public virtual DCPS::ReactorInterceptor
+  , public virtual DCPS::ShutdownListener
+  , public virtual DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>
+{
 public:
   AgentImpl();
 
@@ -95,17 +101,14 @@ public:
   mutable ACE_Recursive_Thread_Mutex mutex;
 
 private:
-  void network_change() const;
-  void add_address(const DCPS::NetworkInterface_rch& interface,
-                   const ACE_INET_Addr& address);
-  void remove_address(const DCPS::NetworkInterface_rch& interface,
-                      const ACE_INET_Addr& address);
+  void on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > reader);
   void process_deferred();
 
   ActiveFoundationSet active_foundations_;
   FoundationList to_unfreeze_;
   bool unfreeze_;
-  bool ncm_listener_added_;
+  DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > reader_;
+  bool reader_added_;
   size_t remote_peer_reflexive_counter_;
   typedef std::map<DCPS::WeakRcHandle<Endpoint>, EndpointManagerPtr> EndpointManagerMapType;
   EndpointManagerMapType endpoint_managers_;
