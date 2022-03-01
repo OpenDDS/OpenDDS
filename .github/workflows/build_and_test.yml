@@ -9145,7 +9145,7 @@ jobs:
         vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
-    - name: ls
+    - name: remove unused files
       shell: bash
       run: |
         cd vcpkg
@@ -9165,23 +9165,27 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: OpenDDS/ACE_TAO
+        path: ACE_TAO #OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
         name: ACE_TAO_w22_x86_i0_artifact
-        path: OpenDDS/ACE_TAO
+        path: ACE_TAO #OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd OpenDDS/ACE_TAO
+        cd ACE_TAO #OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
+    - name: Move OpenDDS to C Drive
       shell: bash
       run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
+        mv OpenDDS /C/
+#    - name: Move ACE and MPC to C Drive
+#      shell: bash
+#      run: |
+#        mv OpenDDS/ACE_TAO /c/
+#        mv MPC /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -9189,26 +9193,34 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
-        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows"
+        cd C:\OpenDDS
+        configure \
+        --tests \
+        --rapidjson \
+        --security \
+        --ace="%GITHUB_WORKSPACE%\ACE_TAO\ACE" \
+        --tao="%GITHUB_WORKSPACE%\ACE_TAO\TAO" \
+        --mpc="%GITHUB_WORKSPACE%\MPC" \
+        --xerces3="%VCPKG_ROOT%\installed\x86-windows" \
+        --openssl="%VCPKG_ROOT%\installed\x86-windows"
     - name: check build configuration
       shell: cmd
       run: |
-        cd OpenDDS
+        cd C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
+        cd C:\OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
+        cd C:\OpenDDS
+        #rm -rf ACE_TAO
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
