@@ -9331,7 +9331,6 @@ jobs:
         cd /C/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
-#        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
         echo using commit $TRIGGERING_COMMIT for SHA
         echo $TRIGGERING_COMMIT >> ./SHA
         cat > config.xml <<EOF
@@ -9467,7 +9466,6 @@ jobs:
         cd /C/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
-#        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
         echo using commit $TRIGGERING_COMMIT for SHA
         echo $TRIGGERING_COMMIT >> ./SHA
         cat > config.xml <<EOF
