@@ -113,8 +113,8 @@ module Xyz {
 
   // Test for https://github.com/objectcomputing/OpenDDS/issues/3268
   @topic
-  struct OnlyASeqOfTypedefChar {
-    sequence<MyChar, 5> anon_seq;
+  struct OnlyAMyCharSeq {
+    AMyCharSeq only_member;
   };
 
   typedef string<100> BoundedString;
