@@ -111,6 +111,12 @@ module Xyz {
   typedef char MyChar;
   typedef sequence<MyChar, 5> AMyCharSeq;
 
+  // Test for https://github.com/objectcomputing/OpenDDS/issues/3268
+  @topic
+  struct OnlyASeqOfTypedefChar {
+    sequence<MyChar, 5> anon_seq;
+  };
+
   typedef string<100> BoundedString;
   typedef sequence<BoundedString> UnboundedSeqOfBoundedString;
   typedef sequence<BoundedString, 10> BoundedSeqOfBoundedString;
