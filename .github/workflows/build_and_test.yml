@@ -9190,7 +9190,7 @@ jobs:
       run: |
         mv OpenDDS /c/
         echo List C Drive using bash
-        ls
+        ls /c/
 #    - name: Move ACE and MPC to C Drive
 #      shell: bash
 #      run: |
