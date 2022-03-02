@@ -217,18 +217,17 @@ SubscriberListenerImpl::verify(const Messenger::Message& msg,
   } else { // TOPIC_PRESENTATION_QOS
     // two instances each from a writer, the samples from same writer should be
     // received in order.
-    typedef std::map <CORBA::ULongLong, DDS::Time_t> InstanceTimeStamp;
-    static InstanceTimeStamp timestamps;
-    if (timestamps.find(msg.subject_id) == timestamps.end() && !reset_last_timestamp) {
-      timestamps[msg.subject_id] = si.source_timestamp;
-      return;
-    }
+    typedef std::map<CORBA::ULongLong, DDS::Time_t> InstanceTimeStampMap;
+    static InstanceTimeStampMap timestamps;
 
-    if (si.source_timestamp < timestamps[msg.subject_id]) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("%N:%l SubscriberListenerImpl::verify()")
-                ACE_TEXT(" ERROR: Samples taken out of order!\n")));
-      verify_result_ = false;
+    const InstanceTimeStampMap::const_iterator pos = timestamps.find(msg.subject_id);
+    if (pos != timestamps.end()) {
+      if (si.source_timestamp < pos->second) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("%N:%l SubscriberListenerImpl::verify()")
+                  ACE_TEXT(" ERROR: Samples taken out of order!\n")));
+        verify_result_ = false;
+      }
     }
 
     if (reset_last_timestamp) {
