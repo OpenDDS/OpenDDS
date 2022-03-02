@@ -3163,6 +3163,12 @@ jobs:
         . setenv.sh
         export ASAN_OPTIONS=detect_leaks=0
         make -j4
+    - name: Build CMake Tests
+      run: |
+        source OpenDDS/setenv.sh
+        cd OpenDDS/tests/cmake
+        cmake -DCMAKE_CXX_COMPILER=clang++-12 -DCMAKE_CXX_STANDARD=11 -S . -B build
+        ASAN_OPTIONS=detect_leaks=0 cmake --build build -- -j4
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -3261,7 +3267,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security -Config GH_ACTIONS_ASAN"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --security -Config GH_ACTIONS_ASAN --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
