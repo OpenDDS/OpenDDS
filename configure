@@ -2232,17 +2232,18 @@ sub write_environment {
   for my $key (sort(keys(%buildEnv))) {
     if ($key ne 'build' && $key ne 'mpctype') {
       my $value = $buildEnv{$key};
+      $value =~ s/^"(.*)"$/$1/g;
+
       if ($is_windows) {
         print $SE "set \"$key=$value\"\n";
       }
       else {
-        $value =~ s/^"(.*)"$/$1/g;
-        $value =~ s/"/\\"/g;
-        print $SE "export $key=\"$value\"\n";
+        my $posix_value = $value;
+        $posix_value =~ s/"/\\"/g;
+        print $SE "export $key=\"$posix_value\"\n";
       }
 
       if ($MK) {
-        my $value = $buildEnv{$key};
         convert_environment(\$value) if $is_windows;
         print $MK "export $key := $value\n";
       }
