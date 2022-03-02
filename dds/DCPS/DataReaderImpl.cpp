@@ -2144,7 +2144,7 @@ DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& 
     if (liveliness_changed_status_.not_alive_count < 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
-                 ACE_TEXT("invalid liveliness_changed_status not alive count - %d .\n"),
+                 ACE_TEXT("invalid liveliness_changed_status not alive count - %d.\n"),
                  liveliness_changed_status_.not_alive_count));
       return;
     }
@@ -2792,8 +2792,8 @@ void DataReaderImpl::notify_liveliness_change()
     output_str += to_dds_string(this->listener_.in());
 
     for (WriterMapType::iterator current = this->writers_.begin();
-        current != this->writers_.end();
-        ++current) {
+         current != this->writers_.end();
+         ++current) {
       const RepoId id = current->first;
       output_str += "\n\tNOTIFY: writer[ ";
       output_str += OPENDDS_STRING(GuidConverter(id));
@@ -2802,12 +2802,12 @@ void DataReaderImpl::notify_liveliness_change()
     }
 
     ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
-        ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
-        ACE_TEXT("\tNOTIFY: %C\n"),
-        listener.in(),
-        listener_mask_,
-        output_str.c_str()));
+               ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
+               ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
+               ACE_TEXT("\tNOTIFY: %C\n"),
+               listener.in(),
+               listener_mask_,
+               output_str.c_str()));
   }
 }
 

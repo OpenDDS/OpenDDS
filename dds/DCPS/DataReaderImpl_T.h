@@ -895,8 +895,7 @@ namespace OpenDDS {
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
       get_key_value(*data, instance);
       store_instance_data(move(data), header, si, just_registered, filtered);
-      if (!filtered)
-      {
+      if (!filtered) {
         notify_read_conditions();
       }
     }

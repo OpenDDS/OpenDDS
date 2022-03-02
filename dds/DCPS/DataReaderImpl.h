@@ -541,7 +541,7 @@ public:
                           const GUID_t& guid = GUID_UNKNOWN)
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-    set_instance_state_i(instance, state, timestamp, guid)
+    set_instance_state_i(instance, state, timestamp, guid);
   }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
