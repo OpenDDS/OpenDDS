@@ -3069,7 +3069,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
-          --asan \
+          --sanitize asan \
           --ipv6 \
           --tests \
           --security
@@ -3144,7 +3144,7 @@ jobs:
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
           --std=c++11 \
-          --asan \
+          --sanitize asan \
           --ipv6 \
           --tests \
           --security \
@@ -3332,7 +3332,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
-          --tsan \
+          --sanitize tsan \
           --ipv6 \
           --tests \
           --security
@@ -3405,7 +3405,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
-          --tsan \
+          --sanitize tsan \
           --ipv6 \
           --tests \
           --security \
