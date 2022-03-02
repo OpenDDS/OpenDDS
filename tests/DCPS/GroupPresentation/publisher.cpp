@@ -30,7 +30,7 @@ parse_args(int argc, ACE_TCHAR *argv[])
   while ((c = get_opts()) != -1) {
     switch (c) {
     case 'n':
-      num_messages = ACE_OS::atoi (get_opts.opt_arg ());
+      num_messages = ACE_OS::atoi(get_opts.opt_arg());
       break;
     case '?':
     default:
@@ -97,7 +97,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ::DDS::PublisherQos publisher_qos;
-    participant->get_default_publisher_qos (publisher_qos);
+    participant->get_default_publisher_qos(publisher_qos);
     publisher_qos.presentation.access_scope = DDS::GROUP_PRESENTATION_QOS;
     publisher_qos.presentation.coherent_access = true;
     publisher_qos.presentation.ordered_access = true;
@@ -116,7 +116,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ::DDS::DataWriterQos dw_qos;
-    pub->get_default_datawriter_qos (dw_qos);
+    pub->get_default_datawriter_qos(dw_qos);
     dw_qos.history.kind                             = ::DDS::KEEP_ALL_HISTORY_QOS;
     dw_qos.resource_limits.max_samples_per_instance = ::DDS::LENGTH_UNLIMITED;
 

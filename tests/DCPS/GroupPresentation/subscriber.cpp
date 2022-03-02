@@ -23,7 +23,7 @@
 #include "MessengerTypeSupportImpl.h"
 
 unsigned int num_messages = 5;
-int acess_scope = ::DDS::GROUP_PRESENTATION_QOS;
+int access_scope = ::DDS::GROUP_PRESENTATION_QOS;
 
 int
 parse_args(int argc, ACE_TCHAR *argv[])
@@ -34,10 +34,10 @@ parse_args(int argc, ACE_TCHAR *argv[])
   while ((c = get_opts()) != -1) {
     switch (c) {
     case 'n':
-      num_messages = ACE_OS::atoi (get_opts.opt_arg());
+      num_messages = ACE_OS::atoi(get_opts.opt_arg());
       break;
     case 'q':
-      acess_scope = ACE_OS::atoi (get_opts.opt_arg());
+      access_scope = ACE_OS::atoi(get_opts.opt_arg());
       break;
     case '?':
     default:
@@ -103,9 +103,9 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     ::DDS::SubscriberQos subscriber_qos;
-    participant->get_default_subscriber_qos (subscriber_qos);
+    participant->get_default_subscriber_qos(subscriber_qos);
     subscriber_qos.presentation.access_scope
-      = (::DDS::PresentationQosPolicyAccessScopeKind)acess_scope;
+      = (::DDS::PresentationQosPolicyAccessScopeKind) access_scope;
     subscriber_qos.presentation.coherent_access = true;
     subscriber_qos.presentation.ordered_access = true;
 
@@ -192,8 +192,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%N:%l main()")
-                 ACE_TEXT(" matches 1: current %d total %d")
-                 ACE_TEXT(" matches 2: current %d total %d\n"),
+                 ACE_TEXT(" subscriber 1 matches: current = %d, total = %d")
+                 ACE_TEXT(" subscriber 2 matches: current = %d, total = %d\n"),
                  matches1.current_count, matches1.total_count,
                  matches2.current_count, matches2.total_count));
 

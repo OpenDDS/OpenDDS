@@ -54,19 +54,19 @@ public:
     DDS::DataReader_ptr reader,
     const DDS::SampleLostStatus& status);
 
-  bool verify_result () const {
+  bool verify_result() const {
     return verify_result_;
   }
 
 private:
 
-  void verify (const Messenger::Message& msg,
-               const ::DDS::SampleInfo& si,
-               const DDS::SubscriberQos& qos,
-               const bool reset_last_timestamp);
+  void verify(const Messenger::Message& msg,
+              const ::DDS::SampleInfo& si,
+              const DDS::SubscriberQos& qos,
+              const bool reset_last_timestamp);
 
   DDS::Subscriber_var subscriber_;
-  bool  verify_result_;
+  bool verify_result_;
   ACE_Thread_Mutex listener_lock_;
 };
 

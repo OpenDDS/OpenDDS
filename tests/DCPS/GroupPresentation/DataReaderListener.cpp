@@ -21,7 +21,7 @@
 
 using OpenDDS::DCPS::retcode_to_string;
 
-extern int acess_scope;
+extern int access_scope;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* /*reader_id*/)
   : num_reads_(0), verify_result_(true)
@@ -54,10 +54,9 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     if (status == DDS::RETCODE_OK) {
       if (si.valid_data) {
-         if (acess_scope != ::DDS::INSTANCE_PRESENTATION_QOS) {
-           this->verify_result_ = false;
-         }
-         else {
+         if (access_scope != ::DDS::INSTANCE_PRESENTATION_QOS) {
+           verify_result_ = false;
+         } else {
             std::cout << "Message: subject    = " << message.subject.in() << std::endl
             << "         subject_id = " << message.subject_id   << std::endl
             << "         from       = " << message.from.in()    << std::endl
@@ -75,7 +74,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
                    ACE_TEXT("%N:%l: on_data_available()")
                    ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                    si.instance_state));
-        this->verify_result_ = false;
+        verify_result_ = false;
       }
 
     } else {
@@ -83,7 +82,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
                  ACE_TEXT("%N:%l: on_data_available()")
                  ACE_TEXT(" ERROR: take_next_sample unexpected status: %C\n"),
                  retcode_to_string(status)));
-      this->verify_result_ = false;
+      verify_result_ = false;
     }
 
   } catch (const CORBA::Exception& e) {
