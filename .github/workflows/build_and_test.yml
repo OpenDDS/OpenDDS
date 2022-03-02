@@ -9186,9 +9186,9 @@ jobs:
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: move OpenDDS to C drive
-      shell: cmd
+      shell: bash
       run: |
-        move OpenDDS C:\
+        mv OpenDDS /C/
 #    - name: Move ACE and MPC to C Drive
 #      shell: bash
 #      run: |
@@ -9203,7 +9203,7 @@ jobs:
       run: |
         cd C:\OpenDDS
         dir
-        configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%\ACE_TAO\ACE --tao=%GITHUB_WORKSPACE%\ACE_TAO\TAO --mpc=%GITHUB_WORKSPACE%\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
+        call configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%\ACE_TAO\ACE --tao=%GITHUB_WORKSPACE%\ACE_TAO\TAO --mpc=%GITHUB_WORKSPACE%\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
     - name: check build configuration
       shell: cmd
       run: |
