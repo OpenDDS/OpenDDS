@@ -9203,13 +9203,13 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
-        echo List C Drive using cmd
-        cd C:\
-        dir
-        cd C:\OpenDDS
+        #echo List C Drive using cmd
+        #cd C:\
+        #dir
+        cd /d C:\OpenDDS
         echo List OpenDDS directory
         dir
-        call configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%\ACE_TAO\ACE --tao=%GITHUB_WORKSPACE%\ACE_TAO\TAO --mpc=%GITHUB_WORKSPACE%\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
+        configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%\ACE_TAO\ACE --tao=%GITHUB_WORKSPACE%\ACE_TAO\TAO --mpc=%GITHUB_WORKSPACE%\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
     - name: check build configuration
       shell: cmd
       run: |
