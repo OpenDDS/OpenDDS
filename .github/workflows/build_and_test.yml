@@ -9189,8 +9189,6 @@ jobs:
       shell: bash
       run: |
         mv OpenDDS /c/
-        echo List C Drive using bash
-        ls /c/
 #    - name: Move ACE and MPC to C Drive
 #      shell: bash
 #      run: |
@@ -9203,9 +9201,6 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
-        #echo List C Drive using cmd
-        #cd C:\
-        #dir
         cd /d C:\OpenDDS
         echo List OpenDDS directory
         dir
@@ -9213,14 +9208,14 @@ jobs:
     - name: check build configuration
       shell: cmd
       run: |
-        cd C:\OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
-        cd C:\OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
     - name: Check disk space post-build
@@ -9228,7 +9223,7 @@ jobs:
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
-        cd /C/OpenDDS
+        cd /c/OpenDDS
         #rm -rf ACE_TAO
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
@@ -9305,14 +9300,14 @@ jobs:
     - name: move OpenDDS to C drive
       shell: bash
       run: |
-        mv OpenDDS /C/
+        mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.9.0
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: Build CMake Tests
       shell: cmd
       run: |
-        cd C:\OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         mkdir tests\cmake\build
         cd tests\cmake\build
@@ -9321,13 +9316,13 @@ jobs:
     - name: check build configuration
       shell: cmd
       run: |
-        cd C:\OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
-        cd /C/OpenDDS
+        cd /c/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         echo using commit $TRIGGERING_COMMIT for SHA
@@ -9336,9 +9331,9 @@ jobs:
         <autobuild>
         <configuration>
         <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="/C/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="/C/OpenDDS"/>
-        <variable name="root" value="/C/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="/c/OpenDDS"/>
+        <variable name="root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -9359,7 +9354,7 @@ jobs:
     - name: run OpenDDS CMake tests
       shell: cmd
       run: |
-        cd C:\OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
@@ -9371,9 +9366,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        /C/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/C/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "/C/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "/C/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   test_w22_x86_i0_sec:
 
@@ -9439,11 +9434,11 @@ jobs:
     - name: move OpenDDS to C drive
       shell: bash
       run: |
-        mv OpenDDS /C/
+        mv OpenDDS /c/
     - name: setup gtest
       shell: cmd
       run: |
-        cd C:\OpenDDS\tests\googletest
+        cd /d C:\OpenDDS\tests\googletest
         git submodule init
         git submodule update
         mkdir build
@@ -9456,13 +9451,13 @@ jobs:
     - name: check build configuration
       shell: cmd
       run: |
-        cd C:\OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: create autobuild config
       shell: bash
       run: |
-        cd /C/OpenDDS
+        cd /c/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         echo using commit $TRIGGERING_COMMIT for SHA
@@ -9471,9 +9466,9 @@ jobs:
         <autobuild>
         <configuration>
         <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="/C/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="/C/OpenDDS"/>
-        <variable name="root" value="/C/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="/c/OpenDDS"/>
+        <variable name="root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -9485,7 +9480,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=/C/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
+        <command name="auto_run_tests" options="script_path=tests dir=/c/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -9494,7 +9489,7 @@ jobs:
     - name: run OpenDDS tests
       shell: cmd
       run: |
-        cd C:\OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
@@ -9506,9 +9501,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        /C/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/C/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "/C/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "/C/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_w22_x86_i0_j_FM-1f:
 
