@@ -9,9 +9,11 @@
 
 #include <openssl/evp.h>
 #include <openssl/dh.h>
+#ifdef OPENSSL_V_3_0
 #include <openssl/ec.h>
 #include <openssl/core_names.h>
 #include <openssl/param_build.h>
+#endif
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
 
 #include <cstring>
