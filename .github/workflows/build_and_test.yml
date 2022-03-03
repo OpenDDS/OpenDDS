@@ -9288,9 +9288,9 @@ jobs:
         <autobuild>
         <configuration>
         <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="/c/OpenDDS"/>
-        <variable name="root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="C:/OpenDDS"/>
+        <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -9302,7 +9302,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=/C/OpenDDS --no-dcps --cmake"/>
+        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS --no-dcps --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -9418,9 +9418,9 @@ jobs:
         <autobuild>
         <configuration>
         <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="/c/OpenDDS"/>
-        <variable name="root" value="/c/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="C:/OpenDDS"/>
+        <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
         <variable name="junit_xml_output" value="Tests"/>
         </configuration>
         <command name="log" options="on"/>
@@ -9432,7 +9432,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=/c/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
+        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
