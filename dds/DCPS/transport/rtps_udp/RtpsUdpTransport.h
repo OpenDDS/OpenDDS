@@ -45,6 +45,9 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
+  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+                                     TransportLocator& /*locators*/);
+
   void rtps_relay_address_change();
   void append_transport_statistics(TransportStatisticsSequence& seq);
 
@@ -105,6 +108,7 @@ private:
   bool use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
+                    const TransportBLOB& discovery_locator,
                     const MonotonicTime_t& participant_discovered_at,
                     ACE_CDR::ULong participant_flags,
                     bool local_reliable, bool remote_reliable,

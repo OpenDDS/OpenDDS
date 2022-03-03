@@ -13,6 +13,7 @@
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/RTPS/BaseMessageUtils.h>
@@ -213,7 +214,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
 
   RtpsUdpDataLink_rch link = link_;
 
-  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.participant_discovered_at_,
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.discovery_blob_, remote.participant_discovered_at_,
                    remote.context_,
                    attribs.local_reliable_, remote.reliable_,
                    attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
@@ -247,7 +248,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
   }
   RtpsUdpDataLink_rch link = link_;
 
-  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.participant_discovered_at_,
+  if (use_datalink(attribs.local_id_, remote.repo_id_, remote.blob_, remote.discovery_blob_, remote.participant_discovered_at_,
                    remote.context_,
                    attribs.local_reliable_, remote.reliable_,
                    attribs.local_durable_, remote.durable_, attribs.max_sn_, client)) {
@@ -293,6 +294,7 @@ bool
 RtpsUdpTransport::use_datalink(const RepoId& local_id,
                                const RepoId& remote_id,
                                const TransportBLOB& remote_data,
+                               const TransportBLOB& discovery_locator,
                                const MonotonicTime_t& participant_discovered_at,
                                ACE_CDR::ULong participant_flags,
                                bool local_reliable, bool remote_reliable,
@@ -305,11 +307,27 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
   unsigned int blob_bytes_read;
   get_connection_addrs(remote_data, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
 
+  NetworkAddress disco_addr_hint;
+  if (discovery_locator.length()) {
+    AddrSet disco_uc_addrs, disco_mc_addrs;
+    bool disco_requires_inline_qos;
+    unsigned int disco_blob_bytes_read;
+    get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, &disco_blob_bytes_read);
+
+    for (AddrSet::const_iterator it = disco_uc_addrs.begin(); it != disco_uc_addrs.end(); ++it) {
+      for (AddrSet::const_iterator it2 = uc_addrs.begin(); it2 != uc_addrs.end(); ++it2) {
+        if (it->addr_bytes_equal(*it2) && DCPS::is_more_local(disco_addr_hint, *it2)) {
+          disco_addr_hint = *it2;
+        }
+      }
+    }
+  }
+
   if (link_) {
     return link_->associated(local_id, remote_id, local_reliable, remote_reliable,
                              local_durable, remote_durable,
                              participant_discovered_at, participant_flags, max_sn, client,
-                             uc_addrs, mc_addrs, requires_inline_qos);
+                             uc_addrs, mc_addrs, disco_addr_hint, requires_inline_qos);
   }
 
   return true;
@@ -436,6 +454,47 @@ RtpsUdpTransport::update_locators(const RepoId& remote,
     get_connection_addrs(*blob, &uc_addrs, &mc_addrs, &requires_inline_qos, &blob_bytes_read);
     link_->update_locators(remote, uc_addrs, mc_addrs, requires_inline_qos, false);
   }
+}
+
+void
+RtpsUdpTransport::get_last_recv_locator(const RepoId& remote,
+                                        TransportLocator& tl)
+{
+  if (is_shut_down()) {
+    return;
+  }
+
+  GuardThreadType guard_links(links_lock_);
+
+  bool expects_inline_qos = false;
+  NetworkAddress addr;
+  if (link_) {
+    addr = link_->get_last_recv_address(remote);
+    if (addr == NetworkAddress()) {
+      return;
+    }
+    GUIDSeq_var guids(new GUIDSeq);
+    GUIDSeq& ref = static_cast<GUIDSeq&>(guids);
+    ref.length(1);
+    ref[0] = remote;
+    expects_inline_qos = link_->requires_inline_qos(guids);
+  }
+
+  LocatorSeq locators;
+  locators.length(1);
+  address_to_locator(locators[0], addr.to_addr());
+
+  const Encoding& encoding = RTPS::get_locators_encoding();
+  size_t size = serialized_size(encoding, locators);
+  primitive_serialized_size_boolean(encoding, size);
+
+  ACE_Message_Block mb_locator(size);
+  Serializer ser_loc(&mb_locator, encoding);
+  ser_loc << locators;
+  ser_loc << ACE_OutputCDR::from_boolean(expects_inline_qos);
+
+  tl.transport_type = "rtps_udp";
+  RTPS::message_block_to_sequence(mb_locator, tl.data);
 }
 
 void

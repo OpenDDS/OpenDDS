@@ -290,7 +290,7 @@ TransportClient::associate(const AssociationData& data, bool active)
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
         if (data.remote_data_[j].transport_type.in() == type) {
           const TransportImpl::RemoteTransport remote = {
-            data.remote_id_, data.remote_data_[j].data, data.participant_discovered_at_, data.remote_transport_context_,
+            data.remote_id_, data.remote_data_[j].data, data.discovery_locator_.data, data.participant_discovered_at_, data.remote_transport_context_,
             data.publication_transport_priority_,
             data.remote_reliable_, data.remote_durable_};
 
@@ -443,7 +443,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
         const TransportImpl::RemoteTransport remote = {
-          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.participant_discovered_at_, data_.remote_transport_context_,
+          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.discovery_locator_.data, data_.participant_discovered_at_, data_.remote_transport_context_,
           data_.publication_transport_priority_,
           data_.remote_reliable_, data_.remote_durable_};
 
