@@ -5708,8 +5708,6 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -5793,8 +5791,6 @@ jobs:
     needs: ACE_TAO_w19_p1_stat_js0
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -5859,8 +5855,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=x64 -m DDS_no_tests.sln
-    - name: Check disk space post-build
-      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -6599,8 +6593,6 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -6684,8 +6676,6 @@ jobs:
     needs: ACE_TAO_w19_re_p1_stat_FM-08
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -6750,8 +6740,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=x64 -m DDS_no_tests.sln
-    - name: Check disk space post-build
-      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -7488,8 +7476,6 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -7574,8 +7560,6 @@ jobs:
     needs: ACE_TAO_w19_re_o1p1_sec
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -7649,8 +7633,6 @@ jobs:
         cd tests\cmake\build
         cmake ..
         cmake --build . --config Release
-    - name: Check disk space post-build
-      run: Get-PSDrive
     - name: gitclean
       shell: bash
       run: |
@@ -8311,8 +8293,6 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -8396,8 +8376,6 @@ jobs:
     needs: [ACE_TAO_w19_re_j_ws_FM-1f, wireshark_w19-release]
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: download Wireshark artifact
       uses: actions/download-artifact@v2
       with:
@@ -8481,8 +8459,6 @@ jobs:
         cd tests\cmake\build
         cmake ..
         cmake --build . --config Release
-    - name: Check disk space post-build
-      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -9057,8 +9033,6 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -9145,8 +9119,6 @@ jobs:
     needs: ACE_TAO_w22_x86_i0
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9173,27 +9145,22 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO #OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
         name: ACE_TAO_w22_x86_i0_artifact
-        path: ACE_TAO #OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO #OpenDDS/ACE_TAO
+        cd ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
     - name: move OpenDDS to C drive
       shell: bash
       run: |
         mv OpenDDS /c/
-#    - name: Move ACE and MPC to C Drive
-#      shell: bash
-#      run: |
-#        mv OpenDDS/ACE_TAO /c/
-#        mv MPC /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -9202,8 +9169,6 @@ jobs:
       shell: cmd
       run: |
         cd /d C:\OpenDDS
-        echo List OpenDDS directory
-        dir
         configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%\ACE_TAO\ACE --tao=%GITHUB_WORKSPACE%\ACE_TAO\TAO --mpc=%GITHUB_WORKSPACE%\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
     - name: check build configuration
       shell: cmd
@@ -9218,13 +9183,10 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
-    - name: Check disk space post-build
-      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
         cd /c/OpenDDS
-        #rm -rf ACE_TAO
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
@@ -9269,23 +9231,18 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO #OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
         name: ACE_TAO_w22_x86_i0_artifact
-        path: ACE_TAO #OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO #OpenDDS/ACE_TAO
+        cd ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-#    - name: Move ACE and MPC to C Drive
-#      shell: bash
-#      run: |
-#        mv OpenDDS/ACE_TAO /c/
-#        mv MPC /c/
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -9403,23 +9360,18 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO #OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
         name: ACE_TAO_w22_x86_i0_artifact
-        path: ACE_TAO #OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO #OpenDDS/ACE_TAO
+        cd ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-#    - name: Move ACE and MPC to C Drive
-#      shell: bash
-#      run: |
-#        mv OpenDDS/ACE_TAO /c/
-#        mv MPC /c/
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -9512,8 +9464,6 @@ jobs:
     needs: ACE_TAO_w22_x86_i0
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9583,8 +9533,6 @@ jobs:
         cd tests\cmake\build
         cmake -A Win32 ..
         cmake --build .
-    - name: Check disk space post-build
-      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -9726,8 +9674,6 @@ jobs:
     runs-on: windows-2022
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: checkout OpenDDS
       uses: actions/checkout@v2
       with:
@@ -9811,8 +9757,6 @@ jobs:
     needs: ACE_TAO_w22_p1
 
     steps:
-    - name: Run Get-PSDrive
-      run: Get-PSDrive
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
@@ -9877,8 +9821,6 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=x64 -m DDS_no_tests.sln
-    - name: Check disk space post-build
-      run: Get-PSDrive
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
