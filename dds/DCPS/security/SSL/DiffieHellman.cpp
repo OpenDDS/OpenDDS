@@ -698,7 +698,6 @@ private:
 int ECDH_PRIME_256_V1_CEUM::compute_shared_secret(const DDS::OctetSeq& pub_key)
 {
   ecdh_shared_secret_from_octets secret(k_);
-
   return secret(pub_key, shared_secret_);
 }
 

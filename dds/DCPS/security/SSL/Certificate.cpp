@@ -363,11 +363,11 @@ struct cache_dsign_algo_impl
     EC_KEY_free(ec_);
   }
 #else
-cache_dsign_algo_impl() : pkey_(NULL) {}
-~cache_dsign_algo_impl()
-{
-  EVP_PKEY_free(pkey_);
-}
+  cache_dsign_algo_impl() : pkey_(NULL) {}
+  ~cache_dsign_algo_impl()
+  {
+    EVP_PKEY_free(pkey_);
+  }
 #endif
 
   int operator() (X509* cert, std::string& dst)
