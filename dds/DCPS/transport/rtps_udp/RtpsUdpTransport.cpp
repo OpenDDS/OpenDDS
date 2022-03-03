@@ -10,6 +10,8 @@
 #include "RtpsUdpSendStrategy.h"
 #include "RtpsUdpReceiveStrategy.h"
 
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
+
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/LogAddr.h>
@@ -17,7 +19,6 @@
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/RTPS/BaseMessageUtils.h>
-
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
 #include <ace/CDR_Base.h>
