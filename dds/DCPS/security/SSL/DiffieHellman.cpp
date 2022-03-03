@@ -9,8 +9,7 @@
 
 #include <openssl/evp.h>
 #include <openssl/dh.h>
-#ifdef OPENSSL_V_3_0
-#include <openssl/ec.h>
+#if OPENSSL_VERSION_NUMBER >= 0x30000000L
 #include <openssl/core_names.h>
 #include <openssl/param_build.h>
 #endif
@@ -177,7 +176,7 @@ int DH_2048_MODP_256_PRIME::pub_key(DDS::OctetSeq& dst)
       }
     }
 #else
-    BIGNUM *pubkey = 0;
+    BIGNUM* pubkey = 0;
     if (EVP_PKEY_get_bn_param(k_, OSSL_PKEY_PARAM_PUB_KEY, &pubkey)) {
       dst.length(BN_num_bytes(pubkey));
       if (0 < BN_bn2bin(pubkey, dst.get_buffer())) {
@@ -199,8 +198,7 @@ class dh_shared_secret
 public:
   explicit dh_shared_secret(EVP_PKEY* pkey)
     : keypair(pkey)
-#ifndef OPENSSL_V_3_0
-#else
+#ifdef OPENSSL_V_3_0
     , dh_ctx(0)
     , fd_ctx(0)
     , peer(0)
@@ -221,8 +219,7 @@ public:
   ~dh_shared_secret()
   {
     BN_free(pubkey);
-#ifndef OPENSSL_V_3_0
-#else
+#ifdef OPENSSL_V_3_0
     EVP_PKEY_CTX_free(dh_ctx);
     EVP_PKEY_CTX_free(fd_ctx);
     EVP_PKEY_free(peer);
@@ -320,14 +317,14 @@ private:
 #ifndef OPENSSL_V_3_0
   DH_Handle keypair;
 #else
-  EVP_PKEY *keypair;
-  EVP_PKEY_CTX *dh_ctx;
-  EVP_PKEY_CTX *fd_ctx;
-  EVP_PKEY *peer;
-  OSSL_PARAM_BLD *param_bld;
-  OSSL_PARAM *params;
+  EVP_PKEY* keypair;
+  EVP_PKEY_CTX* dh_ctx;
+  EVP_PKEY_CTX* fd_ctx;
+  EVP_PKEY* peer;
+  OSSL_PARAM_BLD* param_bld;
+  OSSL_PARAM* params;
   size_t glen;
-  char *grp;
+  char* grp;
 #endif
   BIGNUM* pubkey;
 };
@@ -442,16 +439,14 @@ class ecdh_pubkey_as_octets
 public:
   explicit ecdh_pubkey_as_octets(EVP_PKEY* pkey)
     : keypair(pkey)
-#ifndef OPENSSL_V_3_0
-#else
+#ifdef OPENSSL_V_3_0
     , params(0)
 #endif
   {
   }
 
   ~ecdh_pubkey_as_octets() {
-    #ifndef OPENSSL_V_3_0
-    #else
+    #ifdef OPENSSL_V_3_0
       OSSL_PARAM_free(params);
     #endif
   }
@@ -493,14 +488,14 @@ public:
       OPENDDS_SSL_LOG_ERR("pkey to data failed");
       return 1;
     } else {
-      const char *gname = 0;
-      const unsigned char *pubbuf = 0;
+      const char* gname = 0;
+      const unsigned char* pubbuf = 0;
       size_t pubbuflen = 0;
       for (OSSL_PARAM* p = params; p != 0 && p->key != 0; p++) {
         if (strcasecmp(p->key,"group") == 0) {
-          gname = (char *)p->data;
+          gname = (char* )p->data;
         } else if (strcasecmp(p->key, "pub") == 0) {
-          pubbuf = (unsigned char *)p->data;
+          pubbuf = (unsigned char* )p->data;
           pubbuflen = p->data_size;
         }
       }
@@ -510,9 +505,9 @@ public:
         OPENDDS_SSL_LOG_ERR("failed to find Nid");
         return 1;
       }
-      EC_GROUP *ecg = EC_GROUP_new_by_curve_name(nid);
+      EC_GROUP* ecg = EC_GROUP_new_by_curve_name(nid);
       point_conversion_form_t cf = EC_GROUP_get_point_conversion_form(ecg);
-      EC_POINT *ec = EC_POINT_new(ecg);
+      EC_POINT* ec = EC_POINT_new(ecg);
       if (!EC_POINT_oct2point(ecg, ec, pubbuf, pubbuflen, 0)) {
         OPENDDS_SSL_LOG_ERR("failed to extract ec point from octet sequence");
         EC_POINT_free(ec);
@@ -529,8 +524,7 @@ public:
 
 private:
   EVP_PKEY* keypair;
-#ifndef OPENSSL_V_3_0
-#else
+#ifdef OPENSSL_V_3_0
   OSSL_PARAM* params;
 #endif
 };
@@ -546,8 +540,7 @@ class ecdh_shared_secret_from_octets
 public:
   explicit ecdh_shared_secret_from_octets(EVP_PKEY* pkey)
     : keypair(pkey)
-#ifndef OPENSSL_V_3_0
-#else
+#ifdef OPENSSL_V_3_0
     , ec_ctx(0)
     , fd_ctx(0)
     , peer(0)
@@ -565,8 +558,7 @@ public:
   {
     EC_POINT_free(pubkey);
     BN_CTX_free(bignum_ctx);
-#ifndef OPENSSL_V_3_0
-#else
+#ifdef OPENSSL_V_3_0
     EVP_PKEY_CTX_free(ec_ctx);
     EVP_PKEY_CTX_free(fd_ctx);
     EVP_PKEY_free(peer);
@@ -607,7 +599,7 @@ public:
       return 1;
     }
 #else
-    const char *grp = 0;
+    const char* grp = 0;
     if (EVP_PKEY_todata(keypair, EVP_PKEY_PUBLIC_KEY, &params) <= 0) {
       OPENDDS_SSL_LOG_ERR("pkey to data failed");
       return 1;
@@ -686,11 +678,11 @@ private:
   EC_Handle keypair;
 #else
   EVP_PKEY* keypair;
-  EVP_PKEY_CTX *ec_ctx;
-  EVP_PKEY_CTX *fd_ctx;
-  EVP_PKEY *peer;
-  OSSL_PARAM_BLD *param_bld;
-  OSSL_PARAM *params;
+  EVP_PKEY_CTX* ec_ctx;
+  EVP_PKEY_CTX* fd_ctx;
+  EVP_PKEY* peer;
+  OSSL_PARAM_BLD* param_bld;
+  OSSL_PARAM* params;
 #endif
   EC_POINT* pubkey;
   const EC_GROUP* group;

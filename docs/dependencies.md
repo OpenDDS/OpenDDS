@@ -184,7 +184,7 @@ security XML configuration files.
 ### OpenSSL
 
 OpenSSL is used for DDS Security for verifying security configurations and
-encryption and decryption. Version 1.0 and version 1.1 are supported.
+encryption and decryption. Versions 1.0, 1.1 and 3.0 are supported.
 
 ### Python
 
