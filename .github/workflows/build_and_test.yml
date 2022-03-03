@@ -9315,8 +9315,6 @@ jobs:
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-    - name: Check disk space
-      run: Get-PSDrive
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
@@ -9447,8 +9445,6 @@ jobs:
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
         perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-    - name: Check disk space
-      run: Get-PSDrive
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
       with:
