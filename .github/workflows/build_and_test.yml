@@ -3066,9 +3066,14 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-12 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
-        echo "CPPFLAGS += -ggdb -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
-        echo "LDFLAGS += -ggdb -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-12 \
+          --sanitize asan \
+          --ipv6 \
+          --tests \
+          --security
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3135,7 +3140,16 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-12 --std=c++11 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-12 \
+          --std=c++11 \
+          --sanitize asan \
+          --ipv6 \
+          --tests \
+          --security \
+          --rapidjson
     - name: check build configuration
       shell: bash
       run: |
@@ -3253,8 +3267,6 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        export LSAN_OPTIONS=suppressions=$DDS_ROOT/etc/asan-suppr.txt
-        export ASAN_OPTIONS=detect_leaks=1:fast_unwind_on_malloc=0
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
@@ -3317,14 +3329,14 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-12 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
-        echo "CPPFLAGS += -ggdb -O1 -fsanitize=address -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
-        echo "LDFLAGS += -ggdb -fsanitize=address" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
-    - name: build ACE and TAO
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: |
-        cd OpenDDS
-        . setenv.sh
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-12 \
+          --sanitize tsan \
+          --ipv6 \
+          --tests \
+          --security
         cd ACE_TAO/ACE
         make -j4
         cd ../TAO
@@ -3580,8 +3592,6 @@ jobs:
       run: |
         cd OpenDDS
         ./configure --compiler=clang++-12 --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
-        echo "CPPFLAGS += -ggdb -O1 -fsanitize=thread -fno-omit-frame-pointer" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
-        echo "LDFLAGS += -ggdb -fsanitize=thread" >> ACE_TAO/ACE/include/makeinclude/platform_macros.GNU
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3647,7 +3657,15 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --compiler=clang++-12 --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-12 \
+          --sanitize tsan \
+          --ipv6 \
+          --tests \
+          --security \
+          --rapidjson
     - name: check build configuration
       shell: bash
       run: |
@@ -3771,7 +3789,6 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        export TSAN_OPTIONS="history_size=7 suppressions=$DDS_ROOT/etc/tsan-suppr.txt"
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v2
