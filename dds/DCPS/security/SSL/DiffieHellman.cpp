@@ -248,7 +248,7 @@ public:
       return 1;
     }
 #else
-    if (!EVP_PKEY_get_utf8_string_param(keypair,"group", grp, glen, &glen)) {
+    if (!EVP_PKEY_get_utf8_string_param(keypair, "group", grp, glen, &glen)) {
       OPENDDS_SSL_LOG_ERR("Failed to find group name");
       return 1;
     }
