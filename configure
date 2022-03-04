@@ -183,7 +183,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'host-tools-only!', 'Just build the host tools (no)',
     'prefix=s', 'Installation prefix (none)',
     'install-origin-relative!', 'Install with RPATH relative to $ORIGIN (no)',
-    'workspace=s', 'Custom MPC workspace file to copy and use (Use a builtin one)',
+    'workspace=s', 'Custom MPC workspace file to copy and use' .
+      $argIndent . '(Use a builtin one)',
    ],
    ['Build flags:',
     'debug!', 'Debugging (yes)',
@@ -191,6 +192,12 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'inline!', 'Inlining (yes)',
     'static!', 'Static libraries (no)',
     'ipv6!', 'IPv6 support (no)',
+    'sanitize=s@', 'Build with a sanitizer, can pass multiple times' .
+      $argIndent . 'or one list separated by commas, combining asan' .
+      $argIndent . "and tsan isn't recommended (no sanitizers)" .
+      $argIndent . '  asan: Address Sanitizer, gcc/clang only' .
+      $argIndent . '  tsan: Thread Sanitizer, gcc/clang only' .
+      $argIndent . '  ubsan: Undefined Behavior Sanitizer, clang only',
    ],
    ['Required dependencies for OpenDDS:',
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
@@ -379,9 +386,9 @@ my ($slash, $exeext) = $is_windows ? ('\\', '.exe') : ('/', '');
 
 my %specific =
   ($is_windows ?
-   ('ext' => 'cmd', 'export' => 'set', 'pathsep' => ';', 'refpre' => '%',
+   ('ext' => 'cmd', 'pathsep' => ';', 'refpre' => '%',
     'refpost' => '%', 'comment' => '::') :
-   ('ext' => 'sh', 'export' => 'export', 'pathsep' => ':', 'refpre' => '${',
+   ('ext' => 'sh', 'pathsep' => ':', 'refpre' => '${',
     'refpost' => '}', 'comment' => '#')
   );
 
@@ -915,7 +922,8 @@ sub backup_and_copy {
   backup($dst);
   if ($opts{'dry-run'}) {
     print("Would copy $src to $dst\n");
-  } else {
+  }
+  else {
     copy($src, $dst);
   }
 }
@@ -1001,6 +1009,71 @@ sub write_default_features {
   }
 }
 
+my %all_sanitizers = (
+  asan => {
+    fsanitize => 'address',
+    env => {
+      LSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/asan-suppr.txt",
+      ASAN_OPTIONS => 'detect_leaks=1:fast_unwind_on_malloc=0',
+    },
+  },
+  tsan => {
+    fsanitize => 'thread',
+    env => {
+      TSAN_OPTIONS => "history_size=7 suppressions=$FindBin::RealBin/etc/tsan-suppr.txt",
+    },
+  },
+  ubsan => {
+    fsanitize => 'undefined',
+    env => {
+      UBSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/ubsan-suppr.txt:print_stacktrace=1",
+    },
+    configh => ['#define ACE_INITILAIZE_MEMORY_BEFORE_USE'],
+    compiler_args => ['-fsanitize-coverage=trace-pc-guard'],
+  },
+);
+my %enabled_sanitizers = ();
+for my $arg (@{$opts{sanitize}}) {
+  for my $name (split(/,/, $arg)) {
+    if (exists($all_sanitizers{$name})) {
+      $enabled_sanitizers{$name} = $all_sanitizers{$name};
+    }
+    else {
+      die("ERROR: \"$name\" isn't a valid sanitizer to pass to --sanitize\nStopped");
+    }
+  }
+}
+
+my @fsanitize = ();
+my @sanitizer_compiler_args = ();
+my @sanitizer_linker_args = ();
+for my $name (sort(keys(%enabled_sanitizers))) {
+  my $sanitizer = $enabled_sanitizers{$name};
+  push(@fsanitize, $sanitizer->{fsanitize});
+  if (exists($sanitizer->{env})) {
+    for my $env (keys(%{$sanitizer->{env}})) {
+      setEnv($env, $sanitizer->{env}->{$env});
+    }
+  }
+  if (exists($sanitizer->{configh})) {
+    push(@{$opts{'configh'}}, @{$sanitizer->{configh}});
+  }
+  if (exists($sanitizer->{compiler_args})) {
+    push(@sanitizer_compiler_args, @{$sanitizer->{compiler_args}});
+  }
+  if (exists($sanitizer->{linker_args})) {
+    push(@sanitizer_linker_args, @{$sanitizer->{linker_args}});
+  }
+}
+if (scalar(@fsanitize)) {
+  if (!$debug) {
+    die("ERROR: Using sanitizers requires --debug");
+  }
+  my @common = ('-ggdb', '-fsanitize=' . join(',', @fsanitize));
+  @sanitizer_compiler_args = ('-O1', @common, '-fno-omit-frame-pointer', @sanitizer_compiler_args);
+  @sanitizer_linker_args = (@common, @sanitizer_linker_args);
+}
+
 my @ace_macros = ('debug',
                   'optimize',
                   'inline',
@@ -1041,7 +1114,8 @@ sub write_platform_macros {
           my $host_ace;
           if (exists $opts{'host-ace'}) {
             $host_ace = $opts{'host-ace'};
-          } else {
+          }
+          else {
             $host_ace = '$(HOST_DDS)' . nested($ace_src, '.');
           }
           print $PMG "HOST_ACE = $host_ace\n";
@@ -1073,6 +1147,11 @@ sub write_platform_macros {
     }
     if ($opts{'prefix'}) {
       print $PMG "INSTALL_PREFIX=" . $opts{'prefix'} . "\n";
+    }
+    if (scalar(@fsanitize)) {
+      print $PMG
+        'CPPFLAGS += ' . join(' ', @sanitizer_compiler_args) . "\n" .
+        'LDFLAGS += ' . join(' ', @sanitizer_linker_args) . "\n";
     }
     my $plat = $opts{$buildEnv{'build'}};
     if ($pi->{'aceplatform'}) {
@@ -1165,10 +1244,12 @@ if (exists $opts{'java'}) {
     if (exists $platforminfo{$opts{'target'}}->{'java_platform'}) {
       setEnv('JAVA_PLATFORM', $platforminfo{$opts{'target'}}->{'java_platform'});
       setHostEnv('JAVA_PLATFORM', $host_java_platform);
-    } else {
+    }
+    else {
       die "Cross-compile with Java for $opts{'target'} in not supported.\nStopped";
     }
-  } else {
+  }
+  else {
     setEnv('JAVA_PLATFORM', $host_java_platform);
   }
 }
@@ -1299,7 +1380,8 @@ if (exists $opts{'gtest'} || $tests) {
   }
   if ($is_windows && -d File::Spec->catdir($gtest_root, 'bin')) {
     push_path(\%targetEnv, $gtest_root . $slash . 'bin');
-  } elsif (!$is_windows && -f File::Spec->catfile($gtest_root, 'lib', 'libgtest.so')) {
+  }
+  elsif (!$is_windows && -f File::Spec->catfile($gtest_root, 'lib', 'libgtest.so')) {
     push_libpath(\%targetEnv, $gtest_root . $slash . 'lib');
   }
 
@@ -2147,13 +2229,23 @@ sub write_environment {
   print $SE "$specific{'comment'} OpenDDS configure script: $0 $args_\n";
   print $MK "$specific{'comment'} OpenDDS configure script: $0 $args_\n" if $MK;
 
-  for my $key (keys %buildEnv) {
+  for my $key (sort(keys(%buildEnv))) {
     if ($key ne 'build' && $key ne 'mpctype') {
-      print $SE "$specific{'export'} $key=$buildEnv{$key}\n";
+      my $value = $buildEnv{$key};
+      $value =~ s/^"(.*)"$/$1/g;
+
+      if ($is_windows) {
+        print $SE "set \"$key=$value\"\n";
+      }
+      else {
+        my $posix_value = $value;
+        $posix_value =~ s/"/\\"/g;
+        print $SE "export $key=\"$posix_value\"\n";
+      }
+
       if ($MK) {
-        my $value = $buildEnv{$key};
         convert_environment(\$value) if $is_windows;
-        print $MK "export $key := $value\n" if $MK;
+        print $MK "export $key := $value\n";
       }
     }
   }
@@ -2438,6 +2530,7 @@ sub write_cmake_file {
     print_cmake_config($fh, 'ACE', Cwd::abs_path($buildEnv->{'ACE_ROOT'}));
     print_cmake_config($fh, 'TAO', Cwd::abs_path($buildEnv->{'TAO_ROOT'}));
 
+    print $fh "\n# Based on MPC features\n";
     my @configs = (
       {
         name => 'CXX11',
@@ -2483,6 +2576,7 @@ sub write_cmake_file {
 
     # TODO(iguessthislldo): Move to a smarter system that can use existing
     # ACE/TAO and that works with cross compiling.
+    print $fh "\n# Based on configure script options\n";
     my %opts_to_use = (
       'built-in-topics' => 1,
       'compiler' => '',
@@ -2510,6 +2604,15 @@ sub write_cmake_file {
     );
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
+    }
+
+    print $fh "\n# Sanitizers\n";
+    for my $name (sort(keys(%all_sanitizers))) {
+      print_cmake_config($fh, $name, exists($enabled_sanitizers{$name}) ? 1 : 0);
+    }
+    if (scalar(@fsanitize)) {
+      print_cmake_config($fh, 'SANITIZER_COMPILER_ARGS', \@sanitizer_compiler_args);
+      print_cmake_config($fh, 'SANITIZER_LINKER_ARGS', \@sanitizer_linker_args);
     }
   };
 
