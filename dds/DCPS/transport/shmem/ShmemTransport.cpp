@@ -41,7 +41,6 @@ ShmemTransport::config() const
 ShmemDataLink_rch
 ShmemTransport::make_datalink(const std::string& remote_address)
 {
-
   ShmemDataLink_rch link = make_rch<ShmemDataLink>(ref(*this));
 
   // Open logical connection:
@@ -61,6 +60,9 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
   if (key.first != this->config().hostname()) {
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
+              ACE_TEXT("link %C:%C not found, hostname %C.\n"),
+              key.first.c_str(), key.second.c_str(), this->config().hostname().c_str()), 2);
     return AcceptConnectResult();
   }
   GuardType guard(links_lock_);
@@ -68,11 +70,11 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
   if (iter != links_.end()) {
     ShmemDataLink_rch link = iter->second;
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
-              ACE_TEXT("link found.\n")), 2);
+              ACE_TEXT("link %C:%C found.\n"), key.first.c_str(), key.second.c_str()), 2);
     return AcceptConnectResult(link);
   }
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
-            ACE_TEXT("new link.\n")), 2);
+            ACE_TEXT("new link %C:%C.\n"), key.first.c_str(), key.second.c_str()), 2);
   return AcceptConnectResult(add_datalink(key.second));
 }
 
