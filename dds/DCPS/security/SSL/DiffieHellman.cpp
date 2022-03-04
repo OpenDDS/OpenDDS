@@ -606,7 +606,7 @@ public:
     } else {
       for (OSSL_PARAM* p = params; grp == 0 && p != 0 && p->key != 0; p++) {
         if (strcmp(p->key, "group") == 0) {
-          grp = (char *)p->data;
+          grp = (char*)p->data;
         }
       }
       if (grp == 0) {
