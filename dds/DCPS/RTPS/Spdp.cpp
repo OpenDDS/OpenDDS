@@ -3626,13 +3626,10 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
 
   network_interface_address_reader_->take(samples, infos);
 
-  ACE_Reactor* reactor_ptr = reactor();
-  if (!reactor_ptr) return;
-
   if (multicast_manager_.process(samples,
                                  infos,
                                  multicast_interface_,
-                                 reactor_ptr,
+                                 reactor(),
                                  this,
                                  DCPS::NetworkAddress(multicast_address_),
                                  multicast_socket_

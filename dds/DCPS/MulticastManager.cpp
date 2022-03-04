@@ -61,9 +61,9 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
           joined_interfaces_.insert(nia.name);
           any_joined = true;
 
-          if (reactor->register_handler(multicast_socket.get_handle(),
-                                        event_handler,
-                                        ACE_Event_Handler::READ_MASK) != 0) {
+          if (reactor && reactor->register_handler(multicast_socket.get_handle(),
+                                                   event_handler,
+                                                   ACE_Event_Handler::READ_MASK) != 0) {
             if (log_level >= LogLevel::Error) {
               ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MulticastManager::process: failed to register multicast input handler\n"));
             }
