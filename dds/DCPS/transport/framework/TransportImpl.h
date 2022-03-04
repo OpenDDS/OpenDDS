@@ -168,6 +168,11 @@ public:
   virtual void use_rtps_relay_now(bool /*flag*/) {}
   virtual void use_ice_now(bool /*flag*/) {}
 
+  /// Accessor to obtain a "copy" of the reference to the reactor task.
+  /// Caller is responsible for the "copy" of the reference that is
+  /// returned.
+  ReactorTask_rch reactor_task();
+
 protected:
   TransportImpl(TransportInst& config);
 
@@ -210,11 +215,6 @@ protected:
   /// concrete TransportImpl subclass a chance to do something when
   /// the shutdown "event" occurs.
   virtual void shutdown_i() = 0;
-
-  /// Accessor to obtain a "copy" of the reference to the reactor task.
-  /// Caller is responsible for the "copy" of the reference that is
-  /// returned.
-  ReactorTask_rch reactor_task();
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;

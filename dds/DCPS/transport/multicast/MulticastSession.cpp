@@ -27,69 +27,7 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-SynWatchdog::SynWatchdog(ACE_Reactor* reactor,
-                         ACE_thread_t owner,
-                         MulticastSession* session)
-  : DataLinkWatchdog (reactor, owner)
-  , session_(session)
-  , retries_(0)
-{
-}
-
-bool
-SynWatchdog::reactor_is_shut_down() const
-{
-  return session_->link()->transport().is_shut_down();
-}
-
-TimeDuration
-SynWatchdog::next_interval()
-{
-  MulticastInst& config = this->session_->link()->config();
-  TimeDuration interval(config.syn_interval_);
-
-  // Apply exponential backoff based on number of retries:
-  if (this->retries_ > 0) {
-    interval *= std::pow(config.syn_backoff_, double(this->retries_));
-  }
-  ++this->retries_;
-
-  return interval;
-}
-
-void
-SynWatchdog::on_interval(const void* /*arg*/)
-{
-  // Initiate handshake by sending a MULTICAST_SYN control
-  // sample to the assigned remote peer:
-  this->session_->send_all_syn();
-}
-
-TimeDuration
-SynWatchdog::next_timeout()
-{
-  return this->session_->link()->config().syn_timeout_;
-}
-
-void
-SynWatchdog::on_timeout(const void* /*arg*/)
-{
-  // There is no recourse if a link is unable to handshake;
-  // log an error and return:
-  ACE_ERROR((LM_WARNING,
-             ACE_TEXT("(%P|%t) WARNING: ")
-             ACE_TEXT("SynWatchdog[transport=%C]::on_timeout: ")
-             ACE_TEXT("timed out waiting on remote peer: %#08x%08x local: %#08x%08x\n"),
-             this->session_->link()->config().name().c_str(),
-             (unsigned int)(this->session_->remote_peer() >> 32),
-             (unsigned int) this->session_->remote_peer(),
-             (unsigned int)(this->session_->link()->local_peer() >> 32),
-             (unsigned int) this->session_->link()->local_peer()));
-}
-
-
-MulticastSession::MulticastSession(ACE_Reactor* reactor,
-                                   ACE_thread_t owner,
+MulticastSession::MulticastSession(RcHandle<ReactorInterceptor> interceptor,
                                    MulticastDataLink* link,
                                    MulticastPeer remote_peer)
   : link_(link)
@@ -99,14 +37,15 @@ MulticastSession::MulticastSession(ACE_Reactor* reactor,
   , active_(true)
   , reassembly_(link->config().fragment_reassembly_timeout_)
   , acked_(false)
-  , syn_watchdog_(make_rch<SynWatchdog> (reactor, owner, this))
-{
-}
+  , syn_watchdog_(make_rch<Sporadic>(TheServiceParticipant->time_source(),
+                                     interceptor,
+                                     rchandle_from(this),
+                                     &MulticastSession::send_all_syn))
+{}
 
 MulticastSession::~MulticastSession()
 {
-  ReactorInterceptor::CommandPtr command = syn_watchdog_->cancel();
-  command->wait();
+  syn_watchdog_->cancel();
 }
 
 bool
@@ -122,10 +61,12 @@ MulticastSession::set_acked() {
   this->acked_ = true;
 }
 
-bool
+void
 MulticastSession::start_syn()
 {
-  return this->syn_watchdog_->schedule_now();
+  syn_watchdog_->cancel();
+  syn_delay_ = link()->config().syn_interval_;
+  syn_watchdog_->schedule(TimeDuration(0));
 }
 
 void
@@ -241,7 +182,7 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
 }
 
 void
-MulticastSession::send_all_syn()
+MulticastSession::send_all_syn(const MonotonicTimePoint& /*now*/)
 {
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
   for (PendingRemoteMap::const_iterator pos1 = pending_remote_map_.begin(), limit = pending_remote_map_.end();
@@ -252,6 +193,10 @@ MulticastSession::send_all_syn()
       send_syn(local_writer, remote_reader);
     }
   }
+
+  // Exponential back-off.
+  syn_delay_ *= 2;
+  syn_watchdog_->schedule(syn_delay_);
 }
 
 void
@@ -380,31 +325,38 @@ MulticastSession::reassemble(ReceivedDataSample& data,
 }
 
 void
-MulticastSession::add_remote(const RepoId& local,
-                             const RepoId& remote)
+MulticastSession::add_remote(const RepoId& local)
 {
   const GuidConverter conv(local);
-
-  bool empty;
-
-  {
-    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
-    empty = pending_remote_map_.empty();
-    pending_remote_map_[local].insert(remote);
-  }
-
-  if (conv.isWriter() && empty) {
+  if (conv.isWriter()) {
     // Active peers schedule a watchdog timer to initiate a 2-way
     // handshake to verify that passive endpoints can send/receive
     // data reliably. This process must be executed using the
     // transport reactor thread to prevent blocking.
     // Only publisher send syn so just schedule for pub role.
-    if (!this->start_syn()) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("MulticastSession::add_reader: ")
-                 ACE_TEXT("failed to schedule SYN watchdog!\n")));
-    }
+    this->start_syn();
+  }
+}
+
+void
+MulticastSession::add_remote(const RepoId& local,
+                             const RepoId& remote)
+{
+  const GuidConverter conv(local);
+
+  {
+    ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
+    pending_remote_map_.empty();
+    pending_remote_map_[local].insert(remote);
+  }
+
+  if (conv.isWriter()) {
+    // Active peers schedule a watchdog timer to initiate a 2-way
+    // handshake to verify that passive endpoints can send/receive
+    // data reliably. This process must be executed using the
+    // transport reactor thread to prevent blocking.
+    // Only publisher send syn so just schedule for pub role.
+    this->start_syn();
   }
 }
 
