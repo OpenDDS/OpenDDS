@@ -78,7 +78,7 @@ endif()
 # that get added to their actual libraries and inherited by other targets
 # properly.
 
-if (OPENDDS_NO_DEBUG AND UNIX)
+if(NOT OPENDDS_DEBUG AND UNIX)
   _OPENDDS_APPEND_DEF(ACE_NDEBUG NDEBUG)
 endif()
 
