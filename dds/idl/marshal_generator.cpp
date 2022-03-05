@@ -2584,7 +2584,7 @@ namespace {
       const Classification fld_cls = classify(type);
       if (fld_cls & CL_SEQUENCE) {
         AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(type);
-        AST_Type* const base = seq->base_type();
+        AST_Type* const base = resolveActualType(seq->base_type());
         if (classify(base) & CL_PRIMITIVE) {
           AST_PredefinedType* const pt = dynamic_cast<AST_PredefinedType*>(base);
           if (pt->pt() == AST_PredefinedType::PT_octet) {
