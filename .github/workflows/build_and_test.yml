@@ -517,6 +517,7 @@ jobs:
         repository: DOCGroup/MPC
         path: MPC
     - name: setup gtest
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/tests/googletest
         git submodule init
@@ -784,6 +785,7 @@ jobs:
         repository: DOCGroup/MPC
         path: MPC
     - name: setup gtest
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/tests/googletest
         git submodule init
@@ -2595,6 +2597,7 @@ jobs:
         repository: DOCGroup/MPC
         path: MPC
     - name: setup gtest
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/tests/googletest
         git submodule init
