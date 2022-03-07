@@ -15,10 +15,14 @@
 
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
+#include "tests/Utils/WaitForSample.h"
+
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/EntryExit.h>
 
 #include <ace/Arg_Shifter.h>
@@ -198,7 +202,33 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (readers_ready) ACE_OS::fclose(readers_ready);
 
     // ensure the associations are fully established before writing.
-    ACE_OS::sleep(3);
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    DDS::ConditionSeq conditions;
+    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
+    DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+    for (int ctr = 0; ctr < 2; ++ctr) {
+      DDS::StatusCondition_var condition = datawriter[ctr]->get_statuscondition();
+      condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+
+      ws->attach_condition(condition);
+
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("ERROR: %N:%l: wait_for_subscribers() -")
+                   ACE_TEXT(" wait failed!\n")));
+        ACE_OS::exit(-1);
+      }
+
+      if (datawriter[ctr]->get_publication_matched_status(matches) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("ERROR: %N:%l: wait_for_subscribers() -")
+                   ACE_TEXT(" get_publication_matched_status failed!\n")));
+        ACE_OS::exit(-1);
+      }
+
+      ws->detach_condition(condition);
+    }
 
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; ++i) {

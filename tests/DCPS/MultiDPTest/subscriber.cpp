@@ -18,6 +18,9 @@
 
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
+#include "tests/Utils/WaitForSample.h"
+
+#include "dds/DCPS/BuiltInTopicUtils.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -32,6 +35,10 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+
+#ifdef OPENDDS_SAFETY_PROFILE
+#include "dds/DCPS/WaitSet.h"
+#endif
 
 #include <ace/Arg_Shifter.h>
 
@@ -129,7 +136,6 @@ void init_dcps_objects(int i)
       config->instances_.push_back(inst);
       TheTransportRegistry->bind_config(config_name, participant[i]);
 
-      ACE_OS::sleep(2); // delay to ensure rtps associations complete
     }
   }
 
@@ -234,6 +240,40 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_listener();
     init_dcps_objects(0);
     init_dcps_objects(1);
+
+    int num_participants = 0;
+
+    if (safety_profile) {
+      // wait for Discovery to complete
+      DDS::Subscriber_var bit_subscriber = participant[1]->get_builtin_subscriber();
+      DDS::DataReader_var part_rdr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+      DDS::ParticipantBuiltinTopicDataDataReader_var part_reader = DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_rdr.in());
+
+      if (CORBA::is_nil (part_reader.in ())) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) subscriber: failed to get BUILT_IN_PARTICIPANT_TOPIC datareader.\n"));
+      }
+
+      DDS::SampleInfoSeq part_infos(3);
+      DDS::ParticipantBuiltinTopicDataSeq part_data(3);
+
+      while (num_participants < 2) {
+        Utils::waitForSample(part_rdr);
+
+        int ret = part_reader->read(part_data,
+                                    part_infos,
+                                    3,
+                                    DDS::ANY_SAMPLE_STATE,
+                                    DDS::ANY_VIEW_STATE,
+                                    DDS::ALIVE_INSTANCE_STATE);
+
+        if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
+          ACE_ERROR ((LM_ERROR,
+            "(%P|%t) subscriber:  failed to read BIT participant data.\n"));
+        } else {
+          num_participants = part_data.length ();
+        }
+      }
+   }
 
     // Indicate that the subscriber is ready
     FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
