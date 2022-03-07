@@ -3070,6 +3070,7 @@ jobs:
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
           --sanitize asan \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --tests \
           --security
@@ -3145,6 +3146,7 @@ jobs:
           --compiler=clang++-12 \
           --std=c++11 \
           --sanitize asan \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
           --tests \
           --security \
