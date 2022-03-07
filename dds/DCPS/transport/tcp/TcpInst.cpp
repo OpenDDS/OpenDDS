@@ -75,7 +75,7 @@ OPENDDS_STRING
 OpenDDS::DCPS::TcpInst::dump_to_str() const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str() << std::endl;
+  os << TransportInst::dump_to_str();
 
   os << formatNameForDump("local_address")                 << this->local_address_string() << std::endl;
   os << formatNameForDump("pub_address")                   << this->pub_address_str_ << std::endl;

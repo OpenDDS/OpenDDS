@@ -154,7 +154,7 @@ OPENDDS_STRING
 MulticastInst::dump_to_str() const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str() << std::endl;
+  os << TransportInst::dump_to_str();
 
   os << formatNameForDump("group_address")       << LogAddr(group_address_).str() << std::endl;
   os << formatNameForDump("local_address")       << this->local_address_ << std::endl;
