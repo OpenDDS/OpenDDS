@@ -5,10 +5,12 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Argv_Type_Converter.h>
-#include <ace/Get_Opt.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
+#include "DataReaderListener.h"
+
+#include "SubscriberListener.h"
+#include "MessengerTypeSupportImpl.h"
+
+#include <tests/Utils/StatusMatching.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -16,11 +18,12 @@
 #include <dds/DCPS/SubscriberImpl.h>
 #include <dds/DCPS/WaitSet.h>
 
-#include "dds/DCPS/StaticIncludes.h"
+#include <dds/DCPS/StaticIncludes.h>
 
-#include "DataReaderListener.h"
-#include "SubscriberListener.h"
-#include "MessengerTypeSupportImpl.h"
+#include <ace/Argv_Type_Converter.h>
+#include <ace/Get_Opt.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
 
 unsigned int num_messages = 5;
 int access_scope = ::DDS::GROUP_PRESENTATION_QOS;
@@ -161,56 +164,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                         ACE_TEXT(" ERROR: create_datareader() failed!\n")), -1);
     }
 
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition1 = reader1->get_statuscondition();
-    DDS::StatusCondition_var condition2 = reader2->get_statuscondition();
-    condition1->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-    condition2->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition1);
-    ws->attach_condition(condition2);
-
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches1 = { 0, 0, 0, 0, 0 };
-    DDS::SubscriptionMatchedStatus matches2 = { 0, 0, 0, 0, 0 };
-    while (true) {
-      if (reader1->get_subscription_matched_status(matches1) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
-      }
-
-      if (reader2->get_subscription_matched_status(matches2) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")), -1);
-      }
-
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("%N:%l main()")
-                 ACE_TEXT(" subscriber 1 matches: current = %d, total = %d")
-                 ACE_TEXT(" subscriber 2 matches: current = %d, total = %d\n"),
-                 matches1.current_count, matches1.total_count,
-                 matches2.current_count, matches2.total_count));
-
-      if ((matches1.current_count == 0 && matches1.total_count > 0) ||
-          (matches2.current_count == 0 && matches2.total_count > 0)) {
-        break;
-      }
-      DDS::ReturnCode_t ret = ws->wait(conditions, timeout);
-      if (DDS::RETCODE_OK != ret && DDS::RETCODE_TIMEOUT != ret) {
-        ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: waiting for subscription matched to go away failed.\n")));
-        break;
-      }
+    // Block until all data received
+    if (subscriber_qos.presentation.access_scope == DDS::INSTANCE_PRESENTATION_QOS) {
+      listener_svt1->wait_valid_data(10);
+      listener_svt2->wait_valid_data(10);
+    } else {
+      subscriber_listener_svt->wait_valid_data(20);
     }
-
-    ws->detach_condition(condition1);
-    ws->detach_condition(condition2);
 
     // Clean-up!
     participant->delete_contained_entities();

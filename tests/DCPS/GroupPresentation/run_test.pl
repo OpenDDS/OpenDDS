@@ -32,7 +32,6 @@ elsif ($ARGV[0] ne '') {
   exit 1;
 }
 
-
 my $dcpsrepo_ior = "repo.ior";
 
 unlink $dcpsrepo_ior;

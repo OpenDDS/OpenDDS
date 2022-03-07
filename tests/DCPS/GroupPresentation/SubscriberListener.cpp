@@ -21,8 +21,9 @@
 extern unsigned int num_messages;
 
 SubscriberListenerImpl::SubscriberListenerImpl()
-  : verify_result_(true)
-  , listener_lock_()
+  : cond_(mutex_)
+  , num_valid_data_(0)
+  , verify_result_(true)
 {
 }
 
@@ -40,7 +41,7 @@ SubscriberListenerImpl::on_data_on_readers(DDS::Subscriber_ptr subs)
                ACE_TEXT(" ERROR: begin_access failed!\n")));
     ACE_OS::exit(-1);
   }
-  ACE_GUARD(ACE_Thread_Mutex, guard, listener_lock_);
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   DDS::SubscriberQos qos;
   ret = subs->get_qos(qos);
   if (ret != ::DDS::RETCODE_OK) {
@@ -188,6 +189,8 @@ SubscriberListenerImpl::verify(const Messenger::Message& msg,
               << "         from        = " << msg.from.in()    << std::endl
               << "         count       = " << msg.count        << std::endl
               << "         text        = " << msg.text.in()    << std::endl;
+    ++num_valid_data_;
+    cond_.notify_all();
 
   } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));

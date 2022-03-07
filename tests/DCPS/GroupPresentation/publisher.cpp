@@ -5,10 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Get_Opt.h>
-#include <ace/Log_Msg.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_unistd.h>
+#include "MessengerTypeSupportImpl.h"
+#include "Writer.h"
+
+#include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
@@ -16,8 +16,10 @@
 
 #include "dds/DCPS/StaticIncludes.h"
 
-#include "MessengerTypeSupportImpl.h"
-#include "Writer.h"
+#include <ace/Get_Opt.h>
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_unistd.h>
 
 int num_messages = 5;
 
@@ -162,6 +164,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     writer2->end();
     delete writer1;
     delete writer2;
+
+    Utils::wait_match(dw1, 0);
+    Utils::wait_match(dw2, 0);
 
     // Clean-up!
     participant->delete_contained_entities();

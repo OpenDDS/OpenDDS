@@ -24,7 +24,10 @@ using OpenDDS::DCPS::retcode_to_string;
 extern int access_scope;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* /*reader_id*/)
-  : num_reads_(0), verify_result_(true)
+  : cond_(mutex_)
+  , num_reads_(0)
+  , num_valid_data_(0)
+  , verify_result_(true)
 {
 }
 
@@ -34,6 +37,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ++num_reads_;
 
   try {
@@ -63,6 +67,9 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
             << "         count      = " << message.count        << std::endl
             << "         text       = " << message.text.in()    << std::endl;
          }
+        ++num_valid_data_;
+        cond_.notify_all();
+
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
 

@@ -55,7 +55,22 @@ public:
     const DDS::SampleLostStatus& status);
 
   bool verify_result() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return verify_result_;
+  }
+
+  long num_valid_data() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return num_valid_data_;
+  }
+
+  bool wait_valid_data(long expected) const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+    while (num_valid_data_ < expected) {
+      cond_.wait(thread_status_manager);
+    }
+    return num_valid_data_ >= expected;
   }
 
 private:
@@ -65,9 +80,11 @@ private:
               const DDS::SubscriberQos& qos,
               const bool reset_last_timestamp);
 
+  mutable ACE_Thread_Mutex mutex_;
+  mutable OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> cond_;
   DDS::Subscriber_var subscriber_;
+  long num_valid_data_;
   bool verify_result_;
-  ACE_Thread_Mutex listener_lock_;
 };
 
 #endif /* SUBSCRIBER_LISTENER_IMPL  */
