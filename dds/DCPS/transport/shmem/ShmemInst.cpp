@@ -57,7 +57,9 @@ ShmemInst::dump_to_str() const
   std::ostringstream os;
   os << TransportInst::dump_to_str() << std::endl;
   os << formatNameForDump("pool_size") << pool_size_ << "\n"
-     << formatNameForDump("datalink_control_size") << datalink_control_size_
+     << formatNameForDump("datalink_control_size") << datalink_control_size_ << "\n"
+     << formatNameForDump("pool_name") << this->poolname_ << "\n"
+     << formatNameForDump("host_name") << this->hostname_
      << std::endl;
   return OPENDDS_STRING(os.str());
 }
