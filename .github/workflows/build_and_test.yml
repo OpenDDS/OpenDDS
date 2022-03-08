@@ -9055,39 +9055,39 @@ jobs:
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v2
-      with:
-        path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+#    - name: Cache Artifact
+#      id: cache-artifact
+#      uses: actions/cache@v2
+#      with:
+#        path: ${{ github.job }}.tar.xz
+#        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: set up msvc env
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x86
     - name: configure OpenDDS
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd OpenDDS
         call configure -v --no-inline --tests --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x86-windows --openssl=%VCPKG_ROOT%/installed/x86-windows --mpcopts=-hierarchy
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
         cd OpenDDS
@@ -9097,7 +9097,7 @@ jobs:
         cd ..\TAO
         msbuild -p:Configuration=Debug,Platform=Win32 -m tao.sln
     - name: create ACE_TAO tar.xz artifact
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
