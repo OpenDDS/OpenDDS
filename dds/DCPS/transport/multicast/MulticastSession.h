@@ -18,9 +18,9 @@
 
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/transport/framework/TransportHeader.h"
-#include "dds/DCPS/transport/framework/DataLinkWatchdog_T.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
 #include "dds/DCPS/RcEventHandler.h"
+#include "dds/DCPS/SporadicTask.h"
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
@@ -30,30 +30,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
-class MulticastSession;
-
-class OpenDDS_Multicast_Export SynWatchdog
-  : public DataLinkWatchdog {
-public:
-  explicit SynWatchdog(ACE_Reactor* reactor,
-                       ACE_thread_t owner,
-                       MulticastSession* session);
-
-  virtual bool reactor_is_shut_down() const;
-
-protected:
-  virtual TimeDuration next_interval();
-  virtual void on_interval(const void* arg);
-
-  virtual TimeDuration next_timeout();
-  virtual void on_timeout(const void* arg);
-
-private:
-  ~SynWatchdog() { }
-  MulticastSession* session_;
-  size_t retries_;
-};
 
 class OpenDDS_Multicast_Export MulticastSession
   : public RcObject {
@@ -69,7 +45,7 @@ public:
   virtual bool is_reliable() { return false;}
 
   void syn_received(const Message_Block_Ptr& control);
-  void send_all_syn();
+  void send_all_syn(const MonotonicTimePoint& now);
   void send_syn(const RepoId& local_writer,
                 const RepoId& remote_reader);
 
@@ -91,6 +67,8 @@ public:
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
 
+  void add_remote(const RepoId& local);
+
   // Reliability.
   void add_remote(const RepoId& local,
                   const RepoId& remote);
@@ -103,15 +81,14 @@ protected:
 
   MulticastPeer remote_peer_;
 
-  MulticastSession(ACE_Reactor* reactor,
-                   ACE_thread_t owner,
+  MulticastSession(RcHandle<ReactorInterceptor> interceptor,
                    MulticastDataLink* link,
                    MulticastPeer remote_peer);
 
   void send_control(char submessage_id,
                     Message_Block_Ptr data);
 
-  bool start_syn();
+  void start_syn();
 
   virtual void syn_hook(const SequenceNumber& /*seq*/) {}
 
@@ -145,7 +122,10 @@ private:
 
 
   ACE_Thread_Mutex ack_lock_;
-  RcHandle<SynWatchdog> syn_watchdog_;
+
+  typedef PmfSporadicTask<MulticastSession> Sporadic;
+  RcHandle<Sporadic> syn_watchdog_;
+  TimeDuration syn_delay_;
 };
 
 } // namespace DCPS

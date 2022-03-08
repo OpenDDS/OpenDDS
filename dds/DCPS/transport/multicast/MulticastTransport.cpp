@@ -190,6 +190,8 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     if (remote_peer != local_peer) {
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
     }
+  } else {
+    session->add_remote(attribs.local_id_);
   }
 
   return AcceptConnectResult(link);
