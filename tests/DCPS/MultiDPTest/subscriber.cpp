@@ -17,7 +17,6 @@
 #include "common.h"
 
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
-
 #include "tests/Utils/WaitForSample.h"
 
 #include "dds/DCPS/BuiltInTopicUtils.h"
@@ -35,10 +34,6 @@
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
-
-#ifdef OPENDDS_SAFETY_PROFILE
-#include "dds/DCPS/WaitSet.h"
-#endif
 
 #include <ace/Arg_Shifter.h>
 
