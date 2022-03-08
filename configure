@@ -2556,6 +2556,11 @@ sub write_cmake_file {
         feature => 'dds_suppress_anys',
         default => 1,
       },
+      {
+        name => 'COVERAGE',
+        feature => 'dds_non_coverage',
+        inverted => 1,
+      },
     );
     my %features = get_features($buildEnv);
     for my $config (@configs) {
