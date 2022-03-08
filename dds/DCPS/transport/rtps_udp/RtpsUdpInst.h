@@ -137,6 +137,9 @@ public:
   void update_locators(const RepoId& remote_id,
                        const TransportLocatorSeq& locators);
 
+  void get_last_recv_locator(const RepoId& /*remote_id*/,
+                             TransportLocator& /*locators*/);
+
   void rtps_relay_address_change();
   void append_transport_statistics(TransportStatisticsSequence& seq);
 

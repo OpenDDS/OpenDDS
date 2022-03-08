@@ -105,6 +105,9 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
+  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+                                     TransportLocator& /*locators*/) {}
+
   virtual void rtps_relay_address_change() {}
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
@@ -143,6 +146,7 @@ public:
   struct RemoteTransport {
     RepoId repo_id_;
     TransportBLOB blob_;
+    TransportBLOB discovery_blob_;
     MonotonicTime_t participant_discovered_at_;
     ACE_CDR::ULong context_;
     Priority publication_transport_priority_;
