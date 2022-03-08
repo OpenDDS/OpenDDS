@@ -49,8 +49,15 @@ ReactorInterceptor::~ReactorInterceptor()
 
 bool ReactorInterceptor::should_execute_immediately()
 {
-  return ACE_OS::thr_equal(owner_, ACE_Thread::self()) ||
-    reactor_is_shut_down();
+  bool is_owner_and_empty = false;
+
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const bool is_owner = ACE_OS::thr_equal(owner_, ACE_Thread::self());
+    is_owner_and_empty = is_owner && command_queue_.empty();
+  }
+
+  return is_owner_and_empty || reactor_is_shut_down();
 }
 
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
