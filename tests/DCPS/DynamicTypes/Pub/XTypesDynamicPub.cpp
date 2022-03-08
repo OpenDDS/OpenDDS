@@ -334,7 +334,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
     ACE_ERROR((LM_ERROR, "ERROR: Too many arguments\n"));
     return 1;
   }
-
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling create_participant\n"));
   DomainParticipant_var dp =
     dpf->create_participant(153,
                             PARTICIPANT_QOS_DEFAULT,
@@ -346,7 +346,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
     TheTransportRegistry->bind_config(cfg, dp);
   }
 
-  //this needs modularization
   DDS::TypeSupport_var ts_var;
   if (!ACE_OS::strcmp(type_name, ACE_TEXT("my_struct_final"))) {
     ts_var = new Dynamic::my_struct_finalTypeSupportImpl;
@@ -378,10 +377,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
   }
   ts_var->register_type(dp, ACE_TEXT_ALWAYS_CHAR(type_name));
 
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling create_topic\n"));
   Topic_var topic =
     dp->create_topic("recorder_topic", ACE_TEXT_ALWAYS_CHAR(type_name), TOPIC_QOS_DEFAULT,
                      0, DEFAULT_STATUS_MASK);
 
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling create_publisher\n"));
   // Create the publisher
   Publisher_var pub =
     dp->create_publisher(PUBLISHER_QOS_DEFAULT,
@@ -396,15 +397,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
   } else {
     dw_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
   }
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling create_datawriter\n"));
   DataWriter_var dw =
     pub->create_datawriter(topic, dw_qos,
                            DDS::DataWriterListener::_nil(), DEFAULT_STATUS_MASK);
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling wait_match 1\n"));
   if (Utils::wait_match(dw, 1, Utils::EQ)) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
     }
     return 1;
   }
+
   if (!ACE_OS::strcmp(type_name, ACE_TEXT("my_struct_final"))) {
     my_struct_final_narrow_write(dw);
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("outer_struct_final"))) {
@@ -430,12 +435,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR * argv[])
   } else if (!ACE_OS::strcmp(type_name, ACE_TEXT("outer_union_mutable"))) {
     outer_union_mutable_narrow_write(dw);
   }
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling wait_match 0\n"));
   if (Utils::wait_match(dw, 0, Utils::EQ)) {
     if (log_level >= LogLevel::Error) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for unmatch for dw\n")));
     }
     return 1;
   }
+
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): cleaning up\n"));
   pub->delete_contained_entities();
   dp->delete_publisher(pub);
 
