@@ -20,11 +20,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: ${{ env.DDS_ROOT }}
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
