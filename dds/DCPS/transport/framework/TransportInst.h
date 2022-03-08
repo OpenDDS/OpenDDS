@@ -136,6 +136,9 @@ public:
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
 
+  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+                                     TransportLocator& /*locators*/) {}
+
   virtual void rtps_relay_address_change() {}
 
   ReactorTask_rch reactor_task();

@@ -538,12 +538,12 @@ SubscriberImpl::get_datareaders(
       GroupRakeData data;
       for (DataReaderSet::const_iterator pos = localreaders.begin();
            pos != localreaders.end(); ++pos) {
-        (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
+        (*pos)->get_ordered_data(data, sample_states, view_states, instance_states);
       }
 
       // Return list of readers in the order of the source timestamp of the received
       // samples from readers.
-      data.get_datareaders (readers);
+      data.get_datareaders(readers);
       return DDS::RETCODE_OK;
     }
   }

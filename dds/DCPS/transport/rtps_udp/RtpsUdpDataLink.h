@@ -154,6 +154,8 @@ public:
 
   void remove_locator_and_bundling_cache(const RepoId& remote_id);
 
+  NetworkAddress get_last_recv_address(const RepoId& remote_id);
+
   void update_locators(const RepoId& remote_id,
                        AddrSet& unicast_addresses,
                        AddrSet& multicast_addresses,
@@ -182,6 +184,7 @@ public:
                   const TransportClient_rch& client,
                   AddrSet& unicast_addresses,
                   AddrSet& multicast_addresses,
+                  const NetworkAddress& last_addr_hint,
                   bool requires_inline_qos);
 
   void disassociated(const RepoId& local, const RepoId& remote);
@@ -238,6 +241,8 @@ public:
   void enable_response_queue();
   void disable_response_queue();
 
+  bool requires_inline_qos(const GUIDSeq_var& peers);
+
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
@@ -256,7 +261,6 @@ private:
   friend class ::DDS_TEST;
   /// static member used by testing code to force inline qos
   static bool force_inline_qos_;
-  bool requires_inline_qos(const GUIDSeq_var & peers);
 
   ReactorTask_rch reactor_task_;
   RcHandle<JobQueue> job_queue_;

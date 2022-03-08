@@ -339,7 +339,7 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader.trans_info, 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
+      {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
 #endif
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -411,7 +411,7 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
 
     DDS::OctetSeq type_info;
     const WriterAssociation wa = {
-      writer.trans_info, 0, writerid, writer.publisher_qos, writer.qos, type_info, {0, 0}
+      writer.trans_info, TransportLocator(), 0, writerid, writer.publisher_qos, writer.qos, type_info, {0, 0}
     };
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -505,7 +505,7 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
     DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
     if (dwr) {
       const ReaderAssociation ra =
-        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
+        {reader_pos->second.trans_info, TransportLocator(), 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
          "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
       dwr->add_association(writerid, ra, true);
     }
@@ -541,7 +541,7 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
     DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
     if (drr) {
       const WriterAssociation wa =
-        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
+        {writer_pos->second.trans_info, TransportLocator(), 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
       drr->add_association(readerid, wa, false);
     }
   }
@@ -1375,7 +1375,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     DDS::OctetSeq octet_seq_type_info_reader;
     XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
     const ReaderAssociation ra = {
-      *rTls, rTransportContext, reader, *subQos, *drQos,
+      *rTls, TransportLocator(), rTransportContext, reader, *subQos, *drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
       cfProp->filterClassName, cfProp->filterExpression,
 #else
@@ -1389,7 +1389,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     DDS::OctetSeq octet_seq_type_info_writer;
     XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
     const WriterAssociation wa = {
-      *wTls, wTransportContext, writer, *pubQos, *dwQos,
+      *wTls, TransportLocator(), wTransportContext, writer, *pubQos, *dwQos,
       octet_seq_type_info_writer,
       writer_participant_discovered_at
     };
