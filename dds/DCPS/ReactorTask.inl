@@ -21,6 +21,7 @@ ACE_INLINE
 const ACE_Reactor* ReactorTask::get_reactor() const
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(lock_);
+  wait_for_startup_i();
   return reactor_;
 }
 

@@ -17,12 +17,12 @@ jobs:
     - name: install qt
       run: sudo apt-get -y install qtbase5-dev
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
@@ -39,7 +39,7 @@ jobs:
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC
@@ -64,12 +64,12 @@ jobs:
     runs-on: windows-2019
     steps:
     - name: checkout OpenDDS
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: DOCGroup/ACE_TAO
         ref: Latest_Micro
@@ -94,7 +94,7 @@ jobs:
         vcpkgArguments: --recurse qt5-base
         vcpkgTriplet: x64-windows
     - name: checkout MPC
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: DOCGroup/MPC
         path: OpenDDS/ACE_TAO/ACE/MPC

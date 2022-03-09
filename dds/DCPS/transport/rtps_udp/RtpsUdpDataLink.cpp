@@ -456,6 +456,18 @@ RtpsUdpDataLink::remove_locator_and_bundling_cache(const RepoId& remote_id)
   bundling_cache_.remove_id(remote_id);
 }
 
+NetworkAddress
+RtpsUdpDataLink::get_last_recv_address(const RepoId& remote_id)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(locators_lock_);
+  const RemoteInfoMap::const_iterator pos = locators_.find(remote_id);
+  if (pos != locators_.end()) {
+    const bool valid_last_recv_addr = (MonotonicTimePoint::now() - pos->second.last_recv_time_) <= config().receive_address_duration_;
+    return valid_last_recv_addr ? pos->second.last_recv_addr_ : NetworkAddress();
+  }
+  return NetworkAddress();
+}
+
 void
 RtpsUdpDataLink::update_locators(const RepoId& remote_id,
                                  AddrSet& unicast_addresses,
@@ -544,9 +556,13 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             const TransportClient_rch& client,
                             AddrSet& unicast_addresses,
                             AddrSet& multicast_addresses,
+                            const NetworkAddress& last_addr_hint,
                             bool requires_inline_qos)
 {
   update_locators(remote_id, unicast_addresses, multicast_addresses, requires_inline_qos, true);
+  if (last_addr_hint != NetworkAddress()) {
+    update_last_recv_addr(remote_id, last_addr_hint);
+  }
 
   const GuidConverter conv(local_id);
 

@@ -78,7 +78,7 @@ endif()
 # that get added to their actual libraries and inherited by other targets
 # properly.
 
-if (OPENDDS_NO_DEBUG AND UNIX)
+if(NOT OPENDDS_DEBUG AND UNIX)
   _OPENDDS_APPEND_DEF(ACE_NDEBUG NDEBUG)
 endif()
 
@@ -104,4 +104,8 @@ endif()
 
 if(OPENDDS_VERSIONED_NAMESPACE)
   list(APPEND OPENDDS_DCPS_COMPILE_DEFS ACE_HAS_VERSIONED_NAMESPACE=1)
+endif()
+
+if(OPENDDS_CORBA_E_COMPACT)
+  _OPENDDS_APPEND_DEF(CORBA_E_COMPACT)
 endif()

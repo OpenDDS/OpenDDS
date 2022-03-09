@@ -413,6 +413,19 @@ function(opendds_add_library_group lib_group_name libs has_mononym)
         APPEND PROPERTY
         IMPORTED_CONFIGURATIONS ${config}
       )
+
+      # Set any extra compiler and linker options that are needed to use the
+      # libraries.
+      foreach(from_libs ALL "JUST_${lib_group_var_prefix}")
+        foreach(kind COMPILE LINK)
+          set(options_var "OPENDDS_${from_libs}_LIBS_INTERFACE_${kind}_OPTIONS")
+          if(DEFINED ${options_var})
+            set_property(TARGET ${target}
+              APPEND PROPERTY "INTERFACE_${kind}_OPTIONS" "${${options_var}}")
+          endif()
+        endforeach()
+      endforeach()
+
       set(imploc "${lib_file}")
       if(MSVC)
         set_target_properties(${target}

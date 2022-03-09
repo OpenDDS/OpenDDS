@@ -1268,6 +1268,7 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
 
       DCPS::AssociationData association_data;
       create_association_data_proto(association_data, participant.pdata_);
+      populate_origination_locator(record.remote_id(), association_data.discovery_locator_);
       association_data.remote_id_ = record.remote_id();
       association_data.remote_reliable_ = record.remote_reliable();
       association_data.remote_durable_ = record.remote_durable();
@@ -7018,6 +7019,38 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
   }
 }
 
+void Sedp::populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl)
+{
+  DCPS::GuidConverter conv(id);
+  if (conv.isBuiltinDomainEntity()) {
+    DCPS::LocatorSeq locators;
+    bool expects_inline_qos = false;
+    bool found = spdp_.get_last_recv_locator(make_id(id, ENTITYID_PARTICIPANT), locators, expects_inline_qos);
+
+    if (!found || !locators.length()) {
+      return;
+    }
+
+    const Encoding& encoding = RTPS::get_locators_encoding();
+    size_t size = serialized_size(encoding, locators);
+    primitive_serialized_size_boolean(encoding, size);
+
+    ACE_Message_Block mb_locator(size);
+    Serializer ser_loc(&mb_locator, encoding);
+    ser_loc << locators;
+    ser_loc << ACE_OutputCDR::from_boolean(expects_inline_qos);
+
+    tl.transport_type = "rtps_udp";
+    RTPS::message_block_to_sequence(mb_locator, tl.data);
+  } else {
+    if (conv.isReader()) {
+      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_WRITER), tl);
+    } else {
+      transport_inst_->get_last_recv_locator(make_id(id, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_WRITER), tl);
+    }
+  }
+}
+
 void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
 {
   if (DCPS_debug_level >= 4) {
@@ -7314,6 +7347,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       war = make_rch<WriterAssociationRecord>(dwr, writer, DCPS::ReaderAssociation());
       DCPS::ReaderAssociation& ra = const_cast<DCPS::ReaderAssociation&>(war->reader_association_);
       ra.readerTransInfo = *rTls;
+      populate_origination_locator(reader, ra.readerDiscInfo);
       ra.transportContext = rTransportContext;
       ra.readerId = reader;
       ra.subQos = *subQos;
@@ -7332,6 +7366,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       rar = make_rch<ReaderAssociationRecord>(drr, reader, DCPS::WriterAssociation());
       DCPS::WriterAssociation& wa = const_cast<DCPS::WriterAssociation&>(rar->writer_association_);
       wa.writerTransInfo = *wTls;
+      populate_origination_locator(writer, wa.writerDiscInfo);
       wa.transportContext = wTransportContext;
       wa.writerId = writer;
       wa.pubQos = *pubQos;

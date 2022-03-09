@@ -317,7 +317,7 @@ bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check()
 bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check(ReceivedDataElement* item)
 {
   ACE_UNUSED_ARG(item);
-  OPENDDS_ASSERT(item == 0 || (item->next_data_sample_ == 0 && item == tail_) || item->next_data_sample_->previous_data_sample_ == item);
-  OPENDDS_ASSERT(item == 0 || (item->previous_data_sample_ == 0 && item == head_) || item->previous_data_sample_->next_data_sample_ == item);
+  OPENDDS_ASSERT(item == 0 || (item->next_data_sample_ == 0 && item == tail_) || (item->next_data_sample_ && item->next_data_sample_->previous_data_sample_ == item));
+  OPENDDS_ASSERT(item == 0 || (item->previous_data_sample_ == 0 && item == head_) || (item->previous_data_sample_ && item->previous_data_sample_->next_data_sample_ == item));
   return true;
 }

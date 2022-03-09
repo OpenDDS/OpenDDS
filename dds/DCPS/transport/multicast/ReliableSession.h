@@ -24,31 +24,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class ReliableSession;
-
-class OpenDDS_Multicast_Export NakWatchdog
-  : public DataLinkWatchdog {
-public:
-  explicit NakWatchdog(ACE_Reactor* reactor,
-                       ACE_thread_t owner,
-                       ReliableSession* session);
-
-  virtual bool reactor_is_shut_down() const;
-
-protected:
-  virtual TimeDuration next_interval();
-  virtual void on_interval(const void* arg);
-
-private:
-  ~NakWatchdog() { }
-  ReliableSession* session_;
-};
-
 class OpenDDS_Multicast_Export ReliableSession
   : public MulticastSession {
 public:
-  ReliableSession(ACE_Reactor* reactor,
-                  ACE_thread_t owner,
+  ReliableSession(RcHandle<ReactorInterceptor> interceptor,
                   MulticastDataLink* link,
                   MulticastPeer remote_peer);
 
@@ -81,7 +60,10 @@ public:
   virtual void syn_hook(const SequenceNumber& seq);
 
 private:
-  RcHandle<NakWatchdog> nak_watchdog_;
+  typedef PmfSporadicTask<ReliableSession> Sporadic;
+  RcHandle<Sporadic> nak_watchdog_;
+  TimeDuration nak_delay();
+  void process_naks(const MonotonicTimePoint& /*now*/);
 
   DisjointSequence nak_sequence_;
 

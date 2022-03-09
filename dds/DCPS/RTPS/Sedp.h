@@ -315,7 +315,7 @@ struct DiscoveredParticipant {
   DCPS::ParticipantLocationBuiltinTopicData location_data_;
   DDS::InstanceHandle_t location_ih_;
 
-  ACE_INET_Addr local_address_;
+  ACE_INET_Addr last_recv_address_;
   MonotonicTimePoint discovered_at_;
   MonotonicTimePoint lease_expiration_;
   DDS::InstanceHandle_t bit_ih_;
@@ -469,6 +469,8 @@ private:
   typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredPublication,
                           GUID_tKeyLessThan) DiscoveredPublicationMap;
   typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
+
+  void populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl);
 
 public:
   Sedp(const DCPS::RepoId& participant_id,

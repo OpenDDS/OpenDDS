@@ -292,12 +292,6 @@ public:
     }
   }
 
-  int wait(const ACE_Time_Value& tv)
-  {
-    ACE_Time_Value timeout = ACE_OS::gettimeofday() + tv;
-    return sem_.acquire(timeout);
-  }
-
   int ret_val_;
 
 private:
@@ -324,6 +318,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
     }
     Service_Participant* service = TheServiceParticipant;
 
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling create_participant\n"));
     // Create DomainParticipant
     DDS::DomainParticipant_var participant =
       dpf->create_participant(153,
@@ -339,8 +334,16 @@ int run_test(int argc, ACE_TCHAR* argv[])
     }
     DDS::GuardCondition_var gc = new DDS::GuardCondition;
     DDS::WaitSet_var ws = new DDS::WaitSet;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling attach_condition\n"));
     DDS::ReturnCode_t ret = ws->attach_condition(gc);
+    if (ret != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): attach_condition failed!\n"));
+      }
+      return 1;
+    }
     {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling create_typeless_topic\n"));
       DDS::Topic_var topic =
         service->create_typeless_topic(participant,
                                        "recorder_topic",
@@ -356,9 +359,6 @@ int run_test(int argc, ACE_TCHAR* argv[])
         }
         return 1;
       }
-
-      ACE_Time_Value wait_time(60, 0);
-
       RcHandle<TestRecorderListener> recorder_listener = make_rch<TestRecorderListener>(gc);
 
       DDS::SubscriberQos sub_qos;
@@ -372,6 +372,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
         dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
       }
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling create_recorder\n"));
       // Create Recorder
       Recorder_var recorder =
         service->create_recorder(participant,
@@ -388,6 +389,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
       }
       DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
       DDS::ConditionSeq conditions;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling wait\n"));
       ret = ws->wait(conditions, timeout);
 
       ret_val = recorder_listener->ret_val_;
@@ -397,7 +399,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
         }
         return 1;
       }
-
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): cleaning up\n"));
       service->delete_recorder(recorder);
     }
     participant->delete_contained_entities();

@@ -253,7 +253,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
   }
 
-  //Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
+  // Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
 
@@ -322,6 +322,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = writer.writerId;
   data.remote_data_ = writer.writerTransInfo;
+  data.discovery_locator_ = writer.writerDiscInfo;
   data.participant_discovered_at_ = writer.participantDiscoveredAt;
   data.remote_transport_context_ = writer.transportContext;
   data.publication_transport_priority_ =
@@ -1875,7 +1876,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     if (DCPS_debug_level >= 5) {
       GuidConverter converter(data_reader->get_repo_id());
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
+                 ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
                  OPENDDS_STRING(converter).c_str()));
     }
@@ -1887,7 +1888,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
       // the add_associations' call to this could overlap
       // so it is not a failure.
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
                  ACE_TEXT(" %p.\n"), ACE_TEXT("cancel_timer")));
     }
 
@@ -1941,7 +1942,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   if (DCPS_debug_level >= 5) {
     GuidConverter converter(data_reader->get_repo_id());
     ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::handle_timeout: ")
+        ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
         OPENDDS_STRING(converter).c_str(),
         alive_writers,
@@ -1961,7 +1962,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
     if (liveliness_timer_id_ == -1) {
       ACE_ERROR((LM_ERROR,
-          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::handle_timeout: ")
+          ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
           ACE_TEXT(" %p.\n"), ACE_TEXT("schedule_timer")));
     }
   }
@@ -2069,9 +2070,9 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   }
 #endif
 
-  bool liveliness_changed = false;
-
   {
+    bool liveliness_changed = false;
+
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
     const WriterInfo::WriterState info_state = info.state();
@@ -2089,87 +2090,81 @@ DataReaderImpl::writer_removed(WriterInfo& info)
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-  }
-  instances_liveliness_update(info_writer_id);
+    instances_liveliness_update(info_writer_id);
 
-  if (liveliness_changed) {
-    set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
-    this->notify_liveliness_change();
+    if (liveliness_changed) {
+      set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
+      this->notify_liveliness_change();
+    }
   }
 }
 
 void
-DataReaderImpl::writer_became_alive(WriterInfo& info,
-    const MonotonicTimePoint& /* when */)
+DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& /* when */)
 {
   const PublicationId info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(get_repo_id());
     GuidConverter writer_converter(info_writer_id);
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
-        ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-        OPENDDS_STRING(reader_converter).c_str(),
-        OPENDDS_STRING(writer_converter).c_str(),
-        info.get_state_str()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
+               ACE_TEXT("reader %C from writer %C previous state %C.\n"),
+               OPENDDS_STRING(reader_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str(),
+               info.get_state_str()));
   }
-
-  // caller should already have the sample_lock_ !!!
 
   // NOTE: each instance will change to ALIVE_STATE when they receive a sample
 
-  bool liveliness_changed = false;
-
   const WriterInfo::WriterState info_state = info.state();
 
-  if (info_state != WriterInfo::ALIVE) {
-    liveliness_changed_status_.alive_count++;
-    liveliness_changed_status_.alive_count_change++;
-    liveliness_changed = true;
-  }
+  {
+    bool liveliness_changed = false;
 
-  if (info_state == WriterInfo::DEAD) {
-    liveliness_changed_status_.not_alive_count--;
-    liveliness_changed_status_.not_alive_count_change--;
-    liveliness_changed = true;
-  }
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-  liveliness_changed_status_.last_publication_handle = info.handle();
+    if (info_state != WriterInfo::ALIVE) {
+      liveliness_changed_status_.alive_count++;
+      liveliness_changed_status_.alive_count_change++;
+      liveliness_changed = true;
+    }
 
-  set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
+    if (info_state == WriterInfo::DEAD) {
+      liveliness_changed_status_.not_alive_count--;
+      liveliness_changed_status_.not_alive_count_change--;
+    }
 
-  if (liveliness_changed_status_.alive_count < 0) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
-        ACE_TEXT(" invalid liveliness_changed_status alive count - %d.\n"),
-        liveliness_changed_status_.alive_count));
-    return;
-  }
+    if (liveliness_changed_status_.alive_count < 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
+                 ACE_TEXT("invalid liveliness_changed_status alive count - %d.\n"),
+                 liveliness_changed_status_.alive_count));
+      return;
+    }
 
-  if (liveliness_changed_status_.not_alive_count < 0) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
-        ACE_TEXT(" invalid liveliness_changed_status not alive count - %d .\n"),
-        liveliness_changed_status_.not_alive_count));
-    return;
-  }
+    if (liveliness_changed_status_.not_alive_count < 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_alive: ")
+                 ACE_TEXT("invalid liveliness_changed_status not alive count - %d.\n"),
+                 liveliness_changed_status_.not_alive_count));
+      return;
+    }
 
-  // Change the state to ALIVE since handle_timeout may call writer_became_dead
-  // which need the current state info.
-  info.state(WriterInfo::ALIVE);
+    liveliness_changed_status_.last_publication_handle = info.handle();
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
+    // Change the state to ALIVE since handle_timeout may call writer_became_dead
+    // which need the current state info.
+    info.state(WriterInfo::ALIVE);
 
-  // Call listener only when there are liveliness status changes.
-  if (liveliness_changed) {
-    // Avoid possible deadlock by releasing sample_lock_.
-    // See comments in <Topic>DataDataReaderImpl::notify_status_condition_no_sample_lock()
-    // for information about the locks involved.
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-    this->notify_liveliness_change();
+    if (this->monitor_) {
+      this->monitor_->report();
+    }
+
+    // Call listener only when there are liveliness status changes.
+    if (liveliness_changed) {
+      set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
+      this->notify_liveliness_change();
+    }
   }
 
   // this call will start the liveliness timer if it is not already set
@@ -2184,12 +2179,11 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
   if (DCPS_debug_level >= 5) {
     GuidConverter reader_converter(get_repo_id());
     GuidConverter writer_converter(info_writer_id);
-    ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
-        ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-        OPENDDS_STRING(reader_converter).c_str(),
-        OPENDDS_STRING(writer_converter).c_str(),
-        info.get_state_str()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
+               ACE_TEXT("reader %C from writer %C previous state %C.\n"),
+               OPENDDS_STRING(reader_converter).c_str(),
+               OPENDDS_STRING(writer_converter).c_str(),
+               info.get_state_str()));
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2200,62 +2194,62 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
   }
 #endif
 
-  // caller should already have the sample_lock_ !!!
   bool liveliness_changed = false;
 
   const WriterInfo::WriterState info_state = info.state();
 
-  if (info_state == OpenDDS::DCPS::WriterInfo::NOT_SET) {
-    liveliness_changed_status_.not_alive_count++;
-    liveliness_changed_status_.not_alive_count_change++;
-    liveliness_changed = true;
-  }
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-  if (info_state == WriterInfo::ALIVE) {
-    liveliness_changed_status_.alive_count--;
-    liveliness_changed_status_.alive_count_change--;
-    liveliness_changed_status_.not_alive_count++;
-    liveliness_changed_status_.not_alive_count_change++;
-    liveliness_changed = true;
-  }
+    if (info_state != WriterInfo::DEAD) {
+      ++liveliness_changed_status_.not_alive_count;
+      ++liveliness_changed_status_.not_alive_count_change;
+      liveliness_changed = true;
+    }
 
-  liveliness_changed_status_.last_publication_handle = info.handle();
+    if (info_state == WriterInfo::ALIVE) {
+      --liveliness_changed_status_.alive_count;
+      --liveliness_changed_status_.alive_count_change;
+    }
 
-  //update the state to DEAD.
-  info.state(WriterInfo::DEAD);
+    if (liveliness_changed_status_.alive_count < 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
+                 ACE_TEXT("invalid liveliness_changed_status alive count - %d.\n"),
+                 liveliness_changed_status_.alive_count));
+      return;
+    }
 
-  if (this->monitor_) {
-    this->monitor_->report();
-  }
+    if (liveliness_changed_status_.not_alive_count < 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
+                 ACE_TEXT("invalid liveliness_changed_status not alive count - %d.\n"),
+                 liveliness_changed_status_.not_alive_count));
+      return;
+    }
 
-  if (liveliness_changed_status_.alive_count < 0) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
-        ACE_TEXT(" invalid liveliness_changed_status alive count - %d.\n"),
-        liveliness_changed_status_.alive_count));
-    return;
-  }
+    liveliness_changed_status_.last_publication_handle = info.handle();
 
-  if (liveliness_changed_status_.not_alive_count < 0) {
-    ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::writer_became_dead: ")
-        ACE_TEXT(" invalid liveliness_changed_status not alive count - %d.\n"),
-        liveliness_changed_status_.not_alive_count));
-    return;
-  }
+    info.state(WriterInfo::DEAD);
 
-  instances_liveliness_update(info_writer_id);
+    if (this->monitor_) {
+      this->monitor_->report();
+    }
 
-  // Call listener only when there are liveliness status changes.
-  if (liveliness_changed) {
-    set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
-    this->notify_liveliness_change();
+    instances_liveliness_update(info_writer_id);
+
+    // Call listener only when there are liveliness status changes.
+    if (liveliness_changed) {
+      set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
+      this->notify_liveliness_change();
+    }
   }
 }
 
 void
 DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
 {
+  // sample_lock_ must be held.
   InstanceSet localinsts;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
@@ -2271,7 +2265,7 @@ DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
   }
 
   for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
-    set_instance_state(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    set_instance_state_i(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
   }
 }
 
@@ -2774,6 +2768,7 @@ DataReaderImpl::has_zero_copies()
 
 void DataReaderImpl::notify_liveliness_change()
 {
+  // sample_lock_ must be held.
   // N.B. writers_lock_ should already be acquired when
   //      this method is called.
 
@@ -2781,11 +2776,10 @@ void DataReaderImpl::notify_liveliness_change()
   = listener_for(DDS::LIVELINESS_CHANGED_STATUS);
 
   if (!CORBA::is_nil(listener.in())) {
-    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(sample_lock_);
     const DDS::LivelinessChangedStatus status = liveliness_changed_status_;
     liveliness_changed_status_.alive_count_change = 0;
     liveliness_changed_status_.not_alive_count_change = 0;
-    guard.release();
+    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
     listener->on_liveliness_changed(this, status);
   }
   notify_status_condition();
@@ -2799,8 +2793,8 @@ void DataReaderImpl::notify_liveliness_change()
     output_str += to_dds_string(this->listener_.in());
 
     for (WriterMapType::iterator current = this->writers_.begin();
-        current != this->writers_.end();
-        ++current) {
+         current != this->writers_.end();
+         ++current) {
       const RepoId id = current->first;
       output_str += "\n\tNOTIFY: writer[ ";
       output_str += OPENDDS_STRING(GuidConverter(id));
@@ -2809,12 +2803,12 @@ void DataReaderImpl::notify_liveliness_change()
     }
 
     ACE_DEBUG((LM_DEBUG,
-        ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
-        ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
-        ACE_TEXT("\tNOTIFY: %C\n"),
-        listener.in(),
-        listener_mask_,
-        output_str.c_str()));
+               ACE_TEXT("(%P|%t) DataReaderImpl::notify_liveliness_change: ")
+               ACE_TEXT("listener at 0x%x, mask 0x%x.\n")
+               ACE_TEXT("\tNOTIFY: %C\n"),
+               listener.in(),
+               listener_mask_,
+               output_str.c_str()));
   }
 }
 

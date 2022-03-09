@@ -30,58 +30,19 @@ namespace {
   const Encoding encoding_unaligned_native(encoding_kind);
 }
 
-NakWatchdog::NakWatchdog(ACE_Reactor* reactor,
-                         ACE_thread_t owner,
-                         ReliableSession* session)
-  : DataLinkWatchdog(reactor, owner)
-  , session_(session)
-{
-}
-
-TimeDuration
-NakWatchdog::next_interval()
-{
-  TimeDuration interval(this->session_->link()->config().nak_interval_);
-
-  // Apply random backoff to minimize potential collisions:
-  interval *= static_cast<double>(std::rand()) /
-              static_cast<double>(RAND_MAX) + 1.0;
-
-  return interval;
-}
-
-void
-NakWatchdog::on_interval(const void* /*arg*/)
-{
-  // Expire outstanding repair requests that have not yet been
-  // fulfilled; this prevents NAK implosions due to remote
-  // peers becoming unresponsive:
-  this->session_->expire_naks();
-
-  // Initiate repairs by sending MULTICAST_NAK control samples
-  // to remote peers from which we are missing data:
-  this->session_->send_naks();
-}
-
-ReliableSession::ReliableSession(ACE_Reactor* reactor,
-                                 ACE_thread_t owner,
+ReliableSession::ReliableSession(RcHandle<ReactorInterceptor> interceptor,
                                  MulticastDataLink* link,
                                  MulticastPeer remote_peer)
-  : MulticastSession(reactor, owner, link, remote_peer),
-    nak_watchdog_(make_rch<NakWatchdog> (reactor, owner, this))
-{
-}
+  : MulticastSession(interceptor, link, remote_peer)
+  , nak_watchdog_(make_rch<Sporadic>(TheServiceParticipant->time_source(),
+                                     interceptor,
+                                     rchandle_from(this),
+                                     &ReliableSession::process_naks))
+{}
 
 ReliableSession::~ReliableSession()
 {
-  ReactorInterceptor::CommandPtr command = nak_watchdog_->cancel();
-  command->wait();
-}
-
-bool
-NakWatchdog::reactor_is_shut_down() const
-{
-  return session_->link()->transport().is_shut_down();
+  nak_watchdog_->cancel();
 }
 
 bool
@@ -702,13 +663,7 @@ ReliableSession::start(bool active, bool acked)
       if (acked) {
         this->set_acked();
       }
-      if (!this->nak_watchdog_->schedule()) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("(%P|%t) ERROR: ")
-                          ACE_TEXT("ReliableSession::start: ")
-                          ACE_TEXT("failed to schedule NAK watchdog!\n")),
-                         false);
-      }
+      this->nak_watchdog_->schedule(nak_delay());
     }
   } //Reacquire start_lock_ after releasing unlock_guard with release_start_lock_
 
@@ -720,6 +675,33 @@ ReliableSession::stop()
 {
   MulticastSession::stop();
   this->nak_watchdog_->cancel();
+}
+
+TimeDuration
+ReliableSession::nak_delay()
+{
+  TimeDuration interval(link()->config().nak_interval_);
+
+  // Apply random backoff to minimize potential collisions:
+  interval *= static_cast<double>(std::rand()) /
+    static_cast<double>(RAND_MAX) + 1.0;
+
+  return interval;
+}
+
+void
+ReliableSession::process_naks(const MonotonicTimePoint& /*now*/)
+{
+  // Expire outstanding repair requests that have not yet been
+  // fulfilled; this prevents NAK implosions due to remote
+  // peers becoming unresponsive:
+  expire_naks();
+
+  // Initiate repairs by sending MULTICAST_NAK control samples
+  // to remote peers from which we are missing data:
+  send_naks();
+
+  nak_watchdog_->schedule(nak_delay());
 }
 
 } // namespace DCPS

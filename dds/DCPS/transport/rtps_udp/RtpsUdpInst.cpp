@@ -291,6 +291,17 @@ RtpsUdpInst::update_locators(const RepoId& remote_id,
 }
 
 void
+RtpsUdpInst::get_last_recv_locator(const RepoId& remote_id,
+                                   TransportLocator& locator)
+{
+  TransportImpl_rch imp = impl();
+  if (imp) {
+    RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
+    rtps_impl->get_last_recv_locator(remote_id, locator);
+  }
+}
+
+void
 RtpsUdpInst::rtps_relay_address_change()
 {
   TransportImpl_rch imp = impl();
