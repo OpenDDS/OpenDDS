@@ -49,15 +49,25 @@ ReactorInterceptor::~ReactorInterceptor()
 
 bool ReactorInterceptor::should_execute_immediately()
 {
-  bool is_owner_and_empty = false;
+  bool is_safe_to_execute = false;
 
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+    // Only allow immediate execution if running on the reactor thread, otherwise we risk deadlock
+    // when calling into the reactor object.
     const bool is_owner = ACE_OS::thr_equal(owner_, ACE_Thread::self());
-    is_owner_and_empty = is_owner && command_queue_.empty();
+    // If state is set to processing, the conents of command_queue_ have been swapped out
+    // so immediate execution may run jobs out of the expected order.
+    const bool is_not_processing = state_ != PROCESSING;
+    // If the command_queue_ is not empty, allowing execution will potentially run unexpected code
+    // which is problematic since we may be holding locks used by the unexpected code.
+    const bool is_empty = command_queue_.empty();
+
+    is_safe_to_execute = is_owner && is_not_processing && is_empty;
   }
 
-  return is_owner_and_empty || reactor_is_shut_down();
+  return is_safe_to_execute || reactor_is_shut_down();
 }
 
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
