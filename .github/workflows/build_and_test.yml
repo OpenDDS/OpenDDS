@@ -8279,7 +8279,7 @@ jobs:
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse qt5-winextras qt5-tools qt5-svg qt5-multimedia qt5-declarative
         vcpkgTriplet: x64-windows
     - name: checkout WinFlexBison
