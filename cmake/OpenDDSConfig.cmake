@@ -107,16 +107,6 @@ enable_language(C)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
-if(OPENDDS_XERCES3)
-  find_package(XercesC PATHS "${OPENDDS_XERCES3}" NO_DEFAULT_PATH)
-  if (NOT XercesC_FOUND)
-    find_package(XercesC)
-  endif()
-  if (NOT XercesC_FOUND)
-    message(FATAL_ERROR "Could not find XercesC")
-  endif()
-endif()
-
 if(OPENDDS_SECURITY)
   find_package(OpenSSL PATHS "${OPENDDS_OPENSSL}" NO_DEFAULT_PATH)
   if (NOT OpenSSL_FOUND)
@@ -125,6 +115,20 @@ if(OPENDDS_SECURITY)
   endif()
   if (NOT OpenSSL_FOUND)
     message(FATAL_ERROR "Could not find OpenSSL")
+  endif()
+
+  if(NOT OPENDDS_XERCES3)
+    set(OPENDDS_XERCES3 ON)
+  endif()
+endif()
+
+if(OPENDDS_XERCES3)
+  find_package(XercesC PATHS "${OPENDDS_XERCES3}" NO_DEFAULT_PATH)
+  if (NOT XercesC_FOUND)
+    find_package(XercesC)
+  endif()
+  if (NOT XercesC_FOUND)
+    message(FATAL_ERROR "Could not find XercesC")
   endif()
 endif()
 
@@ -413,6 +417,19 @@ function(opendds_add_library_group lib_group_name libs has_mononym)
         APPEND PROPERTY
         IMPORTED_CONFIGURATIONS ${config}
       )
+
+      # Set any extra compiler and linker options that are needed to use the
+      # libraries.
+      foreach(from_libs ALL "JUST_${lib_group_var_prefix}")
+        foreach(kind COMPILE LINK)
+          set(options_var "OPENDDS_${from_libs}_LIBS_INTERFACE_${kind}_OPTIONS")
+          if(DEFINED ${options_var})
+            set_property(TARGET ${target}
+              APPEND PROPERTY "INTERFACE_${kind}_OPTIONS" "${${options_var}}")
+          endif()
+        endforeach()
+      endforeach()
+
       set(imploc "${lib_file}")
       if(MSVC)
         set_target_properties(${target}

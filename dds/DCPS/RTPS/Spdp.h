@@ -107,6 +107,10 @@ public:
                             DCPS::LocatorSeq& target,
                             bool& inlineQos);
 
+  bool get_last_recv_locator(const DCPS::RepoId& part_id,
+                             DCPS::LocatorSeq& target,
+                             bool& inlineQos);
+
   // Managing reader/writer associations
   void signal_liveliness(DDS::LivelinessQosPolicyKind kind);
 

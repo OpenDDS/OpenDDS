@@ -9,6 +9,8 @@ OpenDDS 3.20.0 is currently in development, so this list might change.
     - To help facilitate this, a new function called `opendds_get_library_dependencies` has been added.
   - To help install generated files, `OPENDDS_TARGET_SOURCES` now adds lists of the files that where passed in and generated that are part of the `PUBLIC` and `INTERFACE` scopes as properties on the target (#3315)
   - Added an `OPENDDS_DEFAULT_SCOPE` option that allows changing the default scope of `OPENDDS_TARGET_SOURCES` (#3315)
+  - Support `INSTALL_LIB` being used with `make install` to change the name of the `lib` directory (#2879)
+    - NOTE: This required changing the CMake module installation destination from `lib` to `share`.
   - See `docs/cmake.md` for details on all of these new features
 
 ### Fixes:

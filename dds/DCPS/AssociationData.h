@@ -23,6 +23,7 @@ namespace DCPS {
 struct AssociationData {
   RepoId               remote_id_;
   TransportLocatorSeq  remote_data_;
+  TransportLocator     discovery_locator_;
   MonotonicTime_t      participant_discovered_at_;
   ACE_CDR::ULong       remote_transport_context_;
   Priority             publication_transport_priority_;
@@ -30,6 +31,7 @@ struct AssociationData {
 
   AssociationData()
     : remote_id_(GUID_UNKNOWN)
+    , discovery_locator_()
     , participant_discovered_at_(monotonic_time_zero())
     , remote_transport_context_(0)
     , publication_transport_priority_(0)

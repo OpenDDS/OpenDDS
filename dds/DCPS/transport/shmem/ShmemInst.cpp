@@ -45,6 +45,13 @@ ShmemInst::load(ACE_Configuration_Heap& cf,
 {
   TransportInst::load(cf, sect);
 
+  std::string host_name;
+  GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("host_name"), host_name);
+
+  if (!host_name.empty()) {
+    hostname_ = host_name;
+  }
+
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_size"),
                    datalink_control_size_, size_t)
@@ -55,9 +62,11 @@ OPENDDS_STRING
 ShmemInst::dump_to_str() const
 {
   std::ostringstream os;
-  os << TransportInst::dump_to_str() << std::endl;
+  os << TransportInst::dump_to_str();
   os << formatNameForDump("pool_size") << pool_size_ << "\n"
-     << formatNameForDump("datalink_control_size") << datalink_control_size_
+     << formatNameForDump("datalink_control_size") << datalink_control_size_ << "\n"
+     << formatNameForDump("pool_name") << this->poolname_ << "\n"
+     << formatNameForDump("host_name") << this->hostname_
      << std::endl;
   return OPENDDS_STRING(os.str());
 }

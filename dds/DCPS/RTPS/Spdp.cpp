@@ -802,7 +802,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     update_rtps_relay_application_participant_i(iter, p.second);
 
     if (!from_relay && from != ACE_INET_Addr()) {
-      iter->second.local_address_ = from;
+      iter->second.last_recv_address_ = from;
     }
 
     if (DCPS::transport_debug.log_progress) {
@@ -825,7 +825,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     // own announcement, so they don't have to wait.
     if (from != ACE_INET_Addr()) {
       if (from_relay) {
-        tport_->write_i(guid, iter->second.local_address_, SpdpTransport::SEND_RELAY);
+        tport_->write_i(guid, iter->second.last_recv_address_, SpdpTransport::SEND_RELAY);
       } else {
         tport_->shorten_local_sender_delay_i();
       }
@@ -854,7 +854,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.extended_builtin_endpoints_ = pdata.ddsParticipantDataSecure.base.extended_builtin_endpoints;
 
         // The remote needs to see our SPDP before attempting authentication.
-        tport_->write_i(guid, iter->second.local_address_, from_relay ? SpdpTransport::SEND_RELAY : SpdpTransport::SEND_DIRECT);
+        tport_->write_i(guid, iter->second.last_recv_address_, from_relay ? SpdpTransport::SEND_RELAY : SpdpTransport::SEND_DIRECT);
 
         attempt_authentication(iter, true);
 
@@ -901,7 +901,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     if (is_security_enabled() && iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED && !from_sedp) {
       update_lease_expiration_i(iter, now);
       if (!from_relay && from != ACE_INET_Addr()) {
-        iter->second.local_address_ = from;
+        iter->second.last_recv_address_ = from;
       }
 #ifndef DDS_HAS_MINIMUM_BIT
       process_location_updates_i(iter);
@@ -965,7 +965,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       update_lease_expiration_i(iter, now);
       update_rtps_relay_application_participant_i(iter, false);
       if (!from_relay && from != ACE_INET_Addr()) {
-        iter->second.local_address_ = from;
+        iter->second.last_recv_address_ = from;
       }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -1771,7 +1771,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
       // Send the auth req first to reset the remote if necessary.
       if (pit->second.have_auth_req_msg_) {
         // Send the SPDP announcement in case it got lost.
-        tport_->write_i(pit->first, pit->second.local_address_, SpdpTransport::SEND_RELAY | SpdpTransport::SEND_DIRECT);
+        tport_->write_i(pit->first, pit->second.last_recv_address_, SpdpTransport::SEND_RELAY | SpdpTransport::SEND_DIRECT);
         if (sedp_->transport_inst()->count_messages()) {
           ++tport_->transport_statistics_.writer_resend_count[make_id(guid_, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_WRITER)];
         }
@@ -2434,7 +2434,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   }
 #endif
 
-  reactor(reactor_task->reactor());
+  reactor(reactor_task->get_reactor());
   reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this), reactor_task));
 
 #ifdef OPENDDS_SECURITY
@@ -3672,6 +3672,20 @@ Spdp::get_default_locators(const RepoId& part_id, DCPS::LocatorSeq& target,
 }
 
 bool
+Spdp::get_last_recv_locator(const RepoId& part_id, DCPS::LocatorSeq& target,
+                            bool& inlineQos)
+{
+  DiscoveredParticipantIter pos = participants_.find(part_id);
+  if (pos != participants_.end() && pos->second.last_recv_address_ != ACE_INET_Addr()) {
+    inlineQos = pos->second.pdata_.participantProxy.expectsInlineQos;
+    target.length(1);
+    DCPS::address_to_locator(target[0], pos->second.last_recv_address_);
+    return true;
+  }
+  return false;
+}
+
+bool
 Spdp::associated() const
 {
   return !participants_.empty();
@@ -4267,7 +4281,7 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
       continue;
     }
 
-    write_i(id, pos->second.local_address_, SEND_DIRECT | SEND_RELAY);
+    write_i(id, pos->second.last_recv_address_, SEND_DIRECT | SEND_RELAY);
     directed_guids_.push_back(id);
     directed_send_task_->schedule(outer->config_->resend_period() * (1.0 / directed_guids_.size()));
     break;

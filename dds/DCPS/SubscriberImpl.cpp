@@ -538,12 +538,12 @@ SubscriberImpl::get_datareaders(
       GroupRakeData data;
       for (DataReaderSet::const_iterator pos = localreaders.begin();
            pos != localreaders.end(); ++pos) {
-        (*pos)->get_ordered_data (data, sample_states, view_states, instance_states);
+        (*pos)->get_ordered_data(data, sample_states, view_states, instance_states);
       }
 
       // Return list of readers in the order of the source timestamp of the received
       // samples from readers.
-      data.get_datareaders (readers);
+      data.get_datareaders(readers);
       return DDS::RETCODE_OK;
     }
   }
@@ -750,22 +750,24 @@ SubscriberImpl::begin_access()
     return DDS::RETCODE_OK;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
+  DataReaderSet to_call;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     si_lock_,
+                     DDS::RETCODE_ERROR);
 
-  ++this->access_depth_;
-
-  // We should only notify subscription on the first
-  // and last change to the current change set:
-  if (this->access_depth_ == 1) {
-    for (DataReaderSet::iterator it = this->datareader_set_.begin();
-         it != this->datareader_set_.end(); ++it) {
-      (*it)->begin_access();
+    ++access_depth_;
+    // We should only notify subscription on the first
+    // and last change to the current change set:
+    if (access_depth_ == 1) {
+      to_call = datareader_set_;
     }
   }
 
+  for (DataReaderSet::iterator it = to_call.begin(); it != to_call.end(); ++it) {
+    (*it)->begin_access();
+  }
   return DDS::RETCODE_OK;
 }
 
@@ -785,31 +787,33 @@ SubscriberImpl::end_access()
     return DDS::RETCODE_OK;
   }
 
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                   guard,
-                   this->si_lock_,
-                   DDS::RETCODE_ERROR);
+  DataReaderSet to_call;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     guard,
+                     si_lock_,
+                     DDS::RETCODE_ERROR);
 
-  if (this->access_depth_ == 0) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
-                ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
+    if (access_depth_ == 0) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                  ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
+      }
+      return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
-    return DDS::RETCODE_PRECONDITION_NOT_MET;
+
+    --access_depth_;
+    // We should only notify subscription on the first
+    // and last change to the current change set:
+    if (access_depth_ == 0) {
+      to_call = datareader_set_;
+    }
   }
 
-  --this->access_depth_;
-
-  // We should only notify subscription on the first
-  // and last change to the current change set:
-  if (this->access_depth_ == 0) {
-    for (DataReaderSet::iterator it = this->datareader_set_.begin();
-         it != this->datareader_set_.end(); ++it) {
-      (*it)->end_access();
-    }
+  for (DataReaderSet::iterator it = to_call.begin(); it != to_call.end(); ++it) {
+    (*it)->end_access();
   }
-
   return DDS::RETCODE_OK;
 }
 

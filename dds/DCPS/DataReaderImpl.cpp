@@ -253,7 +253,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
   }
 
-  //Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
+  // Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
 
@@ -322,6 +322,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
   AssociationData data;
   data.remote_id_ = writer.writerId;
   data.remote_data_ = writer.writerTransInfo;
+  data.discovery_locator_ = writer.writerDiscInfo;
   data.participant_discovered_at_ = writer.participantDiscoveredAt;
   data.remote_transport_context_ = writer.transportContext;
   data.publication_transport_priority_ =

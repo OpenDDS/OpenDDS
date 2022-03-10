@@ -22,6 +22,9 @@ set(common_cmake_args
 if(DEFINED CMAKE_CXX_STANDARD)
   list(APPEND common_cmake_args "-DCMAKE_CXX_STANDARD=${CMAKE_CXX_STANDARD}")
 endif()
+if(DEFINED CMAKE_TOOLCHAIN_FILE)
+  list(APPEND common_cmake_args "-DCMAKE_TOOLCHAIN_FILE=${CMAKE_TOOLCHAIN_FILE}")
+endif()
 
 set(lib "${PROJECT_NAME}_lib")
 ExternalProject_Add(

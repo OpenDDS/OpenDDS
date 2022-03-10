@@ -105,6 +105,9 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
+  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+                                     TransportLocator& /*locators*/) {}
+
   virtual void rtps_relay_address_change() {}
   virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
@@ -143,6 +146,7 @@ public:
   struct RemoteTransport {
     RepoId repo_id_;
     TransportBLOB blob_;
+    TransportBLOB discovery_blob_;
     MonotonicTime_t participant_discovered_at_;
     ACE_CDR::ULong context_;
     Priority publication_transport_priority_;
@@ -167,6 +171,11 @@ public:
   virtual void rtps_relay_only_now(bool /*flag*/) {}
   virtual void use_rtps_relay_now(bool /*flag*/) {}
   virtual void use_ice_now(bool /*flag*/) {}
+
+  /// Accessor to obtain a "copy" of the reference to the reactor task.
+  /// Caller is responsible for the "copy" of the reference that is
+  /// returned.
+  ReactorTask_rch reactor_task();
 
 protected:
   TransportImpl(TransportInst& config);
@@ -210,11 +219,6 @@ protected:
   /// concrete TransportImpl subclass a chance to do something when
   /// the shutdown "event" occurs.
   virtual void shutdown_i() = 0;
-
-  /// Accessor to obtain a "copy" of the reference to the reactor task.
-  /// Caller is responsible for the "copy" of the reference that is
-  /// returned.
-  ReactorTask_rch reactor_task();
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
