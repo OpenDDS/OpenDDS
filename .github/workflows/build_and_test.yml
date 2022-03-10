@@ -537,6 +537,14 @@ jobs:
           --no-rapidjson \
           --safety-profile \
           --tests
+    - name: exclude OpenDDS_Util and opendds_idl
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS/build/host
+        perl -ni.bak -e "print unless /dds/" host_tools.mwc
+        cat host_tools.mwc
+        . setenv.sh
+        mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -619,6 +627,19 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u18_esafe_js0.tar.xz
+    - name: build OpenDDS_Util lib and opendds_idl in host
+      run: |
+        cd OpenDDS/build/host
+        cat > host_tools.mwc <<EOF
+        workspace {
+          dds/DCPS/OpenDDS_Util.mpc
+          dds/idl
+        }
+        EOF
+        cat host_tools.mwc
+        . setenv.sh
+        mwc.pl -type gnuace host_tools.mwc
+        make -j4
     - name: check build configuration
       shell: bash
       run: |
@@ -634,10 +655,21 @@ jobs:
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/OpenDDS_Util.so.*
+        cd target
         find . -iname "*\.o" | xargs rm
-        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
-        xz -3 ../../../${{ github.job }}.tar
+        cd ..
+        tar --exclude='ACE_TAO' uvf ../../${{ github.job }}.tar target
+        xz -3 ../../${{ github.job }}.tar
+#    - name: create OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        find . -iname "*\.o" | xargs rm
+#        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
+#        xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -681,11 +713,13 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: build_u18_esafe_js0_artifact
-        path: OpenDDS/build/target
+        path: OpenDDS/build
+#        path: OpenDDS/build/target
     - name: extract OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
+#        cd OpenDDS/build/target
         tar xvfJ build_u18_esafe_js0.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
