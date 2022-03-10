@@ -240,16 +240,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (safety_profile) {
       // wait for Discovery to complete
-      DDS::Subscriber_var bit_subscriber = participant[1]->get_builtin_subscriber();
-      DDS::DataReader_var part_rdr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-      DDS::ParticipantBuiltinTopicDataDataReader_var part_reader = DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_rdr.in());
+      ::DDS::Subscriber_var bit_subscriber = participant[1]->get_builtin_subscriber();
+      ::DDS::DataReader_var part_rdr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
+      ::DDS::ParticipantBuiltinTopicDataDataReader_var part_reader = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_rdr.in());
 
       if (CORBA::is_nil (part_reader.in ())) {
         ACE_ERROR((LM_ERROR, "(%P|%t) subscriber: failed to get BUILT_IN_PARTICIPANT_TOPIC datareader.\n"));
       }
 
-      DDS::SampleInfoSeq part_infos(3);
-      DDS::ParticipantBuiltinTopicDataSeq part_data(3);
+      ::DDS::SampleInfoSeq part_infos(3);
+      ::DDS::ParticipantBuiltinTopicDataSeq part_data(3);
 
       while (num_participants < 2) {
         Utils::waitForSample(part_rdr);
