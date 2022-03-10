@@ -4492,6 +4492,8 @@ jobs:
     needs: ACE_TAO_u18_stat_qt_ws_sec
 
     steps:
+    - name: pre-build disk usage
+      run: df -h
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: update apt
@@ -4553,6 +4555,8 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
+    - name: after building OpenDDS disk usage
+      run: df -h
     - name: Build CMake Tests
       run: |
         source OpenDDS/setenv.sh
@@ -4594,17 +4598,18 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Compiler
-        rm -rf key_annotation
-        rm -rf keywords
-        rm -rf namespace_conflict
-        rm -rf vread_vwrite
-        rm -rf sequence_conflict
-        rm -rf TryConstruct
-        rm -rf typecode
-        rm -rf typeobject_hash_consistency
-        rm -rf underscore_fields
-        rm -rf xcdr
-        rm -rf XTypesExtensibility
+#        rm -rf key_annotation
+#        rm -rf keywords
+#        rm -rf namespace_conflict
+#        rm -rf vread_vwrite
+#        rm -rf sequence_conflict
+#        rm -rf TryConstruct
+#        rm -rf typecode
+#        rm -rf typeobject_hash_consistency
+#        rm -rf typeobject_generator
+#        rm -rf underscore_fields
+#        rm -rf xcdr
+#        rm -rf XTypesExtensibility
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
     - name: make compiler tests
       shell: bash
@@ -4613,6 +4618,24 @@ jobs:
         . setenv.sh
         cd tests/DCPS/Compiler
         make
+    - name: check disk usage after cmake, messenger, compiler tests
+      run: df -h
+    - name: configure unit tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/unit-tests
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - name: make unit tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/unit-tests
+        make
+    - name: check disk usage after building unit tests
+      run: df -h
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -5082,34 +5105,33 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: configure compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        rm -rf anonymous_types
-        rm -rf C++11
-        rm -rf char_literals
-        rm -rf explicit_ints
-        rm -rf idl_test1_lib
-        rm -rf idl_test1_main
-        rm -rf idl_test2_lib
-        rm -rf idl_test2_main
-        rm -rf idl_test3_lib
-        rm -rf idl_test3_main
-        rm -rf idl_test_nested_types_lib
-        rm -rf isolated_types
-        rm -rf is_topic_type
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: make compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        make
+#    - name: configure compiler tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        . setenv.sh
+#        cd tests/DCPS/Compiler
+#        rm -rf anonymous_types
+#        rm -rf C++11
+#        rm -rf char_literals
+#        rm -rf explicit_ints
+#        rm -rf idl_test1_lib
+#        rm -rf idl_test1_main
+#        rm -rf idl_test2_lib
+#        rm -rf idl_test3_lib
+#        rm -rf idl_test3_main
+#        rm -rf idl_test_nested_types_lib
+#        rm -rf isolated_types
+#        rm -rf is_topic_type
+#        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+#    - uses: ammaraskar/gcc-problem-matcher@0.1
+#    - name: make compiler tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        . setenv.sh
+#        cd tests/DCPS/Compiler
+#        make
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5224,21 +5246,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: configure unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: make unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        make
+#    - name: configure unit tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        . setenv.sh
+#        cd tests/unit-tests
+#        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+#    - uses: ammaraskar/gcc-problem-matcher@0.1
+#    - name: make unit tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        . setenv.sh
+#        cd tests/unit-tests
+#        make
     - name: run OpenDDS tests
       shell: bash
       run: |
