@@ -657,7 +657,9 @@ jobs:
       run: |
         cd OpenDDS/build
         tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
-        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/OpenDDS_Util.so.*
+        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
+        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
