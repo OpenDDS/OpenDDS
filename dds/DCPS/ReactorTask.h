@@ -69,6 +69,9 @@ public:
 
 private:
 
+  virtual void reactor(ACE_Reactor* reactor);
+  virtual ACE_Reactor* reactor() const;
+
   void cleanup();
   void wait_for_startup_i() const;
 
