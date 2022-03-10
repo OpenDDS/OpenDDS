@@ -4642,18 +4642,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         cd tests/DCPS/Compiler
-#        rm -rf key_annotation
-#        rm -rf keywords
-#        rm -rf namespace_conflict
-#        rm -rf vread_vwrite
-#        rm -rf sequence_conflict
-#        rm -rf TryConstruct
-#        rm -rf typecode
-#        rm -rf typeobject_hash_consistency
-#        rm -rf typeobject_generator
-#        rm -rf underscore_fields
-#        rm -rf xcdr
-#        rm -rf XTypesExtensibility
         perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
     - name: make compiler tests
       shell: bash
@@ -4694,7 +4682,6 @@ jobs:
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
-
 
   cmake_u18_stat_qt_ws_sec:
 
