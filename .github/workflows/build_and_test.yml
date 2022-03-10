@@ -549,7 +549,8 @@ jobs:
         perl -ni.bak -e "print unless /dds/" host_tools.mwc
         cat host_tools.mwc
         . setenv.sh
-        mwc.pl -type gnuace host_tools.mwc
+        cat setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
