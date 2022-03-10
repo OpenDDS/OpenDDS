@@ -81,14 +81,22 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     ../rules.dds.GNU
   }
 
+  verbatim (gnuace, top, 1) {
+    cmake_dir_install_dest=$(DESTDIR)$(INSTALL_PREFIX)/share/cmake/OpenDDS
+    cmake_config_install_dest=$(cmake_dir_install_dest)/config.cmake
+  }
+
   verbatim(gnuace, postinstall, 1) {
 "	echo export DDS_ROOT=$(INSTALL_PREFIX)/share/dds> $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds-devel.sh"
 "	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
 "	ln -sf ../../../include/dds/Version.h $(DESTDIR)$(INSTALL_PREFIX)/share/dds/dds"
 "	cp $(DDS_ROOT)/user_macros.GNU $(DESTDIR)$(INSTALL_PREFIX)/share/dds $(ACE_NUL_STDERR)"
-"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS"
-"	cp $(DDS_ROOT)/cmake/*.cmake $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS"
-"	echo 'set(OPENDDS_USE_PREFIX_PATH ON) # from make install' >> $(DESTDIR)$(INSTALL_PREFIX)/$(INSTALL_LIB)/cmake/OpenDDS/config.cmake"
+"	@$(MKDIR) $(cmake_dir_install_dest)"
+"	cp $(DDS_ROOT)/cmake/*.cmake $(cmake_dir_install_dest)"
+"	echo '' >> $(cmake_config_install_dest)"
+"	echo '# From make install' >> $(cmake_config_install_dest)"
+"	echo 'set(OPENDDS_USE_PREFIX_PATH ON)' >> $(cmake_config_install_dest)"
+"	echo 'set(OPENDDS_INSTALL_LIB \"$(INSTALL_LIB)\")' >> $(cmake_config_install_dest)"
   }
 
 }

@@ -65,6 +65,10 @@ macro(_OPENDDS_RETURN_ERR msg)
   return()
 endmacro()
 
+if(NOT DEFINED OPENDDS_INSTALL_LIB)
+  set(OPENDDS_INSTALL_LIB "lib")
+endif()
+
 if(OPENDDS_USE_PREFIX_PATH)
   set(OPENDDS_ROOT "${CMAKE_CURRENT_LIST_DIR}/../../..")
 else()
@@ -83,14 +87,14 @@ if(NOT DEFINED DDS_ROOT)
   endif()
 
   set(OPENDDS_BIN_DIR "${OPENDDS_ROOT}/bin")
-  set(OPENDDS_LIB_DIR "${OPENDDS_ROOT}/lib")
+  set(OPENDDS_LIB_DIR "${OPENDDS_ROOT}/${OPENDDS_INSTALL_LIB}")
 endif()
 
 if(NOT DEFINED ACE_ROOT)
   if(OPENDDS_USE_PREFIX_PATH)
     set(ACE_ROOT "${OPENDDS_ROOT}/share/ace")
     set(ACE_INCLUDE_DIRS "${OPENDDS_ROOT}/include")
-    set(ACE_LIB_DIR "${OPENDDS_ROOT}/lib")
+    set(ACE_LIB_DIR "${OPENDDS_ROOT}/${OPENDDS_INSTALL_LIB}")
 
   elseif(OPENDDS_ACE)
     set(ACE_ROOT ${OPENDDS_ACE})
