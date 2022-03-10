@@ -633,6 +633,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u18_esafe_js0.tar.xz
+    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -653,7 +654,6 @@ jobs:
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
