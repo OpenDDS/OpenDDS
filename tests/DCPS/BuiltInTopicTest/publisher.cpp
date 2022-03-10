@@ -154,7 +154,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       dw_qos.resource_limits.max_samples_per_instance = 1000;
       dw_qos.history.kind  = ::DDS::KEEP_ALL_HISTORY_QOS;
       dw_qos.representation.value.length(1);
-      dw_qos.representation.value[0] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
+
+#if defined(OPENDDS_SAFETY_PROFILE)
+      dw_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;;
+#else
+      dw_qos.representation.value[0] = OpenDDS::DCPS::UNALIGNED_CDR2_DATA_REPRESENTATION;;
+#endif
 
       // set up user data in DW qos
       CORBA::ULong dw_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DW_USER_DATA));

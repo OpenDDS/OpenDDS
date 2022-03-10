@@ -173,7 +173,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;
 
       // give time for BIT datareader/datawriter fully association.
-      ACE_OS::sleep (5);
+      ACE_OS::sleep (3);
 
       if (delay_before_read_sec > 0) {
         ACE_DEBUG((LM_DEBUG,"(%P|%t) monitor: SLEEPING BEFORE READING!\n"));
@@ -194,6 +194,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
+#ifndef OPENDDS_SAFETY_PROFILE
+      // BUILT_IN_TOPIC_TOPIC unsupported in SAFETY PROFILE with RTPS
       ::DDS::DataReader_var topic_rdr =
           bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
       ::DDS::TopicBuiltinTopicDataDataReader_var topic_reader
@@ -203,6 +205,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_TOPIC_TOPIC datareader.\n"));
         return 1;
       }
+#endif
+
+      ::DDS::ReturnCode_t ret;
+      CORBA::ULong len = 0;
 
       ::DDS::DataReader_var subscription_rdr =
           bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) ;
@@ -214,6 +220,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for subscription sample\n"));
+      Utils::waitForSample(subscription_rdr);
+
       ::DDS::DataReader_var publication_rdr =
           bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
       ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader
@@ -224,267 +233,11 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
-      {
-        ::DDS::InstanceHandleSeq handles;
-        const DDS::ReturnCode_t discpart_error =
-          participant->get_discovered_participants(handles);
-        if (discpart_error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants failed: %C\n",
-            OpenDDS::DCPS::retcode_to_string(discpart_error)));
-          return 1;
-        }
-        if (handles.length() == 0) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants gave no handles, "
-            "but we expected some\n"));
-          return 1;
-        }
-
-        CORBA::ULong len = handles.length ();
-        if (len != num_parts - 1)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) ERROR: monitor: get_discovered_participants expected %d got %d.\n",
-            num_parts, len),
-            1);
-        }
-
-        for (CORBA::ULong i = 0; i < len; ++ i)
-        {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) monitor: participant %d examining participant handle %d.\n"),
-            participant->get_instance_handle(),
-            handles[i]
-          ));
-          ::DDS::ParticipantBuiltinTopicData data;
-          participant->get_discovered_participant_data(data, handles[i]);
-
-          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
-
-          if (part_svt->lookup_handle(id) != handles[i])
-          {
-            ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant_data test failed.\n"));
-            return 1;
-          }
-        }
-
-        if (participant->ignore_participant (handles[0]) != ::DDS::RETCODE_OK)
-        {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: ignore_participant failed.\n"));
-          return 1;
-        }
-
-        handles.length (0);
-        if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
-          || handles.length () != num_parts - 2)
-        {
-          ACE_ERROR((LM_ERROR, ACE_TEXT ("(%P|%t) monitor: get_discovered_participant ")
-                               ACE_TEXT ("skip ignored participant test failed.\n")));
-          return 1;
-        }
-
-        if (!ignoredEntitiesAreInBIT) --num_parts;
-
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
-      }
-
-      ::DDS::ReturnCode_t ret;
-
-      ::DDS::ParticipantBuiltinTopicDataSeq partdata;
-      const CORBA::ULong expected_part_count = num_parts - !ownEntitiesAreInBIT;
-
-      while (partdata.length() != expected_part_count) {
-        // Do not constantly poll.
-        const ACE_Time_Value delay(0, 100000); // 100ms
-        ACE_OS::sleep(delay);
-
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample expected %u have %u\n", expected_part_count, partdata.length()));
-        Utils::waitForSample(part_rdr);
-        ::DDS::SampleInfoSeq pinfos(10);
-        ::DDS::ParticipantBuiltinTopicDataSeq pdata(10);
-        ret = part_reader->read(pdata,
-                                pinfos,
-                                10,
-                                ::DDS::ANY_SAMPLE_STATE,
-                                ::DDS::ANY_VIEW_STATE,
-                                ::DDS::ALIVE_INSTANCE_STATE);
-
-        if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
-          ACE_ERROR_RETURN ((LM_ERROR,
-                             "(%P|%t) monitor:  failed to read BIT participant data.\n"),
-                            1);
-        }
-
-        for (CORBA::ULong i = 0; i < pdata.length(); ++i) {
-          const CORBA::ULong idx = partdata.length();
-          partdata.length(idx + 1);
-          partdata[idx] = pdata[i];
-        }
-      }
-
-
-      CORBA::ULong cur_dps_with_user_data = 0;
-      CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_PART_USER_DATA));
-
-      for (CORBA::ULong i = 0; i < partdata.length(); ++i)
-      {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Participant: key = %d, %x, %x\n",
-          partdata[i].key.value[0], partdata[i].key.value[1], partdata[i].key.value[2]));
-
-        CORBA::ULong cur_len = partdata[i].user_data.value.length ();
-
-        if ((cur_len == user_data_len)
-          && (ACE_OS::strncmp (reinterpret_cast <char*> (partdata[i].user_data.value.get_buffer()),
-                                                         CUR_PART_USER_DATA,
-                                                         user_data_len) == 0))
-          {
-            ++cur_dps_with_user_data;
-          }
-      }
-
-      if (cur_dps_with_user_data == dps_with_user_data - !ignoredEntitiesAreInBIT)
-      {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DomainParticipant changeable qos test PASSED.\n"));
-      }
-      else
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  DomainParticipant changeable qos test FAILED.\n"),
-          1);
-      }
-
-      {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
-        Utils::waitForSample(topic_rdr);
-        ::DDS::InstanceHandleSeq handles;
-        if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK)
-        {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics test failed.\n"));
-          return 1;
-        }
-
-        CORBA::ULong len = handles.length ();
-        if (len != num_topics)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor: ERROR: get_discovered_topics expected %d got %d.\n",
-            num_topics, len),
-            1);
-        }
-
-        for (CORBA::ULong i = 0; i < len; ++ i)
-        {
-          ::DDS::TopicBuiltinTopicData data;
-          participant->get_discovered_topic_data(data, handles[i]);
-
-          OpenDDS::DCPS::Discovery_rch disc =
-            TheServiceParticipant->get_discovery(participant->get_domain_id());
-          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
-
-          if (part_svt->lookup_handle(id) != handles[i])
-          {
-            ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topic_data test failed.\n"));
-            return 1;
-          }
-        }
-
-        if (len && participant->ignore_topic(handles[0]) != ::DDS::RETCODE_OK)
-        {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: ignore_topic failed.\n"));
-          return 1;
-        }
-
-        handles.length (0);
-        if (len &&
-            (participant->get_discovered_topics(handles) != ::DDS::RETCODE_OK
-             || handles.length() != num_topics - 1))
-        {
-          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics "
-                     "skip ignored topic test failed with len = %d, "
-                     "handles.length() = %d, num_topics = %d\n",
-                     len, handles.length(), num_topics));
-          return 1;
-        }
-
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover topics test PASSED.\n"));
-      }
-
-      ::DDS::SampleInfoSeq topicinfos(10);
-      ::DDS::TopicBuiltinTopicDataSeq topicdata(10);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
-      Utils::waitForSample(topic_rdr);
-      ret = topic_reader->read (topicdata,
-        topicinfos,
-        10,
-        ::DDS::ANY_SAMPLE_STATE,
-        ::DDS::ANY_VIEW_STATE,
-        ::DDS::ANY_INSTANCE_STATE);
-
-      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT topic data.\n"),
-            1);
-        }
-
-      CORBA::ULong len = topicdata.length ();
-
-      if (len != num_topics)
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor: ERROR: read %d BIT topic data, expected %d topics.\n", len, num_topics),
-          1);
-      }
-
-      CORBA::ULong num_topics_with_data = 0;
-      for (CORBA::ULong i = 0; i < len; ++i)
-      {
-        if (ACE_OS::strcmp (topicdata[i].name.in (), topic_name) != 0)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor: ERROR: got topic name \"%C\", expected topic name \"%C\"\n",
-            topicdata[i].name.in (), topic_name),
-            1);
-        }
-        if (ACE_OS::strcmp (topicdata[i].type_name.in (), topic_type_name) != 0)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got topic type name \"%C\", expected topic type name \"%C\"\n",
-            topicdata[i].type_name.in (), topic_type_name),
-            1);
-        }
-
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
-          "type_name=%C\n",
-          topicdata[i].key.value[0], topicdata[i].key.value[1], topicdata[i].key.value[2],
-          topicdata[i].name.in (), topicdata[i].type_name.in ()));
-
-        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
-
-        if ((topicdata[i].topic_data.value.length () == topic_data_len)
-          && (ACE_OS::strncmp (reinterpret_cast <char*> (topicdata[i].topic_data.value.get_buffer()),
-                               CUR_TOPIC_DATA,
-                               topic_data_len) == 0))
-          {
-            ++ num_topics_with_data;
-          }
-      }
-
-      if (num_topics_with_data == num_topics)
-      {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic changeable qos test PASSED.\n"));
-      }
-      else
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor:  Topic changeable qos test FAILED.\n"),
-          1);
-      }
-
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for publication sample\n"));
+      Utils::waitForSample(publication_rdr);
 
       ::DDS::SampleInfoSeq pubinfos(10);
       ::DDS::PublicationBuiltinTopicDataSeq pubdata(10);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for publication sample\n"));
-      Utils::waitForSample(publication_rdr);
       ret = pub_reader->read (pubdata,
         pubinfos,
         10,
@@ -569,13 +322,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           1);
       }
 
-
-
       ::DDS::SampleInfoSeq subinfos(10);
       ::DDS::SubscriptionBuiltinTopicDataSeq subdata(10);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for subscription sample\n"));
-      Utils::waitForSample(subscription_rdr);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: done waiting for subscription sample\n"));
       ret = sub_reader->read (subdata,
         subinfos,
         10,
@@ -659,6 +407,263 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           "(%P|%t) monitor: DataReader changeable qos test FAILED.\n"),
           1);
       }
+
+      // wait before checking discovered participants
+      ACE_OS::sleep(1);
+
+      {
+        ::DDS::InstanceHandleSeq handles;
+        const DDS::ReturnCode_t discpart_error =
+          participant->get_discovered_participants(handles);
+        if (discpart_error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants failed: %C\n",
+            OpenDDS::DCPS::retcode_to_string(discpart_error)));
+          return 1;
+        }
+        if (handles.length() == 0) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants gave no handles, "
+            "but we expected some\n"));
+          return 1;
+        }
+
+        CORBA::ULong len = handles.length ();
+        if (len != num_parts - 1)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) ERROR: monitor: get_discovered_participants expected %d got %d.\n",
+            num_parts, len),
+            1);
+        }
+
+        for (CORBA::ULong i = 0; i < len; ++ i)
+        {
+          ACE_DEBUG((LM_DEBUG,
+            ACE_TEXT("(%P|%t) monitor: participant %d examining participant handle %d.\n"),
+            participant->get_instance_handle(),
+            handles[i]
+          ));
+          ::DDS::ParticipantBuiltinTopicData data;
+          participant->get_discovered_participant_data(data, handles[i]);
+
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+
+          if (part_svt->lookup_handle(id) != handles[i])
+          {
+            ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_participant_data test failed.\n"));
+            return 1;
+          }
+        }
+
+        if (participant->ignore_participant (handles[0]) != ::DDS::RETCODE_OK)
+        {
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: ignore_participant failed.\n"));
+          return 1;
+        }
+
+        handles.length (0);
+        if (participant->get_discovered_participants (handles) != ::DDS::RETCODE_OK
+          || handles.length () != num_parts - 2)
+        {
+          ACE_ERROR((LM_ERROR, ACE_TEXT ("(%P|%t) monitor: get_discovered_participant ")
+                               ACE_TEXT ("skip ignored participant test failed.\n")));
+          return 1;
+        }
+
+        if (!ignoredEntitiesAreInBIT) --num_parts;
+
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
+      }
+
+      ::DDS::ParticipantBuiltinTopicDataSeq partdata;
+      const CORBA::ULong expected_part_count = num_parts - !ownEntitiesAreInBIT;
+
+      while (partdata.length() != expected_part_count) {
+        // Do not constantly poll.
+        const ACE_Time_Value delay(0, 100000); // 100ms
+        ACE_OS::sleep(delay);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample expected %u have %u\n", expected_part_count, partdata.length()));
+        Utils::waitForSample(part_rdr);
+        ::DDS::SampleInfoSeq pinfos(10);
+        ::DDS::ParticipantBuiltinTopicDataSeq pdata(10);
+        ret = part_reader->read(pdata,
+                                pinfos,
+                                10,
+                                ::DDS::ANY_SAMPLE_STATE,
+                                ::DDS::ANY_VIEW_STATE,
+                                ::DDS::ALIVE_INSTANCE_STATE);
+
+        if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
+          ACE_ERROR_RETURN ((LM_ERROR,
+                             "(%P|%t) monitor:  failed to read BIT participant data.\n"),
+                            1);
+        }
+
+        for (CORBA::ULong i = 0; i < pdata.length(); ++i) {
+          const CORBA::ULong idx = partdata.length();
+          partdata.length(idx + 1);
+          partdata[idx] = pdata[i];
+        }
+      }
+
+      CORBA::ULong cur_dps_with_user_data = 0;
+      CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_PART_USER_DATA));
+
+      for (CORBA::ULong i = 0; i < partdata.length(); ++i)
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Participant: key = %d, %x, %x\n",
+          partdata[i].key.value[0], partdata[i].key.value[1], partdata[i].key.value[2]));
+
+        CORBA::ULong cur_len = partdata[i].user_data.value.length ();
+
+        if ((cur_len == user_data_len)
+          && (ACE_OS::strncmp (reinterpret_cast <char*> (partdata[i].user_data.value.get_buffer()),
+                                                         CUR_PART_USER_DATA,
+                                                         user_data_len) == 0))
+          {
+            ++cur_dps_with_user_data;
+          }
+      }
+
+      if (cur_dps_with_user_data == dps_with_user_data - !ignoredEntitiesAreInBIT)
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DomainParticipant changeable qos test PASSED.\n"));
+      }
+      else
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+          "(%P|%t) monitor:  DomainParticipant changeable qos test FAILED.\n"),
+          1);
+      }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
+        Utils::waitForSample(topic_rdr);
+        ::DDS::InstanceHandleSeq handles;
+        if (participant->get_discovered_topics (handles) != ::DDS::RETCODE_OK)
+        {
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics test failed.\n"));
+          return 1;
+        }
+
+        CORBA::ULong len = handles.length ();
+        if (len != num_topics)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor: ERROR: get_discovered_topics expected %d got %d.\n",
+            num_topics, len),
+            1);
+        }
+
+        for (CORBA::ULong i = 0; i < len; ++ i)
+        {
+          ::DDS::TopicBuiltinTopicData data;
+          participant->get_discovered_topic_data(data, handles[i]);
+
+          OpenDDS::DCPS::Discovery_rch disc =
+            TheServiceParticipant->get_discovery(participant->get_domain_id());
+          OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+
+          if (part_svt->lookup_handle(id) != handles[i])
+          {
+            ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topic_data test failed.\n"));
+            return 1;
+          }
+        }
+
+        if (len && participant->ignore_topic(handles[0]) != ::DDS::RETCODE_OK)
+        {
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: ignore_topic failed.\n"));
+          return 1;
+        }
+
+        handles.length (0);
+        if (len &&
+            (participant->get_discovered_topics(handles) != ::DDS::RETCODE_OK
+             || handles.length() != num_topics - 1))
+        {
+          ACE_ERROR((LM_ERROR, "(%P|%t) monitor: get_discovered_topics "
+                     "skip ignored topic test failed with len = %d, "
+                     "handles.length() = %d, num_topics = %d\n",
+                     len, handles.length(), num_topics));
+          return 1;
+        }
+
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover topics test PASSED.\n"));
+      }
+
+      ::DDS::SampleInfoSeq topicinfos(10);
+      ::DDS::TopicBuiltinTopicDataSeq topicdata(10);
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
+      Utils::waitForSample(topic_rdr);
+      ret = topic_reader->read (topicdata,
+        topicinfos,
+        10,
+        ::DDS::ANY_SAMPLE_STATE,
+        ::DDS::ANY_VIEW_STATE,
+        ::DDS::ANY_INSTANCE_STATE);
+
+      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  failed to read BIT topic data.\n"),
+            1);
+        }
+
+      len = topicdata.length ();
+
+      if (len != num_topics)
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+          "(%P|%t) monitor: ERROR: read %d BIT topic data, expected %d topics.\n", len, num_topics),
+          1);
+      }
+
+      CORBA::ULong num_topics_with_data = 0;
+      for (CORBA::ULong i = 0; i < len; ++i)
+      {
+        if (ACE_OS::strcmp (topicdata[i].name.in (), topic_name) != 0)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor: ERROR: got topic name \"%C\", expected topic name \"%C\"\n",
+            topicdata[i].name.in (), topic_name),
+            1);
+        }
+        if (ACE_OS::strcmp (topicdata[i].type_name.in (), topic_type_name) != 0)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  got topic type name \"%C\", expected topic type name \"%C\"\n",
+            topicdata[i].type_name.in (), topic_type_name),
+            1);
+        }
+
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic: key = %d, %x, %x, name = %C, "
+          "type_name=%C\n",
+          topicdata[i].key.value[0], topicdata[i].key.value[1], topicdata[i].key.value[2],
+          topicdata[i].name.in (), topicdata[i].type_name.in ()));
+
+        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
+
+        if ((topicdata[i].topic_data.value.length () == topic_data_len)
+          && (ACE_OS::strncmp (reinterpret_cast <char*> (topicdata[i].topic_data.value.get_buffer()),
+                               CUR_TOPIC_DATA,
+                               topic_data_len) == 0))
+          {
+            ++ num_topics_with_data;
+          }
+      }
+
+      if (num_topics_with_data == num_topics)
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: Topic changeable qos test PASSED.\n"));
+      }
+      else
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+          "(%P|%t) monitor:  Topic changeable qos test FAILED.\n"),
+          1);
+      }
+#endif
 
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
