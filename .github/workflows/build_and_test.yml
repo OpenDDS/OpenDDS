@@ -504,19 +504,20 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v2
-      with:
-        path: ${{ github.job }}.tar.xz
-        key: c05_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+#    - name: Cache Artifact
+#      id: cache-artifact
+#      uses: actions/cache@v2
+#      with:
+#        path: ${{ github.job }}.tar.xz
+#        key: c05_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v2
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: setup gtest
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/tests/googletest
         git submodule init
@@ -527,7 +528,7 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=./install ..
         cmake --build . --target install
     - name: configure OpenDDS
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure \
@@ -538,7 +539,7 @@ jobs:
           --safety-profile \
           --tests
     - name: exclude OpenDDS_Util and opendds_idl
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/build/host
         perl -ni.bak -e "print unless /dds/" host_tools.mwc
@@ -546,7 +547,7 @@ jobs:
         . setenv.sh
         mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/build/host
         . setenv.sh
@@ -556,7 +557,7 @@ jobs:
         cd ACE_TAO/ACE/ace
         make -j4
     - name: create ACE_TAO tar.xz artifact
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/build/target/ACE_TAO
