@@ -543,6 +543,7 @@ jobs:
           --tests
     - name: exclude OpenDDS_Util and opendds_idl
 #      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
       run: |
         cd OpenDDS/build/host
         perl -ni.bak -e "print unless /dds/" host_tools.mwc
@@ -632,6 +633,7 @@ jobs:
         cd OpenDDS
         tar xvfJ ACE_TAO_u18_esafe_js0.tar.xz
     - name: build OpenDDS_Util lib and opendds_idl in host
+      shell: bash
       run: |
         cd OpenDDS/build/host
         cat > host_tools.mwc <<EOF
