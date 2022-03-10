@@ -158,7 +158,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
 #if defined(OPENDDS_SAFETY_PROFILE)
       dw_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;;
 #else
-      dw_qos.representation.value[0] = OpenDDS::DCPS::UNALIGNED_CDR2_DATA_REPRESENTATION;;
+      dw_qos.representation.value[0] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;;
 #endif
 
       // set up user data in DW qos
