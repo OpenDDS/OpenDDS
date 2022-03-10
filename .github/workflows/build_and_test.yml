@@ -645,7 +645,7 @@ jobs:
         EOF
         cat host_tools.mwc
         . setenv.sh
-        mwc.pl -type gnuace host_tools.mwc
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
         make -j4
     - name: check build configuration
       shell: bash
