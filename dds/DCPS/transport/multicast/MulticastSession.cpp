@@ -346,7 +346,6 @@ MulticastSession::add_remote(const RepoId& local,
 
   {
     ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
-    pending_remote_map_.empty();
     pending_remote_map_[local].insert(remote);
   }
 
