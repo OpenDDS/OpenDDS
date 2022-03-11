@@ -670,7 +670,7 @@ jobs:
         cd target
         find . -iname "*\.o" | xargs rm
         cd ..
-        tar --exclude='ACE_TAO' uvf ../../${{ github.job }}.tar target
+        tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
         xz -3 ../../${{ github.job }}.tar
 #    - name: create OpenDDS artifact
 #      shell: bash
