@@ -11,14 +11,14 @@
  *
  *   void serialized_size(
  *       const Encoding& encoding, size_t& size, const Type& value);
- *     Get the byte size of the representation of value.
+ *     Get the size (in bytes) of the encoded representation of value.
  *
  *   bool operator<<(Serializer& serializer, const Type& value);
  *     Tries to encode value into the stream of the serializer. Returns true if
  *     successful, else false.
  *
  *   bool operator>>(Serializer& serializer, Type& value);
- *     Tries to decodes a representation of Type located at the current
+ *     Tries to decode a representation of Type located at the current
  *     position of the stream and use that to set value. Returns true if
  *     successful, else false.
  */
@@ -94,14 +94,16 @@ OpenDDS_Dcps_Export
 void align(size_t& value, size_t by);
 
 /**
- * Represents the settings of the serialized stream. Passed to things like
- * Serializer, serialized_size(), and max_serialized_size(), etc.
+ * Represents the serialization rules. Used to construct a
+ * Serializer and to pass to functions that are used without
+ * a Serizlier like serialized_size() and max_serialized_size()
  */
 class OpenDDS_Dcps_Export Encoding {
 public:
   /**
-   * The encoding kinds represent the possible compatible encoding sets used
-   * for serialization.
+   * Kinds are the overall algorithm for serialization.
+   * A Kind value along with other details like alignment and endianness
+   * comprise an Encoding.
    */
   enum Kind {
     /**
@@ -207,7 +209,7 @@ private:
  *
  * This consists of 4 bytes that appear in front of the data. The first two
  * bytes represents the kind of the encoding the data uses and the last two
- * bytes are traditionally reserved.
+ * bytes (known as "options") are traditionally reserved.
  *
  * See XTypes 1.3 7.6.3.1.2
  */
