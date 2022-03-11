@@ -4692,6 +4692,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4791,7 +4792,21 @@ jobs:
         . setenv.sh
         cd tests/unit-tests
         make
-    - name: check disk usage after building unit tests
+    - name: configure security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+    - name: build security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        make -j $(getconf _NPROCESSORS_ONLN)
+    - name: check disk usage after building unit, security tests
       run: df -h
     - name: create OpenDDS tar.xz artifact
       shell: bash
@@ -4843,6 +4858,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4858,6 +4874,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -4953,6 +4970,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -4963,6 +4981,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5096,6 +5115,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -5106,6 +5126,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5236,6 +5257,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -5246,6 +5268,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5377,6 +5400,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -5387,6 +5411,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5462,93 +5487,95 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  test_build_u18_stat_qt_ws_sec:
-
-    runs-on: ubuntu-18.04
-
-    needs: build_u18_stat_qt_ws_sec
-
-    steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: update apt
-      run: sudo apt-get update
-    - name: install qt
-      run: sudo apt-get -y install qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_u18_stat_qt_ws_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: configure security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: build security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        make -j $(getconf _NPROCESSORS_ONLN)
-    - name: create test build artifact
-      shell: bash
-      run: |
-        cd OpenDDS/tests/security/attributes
-        find . -iname "*\.o" | xargs rm
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ${{ github.job }}.tar
-        xz -3 ${{ github.job }}.tar
-    - name: upload test build artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_artifact
-        path: OpenDDS/tests/security/attributes/${{ github.job }}.tar.xz
+#  test_build_u18_stat_qt_ws_sec:
+#
+#    runs-on: ubuntu-18.04
+#
+#    needs: build_u18_stat_qt_ws_sec
+#
+#    steps:
+#    - name: install xerces
+#      run: sudo apt-get -y install libxerces-c-dev
+#    - name: update apt
+#      run: sudo apt-get update
+#    - name: install qt
+#      run: sudo apt-get -y install qtbase5-dev
+#    - name: checkout MPC
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+#        path: ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd ACE_TAO
+#        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+#        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v3
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: build_u18_stat_qt_ws_sec_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+#        rm build_u18_stat_qt_ws_sec.tar.xz
+#    - name: check build configuration
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        . setenv.sh
+#        tools/scripts/show_build_config.pl
+#    - name: configure security tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        . setenv.sh
+#        cd tests/security/attributes
+#        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
+#    - uses: ammaraskar/gcc-problem-matcher@0.1
+#    - name: build security tests
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        . setenv.sh
+#        cd tests/security/attributes
+#        make -j $(getconf _NPROCESSORS_ONLN)
+#    - name: create test build artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/tests/security/attributes
+#        find . -iname "*\.o" | xargs rm
+#        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ${{ github.job }}.tar
+#        xz -3 ${{ github.job }}.tar
+#    - name: upload test build artifact
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_artifact
+#        path: OpenDDS/tests/security/attributes/${{ github.job }}.tar.xz
 
   test_run_u18_stat_qt_ws_sec:
 
@@ -5585,6 +5612,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -5600,23 +5628,24 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: download test build artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: test_build_u18_stat_qt_ws_sec_artifact
-        path: OpenDDS/tests/security/attributes
-    - name: extract test build artifact
-      shell: bash
-      run: |
-        cd OpenDDS/tests/security/attributes
-        tar xvfJ test_build_u18_stat_qt_ws_sec.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+#    - name: download test build artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: test_build_u18_stat_qt_ws_sec_artifact
+#        path: OpenDDS/tests/security/attributes
+#    - name: extract test build artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/tests/security/attributes
+#        tar xvfJ test_build_u18_stat_qt_ws_sec.tar.xz
+#    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: run security tests
       shell: bash
       run: |
