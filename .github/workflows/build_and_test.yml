@@ -822,20 +822,20 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v2
-      with:
-        path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+#    - name: Cache Artifact
+#      id: cache-artifact
+#      uses: actions/cache@v2
+#      with:
+#        path: ${{ github.job }}.tar.xz
+#        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: setup gtest
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/tests/googletest
         git submodule init
@@ -846,7 +846,7 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=./install ..
         cmake --build . --target install
     - name: configure OpenDDS
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure \
@@ -857,8 +857,18 @@ jobs:
           --safety-profile=base \
           --no-built-in-topics \
           --tests
+    - name: exclude OpenDDS_Util and opendds_idl
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        perl -ni.bak -e "print unless /dds/" host_tools.mwc
+        cat host_tools.mwc
+        . setenv.sh
+        cat setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/build/host
         . setenv.sh
@@ -868,7 +878,7 @@ jobs:
         cd ACE_TAO/ACE/ace
         make -j4
     - name: create ACE_TAO tar.xz artifact
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/build/target/ACE_TAO
@@ -940,13 +950,27 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS_Util lib and opendds_idl in host
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        cat > host_tools.mwc <<EOF
+        workspace {
+          dds/DCPS/OpenDDS_Util.mpc
+          dds/idl
+        }
+        EOF
+        cat host_tools.mwc
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
+        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
@@ -955,10 +979,23 @@ jobs:
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
+        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        cd target
         find . -iname "*\.o" | xargs rm
-        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
-        xz -3 ../../../${{ github.job }}.tar
+        cd ..
+        tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
+        xz -3 ../../${{ github.job }}.tar
+#    - name: create OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        find . -iname "*\.o" | xargs rm
+#        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
+#        xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -1002,12 +1039,22 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: build_u18_bsafe_js0_FM-1f_artifact
-        path: OpenDDS/build/target
+        path: OpenDDS/build
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: build_u18_bsafe_js0_FM-1f_artifact
+#        path: OpenDDS/build/target
     - name: extract OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
         tar xvfJ build_u18_bsafe_js0_FM-1f.tar.xz
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        tar xvfJ build_u18_bsafe_js0_FM-1f.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout autobuild
@@ -2634,20 +2681,20 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
-    - name: Cache Artifact
-      id: cache-artifact
-      uses: actions/cache@v2
-      with:
-        path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+#    - name: Cache Artifact
+#      id: cache-artifact
+#      uses: actions/cache@v2
+#      with:
+#        path: ${{ github.job }}.tar.xz
+#        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
       with:
         repository: DOCGroup/MPC
         path: MPC
     - name: setup gtest
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/tests/googletest
         git submodule init
@@ -2658,7 +2705,7 @@ jobs:
         cmake -DCMAKE_INSTALL_PREFIX=./install ..
         cmake --build . --target install
     - name: configure OpenDDS
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
         ./configure \
@@ -2672,8 +2719,18 @@ jobs:
           --no-object-model-profile \
           --no-persistence-profile \
           --tests
+    - name: exclude OpenDDS_Util and opendds_idl
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        perl -ni.bak -e "print unless /dds/" host_tools.mwc
+        cat host_tools.mwc
+        . setenv.sh
+        cat setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS/build/host
         . setenv.sh
@@ -2683,7 +2740,7 @@ jobs:
         cd ACE_TAO/ACE/ace
         make -j4
     - name: create ACE_TAO tar.xz artifact
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
+#      if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
       run: |
         cd OpenDDS/build/target/ACE_TAO
@@ -2761,13 +2818,27 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS_Util lib and opendds_idl in host
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        cat > host_tools.mwc <<EOF
+        workspace {
+          dds/DCPS/OpenDDS_Util.mpc
+          dds/idl
+        }
+        EOF
+        cat host_tools.mwc
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
+        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
@@ -2776,10 +2847,23 @@ jobs:
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
+        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        cd target
         find . -iname "*\.o" | xargs rm
-        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
-        xz -3 ../../../${{ github.job }}.tar
+        cd ..
+        tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
+        xz -3 ../../${{ github.job }}.tar
+#    - name: create OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/build/target
+#        find . -iname "*\.o" | xargs rm
+#        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
+#        xz -3 ../../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
