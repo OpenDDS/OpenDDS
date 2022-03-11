@@ -5581,7 +5581,7 @@ jobs:
 
     runs-on: ubuntu-18.04
 
-    needs: test_build_u18_stat_qt_ws_sec
+    needs: build_u18_stat_qt_ws_sec
     timeout-minutes: 150
 
     steps:
