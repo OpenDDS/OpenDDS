@@ -446,12 +446,6 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_o1d0v1_xer0_j12.tar.xz
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
     - name: test make install messenger
       shell: bash
       run: |
