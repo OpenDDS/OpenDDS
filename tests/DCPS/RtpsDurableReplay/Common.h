@@ -6,7 +6,7 @@
 #include <dds/DdsDcpsInfrastructureC.h>
 
 const DDS::DomainId_t TEST_DOMAIN = 111;
-const int INSTANCE_COUNT = 10;
+const size_t INSTANCE_COUNT = 10;
 
 const char PUBLISHER_ACTOR[] = "publisher";
 const char SUBSCRIBER_ACTOR[] = "subscriber";
