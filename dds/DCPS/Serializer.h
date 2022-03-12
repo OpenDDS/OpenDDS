@@ -96,7 +96,7 @@ void align(size_t& value, size_t by);
 /**
  * Represents the serialization rules. Used to construct a
  * Serializer and to pass to functions that are used without
- * a Serizlier like serialized_size() and max_serialized_size()
+ * a Serializer like serialized_size() and max_serialized_size()
  */
 class OpenDDS_Dcps_Export Encoding {
 public:
