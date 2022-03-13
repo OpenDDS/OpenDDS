@@ -183,8 +183,6 @@ void ThreadStatusManager::harvest(const MonotonicTimePoint& start,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
-
   for (Map::const_iterator pos = map_.begin(), limit = map_.end(); pos != limit; ++pos) {
     if (pos->second.last_update() > start) {
       running.push_back(pos->second);
