@@ -4587,7 +4587,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         find . -iname "*\.o" | xargs rm
         tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
