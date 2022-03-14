@@ -246,6 +246,10 @@ Each test has a list of the builds it was failing on before being blocked.
 
   * ``test_u18_esafe_js0``
 
+* tests/DCPS/NotifyTest/run_test.pl
+
+  *  ``test_u18_esafe_js0``
+
 * tests/DCPS/Reconnect/run_test.pl restart_pub
 
   * ``test_w22_x86_i0_sec``
