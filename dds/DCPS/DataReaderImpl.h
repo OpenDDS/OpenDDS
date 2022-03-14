@@ -72,7 +72,7 @@ class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
 
-typedef Cached_Allocator_With_Overflow<ReceivedDataElementMemoryBlock, ACE_Null_Mutex>
+typedef Cached_Allocator_With_Overflow<ReceivedDataElementMemoryBlock, ACE_Thread_Mutex>
 ReceivedDataAllocator;
 
 enum MarshalingType {
