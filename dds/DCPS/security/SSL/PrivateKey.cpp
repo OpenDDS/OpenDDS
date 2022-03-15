@@ -232,9 +232,9 @@ bool operator==(const PrivateKey& lhs, const PrivateKey& rhs)
 {
   if (lhs.k_ && rhs.k_) {
 #ifdef OPENSSL_V_3_0
-    return (1 == EVP_PKEY_eq(lhs.k_, rhs.k_));
+    return 1 == EVP_PKEY_eq(lhs.k_, rhs.k_);
 #else
-    return (1 == EVP_PKEY_cmp(lhs.k_, rhs.k_));
+    return 1 == EVP_PKEY_cmp(lhs.k_, rhs.k_);
 #endif
   }
   return lhs.k_ == rhs.k_;
