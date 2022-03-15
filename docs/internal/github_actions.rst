@@ -140,6 +140,7 @@ Test runs which only contain CMake tests are prefixed by ``cmake_``.
 .lst files contain a list of tests with configuration options that will turn tests on or off.
 The *test_* jobs pass in :ghfile:`tests/dcps_tests.lst`.
 Static and Release builds instead use :ghfile:`tests/static_ci_tests.lst`.
+The Thread Sanatizer build uses :ghfile:`tests/tsan_tests.lst`.
 This separation of .lst files is due to how excluding all but a few tests in the ``dcps_tests.lst`` would require adding a new config option to every test we didn't want to run.
 There is a separate security test list, :ghfile:`tests/security/security_tests.lst`, which governs the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``.
 The last list file used by ``build_and_test.yml`` is :ghfile:`tools/modeling/tests/modeling_tests.lst`, which is included by passing ``--modeling`` to ``auto_run_tests.pl``.
@@ -225,12 +226,6 @@ Each test has a list of the builds it was failing on before being blocked.
 
   * ``test_m10_o1d0_sec``
 
-* tests/DCPS/Deadline/run_test.pl rtps_disc
-
-  * ``test_u20_p1_asan_sec``
-
-  * ``test_m10_o1d0_sec``
-
 * tests/DCPS/Federation/run_test.pl
 
   * ``test_u18_w1_sec``
@@ -245,12 +240,6 @@ Each test has a list of the builds it was failing on before being blocked.
 
   * ``test_u20_p1_asan_sec``
 
-* tests/DCPS/Instances/run_test.pl [Multiple Configurations]
-
-  * ``test_u18_bsafe_js0_FM-1f``
-
-  * ``test_u18_esafe_js0``
-
 * tests/DCPS/MultiDPTest/run_test.pl
 
   * ``test_u18_bsafe_js0_FM-1f``
@@ -259,6 +248,8 @@ Each test has a list of the builds it was failing on before being blocked.
 
 * tests/DCPS/NotifyTest/run_test.pl
 
+  *  ``test_u18_esafe_js0``
+
 * tests/DCPS/Reconnect/run_test.pl restart_pub
 
   * ``test_w22_x86_i0_sec``
@@ -266,16 +257,6 @@ Each test has a list of the builds it was failing on before being blocked.
 * tests/DCPS/Reconnect/run_test.pl restart_sub
 
   * ``test_w22_x86_i0_sec``
-
-* tests/DCPS/ReliableBestEffortReaders/run_test.pl
-
-  * ``test_u18_w1_j_FM-2f``
-
-  * ``test_u18_j_cft0_FM-37``
-
-  * ``test_u20_p1_j8_FM-1f``
-
-  * ``test_m10_o1d0_sec``
 
 * tests/DCPS/TimeBasedFilter/run_test.pl -reliable
 
@@ -287,10 +268,8 @@ Test Results
 ============
 
 The tests are run using `autobuild <https://github.com/DOCGroup/autobuild>`_ which creates a number of output files that are turned into a GitHub artifact.
-This artifact is processed by the "Check Test Results" workflow which modifies the files with detailed summaries of the test runs.
-After all of the Check Test Results jobs are complete, the test results will be posted in either the build_and_test or lint workflows.
-It is `random <https://github.com/dorny/test-reporter/issues/67>`_ which one of the workflows the results will appear in, so be sure to check both.
-This is due to a `known problem with the GitHub API <https://github.com/mikepenz/action-junit-report/issues/40>`_.
+This artifact is processed by the "check results" step which uses the script :ghfile:`tools/scripts/autobuild_brief_html_to_text.pl` to catch failures and print them in an organized manner.
+Due to this being a part of the "test" jobs, the results of each run will appear as soon as the job is finished.
 
 Artifacts
 =========
