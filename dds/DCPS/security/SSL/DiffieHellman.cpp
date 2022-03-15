@@ -15,6 +15,8 @@
 #endif
 #include "../OpenSSL_legacy.h"  // Must come after all other OpenSSL includes
 
+#include <ace/OS_NS_strings.h>
+
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -303,7 +305,7 @@ public:
       OPENDDS_SSL_LOG_ERR("DH compute_key error getting length");
       return 1;
     }
-    dst.length(len);
+    dst.length(static_cast<ACE_CDR::ULong>(len));
     if (EVP_PKEY_derive(dh_ctx, dst.get_buffer(), &len) <= 0) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive failed");
       dst.length(0u);
@@ -445,11 +447,12 @@ public:
   {
   }
 
-  ~ecdh_pubkey_as_octets() {
-    #ifdef OPENSSL_V_3_0
-      OSSL_PARAM_free(params);
-    #endif
+#ifdef OPENSSL_V_3_0
+  ~ecdh_pubkey_as_octets()
+  {
+    OSSL_PARAM_free(params);
   }
+#endif
 
   int operator()(DDS::OctetSeq& dst)
   {
@@ -491,30 +494,30 @@ public:
       const char* gname = 0;
       const unsigned char* pubbuf = 0;
       size_t pubbuflen = 0;
-      for (OSSL_PARAM* p = params; p != 0 && p->key != 0; p++) {
-        if (strcasecmp(p->key,"group") == 0) {
-          gname = (char* )p->data;
-        } else if (strcasecmp(p->key, "pub") == 0) {
-          pubbuf = (unsigned char* )p->data;
+      for (OSSL_PARAM* p = params; p != 0 && p->key != 0; ++p) {
+        if (ACE_OS::strcasecmp(p->key, "group") == 0) {
+          gname = static_cast<const char*>(p->data);
+        } else if (ACE_OS::strcasecmp(p->key, "pub") == 0) {
+          pubbuf = static_cast<const unsigned char*>(p->data);
           pubbuflen = p->data_size;
         }
       }
 
-      int nid = OBJ_txt2nid(gname);
+      const int nid = OBJ_txt2nid(gname);
       if (nid == 0) {
         OPENDDS_SSL_LOG_ERR("failed to find Nid");
         return 1;
       }
-      EC_GROUP* ecg = EC_GROUP_new_by_curve_name(nid);
-      point_conversion_form_t cf = EC_GROUP_get_point_conversion_form(ecg);
-      EC_POINT* ec = EC_POINT_new(ecg);
+      const EC_GROUP* const ecg = EC_GROUP_new_by_curve_name(nid);
+      const point_conversion_form_t cf = EC_GROUP_get_point_conversion_form(ecg);
+      EC_POINT* const ec = EC_POINT_new(ecg);
       if (!EC_POINT_oct2point(ecg, ec, pubbuf, pubbuflen, 0)) {
         OPENDDS_SSL_LOG_ERR("failed to extract ec point from octet sequence");
         EC_POINT_free(ec);
         return 1;
       }
-      size_t eclen = EC_POINT_point2oct(ecg, ec, cf, 0, 0u, 0);
-      dst.length(eclen);
+      const size_t eclen = EC_POINT_point2oct(ecg, ec, cf, 0, 0u, 0);
+      dst.length(static_cast<ACE_CDR::ULong>(eclen));
       EC_POINT_point2oct(ecg, ec, cf, dst.get_buffer(), eclen, 0);
       EC_POINT_free(ec);
     }
@@ -606,7 +609,7 @@ public:
     } else {
       for (OSSL_PARAM* p = params; grp == 0 && p != 0 && p->key != 0; p++) {
         if (strcmp(p->key, "group") == 0) {
-          grp = (char*)p->data;
+          grp = static_cast<const char*>(p->data);
         }
       }
       if (grp == 0) {
@@ -663,7 +666,7 @@ public:
       OPENDDS_SSL_LOG_ERR("DH compute_key error getting length");
       return 1;
     }
-    dst.length(len);
+    dst.length(static_cast<ACE_CDR::ULong>(len));
     if (EVP_PKEY_derive(ec_ctx, dst.get_buffer(), &len) <= 0) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_derive failed");
       dst.length(0u);

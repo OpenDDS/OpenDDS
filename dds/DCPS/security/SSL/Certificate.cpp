@@ -398,7 +398,7 @@ struct cache_dsign_algo_impl
       return 0;
     }
 #else
-    int ptype = EVP_PKEY_id (pkey_);
+    const int ptype = EVP_PKEY_id (pkey_);
     if (ptype == EVP_PKEY_RSA || ptype == EVP_PKEY_RSA_PSS) {
       dst = "RSASSA-PSS-SHA256";
       return 0;
