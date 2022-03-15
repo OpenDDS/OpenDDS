@@ -446,12 +446,6 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_o1d0v1_xer0_j12.tar.xz
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
     - name: test make install messenger
       shell: bash
       run: |
@@ -512,7 +506,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c07_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -541,6 +535,14 @@ jobs:
           --no-rapidjson \
           --safety-profile \
           --tests
+    - name: exclude OpenDDS_Util and opendds_idl
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        perl -ni.bak -e "print unless /dds/" host_tools.mwc
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -623,13 +625,26 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u18_esafe_js0.tar.xz
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS_Util lib and opendds_idl in host
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        cat > host_tools.mwc <<EOF
+        workspace {
+          dds/DCPS/OpenDDS_Util.mpc
+          dds/idl
+        }
+        EOF
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
+        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
@@ -638,10 +653,16 @@ jobs:
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
+        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        cd target
         find . -iname "*\.o" | xargs rm
-        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
-        xz -3 ../../../${{ github.job }}.tar
+        cd ..
+        tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
+        xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -685,11 +706,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: build_u18_esafe_js0_artifact
-        path: OpenDDS/build/target
+        path: OpenDDS/build
     - name: extract OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
         tar xvfJ build_u18_esafe_js0.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -780,7 +801,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c07_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -810,6 +831,14 @@ jobs:
           --safety-profile=base \
           --no-built-in-topics \
           --tests
+    - name: exclude OpenDDS_Util and opendds_idl
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        perl -ni.bak -e "print unless /dds/" host_tools.mwc
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -893,13 +922,26 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS_Util lib and opendds_idl in host
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        cat > host_tools.mwc <<EOF
+        workspace {
+          dds/DCPS/OpenDDS_Util.mpc
+          dds/idl
+        }
+        EOF
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
+        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
@@ -908,10 +950,16 @@ jobs:
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
+        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        cd target
         find . -iname "*\.o" | xargs rm
-        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
-        xz -3 ../../../${{ github.job }}.tar
+        cd ..
+        tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
+        xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -955,11 +1003,11 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: build_u18_bsafe_js0_FM-1f_artifact
-        path: OpenDDS/build/target
+        path: OpenDDS/build
     - name: extract OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
         tar xvfJ build_u18_bsafe_js0_FM-1f.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
@@ -2592,7 +2640,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c07_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -2625,6 +2673,14 @@ jobs:
           --no-object-model-profile \
           --no-persistence-profile \
           --tests
+    - name: exclude OpenDDS_Util and opendds_idl
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        perl -ni.bak -e "print unless /dds/" host_tools.mwc
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -2714,13 +2770,26 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS_Util lib and opendds_idl in host
+      shell: bash
+      run: |
+        cd OpenDDS/build/host
+        cat > host_tools.mwc <<EOF
+        workspace {
+          dds/DCPS/OpenDDS_Util.mpc
+          dds/idl
+        }
+        EOF
+        . setenv.sh
+        $ACE_ROOT/bin/mwc.pl -type gnuace host_tools.mwc
+        make -j4
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS
       run: |
         cd OpenDDS/build/target
@@ -2729,10 +2798,16 @@ jobs:
     - name: create OpenDDS artifact
       shell: bash
       run: |
-        cd OpenDDS/build/target
+        cd OpenDDS/build
+        tar cvf ../../${{ github.job }}.tar host/dds/idl/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/bin/opendds_idl
+        tar uvf ../../${{ github.job }}.tar host/dds/DCPS/libOpenDDS_Util*
+        tar uvf ../../${{ github.job }}.tar host/lib/libOpenDDS_Util*
+        cd target
         find . -iname "*\.o" | xargs rm
-        tar --exclude='ACE_TAO' -cvf ../../../${{ github.job }}.tar .
-        xz -3 ../../../${{ github.job }}.tar
+        cd ..
+        tar --exclude='ACE_TAO' -uvf ../../${{ github.job }}.tar target
+        xz -3 ../../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
@@ -4483,7 +4558,7 @@ jobs:
       uses: actions/cache@v2
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -4512,7 +4587,6 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         find . -iname "*\.o" | xargs rm
         tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
@@ -4559,6 +4633,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4598,6 +4673,76 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
+    - name: configure messenger tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Messenger
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - name: make messenger tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Messenger
+        make
+    - name: configure C++11 messenger test
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/C++11
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - name: make C++11 messenger test
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/C++11
+        make
+    - name: configure compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - name: make compiler tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/DCPS/Compiler
+        make
+    - name: configure unit tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/unit-tests
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - name: make unit tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/unit-tests
+        make
+    - name: configure security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
+    - name: build security tests
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/security/attributes
+        make -j $(getconf _NPROCESSORS_ONLN)
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4648,6 +4793,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4663,6 +4809,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -4758,6 +4905,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -4768,6 +4916,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -4784,35 +4933,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: configure messenger tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Messenger
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0 -features no_cxx11=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: make messenger tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Messenger
-        make
-    - name: configure C++11 messenger test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/C++11
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0 -features no_cxx11=0
-    - name: make C++11 messenger test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/C++11
-        make
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4901,6 +5021,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -4911,6 +5032,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -4927,32 +5049,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: configure compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        rm -rf key_annotation
-        rm -rf keywords
-        rm -rf namespace_conflict
-        rm -rf vread_vwrite
-        rm -rf sequence_conflict
-        rm -rf TryConstruct
-        rm -rf typecode
-        rm -rf typeobject_hash_consistency
-        rm -rf underscore_fields
-        rm -rf xcdr
-        rm -rf XTypesExtensibility
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: make compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        make
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -4979,149 +5075,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_COMPILER -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-
-  compiler2_u18_stat_qt_ws_sec:
-
-    runs-on: ubuntu-18.04
-
-    needs: build_u18_stat_qt_ws_sec
-
-    steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: update apt
-      run: sudo apt-get update
-    - name: install qt
-      run: sudo apt-get -y install qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_u18_stat_qt_ws_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-    - name: setup gtest
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install ..
-        cmake --build . --target install
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: configure compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        rm -rf anonymous_types
-        rm -rf C++11
-        rm -rf char_literals
-        rm -rf explicit_ints
-        rm -rf idl_test1_lib
-        rm -rf idl_test1_main
-        rm -rf idl_test2_lib
-        rm -rf idl_test2_main
-        rm -rf idl_test3_lib
-        rm -rf idl_test3_main
-        rm -rf idl_test_nested_types_lib
-        rm -rf isolated_types
-        rm -rf is_topic_type
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: make compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        make
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_COMPILER2 -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS tests/static_ci_tests.lst -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC -Config XERCES3 -Config OPENDDS_SECURITY -Config RAPIDJSON -Config CXX11 -Config NO_UNIT_TESTS"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -5183,6 +5137,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v2
       with:
@@ -5193,6 +5148,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5209,21 +5165,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: configure unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: make unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        make
     - name: run OpenDDS tests
       shell: bash
       run: |
@@ -5268,99 +5209,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  test_build_u18_stat_qt_ws_sec:
+  security_u18_stat_qt_ws_sec:
 
     runs-on: ubuntu-18.04
 
     needs: build_u18_stat_qt_ws_sec
-
-    steps:
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
-    - name: update apt
-      run: sudo apt-get update
-    - name: install qt
-      run: sudo apt-get -y install qtbase5-dev
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_u18_stat_qt_ws_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: configure security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static -features no_cxx11=0 -features no_rapidjson=0 -features qt5=1 -features ssl=1 -features java=1 -features openssl11=1 -features xerces3=1 -features no_opendds_security=0
-    - uses: ammaraskar/gcc-problem-matcher@0.1
-    - name: build security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        make -j $(getconf _NPROCESSORS_ONLN)
-    - name: create test build artifact
-      shell: bash
-      run: |
-        cd OpenDDS/tests/security/attributes
-        find . -iname "*\.o" | xargs rm
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ${{ github.job }}.tar
-        xz -3 ${{ github.job }}.tar
-    - name: upload test build artifact
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_artifact
-        path: OpenDDS/tests/security/attributes/${{ github.job }}.tar.xz
-
-  test_run_u18_stat_qt_ws_sec:
-
-    runs-on: ubuntu-18.04
-
-    needs: test_build_u18_stat_qt_ws_sec
     timeout-minutes: 150
 
     steps:
@@ -5391,6 +5244,7 @@ jobs:
       run: |
         cd ACE_TAO
         tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -5406,23 +5260,13 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
+        rm build_u18_stat_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - name: download test build artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: test_build_u18_stat_qt_ws_sec_artifact
-        path: OpenDDS/tests/security/attributes
-    - name: extract test build artifact
-      shell: bash
-      run: |
-        cd OpenDDS/tests/security/attributes
-        tar xvfJ test_build_u18_stat_qt_ws_sec.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: run security tests
       shell: bash
       run: |
@@ -8279,7 +8123,7 @@ jobs:
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse qt5-winextras qt5-tools qt5-svg qt5-multimedia qt5-declarative
         vcpkgTriplet: x64-windows
     - name: checkout WinFlexBison
@@ -9163,7 +9007,7 @@ jobs:
         vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
-    - name: ls
+    - name: remove unused files
       shell: bash
       run: |
         cd vcpkg
@@ -9183,23 +9027,22 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v2
       with:
         name: ACE_TAO_w22_x86_i0_artifact
-        path: OpenDDS/ACE_TAO
+        path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd OpenDDS/ACE_TAO
+        cd ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
+    - name: move OpenDDS to C drive
       shell: bash
       run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
+        mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -9207,298 +9050,292 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
-        configure --tests --rapidjson --security --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --openssl="%VCPKG_ROOT%\installed\x86-windows"
+        cd /d C:\OpenDDS
+        configure --tests --rapidjson --security --ace=%GITHUB_WORKSPACE%\ACE_TAO\ACE --tao=%GITHUB_WORKSPACE%\ACE_TAO\TAO --mpc=%GITHUB_WORKSPACE%\MPC --xerces3=%VCPKG_ROOT%\installed\x86-windows --openssl=%VCPKG_ROOT%\installed\x86-windows
     - name: check build configuration
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - uses: ammaraskar/msvc-problem-matcher@0.1
     - name: build OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
-        cd OpenDDS
-        rm -rf ACE_TAO
+        cd /c/OpenDDS
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
+        mv ../${{ github.job }}.tar.xz $GITHUB_WORKSPACE
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w22_x86_i0_sec:
+#  cmake_w22_x86_i0_sec:
+#
+#    runs-on: windows-2022
+#
+#    needs: build_w22_x86_i0_sec
+#
+#    steps:
+#    - name: install openssl & xerces-c
+#      uses: lukka/run-vcpkg@v7
+#      with:
+#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgArguments: --recurse openssl xerces-c
+#        vcpkgTriplet: x86-windows
+#    - name: checkout MPC
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v3
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: ACE_TAO_w22_x86_i0_artifact
+#        path: ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd ACE_TAO
+#        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
+#        rm -f ACE_TAO_w22_x86_i0.tar.xz
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: build_w22_x86_i0_sec_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ build_w22_x86_i0_sec.tar.xz
+#        rm -f build_w22_x86_i0_sec.tar.xz
+#    - name: move OpenDDS to C drive
+#      shell: bash
+#      run: |
+#        mv OpenDDS /c/
+#    - name: set up msvc env
+#      uses: ilammy/msvc-dev-cmd@v1.9.0
+#    - uses: ammaraskar/msvc-problem-matcher@0.1
+#    - name: Build CMake Tests
+#      shell: cmd
+#      run: |
+#        cd /d C:\OpenDDS
+#        call setenv.cmd
+#        mkdir tests\cmake\build
+#        cd tests\cmake\build
+#        cmake -A Win32 ..
+#        cmake --build .
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd /d C:\OpenDDS
+#        call setenv.cmd
+#        perl tools\scripts\show_build_config.pl
+#    - name: create autobuild config
+#      shell: bash
+#      run: |
+#        cd /c/OpenDDS
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="C:/OpenDDS"/>
+#        <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_cmake_version"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="msvc"/>
+#        <command name="print_perl_version"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS --no-dcps --cmake"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#    - name: run OpenDDS CMake tests
+#      shell: cmd
+#      run: |
+#        cd /d C:\OpenDDS
+#        call setenv.cmd
+#        cd ${{ github.job }}_autobuild_workspace
+#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+#        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-    runs-on: windows-2022
-
-    needs: build_w22_x86_i0_sec
-
-    steps:
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
-      with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_w22_x86_i0_artifact
-        path: OpenDDS/ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
-        rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
-      shell: bash
-      run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_w22_x86_i0_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_w22_x86_i0_sec.tar.xz
-        rm -f build_w22_x86_i0_sec.tar.xz
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
-    - name: Build CMake Tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake -A Win32 ..
-        cmake --build .
-    - name: check build configuration
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        perl tools\scripts\show_build_config.pl
-    - name: create autobuild config
-      shell: bash
-      run: |
-        cd OpenDDS
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
-        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="msvc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        cat config.xml
-    - name: run OpenDDS CMake tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS\${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-
-  test_w22_x86_i0_sec:
-
-    runs-on: windows-2022
-
-    needs: build_w22_x86_i0_sec
-
-    steps:
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
-      with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_w22_x86_i0_artifact
-        path: OpenDDS/ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
-        rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
-      shell: bash
-      run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_w22_x86_i0_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_w22_x86_i0_sec.tar.xz
-        rm -f build_w22_x86_i0_sec.tar.xz
-    - name: setup gtest
-      shell: cmd
-      run: |
-        cd OpenDDS/tests/googletest
-        git submodule init
-        git submodule update
-        mkdir build
-        cd build
-        mkdir install
-        cmake -DCMAKE_INSTALL_PREFIX=./install -A Win32 ..
-        cmake --build . --target install
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: check build configuration
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        perl tools\scripts\show_build_config.pl
-    - name: create autobuild config
-      shell: bash
-      run: |
-        cd OpenDDS
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
-        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="msvc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config GH_ACTIONS_W22 --security"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        cat config.xml
-    - name: run OpenDDS tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS\${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#  test_w22_x86_i0_sec:
+#
+#    runs-on: windows-2022
+#
+#    needs: build_w22_x86_i0_sec
+#
+#    steps:
+#    - name: install openssl & xerces-c
+#      uses: lukka/run-vcpkg@v7
+#      with:
+#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgArguments: --recurse openssl xerces-c
+#        vcpkgTriplet: x86-windows
+#    - name: checkout MPC
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v3
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: ACE_TAO_w22_x86_i0_artifact
+#        path: ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd ACE_TAO
+#        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
+#        rm -f ACE_TAO_w22_x86_i0.tar.xz
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: build_w22_x86_i0_sec_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ build_w22_x86_i0_sec.tar.xz
+#        rm -f build_w22_x86_i0_sec.tar.xz
+#    - name: move OpenDDS to C drive
+#      shell: bash
+#      run: |
+#        mv OpenDDS /c/
+#    - name: setup gtest
+#      shell: cmd
+#      run: |
+#        cd /d C:\OpenDDS\tests\googletest
+#        git submodule init
+#        git submodule update
+#        mkdir build
+#        cd build
+#        mkdir install
+#        cmake -DCMAKE_INSTALL_PREFIX=./install -A Win32 ..
+#        cmake --build . --target install
+#    - name: set up msvc env
+#      uses: ilammy/msvc-dev-cmd@v1
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd /d C:\OpenDDS
+#        call setenv.cmd
+#        perl tools\scripts\show_build_config.pl
+#    - name: create autobuild config
+#      shell: bash
+#      run: |
+#        cd /c/OpenDDS
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="C:/OpenDDS"/>
+#        <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_cmake_version"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="msvc"/>
+#        <command name="print_perl_version"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS -Config DCPS_MIN"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#    - name: run OpenDDS tests
+#      shell: cmd
+#      run: |
+#        cd /d C:\OpenDDS
+#        call setenv.cmd
+#        cd ${{ github.job }}_autobuild_workspace
+#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+#        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_w22_x86_i0_j_FM-1f:
 
@@ -9591,126 +9428,126 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w22_x86_i0_j_FM-1f:
-
-    runs-on: windows-2022
-
-    needs: build_w22_x86_i0_j_FM-1f
-
-    steps:
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
-      with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x86-windows
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_w22_x86_i0_artifact
-        path: OpenDDS/ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
-        rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
-      shell: bash
-      run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_w22_x86_i0_j_FM-1f_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
-        rm -f build_w22_x86_i0_j_FM-1f.tar.xz
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
-    - name: check build configuration
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        perl tools\scripts\show_build_config.pl
-    - name: create autobuild config
-      shell: bash
-      run: |
-        cd OpenDDS
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
-        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="msvc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake -Config OPENDDS_TESTING_FEATURES"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        cat config.xml
-    - name: run OpenDDS tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS\${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#  cmake_w22_x86_i0_j_FM-1f:
+#
+#    runs-on: windows-2022
+#
+#    needs: build_w22_x86_i0_j_FM-1f
+#
+#    steps:
+#    - name: install openssl & xerces-c
+#      uses: lukka/run-vcpkg@v7
+#      with:
+#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgArguments: --recurse openssl xerces-c
+#        vcpkgTriplet: x86-windows
+#    - name: checkout MPC
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v3
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: ACE_TAO_w22_x86_i0_artifact
+#        path: OpenDDS/ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
+#        rm -f ACE_TAO_w22_x86_i0.tar.xz
+#    - name: Move ACE and MPC to C Drive
+#      shell: bash
+#      run: |
+#        mv OpenDDS/ACE_TAO /c/
+#        mv MPC /c/
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: build_w22_x86_i0_j_FM-1f_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
+#        rm -f build_w22_x86_i0_j_FM-1f.tar.xz
+#    - name: set up msvc env
+#      uses: ilammy/msvc-dev-cmd@v1.9.0
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        perl tools\scripts\show_build_config.pl
+#    - name: create autobuild config
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
+#        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_cmake_version"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="msvc"/>
+#        <command name="print_perl_version"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake -Config OPENDDS_TESTING_FEATURES"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#        cat config.xml
+#    - name: run OpenDDS tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd ${{ github.job }}_autobuild_workspace
+#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: OpenDDS\${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+#        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w22_p1:
 
@@ -9879,275 +9716,275 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_w22_p1:
+#  cmake_w22_p1:
+#
+#    runs-on: windows-2022
+#
+#    needs: build_w22_p1
+#
+#    steps:
+#    - name: install openssl & xerces-c
+#      uses: lukka/run-vcpkg@v7
+#      with:
+#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgArguments: --recurse openssl xerces-c
+#        vcpkgTriplet: x64-windows
+#    - name: checkout MPC
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v3
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: ACE_TAO_w22_p1_artifact
+#        path: OpenDDS/ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        tar xvfJ ACE_TAO_w22_p1.tar.xz
+#        rm -f ACE_TAO_w22_p1.tar.xz
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: build_w22_p1_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ build_w22_p1.tar.xz
+#        rm -f build_w22_p1.tar.xz
+#    - name: set up msvc env
+#      uses: ilammy/msvc-dev-cmd@v1
+#    - uses: ammaraskar/msvc-problem-matcher@0.1
+#    - name: Build CMake Tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        mkdir tests\cmake\build
+#        cd tests\cmake\build
+#        cmake ..
+#        cmake --build .
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        perl tools\scripts\show_build_config.pl
+#    - name: create autobuild config
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
+#        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_cmake_version"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="msvc"/>
+#        <command name="print_perl_version"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#        cat config.xml
+#    - name: run OpenDDS CMake tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd ${{ github.job }}_autobuild_workspace
+#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: OpenDDS\${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+#        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-    runs-on: windows-2022
-
-    needs: build_w22_p1
-
-    steps:
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
-      with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_w22_p1_artifact
-        path: OpenDDS/ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1.tar.xz
-        rm -f ACE_TAO_w22_p1.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_w22_p1_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_w22_p1.tar.xz
-        rm -f build_w22_p1.tar.xz
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.1
-    - name: Build CMake Tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake ..
-        cmake --build .
-    - name: check build configuration
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        perl tools\scripts\show_build_config.pl
-    - name: create autobuild config
-      shell: bash
-      run: |
-        cd OpenDDS
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
-        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="msvc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        cat config.xml
-    - name: run OpenDDS CMake tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS\${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-
-  messenger_w22_p1:
-
-    runs-on: windows-2022
-
-    needs: build_w22_p1
-
-    steps:
-    - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
-      with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
-        vcpkgArguments: --recurse openssl xerces-c
-        vcpkgTriplet: x64-windows
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: OpenDDS/ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_w22_p1_artifact
-        path: OpenDDS/ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_w22_p1.tar.xz
-        rm -f ACE_TAO_w22_p1.tar.xz
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_w22_p1_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_w22_p1.tar.xz
-        rm -f build_w22_p1.tar.xz
-    - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1
-    - name: check build configuration
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        perl tools\scripts\show_build_config.pl
-    - name: configure messenger tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd tests\DCPS\Messenger
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
-    - name: make messenger tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd tests\DCPS\Messenger
-        msbuild -p:Configuration=Debug,Platform=x64 -m Messenger.sln
-    - name: configure C++11 messenger test
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd tests\DCPS\C++11
-        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - name: make C++11 messenger test
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd tests\DCPS\C++11
-        msbuild -p:Configuration=Debug,Platform=x64 -m C++11.sln
-    - name: create autobuild config
-      shell: bash
-      run: |
-        cd OpenDDS
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
-        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="msvc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        cat config.xml
-    - name: run OpenDDS Messenger tests
-      shell: cmd
-      run: |
-        cd OpenDDS
-        call setenv.cmd
-        cd ${{ github.job }}_autobuild_workspace
-        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS\${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#  messenger_w22_p1:
+#
+#    runs-on: windows-2022
+#
+#    needs: build_w22_p1
+#
+#    steps:
+#    - name: install openssl & xerces-c
+#      uses: lukka/run-vcpkg@v7
+#      with:
+#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgArguments: --recurse openssl xerces-c
+#        vcpkgTriplet: x64-windows
+#    - name: checkout MPC
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/MPC
+#        path: MPC
+#    - name: checkout autobuild
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/autobuild
+#        path: autobuild
+#    - name: checkout OpenDDS
+#      uses: actions/checkout@v3
+#      with:
+#        path: OpenDDS
+#        submodules: true
+#    - name: checkout ACE_TAO
+#      uses: actions/checkout@v3
+#      with:
+#        repository: DOCGroup/ACE_TAO
+#        ref: ace6tao2
+#        path: OpenDDS/ACE_TAO
+#    - name: download ACE_TAO artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: ACE_TAO_w22_p1_artifact
+#        path: OpenDDS/ACE_TAO
+#    - name: extract ACE_TAO artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS/ACE_TAO
+#        tar xvfJ ACE_TAO_w22_p1.tar.xz
+#        rm -f ACE_TAO_w22_p1.tar.xz
+#    - name: download OpenDDS artifact
+#      uses: actions/download-artifact@v2
+#      with:
+#        name: build_w22_p1_artifact
+#        path: OpenDDS
+#    - name: extract OpenDDS artifact
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        tar xvfJ build_w22_p1.tar.xz
+#        rm -f build_w22_p1.tar.xz
+#    - name: set up msvc env
+#      uses: ilammy/msvc-dev-cmd@v1
+#    - name: check build configuration
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        perl tools\scripts\show_build_config.pl
+#    - name: configure messenger tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd tests\DCPS\Messenger
+#        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+#    - uses: ammaraskar/msvc-problem-matcher@0.1
+#    - name: make messenger tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd tests\DCPS\Messenger
+#        msbuild -p:Configuration=Debug,Platform=x64 -m Messenger.sln
+#    - name: configure C++11 messenger test
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd tests\DCPS\C++11
+#        perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
+#    - name: make C++11 messenger test
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd tests\DCPS\C++11
+#        msbuild -p:Configuration=Debug,Platform=x64 -m C++11.sln
+#    - name: create autobuild config
+#      shell: bash
+#      run: |
+#        cd OpenDDS
+#        mkdir ${{ github.job }}_autobuild_workspace
+#        cd ${{ github.job }}_autobuild_workspace
+#        export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
+#        echo using commit $TRIGGERING_COMMIT for SHA
+#        echo $TRIGGERING_COMMIT >> ./SHA
+#        cat > config.xml <<EOF
+#        <autobuild>
+#        <configuration>
+#        <variable name="log_file" value="output.log"/>
+#        <variable name="log_root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="project_root" value="$FS_GHW/OpenDDS"/>
+#        <variable name="root" value="$FS_GHW/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+#        <variable name="junit_xml_output" value="Tests"/>
+#        </configuration>
+#        <command name="log" options="on"/>
+#        <command name="print_os_version"/>
+#        <command name="print_env_vars"/>
+#        <command name="print_ace_config"/>
+#        <command name="print_make_version"/>
+#        <command name="check_compiler" options="msvc"/>
+#        <command name="print_perl_version"/>
+#        <command name="print_autobuild_config"/>
+#        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS tests\static_ci_tests.lst -ExeSubDir Debug -Config STATIC_MESSENGER -Config IPV6 -Config XERCES3 -Config CXX11 -Config NO_UNIT_TESTS -Config RAPIDJSON"/>
+#        <command name="log" options="off"/>
+#        <command name="process_logs" options="prettify"/>
+#        </autobuild>
+#        EOF
+#        cat config.xml
+#    - name: run OpenDDS Messenger tests
+#      shell: cmd
+#      run: |
+#        cd OpenDDS
+#        call setenv.cmd
+#        cd ${{ github.job }}_autobuild_workspace
+#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "%GITHUB_WORKSPACE%\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+#    - name: upload autobuild output
+#      uses: actions/upload-artifact@v2
+#      with:
+#        name: ${{ github.job }}_autobuild_output
+#        path: OpenDDS\${{ github.job }}_autobuild_workspace
+#    - name: check results
+#      shell: bash
+#      run: |
+#        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+#        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+#        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   compiler_w22_p1:
 
@@ -11016,112 +10853,112 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m10_o1d0_sec:
+  # test_m10_o1d0_sec:
 
-    runs-on: macos-10.15
+  #   runs-on: macos-10.15
 
-    needs: build_m10_o1d0_sec
+  #   needs: build_m10_o1d0_sec
 
-    steps:
-    - name: install xerces-c
-      run: |
-        brew install xerces-c
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_m10_o1d0_sec_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_m10_o1d0_sec.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_m10_o1d0_sec_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_m10_o1d0_sec.tar.xz
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: disable ntp
-      shell: bash
-      run: |
-        sudo systemsetup -setusingnetworktime off
-        sudo rm -rf /etc/ntp.conf
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M10 --security --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+  #   steps:
+  #   - name: install xerces-c
+  #     run: |
+  #       brew install xerces-c
+  #   - name: checkout MPC
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: DOCGroup/MPC
+  #       path: MPC
+  #   - name: checkout autobuild
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: DOCGroup/autobuild
+  #       path: autobuild
+  #   - name: checkout ACE_TAO
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: DOCGroup/ACE_TAO
+  #       ref: ace6tao2
+  #       path: ACE_TAO
+  #   - name: download ACE_TAO artifact
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: ACE_TAO_m10_o1d0_sec_artifact
+  #       path: ACE_TAO
+  #   - name: extract ACE_TAO artifact
+  #     shell: bash
+  #     run: |
+  #       cd ACE_TAO
+  #       tar xvfJ ACE_TAO_m10_o1d0_sec.tar.xz
+  #   - name: checkout OpenDDS
+  #     uses: actions/checkout@v3
+  #     with:
+  #       path: OpenDDS
+  #       submodules: true
+  #   - name: download OpenDDS artifact
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: build_m10_o1d0_sec_artifact
+  #       path: OpenDDS
+  #   - name: extract OpenDDS artifact
+  #     shell: bash
+  #     run: |
+  #       cd OpenDDS
+  #       tar xvfJ build_m10_o1d0_sec.tar.xz
+  #   - name: check build configuration
+  #     shell: bash
+  #     run: |
+  #       cd OpenDDS
+  #       . setenv.sh
+  #       tools/scripts/show_build_config.pl
+  #   - name: disable ntp
+  #     shell: bash
+  #     run: |
+  #       sudo systemsetup -setusingnetworktime off
+  #       sudo rm -rf /etc/ntp.conf
+  #   - name: run OpenDDS tests
+  #     shell: bash
+  #     run: |
+  #       cd OpenDDS
+  #       . setenv.sh
+  #       mkdir ${{ github.job }}_autobuild_workspace
+  #       cd ${{ github.job }}_autobuild_workspace
+  #       echo using commit $TRIGGERING_COMMIT for SHA
+  #       echo $TRIGGERING_COMMIT >> ./SHA
+  #       cat > config.xml <<EOF
+  #       <autobuild>
+  #       <configuration>
+  #       <variable name="log_file" value="output.log"/>
+  #       <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+  #       <variable name="project_root" value="$DDS_ROOT"/>
+  #       <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+  #       <variable name="junit_xml_output" value="Tests"/>
+  #       </configuration>
+  #       <command name="log" options="on"/>
+  #       <command name="print_os_version"/>
+  #       <command name="print_env_vars"/>
+  #       <command name="print_ace_config"/>
+  #       <command name="print_cmake_version"/>
+  #       <command name="print_make_version"/>
+  #       <command name="check_compiler" options="gcc"/>
+  #       <command name="print_perl_version"/>
+  #       <command name="print_autobuild_config"/>
+  #       <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M10 --security --cmake"/>
+  #       <command name="log" options="off"/>
+  #       <command name="process_logs" options="prettify"/>
+  #       </autobuild>
+  #       EOF
+  #       $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+  #   - name: upload autobuild output
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: ${{ github.job }}_autobuild_output
+  #       path: OpenDDS/${{ github.job }}_autobuild_workspace
+  #   - name: check results
+  #     shell: bash
+  #     run: |
+  #       $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+  #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+  #       grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_m10_i0_j_FM-1f:
 
@@ -11299,112 +11136,112 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m10_i0_j_FM-1f:
+  # test_m10_i0_j_FM-1f:
 
-    runs-on: macos-10.15
+  #   runs-on: macos-10.15
 
-    needs: build_m10_i0_j_FM-1f
+  #   needs: build_m10_i0_j_FM-1f
 
-    steps:
-    - name: install xerces-c
-      run: |
-        brew install xerces-c
-    - name: checkout MPC
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/MPC
-        path: MPC
-    - name: checkout autobuild
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/autobuild
-        path: autobuild
-    - name: checkout ACE_TAO
-      uses: actions/checkout@v3
-      with:
-        repository: DOCGroup/ACE_TAO
-        ref: ace6tao2
-        path: ACE_TAO
-    - name: download ACE_TAO artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: ACE_TAO_m10_i0_j_FM-1f_artifact
-        path: ACE_TAO
-    - name: extract ACE_TAO artifact
-      shell: bash
-      run: |
-        cd ACE_TAO
-        tar xvfJ ACE_TAO_m10_i0_j_FM-1f.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
-    - name: download OpenDDS artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: build_m10_i0_j_FM-1f_artifact
-        path: OpenDDS
-    - name: extract OpenDDS artifact
-      shell: bash
-      run: |
-        cd OpenDDS
-        tar xvfJ build_m10_i0_j_FM-1f.tar.xz
-    - name: check build configuration
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        tools/scripts/show_build_config.pl
-    - name: disable ntp
-      shell: bash
-      run: |
-        sudo systemsetup -setusingnetworktime off
-        sudo rm -rf /etc/ntp.conf
-    - name: run OpenDDS tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mkdir ${{ github.job }}_autobuild_workspace
-        cd ${{ github.job }}_autobuild_workspace
-        echo using commit $TRIGGERING_COMMIT for SHA
-        echo $TRIGGERING_COMMIT >> ./SHA
-        cat > config.xml <<EOF
-        <autobuild>
-        <configuration>
-        <variable name="log_file" value="output.log"/>
-        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="project_root" value="$DDS_ROOT"/>
-        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
-        <variable name="junit_xml_output" value="Tests"/>
-        </configuration>
-        <command name="log" options="on"/>
-        <command name="print_os_version"/>
-        <command name="print_env_vars"/>
-        <command name="print_ace_config"/>
-        <command name="print_cmake_version"/>
-        <command name="print_make_version"/>
-        <command name="check_compiler" options="gcc"/>
-        <command name="print_perl_version"/>
-        <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M10 --java --modeling --cmake"/>
-        <command name="log" options="off"/>
-        <command name="process_logs" options="prettify"/>
-        </autobuild>
-        EOF
-        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
-    - name: upload autobuild output
-      uses: actions/upload-artifact@v2
-      with:
-        name: ${{ github.job }}_autobuild_output
-        path: OpenDDS/${{ github.job }}_autobuild_workspace
-    - name: check results
-      shell: bash
-      run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+  #   steps:
+  #   - name: install xerces-c
+  #     run: |
+  #       brew install xerces-c
+  #   - name: checkout MPC
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: DOCGroup/MPC
+  #       path: MPC
+  #   - name: checkout autobuild
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: DOCGroup/autobuild
+  #       path: autobuild
+  #   - name: checkout ACE_TAO
+  #     uses: actions/checkout@v3
+  #     with:
+  #       repository: DOCGroup/ACE_TAO
+  #       ref: ace6tao2
+  #       path: ACE_TAO
+  #   - name: download ACE_TAO artifact
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: ACE_TAO_m10_i0_j_FM-1f_artifact
+  #       path: ACE_TAO
+  #   - name: extract ACE_TAO artifact
+  #     shell: bash
+  #     run: |
+  #       cd ACE_TAO
+  #       tar xvfJ ACE_TAO_m10_i0_j_FM-1f.tar.xz
+  #   - name: checkout OpenDDS
+  #     uses: actions/checkout@v3
+  #     with:
+  #       path: OpenDDS
+  #       submodules: true
+  #   - name: download OpenDDS artifact
+  #     uses: actions/download-artifact@v2
+  #     with:
+  #       name: build_m10_i0_j_FM-1f_artifact
+  #       path: OpenDDS
+  #   - name: extract OpenDDS artifact
+  #     shell: bash
+  #     run: |
+  #       cd OpenDDS
+  #       tar xvfJ build_m10_i0_j_FM-1f.tar.xz
+  #   - name: check build configuration
+  #     shell: bash
+  #     run: |
+  #       cd OpenDDS
+  #       . setenv.sh
+  #       tools/scripts/show_build_config.pl
+  #   - name: disable ntp
+  #     shell: bash
+  #     run: |
+  #       sudo systemsetup -setusingnetworktime off
+  #       sudo rm -rf /etc/ntp.conf
+  #   - name: run OpenDDS tests
+  #     shell: bash
+  #     run: |
+  #       cd OpenDDS
+  #       . setenv.sh
+  #       mkdir ${{ github.job }}_autobuild_workspace
+  #       cd ${{ github.job }}_autobuild_workspace
+  #       echo using commit $TRIGGERING_COMMIT for SHA
+  #       echo $TRIGGERING_COMMIT >> ./SHA
+  #       cat > config.xml <<EOF
+  #       <autobuild>
+  #       <configuration>
+  #       <variable name="log_file" value="output.log"/>
+  #       <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+  #       <variable name="project_root" value="$DDS_ROOT"/>
+  #       <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+  #       <variable name="junit_xml_output" value="Tests"/>
+  #       </configuration>
+  #       <command name="log" options="on"/>
+  #       <command name="print_os_version"/>
+  #       <command name="print_env_vars"/>
+  #       <command name="print_ace_config"/>
+  #       <command name="print_cmake_version"/>
+  #       <command name="print_make_version"/>
+  #       <command name="check_compiler" options="gcc"/>
+  #       <command name="print_perl_version"/>
+  #       <command name="print_autobuild_config"/>
+  #       <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M10 --java --modeling --cmake"/>
+  #       <command name="log" options="off"/>
+  #       <command name="process_logs" options="prettify"/>
+  #       </autobuild>
+  #       EOF
+  #       $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+  #   - name: upload autobuild output
+  #     uses: actions/upload-artifact@v2
+  #     with:
+  #       name: ${{ github.job }}_autobuild_output
+  #       path: OpenDDS/${{ github.job }}_autobuild_workspace
+  #   - name: check results
+  #     shell: bash
+  #     run: |
+  #       $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+  #       cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+  #       grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   build_u14_gcc4:
 

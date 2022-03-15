@@ -2434,7 +2434,7 @@ Spdp::SpdpTransport::open(const DCPS::ReactorTask_rch& reactor_task,
   }
 #endif
 
-  reactor(reactor_task->reactor());
+  reactor(reactor_task->get_reactor());
   reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<RegisterHandlers>(rchandle_from(this), reactor_task));
 
 #ifdef OPENDDS_SECURITY

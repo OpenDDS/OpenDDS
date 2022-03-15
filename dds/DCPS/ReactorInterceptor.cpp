@@ -21,7 +21,6 @@ namespace DCPS {
 
 ReactorInterceptor::Command::Command()
   : executed_(false)
-  , on_queue_(false)
   , condition_(mutex_)
   , reactor_(0)
 {}
@@ -47,32 +46,65 @@ ReactorInterceptor::~ReactorInterceptor()
 {
 }
 
-bool ReactorInterceptor::should_execute_immediately()
+ReactorInterceptor::CommandPtr ReactorInterceptor::execute_or_enqueue(CommandPtr command)
 {
-  return ACE_OS::thr_equal(owner_, ACE_Thread::self()) ||
-    reactor_is_shut_down();
+  OPENDDS_ASSERT(command);
+
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
+  // Only allow immediate execution if running on the reactor thread, otherwise we risk deadlock
+  // when calling into the reactor object.
+  const bool is_owner = ACE_OS::thr_equal(owner_, ACE_Thread::self());
+
+  // If state is set to processing, the conents of command_queue_ have been swapped out
+  // so immediate execution may run jobs out of the expected order.
+  const bool is_not_processing = state_ != PROCESSING;
+
+  // If the command_queue_ is not empty, allowing execution will potentially run unexpected code
+  // which is problematic since we may be holding locks used by the unexpected code.
+  const bool is_empty = command_queue_.empty();
+
+  // If all three of these conditions are met, it should be safe to execute
+  const bool is_safe_to_execute = is_owner && is_not_processing && is_empty;
+
+  // Even if it's not normally safe to execute, allow immediate execution if the reactor is shut down
+  const bool immediate = is_safe_to_execute || reactor_is_shut_down();
+
+  // Always set reactor and push to the queue
+  ACE_Reactor* local_reactor = ACE_Event_Handler::reactor();
+  command->set_reactor(local_reactor);
+  command_queue_.push_back(command);
+
+  // But depending on whether we're running it immediately or not, we either process or notify
+  if (immediate) {
+    process_command_queue_i(guard);
+  } else if (state_ == NONE) {
+    state_ = NOTIFIED;
+    guard.release();
+    local_reactor->notify(this);
+  }
+  return command;
 }
 
 int ReactorInterceptor::handle_exception(ACE_HANDLE /*fd*/)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
-  process_command_queue_i();
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  process_command_queue_i(guard);
   return 0;
 }
 
-void ReactorInterceptor::process_command_queue_i()
+void ReactorInterceptor::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard)
 {
   Queue cq;
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
 
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   state_ = PROCESSING;
   if (!command_queue_.empty()) {
     cq.swap(command_queue_);
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
-      (*pos)->dequeue();
       (*pos)->execute();
       (*pos)->executed();
     }

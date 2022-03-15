@@ -34,22 +34,7 @@ public:
     Command();
     virtual ~Command() { }
 
-    bool reset()
-    {
-      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, false);
-      executed_ = false;
-      const bool retval = on_queue_;
-      on_queue_ = true;
-      return retval;
-    }
-
     virtual void execute() = 0;
-
-    void dequeue()
-    {
-      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      on_queue_ = false;
-    }
 
     void executed()
     {
@@ -69,25 +54,13 @@ public:
     void set_reactor(ACE_Reactor* reactor) { reactor_ = reactor; }
 
     bool executed_;
-    bool on_queue_;
     mutable ACE_Thread_Mutex mutex_;
     mutable ConditionVariable<ACE_Thread_Mutex> condition_;
     ACE_Reactor* reactor_;
   };
   typedef RcHandle<Command> CommandPtr;
 
-  bool should_execute_immediately();
-
-  CommandPtr execute_or_enqueue(CommandPtr c)
-  {
-    OPENDDS_ASSERT(c);
-    const bool immediate = should_execute_immediately();
-    CommandPtr command = enqueue_i(c, immediate);
-    if (immediate) {
-      process_command_queue_i();
-    }
-    return command;
-  }
+  CommandPtr execute_or_enqueue(CommandPtr command);
 
   virtual bool reactor_is_shut_down() const = 0;
 
@@ -102,35 +75,12 @@ protected:
     PROCESSING
   };
 
-  CommandPtr enqueue_i(CommandPtr command, bool immediate)
-  {
-    if (command->reset()) {
-      return command;
-    }
-
-    command->set_reactor(reactor());
-
-    bool do_notify = false;
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-      command_queue_.push_back(command);
-      if (state_ == NONE) {
-        state_ = NOTIFIED;
-        do_notify = true;
-      }
-    }
-    if (!immediate && do_notify) {
-      reactor()->notify(this);
-    }
-    return command;
-  }
-
   ReactorInterceptor(ACE_Reactor* reactor,
                      ACE_thread_t owner);
 
   virtual ~ReactorInterceptor();
   int handle_exception(ACE_HANDLE /*fd*/);
-  void process_command_queue_i();
+  void process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& guard);
 
   ACE_thread_t owner_;
   mutable ACE_Thread_Mutex mutex_;

@@ -96,8 +96,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   message.text = "text";
 
   // Write the instances.
-  for (int idx = 0; idx != INSTANCE_COUNT; ++idx) {
-    message.subject_id = idx;
+  for (size_t idx = 0; idx != INSTANCE_COUNT; ++idx) {
+    message.subject_id = static_cast<int>(idx);
     writer->write(message, DDS::HANDLE_NIL);
   }
 
@@ -111,8 +111,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   transport_inst->drop_messages(true);
 
   // Write to engage the backoff.
-  for (int idx = 0; idx != INSTANCE_COUNT; ++idx) {
-    message.subject_id = idx;
+  for (size_t idx = 0; idx != INSTANCE_COUNT; ++idx) {
+    message.subject_id = static_cast<int>(idx);
     writer->write(message, DDS::HANDLE_NIL);
   }
 

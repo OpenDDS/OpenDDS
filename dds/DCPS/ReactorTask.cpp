@@ -242,6 +242,16 @@ void ReactorTask::stop()
   }
 }
 
+void ReactorTask::reactor(ACE_Reactor* reactor)
+{
+  ACE_Event_Handler::reactor(reactor);
+}
+
+ACE_Reactor* ReactorTask::reactor() const
+{
+  return ACE_Event_Handler::reactor();
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
