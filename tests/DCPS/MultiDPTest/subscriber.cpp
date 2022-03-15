@@ -238,6 +238,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     int num_participants = 0;
 
+#ifdef OPENDDS_SAFETY_PROFILE
     if (safety_profile) {
       // wait for Discovery to complete
       ::DDS::Subscriber_var bit_subscriber = participant[1]->get_builtin_subscriber();
@@ -268,7 +269,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           num_participants = part_data.length ();
         }
       }
-   }
+    }
+#endif // OPENDDS_SAFETY_PROFILE
 
     // Indicate that the subscriber is ready
     FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
