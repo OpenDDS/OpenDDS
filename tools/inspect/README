@@ -1,6 +1,6 @@
-The inspect tool is a way to monitor traffic occuring on a given topic, typename and domain when 
-using OpenDDS XTypes. It creates a recorder that will associate with any compatible discovered
-readers. Any message received by the recorder will be printed to cout.
+The inspect tool is a way to monitor samples from OpenDDS XTypes writers with a matching topic,
+typename and domain. It creates a recorder that will associate with any compatible discovered
+readers. Any sample received by the recorder will be printed to cout.
 
 Positional Arguments:
   TOPIC_NAME              The name of the topic to listen for.
