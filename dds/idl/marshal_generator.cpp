@@ -3657,7 +3657,7 @@ namespace {
         "    uni._d(disc);\n"
         "    return true;\n"
         "  }\n"
-        "  if (size >= strm.length()) {\n"
+        "  if (size > strm.length()) {\n"
         "    return false;\n"
         "  }\n"
         "  if (disc == RTPS::PID_PROPERTY_LIST) {\n"
