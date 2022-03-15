@@ -1,0 +1,5 @@
+Run inspect with --help for additional usage information.
+
+The inspect tool is a way to monitor traffic occuring on a given topic, typename and domain.
+It creates a recorder that will associate with any compatible discovered readers. Any message
+received by the recorder will be printed to cout.
