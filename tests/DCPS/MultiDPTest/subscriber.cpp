@@ -236,10 +236,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_dcps_objects(0);
     init_dcps_objects(1);
 
-    int num_participants = 0;
-
 #ifdef OPENDDS_SAFETY_PROFILE
+#ifndef DDS_HAS_MINIMUM_BIT
     if (safety_profile) {
+      int num_participants = 0;
+
       // wait for Discovery to complete
       ::DDS::Subscriber_var bit_subscriber = participant[1]->get_builtin_subscriber();
       ::DDS::DataReader_var part_rdr = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PARTICIPANT_TOPIC);
@@ -270,6 +271,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
     }
+#endif // !DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_SAFETY_PROFILE
 
     // Indicate that the subscriber is ready
