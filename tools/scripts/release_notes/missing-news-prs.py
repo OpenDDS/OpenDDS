@@ -30,7 +30,7 @@ with open(sys.argv[1]) as f:
     next(rows) # Skip Row
     for row in rows:
         # print(' '.join(['[{}]'.format(c) for c in row]))
-        if row[4] in ('yes', 'maybe'):
+        if any([x in row[4].lower() for x in ('yes', 'maybe')]):
             m = pr_re.search(row[1])
             if not m:
               sys.exit('Could not find PR number in ' + repr(row[1]))
