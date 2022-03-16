@@ -19,7 +19,7 @@
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 #include "tests/Utils/WaitForSample.h"
 
-#include "dds/DCPS/BuiltInTopicUtils.h"
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>

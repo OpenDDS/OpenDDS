@@ -17,7 +17,7 @@
 
 #include "tests/Utils/WaitForSample.h"
 
-#include "dds/DCPS/BuiltInTopicUtils.h"
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
@@ -214,16 +214,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ws->attach_condition(condition);
 
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("ERROR: %N:%l: wait_for_subscribers() -")
-                   ACE_TEXT(" wait failed!\n")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: wait failed!\n")));
         ACE_OS::exit(-1);
       }
 
       if (datawriter[ctr]->get_publication_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("ERROR: %N:%l: wait_for_subscribers() -")
-                   ACE_TEXT(" get_publication_matched_status failed!\n")));
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status failed!\n")));
         ACE_OS::exit(-1);
       }
 
