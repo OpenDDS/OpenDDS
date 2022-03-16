@@ -271,6 +271,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -729,6 +730,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build/target
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -1026,6 +1028,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/build/target
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -1272,6 +1275,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -1544,6 +1548,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -1814,6 +1819,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -2065,6 +2071,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -2316,6 +2323,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -2562,6 +2570,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -3056,6 +3065,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -3327,6 +3337,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -3587,6 +3598,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -3834,6 +3846,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -4036,6 +4049,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -4283,6 +4297,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -4485,6 +4500,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -4820,6 +4836,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -4937,6 +4954,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -5053,6 +5071,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -5169,6 +5188,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -5544,6 +5564,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
@@ -10467,6 +10488,7 @@ jobs:
 #      shell: bash
 #      run: |
 #        cd OpenDDS
+#        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
 #        . setenv.sh
 #        mkdir ${{ github.job }}_autobuild_workspace
 #        cd ${{ github.job }}_autobuild_workspace
@@ -10663,6 +10685,7 @@ jobs:
 #      shell: bash
 #      run: |
 #        cd OpenDDS
+#        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
 #        . setenv.sh
 #        mkdir ${{ github.job }}_autobuild_workspace
 #        cd ${{ github.job }}_autobuild_workspace
@@ -10919,6 +10942,7 @@ jobs:
   #     shell: bash
   #     run: |
   #       cd OpenDDS
+  #       echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
   #       . setenv.sh
   #       mkdir ${{ github.job }}_autobuild_workspace
   #       cd ${{ github.job }}_autobuild_workspace
@@ -11202,6 +11226,7 @@ jobs:
   #     shell: bash
   #     run: |
   #       cd OpenDDS
+  #       echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
   #       . setenv.sh
   #       mkdir ${{ github.job }}_autobuild_workspace
   #       cd ${{ github.job }}_autobuild_workspace
