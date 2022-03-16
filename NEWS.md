@@ -6,7 +6,7 @@ OpenDDS 3.20.0 is currently in development, so this list might change.
 ### Additions:
 - Added the `host_name` shared memory transport config option (#3386)
 - Added an example test for demonstrating issues (#3322)
-- Added the `--old-typeobject-encoding` option to `opendds_idl` for compatibility with 3.18 XTypes `TypeObject` before OpenDDS 3.18.0 (#3263)
+- Added the `--old-typeobject-encoding` option to `opendds_idl` for compatibility with `TypeObject` before OpenDDS 3.18.0 (#3263)
 - Added return code to `ServiceParticipant::shutdown()` (#3159, #3270)
 - CMake Module:
   - Improved support for installing CMake projects that use OpenDDS (#3315, #3354, #3367, #3368, #3393)
