@@ -233,8 +233,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     init_dcps_objects(0);
     init_dcps_objects(1);
 
-#ifdef OPENDDS_SAFETY_PROFILE
-#ifndef DDS_HAS_MINIMUM_BIT
+#if defined (OPENDDS_SAFETY_PROFILE) && !defined (DDS_HAS_MINIMUM_BIT)
     if (safety_profile) {
       int num_participants = 0;
 
@@ -268,8 +267,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         }
       }
     }
-#endif // !DDS_HAS_MINIMUM_BIT
-#endif // OPENDDS_SAFETY_PROFILE
+#endif // OPENDDS_SAFETY_PROFILE && !DDS_HAS_MINIMUM_BIT
 
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 
