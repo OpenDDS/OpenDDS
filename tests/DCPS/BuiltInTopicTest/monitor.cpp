@@ -173,7 +173,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;
 
       // give time for BIT datareader/datawriter fully association.
-      ACE_OS::sleep (3);
+      ACE_OS::sleep(3);
 
       if (delay_before_read_sec > 0) {
         ACE_DEBUG((LM_DEBUG,"(%P|%t) monitor: SLEEPING BEFORE READING!\n"));
@@ -290,10 +290,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter: key = %d, %x, %x.\n",
             pubdata[i].key.value[0], pubdata[i].key.value[1], pubdata[i].key.value[2]));
 
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW user data %C\n", pubdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW topic data %C\n", pubdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW group data %C\n", pubdata[i].group_data.value.get_buffer()));
-
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DW_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
         CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_GROUP_DATA));
@@ -375,10 +371,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
 
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x\n",
           subdata[i].key.value[0], subdata[i].key.value[1], subdata[i].key.value[2]));
-
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR user data %C\n", subdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR topic data %C\n", subdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR group data %C\n", subdata[i].group_data.value.get_buffer()));
 
         CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DR_USER_DATA));
         CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));

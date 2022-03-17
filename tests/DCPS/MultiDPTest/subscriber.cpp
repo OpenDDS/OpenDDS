@@ -263,7 +263,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
           ACE_ERROR ((LM_ERROR,
             "(%P|%t) subscriber:  failed to read BIT participant data.\n"));
         } else {
-          num_participants = part_data.length ();
+          num_participants = part_data.length();
         }
       }
     }
