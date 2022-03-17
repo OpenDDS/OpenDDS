@@ -63,10 +63,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
       synch_file_dir = currentArg;
-      pub_ready_filename = synch_file_dir + pub_ready_filename;
       pub_finished_filename = synch_file_dir + pub_finished_filename;
-      sub_ready_filename = synch_file_dir + sub_ready_filename;
-      sub_finished_filename = synch_file_dir + sub_finished_filename;
 
       arg_shifter.consume_arg ();
     } else {
@@ -183,24 +180,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     init();
 
-    // Indicate that the publisher is ready
-    FILE* writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("w"));
-    if (writers_ready == 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
-    }
-
-    // Wait for the subscriber to be ready.
-    const ACE_Time_Value small_time(0, 250000);
-    FILE* readers_ready = 0;
-    do {
-      ACE_OS::sleep(small_time);
-      readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("r"));
-    } while (!readers_ready);
-
-    if (writers_ready) ACE_OS::fclose(writers_ready);
-    if (readers_ready) ACE_OS::fclose(readers_ready);
-
     // ensure the associations are fully established before writing.
     DDS::WaitSet_var ws = new DDS::WaitSet;
     DDS::ConditionSeq conditions;
@@ -232,6 +211,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       }
     }
 
+    const ACE_Time_Value small_time(0, 250000);
+
     int timeout_writes = 0;
     bool writers_finished = false;
 
@@ -256,23 +237,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  ACE_TEXT("(%P|%t) ERROR: Unable to i publisher completed file\n")));
     } else {
       ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
-    }
-
-    // Wait for the subscriber to finish.
-    FILE* readers_completed = 0;
-    do {
-      ACE_OS::sleep(small_time);
-      readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("r"));
-    } while (!readers_completed);
-
-    if (writers_completed) ACE_OS::fclose(writers_completed);
-    if (readers_completed) ACE_OS::fclose(readers_completed);
-
-    {  // Extra scope for VC6
-      for (int i = 0; i < num_datawriters; ++i) {
-        writers[i]->end();
-        delete writers[i];
-      }
     }
 
   } catch (const TestException&) {

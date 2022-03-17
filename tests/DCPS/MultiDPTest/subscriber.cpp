@@ -77,10 +77,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
       synch_file_dir = currentArg;
-      pub_ready_filename = synch_file_dir + pub_ready_filename;
       pub_finished_filename = synch_file_dir + pub_finished_filename;
-      sub_ready_filename = synch_file_dir + sub_ready_filename;
-      sub_finished_filename = synch_file_dir + sub_finished_filename;
 
       arg_shifter.consume_arg ();
     } else if (arg_shifter.cur_arg_strncasecmp(ACE_TEXT("-safety-profile")) == 0) {
@@ -274,24 +271,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 #endif // !DDS_HAS_MINIMUM_BIT
 #endif // OPENDDS_SAFETY_PROFILE
 
-    // Indicate that the subscriber is ready
-    FILE* readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("w"));
-    if (readers_ready == 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber ready file\n")));
-    }
-
-    // Wait for the publisher to be ready
-    const ACE_Time_Value small_time(0, 250000);
-    FILE* writers_ready = 0;
-    do {
-      ACE_OS::sleep(small_time);
-      writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("r"));
-    } while (!writers_ready);
-
-    if (readers_ready) ACE_OS::fclose(readers_ready);
-    if (writers_ready) ACE_OS::fclose(writers_ready);
-
     int expected = num_datawriters * num_instances_per_writer * num_samples_per_instance;
 
     FILE* writers_completed = 0;
@@ -321,22 +300,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
       ACE_OS::sleep(1);
     }
-
-    // Indicate that the subscriber is done
-    FILE* readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("w"));
-    if (!readers_completed) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Unable to create subscriber completed file\n")));
-    }
-
-    // Wait for the publisher to finish
-    while (!writers_completed) {
-      ACE_OS::sleep(small_time);
-      writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("r"));
-    }
-
-    if (readers_completed) ACE_OS::fclose(readers_completed);
-    if (writers_completed) ACE_OS::fclose(writers_completed);
 
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));
