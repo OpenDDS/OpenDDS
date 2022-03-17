@@ -234,7 +234,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     FILE* writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("w"));
     if (writers_completed == 0) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Unable to i publisher completed file\n")));
+                 ACE_TEXT("(%P|%t) ERROR: Unable to write publisher completed file\n")));
     } else {
       ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
     }
