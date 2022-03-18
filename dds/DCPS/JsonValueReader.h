@@ -140,7 +140,7 @@ private:
       return token_type_;
     }
 
-    if (!reader_.IterativeParseNext<rapidjson::kParseDefaultFlags>(input_stream_, *this)) {
+    if (!reader_.IterativeParseNext<rapidjson::kParseStopWhenDoneFlag>(input_stream_, *this)) {
       token_type_ = kError;
     }
 
