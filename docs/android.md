@@ -111,7 +111,7 @@ software:
     Android when that comes.
 
 Finally, all paths being passed to GNU Make must not contain spaces because
-ACE's gnuace make scripts doesn't handle those paths correctly on Windows. This
+ACE's gnuace make scripts don't handle those paths correctly on Windows. This
 means the NDK, toolchain, MSYS2, JDK, OpenDDS source, OpenDDS host tools, etc.
 must not contain any spaces in their paths.
 
