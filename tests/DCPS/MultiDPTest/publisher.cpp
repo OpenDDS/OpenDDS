@@ -239,6 +239,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
     }
 
+    if (writers_completed) ACE_OS::fclose(writers_completed);
+
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));
     status = 1;
