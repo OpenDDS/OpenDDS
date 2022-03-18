@@ -336,7 +336,7 @@ public:
     bit_enabled_ = b;
   }
 
-  const NetworkAddress& default_address() const { return default_address_; }
+  const ACE_INET_Addr& default_address() const { return default_address_; }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
@@ -434,6 +434,8 @@ public:
 #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
   NetworkConfigModifier* network_config_modifier();
 #endif
+  NetworkConfigMonitor_rch network_config_monitor();
+
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay() const;
   void bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration);
@@ -457,11 +459,6 @@ public:
   * Share the configuration database
   */
   ACE_Configuration_Heap& get_configuration();
-
-  RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic() const
-  {
-    return network_interface_address_topic_;
-  }
 
 private:
 
@@ -624,7 +621,7 @@ private:
   int bit_lookup_duration_msec_;
 
   /// The default network address to use.
-  NetworkAddress default_address_;
+  ACE_INET_Addr default_address_;
 
   /// The configuration object that imports the configuration
   /// file.
@@ -774,8 +771,6 @@ private:
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
-
-  RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

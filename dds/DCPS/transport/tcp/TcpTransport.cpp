@@ -324,11 +324,11 @@ TcpTransport::configure_i(TcpInst& config)
 
   // Override with DCPSDefaultAddress.
   if (config.local_address() == ACE_INET_Addr() &&
-      TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
+      TheServiceParticipant->default_address() != ACE_INET_Addr()) {
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) TcpTransport::configure_i overriding with DCPSDefaultAddress\n")), 2);
 
-    config.local_address(TheServiceParticipant->default_address().to_addr());
+    config.local_address(TheServiceParticipant->default_address());
   }
 
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TcpTransport::configure_i opening acceptor for %C on %C\n"),

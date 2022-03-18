@@ -15,148 +15,305 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-bool NetworkInterfaceAddress::exclude_from_multicast(const char* configured_interface) const
+void NetworkInterface::add_default_addrs()
 {
-  if (!can_multicast) {
+  const ACE_INET_Addr sp_default = TheServiceParticipant->default_address();
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+  if (sp_default != ACE_INET_Addr()) {
+    addresses_.insert(sp_default);
+    return;
+  }
+  static const u_short port_zero = 0;
+  ACE_INET_Addr addr(port_zero, "0.0.0.0");
+  addresses_.insert(addr);
+#ifdef ACE_HAS_IPV6
+  ACE_INET_Addr addr2(port_zero, "::");
+  addresses_.insert(addr2);
+#endif
+}
+
+bool NetworkInterface::has(const ACE_INET_Addr& addr) const
+{
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+  return addresses_.count(addr);
+}
+
+bool NetworkInterface::exclude_from_multicast(const char* configured_interface) const
+{
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
+  if (addresses_.empty() || !can_multicast_) {
     return true;
   }
 
-  if (configured_interface && *configured_interface && name != configured_interface) {
+  if (configured_interface && *configured_interface && name_ != configured_interface) {
     OPENDDS_STRING ci_semi(configured_interface);
     if (ci_semi.find_first_of(':') == OPENDDS_STRING::npos) {
       ci_semi += ':';
     }
-    NetworkAddress as_addr(ci_semi.c_str());
-    if (as_addr == NetworkAddress() || address != as_addr) {
+    ACE_INET_Addr as_addr(ci_semi.c_str());
+    if (as_addr == ACE_INET_Addr() || addresses_.count(as_addr) == 0) {
       return true;
     }
   }
 
-  const NetworkAddress sp_default = TheServiceParticipant->default_address();
-  return sp_default != NetworkAddress() && address != sp_default;
+  const ACE_INET_Addr sp_default = TheServiceParticipant->default_address();
+  return sp_default != ACE_INET_Addr() && addresses_.count(sp_default) == 0;
 }
 
-NetworkConfigMonitor::NetworkConfigMonitor()
-  : writer_(make_rch<InternalDataWriter<NetworkInterfaceAddress> >(true))
-{}
-
-void NetworkConfigMonitor::connect(RcHandle<InternalTopic<NetworkInterfaceAddress> > topic)
+bool NetworkInterface::add_address(const ACE_INET_Addr& addr)
 {
-  topic->connect(writer_);
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+  return addresses_.insert(addr).second;
 }
 
-void NetworkConfigMonitor::disconnect(RcHandle<InternalTopic<NetworkInterfaceAddress> > topic)
+bool NetworkInterface::remove_address(const ACE_INET_Addr& addr)
 {
-  topic->disconnect(writer_);
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+  return addresses_.erase(addr) != 0;
 }
 
-void NetworkConfigMonitor::set(const List& list)
+NetworkInterface& NetworkInterface::operator=(const NetworkInterface& rhs)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  if (this != &rhs) {
+    const bool me_first = this < &rhs;
+    ACE_Thread_Mutex* const first = me_first ? &mutex_ : &(rhs.mutex_);
+    ACE_Thread_Mutex* const second = me_first ? &(rhs.mutex_) : &mutex_;
 
-  for (List::const_iterator pos = list.begin(), limit = list.end(); pos != limit; ++pos) {
-    List::const_iterator iter = std::find_if(list_.begin(), list_.end(), NetworkInterfaceAddressKeyEqual(*pos));
-    if (iter != list_.end()) {
-      if (*iter != *pos) {
-        // Change.
-        writer_->write(*pos);
+    ACE_Guard<ACE_Thread_Mutex> g1(*first);
+    ACE_Guard<ACE_Thread_Mutex> g2(*second);
+
+    addresses_ = rhs.addresses_;
+    index_ = rhs.index_;
+    name_ = rhs.name_;
+    can_multicast_ = rhs.can_multicast_;
+  }
+  return *this;
+}
+
+void NetworkConfigMonitor::add_listener(NetworkConfigListener_wrch listener)
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
+    listeners_.insert(listener);
+  }
+
+  const RcHandle<NetworkConfigListener> list = listener.lock();
+
+  NetworkInterfaces interfaces = get_interfaces();
+  for (NetworkInterfaces::const_iterator pos = interfaces.begin(), limit = interfaces.end(); pos != limit; ++pos) {
+    list->add_interface(*pos);
+  }
+}
+
+void NetworkConfigMonitor::remove_listener(NetworkConfigListener_wrch listener)
+{
+  ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
+  listeners_.erase(listener);
+}
+
+NetworkInterfaces NetworkConfigMonitor::get_interfaces() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, network_interfaces_mutex_, NetworkInterfaces());
+  return network_interfaces_;
+}
+
+void NetworkConfigMonitor::add_interface(const NetworkInterface_rch& nic)
+{
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    network_interfaces_.push_back(nic);
+  }
+
+  Listeners listeners;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
+    listeners = listeners_;
+  }
+
+  for (Listeners::const_iterator pos = listeners.begin(), limit = listeners.end(); pos != limit; ++pos) {
+    const RcHandle<NetworkConfigListener> listener(pos->lock());
+    if (listener) {
+      if (DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigMontior::add_interface(%C)\n"), nic->name().c_str()));
       }
-    } else {
-      // New.
-      writer_->write(*pos);
+      listener->add_interface(nic);
     }
-  }
-
-  for (List::const_iterator pos = list_.begin(), limit = list_.end(); pos != limit; ++pos) {
-    List::const_iterator iter = std::find_if(list.begin(), list.end(), NetworkInterfaceAddressKeyEqual(*pos));
-    if (iter == list.end()) {
-      // Deleted.
-      writer_->dispose(*pos);
-    }
-  }
-
-  list_ = list;
-}
-
-void NetworkConfigMonitor::clear()
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  for (List::const_iterator pos = list_.begin(), limit = list_.end(); pos != limit; ++pos) {
-    writer_->dispose(*pos);
-  }
-
-  list_.clear();
-}
-
-void NetworkConfigMonitor::set(const NetworkInterfaceAddress& nia)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  List::iterator pos = std::find_if(list_.begin(), list_.end(), NetworkInterfaceAddressKeyEqual(nia));
-  if (pos != list_.end()) {
-    if (*pos != nia) {
-      writer_->write(nia);
-      *pos = nia;
-    }
-  } else {
-    writer_->write(nia);
-    list_.push_back(nia);
   }
 }
 
 void NetworkConfigMonitor::remove_interface(int index)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
-    if (pos->index == index) {
-      writer_->dispose(*pos);
-      list_.erase(pos++);
-    } else {
-      ++pos;
+  NetworkInterface_rch nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceIndex(index));
+    if (pos != network_interfaces_.end()) {
+      nic = *pos;
+      if (DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigMontior::remove_interface(%C)\n"), nic->name().c_str()));
+      }
+      network_interfaces_.erase(pos);
+      publish = true;
     }
+  }
+
+  if (publish) {
+    publish_remove_interface(nic);
   }
 }
 
 void NetworkConfigMonitor::remove_interface(const OPENDDS_STRING& name)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  NetworkInterface_rch nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
+    if (pos != network_interfaces_.end()) {
+      nic = *pos;
+      if (DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) NetworkConfigMontior::remove_interface(%C)\n"), nic->name().c_str()));
+      }
+      network_interfaces_.erase(pos);
+      publish = true;
+    }
+  }
 
-  for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
-    if (pos->name == name) {
-      writer_->dispose(*pos);
-      list_.erase(pos++);
-    } else {
-      ++pos;
+  if (publish) {
+    publish_remove_interface(nic);
+  }
+}
+
+void NetworkConfigMonitor::publish_remove_interface(const NetworkInterface_rch& nic)
+{
+  Listeners listeners;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
+    listeners = listeners_;
+  }
+
+  for (Listeners::const_iterator pos = listeners.begin(), limit = listeners.end(); pos != limit; ++pos) {
+    const RcHandle<NetworkConfigListener> listener(pos->lock());
+    if (listener) {
+      listener->remove_interface(nic);
     }
   }
 }
 
-void NetworkConfigMonitor::remove_address(int index, const NetworkAddress& address)
+void NetworkConfigMonitor::add_address(int index, const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  NetworkInterface_rch nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceIndex(index));
+    if (nic_pos != network_interfaces_.end()) {
+      nic = *nic_pos;
+      g.release();
+      if (nic->add_address(address)) {
+        publish = true;
+      }
+    }
+  }
 
-  for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
-    if (pos->index == index && pos->address == address) {
-      writer_->dispose(*pos);
-      list_.erase(pos++);
-    } else {
-      ++pos;
+  if (publish) {
+    publish_add_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::add_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address)
+{
+  NetworkInterface_rch nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
+    if (nic_pos != network_interfaces_.end()) {
+      nic = *nic_pos;
+      g.release();
+      if (nic->add_address(address)) {
+        publish = true;
+      }
+    }
+  }
+
+  if (publish) {
+    publish_add_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::publish_add_address(const NetworkInterface_rch& nic, const ACE_INET_Addr& address)
+{
+  Listeners listeners;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
+    listeners = listeners_;
+  }
+
+  for (Listeners::const_iterator pos = listeners.begin(), limit = listeners.end(); pos != limit; ++pos) {
+    const RcHandle<NetworkConfigListener> listener(pos->lock());
+    if (listener) {
+      listener->add_address(nic, address);
     }
   }
 }
 
-void NetworkConfigMonitor::remove_address(const OPENDDS_STRING& name, const NetworkAddress& address)
+void NetworkConfigMonitor::remove_address(int index, const ACE_INET_Addr& address)
 {
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  NetworkInterface_rch nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceIndex(index));
+    if (nic_pos != network_interfaces_.end()) {
+      nic = *nic_pos;
+      g.release();
+      if (nic->remove_address(address)) {
+        publish = true;
+      }
+    }
+  }
 
-  for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
-    if (pos->name == name && pos->address == address) {
-      writer_->dispose(*pos);
-      list_.erase(pos++);
-    } else {
-      ++pos;
+  if (publish) {
+    publish_remove_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::remove_address(const OPENDDS_STRING& name, const ACE_INET_Addr& address)
+{
+  NetworkInterface_rch nic;
+  bool publish = false;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, network_interfaces_mutex_);
+    NetworkInterfaces::iterator nic_pos = std::find_if(network_interfaces_.begin(), network_interfaces_.end(), NetworkInterfaceName(name));
+    if (nic_pos != network_interfaces_.end()) {
+      nic = *nic_pos;
+      g.release();
+      if (nic->remove_address(address)) {
+        publish = true;
+      }
+    }
+  }
+
+  if (publish) {
+    publish_remove_address(nic, address);
+  }
+}
+
+void NetworkConfigMonitor::publish_remove_address(const NetworkInterface_rch& nic, const ACE_INET_Addr& address)
+{
+  Listeners listeners;
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, listeners_mutex_);
+    listeners = listeners_;
+  }
+
+  for (Listeners::const_iterator pos = listeners.begin(), limit = listeners.end(); pos != limit; ++pos) {
+    const RcHandle<NetworkConfigListener> listener(pos->lock());
+    if (listener) {
+      listener->remove_address(nic, address);
     }
   }
 }

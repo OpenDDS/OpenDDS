@@ -96,7 +96,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , local_crypto_handle_(DDS::HANDLE_NIL)
   , ice_agent_(ICE::Agent::instance())
 #endif
-  , network_interface_address_reader_(make_rch<InternalDataReader<NetworkInterfaceAddress> >(true, rchandle_from(this)))
 {
 #ifdef OPENDDS_SECURITY
   const GUID_t guid = make_id(local_prefix, ENTITYID_PARTICIPANT);
@@ -106,8 +105,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
   receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
   assign(local_prefix_, local_prefix);
-
-  this->job_queue(job_queue_);
 }
 
 RtpsUdpDataLink::~RtpsUdpDataLink()
@@ -414,39 +411,152 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
     return false;
   }
 
-  TheServiceParticipant->network_interface_address_topic()->connect(network_interface_address_reader_);
+  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->add_listener(*this);
+  } else {
+    NetworkInterface_rch nic = make_rch<NetworkInterface>(0, cfg.multicast_interface_, true);
+    nic->add_default_addrs();
+    const bool all = cfg.multicast_interface_.empty();
+    join_multicast_group(nic, all);
+  }
 
   return true;
 }
 
-void RtpsUdpDataLink::on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> >)
+void
+RtpsUdpDataLink::add_address(const NetworkInterface_rch& nic,
+                             const ACE_INET_Addr&)
 {
-  InternalDataReader<NetworkInterfaceAddress>::SampleSequence samples;
-  InternalSampleInfoSequence infos;
+  job_queue_->enqueue(make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                     ChangeMulticastGroup::CMG_JOIN));
+}
 
-  network_interface_address_reader_->take(samples, infos);
+void
+RtpsUdpDataLink::remove_address(const NetworkInterface_rch& nic,
+                                const ACE_INET_Addr&)
+{
+  job_queue_->enqueue(make_rch<ChangeMulticastGroup>(rchandle_from(this), nic,
+                                                     ChangeMulticastGroup::CMG_LEAVE));
+}
+
+void
+RtpsUdpDataLink::join_multicast_group(const NetworkInterface_rch& nic,
+                                      bool all_interfaces)
+{
+  network_change();
 
   if (!config().use_multicast_) {
     return;
   }
 
-  multicast_manager_.process(samples,
-                             infos,
-                             config().multicast_interface_,
-                             get_reactor(),
-                             receive_strategy().in(),
-                             config().multicast_group_address(),
-                             multicast_socket_
-#ifdef ACE_HAS_IPV6
-                             , config().ipv6_multicast_group_address(),
-                             ipv6_multicast_socket_
-#endif
-                             );
-
-  if (!samples.empty()) {
-    // FUTURE: This is propagating info to discovery.  Write instead.
-    network_change();
+  if (nic->exclude_from_multicast(config().multicast_interface_.c_str())) {
+    return;
   }
+
+  if (joined_interfaces_.count(nic->name()) == 0 && nic->has_ipv4()) {
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
+                 ACE_TEXT("joining group %C on %C\n"),
+                 DCPS::LogAddr(config().multicast_group_address()).c_str(),
+                 nic->name().c_str()));
+    }
+
+    if (0 == multicast_socket_.join(config().multicast_group_address().to_addr(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+      joined_interfaces_.insert(nic->name());
+
+      if (get_reactor()->register_handler(multicast_socket_.get_handle(),
+                                          receive_strategy().in(),
+                                          ACE_Event_Handler::READ_MASK) != 0) {
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register multicast input handler\n")));
+        }
+      }
+    } else {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+      }
+    }
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (ipv6_joined_interfaces_.count(nic->name()) == 0 && nic->has_ipv6()) {
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group ")
+                 ACE_TEXT("joining group %C on %C\n"),
+                 DCPS::LogAddr(config().ipv6_multicast_group_address()).c_str(),
+                 nic->name().c_str()));
+    }
+
+    if (0 == ipv6_multicast_socket_.join(config().ipv6_multicast_group_address().to_addr(), 1, all_interfaces ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+      ipv6_joined_interfaces_.insert(nic->name());
+
+      if (get_reactor()->register_handler(ipv6_multicast_socket_.get_handle(),
+                                          receive_strategy().in(),
+                                          ACE_Event_Handler::READ_MASK) != 0) {
+        if (DCPS_debug_level > 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) RtpsUdpDataLink::join_multicast_group failed to register ipv6 multicast input handler\n")));
+        }
+      }
+    } else {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::join_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::join failed: %m\n")));
+      }
+    }
+  }
+#endif
+}
+
+void
+RtpsUdpDataLink::leave_multicast_group(const NetworkInterface_rch& nic)
+{
+  if (joined_interfaces_.count(nic->name()) != 0 && !nic->has_ipv4()) {
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_multicast_group ")
+                 ACE_TEXT("leaving group %C on %C\n"),
+                 DCPS::LogAddr(config().multicast_group_address()).c_str(),
+                 nic->name().c_str()));
+    }
+
+    if (0 == multicast_socket_.leave(config().multicast_group_address().to_addr(), ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+      joined_interfaces_.erase(nic->name());
+    } else {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+      }
+    }
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (ipv6_joined_interfaces_.count(nic->name()) != 0 && !nic->has_ipv6()) {
+    if (DCPS_debug_level > 3) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) RtpsUdpDataLink::leave_ipv6_multicast_group ")
+                 ACE_TEXT("leaving group %C on %C\n"),
+                 DCPS::LogAddr(config().multicast_group_address()).c_str(),
+                 nic->name().c_str()));
+    }
+
+    if (0 == ipv6_multicast_socket_.leave(config().ipv6_multicast_group_address().to_addr(), ACE_TEXT_CHAR_TO_TCHAR(nic->name().c_str()))) {
+      ipv6_joined_interfaces_.erase(nic->name());
+    } else {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                  ACE_TEXT("(%P|%t) ERROR: RtpsUdpDataLink::leave_ipv6_multicast_group(): ")
+                  ACE_TEXT("ACE_SOCK_Dgram_Mcast::leave failed: %m\n")));
+      }
+    }
+  }
+#endif
 }
 
 void
@@ -501,14 +611,14 @@ RtpsUdpDataLink::update_locators(const RepoId& remote_id,
     for (AddrSet::const_iterator pos = unicast_addresses.begin(), limit = unicast_addresses.end();
          pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
-                 LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
+                 LogGuid(remote_id).c_str(), DCPS::LogAddr(*pos).c_str()));
     }
   }
   if (log_multicast_change) {
     for (AddrSet::const_iterator pos = multicast_addresses.begin(), limit = multicast_addresses.end();
          pos != limit; ++pos) {
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) RtpsUdpDataLink::update_locators %C is now at %C\n"),
-                 LogGuid(remote_id).c_str(), LogAddr(*pos).c_str()));
+                 LogGuid(remote_id).c_str(), DCPS::LogAddr(*pos).c_str()));
     }
   }
 }
@@ -583,7 +693,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
 
   if (conv.isWriter()) {
     if (transport_debug.log_progress) {
-      log_progress("RTPS writer/reader association", local_id, remote_id, participant_discovered_at);
+      DCPS::log_progress("RTPS writer/reader association", local_id, remote_id, participant_discovered_at);
     }
 
     if (remote_reliable) {
@@ -610,7 +720,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     invoke_on_start_callbacks(local_id, remote_id, true);
   } else if (conv.isReader()) {
     if (transport_debug.log_progress) {
-      log_progress("RTPS reader/writer association", local_id, remote_id, participant_discovered_at);
+      DCPS::log_progress("RTPS reader/writer association", local_id, remote_id, participant_discovered_at);
     }
     {
       GuardType guard(strategy_lock_);
@@ -949,7 +1059,10 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 void
 RtpsUdpDataLink::stop_i()
 {
-  TheServiceParticipant->network_interface_address_topic()->disconnect(network_interface_address_reader_);
+  NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
+  if (ncm) {
+    ncm->remove_listener(*this);
+  }
 
   heartbeat_->disable();
   heartbeatchecker_->disable();
@@ -1530,7 +1643,7 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddr
       const bool expired = config().receive_address_duration_ < (MonotonicTimePoint::now() - pos->second.last_recv_time_);
       const bool allow_update = expired ||
                                 pos->second.last_recv_addr_ == addr ||
-                                is_more_local(pos->second.last_recv_addr_, addr);
+                                DCPS::is_more_local(pos->second.last_recv_addr_, addr);
       if (allow_update) {
         remove_cache = pos->second.last_recv_addr_ != addr;
         pos->second.last_recv_addr_ = addr;
@@ -1966,7 +2079,7 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       OPENDDS_ASSERT(preassociation_writers_.count(writer));
       preassociation_writers_.erase(writer);
       if (transport_debug.log_progress) {
-        log_progress("RTPS reader/writer association complete", id_, writer->id_, writer->participant_discovered_at_);
+        DCPS::log_progress("RTPS reader/writer association complete", id_, writer->id_, writer->participant_discovered_at_);
       }
       log_remote_counts("process_heartbeat_i");
 
@@ -3156,7 +3269,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
     if (is_postassociation) {
       remove_preassociation_reader(reader);
       if (transport_debug.log_progress) {
-        log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
+        DCPS::log_progress("RTPS writer/reader association complete", id_, reader->id_, reader->participant_discovered_at_);
       }
       log_remote_counts("process_acknack");
 
@@ -4598,7 +4711,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
   }
 
 #ifdef OPENDDS_SECURITY
-  WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> endpoint = get_ice_endpoint();
   if (endpoint) {
     ice_addr = ice_agent_->get_address(endpoint, local, remote);
   }
@@ -4628,14 +4741,14 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
 }
 
 #ifdef OPENDDS_SECURITY
-RcHandle<ICE::Agent>
+DCPS::RcHandle<ICE::Agent>
 RtpsUdpDataLink::get_ice_agent() const
 {
   return ice_agent_;
 }
 #endif
 
-WeakRcHandle<ICE::Endpoint>
+DCPS::WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {
   return impl().get_ice_endpoint();
 }

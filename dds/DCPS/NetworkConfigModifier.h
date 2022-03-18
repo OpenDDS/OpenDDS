@@ -25,9 +25,18 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export NetworkConfigModifier : public NetworkConfigMonitor {
 public:
+  explicit NetworkConfigModifier();
   bool open();
   bool close();
+
+  void add_interface(const OPENDDS_STRING &name);
+  using NetworkConfigMonitor::remove_interface;
+  using NetworkConfigMonitor::add_address;
+  using NetworkConfigMonitor::remove_address;
   void update_interfaces();
+
+private:
+  void validate_interfaces_index();
 };
 typedef RcHandle<NetworkConfigModifier> NetworkConfigModifier_rch;
 
