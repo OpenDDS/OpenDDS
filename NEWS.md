@@ -4,22 +4,41 @@
 OpenDDS 3.20.0 is currently in development, so this list might change.
 
 ### Additions:
+- Added the `host_name` shared memory transport config option (#3386)
+- Added an example test for demonstrating issues (#3322)
+- Added the `--old-typeobject-encoding` option to `opendds_idl` for compatibility with `TypeObject` before OpenDDS 3.18.0 (#3263)
+- Added return code to `ServiceParticipant::shutdown()` (#3159, #3270)
 - CMake Module:
-  - OpenDDS, ACE, and TAO libraries can now be installed using `install(IMPORTED_RUNTIME_ARTIFACTS)` if using CMake 3.21 or later (#3315)
-    - To help facilitate this, a new function called `opendds_get_library_dependencies` has been added.
-  - To help install generated files, `OPENDDS_TARGET_SOURCES` now adds lists of the files that where passed in and generated that are part of the `PUBLIC` and `INTERFACE` scopes as properties on the target (#3315)
+  - Improved support for installing CMake projects that use OpenDDS (#3315, #3354, #3367, #3368, #3393)
+    - OpenDDS, ACE, and TAO libraries can now be installed using `install(IMPORTED_RUNTIME_ARTIFACTS)` if using CMake 3.21 or later
+      - To help facilitate this, a new function called `opendds_get_library_dependencies` has been added.
+    - To help install generated files, `OPENDDS_TARGET_SOURCES` now adds lists of the files that where passed in and generated that are part of the `PUBLIC` and `INTERFACE` scopes as properties on the target
+    - See `docs/cmake.md` for details on all of these new features
   - Added an `OPENDDS_DEFAULT_SCOPE` option that allows changing the default scope of `OPENDDS_TARGET_SOURCES` (#3315)
   - Support `INSTALL_LIB` being used with `make install` to change the name of the `lib` directory (#2879)
     - NOTE: This required changing the CMake module installation destination from `lib` to `share`.
-  - See `docs/cmake.md` for details on all of these new features
+
+### Platform Support and Dependencies:
+- Support for Visual Studio 2022 (#3267)
+- Updated to work with the C++20 standard library (#3288)
+- Support for OpenSSL 3.0.1 and later (#3358, #3404)
+- Updated Wireshark dissector to work with GLib 2.68 and later (#2918)
+- Removed Boost as an optional dependency (#3323)
+- Updated the RapidJSON submodule (#3284)
 
 ### Fixes:
+- Fixed issues with entity association when using the multicast transport (#3377)
+- Fixed issue #3268, a segfault in `opendds_idl` (#3374)
+- Improvements to how data representation is handled (#3233)
+- Fixed instance lifetime issue with `assert_liveliness` (#3241)
+- RTPS:
+  - Improved internal handling of remote addresses to reduce initial traffic (#3375)
+  - General ICE improvements (#3298, #3218)
+  - Improvements to RtpsRelay (#3257, #3240, #3237)
+  - Check for invalid RTPS Parameter length (#3405)
 - CMake Module:
-  - Fix issue when using `install(EXPORT)` on a target used with `OPENDDS_TARGET_SOURCES` (#3315)
-  - Fix issue #1297 where `opendds_idl` generates an incorrect include path (#3315)
-
-### Notes:
-- TODO: Add your notes here
+  - Fixed issue when using `install(EXPORT)` on a target used with `OPENDDS_TARGET_SOURCES` (#3315)
+  - Fixed issue #1297 where `opendds_idl` generates an incorrect include path (#3315)
 
 ## Version 3.19.0 of OpenDDS
 OpenDDS 3.19.0 was released on Dec 10 2021.
