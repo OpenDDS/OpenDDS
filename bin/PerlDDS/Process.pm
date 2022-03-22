@@ -63,9 +63,9 @@ sub WaitKill ($)
 {
   my $self = shift;
   my $timeout = shift;
-  my $ret_value = $self->SUPER::WaitKill($timeout);
+  my @ret_values = $self->SUPER::WaitKill($timeout);
   $self->return_coverage_process();
-  return $ret_value;
+  return @ret_values;
 }
 
 sub Kill ($)
