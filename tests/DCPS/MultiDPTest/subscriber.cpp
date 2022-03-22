@@ -62,7 +62,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -m num_instances_per_writer defaults to 1
     //  -i num_samples_per_instance defaults to 1
     //  -v verbose transport debug
-    //  -o directory of synch files used to coordinate publisher and subscriber
+    //  -o directory of synch file used to coordinate publisher and subscriber
     //     defaults to current directory
     const ACE_TCHAR *currentArg = 0;
 

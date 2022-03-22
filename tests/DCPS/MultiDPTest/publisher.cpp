@@ -27,6 +27,7 @@
 
 #include <ace/Arg_Shifter.h>
 
+enum Subscriber_State { READY, DONE };
 
 ::DDS::DomainParticipantFactory_var dpf;
 ::DDS::DomainParticipant_var participant;
@@ -48,7 +49,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -i num_samples_per_instance (defaults to 1)
     //  -m num_instances_per_writer (defaults to 1)
     //  -v verbose transport debug
-    //  -o directory of synch files used to coordinate publisher and subscriber
+    //  -o directory of synch file used to coordinate publisher and subscriber
     //     defaults to current directory
     const ACE_TCHAR *currentArg = 0;
 
@@ -165,21 +166,8 @@ void shutdown()
   TheServiceParticipant->shutdown();
 }
 
-
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+void wait_for_subscriber(Subscriber_State state)
 {
-  int status = 0;
-
-  try {
-    dpf = TheParticipantFactoryWithArgs(argc, argv);
-    ACE_DEBUG((LM_INFO, "(%P|%t) %T publisher main\n"));
-
-    // let the Service_Participant (in above line) strip out -DCPSxxx parameters
-    // and then get application specific parameters.
-    parse_args(argc, argv);
-
-    init();
-
     // ensure the associations are fully established before writing.
     DDS::WaitSet_var ws = new DDS::WaitSet;
     DDS::ConditionSeq conditions;
@@ -200,10 +188,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (datawriter[ctr]->get_publication_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status failed!\n")));
         ACE_OS::exit(-1);
+      } else {
+        if (state == READY && matches.current_count == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status READY but current_count is 0\n")));
+          ACE_OS::exit(-1);
+        } else if (state == DONE && matches.current_count == 1) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status DONE but current_count is not 0\n")));
+          ACE_OS::exit(-1);
+        }
       }
 
       ws->detach_condition(condition);
     }
+}
+
+
+int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+{
+  int status = 0;
+
+  try {
+    dpf = TheParticipantFactoryWithArgs(argc, argv);
+    ACE_DEBUG((LM_INFO, "(%P|%t) %T publisher main\n"));
+
+    // let the Service_Participant (in above line) strip out -DCPSxxx parameters
+    // and then get application specific parameters.
+    parse_args(argc, argv);
+
+    init();
+
+    // wait for subscrier ready
+    wait_for_subscriber(READY);
 
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; ++i) {
@@ -240,6 +255,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     if (writers_completed) ACE_OS::fclose(writers_completed);
+
+    // wait for subscriber finish
+    wait_for_subscriber(DONE);
 
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));
