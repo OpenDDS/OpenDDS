@@ -131,7 +131,7 @@ TEST(dds_DCPS_WaitSet, WaitForever)
   }
 
   thread.join();
-  
+
   EXPECT_EQ(ws->detach_condition(gc), DDS::RETCODE_OK);
 }
 
@@ -155,7 +155,7 @@ TEST(dds_DCPS_WaitSet, WaitDeadline)
   }
 
   thread.join();
-  
+
   EXPECT_EQ(ws->detach_condition(gc), DDS::RETCODE_OK);
 }
 
