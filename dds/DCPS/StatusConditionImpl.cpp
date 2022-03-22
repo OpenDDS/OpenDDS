@@ -38,9 +38,11 @@ DDS::StatusMask StatusConditionImpl::get_enabled_statuses()
 DDS::ReturnCode_t
 StatusConditionImpl::set_enabled_statuses(DDS::StatusMask mask)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
-                   DDS::RETCODE_OUT_OF_RESOURCES);
-  mask_ = mask;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
+                     DDS::RETCODE_OUT_OF_RESOURCES);
+    mask_ = mask;
+  }
   signal_all();
   return DDS::RETCODE_OK;
 }
