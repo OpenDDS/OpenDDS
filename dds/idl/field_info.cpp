@@ -12,14 +12,24 @@
 using namespace AstTypeClassification;
 
 FieldInfo::EleLen::EleLen(const FieldInfo& af)
-  : ele_(af.as_base_)
+  : cls_(af.cls_)
   , len_(af.n_elems_)
 {
+  AST_Type* const base = resolveActualType(af.as_base_);
+  base_cls_ = classify(base);
+  base_name_ = base->full_name();
 }
 
 bool FieldInfo::EleLen::operator<(const EleLen& o) const
 {
-  return ele_ < o.ele_ || (ele_ == o.ele_ && len_ < o.len_);
+  if (cls_ == o.cls_) {
+    if (base_cls_ == o.base_cls_) {
+      const int compared = base_name_.compare(o.base_name_);
+      return compared < 0 || (compared == 0 && len_ < o.len_);
+    }
+    return base_cls_ < o.base_cls_;
+  }
+  return cls_ < o.cls_;
 }
 
 const std::string FieldInfo::scope_op = "::";

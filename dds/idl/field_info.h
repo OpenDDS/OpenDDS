@@ -17,7 +17,9 @@
 
 struct FieldInfo {
   struct EleLen {
-    AST_Type* ele_;
+    AstTypeClassification::Classification cls_;
+    AstTypeClassification::Classification base_cls_;
+    std::string base_name_;
     std::size_t len_;
     explicit EleLen(const FieldInfo& af);
     bool operator<(const EleLen& o) const;
