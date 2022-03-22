@@ -63,9 +63,17 @@ sub WaitKill ($)
 {
   my $self = shift;
   my $timeout = shift;
-  my @ret_values = $self->SUPER::WaitKill($timeout);
+  my @ret_array;
+  my $ret_val;
+
+  if (wantarray()) {
+    @ret_array = $self->SUPER::WaitKill($timeout);
+  } else {
+    $ret_val = $self->SUPER::WaitKill($timeout);
+  }
   $self->return_coverage_process();
-  return @ret_values;
+
+  return (wantarray() ? @ret_array : $ret_val);
 }
 
 sub Kill ($)

@@ -102,7 +102,16 @@ sub wait_kill {
     print STDERR "$start_time: waiting $wait_time seconds for $name before "
       . "calling kill\n";
   }
-  my ($result, $sigcode) = $process->WaitKill($wait_time);
+
+  my @ret_array;
+  my $result;
+  if (wantarray()) {
+    @ret_array = $process->WaitKill($wait_time);
+    $result = $ret_array[0];
+  } else {
+    $result = $process->WaitKill($wait_time);
+  }
+
   my $time_str = formatted_time();
   if ($result != 0) {
       my $ext = ($verbose ? "(started waiting for termination at $start_time)" : "");
@@ -111,7 +120,7 @@ sub wait_kill {
   } elsif ($verbose) {
     print STDERR "$time_str: shut down $name\n";
   }
-  return ($ret_status, $sigcode);
+  return (wantarray() ? ($ret_status, $ret_array[1]) : $ret_status);
 }
 
 sub terminate_wait_kill {
@@ -796,14 +805,24 @@ sub stop_process {
     }
   }
 
-  my ($kill_status, $sigcode) =
-    PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
-                       $timed_wait,
-                       $name,
-                       $self->{test_verbose});
+  my @ret_array;
+  my $kill_status;
+  if (wantarray()) {
+    @ret_array = PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
+                                    $timed_wait,
+                                    $name,
+                                    $self->{test_verbose});
+    $kill_status = $ret_array[0];
+  } else {
+    $kill_status = PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
+                                      $timed_wait,
+                                      $name,
+                                      $self->{test_verbose});
+  }
+
   $self->{status} |= $kill_status;
   delete($self->{processes}->{process}->{$name});
-  return (!$kill_status, $sigcode);
+  return (wantarray() ? (!$kill_status, $ret_array[1]) : !$kill_status);
 }
 
 sub kill_process {
