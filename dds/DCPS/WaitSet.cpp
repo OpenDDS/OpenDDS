@@ -114,10 +114,6 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
 {
   using namespace OpenDDS::DCPS;
 
-  if (waiting_ != false) {
-    return RETCODE_PRECONDITION_NOT_MET;
-  }
-
   if (!non_negative_duration(timeout)) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -130,6 +126,11 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    RETCODE_OUT_OF_RESOURCES);
+
+  if (waiting_ != false) {
+    return RETCODE_PRECONDITION_NOT_MET;
+  }
+
   waiting_ = true;
   signaled_conditions_.clear();
 
