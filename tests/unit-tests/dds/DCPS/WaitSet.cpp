@@ -63,7 +63,7 @@ TEST(dds_DCPS_WaitSet, AttachDetach)
   EXPECT_EQ(ws->get_conditions(conditions), DDS::RETCODE_OK);
   EXPECT_EQ(conditions.length(), test_len);
 
-  for (int i = 0; i < conditions.length(); ++i) {
+  for (CORBA::ULong i = 0; i < conditions.length(); ++i) {
     EXPECT_EQ(ws->detach_condition(conditions[i]), DDS::RETCODE_OK);
   }
 
