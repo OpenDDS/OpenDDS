@@ -127,7 +127,7 @@ ReturnCode_t WaitSet::wait(ConditionSeq& active_conditions,
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, lock_,
                    RETCODE_OUT_OF_RESOURCES);
 
-  if (waiting_ != false) {
+  if (waiting_) {
     return RETCODE_PRECONDITION_NOT_MET;
   }
 
