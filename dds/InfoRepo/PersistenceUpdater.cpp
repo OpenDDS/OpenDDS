@@ -422,7 +422,6 @@ PersistenceUpdater::requestImage()
     size_t qos_len = participant->participantQos.second.first;
     char *buf;
     ACE_NEW_NORETURN(buf, char[qos_len]);
-    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
@@ -431,6 +430,7 @@ PersistenceUpdater::requestImage()
     }
 
     ACE_OS::memcpy(buf, participant->participantQos.second.second, qos_len);
+    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     BinSeq in_seq(qos_len, buf);
     QosSeq qos(ParticipantQos, in_seq);
@@ -454,7 +454,6 @@ PersistenceUpdater::requestImage()
     size_t qos_len = topic->topicQos.second.first;
     char *buf;
     ACE_NEW_NORETURN(buf, char[qos_len]);
-    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
@@ -463,6 +462,7 @@ PersistenceUpdater::requestImage()
     }
 
     ACE_OS::memcpy(buf, topic->topicQos.second.second, qos_len);
+    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     BinSeq in_seq(qos_len, buf);
     QosSeq qos(TopicQos, in_seq);
@@ -479,7 +479,6 @@ PersistenceUpdater::requestImage()
     size_t qos_len = actor->pubsubQos.second.first;
     char *buf;
     ACE_NEW_NORETURN(buf, char[qos_len]);
-    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
@@ -488,13 +487,13 @@ PersistenceUpdater::requestImage()
     }
 
     ACE_OS::memcpy(buf, actor->pubsubQos.second.second, qos_len);
+    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     BinSeq in_pubsub_seq(qos_len, buf);
     QosSeq pubsub_qos(actor->pubsubQos.first, in_pubsub_seq);
 
     qos_len = actor->drdwQos.second.first;
     ACE_NEW_NORETURN(buf, char[qos_len]);
-    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
@@ -503,6 +502,7 @@ PersistenceUpdater::requestImage()
     }
 
     ACE_OS::memcpy(buf, actor->drdwQos.second.second, qos_len);
+    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     BinSeq in_drdw_seq(qos_len, buf);
     QosSeq drdw_qos(actor->drdwQos.first, in_drdw_seq);
@@ -523,7 +523,6 @@ PersistenceUpdater::requestImage()
 
     size_t ti_len = actor->serializedTypeInfo.first;
     ACE_NEW_NORETURN(buf, char[ti_len]);
-    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     if (buf == 0) {
       ACE_ERROR((LM_ERROR,
@@ -531,6 +530,7 @@ PersistenceUpdater::requestImage()
       return;
     }
     ACE_OS::memcpy(buf, actor->serializedTypeInfo.second, ti_len);
+    qos_sequences.push_back(ArrDelAdapter<char>(buf));
 
     BinSeq in_type_info(ti_len, buf);
 
