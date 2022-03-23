@@ -59,7 +59,7 @@ sub Spawn {
   return $ret_value;
 }
 
-sub WaitKill ($)
+sub WaitKill ($;$)
 {
   my $self = shift;
   my $timeout = shift;
