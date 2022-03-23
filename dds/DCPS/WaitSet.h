@@ -89,12 +89,7 @@ private:
   typedef OpenDDS::DCPS::ConditionVariable<ACE_Recursive_Thread_Mutex> ConditionVariableType;
   ConditionVariableType cond_;
 
-#ifdef ACE_HAS_CPP11
-  std::atomic<bool> waiting_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> waiting_;
-#endif
-
+  bool waiting_;
   ConditionSet attached_conditions_;
   ConditionSet signaled_conditions_;
 };
