@@ -1706,7 +1706,7 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
   Serializer de_ser(&mb_in, common_encoding);
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   if (!(de_ser.skip(RTPS::SMHDR_SZ) && (de_ser >> ch))) {
     ACE_ERROR((LM_ERROR,
       "(%P|%t) CryptoBuiltInImpl::preprocess_secure_submsg: "
