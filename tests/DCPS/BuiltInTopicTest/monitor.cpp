@@ -173,7 +173,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
       const bool ownEntitiesAreInBIT = ignoredEntitiesAreInBIT;
 
       // give time for BIT datareader/datawriter fully association.
-      ACE_OS::sleep (5);
+      ACE_OS::sleep(3);
 
       if (delay_before_read_sec > 0) {
         ACE_DEBUG((LM_DEBUG,"(%P|%t) monitor: SLEEPING BEFORE READING!\n"));
@@ -194,6 +194,8 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
+#ifndef OPENDDS_SAFETY_PROFILE
+      // BUILT_IN_TOPIC_TOPIC unsupported in SAFETY PROFILE with RTPS
       ::DDS::DataReader_var topic_rdr =
           bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
       ::DDS::TopicBuiltinTopicDataDataReader_var topic_reader
@@ -203,6 +205,10 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_TOPIC_TOPIC datareader.\n"));
         return 1;
       }
+#endif
+
+      ::DDS::ReturnCode_t ret;
+      CORBA::ULong len = 0;
 
       ::DDS::DataReader_var subscription_rdr =
           bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC) ;
@@ -214,6 +220,9 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         return 1;
       }
 
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for subscription sample\n"));
+      Utils::waitForSample(subscription_rdr);
+
       ::DDS::DataReader_var publication_rdr =
           bit_subscriber->lookup_datareader (OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC) ;
       ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader
@@ -223,6 +232,176 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_PUBLICATION_TOPIC datareader.\n"));
         return 1;
       }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for publication sample\n"));
+      Utils::waitForSample(publication_rdr);
+
+      ::DDS::SampleInfoSeq pubinfos(10);
+      ::DDS::PublicationBuiltinTopicDataSeq pubdata(10);
+      ret = pub_reader->read (pubdata,
+        pubinfos,
+        10,
+        ::DDS::ANY_SAMPLE_STATE,
+        ::DDS::ANY_VIEW_STATE,
+        ::DDS::ALIVE_INSTANCE_STATE);
+
+      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  failed to read BIT publication data.\n"),
+            1);
+        }
+
+      len = pubdata.length ();
+      bool pubWasIgnored = false;
+      if (len != num_pubs)
+      {
+        if (!ignoredEntitiesAreInBIT && len == num_pubs - 1)
+        {
+          pubWasIgnored = true;
+          ACE_DEBUG((LM_INFO, "(%P|%t) monitor: pub assumed to be ignored\n"));
+        }
+        else
+        {
+          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  read %d BIT pub data,"
+                            "expected %d pubs.\n", len, num_pubs),
+                           1);
+        }
+      }
+
+      CORBA::ULong num_dws_with_data = 0;
+      for (CORBA::ULong i = 0; i < len; ++i)
+      {
+        if (ACE_OS::strcmp (pubdata[i].topic_name.in (), topic_name) != 0)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  got datawriter topic name \"%C\", expected topic name \"%C\"\n",
+            pubdata[i].topic_name.in (), topic_name),
+            1);
+        }
+        if (ACE_OS::strcmp (pubdata[i].type_name.in (), topic_type_name) != 0)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  got datawriter topic type name \"%C\", expected topic type name \"%C\"\n",
+            pubdata[i].type_name.in (), topic_type_name),
+            1);
+        }
+
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter: key = %d, %x, %x.\n",
+            pubdata[i].key.value[0], pubdata[i].key.value[1], pubdata[i].key.value[2]));
+
+        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DW_USER_DATA));
+        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
+        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_GROUP_DATA));
+
+        if (pubdata[i].user_data.value.length () == user_data_len
+          && pubdata[i].topic_data.value.length () == topic_data_len
+          && pubdata[i].group_data.value.length () == group_data_len)
+        {
+          if (ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].user_data.value.get_buffer()), CUR_DW_USER_DATA, user_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0)
+          {
+            ++ num_dws_with_data;
+          }
+        }
+      }
+
+      if (num_dws_with_data == len)
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter changeable qos test PASSED.\n"));
+      }
+      else
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+          "(%P|%t) monitor: DataWriter changeable qos test FAILED.\n"),
+          1);
+      }
+
+      ::DDS::SampleInfoSeq subinfos(10);
+      ::DDS::SubscriptionBuiltinTopicDataSeq subdata(10);
+      ret = sub_reader->read (subdata,
+        subinfos,
+        10,
+        ::DDS::ANY_SAMPLE_STATE,
+        ::DDS::ANY_VIEW_STATE,
+        ::DDS::ALIVE_INSTANCE_STATE);
+
+      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  failed to read BIT subsciption data.\n"),
+            1);
+        }
+
+      len = subdata.length ();
+
+      if (len != num_subs)
+      {
+        if (!pubWasIgnored && !ignoredEntitiesAreInBIT && len == num_subs - 1)
+        {
+          ACE_DEBUG((LM_INFO, "(%P|%t) monitor: sub assumed to be ignored\n"));
+        }
+        else
+        {
+          ACE_ERROR_RETURN((LM_ERROR,
+                            "(%P|%t) monitor:  read %d BIT sub data, "
+                            "expected %d subs.\n", len, num_subs),
+                           1);
+        }
+      }
+
+      CORBA::ULong num_drs_with_data = 0;
+      for (CORBA::ULong i = 0; i < len; ++i)
+      {
+        if (ACE_OS::strcmp (subdata[i].topic_name.in (), topic_name) != 0)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  got datareader topic name \"%C\", expected topic name \"%C\"\n",
+            subdata[i].topic_name.in (), topic_name),
+            1);
+        }
+        if (ACE_OS::strcmp (subdata[i].type_name.in (), topic_type_name) != 0)
+        {
+          ACE_ERROR_RETURN ((LM_ERROR,
+            "(%P|%t) monitor:  got datareader topic type name \"%C\", expected topic type name \"%C\"\n",
+            subdata[i].type_name.in (), topic_type_name),
+            1);
+        }
+
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x\n",
+          subdata[i].key.value[0], subdata[i].key.value[1], subdata[i].key.value[2]));
+
+        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DR_USER_DATA));
+        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
+        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_GROUP_DATA));
+
+        if (subdata[i].user_data.value.length () == user_data_len
+          && subdata[i].topic_data.value.length () == topic_data_len
+          && subdata[i].group_data.value.length () == group_data_len)
+        {
+          if (ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].user_data.value.get_buffer()), CUR_DR_USER_DATA, user_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0
+            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0)
+          {
+            ++ num_drs_with_data;
+          }
+        }
+      }
+
+      if (num_drs_with_data == len)
+      {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader changeable qos test PASSED.\n"));
+      }
+      else
+      {
+        ACE_ERROR_RETURN ((LM_ERROR,
+          "(%P|%t) monitor: DataReader changeable qos test FAILED.\n"),
+          1);
+      }
+
+      // wait before checking discovered participants
+      ACE_OS::sleep(1);
 
       {
         ::DDS::InstanceHandleSeq handles;
@@ -287,8 +466,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: discover participants test PASSED.\n"));
       }
 
-      ::DDS::ReturnCode_t ret;
-
       ::DDS::ParticipantBuiltinTopicDataSeq partdata;
       const CORBA::ULong expected_part_count = num_parts - !ownEntitiesAreInBIT;
 
@@ -296,7 +473,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
         // Do not constantly poll.
         const ACE_Time_Value delay(0, 100000); // 100ms
         ACE_OS::sleep(delay);
-
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample expected %u have %u\n", expected_part_count, partdata.length()));
         Utils::waitForSample(part_rdr);
         ::DDS::SampleInfoSeq pinfos(10);
@@ -320,7 +496,6 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           partdata[idx] = pdata[i];
         }
       }
-
 
       CORBA::ULong cur_dps_with_user_data = 0;
       CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_PART_USER_DATA));
@@ -352,6 +527,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           1);
       }
 
+#ifndef OPENDDS_SAFETY_PROFILE
       {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for topic sample\n"));
         Utils::waitForSample(topic_rdr);
@@ -426,7 +602,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
             1);
         }
 
-      CORBA::ULong len = topicdata.length ();
+      len = topicdata.length ();
 
       if (len != num_topics)
       {
@@ -479,186 +655,7 @@ int ACE_TMAIN (int argc, ACE_TCHAR *argv[])
           "(%P|%t) monitor:  Topic changeable qos test FAILED.\n"),
           1);
       }
-
-
-      ::DDS::SampleInfoSeq pubinfos(10);
-      ::DDS::PublicationBuiltinTopicDataSeq pubdata(10);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for publication sample\n"));
-      Utils::waitForSample(publication_rdr);
-      ret = pub_reader->read (pubdata,
-        pubinfos,
-        10,
-        ::DDS::ANY_SAMPLE_STATE,
-        ::DDS::ANY_VIEW_STATE,
-        ::DDS::ALIVE_INSTANCE_STATE);
-
-      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT publication data.\n"),
-            1);
-        }
-
-      len = pubdata.length ();
-      bool pubWasIgnored = false;
-      if (len != num_pubs)
-      {
-        if (!ignoredEntitiesAreInBIT && len == num_pubs - 1)
-        {
-          pubWasIgnored = true;
-          ACE_DEBUG((LM_INFO, "(%P|%t) monitor: pub assumed to be ignored\n"));
-        }
-        else
-        {
-          ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor:  read %d BIT pub data,"
-                            "expected %d pubs.\n", len, num_pubs),
-                           1);
-        }
-      }
-
-      CORBA::ULong num_dws_with_data = 0;
-      for (CORBA::ULong i = 0; i < len; ++i)
-      {
-        if (ACE_OS::strcmp (pubdata[i].topic_name.in (), topic_name) != 0)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datawriter topic name \"%C\", expected topic name \"%C\"\n",
-            pubdata[i].topic_name.in (), topic_name),
-            1);
-        }
-        if (ACE_OS::strcmp (pubdata[i].type_name.in (), topic_type_name) != 0)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datawriter topic type name \"%C\", expected topic type name \"%C\"\n",
-            pubdata[i].type_name.in (), topic_type_name),
-            1);
-        }
-
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter: key = %d, %x, %x.\n",
-            pubdata[i].key.value[0], pubdata[i].key.value[1], pubdata[i].key.value[2]));
-
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW user data %C\n", pubdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW topic data %C\n", pubdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DW group data %C\n", pubdata[i].group_data.value.get_buffer()));
-
-        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DW_USER_DATA));
-        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
-        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_GROUP_DATA));
-
-        if (pubdata[i].user_data.value.length () == user_data_len
-          && pubdata[i].topic_data.value.length () == topic_data_len
-          && pubdata[i].group_data.value.length () == group_data_len)
-        {
-          if (ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].user_data.value.get_buffer()), CUR_DW_USER_DATA, user_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (pubdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0)
-          {
-            ++ num_dws_with_data;
-          }
-        }
-      }
-
-      if (num_dws_with_data == len)
-      {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter changeable qos test PASSED.\n"));
-      }
-      else
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor: DataWriter changeable qos test FAILED.\n"),
-          1);
-      }
-
-
-
-      ::DDS::SampleInfoSeq subinfos(10);
-      ::DDS::SubscriptionBuiltinTopicDataSeq subdata(10);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for subscription sample\n"));
-      Utils::waitForSample(subscription_rdr);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: done waiting for subscription sample\n"));
-      ret = sub_reader->read (subdata,
-        subinfos,
-        10,
-        ::DDS::ANY_SAMPLE_STATE,
-        ::DDS::ANY_VIEW_STATE,
-        ::DDS::ALIVE_INSTANCE_STATE);
-
-      if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  failed to read BIT subsciption data.\n"),
-            1);
-        }
-
-      len = subdata.length ();
-
-      if (len != num_subs)
-      {
-        if (!pubWasIgnored && !ignoredEntitiesAreInBIT && len == num_subs - 1)
-        {
-          ACE_DEBUG((LM_INFO, "(%P|%t) monitor: sub assumed to be ignored\n"));
-        }
-        else
-        {
-          ACE_ERROR_RETURN((LM_ERROR,
-                            "(%P|%t) monitor:  read %d BIT sub data, "
-                            "expected %d subs.\n", len, num_subs),
-                           1);
-        }
-      }
-
-      CORBA::ULong num_drs_with_data = 0;
-      for (CORBA::ULong i = 0; i < len; ++i)
-      {
-        if (ACE_OS::strcmp (subdata[i].topic_name.in (), topic_name) != 0)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datareader topic name \"%C\", expected topic name \"%C\"\n",
-            subdata[i].topic_name.in (), topic_name),
-            1);
-        }
-        if (ACE_OS::strcmp (subdata[i].type_name.in (), topic_type_name) != 0)
-        {
-          ACE_ERROR_RETURN ((LM_ERROR,
-            "(%P|%t) monitor:  got datareader topic type name \"%C\", expected topic type name \"%C\"\n",
-            subdata[i].type_name.in (), topic_type_name),
-            1);
-        }
-
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader: key = %d, %x, %x\n",
-          subdata[i].key.value[0], subdata[i].key.value[1], subdata[i].key.value[2]));
-
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR user data %C\n", subdata[i].user_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR topic data %C\n", subdata[i].topic_data.value.get_buffer()));
-        //ACE_DEBUG((LM_DEBUG, "(%P|%t) DR group data %C\n", subdata[i].group_data.value.get_buffer()));
-
-        CORBA::ULong user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_DR_USER_DATA));
-        CORBA::ULong topic_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_TOPIC_DATA));
-        CORBA::ULong group_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (CUR_GROUP_DATA));
-
-        if (subdata[i].user_data.value.length () == user_data_len
-          && subdata[i].topic_data.value.length () == topic_data_len
-          && subdata[i].group_data.value.length () == group_data_len)
-        {
-          if (ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].user_data.value.get_buffer()), CUR_DR_USER_DATA, user_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].topic_data.value.get_buffer()), CUR_TOPIC_DATA, topic_data_len) == 0
-            && ACE_OS::strncmp (reinterpret_cast <char*> (subdata[i].group_data.value.get_buffer()), CUR_GROUP_DATA, group_data_len) == 0)
-          {
-            ++ num_drs_with_data;
-          }
-        }
-      }
-
-      if (num_drs_with_data == len)
-      {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader changeable qos test PASSED.\n"));
-      }
-      else
-      {
-        ACE_ERROR_RETURN ((LM_ERROR,
-          "(%P|%t) monitor: DataReader changeable qos test FAILED.\n"),
-          1);
-      }
+#endif
 
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());

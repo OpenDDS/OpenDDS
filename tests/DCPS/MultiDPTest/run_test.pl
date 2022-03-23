@@ -29,10 +29,7 @@ $test->enable_console_logging();
 $test->process('sub', 'subscriber', $args);
 $test->process('pub', 'publisher', $args);
 
-$test->add_temporary_file('sub', 'subscriber_finished.txt');
-$test->add_temporary_file('sub', 'subscriber_ready.txt');
 $test->add_temporary_file('pub', 'publisher_finished.txt');
-$test->add_temporary_file('pub', 'publisher_ready.txt');
 
 $test->setup_discovery();
 
