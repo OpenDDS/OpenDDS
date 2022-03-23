@@ -467,19 +467,49 @@ public:
   {
   public:
     OwnershipManagerPtr(DataReaderImpl* reader)
-      : participant_( reader->is_exclusive_ownership_ ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
+      : participant_( (reader && reader->is_exclusive_ownership_) ? reader->participant_servant_.lock() : RcHandle<DomainParticipantImpl>())
     {
     }
     operator bool() const { return participant_.in(); }
     OwnershipManager* operator->() const
     {
-      return participant_->ownership_manager();
+      return participant_ ? participant_->ownership_manager() : 0;
     }
 
   private:
     RcHandle<DomainParticipantImpl> participant_;
   };
   friend class OwnershipManagerPtr;
+
+  struct OwnershipManagerScopedAccess {
+    OwnershipManagerScopedAccess() : om_(0), lock_result_(0) {}
+    OwnershipManagerScopedAccess(DataReaderImpl::OwnershipManagerPtr om) : om_(om), lock_result_(om_ ? om_->instance_lock_acquire() : 0) {}
+    ~OwnershipManagerScopedAccess() { release(); }
+
+    int release()
+    {
+      int result = 0;
+      if (om_ && !lock_result_) {
+        result = om_->instance_lock_release();
+      }
+      om_ = 0;
+      lock_result_ = 0;
+      return result;
+    }
+
+    void swap(OwnershipManagerScopedAccess& sa)
+    {
+      OwnershipManagerPtr om = om_;
+      om_ = sa.om_;
+      sa.om_ = om;
+      int lock_result = lock_result_;
+      lock_result_ = sa.lock_result_;
+      sa.lock_result_ = lock_result;
+    }
+
+    DataReaderImpl::OwnershipManagerPtr om_;
+    int lock_result_;
+  };
 
   OwnershipManagerPtr ownership_manager() { return OwnershipManagerPtr(this); }
 #endif

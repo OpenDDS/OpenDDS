@@ -134,11 +134,7 @@ if ($SubscriberResult != 0) {
 }
 
 unless ($is_rtps_disc) {
-    $ir = $DCPSREPO->TerminateWaitKill(5);
-    if ($ir != 0) {
-        print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-        $status = 1;
-    }
+    $ir = $DCPSREPO->TerminateWaitKill (10);
 }
 
 unlink $dcpsrepo_ior;
