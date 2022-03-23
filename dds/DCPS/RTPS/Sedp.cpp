@@ -5400,6 +5400,7 @@ Sedp::send_datareader_crypto_tokens(const RepoId& local_reader,
     msg.destination_endpoint_guid = remote_writer;
     msg.source_endpoint_guid = local_reader;
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(drcts);
+    msg.related_message_identity = DDS::Security::MessageIdentity();
 
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datareader_crypto_tokens() - ")
