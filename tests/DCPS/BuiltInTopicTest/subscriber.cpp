@@ -182,7 +182,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataReaderQos dr_qos;
       sub->get_default_datareader_qos (dr_qos);
       dr_qos.representation.value.length(1);
+
+#if defined(OPENDDS_SAFETY_PROFILE)
+      dr_qos.representation.value[0] = DDS::XCDR2_DATA_REPRESENTATION;
+#else
       dr_qos.representation.value[0] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
+#endif
 
       // set up user data in DR qos
       CORBA::ULong dr_user_data_len = static_cast<CORBA::ULong>(ACE_OS::strlen (DR_USER_DATA));
