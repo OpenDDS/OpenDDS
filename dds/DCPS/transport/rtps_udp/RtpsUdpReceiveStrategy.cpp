@@ -1078,6 +1078,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
             if (std::memcmp(&buffer[idx], &empty_buffer[0], len8) != 0) {
               std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
               p.first = sn;
+              p.second = RTPS::FragmentNumberSet();
               frag_info->push_back(p);
               RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
               missing_frags.numBits = len;
@@ -1090,6 +1091,7 @@ RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
         } else {
           std::pair<SequenceNumber, RTPS::FragmentNumberSet> p;
           p.first = sn;
+          p.second = RTPS::FragmentNumberSet();
           frag_info->push_back(p);
           RTPS::FragmentNumberSet& missing_frags = frag_info->back().second;
           missing_frags.numBits = 0; // make sure this is a valid number before passing to get_gaps
