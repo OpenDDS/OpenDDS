@@ -3825,7 +3825,7 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 
     const DCPS::RepoId reader = make_id(peer, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
 
-    DDS::Security::ParticipantVolatileMessageSecure msg;
+    DDS::Security::ParticipantVolatileMessageSecure msg = DDS::Security::ParticipantVolatileMessageSecure();
     msg.message_identity.source_guid = writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
     msg.destination_participant_guid = peer;
