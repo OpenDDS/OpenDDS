@@ -1507,7 +1507,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
-    DDS::Security::ParticipantStatelessMessage reply;
+    DDS::Security::ParticipantStatelessMessage reply = DDS::Security::ParticipantStatelessMessage();
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
@@ -1614,7 +1614,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   case HANDSHAKE_STATE_PROCESS_HANDSHAKE: {
-    DDS::Security::ParticipantStatelessMessage reply;
+    DDS::Security::ParticipantStatelessMessage reply = DDS::Security::ParticipantStatelessMessage();
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
