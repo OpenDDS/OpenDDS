@@ -5443,6 +5443,7 @@ Sedp::send_datawriter_crypto_tokens(const RepoId& local_writer,
     msg.destination_endpoint_guid = remote_reader;
     msg.source_endpoint_guid = local_writer;
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(dwcts);
+    msg.related_message_identity = DDS::Security::MessageIdentity();
 
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datawriter_crypto_tokens() - ")
@@ -6815,7 +6816,7 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
       }
     }
   } else if (equal_guid_prefixes(reader, participant_id_) && equal_guid_prefixes(writer, participant_id_)) {
-    DCPS::WriterAssociation wa;
+    DCPS::WriterAssociation wa = DCPS::WriterAssociation();
     wa.writerId = writer;
     job_queue_->enqueue(DCPS::make_rch<ReaderRemoveAssociations>(DCPS::make_rch<ReaderAssociationRecord>(callbacks, reader, wa)));
   }
