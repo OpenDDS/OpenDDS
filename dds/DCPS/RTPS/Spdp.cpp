@@ -1025,10 +1025,11 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  ParticipantData_t pdata;
+  ParticipantData_t pdata = ParticipantData_t();
 
   pdata.participantProxy.domainId = domain_;
   pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
+
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
