@@ -6790,7 +6790,7 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
       }
     }
   } else if (equal_guid_prefixes(writer, participant_id_) && equal_guid_prefixes(reader, participant_id_)) {
-    DCPS::ReaderAssociation ra;
+    DCPS::ReaderAssociation ra = DCPS::ReaderAssociation();
     ra.readerId = reader;
     job_queue_->enqueue(DCPS::make_rch<WriterRemoveAssociations>(DCPS::make_rch<WriterAssociationRecord>(callbacks, writer, ra)));
   }
