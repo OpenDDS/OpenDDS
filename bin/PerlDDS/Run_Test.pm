@@ -94,6 +94,8 @@ sub wait_kill {
   my $wait_time = shift;
   my $name = shift;
   my $verbose = shift;
+  my $signum = shift;
+
   $verbose = 0 if !defined($verbose);
 
   my $ret_status = 0;
@@ -103,14 +105,7 @@ sub wait_kill {
       . "calling kill\n";
   }
 
-  my @ret_array;
-  my $result;
-  if (wantarray()) {
-    @ret_array = $process->WaitKill($wait_time);
-    $result = $ret_array[0];
-  } else {
-    $result = $process->WaitKill($wait_time);
-  }
+  my $result = $process->WaitKill($wait_time, $signum);
 
   my $time_str = formatted_time();
   if ($result != 0) {
@@ -120,7 +115,8 @@ sub wait_kill {
   } elsif ($verbose) {
     print STDERR "$time_str: shut down $name\n";
   }
-  return (wantarray() ? ($ret_status, $ret_array[1]) : $ret_status);
+
+  return $ret_status;
 }
 
 sub terminate_wait_kill {
@@ -459,10 +455,11 @@ sub wait_kill {
   my $name = shift;
   my $wait_time = shift;
   my $verbose = shift;
+  my $signum = shift;
 
   my $process = $self->{processes}->{process}->{$name}->{process};
 
-  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose);
+  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose, $signum);
 }
 
 sub default_transport {
@@ -789,6 +786,7 @@ sub stop_process {
   my $self = shift;
   my $timed_wait = shift;
   my $name = shift;
+  my $signum = shift;
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
@@ -805,24 +803,15 @@ sub stop_process {
     }
   }
 
-  my @ret_array;
-  my $kill_status;
-  if (wantarray()) {
-    @ret_array = PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
-                                    $timed_wait,
-                                    $name,
-                                    $self->{test_verbose});
-    $kill_status = $ret_array[0];
-  } else {
-    $kill_status = PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
-                                      $timed_wait,
-                                      $name,
-                                      $self->{test_verbose});
-  }
+  my $kill_status = PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
+                                       $timed_wait,
+                                       $name,
+                                       $self->{test_verbose},
+                                       $signum);
 
   $self->{status} |= $kill_status;
   delete($self->{processes}->{process}->{$name});
-  return (wantarray() ? (!$kill_status, $ret_array[1]) : !$kill_status);
+  return !$kill_status;
 }
 
 sub kill_process {
