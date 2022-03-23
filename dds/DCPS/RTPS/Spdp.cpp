@@ -1269,7 +1269,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
 
-  DDS::Security::ParticipantStatelessMessage msg;
+  DDS::Security::ParticipantStatelessMessage msg = DDS::Security::ParticipantStatelessMessage();
   msg.message_identity.source_guid = guid_;
   msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
   msg.destination_participant_guid = guid;
