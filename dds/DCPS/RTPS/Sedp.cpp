@@ -4375,7 +4375,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    DiscoveredPublication_SecurityWrapper wdata_secure;
+    DiscoveredPublication_SecurityWrapper wdata_secure = DiscoveredPublication_SecurityWrapper();
 
     if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
