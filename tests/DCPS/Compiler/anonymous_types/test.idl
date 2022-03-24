@@ -60,6 +60,9 @@ struct TopicA {
   BoundedString bstr;
   string<20> bstr20;
   sequence<string> strs;
+  sequence<string> strs_2nd;
+  string str_arr[4];
+  string str_arr_2nd[4];
   //sequence<string<30>> str30s;
   sequence<BoundedString> bstrs;
 

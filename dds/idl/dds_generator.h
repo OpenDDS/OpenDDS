@@ -385,7 +385,7 @@ namespace AstTypeClassification {
 
   inline Classification classify(AST_Type* type)
   {
-    type = AstTypeClassification::resolveActualType(type);
+    type = resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
@@ -1179,6 +1179,34 @@ ACE_CDR::ULong array_element_count(AST_Array* arr)
     count *= arr->dims()[i]->ev()->u.ulval;
   }
   return count;
+}
+
+inline
+ACE_CDR::ULong container_element_limit(AST_Type* type)
+{
+  AST_Type* const act = AstTypeClassification::resolveActualType(type);
+  AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
+  AST_Array* const arr = dynamic_cast<AST_Array*>(act);
+  if (seq && !seq->unbounded()) {
+    return seq->max_size()->ev()->u.ulval;
+  } else if (arr) {
+    return array_element_count(arr);
+  }
+  return 0;
+}
+
+inline
+AST_Type* container_base_type(AST_Type* type)
+{
+  AST_Type* const act = AstTypeClassification::resolveActualType(type);
+  AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
+  AST_Array* const arr = dynamic_cast<AST_Array*>(act);
+  if (seq) {
+    return seq->base_type();
+  } else if (arr) {
+    return arr->base_type();
+  }
+  return 0;
 }
 
 #endif
