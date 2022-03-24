@@ -38,7 +38,7 @@ with open(sys.argv[1]) as f:
             prs.append((m.group(1), row[2], row[8]))
 
 # Print Missing PRs
-for pr in reversed(prs):
+for pr in prs:
     num = pr[0]
     if num not in news_prs:
         what = pr[1]
