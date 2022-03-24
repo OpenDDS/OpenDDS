@@ -13,13 +13,19 @@
 #include <utl_scoped_name.h>
 #include <ast.h>
 
+#include <ace/Bound_Ptr.h>
+
 #include <string>
 
 struct FieldInfo {
   struct EleLen {
-    AST_Type* ele_;
+    AstTypeClassification::Classification cls_;
+    const char* base_name_;
+    AstTypeClassification::Classification base_cls_;
+    typedef ACE_Strong_Bound_Ptr<const EleLen, ACE_Null_Mutex> Container;
+    Container base_container_;
     std::size_t len_;
-    explicit EleLen(const FieldInfo& af);
+    explicit EleLen(AST_Type* type);
     bool operator<(const EleLen& o) const;
   };
   typedef std::set<EleLen> EleLenSet;
