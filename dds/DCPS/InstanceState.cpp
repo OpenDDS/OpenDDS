@@ -266,11 +266,13 @@ void InstanceState::release()
 
 void InstanceState::set_owner(const PublicationId& owner)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(owner_lock_);
   owner_ = owner;
 }
 
-PublicationId& InstanceState::get_owner()
+PublicationId InstanceState::get_owner()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(owner_lock_);
   return owner_;
 }
 
@@ -293,7 +295,7 @@ void InstanceState::registered(bool flag)
 
 void InstanceState::reset_ownership(DDS::InstanceHandle_t instance)
 {
-  owner_ = GUID_UNKNOWN;
+  set_owner(GUID_UNKNOWN);
   registered_ = false;
 
   RcHandle<DataReaderImpl> reader = reader_.lock();
