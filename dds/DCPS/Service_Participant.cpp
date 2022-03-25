@@ -1605,9 +1605,7 @@ Service_Participant::load_configuration(
   // for config templates before loading any config information.
   ACE_TString section_name;
 
-  int status = 0;
-
-  status = this->load_common_configuration(config, filename);
+  int status = this->load_common_configuration(config, filename);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
