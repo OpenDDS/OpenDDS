@@ -483,8 +483,18 @@ public:
 
   struct OwnershipManagerScopedAccess {
     OwnershipManagerScopedAccess() : om_(0), lock_result_(0) {}
-    OwnershipManagerScopedAccess(DataReaderImpl::OwnershipManagerPtr om) : om_(om), lock_result_(om_ ? om_->instance_lock_acquire() : 0) {}
+    OwnershipManagerScopedAccess(const OwnershipManagerScopedAccess& val) : om_(val.om_), lock_result_(val.lock_result_) {}
+    explicit OwnershipManagerScopedAccess(DataReaderImpl::OwnershipManagerPtr om) : om_(om), lock_result_(om_ ? om_->instance_lock_acquire() : 0) {}
     ~OwnershipManagerScopedAccess() { release(); }
+
+    OwnershipManagerScopedAccess& operator=(const OwnershipManagerScopedAccess& rhs)
+    {
+      if (&rhs != this) {
+        om_ = rhs.om_;
+        lock_result_ = rhs.lock_result_;
+      }
+      return *this;
+    }
 
     int release()
     {
@@ -497,17 +507,7 @@ public:
       return result;
     }
 
-    void swap(OwnershipManagerScopedAccess& sa)
-    {
-      OwnershipManagerPtr om = om_;
-      om_ = sa.om_;
-      sa.om_ = om;
-      int lock_result = lock_result_;
-      lock_result_ = sa.lock_result_;
-      sa.lock_result_ = lock_result;
-    }
-
-    DataReaderImpl::OwnershipManagerPtr om_;
+    OwnershipManagerPtr om_;
     int lock_result_;
   };
 

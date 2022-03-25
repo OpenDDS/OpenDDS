@@ -1671,7 +1671,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       if (is_exclusive_ownership_) {
         OwnershipManagerPtr owner_manager = ownership_manager();
         OwnershipManagerScopedAccess temp(owner_manager);
-        ownership_scoped_access.swap(temp);
+        std::swap(ownership_scoped_access, temp);
         if (!owner_manager || ownership_scoped_access.lock_result_ != 0) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR ((LM_ERROR,
@@ -1754,7 +1754,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         }
 
         OwnershipManagerScopedAccess temp;
-        ownership_scoped_access.swap(temp);
+        std::swap(ownership_scoped_access, temp);
         if (temp.release() != 0) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR ((LM_ERROR,
