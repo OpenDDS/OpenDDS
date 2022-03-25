@@ -152,7 +152,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     if (DataReaderListenerImpl::is_reliable()) {
       std::cout << "Reliable DataReader" << std::endl;
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+      listener_servant->set_expected_reads(40);
+    } else {
+      listener_servant->set_expected_reads(1);
     }
+
+    DDS::GuardCondition_var gc = new DDS::GuardCondition;
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling attach_condition\n"));
+    DDS::ReturnCode_t ret = ws->attach_condition(gc);
+    if (ret != DDS::RETCODE_OK) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): attach_condition failed!\n"));
+      }
+      return 1;
+    }
+    listener_servant->set_guard_condition(gc);
 
     DDS::DataReader_var reader =
       sub->create_datareader(topic.in(),
@@ -167,41 +182,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
 
     DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-
-    while (true) {
-      if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")),
-                         EXIT_FAILURE);
-      }
-      if (matches.current_count == 0 && matches.total_count > 0) {
-        break;
-      }
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")),
-                         EXIT_FAILURE);
-      }
-    }
+    ret = ws->wait(conditions, timeout);
 
     if (!listener_servant->is_valid()) {
       status = EXIT_FAILURE;
     }
-
-    ws->detach_condition(condition);
 
     // Clean-up!
     participant->delete_contained_entities();

@@ -6,10 +6,12 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
+#include <tests/Utils/StatusMatching.h>
+
 #include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/GuardCondition.h>
 
 #include <dds/DdsDcpsSubscriptionC.h>
-
 #include <set>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -59,10 +61,16 @@ public:
 
   bool is_valid() const;
 
+  void set_expected_reads(long expected);
+
+  void set_guard_condition(DDS::GuardCondition_var gc);
+
 private:
   typedef std::set<CORBA::ULong> Counts;
 
+  DDS::GuardCondition_var gc_;
   DDS::DataReader_var reader_;
+  long expected_reads_;
   long num_reads_;
   Counts counts_;
   bool valid_;

@@ -7,6 +7,8 @@
 #include "Writer.h"
 #include "Args.h"
 
+#include <tests/Utils/StatusMatching.h>
+
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
@@ -183,6 +185,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       // Start writing threads
       std::cout << "Creating Writer" << std::endl;
       Writer* writer = new Writer(dw.in(), dw_reliable());
+
+      // Block until Subscriber is available
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling wait_match 1\n"));
+      if (Utils::wait_match(dw, 1, Utils::EQ)) {
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
+        }
+        return 1;
+      }
+
       std::cout << "Starting Writer" << std::endl;
       writer->start();
 
@@ -193,18 +205,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       std::cout << "Writer finished " << std::endl;
       writer->end();
-
-      if (dw_reliable()) {
-        std::cout << "Writer wait for ACKS" << std::endl;
-
-        const DDS::Duration_t timeout =
-          { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-        dw->wait_for_acknowledgments(timeout);
-      } else {
-        // let any missed multicast/rtps messages get re-delivered
-        std::cout << "Writer wait small time" << std::endl;
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
+      if (Utils::wait_match(dw, 0, Utils::EQ)) {
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for unmatch for writer\n")));
+        }
+        return 1;
       }
 
       std::cerr << "deleting DW" << std::endl;

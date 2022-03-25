@@ -22,6 +22,7 @@ DataReaderListenerImpl::DataReaderListenerImpl()
   : num_reads_(0)
   , valid_(true)
   , reliable_(is_reliable())
+  , gc_()
 {
   std::cout << "Transport is " << (reliable_ ? "" : "UN-") << "RELIABLE" <<  std::endl;
 }
@@ -35,6 +36,16 @@ bool DataReaderListenerImpl::is_reliable()
   OpenDDS::DCPS::TransportConfig_rch gc = TheTransportRegistry->global_config();
   return gc->instances_[0]->transport_type_ != "udp" &&
          !(gc->instances_[0]->transport_type_ == "multicast" && !gc->instances_[0]->is_reliable());
+}
+
+void DataReaderListenerImpl::set_expected_reads(long expected)
+{
+  expected_reads_ = expected;
+}
+
+void DataReaderListenerImpl::set_guard_condition(DDS::GuardCondition_var gc)
+{
+  gc_ = gc;
 }
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
@@ -116,6 +127,9 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     e._tao_print_exception("Exception caught in on_data_available():");
     ACE_OS::exit(EXIT_FAILURE);
   }
+  if (counts_.size() == expected_reads_) {
+    gc_->set_trigger_value(true);
+  }
 }
 
 void DataReaderListenerImpl::on_requested_deadline_missed(
@@ -165,7 +179,7 @@ bool DataReaderListenerImpl::is_valid() const
   CORBA::ULong expected = 0;
   Counts::const_iterator count = counts_.begin();
   bool valid_count = true;
-  while (count != counts_.end() && expected < num_messages) {
+  while (count != counts_.end() && expected < expected_reads_) {
     if (expected != *count) {
       if (expected < *count) {
         if (reliable_) {
@@ -201,10 +215,10 @@ bool DataReaderListenerImpl::is_valid() const
   if (count != counts_.end()) {
     std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
     valid_count = false;
-  } else if (counts_.size() < num_messages &&
-      (reliable_ || (counts_.size() * 4) < num_messages)) {
+  } else if (counts_.size() < expected_reads_ &&
+      (reliable_ || (counts_.size() * 4) < expected_reads_)) {
     std::cout << "ERROR: received " << counts_.size() << " messages, but expected " <<
-      num_messages << std::endl;
+      expected_reads_ << std::endl;
     valid_count = false;
   }
 

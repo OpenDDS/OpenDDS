@@ -46,37 +46,7 @@ void Writer::end()
 int Writer::svc()
 {
   try {
-    // Block until Subscriber is available
-    DDS::StatusCondition_var condition = writer_->get_statuscondition();
-    condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
-    const DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-
-    DDS::ConditionSeq conditions;
-    DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: wait failed!\n")));
-        ACE_OS::exit(EXIT_FAILURE);
-      }
-
-      if (writer_->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l: svc()")
-                   ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
-        ACE_OS::exit(EXIT_FAILURE);
-      }
-
-    } while (matches.current_count < 1);
-
-    ws->detach_condition(condition);
 
     // Write samples
     Messenger::MessageDataWriter_var message_dw
