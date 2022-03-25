@@ -94,7 +94,7 @@ sub wait_kill {
   my $wait_time = shift;
   my $name = shift;
   my $verbose = shift;
-  my $signum = shift;
+  my $opts = shift;
 
   $verbose = 0 if !defined($verbose);
 
@@ -105,13 +105,19 @@ sub wait_kill {
       . "calling kill\n";
   }
 
-  my $result = $process->WaitKill($wait_time, $signum);
+  my $result = $process->WaitKill($wait_time, $opts);
 
   my $time_str = formatted_time();
   if ($result != 0) {
-      my $ext = ($verbose ? "(started waiting for termination at $start_time)" : "");
-      print STDERR "$time_str: ERROR: PerlDDS::Process::WaitKill returned $result $ext\n";
-      $ret_status = 1;
+    my $ext = ($verbose ? "(started waiting for termination at $start_time)" : "");
+    if ($result == -1) {
+      print STDERR "$time_str: ERROR: $name timedout $ext\n";
+    } elsif ($result == 255) {
+      print STDERR "$time_str: ERROR: $name terminated with a signal $ext\n";
+    } else {
+      print STDERR "$time_str: ERROR: $name finished and returned $result $ext\n";
+    }
+    $ret_status = 1;
   } elsif ($verbose) {
     print STDERR "$time_str: shut down $name\n";
   }
@@ -455,11 +461,11 @@ sub wait_kill {
   my $name = shift;
   my $wait_time = shift;
   my $verbose = shift;
-  my $signum = shift;
+  my $opts = shift;
 
   my $process = $self->{processes}->{process}->{$name}->{process};
 
-  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose, $signum);
+  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose, $opts);
 }
 
 sub default_transport {
@@ -786,7 +792,7 @@ sub stop_process {
   my $self = shift;
   my $timed_wait = shift;
   my $name = shift;
-  my $signum = shift;
+  my $opts = shift;
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
@@ -807,7 +813,7 @@ sub stop_process {
                                        $timed_wait,
                                        $name,
                                        $self->{test_verbose},
-                                       $signum);
+                                       $opts);
 
   $self->{status} |= $kill_status;
   delete($self->{processes}->{process}->{$name});

@@ -63,9 +63,9 @@ sub WaitKill ($;$)
 {
   my $self = shift;
   my $timeout = shift;
-  my $opt_signum = shift;
+  my $opts = shift;
 
-  my $ret_value = $self->SUPER::WaitKill($timeout, $opt_signum);
+  my $ret_value = $self->SUPER::WaitKill($timeout, $opts);
   $self->return_coverage_process();
 
   return $ret_value;
