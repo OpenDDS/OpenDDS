@@ -27,8 +27,10 @@ OpenDDS 3.20.0 is currently in development, so this list might change.
 - Updated the RapidJSON submodule (#3284)
 
 ### Fixes:
+- Fixed issue preventing 2 `sequence<string>` anonymous types in the same struct (#3415)
 - Fixed issues with entity association when using the multicast transport (#3377)
 - Fixed issue #3268, a segfault in `opendds_idl` (#3374)
+- Fixed thread safety of `DataReaderImpl_T`'s allocator (#3335, #3403)
 - Improvements to how data representation is handled (#3233)
 - Fixed instance lifetime issue with `assert_liveliness` (#3241)
 - RTPS:
