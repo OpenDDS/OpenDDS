@@ -114,7 +114,7 @@ first -- the `configure` script will download it for you.
 
 There are three distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI ACE/TAO 2.2a patch 22 or later
+* OCI ACE/TAO 2.2a patch 23 or later
   * This will be automatically downloaded by default when using the configure
     script.
   * Can be manually downloaded from:

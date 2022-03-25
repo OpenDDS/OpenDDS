@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.20.0 of OpenDDS
-OpenDDS 3.20.0 is currently in development, so this list might change.
+OpenDDS 3.20.0 was released on Mar 25 2022.
 
 ### Additions:
 - Added the `host_name` shared memory transport config option (#3386)
