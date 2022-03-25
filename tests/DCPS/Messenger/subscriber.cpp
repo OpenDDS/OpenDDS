@@ -150,10 +150,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
     if (DataReaderListenerImpl::is_reliable()) {
-      std::cout << "Reliable DataReader" << std::endl;
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Reliable DataReader\n"));
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       listener_servant->set_expected_reads(40);
     } else {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Unreliable DataReader\n"));
       listener_servant->set_expected_reads(1);
     }
 
@@ -181,9 +182,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                        EXIT_FAILURE);
     }
 
-    // Block until Publisher completes
-
-
+    // Block until GuardCondition is released
     DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 

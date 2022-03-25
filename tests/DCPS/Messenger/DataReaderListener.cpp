@@ -38,7 +38,7 @@ bool DataReaderListenerImpl::is_reliable()
          !(gc->instances_[0]->transport_type_ == "multicast" && !gc->instances_[0]->is_reliable());
 }
 
-void DataReaderListenerImpl::set_expected_reads(long expected)
+void DataReaderListenerImpl::set_expected_reads(size_t expected)
 {
   expected_reads_ = expected;
 }

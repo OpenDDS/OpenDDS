@@ -86,6 +86,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     // Create DataReader
     DataReaderListenerImpl listener;
+    listener.set_expected_reads(40);
+
+    DDS::GuardCondition_var gc = new DDS::GuardCondition;
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling attach_condition\n"));
+    DDS::ReturnCode_t ret = ws->attach_condition(gc);
+    if (ret != DDS::RETCODE_OK) {
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): attach_condition failed!\n"));
+      }
+      return 1;
+    }
+    listener.set_guard_condition(gc);
 
     DDS::DataReader_var reader =
       sub->create_datareader(topic.in(),
@@ -99,36 +112,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                        EXIT_FAILURE);
     }
 
-    // Block until Publisher completes
-    DDS::StatusCondition_var condition = reader->get_statuscondition();
-    condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
-
-    DDS::WaitSet_var ws = new DDS::WaitSet;
-    ws->attach_condition(condition);
-
+    // Block until GuardCondition is released
     const DDS::Duration_t timeout =
       { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
 
     DDS::ConditionSeq conditions;
-    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
-
-    do {
-      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: wait() failed!\n")),
-                         EXIT_FAILURE);
-      }
-
-      if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l main()")
-                          ACE_TEXT(" ERROR: get_subscription_matched_status() failed!\n")),
-                         EXIT_FAILURE);
-      }
-    } while (matches.current_count > 0);
-
-    ws->detach_condition(condition);
+    ret = ws->wait(conditions, timeout);
 
     // Clean-up!
     participant->delete_contained_entities();
