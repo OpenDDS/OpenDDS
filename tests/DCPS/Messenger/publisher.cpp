@@ -187,7 +187,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       Writer* writer = new Writer(dw.in(), dw_reliable());
 
       // Block until Subscriber is available
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling wait_match 1\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): DataWriter waiting for match\n"));
       if (Utils::wait_match(dw, 1, Utils::EQ)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
@@ -198,13 +198,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       std::cout << "Starting Writer" << std::endl;
       writer->start();
 
-      while (!writer->is_finished()) {
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
-      }
-
-      std::cout << "Writer finished " << std::endl;
-      writer->end();
+      // Block until Subscriber goes away
       if (Utils::wait_match(dw, 0, Utils::EQ)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for unmatch for writer\n")));
