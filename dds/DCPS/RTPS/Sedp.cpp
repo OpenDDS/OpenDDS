@@ -4375,7 +4375,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    DiscoveredPublication_SecurityWrapper wdata_secure;
+    DiscoveredPublication_SecurityWrapper wdata_secure = DiscoveredPublication_SecurityWrapper();
 
     if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
@@ -4463,7 +4463,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    DiscoveredSubscription_SecurityWrapper rdata_secure;
+    DiscoveredSubscription_SecurityWrapper rdata_secure = DiscoveredSubscription_SecurityWrapper();
     if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
@@ -5400,6 +5400,7 @@ Sedp::send_datareader_crypto_tokens(const RepoId& local_reader,
     msg.destination_endpoint_guid = remote_writer;
     msg.source_endpoint_guid = local_reader;
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(drcts);
+    msg.related_message_identity = DDS::Security::MessageIdentity();
 
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datareader_crypto_tokens() - ")
@@ -5443,6 +5444,7 @@ Sedp::send_datawriter_crypto_tokens(const RepoId& local_writer,
     msg.destination_endpoint_guid = remote_reader;
     msg.source_endpoint_guid = local_writer;
     msg.message_data = reinterpret_cast<const DDS::Security::DataHolderSeq&>(dwcts);
+    msg.related_message_identity = DDS::Security::MessageIdentity();
 
     if (write_volatile_message(msg, remote_volatile_reader) != DDS::RETCODE_OK) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: Sedp::send_datawriter_crypto_tokens() - ")
@@ -6788,7 +6790,7 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
       }
     }
   } else if (equal_guid_prefixes(writer, participant_id_) && equal_guid_prefixes(reader, participant_id_)) {
-    DCPS::ReaderAssociation ra;
+    DCPS::ReaderAssociation ra = DCPS::ReaderAssociation();
     ra.readerId = reader;
     job_queue_->enqueue(DCPS::make_rch<WriterRemoveAssociations>(DCPS::make_rch<WriterAssociationRecord>(callbacks, writer, ra)));
   }
@@ -6815,7 +6817,7 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
       }
     }
   } else if (equal_guid_prefixes(reader, participant_id_) && equal_guid_prefixes(writer, participant_id_)) {
-    DCPS::WriterAssociation wa;
+    DCPS::WriterAssociation wa = DCPS::WriterAssociation();
     wa.writerId = writer;
     job_queue_->enqueue(DCPS::make_rch<ReaderRemoveAssociations>(DCPS::make_rch<ReaderAssociationRecord>(callbacks, reader, wa)));
   }

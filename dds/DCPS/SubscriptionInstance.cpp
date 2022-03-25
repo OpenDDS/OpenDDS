@@ -23,6 +23,7 @@ SubscriptionInstance::SubscriptionInstance(DataReaderImpl* reader,
   , rcvd_samples_(reader, instance_state_)
   , read_sample_count_(0)
   , not_read_sample_count_(0)
+  , sample_states_(0)
   , instance_handle_(handle)
   , owns_handle_(owns_handle)
   , deadline_timer_id_(-1)

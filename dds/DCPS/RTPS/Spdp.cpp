@@ -1025,10 +1025,11 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
-  ParticipantData_t pdata;
+  ParticipantData_t pdata = ParticipantData_t();
 
   pdata.participantProxy.domainId = domain_;
   pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
+
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -1268,7 +1269,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   dp.handshake_state_ = HANDSHAKE_STATE_PROCESS_HANDSHAKE;
 
-  DDS::Security::ParticipantStatelessMessage msg;
+  DDS::Security::ParticipantStatelessMessage msg = DDS::Security::ParticipantStatelessMessage();
   msg.message_identity.source_guid = guid_;
   msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
   msg.destination_participant_guid = guid;
@@ -1506,7 +1507,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
-    DDS::Security::ParticipantStatelessMessage reply;
+    DDS::Security::ParticipantStatelessMessage reply = DDS::Security::ParticipantStatelessMessage();
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
@@ -1613,7 +1614,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   }
 
   case HANDSHAKE_STATE_PROCESS_HANDSHAKE: {
-    DDS::Security::ParticipantStatelessMessage reply;
+    DDS::Security::ParticipantStatelessMessage reply = DDS::Security::ParticipantStatelessMessage();
     reply.message_identity.source_guid = guid_;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
@@ -3824,7 +3825,7 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 
     const DCPS::RepoId reader = make_id(peer, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
 
-    DDS::Security::ParticipantVolatileMessageSecure msg;
+    DDS::Security::ParticipantVolatileMessageSecure msg = DDS::Security::ParticipantVolatileMessageSecure();
     msg.message_identity.source_guid = writer;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
     msg.destination_participant_guid = peer;

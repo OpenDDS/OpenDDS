@@ -67,6 +67,7 @@ FilterEvaluator::FilterEvaluator(const char* filter, bool allowOrderBy)
 FilterEvaluator::FilterEvaluator(const AstNodeWrapper& yardNode)
   : extended_grammar_(false)
   , filter_root_(walkAst(yardNode))
+  , number_parameters_(0)
 {
 }
 
