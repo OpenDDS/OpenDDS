@@ -1706,7 +1706,7 @@ bool CryptoBuiltInImpl::preprocess_secure_submsg(
                           encoded_rtps_submessage.length());
   mb_in.wr_ptr(encoded_rtps_submessage.length());
   Serializer de_ser(&mb_in, common_encoding);
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   if (!(de_ser.skip(RTPS::SMHDR_SZ) && (de_ser >> ch))) {
     ACE_ERROR((LM_ERROR,
       "(%P|%t) CryptoBuiltInImpl::preprocess_secure_submsg: "
@@ -1970,7 +1970,7 @@ bool CryptoBuiltInImpl::decode_rtps_message(
     return CommonUtilities::set_security_error(ex, -2, 0, "Failed to deserialize Header");
   }
 
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   CryptoFooter cf;
   bool haveCryptoHeader = false, haveCryptoFooter = false;
   const char* afterSrtpsPrefix = 0;
@@ -2112,7 +2112,7 @@ bool CryptoBuiltInImpl::decode_submessage(
   de_ser.swap_bytes((flags & RTPS::FLAG_E) != ACE_CDR_BYTE_ORDER);
   ACE_CDR::UShort octetsToNext;
   de_ser >> octetsToNext;
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   de_ser.endianness(ENDIAN_BIG);
   de_ser >> ch;
   de_ser.skip(octetsToNext - CRYPTO_HEADER_LENGTH);
@@ -2286,7 +2286,7 @@ bool CryptoBuiltInImpl::decode_serialized_payload(
                           encoded_buffer.length());
   mb_in.wr_ptr(encoded_buffer.length());
   Serializer de_ser(&mb_in, common_encoding);
-  CryptoHeader ch;
+  CryptoHeader ch = CryptoHeader();
   if (!(de_ser >> ch)) {
     return CommonUtilities::set_security_error(ex, -3, 4, "Failed to deserialize CryptoHeader");
   }

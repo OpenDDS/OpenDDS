@@ -386,6 +386,7 @@ private:
     , participant_discovered_at_(DCPS::monotonic_time_zero())
     , transport_context_(0)
 #ifdef OPENDDS_SECURITY
+    , security_attribs_(DDS::Security::EndpointSecurityAttributes())
     , have_ice_agent_info_(false)
 #endif
     {

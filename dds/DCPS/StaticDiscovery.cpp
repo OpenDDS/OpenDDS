@@ -115,7 +115,7 @@ void StaticEndpointManager::init_bit()
 
       // pos represents a remote.
       // Populate data.
-      DDS::PublicationBuiltinTopicData data;
+      DDS::PublicationBuiltinTopicData data = DDS::PublicationBuiltinTopicData();
 
       data.key = key;
       OPENDDS_STRING topic_name = writer.topic_name;
@@ -161,7 +161,7 @@ void StaticEndpointManager::init_bit()
 
       // pos represents a remote.
       // Populate data.
-      DDS::SubscriptionBuiltinTopicData data;
+      DDS::SubscriptionBuiltinTopicData data = DDS::SubscriptionBuiltinTopicData();
 
       data.key = key;
       OPENDDS_STRING topic_name = reader.topic_name;
