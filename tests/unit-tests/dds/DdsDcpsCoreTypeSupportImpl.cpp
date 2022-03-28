@@ -13,7 +13,7 @@
 using namespace OpenDDS::DCPS;
 
 
-TEST(DdsDcpsCoreTypeSupportImpl, InvalidPropertySeq)
+TEST(dds_DdsDcpsCoreTypeSupportImpl, InvalidPropertySeq)
 {
   static const Encoding enc(Encoding::KIND_XCDR1);
   const size_t size = int32_cdr_size;
