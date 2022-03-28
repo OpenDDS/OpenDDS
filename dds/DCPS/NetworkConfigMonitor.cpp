@@ -105,40 +105,12 @@ void NetworkConfigMonitor::set(const NetworkInterfaceAddress& nia)
   }
 }
 
-void NetworkConfigMonitor::remove_interface(int index)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
-    if (pos->index == index) {
-      writer_->dispose(*pos);
-      list_.erase(pos++);
-    } else {
-      ++pos;
-    }
-  }
-}
-
 void NetworkConfigMonitor::remove_interface(const OPENDDS_STRING& name)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
     if (pos->name == name) {
-      writer_->dispose(*pos);
-      list_.erase(pos++);
-    } else {
-      ++pos;
-    }
-  }
-}
-
-void NetworkConfigMonitor::remove_address(int index, const NetworkAddress& address)
-{
-  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-  for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
-    if (pos->index == index && pos->address == address) {
       writer_->dispose(*pos);
       list_.erase(pos++);
     } else {
