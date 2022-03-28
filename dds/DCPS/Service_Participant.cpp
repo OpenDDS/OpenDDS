@@ -2605,7 +2605,7 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
 }
 
 int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& start, int& end) {
-  std::size_t dash_pos = range.find("-", 0);
+  const std::size_t dash_pos = range.find("-", 0);
 
   if (dash_pos == std::string::npos || dash_pos == range.length() - 1) {
     start = end = -1;
