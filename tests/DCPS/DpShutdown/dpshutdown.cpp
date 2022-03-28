@@ -385,6 +385,39 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         retcode_to_string(rc)));
       return 1;
     }
+
+    // After we have shutdown the service participant let us restart DDS again
+    DDS::DomainParticipantFactory_var dpf_shutdown = TheParticipantFactoryWithArgs(argc, argv);
+    if (!dpf_shutdown) {
+      ACE_ERROR((LM_ERROR, "%N:%l: ERROR: unable to retrieve the DPF after shutdown, re-initialization not working"));
+      return 1;
+    }
+
+    DDS::DomainParticipant_var participant_shutdown =
+      dpf_shutdown->create_participant(11, PARTICIPANT_QOS_DEFAULT, 0, 0);
+    if (!participant_shutdown) {
+      ACE_ERROR((LM_ERROR, "%N:%l: ERROR: unable to create domain participant after shutdown"));
+      return 1;
+    } else {
+      ACE_DEBUG((LM_DEBUG,
+        "Created participant after shutdown using instance handle %d\n",
+        participant_shutdown->get_instance_handle()));
+    }
+
+    rc = dpf_shutdown->delete_participant(participant_shutdown);
+    if (rc != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "%N:%l: ERROR: Delete of domain participant after shutdown failed: %C\n",
+        retcode_to_string(rc)));
+      return 1;
+    }
+
+    // And let us shutdown the dpf2 again
+    rc = TheServiceParticipant->shutdown();
+    if (rc != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "%N:%l: ERROR: shutdown after re-initialization failed: %C\n",
+        retcode_to_string(rc)));
+      return 1;
+    }
   } catch (CORBA::Exception& e) {
     cerr << "dp: Exception caught in main.cpp:" << endl << e << endl;
     exit(1);
