@@ -253,7 +253,7 @@ struct DiscoveredParticipant {
     : pdata_(p)
     , location_ih_(DDS::HANDLE_NIL)
     , bit_ih_(DDS::HANDLE_NIL)
-    , last_seq_(seq)
+    , max_seq_(seq)
     , seq_reset_count_(0)
 #ifdef OPENDDS_SECURITY
     , have_spdp_info_(false)
@@ -319,7 +319,7 @@ struct DiscoveredParticipant {
   MonotonicTimePoint discovered_at_;
   MonotonicTimePoint lease_expiration_;
   DDS::InstanceHandle_t bit_ih_;
-  SequenceNumber last_seq_;
+  SequenceNumber max_seq_;
   ACE_UINT16 seq_reset_count_;
   typedef OPENDDS_LIST(BuiltinAssociationRecord) BuiltinAssociationRecords;
   BuiltinAssociationRecords builtin_pending_records_;

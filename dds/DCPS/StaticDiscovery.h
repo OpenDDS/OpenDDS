@@ -837,7 +837,7 @@ private:
     MonotonicTimePoint discovered_at_;
     MonotonicTimePoint lease_expiration_;
     DDS::InstanceHandle_t bit_ih_;
-    SequenceNumber last_seq_;
+    SequenceNumber max_seq_;
     ACE_UINT16 seq_reset_count_;
   };
 

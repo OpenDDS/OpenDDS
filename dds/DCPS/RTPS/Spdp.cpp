@@ -1001,10 +1001,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 bool
 Spdp::validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::SequenceNumber& seq, DiscoveredParticipantIter& iter)
 {
-  if (seq.getValue() != 0 && iter->second.last_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
-    if (seq < iter->second.last_seq_) {
+  if (seq.getValue() != 0 && iter->second.max_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
+    if (seq < iter->second.max_seq_) {
       const bool honeymoon_period = now < iter->second.discovered_at_ + config_->min_resend_delay();
       if (!honeymoon_period) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::validateSequenceNumber() - %C sees %C seq %q and max_seq_ was %q\n", DCPS::LogGuid(guid_).c_str(), DCPS::LogGuid(iter->first).c_str(), seq.getValue(), iter->second.max_seq_.getValue()));
         ++iter->second.seq_reset_count_;
       }
       return false;
@@ -1012,7 +1013,7 @@ Spdp::validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::Se
       --iter->second.seq_reset_count_;
     }
   }
-  iter->second.last_seq_ = seq;
+  iter->second.max_seq_ = std::max(iter->second.max_seq_, seq);
   return true;
 }
 
