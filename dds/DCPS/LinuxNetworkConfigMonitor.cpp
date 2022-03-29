@@ -206,7 +206,7 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
           addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
           NetworkInterfaceMap::const_iterator pos = network_interface_map_.find(msg->ifa_index);
           if (pos != network_interface_map_.end()) {
-            set(NetworkInterfaceAddress(msg->ifa_index, pos->second.name, pos->second.can_multicast, NetworkAddress(addr)));
+            set(NetworkInterfaceAddress(pos->second.name, pos->second.can_multicast, NetworkAddress(addr)));
           } else if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: cannot find interface for address\n"));
           }
@@ -239,12 +239,15 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
             }
             return;
           }
-          ACE_INET_Addr addr;
-          addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-          remove_address(msg->ifa_index, NetworkAddress(addr));
+
+          NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifa_index);
+          if (pos != network_interface_map_.end()) {
+            ACE_INET_Addr addr;
+            addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
+            remove_address(pos->second.name, NetworkAddress(addr));
+          }
         }
       }
-
     }
     break;
   case RTM_NEWLINK:
@@ -260,15 +263,23 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         }
       }
 
-      remove_interface(msg->ifi_index);
+      // Clean up the old if necessary.
+      NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifi_index);
+      if (pos != network_interface_map_.end()) {
+        remove_interface(pos->second.name);
+        network_interface_map_.erase(pos);
+      }
       network_interface_map_[msg->ifi_index] = NetworkInterface(name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK));
     }
     break;
   case RTM_DELLINK:
     {
       const ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
-      remove_interface(msg->ifi_index);
-      network_interface_map_.erase(msg->ifi_index);
+      NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifi_index);
+      if (pos != network_interface_map_.end()) {
+        remove_interface(pos->second.name);
+        network_interface_map_.erase(pos);
+      }
     }
     break;
   }
