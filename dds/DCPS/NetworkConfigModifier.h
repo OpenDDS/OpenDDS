@@ -28,6 +28,13 @@ public:
   bool open();
   bool close();
   void update_interfaces();
+
+  void add_interface(const OPENDDS_STRING& name);
+  void remove_interface(const OPENDDS_STRING& name);
+  void add_address(const OPENDDS_STRING& name,
+                   bool can_multicast,
+                   const ACE_INET_Addr& addr);
+  void remove_address(const OPENDDS_STRING& name, const ACE_INET_Addr& addr);
 };
 typedef RcHandle<NetworkConfigModifier> NetworkConfigModifier_rch;
 
