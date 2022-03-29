@@ -194,6 +194,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     // Clean-up!
+    sub->delete_datareader(reader.in());
     participant->delete_contained_entities();
     dpf->delete_participant(participant.in());
     TheServiceParticipant->shutdown();
