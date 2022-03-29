@@ -76,7 +76,7 @@ void NetworkConfigModifier::update_interfaces()
         ACE_INET_Addr address;
         address.set((u_short) 0, addr->sin_addr.s_addr, 0);
 
-        nia_list.push_back(NetworkInterfaceAddress(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK), NetworkAddress(address)));
+        nia_list.push_back(NetworkInterfaceAddress(p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK), NetworkAddress(address)));
       }
     }
 # if defined (ACE_HAS_IPV6)
@@ -97,6 +97,28 @@ void NetworkConfigModifier::update_interfaces()
   ::freeifaddrs (p_ifa);
 
   NetworkConfigMonitor::set(nia_list);
+}
+
+void NetworkConfigModifier::add_interface(const OPENDDS_STRING&)
+{
+  // This is a no-op.
+}
+
+void NetworkConfigModifier::remove_interface(const OPENDDS_STRING& name)
+{
+  NetworkConfigMonitor::remove_interface(name);
+}
+
+void NetworkConfigModifier::add_address(const OPENDDS_STRING& name,
+                                        bool can_multicast,
+                                        const ACE_INET_Addr& addr)
+{
+  NetworkConfigMonitor::set(NetworkInterfaceAddress(name, can_multicast, NetworkAddress(addr)));
+}
+
+void NetworkConfigModifier::remove_address(const OPENDDS_STRING& name, const ACE_INET_Addr& addr)
+{
+  NetworkConfigMonitor::remove_address(name, NetworkAddress(addr));
 }
 
 } // DCPS
