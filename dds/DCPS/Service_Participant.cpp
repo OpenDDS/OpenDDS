@@ -304,6 +304,10 @@ Service_Participant::job_queue() const
 
 DDS::ReturnCode_t Service_Participant::shutdown()
 {
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
+  }
+
   if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
   }
@@ -338,8 +342,11 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     TransportRegistry::instance()->release();
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown reset\n"));
 
       dp_factory_servant_.reset();
+      if (dp_factory_servant_)
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown reset not nil\n"));
 
       domainRepoMap_.clear();
 
@@ -395,7 +402,16 @@ DDS::DomainParticipantFactory_ptr
 Service_Participant::get_domain_participant_factory(int &argc,
                                                     ACE_TCHAR *argv[])
 {
+//    if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::dp\n"));
+  //}
+
   if (!dp_factory_servant_) {
+
+  //if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::creating new dp\n"));
+  //}
+
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
     shut_down_ = false;
