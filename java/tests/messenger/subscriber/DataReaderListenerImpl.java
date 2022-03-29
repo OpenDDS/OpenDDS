@@ -16,8 +16,12 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
 
     private int num_msgs = 0;
 
+    private int expected_count = 40;
+
     private static final int N_EXPECTED = 40;
     private ArrayList<Boolean> counts = new ArrayList<Boolean>(N_EXPECTED);
+
+    private GuardCondition gc;
 
     private void initialize_counts() {
         if (counts.size() > 0) {
@@ -27,6 +31,16 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
         for (int i = 0; i < N_EXPECTED; ++i) {
             counts.add(false);
         }
+    }
+
+    public void set_expected_count(int expected)
+    {
+        expected_count = expected;
+    }
+
+    public void set_guard_condition(GuardCondition guard_cond)
+    {
+        gc = guard_cond;
     }
 
     public synchronized void on_data_available(DDS.DataReader reader) {
@@ -110,6 +124,12 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
         } else {
             System.err.println("ERROR: read Message: Error: " + status);
         }
+        System.out.println("CLAYTON:"+(1+ mh.value.count));
+
+        System.out.println("CLAYTON EXPECTED:"+expected_count);
+        if ((1+ mh.value.count) == expected_count) {
+            gc.set_trigger_value(true);
+        }
     }
 
     public void on_requested_deadline_missed(DDS.DataReader reader, DDS.RequestedDeadlineMissedStatus status) {
@@ -143,7 +163,7 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
             if (val == false)
                 ++missed_counts;
         }
-        if (missed_counts > 0) {
+        if (missed_counts > 40 - expected_count) {
             System.out.println("ERROR: Missing " + missed_counts + " messages");
         }
     }
