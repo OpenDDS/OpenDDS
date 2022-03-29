@@ -93,7 +93,7 @@ struct Application {
 #endif
     participant_ = dpf->create_participant(4, participant_qos, 0, 0);
     if (!participant_) {
-      std::cout << "Failed to create participant\n";
+      std::cout << "Application " << id_ << " failed to create participant\n";
       throw std::runtime_error("Failed to create participant");
     } else {
       std::cout << "Application " << id_ << " created domain participant\n";
@@ -157,8 +157,6 @@ struct Application {
 
   static int instances_;
   static int total_instances_;
-  static int argc_;
-  static char** argv_;
 
   int id_;
   std::string transport_config_name_;
@@ -167,14 +165,9 @@ struct Application {
 
 int Application::instances_ = 0;
 int Application::total_instances_ = 0;
-int Application::argc_ = 0;
-char** Application::argv_ = 0;
 
 int main(int argc, char* argv[])
 {
-  Application::argc_ = argc;
-  Application::argv_ = argv;
-
   const std::string usage =
     std::string("usage: ") + argv[0] + " [--help|-h] [--secure]\n";
   for (int i = 1; i < argc; ++i) {

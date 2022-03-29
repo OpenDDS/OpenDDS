@@ -27,11 +27,6 @@ DomainParticipantFactoryImpl::DomainParticipantFactoryImpl()
   : qos_(TheServiceParticipant->initial_DomainParticipantFactoryQos()),
     default_participant_qos_(TheServiceParticipant->initial_DomainParticipantQos())
 {
-//  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) DomainParticipantFactoryImpl::"
-               "DomainParticipantFactoryImpl()\n"));
-  //}
 }
 
 DomainParticipantFactoryImpl::~DomainParticipantFactoryImpl()
