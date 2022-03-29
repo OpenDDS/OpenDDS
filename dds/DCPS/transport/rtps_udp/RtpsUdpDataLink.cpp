@@ -1945,7 +1945,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   if (!compare_and_update_counts(heartbeat.count.value, writer->heartbeat_recvd_count_)) {
     if (transport_debug.log_dropped_messages) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C stale/duplicate message (%d vs %d)\n", LogGuid(writer->id_).c_str(), heartbeat.readerId == DCPS::ENTITYID_UNKNOWN ? LogGuid(GUID_UNKNOWN).c_str() : LogGuid(id_).c_str(), heartbeat.count, writer->heartbeat_recvd_count_));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C stale/duplicate message (%d vs %d)\n",
+        LogGuid(writer->id_).c_str(), (heartbeat.readerId == DCPS::ENTITYID_UNKNOWN ? LogGuid(GUID_UNKNOWN).c_str() : LogGuid(id_).c_str()), heartbeat.count, writer->heartbeat_recvd_count_));
     }
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_heartbeat_i "
           "WARNING Count indicates duplicate, dropping\n"));
