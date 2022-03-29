@@ -1945,7 +1945,8 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
 
   if (!compare_and_update_counts(heartbeat.count.value, writer->heartbeat_recvd_count_)) {
     if (transport_debug.log_dropped_messages) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C stale/duplicate message\n", LogGuid(writer->id_).c_str(), LogGuid(id_).c_str()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsReader::process_heartbeat_i - %C -> %C stale/duplicate message (%d vs %d)\n",
+        LogGuid(writer->id_).c_str(), (heartbeat.readerId == DCPS::ENTITYID_UNKNOWN ? LogGuid(GUID_UNKNOWN).c_str() : LogGuid(id_).c_str()), heartbeat.count, writer->heartbeat_recvd_count_));
     }
     VDBG((LM_WARNING, "(%P|%t) RtpsUdpDataLink::process_heartbeat_i "
           "WARNING Count indicates duplicate, dropping\n"));
@@ -2231,7 +2232,6 @@ RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoi
   }
 
   MetaSubmessageVec meta_submessages;
-
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -2240,6 +2240,7 @@ RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoi
     }
 
     // We want a heartbeat from these writers.
+    meta_submessages.reserve(preassociation_writers_.size());
     for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
          pos != limit; ++pos) {
       gather_preassociation_acknack_i(meta_submessages, *pos);
@@ -2884,7 +2885,7 @@ RtpsUdpDataLink::RtpsReader::generate_nack_frags_i(MetaSubmessageVec& meta_subme
     {0} // count set below
   };
 
-
+  meta_submessages.reserve(meta_submessages.size() + frag_info.size());
   for (size_t i = 0; i < frag_info.size(); ++i) {
     MetaSubmessage meta_submessage(id_, wi->id_);
     meta_submessage.sm_.nack_frag_sm(nackfrag_prototype);
@@ -3661,6 +3662,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
 
   // Directed, final.
   meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::FLAG_F;
+  meta_submessages.reserve(meta_submessages.size() + readers_expecting_heartbeat_.size());
   for (ReaderInfoSet::const_iterator pos = readers_expecting_heartbeat_.begin(), limit = readers_expecting_heartbeat_.end();
        pos != limit; ++pos) {
     const ReaderInfo_rch& reader = *pos;
@@ -4143,6 +4145,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(MetaSubmessageVec& meta_submess
 
   // Directed, non-final.
   if (!preassociation_readers_.empty()) {
+    meta_submessages.reserve(meta_submessages.size() + preassociation_readers_.size());
     for (ReaderInfoSet::const_iterator pos = preassociation_readers_.begin(), limit = preassociation_readers_.end();
          pos != limit; ++pos) {
       const ReaderInfo_rch& reader = *pos;
@@ -4170,6 +4173,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(MetaSubmessageVec& meta_submess
     } else {
       for (SNRIS::const_iterator snris_pos = lagging_readers_.begin(), snris_limit = lagging_readers_.end();
            snris_pos != snris_limit; ++snris_pos) {
+        meta_submessages.reserve(meta_submessages.size() + snris_pos->second->readers.size());
         for (ReaderInfoSet::const_iterator pos = snris_pos->second->readers.begin(),
                limit = snris_pos->second->readers.end();
              pos != limit; ++pos) {
