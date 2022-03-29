@@ -71,7 +71,7 @@ typedef WeakRcHandle<TransportSendListener> TransportSendListener_wrch;
  *    is enabled.
  */
 class OpenDDS_Dcps_Export DataLink
-: public RcEventHandler {
+: public virtual RcEventHandler {
 
   friend class DataLinkCleanupTask;
 

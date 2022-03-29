@@ -36,6 +36,7 @@
 #include <dds/DCPS/AddressCache.h>
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/MulticastManager.h>
 
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
@@ -85,9 +86,11 @@ typedef AddressCache<BundlingCacheKey> BundlingCache;
 
 typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 
-class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink : public DataLink, public virtual NetworkConfigListener {
+class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
+  : public virtual DataLink
+  , public virtual InternalDataReaderListener<NetworkInterfaceAddress>
+{
 public:
-
   RtpsUdpDataLink(RtpsUdpTransport& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
@@ -241,13 +244,7 @@ public:
   bool requires_inline_qos(const GUIDSeq_var& peers);
 
 private:
-  void join_multicast_group(const NetworkInterface_rch& nic,
-                            bool all_interfaces = false);
-  void leave_multicast_group(const NetworkInterface_rch& nic);
-  void add_address(const NetworkInterface_rch& nic,
-                   const ACE_INET_Addr& address);
-  void remove_address(const NetworkInterface_rch& nic,
-                      const ACE_INET_Addr& address);
+  void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
   // Internal non-locking versions of the above
   AddrSet get_addresses_i(const RepoId& local, const RepoId& remote) const;
@@ -300,11 +297,9 @@ private:
 
   ACE_SOCK_Dgram unicast_socket_;
   ACE_SOCK_Dgram_Mcast multicast_socket_;
-  OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
 #ifdef ACE_HAS_IPV6
   ACE_SOCK_Dgram ipv6_unicast_socket_;
   ACE_SOCK_Dgram_Mcast ipv6_multicast_socket_;
-  OPENDDS_SET(OPENDDS_STRING) ipv6_joined_interfaces_;
 #endif
 
   MessageBlockAllocator mb_allocator_;
@@ -929,29 +924,8 @@ private:
 
   void accumulate_addresses(const RepoId& local, const RepoId& remote, AddrSet& addresses, bool prefer_unicast = false) const;
 
-  struct ChangeMulticastGroup : public JobQueue::Job {
-    enum CmgAction {CMG_JOIN, CMG_LEAVE};
-
-    ChangeMulticastGroup(RcHandle<RtpsUdpDataLink> link,
-                         const NetworkInterface_rch& nic, CmgAction action)
-      : link_(link)
-      , nic_(nic)
-      , action_(action)
-    {}
-
-    void execute()
-    {
-      if (action_ == CMG_JOIN) {
-        link_->join_multicast_group(nic_);
-      } else {
-        link_->leave_multicast_group(nic_);
-      }
-    }
-
-    RcHandle<RtpsUdpDataLink> link_;
-    NetworkInterface_rch nic_;
-    CmgAction action_;
-  };
+  RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
+  MulticastManager multicast_manager_;
 
   void send_interesting_ack_nack(const RepoId& writerid,
                                  const RepoId& readerid,

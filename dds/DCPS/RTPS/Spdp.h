@@ -19,6 +19,7 @@
 #include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/MultiTask.h>
+#include <dds/DCPS/MulticastManager.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/NetworkConfigMonitor.h>
 #include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
@@ -486,7 +487,7 @@ private:
 
   struct SpdpTransport
     : public virtual DCPS::RcEventHandler
-    , public virtual DCPS::NetworkConfigListener
+    , public virtual DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>
 #ifdef OPENDDS_SECURITY
     , public virtual ICE::Endpoint
 #endif
@@ -526,7 +527,8 @@ private:
 
     virtual int handle_input(ACE_HANDLE h);
 
-    void open(const DCPS::ReactorTask_rch& reactor_task);
+    void open(const DCPS::ReactorTask_rch& reactor_task,
+              const DCPS::JobQueue_rch& job_queue);
     void register_unicast_socket(
       ACE_Reactor* reactor, ACE_SOCK_Dgram& socket, const char* what);
     void register_handlers(const DCPS::ReactorTask_rch& reactor_task);
@@ -546,13 +548,7 @@ private:
     bool open_unicast_ipv6_socket(u_short port);
 #endif
 
-    void join_multicast_group(const DCPS::NetworkInterface_rch& nic,
-                              bool all_interfaces = false);
-    void leave_multicast_group(const DCPS::NetworkInterface_rch& nic);
-    void add_address(const DCPS::NetworkInterface_rch& nic,
-                     const ACE_INET_Addr& address);
-    void remove_address(const DCPS::NetworkInterface_rch& nic,
-                        const ACE_INET_Addr& address);
+    void on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > reader);
 
     DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
@@ -581,9 +577,8 @@ private:
     OPENDDS_STRING multicast_ipv6_interface_;
     ACE_INET_Addr multicast_ipv6_address_;
     ACE_SOCK_Dgram_Mcast multicast_ipv6_socket_;
-    OPENDDS_SET(OPENDDS_STRING) joined_ipv6_interfaces_;
 #endif
-    OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
+    DCPS::MulticastManager multicast_manager_;
     OPENDDS_SET(ACE_INET_Addr) send_addrs_;
     ACE_Message_Block buff_, wbuff_;
     typedef DCPS::PmfPeriodicTask<SpdpTransport> SpdpPeriodic;
@@ -598,6 +593,7 @@ private:
     DCPS::RcHandle<SpdpSporadic> lease_expiration_task_;
     void thread_status_task(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpPeriodic> thread_status_task_;
+    DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> > network_interface_address_reader_;
 #ifdef OPENDDS_SECURITY
     void process_handshake_deadlines(const DCPS::MonotonicTimePoint& now);
     DCPS::RcHandle<SpdpSporadic> handshake_deadline_task_;
@@ -621,38 +617,6 @@ private:
   };
 
   DCPS::RcHandle<SpdpTransport> tport_;
-
-  struct ChangeMulticastGroup : public DCPS::JobQueue::Job {
-    enum CmgAction {CMG_JOIN, CMG_LEAVE};
-
-    ChangeMulticastGroup(const DCPS::RcHandle<SpdpTransport>& tport,
-                         const DCPS::NetworkInterface_rch& nic, CmgAction action,
-                         bool all_interfaces = false)
-      : tport_(tport)
-      , nic_(nic)
-      , action_(action)
-      , all_interfaces_(all_interfaces)
-    {}
-
-    void execute()
-    {
-      DCPS::RcHandle<SpdpTransport> tport = tport_.lock();
-      if (!tport) {
-        return;
-      }
-
-      if (action_ == CMG_JOIN) {
-        tport->join_multicast_group(nic_, all_interfaces_);
-      } else {
-        tport->leave_multicast_group(nic_);
-      }
-    }
-
-    DCPS::WeakRcHandle<SpdpTransport> tport_;
-    DCPS::NetworkInterface_rch nic_;
-    CmgAction action_;
-    bool all_interfaces_;
-  };
 
 #ifdef OPENDDS_SECURITY
   class SendStun : public DCPS::JobQueue::Job {

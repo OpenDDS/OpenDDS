@@ -88,8 +88,10 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
 AgentImpl::AgentImpl()
   : ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>(TheServiceParticipant->job_queue())
   , unfreeze_(false)
-  , ncm_listener_added_(false)
+  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(true, DCPS::rchandle_from(this)))
+  , reader_added_(false)
   , remote_peer_reflexive_counter_(0)
 {
   // Bind the lifetime of this to the service participant.
@@ -108,13 +110,9 @@ void AgentImpl::add_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint)
 
   check_invariants();
 
-  if (!endpoint_managers_.empty() && !ncm_listener_added_) {
-    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-    ncm_listener_added_ = true;
-    guard.release();
-    if (ncm) {
-      ncm->add_listener(*this);
-    }
+  if (!endpoint_managers_.empty() && !reader_added_) {
+    TheServiceParticipant->network_interface_address_topic()->connect(reader_);
+    reader_added_ = true;
   }
 }
 
@@ -133,13 +131,9 @@ void AgentImpl::remove_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint)
 
   check_invariants();
 
-  if (endpoint_managers_.empty() && ncm_listener_added_) {
-    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-    ncm_listener_added_ = false;
-    guard.release();
-    if (ncm) {
-      ncm->remove_listener(*this);
-    }
+  if (endpoint_managers_.empty() && reader_added_) {
+    TheServiceParticipant->network_interface_address_topic()->disconnect(reader_);
+    reader_added_ = false;
   }
 }
 
@@ -264,25 +258,18 @@ void AgentImpl::notify_shutdown()
   shutdown();
 }
 
-void AgentImpl::network_change() const
+void AgentImpl::on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >)
 {
+  DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  reader_->take(samples, infos);
+
+  // FUTURE: This polls the endpoints.  The endpoints should just publish the change.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
          limit = endpoint_managers_.end(); pos != limit; ++pos) {
     pos->second->network_change();
   }
-}
-
-void AgentImpl::add_address(const DCPS::NetworkInterface_rch&,
-                            const ACE_INET_Addr&)
-{
-  network_change();
-}
-
-void AgentImpl::remove_address(const DCPS::NetworkInterface_rch&,
-                               const ACE_INET_Addr&)
-{
-  network_change();
 }
 
 void AgentImpl::process_deferred()
