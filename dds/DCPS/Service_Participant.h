@@ -26,7 +26,6 @@
 #include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <ace/Task.h>
-#include <ace/Configuration.h>
 #include <ace/Time_Value.h>
 #include <ace/ARGV.h>
 #include <ace/Barrier.h>
@@ -453,11 +452,6 @@ public:
   XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
                                      const XTypes::TypeIdentifier& ti) const;
 
-  /**
-  * Share the configuration database
-  */
-  ACE_Configuration_Heap& get_configuration();
-
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic() const
   {
     return network_interface_address_topic_;
@@ -625,10 +619,6 @@ private:
 
   /// The default network address to use.
   NetworkAddress default_address_;
-
-  /// The configuration object that imports the configuration
-  /// file.
-  ACE_Configuration_Heap cf_;
 
   /// Specifies the name of the transport configuration that
   /// is used when the entity tree does not specify one.  If
