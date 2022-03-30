@@ -1661,52 +1661,58 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       return;
     }
 
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    SharedInstanceMap_rch inst;
-    bool new_handle = true;
-    if (is_exclusive_ownership_) {
-      OwnershipManagerPtr owner_manager = ownership_manager();
-
-      if (!owner_manager || owner_manager->instance_lock_acquire () != 0) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%CDataReaderImpl::")
-                      ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("acquire instance_lock failed.\n"), TraitsType::type_name()));
-        }
-        return;
-      }
-
-      inst = dynamic_rchandle_cast<SharedInstanceMap>(
-        owner_manager->get_instance_map(topic_servant_->type_name(), this));
-      if (inst != 0) {
-        typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
-        if (iter != inst->end ()) {
-          handle = iter->second;
-          new_handle = false;
-        }
-      }
-    }
-#endif
-
-    just_registered = true;
-    DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data.get()));
-    bool owns_handle = false;
-    if (handle == DDS::HANDLE_NIL) {
-      handle = get_next_handle(key);
-      owns_handle = true;
-    }
-    OpenDDS::DCPS::SubscriptionInstance_rch instance =
-      OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
-        this,
-        qos_,
-        ref(instances_lock_),
-        handle, owns_handle);
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+      SharedInstanceMap_rch inst;
+      OwnershipManagerScopedAccess ownership_scoped_access;
+      OwnershipManagerPtr owner_manager = ownership_manager();
+
+      bool new_handle = true;
+      if (is_exclusive_ownership_) {
+        OwnershipManagerScopedAccess temp(owner_manager);
+        temp.swap(ownership_scoped_access);
+        if (!owner_manager || ownership_scoped_access.lock_result_ != 0) {
+          if (DCPS_debug_level > 0) {
+            ACE_ERROR ((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ")
+                        ACE_TEXT("%CDataReaderImpl::")
+                        ACE_TEXT("store_instance_data, ")
+                        ACE_TEXT("acquire instance_lock failed.\n"), TraitsType::type_name()));
+          }
+          return;
+        }
+
+        inst = dynamic_rchandle_cast<SharedInstanceMap>(
+          owner_manager->get_instance_map(topic_servant_->type_name(), this));
+        if (inst != 0) {
+          typename InstanceMap::const_iterator const iter = inst->find(*instance_data);
+          if (iter != inst->end ()) {
+            handle = iter->second;
+            new_handle = false;
+          }
+        }
+      }
+#endif
+
+      just_registered = true;
+      DDS::BuiltinTopicKey_t key = OpenDDS::DCPS::keyFromSample(static_cast<MessageType*>(instance_data.get()));
+      bool owns_handle = false;
+      if (handle == DDS::HANDLE_NIL) {
+        handle = get_next_handle(key);
+        owns_handle = true;
+      }
+      OpenDDS::DCPS::SubscriptionInstance_rch instance =
+        OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
+          this,
+          qos_,
+          ref(instances_lock_),
+          handle, owns_handle);
+
       const std::pair<typename SubscriptionInstanceMapType::iterator, bool> bpair =
         instances_.insert(typename SubscriptionInstanceMapType::value_type(handle, instance));
+
       if (bpair.second == false) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_ERROR,
@@ -1718,49 +1724,49 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         return;
       }
       update_lookup_maps(bpair.first);
-    }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-    OwnershipManagerPtr owner_manager = ownership_manager();
+      if (owner_manager) {
+        if (!inst) {
+          inst = make_rch<SharedInstanceMap>();
+          owner_manager->set_instance_map(
+            topic_servant_->type_name(),
+            inst,
+            this);
+        }
 
-    if (owner_manager) {
-      if (!inst) {
-        inst = make_rch<SharedInstanceMap>();
-        owner_manager->set_instance_map(
-          topic_servant_->type_name(),
-          inst,
-          this);
-      }
+        if (new_handle) {
+          const std::pair<typename InstanceMap::iterator, bool> bpair =
+            inst->insert(typename InstanceMap::value_type(*instance_data,
+              handle));
+          if (bpair.second == false)
+          {
+            if (DCPS_debug_level > 0) {
+              ACE_ERROR ((LM_ERROR,
+                          ACE_TEXT("(%P|%t) ")
+                          ACE_TEXT("%CDataReaderImpl::")
+                          ACE_TEXT("store_instance_data, ")
+                          ACE_TEXT("insert to participant scope %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
+            }
+            return;
+          }
+        }
 
-      if (new_handle) {
-        const std::pair<typename InstanceMap::iterator, bool> bpair =
-          inst->insert(typename InstanceMap::value_type(*instance_data,
-            handle));
-        if (bpair.second == false)
-        {
+        OwnershipManagerScopedAccess temp;
+        temp.swap(ownership_scoped_access);
+        if (temp.release() != 0) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR ((LM_ERROR,
                         ACE_TEXT("(%P|%t) ")
                         ACE_TEXT("%CDataReaderImpl::")
                         ACE_TEXT("store_instance_data, ")
-                        ACE_TEXT("insert to participant scope %C failed.\n"), TraitsType::type_name(), TraitsType::type_name()));
+                        ACE_TEXT("release instance_lock failed.\n"), TraitsType::type_name()));
           }
           return;
         }
       }
-
-      if (owner_manager->instance_lock_release () != 0) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR ((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ")
-                      ACE_TEXT("%CDataReaderImpl::")
-                      ACE_TEXT("store_instance_data, ")
-                      ACE_TEXT("release instance_lock failed.\n"), TraitsType::type_name()));
-        }
-        return;
-      }
-    }
 #endif
+    } // scope for instances_lock_
 
     std::pair<typename InstanceMap::iterator, bool> bpair =
       instance_map_.insert(typename InstanceMap::value_type(*instance_data,
@@ -1791,7 +1797,10 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 
     if (header.message_id_ == OpenDDS::DCPS::SAMPLE_DATA)
     {
-      filtered = ownership_filter_instance(instance_ptr, header.publication_id_);
+      {
+        ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_);
+        filtered = ownership_filter_instance(instance_ptr, header.publication_id_);
+      }
 
       TimeDuration filter_time_expired;
       if (!filtered && time_based_filter_instance(instance_ptr, filter_time_expired)) {

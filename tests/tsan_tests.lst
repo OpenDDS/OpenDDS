@@ -55,6 +55,15 @@ tests/DCPS/GroupPresentation/run_test.pl: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE
 tests/DCPS/GroupPresentation/run_test.pl topic: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/GroupPresentation/run_test.pl instance: !DCPS_MIN !DDS_NO_OBJECT_MODEL_PROFILE !DDS_NO_OWNERSHIP_PROFILE
 
+tests/DCPS/Ownership/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Ownership/run_test.pl update_strength: !DCPS_MIN !NO_BUILT_IN_TOPICS  !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Ownership/run_test.pl liveliness_change: !DCPS_MIN !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Ownership/run_test.pl miss_deadline: !DCPS_MIN !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Ownership/run_test.pl rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Ownership/run_test.pl update_strength rtps: !DCPS_MIN RTPS !NO_BUILT_IN_TOPICS  !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Ownership/run_test.pl liveliness_change rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/Ownership/run_test.pl miss_deadline rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+
 tests/DCPS/EntityLifecycleStress/run_test.pl publishers 10 subscribers 10: !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps_disc publishers 10 subscribers 10: RTPS
