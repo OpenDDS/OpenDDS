@@ -1667,11 +1667,12 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       SharedInstanceMap_rch inst;
       OwnershipManagerScopedAccess ownership_scoped_access;
+      OwnershipManagerPtr owner_manager = ownership_manager();
+
       bool new_handle = true;
       if (is_exclusive_ownership_) {
-        OwnershipManagerPtr owner_manager = ownership_manager();
         OwnershipManagerScopedAccess temp(owner_manager);
-        std::swap(ownership_scoped_access, temp);
+        temp.swap(ownership_scoped_access);
         if (!owner_manager || ownership_scoped_access.lock_result_ != 0) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR ((LM_ERROR,
@@ -1725,8 +1726,6 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       update_lookup_maps(bpair.first);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-      OwnershipManagerPtr owner_manager = ownership_manager();
-
       if (owner_manager) {
         if (!inst) {
           inst = make_rch<SharedInstanceMap>();
@@ -1754,7 +1753,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
         }
 
         OwnershipManagerScopedAccess temp;
-        std::swap(ownership_scoped_access, temp);
+        temp.swap(ownership_scoped_access);
         if (temp.release() != 0) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR ((LM_ERROR,
