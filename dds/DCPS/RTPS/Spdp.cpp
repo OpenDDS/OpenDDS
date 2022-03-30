@@ -438,7 +438,7 @@ Spdp::~Spdp()
 void
 Spdp::write_secure_updates()
 {
-  if (shutdown_flag_ == true) {
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
     return;
   }
 
@@ -699,6 +699,11 @@ Spdp::handle_participant_data(DCPS::MessageId id,
   const GUID_t guid = DCPS::make_part_guid(pdata.participantProxy.guidPrefix);
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
+    return;
+  }
+
   if (sedp_->ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
     // asked us to ignore.
@@ -1022,6 +1027,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ParameterList& plist,
                     const ACE_INET_Addr& from)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (initialized_flag_ == false || shutdown_flag_ == true) {
     return;
   }
@@ -1064,19 +1070,28 @@ Spdp::data_received(const DataSubmessage& data,
     }
     return;
   }
-  if (!is_security_enabled()) {
+
+  const bool security_enabled = is_security_enabled();
+  guard.release();
+
+  if (!security_enabled) {
     process_participant_ice(plist, pdata, guid);
   }
 #elif !defined OPENDDS_SAFETY_PROFILE
   const bool relay_in_use = (config_->rtps_relay_only() || config_->use_rtps_relay());
   const bool from_relay = relay_in_use && (from == config_->spdp_rtps_relay_address());
 
-  if (config_->check_source_ip() && msg_id == DCPS::SAMPLE_DATA && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
+  const bool check_source_ip = config_->check_source_ip();
+  guard.release();
+
+  if (check_source_ip && msg_id == DCPS::SAMPLE_DATA && !from_relay && !ip_in_locator_list(from, pdata.participantProxy.metatrafficUnicastLocatorList)) {
     if (DCPS::DCPS_debug_level >= 8) {
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) Spdp::data_received - IP not in locator list: %C\n"), DCPS::LogAddr(from).c_str()));
     }
     return;
   }
+#else
+  guard.release();
 #endif
 
   handle_participant_data(msg_id, pdata, to_opendds_seqnum(data.writerSN), from, false);
@@ -1134,6 +1149,10 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
   }
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
+    return;
+  }
 
   if (sedp_->ignoring(guid)) {
     // Ignore, this is our domain participant or one that the user has
@@ -1443,6 +1462,10 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
+    return;
+  }
+
   // If discovery hasn't initialized / validated this participant yet, ignore handshake messages
   DiscoveredParticipantIter iter = participants_.find(src_participant);
   if (iter == participants_.end()) {
@@ -1713,6 +1736,10 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
+    return;
+  }
+
   for (TimeQueue::iterator pos = handshake_deadlines_.begin(),
         limit = handshake_deadlines_.upper_bound(now); pos != limit;) {
 
@@ -1759,6 +1786,10 @@ void
 Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+
+  if (initialized_flag_ == false || shutdown_flag_ == true) {
+    return;
+  }
 
   bool processor_needs_cancel = false;
   for (TimeQueue::iterator pos = handshake_resends_.begin(), limit = handshake_resends_.end();
@@ -4410,8 +4441,19 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   ICE::AgentInfoMap::const_iterator sedp_pos = ai_map.find(SEDP_AGENT_INFO_KEY);
   ICE::AgentInfoMap::const_iterator spdp_pos = ai_map.find(SPDP_AGENT_INFO_KEY);
 
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint;
+  DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    if (initialized_flag_ == false || shutdown_flag_ == true) {
+      return;
+    }
+    if (sedp_) {
+      sedp_endpoint = sedp_->get_ice_endpoint();
+    }
+    if (tport_) {
+      spdp_endpoint = tport_->get_ice_endpoint();
+    }
     DiscoveredParticipantIter iter = participants_.find(guid);
     if (iter != participants_.end()) {
       if (sedp_pos != ai_map.end()) {
@@ -4430,7 +4472,6 @@ void Spdp::process_participant_ice(const ParameterList& plist,
     }
   }
 
-  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
     if (sedp_pos != ai_map.end()) {
       start_ice(sedp_endpoint, guid, pdata.participantProxy.availableBuiltinEndpoints,
@@ -4440,7 +4481,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
                pdata.participantProxy.availableExtendedBuiltinEndpoints);
     }
   }
-  DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint = tport_->get_ice_endpoint();
+
   if (spdp_endpoint) {
     if (spdp_pos != ai_map.end()) {
       ice_agent_->start_ice(spdp_endpoint, guid_, guid, spdp_pos->second);
