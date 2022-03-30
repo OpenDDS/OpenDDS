@@ -1089,6 +1089,8 @@ Spdp::data_received(const DataSubmessage& data,
     }
     return;
   }
+#else
+  guard.release();
 #endif
 
   handle_participant_data(msg_id, pdata, to_opendds_seqnum(data.writerSN), from, false);
