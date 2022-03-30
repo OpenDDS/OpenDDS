@@ -129,7 +129,7 @@ public:
                              const void* arg);
 
   void set_owner (const PublicationId& owner);
-  PublicationId& get_owner ();
+  PublicationId get_owner ();
   bool is_exclusive () const;
   bool registered();
   void registered (bool flag);
@@ -154,6 +154,7 @@ private:
   bool reactor_is_shut_down() const;
 
   ACE_Recursive_Thread_Mutex& lock_;
+  ACE_Thread_Mutex owner_lock_;
 
   /**
    * Current instance state.
