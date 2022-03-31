@@ -59,15 +59,12 @@ sub Spawn {
   return $ret_value;
 }
 
-sub WaitKill ($;$)
+sub WaitKill ($)
 {
   my $self = shift;
   my $timeout = shift;
-  my $opts = shift;
-
-  my $ret_value = $self->SUPER::WaitKill($timeout, $opts);
+  my $ret_value = $self->SUPER::WaitKill($timeout);
   $self->return_coverage_process();
-
   return $ret_value;
 }
 
