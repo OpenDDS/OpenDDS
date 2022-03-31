@@ -934,7 +934,7 @@ public:
 
   static StaticDiscovery_rch instance() { return instance_; }
 
-  DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* participant);
+  RcHandle<BitSubscriber> init_bit(DCPS::DomainParticipantImpl* participant);
 
   void fini_bit(DCPS::DomainParticipantImpl* participant);
 

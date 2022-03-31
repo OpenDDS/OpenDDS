@@ -819,14 +819,14 @@ private:
   bool coherent_change_received(WriterInfo* writer);
 #endif
 
-  DDS::Subscriber_var get_builtin_subscriber() const
+  RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const
   {
     RcHandle<DomainParticipantImpl> participant_servant = participant_servant_.lock();
     if (participant_servant) {
-      return participant_servant->get_builtin_subscriber();
+      return participant_servant->get_builtin_subscriber_proxy();
     }
 
-    return DDS::Subscriber_var();
+    return RcHandle<BitSubscriber>();
   }
 
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
@@ -1046,14 +1046,12 @@ public:
 
   class OpenDDS_Dcps_Export OnDataAvailable : public JobQueue::Job {
   public:
-    OnDataAvailable(WeakRcHandle<SubscriberImpl> subscriber,
-                    DDS::DataReaderListener_var listener,
+    OnDataAvailable(DDS::DataReaderListener_var listener,
                     WeakRcHandle<DataReaderImpl> data_reader,
                     bool call,
                     bool set_reader_status,
                     bool set_subscriber_status)
-      : subscriber_(subscriber)
-      , listener_(listener)
+      : listener_(listener)
       , data_reader_(data_reader)
       , call_(call)
       , set_reader_status_(set_reader_status)
@@ -1063,7 +1061,6 @@ public:
   private:
     virtual void execute();
 
-    WeakRcHandle<SubscriberImpl> subscriber_;
     DDS::DataReaderListener_var listener_;
     WeakRcHandle<DataReaderImpl> data_reader_;
     const bool call_;

@@ -44,6 +44,7 @@ private:
   private:
     void execute()
     {
+      ACE_GUARD(ACE_Thread_Mutex, g, lncm_->socket_mutex_);
       if (reactor()->register_handler(lncm_, READ_MASK) != 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
       }
@@ -60,6 +61,7 @@ private:
 
     void execute()
     {
+      ACE_GUARD(ACE_Thread_Mutex, g, lncm_->socket_mutex_);
       reactor()->remove_handler(lncm_, READ_MASK);
     }
 
@@ -72,6 +74,7 @@ private:
   void process_message(const nlmsghdr* header);
 
   ACE_SOCK_Netlink socket_;
+  ACE_Thread_Mutex socket_mutex_;
   ReactorInterceptor_wrch interceptor_;
 
   struct NetworkInterface {

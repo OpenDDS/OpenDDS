@@ -589,7 +589,7 @@ private:
   void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  DDS::Subscriber_var get_builtin_subscriber() const;
+  RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const;
 
   DDS::DomainId_t domain_id() const {
     return this->domain_id_;

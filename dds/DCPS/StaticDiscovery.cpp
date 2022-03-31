@@ -2811,17 +2811,17 @@ void StaticDiscovery::pre_reader(DataReaderImpl* reader)
 
 StaticDiscovery_rch StaticDiscovery::instance_(make_rch<StaticDiscovery>(Discovery::DEFAULT_STATIC));
 
-DDS::Subscriber_ptr StaticDiscovery::init_bit(DomainParticipantImpl* participant)
+RcHandle<BitSubscriber> StaticDiscovery::init_bit(DomainParticipantImpl* participant)
 {
   DDS::Subscriber_var bit_subscriber;
 #ifndef DDS_HAS_MINIMUM_BIT
   if (!TheServiceParticipant->get_BIT()) {
     get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   if (create_bit_topics(participant) != DDS::RETCODE_OK) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   bit_subscriber =
@@ -2832,7 +2832,7 @@ DDS::Subscriber_ptr StaticDiscovery::init_bit(DomainParticipantImpl* participant
   if (sub == 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
                ACE_TEXT(" - Could not cast Subscriber to SubscriberImpl\n")));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   DDS::DataReaderQos dr_qos;
@@ -2885,13 +2885,13 @@ DDS::Subscriber_ptr StaticDiscovery::init_bit(DomainParticipantImpl* participant
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
                  ACE_TEXT(" - Error %d enabling subscriber\n"), ret));
     }
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
 
-  return bit_subscriber._retn();
+  return make_rch<BitSubscriber>(bit_subscriber);
 }
 
 void StaticDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant)

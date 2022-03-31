@@ -100,7 +100,7 @@ public:
 
   // Participant
   const DCPS::RepoId& guid() const { return guid_; }
-  void init_bit(const DDS::Subscriber_var& bit_subscriber);
+  void init_bit(RcHandle<DCPS::BitSubscriber> bit_subscriber);
   void fini_bit();
 
   bool get_default_locators(const DCPS::RepoId& part_id,
@@ -353,11 +353,6 @@ public:
     endpoint_manager().update_subscription_locators(subId, transInfo);
   }
 
-  DDS::Subscriber_var bit_subscriber() const
-  {
-    return bit_subscriber_;
-  }
-
   RcHandle<DCPS::TransportInst> sedp_transport_inst() const
   {
     return sedp_->transport_inst();
@@ -384,51 +379,6 @@ protected:
   }
 
 private:
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::ParticipantBuiltinTopicDataDataReaderImpl* part_bit()
-  {
-    DDS::Subscriber_var bit_sub(bit_subscriber());
-    if (!bit_sub.in())
-      return 0;
-
-    DDS::DataReader_var d =
-      bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_TOPIC);
-    return dynamic_cast<DCPS::ParticipantBuiltinTopicDataDataReaderImpl*>(d.in());
-  }
-
-  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* part_loc_bit()
-  {
-    DDS::Subscriber_var bit_sub(bit_subscriber());
-    if (!bit_sub.in())
-      return 0;
-
-    DDS::DataReader_var d =
-      bit_sub->lookup_datareader(DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC);
-    return dynamic_cast<DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl*>(d.in());
-  }
-
-  DCPS::ConnectionRecordDataReaderImpl* connection_record_bit()
-  {
-    DDS::Subscriber_var bit_sub(bit_subscriber());
-    if (!bit_sub.in())
-      return 0;
-
-    DDS::DataReader_var d =
-      bit_sub->lookup_datareader(DCPS::BUILT_IN_CONNECTION_RECORD_TOPIC);
-    return dynamic_cast<DCPS::ConnectionRecordDataReaderImpl*>(d.in());
-  }
-
-  DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* internal_thread_bit()
-  {
-    DDS::Subscriber_var bit_sub(bit_subscriber());
-    if (!bit_sub.in())
-      return 0;
-
-    DDS::DataReader_var d =
-      bit_sub->lookup_datareader(DCPS::BUILT_IN_INTERNAL_THREAD_TOPIC);
-    return dynamic_cast<DCPS::InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
-  }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
 #ifdef OPENDDS_SECURITY
   typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::AuthRequestMessageToken, GUID_tKeyLessThan)
@@ -438,11 +388,10 @@ private:
   void init(DDS::DomainId_t domain,
             DCPS::RepoId& guid,
             const DDS::DomainParticipantQos& qos,
-            RtpsDiscovery* disco,
             XTypes::TypeLookupService_rch tls);
 
   mutable ACE_Thread_Mutex lock_;
-  DDS::Subscriber_var bit_subscriber_;
+  DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_;
   DDS::DomainParticipantQos qos_;
   friend class Sedp;
   DiscoveredParticipantMap participants_;
@@ -450,6 +399,7 @@ private:
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
   DCPS::TimeDuration lease_duration_;
   DCPS::TimeDuration lease_extension_;
+  XTypes::TypeLookupService_rch type_lookup_service_;
 
   // Participant:
   const DDS::DomainId_t domain_;

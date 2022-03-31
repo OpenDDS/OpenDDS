@@ -838,8 +838,6 @@ private:
 
     void shutting_down() { shutting_down_ = true; }
 
-    DDS::Subscriber_var get_builtin_subscriber() const;
-
     // Return instance_name field in RPC type lookup request for a given RepoId
     // (as per chapter 7.6.3.3.4 of XTypes spec)
     OPENDDS_STRING get_instance_name(const DCPS::RepoId& id) const
@@ -1225,12 +1223,6 @@ private:
   DCPS::TransportConfig_rch transport_cfg_;
   DCPS::ReactorTask_rch reactor_task_;
   DCPS::JobQueue_rch job_queue_;
-
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
-  DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
-#endif /* DDS_HAS_MINIMUM_BIT */
 
   void populate_discovered_writer_msg(
       DCPS::DiscoveredWriterData& dwd,

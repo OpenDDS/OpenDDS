@@ -949,7 +949,7 @@ public:
                                    const DCPS::RepoId& local_participant,
                                    DCPS::TransportStatisticsSequence& seq);
 
-  DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* participant);
+  RcHandle<DCPS::BitSubscriber> init_bit(DCPS::DomainParticipantImpl* participant);
 
   void fini_bit(DCPS::DomainParticipantImpl* participant);
 
