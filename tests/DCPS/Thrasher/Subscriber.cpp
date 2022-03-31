@@ -58,9 +58,9 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
     if (durable_) {
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
-#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
-#endif
+    qos.history.depth = static_cast<CORBA::Long>(expected_samples * 2);
+
     reader_ = sub->create_datareader(topic.in(), qos, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!reader_) {
       throw std::runtime_error("create_datareader failed.");
