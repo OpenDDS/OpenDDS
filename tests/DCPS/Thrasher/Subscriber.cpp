@@ -58,8 +58,8 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
     if (durable_) {
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
-    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
     qos.history.depth = static_cast<CORBA::Long>(expected_samples * 2);
 #endif
 

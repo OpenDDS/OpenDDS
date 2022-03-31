@@ -57,9 +57,9 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
     if (durable_) {
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
-    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
-  qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_ * 2);
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_ * 2);
 #endif
 
     dw_ = pub->create_datawriter(topic.in(), qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
