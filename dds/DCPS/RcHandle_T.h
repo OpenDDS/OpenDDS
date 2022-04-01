@@ -23,7 +23,6 @@ struct keep_count {};
 template <typename T>
 class RcHandle {
 public:
-
   RcHandle()
     : ptr_(0)
   {}
@@ -38,7 +37,6 @@ public:
     : ptr_(p.release())
   {
   }
-
 
   RcHandle(T* p, inc_count)
     : ptr_(p)
@@ -174,7 +172,6 @@ public:
   }
 
 private:
-
   void bump_up()
   {
     if (this->ptr_ != 0) {

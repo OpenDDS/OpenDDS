@@ -305,6 +305,10 @@ Service_Participant::job_queue() const
 
 DDS::ReturnCode_t Service_Participant::shutdown()
 {
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
+  }
+
   if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
   }
