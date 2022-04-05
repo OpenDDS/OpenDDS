@@ -25,14 +25,14 @@ sub new {
     my $now;
     my $diff_ms;
 
-    while(1) {
+    while (1) {
       $last = Time::HiRes::gettimeofday();
       Time::HiRes::sleep $delay;
       $now = Time::HiRes::gettimeofday();
       $diff_ms = 1000 * ($now - $last - $delay);
 
-      if ( $diff_ms > $drift) {
-        print "Response monitor reports $diff_ms milliseconds drift.\n";
+      if ($diff_ms > $drift) {
+        print "WARNING: Response monitor reports $diff_ms milliseconds drift.\n";
       }
     }
   }
