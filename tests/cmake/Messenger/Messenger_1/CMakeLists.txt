@@ -23,7 +23,7 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${publisher} ${subscriber})
 
 foreach(file
-  Messenger.idl subscriber.cpp publisher.cpp Writer.cpp Writer.h Args.h
+  Messenger.idl subscriber.cpp publisher.cpp Args.h
   DataReaderListener.cpp DataReaderListener.h pub.ini sub.ini)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
@@ -31,8 +31,6 @@ endforeach()
 # Publisher
 add_executable(${publisher}
   "${dst}/publisher.cpp"
-  "${dst}/Writer.h"
-  "${dst}/Writer.cpp"
 )
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
