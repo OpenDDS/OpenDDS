@@ -5907,7 +5907,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -5961,7 +5961,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6047,7 +6047,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6173,7 +6173,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6624,7 +6624,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6792,7 +6792,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6846,7 +6846,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -6932,7 +6932,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7058,7 +7058,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7507,7 +7507,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7675,7 +7675,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7730,7 +7730,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -7953,7 +7953,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -8108,7 +8108,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -8249,7 +8249,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -8492,7 +8492,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -8556,7 +8556,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -8761,7 +8761,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -8916,7 +8916,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -9057,7 +9057,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -9232,7 +9232,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -9289,7 +9289,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x86-windows
     - name: remove unused files
@@ -9375,7 +9375,7 @@ jobs:
 #    - name: install openssl & xerces-c
 #      uses: lukka/run-vcpkg@v7
 #      with:
-#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
 #        vcpkgArguments: --recurse openssl xerces-c
 #        vcpkgTriplet: x86-windows
 #    - name: checkout MPC
@@ -9503,7 +9503,7 @@ jobs:
 #    - name: install openssl & xerces-c
 #      uses: lukka/run-vcpkg@v7
 #      with:
-#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
 #        vcpkgArguments: --recurse openssl xerces-c
 #        vcpkgTriplet: x86-windows
 #    - name: checkout MPC
@@ -9632,7 +9632,7 @@ jobs:
     - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x86-windows
     - name: checkout MPC
@@ -9723,7 +9723,7 @@ jobs:
 #    - name: install openssl & xerces-c
 #      uses: lukka/run-vcpkg@v7
 #      with:
-#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
 #        vcpkgArguments: --recurse openssl xerces-c
 #        vcpkgTriplet: x86-windows
 #    - name: checkout MPC
@@ -9871,7 +9871,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -9925,7 +9925,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -10011,7 +10011,7 @@ jobs:
 #    - name: install openssl & xerces-c
 #      uses: lukka/run-vcpkg@v7
 #      with:
-#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
 #        vcpkgArguments: --recurse openssl xerces-c
 #        vcpkgTriplet: x64-windows
 #    - name: checkout MPC
@@ -10137,7 +10137,7 @@ jobs:
 #    - name: install openssl & xerces-c
 #      uses: lukka/run-vcpkg@v7
 #      with:
-#        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+#        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
 #        vcpkgArguments: --recurse openssl xerces-c
 #        vcpkgTriplet: x64-windows
 #    - name: checkout MPC
@@ -10281,7 +10281,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
@@ -10422,7 +10422,7 @@ jobs:
     - name: install openssl & xerces-c
       uses: lukka/run-vcpkg@v7
       with:
-        vcpkgGitCommitId: 70033dbb31527fb3e69654731f540f59c87787f9
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
