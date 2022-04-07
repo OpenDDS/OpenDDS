@@ -171,7 +171,6 @@ public class TestPublisher {
 
         while (matched.value.current_count != 0) {
           final int result = mdw.get_publication_matched_status(matched);
-          System.out.println("CLAYTO: CURRENT COUNT: "+ result);
           try {
             Thread.sleep(100);
           } catch(InterruptedException ie) {
