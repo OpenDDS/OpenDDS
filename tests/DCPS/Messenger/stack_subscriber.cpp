@@ -42,20 +42,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!participant) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_participant() failed!\n")),
-                       EXIT_FAILURE);
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant() failed!\n"));
+      }
+      return EXIT_FAILURE;
     }
 
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =
       new Messenger::MessageTypeSupportImpl();
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: register_type() failed!\n")),
-                       EXIT_FAILURE);
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type() failed!\n"));
+      }
+      return EXIT_FAILURE;
     }
 
     // Create Topic (Movie Discussion List)
@@ -66,10 +66,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!topic) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_topic() failed!\n")),
-                       EXIT_FAILURE);
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic() failed!\n"));
+      }
+      return EXIT_FAILURE;
     }
 
     // Create Subscriber
@@ -78,10 +78,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!sub) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_subscriber() failed!\n")),
-                       EXIT_FAILURE);
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_subscriber() failed!\n"));
+      }
+      return EXIT_FAILURE;
     }
 
     // Create DataReader
@@ -90,7 +90,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     DDS::GuardCondition_var gc = new DDS::GuardCondition;
     DDS::WaitSet_var ws = new DDS::WaitSet;
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling attach_condition\n"));
+    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling attach_condition\n"));
+    }
     DDS::ReturnCode_t ret = ws->attach_condition(gc);
     if (ret != DDS::RETCODE_OK) {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
@@ -106,10 +108,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                              &listener,
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!reader) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("%N:%l main()")
-                        ACE_TEXT(" ERROR: create_datareader() failed!\n")),
-                       EXIT_FAILURE);
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_datareader() failed!\n"));
+      }
+      return EXIT_FAILURE;
     }
 
     // Block until GuardCondition is released

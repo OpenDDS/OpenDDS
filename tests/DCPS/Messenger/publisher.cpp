@@ -117,20 +117,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                 DDS::DomainParticipantListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!participant) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         EXIT_FAILURE);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant failed!\n"));
+        }
+        return EXIT_FAILURE;
       }
 
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =
         new Messenger::MessageTypeSupportImpl();
       if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: register_type failed!\n")),
-                         EXIT_FAILURE);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type failed!\n"));
+        }
+        return EXIT_FAILURE;
       }
 
       // Create Topic
@@ -142,10 +142,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                   DDS::TopicListener::_nil(),
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!topic) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         EXIT_FAILURE);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic failed!\n"));
+        }
+        return EXIT_FAILURE;
       }
 
       // Create Publisher
@@ -154,10 +154,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                       DDS::PublisherListener::_nil(),
                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!pub) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         EXIT_FAILURE);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_publisher failed!\n"));
+        }
+        return EXIT_FAILURE;
       }
 
       DDS::DataWriterQos qos;
@@ -175,19 +175,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                DDS::DataWriterListener::_nil(),
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!dw) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         EXIT_FAILURE);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_datawriter failed!\n"));
+        }
+        return EXIT_FAILURE;
       }
 
       // Block until Subscriber is available
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): DataWriter waiting for match\n"));
+      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): DataWriter waiting for match\n"));
+      }
       if (Utils::wait_match(dw, 1, Utils::EQ)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for match for dw\n")));
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dw\n"));
         }
-        return 1;
+        return EXIT_FAILURE;
       }
 
       std::cout << "Start Writing Samples" << std::endl;
@@ -196,10 +198,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       Messenger::MessageDataWriter_var message_dw
         = Messenger::MessageDataWriter::_narrow(dw);
       if (!message_dw) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("%N:%l:")
-                   ACE_TEXT(" ERROR: _narrow failed!\n")));
-        ACE_OS::exit(EXIT_FAILURE);
+        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): _narrow failed!\n"));
+        }
+        return EXIT_FAILURE;
       }
 
       Messenger::Message message;
@@ -218,10 +220,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           error = message_dw->write(message, handle);
         } while (error == DDS::RETCODE_TIMEOUT);
 
-        if (error != DDS::RETCODE_OK) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("%N:%l:")
-                     ACE_TEXT(" ERROR: write returned %d!\n"), error));
+        if (error != DDS::RETCODE_OK && OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: main(): write returned %d!\n", error));
         }
 
         message.count++;
@@ -230,9 +230,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       // Block until Subscriber goes away
       if (Utils::wait_match(dw, 0, Utils::EQ)) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("Error waiting for unmatch for writer\n")));
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): waiting for unmatch for writer\n"));
         }
-        return 1;
+        return EXIT_FAILURE;
       }
 
     }
