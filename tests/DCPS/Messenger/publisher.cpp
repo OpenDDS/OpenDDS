@@ -4,7 +4,6 @@
  */
 
 #include "MessengerTypeSupportImpl.h"
-#include "Writer.h"
 #include "Args.h"
 
 #include <tests/Utils/StatusMatching.h>
@@ -182,10 +181,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                          EXIT_FAILURE);
       }
 
-      // Start writing threads
-      std::cout << "Creating Writer" << std::endl;
-      Writer* writer = new Writer(dw.in(), dw_reliable());
-
       // Block until Subscriber is available
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): DataWriter waiting for match\n"));
       if (Utils::wait_match(dw, 1, Utils::EQ)) {
@@ -195,8 +190,42 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         return 1;
       }
 
-      std::cout << "Starting Writer" << std::endl;
-      writer->start();
+      std::cout << "Start Writing Samples" << std::endl;
+
+      // Write samples
+      Messenger::MessageDataWriter_var message_dw
+        = Messenger::MessageDataWriter::_narrow(dw);
+      if (!message_dw) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("%N:%l:")
+                   ACE_TEXT(" ERROR: _narrow failed!\n")));
+        ACE_OS::exit(EXIT_FAILURE);
+      }
+
+      Messenger::Message message;
+      message.subject_id = 99;
+
+      const DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+
+      message.from = "Comic Book Guy";
+      message.subject = "Review";
+      message.text = "Worst. Movie. Ever.";
+      message.count = 0;
+
+      for (size_t i = 0; i < num_messages; i++) {
+        DDS::ReturnCode_t error;
+        do {
+          error = message_dw->write(message, handle);
+        } while (error == DDS::RETCODE_TIMEOUT);
+
+        if (error != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("%N:%l:")
+                     ACE_TEXT(" ERROR: write returned %d!\n"), error));
+        }
+
+        message.count++;
+      }
 
       // Block until Subscriber goes away
       if (Utils::wait_match(dw, 0, Utils::EQ)) {
@@ -206,8 +235,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         return 1;
       }
 
-      std::cerr << "deleting DW" << std::endl;
-      delete writer;
     }
 
     // Clean-up!
