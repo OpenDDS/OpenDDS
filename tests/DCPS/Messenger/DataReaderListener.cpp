@@ -228,11 +228,10 @@ bool DataReaderListenerImpl::is_valid() const
     ++count;
   }
 
-  if (count != counts_.end()) {
+  if (reliable_ && count != counts_.end()) {
     std::cout << "ERROR: received messages with count higher than expected values" << std::endl;
     valid_count = false;
-  } else if (counts_.size() < expected_reads_ &&
-      (reliable_ || (counts_.size() * 4) < expected_reads_)) {
+  } else if (counts_.size() < expected_reads_) {
     std::cout << "ERROR: received " << counts_.size() << " messages, but expected " <<
       expected_reads_ << std::endl;
     valid_count = false;
