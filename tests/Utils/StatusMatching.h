@@ -34,7 +34,7 @@ inline int wait_match<DDS::DataWriter_var>(const DDS::DataWriter_var& writer, un
   }
 
   const CORBA::Long n_readers = static_cast<CORBA::Long>(num_readers);
-  const DDS::Duration_t wake_interval = { 3, 0 };
+  const DDS::Duration_t forever = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
   DDS::PublicationMatchedStatus ms = { 0, 0, 0, 0, 0 };
   DDS::ConditionSeq conditions;
   while (ret != 0) {
@@ -46,7 +46,7 @@ inline int wait_match<DDS::DataWriter_var>(const DDS::DataWriter_var& writer, un
           (cmp == GT  && ms.current_count >  n_readers)) {
         ret = 0;
       } else { // wait for a change
-        DDS::ReturnCode_t w = ws->wait(conditions, wake_interval);
+        DDS::ReturnCode_t w = ws->wait(conditions, forever);
         if ((w != DDS::RETCODE_OK) && (w != DDS::RETCODE_TIMEOUT)) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() - wait returned %d\n"), w));
           break;
@@ -76,7 +76,7 @@ inline int wait_match<DDS::DataReader_var>(const DDS::DataReader_var& reader, un
   }
 
   const CORBA::Long n_writers = static_cast<CORBA::Long>(num_writers);
-  const DDS::Duration_t wake_interval = { 3, 0 };
+  const DDS::Duration_t forever = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
   DDS::SubscriptionMatchedStatus ms = { 0, 0, 0, 0, 0 };
   DDS::ConditionSeq conditions;
   while (ret != 0) {
@@ -88,7 +88,7 @@ inline int wait_match<DDS::DataReader_var>(const DDS::DataReader_var& reader, un
           (cmp == GT  && ms.current_count >  n_writers)) {
         ret = 0;
       } else { // wait for a change
-        DDS::ReturnCode_t w = ws->wait(conditions, wake_interval);
+        DDS::ReturnCode_t w = ws->wait(conditions, forever);
         if ((w != DDS::RETCODE_OK) && (w != DDS::RETCODE_TIMEOUT)) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %N:%l: wait_match() - wait returned %d\n"), w));
           break;
