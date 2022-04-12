@@ -124,10 +124,8 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
         } else {
             System.err.println("ERROR: read Message: Error: " + status);
         }
-        System.out.println("CLAYTON:"+(1+ mh.value.count));
 
-        System.out.println("CLAYTON EXPECTED:"+expected_count);
-        if ((1+ mh.value.count) == expected_count) {
+        if (mh.value.count + 1 == expected_count) {
             gc.set_trigger_value(true);
         }
     }

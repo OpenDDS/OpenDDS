@@ -103,17 +103,17 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available:"
-                     " instance is disposed\n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available: "
+                     "instance is disposed\n")));
         }
       } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available:"
-                    " instance is unregistered\n")));
+          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available: "
+                    "instance is unregistered\n")));
         }
       } else {
         if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available:"
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: "
                      "unknown instance state: %d\n", si.instance_state));
         }
         valid_ = false;
@@ -121,8 +121,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     } else {
       if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available:"
-                   " unexpected status: %d\n", status));
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: "
+                   "unexpected status: %d\n", status));
       }
       valid_ = false;
     }

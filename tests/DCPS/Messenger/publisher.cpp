@@ -11,6 +11,7 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
@@ -221,7 +222,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         } while (error == DDS::RETCODE_TIMEOUT);
 
         if (error != DDS::RETCODE_OK && OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: main(): write returned %d!\n", error));
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: main(): write returned %C!\n", OpenDDS::DCPS::retcode_to_string(error)));
         }
 
         message.count++;
