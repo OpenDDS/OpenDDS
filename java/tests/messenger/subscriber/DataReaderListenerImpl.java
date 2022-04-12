@@ -33,13 +33,11 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
         }
     }
 
-    public void set_expected_count(int expected)
-    {
+    public void set_expected_count(int expected) {
         expected_count = expected;
     }
 
-    public void set_guard_condition(GuardCondition guard_cond)
-    {
+    public void set_guard_condition(GuardCondition guard_cond) {
         gc = guard_cond;
     }
 
@@ -161,7 +159,7 @@ public class DataReaderListenerImpl extends DDS._DataReaderListenerLocalBase {
             if (val == false)
                 ++missed_counts;
         }
-        if (missed_counts > 40 - expected_count) {
+        if (missed_counts > N_EXPECTED - expected_count) {
             System.out.println("ERROR: Missing " + missed_counts + " messages");
         }
     }

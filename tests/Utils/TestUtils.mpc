@@ -1,9 +1,3 @@
-project: dcps_test, install {
+project: dcps_test {
   dynamicflags = TESTUTILS_BUILD_DLL
-  Header_Files {
-    StatusMatching.h
-  }
-  specific {
-    install_dir = tests/Utils
-  }
 }

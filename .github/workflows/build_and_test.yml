@@ -380,7 +380,7 @@ jobs:
         . install_setenv.sh
         cd tests/DCPS/Messenger
         git clean -dfx .
-        $ACE_ROOT/bin/mwc.pl -type gnuace .
+        $ACE_ROOT/bin/mwc.pl -type gnuace . -value_project includes+=$PWD/../../../
         make
     - name: build make install cmake
       shell: bash
