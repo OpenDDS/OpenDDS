@@ -105,6 +105,8 @@ highlight_language = 'none'
 linkcheck_ignore = [
     # Linkcheck fails to work with GitHub anchors
     r'^https?://github\.com/.*#.+$',
+    # Returns 403 for some reason
+    r'^https?://docs\.github\.com/.*$',
 ]
 
 

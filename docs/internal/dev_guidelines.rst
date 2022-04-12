@@ -266,7 +266,7 @@ They inform Doxygen that comment is the documentation for the following declarat
 If referring to something that happens to be a namespace or other global object (like DDS, OpenDDS, or RTPS), you should precede it with a ``%``.
 If not it will turn into a link to that object.
 
-For more information, see `the Doxygen manual <http://www.doxygen.nl/manual/>`_.
+For more information, see `the Doxygen manual <https://www.doxygen.nl/manual/>`_.
 
 Preprocessor
 ============

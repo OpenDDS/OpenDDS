@@ -181,7 +181,7 @@ There are more EXPECT_* and ASSERT_*, but these are the most common ones.
 The difference between EXPECT and ASSERT is that an ASSERT will cease the test upon failure, whereas EXPECTS continue to run.
 For example if you have multiple ``EXPECT_EQ``, they will all always run.
 
-For more information, visit the google test documentation: https://github.com/google/googletest/blob/master/docs/primer.md.
+For more information, visit the google test documentation: https://github.com/google/googletest/blob/main/docs/primer.md.
 
 *************
 Code Coverage
