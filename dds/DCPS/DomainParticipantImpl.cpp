@@ -1579,10 +1579,18 @@ DomainParticipantImpl::get_discovered_participant_data(
 
   DDS::SampleInfoSeq info;
   DDS::ParticipantBuiltinTopicDataSeq data;
-  DDS::DataReader_var dr =
-    this->bit_subscriber_->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-  DDS::ParticipantBuiltinTopicDataDataReader_var bit_part_dr =
-    DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr);
+  DDS::ParticipantBuiltinTopicDataDataReader_var bit_part_dr;
+
+  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
+  if (bit_subscriber) {
+    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
+    bit_part_dr = DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr);
+  }
+
+  if (!bit_part_dr) {
+    return DDS::RETCODE_NO_DATA;
+  }
+
   DDS::ReturnCode_t ret = bit_part_dr->read_instance(data,
                                                      info,
                                                      1,
@@ -1592,11 +1600,11 @@ DomainParticipantImpl::get_discovered_participant_data(
                                                      DDS::ANY_INSTANCE_STATE);
 
   if (ret == DDS::RETCODE_OK) {
-    if (info[0].valid_data)
+    if (info[0].valid_data) {
       participant_data = data[0];
-
-    else
+    } else {
       return DDS::RETCODE_NO_DATA;
+    }
   }
 
   return ret;
@@ -1644,10 +1652,17 @@ DomainParticipantImpl::get_discovered_topic_data(
       return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::DataReader_var dr =
-    bit_subscriber_->lookup_datareader(BUILT_IN_TOPIC_TOPIC);
-  DDS::TopicBuiltinTopicDataDataReader_var bit_topic_dr =
-    DDS::TopicBuiltinTopicDataDataReader::_narrow(dr);
+  DDS::TopicBuiltinTopicDataDataReader_var bit_topic_dr;
+
+  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
+  if (bit_subscriber) {
+    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_TOPIC_TOPIC);
+    bit_topic_dr = DDS::TopicBuiltinTopicDataDataReader::_narrow(dr);
+  }
+
+  if (!bit_topic_dr) {
+    return DDS::RETCODE_NO_DATA;
+  }
 
   DDS::SampleInfoSeq info;
   DDS::TopicBuiltinTopicDataSeq data;
@@ -1661,11 +1676,11 @@ DomainParticipantImpl::get_discovered_topic_data(
                                 DDS::ANY_INSTANCE_STATE);
 
   if (ret == DDS::RETCODE_OK) {
-    if (info[0].valid_data)
+    if (info[0].valid_data) {
       topic_data = data[0];
-
-    else
+    } else {
       return DDS::RETCODE_NO_DATA;
+    }
   }
 
   return ret;
@@ -2156,12 +2171,15 @@ DomainParticipantImpl::ownership_manager()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  DDS::DataReader_var dr =
-    bit_subscriber_->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-  DDS::PublicationBuiltinTopicDataDataReader_var bit_pub_dr =
-    DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
+  DDS::PublicationBuiltinTopicDataDataReader_var bit_pub_dr;
 
-  if (!CORBA::is_nil(bit_pub_dr.in())) {
+  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
+  if (bit_subscriber) {
+    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
+    bit_pub_dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
+  }
+
+  if (bit_pub_dr) {
     DDS::DataReaderListener_var listener = bit_pub_dr->get_listener();
     if (CORBA::is_nil(listener.in())) {
       DDS::DataReaderListener_var bit_pub_listener =
@@ -2175,7 +2193,7 @@ DomainParticipantImpl::ownership_manager()
   }
 
 #endif
-  return &this->owner_man_;
+  return &owner_man_;
 }
 
 void
