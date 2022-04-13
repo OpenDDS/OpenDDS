@@ -407,11 +407,24 @@ private:
    */
   void wakeup_blocking_writers (DataSampleElement* stale);
 
+  void add_reader_acks(const RepoId& reader);
+  void remove_reader_acks(const RepoId& reader);
+
 private:
 
   void log_send_state_lists (OPENDDS_STRING description);
 
-  DisjointSequence acked_sequences_;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, DisjointSequence) AckedSequenceMap;
+#else
+  typedef OPENDDS_MAP_CMP(RepoId, DisjointSequence, GUID_tKeyLessThan) AckedSequenceMap;
+#endif
+  AckedSequenceMap acked_sequences_;
+
+  SequenceNumber get_cumulative_ack();
+  SequenceNumber get_last_ack();
+  void update_acked(const SequenceNumber& seq, const RepoId& id = GUID_UNKNOWN);
+  bool sequence_acknowledged_i(const SequenceNumber sequence);
 
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
