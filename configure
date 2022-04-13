@@ -2343,6 +2343,10 @@ sub add_dependency_paths {
   for my $d (keys %dirs) {
     push_libpath(\%targetEnv, $d);
   }
+
+  if ($opts{'openssl'} && $ENV{'SSL_LIBDIR'}) {
+    push_libpath(\%targetEnv, $ENV{'SSL_LIBDIR'});
+  }
 }
 
 my $cloned_build = $cross_compile && $build_host_tools;
