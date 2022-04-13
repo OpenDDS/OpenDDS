@@ -6,8 +6,6 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
-#include <tests/Utils/StatusMatching.h>
-
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/GuardCondition.h>
 
