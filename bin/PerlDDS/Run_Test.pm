@@ -92,25 +92,35 @@ sub formatted_time {
 sub wait_kill {
   my $process = shift;
   my $wait_time = shift;
-  my $desc = shift;
+  my $name = shift;
   my $verbose = shift;
   $verbose = 0 if !defined($verbose);
+  my $opts = shift;
 
   my $ret_status = 0;
   my $start_time = formatted_time();
   if ($verbose) {
-    print STDERR "$start_time: waiting $wait_time seconds for $desc before "
+    print STDERR "$start_time: waiting $wait_time seconds for $name before "
       . "calling kill\n";
   }
-  my $result = $process->WaitKill($wait_time);
+
+  my $result = $process->WaitKill($wait_time, $opts);
+
   my $time_str = formatted_time();
   if ($result != 0) {
-      my $ext = ($verbose ? "" : "(started waiting for termination at $start_time)");
-      print STDERR "$time_str: ERROR: $desc returned $result $ext\n";
-      $ret_status = 1;
+    my $ext = ($verbose ? "(started waiting for termination at $start_time)" : "");
+    if ($result == -1) {
+      print STDERR "$time_str: ERROR: $name timedout $ext\n";
+    } elsif ($result == 255) {
+      print STDERR "$time_str: ERROR: $name terminated with a signal $ext\n";
+    } else {
+      print STDERR "$time_str: ERROR: $name finished and returned $result $ext\n";
+    }
+    $ret_status = 1;
   } elsif ($verbose) {
-    print STDERR "$time_str: shut down $desc\n";
+    print STDERR "$time_str: shut down $name\n";
   }
+
   return $ret_status;
 }
 
@@ -386,10 +396,8 @@ sub new {
   $self->{dcps_log_level} = $ENV{DCPSLogLevel} // "";
   $self->{dcps_debug_level} = 1;
   $self->{dcps_transport_debug_level} = 1;
-  $self->{dcps_security_debug} = defined $ENV{DCPSSecurityDebug} ?
-    $ENV{DCPSSecurityDebug} : "";
-  $self->{dcps_security_debug_level} = defined $ENV{DCPSSecurityDebugLevel} ?
-    $ENV{DCPSSecurityDebugLevel} : "";
+  $self->{dcps_security_debug} = $ENV{DCPSSecurityDebug} // "";
+  $self->{dcps_security_debug_level} = $ENV{DCPSSecurityDebugLevel} // "";
   $self->{add_orb_log_file} = 1;
   $self->{wait_after_first_proc} = 25;
   $self->{finished} = 0;
@@ -452,10 +460,11 @@ sub wait_kill {
   my $name = shift;
   my $wait_time = shift;
   my $verbose = shift;
+  my $opts = shift;
 
   my $process = $self->{processes}->{process}->{$name}->{process};
 
-  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose);
+  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose, $opts);
 }
 
 sub default_transport {
@@ -782,6 +791,7 @@ sub stop_process {
   my $self = shift;
   my $timed_wait = shift;
   my $name = shift;
+  my $opts = shift;
 
   if (!defined($self->{processes}->{process}->{$name})) {
     print STDERR "ERROR: no process with name=$name\n";
@@ -798,11 +808,11 @@ sub stop_process {
     }
   }
 
-  my $kill_status =
-    PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
-                       $timed_wait,
-                       $name,
-                       $self->{test_verbose});
+  my $kill_status = PerlDDS::wait_kill($self->{processes}->{process}->{$name}->{process},
+                                       $timed_wait,
+                                       $name,
+                                       $self->{test_verbose},
+                                       $opts);
   $self->{status} |= $kill_status;
   delete($self->{processes}->{process}->{$name});
   return !$kill_status;
