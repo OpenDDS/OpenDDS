@@ -97,6 +97,7 @@ sub wait_kill {
   my $opts = shift;
 
   $verbose = 0 if !defined($verbose);
+  my $opts = shift;
 
   my $ret_status = 0;
   my $start_time = formatted_time();
