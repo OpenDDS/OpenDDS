@@ -3907,7 +3907,18 @@ jobs:
 
     runs-on: ubuntu-20.04
 
+    needs: openssl3_u20
+
     steps:
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_u20_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_u20.tar.xz
+        rm -f openssl3_u20.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -3935,7 +3946,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3948,8 +3959,9 @@ jobs:
     - name: configure OpenDDS
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
+        SSL_DIR=$PWD/openssl_install
         cd OpenDDS
-        ./configure --ipv6 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -3982,6 +3994,15 @@ jobs:
     needs: ACE_TAO_u20_p1
 
     steps:
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_u20_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_u20.tar.xz
+        rm -f openssl3_u20.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -4012,8 +4033,11 @@ jobs:
         submodules: true
     - name: configure OpenDDS
       run: |
+        SSL_DIR=$PWD/openssl_install
+        export SSL_LIBDIR=$SSL_DIR/lib64
         cd OpenDDS
-        ./configure --ipv6 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --ipv6 --tests --security --openssl=$SSL_DIR --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        echo "export SSL_LIBDIR=$SSL_LIBDIR" >> setenv.sh
     - name: check build configuration
       shell: bash
       run: |
@@ -4056,6 +4080,15 @@ jobs:
     needs: build_u20_p1_sec
 
     steps:
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_u20_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_u20.tar.xz
+        rm -f openssl3_u20.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -11544,3 +11577,40 @@ jobs:
         submodules: true
     - name: Build
       run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
+
+  openssl3_u20:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: checkout openssl 3.0.2
+      run: |
+        git clone --branch openssl-3.0.2 --depth 1 https://github.com/openssl/openssl.git
+        cd openssl
+        echo "OPENSSL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v2
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: c02_${{ github.job }}_${{ env.OPENSSL_COMMIT }}
+    - name: Build openssl 3.0.2
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        PREFIX=$PWD/openssl_install
+        echo PREFIX=$PREFIX
+        mkdir $PREFIX
+        cd openssl
+        ./Configure no-tests --prefix=$PREFIX
+        make install_sw
+    - name: create openssl tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        tar cvf ${{ github.job }}.tar openssl_install
+        xz -3 ${{ github.job }}.tar
+    - name: upload openssl artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
