@@ -172,10 +172,15 @@ WriteDataContainer::~WriteDataContainer()
 }
 
 void
-WriteDataContainer::add_reader_acks(const RepoId& reader)
+WriteDataContainer::add_reader_acks(const RepoId& reader, const SequenceNumber& base)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
   acked_sequences_[reader].reset();
+  if (base == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    acked_sequences_[reader].insert(SequenceNumber::ZERO());
+  } else {
+    acked_sequences_[reader].insert(SequenceRange(SequenceNumber(), base));
+  }
 }
 
 void
@@ -1554,7 +1559,7 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
 }
 
 bool
-WriteDataContainer::sequence_acknowledged(SequenceNumber sequence)
+WriteDataContainer::sequence_acknowledged(const SequenceNumber& sequence)
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
   return sequence_acknowledged_i(sequence);

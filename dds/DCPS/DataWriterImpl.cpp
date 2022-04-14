@@ -421,7 +421,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     if (!participant)
       return;
 
-    data_container_->add_reader_acks(remote_id);
+    data_container_->add_reader_acks(remote_id, get_max_sn());
 
     const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
 

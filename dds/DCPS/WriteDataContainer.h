@@ -343,7 +343,7 @@ public:
                                     bool deadline_is_infinite,
                                     const SequenceNumber& sequence);
 
-  bool sequence_acknowledged(const SequenceNumber sequence);
+  bool sequence_acknowledged(const SequenceNumber& sequence);
 
 private:
 
@@ -407,7 +407,7 @@ private:
    */
   void wakeup_blocking_writers (DataSampleElement* stale);
 
-  void add_reader_acks(const RepoId& reader);
+  void add_reader_acks(const RepoId& reader, const SequenceNumber& base);
   void remove_reader_acks(const RepoId& reader);
 
 private:
