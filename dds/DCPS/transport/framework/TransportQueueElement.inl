@@ -48,7 +48,11 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement", "decision_made", 6);
 
+#ifdef ACE_HAS_CPP11
   OPENDDS_ASSERT(sub_loan_count_);
+#else
+  OPENDDS_ASSERT(sub_loan_count_.value());
+#endif
   const unsigned long new_count = --sub_loan_count_;
   if (new_count == 0) {
     // All interested subscriptions have been satisfied.
