@@ -133,7 +133,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
   bool large_samples = false;
   bool delay_exit = false;
-  for (int i = 0; i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) {
     if (std::string(ACE_TEXT_ALWAYS_CHAR(argv[i])) == "-l") {
       large_samples = true;
     }
@@ -151,8 +151,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipant_var participant =
       dpf->create_participant(31,
                               PARTICIPANT_QOS_DEFAULT,
-                              DDS::DomainParticipantListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                              0,
+                              0);
     if (CORBA::is_nil(participant.in())) {
       cerr << "create_participant failed." << endl;
       return 1;
@@ -173,8 +173,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->create_topic("Movie Discussion List",
                                 type_name.in(),
                                 topic_qos,
-                                DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                0,
+                                0);
 
     if (CORBA::is_nil(topic.in())) {
       cerr << "create_topic failed." << endl;
@@ -185,8 +185,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->get_default_subscriber_qos(sub_qos);
 
     DDS::Subscriber_var sub =
-      participant->create_subscriber(sub_qos, DDS::SubscriberListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      participant->create_subscriber(sub_qos,
+                                     0,
+                                     0);
     if (CORBA::is_nil(sub.in())) {
       cerr << "create_subscriber failed." << endl;
       exit(1);
@@ -203,9 +204,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataReader_var dr =
       sub->create_datareader(topic.in(),
-                              dr_qos,
-                              drl.in(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                             dr_qos,
+                             drl.in(),
+                             ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
     if (CORBA::is_nil(dr.in())) {
       cerr << "create_datareader failed." << endl;

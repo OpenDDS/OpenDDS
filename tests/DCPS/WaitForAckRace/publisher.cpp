@@ -74,7 +74,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   bool large_samples = false;
   bool sub_delayed_exit = false;
-  for (int i = 0; i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) {
     if (std::string(ACE_TEXT_ALWAYS_CHAR(argv[i])) == "-l") {
       large_samples = true;
     }
@@ -97,8 +97,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::DomainParticipant_var participant =
       dpf->create_participant(31,
                               PARTICIPANT_QOS_DEFAULT,
-                              DDS::DomainParticipantListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                              0,
+                              0);
     if (CORBA::is_nil(participant.in())) {
       cerr << "create_participant failed." << endl;
       return 1;
@@ -119,8 +119,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->create_topic("Movie Discussion List",
                                 type_name.in(),
                                 topic_qos,
-                                DDS::TopicListener::_nil(),
-                                ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                                0,
+                                0);
 
     if (CORBA::is_nil(topic.in())) {
       cerr << "create_topic failed." << endl;
@@ -131,8 +131,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->get_default_publisher_qos(pub_qos);
 
     DDS::Publisher_var pub =
-      participant->create_publisher(pub_qos, DDS::PublisherListener::_nil(),
-                                    ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+      participant->create_publisher(pub_qos,
+                                    0,
+                                    0);
     if (CORBA::is_nil(pub.in())) {
       cerr << "create_publisher failed." << endl;
       exit(1);
@@ -145,9 +146,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     DDS::DataWriter_var dw =
       pub->create_datawriter(topic.in(),
-                              dw_qos,
-                              DDS::DataWriterListener::_nil(),
-                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+                             dw_qos,
+                             0,
+                             0);
 
     if (CORBA::is_nil(dw.in())) {
       cerr << "create_datawriter failed." << endl;

@@ -183,8 +183,8 @@ WriteDataContainer::remove_reader_acks(const RepoId& reader)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
 
-  SequenceNumber prev_cum_ack = get_cumulative_ack();
-  AckedSequenceMap::iterator it = acked_sequences_.find(reader);
+  const SequenceNumber prev_cum_ack = get_cumulative_ack();
+  const AckedSequenceMap::iterator it = acked_sequences_.find(reader);
   if (it != acked_sequences_.end()) {
     acked_sequences_.erase(it);
     if (prev_cum_ack != get_cumulative_ack()) {
@@ -312,7 +312,6 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                    lock_,
                    DDS::RETCODE_ERROR);
 
-
   ssize_t total_size = 0;
   for (PublicationInstanceMapType::iterator it = instances_.begin();
        it != instances_.end(); ++it) {
@@ -322,7 +321,6 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
     it->second->durable_samples_remaining_ = durable;
   }
 
-  const ssize_t start_total_size = total_size;
   copy_and_prepend(resend_data_,
                    sending_data_,
                    reader_id,
@@ -701,7 +699,8 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
         ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
-        for (int i = 0; i < stale->get_num_subs(); ++i) {
+        const int num_subs = static_cast<int>(stale->get_num_subs());
+        for (int i = 0; i < num_subs; ++i) {
           update_acked(stale->get_header().sequence_, stale->get_sub_id(i));
         }
         guard.release();
@@ -1555,14 +1554,14 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
 }
 
 bool
-WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
+WriteDataContainer::sequence_acknowledged(SequenceNumber sequence)
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
   return sequence_acknowledged_i(sequence);
 }
 
 bool
-WriteDataContainer::sequence_acknowledged_i(const SequenceNumber sequence)
+WriteDataContainer::sequence_acknowledged_i(const SequenceNumber& sequence)
 {
   if (sequence == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
     //return true here so that wait_for_acknowledgments doesn't block

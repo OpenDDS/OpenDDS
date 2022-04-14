@@ -424,7 +424,7 @@ private:
   SequenceNumber get_cumulative_ack();
   SequenceNumber get_last_ack();
   void update_acked(const SequenceNumber& seq, const RepoId& id = GUID_UNKNOWN);
-  bool sequence_acknowledged_i(const SequenceNumber sequence);
+  bool sequence_acknowledged_i(const SequenceNumber& sequence);
 
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
