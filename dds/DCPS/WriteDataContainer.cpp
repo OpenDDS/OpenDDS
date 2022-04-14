@@ -716,8 +716,8 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
         ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
-        const int num_subs = static_cast<int>(stale->get_num_subs());
-        for (int i = 0; i < num_subs; ++i) {
+        const CORBA::ULong num_subs = stale->get_num_subs();
+        for (CORBA::ULong i = 0; i < num_subs; ++i) {
           update_acked(stale->get_header().sequence_, stale->get_sub_id(i));
         }
         guard.release();

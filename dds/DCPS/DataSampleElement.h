@@ -76,12 +76,12 @@ public:
 
   CORBA::ULong get_num_subs() const;
 
-  void set_num_subs(int num_subs);
+  void set_num_subs(CORBA::ULong num_subs);
 
   const OpenDDS::DCPS::RepoId* get_sub_ids() const;
-  OpenDDS::DCPS::RepoId  get_sub_id(int index) const;
+  OpenDDS::DCPS::RepoId get_sub_id(CORBA::ULong index) const;
 
-  void set_sub_id(int index, OpenDDS::DCPS::RepoId id);
+  void set_sub_id(CORBA::ULong index, OpenDDS::DCPS::RepoId id);
 
   TransportSendListener* get_send_listener() const;
   TransportSendListener* get_send_listener();

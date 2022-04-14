@@ -99,14 +99,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                               PARTICIPANT_QOS_DEFAULT,
                               0,
                               0);
-    if (CORBA::is_nil(participant.in())) {
+    if (!participant) {
       cerr << "create_participant failed." << endl;
       return 1;
     }
 
     MessageTypeSupportImpl::_var_type servant = new MessageTypeSupportImpl();
 
-    if (DDS::RETCODE_OK != servant->register_type(participant.in(), "")) {
+    if (DDS::RETCODE_OK != servant->register_type(participant, "")) {
       cerr << "register_type failed." << endl;
       exit(1);
     }
@@ -117,12 +117,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     participant->get_default_topic_qos(topic_qos);
     DDS::Topic_var topic =
       participant->create_topic("Movie Discussion List",
-                                type_name.in(),
+                                type_name,
                                 topic_qos,
                                 0,
                                 0);
 
-    if (CORBA::is_nil(topic.in())) {
+    if (!topic) {
       cerr << "create_topic failed." << endl;
       exit(1);
     }
@@ -134,7 +134,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       participant->create_publisher(pub_qos,
                                     0,
                                     0);
-    if (CORBA::is_nil(pub.in())) {
+    if (!pub) {
       cerr << "create_publisher failed." << endl;
       exit(1);
     }
@@ -145,20 +145,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dw_qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
 
     DDS::DataWriter_var dw =
-      pub->create_datawriter(topic.in(),
+      pub->create_datawriter(topic,
                              dw_qos,
                              0,
                              0);
 
-    if (CORBA::is_nil(dw.in())) {
+    if (!dw) {
       cerr << "create_datawriter failed." << endl;
       exit(1);
     }
 
     Messenger::MessageDataWriter_var message_dw =
-      Messenger::MessageDataWriter::_narrow(dw.in());
+      Messenger::MessageDataWriter::_narrow(dw);
 
-    if (CORBA::is_nil(message_dw.in())) {
+    if (!message_dw) {
       cerr << "Messenger::MessageDataWriter::_narrow() failed." << endl;
       exit(1);
     }
@@ -243,7 +243,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     participant->delete_contained_entities();
-    dpf->delete_participant(participant.in());
+    dpf->delete_participant(participant);
   }
   catch (const CORBA::Exception& e)
   {
