@@ -7,6 +7,7 @@
 #define OPENDDS_DCPS_VALUE_WRITER_H
 
 #include "Definitions.h"
+#include "XTypes/MemberDescriptor.h"
 
 #include <dds/Versioned_Namespace.h>
 #include <FACE/Fixed.h>
@@ -41,7 +42,7 @@ public:
 
   virtual void begin_struct() {}
   virtual void end_struct() {}
-  virtual void begin_struct_member(const char* /*name*/) {}
+  virtual void begin_struct_member(const XTypes::MemberDescriptor& /*descriptor*/) {}
   virtual void end_struct_member() {}
 
   virtual void begin_union() {}
