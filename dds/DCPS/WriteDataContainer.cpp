@@ -84,25 +84,26 @@ WriteDataContainer::WriteDataContainer(
   ACE_Recursive_Thread_Mutex& deadline_status_lock,
   DDS::OfferedDeadlineMissedStatus& deadline_status,
   CORBA::Long& deadline_last_total_count)
-  : transaction_id_(0),
-    publication_id_(GUID_UNKNOWN),
-    writer_(writer),
-    max_samples_per_instance_(max_samples_per_instance),
-    history_depth_(history_depth),
-    max_durable_per_instance_(max_durable_per_instance),
-    max_num_instances_(max_instances),
-    max_num_samples_(max_total_samples),
-    max_blocking_time_(max_blocking_time),
-    waiting_on_release_(false),
-    condition_(lock_),
-    empty_condition_(lock_),
-    wfa_condition_(wfa_lock_),
-    n_chunks_(n_chunks),
-    sample_list_element_allocator_(2 * n_chunks_),
-    shutdown_(false),
-    domain_id_(domain_id),
-    topic_name_(topic_name),
-    type_name_(type_name)
+  : cached_cumulative_ack_valid_(false)
+  , transaction_id_(0)
+  , publication_id_(GUID_UNKNOWN)
+  , writer_(writer)
+  , max_samples_per_instance_(max_samples_per_instance)
+  , history_depth_(history_depth)
+  , max_durable_per_instance_(max_durable_per_instance)
+  , max_num_instances_(max_instances)
+  , max_num_samples_(max_total_samples)
+  , max_blocking_time_(max_blocking_time)
+  , waiting_on_release_(false)
+  , condition_(lock_)
+  , empty_condition_(lock_)
+  , wfa_condition_(wfa_lock_)
+  , n_chunks_(n_chunks)
+  , sample_list_element_allocator_(2 * n_chunks_)
+  , shutdown_(false)
+  , domain_id_(domain_id)
+  , topic_name_(topic_name)
+  , type_name_(type_name)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   , durability_cache_(durability_cache)
   , durability_service_(durability_service)
@@ -119,7 +120,7 @@ WriteDataContainer::WriteDataContainer(
                "sample_list_element_allocator %x with %d chunks\n",
                &sample_list_element_allocator_, n_chunks_));
   }
-  acked_sequences_[GUID_UNKNOWN].reset();
+  acked_sequences_[GUID_UNKNOWN].insert(SequenceNumber::ZERO());
 }
 
 WriteDataContainer::~WriteDataContainer()
@@ -175,12 +176,14 @@ void
 WriteDataContainer::add_reader_acks(const RepoId& reader, const SequenceNumber& base)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
-  acked_sequences_[reader].reset();
+  DisjointSequence& ds = acked_sequences_[reader];
+  ds.reset();
   if (base == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    acked_sequences_[reader].insert(SequenceNumber::ZERO());
+    ds.insert(SequenceNumber::ZERO());
   } else {
-    acked_sequences_[reader].insert(SequenceRange(SequenceNumber(), base));
+    ds.insert(SequenceRange(SequenceNumber(), base));
   }
+  cached_cumulative_ack_valid_ = false;
 }
 
 void
@@ -192,6 +195,7 @@ WriteDataContainer::remove_reader_acks(const RepoId& reader)
   const AckedSequenceMap::iterator it = acked_sequences_.find(reader);
   if (it != acked_sequences_.end()) {
     acked_sequences_.erase(it);
+    cached_cumulative_ack_valid_ = false;
     if (prev_cum_ack != get_cumulative_ack()) {
       wfa_condition_.notify_all();
     }
@@ -205,12 +209,18 @@ WriteDataContainer::get_cumulative_ack()
     return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   }
 
+  if (cached_cumulative_ack_valid_) {
+    return cached_cumulative_ack_;
+  }
+
   SequenceNumber result = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
   for (AckedSequenceMap::const_iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
     if (!it->second.empty()) {
       result = result == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ? it->second.cumulative_ack() : std::min(result, it->second.cumulative_ack());
     }
   }
+  cached_cumulative_ack_ = result;
+  cached_cumulative_ack_valid_ = true;
   return result;
 }
 
@@ -238,6 +248,7 @@ WriteDataContainer::update_acked(const SequenceNumber& seq, const RepoId& id)
     for (AckedSequenceMap::iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
       SequenceNumber prev_cum_ack = it->second.cumulative_ack();
       it->second.insert(seq);
+      cached_cumulative_ack_valid_ = false;
       if (prev_cum_ack != it->second.cumulative_ack()) {
         do_notify = true;
       }
@@ -248,6 +259,7 @@ WriteDataContainer::update_acked(const SequenceNumber& seq, const RepoId& id)
       SequenceNumber prev_cum_ack = it->second.cumulative_ack();
       if (prev_cum_ack < seq) {
         it->second.insert(SequenceRange(prev_cum_ack, seq));
+        cached_cumulative_ack_valid_ = false;
         if (prev_cum_ack != it->second.cumulative_ack()) {
           do_notify = true;
         }
@@ -344,14 +356,14 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
 #endif
                    total_size);
 
-  acked_sequences_[reader_id].reset();
-  if (resend_data_.head()) {
+  {
+    ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+    cached_cumulative_ack_valid_ = false;
     DisjointSequence& ds = acked_sequences_[reader_id];
     ds = acked_sequences_[GUID_UNKNOWN];
 
-    // Remove exactly what will be acked
+    // Remove exactly what will be sent
     SendStateDataSampleList::iterator iter = resend_data_.begin();
-    ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
     while (iter != resend_data_.end()) {
       ds.erase(iter->get_header().sequence_);
       ++iter;

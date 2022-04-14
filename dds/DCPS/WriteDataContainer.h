@@ -420,6 +420,8 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DisjointSequence, GUID_tKeyLessThan) AckedSequenceMap;
 #endif
   AckedSequenceMap acked_sequences_;
+  SequenceNumber cached_cumulative_ack_;
+  bool cached_cumulative_ack_valid_;
 
   SequenceNumber get_cumulative_ack();
   SequenceNumber get_last_ack();
