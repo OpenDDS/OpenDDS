@@ -100,9 +100,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                               DDS::DomainParticipantListener::_nil(),
                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!participant) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant() failed!\n"));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant() failed!\n"));
       return EXIT_FAILURE;
     }
 
@@ -110,9 +108,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     Messenger::MessageTypeSupport_var ts =
       new Messenger::MessageTypeSupportImpl();
     if (ts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type() failed!\n"));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type() failed!\n"));
       return EXIT_FAILURE;
     }
 
@@ -125,9 +121,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                 DDS::TopicListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!topic) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic() failed!\n"));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic() failed!\n"));
       return EXIT_FAILURE;
     }
 
@@ -137,9 +131,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                      DDS::SubscriberListener::_nil(),
                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!sub) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_subscriber() failed!\n"));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_subscriber() failed!\n"));
       return EXIT_FAILURE;
     }
 
@@ -150,28 +142,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     DDS::DataReaderQos dr_qos;
     sub->get_default_datareader_qos(dr_qos);
     if (DataReaderListenerImpl::is_reliable()) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Reliable DataReader\n"));
-      }
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Reliable DataReader\n"));
       dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
       listener_servant->set_expected_reads(40);
     } else {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Unreliable DataReader\n"));
-      }
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Unreliable DataReader\n"));
       listener_servant->set_expected_reads(1);
     }
 
     DDS::GuardCondition_var gc = new DDS::GuardCondition;
     DDS::WaitSet_var ws = new DDS::WaitSet;
-    if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling attach_condition\n"));
-    }
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): calling attach_condition\n"));
     DDS::ReturnCode_t ret = ws->attach_condition(gc);
     if (ret != DDS::RETCODE_OK) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): attach_condition failed!\n"));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): attach_condition failed!\n"));
       return EXIT_FAILURE;
     }
     listener_servant->set_guard_condition(gc);
@@ -182,9 +166,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                              listener.in(),
                              OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!reader) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_datareader() failed!\n"));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_datareader() failed!\n"));
       return EXIT_FAILURE;
     }
 

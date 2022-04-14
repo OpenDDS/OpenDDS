@@ -56,10 +56,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(reader);
     if (!message_dr) {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: _narrow failed!\n"));
-      }
-      ACE_OS::exit(EXIT_FAILURE);
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: _narrow failed!\n"));
     }
 
     Messenger::Message message;
@@ -102,28 +99,20 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           valid_ = false;
         }
       } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available: "
-                     "instance is disposed\n")));
-        }
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available: "
+                   "instance is disposed\n")));
       } else if (si.instance_state == DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE) {
-        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-          ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available: "
-                    "instance is unregistered\n")));
-        }
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_data_available: "
+                   "instance is unregistered\n")));
       } else {
-        if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: "
-                     "unknown instance state: %d\n", si.instance_state));
-        }
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: "
+                   "unknown instance state: %d\n", si.instance_state));
         valid_ = false;
       }
 
     } else {
-      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: "
-                   "unexpected status: %d\n", status));
-      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::on_data_available: "
+                 "unexpected status: %d\n", status));
       valid_ = false;
     }
 
@@ -140,54 +129,42 @@ void DataReaderListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
   const DDS::RequestedDeadlineMissedStatus &)
 {
-  if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_requested_deadline_missed\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_requested_deadline_missed\n")));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(
   DDS::DataReader_ptr,
   const DDS::RequestedIncompatibleQosStatus &)
 {
-  if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_requested_incompatible_qos()\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_requested_incompatible_qos()\n")));
 }
 
 void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus &)
 {
-  if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_liveliness_changed()\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_liveliness_changed()\n")));
 }
 
 void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus &)
 {
-  if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_subscription_matched()\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_subscription_matched()\n")));
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
   DDS::DataReader_ptr,
   const DDS::SampleRejectedStatus&)
 {
-  if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_sample_rejected()\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_sample_rejected()\n")));
 }
 
 void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
 {
-  if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Debug) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_sample_lost()\n")));
-  }
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DEBUG: DataReaderListenerImpl::on_sample_lost()\n")));
 }
 
 bool DataReaderListenerImpl::is_valid() const
