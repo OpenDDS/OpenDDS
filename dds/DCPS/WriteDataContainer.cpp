@@ -84,25 +84,26 @@ WriteDataContainer::WriteDataContainer(
   ACE_Recursive_Thread_Mutex& deadline_status_lock,
   DDS::OfferedDeadlineMissedStatus& deadline_status,
   CORBA::Long& deadline_last_total_count)
-  : transaction_id_(0),
-    publication_id_(GUID_UNKNOWN),
-    writer_(writer),
-    max_samples_per_instance_(max_samples_per_instance),
-    history_depth_(history_depth),
-    max_durable_per_instance_(max_durable_per_instance),
-    max_num_instances_(max_instances),
-    max_num_samples_(max_total_samples),
-    max_blocking_time_(max_blocking_time),
-    waiting_on_release_(false),
-    condition_(lock_),
-    empty_condition_(lock_),
-    wfa_condition_(wfa_lock_),
-    n_chunks_(n_chunks),
-    sample_list_element_allocator_(2 * n_chunks_),
-    shutdown_(false),
-    domain_id_(domain_id),
-    topic_name_(topic_name),
-    type_name_(type_name)
+  : cached_cumulative_ack_valid_(false)
+  , transaction_id_(0)
+  , publication_id_(GUID_UNKNOWN)
+  , writer_(writer)
+  , max_samples_per_instance_(max_samples_per_instance)
+  , history_depth_(history_depth)
+  , max_durable_per_instance_(max_durable_per_instance)
+  , max_num_instances_(max_instances)
+  , max_num_samples_(max_total_samples)
+  , max_blocking_time_(max_blocking_time)
+  , waiting_on_release_(false)
+  , condition_(lock_)
+  , empty_condition_(lock_)
+  , wfa_condition_(wfa_lock_)
+  , n_chunks_(n_chunks)
+  , sample_list_element_allocator_(2 * n_chunks_)
+  , shutdown_(false)
+  , domain_id_(domain_id)
+  , topic_name_(topic_name)
+  , type_name_(type_name)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   , durability_cache_(durability_cache)
   , durability_service_(durability_service)
@@ -119,6 +120,7 @@ WriteDataContainer::WriteDataContainer(
                "sample_list_element_allocator %x with %d chunks\n",
                &sample_list_element_allocator_, n_chunks_));
   }
+  acked_sequences_[GUID_UNKNOWN].insert(SequenceNumber::ZERO());
 }
 
 WriteDataContainer::~WriteDataContainer()
@@ -167,6 +169,105 @@ WriteDataContainer::~WriteDataContainer()
                ACE_TEXT("(%P|%t) ERROR: ")
                ACE_TEXT("WriteDataContainer::~WriteDataContainer, ")
                ACE_TEXT("The container has not been cleaned.\n")));
+  }
+}
+
+void
+WriteDataContainer::add_reader_acks(const RepoId& reader, const SequenceNumber& base)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
+  DisjointSequence& ds = acked_sequences_[reader];
+  ds.reset();
+  if (base == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    ds.insert(SequenceNumber::ZERO());
+  } else {
+    ds.insert(SequenceRange(SequenceNumber(), base));
+  }
+  cached_cumulative_ack_valid_ = false;
+}
+
+void
+WriteDataContainer::remove_reader_acks(const RepoId& reader)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
+
+  const SequenceNumber prev_cum_ack = get_cumulative_ack();
+  const AckedSequenceMap::iterator it = acked_sequences_.find(reader);
+  if (it != acked_sequences_.end()) {
+    acked_sequences_.erase(it);
+    cached_cumulative_ack_valid_ = false;
+    if (prev_cum_ack != get_cumulative_ack()) {
+      wfa_condition_.notify_all();
+    }
+  }
+}
+
+SequenceNumber
+WriteDataContainer::get_cumulative_ack()
+{
+  if (acked_sequences_.empty()) {
+    return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  }
+
+  if (cached_cumulative_ack_valid_) {
+    return cached_cumulative_ack_;
+  }
+
+  SequenceNumber result = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  for (AckedSequenceMap::const_iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
+    if (!it->second.empty()) {
+      result = result == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ? it->second.cumulative_ack() : std::min(result, it->second.cumulative_ack());
+    }
+  }
+  cached_cumulative_ack_ = result;
+  cached_cumulative_ack_valid_ = true;
+  return result;
+}
+
+SequenceNumber
+WriteDataContainer::get_last_ack()
+{
+  if (acked_sequences_.empty()) {
+    return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  }
+
+  SequenceNumber result = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  for (AckedSequenceMap::const_iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
+    if (!it->second.empty()) {
+      result = result == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ? it->second.last_ack() : std::max(result, it->second.last_ack());
+    }
+  }
+  return result;
+}
+
+void
+WriteDataContainer::update_acked(const SequenceNumber& seq, const RepoId& id)
+{
+  bool do_notify = false;
+  if (id == GUID_UNKNOWN) {
+    for (AckedSequenceMap::iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
+      SequenceNumber prev_cum_ack = it->second.cumulative_ack();
+      it->second.insert(seq);
+      cached_cumulative_ack_valid_ = false;
+      if (prev_cum_ack != it->second.cumulative_ack()) {
+        do_notify = true;
+      }
+    }
+  } else {
+    const AckedSequenceMap::iterator it = acked_sequences_.find(id);
+    if (it != acked_sequences_.end()) {
+      SequenceNumber prev_cum_ack = it->second.cumulative_ack();
+      if (prev_cum_ack < seq) {
+        it->second.insert(SequenceRange(prev_cum_ack, seq));
+        cached_cumulative_ack_valid_ = false;
+        if (prev_cum_ack != it->second.cumulative_ack()) {
+          do_notify = true;
+        }
+      }
+    }
+  }
+  if (do_notify) {
+    wfa_condition_.notify_all();
   }
 }
 
@@ -254,6 +355,20 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                    filterClassName, eval, expression_params,
 #endif
                    total_size);
+
+  {
+    ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+    cached_cumulative_ack_valid_ = false;
+    DisjointSequence& ds = acked_sequences_[reader_id];
+    ds = acked_sequences_[GUID_UNKNOWN];
+
+    // Remove exactly what will be sent
+    SendStateDataSampleList::iterator iter = resend_data_.begin();
+    while (iter != resend_data_.end()) {
+      ds.erase(iter->get_header().sequence_);
+      ++iter;
+    }
+  }
 
   if (DCPS_debug_level > 9 && resend_data_.size()) {
     GuidConverter converter(publication_id_);
@@ -600,19 +715,26 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
+        ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+        const CORBA::ULong num_subs = stale->get_num_subs();
+        for (CORBA::ULong i = 0; i < num_subs; ++i) {
+          update_acked(stale->get_header().sequence_, stale->get_sub_id(i));
+        }
+        guard.release();
         SendStateDataSampleList::remove(stale);
         release_buffer(stale);
       }
 
-      if (!pending_data())
+      if (!pending_data()) {
         empty_condition_.notify_all();
+      }
     }
 
     return;
   }
   ACE_GUARD(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_);
   SequenceNumber acked_seq = stale->get_header().sequence_;
-  SequenceNumber prev_max = acked_sequences_.cumulative_ack();
+  SequenceNumber prev_max = get_cumulative_ack();
 
   if (stale->get_header().message_id_ != SAMPLE_DATA) {
     //this message was a control message so release it
@@ -666,10 +788,10 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                          acked_seq.getValue()));
   }
 
-  acked_sequences_.insert(acked_seq);
+  update_acked(acked_seq);
 
   if (prev_max == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ||
-      prev_max < acked_sequences_.cumulative_ack()) {
+      prev_max < get_cumulative_ack()) {
 
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -1422,19 +1544,10 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
                                     bool deadline_is_infinite,
                                     const SequenceNumber& sequence)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_, DDS::RETCODE_ERROR);
-
-  const SequenceNumber last_acked = acked_sequences_.last_ack();
-  const SequenceNumber acked = acked_sequences_.cumulative_ack();
-  if (sequence == last_acked && sequence == acked && sending_data_.size() != 0) {
-    acked_sequences_.insert(sending_data_.head()->get_header().sequence_.previous());
-  }
-
-  guard.release();
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
 
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged(sequence)) {
+  while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged_i(sequence)) {
     switch (deadline_is_infinite ? wfa_condition_.wait(thread_status_manager) : wfa_condition_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_NoTimeout:
       break;
@@ -1454,25 +1567,30 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
     }
   }
 
-  return sequence_acknowledged(sequence) ? DDS::RETCODE_OK : DDS::RETCODE_TIMEOUT;
+  return sequence_acknowledged_i(sequence) ? DDS::RETCODE_OK : DDS::RETCODE_TIMEOUT;
 }
 
 bool
-WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
+WriteDataContainer::sequence_acknowledged(const SequenceNumber& sequence)
+{
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+  return sequence_acknowledged_i(sequence);
+}
+
+bool
+WriteDataContainer::sequence_acknowledged_i(const SequenceNumber& sequence)
 {
   if (sequence == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    //return true here so that wait_for_acknowledgements doesn't block
+    //return true here so that wait_for_acknowledgments doesn't block
     return true;
   }
 
-  SequenceNumber acked = acked_sequences_.cumulative_ack();
+  SequenceNumber acked = get_cumulative_ack();
   if (DCPS_debug_level >= 10) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged ")
-                          ACE_TEXT("- cumulative ack is currently: %q\n"), acked.getValue()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged_i ")
+                          ACE_TEXT("- %C cumulative ack is currently: %q\n"), DCPS::LogGuid(publication_id_).c_str(), acked.getValue()));
   }
   if (acked == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || acked < sequence){
-    //if acked_sequences_ is empty or its cumulative_ack is lower than
-    //the requests sequence, return false
     return false;
   }
   return true;
