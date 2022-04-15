@@ -3074,6 +3074,9 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru);
 OpenDDS_Dcps_Export
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru);
 
+OpenDDS_Dcps_Export
+bool to_type_object(const unsigned char* buffer, size_t size, XTypes::TypeObject& to);
+
 } // namespace DCPS
 } // namespace OpenDDS
 

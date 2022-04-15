@@ -4858,6 +4858,13 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru)
     && (strm >> stru.type_identifier2);
 }
 
+bool to_type_object(const unsigned char* buffer, size_t size, XTypes::TypeObject& to)
+{
+  ACE_Message_Block message_block(reinterpret_cast<const char*>(buffer), size);
+  message_block.length(size);
+  DCPS::Serializer ser(&message_block, XTypes::get_typeobject_encoding());
+  return ser >> to;
+}
 
 } // namespace DCPS
 } // namespace OpenDDS
