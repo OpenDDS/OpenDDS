@@ -248,7 +248,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  // To set up a more difficult wait_for_acknowledgements() scenario,
+  // To set up a more difficult wait_for_acknowledgments() scenario,
   // make sure the sub2 datalink's two readers have different "latest"
   // sequence numbers, and the sub datalink needs no customization.
   sample.key = 2;

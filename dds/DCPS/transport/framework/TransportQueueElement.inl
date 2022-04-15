@@ -48,6 +48,11 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
 {
   DBG_ENTRY_LVL("TransportQueueElement", "decision_made", 6);
 
+#ifdef ACE_HAS_CPP11
+  OPENDDS_ASSERT(sub_loan_count_);
+#else
+  OPENDDS_ASSERT(sub_loan_count_.value());
+#endif
   const unsigned long new_count = --sub_loan_count_;
   if (new_count == 0) {
     // All interested subscriptions have been satisfied.
@@ -63,12 +68,6 @@ TransportQueueElement::decision_made(bool dropped_by_transport)
     return true;
   }
 
-  // ciju: The sub_loan_count_ has been observed to drop below zero.
-  // Since it isn't exactly a ref count and the object is created in
-  // allocater memory (user space) we *probably* can disregard the
-  // count for now. Ideally we would like to prevent the count from
-  // falling below 0 and opening up this assert.
-  // assert (new_count > 0);
   return false;
 }
 

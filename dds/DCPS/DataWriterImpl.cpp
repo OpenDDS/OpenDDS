@@ -421,6 +421,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     if (!participant)
       return;
 
+    data_container_->add_reader_acks(remote_id, get_max_sn());
+
     const DDS::InstanceHandle_t handle = participant->assign_handle(remote_id);
 
     {
@@ -608,6 +610,8 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
         rds.length(rds_len);
         rds [rds_len - 1] = readers[i];
       }
+
+      data_container_->remove_reader_acks(readers[i]);
 
       ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
       reader_info_.erase(readers[i]);

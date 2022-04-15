@@ -129,7 +129,7 @@ Write_Samples::post_loop()
   const DDS::ReturnCode_t ret =  message_dw_->wait_for_acknowledgments(timeout);
   if (ret != ::DDS::RETCODE_OK) {
     ACE_ERROR ((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: wait_for_acknowledgements: ")
+                ACE_TEXT("(%P|%t) ERROR: wait_for_acknowledgments: ")
                 ACE_TEXT("%C returned %d\n"),
                 name_, ret));
   }
