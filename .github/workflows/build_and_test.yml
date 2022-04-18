@@ -562,7 +562,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
@@ -858,7 +858,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
@@ -2706,7 +2706,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v2
