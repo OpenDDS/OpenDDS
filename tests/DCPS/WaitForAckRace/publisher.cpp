@@ -84,7 +84,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (std::string(ACE_TEXT_ALWAYS_CHAR(argv[i])) == "-r") {
       ++i;
       if (i < argc) {
-        total_readers = ACE_OS::atoi(argv[i]);
+        const int temp = ACE_OS::atoi(argv[i]);
+        if (temp > 0 && temp < 100) {
+          total_readers = temp;
+        }
       }
     }
   }
