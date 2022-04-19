@@ -384,7 +384,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   BIO* mem = BIO_new(BIO_s_mem());
-  if (BIO_write(mem, buffer.str().data(), buffer.str().size()) != static_cast<ssize_t>(buffer.str().size())) {
+  const int buffer_size = static_cast<int>(buffer.str().size());
+  if (BIO_write(mem, buffer.str().data(), buffer_size) != buffer_size) {
     std::cerr << "ERROR: could not copy to BIO" << std::endl;
     return EXIT_FAILURE;
   }
