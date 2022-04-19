@@ -26,15 +26,13 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${publisher})
 
 foreach(file
-  publisher.cpp Writer.cpp Writer.h Args.h)
+  publisher.cpp Args.h)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
 
 # Publisher
 add_executable(${publisher}
   "${dst}/publisher.cpp"
-  "${dst}/Writer.h"
-  "${dst}/Writer.cpp"
 )
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher

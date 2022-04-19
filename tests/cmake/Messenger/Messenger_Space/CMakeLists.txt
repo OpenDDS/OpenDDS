@@ -27,7 +27,7 @@ set(dst "${CMAKE_CURRENT_BINARY_DIR}/ Space")
 set(all_targets ${publisher})
 
 foreach(file
-  Messenger.idl publisher.cpp Writer.cpp Writer.h Args.h
+  Messenger.idl publisher.cpp Args.h
   pub.ini)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
@@ -35,8 +35,6 @@ endforeach()
 # Publisher
 add_executable(${publisher}
   "${dst}/publisher.cpp"
-  "${dst}/Writer.h"
-  "${dst}/Writer.cpp"
 )
 set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher

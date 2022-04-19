@@ -380,7 +380,7 @@ jobs:
         . install_setenv.sh
         cd tests/DCPS/Messenger
         git clean -dfx .
-        $ACE_ROOT/bin/mwc.pl -type gnuace .
+        $ACE_ROOT/bin/mwc.pl -type gnuace . -value_project includes+=$PWD/../../../
         make
     - name: build make install cmake
       shell: bash
@@ -507,7 +507,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c07_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -562,8 +562,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        rm build/target/setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../${{ github.job }}.tar
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v3
@@ -803,7 +802,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c07_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -859,8 +858,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        rm build/target/setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../${{ github.job }}.tar
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v3
@@ -2649,7 +2647,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c07_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -2708,8 +2706,7 @@ jobs:
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         cd $GITHUB_WORKSPACE/OpenDDS
         find . -iname "*\.o" | xargs rm
-        rm build/target/setenv.sh
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar cvf ../${{ github.job }}.tar
+        tar cvf ../${{ github.job }}.tar build/host/ACE_TAO build/target/ACE_TAO build/host/setenv.sh build/host/VERSION.txt
         xz -3 ../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v3
