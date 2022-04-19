@@ -31,7 +31,7 @@ void ConditionImpl::signal_all()
   if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ConditionImpl::signal_all() - ")
-               ACE_TEXT("number of sets: %d\n"),
+               ACE_TEXT("number of sets: %B\n"),
                local_ws.size()));
   }
 
