@@ -115,6 +115,7 @@ bool DataReaderListenerImpl::received_all() const
     if (i == received_samples_map_.end() || i->first != p || i->second.size() == 0) {
       return false;
     }
+    ++i;
   }
   return true;
 #endif
