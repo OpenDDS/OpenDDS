@@ -15,7 +15,7 @@ endif()
 set(dest_install_prefix "${CMAKE_CURRENT_BINARY_DIR}/the-install-prefix")
 set(common_cmake_args
   "-DCMAKE_INSTALL_PREFIX:PATH=${dest_install_prefix}"
-  "-DCMAKE_PREFIX_PATH:PATH=${OPENDDS_ROOT};${dest_install_prefix}"
+  "-DCMAKE_PREFIX_PATH:PATH=${OPENDDS_ROOT}$<SEMICOLON>${dest_install_prefix}"
   "-DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}"
   "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}"
 )
