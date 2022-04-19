@@ -9,7 +9,11 @@ DataReaderListenerImpl::DataReaderListenerImpl(const std::size_t expected_sample
 #else
   , condition_(mutex_)
 #endif
+#ifndef OPENDDS_NO_OWNERSHIP_PROFILE
+  , expected_samples_(1)
+#else
   , expected_samples_(expected_samples)
+#endif
   , received_samples_(0)
   , task_samples_map_()
   , progress_(progress_fmt, expected_samples_)
