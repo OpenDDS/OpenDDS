@@ -30,7 +30,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 void DataReaderListenerImpl::wait_received() const
 {
   Lock lock(mutex_);
-  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received %d:%d\n"), received_total_samples_, expected_total_samples_));
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub wait_received %B:%B\n"), received_total_samples_, expected_total_samples_));
   while (!received_all()) {
 #ifdef ACE_HAS_CPP11
     condition_.wait(lock);
@@ -53,19 +53,19 @@ int DataReaderListenerImpl::check_received() const
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
       for (size_t s = 0; s < expected_samples_per_publisher_; ++s) {
         if (i->second.count(s) == 0) {
-          ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missing pub%d sample%d\n"), p, s));
+          ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missing pub%B sample%B\n"), p, s));
           ++ret;
         }
       }
 #else
       if (i->second.size() == 0) {
         // Theoretically this should never happen, since the only reason to have a map entry is receiving a sample
-        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missing any sample from pub%d\n"), p));
+        ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missing any sample from pub%B\n"), p));
         ++ret;
       }
 #endif
     } else {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missing pub%d samples\n"), p));
+      ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: missing pub%B samples\n"), p));
       ++ret;
     }
   }
@@ -74,7 +74,7 @@ int DataReaderListenerImpl::check_received() const
 #else
   if (received_total_samples_ < expected_total_samples_) {
 #endif
-    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: sub received %d of expected %d samples.\n"),
+    ACE_DEBUG((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: sub received %B of expected %B samples.\n"),
       received_total_samples_, expected_total_samples_));
     ++ret;
   }
@@ -86,7 +86,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
   FooDataReader_var reader_i = FooDataReader::_narrow(reader);
   if (!reader_i) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l: on_data_available() _narrow failed!\n")));
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available() _narrow failed!\n")));
     return;
   }
 
@@ -98,7 +98,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     if (si.valid_data) {
       Lock lock(mutex_);
       if (update_and_check(static_cast<size_t>(foo.x), static_cast<size_t>(foo.y))) {
-        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t)  sub condition_.notify_all\n")));
+        ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) sub condition_.notify_all\n")));
         condition_.notify_all();
       }
     }

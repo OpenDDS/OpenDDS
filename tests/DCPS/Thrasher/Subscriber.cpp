@@ -18,7 +18,6 @@
 
 Subscriber::Subscriber(DDS::DomainId_t domainId, size_t n_pub_threads, size_t expected_samples, bool durable)
   : domainId_(domainId)
-  , n_pub_threads_(n_pub_threads)
   , expected_samples_(expected_samples)
   , durable_(durable)
 {
