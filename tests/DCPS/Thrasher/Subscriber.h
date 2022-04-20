@@ -14,7 +14,6 @@ public:
 private:
   void cleanup();
   const DDS::DomainId_t domainId_;
-  const size_t n_pub_threads_;
   const size_t expected_samples_;
   const bool durable_;
   DDS::DomainParticipantFactory_var dpf_;
