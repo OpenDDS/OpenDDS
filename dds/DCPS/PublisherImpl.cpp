@@ -195,7 +195,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
     if (dw_publisher.in() != this) {
       if (DCPS_debug_level > 0) {
         RepoId id = dw_servant->get_repo_id();
-        GuidConverter converter(id);
+        LogGuid converter(id);
         ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
             ACE_TEXT("the data writer %C doesn't ")
@@ -228,7 +228,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
     if (it == publication_map_.end()) {
       if (DCPS_debug_level > 0) {
-        GuidConverter converter(publication_id);
+        LogGuid converter(publication_id);
         ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("PublisherImpl::delete_datawriter, ")
@@ -407,7 +407,7 @@ DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
 
     if (ret != DDS::RETCODE_OK) {
       if (DCPS_debug_level > 0) {
-        GuidConverter converter(pub_id);
+        LogGuid converter(pub_id);
         ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("PublisherImpl::")
@@ -460,7 +460,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
 
           if (!pair.second) {
             if (DCPS_debug_level > 0) {
-              GuidConverter converter(id);
+              LogGuid converter(id);
               ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ")
                   ACE_TEXT("PublisherImpl::set_qos: ")
@@ -923,7 +923,7 @@ PublisherImpl::writer_enabled(const char*     topic_name,
 
   if (!pair.second) {
     if (DCPS_debug_level > 0) {
-      GuidConverter converter(publication_id);
+      LogGuid converter(publication_id);
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("PublisherImpl::writer_enabled: ")

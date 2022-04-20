@@ -564,7 +564,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
     update_last_recv_addr(remote_id, last_addr_hint);
   }
 
-  const GuidConverter conv(local_id);
+  const LogGuid conv(local_id);
 
   if (!local_reliable) {
     if (conv.isReader()) {
@@ -739,7 +739,7 @@ RtpsUdpDataLink::unregister_for_writer(const RepoId& readerid,
 
 void RtpsUdpDataLink::client_stop(const RepoId& localId)
 {
-  const GuidConverter conv(localId);
+  const LogGuid conv(localId);
 
   if (conv.isReader()) {
     ACE_GUARD(ACE_Thread_Mutex, gr, readers_lock_);
@@ -890,7 +890,7 @@ RtpsUdpDataLink::release_reservations_i(const RepoId& remote_id,
 {
   TqeVector to_drop;
   using std::pair;
-  const GuidConverter conv(local_id);
+  const LogGuid conv(local_id);
   if (conv.isWriter()) {
     ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
     RtpsWriterMap::iterator rw = writers_.find(local_id);
@@ -1194,7 +1194,7 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
         ri->second->durable_data_[rtps->sequence()] = rtps;
         ri->second->durable_timestamp_.set_to_now();
         if (Transport_debug_level > 3) {
-          const GuidConverter conv(pub_id), sub_conv(sub);
+          const LogGuid conv(pub_id), sub_conv(sub);
           ACE_DEBUG((LM_DEBUG,
             "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
             "storing durable data for local %C remote %C seq %q\n",
@@ -1402,7 +1402,7 @@ RtpsUdpDataLink::RtpsWriter::request_ack_i(const DataSampleHeader& header,
       initialize_heartbeat(proxy, meta_submessage);
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, iter->second);
       if (Transport_debug_level > 3) {
-        const GuidConverter conv(id_), sub_conv(sub);
+        const LogGuid conv(id_), sub_conv(sub);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::request_ack"
                    " local %C remote %C\n", LogGuid(id_).c_str(), LogGuid(sub).c_str()));
       }
@@ -3068,7 +3068,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
   meta_submessage.sm_.gap_sm(gap);
 
   if (Transport_debug_level > 5) {
-    const GuidConverter conv(id_);
+    const LogGuid conv(id_);
     SequenceRange sr;
     sr.first = to_opendds_seqnum(gap.gapStart);
     const SequenceNumber srbase = to_opendds_seqnum(gap.gapList.bitmapBase);
@@ -3100,7 +3100,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   }
 
   if (Transport_debug_level > 5) {
-    GuidConverter local_conv(id_), remote_conv(src);
+    LogGuid local_conv(id_), remote_conv(src);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(ACKNACK) "
       "local %C remote %C\n", OPENDDS_STRING(local_conv).c_str(),
       OPENDDS_STRING(remote_conv).c_str()));
@@ -3178,7 +3178,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
 
   if (Transport_debug_level > 5) {
-    GuidConverter local_conv(id_), remote_conv(src);
+    LogGuid local_conv(id_), remote_conv(src);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack "
                "local %C remote %C ack %q\n", OPENDDS_STRING(local_conv).c_str(),
                OPENDDS_STRING(remote_conv).c_str(), ack.getValue()));
@@ -3217,7 +3217,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
     if (!reader->durable_data_.empty()) {
       if (Transport_debug_level > 5) {
-        const GuidConverter local_conv(id_), remote_conv(src);
+        const LogGuid local_conv(id_), remote_conv(src);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: "
                    "local %C has durable for remote %C\n",
                    OPENDDS_STRING(local_conv).c_str(),
@@ -3369,7 +3369,7 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
   }
 
   if (Transport_debug_level > 5) {
-    GuidConverter local_conv(id_), remote_conv(src);
+    LogGuid local_conv(id_), remote_conv(src);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::received(NACK_FRAG) "
       "local %C remote %C\n", OPENDDS_STRING(local_conv).c_str(),
       OPENDDS_STRING(remote_conv).c_str()));
@@ -3943,7 +3943,7 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
   }
   const AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
   if (addrs.empty()) {
-    const GuidConverter conv(element->subscription_id());
+    const LogGuid conv(element->subscription_id());
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: RtpsUdpDataLink::durability_resend() - "
                "no locator for remote %C\n", OPENDDS_STRING(conv).c_str()));
@@ -4435,7 +4435,7 @@ RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
 
   for (OPENDDS_VECTOR(ReceivedDataSample)::iterator it = to_deliver.begin(); it != to_deliver.end(); ++it) {
     if (Transport_debug_level > 5) {
-      GuidConverter reader(dst);
+      LogGuid reader(dst);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData -")
                  ACE_TEXT(" deliver sequence: %q to %C\n"),
                  it->header_.sequence_.getValue(),
@@ -4581,7 +4581,7 @@ RtpsUdpDataLink::accumulate_addresses(const RepoId& local, const RepoId& remote,
       normal_addrs = pos->second.unicast_addrs_;
     }
   } else {
-    const GuidConverter conv(remote);
+    const LogGuid conv(remote);
     if (conv.isReader()) {
       ACE_GUARD(ACE_Thread_Mutex, g, writers_lock_);
       InterestingRemoteMapType::const_iterator ipos = interesting_readers_.find(remote);

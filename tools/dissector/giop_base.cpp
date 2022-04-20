@@ -158,7 +158,7 @@ namespace OpenDDS
       guint len = 16; // size of RepoId
       const RepoId *rid =
         reinterpret_cast<const RepoId *>(tvb_get_ptr(tvb_, *offset_, len));
-      GuidConverter converter (*rid);
+      LogGuid converter (*rid);
       proto_tree_add_bytes_format_value
         ( tree, fieldId, tvb_, *offset_, len,
           reinterpret_cast<const guint8*>(rid),

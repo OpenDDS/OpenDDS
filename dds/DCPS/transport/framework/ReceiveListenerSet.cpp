@@ -35,7 +35,7 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
   TransportReceiveListener_wrch listener;
 
   if (find(map_, local_id, listener) == -1) {
-    GuidConverter converter(local_id);
+    LogGuid converter(local_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
                ACE_TEXT("could not find local %C.\n"),
@@ -45,7 +45,7 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
   }
 
   if (!listener) {
-    GuidConverter converter(local_id);
+    LogGuid converter(local_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
                ACE_TEXT("listener for local %C is nil.\n"),

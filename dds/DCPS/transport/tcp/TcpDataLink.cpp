@@ -392,7 +392,7 @@ bool
 OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* element)
 {
   if (Transport_debug_level >= 1) {
-    const GuidConverter converter(element->publication_id());
+    const LogGuid converter(element->publication_id());
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::handle_send_request_ack(%@) sequence number %q, publication_id=%C\n"),
       element, element->sequence().getValue(), OPENDDS_STRING(converter).c_str()));
   }
@@ -413,7 +413,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
   }
 
   if (Transport_debug_level >= 1) {
-    const GuidConverter converter(sample.header_.publication_id_);
+    const LogGuid converter(sample.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::ack_received() received sequence number %q, publiction_id=%C\n"),
       sequence.getValue(), OPENDDS_STRING(converter).c_str()));
   }
@@ -510,7 +510,7 @@ OpenDDS::DCPS::TcpDataLink::do_association_actions()
 
     for (OnStartCallbackMap::const_iterator it = on_start_callbacks_.begin(); it != on_start_callbacks_.end(); ++it) {
       for (RepoToClientMap::const_iterator it2 = it->second.begin(); it2 != it->second.end(); ++it2) {
-        GuidConverter conv(it2->first);
+        LogGuid conv(it2->first);
         if (conv.isReader()) {
           to_call_and_send.push_back(std::make_pair(it2->first, it->first));
         }

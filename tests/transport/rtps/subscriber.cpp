@@ -96,7 +96,7 @@ public:
         return;
       }
 
-      GuidConverter pub(sample.header_.publication_id_);
+      LogGuid pub(sample.header_.publication_id_);
       DDS::Time_t ts = {sample.header_.source_timestamp_sec_,
                         sample.header_.source_timestamp_nanosec_};
       ACE_Time_Value atv = time_to_time_value(ts);
@@ -117,7 +117,7 @@ public:
       if (sample.header_.message_id_ != SAMPLE_DATA
           || sample.header_.sequence_ != seq_ || !sample.header_.byte_order_
           || sample.header_.message_length_ != 533
-          || pub.checksum() != GuidConverter(pub_id_).checksum()) {
+          || pub.checksum() != LogGuid(pub_id_).checksum()) {
         ACE_ERROR((LM_ERROR, "ERROR: DataSampleHeader malformed\n"));
       }
 

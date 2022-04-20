@@ -64,7 +64,7 @@ namespace DCPS {
  *  14  GUID_t.entityId.entityKey[ 2] == entity id[2] (LS byte)
  *  15  GUID_t.entityId.entityKind    == entity kind
  */
-class OpenDDS_Dcps_Export RepoIdConverter : public GuidConverter {
+class OpenDDS_Dcps_Export RepoIdConverter : public LogGuid {
 public:
   RepoIdConverter(const RepoId& repoId);
 

@@ -221,8 +221,8 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
     return AcceptConnectResult();
   }
 
-  GuidConverter remote_conv(remote.repo_id_);
-  GuidConverter local_conv(attribs.local_id_);
+  LogGuid remote_conv(remote.repo_id_);
+  LogGuid local_conv(attribs.local_id_);
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink local %C "
             "accepting connection from remote %C\n",
@@ -296,7 +296,7 @@ TcpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
                                            bool /*disassociate*/,
                                            bool /*association_failed*/)
 {
-  GuidConverter remote_converted(remote_id);
+  LogGuid remote_converted(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::stop_accepting_or_connecting "
             "stop connecting to remote: %C\n",
             std::string(remote_converted).c_str()), 5);

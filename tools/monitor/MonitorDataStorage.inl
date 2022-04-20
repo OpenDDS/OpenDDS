@@ -160,7 +160,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::DomainParticipantReport>(
   //    NVPSeq           values;
   //  };
 
-  OpenDDS::DCPS::GuidConverter converter( data.dp_id);
+  OpenDDS::DCPS::LogGuid converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DomainParticipantReport, id: %C, domain: %d.\n"),
@@ -241,7 +241,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::TopicReport>(
   //    NVPSeq  values;
   //  };
 
-  OpenDDS::DCPS::GuidConverter converter( data.topic_id);
+  OpenDDS::DCPS::LogGuid converter( data.topic_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s TopicReport, id: %C, name: %C, type: %C.\n"),
@@ -328,7 +328,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::PublisherReport>(
   //   NVPSeq        values;
   // };
 
-  OpenDDS::DCPS::GuidConverter converter( data.dp_id);
+  OpenDDS::DCPS::LogGuid converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s PublisherReport, id: %C, handle: %d, transport: 0x%x.\n"),
@@ -405,7 +405,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::SubscriberReport>(
   //   NVPSeq        values;
   // };
 
-  OpenDDS::DCPS::GuidConverter converter( data.dp_id);
+  OpenDDS::DCPS::LogGuid converter( data.dp_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s SubscriberReport, id: %C, handle: %d, transport: 0x%x.\n"),
@@ -488,8 +488,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterReport>(
   //    NVPSeq                 values;
   //  };
 
-  OpenDDS::DCPS::GuidConverter idconverter( data.dw_id);
-  OpenDDS::DCPS::GuidConverter topicconverter( data.topic_id);
+  OpenDDS::DCPS::LogGuid idconverter( data.dw_id);
+  OpenDDS::DCPS::LogGuid topicconverter( data.topic_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataWriterReport, id: %C, topic: %C.\n"),
@@ -538,7 +538,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterReport>(
   for( int index = 0; index < size; ++index) {
     // Create a child node to hold the association if its not already in
     // the tree.
-    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dr_id);
+    OpenDDS::DCPS::LogGuid converter( data.associations[ index].dr_id);
     QString reader( std::string(converter).c_str());
     int row = node->indexOf( 1, reader);
     if( row == -1) {
@@ -579,7 +579,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterPeriodicReport>(
   //   NVPSeq        values;
   // };
 
-  OpenDDS::DCPS::GuidConverter converter( data.dw_id);
+  OpenDDS::DCPS::LogGuid converter( data.dw_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataWriterPeriodicReport, id: %C.\n"),
@@ -671,7 +671,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataWriterPeriodicReport>(
     // Create a child node to hold the association if its not already in
     // the tree.
     TreeNode* readerNode = 0;
-    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dr_id);
+    OpenDDS::DCPS::LogGuid converter( data.associations[ index].dr_id);
     QString reader( std::string(converter).c_str());
     int row = node->indexOf( 1, reader);
     if( row == -1) {
@@ -730,8 +730,8 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderReport>(
   //    NVPSeq                 values;
   //  };
 
-  OpenDDS::DCPS::GuidConverter idconverter( data.dr_id);
-  OpenDDS::DCPS::GuidConverter topicconverter( data.topic_id);
+  OpenDDS::DCPS::LogGuid idconverter( data.dr_id);
+  OpenDDS::DCPS::LogGuid topicconverter( data.topic_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataReaderReport, id: %C, topic: %C.\n"),
@@ -780,7 +780,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderReport>(
   for( int index = 0; index < size; ++index) {
     // Create a child node to hold the association if its not already in
     // the tree.
-    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dw_id);
+    OpenDDS::DCPS::LogGuid converter( data.associations[ index].dw_id);
     QString writer( std::string(converter).c_str());
     int row = node->indexOf( 1, writer);
     if( row == -1) {
@@ -818,7 +818,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderPeriodicReport>(
   //   NVPSeq        values;
   // };
 
-  OpenDDS::DCPS::GuidConverter converter( data.dr_id);
+  OpenDDS::DCPS::LogGuid converter( data.dr_id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s DataReaderPeriodicReport, id: %C.\n"),
@@ -854,7 +854,7 @@ MonitorDataStorage::update<OpenDDS::DCPS::DataReaderPeriodicReport>(
     // Create a child node to hold the association if its not already in
     // the tree.
     TreeNode* writerNode = 0;
-    OpenDDS::DCPS::GuidConverter converter( data.associations[ index].dw_id);
+    OpenDDS::DCPS::LogGuid converter( data.associations[ index].dw_id);
     QString writer( std::string(converter).c_str());
     int row = node->indexOf( 1, writer);
     if( row == -1) {
@@ -969,7 +969,7 @@ MonitorDataStorage::update<DDS::ParticipantBuiltinTopicData>(
   // Extract a GUID from the key.
   const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
-  OpenDDS::DCPS::GuidConverter converter(id);
+  OpenDDS::DCPS::LogGuid converter(id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s Participant Builtin Topic %C, key: ")
@@ -1045,7 +1045,7 @@ MonitorDataStorage::update<DDS::TopicBuiltinTopicData>(
   // Extract a GUID from the key.
   const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
-  OpenDDS::DCPS::GuidConverter converter( id);
+  OpenDDS::DCPS::LogGuid converter( id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s Topic Builtin Topic %C, key: ")
@@ -1130,7 +1130,7 @@ MonitorDataStorage::update<DDS::PublicationBuiltinTopicData>(
   // Extract a GUID from the key.
   const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
-  OpenDDS::DCPS::GuidConverter converter( id);
+  OpenDDS::DCPS::LogGuid converter( id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s Publication Builtin Topic %C, key: ")
@@ -1213,7 +1213,7 @@ MonitorDataStorage::update<DDS::SubscriptionBuiltinTopicData>(
   // Extract a GUID from the key.
   const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
 
-  OpenDDS::DCPS::GuidConverter converter( id);
+  OpenDDS::DCPS::LogGuid converter( id);
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
     ACE_TEXT("%s Subscription Builtin Topic %C, key: ")

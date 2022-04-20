@@ -62,11 +62,11 @@ TEST(dds_DCPS_GuidGenerator, maintest)
     guid.guidPrefix[11] = 12;
     guid.entityId.entityKey[0] = guid.entityId.entityKey[1] = guid.entityId.entityKey[2] = 0;
     guid.entityId.entityKind = 0;
-    EXPECT_TRUE(GuidConverter(guid).uniqueParticipantId() == "0102030405060708090a0b0c");
+    EXPECT_TRUE(LogGuid(guid).uniqueParticipantId() == "0102030405060708090a0b0c");
 
     guid.guidPrefix[2] = 233;
     guid.guidPrefix[4] = 244;
     guid.guidPrefix[6] = 255;
-    EXPECT_TRUE(GuidConverter(guid).uniqueParticipantId() == "0102e904f406ff08090a0b0c");
+    EXPECT_TRUE(LogGuid(guid).uniqueParticipantId() == "0102e904f406ff08090a0b0c");
   }
 }

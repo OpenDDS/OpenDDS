@@ -381,7 +381,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
   if (DCPS_debug_level > 9) {
-    GuidConverter local(local_publication_id), remote(remote_subscription_id);
+    LogGuid local(local_publication_id), remote(remote_subscription_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
                ACE_TEXT("creating association local publication  %C ")
@@ -422,7 +422,7 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
   if (DCPS_debug_level > 9) {
-    GuidConverter local(local_subscription_id), remote(remote_publication_id);
+    LogGuid local(local_subscription_id), remote(remote_publication_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
                ACE_TEXT("creating association local subscription %C ")
@@ -493,8 +493,8 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
   DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
 
   if (DCPS_debug_level > 9) {
-    GuidConverter local(local_id);
-    GuidConverter remote(remote_id);
+    LogGuid local(local_id);
+    LogGuid remote(remote_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::release_reservations() - ")
                ACE_TEXT("releasing association local: %C ")
@@ -687,8 +687,8 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   // DataLink that are interested in hearing about any samples received
   // from the remote publisher_id.
   if (DCPS_debug_level > 9) {
-    const GuidConverter converter(publication_id);
-    const GuidConverter reader(readerId);
+    const LogGuid converter(publication_id);
+    const LogGuid reader(readerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
                ACE_TEXT("from publication %C received sample: %C to readerId %C (%C).\n"),
@@ -699,7 +699,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
   }
 
   if (Transport_debug_level > 9) {
-    const GuidConverter converter(publication_id);
+    const LogGuid converter(publication_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
                ACE_TEXT("from publication %C received sample: %C.\n"),
@@ -725,7 +725,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     } else {
       // Nobody has any interest in this message.  Drop it on the floor.
       if (Transport_debug_level > 4) {
-        const GuidConverter converter(publication_id);
+        const LogGuid converter(publication_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::data_received_i: ")
                    ACE_TEXT(" discarding sample from publication %C due to no listeners.\n"),
@@ -759,7 +759,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
       bool first = true;
       RepoIdSet::const_iterator iter = incl_excl.begin();
       while(iter != incl_excl.end()) {
-        included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
+        included_ids += (first ? "" : "\n") + OPENDDS_STRING(LogGuid(*iter));
         first = false;
         ++iter;
       }
@@ -834,7 +834,7 @@ DataLink::notify(ConnectionNotice notice)
 
     if (tsl) {
       if (Transport_debug_level > 0) {
-        GuidConverter converter(itr->first);
+        LogGuid converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("notify pub %C %C.\n"),
@@ -844,7 +844,7 @@ DataLink::notify(ConnectionNotice notice)
       AssocByLocal::iterator local_it = assoc_by_local_.find(itr->first);
       if (local_it == assoc_by_local_.end()) {
         if (Transport_debug_level) {
-          GuidConverter converter(itr->first);
+          LogGuid converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
                      ACE_TEXT("try to notify pub %C %C - no associations to notify.\n"),
@@ -880,7 +880,7 @@ DataLink::notify(ConnectionNotice notice)
 
     } else {
       if (Transport_debug_level > 0) {
-        GuidConverter converter(itr->first);
+        LogGuid converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("not notify pub %C %C\n"),
@@ -899,7 +899,7 @@ DataLink::notify(ConnectionNotice notice)
 
     if (trl) {
       if (Transport_debug_level > 0) {
-        GuidConverter converter(itr->first);
+        LogGuid converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("notify sub %C %C.\n"),
@@ -909,7 +909,7 @@ DataLink::notify(ConnectionNotice notice)
       AssocByLocal::iterator local_it = assoc_by_local_.find(itr->first);
       if (local_it == assoc_by_local_.end()) {
         if (Transport_debug_level) {
-          GuidConverter converter(itr->first);
+          LogGuid converter(itr->first);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataLink::notify: ")
                      ACE_TEXT("try to notify sub %C %C - no associations to notify.\n"),
@@ -945,7 +945,7 @@ DataLink::notify(ConnectionNotice notice)
 
     } else {
       if (Transport_debug_level > 0) {
-        GuidConverter converter(itr->first);
+        LogGuid converter(itr->first);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::notify: ")
                    ACE_TEXT("not notify sub %C subscription lost.\n"),
@@ -1200,8 +1200,8 @@ DataLink::network_change() const
 void
 DataLink::replay_durable_data(const RepoId& local_pub_id, const RepoId& remote_sub_id) const
 {
-  GuidConverter local(local_pub_id);
-  GuidConverter remote(remote_sub_id);
+  LogGuid local(local_pub_id);
+  LogGuid remote(remote_sub_id);
   TransportSendListener_rch send_listener = send_listener_for(local_pub_id);
   if (send_listener) {
     send_listener->replay_durable_data_for(remote_sub_id);
@@ -1225,8 +1225,8 @@ operator<<(std::ostream& str, const DataLink& value)
   for (assoc_iter_t ait = abl.begin(); ait != abl.end(); ++ait) {
     const RepoIdSet& set = ait->second.associated_;
     for (RepoIdSet::const_iterator rit = set.begin(); rit != set.end(); ++rit) {
-      str << GuidConverter(ait->first) << " --> "
-          << GuidConverter(*rit) << "   " << std::endl;
+      str << LogGuid(ait->first) << " --> "
+          << LogGuid(*rit) << "   " << std::endl;
     }
   }
   return str;

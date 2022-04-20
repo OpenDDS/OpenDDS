@@ -838,7 +838,7 @@ void StaticEndpointManager::update_publication_locators(
   LocalPublicationIter iter = local_publications_.find(publicationId);
   if (iter != local_publications_.end()) {
     if (DCPS_debug_level > 3) {
-      const GuidConverter conv(publicationId);
+      const LogGuid conv(publicationId);
       ACE_DEBUG((LM_INFO,
         ACE_TEXT("(%P|%t) StaticEndpointManager::update_publication_locators - updating locators for %C\n"),
         OPENDDS_STRING(conv).c_str()));
@@ -925,7 +925,7 @@ void StaticEndpointManager::update_subscription_locators(
   LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
   if (iter != local_subscriptions_.end()) {
     if (DCPS_debug_level > 3) {
-      const GuidConverter conv(subscriptionId);
+      const LogGuid conv(subscriptionId);
       ACE_DEBUG((LM_INFO,
         ACE_TEXT("(%P|%t) StaticEndpointManager::update_subscription_locators updating locators for %C\n"),
         OPENDDS_STRING(conv).c_str()));
@@ -944,7 +944,7 @@ void StaticEndpointManager::match_endpoints(
       remove ? "remove " : "", LogGuid(repoId).c_str()));
   }
 
-  const bool reader = GuidConverter(repoId).isReader();
+  const bool reader = LogGuid(repoId).isReader();
   // Copy the endpoint set - lock can be released in match()
   RepoIdSet local_endpoints;
   RepoIdSet discovered_endpoints;
@@ -965,7 +965,7 @@ void StaticEndpointManager::match_endpoints(
   for (RepoIdSet::const_iterator iter = local_endpoints.begin();
        iter != local_endpoints.end(); ++iter) {
     // check to make sure it's a Reader/Writer or Writer/Reader match
-    if (GuidConverter(*iter).isReader() != reader) {
+    if (LogGuid(*iter).isReader() != reader) {
       if (remove) {
         remove_assoc(*iter, repoId);
       } else {
@@ -982,7 +982,7 @@ void StaticEndpointManager::match_endpoints(
   for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
        iter != discovered_endpoints.end(); ++iter) {
     // check to make sure it's a Reader/Writer or Writer/Reader match
-    if (GuidConverter(*iter).isReader() != reader) {
+    if (LogGuid(*iter).isReader() != reader) {
       if (remove) {
         remove_assoc(*iter, repoId);
       } else {
@@ -994,7 +994,7 @@ void StaticEndpointManager::match_endpoints(
 
 void StaticEndpointManager::remove_assoc(const GUID_t& remove_from, const GUID_t& removing)
 {
-  if (GuidConverter(remove_from).isReader()) {
+  if (LogGuid(remove_from).isReader()) {
     const LocalSubscriptionIter lsi = local_subscriptions_.find(remove_from);
     if (lsi != local_subscriptions_.end()) {
       lsi->second.matched_endpoints_.erase(removing);
@@ -1400,8 +1400,8 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     if (call_writer) {
       if (DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) StaticEndpointManager::match_continue - ")
-          ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(),
-          OPENDDS_STRING(GuidConverter(reader)).c_str()));
+          ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(LogGuid(writer)).c_str(),
+          OPENDDS_STRING(LogGuid(reader)).c_str()));
       }
       DataWriterCallbacks_rch dwr_lock = dwr.lock();
       if (dwr_lock) {
@@ -1421,7 +1421,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       if (DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) StaticEndpointManager::match_continue - ")
           ACE_TEXT("adding reader %C association for writer %C\n"),
-          OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
+          OPENDDS_STRING(LogGuid(reader)).c_str(), OPENDDS_STRING(LogGuid(writer)).c_str()));
       }
       DataReaderCallbacks_rch drr_lock = drr.lock();
       if (drr_lock) {
@@ -3189,7 +3189,7 @@ void StaticParticipant::remove_discovered_participant(DiscoveredParticipantIter&
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
     if (DCPS_debug_level > 3) {
-      GuidConverter conv(iter->first);
+      LogGuid conv(iter->first);
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
                  ACE_TEXT(" - erasing %C (%B)\n"), OPENDDS_STRING(conv).c_str(), participants_.size()));
     }

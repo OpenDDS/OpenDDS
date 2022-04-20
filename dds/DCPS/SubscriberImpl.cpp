@@ -350,7 +350,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       }
       if (DCPS_debug_level > 0) {
         RepoId id = dr_servant->get_repo_id();
-        GuidConverter converter(id);
+        LogGuid converter(id);
         ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("SubscriberImpl::delete_datareader: ")
@@ -663,7 +663,7 @@ SubscriberImpl::set_qos(
 
           if (!pair.second) {
             if (DCPS_debug_level > 0) {
-              GuidConverter converter(id);
+              LogGuid converter(id);
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
                         ACE_TEXT("insert %C to DrIdToQosMap failed.\n"),

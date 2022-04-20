@@ -295,7 +295,7 @@ DataLink::remove_listener(const RepoId& local_id)
     if (pos != send_listeners_.end()) {
       send_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
-        GuidConverter converter(local_id);
+        LogGuid converter(local_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::remove_listener: ")
                    ACE_TEXT("removed %C from send_listeners\n"),
@@ -309,7 +309,7 @@ DataLink::remove_listener(const RepoId& local_id)
     if (pos != recv_listeners_.end()) {
       recv_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
-        GuidConverter converter(local_id);
+        LogGuid converter(local_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::remove_listener: ")
                    ACE_TEXT("removed %C from recv_listeners\n"),

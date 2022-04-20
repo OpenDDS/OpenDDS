@@ -59,7 +59,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 
   if (data.key == 99) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("%C received terminating sample\n"),
-      OPENDDS_STRING(GuidConverter(get_repo_id())).c_str()));
+      OPENDDS_STRING(LogGuid(get_repo_id())).c_str()));
     done_ = true;
     return;
   }
@@ -67,8 +67,8 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
   DDS::Time_t ts = {sample.header_.source_timestamp_sec_, sample.header_.source_timestamp_nanosec_};
   ACE_Time_Value atv = time_to_time_value(ts);
 
-  GuidConverter pub(sample.header_.publication_id_);
-  GuidConverter id(get_repo_id());
+  LogGuid pub(sample.header_.publication_id_);
+  LogGuid id(get_repo_id());
   ACE_INT64 seqN = sample.header_.sequence_.getValue();
 
   std::ostringstream oss;

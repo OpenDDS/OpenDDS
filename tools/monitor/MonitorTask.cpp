@@ -871,7 +871,7 @@ Monitor::MonitorTask::readBuiltinTopicData(
   const DDS::InstanceHandle_t instance = dpi->lookup_handle(id);
 
   if (this->options_.verbose()) {
-    OpenDDS::DCPS::GuidConverter converter(id);
+    OpenDDS::DCPS::LogGuid converter(id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
       ACE_TEXT("id: %C ==> BuiltinTopic key: ")
@@ -884,7 +884,7 @@ Monitor::MonitorTask::readBuiltinTopicData(
   }
 
   if (instance == DDS::HANDLE_NIL) {
-    OpenDDS::DCPS::GuidConverter converter(id);
+    OpenDDS::DCPS::LogGuid converter(id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
       ACE_TEXT("no data for id %C at this time.\n"),

@@ -88,7 +88,7 @@ ReliableSession::ready_to_deliver(const TransportHeader& header,
       || (nak_sequence_.empty() && header.sequence_ > 1)) {
 
     if (Transport_debug_level > 5) {
-      GuidConverter writer(data.header_.publication_id_);
+      LogGuid writer(data.header_.publication_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::ready_to_deliver -")
                            ACE_TEXT(" tseq: %q data seq: %q from %C being WITHHELD because can't receive yet\n"),
                            header.sequence_.getValue(),
@@ -106,7 +106,7 @@ ReliableSession::ready_to_deliver(const TransportHeader& header,
                              ACE_TEXT(" held_ data currently contains: %d samples\n"),
                              held_.size()));
         while (it != held_.end()) {
-          GuidConverter writer(it->second.header_.publication_id_);
+          LogGuid writer(it->second.header_.publication_id_);
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::ready_to_deliver -")
                                ACE_TEXT(" held_ data currently contains: tseq: %q dseq: %q from %C HELD\n"),
                                it->first.getValue(),
@@ -120,7 +120,7 @@ ReliableSession::ready_to_deliver(const TransportHeader& header,
     return false;
   } else {
     if (Transport_debug_level > 5) {
-      GuidConverter writer(data.header_.publication_id_);
+      LogGuid writer(data.header_.publication_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ReliableSession::ready_to_deliver -")
                            ACE_TEXT(" tseq: %q data seq: %q from %C OK to deliver\n"),
                            header.sequence_.getValue(),
@@ -146,7 +146,7 @@ ReliableSession::deliver_held_data()
     const iter end = this->held_.upper_bound(ca);
     for (iter it = this->held_.begin(); it != end; /*increment in loop body*/) {
       if (Transport_debug_level > 5) {
-        GuidConverter writer(it->second.header_.publication_id_);
+        LogGuid writer(it->second.header_.publication_id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) MulticastDataLink::deliver_held_data -")
                              ACE_TEXT(" deliver tseq: %q dseq: %q from %C\n"),
                              it->first.getValue(),

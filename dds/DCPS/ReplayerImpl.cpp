@@ -405,8 +405,8 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   DBG_ENTRY_LVL("ReplayerImpl", "add_association", 6);
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(yourId);
-    GuidConverter reader_converter(reader.readerId);
+    LogGuid writer_converter(yourId);
+    LogGuid reader_converter(reader.readerId);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ReplayerImpl::add_association - ")
                ACE_TEXT("bit %d local %C remote %C\n"),
@@ -437,7 +437,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
   }
 
   if (DCPS_debug_level > 4) {
-    GuidConverter converter(publication_id_);
+    LogGuid converter(publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ReplayerImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
@@ -498,7 +498,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
     if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
-      GuidConverter converter(remote_id);
+      LogGuid converter(remote_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
@@ -525,7 +525,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
       ++publication_match_status_.current_count_change;
 
       if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
-        GuidConverter converter(remote_id);
+        LogGuid converter(remote_id);
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
@@ -534,7 +534,7 @@ ReplayerImpl::association_complete_i(const RepoId& remote_id)
         return;
 
       } else if (DCPS_debug_level > 4) {
-        GuidConverter converter(remote_id);
+        LogGuid converter(remote_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) ReplayerImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x.\n"),
@@ -566,8 +566,8 @@ ReplayerImpl::remove_associations(const ReaderIdSeq & readers,
                                   CORBA::Boolean      notify_lost)
 {
   if (DCPS_debug_level >= 1) {
-    GuidConverter writer_converter(publication_id_);
-    GuidConverter reader_converter(readers[0]);
+    LogGuid writer_converter(publication_id_);
+    LogGuid reader_converter(readers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) ReplayerImpl::remove_associations: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
@@ -791,8 +791,8 @@ ReplayerImpl::data_delivered(const DataSampleElement* sample)
 {
   DBG_ENTRY_LVL("ReplayerImpl","data_delivered",6);
   if (!(sample->get_pub_id() == this->publication_id_)) {
-    GuidConverter sample_converter(sample->get_pub_id());
-    GuidConverter writer_converter(publication_id_);
+    LogGuid sample_converter(sample->get_pub_id());
+    LogGuid writer_converter(publication_id_);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReplayerImpl::data_delivered: ")
                ACE_TEXT(" The publication id %C from delivered element ")
@@ -1022,7 +1022,7 @@ ReplayerImpl::lookup_instance_handles(const ReaderIdSeq&       ids,
     OPENDDS_STRING buffer;
 
     for (CORBA::ULong i = 0; i < num_rds; ++i) {
-      buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
+      buffer += separator + OPENDDS_STRING(LogGuid(ids[i]));
       separator = ", ";
     }
 

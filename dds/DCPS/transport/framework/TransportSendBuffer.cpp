@@ -173,7 +173,7 @@ void
 SingleSendBuffer::retain_all(const RepoId& pub_id)
 {
   if (Transport_debug_level > 5) {
-    GuidConverter converter(pub_id);
+    LogGuid converter(pub_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::retain_all() - ")
       ACE_TEXT("copying out blocks for publication: %C\n"),
@@ -185,7 +185,7 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
        it != buffers_.end();) {
     if (it->second.first && it->second.second) {
       if (retain_buffer(pub_id, it->second) == REMOVE_ERROR) {
-        GuidConverter converter(pub_id);
+        LogGuid converter(pub_id);
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("SingleSendBuffer::retain_all: ")
@@ -202,7 +202,7 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
         for (BufferMap::iterator bm_it = fm_it->second.begin();
              bm_it != fm_it->second.end();) {
           if (retain_buffer(pub_id, bm_it->second) == REMOVE_ERROR) {
-            GuidConverter converter(pub_id);
+            LogGuid converter(pub_id);
             ACE_ERROR((LM_WARNING,
                        ACE_TEXT("(%P|%t) WARNING: ")
                        ACE_TEXT("SingleSendBuffer::retain_all: failed to ")

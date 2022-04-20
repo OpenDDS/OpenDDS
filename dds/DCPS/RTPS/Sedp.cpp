@@ -378,7 +378,7 @@ Sedp::init(const RepoId& guid,
   type_lookup_service_ = tls;
 
   const OPENDDS_STRING domainStr = DCPS::to_dds_string(domainId);
-  const OPENDDS_STRING key = DCPS::GuidConverter(guid).uniqueParticipantId();
+  const OPENDDS_STRING key = DCPS::LogGuid(guid).uniqueParticipantId();
 
   // configure one transport
   transport_inst_ = TheTransportRegistry->create_inst(
@@ -1005,7 +1005,7 @@ create_association_data_proto(DCPS::AssociationData& proto,
 #ifdef OPENDDS_SECURITY
 void Sedp::generate_remote_matched_crypto_handle(const BuiltinAssociationRecord& record)
 {
-  if (DCPS::GuidConverter(record.remote_id()).isWriter()) {
+  if (DCPS::LogGuid(record.remote_id()).isWriter()) {
     generate_remote_matched_writer_crypto_handle(record.remote_id(), record.local_id());
   } else {
     generate_remote_matched_reader_crypto_handle(record.remote_id(), record.local_id(), false);
@@ -1272,7 +1272,7 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
       association_data.remote_id_ = record.remote_id();
       association_data.remote_reliable_ = record.remote_reliable();
       association_data.remote_durable_ = record.remote_durable();
-      record.transport_client_->associate(association_data, DCPS::GuidConverter(association_data.remote_id_).isReader());
+      record.transport_client_->associate(association_data, DCPS::LogGuid(association_data.remote_id_).isReader());
 
       participant.builtin_associated_records_.push_back(record);
       participant.builtin_pending_records_.erase(pos++);
@@ -1420,7 +1420,7 @@ void Sedp::remove_remote_crypto_handle(const RepoId& participant, const EntityId
   SecurityException se = {"", 0, 0};
   CryptoKeyFactory_var key_factory = spdp_.get_security_config()->get_crypto_key_factory();
 
-  const DCPS::GuidConverter traits(remote);
+  const DCPS::LogGuid traits(remote);
   if (traits.isReader()) {
     const DDS::Security::DatareaderCryptoHandle drch =
       get_handle_registry()->get_remote_datareader_crypto_handle(remote);
@@ -1493,7 +1493,7 @@ Sedp::create_and_send_datawriter_crypto_tokens(
 void
 Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& dst, const DCPS::RepoId& src)
 {
-  if (DCPS::GuidConverter(src).isReader()) {
+  if (DCPS::LogGuid(src).isReader()) {
     create_and_send_datareader_crypto_tokens(get_handle_registry()->get_local_datareader_crypto_handle(src), src,
                                              get_handle_registry()->get_remote_datawriter_crypto_handle(dst), dst);
   } else {
@@ -1632,7 +1632,7 @@ Sedp::disassociate(DiscoveredParticipant& participant)
 void
 Sedp::replay_durable_data_for(const DCPS::RepoId& remote_sub_id)
 {
-  DCPS::GuidConverter conv(remote_sub_id);
+  DCPS::LogGuid conv(remote_sub_id);
   ACE_DEBUG((LM_DEBUG, "Sedp::replay_durable_data_for %C\n", OPENDDS_STRING(conv).c_str()));
   if (remote_sub_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
     write_durable_publication_data(remote_sub_id, false);
@@ -4677,7 +4677,7 @@ Sedp::populate_discovered_reader_msg(
   drd.readerProxy.allLocators = sub.trans_info_;
 
   drd.contentFilterProperty.contentFilteredTopicName =
-    OPENDDS_STRING(DCPS::GuidConverter(subscription_id)).c_str();
+    OPENDDS_STRING(DCPS::LogGuid(subscription_id)).c_str();
   drd.contentFilterProperty.relatedTopicName = topic_name.c_str();
   drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
   drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
@@ -5599,7 +5599,7 @@ void Sedp::resend_user_crypto_tokens(const RepoId& id)
   for (LocalSubscriptionCIter reader_pos = local_subscriptions_.begin(),
          reader_limit = local_subscriptions_.end();
        reader_pos != reader_limit; ++reader_pos) {
-    if (!DCPS::GuidConverter(reader_pos->first).isUserDomainEntity()) {
+    if (!DCPS::LogGuid(reader_pos->first).isUserDomainEntity()) {
       continue;
     }
     const DDS::Security::DatareaderCryptoHandle drch =
@@ -5629,7 +5629,7 @@ void Sedp::resend_user_crypto_tokens(const RepoId& id)
   for (LocalPublicationCIter writer_pos = local_publications_.begin(),
          writer_limit = local_publications_.end();
        writer_pos != writer_limit; ++writer_pos) {
-    if (!DCPS::GuidConverter(writer_pos->first).isUserDomainEntity()) {
+    if (!DCPS::LogGuid(writer_pos->first).isUserDomainEntity()) {
       continue;
     }
     const DDS::Security::DatawriterCryptoHandle dwch =
@@ -5868,7 +5868,7 @@ Sedp::start_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub) {
 
   for (DCPS::RepoIdSet::const_iterator it = dsub.matched_endpoints_.begin(),
        end = dsub.matched_endpoints_.end(); it != end; ++it) {
-    const DCPS::GuidConverter conv(*it);
+    const DCPS::LogGuid conv(*it);
     if (conv.isWriter()) {
       LocalPublicationIter lpi = local_publications_.find(*it);
       if (lpi != local_publications_.end() &&
@@ -5895,7 +5895,7 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredPublication& dpub)
 #ifdef OPENDDS_SECURITY
   for (DCPS::RepoIdSet::const_iterator it = dpub.matched_endpoints_.begin(),
        end = dpub.matched_endpoints_.end(); it != end; ++it) {
-    const DCPS::GuidConverter conv(*it);
+    const DCPS::LogGuid conv(*it);
     if (conv.isReader()) {
       LocalSubscriptionIter lsi = local_subscriptions_.find(*it);
       if (lsi != local_subscriptions_.end() &&
@@ -5922,7 +5922,7 @@ Sedp::stop_ice(const DCPS::RepoId& guid, const DiscoveredSubscription& dsub)
 #ifdef OPENDDS_SECURITY
   for (DCPS::RepoIdSet::const_iterator it = dsub.matched_endpoints_.begin(),
        end = dsub.matched_endpoints_.end(); it != end; ++it) {
-    const DCPS::GuidConverter conv(*it);
+    const DCPS::LogGuid conv(*it);
     if (conv.isWriter()) {
       LocalPublicationIter lpi = local_publications_.find(*it);
       if (lpi != local_publications_.end() &&
@@ -6455,9 +6455,9 @@ bool Sedp::remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote)
                LogGuid(local).c_str(), LogGuid(remote).c_str()));
   }
 
-  const DCPS::GuidConverter gc(local);
+  const DCPS::LogGuid gc(local);
   if (gc.isBuiltinDomainEntity()) {
-    OPENDDS_ASSERT(DCPS::GuidConverter(remote).isBuiltinDomainEntity());
+    OPENDDS_ASSERT(DCPS::LogGuid(remote).isBuiltinDomainEntity());
     // One improvement to returning true here would be waiting until
     // the remote actually sends confirmation that it knows about the
     // local.  A directed SPDP message from the remote would work.
@@ -6593,7 +6593,7 @@ bool Sedp::local_has_remote_endpoint_token_i(const GUID_t& local, const GUID_t& 
   }
 
   Security::CryptoKeyExchange_var key_exchange = spdp_.security_config_->get_crypto_key_exchange();
-  if (DCPS::GuidConverter(local).isWriter()) {
+  if (DCPS::LogGuid(local).isWriter()) {
     const DDS::Security::DatawriterCryptoHandle local_crypto_handle =
       get_handle_registry()->get_local_datawriter_crypto_handle(local);
     if (local_crypto_handle == DDS::HANDLE_NIL) {
@@ -6639,7 +6639,7 @@ bool Sedp::remote_has_local_endpoint_token_i(const GUID_t& local, bool local_tok
   }
 
   Security::CryptoKeyExchange_var key_exchange = spdp_.security_config_->get_crypto_key_exchange();
-  if (DCPS::GuidConverter(local).isWriter()) {
+  if (DCPS::LogGuid(local).isWriter()) {
     const DDS::Security::DatawriterCryptoHandle local_crypto_handle =
       get_handle_registry()->get_local_datawriter_crypto_handle(local);
     const DDS::Security::DatareaderCryptoHandle remote_crypto_handle =
@@ -6719,7 +6719,7 @@ void Sedp::match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td, bool rem
       remove ? "remove " : "", LogGuid(repoId).c_str()));
   }
 
-  const bool reader = DCPS::GuidConverter(repoId).isReader();
+  const bool reader = DCPS::LogGuid(repoId).isReader();
   // Copy the endpoint set - lock can be released in match()
   RepoIdSet local_endpoints;
   RepoIdSet discovered_endpoints;
@@ -6740,7 +6740,7 @@ void Sedp::match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td, bool rem
   for (RepoIdSet::const_iterator iter = local_endpoints.begin();
        iter != local_endpoints.end(); ++iter) {
     // check to make sure it's a Reader/Writer or Writer/Reader match
-    if (DCPS::GuidConverter(*iter).isReader() != reader) {
+    if (DCPS::LogGuid(*iter).isReader() != reader) {
       if (remove) {
         remove_assoc(*iter, repoId);
       } else {
@@ -6757,7 +6757,7 @@ void Sedp::match_endpoints(GUID_t repoId, const DCPS::TopicDetails& td, bool rem
   for (RepoIdSet::const_iterator iter = discovered_endpoints.begin();
        iter != discovered_endpoints.end(); ++iter) {
     // check to make sure it's a Reader/Writer or Writer/Reader match
-    if (DCPS::GuidConverter(*iter).isReader() != reader) {
+    if (DCPS::LogGuid(*iter).isReader() != reader) {
       if (remove) {
         remove_assoc(*iter, repoId);
       } else {
@@ -6823,7 +6823,7 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
 
 void Sedp::remove_assoc(const GUID_t& remove_from, const GUID_t& removing)
 {
-  if (DCPS::GuidConverter(remove_from).isReader()) {
+  if (DCPS::LogGuid(remove_from).isReader()) {
     const LocalSubscriptionIter lsi = local_subscriptions_.find(remove_from);
     if (lsi != local_subscriptions_.end()) {
       lsi->second.matched_endpoints_.erase(removing);
@@ -7021,7 +7021,7 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
 
 void Sedp::populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl)
 {
-  DCPS::GuidConverter conv(id);
+  DCPS::LogGuid conv(id);
   if (conv.isBuiltinDomainEntity()) {
     DCPS::LocatorSeq locators;
     bool expects_inline_qos = false;

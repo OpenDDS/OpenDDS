@@ -167,7 +167,7 @@ bool read_participant_bit(const Subscriber_var& bit_sub,
       ++num_valid;
       OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
 
-      OpenDDS::DCPS::GuidConverter converter(repo_id);
+      OpenDDS::DCPS::LogGuid converter(repo_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("%P ")
                  ACE_TEXT("Read Participant BIT GUID=%C handle=%d\n"),
@@ -412,12 +412,12 @@ bool read_publication_bit(const Subscriber_var& bit_sub,
       OpenDDS::DCPS::RepoId publication_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
       OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
 
-      OpenDDS::DCPS::GuidConverter converter(repo_id);
+      OpenDDS::DCPS::LogGuid converter(repo_id);
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Publication BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(publication_repo_id)).c_str(),
+                 OPENDDS_STRING(OpenDDS::DCPS::LogGuid(publication_repo_id)).c_str(),
                  infos[i].instance_handle,
                  OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
@@ -540,12 +540,12 @@ bool read_subscription_bit(const Subscriber_var& bit_sub,
       OpenDDS::DCPS::RepoId subscription_repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].key);
       OpenDDS::DCPS::RepoId repo_id = OpenDDS::DCPS::bit_key_to_repo_id(data[i].participant_key);
 
-      OpenDDS::DCPS::GuidConverter converter(repo_id);
+      OpenDDS::DCPS::LogGuid converter(repo_id);
 
       ACE_DEBUG((LM_DEBUG,
                  "%P Read Subscription BIT with key: %C and handle %d\n"
                  "\tParticipant's GUID=%C\n\tTopic: %C\tType: %C\n",
-                 OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(subscription_repo_id)).c_str(),
+                 OPENDDS_STRING(OpenDDS::DCPS::LogGuid(subscription_repo_id)).c_str(),
                  infos[i].instance_handle,
                  OPENDDS_STRING(converter).c_str (), data[i].topic_name.in(),
                  data[i].type_name.in()));
@@ -654,8 +654,8 @@ bool check_discovered_participants(DomainParticipant_var& dp,
       }
       handle = part_handles[0];
       {
-        OpenDDS::DCPS::GuidConverter converter1(dp_impl->get_id ());
-        OpenDDS::DCPS::GuidConverter converter2(repo_id);
+        OpenDDS::DCPS::LogGuid converter1(dp_impl->get_id ());
+        OpenDDS::DCPS::LogGuid converter2(repo_id);
         ACE_DEBUG ((LM_DEBUG,
                     ACE_TEXT("%P ")
                     ACE_TEXT("%C discovered %C\n"),
@@ -683,7 +683,7 @@ bool run_test(DomainParticipant_var& dp_sub,
     }
 
     sub_repo_id = dp_impl->get_id ();
-    OpenDDS::DCPS::GuidConverter converter(sub_repo_id);
+    OpenDDS::DCPS::LogGuid converter(sub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
                 ACE_TEXT("Sub Domain Participant GUID=%C\n"),
@@ -701,7 +701,7 @@ bool run_test(DomainParticipant_var& dp_sub,
     }
 
     pub_repo_id = dp_impl->get_id ();
-    OpenDDS::DCPS::GuidConverter converter(pub_repo_id);
+    OpenDDS::DCPS::LogGuid converter(pub_repo_id);
     ACE_DEBUG ((LM_DEBUG,
                 ACE_TEXT("%P ")
                 ACE_TEXT("Pub Domain Participant GUID=%C\n"),

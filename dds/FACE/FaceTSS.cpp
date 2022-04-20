@@ -808,7 +808,7 @@ FACE::SYSTEM_TIME_TYPE convertTime(const DDS::Time_t& timestamp)
 FACE::MESSAGE_INSTANCE_GUID
 create_message_instance_guid(const OpenDDS::DCPS::RepoId& pub, const CORBA::LongLong& orig_seq)
 {
-  OpenDDS::DCPS::GuidConverter writer(pub);
+  OpenDDS::DCPS::LogGuid writer(pub);
 
   FACE::MESSAGE_INSTANCE_GUID message_instance_guid;
   FACE::LongLong mig_low;

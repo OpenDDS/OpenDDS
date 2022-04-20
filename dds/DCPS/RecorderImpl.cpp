@@ -307,7 +307,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
       //       this->raw_latency_buffer_type_)));
 
       // if (DCPS_debug_level > 4) {
-      //   GuidConverter converter(writer_id);
+      //   LogGuid converter(writer_id);
       //   ACE_DEBUG((LM_DEBUG,
       //              "(%P|%t) RecorderImpl::add_association: "
       //              "inserted writer %C.return %d\n",
@@ -318,8 +318,8 @@ RecorderImpl::add_association(const RepoId&            yourId,
       //     // This may not be an error since it could happen that the sample
       //     // is delivered to the datareader after the write is dis-associated
       //     // with this datareader.
-      //     GuidConverter reader_converter(subscription_id_);
-      //     GuidConverter writer_converter(writer_id);
+      //     LogGuid reader_converter(subscription_id_);
+      //     LogGuid writer_converter(writer_id);
       //     ACE_DEBUG((LM_DEBUG,
       //               ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
       //               ACE_TEXT("reader %C is associated with writer %C.\n"),
@@ -383,7 +383,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     //   const MonotonicTimePoint now = MonotonicTimePoint::now();
     //
     //   if (DCPS_debug_level >= 5) {
-    //     GuidConverter converter(subscription_id_);
+    //     LogGuid converter(subscription_id_);
     //     ACE_DEBUG((LM_DEBUG,
     //                ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
     //                ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
@@ -420,7 +420,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
         RepoIdToHandleMap::value_type(writer.writerId, handle));
 
       if (DCPS_debug_level > 4) {
-        GuidConverter converter(writer.writerId);
+        LogGuid converter(writer.writerId);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
                    ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
@@ -509,8 +509,8 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter reader_converter(subscription_id_);
-    GuidConverter writer_converter(writers[0]);
+    LogGuid reader_converter(subscription_id_);
+    LogGuid writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
@@ -556,7 +556,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
-          GuidConverter converter(writer_id);
+          LogGuid converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                      ACE_TEXT("the writer local %C was already removed.\n"),
@@ -843,7 +843,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
     OPENDDS_STRING buffer;
 
     for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-      buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
+      buffer += separator + OPENDDS_STRING(LogGuid(ids[i]));
       separator = ", ";
     }
 

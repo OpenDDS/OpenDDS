@@ -15,7 +15,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RepoIdConverter::RepoIdConverter(const RepoId& repoId)
-  : GuidConverter(repoId)
+  : LogGuid(repoId)
 {}
 
 RepoIdConverter::~RepoIdConverter()

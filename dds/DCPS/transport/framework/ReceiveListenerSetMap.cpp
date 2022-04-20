@@ -30,7 +30,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
 
   if (listener_set.is_nil()) {
     // find_or_create failure
-    GuidConverter converter(publisher_id);
+    LogGuid converter(publisher_id);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
                       ACE_TEXT("failed to find_or_create entry for ")
@@ -44,8 +44,8 @@ OpenDDS::DCPS::ReceiveListenerSetMap::insert
     return 0;
   }
 
-  GuidConverter sub_converter(subscriber_id);
-  GuidConverter pub_converter(publisher_id);
+  LogGuid sub_converter(subscriber_id);
+  LogGuid pub_converter(publisher_id);
   ACE_ERROR((LM_ERROR,
              ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::insert: ")
              ACE_TEXT("failed to insert subscriber %C for ")
@@ -89,7 +89,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::remove(RepoId publisher_id,
 
   if (listener_set->size() == 0) {
     if (unbind(map_, publisher_id) != 0) {
-      GuidConverter converter(publisher_id);
+      LogGuid converter(publisher_id);
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::remove: ")
                         ACE_TEXT("failed to remove empty ReceiveListenerSet for ")
@@ -123,7 +123,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
   ReceiveListenerSet_rch listener_set;
 
   if (OpenDDS::DCPS::find(map_, publisher_id, listener_set) != 0) {
-    GuidConverter converter(publisher_id);
+    LogGuid converter(publisher_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ReciveListenerSetMap::release_subscriber: ")
                ACE_TEXT("publisher %C not found in map_.\n"),
@@ -140,7 +140,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::release_subscriber(RepoId publisher_id,
 
   if (listener_set->size() == 0) {
     if (unbind(map_, publisher_id) != 0) {
-      GuidConverter converter(publisher_id);
+      LogGuid converter(publisher_id);
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ReceiveListenerSetMap::release_subscriber: ")
                  ACE_TEXT("failed to remove empty ReceiveListenerSet for ")

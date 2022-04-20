@@ -48,7 +48,7 @@ TransportClient::TransportClient()
 TransportClient::~TransportClient()
 {
   if (Transport_debug_level > 5) {
-    GuidConverter converter(repo_id_);
+    LogGuid converter(repo_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
                OPENDDS_STRING(converter).c_str()));
@@ -206,8 +206,8 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(repo_id_);
-      GuidConverter reader_converter(data.remote_id_);
+      LogGuid writer_converter(repo_id_);
+      LogGuid reader_converter(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C no available impls\n"),
                  OPENDDS_STRING(writer_converter).c_str(),
@@ -227,8 +227,8 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (all_impls_shut_down) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(repo_id_);
-      GuidConverter reader_converter(data.remote_id_);
+      LogGuid writer_converter(repo_id_);
+      LogGuid reader_converter(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C all available impls previously shutdown\n"),
                  OPENDDS_STRING(writer_converter).c_str(),
@@ -245,8 +245,8 @@ TransportClient::associate(const AssociationData& data, bool active)
     RepoId remote_copy(data.remote_id_);
     iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>(this))).first;
 
-    GuidConverter tc_assoc(repo_id_);
-    GuidConverter remote_new(data.remote_id_);
+    LogGuid tc_assoc(repo_id_);
+    LogGuid remote_new(data.remote_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate added PendingAssoc "
               "between %C and remote %C\n",
               OPENDDS_STRING(tc_assoc).c_str(),
@@ -376,8 +376,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 {
   if (!guard.locked()) {
     //don't own the lock_ so can't release it...shouldn't happen
-    GuidConverter local(repo_id_);
-    GuidConverter remote_conv(remote.repo_id_);
+    LogGuid local(repo_id_);
+    LogGuid remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i ")
                         ACE_TEXT("between local %C and remote %C unsuccessful because ")
                         ACE_TEXT("guard was not locked\n"),
@@ -388,8 +388,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 
   {
     //can't call connect while holding lock due to possible reactor deadlock
-    GuidConverter local(repo_id_);
-    GuidConverter remote_conv(remote.repo_id_);
+    LogGuid local(repo_id_);
+    LogGuid remote_conv(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                         "attempt to connect_datalink between local %C and remote %C\n",
                         OPENDDS_STRING(local).c_str(),
@@ -402,8 +402,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     }
     if (!result.success_) {
       if (DCPS_debug_level) {
-        GuidConverter writer_converter(repo_id_);
-        GuidConverter reader_converter(remote.repo_id_);
+        LogGuid writer_converter(repo_id_);
+        LogGuid reader_converter(remote.repo_id_);
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                    ACE_TEXT("connect_datalink between local %C remote %C not successful\n"),
                    OPENDDS_STRING(writer_converter).c_str(),
@@ -413,8 +413,8 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     }
   }
 
-  GuidConverter local(repo_id_);
-  GuidConverter remote_conv(remote.repo_id_);
+  LogGuid local(repo_id_);
+  LogGuid remote_conv(remote.repo_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                       "connection between local %C and remote %C initiation successful\n",
                       OPENDDS_STRING(local).c_str(),
@@ -426,8 +426,8 @@ bool
 TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                                                 Guard& guard)
 {
-  GuidConverter local(tc->repo_id_);
-  GuidConverter remote(data_.remote_id_);
+  LogGuid local(tc->repo_id_);
+  LogGuid remote(data_.remote_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                       "between %C and remote %C\n",
                       OPENDDS_STRING(local).c_str(),
@@ -448,14 +448,14 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           data_.remote_reliable_, data_.remote_durable_};
 
         TransportImpl::AcceptConnectResult res;
-        GuidConverter tmp_local(tc->repo_id_);
-        GuidConverter tmp_remote(data_.remote_id_);
+        LogGuid tmp_local(tc->repo_id_);
+        LogGuid tmp_remote(data_.remote_id_);
         if (!tc->initiate_connect_i(res, impl, remote, attribs_, guard)) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
           if (res.success_ ) {
-            GuidConverter local(tc->repo_id_);
-            GuidConverter remote(data_.remote_id_);
+            LogGuid local(tc->repo_id_);
+            LogGuid remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) PendingAssoc::initiate_connect - ")
                                 ACE_TEXT("between %C and remote %C success\n"),
                                 OPENDDS_STRING(local).c_str(),
@@ -477,8 +477,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
             tc->use_datalink_i(data_.remote_id_, res.link_, guard);
           } else {
-            GuidConverter local(tc->repo_id_);
-            GuidConverter remote(data_.remote_id_);
+            LogGuid local(tc->repo_id_);
+            LogGuid remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
                                 OPENDDS_STRING(local).c_str(),
@@ -487,8 +487,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
           return true;
         } else {
-          GuidConverter local(tc->repo_id_);
-          GuidConverter remote(data_.remote_id_);
+          LogGuid local(tc->repo_id_);
+          LogGuid remote(data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                               "result of initiate_connect_i (local: %C to remote: %C) was not success\n",
                               OPENDDS_STRING(local).c_str(),
@@ -525,7 +525,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   // Does changing this from a reference to a local affect anything going forward?
   RepoId remote_id(remote_id_ref);
 
-  GuidConverter peerId_conv(remote_id);
+  LogGuid peerId_conv(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
             "TransportClient(%@) using datalink[%@] from %C\n",
             this,
@@ -649,7 +649,7 @@ TransportClient::send_final_acks()
 void
 TransportClient::disassociate(const RepoId& peerId)
 {
-  GuidConverter peerId_conv(peerId);
+  LogGuid peerId_conv(peerId);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::disassociate "
             "TransportClient(%@) disassociating from %C\n",
             this,
@@ -677,7 +677,7 @@ TransportClient::disassociate(const RepoId& peerId)
 
   if (found == data_link_index_.end()) {
     if (DCPS_debug_level > 4) {
-      const GuidConverter converter(peerId);
+      const LogGuid converter(peerId);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
                  ACE_TEXT("no link for remote peer %C\n"),
@@ -714,7 +714,7 @@ TransportClient::disassociate(const RepoId& peerId)
     links_.remove_link(link);
 
     if (DCPS_debug_level > 4) {
-      GuidConverter converter(repo_id_);
+      LogGuid converter(repo_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: calling remove_listener %C on link[%@]\n"),
                  OPENDDS_STRING(converter).c_str(),
@@ -854,7 +854,7 @@ TransportClient::send_response(const RepoId& peer,
 
   if (found == data_link_index_.end()) {
     if (DCPS_debug_level > 4) {
-      GuidConverter converter(peer);
+      LogGuid converter(peer);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::send_response: ")
                  ACE_TEXT("no link for publication %C, ")
@@ -942,7 +942,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
         //       associated with any remote subscriber ids" case.
 
         if (DCPS_debug_level > 4) {
-          GuidConverter converter(cur->get_pub_id());
+          LogGuid converter(cur->get_pub_id());
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) TransportClient::send_i: ")
                      ACE_TEXT("no links for publication %C, ")

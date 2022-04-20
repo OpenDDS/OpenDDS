@@ -583,10 +583,10 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
       ret += ", ";
     }
 
-    ret += "Publication: " + OPENDDS_STRING(GuidConverter(value.publication_id_));
+    ret += "Publication: " + OPENDDS_STRING(LogGuid(value.publication_id_));
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
-      ret += ", Publisher: " + OPENDDS_STRING(GuidConverter(value.publisher_id_));
+      ret += ", Publisher: " + OPENDDS_STRING(LogGuid(value.publisher_id_));
     }
 #endif
 
@@ -596,7 +596,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
       ret += to_dds_string(len);
       ret += "): [";
       for (CORBA::ULong i(0); i < len; ++i) {
-        ret += OPENDDS_STRING(GuidConverter(value.content_filter_entries_[i])) + ' ';
+        ret += OPENDDS_STRING(LogGuid(value.content_filter_entries_[i])) + ' ';
       }
       ret += ']';
     }
@@ -667,10 +667,10 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
           << std::dec << value.lifespan_duration_nanosec_ << ", ";
     }
 
-    str << "Publication: " << GuidConverter(value.publication_id_);
+    str << "Publication: " << LogGuid(value.publication_id_);
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
-      str << ", Publisher: " << GuidConverter(value.publisher_id_);
+      str << ", Publisher: " << LogGuid(value.publisher_id_);
     }
 #endif
 
@@ -678,7 +678,7 @@ std::ostream& operator<<(std::ostream& str, const DataSampleHeader& value)
       const CORBA::ULong len = value.content_filter_entries_.length();
       str << ", Content-Filter Entries (" << len << "): [";
       for (CORBA::ULong i(0); i < len; ++i) {
-        str << GuidConverter(value.content_filter_entries_[i]) << ' ';
+        str << LogGuid(value.content_filter_entries_[i]) << ' ';
       }
       str << ']';
     }

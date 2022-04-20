@@ -179,7 +179,7 @@ DomainParticipantFactoryImpl::delete_participant(
     DPMap::iterator pos = participants_.find(domain_id);
     if (pos == participants_.end()) {
       if (DCPS_debug_level > 0) {
-        GuidConverter converter(dp_id);
+        LogGuid converter(dp_id);
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: ")
                    ACE_TEXT("DomainParticipantFactoryImpl::delete_participant: ")

@@ -256,8 +256,8 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                    total_size);
 
   if (DCPS_debug_level > 9 && resend_data_.size()) {
-    GuidConverter converter(publication_id_);
-    GuidConverter reader(reader_id);
+    LogGuid converter(publication_id_);
+    LogGuid reader(reader_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
                ACE_TEXT("domain %d topic %C publication %C copying ")
@@ -583,7 +583,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       if (stale->get_header().message_id_ != SAMPLE_DATA) {
         //this message was a control message so release it
         if (DCPS_debug_level > 9) {
-          GuidConverter converter(publication_id_);
+          LogGuid converter(publication_id_);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                      ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
@@ -617,7 +617,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   if (stale->get_header().message_id_ != SAMPLE_DATA) {
     //this message was a control message so release it
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
+      LogGuid converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
@@ -645,7 +645,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     }
 
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
+      LogGuid converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C seq# %q %s.\n"),
@@ -768,7 +768,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
       if (stale->get_header().message_id_ != SAMPLE_DATA) {
         //this message was a control message so release it
         if (DCPS_debug_level > 9) {
-          GuidConverter converter(publication_id_);
+          LogGuid converter(publication_id_);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_dropped: ")
                      ACE_TEXT("domain %d topic %C publication %C control message dropped.\n"),
@@ -836,7 +836,7 @@ WriteDataContainer::remove_excess_durable()
   }
 
   if (n_released && DCPS_debug_level > 9) {
-    const GuidConverter converter(publication_id_);
+    const LogGuid converter(publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) WriteDataContainer::remove_excess_durable: ")
                ACE_TEXT("domain %d topic %C publication %C %B samples removed ")
@@ -934,7 +934,7 @@ WriteDataContainer::remove_oldest_sample(
     released = true;
 
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
+      LogGuid converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
                  ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),
@@ -953,7 +953,7 @@ WriteDataContainer::remove_oldest_sample(
     released = true;
 
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
+      LogGuid converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
                  ACE_TEXT("domain %d topic %C publication %C sample removed from unsent.\n"),

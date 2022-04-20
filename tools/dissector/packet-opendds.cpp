@@ -252,7 +252,7 @@ namespace OpenDDS
           os << ", Sequence: 0x" << std::hex << std::setw(8) << std::setfill('0')
              << sample.sequence_.getValue();
         }
-        os << ", Publication: " << DCPS::GuidConverter(sample.publication_id_);
+        os << ", Publication: " << DCPS::LogGuid(sample.publication_id_);
       }
 
       return os.str();
@@ -398,7 +398,7 @@ namespace OpenDDS
         reinterpret_cast<const guint8*>(&sample.publication_id_);
       if (sample.message_id_ != TRANSPORT_CONTROL)
         {
-          GuidConverter converter (sample.publication_id_);
+          LogGuid converter (sample.publication_id_);
           proto_tree_add_bytes_format_value (ltree, hf_sample_publication,
                                              tvb_, offset, len, data_ptr, "%s",
                                              std::string(converter).c_str());
@@ -413,7 +413,7 @@ namespace OpenDDS
           data_ptr = reinterpret_cast<const guint8*>(&sample.publisher_id_);
           if (sample.message_id_ != DCPS::TRANSPORT_CONTROL)
             {
-              DCPS::GuidConverter converter(sample.publisher_id_);
+              DCPS::LogGuid converter(sample.publisher_id_);
               proto_tree_add_bytes_format_value (ltree, hf_sample_publisher,
                                                  tvb_, offset, len,
                                                  data_ptr, "%s",
@@ -444,7 +444,7 @@ namespace OpenDDS
                 {
                   // Get Entry Value
                   const GUID_t &filter = sample.content_filter_entries_[i];
-                  DCPS::GuidConverter converter(filter);
+                  DCPS::LogGuid converter(filter);
                   std::stringstream strm;
                   strm << converter;
                   std::string guid = strm.str();
@@ -504,7 +504,7 @@ namespace OpenDDS
           return;
         }
 
-      GuidConverter converter(header.publication_id_);
+      LogGuid converter(header.publication_id_);
 
       if (header.cdr_encapsulation_) {
         ACE_DEBUG ((LM_DEBUG,
