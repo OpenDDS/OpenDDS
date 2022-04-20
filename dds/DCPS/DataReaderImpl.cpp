@@ -2648,6 +2648,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
 
+    ACE_Guard<ACE_RW_Thread_Mutex> write_guard(writers_lock_);
     WriterMapType::iterator iter = writers_.find(pubid);
 
     if (iter == writers_.end()) {
