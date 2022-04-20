@@ -276,7 +276,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     // Schedule timer if necessary
     //   - only need to check reader qos - we know the writer must be >= reader
     if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
-      info->waiting_for_end_historic_samples(true);
+      //info->waiting_for_end_historic_samples(true);
     }
 
     {
@@ -3459,13 +3459,13 @@ EndHistoricSamplesMissedSweeper::~EndHistoricSamplesMissedSweeper()
 
 void EndHistoricSamplesMissedSweeper::schedule_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
-  info->waiting_for_end_historic_samples(true);
+  //info->waiting_for_end_historic_samples(true);
   execute_or_enqueue(make_rch<ScheduleCommand>(this, ref(info)));
 }
 
 void EndHistoricSamplesMissedSweeper::cancel_timer(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::WriterInfo>& info)
 {
-  info->waiting_for_end_historic_samples(false);
+  //info->waiting_for_end_historic_samples(false);
   execute_or_enqueue(make_rch<CancelCommand>(this, ref(info)));
 }
 
