@@ -464,7 +464,82 @@ sub wait_kill {
 
   my $process = $self->{processes}->{process}->{$name}->{process};
 
-  return PerlDDS::wait_kill($process, $wait_time, $name, $verbose, $opts);
+  my $result = PerlDDS::wait_kill($process, $wait_time, $name, $verbose, $opts);
+
+  # If opts has indicated that user wants to get core dump/signal information
+  # then find the core dump file if any and print its stack trace.
+  if (defined $opts && defined $opts->{dump_ref} && ${$opts->{dump_ref}}) {
+      # Get the core file pattern from /proc/sys/kernel/core_pattern
+      my $core_pattern_file = "/proc/sys/kernel/core_pattern";
+      if (!(-e $core_pattern_file)) {
+          printf STDOUT "INFO: Core file pattern $core_pattern_file not exist\n";
+          return $result;
+      }
+
+      if (!open(my $pattern_fh, "<", "$core_pattern_file")) {
+          printf STDOUT "INFO: Could not open $core_pattern_file\n";
+          return $result;
+      }
+
+      my $line = <$pattern_fh>;
+      close($pattern_fh);
+
+      # Find the core file from the pattern
+      my $last_slash_idx = rindex($line, "/");
+      my $path = ".";
+      my $pattern;
+      if ($last_slash_idx == -1) {
+          $pattern = $line;
+      } else {
+          $pattern = substr($line, ($last_slash_idx + 1));
+          $path = substr($line, 0, $last_slash_idx);
+      }
+
+      # Find file with the pattern from the path.
+      # Consider %e, %h, %p, %t templates in the core pattern.
+      # If /proc/sys/kernel/core_uses_pid is non-zero and the pattern
+      # doesn't have %p, then .PID is appended to the core file name.
+      my $uses_pid_file = "/proc/sys/kernel/core_uses_pid";
+      my $uses_pid = 0;
+      if (!open(my $uses_pid_fh, "<", "$uses_pid_file")) {
+          printf STDOUT "INFO: Could not open $uses_pid_file\n";
+      } else {
+          $line = <$uses_pid_fh>;
+          if ($line ne "" || $line ne "\n") {
+              $uses_pid = $line;
+          }
+          close($uses_pid_fh);
+      }
+
+      my $exec_name_idx = index($pattern, "%e");
+      if ($exec_name_idx != -1) {
+          my $exec_path = $process->Executable();
+          my $exec_name = basename($executable);
+          $exec_name = substr($exec_name, 0, 15);
+          substr($pattern, $exec_name_idx, 2) = $exec_name;
+      }
+
+      my $hostname_idx = index($pattern, "%h");
+      if ($hostname_idx != -1) {
+          substr($pattern, $hostname_idx, 2) = hostname;
+      }
+
+      my $pid_idx = index($pattern, "%p");
+      if ($pid_idx != -1) {
+          substr($pattern, $pid_idx, 2) = _getpid($process);
+      } elsif ($uses_pid != 0) {
+          $pattern = $pattern . "." . _getpid($process);
+      }
+
+      my $has_timestamp = index($pattern, "%t");
+      if ($has_timestamp != -1) {
+          # TODO: Get the core file that has latest timestamp.
+
+      }
+
+      # Print the stack trace
+  }
+  return $result;
 }
 
 sub default_transport {
