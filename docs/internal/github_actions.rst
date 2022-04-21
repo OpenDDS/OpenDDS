@@ -140,7 +140,7 @@ Test runs which only contain CMake tests are prefixed by ``cmake_``.
 
 .lst files contain a list of tests with configuration options that will turn tests on or off.
 The *test_* jobs pass in :ghfile:`tests/dcps_tests.lst`.
-MacOS, Windows 22, Static, and Release builds instead use :ghfile:`tests/static_ci_tests.lst`.
+MacOS, Windows 22, Static, and Release builds instead use :ghfile:`tests/core_ci_tests.lst`.
 The Thread Sanatizer build uses :ghfile:`tests/tsan_tests.lst`.
 This separation of .lst files is due to how excluding all but a few tests in the ``dcps_tests.lst`` would require adding a new config option to every test we didn't want to run.
 There is a separate security test list, :ghfile:`tests/security/security_tests.lst`, which governs the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``.
