@@ -16,9 +16,8 @@
 
 #include <stdexcept>
 
-Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_threads, const std::size_t expected_samples, const bool durable)
+Subscriber::Subscriber(DDS::DomainId_t domainId, size_t n_pub_threads, size_t expected_samples, bool durable)
   : domainId_(domainId)
-  , n_pub_threads_(n_pub_threads)
   , expected_samples_(expected_samples)
   , durable_(durable)
 {
@@ -47,7 +46,7 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
       throw std::runtime_error("create_subscriber failed.");
     }
     // Create DataReader
-    listener_i_ = new DataReaderListenerImpl(expected_samples_, "(%P|%t)  sub %d%% (%d samples received)\n");
+    listener_i_ = new DataReaderListenerImpl(n_pub_threads, expected_samples_ / n_pub_threads, "(%P|%t)  sub %d%% (%d samples received)\n");
     listener_ = listener_i_;
     if (!listener_) {
       throw std::runtime_error("DataReaderListenerImpl creation failed.");
@@ -60,7 +59,9 @@ Subscriber::Subscriber(const DDS::DomainId_t domainId, const std::size_t n_pub_t
     }
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
     qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    qos.history.depth = static_cast<CORBA::Long>(expected_samples * 2);
 #endif
+
     reader_ = sub->create_datareader(topic.in(), qos, listener_.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!reader_) {
       throw std::runtime_error("create_datareader failed.");
@@ -105,5 +106,5 @@ void Subscriber::cleanup()
 int Subscriber::wait_and_check_received() const
 {
   listener_i_->wait_received();
-  return listener_i_->check_received(n_pub_threads_);
+  return listener_i_->check_received();
 }
