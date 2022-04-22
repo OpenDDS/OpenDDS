@@ -472,12 +472,12 @@ sub wait_kill {
       # Get the core file pattern from /proc/sys/kernel/core_pattern
       my $core_pattern_file = "/proc/sys/kernel/core_pattern";
       if (!(-e $core_pattern_file)) {
-          printf STDOUT "INFO: Core file pattern $core_pattern_file not exist\n";
+          printf STDOUT "WARNING: Core file pattern $core_pattern_file not exist\n";
           return $result;
       }
 
       if (!open(my $pattern_fh, "<", "$core_pattern_file")) {
-          printf STDOUT "INFO: Could not open $core_pattern_file\n";
+          printf STDOUT "WARNING: Could not open $core_pattern_file\n";
           return $result;
       }
 
@@ -502,7 +502,7 @@ sub wait_kill {
       my $uses_pid_file = "/proc/sys/kernel/core_uses_pid";
       my $uses_pid = 0;
       if (!open(my $uses_pid_fh, "<", "$uses_pid_file")) {
-          printf STDOUT "INFO: Could not open $uses_pid_file\n";
+          printf STDOUT "WARNING: Could not open $uses_pid_file\n";
       } else {
           $line = <$uses_pid_fh>;
           if ($line ne "" || $line ne "\n") {
@@ -511,10 +511,12 @@ sub wait_kill {
           close($uses_pid_fh);
       }
 
+      my $exec_path = $process->Executable();
+
       my $exec_name_idx = index($pattern, "%e");
       if ($exec_name_idx != -1) {
-          my $exec_path = $process->Executable();
-          my $exec_name = basename($executable);
+          my $exec_name = basename($exec_path);
+          # The core file name contains at most 15 characters from the executable name.
           $exec_name = substr($exec_name, 0, 15);
           substr($pattern, $exec_name_idx, 2) = $exec_name;
       }
@@ -531,13 +533,59 @@ sub wait_kill {
           $pattern = $pattern . "." . _getpid($process);
       }
 
-      my $has_timestamp = index($pattern, "%t");
-      if ($has_timestamp != -1) {
-          # TODO: Get the core file that has latest timestamp.
+      my $timestamp_idx = index($pattern, "%t");
+      my $core_file_path;
+      if ($timestamp_idx != -1) {
+          my $prefix = substr($pattern, 0, $timestamp_idx);
+          my $suffix_len = length($pattern) - $timestamp_idx - 2;
+          my $suffix = substr($pattern, $timestamp_idx + 2, $suffix_len);
 
+          # Get the core file that has latest timestamp.
+          opendir(my $dh, $path);
+          my @files = grep(/$prefix[0-9]+$suffix/, readdir($dh));
+          my $latest_timestamp;
+          my $chosen_core_file;
+          foreach $file (@files) {
+              my $timestamp_len = length($file) - $timestamp_idx - $suffix_len;
+              my $timestamp = substr($file, $timestamp_idx, $timestamp_len);
+              if (!defined $latest_timestamp) {
+                  $latest_timestamp = $timestamp;
+                  $chosen_core_file = $file;
+              } elsif ($latest_timestamp < $timestamp) {
+                  $latest_timestamp = $timestamp;
+                  $chosen_core_file = $file;
+              }
+          }
+          closedir($dh);
+          if (defined $chosen_core_file) {
+              $core_file_path = $path . "/" . $chosen_core_file;
+          } else {
+              printf STDOUT "WARNING: Could not determine a core file with timestamp\n";
+              return $result;
+          }
+      } else {
+          $core_file_path = $path . "/" . $pattern;
       }
 
-      # Print the stack trace
+      if (!(-e $core_file_path)) {
+          printf STDOUT "WARNING: Core file $core_file_path not exist\n";
+          return $result;
+      }
+
+      # Print stack trace.
+      my $stack_trace;
+      if (system("gdb --version") != -1) {
+          $stack_trace = `gdb $exec_path -c $core_file_path -ex bt -ex quit`;
+      } elsif (system("lldb --version") != -1) {
+          printf STDOUT "WARNING: Failed printing stack trace with gdb. Trying lldb...\n";
+          $stack_trace = `lldb $exec_path -c $core_file_path -o bt -o quit`;
+      } else {
+          printf STDOUT "WARNING: Failed printing stack trace with both gdb and lldb\n";
+      }
+
+      if (defined $stack_trace) {
+          printf STDOUT $stack_trace;
+      }
   }
   return $result;
 }
