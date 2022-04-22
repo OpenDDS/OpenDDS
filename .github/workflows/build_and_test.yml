@@ -385,7 +385,7 @@ jobs:
         . install_setenv.sh
         cd tests
         git clean -dfx .
-        $ACE_ROOT/bin/mwc.pl -type gnuace . -value_project includes+=$PWD/../
+        $ACE_ROOT/bin/mwc.pl -type gnuace -value_project includes+=$PWD/../
         make
     - name: build make install cmake
       shell: bash
@@ -405,7 +405,7 @@ jobs:
         . install_setenv.sh
         cd java/tests
         git clean -dfx .
-        $ACE_ROOT/bin/mwc.pl -type gnuace .
+        $ACE_ROOT/bin/mwc.pl -type gnuace
         make
     - name: create OpenDDS tar.xz artifact
       shell: bash
