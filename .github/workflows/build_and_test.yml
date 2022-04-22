@@ -373,26 +373,21 @@ jobs:
         export LD_LIBRARY_PATH="\$OPENDDS_INSTALL_PREFIX/$INSTALL_LIB:\$LD_LIBRARY_PATH"
         export PERL5LIB=$(realpath bin):$(realpath $ACE_ROOT/bin)
         EOF
-    - name: delete host directories
-      shell: bash
-      run: |
-        cd OpenDDS
-        rm -rf dds java/dds java/idl2jni java/tao FACE performance-tests/bench tools/rtpsrelay tests/DCPS/RtpsRelay java/tests/hello
-    - name: build make install tests
+    - name: build make install messenger
       shell: bash
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd tests
+        cd tests/DCPS/Messenger
         git clean -dfx .
-        $ACE_ROOT/bin/mwc.pl -type gnuace -value_project includes+=$PWD/../
+        $ACE_ROOT/bin/mwc.pl -type gnuace . -value_project includes+=$PWD/../../../
         make
     - name: build make install cmake
       shell: bash
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd tests/cmake
+        cd tests/cmake/Messenger/Messenger_1
         git clean -dfx .
         mkdir build
         cd build
@@ -403,7 +398,7 @@ jobs:
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd java/tests
+        cd java/tests/messenger
         git clean -dfx .
         $ACE_ROOT/bin/mwc.pl -type gnuace
         make
@@ -464,7 +459,7 @@ jobs:
       run: |
         cd OpenDDS
         . install_setenv.sh
-        cd tests/cmake/build/Messenger/Messenger_1
+        cd tests/cmake/Messenger/Messenger_1/build
         perl run_test.pl
     - name: remove install clutter
       shell: bash

@@ -38,5 +38,4 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 
-target_include_directories(${publisher} PRIVATE "${src}/../../../")
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
