@@ -927,22 +927,87 @@ bool Qos_Helper::valid(const DDS::DomainParticipantQos& qos)
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::TopicQos& qos)
 {
-  return
-    valid(qos.topic_data)
-    && valid(qos.durability)
+  if (!valid(qos.topic_data))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid topic_data qos.\n")), false);
+
+  if (!valid(qos.durability))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid durability qos.\n")), false);
+
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    && valid(qos.durability_service)
+  if (!valid(qos.durability_service))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid durability_service qos.\n")), false);
 #endif
-    && valid(qos.deadline)
-    && valid(qos.latency_budget)
-    && valid(qos.liveliness)
-    && valid(qos.destination_order)
-    && valid(qos.history)
-    && valid(qos.resource_limits)
-    && valid(qos.transport_priority)
-    && valid(qos.lifespan)
-    && valid(qos.ownership)
-    && valid(qos.representation);
+
+  if (!valid(qos.deadline))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid deadline qos.\n")), false);
+
+  if (!valid(qos.latency_budget))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid latency_budget qos.\n")), false);
+
+  if (!valid(qos.liveliness))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid liveliness qos.\n")), false);
+
+  if (!valid(qos.destination_order))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid destination_order qos.\n")), false);
+
+  if (!valid(qos.history))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid history qos.\n")), false);
+
+  if (!valid(qos.resource_limits))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid resource_limits qos.\n")), false);
+
+  if (!valid(qos.transport_priority))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid transport_priority qos.\n")), false);
+
+  if (!valid(qos.lifespan))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid lifespan qos.\n")), false);
+
+  if (!valid(qos.ownership))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid ownership qos.\n")), false);
+
+  if (!valid(qos.representation))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::TopicQos, ")
+        ACE_TEXT("invalid representation qos.\n")), false);
+
+    return true;
 }
 
 ACE_INLINE
@@ -1047,46 +1112,163 @@ bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::PublisherQos& qos)
 {
-  return
-    valid(qos.presentation)
-    && valid(qos.partition)
-    && valid(qos.group_data)
-    && valid(qos.entity_factory);
+
+  if (!valid(qos.presentation))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::PublisherQos, ")
+        ACE_TEXT("invalid presentation qos.\n")), false);
+
+
+  if (!valid(qos.partition))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::PublisherQos, ")
+        ACE_TEXT("invalid partition qos.\n")), false);
+
+
+  if (!valid(qos.group_data))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::PublisherQos, ")
+        ACE_TEXT("invalid group_data qos.\n")), false);
+
+
+  if (!valid(qos.entity_factory))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::PublisherQos, ")
+        ACE_TEXT("invalid entity_factory qos.\n")), false);
+
+  return true;
 }
 
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::DataReaderQos& qos)
 {
-  return
-    valid(qos.durability)
-    && valid(qos.deadline)
-    && valid(qos.latency_budget)
-    && valid(qos.liveliness)
-    && valid(qos.reliability)
-    && valid(qos.destination_order)
-    && valid(qos.history)
-    && valid(qos.resource_limits)
-    && valid(qos.user_data)
-    && valid(qos.time_based_filter)
-    && valid(qos.reader_data_lifecycle)
-    && valid(qos.ownership)
-    && valid(qos.representation);
+  
+  if (!valid(qos.durability))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid durability qos.\n")), false);
+
+  if (!valid(qos.deadline))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid deadline qos.\n")), false);
+
+  
+  if (!valid(qos.latency_budget))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid latency_budget qos.\n")), false);
+
+  if (!valid(qos.liveliness))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid liveliness qos.\n")), false);
+
+  if (!valid(qos.reliability))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid reliability qos.\n")), false);
+
+  if (!valid(qos.destination_order))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid destination_order qos.\n")), false);
+
+  if (!valid(qos.history))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid history qos.\n")), false);
+
+  if (!valid(qos.resource_limits))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid resource_limits qos.\n")), false);
+
+  if (!valid(qos.user_data))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid user_data qos.\n")), false);
+
+  if (!valid(qos.time_based_filter))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid time_based_filter qos.\n")), false);
+
+  if (!valid(qos.reader_data_lifecycle))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid reader_data_lifecycle qos.\n")), false);
+
+  if (!valid(qos.ownership))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid ownership qos.\n")), false);
+
+  if (!valid(qos.representation))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
+        ACE_TEXT("invalid representation qos.\n")), false);
+
+    return true;
 }
 
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::SubscriberQos& qos)
 {
-  return
-    valid(qos.presentation)
-    && valid(qos.partition)
-    && valid(qos.group_data)
-    && valid(qos.entity_factory);
+  if (!valid(qos.presentation))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::SubscriberQos, ")
+        ACE_TEXT("invalid presentation qos.\n")), false);
+
+  if (!valid(qos.partition))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::SubscriberQos, ")
+        ACE_TEXT("invalid partition qos.\n")), false);
+
+  if (!valid(qos.group_data))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::SubscriberQos, ")
+        ACE_TEXT("invalid group_data qos.\n")), false);
+
+  if (!valid(qos.entity_factory))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::SubscriberQos, ")
+        ACE_TEXT("invalid entity_factory qos.\n")), false);
+
+  return true;
 }
 
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::DomainParticipantFactoryQos& qos)
 {
-  return valid(qos.entity_factory);
+  if (!valid(qos.entity_factory))
+    ACE_ERROR_RETURN ((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: ")
+        ACE_TEXT("Qos_Helper::valid::DomainParticipantFactoryQos, ")
+        ACE_TEXT("invalid entity_factory qos.\n")), false);
+
+  return true;
 }
 
 ACE_INLINE
