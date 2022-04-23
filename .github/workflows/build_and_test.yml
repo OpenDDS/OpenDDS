@@ -2951,18 +2951,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: set up TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mwc.pl -type gnuace -workers 4 $TAO_ROOT/tests/Hello
-    - name: build TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 dir=$TAO_ROOT/tests/Hello
     - name: set up Modeling tests
       shell: bash
       run: |
@@ -3947,18 +3935,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
-    - name: set up TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mwc.pl -type gnuace -workers 4 $TAO_ROOT/tests/Hello
-    - name: build TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 dir=$TAO_ROOT/tests/Hello
     - name: set up Modeling tests
       shell: bash
       run: |
@@ -4398,18 +4374,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
-    - name: set up TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mwc.pl -type gnuace -workers 4 $TAO_ROOT/tests/Hello
-    - name: build TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 dir=$TAO_ROOT/tests/Hello
     - name: set up Modeling tests
       shell: bash
       run: |
@@ -5462,18 +5426,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake ..
         cmake --build . -- -j4
-    - name: set up TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mwc.pl -type gnuace -workers 4 $TAO_ROOT/tests/Hello
-    - name: build TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 dir=$TAO_ROOT/tests/Hello
     - name: set up Modeling tests
       shell: bash
       run: |
@@ -10696,18 +10648,6 @@ jobs:
         cd OpenDDS
         . setenv.sh
         make -j4
-    - name: set up TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mwc.pl -type gnuace -workers 4 $TAO_ROOT/tests/Hello
-    - name: build TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 dir=$TAO_ROOT/tests/Hello
     - name: set up Modeling tests
       shell: bash
       run: |
@@ -11330,18 +11270,6 @@ jobs:
         cd OpenDDS/tests/cmake/build
         cmake -DCMAKE_CXX_STANDARD=11 ..
         cmake --build . -- -j4
-    - name: set up TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        mwc.pl -type gnuace -workers 4 $TAO_ROOT/tests/Hello
-    - name: build TAO Hello test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        make -j4 dir=$TAO_ROOT/tests/Hello
     - name: set up Modeling tests
       shell: bash
       run: |
