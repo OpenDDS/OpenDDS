@@ -469,19 +469,21 @@ sub wait_kill {
   # If opts has indicated that user wants to get core dump/signal information
   # then find the core dump file if any and print its stack trace.
   if (defined $opts && defined $opts->{dump_ref} && ${$opts->{dump_ref}}) {
-      # Get the core file pattern from /proc/sys/kernel/core_pattern
+      # Get the core file pattern
       my $core_pattern_file = "/proc/sys/kernel/core_pattern";
       if (!(-e $core_pattern_file)) {
           printf STDOUT "WARNING: Core file pattern $core_pattern_file not exist\n";
           return $result;
       }
 
-      if (!open(my $pattern_fh, "<", "$core_pattern_file")) {
+      my $pattern_fh;
+      if (!open($pattern_fh, "<", "$core_pattern_file")) {
           printf STDOUT "WARNING: Could not open $core_pattern_file\n";
           return $result;
       }
 
       my $line = <$pattern_fh>;
+      chomp($line);
       close($pattern_fh);
 
       # Find the core file from the pattern
@@ -495,8 +497,6 @@ sub wait_kill {
           $path = substr($line, 0, $last_slash_idx);
       }
 
-      # Find file with the pattern from the path.
-      # Consider %e, %h, %p, %t templates in the core pattern.
       # If /proc/sys/kernel/core_uses_pid is non-zero and the pattern
       # doesn't have %p, then .PID is appended to the core file name.
       my $uses_pid_file = "/proc/sys/kernel/core_uses_pid";
@@ -515,15 +515,15 @@ sub wait_kill {
 
       my $exec_name_idx = index($pattern, "%e");
       if ($exec_name_idx != -1) {
-          my $exec_name = basename($exec_path);
+          my $exec_name = File::Basename::basename($exec_path);
           # The core file name contains at most 15 characters from the executable name.
           $exec_name = substr($exec_name, 0, 15);
           substr($pattern, $exec_name_idx, 2) = $exec_name;
       }
 
-      my $hostname_idx = index($pattern, "%h");
-      if ($hostname_idx != -1) {
-          substr($pattern, $hostname_idx, 2) = hostname;
+      my $hname_idx = index($pattern, "%h");
+      if ($hname_idx != -1) {
+          substr($pattern, $hname_idx, 2) = Sys::Hostname::hostname();
       }
 
       my $pid_idx = index($pattern, "%p");
@@ -545,7 +545,7 @@ sub wait_kill {
           my @files = grep(/$prefix[0-9]+$suffix/, readdir($dh));
           my $latest_timestamp;
           my $chosen_core_file;
-          foreach $file (@files) {
+          foreach my $file (@files) {
               my $timestamp_len = length($file) - $timestamp_idx - $suffix_len;
               my $timestamp = substr($file, $timestamp_idx, $timestamp_len);
               if (!defined $latest_timestamp) {
@@ -584,7 +584,9 @@ sub wait_kill {
       }
 
       if (defined $stack_trace) {
+          printf STDOUT "\n======= Stack trace from core file $core_file_path =======\n";
           printf STDOUT $stack_trace;
+          printf STDOUT "\n";
       }
   }
   return $result;
