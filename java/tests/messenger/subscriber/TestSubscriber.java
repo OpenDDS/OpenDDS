@@ -105,6 +105,12 @@ public class TestSubscriber {
         qosh.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
 
         DataReaderListenerImpl listener = new DataReaderListenerImpl();
+
+        GuardCondition gc = new GuardCondition();
+        WaitSet ws = new WaitSet();
+        ws.attach_condition(gc);
+        listener.set_guard_condition(gc);
+
         DataReader dr = sub.create_datareader(top,
                                               qosh.value,
                                               listener,
@@ -117,10 +123,6 @@ public class TestSubscriber {
             System.err.println("ERROR: DataReader creation failed");
             return;
         }
-        GuardCondition gc = new GuardCondition();
-        listener.set_guard_condition(gc);
-        WaitSet ws = new WaitSet();
-        ws.attach_condition(gc);
         Duration_t timeout = new Duration_t(DURATION_INFINITE_SEC.value,
                                             DURATION_INFINITE_NSEC.value);
 
