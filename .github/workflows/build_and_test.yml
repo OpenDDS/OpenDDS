@@ -10871,7 +10871,7 @@ jobs:
   #       <command name="check_compiler" options="gcc"/>
   #       <command name="print_perl_version"/>
   #       <command name="print_autobuild_config"/>
-  #       <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --cmake --modeling"/>
+  #       <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS --no-dcps -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --java --cmake --modeling"/>
   #       <command name="log" options="off"/>
   #       <command name="process_logs" options="prettify"/>
   #       </autobuild>
