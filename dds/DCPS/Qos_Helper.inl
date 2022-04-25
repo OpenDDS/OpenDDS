@@ -1145,8 +1145,7 @@ bool Qos_Helper::valid(const DDS::PublisherQos& qos)
 
 ACE_INLINE
 bool Qos_Helper::valid(const DDS::DataReaderQos& qos)
-{
-  
+{  
   if (!valid(qos.durability))
     ACE_ERROR_RETURN ((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
@@ -1158,7 +1157,6 @@ bool Qos_Helper::valid(const DDS::DataReaderQos& qos)
         ACE_TEXT("(%P|%t) ERROR: ")
         ACE_TEXT("Qos_Helper::valid::DataReaderQos, ")
         ACE_TEXT("invalid deadline qos.\n")), false);
-
   
   if (!valid(qos.latency_budget))
     ACE_ERROR_RETURN ((LM_ERROR,
