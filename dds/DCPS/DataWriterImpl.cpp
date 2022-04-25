@@ -469,6 +469,8 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
     }
 
     notify_status_condition();
+  } else {
+    data_container_->add_reader_acks(remote_id, get_max_sn());
   }
 
   // Support DURABILITY QoS
