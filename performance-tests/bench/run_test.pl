@@ -52,6 +52,10 @@ elsif ($test->flag('disco_long')) {
   $tc_opts .= " ci_disco_long";
   $is_rtps_disc = 1;
 }
+elsif ($test->flag('disco_repo')) {
+  $tc_opts .= " ci_disco_repo";
+  $is_rtps_disc = 1; # counter-intuitive, but we want bench to launch the repo, not the run script
+}
 elsif ($test->flag('disco_relay')) {
   $tc_opts .= " ci_disco_relay";
   $is_rtps_disc = 1;
