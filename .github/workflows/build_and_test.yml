@@ -7629,7 +7629,18 @@ jobs:
 
     runs-on: windows-2019
 
+    needs: openssl3_w19
+
     steps:
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_w19_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_w19.tar.xz
+        rm -f openssl3_w19.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -7658,12 +7669,12 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: install openssl & xerces-c
+    - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
+        vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -7678,8 +7689,10 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: cmd
       run: |
+        set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        call configure -v --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows --mpcopts=-hierarchy
+        call configure -v --optimize --ipv6 --security --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%SSL_DIR% --mpcopts=-hierarchy
+        echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build ACE & TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -7714,11 +7727,20 @@ jobs:
     needs: ACE_TAO_w19_re_o1p1_sec
 
     steps:
-    - name: install openssl & xerces-c
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_w19_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_w19.tar.xz
+        rm -f openssl3_w19.tar.xz
+    - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
+        vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v3
@@ -7763,8 +7785,10 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
+        set SSL_DIR=%CD%/openssl3
         cd OpenDDS
-        configure --optimize --ipv6 --rapidjson --security --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%VCPKG_ROOT%/installed/x64-windows
+        configure --optimize --ipv6 --rapidjson --security --gtest=%GITHUB_WORKSPACE%/OpenDDS/tests/googletest/build/install --ace=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/ACE --tao=%GITHUB_WORKSPACE%/OpenDDS/ACE_TAO/TAO --mpc=%GITHUB_WORKSPACE%/MPC --xerces3=%VCPKG_ROOT%/installed/x64-windows --openssl=%SSL_DIR%
+        echo "SSL_DIR=%SSL_DIR%" >> setenv.cmd
     - name: check build configuration
       shell: cmd
       run: |
@@ -7937,11 +7961,20 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
-    - name: install openssl & xerces-c
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_w19_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_w19.tar.xz
+        rm -f openssl3_w19.tar.xz
+    - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
+        vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v3
@@ -8233,11 +8266,20 @@ jobs:
     needs: build_w19_re_o1p1_sec
 
     steps:
-    - name: install openssl & xerces-c
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_w19_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_w19.tar.xz
+        rm -f openssl3_w19.tar.xz
+    - name: install xerces-c
       uses: lukka/run-vcpkg@v7
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-        vcpkgArguments: --recurse openssl xerces-c
+        vcpkgArguments: --recurse xerces-c
         vcpkgTriplet: x64-windows
     - name: checkout MPC
       uses: actions/checkout@v3
@@ -11960,6 +12002,61 @@ jobs:
         xz -3 ${{ github.job }}.tar
     - name: upload openssl artifact
       uses: actions/upload-artifact@v2
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  openssl3_w19:
+
+    runs-on: windows-2019
+
+    steps:
+    - name: checkout openssl 3.0.2
+      shell: cmd
+      run: |
+        git clone --branch openssl-3.0.2 --depth 1 https://github.com/openssl/openssl.git
+        cd openssl
+        for /f %%x in ('git rev-parse HEAD') do @echo OPENSSL_COMMIT=%%x>> %GITHUB_ENV%
+    - name: get compiler version
+      shell: bash
+      run: |
+        export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
+        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: c01_${{ github.job }}_${{ env.OPENSSL_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: set up msvc env
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ilammy/msvc-dev-cmd@v1
+    - name: set up nasm
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: ilammy/setup-nasm@v1
+    - name: set openssl environment
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        echo SSL_ROOT=%CD%\openssl3>> %GITHUB_ENV%
+        echo OPENSSLDIR=%CD%\openssl3dir>> %GITHUB_ENV%
+        type %GITHUB_ENV%
+    - name: build openssl
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: cmd
+      run: |
+        cd openssl
+        perl Configure --prefix=%SSL_ROOT% --openssldir=%OPENSSLDIR% --no-asm VC-WIN64A
+        nmake
+        nmake install
+    - name: create openssl artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        tar cvhf ${{ github.job }}.tar openssl3
+        xz -3 ${{ github.job }}.tar
+    - name: upload openssl artifact
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
