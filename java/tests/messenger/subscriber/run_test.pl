@@ -39,7 +39,7 @@ my $sub_opts = "$opts $reliable";
 if ($debug ne '0') {
     my $debug_opt = "-ORBDebugLevel $debug -DCPSDebugLevel $debug " .
                     "-DCPSTransportDebugLevel $debug";
-    $pub_opts .= " $debug_opt -ORBLogFile pub.log";
+    $pub_opts .= " $debug_opt -ORBLogFile pub.log -DCPSPendingTimeout 3";
     $sub_opts .= " $debug_opt -ORBLogFile sub.log";
 }
 
