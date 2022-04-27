@@ -63,7 +63,7 @@ public:
 
 private:
 
-  static void* run(void* arg);
+  static ACE_THR_FUNC_RETURN run(void* arg);
   void run_event_loop();
 
   typedef std::pair<FunPtr, void*> FunArgPair;

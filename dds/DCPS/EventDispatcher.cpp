@@ -50,7 +50,7 @@ EventDispatcher::DispatchStatus EventDispatcher::schedule(FunPtr fun, void* arg,
   return DS_SUCCESS;
 }
 
-void* EventDispatcher::run(void* arg)
+ACE_THR_FUNC_RETURN EventDispatcher::run(void* arg)
 {
   EventDispatcher& dispatcher = *(static_cast<EventDispatcher*>(arg));
   dispatcher.run_event_loop();

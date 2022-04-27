@@ -5,7 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "dds/DCPS/EventDispatcher.h"
+#include <dds/DCPS/EventDispatcher.h>
+
+#include <ace/OS_NS_unistd.h>
 
 #include <gtest/gtest.h>
 
@@ -130,7 +132,7 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
   OpenDDS::DCPS::EventDispatcher dispatcher(8);
   RecursiveTestObjTwo test_obj(dispatcher, 2);
   dispatcher.dispatch(test_obj);
-  while (test_obj.call_count_ < 1e6) {
+  while (test_obj.call_count_ < 1000000) {
     ACE_OS::sleep(ACE_Time_Value(0, 10000));
   }
   test_obj.dispatch_scale_ = 0;

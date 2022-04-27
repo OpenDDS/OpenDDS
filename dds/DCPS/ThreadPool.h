@@ -24,7 +24,7 @@ class OpenDDS_Dcps_Export ThreadPool
 {
 public:
 
-  typedef void*(*FunPtr)(void*);
+  typedef ACE_THR_FUNC_RETURN(*FunPtr)(void*);
 
   ThreadPool(size_t count, FunPtr fun, void* arg = 0);
 
@@ -34,7 +34,7 @@ private:
 
   void join_all();
 
-  OPENDDS_VECTOR(ACE_thread_t) ids_;
+  OPENDDS_VECTOR(ACE_hthread_t) ids_;
 };
 
 } // DCPS
