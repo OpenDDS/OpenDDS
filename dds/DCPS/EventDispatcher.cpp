@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "dds/DCPS/EventDispatcher.h"
+#include "EventDispatcher.h"
 
 #include <ace/Reverse_Lock_T.h>
 
