@@ -1296,9 +1296,6 @@ void DCPS_IR_Domain::dispose_participant_bit(DCPS_IR_Participant* participant)
         ex._tao_print_exception(
           "ERROR: Exception caught in DCPS_IR_Domain::dispose_participant_bit:");
       }
-    } else {
-      const DDS::Duration_t forever = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-      bitParticipantDataWriter_->wait_for_acknowledgments(forever);
     }
   }
 
@@ -1349,9 +1346,6 @@ void DCPS_IR_Domain::dispose_topic_bit(DCPS_IR_Topic* topic)
         ex._tao_print_exception(
           "(%P|%t) ERROR: Exception caught in DCPS_IR_Domain::dispose_topic_bit:");
       }
-    } else {
-      const DDS::Duration_t forever = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-      bitTopicDataWriter_->wait_for_acknowledgments(forever);
     }
   }
 
@@ -1402,9 +1396,6 @@ void DCPS_IR_Domain::dispose_subscription_bit(DCPS_IR_Subscription* subscription
         ex._tao_print_exception(
           "(%P|%t) ERROR: Exception caught in DCPS_IR_Domain::dispose_subscription_bit:");
       }
-    } else {
-      const DDS::Duration_t forever = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-      bitSubscriptionDataWriter_->wait_for_acknowledgments(forever);
     }
   }
 
@@ -1454,9 +1445,6 @@ void DCPS_IR_Domain::dispose_publication_bit(DCPS_IR_Publication* publication)
         ex._tao_print_exception(
           "(%P|%t) ERROR: Exception caught in DCPS_IR_Domain::dispose_publication_bit:");
       }
-    } else {
-      const DDS::Duration_t forever = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-      bitPublicationDataWriter_->wait_for_acknowledgments(forever);
     }
   }
 

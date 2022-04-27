@@ -396,13 +396,16 @@ OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* eleme
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::handle_send_request_ack(%@) sequence number %q, publication_id=%C\n"),
       element, element->sequence().getValue(), OPENDDS_STRING(converter).c_str()));
   }
+  bool result = false;
   TcpConnection_rch connection(connection_.lock());
   if (connection) {
     ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
     pending_request_acks_.push_back(element);
-    return false;
+  } else {
+    element->data_dropped(true);
+    result = true;
   }
-  return true;
+  return result;
 }
 
 void

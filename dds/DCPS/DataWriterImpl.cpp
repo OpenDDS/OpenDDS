@@ -1877,6 +1877,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
   element->set_sample(move(temp));
 
   if (ret != DDS::RETCODE_OK) {
+    delete element;
     return ret;
   }
 
@@ -2179,8 +2180,9 @@ DataWriterImpl::create_sample_data_message(Message_Block_Ptr data,
 
   RcHandle<PublisherImpl> publisher = this->publisher_servant_.lock();
 
-  if (!publisher)
+  if (!publisher) {
     return DDS::RETCODE_ERROR;
+  }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   header_data.group_coherent_ =

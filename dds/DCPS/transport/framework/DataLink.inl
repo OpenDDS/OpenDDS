@@ -96,7 +96,6 @@ DataLink::send(TransportQueueElement* element)
   DBG_ENTRY_LVL("DataLink","send",6);
 
   if (element->is_request_ack() && handle_send_request_ack(element)) {
-    element->data_dropped(true);
     return;
   }
 
