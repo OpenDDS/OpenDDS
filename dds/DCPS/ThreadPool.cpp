@@ -20,7 +20,7 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
  : ids_(count, 0)
 {
   for (size_t i = 0; i < count; ++i) {
-    ACE_Thread::spawn(fun, arg, THR_NEW_LWP | THR_JOINABLE, &(ids_[i]));
+    ACE_Thread::spawn(fun, arg, THR_NEW_LWP | THR_JOINABLE, 0, &(ids_[i]));
   }
 }
 
