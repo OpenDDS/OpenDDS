@@ -5,9 +5,13 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+
 #include "dds/DCPS/EventDispatcher.h"
 
 #include <ace/Reverse_Lock_T.h>
+
+OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS
 {
