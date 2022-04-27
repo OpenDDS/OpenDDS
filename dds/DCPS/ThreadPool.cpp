@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "dds/DCPS/ThreadPool.h"
+#include "ThreadPool.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
