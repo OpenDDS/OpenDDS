@@ -1070,11 +1070,13 @@ DataWriterImpl::send_request_ack()
       element->get_header(),
       move(blk),
       SystemTimePoint::now().to_dds_time()));
+
   element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
 
   if (ret != DDS::RETCODE_OK) {
+    data_container_->release_buffer(element);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::send_request_ack: ")
@@ -1642,7 +1644,9 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
   element->set_sample(move(sample));
 
   ret = this->data_container_->enqueue_control(element);
+
   if (ret != DDS::RETCODE_OK) {
+    data_container_->release_buffer(element);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
@@ -1730,9 +1734,11 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
                                                   move(unregistered_sample_data),
                                                   source_timestamp));
   element->set_sample(move(sample));
+
   ret = this->data_container_->enqueue_control(element);
 
   if (ret != DDS::RETCODE_OK) {
+    data_container_->release_buffer(element);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::unregister_instance_i: ")
@@ -1791,9 +1797,11 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
                                                   move(data_sample),
                                                   source_timestamp));
   element->set_sample(move(sample));
+
   ret = this->data_container_->enqueue_control(element);
 
   if (ret != DDS::RETCODE_OK) {
+    data_container_->release_buffer(element);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::dispose_and_unregister: ")
@@ -1877,7 +1885,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
   element->set_sample(move(temp));
 
   if (ret != DDS::RETCODE_OK) {
-    delete element;
+    data_container_->release_buffer(element);
     return ret;
   }
 
@@ -1886,6 +1894,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
   ret = this->data_container_->enqueue(element, handle);
 
   if (ret != DDS::RETCODE_OK) {
+    data_container_->release_buffer(element);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::write: ")
@@ -2030,9 +2039,11 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
                                                   move(registered_sample_data),
                                                   source_timestamp));
   element->set_sample(move(sample));
+
   ret = this->data_container_->enqueue_control(element);
 
   if (ret != DDS::RETCODE_OK) {
+    data_container_->release_buffer(element);
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::dispose: ")

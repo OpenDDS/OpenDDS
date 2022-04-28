@@ -280,6 +280,10 @@ WriteDataContainer::enqueue_control(DataSampleElement* control_sample)
   // also next_send_sample_.
   // This would save time when we actually send the data.
 
+  if (shutdown_) {
+    return DDS::RETCODE_ERROR;
+  }
+
   unsent_data_.enqueue_tail(control_sample);
 
   return DDS::RETCODE_OK;
@@ -291,6 +295,10 @@ WriteDataContainer::enqueue(
   DataSampleElement* sample,
   DDS::InstanceHandle_t instance_handle)
 {
+  if (shutdown_) {
+    return DDS::RETCODE_ERROR;
+  }
+
   // Get the PublicationInstance pointer from InstanceHandle_t.
   PublicationInstance_rch instance =
     get_handle_instance(instance_handle);
@@ -753,7 +761,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     writer_->controlTracker.message_delivered();
   } else {
 
-    if (max_durable_per_instance_) {
+    if (max_durable_per_instance_ && !shutdown_ && InstanceDataSampleList::on_some_list(sample)) {
       const_cast<DataSampleElement*>(sample)->get_header().historic_sample_ = true;
       DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
       sent_data_.enqueue_tail(sample);
@@ -858,7 +866,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     // called from reenqueue_all() which supports the TRANSIENT_LOCAL
     // qos. The samples that are sending by transport are dropped from
     // transport and will be moved to the unsent list for resend.
-    if (InstanceDataSampleList::on_some_list(sample)) {
+    if (!shutdown_ && InstanceDataSampleList::on_some_list(sample)) {
       unsent_data_.enqueue_tail(sample);
     } else {
       SendStateDataSampleList::remove(stale);
