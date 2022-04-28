@@ -590,22 +590,13 @@ sub wait_kill {
 
   my $process = $self->{processes}->{process}->{$name}->{process};
 
-  my $print_stack_trace = 1;
   my $has_core;
-  my %my_opts;
+  my %my_opts = (dump_ref => \$has_core);
 
-  if (!defined $opts) {
-    $my_opts{dump_ref} = \$has_core;
-  } elsif (!$opts->{self_crash}) {
-    $my_opts{dump_ref} = \$has_core;
-    if (defined $opts->{signal_ref}) {
-      $my_opts{signal_ref} = $opts->{signal_ref};
+  if (defined $opts) {
+    if (defined $opts->{self_crash}) {
+      $my_opts{self_crash} = $opts->{self_crash};
     }
-  } else {
-    # We don't want to print out stack trace in case of self-crash.
-    $print_stack_trace = 0;
-    $my_opts{self_crash} = 1;
-    $my_opts{dump_ref} = \$has_core;
     if (defined $opts->{signal_ref}) {
       $my_opts{signal_ref} = $opts->{signal_ref};
     }
@@ -617,7 +608,8 @@ sub wait_kill {
     ${$opts->{dump_ref}} = $has_core;
   }
 
-  if ($print_stack_trace && $has_core) {
+  if ($has_core) {
+    # TODO: Add an environment variable to turn off printing?
     $self->print_stacktrace($process);
   }
   return $result;
