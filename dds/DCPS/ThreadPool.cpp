@@ -17,16 +17,28 @@ namespace DCPS
 {
 
 ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
- : ids_(count, 0)
+ : barrier_(count + 1)
+ , fun_(fun)
+ , arg_(arg)
+ , ids_(count, 0)
 {
   for (size_t i = 0; i < count; ++i) {
-    ACE_Thread::spawn(fun, arg, THR_NEW_LWP | THR_JOINABLE, 0, &(ids_[i]));
+    ACE_Thread::spawn(run, this, THR_NEW_LWP | THR_JOINABLE, 0, &(ids_[i]));
   }
+  barrier_.wait();
 }
 
 ThreadPool::~ThreadPool()
 {
   join_all();
+}
+
+ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
+{
+  ThreadPool& pool = *(static_cast<ThreadPool*>(arg));
+  pool.barrier_.wait();
+  (*pool.fun_)(pool.arg_);
+  return 0;
 }
 
 void ThreadPool::join_all()
