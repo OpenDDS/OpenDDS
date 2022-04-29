@@ -176,6 +176,7 @@ void
 WriteDataContainer::add_reader_acks(const RepoId& reader, const SequenceNumber& base)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
+
   DisjointSequence& ds = acked_sequences_[reader];
   ds.reset();
   if (base == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
@@ -279,6 +280,10 @@ WriteDataContainer::enqueue_control(DataSampleElement* control_sample)
   // also next_send_sample_.
   // This would save time when we actually send the data.
 
+  if (shutdown_) {
+    return DDS::RETCODE_ERROR;
+  }
+
   unsent_data_.enqueue_tail(control_sample);
 
   return DDS::RETCODE_OK;
@@ -290,6 +295,10 @@ WriteDataContainer::enqueue(
   DataSampleElement* sample,
   DDS::InstanceHandle_t instance_handle)
 {
+  if (shutdown_) {
+    return DDS::RETCODE_ERROR;
+  }
+
   // Get the PublicationInstance pointer from InstanceHandle_t.
   PublicationInstance_rch instance =
     get_handle_instance(instance_handle);
@@ -715,12 +724,12 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
 
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
-        ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+        ACE_Guard<ACE_SYNCH_MUTEX> wfa_guard(wfa_lock_);
         const CORBA::ULong num_subs = stale->get_num_subs();
         for (CORBA::ULong i = 0; i < num_subs; ++i) {
           update_acked(stale->get_header().sequence_, stale->get_sub_id(i));
         }
-        guard.release();
+        wfa_guard.release();
         SendStateDataSampleList::remove(stale);
         release_buffer(stale);
       }
@@ -752,7 +761,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     writer_->controlTracker.message_delivered();
   } else {
 
-    if (max_durable_per_instance_) {
+    if (max_durable_per_instance_ && !shutdown_ && InstanceDataSampleList::on_some_list(sample)) {
       const_cast<DataSampleElement*>(sample)->get_header().historic_sample_ = true;
       DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
       sent_data_.enqueue_tail(sample);
@@ -857,7 +866,12 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     // called from reenqueue_all() which supports the TRANSIENT_LOCAL
     // qos. The samples that are sending by transport are dropped from
     // transport and will be moved to the unsent list for resend.
-    unsent_data_.enqueue_tail(sample);
+    if (!shutdown_ && InstanceDataSampleList::on_some_list(sample)) {
+      unsent_data_.enqueue_tail(sample);
+    } else {
+      SendStateDataSampleList::remove(stale);
+      release_buffer(stale);
+    }
 
   } else {
     //
@@ -1545,7 +1559,6 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
                                     const SequenceNumber& sequence)
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
-
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged_i(sequence)) {
     switch (deadline_is_infinite ? wfa_condition_.wait(thread_status_manager) : wfa_condition_.wait_until(deadline, thread_status_manager)) {
