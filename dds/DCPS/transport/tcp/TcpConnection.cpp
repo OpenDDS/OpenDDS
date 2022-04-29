@@ -635,7 +635,6 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 void
 OpenDDS::DCPS::TcpConnection::notify_connection_lost()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::notify_connection_lost()\n"));
   if (link_) {
     link_->drop_pending_request_acks();
     link_->notify(DataLink::LOST);
