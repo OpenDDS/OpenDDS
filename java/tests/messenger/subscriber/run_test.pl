@@ -39,10 +39,10 @@ my $sub_opts = "$opts $reliable";
 if ($debug ne '0') {
     my $debug_opt = "-ORBDebugLevel $debug -DCPSDebugLevel $debug " .
                     "-DCPSTransportDebugLevel $debug";
-    $pub_opts .= " $debug_opt -ORBLogFile pub.log -DCPSPendingTimeout 3";
+    $pub_opts .= " $debug_opt -ORBLogFile pub.log";
     $sub_opts .= " $debug_opt -ORBLogFile sub.log";
 }
-
+$pub_opts .= " -DCPSPendingTimeout 3";
 my $dcpsrepo_ior = 'repo.ior';
 
 unlink $dcpsrepo_ior;

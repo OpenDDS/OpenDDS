@@ -203,6 +203,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         DDS::ReturnCode_t error;
         do {
           error = message_dw->write(message, handle);
+          if (!dw_reliable()) {
+            //spread out unreliable messages some
+            ACE_Time_Value small_time(0, 250000);
+            ACE_OS::sleep(small_time);
+          }
         } while (error == DDS::RETCODE_TIMEOUT);
         if (error != DDS::RETCODE_OK) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: main(): write returned %C!\n", OpenDDS::DCPS::retcode_to_string(error)));
