@@ -267,9 +267,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -726,9 +738,21 @@ jobs:
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS/build/target
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -1024,9 +1048,21 @@ jobs:
         cd OpenDDS/build/target
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS/build/target
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -1271,9 +1307,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -1544,9 +1592,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install lldb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install lldb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -1815,9 +1875,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install lldb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install lldb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -2067,9 +2139,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -2319,9 +2403,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -2566,9 +2662,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -3061,9 +3169,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -3333,9 +3453,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -3594,9 +3726,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -3875,9 +4019,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -4078,9 +4234,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -4326,9 +4494,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -4529,9 +4709,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -4865,9 +5057,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -4983,9 +5187,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -5100,9 +5316,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -5217,9 +5445,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -5320,9 +5560,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run security tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
@@ -5593,9 +5845,21 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
+    - name: install gdb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install gdb
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
