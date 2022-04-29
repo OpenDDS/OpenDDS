@@ -89,20 +89,26 @@ bool Qos_Helper::valid(const DDS::TopicQos& qos)
   }
 
   if (!valid(qos.liveliness)) {
-    ACE_ERROR((LM_NOTICE,
-               "(%P|%t) ERROR: Qos_Helper::valid::TopicQos, invalid liveliness qos.\n"));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+        "(%P|%t) ERROR: Qos_Helper::valid::TopicQos, invalid liveliness qos.\n"));
+    }
     return false;
   }
 
   if (!valid(qos.destination_order)) {
-    ACE_ERROR((LM_NOTICE,
-               "(%P|%t) ERROR: Qos_Helper::valid::TopicQos, invalid destination_order qos.\n"));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+        "(%P|%t) ERROR: Qos_Helper::valid::TopicQos, invalid destination_order qos.\n"));
+    }
     return false;
   }
 
   if (!valid(qos.history)) {
-    ACE_ERROR((LM_NOTICE,
-               "(%P|%t) ERROR: Qos_Helper::valid::TopicQos, invalid history qos.\n"));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE,
+        "(%P|%t) ERROR: Qos_Helper::valid::TopicQos, invalid history qos.\n"));
+    }
     return false;
   }
 
