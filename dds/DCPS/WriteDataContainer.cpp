@@ -687,13 +687,13 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     const SendStateDataSampleList* containing_list =
       SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
-    if (containing_list == &this->sent_data_) {
+    if (containing_list == &sent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_delivered, ")
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN sent_data_.\n")));
-    } else if (containing_list == &this->unsent_data_) {
+    } else if (containing_list == &unsent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_delivered, ")
@@ -711,14 +711,14 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                      ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
-                     this->domain_id_,
-                     this->topic_name_,
+                     domain_id_,
+                     topic_name_,
                      OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_delivered();
       }
 
-      if (containing_list == &this->orphaned_to_transport_) {
+      if (containing_list == &orphaned_to_transport_) {
         orphaned_to_transport_.dequeue(sample);
         release_buffer(stale);
 
@@ -752,8 +752,8 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
-                 this->domain_id_,
-                 this->topic_name_,
+                 domain_id_,
+                 topic_name_,
                  OPENDDS_STRING(converter).c_str()));
     }
     release_buffer(stale);
@@ -780,8 +780,8 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C seq# %q %s.\n"),
-                 this->domain_id_,
-                 this->topic_name_,
+                 domain_id_,
+                 topic_name_,
                  OPENDDS_STRING(converter).c_str(),
                  acked_seq.getValue(),
                  max_durable_per_instance_
@@ -789,7 +789,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  : ACE_TEXT("released")));
     }
 
-    this->wakeup_blocking_writers (stale);
+    wakeup_blocking_writers(stale);
   }
   if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
@@ -834,7 +834,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
   // and the instance list. We do not need acquire the lock here since
   // the data_delivered acquires the lock.
   if (dropped_by_transport) {
-    this->data_delivered(sample);
+    data_delivered(sample);
     return;
   }
 
@@ -871,6 +871,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     } else {
       SendStateDataSampleList::remove(stale);
       release_buffer(stale);
+      stale = 0;
     }
 
   } else {
@@ -884,13 +885,13 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     const SendStateDataSampleList* containing_list =
       SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
-    if (containing_list == &this->sent_data_) {
+    if (containing_list == &sent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_dropped, ")
                  ACE_TEXT("The dropped sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN sent_data_.\n")));
-    } else if (containing_list == &this->unsent_data_) {
+    } else if (containing_list == &unsent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_dropped, ")
@@ -908,16 +909,17 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_dropped: ")
                      ACE_TEXT("domain %d topic %C publication %C control message dropped.\n"),
-                     this->domain_id_,
-                     this->topic_name_,
+                     domain_id_,
+                     topic_name_,
                      OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_dropped();
       }
 
-      if (containing_list == &this->orphaned_to_transport_) {
+      if (containing_list == &orphaned_to_transport_) {
         orphaned_to_transport_.dequeue(sample);
         release_buffer(stale);
+        stale = 0;
         if (!pending_data()) {
           empty_condition_.notify_all();
         }
@@ -926,13 +928,14 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
         // samples that were retrieved from get_resend_data()
         SendStateDataSampleList::remove(stale);
         release_buffer(stale);
+        stale = 0;
       }
     }
 
     return;
   }
 
-  this->wakeup_blocking_writers (stale);
+  wakeup_blocking_writers(stale);
 
   if (!pending_data()) {
     empty_condition_.notify_all();
@@ -1610,7 +1613,7 @@ WriteDataContainer::sequence_acknowledged_i(const SequenceNumber& sequence)
 }
 
 void
-WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
+WriteDataContainer::wakeup_blocking_writers(DataSampleElement* stale)
 {
   if (!stale && waiting_on_release_) {
     waiting_on_release_ = false;
@@ -1620,7 +1623,7 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
 }
 
 void
-WriteDataContainer::log_send_state_lists (OPENDDS_STRING description)
+WriteDataContainer::log_send_state_lists(OPENDDS_STRING description)
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), sending(%d), sent(%d), orphaned_to_transport(%d), num_all_samples(%d), num_instances(%d)\n",
              description.c_str(),
