@@ -36,7 +36,6 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   try {
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(reader);
@@ -50,7 +49,6 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
     DDS::ReturnCode_t status = DDS::RETCODE_OK;
     while (status == DDS::RETCODE_OK) {
-      ++num_reads_;
       Messenger::Message message;
       DDS::SampleInfo si;
 
@@ -58,6 +56,8 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
       if (status == DDS::RETCODE_OK) {
         if (si.valid_data) {
+          ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+          ++num_reads_;
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) %C->%C subject_id: %d ")
             ACE_TEXT("count: %d strength: %d\n"),
             message.from.in(), reader_id_, message.subject_id,
