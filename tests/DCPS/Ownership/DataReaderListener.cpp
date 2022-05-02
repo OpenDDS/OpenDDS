@@ -22,12 +22,12 @@ const int num_messages_per_writer = 20;
 
 DataReaderListenerImpl::DataReaderListenerImpl(const char* reader_id)
   : num_reads_(0),
-    reader_id_ (reader_id),
-    verify_result_ (true),
-    result_verify_complete_ (false)
+    reader_id_(reader_id),
+    verify_result_(true),
+    result_verify_complete_(false)
 {
-  this->current_strength_[0] = 0;
-  this->current_strength_[1] = 0;
+  current_strength_[0] = 0;
+  current_strength_[1] = 0;
 }
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
@@ -36,7 +36,7 @@ DataReaderListenerImpl::~DataReaderListenerImpl()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
-
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   try {
     Messenger::MessageDataReader_var message_dr =
       Messenger::MessageDataReader::_narrow(reader);
@@ -60,15 +60,15 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
         if (si.valid_data) {
           ACE_DEBUG ((LM_DEBUG, ACE_TEXT("(%P|%t) %C->%C subject_id: %d ")
             ACE_TEXT("count: %d strength: %d\n"),
-            message.from.in(), this->reader_id_, message.subject_id,
+            message.from.in(), reader_id_, message.subject_id,
             message.count, message.strength));
-          std::cout << message.from.in() << "->" << this->reader_id_
+          std::cout << message.from.in() << "->" << reader_id_
           << " subject_id: " << message.subject_id
           << " count: " << message.count
           << " strength: " << message.strength
           << std::endl;
-          bool result = verify (message);
-          this->verify_result_ &= result;
+          bool result = verify(message);
+          verify_result_ &= result;
 
         } else if (si.instance_state == DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: instance is disposed\n")));
@@ -101,15 +101,17 @@ void DataReaderListenerImpl::on_requested_deadline_missed(
   DDS::DataReader_ptr,
   const DDS::RequestedDeadlineMissedStatus & status)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %s: on_requested_deadline_missed(): ")
           ACE_TEXT(" handle %d total_count_change %d\n"),
-          this->reader_id_, status.last_instance_handle, status.total_count_change));
+          reader_id_, status.last_instance_handle, status.total_count_change));
 }
 
 void DataReaderListenerImpl::on_requested_incompatible_qos(
   DDS::DataReader_ptr,
   const DDS::RequestedIncompatibleQosStatus &)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_requested_incompatible_qos()\n")));
 }
 
@@ -117,6 +119,7 @@ void DataReaderListenerImpl::on_liveliness_changed(
   DDS::DataReader_ptr,
   const DDS::LivelinessChangedStatus & status)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %C: on_liveliness_changed(): ")
           ACE_TEXT(" last pub handle %d alive_count %d change %d; not_alive_count %d change %d\n"),
           reader_id_, status.last_publication_handle,
@@ -128,6 +131,7 @@ void DataReaderListenerImpl::on_subscription_matched(
   DDS::DataReader_ptr,
   const DDS::SubscriptionMatchedStatus &)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_subscription_matched()\n")));
 }
 
@@ -135,6 +139,7 @@ void DataReaderListenerImpl::on_sample_rejected(
   DDS::DataReader_ptr,
   const DDS::SampleRejectedStatus&)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_rejected()\n")));
 }
 
@@ -142,11 +147,12 @@ void DataReaderListenerImpl::on_sample_lost(
   DDS::DataReader_ptr,
   const DDS::SampleLostStatus&)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: on_sample_lost()\n")));
 }
 
 bool
-DataReaderListenerImpl::verify (const Messenger::Message& msg)
+DataReaderListenerImpl::verify(const Messenger::Message& msg)
 {
   if (msg.subject_id != msg.count % 2) {
     ACE_ERROR((LM_ERROR,
@@ -155,9 +161,9 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
     return false;
   }
 
-  int previous_strength = this->current_strength_[msg.subject_id];
+  int previous_strength = current_strength_[msg.subject_id];
   // record the strength of writer that sample is from.
-  this->current_strength_[msg.subject_id] = msg.strength;
+  current_strength_[msg.subject_id] = msg.strength;
 
   switch (testcase) {
   case strength:
@@ -222,7 +228,7 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
       // The owner writer is done. so the other writer will become
       // owner, then it will not meet the condition of the strength
       // always increase.
-      this->result_verify_complete_ = true;
+      result_verify_complete_ = true;
 
       if (msg.strength != 15) {
         ACE_ERROR((LM_ERROR,
@@ -244,14 +250,15 @@ DataReaderListenerImpl::verify (const Messenger::Message& msg)
 
 
 bool
-DataReaderListenerImpl::verify_result ()
+DataReaderListenerImpl::verify_result()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   switch (testcase) {
   case strength:
   {
-    this->verify_result_ &=
-        (this->current_strength_[0] == this->current_strength_[1]
-        && this->current_strength_[0] == 12);
+    verify_result_ &=
+        (current_strength_[0] == current_strength_[1]
+        && current_strength_[0] == 12);
   }
   break;
   case liveliness_change:
@@ -259,9 +266,9 @@ DataReaderListenerImpl::verify_result ()
   {
     // The liveliness is changed for both writers in the middle of sending
     // total messages but finally, the higher strength writer takes ownership.
-    this->verify_result_ &=
-        (this->current_strength_[0] == this->current_strength_[1]
-        && this->current_strength_[0] == 12);
+    verify_result_ &=
+        (current_strength_[0] == current_strength_[1]
+        && current_strength_[0] == 12);
   }
   break;
   case update_strength:
@@ -272,5 +279,5 @@ DataReaderListenerImpl::verify_result ()
   ACE_OS::exit(1);
   break;
   }
-  return this->verify_result_;
+  return verify_result_;
 }
