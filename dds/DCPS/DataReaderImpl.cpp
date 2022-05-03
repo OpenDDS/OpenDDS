@@ -741,7 +741,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-  typedef std::pair<RepoId, WriterInfo_rch > RepoWriterPair;
+  typedef std::pair<RepoId, WriterInfo_rch> RepoWriterPair;
   typedef OPENDDS_VECTOR(RepoWriterPair) WriterSet;
   WriterSet writers;
 
