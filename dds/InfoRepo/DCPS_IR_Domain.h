@@ -175,7 +175,7 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
-  bool useBIT() const { return useBIT_; }
+  bool useBIT() const { return useBIT_.value(); }
 
 private:
   OpenDDS::DCPS::TopicStatus add_topic_i(OpenDDS::DCPS::RepoId& topicId,
@@ -239,7 +239,7 @@ private:
   IdToTopicMap idToTopicMap_;
 
   /// indicates if the BuiltIn Topics are enabled
-  bool useBIT_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> useBIT_;
 
   ///@{
   /// Built-in Topic variables

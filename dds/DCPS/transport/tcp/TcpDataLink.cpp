@@ -396,12 +396,17 @@ OpenDDS::DCPS::TcpDataLink::handle_send_request_ack(TransportQueueElement* eleme
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TcpDataLink::handle_send_request_ack(%@) sequence number %q, publication_id=%C\n"),
       element, element->sequence().getValue(), OPENDDS_STRING(converter).c_str()));
   }
-
-  ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
-  pending_request_acks_.push_back(element);
-  return false;
+  bool result = false;
+  TcpConnection_rch connection(connection_.lock());
+  if (connection) {
+    ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
+    pending_request_acks_.push_back(element);
+  } else {
+    element->data_dropped(true);
+    result = true;
+  }
+  return result;
 }
-
 
 void
 OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
@@ -423,7 +428,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
     // find the pending request with the same sequence number.
     ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
     PendingRequestAcks::iterator it;
-    for (it = pending_request_acks_.begin(); it != pending_request_acks_.end(); ++it){
+    for (it = pending_request_acks_.begin(); it != pending_request_acks_.end(); ++it) {
       if ((*it)->sequence() == sequence && (*it)->publication_id() == sample.header_.publication_id_) {
         elem = *it;
         pending_request_acks_.erase(it);
@@ -564,7 +569,7 @@ OpenDDS::DCPS::TcpDataLink::drop_pending_request_acks()
 {
   ACE_Guard<ACE_SYNCH_MUTEX> guard(pending_request_acks_lock_);
   PendingRequestAcks::iterator it;
-  for (it = pending_request_acks_.begin(); it != pending_request_acks_.end(); ++it){
+  for (it = pending_request_acks_.begin(); it != pending_request_acks_.end(); ++it) {
     (*it)->data_dropped(true);
   }
   pending_request_acks_.clear();

@@ -84,25 +84,26 @@ WriteDataContainer::WriteDataContainer(
   ACE_Recursive_Thread_Mutex& deadline_status_lock,
   DDS::OfferedDeadlineMissedStatus& deadline_status,
   CORBA::Long& deadline_last_total_count)
-  : transaction_id_(0),
-    publication_id_(GUID_UNKNOWN),
-    writer_(writer),
-    max_samples_per_instance_(max_samples_per_instance),
-    history_depth_(history_depth),
-    max_durable_per_instance_(max_durable_per_instance),
-    max_num_instances_(max_instances),
-    max_num_samples_(max_total_samples),
-    max_blocking_time_(max_blocking_time),
-    waiting_on_release_(false),
-    condition_(lock_),
-    empty_condition_(lock_),
-    wfa_condition_(wfa_lock_),
-    n_chunks_(n_chunks),
-    sample_list_element_allocator_(2 * n_chunks_),
-    shutdown_(false),
-    domain_id_(domain_id),
-    topic_name_(topic_name),
-    type_name_(type_name)
+  : cached_cumulative_ack_valid_(false)
+  , transaction_id_(0)
+  , publication_id_(GUID_UNKNOWN)
+  , writer_(writer)
+  , max_samples_per_instance_(max_samples_per_instance)
+  , history_depth_(history_depth)
+  , max_durable_per_instance_(max_durable_per_instance)
+  , max_num_instances_(max_instances)
+  , max_num_samples_(max_total_samples)
+  , max_blocking_time_(max_blocking_time)
+  , waiting_on_release_(false)
+  , condition_(lock_)
+  , empty_condition_(lock_)
+  , wfa_condition_(wfa_lock_)
+  , n_chunks_(n_chunks)
+  , sample_list_element_allocator_(2 * n_chunks_)
+  , shutdown_(false)
+  , domain_id_(domain_id)
+  , topic_name_(topic_name)
+  , type_name_(type_name)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   , durability_cache_(durability_cache)
   , durability_service_(durability_service)
@@ -119,6 +120,7 @@ WriteDataContainer::WriteDataContainer(
                "sample_list_element_allocator %x with %d chunks\n",
                &sample_list_element_allocator_, n_chunks_));
   }
+  acked_sequences_[GUID_UNKNOWN].insert(SequenceNumber::ZERO());
 }
 
 WriteDataContainer::~WriteDataContainer()
@@ -170,6 +172,106 @@ WriteDataContainer::~WriteDataContainer()
   }
 }
 
+void
+WriteDataContainer::add_reader_acks(const RepoId& reader, const SequenceNumber& base)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
+
+  DisjointSequence& ds = acked_sequences_[reader];
+  ds.reset();
+  if (base == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    ds.insert(SequenceNumber::ZERO());
+  } else {
+    ds.insert(SequenceRange(SequenceNumber(), base));
+  }
+  cached_cumulative_ack_valid_ = false;
+}
+
+void
+WriteDataContainer::remove_reader_acks(const RepoId& reader)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
+
+  const SequenceNumber prev_cum_ack = get_cumulative_ack();
+  const AckedSequenceMap::iterator it = acked_sequences_.find(reader);
+  if (it != acked_sequences_.end()) {
+    acked_sequences_.erase(it);
+    cached_cumulative_ack_valid_ = false;
+    if (prev_cum_ack != get_cumulative_ack()) {
+      wfa_condition_.notify_all();
+    }
+  }
+}
+
+SequenceNumber
+WriteDataContainer::get_cumulative_ack()
+{
+  if (acked_sequences_.empty()) {
+    return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  }
+
+  if (cached_cumulative_ack_valid_) {
+    return cached_cumulative_ack_;
+  }
+
+  SequenceNumber result = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  for (AckedSequenceMap::const_iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
+    if (!it->second.empty()) {
+      result = result == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ? it->second.cumulative_ack() : std::min(result, it->second.cumulative_ack());
+    }
+  }
+  cached_cumulative_ack_ = result;
+  cached_cumulative_ack_valid_ = true;
+  return result;
+}
+
+SequenceNumber
+WriteDataContainer::get_last_ack()
+{
+  if (acked_sequences_.empty()) {
+    return SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  }
+
+  SequenceNumber result = SequenceNumber::SEQUENCENUMBER_UNKNOWN();
+  for (AckedSequenceMap::const_iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
+    if (!it->second.empty()) {
+      result = result == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ? it->second.last_ack() : std::max(result, it->second.last_ack());
+    }
+  }
+  return result;
+}
+
+void
+WriteDataContainer::update_acked(const SequenceNumber& seq, const RepoId& id)
+{
+  bool do_notify = false;
+  if (id == GUID_UNKNOWN) {
+    for (AckedSequenceMap::iterator it = acked_sequences_.begin(); it != acked_sequences_.end(); ++it) {
+      SequenceNumber prev_cum_ack = it->second.cumulative_ack();
+      it->second.insert(seq);
+      cached_cumulative_ack_valid_ = false;
+      if (prev_cum_ack != it->second.cumulative_ack()) {
+        do_notify = true;
+      }
+    }
+  } else {
+    const AckedSequenceMap::iterator it = acked_sequences_.find(id);
+    if (it != acked_sequences_.end()) {
+      SequenceNumber prev_cum_ack = it->second.cumulative_ack();
+      if (prev_cum_ack < seq) {
+        it->second.insert(SequenceRange(prev_cum_ack, seq));
+        cached_cumulative_ack_valid_ = false;
+        if (prev_cum_ack != it->second.cumulative_ack()) {
+          do_notify = true;
+        }
+      }
+    }
+  }
+  if (do_notify) {
+    wfa_condition_.notify_all();
+  }
+}
+
 DDS::ReturnCode_t
 WriteDataContainer::enqueue_control(DataSampleElement* control_sample)
 {
@@ -177,6 +279,10 @@ WriteDataContainer::enqueue_control(DataSampleElement* control_sample)
   // will link samples with the next_sample/previous_sample and
   // also next_send_sample_.
   // This would save time when we actually send the data.
+
+  if (shutdown_) {
+    return DDS::RETCODE_ERROR;
+  }
 
   unsent_data_.enqueue_tail(control_sample);
 
@@ -189,6 +295,10 @@ WriteDataContainer::enqueue(
   DataSampleElement* sample,
   DDS::InstanceHandle_t instance_handle)
 {
+  if (shutdown_) {
+    return DDS::RETCODE_ERROR;
+  }
+
   // Get the PublicationInstance pointer from InstanceHandle_t.
   PublicationInstance_rch instance =
     get_handle_instance(instance_handle);
@@ -254,6 +364,20 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
                    filterClassName, eval, expression_params,
 #endif
                    total_size);
+
+  {
+    ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+    cached_cumulative_ack_valid_ = false;
+    DisjointSequence& ds = acked_sequences_[reader_id];
+    ds = acked_sequences_[GUID_UNKNOWN];
+
+    // Remove exactly what will be sent
+    SendStateDataSampleList::iterator iter = resend_data_.begin();
+    while (iter != resend_data_.end()) {
+      ds.erase(iter->get_header().sequence_);
+      ++iter;
+    }
+  }
 
   if (DCPS_debug_level > 9 && resend_data_.size()) {
     GuidConverter converter(publication_id_);
@@ -563,13 +687,13 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     const SendStateDataSampleList* containing_list =
       SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
-    if (containing_list == &this->sent_data_) {
+    if (containing_list == &sent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_delivered, ")
                  ACE_TEXT("The delivered sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN sent_data_.\n")));
-    } else if (containing_list == &this->unsent_data_) {
+    } else if (containing_list == &unsent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_delivered, ")
@@ -587,32 +711,39 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                      ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
-                     this->domain_id_,
-                     this->topic_name_,
+                     domain_id_,
+                     topic_name_,
                      OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_delivered();
       }
 
-      if (containing_list == &this->orphaned_to_transport_) {
+      if (containing_list == &orphaned_to_transport_) {
         orphaned_to_transport_.dequeue(sample);
         release_buffer(stale);
 
       } else if (!containing_list) {
         // samples that were retrieved from get_resend_data()
+        ACE_Guard<ACE_SYNCH_MUTEX> wfa_guard(wfa_lock_);
+        const CORBA::ULong num_subs = stale->get_num_subs();
+        for (CORBA::ULong i = 0; i < num_subs; ++i) {
+          update_acked(stale->get_header().sequence_, stale->get_sub_id(i));
+        }
+        wfa_guard.release();
         SendStateDataSampleList::remove(stale);
         release_buffer(stale);
       }
 
-      if (!pending_data())
+      if (!pending_data()) {
         empty_condition_.notify_all();
+      }
     }
 
     return;
   }
   ACE_GUARD(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_);
   SequenceNumber acked_seq = stale->get_header().sequence_;
-  SequenceNumber prev_max = acked_sequences_.cumulative_ack();
+  SequenceNumber prev_max = get_cumulative_ack();
 
   if (stale->get_header().message_id_ != SAMPLE_DATA) {
     //this message was a control message so release it
@@ -621,8 +752,8 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
-                 this->domain_id_,
-                 this->topic_name_,
+                 domain_id_,
+                 topic_name_,
                  OPENDDS_STRING(converter).c_str()));
     }
     release_buffer(stale);
@@ -630,7 +761,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     writer_->controlTracker.message_delivered();
   } else {
 
-    if (max_durable_per_instance_) {
+    if (max_durable_per_instance_ && !shutdown_ && InstanceDataSampleList::on_some_list(sample)) {
       const_cast<DataSampleElement*>(sample)->get_header().historic_sample_ = true;
       DataSampleHeader::set_flag(HISTORIC_SAMPLE_FLAG, sample->get_sample());
       sent_data_.enqueue_tail(sample);
@@ -649,8 +780,8 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C seq# %q %s.\n"),
-                 this->domain_id_,
-                 this->topic_name_,
+                 domain_id_,
+                 topic_name_,
                  OPENDDS_STRING(converter).c_str(),
                  acked_seq.getValue(),
                  max_durable_per_instance_
@@ -658,7 +789,7 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                  : ACE_TEXT("released")));
     }
 
-    this->wakeup_blocking_writers (stale);
+    wakeup_blocking_writers(stale);
   }
   if (DCPS_debug_level > 9) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
@@ -666,10 +797,10 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
                          acked_seq.getValue()));
   }
 
-  acked_sequences_.insert(acked_seq);
+  update_acked(acked_seq);
 
   if (prev_max == SequenceNumber::SEQUENCENUMBER_UNKNOWN() ||
-      prev_max < acked_sequences_.cumulative_ack()) {
+      prev_max < get_cumulative_ack()) {
 
     if (DCPS_debug_level > 9) {
       ACE_DEBUG((LM_DEBUG,
@@ -703,7 +834,7 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
   // and the instance list. We do not need acquire the lock here since
   // the data_delivered acquires the lock.
   if (dropped_by_transport) {
-    this->data_delivered(sample);
+    data_delivered(sample);
     return;
   }
 
@@ -735,7 +866,13 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     // called from reenqueue_all() which supports the TRANSIENT_LOCAL
     // qos. The samples that are sending by transport are dropped from
     // transport and will be moved to the unsent list for resend.
-    unsent_data_.enqueue_tail(sample);
+    if (!shutdown_ && InstanceDataSampleList::on_some_list(sample)) {
+      unsent_data_.enqueue_tail(sample);
+    } else {
+      SendStateDataSampleList::remove(stale);
+      release_buffer(stale);
+      stale = 0;
+    }
 
   } else {
     //
@@ -748,13 +885,13 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
     const SendStateDataSampleList* containing_list =
       SendStateDataSampleList::send_list_containing_element(stale, send_lists);
 
-    if (containing_list == &this->sent_data_) {
+    if (containing_list == &sent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_dropped, ")
                  ACE_TEXT("The dropped sample is not in sending_data_ and ")
                  ACE_TEXT("WAS IN sent_data_.\n")));
-    } else if (containing_list == &this->unsent_data_) {
+    } else if (containing_list == &unsent_data_) {
       ACE_ERROR((LM_WARNING,
                  ACE_TEXT("(%P|%t) WARNING: ")
                  ACE_TEXT("WriteDataContainer::data_dropped, ")
@@ -772,16 +909,17 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_dropped: ")
                      ACE_TEXT("domain %d topic %C publication %C control message dropped.\n"),
-                     this->domain_id_,
-                     this->topic_name_,
+                     domain_id_,
+                     topic_name_,
                      OPENDDS_STRING(converter).c_str()));
         }
         writer_->controlTracker.message_dropped();
       }
 
-      if (containing_list == &this->orphaned_to_transport_) {
+      if (containing_list == &orphaned_to_transport_) {
         orphaned_to_transport_.dequeue(sample);
         release_buffer(stale);
+        stale = 0;
         if (!pending_data()) {
           empty_condition_.notify_all();
         }
@@ -790,13 +928,14 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
         // samples that were retrieved from get_resend_data()
         SendStateDataSampleList::remove(stale);
         release_buffer(stale);
+        stale = 0;
       }
     }
 
     return;
   }
 
-  this->wakeup_blocking_writers (stale);
+  wakeup_blocking_writers(stale);
 
   if (!pending_data()) {
     empty_condition_.notify_all();
@@ -1422,19 +1561,9 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
                                     bool deadline_is_infinite,
                                     const SequenceNumber& sequence)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, DDS::RETCODE_ERROR);
-  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, wfa_guard, wfa_lock_, DDS::RETCODE_ERROR);
-
-  const SequenceNumber last_acked = acked_sequences_.last_ack();
-  const SequenceNumber acked = acked_sequences_.cumulative_ack();
-  if (sequence == last_acked && sequence == acked && sending_data_.size() != 0) {
-    acked_sequences_.insert(sending_data_.head()->get_header().sequence_.previous());
-  }
-
-  guard.release();
-
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged(sequence)) {
+  while ((deadline_is_infinite || MonotonicTimePoint::now() < deadline) && !sequence_acknowledged_i(sequence)) {
     switch (deadline_is_infinite ? wfa_condition_.wait(thread_status_manager) : wfa_condition_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_NoTimeout:
       break;
@@ -1454,32 +1583,37 @@ WriteDataContainer::wait_ack_of_seq(const MonotonicTimePoint& deadline,
     }
   }
 
-  return sequence_acknowledged(sequence) ? DDS::RETCODE_OK : DDS::RETCODE_TIMEOUT;
+  return sequence_acknowledged_i(sequence) ? DDS::RETCODE_OK : DDS::RETCODE_TIMEOUT;
 }
 
 bool
-WriteDataContainer::sequence_acknowledged(const SequenceNumber sequence)
+WriteDataContainer::sequence_acknowledged(const SequenceNumber& sequence)
+{
+  ACE_Guard<ACE_SYNCH_MUTEX> guard(wfa_lock_);
+  return sequence_acknowledged_i(sequence);
+}
+
+bool
+WriteDataContainer::sequence_acknowledged_i(const SequenceNumber& sequence)
 {
   if (sequence == SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    //return true here so that wait_for_acknowledgements doesn't block
+    //return true here so that wait_for_acknowledgments doesn't block
     return true;
   }
 
-  SequenceNumber acked = acked_sequences_.cumulative_ack();
+  SequenceNumber acked = get_cumulative_ack();
   if (DCPS_debug_level >= 10) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged ")
-                          ACE_TEXT("- cumulative ack is currently: %q\n"), acked.getValue()));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) WriteDataContainer::sequence_acknowledged_i ")
+                          ACE_TEXT("- %C cumulative ack is currently: %q\n"), DCPS::LogGuid(publication_id_).c_str(), acked.getValue()));
   }
   if (acked == SequenceNumber::SEQUENCENUMBER_UNKNOWN() || acked < sequence){
-    //if acked_sequences_ is empty or its cumulative_ack is lower than
-    //the requests sequence, return false
     return false;
   }
   return true;
 }
 
 void
-WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
+WriteDataContainer::wakeup_blocking_writers(DataSampleElement* stale)
 {
   if (!stale && waiting_on_release_) {
     waiting_on_release_ = false;
@@ -1489,7 +1623,7 @@ WriteDataContainer::wakeup_blocking_writers (DataSampleElement* stale)
 }
 
 void
-WriteDataContainer::log_send_state_lists (OPENDDS_STRING description)
+WriteDataContainer::log_send_state_lists(OPENDDS_STRING description)
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) WriteDataContainer::log_send_state_lists: %C -- unsent(%d), sending(%d), sent(%d), orphaned_to_transport(%d), num_all_samples(%d), num_instances(%d)\n",
              description.c_str(),

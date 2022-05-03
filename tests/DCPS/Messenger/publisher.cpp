@@ -4,12 +4,14 @@
  */
 
 #include "MessengerTypeSupportImpl.h"
-#include "Writer.h"
 #include "Args.h"
+
+#include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DCPS_Utils.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/Properties.h>
 #endif
@@ -116,20 +118,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                 DDS::DomainParticipantListener::_nil(),
                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!participant) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_participant failed!\n")),
-                         EXIT_FAILURE);
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_participant failed!\n"));
+        return EXIT_FAILURE;
       }
 
       // Register TypeSupport (Messenger::Message)
       Messenger::MessageTypeSupport_var mts =
         new Messenger::MessageTypeSupportImpl();
       if (mts->register_type(participant.in(), "") != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: register_type failed!\n")),
-                         EXIT_FAILURE);
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type failed!\n"));
+        return EXIT_FAILURE;
       }
 
       // Create Topic
@@ -141,10 +139,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                   DDS::TopicListener::_nil(),
                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!topic) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_topic failed!\n")),
-                         EXIT_FAILURE);
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic failed!\n"));
+        return EXIT_FAILURE;
       }
 
       // Create Publisher
@@ -153,10 +149,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                       DDS::PublisherListener::_nil(),
                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!pub) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_publisher failed!\n")),
-                         EXIT_FAILURE);
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_publisher failed!\n"));
+        return EXIT_FAILURE;
       }
 
       DDS::DataWriterQos qos;
@@ -174,41 +168,60 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                DDS::DataWriterListener::_nil(),
                                OpenDDS::DCPS::DEFAULT_STATUS_MASK);
       if (!dw) {
-        ACE_ERROR_RETURN((LM_ERROR,
-                          ACE_TEXT("%N:%l: main()")
-                          ACE_TEXT(" ERROR: create_datawriter failed!\n")),
-                         EXIT_FAILURE);
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_datawriter failed!\n"));
+        return EXIT_FAILURE;
       }
 
-      // Start writing threads
-      std::cout << "Creating Writer" << std::endl;
-      Writer* writer = new Writer(dw.in(), dw_reliable());
-      std::cout << "Starting Writer" << std::endl;
-      writer->start();
-
-      while (!writer->is_finished()) {
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
+      // Block until Subscriber is available
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): DataWriter waiting for match\n"));
+      if (Utils::wait_match(dw, 1, Utils::EQ)) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dw\n"));
+        return EXIT_FAILURE;
       }
 
-      std::cout << "Writer finished " << std::endl;
-      writer->end();
+      std::cout << "Start Writing Samples" << std::endl;
 
-      if (dw_reliable()) {
-        std::cout << "Writer wait for ACKS" << std::endl;
-
-        const DDS::Duration_t timeout =
-          { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
-        dw->wait_for_acknowledgments(timeout);
-      } else {
-        // let any missed multicast/rtps messages get re-delivered
-        std::cout << "Writer wait small time" << std::endl;
-        ACE_Time_Value small_time(0, 250000);
-        ACE_OS::sleep(small_time);
+      // Write samples
+      Messenger::MessageDataWriter_var message_dw
+        = Messenger::MessageDataWriter::_narrow(dw);
+      if (!message_dw) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): _narrow failed!\n"));
+        return EXIT_FAILURE;
       }
 
-      std::cerr << "deleting DW" << std::endl;
-      delete writer;
+      Messenger::Message message;
+      message.subject_id = 99;
+
+      const DDS::InstanceHandle_t handle = message_dw->register_instance(message);
+
+      message.from = "Comic Book Guy";
+      message.subject = "Review";
+      message.text = "Worst. Movie. Ever.";
+      message.count = 0;
+
+      for (size_t i = 0; i < num_messages; i++) {
+        DDS::ReturnCode_t error;
+        do {
+          error = message_dw->write(message, handle);
+          if (!dw_reliable()) {
+            //spread out unreliable messages some
+            ACE_Time_Value small_time(0, 250000);
+            ACE_OS::sleep(small_time);
+          }
+        } while (error == DDS::RETCODE_TIMEOUT);
+        if (error != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: main(): write returned %C!\n", OpenDDS::DCPS::retcode_to_string(error)));
+        }
+        message.count++;
+      }
+
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): finished writing messages, waiting for subscriber."));
+      // Block until Subscriber goes away
+      if (Utils::wait_match(dw, 0, Utils::EQ)) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): waiting for unmatch for writer\n"));
+        return EXIT_FAILURE;
+      }
+
     }
 
     // Clean-up!

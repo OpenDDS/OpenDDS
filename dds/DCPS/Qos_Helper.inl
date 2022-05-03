@@ -919,182 +919,13 @@ bool Qos_Helper::valid(const DDS::ReaderDataLifecycleQosPolicy&)
 }
 
 ACE_INLINE
-bool Qos_Helper::valid(const DDS::DomainParticipantQos& qos)
-{
-  return valid(qos.user_data) && valid(qos.entity_factory) && valid(qos.property);
-}
-
-ACE_INLINE
-bool Qos_Helper::valid(const DDS::TopicQos& qos)
-{
-  return
-    valid(qos.topic_data)
-    && valid(qos.durability)
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    && valid(qos.durability_service)
-#endif
-    && valid(qos.deadline)
-    && valid(qos.latency_budget)
-    && valid(qos.liveliness)
-    && valid(qos.destination_order)
-    && valid(qos.history)
-    && valid(qos.resource_limits)
-    && valid(qos.transport_priority)
-    && valid(qos.lifespan)
-    && valid(qos.ownership)
-    && valid(qos.representation);
-}
-
-ACE_INLINE
-bool Qos_Helper::valid(const DDS::DataWriterQos& qos)
-{
-  if (!valid(qos.durability))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid durability qos.\n")), false);
-
-#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-  if (!valid(qos.durability_service))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid durability_service qos.\n")), false);
-#endif
-  if (!valid(qos.deadline))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid deadline qos.\n")), false);
-
-  if (!valid(qos.latency_budget))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid latency_budget qos.\n")), false);
-
-  if (!valid(qos.liveliness))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid liveliness qos.\n")), false);
-
-  if (!valid(qos.destination_order))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid destination_order qos.\n")), false);
-
-  if (!valid(qos.history))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid history qos.\n")), false);
-
-  if (!valid(qos.resource_limits))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid resource_limits qos.\n")), false);
-
-  if (!valid(qos.transport_priority))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid transport_priority qos.\n")), false);
-
-  if (!valid(qos.lifespan))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid lifespan qos.\n")), false);
-
-  if (!valid(qos.user_data))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid user_data qos.\n")), false);
-
-  if (!valid(qos.ownership))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid ownership qos.\n")), false);
-
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  if (!valid(qos.ownership_strength))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid ownership_strength qos.\n")), false);
-#endif
-  if (!valid(qos.writer_data_lifecycle))
-    ACE_ERROR_RETURN ((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-        ACE_TEXT("invalid writer_data_lifecycle qos.\n")), false);
-
-  if (!valid(qos.representation)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-      ACE_TEXT("Qos_Helper::valid::DataWriterQos, ")
-      ACE_TEXT("invalid data representation qos.\n")));
-    return false;
-  }
-
-  return true;
-}
-
-ACE_INLINE
-bool Qos_Helper::valid(const DDS::PublisherQos& qos)
-{
-  return
-    valid(qos.presentation)
-    && valid(qos.partition)
-    && valid(qos.group_data)
-    && valid(qos.entity_factory);
-}
-
-ACE_INLINE
-bool Qos_Helper::valid(const DDS::DataReaderQos& qos)
-{
-  return
-    valid(qos.durability)
-    && valid(qos.deadline)
-    && valid(qos.latency_budget)
-    && valid(qos.liveliness)
-    && valid(qos.reliability)
-    && valid(qos.destination_order)
-    && valid(qos.history)
-    && valid(qos.resource_limits)
-    && valid(qos.user_data)
-    && valid(qos.time_based_filter)
-    && valid(qos.reader_data_lifecycle)
-    && valid(qos.ownership)
-    && valid(qos.representation);
-}
-
-ACE_INLINE
-bool Qos_Helper::valid(const DDS::SubscriberQos& qos)
-{
-  return
-    valid(qos.presentation)
-    && valid(qos.partition)
-    && valid(qos.group_data)
-    && valid(qos.entity_factory);
-}
-
-ACE_INLINE
-bool Qos_Helper::valid(const DDS::DomainParticipantFactoryQos& qos)
-{
-  return valid(qos.entity_factory);
-}
-
-ACE_INLINE
 bool Qos_Helper::valid(const DDS::DataRepresentationQosPolicy& qos)
 {
   const CORBA::ULong count = qos.value.length();
+
   for (CORBA::ULong i = 0; i < count; ++i) {
     const CORBA::Short value = qos.value[i];
+
     switch (value) {
     case DDS::XCDR_DATA_REPRESENTATION:
     case DDS::XML_DATA_REPRESENTATION:
@@ -1104,11 +935,12 @@ bool Qos_Helper::valid(const DDS::DataRepresentationQosPolicy& qos)
 
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("Qos_Helper::valid(const DataRepresentationQosPolicy&): ")
-        ACE_TEXT("Unknown DataRepresentationId_t: %d\n"), value));
+                 ACE_TEXT("Qos_Helper::valid(const DataRepresentationQosPolicy&): ")
+                 ACE_TEXT("Unknown DataRepresentationId_t: %d\n"), value));
       return false;
     };
   }
+
   return true;
 }
 

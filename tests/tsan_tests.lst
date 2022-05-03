@@ -44,6 +44,14 @@ tests/DCPS/WaitForAck/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_
 tests/DCPS/WaitForAck/run_test.pl rtps: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/WaitForAck/run_test.pl --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/WaitForAck/run_test.pl rtps --publisher: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl subscribers 3: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl subscribers 3 large_samples: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl subscribers 3 sub_delay: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl subscribers 3 sub_delay large_samples: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl rtps_disc subscribers 3: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl rtps_disc subscribers 3 large_samples: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl rtps_disc subscribers 3 sub_delay: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
+tests/DCPS/WaitForAckRace/run_test.pl rtps_disc subscribers 3 sub_delay large_samples: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/LivelinessTest/run_test.pl: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 tests/DCPS/LivelinessTest/run_test.pl take: !DCPS_MIN !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE

@@ -105,55 +105,36 @@ public class TestSubscriber {
         qosh.value.history.kind = HistoryQosPolicyKind.KEEP_ALL_HISTORY_QOS;
 
         DataReaderListenerImpl listener = new DataReaderListenerImpl();
+
+        GuardCondition gc = new GuardCondition();
+        WaitSet ws = new WaitSet();
+        ws.attach_condition(gc);
+        listener.set_guard_condition(gc);
+
         DataReader dr = sub.create_datareader(top,
                                               qosh.value,
                                               listener,
                                               DEFAULT_STATUS_MASK.value);
+        if (!reliable) {
+            listener.set_expected_count(1);
+        }
+
         if (dr == null) {
             System.err.println("ERROR: DataReader creation failed");
             return;
         }
-
-        StatusCondition sc = dr.get_statuscondition();
-        sc.set_enabled_statuses(SUBSCRIPTION_MATCHED_STATUS.value);
-        WaitSet ws = new WaitSet();
-        ws.attach_condition(sc);
-        SubscriptionMatchedStatusHolder matched =
-          new SubscriptionMatchedStatusHolder(new SubscriptionMatchedStatus());
         Duration_t timeout = new Duration_t(DURATION_INFINITE_SEC.value,
                                             DURATION_INFINITE_NSEC.value);
 
-        boolean matched_pub = false;
-        while (true) {
-            final int result = dr.get_subscription_matched_status(matched);
-            if (result != RETCODE_OK.value) {
-                System.err.println("ERROR: get_subscription_matched_status()" +
-                                   "failed.");
-                return;
-            }
-
-            if (matched.value.current_count == 0
-                && matched.value.total_count > 0) {
-                System.out.println("Subscriber No Longer Matched");
-                break;
-            }
-            else if (matched.value.current_count > 0 &&
-                     !matched_pub) {
-                System.out.println("Subscriber Matched");
-                matched_pub = true;
-            }
-
-            ConditionSeqHolder cond = new ConditionSeqHolder(new Condition[]{});
-            if (ws.wait(cond, timeout) != RETCODE_OK.value) {
-                System.err.println("ERROR: wait() failed.");
-                return;
-            }
+        ConditionSeqHolder cond = new ConditionSeqHolder(new Condition[]{});
+        if (ws.wait(cond, timeout) != RETCODE_OK.value) {
+            System.err.println("ERROR: wait() failed.");
+            return;
         }
-
         System.out.println("Subscriber Report Validity");
         listener.report_validity();
 
-        ws.detach_condition(sc);
+        ws.detach_condition(gc);
 
         System.out.println("Stop Subscriber");
 

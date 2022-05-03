@@ -351,8 +351,9 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
     }
   } else {
     TcpSendStrategy_rch send_strategy = this->send_strategy();
-    if (send_strategy)
+    if (send_strategy) {
       send_strategy->terminate_send();
+    }
 
     this->disconnect();
   }
@@ -618,8 +619,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
           ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
                                "active_reconnect_i() socket operation is already in progress, wait another second to initiate the connect\n"));
         }
-      }
-      else {
+      } else {
         ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
       }
       this->reconnect_state_ = ACTIVE_WAITING_STATE;
@@ -627,8 +627,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
     this->reactor()->schedule_timer(this, 0, timeout);
     this->conn_retry_counter_ ++;
-  }
-  else {
+  } else {
     this->handle_stop_reconnecting();
   }
 }
@@ -636,11 +635,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 void
 OpenDDS::DCPS::TcpConnection::notify_connection_lost()
 {
-  if (this->link_) {
-    this->link_->notify(DataLink::LOST);
+  if (link_) {
+    link_->drop_pending_request_acks();
+    link_->notify(DataLink::LOST);
     TcpSendStrategy_rch send_strategy = link_->send_strategy();
-    if (send_strategy)
+    if (send_strategy) {
       send_strategy->terminate_send();
+    }
   }
 }
 
@@ -652,8 +653,7 @@ OpenDDS::DCPS::TcpConnection::handle_stop_reconnecting()
   if (this->tcp_config_->conn_retry_attempts_ > 0) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C.\n",
       config_name().c_str(), LogAddr(remote_address_).c_str()));
-  }
-  else {
+  } else {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) we did not try to re-establish connection on transport: %C to %C.\n",
       config_name().c_str(), LogAddr(remote_address_).c_str()));
   }
@@ -668,7 +668,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
   DBG_ENTRY_LVL("TcpConnection","handle_timeout",6);
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, this->reconnect_state_=%C\n",reconnect_state_string() ));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, this->reconnect_state_ = %C\n", reconnect_state_string()));
   GuardType guard(this->reconnect_lock_);
 
   switch (this->reconnect_state_) {
@@ -723,7 +723,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
   default :
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::handle_timeout, ")
-               ACE_TEXT(" unknown state or it should not be in state=%d\n"),
+               ACE_TEXT(" unknown state or it should not be in state = %d\n"),
                reconnect_state_));
     break;
   }

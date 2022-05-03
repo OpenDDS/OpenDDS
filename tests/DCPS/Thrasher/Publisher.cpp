@@ -58,8 +58,10 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
       qos.durability.kind = DDS::TRANSIENT_LOCAL_DURABILITY_QOS;
     }
 #ifndef OPENDDS_NO_OWNERSHIP_PROFILE
-    qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_);
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    qos.history.depth = static_cast<CORBA::Long>(samples_per_thread_ * 2);
 #endif
+
     dw_ = pub->create_datawriter(topic.in(), qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
     if (!dw_) {
       throw std::runtime_error("create_datawriter failed!\n");
@@ -182,6 +184,7 @@ void Publisher::configure_transport()
     ach.set_string_value(sect_key, ACE_TEXT("heartbeat_period"), ACE_TEXT("200"));
     ach.set_string_value(sect_key, ACE_TEXT("heartbeat_response_delay"), ACE_TEXT("100"));
     inst->load(ach, sect_key);
+    config->passive_connect_duration_ = 600000;
     config->instances_.push_back(inst);
     TheTransportRegistry->bind_config(config_name, dp_);
   }

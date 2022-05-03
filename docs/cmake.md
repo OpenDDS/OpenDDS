@@ -269,7 +269,6 @@ macro:
 ```cmake
 add_executable(publisher
   "publisher.cpp"
-  "Writer.cpp"
 )
 OPENDDS_TARGET_SOURCES(publisher "Messenger.idl")
 target_link_libraries(publisher OpenDDS::OpenDDS)
@@ -288,7 +287,6 @@ target_link_libraries(messenger OpenDDS::Dcps)
 
 add_executable(publisher
   "publisher.cpp"
-  "Writer.cpp"
 )
 target_link_libraries(publisher OpenDDS::OpenDDS)
 ```

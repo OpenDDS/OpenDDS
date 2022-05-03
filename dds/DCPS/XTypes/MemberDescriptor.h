@@ -30,6 +30,17 @@ class OpenDDS_Dcps_Export MemberDescriptor {
 public:
   MemberDescriptor();
   ~MemberDescriptor();
+  MemberDescriptor(const char* a_name, bool a_is_key)
+    : name(a_name)
+    , id(0)
+    , index(0)
+    , try_construct_kind(USE_DEFAULT)
+    , is_key(a_is_key)
+    , is_optional(false)
+    , is_must_understand(false)
+    , is_shared(false)
+    , is_default_label(false)
+  {}
 
   DynamicType_rch get_type() const;
   bool equals(const MemberDescriptor& other) const;

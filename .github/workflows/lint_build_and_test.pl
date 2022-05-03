@@ -65,6 +65,9 @@ for my $job_name (keys(%{$gha->{jobs}})) {
       elsif ($step->{name} =~ /build ace.*tao/i) {
         $avoids_problem_matcher = 1;
       }
+      elsif ($step->{name} =~ /build openssl/i) {
+        $avoids_problem_matcher = 1;
+      }
 
       if ($avoids_problem_matcher) {
         if ($job_has_problem_matcher) {

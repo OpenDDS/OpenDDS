@@ -104,11 +104,10 @@ EncapsulationHeader::EncapsulationHeader(const Encoding& enc, Extensibility ext,
   : kind_(KIND_INVALID)
   , options_(options)
 {
-   if (!from_encoding(enc, ext)) {
-     kind_ = KIND_INVALID;
-   }
+  if (!from_encoding(enc, ext)) {
+    kind_ = KIND_INVALID;
+  }
 }
-
 
 bool EncapsulationHeader::from_encoding(
   const Encoding& encoding, Extensibility extensibility)
