@@ -179,8 +179,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     const ACE_Time_Value delay(large_samples ? 2 : 0, large_samples ? 0 : 10000);
 
-    const size_t count = large_samples ? 4u : 20u;
-    for (size_t i = 0; i < count; ++i) {
+    const int count = large_samples ? 4 : 20;
+    for (int i = 0; i < count; ++i) {
       message.subject_id = i;
       message.count = i;
       DDS::ReturnCode_t error = message_dw->write(message, DDS::HANDLE_NIL);
