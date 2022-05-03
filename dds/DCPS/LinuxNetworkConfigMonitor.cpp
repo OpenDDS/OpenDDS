@@ -150,6 +150,9 @@ void LinuxNetworkConfigMonitor::read_messages()
     ssize_t buffer_length;
     {
       ACE_GUARD(ACE_Thread_Mutex, g, socket_mutex_);
+      if (socket_.get_handle() == -1) {
+        return;
+      }
       buffer_length = socket_.recv(buffer, 4096, 0);
     }
     if (buffer_length < 0) {
