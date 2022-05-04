@@ -25,6 +25,7 @@ race:^ACE_TSS_Singleton<*>::instance
 
 race_top:^TAO_Leader_Follower::wait_for_event
 race_top:^TAO_ORB_Core::*shutdown
+race_top:^TAO_Transport::*
 race_top:^TAO_Stub::set_valid_profile
 race:^TAO_IIOP_Connection_Handler
 race:^TAO_Wait_On_Leader_Follower::register_handler
