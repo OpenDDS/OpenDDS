@@ -5,23 +5,25 @@
 
 using namespace OpenDDS::DCPS;
 
-struct Sample {
-  std::string key;
+namespace {
+  struct Sample {
+    std::string key;
 
-  Sample(const std::string& a_key)
-    : key(a_key)
-  {}
+    Sample(const std::string& a_key)
+      : key(a_key)
+    {}
 
-  bool operator==(const Sample& other) const
-  {
-    return key == other.key;
-  }
+    bool operator==(const Sample& other) const
+    {
+      return key == other.key;
+    }
 
-  bool operator<(const Sample& other) const
-  {
-    return key < other.key;
-  }
-};
+    bool operator<(const Sample& other) const
+    {
+      return key < other.key;
+    }
+  };
+}
 
 typedef InternalDataReader<Sample> ReaderType;
 

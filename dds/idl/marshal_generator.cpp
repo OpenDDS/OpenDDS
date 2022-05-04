@@ -149,7 +149,7 @@ namespace {
 
   string streamCommon(const std::string& indent, const string& name, AST_Type* type,
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
-                      const string& stru = "", bool printing = false);
+                      const string& stru = "");
 
   const std::string construct_bound_fail =
     "strm.get_construction_status() == Serializer::BoundConstructionFailure";
@@ -1891,7 +1891,7 @@ namespace {
   // common to both fields (in structs) and branches (in unions)
   string findSizeCommon(const std::string& indent, const string& name, AST_Type* type,
                         const string& prefix, bool wrap_nested_key_only, Intro& intro,
-                        const string& = "", bool = false) // same sig as streamCommon
+                        const string& = "") // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix == "uni";
@@ -1933,7 +1933,7 @@ namespace {
 
   string findSizeMutableUnion(const string& indent, const string& name, AST_Type* type,
                               const string& prefix, bool wrap_nested_key_only, Intro& intro,
-                              const string & = "", bool = false) // same sig as streamCommon
+                              const string & = "") // same sig as streamCommon
   {
     return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total);\n"
       + findSizeCommon(indent, name, type, prefix, wrap_nested_key_only, intro);
@@ -1959,7 +1959,7 @@ namespace {
   // common to both fields (in structs) and branches (in unions)
   string streamCommon(const std::string& /*indent*/, const string& name, AST_Type* type,
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
-                      const string& stru, bool printing)
+                      const string& stru)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
@@ -1977,7 +1977,7 @@ namespace {
 
     WrapDirection dir = (shift == ">>") ? WD_INPUT : WD_OUTPUT;
     if ((fld_cls & CL_STRING) && (dir == WD_INPUT)) {
-      if ((fld_cls & CL_BOUNDED) && !printing) {
+      if ((fld_cls & CL_BOUNDED)) {
         const string args = expr + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(actual_type);
         return "(strm " + shift + ' ' + getWrapper(args, actual_type, WD_INPUT) + ')';
       }
@@ -1999,7 +1999,7 @@ namespace {
         if (!accessor && !use_cxx11) {
           local += ".in()";
         }
-        if ((fld_cls & CL_BOUNDED) && !printing) {
+        if ((fld_cls & CL_BOUNDED)) {
           const string args = (fieldref + '.' + local).substr(3) + ", " + bounded_arg(actual_type);
           return "(strm " + shift + ' ' + getWrapper(args, actual_type, WD_OUTPUT) + ')';
         }
@@ -3204,57 +3204,6 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   if (!generate_struct_serialization_functions(node, FieldFilter_All) ||
       !generate_struct_serialization_functions(node, FieldFilter_NestedKeyOnly)) {
     return false;
-  }
-
-  if (be_global->printer()) {
-    be_global->add_include("dds/DCPS/Printer.h");
-    PreprocessorIfGuard g("ndef OPENDDS_SAFETY_PROFILE");
-    g.extra_newline(true);
-    Function shift("operator<<", "std::ostream&");
-    shift.addArg("strm", "Printable");
-    shift.addArg("stru", "const " + cxx + "&");
-    shift.endArgs();
-    shift.extra_newline_ = false;
-    Intro intro;
-    const std::string indent = "  ";
-    std::string expr = indent + "strm.push_indent();\n";
-    for (size_t i = 0; i < fields.size(); ++i) {
-      const string field_name = fields[i]->local_name()->get_string();
-      AST_Type* const field_type = resolveActualType(fields[i]->field_type());
-      const AST_Decl::NodeType node_type = field_type->node_type();
-      const bool is_composite_type = node_type == AST_Decl::NT_struct;
-      const bool is_string_type = node_type == AST_Decl::NT_string ||
-        node_type == AST_Decl::NT_wstring;
-      expr +=
-        "\n"
-        "  // Print " + field_name  + "\n"
-        "  strm.print_indent();\n"
-        "  if (strm.printer().print_field_names()) {\n"
-        "    strm.os() << \"" + field_name + ":";
-      if (is_composite_type) {
-        expr += "\" << std::endl";
-      } else {
-        expr += " \"";
-      }
-      expr += ";\n"
-        "  }\n";
-      if (is_string_type) {
-        expr +=
-          "  strm.os() << '\"';\n";
-      }
-      expr += indent + streamCommon(
-        indent, field_name, fields[i]->field_type(), "<< stru", false, intro, cxx, true);
-      if (is_string_type) {
-        expr += " << '\"'";
-      }
-      if (!is_composite_type) {
-        expr += " << std::endl";
-      }
-      expr += ";\n";
-    }
-    intro.join(be_global->impl_, indent);
-    be_global->impl_ << expr << "\n"
-      "  return strm.os();\n";
   }
 
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);

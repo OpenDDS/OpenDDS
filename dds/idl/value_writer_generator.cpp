@@ -186,8 +186,7 @@ namespace {
                             const std::string&,
                             bool,
                             Intro&,
-                            const std::string&,
-                            bool)
+                            const std::string&)
   {
     be_global->impl_ <<
       "    value_writer.begin_union_member(\"" << field_name << "\");\n";
