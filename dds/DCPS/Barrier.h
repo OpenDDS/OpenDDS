@@ -24,7 +24,7 @@ class OpenDDS_Dcps_Export Barrier
 {
 public:
 
-  Barrier(size_t expected);
+  explicit Barrier(size_t expected);
 
   virtual ~Barrier();
 

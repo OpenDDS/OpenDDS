@@ -11,27 +11,8 @@
 
 #include <gtest/gtest.h>
 
-TEST(dds_DCPS_EventDispatcher, DefaultConstructor)
+namespace
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher;
-}
-
-TEST(dds_DCPS_EventDispatcher, ArgConstructorFour)
-{
-  OpenDDS::DCPS::EventDispatcher dispatcher(4);
-}
-
-TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderAlpha)
-{
-  OpenDDS::DCPS::EventDispatcher dispatcher_four(4);
-  OpenDDS::DCPS::EventDispatcher dispatcher_two(2);
-}
-
-TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderBeta)
-{
-  OpenDDS::DCPS::EventDispatcher dispatcher_four(2);
-  OpenDDS::DCPS::EventDispatcher dispatcher_two(4);
-}
 
 class TestObjBase
 {
@@ -73,6 +54,49 @@ struct SimpleTestObj : public TestObjBase
   void operator()() { increment_call_count(); }
 };
 
+struct RecursiveTestObjOne : public TestObjBase
+{
+  RecursiveTestObjOne(OpenDDS::DCPS::EventDispatcher& dispatcher) : dispatcher_(dispatcher) {}
+
+  void operator()() { if (increment_call_count() % 2) { dispatcher_.dispatch(*this); } }
+
+  OpenDDS::DCPS::EventDispatcher& dispatcher_;
+};
+
+struct RecursiveTestObjTwo : public TestObjBase
+{
+  RecursiveTestObjTwo(OpenDDS::DCPS::EventDispatcher& dispatcher, size_t dispatch_scale) : dispatcher_(dispatcher), dispatch_scale_(dispatch_scale) {}
+
+  void operator()() { increment_call_count(); const size_t scale = dispatch_scale_.value(); for (size_t i = 0; i < scale; ++i) { dispatcher_.dispatch(*this); } }
+
+  OpenDDS::DCPS::EventDispatcher& dispatcher_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> dispatch_scale_;
+};
+
+} // (anonymous) namespace
+
+TEST(dds_DCPS_EventDispatcher, DefaultConstructor)
+{
+  OpenDDS::DCPS::EventDispatcher dispatcher;
+}
+
+TEST(dds_DCPS_EventDispatcher, ArgConstructorFour)
+{
+  OpenDDS::DCPS::EventDispatcher dispatcher(4);
+}
+
+TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderAlpha)
+{
+  OpenDDS::DCPS::EventDispatcher dispatcher_four(4);
+  OpenDDS::DCPS::EventDispatcher dispatcher_two(2);
+}
+
+TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderBeta)
+{
+  OpenDDS::DCPS::EventDispatcher dispatcher_four(2);
+  OpenDDS::DCPS::EventDispatcher dispatcher_two(4);
+}
+
 TEST(dds_DCPS_EventDispatcher, SimpleDispatchAlpha)
 {
   SimpleTestObj test_obj;
@@ -99,15 +123,6 @@ TEST(dds_DCPS_EventDispatcher, SimpleDispatchBeta)
   test_obj.wait(5u);
   EXPECT_EQ(test_obj.call_count(), 5u);
 }
-
-struct RecursiveTestObjOne : public TestObjBase
-{
-  RecursiveTestObjOne(OpenDDS::DCPS::EventDispatcher& dispatcher) : dispatcher_(dispatcher) {}
-
-  void operator()() { if (increment_call_count() % 2) { dispatcher_.dispatch(*this); } }
-
-  OpenDDS::DCPS::EventDispatcher& dispatcher_;
-};
 
 TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha)
 {
@@ -140,16 +155,6 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
 
   EXPECT_GE(test_obj.call_count(), 10u);
 }
-
-struct RecursiveTestObjTwo : public TestObjBase
-{
-  RecursiveTestObjTwo(OpenDDS::DCPS::EventDispatcher& dispatcher, size_t dispatch_scale) : dispatcher_(dispatcher), dispatch_scale_(dispatch_scale) {}
-
-  void operator()() { increment_call_count(); const size_t scale = dispatch_scale_.value(); for (size_t i = 0; i < scale; ++i) { dispatcher_.dispatch(*this); } }
-
-  OpenDDS::DCPS::EventDispatcher& dispatcher_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> dispatch_scale_;
-};
 
 TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma)
 {
