@@ -19,6 +19,7 @@ Operating System
 * u18/u20 - Ubuntu 18.04/Ubuntu 20.04
 * w19/w22 - Windows Server 2019 (Visual Studio 2019)/Windows Server 2022 (Visual Studio 2022)
 * m10 - MacOS 10.15
+* m11 - MacOS 11.0
 
 .. seealso::
 
@@ -139,7 +140,7 @@ Test runs which only contain CMake tests are prefixed by ``cmake_``.
 
 .lst files contain a list of tests with configuration options that will turn tests on or off.
 The *test_* jobs pass in :ghfile:`tests/dcps_tests.lst`.
-Static and Release builds instead use :ghfile:`tests/static_ci_tests.lst`.
+MacOS, Windows 22, Static, and Release builds instead use :ghfile:`tests/core_ci_tests.lst`.
 The Thread Sanatizer build uses :ghfile:`tests/tsan_tests.lst`.
 This separation of .lst files is due to how excluding all but a few tests in the ``dcps_tests.lst`` would require adding a new config option to every test we didn't want to run.
 There is a separate security test list, :ghfile:`tests/security/security_tests.lst`, which governs the security tests which are run when ``--security`` is passed to ``auto_run_tests.pl``.
@@ -151,6 +152,8 @@ There are similar test blockers which only block for specific GitHub Actions con
 * ``!GH_ACTIONS_OPENDDS_SAFETY_PROFILE`` blocks Safety Profile builds
 
 * ``!GH_ACTIONS_M10`` blocks the MacOS10 runners
+
+This option currently does nothing because GitHub sees MacOS runners as unresponsive when they attempt to run some of the more intensive tests in dcps_tests.lst.
 
 * ``!GH_ACTIONS_ASAN`` blocks the Address Sanitizer builds
 

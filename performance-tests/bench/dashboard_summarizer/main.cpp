@@ -90,6 +90,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   std::set<std::string> known_scenario_names;
   known_scenario_names.insert("disco");
+  known_scenario_names.insert("disco-relay");
+  known_scenario_names.insert("disco-repo");
   known_scenario_names.insert("echo_tcp");
   known_scenario_names.insert("echo_rtps");
   known_scenario_names.insert("fan_tcp");

@@ -30,6 +30,8 @@ bool
       return false;
     }
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, tc->lock_, false);
+
   OPENDDS_STRING supported;
   for (OpenDDS::DCPS::TransportClient::ImplsType::const_iterator it = tc->impls_.begin(),
           end = tc->impls_.end();
@@ -88,6 +90,8 @@ bool
                         ACE_TEXT("(%P|%t) WARNING: Null transport client.\n")),
                        false);
     }
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, tc->lock_, false);
 
   if (tc->links_.map().size() == 0)
     {
