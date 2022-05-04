@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_EVENTDISPATCHER_H
 
 #include "Definitions.h"
+#include "RcObject.h"
 #include "ThreadPool.h"
 #include "TimePoint_T.h"
 #include "TimeDuration.h"
@@ -32,7 +33,7 @@ void* fun_ptr_proxy(void* arg)
   return 0;
 }
 
-class OpenDDS_Dcps_Export EventDispatcher
+class OpenDDS_Dcps_Export EventDispatcher : public RcObject
 {
 public:
   enum DispatchStatus : uint32_t
@@ -44,6 +45,8 @@ public:
 
   EventDispatcher(size_t count = 1);
   virtual ~EventDispatcher();
+
+  void shutdown();
 
   typedef void*(*FunPtr)(void*);
 

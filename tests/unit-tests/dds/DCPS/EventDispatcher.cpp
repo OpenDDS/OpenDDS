@@ -119,6 +119,8 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha)
   dispatcher.dispatch(test_obj);
 
   test_obj.wait(6u);
+  dispatcher.shutdown();
+
   EXPECT_GE(test_obj.call_count(), 6u);
 }
 
@@ -134,6 +136,8 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
   dispatcher.dispatch(test_obj);
 
   test_obj.wait(10u);
+  dispatcher.shutdown();
+
   EXPECT_GE(test_obj.call_count(), 10u);
 }
 
@@ -156,6 +160,8 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma)
 
   test_obj.wait(1000u);
   test_obj.dispatch_scale_ = 0;
+  dispatcher.shutdown();
+
   EXPECT_GE(test_obj.call_count(), 1000u);
 }
 
@@ -166,9 +172,11 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
 
   dispatcher.dispatch(test_obj);
 
-  test_obj.wait(1000000u);
+  test_obj.wait(100000u);
   test_obj.dispatch_scale_ = 0;
-  EXPECT_GE(test_obj.call_count(), 1000000u);
+  dispatcher.shutdown();
+
+  EXPECT_GE(test_obj.call_count(), 100000u);
 }
 
 TEST(dds_DCPS_EventDispatcher, TimedDispatch)
@@ -178,17 +186,17 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatch)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
   dispatcher.dispatch(test_obj);
 
   test_obj.wait(6u);
@@ -213,14 +221,14 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatch)
   const OpenDDS::DCPS::MonotonicTimePoint after12 = OpenDDS::DCPS::MonotonicTimePoint::now();
 
   EXPECT_LT(now, after6);
-  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
 
-  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
-  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
-  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
-  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
-  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
-  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
+  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
 }
 
 TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
@@ -230,17 +238,17 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
   dispatcher.dispatch(test_obj);
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
   dispatcher.dispatch(test_obj);
 
   test_obj.wait(6u);
@@ -265,14 +273,14 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
   const OpenDDS::DCPS::MonotonicTimePoint after12 = OpenDDS::DCPS::MonotonicTimePoint::now();
 
   EXPECT_LT(now, after6);
-  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
 
-  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
-  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
-  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
-  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
-  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
-  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
+  EXPECT_GE(after7, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
+  EXPECT_GE(after8, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  EXPECT_GE(after9, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  EXPECT_GE(after10, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  EXPECT_GE(after11, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
 }
 
 TEST(dds_DCPS_EventDispatcher, CancelDispatch)
@@ -282,31 +290,31 @@ TEST(dds_DCPS_EventDispatcher, CancelDispatch)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
 
   EXPECT_EQ(dispatcher.cancel(test_obj), 6u);
 
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
 
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0)), 1u);
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66)), 1u);
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33)), 1u);
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8)), 1u);
 
   test_obj.wait(2u);
   const OpenDDS::DCPS::MonotonicTimePoint after2 = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
+  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
   EXPECT_EQ(test_obj.call_count(), 2u);
 }
 
@@ -317,30 +325,30 @@ TEST(dds_DCPS_EventDispatcher, CancelDispatchSingleThreaded)
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
 
   EXPECT_EQ(dispatcher.cancel(test_obj), 6u);
 
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.66));
-  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.6));
+  dispatcher.schedule(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
 
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.0)), 1u);
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.66)), 1u);
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(1.33)), 1u);
-  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(2.33)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.4)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.9)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.5)), 1u);
+  EXPECT_EQ(dispatcher.cancel(test_obj, now + OpenDDS::DCPS::TimeDuration::from_double(0.8)), 1u);
 
   test_obj.wait(2u);
   const OpenDDS::DCPS::MonotonicTimePoint after2 = OpenDDS::DCPS::MonotonicTimePoint::now();
 
-  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(2.0));
+  EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
   EXPECT_EQ(test_obj.call_count(), 2u);
 }

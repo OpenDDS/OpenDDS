@@ -28,6 +28,11 @@ EventDispatcher::EventDispatcher(size_t count)
 
 EventDispatcher::~EventDispatcher()
 {
+  shutdown();
+}
+
+void EventDispatcher::shutdown()
+{
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   running_ = false;
   cv_.notify_all();
