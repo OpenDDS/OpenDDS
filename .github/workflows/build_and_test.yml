@@ -795,7 +795,7 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log_Brief.html" "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log_Brief.html" "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log"
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
@@ -1104,7 +1104,7 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log_Brief.html" "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log_Brief.html" "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/output.log"
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
