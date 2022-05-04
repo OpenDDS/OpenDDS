@@ -85,7 +85,11 @@ sub collect_stack_trace {
             $line = <$fh>;
           } while (index($line, $trace_end) == -1);
           $trace = $trace . $line;
-          $traces{$test_name} = $trace;
+          if (!defined $traces{$test_name}) {
+            $traces{$test_name} = $trace;
+          } else {
+            $traces{$test_name} = $traces{$test_name} . "\n" . $trace;
+          }
         }
       }
     } else {
