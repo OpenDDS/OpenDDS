@@ -60,6 +60,8 @@ WriterInfo::WriterInfo(WriterInfoListener* reader,
   , historic_samples_timer_(NO_TIMER)
   , last_historic_seq_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
   , waiting_for_end_historic_samples_(false)
+  , delivering_historic_samples_(false)
+  , delivering_historic_samples_cv_(mutex_)
   , state_(NOT_SET)
   , reader_(reader)
   , writer_id_(writer_id)
@@ -119,15 +121,21 @@ bool
 WriterInfo::check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  while (delivering_historic_samples_) {
+    delivering_historic_samples_cv_.wait(TheServiceParticipant->get_thread_status_manager());
+  }
   if (waiting_for_end_historic_samples_) {
+    bool result = false;
     RcHandle<WriterInfo> info = rchandle_from(this);
     if (!historic_samples_.empty()) {
       last_historic_seq_ = historic_samples_.rbegin()->first;
+      delivering_historic_samples_ = true;
+      to_deliver.swap(historic_samples_);
+      result = true;
     }
-    to_deliver.swap(historic_samples_);
     guard.release();
     sweeper->cancel_timer(info);
-    return true;
+    return result;
   }
   return false;
 }
@@ -142,6 +150,14 @@ WriterInfo::check_historic(const SequenceNumber& seq, const ReceivedDataSample& 
     return true;
   }
   return false;
+}
+
+void
+WriterInfo::finished_delivering_historic()
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  delivering_historic_samples_ = false;
+  delivering_historic_samples_cv_.notify_all();
 }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE

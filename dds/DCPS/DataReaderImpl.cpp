@@ -266,7 +266,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
-    RcHandle<WriterInfo> info = make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos);
+    WriterInfo_rch info = make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -532,6 +532,13 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
   DDS::InstanceHandleSeq handles;
 
+  CORBA::ULong wr_len = writers.length();
+
+  // Flush historic samples and/or allow in-progress delivery of historic samples to complete
+  for (CORBA::ULong i = 0; i < wr_len; i++) {
+    resume_sample_processing(writers[i]);
+  }
+
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
   // This is used to hold the list of writers which were actually
@@ -540,16 +547,12 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   WriterIdSeq updated_writers;
   WriterMapType removed_writers;
 
-  CORBA::ULong wr_len;
-
   //Remove the writers from writer list. If the supplied writer
   //is not in the cached writers list then it is already removed.
   //We just need remove the writers in the list that have not been
   //removed.
   {
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-
-    wr_len = writers.length();
 
     for (CORBA::ULong i = 0; i < wr_len; i++) {
       const PublicationId writer_id = writers[i];
@@ -738,7 +741,7 @@ DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-  typedef std::pair<RepoId, RcHandle<WriterInfo> > RepoWriterPair;
+  typedef std::pair<RepoId, WriterInfo_rch> RepoWriterPair;
   typedef OPENDDS_VECTOR(RepoWriterPair) WriterSet;
   WriterSet writers;
 
@@ -1352,7 +1355,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
 {
   // caller should have the sample_lock_ !!!
 
-  RcHandle<WriterInfo> writer;
+  WriterInfo_rch writer;
 
   // The received_activity() has to be called outside the writers_lock_
   // because it probably acquire writers_lock_ read lock recursively
@@ -1499,7 +1502,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           buffer.str().c_str()));
     }
 
-    RcHandle<WriterInfo> writer;
+    WriterInfo_rch writer;
     {
       ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -1671,7 +1674,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     }
     // Going to acquire writers lock, release samples lock
     guard.release();
-    this->resume_sample_processing(sample.header_.publication_id_);
+    resume_sample_processing(sample.header_.publication_id_);
     if (DCPS_debug_level > 4) {
       GuidConverter pub_id(sample.header_.publication_id_);
       ACE_DEBUG((
@@ -3220,15 +3223,21 @@ DataReaderImpl::reset_ownership(::DDS::InstanceHandle_t instance)
 void
 DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
 {
-  ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
-  WriterMapType::iterator where = writers_.find(pub_id);
-  if (writers_.end() != where) {
-    WriterInfo& info = *where->second;
+  WriterInfo_rch info;
+  {
+    ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
+    WriterMapType::iterator where = writers_.find(pub_id);
+    if (writers_.end() != where) {
+      info = where->second;
+    }
+  }
+
+  if (info) {
     OPENDDS_MAP(SequenceNumber, ReceivedDataSample) to_deliver;
     // Stop filtering these
-    if (info.check_end_historic_samples(end_historic_sweeper_.in(), to_deliver)) {
-      write_guard.release();
+    if (info->check_end_historic_samples(end_historic_sweeper_.in(), to_deliver)) {
       deliver_historic(to_deliver);
+      info->finished_delivering_historic();
     }
   }
 }
@@ -3386,7 +3395,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent = false;
 #endif
-  RcHandle<WriterInfo> writer;
+  WriterInfo_rch writer;
 
   if (header.publication_id_.entityId.entityKind != ENTITYKIND_OPENDDS_NIL_WRITER) {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, writers_lock_);
