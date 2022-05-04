@@ -139,4 +139,5 @@ sub merge_output {
   }
 }
 
+
 merge_output(shift, shift);
