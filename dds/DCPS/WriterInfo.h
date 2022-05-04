@@ -9,15 +9,17 @@
 #ifndef OPENDDS_DCPS_WRITERINFO_H
 #define OPENDDS_DCPS_WRITERINFO_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsCoreC.h"
 #include "PoolAllocator.h"
 #include "RcObject.h"
 #include "Definitions.h"
+#include "ConditionVariable.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
-#include "transport/framework/ReceivedDataSample.h"
 #include "TimeTypes.h"
+#include "transport/framework/ReceivedDataSample.h"
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsCoreC.h>
 
 #ifdef ACE_HAS_CPP11
 #  include <atomic>
@@ -199,6 +201,7 @@ public:
   void cancel_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper);
   bool check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver);
   bool check_historic(const SequenceNumber& seq, const ReceivedDataSample& sample, SequenceNumber& last_historic_seq);
+  void finished_delivering_historic();
 
 private:
 
@@ -218,6 +221,9 @@ private:
   SequenceNumber last_historic_seq_;
 
   bool waiting_for_end_historic_samples_;
+
+  bool delivering_historic_samples_;
+  ConditionVariable<ACE_Thread_Mutex> delivering_historic_samples_cv_;
 
   /// State of the writer.
   WriterState state_;
@@ -270,6 +276,8 @@ WriterInfo::received_activity(const MonotonicTimePoint& when)
     reader->writer_became_alive(*this, when);
   }
 }
+
+typedef RcHandle<WriterInfo> WriterInfo_rch;
 
 } // namespace DCPS
 } // namespace
