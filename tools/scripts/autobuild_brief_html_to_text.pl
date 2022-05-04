@@ -106,11 +106,14 @@ sub print_out {
 }
 
 sub merge_output {
-  # First argument is the brief html output
+  # First argument is a brief html output
   parse_html(shift);
 
-  # Second argument is the full text output
-  collect_stack_trace(shift);
+  # Optional second argument is a full text output
+  my $full_log = shift;
+  if (defined $full_log) {
+    collect_stack_trace($full_log);
+  }
 
   my $full_log_file = shift;
   my $test;
