@@ -61,6 +61,20 @@ public:
     return schedule(fun_ptr_proxy<T>, &ref, expiration);
   }
 
+  size_t cancel(FunPtr fun, void* arg, const MonotonicTimePoint& expiration);
+
+  template <typename T>
+  size_t cancel(T& ref, const MonotonicTimePoint& expiration) {
+    return cancel(fun_ptr_proxy<T>, &ref, expiration);
+  }
+
+  size_t cancel(FunPtr fun, void* arg = NULL);
+
+  template <typename T>
+  size_t cancel(T& ref) {
+    return cancel(fun_ptr_proxy<T>, &ref);
+  }
+
 private:
 
   static ACE_THR_FUNC_RETURN run(void* arg);
@@ -73,6 +87,7 @@ private:
   mutable ACE_Thread_Mutex mutex_;
   mutable ConditionVariable<ACE_Thread_Mutex> cv_;
   bool running_;
+  size_t running_threads_;
   EventQueue event_queue_;
   TimerQueueMap timer_queue_map_;
   ThreadStatusManager tsm_;
