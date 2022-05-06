@@ -8,6 +8,7 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "EventDispatcher.h"
+#include "TimeDuration.h"
 
 #include <ace/Reverse_Lock_T.h>
 
@@ -22,6 +23,7 @@ EventDispatcher::EventDispatcher(size_t count)
  : cv_(mutex_)
  , running_(true)
  , running_threads_(0)
+ , max_timer_id_(LONG_MAX)
  , pool_(count, run, this)
 {
 }
@@ -44,44 +46,57 @@ void EventDispatcher::shutdown()
 
 EventDispatcher::DispatchStatus EventDispatcher::dispatch(FunPtr fun, void* arg)
 {
-  OPENDDS_ASSERT(fun);
+  if (!fun) {
+    return DS_ERROR;
+  }
+
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (running_) {
     event_queue_.push(std::make_pair(fun, arg));
     cv_.notify_one();
+    return DS_SUCCESS;
   }
-  return DS_SUCCESS;
+  return DS_ERROR;
 }
 
-EventDispatcher::DispatchStatus EventDispatcher::schedule(FunPtr fun, void* arg, const MonotonicTimePoint& expiration)
+EventDispatcher::TimerId EventDispatcher::schedule(FunPtr fun, void* arg, const MonotonicTimePoint& expiration)
 {
-  OPENDDS_ASSERT(fun);
+  if (!fun) {
+    return -1;
+  }
+
+  TimerId id = 0;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (running_) {
-    timer_queue_map_.insert(std::make_pair(expiration, std::make_pair(fun, arg)));
+    TimerQueueMap::iterator pos = timer_queue_map_.insert(std::make_pair(expiration, std::make_pair(std::make_pair(fun, arg), 0)));
+    // Make it a loop in case we ever recycle timer ids
+    const TimerId starting_id = max_timer_id_;
+    do {
+      id = max_timer_id_ = max_timer_id_ == LONG_MAX ? 1 : max_timer_id_ + 1;
+      if (id == starting_id) {
+        return -1; // all ids in use ?!
+      }
+      pos->second.second = id;
+    } while (timer_id_map_.insert(std::make_pair(id, pos)).second == false);
     cv_.notify_one();
+    return id;
   }
-  return DS_SUCCESS;
+  return -1;
 }
 
-size_t EventDispatcher::cancel(FunPtr fun, void* arg, const MonotonicTimePoint& expiration)
+size_t EventDispatcher::cancel(EventDispatcher::TimerId id)
 {
-  OPENDDS_ASSERT(fun);
-  size_t count = 0;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  const std::pair<TimerQueueMap::iterator, TimerQueueMap::iterator> range = timer_queue_map_.equal_range(expiration);
-  for (TimerQueueMap::iterator it = range.first; it != range.second;) {
-    if (it->second.first == fun && it->second.second == arg) {
-      if (it == timer_queue_map_.begin()) {
-        cv_.notify_all();
-      }
-      timer_queue_map_.erase(it++);
-      ++count;
-    } else {
-      ++it;
+  TimerIdMap::iterator pos = timer_id_map_.find(id);
+  if (pos != timer_id_map_.end()) {
+    if (pos->second == timer_queue_map_.begin()) {
+      cv_.notify_all();
     }
+    timer_queue_map_.erase(pos->second);
+    timer_id_map_.erase(pos);
+    return 1;
   }
-  return count;
+  return 0;
 }
 
 size_t EventDispatcher::cancel(FunPtr fun, void* arg)
@@ -90,10 +105,11 @@ size_t EventDispatcher::cancel(FunPtr fun, void* arg)
   size_t count = 0;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (TimerQueueMap::iterator it = timer_queue_map_.begin(); it != timer_queue_map_.end();) {
-    if (it->second.first == fun && it->second.second == arg) {
+    if (it->second.first.first == fun && it->second.first.second == arg) {
       if (it == timer_queue_map_.begin()) {
         cv_.notify_all();
       }
+      timer_id_map_.erase(it->second.second);
       timer_queue_map_.erase(it++);
       ++count;
     } else {
@@ -128,7 +144,8 @@ void EventDispatcher::run_event_loop()
     TimerQueueMap::iterator last = timer_queue_map_.upper_bound(now), pos = last;
     while (pos != timer_queue_map_.begin()) {
       --pos;
-      event_queue_.push(pos->second);
+      event_queue_.push(pos->second.first);
+      timer_id_map_.erase(pos->second.second);
     }
     if (last != timer_queue_map_.begin()) {
       timer_queue_map_.erase(timer_queue_map_.begin(), last);
