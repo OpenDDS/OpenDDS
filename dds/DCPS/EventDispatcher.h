@@ -12,10 +12,8 @@
 #include "RcObject.h"
 #include "ThreadPool.h"
 #include "TimePoint_T.h"
-#include "TimeDuration.h"
 
 #include <ace/Thread_Mutex.h>
-#include <ace/Reverse_Lock_T.h>
 #include "ConditionVariable.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -36,12 +34,12 @@ void* fun_ptr_proxy(void* arg)
 class OpenDDS_Dcps_Export EventDispatcher : public RcObject
 {
 public:
-  enum DispatchStatus : uint32_t
-  {
-    DS_UNKNOWN = 0,
-    DS_SUCCESS = 1,
-    DS_ERROR = 2
-  };
+
+  typedef bool DispatchStatus;
+  typedef long TimerId;
+
+  const bool DS_SUCCESS = true;
+  const bool DS_ERROR = false;
 
   EventDispatcher(size_t count = 1);
   virtual ~EventDispatcher();
@@ -57,19 +55,14 @@ public:
     return dispatch(fun_ptr_proxy<T>, &ref);
   }
 
-  DispatchStatus schedule(FunPtr fun, void* arg = NULL, const MonotonicTimePoint& expiration = MonotonicTimePoint::now());
+  TimerId schedule(FunPtr fun, void* arg = NULL, const MonotonicTimePoint& expiration = MonotonicTimePoint::now());
 
   template <typename T>
-  DispatchStatus schedule(T& ref, const MonotonicTimePoint& expiration = MonotonicTimePoint::now()) {
+  TimerId schedule(T& ref, const MonotonicTimePoint& expiration = MonotonicTimePoint::now()) {
     return schedule(fun_ptr_proxy<T>, &ref, expiration);
   }
 
-  size_t cancel(FunPtr fun, void* arg, const MonotonicTimePoint& expiration);
-
-  template <typename T>
-  size_t cancel(T& ref, const MonotonicTimePoint& expiration) {
-    return cancel(fun_ptr_proxy<T>, &ref, expiration);
-  }
+  size_t cancel(TimerId id);
 
   size_t cancel(FunPtr fun, void* arg = NULL);
 
@@ -85,7 +78,9 @@ private:
 
   typedef std::pair<FunPtr, void*> FunArgPair;
   typedef OPENDDS_QUEUE(FunArgPair) EventQueue;
-  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, FunArgPair) TimerQueueMap;
+  typedef std::pair<FunArgPair, TimerId> TimerPair;
+  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, TimerPair) TimerQueueMap;
+  typedef OPENDDS_MAP(TimerId, TimerQueueMap::iterator) TimerIdMap;
 
   mutable ACE_Thread_Mutex mutex_;
   mutable ConditionVariable<ACE_Thread_Mutex> cv_;
@@ -93,6 +88,8 @@ private:
   size_t running_threads_;
   EventQueue event_queue_;
   TimerQueueMap timer_queue_map_;
+  TimerIdMap timer_id_map_;
+  TimerId max_timer_id_;
   ThreadStatusManager tsm_;
   ThreadPool pool_;
 };
