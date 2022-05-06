@@ -617,7 +617,7 @@ public:
       {"complete", XTYPES_COMPLETE}
     };
 
-    for (size_t i = 0; i < DCPS::array_count(entries); ++i) {
+    for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
       if (0 == std::strcmp(entries[i].name, str)) {
         use_xtypes_ = entries[i].value;
         return true;

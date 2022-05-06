@@ -791,13 +791,11 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->max_type_lookup_service_reply_period(TimeDuration::from_msec(timeout));
         } else if (name == "UseXTypes") {
           const OPENDDS_STRING& value = it->second;
-          bool valid;
-          if (value.size() == 1) {
-            int smInt;
-            valid = DCPS::convertToInteger(value, smInt) && smInt >= 0 && smInt <= 2;
-            if (valid) {
-              config->use_xtypes(static_cast<RtpsDiscoveryConfig::UseXTypes>(smInt));
-            }
+          int smInt;
+          bool valid = value.size() == 1 && DCPS::convertToInteger(value, smInt) &&
+            smInt >= 0 && smInt <= 2;
+          if (valid) {
+            config->use_xtypes(static_cast<RtpsDiscoveryConfig::UseXTypes>(smInt));
           } else {
             valid = config->use_xtypes(value.c_str());
           }
