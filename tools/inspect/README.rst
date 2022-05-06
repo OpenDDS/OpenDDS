@@ -101,7 +101,7 @@ This should result in ``inspect`` printing messages like these after a short per
       String8 text = "Worst. Movie. Ever."
       Int32 count = 0
 
-If the delays are not added to publisher or the timing of the added delays need to be increased, then it could just prints something like::
+If the delays are not added to publisher or the timing of the added delays need to be increased, then it could just print something like::
 
     Listening to 1 writer(s)
     Listening to 0 writer(s)
