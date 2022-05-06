@@ -72,6 +72,39 @@ tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps publishers 10 su
 tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc publishers 10 subscribers 10: RTPS
 tests/DCPS/EntityLifecycleStress/run_test.pl large_samples rtps_disc_tcp publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
 
+tests/DCPS/Thrasher/run_test.pl single: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl double: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl triangle: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl default: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl low: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl medium: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl high: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl aggressive: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl single rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl double rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl triangle rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl default rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl low rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl medium rtps: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl high rtps: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS_ASAN
+#tests/DCPS/Thrasher/run_test.pl aggressive rtps: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS_ASAN
+tests/DCPS/Thrasher/run_test.pl single durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl double durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl triangle durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl default durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl low durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl medium durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl high durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl aggressive durable: !DCPS_MIN !LYNXOS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Thrasher/run_test.pl single rtps durable: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl double rtps durable: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl triangle rtps durable: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl default rtps durable: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl low rtps durable: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl medium rtps durable: !DCPS_MIN RTPS !LYNXOS
+tests/DCPS/Thrasher/run_test.pl high rtps durable: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS_ASAN
+#tests/DCPS/Thrasher/run_test.pl aggressive rtps durable: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE !GH_ACTIONS_ASAN
+
 performance-tests/bench/run_test.pl disco show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS
 performance-tests/bench/run_test.pl echo show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 performance-tests/bench/run_test.pl echo_frag show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
