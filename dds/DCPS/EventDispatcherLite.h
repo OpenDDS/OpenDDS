@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_EVENTDISPATCHER_H
-#define OPENDDS_DCPS_EVENTDISPATCHER_H
+#ifndef OPENDDS_DCPS_EVENTDISPATCHERLITE_H
+#define OPENDDS_DCPS_EVENTDISPATCHERLITE_H
 
 #include "Definitions.h"
 #include "RcObject.h"
@@ -31,7 +31,7 @@ void* fun_ptr_proxy(void* arg)
   return 0;
 }
 
-class OpenDDS_Dcps_Export EventDispatcher : public RcObject
+class OpenDDS_Dcps_Export EventDispatcherLite : public RcObject
 {
 public:
 
@@ -41,8 +41,8 @@ public:
   const bool DS_SUCCESS = true;
   const bool DS_ERROR = false;
 
-  EventDispatcher(size_t count = 1);
-  virtual ~EventDispatcher();
+  EventDispatcherLite(size_t count = 1);
+  virtual ~EventDispatcherLite();
 
   void shutdown();
 
@@ -99,4 +99,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_EVENTDISPATCHER_H
+#endif // OPENDDS_DCPS_EVENTDISPATCHERLITE_H
