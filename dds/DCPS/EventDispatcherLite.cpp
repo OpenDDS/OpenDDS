@@ -7,7 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
-#include "EventDispatcher.h"
+#include "EventDispatcherLite.h"
 #include "TimeDuration.h"
 
 #include <ace/Reverse_Lock_T.h>
@@ -19,7 +19,7 @@ namespace OpenDDS
 namespace DCPS
 {
 
-EventDispatcher::EventDispatcher(size_t count)
+EventDispatcherLite::EventDispatcherLite(size_t count)
  : cv_(mutex_)
  , running_(true)
  , running_threads_(0)
@@ -28,12 +28,12 @@ EventDispatcher::EventDispatcher(size_t count)
 {
 }
 
-EventDispatcher::~EventDispatcher()
+EventDispatcherLite::~EventDispatcherLite()
 {
   shutdown();
 }
 
-void EventDispatcher::shutdown()
+void EventDispatcherLite::shutdown()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   running_ = false;
@@ -44,7 +44,7 @@ void EventDispatcher::shutdown()
   }
 }
 
-EventDispatcher::DispatchStatus EventDispatcher::dispatch(FunPtr fun, void* arg)
+EventDispatcherLite::DispatchStatus EventDispatcherLite::dispatch(FunPtr fun, void* arg)
 {
   if (!fun) {
     return DS_ERROR;
@@ -59,7 +59,7 @@ EventDispatcher::DispatchStatus EventDispatcher::dispatch(FunPtr fun, void* arg)
   return DS_ERROR;
 }
 
-EventDispatcher::TimerId EventDispatcher::schedule(FunPtr fun, void* arg, const MonotonicTimePoint& expiration)
+EventDispatcherLite::TimerId EventDispatcherLite::schedule(FunPtr fun, void* arg, const MonotonicTimePoint& expiration)
 {
   if (!fun) {
     return -1;
@@ -84,7 +84,7 @@ EventDispatcher::TimerId EventDispatcher::schedule(FunPtr fun, void* arg, const 
   return -1;
 }
 
-size_t EventDispatcher::cancel(EventDispatcher::TimerId id)
+size_t EventDispatcherLite::cancel(EventDispatcherLite::TimerId id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   TimerIdMap::iterator pos = timer_id_map_.find(id);
@@ -99,7 +99,7 @@ size_t EventDispatcher::cancel(EventDispatcher::TimerId id)
   return 0;
 }
 
-size_t EventDispatcher::cancel(FunPtr fun, void* arg)
+size_t EventDispatcherLite::cancel(FunPtr fun, void* arg)
 {
   OPENDDS_ASSERT(fun);
   size_t count = 0;
@@ -119,14 +119,14 @@ size_t EventDispatcher::cancel(FunPtr fun, void* arg)
   return count;
 }
 
-ACE_THR_FUNC_RETURN EventDispatcher::run(void* arg)
+ACE_THR_FUNC_RETURN EventDispatcherLite::run(void* arg)
 {
-  EventDispatcher& dispatcher = *(static_cast<EventDispatcher*>(arg));
+  EventDispatcherLite& dispatcher = *(static_cast<EventDispatcherLite*>(arg));
   dispatcher.run_event_loop();
   return 0;
 }
 
-void EventDispatcher::run_event_loop()
+void EventDispatcherLite::run_event_loop()
 {
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

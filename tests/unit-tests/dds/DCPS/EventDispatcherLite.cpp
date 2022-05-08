@@ -5,7 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/EventDispatcherLite.h>
 
 #include <ace/OS_NS_unistd.h>
 
@@ -56,51 +56,51 @@ struct SimpleTestObj : public TestObjBase
 
 struct RecursiveTestObjOne : public TestObjBase
 {
-  RecursiveTestObjOne(OpenDDS::DCPS::EventDispatcher& dispatcher) : dispatcher_(dispatcher) {}
+  RecursiveTestObjOne(OpenDDS::DCPS::EventDispatcherLite& dispatcher) : dispatcher_(dispatcher) {}
 
   void operator()() { if (increment_call_count() % 2) { dispatcher_.dispatch(*this); } }
 
-  OpenDDS::DCPS::EventDispatcher& dispatcher_;
+  OpenDDS::DCPS::EventDispatcherLite& dispatcher_;
 };
 
 struct RecursiveTestObjTwo : public TestObjBase
 {
-  RecursiveTestObjTwo(OpenDDS::DCPS::EventDispatcher& dispatcher, size_t dispatch_scale) : dispatcher_(dispatcher), dispatch_scale_(dispatch_scale) {}
+  RecursiveTestObjTwo(OpenDDS::DCPS::EventDispatcherLite& dispatcher, size_t dispatch_scale) : dispatcher_(dispatcher), dispatch_scale_(dispatch_scale) {}
 
   void operator()() { increment_call_count(); const size_t scale = dispatch_scale_.value(); for (size_t i = 0; i < scale; ++i) { dispatcher_.dispatch(*this); } }
 
-  OpenDDS::DCPS::EventDispatcher& dispatcher_;
+  OpenDDS::DCPS::EventDispatcherLite& dispatcher_;
   ACE_Atomic_Op<ACE_Thread_Mutex, size_t> dispatch_scale_;
 };
 
 } // (anonymous) namespace
 
-TEST(dds_DCPS_EventDispatcher, DefaultConstructor)
+TEST(dds_DCPS_EventDispatcherLite, DefaultConstructor)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher;
+  OpenDDS::DCPS::EventDispatcherLite dispatcher;
 }
 
-TEST(dds_DCPS_EventDispatcher, ArgConstructorFour)
+TEST(dds_DCPS_EventDispatcherLite, ArgConstructorFour)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher(4);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(4);
 }
 
-TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderAlpha)
+TEST(dds_DCPS_EventDispatcherLite, ArgConstructorOrderAlpha)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher_four(4);
-  OpenDDS::DCPS::EventDispatcher dispatcher_two(2);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher_four(4);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher_two(2);
 }
 
-TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderBeta)
+TEST(dds_DCPS_EventDispatcherLite, ArgConstructorOrderBeta)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher_four(2);
-  OpenDDS::DCPS::EventDispatcher dispatcher_two(4);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher_four(2);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher_two(4);
 }
 
-TEST(dds_DCPS_EventDispatcher, SimpleDispatchAlpha)
+TEST(dds_DCPS_EventDispatcherLite, SimpleDispatchAlpha)
 {
   SimpleTestObj test_obj;
-  OpenDDS::DCPS::EventDispatcher dispatcher;
+  OpenDDS::DCPS::EventDispatcherLite dispatcher;
 
   dispatcher.dispatch(test_obj);
   dispatcher.dispatch(test_obj);
@@ -110,10 +110,10 @@ TEST(dds_DCPS_EventDispatcher, SimpleDispatchAlpha)
   EXPECT_EQ(test_obj.call_count(), 3u);
 }
 
-TEST(dds_DCPS_EventDispatcher, SimpleDispatchBeta)
+TEST(dds_DCPS_EventDispatcherLite, SimpleDispatchBeta)
 {
   SimpleTestObj test_obj;
-  OpenDDS::DCPS::EventDispatcher dispatcher(8);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(8);
   dispatcher.dispatch(test_obj);
   dispatcher.dispatch(test_obj);
   dispatcher.dispatch(test_obj);
@@ -124,9 +124,9 @@ TEST(dds_DCPS_EventDispatcher, SimpleDispatchBeta)
   EXPECT_EQ(test_obj.call_count(), 5u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha)
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchAlpha)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher;
+  OpenDDS::DCPS::EventDispatcherLite dispatcher;
   RecursiveTestObjOne test_obj(dispatcher);
 
   dispatcher.dispatch(test_obj);
@@ -139,9 +139,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha)
   EXPECT_GE(test_obj.call_count(), 6u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchBeta)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher(8);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(8);
   RecursiveTestObjOne test_obj(dispatcher);
 
   dispatcher.dispatch(test_obj);
@@ -156,9 +156,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
   EXPECT_GE(test_obj.call_count(), 10u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma)
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchGamma)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher;
+  OpenDDS::DCPS::EventDispatcherLite dispatcher;
   RecursiveTestObjTwo test_obj(dispatcher, 1);
 
   dispatcher.dispatch(test_obj);
@@ -170,9 +170,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma)
   EXPECT_GE(test_obj.call_count(), 1000u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchDelta)
 {
-  OpenDDS::DCPS::EventDispatcher dispatcher(8);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(8);
   RecursiveTestObjTwo test_obj(dispatcher, 2);
 
   dispatcher.dispatch(test_obj);
@@ -184,10 +184,10 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
   EXPECT_GE(test_obj.call_count(), 100000u);
 }
 
-TEST(dds_DCPS_EventDispatcher, TimedDispatch)
+TEST(dds_DCPS_EventDispatcherLite, TimedDispatch)
 {
   SimpleTestObj test_obj;
-  OpenDDS::DCPS::EventDispatcher dispatcher(4);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(4);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -236,10 +236,10 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatch)
   EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
 }
 
-TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
+TEST(dds_DCPS_EventDispatcherLite, TimedDispatchSingleThreaded)
 {
   SimpleTestObj test_obj;
-  OpenDDS::DCPS::EventDispatcher dispatcher(1);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(1);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -288,10 +288,10 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
   EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
 }
 
-TEST(dds_DCPS_EventDispatcher, CancelDispatch)
+TEST(dds_DCPS_EventDispatcherLite, CancelDispatch)
 {
   SimpleTestObj test_obj;
-  OpenDDS::DCPS::EventDispatcher dispatcher(4);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(4);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -323,10 +323,10 @@ TEST(dds_DCPS_EventDispatcher, CancelDispatch)
   EXPECT_EQ(test_obj.call_count(), 2u);
 }
 
-TEST(dds_DCPS_EventDispatcher, CancelDispatchSingleThreaded)
+TEST(dds_DCPS_EventDispatcherLite, CancelDispatchSingleThreaded)
 {
   SimpleTestObj test_obj;
-  OpenDDS::DCPS::EventDispatcher dispatcher(1);
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(1);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
