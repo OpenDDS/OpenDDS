@@ -11,6 +11,7 @@
 #include "rtps_export.h"
 
 #include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/debug.h>
 
 #include <ace/Configuration.h>
 
@@ -24,6 +25,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+
+using DCPS::log_level;
+using DCPS::LogLevel;
 
 typedef RcHandle<Spdp> ParticipantHandle;
 typedef OPENDDS_MAP_CMP(GUID_t, ParticipantHandle, GUID_tKeyLessThan) ParticipantMap;
@@ -599,9 +603,9 @@ public:
   {
     use_xtypes_ = use_xtypes;
   }
-  void use_xtypes(const char* str)
+  bool use_xtypes(const char* str)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, false);
     struct NameValue {
       const char* name;
       UseXTypes value;
@@ -614,12 +618,15 @@ public:
 
     for (size_t i = 0; i < sizeof entries / sizeof entries[0]; ++i) {
       if (0 == std::strcmp(entries[i].name, str)) {
-        use_xtypes(entries[i].value);
-        return;
+        use_xtypes_ = entries[i].value;
+        return true;
       }
     }
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: RtpsDiscoveryConfig::use_xtypes -")
-               ACE_TEXT(" invalid XTypes configuration: %C\n"), str));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RtpsDiscoveryConfig::use_xtypes: "
+                 "invalid XTypes configuration: %C\n", str));
+    }
+    return false;
   }
   bool use_xtypes_complete() const
   {
