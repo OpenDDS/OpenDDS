@@ -93,6 +93,7 @@ private:
   ThreadStatusManager tsm_;
   ThreadPool pool_;
 };
+typedef RcHandle<EventDispatcherLite> EventDispatcherLite_rch;
 
 } // DCPS
 } // OpenDDS
