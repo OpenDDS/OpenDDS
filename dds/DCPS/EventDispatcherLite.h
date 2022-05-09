@@ -38,8 +38,8 @@ public:
   typedef bool DispatchStatus;
   typedef long TimerId;
 
-  const bool DS_SUCCESS = true;
-  const bool DS_ERROR = false;
+  static const bool DS_SUCCESS = true;
+  static const bool DS_ERROR = false;
 
   EventDispatcherLite(size_t count = 1);
   virtual ~EventDispatcherLite();
