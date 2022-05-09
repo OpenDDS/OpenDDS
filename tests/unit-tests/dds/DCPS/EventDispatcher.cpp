@@ -125,6 +125,8 @@ TEST(dds_DCPS_EventDispatcher, SimpleDispatchAlpha)
   dispatcher->dispatch(test_event);
 
   test_event->wait(3u);
+  dispatcher->shutdown();
+
   EXPECT_EQ(test_event->call_count(), 3u);
 }
 
@@ -140,6 +142,8 @@ TEST(dds_DCPS_EventDispatcher, SimpleDispatchBeta)
   dispatcher->dispatch(test_event);
 
   test_event->wait(5u);
+  dispatcher->shutdown();
+
   EXPECT_EQ(test_event->call_count(), 5u);
 }
 
@@ -244,6 +248,8 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatch)
   test_event->wait(12u);
   const OpenDDS::DCPS::MonotonicTimePoint after12 = OpenDDS::DCPS::MonotonicTimePoint::now();
 
+  dispatcher->shutdown();
+
   EXPECT_LT(now, after6);
   EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
 
@@ -295,6 +301,8 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
 
   test_event->wait(12u);
   const OpenDDS::DCPS::MonotonicTimePoint after12 = OpenDDS::DCPS::MonotonicTimePoint::now();
+
+  dispatcher->shutdown();
 
   EXPECT_LT(now, after6);
   EXPECT_LT(after6, now + OpenDDS::DCPS::TimeDuration::from_double(0.4));
@@ -354,6 +362,8 @@ TEST(dds_DCPS_EventDispatcher, CancelDispatchSingleThreaded)
 
   test_event->wait(2u);
   const OpenDDS::DCPS::MonotonicTimePoint after2 = OpenDDS::DCPS::MonotonicTimePoint::now();
+
+  dispatcher->shutdown();
 
   EXPECT_GE(after2, now + OpenDDS::DCPS::TimeDuration::from_double(0.7));
   EXPECT_EQ(test_event->call_count(), 2u);

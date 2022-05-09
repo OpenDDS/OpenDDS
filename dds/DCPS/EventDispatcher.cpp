@@ -28,21 +28,31 @@ EventDispatcher::~EventDispatcher()
 
 void EventDispatcher::shutdown()
 {
-  EventDispatcherLite_rch copy = dispatcher_;
-  if (copy) {
-    copy->shutdown();
+  EventDispatcherLite_rch local;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    local.swap(dispatcher_);
+  }
+  if (local) {
+    local->shutdown();
   }
 }
 
 void EventDispatcher::dispatch(EventBase_rch event)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!dispatcher_) {
+    return;
+  }
   dispatch_i(event);
 }
 
 long EventDispatcher::schedule(EventBase_rch event, const MonotonicTimePoint& expiration)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!dispatcher_) {
+    return -1;
+  }
   timer_list_.push_back(TimerCaller(event, rchandle_from(this)));
   TimerCaller& tc = timer_list_.back();
   tc.iter_ = timer_list_.end();
@@ -60,6 +70,9 @@ long EventDispatcher::schedule(EventBase_rch event, const MonotonicTimePoint& ex
 size_t EventDispatcher::cancel(long id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (!dispatcher_) {
+    return 0;
+  }
   size_t result = dispatcher_->cancel(id);
   TimerIdMap::iterator pos = timer_id_map_.find(id);
   if (pos != timer_id_map_.end()) {
