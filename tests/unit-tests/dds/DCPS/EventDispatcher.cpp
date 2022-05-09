@@ -51,14 +51,14 @@ private:
 struct SimpleTestEvent : public TestEventBase
 {
   SimpleTestEvent() {}
-  void handle_event() override { increment_call_count(); }
+  void handle_event() { increment_call_count(); }
 };
 
 struct RecursiveTestEventOne : public TestEventBase
 {
   RecursiveTestEventOne(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher) : dispatcher_(dispatcher) {}
 
-  void handle_event() override
+  void handle_event()
   {
     if (increment_call_count() % 2) {
       OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = dispatcher_.lock();
@@ -75,7 +75,7 @@ struct RecursiveTestEventTwo : public TestEventBase
 {
   RecursiveTestEventTwo(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher, size_t dispatch_scale) : dispatcher_(dispatcher), dispatch_scale_(dispatch_scale) {}
 
-  void handle_event() override
+  void handle_event()
   {
     increment_call_count();
     const size_t scale = dispatch_scale_.value();
