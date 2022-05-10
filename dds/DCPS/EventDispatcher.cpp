@@ -124,6 +124,67 @@ void EventDispatcher::TimerCaller::operator()()
   }
 }
 
+SporadicEvent::SporadicEvent(EventDispatcher_rch dispatcher, EventBase_rch event)
+ : dispatcher_(dispatcher)
+ , event_(event)
+ , timer_id_(0)
+{
+}
+
+void SporadicEvent::schedule(const TimeDuration& duration)
+{
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (timer_id_ < 1) {
+    EventDispatcher_rch dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      expiration_ = now + duration;
+      long id = dispatcher->schedule(rchandle_from(this), expiration_);
+      if (id > 0) {
+        timer_id_ = id;
+      }
+    }
+  } else {
+    if (now + duration < expiration_) {
+      EventDispatcher_rch dispatcher = dispatcher_.lock();
+      if (dispatcher) {
+        if (dispatcher->cancel(timer_id_)) {
+          timer_id_ = 0;
+          expiration_ = now + duration;
+          long id = dispatcher->schedule(rchandle_from(this), expiration_);
+          if (id > 0) {
+            timer_id_ = id;
+          }
+        }
+      }
+    }
+  }
+}
+
+void SporadicEvent::cancel()
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (timer_id_ > 0) {
+    EventDispatcher_rch dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      if (dispatcher->cancel(timer_id_)) {
+        timer_id_ = 0;
+      }
+    }
+  }
+}
+
+void SporadicEvent::handle_event()
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  timer_id_ = 0;
+  RcHandle<EventBase> event = event_.lock();
+  if (event) {
+    guard.release();
+    event->handle_event();
+  }
+}
+
 } // DCPS
 } // OpenDDS
 
