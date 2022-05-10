@@ -617,7 +617,7 @@ TransportRegistry::bind_config(const TransportConfig_rch& cfg,
     throw Transport::MiscProblem();
   }
 
-  DDS::DomainId_t domain_id = ei->get_domain_id();
+  const DDS::DomainId_t domain_id = ei->get_domain_id();
 
   // if domain is in a domain range and config is a transport template,
   // get the correct config.
