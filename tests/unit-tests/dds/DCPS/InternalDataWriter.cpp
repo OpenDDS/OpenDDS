@@ -4,26 +4,28 @@
 
 using namespace OpenDDS::DCPS;
 
-struct Sample {
-  std::string key;
+namespace {
+  struct Sample {
+    std::string key;
 
-  Sample()
-  {}
+    Sample()
+    {}
 
-  Sample(const std::string& a_key)
-    : key(a_key)
-  {}
+    Sample(const std::string& a_key)
+      : key(a_key)
+    {}
 
-  bool operator==(const Sample& other) const
-  {
-    return key == other.key;
-  }
+    bool operator==(const Sample& other) const
+    {
+      return key == other.key;
+    }
 
-  bool operator<(const Sample& other) const
-  {
-    return key < other.key;
-  }
-};
+    bool operator<(const Sample& other) const
+    {
+      return key < other.key;
+    }
+  };
+}
 
 typedef InternalDataWriter<Sample> WriterType;
 typedef InternalDataReader<Sample> ReaderType;
@@ -41,6 +43,8 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable)
 {
   Sample sample1("key1");
   Sample sample2("key2");
+  ASSERT_LT(sample1, sample2);
+
   ReaderType::SampleSequence samples;
   InternalSampleInfoSequence infos;
 

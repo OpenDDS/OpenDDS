@@ -188,8 +188,7 @@ namespace {
                             const std::string&,
                             bool,
                             Intro&,
-                            const std::string&,
-                            bool)
+                            const std::string&)
   {
     AST_Type* const actual = resolveActualType(type);
     std::string decl = scoped(type->name());

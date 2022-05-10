@@ -754,14 +754,13 @@ typedef std::string (*CommonFn)(
   const std::string& indent,
   const std::string& name, AST_Type* type,
   const std::string& prefix, bool wrap_nested_key_only, Intro& intro,
-  const std::string&, bool printing);
+  const std::string&);
 
 inline
 void generateCaseBody(
   CommonFn commonFn, CommonFn commonFn2,
   AST_UnionBranch* branch,
-  const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens,
-  bool printing = false)
+  const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -864,14 +863,14 @@ void generateCaseBody(
     if (commonFn2) {
       const OpenDDS::XTypes::MemberId id = be_global->get_id(branch);
       contents
-        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "", false)
+        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
         << indent << "  return false;\n"
         << indent << "}\n";
     }
     const std::string expr = commonFn(indent,
       name + (parens ? "()" : ""), branch->field_type(),
-      std::string(namePrefix) + "uni", false, intro, uni, printing);
+      std::string(namePrefix) + "uni", false, intro, uni);
     if (*statementPrefix) {
       contents <<
         indent << statementPrefix << " " << expr << ";\n" <<
@@ -910,7 +909,7 @@ bool generateSwitchBody(AST_Union*, CommonFn commonFn,
     }
     generateBranchLabels(branch, discriminator, n_labels, has_default);
     generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix,
-                     uni, breaks, parens, false);
+                     uni, breaks, parens);
     be_global->impl_ <<
       "  }\n";
   }

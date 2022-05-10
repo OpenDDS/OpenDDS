@@ -457,6 +457,16 @@ public:
     return network_interface_address_topic_;
   }
 
+  unsigned int printer_value_writer_indent() const
+  {
+    return printer_value_writer_indent_;
+  }
+
+  void printer_value_writer_indent(unsigned int value)
+  {
+    printer_value_writer_indent_ = value;
+  }
+
 private:
 
   /// Initialize default qos.
@@ -766,6 +776,8 @@ private:
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
 
   RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
+
+  unsigned int printer_value_writer_indent_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

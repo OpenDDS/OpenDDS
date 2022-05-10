@@ -674,7 +674,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
 static std::string
 func(const std::string&, const std::string&, AST_Type* br_type, const std::string&,
-  bool, Intro&, const std::string&, bool)
+  bool, Intro&, const std::string&)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;

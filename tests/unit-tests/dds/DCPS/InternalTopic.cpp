@@ -4,12 +4,14 @@
 
 using namespace OpenDDS::DCPS;
 
-struct Sample {
-  bool operator<(const Sample&) const
-  {
-    return false;
-  }
-};
+namespace {
+  struct Sample {
+    bool operator<(const Sample&) const
+    {
+      return false;
+    }
+  };
+}
 
 typedef InternalTopic<Sample> TopicType;
 typedef InternalDataWriter<Sample> WriterType;
