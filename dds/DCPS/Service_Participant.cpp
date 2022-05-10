@@ -216,6 +216,7 @@ Service_Participant::Service_Participant()
   , default_configuration_file_(ACE_TEXT(""))
   , type_object_encoding_(Encoding_Normal)
   , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
+  , printer_value_writer_indent_(4)
 {
   initialize();
 }

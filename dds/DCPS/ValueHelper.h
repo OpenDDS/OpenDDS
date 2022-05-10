@@ -113,6 +113,15 @@ std::ostream& string_helper(std::ostream& o, const CharType* value)
   return o;
 }
 
+template <typename CharType>
+std::ostream& string_helper(std::ostream& o, const CharType* value, size_t length)
+{
+  for (size_t i = 0; i != length; ++i) {
+    char_helper<CharType>(o, value[i]);
+  }
+  return o;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 
