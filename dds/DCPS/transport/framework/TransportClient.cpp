@@ -442,20 +442,16 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
-        const TransportImpl::RemoteTransport remote = {
+        const TransportImpl::RemoteTransport remote_transport = {
           data_.remote_id_, data_.remote_data_[blob_index_].data, data_.discovery_locator_.data, data_.participant_discovered_at_, data_.remote_transport_context_,
           data_.publication_transport_priority_,
           data_.remote_reliable_, data_.remote_durable_};
 
         TransportImpl::AcceptConnectResult res;
-        GuidConverter tmp_local(tc->repo_id_);
-        GuidConverter tmp_remote(data_.remote_id_);
-        if (!tc->initiate_connect_i(res, impl, remote, attribs_, guard)) {
+        if (!tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard)) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
           if (res.success_ ) {
-            GuidConverter local(tc->repo_id_);
-            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) PendingAssoc::initiate_connect - ")
                                 ACE_TEXT("between %C and remote %C success\n"),
                                 OPENDDS_STRING(local).c_str(),
@@ -465,8 +461,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                               "between %C and remote %C unsuccessful\n",
-                              OPENDDS_STRING(tmp_local).c_str(),
-                              OPENDDS_STRING(tmp_remote).c_str()), 0);
+                              OPENDDS_STRING(local).c_str(),
+                              OPENDDS_STRING(remote).c_str()), 0);
         }
 
         if (res.success_) {
@@ -477,8 +473,6 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
             tc->use_datalink_i(data_.remote_id_, res.link_, guard);
           } else {
-            GuidConverter local(tc->repo_id_);
-            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
                                 OPENDDS_STRING(local).c_str(),
@@ -487,8 +481,6 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
           return true;
         } else {
-          GuidConverter local(tc->repo_id_);
-          GuidConverter remote(data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                               "result of initiate_connect_i (local: %C to remote: %C) was not success\n",
                               OPENDDS_STRING(local).c_str(),
