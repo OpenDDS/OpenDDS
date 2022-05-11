@@ -33,6 +33,8 @@ public:
 
   static ACE_THR_FUNC_RETURN run(void* arg);
 
+  bool contains(ACE_thread_t) const;
+
 private:
 
   void join_all();
@@ -41,6 +43,7 @@ private:
   FunPtr fun_;
   void* arg_;
   OPENDDS_VECTOR(ACE_hthread_t) ids_;
+  OPENDDS_SET(ACE_thread_t) id_set_;
 };
 
 } // DCPS
