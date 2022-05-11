@@ -45,7 +45,9 @@ struct AddressCacheEntryProxy {
   bool operator<(const AddressCacheEntryProxy& rhs) const {
     return (rhs.entry_ && (!entry_ || (entry_->addrs_ < rhs.entry_->addrs_)));
   }
+  const AddrSet& addrs() { return entry_->addrs_; }
 
+private:
   RcHandle<AddressCacheEntry> entry_;
 };
 
