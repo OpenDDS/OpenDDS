@@ -212,6 +212,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
     if (local_address() != NetworkAddress()) {
       if (advertised_address() != NetworkAddress()) {
         grow(locators);
+        address_to_locator(locators[idx], advertised_address().to_addr());
         if (locators[idx].port == 0) {
           locators[idx].port = local_address().get_port_number();
         }
@@ -237,6 +238,7 @@ RtpsUdpInst::populate_locator(TransportLocator& info, ConnectionInfoFlags flags)
     if (ipv6_local_address() != NetworkAddress()) {
       if (ipv6_advertised_address() != NetworkAddress()) {
         grow(locators);
+        address_to_locator(locators[idx], ipv6_advertised_address().to_addr());
         if (locators[idx].port == 0) {
           locators[idx].port = ipv6_local_address().get_port_number();
         }
