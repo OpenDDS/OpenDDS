@@ -39,7 +39,7 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
   }
   case OpenDDS::RTPS::ACKNACK: {
     const std::pair<RepoId, RepoId> key = std::make_pair(ms.from_guid_, ms.dst_guid_);
-    auto pos = acknack_map_.find(key);
+    MapType::iterator pos = acknack_map_.find(key);
     if (pos == acknack_map_.end()) {
       acknack_map_.insert(std::make_pair(key, ms));
       result = true;
