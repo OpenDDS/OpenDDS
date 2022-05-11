@@ -647,7 +647,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   if (port_div != String::npos) {
 #ifdef ACE_HAS_IPV6
     if (openb != String::npos && closeb != String::npos) {
-      host_name_str = address.substr(openb + 1u, closeb - 1u);
+      host_name_str = address.substr(openb + 1u, closeb - 1u - openb);
     } else
 #endif /* ACE_HAS_IPV6 */
     {
@@ -657,7 +657,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   } else {
 #ifdef ACE_HAS_IPV6
     if (openb != String::npos && closeb != String::npos) {
-      host_name_str = address.substr(openb + 1u, closeb - 1u);
+      host_name_str = address.substr(openb + 1u, closeb - 1u - openb);
     } else
 #endif /* ACE_HAS_IPV6 */
     {
