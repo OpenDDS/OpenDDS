@@ -21,7 +21,7 @@ namespace DCPS {
 struct ConstSharedRepoIdSet : public RcObject {
   ConstSharedRepoIdSet() : guids_() {}
   ConstSharedRepoIdSet(const RepoIdSet& guids) : guids_(guids) {}
-  
+
   const RepoIdSet guids_;
 };
 
