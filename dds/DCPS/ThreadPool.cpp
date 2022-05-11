@@ -36,9 +36,15 @@ ThreadPool::~ThreadPool()
 ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
 {
   ThreadPool& pool = *(static_cast<ThreadPool*>(arg));
+  pool.id_set_.insert(ACE_Thread::self());
   pool.barrier_.wait();
   (*pool.fun_)(pool.arg_);
   return 0;
+}
+
+bool ThreadPool::contains(ACE_thread_t id) const
+{
+  return id_set_.count(id);
 }
 
 void ThreadPool::join_all()
