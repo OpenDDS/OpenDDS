@@ -229,7 +229,7 @@ private:
     PendingAssocTimer(ACE_Reactor* reactor,
                       ACE_thread_t owner)
       : ReactorInterceptor(reactor, owner)
-      , timer_id_(0)
+      , timer_id_(-1)
     { }
 
     void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
@@ -282,7 +282,7 @@ private:
             long id = timer_->reactor()->schedule_timer(assoc_.in(),
                                                         client.in(),
                                                         client->passive_connect_duration_.value());
-            if (id > 0) {
+            if (id != -1) {
               timer_->set_id(id);
             }
           }
@@ -300,7 +300,7 @@ private:
         if (timer_->reactor() && timer_->get_id()) {
           ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
           timer_->reactor()->cancel_timer(timer_->get_id());
-          timer_->set_id(0);
+          timer_->set_id(-1);
           assoc_->scheduled_ = false;
         }
       }

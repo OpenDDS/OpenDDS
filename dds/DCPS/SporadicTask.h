@@ -25,7 +25,7 @@ public:
     : time_source_(time_source)
     , interceptor_(interceptor)
     , desired_scheduled_(false)
-    , timer_id_(0)
+    , timer_id_(-1)
     , sporadic_command_(make_rch<SporadicCommand>(rchandle_from(this)))
   {
     reactor(interceptor->reactor());
@@ -80,6 +80,9 @@ public:
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
+protected:
+  long get_timer_id() { return timer_id_; }
+
 private:
   struct SporadicCommand : public ReactorInterceptor::Command {
     explicit SporadicCommand(WeakRcHandle<SporadicTask> sporadic_task)
@@ -111,15 +114,15 @@ private:
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
-    if ((!desired_scheduled_ && timer_id_ > 0) ||
-        (desired_scheduled_ && timer_id_ > 0 && desired_next_time_ != actual_next_time_)) {
+    if ((!desired_scheduled_ && timer_id_ != -1) ||
+        (desired_scheduled_ && timer_id_ != -1 && desired_next_time_ != actual_next_time_)) {
       reactor()->cancel_timer(timer_id_);
-      timer_id_ = 0;
+      timer_id_ = -1;
     }
 
-    if (desired_scheduled_ && timer_id_ <= 0) {
+    if (desired_scheduled_ && timer_id_ == -1) {
       timer_id_ = reactor()->schedule_timer(this, 0, desired_delay_.value());
-      if (timer_id_ < 0) {
+      if (timer_id_ == -1) {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: SporadicTask::execute_i: "
@@ -139,7 +142,7 @@ private:
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
       desired_scheduled_ = false;
-      timer_id_ = 0;
+      timer_id_ = -1;
     }
     execute(now);
     return 0;
