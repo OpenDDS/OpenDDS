@@ -3143,8 +3143,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
           ACE_DEBUG((LM_DEBUG, "(%P|%t) {transport_debug.log_dropped_messages} RtpsUdpDataLink::RtpsWriter::process_acknack - %C -> %C stale message (reflect %d < %d)\n", LogGuid(id_).c_str(), LogGuid(reader->id_).c_str(), acknack.count.value, reader->required_acknack_count_));
         }
         dont_schedule_nack_response = true;
-      } else {
-        reader->required_acknack_count_ = heartbeat_count_;
       }
     }
   }
@@ -3668,6 +3666,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
        pos != limit; ++pos) {
     const ReaderInfo_rch& reader = *pos;
     gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+    reader->required_acknack_count_ = heartbeat_count_;
   }
   readers_expecting_heartbeat_.clear();
 }
