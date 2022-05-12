@@ -2629,9 +2629,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
           case HEARTBEAT: {
             const EntityId_t id = res.sm_.heartbeat_sm().writerId;
             result = helper.add_to_bundle(res.sm_.heartbeat_sm());
-            size_t bundle_index = result ? meta_submessage_bundles.size() - 1 : meta_submessage_bundles.size();
-            unique = counts.heartbeat_counts_[bundle_index][id].insert(res.sm_.heartbeat_sm().count.value).second;
-            OPENDDS_ASSERT(unique);
+            counts.heartbeat_counts_[id].map_[res.sm_.heartbeat_sm().count.value].assigned_ = false;
             break;
           }
           case ACKNACK: {
@@ -2774,6 +2772,10 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
 
+  for (IdCountMapping::iterator it = counts.heartbeat_counts_.begin(); it != counts.heartbeat_counts_.end(); ++it) {
+    it->second.next_unassigned_ = it->second.map_.begin();
+  }
+
   // Allocate buffers, seralize, and send bundles
   RepoId prev_dst; // used to determine when we need to write a new info_dst
   for (size_t i = 0; i < meta_submessage_bundles.size(); ++i) {
@@ -2794,10 +2796,15 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
       }
       switch (res.sm_._d()) {
         case HEARTBEAT: {
-          CountSet& set = counts.heartbeat_counts_[i][res.sm_.heartbeat_sm().writerId];
-          OPENDDS_ASSERT(!set.empty());
-          res.sm_.heartbeat_sm().count.value = *set.begin();
-          set.erase(set.begin());
+          CountMapping& mapping = counts.heartbeat_counts_[res.sm_.heartbeat_sm().writerId];
+          CountMapPair& map_pair = mapping.map_[res.sm_.heartbeat_sm().count.value];
+          if (!map_pair.assigned_) {
+            OPENDDS_ASSERT(mapping.next_unassigned_ != mapping.map_.end());
+            map_pair.new_ = mapping.next_unassigned_->first;
+            ++mapping.next_unassigned_;
+            map_pair.assigned_ = true;
+          }
+          res.sm_.heartbeat_sm().count.value = map_pair.new_;
           const HeartBeatSubmessage& heartbeat = res.sm_.heartbeat_sm();
           if (transport_debug.log_nonfinal_messages && !(heartbeat.smHeader.flags & RTPS::FLAG_F)) {
             const SequenceNumber hb_first = to_opendds_seqnum(heartbeat.firstSN);

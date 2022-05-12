@@ -700,10 +700,19 @@ private:
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
-  typedef OPENDDS_MAP(size_t, IdCountSet) HeartbeatCounts;
+  struct CountMapPair {
+    bool assigned_;
+    CORBA::Long new_;
+  };
+  typedef OPENDDS_MAP(CORBA::Long, CountMapPair) CountMap;
+  struct CountMapping {
+    CountMap map_;
+    CountMap::iterator next_unassigned_;
+  };
+  typedef OPENDDS_MAP_CMP(EntityId_t, CountMapping, EntityId_tKeyLessThan) IdCountMapping;
 
   struct CountKeeper {
-    HeartbeatCounts heartbeat_counts_;
+    IdCountMapping heartbeat_counts_;
     IdCountSet nackfrag_counts_;
   };
 
@@ -714,8 +723,8 @@ private:
     AddrDestMetaSubmessageMap& adr_map,
     MetaSubmessageIterVecVec& meta_submessage_bundles,
     OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
-                               OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
-                               CountKeeper& counts);
+    OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
+    CountKeeper& counts);
 
   void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
   void bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_submessages);
