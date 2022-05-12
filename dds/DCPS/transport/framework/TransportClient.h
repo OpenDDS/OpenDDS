@@ -229,6 +229,7 @@ private:
     PendingAssocTimer(ACE_Reactor* reactor,
                       ACE_thread_t owner)
       : ReactorInterceptor(reactor, owner)
+      , timer_id_(-1)
     { }
 
     void schedule_timer(TransportClient_rch transport_client, const PendingAssoc_rch& pend)
@@ -240,6 +241,9 @@ private:
     {
       return execute_or_enqueue(make_rch<CancelCommand>(this, pend));
     }
+
+    void set_id(long id) { timer_id_ = id; }
+    long get_id() const { return timer_id_; }
 
     virtual bool reactor_is_shut_down() const
     {
@@ -275,9 +279,12 @@ private:
           if (client) {
             ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
             assoc_->scheduled_ = true;
-            timer_->reactor()->schedule_timer(assoc_.in(),
-                                              client.in(),
-                                              client->passive_connect_duration_.value());
+            long id = timer_->reactor()->schedule_timer(assoc_.in(),
+                                                        client.in(),
+                                                        client->passive_connect_duration_.value());
+            if (id != -1) {
+              timer_->set_id(id);
+            }
           }
         }
       }
@@ -290,13 +297,15 @@ private:
       { }
       virtual void execute()
       {
-        if (timer_->reactor()) {
+        if (timer_->reactor() && timer_->get_id()) {
           ACE_Guard<ACE_Thread_Mutex> guard(assoc_->mutex_);
-          timer_->reactor()->cancel_timer(assoc_.in());
+          timer_->reactor()->cancel_timer(timer_->get_id());
+          timer_->set_id(-1);
           assoc_->scheduled_ = false;
         }
       }
     };
+    long timer_id_;
   };
   RcHandle<PendingAssocTimer> pending_assoc_timer_;
 
