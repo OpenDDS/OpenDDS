@@ -28,7 +28,7 @@ private:
 
 // Tests
 
-TEST(dds_DCPS_transport_framework_NetworkResource, fully_qualified_domain_hostname_basic)
+TEST(dds_DCPS_NetworkResource, fully_qualified_domain_hostname_basic)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -37,7 +37,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, fully_qualified_domain_hostna
   EXPECT_NE(hostname, empty);
 }
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv4)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv4)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -63,7 +63,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
 }
 
 #if defined ACE_HAS_IPV6
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv6)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv6)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -101,7 +101,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
 }
 #endif // ACE_HAS_IPV6
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_localhost)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_localhost)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -117,7 +117,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
 #endif
 }
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_double_self)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_double_self)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -135,7 +135,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
 }
 
 #if defined ACE_HAS_IPV6
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv6_literals)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv6_literals)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -143,27 +143,37 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
   ACE_INET_Addr addr2 = choose_single_coherent_address("2001:4860:4860:0000:0000:0000:0000:8844:22", false);
   ACE_INET_Addr addr3 = choose_single_coherent_address("[2001:4860:4860::8844]:22", false);
   ACE_INET_Addr addr4 = choose_single_coherent_address("[2001:4860:4860:0000:0000:0000:0000:8844]:22", false);
+  ACE_INET_Addr addr5 = choose_single_coherent_address("   [2001:4860:4860::8844]:22", false);
+  ACE_INET_Addr addr6 = choose_single_coherent_address("  [2001:4860:4860:0000:0000:0000:0000:8844]:22", false);
   EXPECT_NE(addr1, ACE_INET_Addr());
   EXPECT_NE(addr2, ACE_INET_Addr());
   EXPECT_NE(addr3, ACE_INET_Addr());
   EXPECT_NE(addr4, ACE_INET_Addr());
+  EXPECT_NE(addr5, ACE_INET_Addr());
+  EXPECT_NE(addr6, ACE_INET_Addr());
   EXPECT_EQ(addr1, addr2);
   EXPECT_EQ(addr2, addr3);
   EXPECT_EQ(addr3, addr4);
-  EXPECT_EQ(addr4, addr1);
+  EXPECT_EQ(addr4, addr5);
+  EXPECT_EQ(addr5, addr6);
+  EXPECT_EQ(addr6, addr1);
   EXPECT_EQ(addr1.get_port_number(), 22);
   EXPECT_EQ(addr2.get_port_number(), 22);
   EXPECT_EQ(addr3.get_port_number(), 22);
   EXPECT_EQ(addr4.get_port_number(), 22);
+  EXPECT_EQ(addr5.get_port_number(), 22);
+  EXPECT_EQ(addr6.get_port_number(), 22);
 #if defined ACE_HAS_IPV6 && defined IPV6_V6ONLY
   EXPECT_FALSE(addr1.is_ipv4_mapped_ipv6());
   EXPECT_FALSE(addr2.is_ipv4_mapped_ipv6());
   EXPECT_FALSE(addr3.is_ipv4_mapped_ipv6());
   EXPECT_FALSE(addr4.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr5.is_ipv4_mapped_ipv6());
+  EXPECT_FALSE(addr6.is_ipv4_mapped_ipv6());
 #endif
 }
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv6_literals_port0)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv6_literals_port0)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -201,7 +211,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
 #endif
 }
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv6_literals_localhost)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv6_literals_localhost)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -219,7 +229,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
 #endif
 }
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv6_literals_localhost_port0)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv6_literals_localhost_port0)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -232,7 +242,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
 }
 #endif // ACE_HAS_IPV6
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv4_literals)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv4_literals)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -241,7 +251,7 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
   EXPECT_EQ(addr1.get_port_number(), 30);
 }
 
-TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_address_ipv4_literals_port0)
+TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_ipv4_literals_port0)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
 
@@ -249,6 +259,8 @@ TEST(dds_DCPS_transport_framework_NetworkResource, choose_single_coherent_addres
   ACE_INET_Addr addr2 = choose_single_coherent_address("10.20.30.40:0", false);
   EXPECT_NE(addr1, ACE_INET_Addr());
   EXPECT_NE(addr2, ACE_INET_Addr());
+  EXPECT_EQ(addr1, addr2);
+  EXPECT_EQ(addr2, addr1);
   EXPECT_EQ(addr1.get_port_number(), 0);
   EXPECT_EQ(addr2.get_port_number(), 0);
 }
