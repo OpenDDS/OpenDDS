@@ -64,6 +64,7 @@ module OpenDDS
       BUILT_IN_TOPIC_KEY DDS::OctetArray16 guid;
       BUILT_IN_TOPIC_KEY string address;
       BUILT_IN_TOPIC_KEY string protocol;
+      DDS::Duration_t latency;
     };
 
     // OpenDDS extension built-in topic for thread
