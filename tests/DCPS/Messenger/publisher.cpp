@@ -215,7 +215,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         message.count++;
       }
 
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): finished writing messages, waiting for subscriber."));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: main(): finished writing messages, waiting for subscriber.\n"));
       // Block until Subscriber goes away
       if (Utils::wait_match(dw, 0, Utils::EQ)) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): waiting for unmatch for writer\n"));

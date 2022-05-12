@@ -20,6 +20,7 @@ TransportDebug::TransportDebug()
   : log_messages(false)
   , log_progress(false)
   , log_dropped_messages(false)
+  , log_nonfinal_messages(false)
   , log_fragment_storage(false)
   , log_remote_counts(false)
 {}
