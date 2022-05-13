@@ -22,12 +22,15 @@ namespace DCPS {
 
 struct OpenDDS_Dcps_Export NetworkInterfaceAddress {
   NetworkInterfaceAddress()
-    : can_multicast(false)
+    : index(-1)
+    , can_multicast(false)
   {}
-  NetworkInterfaceAddress(const OPENDDS_STRING& a_name,
+  NetworkInterfaceAddress(int a_index,
+                          const OPENDDS_STRING& a_name,
                           bool a_can_multicast,
                           const NetworkAddress& a_address)
-    : name(a_name)
+    : index(a_index)
+    , name(a_name)
     , can_multicast(a_can_multicast)
     , address(a_address)
   {}
@@ -38,7 +41,8 @@ struct OpenDDS_Dcps_Export NetworkInterfaceAddress {
 
   bool operator==(const NetworkInterfaceAddress& other) const
   {
-    return name == other.name &&
+    return index == other.index &&
+      name == other.name &&
       can_multicast == other.can_multicast &&
       address == other.address;
   }
@@ -57,9 +61,32 @@ struct OpenDDS_Dcps_Export NetworkInterfaceAddress {
     return address < other.address;
   }
 
+  int index;
   OPENDDS_STRING name;
   bool can_multicast;
   NetworkAddress address;
+};
+
+struct NetworkInterfaceIndex {
+  explicit NetworkInterfaceIndex(int index) : index_(index) {}
+
+  bool operator()(const NetworkInterfaceAddress& nic) const
+  {
+    return index_ == nic.index;
+  }
+
+  const int index_;
+};
+
+struct NetworkInterfaceName {
+  explicit NetworkInterfaceName(const OPENDDS_STRING& name) : name_(name) {}
+
+  bool operator()(const NetworkInterfaceAddress& nic)
+  {
+    return name_ == nic.name;
+  }
+
+  const OPENDDS_STRING name_;
 };
 
 struct NetworkInterfaceAddressKeyEqual {
@@ -91,7 +118,9 @@ public:
   void clear();
 
   void set(const NetworkInterfaceAddress& nia);
+  void remove_interface(int index);
   void remove_interface(const OPENDDS_STRING& name);
+  void remove_address(int index, const NetworkAddress& address);
   void remove_address(const OPENDDS_STRING& name, const NetworkAddress& address);
 
 private:

@@ -24,16 +24,16 @@ public:
   {
     const NetworkAddress sp_default = TheServiceParticipant->default_address();
     if (sp_default != NetworkAddress()) {
-      set(NetworkInterfaceAddress("", true, sp_default));
+      set(NetworkInterfaceAddress(0, "", true, sp_default));
       return true;
     }
 
     static const u_short port_zero = 0;
     ACE_INET_Addr addr(port_zero, "0.0.0.0");
-    set(NetworkInterfaceAddress("", true, NetworkAddress(addr)));
+    set(NetworkInterfaceAddress(0, "", true, NetworkAddress(addr)));
 #ifdef ACE_HAS_IPV6
     ACE_INET_Addr addr2(port_zero, "::");
-    set(NetworkInterfaceAddress("", true, NetworkAddress(addr2)));
+    set(NetworkInterfaceAddress(0, "", true, NetworkAddress(addr2)));
 #endif
 
     return true;
