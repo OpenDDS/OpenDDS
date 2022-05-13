@@ -22,8 +22,11 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
  , arg_(arg)
  , ids_(count, 0)
 {
-  for (size_t i = 0; i < count; ++i) {
-    ACE_Thread::spawn(run, this, THR_NEW_LWP | THR_JOINABLE, 0, &(ids_[i]));
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    for (size_t i = 0; i < count; ++i) {
+      ACE_Thread::spawn(run, this, THR_NEW_LWP | THR_JOINABLE, 0, &(ids_[i]));
+    }
   }
   barrier_.wait();
 }
@@ -36,7 +39,10 @@ ThreadPool::~ThreadPool()
 ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
 {
   ThreadPool& pool = *(static_cast<ThreadPool*>(arg));
-  pool.id_set_.insert(ACE_Thread::self());
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
+    pool.id_set_.insert(ACE_Thread::self());
+  }
   pool.barrier_.wait();
   (*pool.fun_)(pool.arg_);
   return 0;
@@ -44,13 +50,20 @@ ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
 
 bool ThreadPool::contains(ACE_thread_t id) const
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return id_set_.count(id);
 }
 
 void ThreadPool::join_all()
 {
-  for (size_t i = 0; i < ids_.size(); ++i) {
-    ACE_Thread::join(ids_[i], 0);
+  OPENDDS_VECTOR(ACE_hthread_t) ids;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    ids = ids_;
+  }
+
+  for (size_t i = 0; i < ids.size(); ++i) {
+    ACE_Thread::join(ids[i], 0);
   }
 }
 

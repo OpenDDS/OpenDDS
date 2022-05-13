@@ -42,6 +42,7 @@ private:
   Barrier barrier_;
   FunPtr fun_;
   void* arg_;
+  mutable ACE_Thread_Mutex mutex_;
   OPENDDS_VECTOR(ACE_hthread_t) ids_;
   OPENDDS_SET(ACE_thread_t) id_set_;
 };
