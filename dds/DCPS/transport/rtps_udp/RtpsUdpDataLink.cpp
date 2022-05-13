@@ -2071,7 +2071,8 @@ RtpsUdpDataLink::RtpsWriter::add_reader(const ReaderInfo_rch& reader)
 
     fallback_.set(link->config().heartbeat_period_);
     heartbeat_->schedule(fallback_.get());
-    if (link->config().responsive_mode_) {
+    // Durable readers will get their heartbeat from end historic samples.
+    if (!reader->durable_) {
       MetaSubmessageVec meta_submessages;
       MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
       const SingleSendBuffer::Proxy proxy(*send_buff_);
@@ -2177,12 +2178,10 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
     }
 
     preassociation_task_->schedule(link->config().heartbeat_period_);
-    if (link->config().responsive_mode_) {
-      MetaSubmessageVec meta_submessages;
-      gather_preassociation_acknack_i(meta_submessages, writer);
-      g.release();
-      link->queue_submessages(meta_submessages);
-    }
+    MetaSubmessageVec meta_submessages;
+    gather_preassociation_acknack_i(meta_submessages, writer);
+    g.release();
+    link->queue_submessages(meta_submessages);
 
     return true;
   }
@@ -2346,8 +2345,6 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
                                           num_bits, cumulative_bits_added);
     }
 
-    bool non_empty_bitmap = true;
-
     // If the receive strategy is holding any fragments, those should
     // not be "nacked" in the ACKNACK reply.  They will be accounted for
     // in the NACK_FRAG(s) instead.
@@ -2355,16 +2352,13 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
       link->receive_strategy()->remove_frags_from_bitmap(bitmap.get_buffer(),
                                                          num_bits, ack, writer->id_, cumulative_bits_added);
     if (frags_modified) {
-      non_empty_bitmap = false;
       for (CORBA::ULong i = 0; i < bitmap.length(); ++i) {
         if ((i + 1) * 32 <= num_bits) {
           if (bitmap[i]) {
-            non_empty_bitmap = true;
             break;
           }
         } else {
           if ((0xffffffff << (32 - (num_bits % 32))) & bitmap[i]) {
-            non_empty_bitmap = true;
             break;
           }
         }
@@ -2373,7 +2367,7 @@ RtpsUdpDataLink::RtpsReader::gather_ack_nacks_i(const WriterInfo_rch& writer,
 
     AckNackSubmessage acknack = {
       {ACKNACK,
-       CORBA::Octet(FLAG_E | (non_empty_bitmap ? 0 : FLAG_F)),
+       CORBA::Octet(FLAG_E),
        0 /*length*/},
       reader_id,
       writer_id,
@@ -3178,7 +3172,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
 void
 RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& acknack,
                                              const RepoId& src,
-                                             MetaSubmessageVec& meta_submessages)
+                                             MetaSubmessageVec&)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
@@ -3256,13 +3250,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
       check_leader_lagger();
       // Heartbeat is already scheduled.
     }
-    if (link->config().responsive_mode_) {
-      // Send a heartbeat immediately so the reader can request data.
-      const SingleSendBuffer::Proxy proxy(*send_buff_);
-      MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
-      initialize_heartbeat(proxy, meta_submessage);
-      gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
-    }
   }
 
   OPENDDS_MAP(SequenceNumber, TransportQueueElement*) pendingCallbacks;
@@ -3275,6 +3262,12 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   // Process the ack.
   bool inform_send_listener = false;
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    // Clean up requested fragments.
+    for (RequestedFragSeqMap::iterator pos = reader->requested_frags_.begin(),
+           limit = reader->requested_frags_.end(); pos != limit && pos->first < ack;) {
+      reader->requested_frags_.erase(pos++);
+    }
+
     if (ack >= reader->cur_cumulative_ack_) {
       reader->cur_cumulative_ack_ = ack;
       inform_send_listener = true;
@@ -3361,11 +3354,8 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
         if (!reader->requests_.empty()) {
           readers_expecting_data_.insert(reader);
-          if (link->config().responsive_mode_) {
-            readers_expecting_heartbeat_.insert(reader);
-          }
           schedule_nack_response = true;
-        } else {
+        } else if (reader->requested_frags_.empty()) {
           readers_expecting_data_.erase(reader);
         }
       }
@@ -3490,9 +3480,6 @@ void RtpsUdpDataLink::RtpsWriter::process_nackfrag(const RTPS::NackFragSubmessag
 
   reader->requested_frags_[seq][nackfrag.fragmentNumberState.bitmapBase.value] = nackfrag.fragmentNumberState;
   readers_expecting_data_.insert(reader);
-  if (link->config().responsive_mode_) {
-    readers_expecting_heartbeat_.insert(reader);
-  }
   nack_response_->schedule(link->config().nak_response_delay_);
 }
 
@@ -3745,10 +3732,23 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
       "no GAPs to send\n"));
   }
 
-  readers_expecting_data_.clear();
-
   MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
   initialize_heartbeat(proxy, meta_submessage);
+
+  // Directed, non-final.
+  for (ReaderInfoSet::const_iterator pos = readers_expecting_data_.begin(), limit = readers_expecting_data_.end();
+       pos != limit; ++pos) {
+    const ReaderInfo_rch& reader = *pos;
+    readers_expecting_heartbeat_.erase(reader);
+    if (reader->reflects_heartbeat_count()) {
+      meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::OPENDDS_FLAG_R;
+      gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+      reader->required_acknack_count_ = heartbeat_count_;
+    } else {
+      gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
+    }
+  }
+  readers_expecting_data_.clear();
 
   // Directed, final.
   meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::FLAG_F;
@@ -4224,8 +4224,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(MetaSubmessageVec& meta_submess
   if (!link) {
     return;
   }
-
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
 
   using namespace OpenDDS::RTPS;
 
