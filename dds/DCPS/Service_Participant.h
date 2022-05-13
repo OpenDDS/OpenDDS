@@ -335,7 +335,7 @@ public:
     bit_enabled_ = b;
   }
 
-  const NetworkAddress& default_address() const { return default_address_; }
+  const ACE_INET_Addr& default_address() const { return default_address_; }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
@@ -433,6 +433,8 @@ public:
 #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
   NetworkConfigModifier* network_config_modifier();
 #endif
+  NetworkConfigMonitor_rch network_config_monitor();
+
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay() const;
   void bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration);
@@ -451,11 +453,6 @@ public:
    */
   XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
                                      const XTypes::TypeIdentifier& ti) const;
-
-  RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic() const
-  {
-    return network_interface_address_topic_;
-  }
 
   unsigned int printer_value_writer_indent() const
   {
@@ -628,7 +625,7 @@ private:
   int bit_lookup_duration_msec_;
 
   /// The default network address to use.
-  NetworkAddress default_address_;
+  ACE_INET_Addr default_address_;
 
   /// Specifies the name of the transport configuration that
   /// is used when the entity tree does not specify one.  If
@@ -774,8 +771,6 @@ private:
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay_;
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
-
-  RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
 
   unsigned int printer_value_writer_indent_;
 };

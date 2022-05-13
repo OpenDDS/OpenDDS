@@ -26,9 +26,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor
-  : public virtual RcEventHandler
-  , public virtual NetworkConfigMonitor {
+class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor : public RcEventHandler, public NetworkConfigMonitor {
 public:
   explicit LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor);
   bool open();
@@ -73,21 +71,6 @@ private:
 
   ACE_SOCK_Netlink socket_;
   ReactorInterceptor_wrch interceptor_;
-
-  struct NetworkInterface {
-    OPENDDS_STRING name;
-    bool can_multicast;
-
-    NetworkInterface() {}
-    NetworkInterface(const OPENDDS_STRING& a_name,
-                     bool a_can_multicast)
-    : name(a_name)
-    , can_multicast(a_can_multicast)
-    {}
-  };
-
-  typedef OPENDDS_MAP(int, NetworkInterface) NetworkInterfaceMap;
-  NetworkInterfaceMap network_interface_map_;
 };
 
 } // DCPS
