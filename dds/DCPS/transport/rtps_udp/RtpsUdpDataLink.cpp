@@ -2629,7 +2629,10 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
           case HEARTBEAT: {
             const EntityId_t id = res.sm_.heartbeat_sm().writerId;
             result = helper.add_to_bundle(res.sm_.heartbeat_sm());
-            counts.heartbeat_counts_[id].map_[res.sm_.heartbeat_sm().count.value].assigned_ = false;
+            CountMapPair& map_pair = counts.heartbeat_counts_[id].map_[res.sm_.heartbeat_sm().count.value];
+            if (res.dst_guid_ == GUID_UNKNOWN) {
+              map_pair.undirected_ = true;
+            }
             break;
           }
           case ACKNACK: {
@@ -2774,6 +2777,14 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
 
   for (IdCountMapping::iterator it = counts.heartbeat_counts_.begin(); it != counts.heartbeat_counts_.end(); ++it) {
     it->second.next_unassigned_ = it->second.map_.begin();
+    for (CountMap::iterator it2 = it->second.map_.begin(); it2 != it->second.map_.end(); ++it2) {
+      if (it2->second.undirected_) {
+        OPENDDS_ASSERT(it->second.next_unassigned_ != it->second.map_.end());
+        it2->second.new_ = it->second.next_unassigned_->first;
+        ++(it->second.next_unassigned_);
+        it2->second.assigned_ = true;
+      }
+    }
   }
 
   // Allocate buffers, seralize, and send bundles
