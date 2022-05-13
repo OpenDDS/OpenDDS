@@ -2776,13 +2776,11 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
   };
 
   for (IdCountMapping::iterator it = counts.heartbeat_counts_.begin(); it != counts.heartbeat_counts_.end(); ++it) {
-    it->second.next_unassigned_ = it->second.map_.begin();
+    it->second.next_directed_unassigned_ = it->second.map_.begin();
+    it->second.next_undirected_unassigned_ = it->second.map_.begin();
     for (CountMap::iterator it2 = it->second.map_.begin(); it2 != it->second.map_.end(); ++it2) {
       if (it2->second.undirected_) {
-        OPENDDS_ASSERT(it->second.next_unassigned_ != it->second.map_.end());
-        it2->second.new_ = it->second.next_unassigned_->first;
-        ++(it->second.next_unassigned_);
-        it2->second.assigned_ = true;
+        ++(it->second.next_directed_unassigned_);
       }
     }
   }
@@ -2809,11 +2807,17 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_subme
         case HEARTBEAT: {
           CountMapping& mapping = counts.heartbeat_counts_[res.sm_.heartbeat_sm().writerId];
           CountMapPair& map_pair = mapping.map_[res.sm_.heartbeat_sm().count.value];
-          if (!map_pair.assigned_) {
-            OPENDDS_ASSERT(mapping.next_unassigned_ != mapping.map_.end());
-            map_pair.new_ = mapping.next_unassigned_->first;
-            ++mapping.next_unassigned_;
-            map_pair.assigned_ = true;
+          if (!map_pair.is_new_assigned_) {
+            if (map_pair.undirected_) {
+              OPENDDS_ASSERT(mapping.next_undirected_unassigned_ != mapping.map_.end());
+              map_pair.new_ = mapping.next_undirected_unassigned_->first;
+              ++mapping.next_undirected_unassigned_;
+            } else {
+              OPENDDS_ASSERT(mapping.next_directed_unassigned_ != mapping.map_.end());
+              map_pair.new_ = mapping.next_directed_unassigned_->first;
+              ++mapping.next_directed_unassigned_;
+            }
+            map_pair.is_new_assigned_ = true;
           }
           res.sm_.heartbeat_sm().count.value = map_pair.new_;
           const HeartBeatSubmessage& heartbeat = res.sm_.heartbeat_sm();

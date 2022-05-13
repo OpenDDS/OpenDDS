@@ -701,15 +701,16 @@ private:
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
   struct CountMapPair {
-    CountMapPair() : assigned_(false), undirected_(false) {}
-    bool assigned_;
+    CountMapPair() : undirected_(false), is_new_assigned_(false) {}
     bool undirected_;
+    bool is_new_assigned_;
     CORBA::Long new_;
   };
   typedef OPENDDS_MAP(CORBA::Long, CountMapPair) CountMap;
   struct CountMapping {
     CountMap map_;
-    CountMap::iterator next_unassigned_;
+    CountMap::iterator next_directed_unassigned_;
+    CountMap::iterator next_undirected_unassigned_;
   };
   typedef OPENDDS_MAP_CMP(EntityId_t, CountMapping, EntityId_tKeyLessThan) IdCountMapping;
 
