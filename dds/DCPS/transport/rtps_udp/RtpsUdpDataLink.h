@@ -573,6 +573,7 @@ private:
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(const RepoIdSet& additional_guids,
                            MetaSubmessageVec& meta_submessages);
+    void update_required_acknack_count(const RepoId& id, CORBA::ULong previous, CORBA::ULong current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
   };
@@ -700,10 +701,22 @@ private:
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
-  typedef OPENDDS_MAP(size_t, IdCountSet) HeartbeatCounts;
+  struct CountMapPair {
+    CountMapPair() : undirected_(false), is_new_assigned_(false) {}
+    bool undirected_;
+    bool is_new_assigned_;
+    CORBA::Long new_;
+  };
+  typedef OPENDDS_MAP(CORBA::Long, CountMapPair) CountMap;
+  struct CountMapping {
+    CountMap map_;
+    CountMap::iterator next_directed_unassigned_;
+    CountMap::iterator next_undirected_unassigned_;
+  };
+  typedef OPENDDS_MAP_CMP(EntityId_t, CountMapping, EntityId_tKeyLessThan) IdCountMapping;
 
   struct CountKeeper {
-    HeartbeatCounts heartbeat_counts_;
+    IdCountMapping heartbeat_counts_;
     IdCountSet nackfrag_counts_;
   };
 
@@ -714,10 +727,11 @@ private:
     AddrDestMetaSubmessageMap& adr_map,
     MetaSubmessageIterVecVec& meta_submessage_bundles,
     OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
-                               OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
-                               CountKeeper& counts);
+    OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
+    CountKeeper& counts);
 
   void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
+  void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::ULong previous, CORBA::ULong current);
   void bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_submessages);
 
   typedef OPENDDS_MAP(ACE_thread_t, MetaSubmessageVecVec) ThreadSendQueueMap;
