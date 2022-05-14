@@ -22,9 +22,11 @@ ACE_THR_FUNC_RETURN inc_count(void* arg) {
   return 0;
 }
 
+OpenDDS::DCPS::ThreadPool* global_pool = 0;
+
 ACE_THR_FUNC_RETURN check_membership(void* arg) {
   if (arg) {
-    OpenDDS::DCPS::ThreadPool& pool = *reinterpret_cast<OpenDDS::DCPS::ThreadPool*>(arg);
+    OpenDDS::DCPS::ThreadPool& pool = *global_pool;
     EXPECT_TRUE(pool.contains(ACE_Thread::self()));
   }
   return 0;
@@ -78,7 +80,9 @@ TEST(dds_DCPS_ThreadPool, ArgConstructorSixteen)
 TEST(dds_DCPS_ThreadPool, CheckMembership)
 {
   {
-    OpenDDS::DCPS::ThreadPool pool(4, check_membership, &pool);
-    EXPECT_FALSE(pool.contains(ACE_Thread::self()));
+    global_pool = new OpenDDS::DCPS::ThreadPool(4, check_membership);
+    EXPECT_FALSE(global_pool->contains(ACE_Thread::self()));
+    delete global_pool;
+    global_pool = 0;
   }
 }
