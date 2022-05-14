@@ -85,7 +85,7 @@ public:
   void schedule(const TimeDuration& duration);
   void cancel();
 
-  void handle_event() override;
+  void handle_event();
 
 private:
   ACE_Thread_Mutex mutex_;
