@@ -108,36 +108,10 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
 {
   if (heartbeats_need_merge_) {
     heartbeats_need_merge_ = false;
-    EntityId_t prev_writer = ENTITYID_UNKNOWN;
-    bool check_swap = false;
-    size_t undirected_index = 0;
-    size_t min_index = 0;
     for (MapType::iterator it = heartbeat_map_.begin(), limit = heartbeat_map_.end(); it != limit; ++it) {
       if (!it->second.redundant_) {
-        if (prev_writer != it->second.from_guid_.entityId) {
-          if (check_swap) {
-            if (min_index != undirected_index) {
-              std::swap(queue_[min_index].sm_.heartbeat_sm().count.value, queue_[undirected_index].sm_.heartbeat_sm().count.value);
-            }
-            check_swap = false;
-          }
-          if (it->second.dst_guid_ == GUID_UNKNOWN) {
-            undirected_index = queue_.size();
-            check_swap = true;
-          }
-          min_index = queue_.size();
-        }
-        prev_writer = it->second.from_guid_.entityId;
         queue_.push_back(it->second);
-        if (it->second.sm_.heartbeat_sm().count.value < queue_[min_index].sm_.heartbeat_sm().count.value) {
-          min_index = queue_.size();
-        }
         it->second.redundant_ = true;
-      }
-    }
-    if (check_swap) {
-      if (min_index != undirected_index) {
-        std::swap(queue_[min_index].sm_.heartbeat_sm().count.value, queue_[undirected_index].sm_.heartbeat_sm().count.value);
       }
     }
   }

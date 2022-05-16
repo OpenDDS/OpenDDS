@@ -26,17 +26,18 @@ struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
     : from_guid_(from), dst_guid_(dst), to_guids_(make_rch<ConstSharedRepoIdSet>()), redundant_(false) {}
   MetaSubmessage(const RepoId& from, const RepoId& dst, RcHandle<ConstSharedRepoIdSet> to)
     : from_guid_(from), dst_guid_(dst), to_guids_(to), redundant_(false) {}
-  RepoId from_guid_;
-  RepoId dst_guid_;
-  RcHandle<ConstSharedRepoIdSet> to_guids_;
-  RTPS::Submessage sm_;
-  bool redundant_;
 
   void reset_destination()
   {
     dst_guid_ = GUID_UNKNOWN;
     to_guids_ = make_rch<ConstSharedRepoIdSet>();
   }
+
+  RepoId from_guid_;
+  RepoId dst_guid_;
+  RcHandle<ConstSharedRepoIdSet> to_guids_;
+  RTPS::Submessage sm_;
+  bool redundant_;
 };
 
 typedef OPENDDS_VECTOR(MetaSubmessage) MetaSubmessageVec;

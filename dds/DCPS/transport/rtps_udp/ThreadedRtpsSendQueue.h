@@ -17,7 +17,7 @@ namespace OpenDDS
 namespace DCPS
 {
 
-class ThreadedRtpsSendQueue {
+class OpenDDS_Rtps_Udp_Export ThreadedRtpsSendQueue {
 public:
   ThreadedRtpsSendQueue();
 
