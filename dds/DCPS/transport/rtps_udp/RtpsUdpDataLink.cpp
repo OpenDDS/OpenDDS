@@ -2853,7 +2853,7 @@ RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in, double scale)
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::update_required_acknack_count(const RepoId& id, CORBA::ULong previous, CORBA::ULong current)
+RtpsUdpDataLink::RtpsWriter::update_required_acknack_count(const RepoId& id, CORBA::Long previous, CORBA::Long current)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ReaderInfoMap::iterator ri = remote_readers_.find(id);
@@ -2865,7 +2865,7 @@ RtpsUdpDataLink::RtpsWriter::update_required_acknack_count(const RepoId& id, COR
 }
 
 void
-RtpsUdpDataLink::update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::ULong previous, CORBA::ULong current)
+RtpsUdpDataLink::update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long previous, CORBA::Long current)
 {
   RtpsWriter_rch writer;
   {
