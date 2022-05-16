@@ -13,7 +13,7 @@ namespace DCPS
 {
 
 RtpsSendQueue::RtpsSendQueue()
-: enabled_(false)
+: enabled_(true)
 , heartbeats_need_merge_(false)
 , acknacks_need_merge_(false)
 {
@@ -110,8 +110,8 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
     heartbeats_need_merge_ = false;
     EntityId_t prev_writer = ENTITYID_UNKNOWN;
     bool check_swap = false;
-    size_t undirected_index;
-    size_t min_index;
+    size_t undirected_index = 0;
+    size_t min_index = 0;
     for (MapType::iterator it = heartbeat_map_.begin(), limit = heartbeat_map_.end(); it != limit; ++it) {
       if (!it->second.redundant_) {
         if (prev_writer != it->second.from_guid_.entityId) {
