@@ -3359,7 +3359,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
           reader->requests_.insert(ack, acknack.readerSNState.numBits, acknack.readerSNState.bitmap.get_buffer());
         }
 
-        if (!reader->requests_.empty()) {
+        if (!(reader->requests_.empty() && reader->requested_frags_.empty())) {
           readers_expecting_data_.insert(reader);
           if (link->config().responsive_mode_) {
             readers_expecting_heartbeat_.insert(reader);
