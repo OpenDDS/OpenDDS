@@ -4228,6 +4228,7 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = DCPS::RTPS_RELAY_STUN_PROTOCOL;
+  connection_record.latency = DCPS::TimeDuration::zero_value.to_dds_duration();
 
   DCPS::ConnectionRecordDataReaderImpl* dr = outer->connection_record_bit();
   if (!dr) {
