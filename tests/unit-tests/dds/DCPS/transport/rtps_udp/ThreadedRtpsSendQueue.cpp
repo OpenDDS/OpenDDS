@@ -74,6 +74,11 @@ MetaSubmessage create_acknack(const RepoId& from, const RepoId& dst, ACE_INT64 b
   return meta_submessage;
 }
 
+const RepoId w1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, 0x02 } };
+const RepoId w2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, 0x02 } };
+const RepoId r1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, 0x07 } };
+const RepoId r2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, 0x07 } };
+
 }
 
 TEST(dds_DCPS_ThreadedRtpsSendQueue, DefaultConstructor)
@@ -94,11 +99,6 @@ TEST(dds_DCPS_ThreadedRtpsSendQueue, EnableDisable)
   sq.enable_thread_queue();
   EXPECT_FALSE(sq.disable_thread_queue());
   sq.enable_thread_queue();
-
-  const RepoId w1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId w2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId r1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x07 } } };
-  const RepoId r2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x07 } } };
 
   const ACE_INT64 first = 3;
   const ACE_INT64 last = 5;

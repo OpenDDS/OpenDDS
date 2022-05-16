@@ -74,6 +74,11 @@ MetaSubmessage create_acknack(const RepoId& from, const RepoId& dst, ACE_INT64 b
   return meta_submessage;
 }
 
+const RepoId w1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, 0x02 } };
+const RepoId w2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, 0x02 } };
+const RepoId r1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, 0x07 } };
+const RepoId r2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, 0x07 } };
+
 }
 
 TEST(dds_DCPS_RtpsSendQueue, DefaultConstructor)
@@ -98,11 +103,6 @@ TEST(dds_DCPS_RtpsSendQueue, HandlingDuplicateHeartbeats)
 {
   RtpsSendQueue sq;
   MetaSubmessageVec vec;
-
-  const RepoId w1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId w2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId r1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x07 } } };
-  const RepoId r2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x07 } } };
 
   const ACE_INT64 first = 3;
   const ACE_INT64 last = 5;
@@ -155,11 +155,6 @@ TEST(dds_DCPS_RtpsSendQueue, HandlingDuplicateAcknacks)
   RtpsSendQueue sq;
   MetaSubmessageVec vec;
 
-  const RepoId w1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId w2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId r1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x07 } } };
-  const RepoId r2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x07 } } };
-
   const ACE_INT64 base = 3;
   ACE_INT32 count = 0;
 
@@ -203,11 +198,6 @@ TEST(dds_DCPS_RtpsSendQueue, Merge)
   RtpsSendQueue sq1;
   RtpsSendQueue sq2;
   MetaSubmessageVec vec;
-
-  const RepoId w1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId w2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x02 } } };
-  const RepoId r1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, { 0x07 } } };
-  const RepoId r2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, { 0x07 } } };
 
   const ACE_INT64 first = 3;
   const ACE_INT64 last = 5;
