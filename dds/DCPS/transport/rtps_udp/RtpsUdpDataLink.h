@@ -707,7 +707,7 @@ private:
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
   struct CountMapPair {
-    CountMapPair() : undirected_(false), is_new_assigned_(false) {}
+    CountMapPair() : undirected_(false), is_new_assigned_(false), new_(-1) {}
     bool undirected_;
     bool is_new_assigned_;
     CORBA::Long new_;
