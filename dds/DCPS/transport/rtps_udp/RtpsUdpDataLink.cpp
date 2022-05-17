@@ -2421,7 +2421,7 @@ namespace {
 #endif
 
 void
-RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map)
+RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& addr_map)
 {
   size_t cache_hits = 0;
   size_t cache_misses = 0;
@@ -2429,7 +2429,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
   size_t addrset_max_size = 0;
 
   // Sort meta_submessages by address set and destination
-  for (MetaSubmessageVec::iterator it = meta_submessages.begin(); it != meta_submessages.end(); ++it) {
+  for (MetaSubmessageVec::iterator it = meta_submessages.begin(), limit = meta_submessages.end(); it != limit; ++it) {
     const BundlingCacheKey key(it->dst_guid_, it->from_guid_, it->to_guids_);
     BundlingCache::ScopedAccess entry(bundling_cache_, key);
     if (entry.is_new_) {
@@ -2443,7 +2443,7 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
       } else {
         addrs = get_addresses_i(it->from_guid_);
       }
-      for (RepoIdSet::const_iterator it2 = it->to_guids_->guids_.begin(); it2 != it->to_guids_->guids_.end(); ++it2) {
+      for (RepoIdSet::const_iterator it2 = it->to_guids_->guids_.begin(), limit2 = it->to_guids_->guids_.end(); it2 != limit2; ++it2) {
         accumulate_addresses(it->from_guid_, *it2, addrs, directed);
       }
 #ifdef OPENDDS_SECURITY
@@ -2468,11 +2468,11 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
     }
 
     if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-      MetaSubmessageIterVec& vec = adr_map[AddressCacheEntryProxy(entry.rch_)][make_unknown_guid(it->dst_guid_.guidPrefix)];
+      MetaSubmessageIterVec& vec = addr_map[AddressCacheEntryProxy(entry.rch_)][make_unknown_guid(it->dst_guid_.guidPrefix)];
       vec.reserve(meta_submessages.size());
       vec.push_back(it);
     } else {
-      MetaSubmessageIterVec& vec = adr_map[AddressCacheEntryProxy(entry.rch_)][GUID_UNKNOWN];
+      MetaSubmessageIterVec& vec = addr_map[AddressCacheEntryProxy(entry.rch_)][GUID_UNKNOWN];
       vec.reserve(meta_submessages.size());
       vec.push_back(it);
     }
@@ -2567,7 +2567,7 @@ struct BundleHelper {
 
 void
 RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
-                                                AddrDestMetaSubmessageMap& adr_map,
+                                                AddrDestMetaSubmessageMap& addr_map,
                                                 MetaSubmessageIterVecVec& meta_submessage_bundles,
                                                 OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
                                                 OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
@@ -2585,7 +2585,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
 
   BundleHelper helper(encoding, max_bundle_size_, meta_submessage_bundle_sizes);
   RepoId prev_dst; // used to determine when we need to write a new info_dst
-  for (AddrDestMetaSubmessageMap::iterator addr_it = adr_map.begin(); addr_it != adr_map.end(); ++addr_it) {
+  for (AddrDestMetaSubmessageMap::iterator addr_it = addr_map.begin(), limit = addr_map.end(); addr_it != limit; ++addr_it) {
 
     // A new address set always starts a new bundle
     meta_submessage_bundles.push_back(MetaSubmessageIterVec());
@@ -2594,7 +2594,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
 
     prev_dst = GUID_UNKNOWN;
 
-    for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(); dest_it != addr_it->second.end(); ++dest_it) {
+    for (DestMetaSubmessageMap::iterator dest_it = addr_it->second.begin(), limit2 = addr_it->second.end(); dest_it != limit2; ++dest_it) {
 
       // Check to see if we're sending separate messages per destination guid
       if (new_bundle_per_dest_guid && meta_submessage_bundles.back().size()) {
@@ -2605,7 +2605,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
         prev_dst = GUID_UNKNOWN;
       }
 
-      for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(); resp_it != dest_it->second.end(); ++resp_it) {
+      for (MetaSubmessageIterVec::iterator resp_it = dest_it->second.begin(), limit3 = dest_it->second.end(); resp_it != limit3; ++resp_it) {
 
         // Check before every meta_submessage to see if we need to prefix a INFO_DST
         if (dest_it->first != prev_dst) {
@@ -2742,8 +2742,8 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
   using namespace RTPS;
 
   // Sort meta_submessages based on both locator IPs and INFO_DST GUID destination/s
-  AddrDestMetaSubmessageMap adr_map;
-  build_meta_submessage_map(meta_submessages, adr_map);
+  AddrDestMetaSubmessageMap addr_map;
+  build_meta_submessage_map(meta_submessages, addr_map);
 
   const Encoding encoding(Encoding::KIND_XCDR1);
 
@@ -2752,7 +2752,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
   OPENDDS_VECTOR(AddressCacheEntryProxy) meta_submessage_bundle_addrs; // for a bundle's address set
   SizeVec meta_submessage_bundle_sizes; // for allocating the bundle's buffer
   CountKeeper counts;
-  bundle_mapped_meta_submessages(encoding, adr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
+  bundle_mapped_meta_submessages(encoding, addr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
 
   OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_addrs.size());
   OPENDDS_ASSERT(meta_submessage_bundles.size() == meta_submessage_bundle_sizes.size());
@@ -2766,10 +2766,10 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
     {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
   };
 
-  for (IdCountMapping::iterator it = counts.heartbeat_counts_.begin(); it != counts.heartbeat_counts_.end(); ++it) {
+  for (IdCountMapping::iterator it = counts.heartbeat_counts_.begin(), limit = counts.heartbeat_counts_.end(); it != limit; ++it) {
     it->second.next_directed_unassigned_ = it->second.map_.begin();
     it->second.next_undirected_unassigned_ = it->second.map_.begin();
-    for (CountMap::iterator it2 = it->second.map_.begin(); it2 != it->second.map_.end(); ++it2) {
+    for (CountMap::iterator it2 = it->second.map_.begin(), limit2 = it->second.map_.end(); it2 != limit2; ++it2) {
       if (it2->second.undirected_) {
         ++(it->second.next_directed_unassigned_);
       }
@@ -2783,8 +2783,8 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
     prev_dst = GUID_UNKNOWN;
     Message_Block_Ptr mb_bundle(alloc_msgblock(meta_submessage_bundle_sizes[i], &bundle_allocator_));
     Serializer ser(mb_bundle.get(), encoding);
-    for (MetaSubmessageIterVec::const_iterator it = meta_submessage_bundles[i].begin();
-        it != meta_submessage_bundles[i].end(); ++it) {
+    const MetaSubmessageIterVec& bundle_vec = meta_submessage_bundles[i];
+    for (MetaSubmessageIterVec::const_iterator it = bundle_vec.begin(), limit = bundle_vec.end(); it != limit; ++it) {
       MetaSubmessage& res = **it;
       const RepoId dst = make_unknown_guid(res.dst_guid_);
       if (dst != prev_dst) {

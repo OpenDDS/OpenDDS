@@ -704,10 +704,10 @@ private:
     IdCountSet nackfrag_counts_;
   };
 
-  void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
+  void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& addr_map);
   void bundle_mapped_meta_submessages(
     const Encoding& encoding,
-    AddrDestMetaSubmessageMap& adr_map,
+    AddrDestMetaSubmessageMap& addr_map,
     MetaSubmessageIterVecVec& meta_submessage_bundles,
     OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
     OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,

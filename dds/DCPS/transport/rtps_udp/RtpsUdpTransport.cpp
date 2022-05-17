@@ -315,8 +315,8 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
     unsigned int disco_blob_bytes_read;
     get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, &disco_blob_bytes_read);
 
-    for (AddrSet::const_iterator it = disco_uc_addrs.begin(); it != disco_uc_addrs.end(); ++it) {
-      for (AddrSet::const_iterator it2 = uc_addrs.begin(); it2 != uc_addrs.end(); ++it2) {
+    for (AddrSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
+      for (AddrSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
         if (it->addr_bytes_equal(*it2) && DCPS::is_more_local(disco_addr_hint, *it2)) {
           disco_addr_hint = *it2;
         }

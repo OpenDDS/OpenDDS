@@ -47,7 +47,7 @@ bool ThreadedRtpsSendQueue::enqueue(const MetaSubmessageVec& vec)
   } else {
     qptr = &pos->second;
   }
-  for (MetaSubmessageVec::const_iterator it = vec.begin(); it != vec.end(); ++it) {
+  for (MetaSubmessageVec::const_iterator it = vec.begin(), limit = vec.end(); it != limit; ++it) {
     qptr->push_back(*it);
   }
   return result;
@@ -86,7 +86,7 @@ void ThreadedRtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
 void ThreadedRtpsSendQueue::purge_remote(const RepoId& id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  for (ThreadQueueMap::iterator it = thread_queue_map_.begin(); it != thread_queue_map_.end(); ++it) {
+  for (ThreadQueueMap::iterator it = thread_queue_map_.begin(), limit = thread_queue_map_.end(); it != limit; ++it) {
     it->second.purge_remote(id);
   }
   primary_queue_.purge_remote(id);
@@ -95,7 +95,7 @@ void ThreadedRtpsSendQueue::purge_remote(const RepoId& id)
 void ThreadedRtpsSendQueue::purge_local(const RepoId& id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  for (ThreadQueueMap::iterator it = thread_queue_map_.begin(); it != thread_queue_map_.end(); ++it) {
+  for (ThreadQueueMap::iterator it = thread_queue_map_.begin(), limit = thread_queue_map_.end(); it != limit; ++it) {
     it->second.purge_local(id);
   }
   primary_queue_.purge_local(id);

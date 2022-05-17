@@ -63,11 +63,12 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
 bool RtpsSendQueue::merge(RtpsSendQueue& from)
 {
   bool result = from.queue_.size() > 0;
-  queue_.insert(queue_.end(), from.queue_.begin(), from.queue_.end());
+  queue_.insert(queue_.cend(), from.queue_.cbegin(), from.queue_.cend());
   from.queue_.clear();
   if (from.heartbeats_need_merge_) {
     from.heartbeats_need_merge_ = false;
-    for (MapType::iterator it = from.heartbeat_map_.begin(); it != from.heartbeat_map_.end(); ++it) {
+    const MapType::const_iterator limit = from.heartbeat_map_.end();
+    for (MapType::iterator it = from.heartbeat_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         MapType::iterator pos = heartbeat_map_.find(it->first);
         if (pos == heartbeat_map_.end()) {
@@ -85,7 +86,8 @@ bool RtpsSendQueue::merge(RtpsSendQueue& from)
   }
   if (from.acknacks_need_merge_) {
     from.acknacks_need_merge_ = false;
-    for (MapType::iterator it = from.acknack_map_.begin(); it != from.acknack_map_.end(); ++it) {
+    const MapType::const_iterator limit = from.acknack_map_.end();
+    for (MapType::iterator it = from.acknack_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         MapType::iterator pos = acknack_map_.find(it->first);
         if (pos == acknack_map_.end()) {
@@ -108,7 +110,8 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
 {
   if (heartbeats_need_merge_) {
     heartbeats_need_merge_ = false;
-    for (MapType::iterator it = heartbeat_map_.begin(), limit = heartbeat_map_.end(); it != limit; ++it) {
+    const MapType::const_iterator limit = heartbeat_map_.end();
+    for (MapType::iterator it = heartbeat_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         queue_.push_back(it->second);
         it->second.redundant_ = true;
@@ -117,7 +120,8 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
   }
   if (acknacks_need_merge_) {
     acknacks_need_merge_ = false;
-      for (MapType::iterator it = acknack_map_.begin(), limit = acknack_map_.end(); it != limit; ++it) {
+    const MapType::const_iterator limit = acknack_map_.end();
+    for (MapType::iterator it = acknack_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         queue_.push_back(it->second);
         it->second.redundant_ = true;
