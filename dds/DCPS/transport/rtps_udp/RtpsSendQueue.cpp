@@ -63,7 +63,7 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
 bool RtpsSendQueue::merge(RtpsSendQueue& from)
 {
   bool result = from.queue_.size() > 0;
-  queue_.insert(queue_.cend(), from.queue_.cbegin(), from.queue_.cend());
+  queue_.insert(queue_.end(), from.queue_.begin(), from.queue_.end());
   from.queue_.clear();
   if (from.heartbeats_need_merge_) {
     from.heartbeats_need_merge_ = false;
