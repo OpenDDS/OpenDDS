@@ -7,15 +7,12 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSSENDQUEUE_H
 
 #include "Rtps_Udp_Export.h"
-
 #include "MetaSubmessage.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 /**
 * A Send Queue Class For MetaSubmessages
@@ -45,7 +42,7 @@ public:
   /// Remove all queued submessage with the given destination (dst_guid_)
   void purge_remote(const RepoId& id);
 
-  /// Remove all queued submessage with the given source (from_guid_)
+  /// Remove all queued submessage with the given source (src_guid_)
   void purge_local(const RepoId& id);
 
   /// Marks this queue as enabled (for external use, no internal effect)

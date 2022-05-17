@@ -7,10 +7,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 ThreadedRtpsSendQueue::ThreadedRtpsSendQueue()
 : has_data_to_send_(false)
@@ -21,9 +19,9 @@ bool ThreadedRtpsSendQueue::enqueue(const MetaSubmessage& ms)
 {
   bool result = false;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  ThreadQueueMap::iterator pos = thread_queue_map_.find(ACE_Thread::self());
+  const ThreadQueueMap::iterator pos = thread_queue_map_.find(ACE_Thread::self());
   RtpsSendQueue* qptr = 0;
-  if (pos == thread_queue_map_.end() || pos->second.enabled() == false) {
+  if (pos == thread_queue_map_.end() || !pos->second.enabled()) {
     qptr = &primary_queue_;
     result = true;
     has_data_to_send_ = true;
@@ -38,11 +36,11 @@ bool ThreadedRtpsSendQueue::enqueue(const MetaSubmessageVec& vec)
 {
   bool result = false;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  ThreadQueueMap::iterator pos = thread_queue_map_.find(ACE_Thread::self());
+  const ThreadQueueMap::iterator pos = thread_queue_map_.find(ACE_Thread::self());
   RtpsSendQueue* qptr = 0;
-  if (pos == thread_queue_map_.end() || pos->second.enabled() == false) {
+  if (pos == thread_queue_map_.end() || !pos->second.enabled()) {
     qptr = &primary_queue_;
-    result = vec.size() > 0;
+    result = !vec.empty();
     has_data_to_send_ |= result;
   } else {
     qptr = &pos->second;
@@ -63,7 +61,7 @@ bool ThreadedRtpsSendQueue::disable_thread_queue()
 {
   bool result = false;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  ThreadQueueMap::iterator pos = thread_queue_map_.find(ACE_Thread::self());
+  const ThreadQueueMap::iterator pos = thread_queue_map_.find(ACE_Thread::self());
   if (pos != thread_queue_map_.end()) {
     result = primary_queue_.merge(pos->second);
     has_data_to_send_ |= result;

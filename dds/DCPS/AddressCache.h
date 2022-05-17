@@ -74,14 +74,14 @@ public:
       , rch_()
       , is_new_(false)
     {
-      typename MapType::iterator pos = cache.map_.find(key);
+      const typename MapType::iterator pos = cache.map_.find(key);
       if (pos == cache.map_.end()) {
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
         const RcHandle<Key> key_rch = make_rch<Key>(key);
         GuidSet set;
         key.get_contained_guids(set);
-        for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+        for (GuidSet::const_iterator it = set.begin(), limit = set.end(); it != limit; ++it) {
           cache.id_map_[*it].push_back(key_rch);
         }
         is_new_ = true;
@@ -119,11 +119,11 @@ public:
   bool load(const Key& key, AddrSet& addrs) const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    typename MapType::const_iterator pos = map_.find(key);
+    const typename MapType::const_iterator pos = map_.find(key);
     if (pos != map_.end()) {
       if (MonotonicTimePoint::now() < pos->second->expires_) {
         const AddrSet& as = pos->second->addrs_;
-        for (AddrSet::const_iterator it = as.begin(); it != as.end(); ++it) {
+        for (AddrSet::const_iterator it = as.begin(), limit = as.end(); it != limit; ++it) {
           addrs.insert(*it);
         }
         return true;
@@ -144,7 +144,7 @@ public:
       const RcHandle<Key> key_rch = make_rch<Key>(key);
       GuidSet set;
       key.get_contained_guids(set);
-      for (GuidSet::const_iterator it = set.begin(); it != set.end(); ++it) {
+      for (GuidSet::const_iterator it = set.begin(), limit = set.end(); it != limit; ++it) {
         id_map_[*it].push_back(key_rch);
       }
     }
@@ -159,9 +159,9 @@ public:
   void remove_id(const GUID_t& val)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    typename IdMapType::iterator pos = id_map_.find(val);
+    const typename IdMapType::iterator pos = id_map_.find(val);
     if (pos != id_map_.end()) {
-      for (typename KeyVec::iterator it = pos->second.begin(); it != pos->second.end(); ++it) {
+      for (typename KeyVec::iterator it = pos->second.begin(), limit = pos->second.end(); it != limit; ++it) {
         map_.erase(**it);
       }
       id_map_.erase(pos);

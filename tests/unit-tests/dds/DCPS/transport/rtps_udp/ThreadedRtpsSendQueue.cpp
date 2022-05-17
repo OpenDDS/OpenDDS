@@ -36,7 +36,7 @@ MetaSubmessage create_heartbeat(const RepoId& from, const RepoId& dst, ACE_INT64
     { count }
   };
 
-  meta_submessage.from_guid_ = from;
+  meta_submessage.src_guid_ = from;
   meta_submessage.dst_guid_ = dst;
   meta_submessage.sm_.heartbeat_sm(heartbeat);
   return meta_submessage;
@@ -68,7 +68,7 @@ MetaSubmessage create_acknack(const RepoId& from, const RepoId& dst, ACE_INT64 b
     }
   };
 
-  meta_submessage.from_guid_ = from;
+  meta_submessage.src_guid_ = from;
   meta_submessage.dst_guid_ = dst;
   meta_submessage.sm_.acknack_sm(acknack);
   return meta_submessage;

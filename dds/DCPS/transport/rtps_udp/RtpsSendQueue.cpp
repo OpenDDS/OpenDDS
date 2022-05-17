@@ -7,10 +7,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 RtpsSendQueue::RtpsSendQueue()
 : enabled_(true)
@@ -23,46 +21,46 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
 {
   bool result = false;
   switch (ms.sm_._d()) {
-  case OpenDDS::RTPS::HEARTBEAT: {
-    const std::pair<RepoId, RepoId> key = std::make_pair(ms.from_guid_, ms.dst_guid_);
-    MapType::iterator pos = heartbeat_map_.find(key);
-    if (pos == heartbeat_map_.end()) {
-      heartbeat_map_.insert(std::make_pair(key, ms));
-      result = true;
-      heartbeats_need_merge_ = true;
-    } else if (pos->second.redundant_ || pos->second.sm_.heartbeat_sm().count.value < ms.sm_.heartbeat_sm().count.value) {
-      pos->second = ms;
-      result = true;
-      heartbeats_need_merge_ = true;
+    case RTPS::HEARTBEAT: {
+      const std::pair<RepoId, RepoId> key = std::make_pair(ms.src_guid_, ms.dst_guid_);
+      const MapType::iterator pos = heartbeat_map_.find(key);
+      if (pos == heartbeat_map_.end()) {
+        heartbeat_map_.insert(std::make_pair(key, ms));
+        result = true;
+        heartbeats_need_merge_ = true;
+      } else if (pos->second.redundant_ || pos->second.sm_.heartbeat_sm().count.value < ms.sm_.heartbeat_sm().count.value) {
+        pos->second = ms;
+        result = true;
+        heartbeats_need_merge_ = true;
+      }
+      break;
     }
-    break;
-  }
-  case OpenDDS::RTPS::ACKNACK: {
-    const std::pair<RepoId, RepoId> key = std::make_pair(ms.from_guid_, ms.dst_guid_);
-    MapType::iterator pos = acknack_map_.find(key);
-    if (pos == acknack_map_.end()) {
-      acknack_map_.insert(std::make_pair(key, ms));
-      result = true;
-      acknacks_need_merge_ = true;
-    } else if (pos->second.redundant_ || pos->second.sm_.acknack_sm().count.value < ms.sm_.acknack_sm().count.value) {
-      pos->second = ms;
-      result = true;
-      acknacks_need_merge_ = true;
+    case RTPS::ACKNACK: {
+      const std::pair<RepoId, RepoId> key = std::make_pair(ms.src_guid_, ms.dst_guid_);
+      const MapType::iterator pos = acknack_map_.find(key);
+      if (pos == acknack_map_.end()) {
+        acknack_map_.insert(std::make_pair(key, ms));
+        result = true;
+        acknacks_need_merge_ = true;
+      } else if (pos->second.redundant_ || pos->second.sm_.acknack_sm().count.value < ms.sm_.acknack_sm().count.value) {
+        pos->second = ms;
+        result = true;
+        acknacks_need_merge_ = true;
+      }
+      break;
     }
-    break;
-  }
-  default: {
-    queue_.push_back(ms);
-    result = true;
-    break;
-  }
+    default: {
+      queue_.push_back(ms);
+      result = true;
+      break;
+    }
   };
   return result;
 }
 
 bool RtpsSendQueue::merge(RtpsSendQueue& from)
 {
-  bool result = from.queue_.size() > 0;
+  bool result = !from.queue_.empty();
   queue_.insert(queue_.end(), from.queue_.begin(), from.queue_.end());
   from.queue_.clear();
   if (from.heartbeats_need_merge_) {
@@ -70,7 +68,7 @@ bool RtpsSendQueue::merge(RtpsSendQueue& from)
     const MapType::const_iterator limit = from.heartbeat_map_.end();
     for (MapType::iterator it = from.heartbeat_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
-        MapType::iterator pos = heartbeat_map_.find(it->first);
+        const MapType::iterator pos = heartbeat_map_.find(it->first);
         if (pos == heartbeat_map_.end()) {
           heartbeat_map_.insert(std::make_pair(it->first, it->second));
           result = true;
@@ -89,7 +87,7 @@ bool RtpsSendQueue::merge(RtpsSendQueue& from)
     const MapType::const_iterator limit = from.acknack_map_.end();
     for (MapType::iterator it = from.acknack_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
-        MapType::iterator pos = acknack_map_.find(it->first);
+        const MapType::iterator pos = acknack_map_.find(it->first);
         if (pos == acknack_map_.end()) {
           acknack_map_.insert(std::make_pair(it->first, it->second));
           result = true;

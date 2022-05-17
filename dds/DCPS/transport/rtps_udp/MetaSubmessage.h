@@ -14,28 +14,26 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
   MetaSubmessage()
-    : from_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), to_guids_(make_rch<ConstSharedRepoIdSet>()), redundant_(false) {}
-  MetaSubmessage(const RepoId& from, const RepoId& dst)
-    : from_guid_(from), dst_guid_(dst), to_guids_(make_rch<ConstSharedRepoIdSet>()), redundant_(false) {}
-  MetaSubmessage(const RepoId& from, const RepoId& dst, RcHandle<ConstSharedRepoIdSet> to)
-    : from_guid_(from), dst_guid_(dst), to_guids_(to), redundant_(false) {}
+    : src_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), addr_guids_(make_rch<ConstSharedRepoIdSet>()), redundant_(false) {}
+  MetaSubmessage(const RepoId& src, const RepoId& dst)
+    : src_guid_(src), dst_guid_(dst), addr_guids_(make_rch<ConstSharedRepoIdSet>()), redundant_(false) {}
+  MetaSubmessage(const RepoId& src, const RepoId& dst, RcHandle<ConstSharedRepoIdSet> addr_guids)
+    : src_guid_(src), dst_guid_(dst), addr_guids_(addr_guids), redundant_(false) {}
 
   void reset_destination()
   {
     dst_guid_ = GUID_UNKNOWN;
-    to_guids_ = make_rch<ConstSharedRepoIdSet>();
+    addr_guids_ = make_rch<ConstSharedRepoIdSet>();
   }
 
-  RepoId from_guid_;
+  RepoId src_guid_;
   RepoId dst_guid_;
-  RcHandle<ConstSharedRepoIdSet> to_guids_;
+  RcHandle<ConstSharedRepoIdSet> addr_guids_;
   RTPS::Submessage sm_;
   bool redundant_;
 };
