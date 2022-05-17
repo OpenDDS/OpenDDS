@@ -63,7 +63,9 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey : public RcObject {
 
   bool operator==(const BundlingCacheKey& rhs) const
   {
-    return std::memcmp(static_cast<const void*>(&src_guid_), static_cast<const void*>(&rhs.src_guid_), 2 * sizeof (GUID_t)) == 0 && addr_guids_->guids_ == rhs.addr_guids_->guids_;
+    return std::memcmp(static_cast<const void*>(&src_guid_), static_cast<const void*>(&rhs.src_guid_), 2 * sizeof (GUID_t)) == 0 &&
+      addr_guids_->hash() == rhs.addr_guids_->hash() &&
+      addr_guids_->guids_ == rhs.addr_guids_->guids_;
   }
 
   BundlingCacheKey& operator=(const BundlingCacheKey& rhs)
@@ -92,7 +94,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey : public RcObject {
   size_t calculate_hash()
   {
     uint32_t hash = addr_guids_->hash();
-    OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&src_guid_), 2 * sizeof (OpenDDS::DCPS::GUID_t), hash);
+    hash = OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&src_guid_), 2 * sizeof (OpenDDS::DCPS::GUID_t), hash);
     return static_cast<size_t>(hash);
   }
 #endif
