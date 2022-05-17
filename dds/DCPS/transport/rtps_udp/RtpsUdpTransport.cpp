@@ -953,15 +953,22 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
+  connection_record.latency = TimeDuration::zero_value.to_dds_duration();
 
   switch (sc) {
   case ICE::ServerReflexiveStateMachine::SRSM_None:
+    if (relay_srsm_.connected()) {
+      connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
+      connection_record.latency = relay_srsm_.latency().to_dds_duration();
+      deferred_connection_records_.push_back(std::make_pair(true, connection_record));
+    }
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
     // Lengthen to normal period.
     relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
+    connection_record.latency = relay_srsm_.latency().to_dds_duration();
     deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:

@@ -54,7 +54,6 @@ BE_GlobalData::BE_GlobalData()
   , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
   , face_ts_(false)
-  , printer_(false)
   , filename_only_includes_(false)
   , sequence_suffix_("Seq")
   , language_mapping_(LANGMAP_NONE)
@@ -264,16 +263,6 @@ bool BE_GlobalData::face_ts() const
   return this->face_ts_;
 }
 
-void BE_GlobalData::printer(bool b)
-{
-  this->printer_ = b;
-}
-
-bool BE_GlobalData::printer() const
-{
-  return this->printer_;
-}
-
 void BE_GlobalData::xtypes_complete(bool b)
 {
   this->generate_xtypes_complete_ = b;
@@ -395,8 +384,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gv8")) {
       v8(true);
-    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gprinter")) {
-      printer(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
     } else {

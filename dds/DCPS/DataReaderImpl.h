@@ -129,8 +129,8 @@ public:
                                   ACE_thread_t owner,
                                   DataReaderImpl* reader);
 
-  void schedule_timer(RcHandle<WriterInfo>& info);
-  void cancel_timer(RcHandle<WriterInfo>& info);
+  void schedule_timer(WriterInfo_rch& info);
+  void cancel_timer(WriterInfo_rch& info);
 
   // Arg will be PublicationId
   int handle_timeout(const ACE_Time_Value& current_time, const void* arg);
@@ -144,25 +144,25 @@ private:
   ~EndHistoricSamplesMissedSweeper();
 
   WeakRcHandle<DataReaderImpl> reader_;
-  OPENDDS_SET(RcHandle<WriterInfo>) info_set_;
+  OPENDDS_SET(WriterInfo_rch) info_set_;
 
   class CommandBase : public Command {
   public:
     CommandBase(EndHistoricSamplesMissedSweeper* sweeper,
-                RcHandle<WriterInfo>& info)
+                WriterInfo_rch& info)
       : sweeper_(sweeper)
       , info_(info)
     { }
 
   protected:
     EndHistoricSamplesMissedSweeper* sweeper_;
-    RcHandle<WriterInfo> info_;
+    WriterInfo_rch info_;
   };
 
   class ScheduleCommand : public CommandBase {
   public:
     ScheduleCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                    RcHandle<WriterInfo>& info)
+                    WriterInfo_rch& info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
@@ -171,7 +171,7 @@ private:
   class CancelCommand : public CommandBase {
   public:
     CancelCommand(EndHistoricSamplesMissedSweeper* sweeper,
-                  RcHandle<WriterInfo>& info)
+                  WriterInfo_rch& info)
       : CommandBase(sweeper, info)
     { }
     virtual void execute();
@@ -985,7 +985,7 @@ private:
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> statistics_enabled_;
 
   /// publications writing to this reader.
-  typedef OPENDDS_MAP_CMP(PublicationId, RcHandle<WriterInfo>,
+  typedef OPENDDS_MAP_CMP(PublicationId, WriterInfo_rch,
                    GUID_tKeyLessThan) WriterMapType;
 
   WriterMapType writers_;

@@ -17,6 +17,7 @@ race_top:^ACE_TSS<*>::ts_get
 race_top:^ACE_Timer_Heap_T<*>::is_empty
 race:^ACE_Log_Msg::default_priority_mask_$
 race:^ACE_Sig_Handler::sig_pending_$
+race:^ACE_OutputCDR::*_version
 race:^ACE_Proactor::cancel_timer
 race:^ACE_Proactor::schedule_timer
 race:^ACE_Thread_Exit::instance
@@ -24,7 +25,11 @@ race:^ACE_TSS_Singleton<*>::instance
 
 race_top:^TAO_Leader_Follower::wait_for_event
 race_top:^TAO_ORB_Core::*shutdown
+race_top:^TAO_Transport::*
+race_top:^TAO_Stub::set_valid_profile
+race:^TAO_IIOP_Acceptor::hostname
 race:^TAO_IIOP_Connection_Handler
+race:^TAO_Wait_On_Leader_Follower::register_handler
 
 race:^OpenDDS::Federator
 race:^OpenDDS::DCPS::DCPS_debug_level

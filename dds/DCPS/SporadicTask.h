@@ -25,7 +25,7 @@ public:
     : time_source_(time_source)
     , interceptor_(interceptor)
     , desired_scheduled_(false)
-    , actual_scheduled_(false)
+    , timer_id_(-1)
     , sporadic_command_(make_rch<SporadicCommand>(rchandle_from(this)))
   {
     reactor(interceptor->reactor());
@@ -80,6 +80,9 @@ public:
 
   virtual void execute(const MonotonicTimePoint& now) = 0;
 
+protected:
+  long get_timer_id() { return timer_id_; }
+
 private:
   struct SporadicCommand : public ReactorInterceptor::Command {
     explicit SporadicCommand(WeakRcHandle<SporadicTask> sporadic_task)
@@ -102,7 +105,7 @@ private:
   bool desired_scheduled_;
   MonotonicTimePoint desired_next_time_;
   TimeDuration desired_delay_;
-  bool actual_scheduled_;
+  long timer_id_;
   MonotonicTimePoint actual_next_time_;
   RcHandle<SporadicCommand> sporadic_command_;
   mutable ACE_Thread_Mutex mutex_;
@@ -111,22 +114,21 @@ private:
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
-    if ((!desired_scheduled_ && actual_scheduled_) ||
-        (desired_scheduled_ && actual_scheduled_ && desired_next_time_ != actual_next_time_)) {
-      reactor()->cancel_timer(this);
-      actual_scheduled_ = false;
+    if ((!desired_scheduled_ && timer_id_ != -1) ||
+        (desired_scheduled_ && timer_id_ != -1 && desired_next_time_ != actual_next_time_)) {
+      reactor()->cancel_timer(timer_id_);
+      timer_id_ = -1;
     }
 
-    if (desired_scheduled_ && !actual_scheduled_) {
-      const long timer = reactor()->schedule_timer(this, 0, desired_delay_.value());
-      if (timer == -1) {
+    if (desired_scheduled_ && timer_id_ == -1) {
+      timer_id_ = reactor()->schedule_timer(this, 0, desired_delay_.value());
+      if (timer_id_ == -1) {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR,
                      "(%P|%t) ERROR: SporadicTask::execute_i: "
                      "failed to schedule timer %p\n", ""));
         }
       } else {
-        actual_scheduled_ = true;
         actual_next_time_ = desired_next_time_;
       }
     }
@@ -140,7 +142,7 @@ private:
     {
       ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
       desired_scheduled_ = false;
-      actual_scheduled_ = false;
+      timer_id_ = -1;
     }
     execute(now);
     return 0;
