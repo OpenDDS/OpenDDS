@@ -64,7 +64,9 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey : public RcObject {
   bool operator==(const BundlingCacheKey& rhs) const
   {
     return std::memcmp(static_cast<const void*>(&src_guid_), static_cast<const void*>(&rhs.src_guid_), 2 * sizeof (GUID_t)) == 0 &&
+#if defined ACE_HAS_CPP11
       addr_guids_->hash() == rhs.addr_guids_->hash() &&
+#endif
       addr_guids_->guids_ == rhs.addr_guids_->guids_;
   }
 
