@@ -193,14 +193,14 @@ TEST(dds_DCPS_RtpsSendQueue, HandlingDuplicateAcknacks)
   vec.clear();
 }
 
-TEST(dds_DCPS_RtpsSendQueue, Merge)
+TEST(dds_DCPS_RtpsSendQueue, Merging)
 {
   RtpsSendQueue sq1;
   RtpsSendQueue sq2;
   MetaSubmessageVec vec;
 
   const ACE_INT64 first = 3;
-  const ACE_INT64 last = 5;
+  const ACE_INT64 last = 15;
   ACE_INT32 hb_count = 0;
 
   const ACE_INT64 base = 3;
@@ -245,5 +245,80 @@ TEST(dds_DCPS_RtpsSendQueue, Merge)
   sq2.merge(sq1);
   sq2.condense_and_swap(vec);
   EXPECT_EQ(vec.size(), 2u);
+  vec.clear();
+}
+
+TEST(dds_DCPS_RtpsSendQueue, Purging)
+{
+  RtpsSendQueue sq;
+  MetaSubmessageVec vec;
+
+  const ACE_INT64 first = 4;
+  const ACE_INT64 last = 9;
+
+  const ACE_INT64 base = 7;
+
+  ACE_INT32 count = 4;
+
+  sq.push_back(create_heartbeat(w1, GUID_UNKNOWN, first, last, count++));
+  sq.push_back(create_heartbeat(w1, r1, first, last, count++));
+  sq.push_back(create_heartbeat(w1, r2, first, last, count++));
+
+  sq.push_back(create_heartbeat(w2, GUID_UNKNOWN, first, last, count++));
+  sq.push_back(create_heartbeat(w2, r1, first, last, count++));
+  sq.push_back(create_heartbeat(w2, r2, first, last, count++));
+
+  sq.purge_remote(r2);
+
+  sq.condense_and_swap(vec);
+  EXPECT_EQ(vec.size(), 4u);
+  vec.clear();
+
+  sq.push_back(create_acknack(r1, w1, base, count++));
+  sq.push_back(create_acknack(r1, w2, base, count++));
+
+  sq.push_back(create_acknack(r2, w1, base, count++));
+  sq.push_back(create_acknack(r2, w2, base, count++));
+
+  sq.purge_local(r1);
+
+  sq.condense_and_swap(vec);
+  EXPECT_EQ(vec.size(), 2u);
+  vec.clear();
+
+  sq.push_back(create_heartbeat(w1, GUID_UNKNOWN, first, last, count++));
+  sq.push_back(create_heartbeat(w1, r1, first, last, count++));
+  sq.push_back(create_heartbeat(w1, r2, first, last, count++));
+
+  sq.push_back(create_heartbeat(w2, GUID_UNKNOWN, first, last, count++));
+  sq.push_back(create_heartbeat(w2, r1, first, last, count++));
+  sq.push_back(create_heartbeat(w2, r2, first, last, count++));
+
+  sq.push_back(create_acknack(r1, w1, base, count++));
+  sq.push_back(create_acknack(r1, w2, base, count++));
+
+  sq.push_back(create_acknack(r2, w1, base, count++));
+  sq.push_back(create_acknack(r2, w2, base, count++));
+
+  sq.purge_remote(r1);
+  sq.purge_local(w1);
+  sq.purge_remote(w2);
+  sq.purge_remote(w2);
+  sq.purge_remote(GUID_UNKNOWN);
+  sq.purge_local(r1);
+  sq.purge_local(r1);
+  sq.purge_remote(w1);
+  sq.purge_remote(r1);
+  sq.purge_local(w1);
+  sq.purge_local(w2);
+  sq.purge_remote(w1);
+  sq.purge_remote(r2);
+  sq.purge_remote(r2);
+  sq.purge_local(r2);
+  sq.purge_local(r2);
+  sq.purge_local(w2);
+
+  sq.condense_and_swap(vec);
+  EXPECT_EQ(vec.size(), 0u);
   vec.clear();
 }

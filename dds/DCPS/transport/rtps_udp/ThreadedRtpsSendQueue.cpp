@@ -17,6 +17,23 @@ ThreadedRtpsSendQueue::ThreadedRtpsSendQueue()
 {
 }
 
+bool ThreadedRtpsSendQueue::enqueue(const MetaSubmessage& ms)
+{
+  bool result = false;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  ThreadQueueMap::iterator pos = thread_queue_map_.find(ACE_Thread::self());
+  RtpsSendQueue* qptr = 0;
+  if (pos == thread_queue_map_.end() || pos->second.enabled() == false) {
+    qptr = &primary_queue_;
+    result = true;
+    has_data_to_send_ = true;
+  } else {
+    qptr = &pos->second;
+  }
+  qptr->push_back(ms);
+  return result;
+}
+
 bool ThreadedRtpsSendQueue::enqueue(const MetaSubmessageVec& vec)
 {
   bool result = false;

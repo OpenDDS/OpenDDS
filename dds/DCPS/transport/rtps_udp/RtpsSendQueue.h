@@ -17,18 +17,41 @@ namespace OpenDDS
 namespace DCPS
 {
 
+/**
+* A Send Queue Class For MetaSubmessages
+*
+* This class is primarily designed to:
+*  - Place the send queue logic in a single class
+*  - Avoid unnecessary STL allocations and deallocations by allowing the queue
+*    (vector) capacities to grow and be swapped / cleared without the need for
+*    an actual destructor / deallocation call
+*  - Avoid sending "old" heartbeats and acknacks which may have been queued up
+*    a "long" time ago due to congestion / multiple threads etc
+*/
 class OpenDDS_Rtps_Udp_Export RtpsSendQueue {
 public:
   RtpsSendQueue();
 
+  /// Add a single submessage to the queue
   bool push_back(const MetaSubmessage& ms);
+
+  /// Merge another send queue into this one. Note: empties the 'merged' queue
   bool merge(RtpsSendQueue& from);
+
+  /// Push all HB and AN data into the queue vector and swap with the input vector
+  /// Note: calls clear() on the input vector before swapping
   void condense_and_swap(MetaSubmessageVec& vec);
 
+  /// Remove all queued submessage with the given destination (dst_guid_)
   void purge_remote(const RepoId& id);
+
+  /// Remove all queued submessage with the given source (from_guid_)
   void purge_local(const RepoId& id);
 
+  /// Marks this queue as enabled (for external use, no internal effect)
   void enabled(bool enabled);
+
+  /// Check if this queue is marked as enabled. Default is true
   bool enabled() const;
 
 private:
