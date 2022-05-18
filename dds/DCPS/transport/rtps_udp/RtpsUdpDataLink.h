@@ -15,6 +15,7 @@
 #include "RtpsCustomizedElement.h"
 #include "LocatorCacheKey.h"
 #include "BundlingCacheKey.h"
+#include "ThreadedRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
@@ -332,25 +333,6 @@ private:
 
   } multi_buff_;
 
-  struct MetaSubmessage {
-    MetaSubmessage(const RepoId& from, const RepoId& dst)
-      : from_guid_(from), dst_guid_(dst) {}
-    MetaSubmessage(const RepoId& from, const RepoId& dst, const RepoIdSet& to)
-      : from_guid_(from), dst_guid_(dst), to_guids_(to) {}
-    RepoId from_guid_;
-    RepoId dst_guid_;
-    RepoIdSet to_guids_;
-    RTPS::Submessage sm_;
-
-    void reset_destination()
-    {
-      dst_guid_ = GUID_UNKNOWN;
-      to_guids_.clear();
-    }
-  };
-  typedef OPENDDS_VECTOR(MetaSubmessage) MetaSubmessageVec;
-  typedef OPENDDS_VECTOR(MetaSubmessageVec) MetaSubmessageVecVec;
-
   // RTPS reliability support for local writers:
 
   typedef CORBA::ULong FragmentNumberValue;
@@ -441,6 +423,7 @@ private:
   class RtpsWriter : public RcObject {
   private:
     ReaderInfoMap remote_readers_;
+    RcHandle<ConstSharedRepoIdSet> remote_reader_guids_;
     /// Preassociation readers require a non-final heartbeat.
     ReaderInfoSet preassociation_readers_;
     typedef OPENDDS_MULTISET(OpenDDS::DCPS::SequenceNumber) SequenceNumberMultiset;
@@ -505,6 +488,7 @@ private:
     bool is_leading(const ReaderInfo_rch& reader) const;
     void check_leader_lagger() const;
     void record_directed(const RepoId& reader, SequenceNumber seq);
+    void update_remote_guids_cache_i(bool add, const RepoId& guid);
 
 #ifdef OPENDDS_SECURITY
     bool is_pvs_writer() const { return is_pvs_writer_; }
@@ -576,7 +560,7 @@ private:
     void process_acked_by_all();
     void gather_nack_replies_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
-    void gather_heartbeats(const RepoIdSet& additional_guids,
+    void gather_heartbeats(RcHandle<ConstSharedRepoIdSet> additional_guids,
                            MetaSubmessageVec& meta_submessages);
     void update_required_acknack_count(const RepoId& id, CORBA::Long previous, CORBA::Long current);
 
@@ -725,11 +709,10 @@ private:
     IdCountSet nackfrag_counts_;
   };
 
-  typedef OPENDDS_VECTOR(MetaSubmessageVecVec) MetaSubmessageVecVecVec;
-  void build_meta_submessage_map(MetaSubmessageVecVecVec& meta_submessages, AddrDestMetaSubmessageMap& adr_map);
+  void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& addr_map);
   void bundle_mapped_meta_submessages(
     const Encoding& encoding,
-    AddrDestMetaSubmessageMap& adr_map,
+    AddrDestMetaSubmessageMap& addr_map,
     MetaSubmessageIterVecVec& meta_submessage_bundles,
     OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
     OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
@@ -737,11 +720,11 @@ private:
 
   void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
   void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long previous, CORBA::Long current);
-  void bundle_and_send_submessages(MetaSubmessageVecVecVec& meta_submessages);
+  void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
-  typedef OPENDDS_MAP(ACE_thread_t, MetaSubmessageVecVec) ThreadSendQueueMap;
-  ThreadSendQueueMap thread_send_queues_;
-  MetaSubmessageVecVecVec send_queue_;
+  ThreadedRtpsSendQueue sq_;
+  ACE_Thread_Mutex fsq_mutex_;
+  MetaSubmessageVec fsq_vec_;
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
   RcHandle<Sporadic> flush_send_queue_task_;
   void flush_send_queue(const MonotonicTimePoint& now);
