@@ -65,7 +65,7 @@ bool RtpsSendQueue::merge(RtpsSendQueue& from)
   from.queue_.clear();
   if (from.heartbeats_need_merge_) {
     from.heartbeats_need_merge_ = false;
-    const MapType::const_iterator limit = from.heartbeat_map_.end();
+    const MapType::iterator limit = from.heartbeat_map_.end();
     for (MapType::iterator it = from.heartbeat_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         const MapType::iterator pos = heartbeat_map_.find(it->first);
@@ -84,7 +84,7 @@ bool RtpsSendQueue::merge(RtpsSendQueue& from)
   }
   if (from.acknacks_need_merge_) {
     from.acknacks_need_merge_ = false;
-    const MapType::const_iterator limit = from.acknack_map_.end();
+    const MapType::iterator limit = from.acknack_map_.end();
     for (MapType::iterator it = from.acknack_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         const MapType::iterator pos = acknack_map_.find(it->first);
@@ -108,7 +108,7 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
 {
   if (heartbeats_need_merge_) {
     heartbeats_need_merge_ = false;
-    const MapType::const_iterator limit = heartbeat_map_.end();
+    const MapType::iterator limit = heartbeat_map_.end();
     for (MapType::iterator it = heartbeat_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         queue_.push_back(it->second);
@@ -118,7 +118,7 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
   }
   if (acknacks_need_merge_) {
     acknacks_need_merge_ = false;
-    const MapType::const_iterator limit = acknack_map_.end();
+    const MapType::iterator limit = acknack_map_.end();
     for (MapType::iterator it = acknack_map_.begin(); it != limit; ++it) {
       if (!it->second.redundant_) {
         queue_.push_back(it->second);
