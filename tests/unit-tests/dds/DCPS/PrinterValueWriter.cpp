@@ -332,7 +332,7 @@ TEST(dds_DCPS_PrinterValueWriter, write_uint32)
   }
   {
     PrinterValueWriter pvw;
-    pvw.write_uint32(4294967295);
+    pvw.write_uint32(4294967295U);
     EXPECT_STREQ(pvw.str().c_str(), "4294967295");
   }
 }
