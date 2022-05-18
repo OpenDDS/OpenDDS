@@ -239,6 +239,7 @@ public:
   ServerReflexiveStateMachine()
     : message_class_(STUN::REQUEST)
     , send_count_(0)
+    , latency_available_(false)
   {}
 
   // Return Unset if transitioning from a determined SRA to an undetermined SRA.
@@ -266,6 +267,16 @@ public:
     return latency_;
   }
 
+  bool latency_available() const
+  {
+    return latency_available_;
+  }
+
+  void latency_available(bool flag)
+  {
+    latency_available_ = flag;
+  }
+
   bool connected() const
   {
     return server_reflexive_address_ != ACE_INET_Addr();
@@ -286,6 +297,7 @@ private:
   size_t send_count_;
   DCPS::MonotonicTimePoint timestamp_;
   DCPS::TimeDuration latency_;
+  bool latency_available_;
  };
 
 } // namespace ICE
