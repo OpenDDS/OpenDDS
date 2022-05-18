@@ -4348,9 +4348,10 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
 
   switch (sc) {
   case ICE::ServerReflexiveStateMachine::SRSM_None:
-    if (relay_srsm_.connected()) {
+    if (relay_srsm_.latency_available()) {
       connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
       connection_record.latency = relay_srsm_.latency().to_dds_duration();
+      relay_srsm_.latency_available(false);
       outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber(), true, connection_record));
     }
     break;
@@ -4360,6 +4361,7 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
     relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     connection_record.latency = relay_srsm_.latency().to_dds_duration();
+    relay_srsm_.latency_available(false);
     outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber(), true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:

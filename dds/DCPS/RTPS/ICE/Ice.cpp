@@ -156,6 +156,7 @@ ServerReflexiveStateMachine::StateChange
 ServerReflexiveStateMachine::receive(const STUN::Message& message)
 {
   latency_ = DCPS::MonotonicTimePoint::now() - timestamp_;
+  latency_available_ = true;
 
   switch (message.class_) {
   case STUN::SUCCESS_RESPONSE:
