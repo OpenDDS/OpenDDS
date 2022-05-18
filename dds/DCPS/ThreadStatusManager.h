@@ -80,7 +80,7 @@ public:
   void thread_status_interval(const TimeDuration& thread_status_interval)
   {
     thread_status_interval_ = thread_status_interval;
-    bucket_limit_ = thread_status_interval / Thread::bucket_count;
+    bucket_limit_ = thread_status_interval / static_cast<double>(Thread::bucket_count);
   }
 
   const TimeDuration& thread_status_interval() const
