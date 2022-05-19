@@ -21,6 +21,8 @@ namespace DCPS
 
 EventDispatcherLite::EventDispatcherLite(size_t count)
  : cv_(mutex_)
+ , allow_dispatch_(true)
+ , stop_when_empty_(false)
  , running_(true)
  , running_threads_(0)
  , max_timer_id_(LONG_MAX)
@@ -33,15 +35,37 @@ EventDispatcherLite::~EventDispatcherLite()
   shutdown();
 }
 
-void EventDispatcherLite::shutdown()
+void EventDispatcherLite::shutdown(bool immediate, EventQueue* const pending)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  running_ = false;
+  allow_dispatch_ = false;
+  stop_when_empty_ = true;
+  running_ = running_ && !immediate; // && with existing state in case shutdown has already been called
   cv_.notify_all();
-  timer_queue_map_.clear();
+
+  if (pool_.contains(ACE_Thread::self())) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Warning :: EventDispatcherLite::shutdown: Contained Thread Attempting To Call Shutdown."));
+    if (pending) {
+      pending->clear();
+    }
+    return;
+  }
+
   while (running_threads_) {
     cv_.wait(tsm_);
   }
+
+  if (pending) {
+    pending->clear();
+    pending->swap(event_queue_);
+    for (TimerQueueMap::const_iterator it = timer_queue_map_.begin(), limit = timer_queue_map_.end(); it != limit; ++it) {
+      pending->push_back(it->second.first);
+    }
+  } else {
+    event_queue_.clear();
+  }
+  timer_queue_map_.clear();
+  timer_id_map_.clear();
 }
 
 EventDispatcherLite::DispatchStatus EventDispatcherLite::dispatch(FunPtr fun, void* arg)
@@ -51,8 +75,8 @@ EventDispatcherLite::DispatchStatus EventDispatcherLite::dispatch(FunPtr fun, vo
   }
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (running_) {
-    event_queue_.push(std::make_pair(fun, arg));
+  if (allow_dispatch_) {
+    event_queue_.push_back(std::make_pair(fun, arg));
     cv_.notify_one();
     return DS_SUCCESS;
   }
@@ -67,7 +91,7 @@ EventDispatcherLite::TimerId EventDispatcherLite::schedule(FunPtr fun, void* arg
 
   TimerId id = 0;
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  if (running_) {
+  if (allow_dispatch_) {
     TimerQueueMap::iterator pos = timer_queue_map_.insert(std::make_pair(expiration, std::make_pair(std::make_pair(fun, arg), 0)));
     // Make it a loop in case we ever recycle timer ids
     const TimerId starting_id = max_timer_id_;
@@ -139,20 +163,25 @@ void EventDispatcherLite::run_event_loop()
     // - Check for early exit before execution
     // - Run first task from event queue
 
-    const MonotonicTimePoint now = MonotonicTimePoint::now();
+    if (allow_dispatch_) {
+      const MonotonicTimePoint now = MonotonicTimePoint::now();
 
-    TimerQueueMap::iterator last = timer_queue_map_.upper_bound(now), pos = last;
-    while (pos != timer_queue_map_.begin()) {
-      --pos;
-      event_queue_.push(pos->second.first);
-      timer_id_map_.erase(pos->second.second);
-    }
-    if (last != timer_queue_map_.begin()) {
-      timer_queue_map_.erase(timer_queue_map_.begin(), last);
+      TimerQueueMap::iterator last = timer_queue_map_.upper_bound(now), pos = last;
+      while (pos != timer_queue_map_.begin()) {
+        --pos;
+        event_queue_.push_back(pos->second.first);
+        timer_id_map_.erase(pos->second.second);
+      }
+      if (last != timer_queue_map_.begin()) {
+        timer_queue_map_.erase(timer_queue_map_.begin(), last);
+      }
     }
 
     if (event_queue_.empty()) {
-      if (timer_queue_map_.size()) {
+      if (stop_when_empty_) {
+        running_ = false;
+        cv_.notify_all();
+      } else if (allow_dispatch_ && timer_queue_map_.size()) {
         MonotonicTimePoint deadline(timer_queue_map_.begin()->first);
         cv_.wait_until(deadline, tsm_);
       } else {
@@ -163,7 +192,7 @@ void EventDispatcherLite::run_event_loop()
     if (!running_ || event_queue_.empty()) continue;
 
     FunArgPair pair = event_queue_.front();
-    event_queue_.pop();
+    event_queue_.pop_front();
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     pair.first(pair.second);
   }
