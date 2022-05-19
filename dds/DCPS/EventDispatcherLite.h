@@ -41,12 +41,14 @@ public:
   static const bool DS_SUCCESS = true;
   static const bool DS_ERROR = false;
 
+  typedef void*(*FunPtr)(void*);
+  typedef std::pair<FunPtr, void*> FunArgPair;
+  typedef OPENDDS_DEQUE(FunArgPair) EventQueue;
+
   EventDispatcherLite(size_t count = 1);
   virtual ~EventDispatcherLite();
 
-  void shutdown();
-
-  typedef void*(*FunPtr)(void*);
+  void shutdown(bool immediate = false, EventQueue* const pending = 0);
 
   DispatchStatus dispatch(FunPtr fun, void* arg = NULL);
 
@@ -76,14 +78,14 @@ private:
   static ACE_THR_FUNC_RETURN run(void* arg);
   void run_event_loop();
 
-  typedef std::pair<FunPtr, void*> FunArgPair;
-  typedef OPENDDS_QUEUE(FunArgPair) EventQueue;
   typedef std::pair<FunArgPair, TimerId> TimerPair;
   typedef OPENDDS_MULTIMAP(MonotonicTimePoint, TimerPair) TimerQueueMap;
   typedef OPENDDS_MAP(TimerId, TimerQueueMap::iterator) TimerIdMap;
 
   mutable ACE_Thread_Mutex mutex_;
   mutable ConditionVariable<ACE_Thread_Mutex> cv_;
+  bool allow_dispatch_;
+  bool stop_when_empty_;
   bool running_;
   size_t running_threads_;
   EventQueue event_queue_;

@@ -162,6 +162,21 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha)
   EXPECT_GE(test_event->call_count(), 6u);
 }
 
+TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha_IS)
+{
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
+
+  dispatcher->dispatch(test_event);
+  dispatcher->dispatch(test_event);
+  dispatcher->dispatch(test_event);
+
+  test_event->wait(6u);
+  dispatcher->shutdown(true);
+
+  EXPECT_GE(test_event->call_count(), 6u);
+}
+
 TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
 {
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
@@ -175,6 +190,23 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
 
   test_event->wait(10u);
   dispatcher->shutdown();
+
+  EXPECT_GE(test_event->call_count(), 10u);
+}
+
+TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta_IS)
+{
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
+  OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
+
+  dispatcher->dispatch(test_event);
+  dispatcher->dispatch(test_event);
+  dispatcher->dispatch(test_event);
+  dispatcher->dispatch(test_event);
+  dispatcher->dispatch(test_event);
+
+  test_event->wait(10u);
+  dispatcher->shutdown(true);
 
   EXPECT_GE(test_event->call_count(), 10u);
 }
@@ -193,6 +225,20 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma)
   EXPECT_GE(test_event->call_count(), 1000u);
 }
 
+TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma_IS)
+{
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 1);
+
+  dispatcher->dispatch(test_event);
+
+  test_event->wait(1000u);
+  test_event->dispatch_scale_ = 0;
+  dispatcher->shutdown(true);
+
+  EXPECT_GE(test_event->call_count(), 1000u);
+}
+
 TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
 {
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
@@ -203,6 +249,20 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
   test_event->wait(100000u);
   test_event->dispatch_scale_ = 0;
   dispatcher->shutdown();
+
+  EXPECT_GE(test_event->call_count(), 100000u);
+}
+
+TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta_IS)
+{
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
+  OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 2);
+
+  dispatcher->dispatch(test_event);
+
+  test_event->wait(100000u);
+  test_event->dispatch_scale_ = 0;
+  dispatcher->shutdown(true);
 
   EXPECT_GE(test_event->call_count(), 100000u);
 }

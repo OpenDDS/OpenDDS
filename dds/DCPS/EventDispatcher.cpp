@@ -26,7 +26,7 @@ EventDispatcher::~EventDispatcher()
   shutdown();
 }
 
-void EventDispatcher::shutdown()
+void EventDispatcher::shutdown(bool immediate)
 {
   EventDispatcherLite_rch local;
   {
@@ -34,17 +34,27 @@ void EventDispatcher::shutdown()
     local.swap(dispatcher_);
   }
   if (local) {
-    local->shutdown();
+    EventDispatcherLite::EventQueue remaining;
+    local->shutdown(immediate, &remaining);
+    for (EventDispatcherLite::EventQueue::iterator it = remaining.begin(), limit = remaining.end(); it != limit; ++it) {
+      EventCaller* ptr = static_cast<EventCaller*>(it->second);
+      delete ptr;
+    }
   }
 }
 
-void EventDispatcher::dispatch(EventBase_rch event)
+bool EventDispatcher::dispatch(EventBase_rch event)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (!dispatcher_) {
-    return;
+    return false;
   }
-  dispatch_i(event);
+  EventCaller* ptr = new EventCaller(event);
+  const bool result = dispatcher_->dispatch(*ptr);
+  if (!result) {
+    delete ptr;
+  }
+  return result;
 }
 
 long EventDispatcher::schedule(EventBase_rch event, const MonotonicTimePoint& expiration)
@@ -53,18 +63,12 @@ long EventDispatcher::schedule(EventBase_rch event, const MonotonicTimePoint& ex
   if (!dispatcher_) {
     return -1;
   }
-  timer_list_.push_back(TimerCaller(event, rchandle_from(this)));
-  TimerCaller& tc = timer_list_.back();
-  tc.iter_ = timer_list_.end();
-  --tc.iter_;
-  const long id = dispatcher_->schedule(tc, expiration);
-  if (id > 0) {
-    tc.timer_id_ = id;
-    timer_id_map_[id] = tc.iter_;
-  } else {
-    timer_list_.pop_back();
+  EventCaller* ptr = new EventCaller(event);
+  const long result = dispatcher_->schedule(*ptr, expiration);
+  if (result < 0) {
+    delete ptr;
   }
-  return id;
+  return result;
 }
 
 size_t EventDispatcher::cancel(long id)
@@ -73,55 +77,18 @@ size_t EventDispatcher::cancel(long id)
   if (!dispatcher_) {
     return 0;
   }
-  size_t result = dispatcher_->cancel(id);
-  TimerIdMap::iterator pos = timer_id_map_.find(id);
-  if (pos != timer_id_map_.end()) {
-    timer_list_.erase(pos->second);
-    timer_id_map_.erase(pos);
-  }
-  return result;
+  return dispatcher_->cancel(id);
 }
 
-void EventDispatcher::dispatch_i(EventBase_rch event)
-{
-  event_list_.push_back(EventCaller(event, rchandle_from(this)));
-  EventCaller& ec = event_list_.back();
-  ec.iter_ = event_list_.end();
-  --ec.iter_;
-  dispatcher_->dispatch(event_list_.back());
-}
-
-EventDispatcher::EventCaller::EventCaller(EventBase_rch event, RcHandle<EventDispatcher> dispatcher)
- : event_(event)
- , dispatcher_(dispatcher)
+EventDispatcher::EventCaller::EventCaller(EventBase_rch event)
+  : event_(event)
 {
 }
 
 void EventDispatcher::EventCaller::operator()()
 {
-  RcHandle<EventDispatcher> dispatcher = dispatcher_.lock();
-  if (dispatcher) {
-    event_->handle_event();
-    ACE_Guard<ACE_Thread_Mutex> guard(dispatcher->mutex_);
-    dispatcher->event_list_.erase(iter_);
-  }
-}
-
-EventDispatcher::TimerCaller::TimerCaller(EventBase_rch event, RcHandle<EventDispatcher> dispatcher)
- : event_(event)
- , dispatcher_(dispatcher)
-{
-}
-
-void EventDispatcher::TimerCaller::operator()()
-{
-  RcHandle<EventDispatcher> dispatcher = dispatcher_.lock();
-  if (dispatcher) {
-    ACE_Guard<ACE_Thread_Mutex> guard(dispatcher->mutex_);
-    dispatcher->dispatch_i(event_);
-    dispatcher->timer_id_map_.erase(timer_id_);
-    dispatcher->timer_list_.erase(iter_);
-  }
+  event_->handle_event();
+  delete this;
 }
 
 SporadicEvent::SporadicEvent(EventDispatcher_rch dispatcher, EventBase_rch event)

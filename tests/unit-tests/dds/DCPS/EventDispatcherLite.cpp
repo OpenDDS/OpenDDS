@@ -139,6 +139,21 @@ TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchAlpha)
   EXPECT_GE(test_obj.call_count(), 6u);
 }
 
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchAlpha_IS)
+{
+  OpenDDS::DCPS::EventDispatcherLite dispatcher;
+  RecursiveTestObjOne test_obj(dispatcher);
+
+  dispatcher.dispatch(test_obj);
+  dispatcher.dispatch(test_obj);
+  dispatcher.dispatch(test_obj);
+
+  test_obj.wait(6u);
+  dispatcher.shutdown(true);
+
+  EXPECT_GE(test_obj.call_count(), 6u);
+}
+
 TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchBeta)
 {
   OpenDDS::DCPS::EventDispatcherLite dispatcher(8);
@@ -156,6 +171,25 @@ TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchBeta)
   EXPECT_GE(test_obj.call_count(), 10u);
 }
 
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchBeta_IS)
+{
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(8);
+  RecursiveTestObjOne test_obj(dispatcher);
+
+  dispatcher.dispatch(test_obj);
+  dispatcher.dispatch(test_obj);
+  dispatcher.dispatch(test_obj);
+  dispatcher.dispatch(test_obj);
+  dispatcher.dispatch(test_obj);
+
+  test_obj.wait(10u);
+  OpenDDS::DCPS::EventDispatcherLite::EventQueue temp;
+  dispatcher.shutdown(true, &temp);
+
+  EXPECT_GE(test_obj.call_count(), 10u);
+  EXPECT_EQ(temp.size(), 0u);
+}
+
 TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchGamma)
 {
   OpenDDS::DCPS::EventDispatcherLite dispatcher;
@@ -166,6 +200,20 @@ TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchGamma)
   test_obj.wait(1000u);
   test_obj.dispatch_scale_ = 0;
   dispatcher.shutdown();
+
+  EXPECT_GE(test_obj.call_count(), 1000u);
+}
+
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchGamma_IS)
+{
+  OpenDDS::DCPS::EventDispatcherLite dispatcher;
+  RecursiveTestObjTwo test_obj(dispatcher, 1);
+
+  dispatcher.dispatch(test_obj);
+
+  test_obj.wait(1000u);
+  test_obj.dispatch_scale_ = 0;
+  dispatcher.shutdown(true);
 
   EXPECT_GE(test_obj.call_count(), 1000u);
 }
@@ -182,6 +230,22 @@ TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchDelta)
   dispatcher.shutdown();
 
   EXPECT_GE(test_obj.call_count(), 100000u);
+}
+
+TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchDelta_IS)
+{
+  OpenDDS::DCPS::EventDispatcherLite dispatcher(8);
+  RecursiveTestObjTwo test_obj(dispatcher, 2);
+
+  dispatcher.dispatch(test_obj);
+
+  test_obj.wait(100000u);
+  test_obj.dispatch_scale_ = 0;
+  OpenDDS::DCPS::EventDispatcherLite::EventQueue temp;
+  dispatcher.shutdown(true, &temp);
+
+  EXPECT_GE(test_obj.call_count(), 100000u);
+  EXPECT_GE(temp.size(), 1u);
 }
 
 TEST(dds_DCPS_EventDispatcherLite, TimedDispatch)

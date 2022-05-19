@@ -30,9 +30,9 @@ public:
   EventDispatcher(size_t count = 1);
   virtual ~EventDispatcher();
 
-  void shutdown();
+  void shutdown(bool immediate = false);
 
-  void dispatch(EventBase_rch event);
+  bool dispatch(EventBase_rch event);
 
   long schedule(EventBase_rch event, const MonotonicTimePoint& expiration = MonotonicTimePoint::now());
 
@@ -40,39 +40,14 @@ public:
 
 private:
 
-  void dispatch_i(EventBase_rch event);
-
   struct EventCaller
   {
-    EventCaller(EventBase_rch event, RcHandle<EventDispatcher> dispatcher);
-
+    explicit EventCaller(EventBase_rch event);
     void operator()();
-
     EventBase_rch event_;
-    WeakRcHandle<EventDispatcher> dispatcher_;
-    OPENDDS_LIST(EventCaller)::iterator iter_;
-  };
-
-  struct TimerCaller
-  {
-    TimerCaller(EventBase_rch event, RcHandle<EventDispatcher> dispatcher);
-
-    void operator()();
-
-    EventBase_rch event_;
-    WeakRcHandle<EventDispatcher> dispatcher_;
-    OPENDDS_LIST(TimerCaller)::iterator iter_;
-    long timer_id_;
   };
 
   mutable ACE_Thread_Mutex mutex_;
-  typedef OPENDDS_LIST(EventCaller) EventList;
-  EventList event_list_;
-  typedef OPENDDS_LIST(TimerCaller) TimerList;
-  TimerList timer_list_;
-  typedef OPENDDS_MAP(long, TimerList::iterator) TimerIdMap;
-  TimerIdMap timer_id_map_;
-
   EventDispatcherLite_rch dispatcher_;
 };
 typedef RcHandle<EventDispatcher> EventDispatcher_rch;
