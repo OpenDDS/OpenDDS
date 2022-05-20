@@ -19,6 +19,8 @@ namespace DCPS
 
 struct OpenDDS_Dcps_Export EventBase : public RcObject
 {
+  virtual ~EventBase();
+
   virtual void handle_event() = 0;
   virtual void handle_error();
   virtual void handle_cancel();

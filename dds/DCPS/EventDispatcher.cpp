@@ -16,6 +16,10 @@ namespace OpenDDS
 namespace DCPS
 {
 
+EventBase::~EventBase()
+{
+}
+
 void EventBase::handle_error()
 {
 }
@@ -31,6 +35,7 @@ void EventBase::operator()()
   } catch (...) {
     handle_error();
   }
+  this->_remove_ref();
 }
 
 EventDispatcher::EventDispatcher(size_t count)

@@ -245,7 +245,6 @@ TEST(dds_DCPS_EventDispatcherLite, RecursiveDispatchDelta_IS)
   dispatcher.shutdown(true, &temp);
 
   EXPECT_GE(test_obj.call_count(), 100000u);
-  EXPECT_GE(temp.size(), 1u);
 }
 
 TEST(dds_DCPS_EventDispatcherLite, TimedDispatch)
