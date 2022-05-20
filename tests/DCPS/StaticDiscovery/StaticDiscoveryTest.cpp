@@ -139,7 +139,6 @@ public:
 
     // Write samples
     TestMsg message;
-    message.src = thread_id;
     message.value = 1;
     for (int i = 0; i < MSGS_PER_WRITER; ++i) {
       DDS::ReturnCode_t error = message_writer->write(message, DDS::HANDLE_NIL);
@@ -312,7 +311,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, reliable, true, writers, total_writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
+      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, reliable, true, total_writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
