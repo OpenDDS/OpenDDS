@@ -17,9 +17,13 @@ namespace OpenDDS
 namespace DCPS
 {
 
-struct EventBase : public RcObject
+struct OpenDDS_Dcps_Export EventBase : public RcObject
 {
   virtual void handle_event() = 0;
+  virtual void handle_error();
+  virtual void handle_cancel();
+
+  void operator()();
 };
 typedef RcHandle<EventBase> EventBase_rch;
 
@@ -39,13 +43,6 @@ public:
   size_t cancel(long id);
 
 private:
-
-  struct EventCaller
-  {
-    explicit EventCaller(EventBase_rch event);
-    void operator()();
-    EventBase_rch event_;
-  };
 
   mutable ACE_Thread_Mutex mutex_;
   EventDispatcherLite_rch dispatcher_;
