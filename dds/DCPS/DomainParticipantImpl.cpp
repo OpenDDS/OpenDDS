@@ -2112,7 +2112,14 @@ OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-  bit_subscriber_->bit_pub_listener_hack(this);
+  if (bit_subscriber_) {
+    bit_subscriber_->bit_pub_listener_hack(this);
+  } else {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: DomainParticipantImpl::ownership_manager: bit_subscriber_ is null"));
+    }
+  }
 #endif
   return &owner_man_;
 }

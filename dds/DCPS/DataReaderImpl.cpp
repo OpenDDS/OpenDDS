@@ -3569,10 +3569,10 @@ void DataReaderImpl::OnDataAvailable::execute()
     listener_->on_data_available(data_reader.in());
   }
 
-  if (set_reader_status_) {
+  if (data_reader && set_reader_status_) {
     data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
   }
-  if (set_subscriber_status_) {
+  if (data_reader && set_subscriber_status_) {
     RcHandle<SubscriberImpl> subscriber = data_reader->get_subscriber_servant();
     if (subscriber) {
       subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
