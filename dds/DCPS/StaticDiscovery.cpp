@@ -838,10 +838,9 @@ void StaticEndpointManager::update_publication_locators(
   LocalPublicationIter iter = local_publications_.find(publicationId);
   if (iter != local_publications_.end()) {
     if (DCPS_debug_level > 3) {
-      const GuidConverter conv(publicationId);
       ACE_DEBUG((LM_INFO,
         ACE_TEXT("(%P|%t) StaticEndpointManager::update_publication_locators - updating locators for %C\n"),
-        OPENDDS_STRING(conv).c_str()));
+        LogGuid(publicationId).c_str()));
     }
     iter->second.trans_info_ = transInfo;
     write_publication_data(publicationId, iter->second);
@@ -925,10 +924,9 @@ void StaticEndpointManager::update_subscription_locators(
   LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
   if (iter != local_subscriptions_.end()) {
     if (DCPS_debug_level > 3) {
-      const GuidConverter conv(subscriptionId);
       ACE_DEBUG((LM_INFO,
         ACE_TEXT("(%P|%t) StaticEndpointManager::update_subscription_locators updating locators for %C\n"),
-        OPENDDS_STRING(conv).c_str()));
+        LogGuid(subscriptionId).c_str()));
     }
     iter->second.trans_info_ = transInfo;
     write_subscription_data(subscriptionId, iter->second);
@@ -1400,8 +1398,8 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     if (call_writer) {
       if (DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) StaticEndpointManager::match_continue - ")
-          ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(),
-          OPENDDS_STRING(GuidConverter(reader)).c_str()));
+          ACE_TEXT("adding writer %C association for reader %C\n"), LogGuid(writer).c_str(),
+          LogGuid(reader).c_str()));
       }
       DataWriterCallbacks_rch dwr_lock = dwr.lock();
       if (dwr_lock) {
@@ -1421,7 +1419,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       if (DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) StaticEndpointManager::match_continue - ")
           ACE_TEXT("adding reader %C association for writer %C\n"),
-          OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
+          LogGuid(reader).c_str(), LogGuid(writer).c_str()));
       }
       DataReaderCallbacks_rch drr_lock = drr.lock();
       if (drr_lock) {
@@ -3189,9 +3187,8 @@ void StaticParticipant::remove_discovered_participant(DiscoveredParticipantIter&
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
     if (DCPS_debug_level > 3) {
-      GuidConverter conv(iter->first);
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
-                 ACE_TEXT(" - erasing %C (%B)\n"), OPENDDS_STRING(conv).c_str(), participants_.size()));
+                 ACE_TEXT(" - erasing %C (%B)\n"), LogGuid(iter->first).c_str(), participants_.size()));
     }
 
     remove_discovered_participant_i(iter);

@@ -420,11 +420,10 @@ RecorderImpl::add_association(const RepoId&            yourId,
         RepoIdToHandleMap::value_type(writer.writerId, handle));
 
       if (DCPS_debug_level > 4) {
-        GuidConverter converter(writer.writerId);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
                    ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-                   OPENDDS_STRING(converter).c_str(),
+                   LogGuid(writer.writerId).c_str(),
                    handle));
       }
 
@@ -509,14 +508,12 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter reader_converter(subscription_id_);
-    GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str(),
+               LogGuid(subscription_id_).c_str(),
+               LogGuid(writers[0]).c_str(),
                writers.length()));
   }
   DDS::InstanceHandleSeq handles;
@@ -556,11 +553,10 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
-          GuidConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                      ACE_TEXT("the writer local %C was already removed.\n"),
-                     OPENDDS_STRING(converter).c_str()));
+                     LogGuid(writer_id).c_str()));
         }
 
       } else {
@@ -843,7 +839,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
     OPENDDS_STRING buffer;
 
     for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-      buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
+      buffer += separator + LogGuid(ids[i]).conv_;
       separator = ", ";
     }
 
