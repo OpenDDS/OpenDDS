@@ -16,6 +16,23 @@ namespace OpenDDS
 namespace DCPS
 {
 
+void EventBase::handle_error()
+{
+}
+
+void EventBase::handle_cancel()
+{
+}
+
+void EventBase::operator()()
+{
+  try {
+    handle_event();
+  } catch (...) {
+    handle_error();
+  }
+}
+
 EventDispatcher::EventDispatcher(size_t count)
  : dispatcher_(make_rch<EventDispatcherLite>(count))
 {
@@ -37,8 +54,11 @@ void EventDispatcher::shutdown(bool immediate)
     EventDispatcherLite::EventQueue remaining;
     local->shutdown(immediate, &remaining);
     for (EventDispatcherLite::EventQueue::iterator it = remaining.begin(), limit = remaining.end(); it != limit; ++it) {
-      EventCaller* ptr = static_cast<EventCaller*>(it->second);
-      delete ptr;
+      EventBase* ptr = static_cast<EventBase*>(it->second);
+      if (ptr) {
+        ptr->handle_cancel();
+        ptr->_remove_ref();
+      }
     }
   }
 }
@@ -49,10 +69,10 @@ bool EventDispatcher::dispatch(EventBase_rch event)
   if (!dispatcher_) {
     return false;
   }
-  EventCaller* ptr = new EventCaller(event);
-  const bool result = dispatcher_->dispatch(*ptr);
+  event->_add_ref();
+  const bool result = dispatcher_->dispatch(*event);
   if (!result) {
-    delete ptr;
+    event->_remove_ref();
   }
   return result;
 }
@@ -63,10 +83,10 @@ long EventDispatcher::schedule(EventBase_rch event, const MonotonicTimePoint& ex
   if (!dispatcher_) {
     return -1;
   }
-  EventCaller* ptr = new EventCaller(event);
-  const long result = dispatcher_->schedule(*ptr, expiration);
+  event->_add_ref();
+  const long result = dispatcher_->schedule(*event, expiration);
   if (result < 0) {
-    delete ptr;
+    event->_remove_ref();
   }
   return result;
 }
@@ -77,18 +97,16 @@ size_t EventDispatcher::cancel(long id)
   if (!dispatcher_) {
     return 0;
   }
-  return dispatcher_->cancel(id);
-}
-
-EventDispatcher::EventCaller::EventCaller(EventBase_rch event)
-  : event_(event)
-{
-}
-
-void EventDispatcher::EventCaller::operator()()
-{
-  event_->handle_event();
-  delete this;
+  void* arg = 0;
+  const size_t result = dispatcher_->cancel(id, &arg);
+  if (result) {
+    EventBase* ptr = static_cast<EventBase*>(arg);
+    if (ptr) {
+      ptr->handle_cancel();
+      ptr->_remove_ref();
+    }
+  }
+  return result;
 }
 
 SporadicEvent::SporadicEvent(EventDispatcher_rch dispatcher, EventBase_rch event)

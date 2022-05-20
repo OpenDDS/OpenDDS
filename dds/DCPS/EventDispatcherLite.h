@@ -64,7 +64,7 @@ public:
     return schedule(fun_ptr_proxy<T>, &ref, expiration);
   }
 
-  size_t cancel(TimerId id);
+  size_t cancel(TimerId id, void** arg = NULL);
 
   size_t cancel(FunPtr fun, void* arg = NULL);
 

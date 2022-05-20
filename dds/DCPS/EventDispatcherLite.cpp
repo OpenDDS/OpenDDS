@@ -108,13 +108,16 @@ EventDispatcherLite::TimerId EventDispatcherLite::schedule(FunPtr fun, void* arg
   return -1;
 }
 
-size_t EventDispatcherLite::cancel(EventDispatcherLite::TimerId id)
+size_t EventDispatcherLite::cancel(EventDispatcherLite::TimerId id, void** arg)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   TimerIdMap::iterator pos = timer_id_map_.find(id);
   if (pos != timer_id_map_.end()) {
     if (pos->second == timer_queue_map_.begin()) {
       cv_.notify_all();
+    }
+    if (arg) {
+      *arg = pos->second->second.first.second;
     }
     timer_queue_map_.erase(pos->second);
     timer_id_map_.erase(pos);
