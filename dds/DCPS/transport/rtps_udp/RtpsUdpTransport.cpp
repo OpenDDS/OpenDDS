@@ -315,8 +315,8 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
     unsigned int disco_blob_bytes_read;
     get_connection_addrs(discovery_locator, &disco_uc_addrs, &disco_mc_addrs, &disco_requires_inline_qos, &disco_blob_bytes_read);
 
-    for (AddrSet::const_iterator it = disco_uc_addrs.begin(); it != disco_uc_addrs.end(); ++it) {
-      for (AddrSet::const_iterator it2 = uc_addrs.begin(); it2 != uc_addrs.end(); ++it2) {
+    for (AddrSet::const_iterator it = disco_uc_addrs.begin(), limit = disco_uc_addrs.end(); it != limit; ++it) {
+      for (AddrSet::const_iterator it2 = uc_addrs.begin(), limit2 = uc_addrs.end(); it2 != limit2; ++it2) {
         if (it->addr_bytes_equal(*it2) && DCPS::is_more_local(disco_addr_hint, *it2)) {
           disco_addr_hint = *it2;
         }
@@ -957,9 +957,10 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
 
   switch (sc) {
   case ICE::ServerReflexiveStateMachine::SRSM_None:
-    if (relay_srsm_.connected()) {
+    if (relay_srsm_.latency_available()) {
       connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
       connection_record.latency = relay_srsm_.latency().to_dds_duration();
+      relay_srsm_.latency_available(false);
       deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     }
     break;
@@ -969,6 +970,7 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
     relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     connection_record.latency = relay_srsm_.latency().to_dds_duration();
+    relay_srsm_.latency_available(false);
     deferred_connection_records_.push_back(std::make_pair(true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
