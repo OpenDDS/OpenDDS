@@ -752,7 +752,7 @@ private:
     WeakRcHandle<RtpsUdpDataLink> link_;
   };
   RcHandle<EventBase> flush_send_queue_event_;
-  SporadicEvent flush_send_queue_sporadic_;
+  RcHandle<SporadicEvent> flush_send_queue_sporadic_;
 
   RepoIdSet pending_reliable_readers_;
 
