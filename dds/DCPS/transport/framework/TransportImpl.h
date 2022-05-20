@@ -21,6 +21,7 @@
 #include "DataLinkCleanupTask.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/DiscoveryListener.h"
+#include "dds/DCPS/EventDispatcher.h"
 
 #if defined(OPENDDS_SECURITY)
 #include "dds/DdsSecurityCoreC.h"
@@ -177,6 +178,8 @@ public:
   /// returned.
   ReactorTask_rch reactor_task();
 
+  EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
+
 protected:
   TransportImpl(TransportInst& config);
 
@@ -296,8 +299,20 @@ public:
   /// subclass (of TransportImpl) doesn't require a reactor.
   ReactorTask_rch reactor_task_;
 
+  struct DoClear : public EventBase
+  {
+    DoClear(RcHandle<DataLink> link) : link_(link) {}
+    void handle_event() {
+      DataLink_rch link = link_.lock();
+      if (link) {
+        link->clear_associations();
+      }
+    }
+    WeakRcHandle<DataLink> link_;
+  };
+
   /// smart ptr to the associated DL cleanup task
-  DataLinkCleanupTask dl_clean_task_;
+  EventDispatcher_rch event_dispatcher_;
 
   /// Monitor object for this entity
   unique_ptr<Monitor> monitor_;

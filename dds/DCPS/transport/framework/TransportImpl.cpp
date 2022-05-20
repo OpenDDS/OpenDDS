@@ -33,6 +33,7 @@ TransportImpl::TransportImpl(TransportInst& config)
   : config_(config)
   , last_link_(0)
   , is_shut_down_(false)
+  , event_dispatcher_(make_rch<EventDispatcher>(1))
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
@@ -43,6 +44,7 @@ TransportImpl::TransportImpl(TransportInst& config)
 TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl", "~TransportImpl", 6);
+  event_dispatcher_->shutdown();
 }
 
 bool
@@ -58,9 +60,6 @@ TransportImpl::shutdown()
 
   is_shut_down_ = true;
 
-  // Stop datalink clean task.
-  this->dl_clean_task_.close(1);
-
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();
   }
@@ -73,15 +72,6 @@ TransportImpl::shutdown()
 bool
 TransportImpl::open()
 {
-  // Open the DL Cleanup task
-  // We depend upon the existing config logic to ensure the
-  // DL Cleanup task is opened only once
-  if (this->dl_clean_task_.open()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
-                      ACE_TEXT("open")), false);
-  }
-
   // Success.
   if (this->monitor_) {
     this->monitor_->report();
@@ -133,9 +123,7 @@ TransportImpl::release_link_resources(DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
-  // Create a smart pointer without ownership (bumps up ref count)
-  dl_clean_task_.add(rchandle_from(link));
-
+  event_dispatcher_->dispatch(make_rch<DoClear>(rchandle_from(link)));
   return true;
 }
 

@@ -737,9 +737,22 @@ private:
   ThreadedRtpsSendQueue sq_;
   ACE_Thread_Mutex fsq_mutex_;
   MetaSubmessageVec fsq_vec_;
-  typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
-  RcHandle<Sporadic> flush_send_queue_task_;
+
   void flush_send_queue(const MonotonicTimePoint& now);
+
+  struct FlushSendQueueEvent : public EventBase
+  {
+    FlushSendQueueEvent(RcHandle<RtpsUdpDataLink> link) : link_(link) {}
+    void handle_event() {
+      RtpsUdpDataLink_rch link = link_.lock();
+      if (link) {
+        link->flush_send_queue(MonotonicTimePoint::now());
+      }
+    }
+    WeakRcHandle<RtpsUdpDataLink> link_;
+  };
+  RcHandle<EventBase> flush_send_queue_event_;
+  SporadicEvent flush_send_queue_sporadic_;
 
   RepoIdSet pending_reliable_readers_;
 

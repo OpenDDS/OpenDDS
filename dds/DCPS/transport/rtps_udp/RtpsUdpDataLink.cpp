@@ -84,7 +84,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , multi_buff_(this, config.nak_depth_)
-  , flush_send_queue_task_(make_rch<Sporadic>(TheServiceParticipant->time_source(), reactor_task->interceptor(), rchandle_from(this), &RtpsUdpDataLink::flush_send_queue))
+  , flush_send_queue_event_(make_rch<FlushSendQueueEvent>(rchandle_from(this)))
+  , flush_send_queue_sporadic_(transport.event_dispatcher(), flush_send_queue_event_)
   , best_effort_heartbeat_count_(0)
   , heartbeat_(make_rch<Periodic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats))
   , heartbeatchecker_(make_rch<Periodic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats))
@@ -112,7 +113,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 
 RtpsUdpDataLink::~RtpsUdpDataLink()
 {
-  flush_send_queue_task_->cancel();
+  flush_send_queue_sporadic_.cancel();
 }
 
 RtpsUdpInst&
@@ -2642,7 +2643,7 @@ void
 RtpsUdpDataLink::disable_response_queue()
 {
   if (sq_.disable_thread_queue()) {
-    flush_send_queue_task_->schedule(config().send_delay_);
+    flush_send_queue_sporadic_.schedule(config().send_delay_);
   }
 }
 
@@ -2654,7 +2655,7 @@ RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in, double scale)
   }
 
   if (sq_.enqueue(in)) {
-    flush_send_queue_task_->schedule(config().send_delay_ * scale);
+    flush_send_queue_sporadic_.schedule(config().send_delay_ * scale);
   }
 }
 
