@@ -31,7 +31,7 @@ use ChangeDir;
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
 my $doc_tao2_version = '6.5.16';
-my $doc_tao3_version = '7.0.6';
+my $doc_tao3_version = '7.0.7';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
