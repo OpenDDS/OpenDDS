@@ -112,7 +112,7 @@ DataReaderListenerImpl::on_subscription_matched(
 {
   OPENDDS_ASSERT(status.current_count >= 0);
   if (status.current_count > total_writers_) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) DataReaderListenerImpl::on_subscription_matched: more writers than expected\n"))
+    ACE_ERROR((LM_ERROR, "(%P|%t) DataReaderListenerImpl::on_subscription_matched: more writers than expected\n"));
   }
   OPENDDS_ASSERT(previous_count_ + status.current_count_change == status.current_count);
   previous_count_ = status.current_count;
