@@ -2971,9 +2971,9 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
     RtpsUdpSendStrategy_rch ss = send_strategy();
     if (ss) {
       ss->send_rtps_control(rtps_message, *(mb_bundle.get()), meta_submessage_bundle_addrs[i].addrs());
-    }
-    if (transport_debug.log_messages) {
-      RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
+      if (transport_debug.log_messages) {
+        RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
+      }
     }
   }
 }
