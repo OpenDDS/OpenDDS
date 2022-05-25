@@ -47,7 +47,7 @@ public:
     if (!associate(publication, false)) {
       throw std::string("subscriber TransportClient::associate() failed");
     }
-    std::cerr << "Reader " << OPENDDS_STRING(GuidConverter(get_repo_id())) << " called associate()\n";
+    std::cerr << "Reader " << LogGuid(get_repo_id()).conv_ << " called associate()\n";
   }
 
   virtual ~SimpleDataReader() { disassociate(config.getPubWtrId()); }

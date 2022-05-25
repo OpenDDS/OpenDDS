@@ -871,25 +871,23 @@ Monitor::MonitorTask::readBuiltinTopicData(
   const DDS::InstanceHandle_t instance = dpi->lookup_handle(id);
 
   if (this->options_.verbose()) {
-    OpenDDS::DCPS::GuidConverter converter(id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
       ACE_TEXT("id: %C ==> BuiltinTopic key: ")
       ACE_TEXT("[0x%x, 0x%x, 0x%x], handle %d.\n"),
       topicName,
-      std::string(converter).c_str(),
+      LogGuid(id).c_str(),
       data.key.value[0], data.key.value[1], data.key.value[2],
       instance
     ));
   }
 
   if (instance == DDS::HANDLE_NIL) {
-    OpenDDS::DCPS::GuidConverter converter(id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
       ACE_TEXT("no data for id %C at this time.\n"),
       topicName,
-      std::string(converter).c_str()
+      LogGuid(id).c_str()
     ));
     return false;
   }
