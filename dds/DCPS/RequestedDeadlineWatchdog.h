@@ -36,7 +36,7 @@ class DataReaderImpl;
  * @c on_requested_deadline_missed() listener callback when the
  * configured finite deadline period expires.
  */
-class RequestedDeadlineWatchdog : public virtual OpenDDS::DCPS::Watchdog {
+class RequestedDeadlineWatchdog : public virtual Watchdog {
 public:
 
   typedef ACE_Recursive_Thread_Mutex  lock_type;
