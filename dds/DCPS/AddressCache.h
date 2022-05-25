@@ -139,7 +139,9 @@ public:
 
     inline AddressCacheEntry& value() {
       OPENDDS_ASSERT(rch_);
+#if defined ACE_HAS_CPP11
       non_const_touch_ = true;
+#endif
       return *rch_;
     }
 
