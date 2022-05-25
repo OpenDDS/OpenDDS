@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class InternalEntity : public RcObject {};
+class InternalEntity : public virtual RcObject {};
 typedef WeakRcHandle<InternalEntity> InternalEntity_wrch;
 
 enum InternalSampleInfoKind {

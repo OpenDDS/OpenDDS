@@ -35,7 +35,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class TcpConnection
-  : public RcObject
+  : public virtual RcObject
   , public ACE_Svc_Handler<ACE_SOCK_STREAM, ACE_NULL_SYNCH> {
 public:
 

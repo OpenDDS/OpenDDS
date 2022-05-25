@@ -36,18 +36,18 @@ class DataReaderImpl;
  * @c on_requested_deadline_missed() listener callback when the
  * configured finite deadline period expires.
  */
-class RequestedDeadlineWatchdog : public Watchdog {
+class RequestedDeadlineWatchdog : public virtual OpenDDS::DCPS::Watchdog {
 public:
 
   typedef ACE_Recursive_Thread_Mutex  lock_type;
   typedef ACE_Reverse_Lock<lock_type> reverse_lock_type;
 
   RequestedDeadlineWatchdog(
-    lock_type & lock,
+    lock_type& lock,
     DDS::DeadlineQosPolicy qos,
     DataReaderImpl& reader_impl,
-    DDS::RequestedDeadlineMissedStatus & status,
-    CORBA::Long & last_total_count);
+    DDS::RequestedDeadlineMissedStatus& status,
+    CORBA::Long& last_total_count);
 
   virtual ~RequestedDeadlineWatchdog();
 
@@ -73,7 +73,7 @@ public:
 private:
 
   /// Lock for synchronization of @c status_ member.
-  lock_type & status_lock_;
+  lock_type& status_lock_;
   /// Reverse lock used for releasing the @c status_lock_ listener upcall.
   reverse_lock_type reverse_status_lock_;
 
@@ -86,7 +86,7 @@ private:
   DDS::RequestedDeadlineMissedStatus& status_;
 
   /// Last total_count when status was last checked.
-  CORBA::Long & last_total_count_;
+  CORBA::Long& last_total_count_;
 };
 
 } // namespace DCPS

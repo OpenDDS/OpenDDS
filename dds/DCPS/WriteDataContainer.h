@@ -119,7 +119,7 @@ typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance_rch)
  *           we do not deadlock; and, 2) we incur the cost of
  *           obtaining the lock only once.
  */
-class OpenDDS_Dcps_Export WriteDataContainer : public RcObject {
+class OpenDDS_Dcps_Export WriteDataContainer : public virtual RcObject {
 public:
 
   friend class DataWriterImpl;

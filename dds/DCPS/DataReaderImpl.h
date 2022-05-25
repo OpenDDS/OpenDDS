@@ -178,7 +178,7 @@ private:
   };
 };
 
-class MessageHolder : public RcObject {
+class MessageHolder : public virtual RcObject {
 public:
   virtual const void* get() const = 0;
 };

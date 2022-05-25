@@ -34,7 +34,7 @@ typedef RcHandle<TransportInst> TransportInst_rch;
  * to provide the new concrete transport object.
  *
  */
-class OpenDDS_Dcps_Export TransportType : public RcObject {
+class OpenDDS_Dcps_Export TransportType : public virtual RcObject {
 public:
 
   virtual const char* name() = 0;

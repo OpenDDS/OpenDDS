@@ -60,7 +60,7 @@ struct FragKey {
   OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
 #endif
 
-class OpenDDS_Dcps_Export TransportReassembly : public RcObject {
+class OpenDDS_Dcps_Export TransportReassembly : public virtual RcObject {
 public:
   explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
 

@@ -17,7 +17,7 @@ using namespace OpenDDS::DCPS;
 
 ACE_Atomic_Op<ACE_Thread_Mutex, unsigned int> total_count = 0;
 
-struct TestObj : public RcObject
+struct TestObj : public virtual RcObject
 {
   typedef PmfSporadicTask<TestObj> Sporadic;
 

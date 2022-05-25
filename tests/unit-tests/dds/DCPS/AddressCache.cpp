@@ -11,7 +11,7 @@
 
 using namespace OpenDDS::DCPS;
 
-struct TestKey : public RcObject {
+struct TestKey : public virtual RcObject {
   TestKey(const RepoId& from, const RepoId& to) : from_(from), to_(to) {}
   TestKey(const TestKey& val) : RcObject(), from_(val.from_), to_(val.to_) {}
   bool operator<(const TestKey& rhs) const {

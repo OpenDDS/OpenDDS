@@ -27,7 +27,7 @@ class DataSampleElement;
 class DataLinkSet;
 typedef RcHandle<DataLinkSet> DataLinkSet_rch;
 
-class OpenDDS_Dcps_Export DataLinkSet : public RcObject {
+class OpenDDS_Dcps_Export DataLinkSet : public virtual RcObject {
 public:
 
   DataLinkSet();

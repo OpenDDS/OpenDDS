@@ -26,7 +26,7 @@ namespace DCPS {
 
 #pragma pack(push, 1)
 
-struct OpenDDS_Rtps_Udp_Export LocatorCacheKey : public RcObject {
+struct OpenDDS_Rtps_Udp_Export LocatorCacheKey : public virtual RcObject {
   LocatorCacheKey(const GUID_t& remote, const GUID_t& local, bool prefer_unicast)
     : remote_(remote)
     , local_(local)

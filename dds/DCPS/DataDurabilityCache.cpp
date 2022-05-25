@@ -60,7 +60,7 @@ void cleanup_directory(const OPENDDS_VECTOR(OPENDDS_STRING) & path,
  * @brief Event handler that is called when @c service_cleanup_delay
  *        period expires.
  */
-class Cleanup_Handler : public OpenDDS::DCPS::RcEventHandler {
+class Cleanup_Handler : public virtual OpenDDS::DCPS::RcEventHandler {
 public:
 
   typedef

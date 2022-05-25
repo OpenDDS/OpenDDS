@@ -52,7 +52,7 @@ class ShutdownInterface;
  */
 class  OpenDDS_InfoRepoLib_Export TAO_DDS_DCPSInfo_i
   : public virtual POA_OpenDDS::DCPS::DCPSInfo,
-    public ACE_Event_Handler {
+    public virtual ACE_Event_Handler {
 public:
   TAO_DDS_DCPSInfo_i(
     CORBA::ORB_ptr orb,
