@@ -136,6 +136,10 @@ bool NetworkAddress::operator<(const NetworkAddress& rhs) const
   return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) < 0;
 }
 
+size_t NetworkAddress::hash(size_t start_hash) const {
+  return static_cast<size_t>(OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&inet_addr_), sizeof(inet_addr_), static_cast<uint32_t>(start_hash)));
+}
+
 bool NetworkAddress::addr_bytes_equal(const NetworkAddress& rhs) const
 {
   if (inet_addr_.in4_.sin_family == AF_INET && rhs.inet_addr_.in4_.sin_family == AF_INET) {
@@ -317,6 +321,15 @@ bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming
   }
 #endif /* ACE_HAS_IPV6 */
   return false;
+}
+
+size_t calculate_hash(const AddrSet& addrs, size_t start_hash)
+{
+  size_t result = start_hash;
+  for (AddrSet::const_iterator it = addrs.begin(), limit = addrs.end(); it != limit; ++it) {
+    result = it->hash(result);
+  }
+  return result;
 }
 
 } // namespace DCPS

@@ -2456,7 +2456,8 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
       ++cache_hits;
     }
 
-    const AddrSet& addrs = entry.value().addrs_;
+    const BundlingCache::ScopedAccess& const_entry = entry;
+    const AddrSet& addrs = const_entry.value().addrs_;
     addrset_min_size = std::min(addrset_min_size, static_cast<size_t>(addrs.size()));
     addrset_max_size = std::max(addrset_max_size, static_cast<size_t>(addrs.size()));
     if (addrs.empty()) {
@@ -2747,6 +2748,11 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
   MetaSubmessageIterVecVec meta_submessage_bundles; // a vector of vectors of iterators pointing to meta_submessages
   OPENDDS_VECTOR(AddressCacheEntryProxy) meta_submessage_bundle_addrs; // for a bundle's address set
   SizeVec meta_submessage_bundle_sizes; // for allocating the bundle's buffer
+
+  meta_submessage_bundles.reserve(meta_submessages.size());
+  meta_submessage_bundle_addrs.reserve(meta_submessages.size());
+  meta_submessage_bundle_sizes.reserve(meta_submessages.size());
+
   CountKeeper counts;
   bundle_mapped_meta_submessages(encoding, addr_map, meta_submessage_bundles, meta_submessage_bundle_addrs, meta_submessage_bundle_sizes, counts);
 

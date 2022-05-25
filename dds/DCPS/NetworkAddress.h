@@ -47,6 +47,8 @@ public:
 
   bool operator<(const NetworkAddress& rhs) const;
 
+  size_t hash(size_t result) const;
+
   bool addr_bytes_equal(const NetworkAddress& rhs) const;
 
   ACE_INET_Addr to_addr() const;
@@ -78,6 +80,9 @@ private:
 };
 
 typedef OPENDDS_SET(NetworkAddress) AddrSet;
+
+OpenDDS_Dcps_Export
+size_t calculate_hash(const AddrSet& addrs, size_t start_hash = 0);
 
 OpenDDS_Dcps_Export
 bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming);
