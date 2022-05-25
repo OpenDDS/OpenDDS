@@ -18,12 +18,12 @@
 #include <set>
 #include <map>
 
-typedef void (*callback_t)(bool);
+typedef void (*callback_t)(bool, const OpenDDS::DCPS::GUID_t&);
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
-  DataReaderListenerImpl(const std::string& id, bool reliable, bool expect_all_samples, const int total_writers, const int expected_samples, callback_t done_callback, DDS::Subscriber_ptr subscriber, bool check_bits)
+  DataReaderListenerImpl(const std::string& id, bool reliable, bool expect_all_samples, const int total_writers, const int expected_samples, callback_t done_callback, bool check_bits)
     : id_(id)
     , reliable_(reliable)
     , expect_all_samples_(expect_all_samples)
@@ -37,14 +37,14 @@ public:
     , check_bits_(check_bits)
 #endif
   {
-    ACE_UNUSED_ARG(subscriber);
 #ifdef DDS_HAS_MINIMUM_BIT
     ACE_UNUSED_ARG(check_bits);
 #endif
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataReader %C\n", id.c_str()));
   }
 
   ~DataReaderListenerImpl();
+
+  void set_guid(const OpenDDS::DCPS::GUID_t& guid);
 
   virtual void on_requested_deadline_missed(
     DDS::DataReader_ptr reader,
@@ -82,6 +82,7 @@ public:
 #endif /* DDS_HAS_MINIMUM_BIT */
 
 private:
+  OpenDDS::DCPS::GUID_t reader_guid_;
   std::string id_;
   bool reliable_;
   bool expect_all_samples_;

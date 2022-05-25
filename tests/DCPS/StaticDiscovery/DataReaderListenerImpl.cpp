@@ -18,13 +18,20 @@
 
 DataReaderListenerImpl::~DataReaderListenerImpl()
 {
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C is done\n", id_.c_str()));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C is being destroyed\n", OpenDDS::DCPS::LogGuid(reader_guid_).c_str()));
   if (expected_samples_ && received_samples_ != expected_samples_) {
     ACE_ERROR((LM_ERROR, "ERROR: expected %d but received %d\n",
                expected_samples_, received_samples_));
   } else if (expected_samples_) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Expected number of samples received\n"));
   }
+}
+
+void
+DataReaderListenerImpl::set_guid(const OpenDDS::DCPS::GUID_t& guid)
+{
+  reader_guid_ = guid;
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReader %C created\n", OpenDDS::DCPS::LogGuid(reader_guid_).c_str()));
 }
 
 void
@@ -94,11 +101,9 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       }
       it->second.insert(message.value);
 
-      const OpenDDS::DCPS::GUID_t reader_guid = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader)->get_repo_id();
-
-      ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from writer %C)\n", OpenDDS::DCPS::LogGuid(reader_guid).c_str(), received_samples_, message.value, OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
+      ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from writer %C)\n", OpenDDS::DCPS::LogGuid(reader_guid_).c_str(), received_samples_, message.value, OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
       if (++received_samples_ == expected_samples_) {
-        done_callback_(builtin_read_error_);
+        done_callback_(builtin_read_error_, reader_guid_);
       }
     }
     error = reader_i->take_next_sample(message, info);
