@@ -33,6 +33,8 @@ struct OpenDDS_Rtps_Udp_Export RoutedGuidPair {
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-OPENDDS_OOAT_STD_HASH(OpenDDS::DCPS::RoutedGuidPair, OpenDDS_Rtps_Udp_Export)
+#if defined ACE_HAS_CPP11
+OPENDDS_OOAT_STD_HASH(OpenDDS::DCPS::RoutedGuidPair, OpenDDS_Rtps_Udp_Export);
+#endif
 
 #endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_ROUTEDGUIDPAIR_H */
