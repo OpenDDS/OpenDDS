@@ -136,9 +136,11 @@ bool NetworkAddress::operator<(const NetworkAddress& rhs) const
   return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) < 0;
 }
 
+#if defined ACE_HAS_CPP11
 size_t NetworkAddress::hash(size_t start_hash) const {
   return static_cast<size_t>(OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&inet_addr_), sizeof(inet_addr_), static_cast<uint32_t>(start_hash)));
 }
+#endif
 
 bool NetworkAddress::addr_bytes_equal(const NetworkAddress& rhs) const
 {
@@ -323,6 +325,7 @@ bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming
   return false;
 }
 
+#if defined ACE_HAS_CPP11
 size_t calculate_hash(const AddrSet& addrs, size_t start_hash)
 {
   size_t result = start_hash;
@@ -331,6 +334,7 @@ size_t calculate_hash(const AddrSet& addrs, size_t start_hash)
   }
   return result;
 }
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -47,7 +47,9 @@ public:
 
   bool operator<(const NetworkAddress& rhs) const;
 
+#if defined ACE_HAS_CPP11
   size_t hash(size_t result) const;
+#endif
 
   bool addr_bytes_equal(const NetworkAddress& rhs) const;
 
@@ -81,8 +83,10 @@ private:
 
 typedef OPENDDS_SET(NetworkAddress) AddrSet;
 
+#if defined ACE_HAS_CPP11
 OpenDDS_Dcps_Export
 size_t calculate_hash(const AddrSet& addrs, size_t start_hash = 0);
+#endif
 
 OpenDDS_Dcps_Export
 bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming);
