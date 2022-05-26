@@ -9398,133 +9398,133 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-#  cmake_w22_x86_i0_sec:
-#
-#    runs-on: windows-2022
-#
-#    needs: build_w22_x86_i0_sec
-#
-#    steps:
-#    - name: install openssl & xerces-c
-#      uses: lukka/run-vcpkg@v7
-#      with:
-#        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
-#        vcpkgArguments: --recurse openssl xerces-c
-#        vcpkgTriplet: x86-windows
-#    - name: checkout MPC
-#      uses: actions/checkout@v3
-#      with:
-#        repository: DOCGroup/MPC
-#        path: MPC
-#    - name: checkout autobuild
-#      uses: actions/checkout@v3
-#      with:
-#        repository: DOCGroup/autobuild
-#        path: autobuild
-#    - name: checkout OpenDDS
-#      uses: actions/checkout@v3
-#      with:
-#        path: OpenDDS
-#        submodules: true
-#    - name: checkout ACE_TAO
-#      uses: actions/checkout@v3
-#      with:
-#        repository: DOCGroup/ACE_TAO
-#        ref: ace6tao2
-#        path: ACE_TAO
-#    - name: download ACE_TAO artifact
-#      uses: actions/download-artifact@v3
-#      with:
-#        name: ACE_TAO_w22_x86_i0_artifact
-#        path: ACE_TAO
-#    - name: extract ACE_TAO artifact
-#      shell: bash
-#      run: |
-#        cd ACE_TAO
-#        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
-#        rm -f ACE_TAO_w22_x86_i0.tar.xz
-#    - name: download OpenDDS artifact
-#      uses: actions/download-artifact@v3
-#      with:
-#        name: build_w22_x86_i0_sec_artifact
-#        path: OpenDDS
-#    - name: extract OpenDDS artifact
-#      shell: bash
-#      run: |
-#        cd OpenDDS
-#        tar xvfJ build_w22_x86_i0_sec.tar.xz
-#        rm -f build_w22_x86_i0_sec.tar.xz
-#    - name: move OpenDDS to C drive
-#      shell: bash
-#      run: |
-#        mv OpenDDS /c/
-#    - name: set up msvc env
-#      uses: ilammy/msvc-dev-cmd@v1.9.0
-#    - uses: ammaraskar/msvc-problem-matcher@0.1
-#    - name: Build CMake Tests
-#      shell: cmd
-#      run: |
-#        cd /d C:\OpenDDS
-#        call setenv.cmd
-#        mkdir tests\cmake\build
-#        cd tests\cmake\build
-#        cmake -A Win32 ..
-#        cmake --build .
-#    - name: check build configuration
-#      shell: cmd
-#      run: |
-#        cd /d C:\OpenDDS
-#        call setenv.cmd
-#        perl tools\scripts\show_build_config.pl
-#    - name: create autobuild config
-#      shell: bash
-#      run: |
-#        cd /c/OpenDDS
-#        mkdir ${{ github.job }}_autobuild_workspace
-#        cd ${{ github.job }}_autobuild_workspace
-#        echo using commit $TRIGGERING_COMMIT for SHA
-#        echo $TRIGGERING_COMMIT >> ./SHA
-#        cat > config.xml <<EOF
-#        <autobuild>
-#        <configuration>
-#        <variable name="log_file" value="output.log"/>
-#        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-#        <variable name="project_root" value="C:/OpenDDS"/>
-#        <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
-#        <variable name="junit_xml_output" value="Tests"/>
-#        </configuration>
-#        <command name="log" options="on"/>
-#        <command name="print_os_version"/>
-#        <command name="print_env_vars"/>
-#        <command name="print_ace_config"/>
-#        <command name="print_cmake_version"/>
-#        <command name="print_make_version"/>
-#        <command name="check_compiler" options="msvc"/>
-#        <command name="print_perl_version"/>
-#        <command name="print_autobuild_config"/>
-#        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS --no-dcps --cmake"/>
-#        <command name="log" options="off"/>
-#        <command name="process_logs" options="prettify"/>
-#        </autobuild>
-#        EOF
-#    - name: run OpenDDS CMake tests
-#      shell: cmd
-#      run: |
-#        cd /d C:\OpenDDS
-#        call setenv.cmd
-#        cd ${{ github.job }}_autobuild_workspace
-#        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
-#    - name: upload autobuild output
-#      uses: actions/upload-artifact@v3
-#      with:
-#        name: ${{ github.job }}_autobuild_output
-#        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
-#    - name: check results
-#      shell: bash
-#      run: |
-#        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-#        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-#        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+  cmake_w22_x86_i0_sec:
+
+    runs-on: windows-2022
+
+    needs: build_w22_x86_i0_sec
+
+    steps:
+    - name: install openssl & xerces-c
+      uses: lukka/run-vcpkg@v7
+      with:
+        vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
+        vcpkgArguments: --recurse openssl xerces-c
+        vcpkgTriplet: x86-windows
+    - name: checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ACE_TAO_w22_x86_i0_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
+        rm -f ACE_TAO_w22_x86_i0.tar.xz
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build_w22_x86_i0_sec_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_w22_x86_i0_sec.tar.xz
+        rm -f build_w22_x86_i0_sec.tar.xz
+    - name: move OpenDDS to C drive
+      shell: bash
+      run: |
+        mv OpenDDS /c/
+    - name: set up msvc env
+      uses: ilammy/msvc-dev-cmd@v1.9.0
+    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - name: Build CMake Tests
+      shell: cmd
+      run: |
+        cd /d C:\OpenDDS
+        call setenv.cmd
+        mkdir tests\cmake\build
+        cd tests\cmake\build
+        cmake -A Win32 ..
+        cmake --build .
+    - name: check build configuration
+      shell: cmd
+      run: |
+        cd /d C:\OpenDDS
+        call setenv.cmd
+        perl tools\scripts\show_build_config.pl
+    - name: create autobuild config
+      shell: bash
+      run: |
+        cd /c/OpenDDS
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="C:/OpenDDS"/>
+        <variable name="root" value="C:/OpenDDS/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_cmake_version"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="msvc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS --no-dcps --cmake"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+    - name: run OpenDDS CMake tests
+      shell: cmd
+      run: |
+        cd /d C:\OpenDDS
+        call setenv.cmd
+        cd ${{ github.job }}_autobuild_workspace
+        perl "%GITHUB_WORKSPACE%\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: C:\OpenDDS\${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
 #  test_w22_x86_i0_sec:
 #

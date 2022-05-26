@@ -119,7 +119,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Considering fqdn %C\n", hostname), 4);
           // Find the first FQDN that resolves to a valid IP interface address.
-          // If there is no such FQDN, consider the list of non-FQDN.
+          // If there is no such FQDN, consider the list of non-FQDNs.
           if (ACE_OS::strchr(hostname, '.') != 0) {
             if (!addr_array[i].is_loopback() &&
                 choose_single_coherent_address(hostname, false, false) != ACE_INET_Addr()) {
@@ -139,7 +139,6 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
               addr_array[i].get_host_addr(hostname, MAXHOSTNAMELEN);
             }
 
-            // Verify that this non-FQDN resolves to a valid IP.
             if (choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
               OpenDDS::DCPS::HostnameInfo info;
               info.index_ = i;
@@ -186,6 +185,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
       }
     }
 
+    // As a last resort, return the first loopback address from the non-FQDNs list if not empty.
     if (itBegin != itEnd) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: get_fully_qualified_hostname: Could not find FQDN. Using "
                  "\"%C\" as fully qualified hostname, please "
