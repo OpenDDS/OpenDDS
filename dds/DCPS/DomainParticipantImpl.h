@@ -563,7 +563,7 @@ private:
   /// Protect the replayers collection.
   ACE_Recursive_Thread_Mutex replayers_protector_;
 
-  class LivelinessTimer : public RcObject {
+  class LivelinessTimer : public virtual RcObject {
   public:
     LivelinessTimer(DomainParticipantImpl& impl, DDS::LivelinessQosPolicyKind kind);
     virtual ~LivelinessTimer();

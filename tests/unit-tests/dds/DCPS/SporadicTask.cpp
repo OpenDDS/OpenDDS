@@ -48,7 +48,7 @@ namespace {
     MOCK_METHOD1(execute, void(const MonotonicTimePoint&));
   };
 
-  class MyTestClass : public RcObject {
+  class MyTestClass : public virtual RcObject {
   public:
     MyTestClass(const TimeSource& time_source,
                 RcHandle<ReactorInterceptor> interceptor)

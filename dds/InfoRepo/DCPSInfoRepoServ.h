@@ -23,7 +23,7 @@
 #include "ace/Condition_Thread_Mutex.h"
 
 class OpenDDS_DCPSInfoRepoServ_Export InfoRepo
-  : public ShutdownInterface, public ACE_Event_Handler {
+  : public ShutdownInterface, public virtual ACE_Event_Handler {
 public:
   struct InitError {
     InitError(const char* msg)

@@ -32,7 +32,7 @@ class Recorder;
  *
  * This class is for handling callbacks from the Recorder object.
  */
-class OpenDDS_Dcps_Export RecorderListener : public RcObject {
+class OpenDDS_Dcps_Export RecorderListener : public virtual RcObject {
 
 public:
   virtual ~RecorderListener();

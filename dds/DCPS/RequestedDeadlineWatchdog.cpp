@@ -16,12 +16,15 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
-  lock_type & lock,
+namespace OpenDDS {
+namespace DCPS {
+
+RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
+  lock_type& lock,
   DDS::DeadlineQosPolicy qos,
-  OpenDDS::DCPS::DataReaderImpl & reader_impl,
-  DDS::RequestedDeadlineMissedStatus & status,
-  CORBA::Long & last_total_count)
+  DataReaderImpl& reader_impl,
+  DDS::RequestedDeadlineMissedStatus& status,
+  CORBA::Long& last_total_count)
   : Watchdog(TimeDuration(qos.period))
   , status_lock_(lock)
   , reverse_status_lock_(status_lock_)
@@ -31,13 +34,13 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::RequestedDeadlineWatchdog(
 {
 }
 
-OpenDDS::DCPS::RequestedDeadlineWatchdog::~RequestedDeadlineWatchdog()
+RequestedDeadlineWatchdog::~RequestedDeadlineWatchdog()
 {
 }
 
 void
-OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer(
-  OpenDDS::DCPS::SubscriptionInstance_rch instance)
+RequestedDeadlineWatchdog::schedule_timer(
+  SubscriptionInstance_rch instance)
 {
   if (instance->deadline_timer_id_ == -1) {
     intptr_t handle = instance->instance_handle_;
@@ -53,8 +56,8 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::schedule_timer(
 }
 
 void
-OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
-  OpenDDS::DCPS::SubscriptionInstance_rch instance)
+RequestedDeadlineWatchdog::cancel_timer(
+  SubscriptionInstance_rch instance)
 {
   if (instance->deadline_timer_id_ != -1) {
     Watchdog::cancel_timer(instance->deadline_timer_id_);
@@ -66,7 +69,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::cancel_timer(
 }
 
 int
-OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
+RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, const void* act)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
@@ -84,7 +87,7 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::handle_timeout(const ACE_Time_Value&, 
 }
 
 void
-OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch instance, bool timer_called)
+RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch instance, bool timer_called)
 {
   if (instance->deadline_timer_id_ != -1) {
     bool missed = false;
@@ -162,11 +165,14 @@ OpenDDS::DCPS::RequestedDeadlineWatchdog::execute(SubscriptionInstance_rch insta
 }
 
 void
-OpenDDS::DCPS::RequestedDeadlineWatchdog::reschedule_deadline()
+RequestedDeadlineWatchdog::reschedule_deadline()
 {
   DataReaderImpl_rch reader = this->reader_impl_.lock();
   if (reader)
     reader->reschedule_deadline();
 }
+
+} // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
