@@ -44,7 +44,7 @@ TransportImpl::TransportImpl(TransportInst& config)
 TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl", "~TransportImpl", 6);
-  event_dispatcher_->shutdown();
+  event_dispatcher_->shutdown(true);
 }
 
 bool
@@ -63,6 +63,8 @@ TransportImpl::shutdown()
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();
   }
+
+  event_dispatcher_->shutdown(true);
 
   // Tell our subclass about the "shutdown event".
   this->shutdown_i();
@@ -123,7 +125,9 @@ TransportImpl::release_link_resources(DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
-  event_dispatcher_->dispatch(make_rch<DoClear>(rchandle_from(link)));
+  DataLink_rch link_rch = rchandle_from(link);
+  EventBase_rch do_clear = make_rch<DoClear>(link_rch);
+  event_dispatcher_->dispatch(do_clear);
   return true;
 }
 
