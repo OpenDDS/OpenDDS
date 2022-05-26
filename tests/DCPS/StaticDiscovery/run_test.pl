@@ -149,7 +149,7 @@ sub runTest {
     print "Spawning $alpha_count alphas\n";
 
     for (my $i = 0; $i != $alpha_count; ++$i) {
-        $test->process("alpha$i", 'StaticDiscoveryTest', "-ORBVerboseLogging 1 -ORBLogFile alpha_$i.log -DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @{$alpha_reader_array[$i]} @{$alpha_writer_array[$i]} -total_readers $readers -total_writers $writers");
+        $test->process("alpha$i", 'StaticDiscoveryTest', "-ORBVerboseLogging 1 -DCPSDebugLevel 1 -ORBLogFile alpha_$i.log -DCPSConfigFile config.ini -reliable $reliable $alpha_participant_array[$i] @{$alpha_reader_array[$i]} @{$alpha_writer_array[$i]} -total_readers $readers -total_writers $writers");
         $test->start_process("alpha$i");
     }
 
@@ -158,7 +158,7 @@ sub runTest {
     print "Spawning $beta_count betas\n";
 
     for (my $i = 0; $i != $beta_count; ++$i) {
-        $test->process("beta$i", 'StaticDiscoveryTest', "-ORBVerboseLogging 1 -ORBLogFile beta_$i.log -DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @{$beta_reader_array[$i]} @{$beta_writer_array[$i]} -total_readers $readers -total_writers $writers");
+        $test->process("beta$i", 'StaticDiscoveryTest', "-ORBVerboseLogging 1 -DCPSDebugLevel 1 -ORBLogFile beta_$i.log -DCPSConfigFile config.ini -reliable $reliable $beta_participant_array[$i] @{$beta_reader_array[$i]} @{$beta_writer_array[$i]} -total_readers $readers -total_writers $writers");
         $test->start_process("beta$i");
     }
 
