@@ -32,7 +32,7 @@ class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastSessionFactory
-  : public RcObject {
+  : public virtual RcObject {
 public:
   virtual ~MulticastSessionFactory();
 

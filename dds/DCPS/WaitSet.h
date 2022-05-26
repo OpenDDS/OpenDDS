@@ -50,7 +50,7 @@ typedef WaitSet* WaitSet_ptr;
 typedef TAO_Objref_Var_T<WaitSet> WaitSet_var;
 
 class OpenDDS_Dcps_Export WaitSet
-  : public OpenDDS::DCPS::LocalObject<WaitSetInterf> {
+  : public virtual OpenDDS::DCPS::LocalObject<WaitSetInterf> {
 public:
   typedef WaitSet_ptr _ptr_type;
   typedef WaitSet_var _var_type;

@@ -32,7 +32,7 @@ namespace ICE {
 
 typedef std::vector<FoundationType> FoundationList;
 
-class AgentImpl : public virtual Agent, public virtual DCPS::ReactorInterceptor, public virtual DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener {
+class AgentImpl : public virtual Agent, public virtual DCPS::ShutdownListener, public virtual DCPS::NetworkConfigListener, public DCPS::ReactorInterceptor {
 public:
   AgentImpl();
 

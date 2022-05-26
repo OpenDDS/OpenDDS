@@ -18,7 +18,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class MultiTask : public RcEventHandler {
+class MultiTask : public virtual RcEventHandler {
 public:
   explicit MultiTask(RcHandle<ReactorInterceptor> interceptor, const TimeDuration& delay)
     : interceptor_(interceptor)

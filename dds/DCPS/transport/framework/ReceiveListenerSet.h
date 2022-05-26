@@ -25,7 +25,7 @@ class ReceivedDataSample;
 typedef WeakRcHandle<TransportReceiveListener> TransportReceiveListener_wrch;
 
 class OpenDDS_Dcps_Export ReceiveListenerSet :
-      public RcObject {
+      public virtual RcObject {
 public:
 
   enum ConstrainReceiveSet {

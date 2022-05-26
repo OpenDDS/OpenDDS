@@ -27,7 +27,7 @@ namespace DCPS {
 
 #pragma pack(push, 1)
 
-struct OpenDDS_Rtps_Udp_Export BundlingCacheKey : public RcObject {
+struct OpenDDS_Rtps_Udp_Export BundlingCacheKey : public virtual RcObject {
   BundlingCacheKey(const GUID_t& dst_guid, const GUID_t& src_guid, RcHandle<ConstSharedRepoIdSet> addr_guids)
     : RcObject()
     , src_guid_(src_guid)

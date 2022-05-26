@@ -25,11 +25,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ReactorInterceptor : public RcEventHandler {
+class OpenDDS_Dcps_Export ReactorInterceptor : public virtual RcEventHandler {
 public:
 
   class OpenDDS_Dcps_Export Command
-  : public RcObject {
+  : public virtual RcObject {
   public:
     Command();
     virtual ~Command() { }

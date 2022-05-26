@@ -39,7 +39,7 @@ class ReceivedDataSample;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
   : public TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>,
-    public RcEventHandler
+    public virtual RcEventHandler
 {
 public:
   explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
