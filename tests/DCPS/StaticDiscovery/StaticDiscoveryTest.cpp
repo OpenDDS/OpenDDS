@@ -12,6 +12,8 @@
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "dds/DdsDcpsCoreTypeSupportImpl.h"
 #include "dds/DCPS/GuidConverter.h"
+#include "dds/DCPS/DataReaderImpl.h"
+#include "dds/DCPS/DataWriterImpl.h"
 #include "tests/Utils/StatusMatching.h"
 
 #include "dds/DCPS/StaticIncludes.h"
@@ -86,8 +88,6 @@ public:
 
     writers_[thread_id].resize(6);
 
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Starting DataWriter %C\n", writers_[thread_id].c_str()));
-
     unsigned long binary_id = static_cast<unsigned long>(fromhex(writers_[thread_id], 2))
                             + (256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 1)))
                             + (256 * 256 * static_cast<unsigned long>(fromhex(writers_[thread_id], 0)));
@@ -124,6 +124,10 @@ public:
                        -1);
     }
 
+    const OpenDDS::DCPS::GUID_t writer_guid = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in())->get_repo_id();
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C created\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
+
     TestMsgDataWriter_var message_writer =
       TestMsgDataWriter::_narrow(writer);
 
@@ -135,7 +139,10 @@ public:
     }
 
     // Block until Subscriber is available
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C waiting for %d readers to match\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str(), total_readers_));
     Utils::wait_match(writer, total_readers_, Utils::GTE);
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C started\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
 
     // Write samples
     TestMsg message;
@@ -155,7 +162,10 @@ public:
     writer->wait_for_acknowledgments(duration);
 
     // Block until Subscriber is gone
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C waiting for %d readers to unmatch\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str(), total_readers_));
     Utils::wait_match(writer, 0);
+
+    ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C done\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
 
     publisher->delete_datawriter(writer);
 
@@ -178,12 +188,12 @@ ACE_Condition_Thread_Mutex readers_done_cond(readers_done_lock);
 int readers_done = 0;
 bool built_in_read_errors = false;
 
-void reader_done_callback(bool bit_read_errors)
+void reader_done_callback(bool bit_read_errors, const OpenDDS::DCPS::GUID_t& guid)
 {
   ACE_Guard<ACE_Thread_Mutex> g(readers_done_lock);
   if (bit_read_errors) built_in_read_errors = true;
   ++readers_done;
-  ACE_DEBUG((LM_INFO, "(%P|%t) Reader %d done\n", readers_done));
+  ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C is complete\n", OpenDDS::DCPS::LogGuid(guid).c_str()));
   readers_done_cond.signal();
 }
 
@@ -311,7 +321,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
          pos != limit;
          ++pos) {
       pos->resize(6);
-      DDS::DataReaderListener_var listener(new DataReaderListenerImpl(*pos, reliable, true, total_writers, n_msgs, reader_done_callback, subscriber.in(), check_bits));
+      DataReaderListenerImpl* drl_impl = new DataReaderListenerImpl(*pos, reliable, true, total_writers, n_msgs, reader_done_callback, check_bits);
+      DDS::DataReaderListener_var listener(drl_impl);
 
 #ifndef DDS_HAS_MINIMUM_BIT
       DataReaderListenerImpl* listener_servant =
@@ -356,6 +367,8 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT("ERROR: %N:%l: main() -")
                           ACE_TEXT(" create_datareader failed!\n")), -1);
       }
+
+      drl_impl->set_guid(dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->get_repo_id());
 
       datareaders.push_back(reader);
 
