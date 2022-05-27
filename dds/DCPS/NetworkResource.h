@@ -63,6 +63,10 @@ struct OpenDDS_Dcps_Export NetworkResource {
   String addr_;
 };
 
+// Make sure that choose_single_coherent_address picks one of the IP interface addresses.
+bool verify_hostname(String hostname, ACE_INET_Addr* addrs, size_t addr_count,
+                     bool prefer_loopback, bool allow_ipv4_fallback);
+
 /// Helper function to get the fully qualified hostname.
 /// It attempts to discover the FQDN by the network interface addresses, however
 /// the result is impacted by the network configuration, so it returns name in the

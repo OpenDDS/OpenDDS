@@ -66,6 +66,18 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+bool verify_hostname(String hostname, ACE_INET_Addr* addr_array, size_t addr_count,
+                     bool prefer_loopback, bool allow_ipv4_fallback)
+{
+  const ACE_INET_Addr addr = choose_single_coherent_address(hostname, prefer_feedback, allow_ipv4_fallback);
+  for (size_t i = 0; i < addr_count; ++i) {
+    if (addr == addr_array[i]) {
+      return true;
+    }
+  }
+  return false;
+}
+
 String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 {
   // cache the determined fully qualified hostname and its
@@ -118,19 +130,16 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
         // Discover the fully qualified hostname
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
           VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Considering fqdn %C\n", hostname), 4);
-          // Find the first FQDN that resolves to a valid IP interface address.
-          // If there is no such FQDN, consider the list of non-FQDNs.
-          if (ACE_OS::strchr(hostname, '.') != 0) {
-            if (!addr_array[i].is_loopback() &&
-                choose_single_coherent_address(hostname, false, false) != ACE_INET_Addr()) {
-              VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found fqdn %C from %C\n", hostname, LogAddr(addr_array[i]).c_str()), 2);
-              selected_address = addr_array[i];
-              fullname = hostname;
-              if (addr) {
-                *addr = selected_address;
-              }
-              return fullname;
+          // Find the first FQDN that resolves to an IP interface address.
+          if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 &&
+              verify_hostname(hostname, addr_array, addr_count, false, false)) {
+            VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found fqdn %C from %C\n", hostname, LogAddr(addr_array[i]).c_str()), 2);
+            selected_address = addr_array[i];
+            fullname = hostname;
+            if (addr) {
+              *addr = selected_address;
             }
+            return fullname;
           } else {
             VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: IP interface %C maps to hostname %C\n",
                       LogAddr(addr_array[i]).c_str(), hostname), 2);
@@ -139,7 +148,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
               addr_array[i].get_host_addr(hostname, MAXHOSTNAMELEN);
             }
 
-            if (choose_single_coherent_address(hostname, false) != ACE_INET_Addr()) {
+            if (verify_hostname(hostname, addr_array, addr_count, false, true)) {
               OpenDDS::DCPS::HostnameInfo info;
               info.index_ = i;
               info.hostname_ = hostname;
@@ -167,7 +176,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
       }
     }
 
-    // If no non-loopback IP is found from the list of non-FQDNs, return a non-loopback IP
+    // If no non-loopback IP is found from the above step, return a non-loopback
     // address from the IP interfaces list.
     for (size_t i = 0; i < addr_count; ++i) {
       if (!addr_array[i].is_loopback()) {
@@ -774,6 +783,14 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     return ACE_INET_Addr();
   }
 
+  struct AddrInfoGuard {
+    AddrInfoGuard(addrinfo* ptr) : ptr_(ptr) {}
+    ~AddrInfoGuard() {
+      ACE_OS::freeaddrinfo(ptr_);
+    }
+    addrinfo* const ptr_;
+  } guard(res);
+
   OPENDDS_VECTOR(ACE_INET_Addr) addresses;
 
 #ifdef ACE_WIN32
@@ -797,15 +814,6 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   }
 #endif /* ACE_WIN32 */
 
-  size_t addr_count;
-  ACE_INET_Addr* addr_array = 0;
-  if (ACE::get_ip_interfaces(addr_count, addr_array) != 0 || addr_count < 1) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: choose_single_coherent_address: Unable to get IP interfaces. %p\n",
-               "ACE::get_ip_interfaces"));
-    ACE_OS::freeaddrinfo(res);
-    return ACE_INET_Addr();
-  }
-
   for (addrinfo* curr = res; curr; curr = curr->ai_next) {
     if (curr->ai_family != AF_INET && curr->ai_family != AF_INET6) {
       continue;
@@ -826,28 +834,21 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     ACE_INET_Addr temp;
     temp.set_addr(&addr, sizeof addr);
     temp.set_port_number(port_number, 1 /*encode*/);
-    for (size_t i = 0; i < addr_count; ++i) {
-      if (temp == addr_array[i]) {
-        addresses.push_back(temp);
+    addresses.push_back(temp);
 #ifdef ACE_WIN32
-        if (it != addr_cache_map_.end()) {
-          it->second.second.insert(temp);
-        } else {
-          OPENDDS_SET(ACE_INET_Addr) my_set;
-          my_set.insert(temp);
-          addr_cache_map_[host_name] = make_pair(now, my_set);
-        }
-#endif /* ACE_WIN32 */
-      }
+    if (it != addr_cache_map_.end()) {
+      it->second.second.insert(temp);
+    } else {
+      OPENDDS_SET(ACE_INET_Addr) my_set;
+      my_set.insert(temp);
+      addr_cache_map_[host_name] = make_pair(now, my_set);
     }
+#endif /* ACE_WIN32 */
   }
 
 #ifdef ACE_WIN32
   g.release();
 #endif /* ACE_WIN32 */
-
-  delete[] addr_array;
-  ACE_OS::freeaddrinfo(res);
 
   return choose_single_coherent_address(addresses, prefer_loopback, host_name);
 }
