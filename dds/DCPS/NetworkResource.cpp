@@ -170,8 +170,8 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
     // If no non-loopback IP is found from the list of non-FQDNs, return a non-loopback IP
     // address from the IP interfaces list.
     for (size_t i = 0; i < addr_count; ++i) {
-      if (!addr_array[i].is_loop_back()) {
-        char addr_str[MAXHOSTNAMLEN+1] = "";
+      if (!addr_array[i].is_loopback()) {
+        char addr_str[MAXHOSTNAMELEN+1] = "";
         addr_array[i].get_host_addr(addr_str, MAXHOSTNAMELEN);
         ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: get_fully_qualified_hostname: Could not find FQDN. Using "
                    "\"%C\" as fully qualified hostname, please "
@@ -799,8 +799,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 
   size_t addr_count;
   ACE_INET_Addr* addr_array = 0;
-  const int result = ACE::get_ip_interfaces(addr_count, addr_array);
-  if (result != 0 || addr_count < 1) {
+  if (ACE::get_ip_interfaces(addr_count, addr_array) != 0 || addr_count < 1) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: choose_single_coherent_address: Unable to get IP interfaces. %p\n",
                "ACE::get_ip_interfaces"));
     ACE_OS::freeaddrinfo(res);
@@ -833,6 +832,10 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 #ifdef ACE_WIN32
         if (it != addr_cache_map_.end()) {
           it->second.second.insert(temp);
+        } else {
+          OPENDDS_SET(ACE_INET_Addr) my_set;
+          my_set.insert(temp);
+          addr_cache_map_[host_name] = make_pair(now, my_set);
         }
 #endif /* ACE_WIN32 */
       }
