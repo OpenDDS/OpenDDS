@@ -69,7 +69,7 @@ namespace DCPS {
 bool verify_hostname(String hostname, ACE_INET_Addr* addr_array, size_t addr_count,
                      bool prefer_loopback, bool allow_ipv4_fallback)
 {
-  const ACE_INET_Addr addr = choose_single_coherent_address(hostname, prefer_feedback, allow_ipv4_fallback);
+  const ACE_INET_Addr addr = choose_single_coherent_address(hostname, prefer_loopback, allow_ipv4_fallback);
   for (size_t i = 0; i < addr_count; ++i) {
     if (addr == addr_array[i]) {
       return true;
