@@ -678,10 +678,11 @@ private:
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
 #ifdef ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP(RepoId, MetaSubmessageIterVec) DestMetaSubmessageMap;
+  typedef OPENDDS_UNORDERED_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #else
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
-#endif
   typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+#endif
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
@@ -934,6 +935,21 @@ private:
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#if defined ACE_HAS_CPP11
+namespace std
+{
+
+  template<> struct OpenDDS_Rtps_Udp_Export hash<OpenDDS::DCPS::AddressCacheEntryProxy>
+  {
+    std::size_t operator()(const OpenDDS::DCPS::AddressCacheEntryProxy& val) const noexcept
+    {
+      return val.hash();
+    }
+  };
+
+} // namespace std
+#endif
 
 #ifdef __ACE_INLINE__
 # include "RtpsUdpDataLink.inl"

@@ -38,6 +38,10 @@ struct ConstSharedRepoIdSet : public virtual RcObject {
 #if defined ACE_HAS_CPP11
   uint32_t hash()
   {
+    if (guids_.empty()) {
+      return 0;
+    }
+
     if (!valid_hash_) {
       uint32_t hash = 0;
       for (RepoIdSet::const_iterator it = guids_.begin(), limit = guids_.end(); it != limit; ++it) {
