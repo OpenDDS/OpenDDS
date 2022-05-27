@@ -15,6 +15,7 @@
 #include "TypeSupportImpl.h"
 #include "dcps_export.h"
 #include "GuidConverter.h"
+#include "XTypes/DynamicDataAdapter.h"
 
 #ifndef OPENDDS_HAS_STD_SHARED_PTR
 #  include <ace/Bound_Ptr.h>
@@ -848,7 +849,7 @@ namespace OpenDDS {
 
       bool just_registered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator(sample));
-      store_instance_data(move(data), header, instance, just_registered, filtered);
+      store_instance_data(move(data), DDS::HANDLE_NIL, header, instance, just_registered, filtered);
       if (instance) inst = instance->instance_handle_;
     }
 
@@ -875,6 +876,7 @@ namespace OpenDDS {
   }
 
   void set_instance_state_i(DDS::InstanceHandle_t instance,
+                            DDS::InstanceHandle_t publication_handle,
                             DDS::InstanceStateKind state,
                             const SystemTimePoint& timestamp,
                             const GUID_t& publication_id)
@@ -895,7 +897,7 @@ namespace OpenDDS {
       bool just_registered, filtered;
       unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
       get_key_value(*data, instance);
-      store_instance_data(move(data), header, si, just_registered, filtered);
+      store_instance_data(move(data), publication_handle, header, si, just_registered, filtered);
       if (!filtered) {
         notify_read_conditions();
       }
@@ -1053,6 +1055,7 @@ namespace OpenDDS {
 protected:
 
   virtual RcHandle<MessageHolder> dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                                DDS::InstanceHandle_t publication_handle,
                                                 OpenDDS::DCPS::SubscriptionInstance_rch& instance,
                                                 bool& just_registered,
                                                 bool& filtered,
@@ -1070,7 +1073,7 @@ protected:
         }
         return message_holder;
       }
-      store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
+      store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
       return message_holder;
     }
     const bool encapsulated = sample.header_.cdr_encapsulation_;
@@ -1179,11 +1182,12 @@ protected:
     }
 #endif
 
-    store_instance_data(move(data), sample.header_, instance, just_registered, filtered);
+    store_instance_data(move(data), publication_handle, sample.header_, instance, just_registered, filtered);
     return message_holder;
   }
 
   virtual void dispose_unregister(const OpenDDS::DCPS::ReceivedDataSample& sample,
+                                  DDS::InstanceHandle_t publication_handle,
                                   OpenDDS::DCPS::SubscriptionInstance_rch& instance)
   {
     //!!! caller should already have the sample_lock_
@@ -1198,7 +1202,7 @@ protected:
     if (sample.header_.key_fields_only_) {
       marshaling = OpenDDS::DCPS::KEY_ONLY_MARSHALING;
     }
-    dds_demarshal(sample, instance, just_registered, filtered, marshaling, false);
+    dds_demarshal(sample, publication_handle, instance, just_registered, filtered, marshaling, false);
   }
 
   virtual void purge_data(OpenDDS::DCPS::SubscriptionInstance_rch instance)
@@ -1235,6 +1239,73 @@ protected:
   }
 
 private:
+
+  bool store_instance_data_check(unique_ptr<MessageTypeWithAllocator>& instance_data,
+                                 DDS::InstanceHandle_t publication_handle,
+                                 const OpenDDS::DCPS::DataSampleHeader& header,
+                                 OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr)
+  {
+#if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
+    const bool is_dispose_msg =
+      header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
+      header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
+
+    if (!is_bit() && security_config_) {
+      if (header.message_id_ == SAMPLE_DATA ||
+          header.message_id_ == INSTANCE_REGISTRATION) {
+
+        // Pubulisher has already gone through the check.
+        if (instance_ptr &&
+            instance_ptr->instance_state_ &&
+            instance_ptr->instance_state_->writes_instance(header.publication_id_)) {
+          return true;
+        }
+
+        DDS::Security::SecurityException ex;
+        const RepoId local_participant = make_id(get_repo_id(), ENTITYID_PARTICIPANT);
+        const RepoId remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
+        // Construct a DynamicData around the deserialized sample.
+        XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
+        // The remote participant might not be using security.
+        if (remote_participant_permissions_handle != DDS::HANDLE_NIL &&
+            !security_config_->get_access_control()->check_remote_datawriter_register_instance(remote_participant_permissions_handle, this, publication_handle, &dda, ex)) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) WARNING: DataReaderImpl_T::store_instance_data_check: unable to register instance SecurityException[%d.%d]: %C\n",
+                       ex.code, ex.minor_code, ex.message.in()));
+          }
+          return false;
+        }
+      } else if (is_dispose_msg) {
+
+        DDS::Security::SecurityException ex;
+        const RepoId local_participant = make_id(get_repo_id(), ENTITYID_PARTICIPANT);
+        const RepoId remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
+        // Construct a DynamicData around the deserialized sample.
+        XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
+        // The remote participant might not be using security.
+        if (remote_participant_permissions_handle != DDS::HANDLE_NIL &&
+            !security_config_->get_access_control()->check_remote_datawriter_dispose_instance(remote_participant_permissions_handle, this, publication_handle, &dda, ex)) {
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) WARNING: DataReaderImpl_T::store_instance_data_check: unable to dispose instance SecurityException[%d.%d]: %C\n",
+                       ex.code, ex.minor_code, ex.message.in()));
+          }
+          return false;
+        }
+      }
+    }
+#else
+    ACE_UNUSED_ARG(instance_data);
+    ACE_UNUSED_ARG(publication_handle);
+    ACE_UNUSED_ARG(header);
+    ACE_UNUSED_ARG(instance_ptr);
+#endif
+
+    return true;
+  }
 
   DDS::ReturnCode_t read_i(MessageSequenceType& received_data,
                            DDS::SampleInfoSeq& info_seq,
@@ -1622,17 +1693,24 @@ DDS::ReturnCode_t take_next_instance_i(MessageSequenceType& received_data,
 }
 
 void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
+                         DDS::InstanceHandle_t publication_handle,
                          const OpenDDS::DCPS::DataSampleHeader& header,
                          OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr,
                          bool& just_registered,
                          bool& filtered)
 {
+  ACE_UNUSED_ARG(publication_handle);
+
   const bool is_dispose_msg =
     header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
     header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
   const bool is_unregister_msg =
     header.message_id_ == OpenDDS::DCPS::UNREGISTER_INSTANCE ||
     header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;
+
+  if (!store_instance_data_check(instance_data, publication_handle, header, instance_ptr)) {
+    return;
+  }
 
   // not filtering any data, except what is specifically identified as filtered below
   filtered = false;

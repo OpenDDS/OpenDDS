@@ -393,6 +393,7 @@ public:
 #endif
 
   virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
+                                                DDS::InstanceHandle_t publication_handle,
                                                 SubscriptionInstance_rch& instance,
                                                 bool& is_new_instance,
                                                 bool& filtered,
@@ -400,6 +401,7 @@ public:
                                                 bool full_copy) = 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
+                                  DDS::InstanceHandle_t publication_handle,
                                   SubscriptionInstance_rch& instance);
 
   void process_latency(const ReceivedDataSample& sample);
@@ -565,8 +567,17 @@ public:
                           const SystemTimePoint& timestamp = SystemTimePoint::now(),
                           const GUID_t& guid = GUID_UNKNOWN)
   {
+    DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+      RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(guid);
+      if (pos != publication_id_to_handle_map_.end()) {
+        publication_handle = pos->second;
+      }
+    }
+
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-    set_instance_state_i(instance, state, timestamp, guid);
+    set_instance_state_i(instance, publication_handle, state, timestamp, guid);
   }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -800,6 +811,7 @@ protected:
 private:
 
   virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
+                                    DDS::InstanceHandle_t publication_handle,
                                     DDS::InstanceStateKind state,
                                     const SystemTimePoint& timestamp,
                                     const GUID_t& guid) = 0;
@@ -810,7 +822,8 @@ private:
   void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void instances_liveliness_update(const PublicationId& writer);
+  void instances_liveliness_update(const PublicationId& writer,
+                                   DDS::InstanceHandle_t publication_handle);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
@@ -872,7 +885,7 @@ private:
   Reverse_Lock_t reverse_pub_handle_lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
-  RepoIdToHandleMap            id_to_handle_map_;
+  RepoIdToHandleMap            publication_id_to_handle_map_;
 
   // Status conditions.
   DDS::LivelinessChangedStatus         liveliness_changed_status_;
@@ -1082,6 +1095,12 @@ public:
     const bool set_reader_status_;
     const bool set_subscriber_status_;
   };
+
+#if defined(OPENDDS_SECURITY)
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

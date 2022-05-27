@@ -7308,6 +7308,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       event_dispatcher_->dispatch(DCPS::make_rch<ReaderAddAssociation>(rar));
       event_dispatcher_->dispatch(DCPS::make_rch<WriterAddAssociation>(war));
     } else if (call_reader) {
+#ifndef OPENDDS_SAFETY_PROFILE
       if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
         // Reader is a local recorder using complete types
         DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();
@@ -7319,6 +7320,7 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
           }
         }
       }
+#endif
       Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(make_id(writer, ENTITYID_PARTICIPANT));
       if (iter != spdp_.participants_.end()) {
         iter->second.reader_pending_records_.push_back(rar);

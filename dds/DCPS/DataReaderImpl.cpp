@@ -136,6 +136,14 @@ DataReaderImpl::~DataReaderImpl()
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
 
   deadline_task_->cancel();
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+    type_lookup_service->remove_guid_from_dynamic_map(subscription_id_);
+  }
+#endif
 }
 
 // this method is called when delete_datareader is called.
@@ -393,8 +401,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
       // This insertion is idempotent.
-      id_to_handle_map_.insert(
-          RepoIdToHandleMap::value_type(remote_id, handle));
+      publication_id_to_handle_map_.insert(RepoIdToHandleMap::value_type(remote_id, handle));
 
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
@@ -407,7 +414,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       // We need to adjust these after the insertions have all completed
       // since insertions are not guaranteed to increase the number of
       // currently matched publications.
-      const int matchedPublications = static_cast<int>(id_to_handle_map_.size());
+      const int matchedPublications = static_cast<int>(publication_id_to_handle_map_.size());
       subscription_match_status_.current_count_change =
           matchedPublications - subscription_match_status_.current_count;
       subscription_match_status_.current_count = matchedPublications;
@@ -583,7 +590,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     this->lookup_instance_handles(updated_writers, handles);
 
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
-      id_to_handle_map_.erase(updated_writers[i]);
+      publication_id_to_handle_map_.erase(updated_writers[i]);
     }
   }
 
@@ -596,7 +603,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
     // Derive the change in the number of publications writing to this reader.
-    int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
+    int matchedPublications = static_cast<int>(this->publication_id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
     = matchedPublications - this->subscription_match_status_.current_count;
 
@@ -1079,11 +1086,11 @@ DataReaderImpl::get_matched_publications(
 
   // Copy out the handles for the current set of publications.
   int index = 0;
-  publication_handles.length(static_cast<CORBA::ULong>(this->id_to_handle_map_.size()));
+  publication_handles.length(static_cast<CORBA::ULong>(this->publication_id_to_handle_map_.size()));
 
   for (RepoIdToHandleMap::iterator
-      current = this->id_to_handle_map_.begin();
-      current != this->id_to_handle_map_.end();
+      current = this->publication_id_to_handle_map_.begin();
+      current != this->publication_id_to_handle_map_.end();
       ++current, ++index) {
     publication_handles[ index] = current->second;
   }
@@ -1283,6 +1290,14 @@ DataReaderImpl::enable()
         exprParams,
         type_info);
 
+#if defined(OPENDDS_SECURITY)
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
+      security_config_ = participant->get_security_config();
+      dynamic_type_ = type_lookup_service->type_identifier_to_dynamic(typesupport->getCompleteTypeIdentifier(), subscription_id);
+    }
+#endif
+
     {
       ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
       subscription_id_ = subscription_id;
@@ -1379,6 +1394,15 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("DataReaderImpl","data_received",6);
 
+  DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+    RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(sample.header_.publication_id_);
+    if (pos != publication_id_to_handle_map_.end()) {
+      publication_handle = pos->second;
+    }
+  }
+
   // ensure some other thread is not changing the sample container
   // or statuses related to samples.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
@@ -1395,6 +1419,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+
   RcHandle<MessageHolder> real_data;
   SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
@@ -1425,9 +1450,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool is_new_instance = false;
     bool filtered = false;
     if (sample.header_.key_fields_only_) {
-      dds_demarshal(sample, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
+      dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
     } else {
-      real_data = dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vwd);
+      real_data = dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vwd);
     }
 
     // Per sample logging
@@ -1552,7 +1577,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1581,7 +1606,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       }
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1616,7 +1641,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 #endif
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -2035,6 +2060,15 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 #endif
 
   {
+    DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+      RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(info_writer_id);
+      if (pos != publication_id_to_handle_map_.end()) {
+        publication_handle = pos->second;
+      }
+    }
+
     bool liveliness_changed = false;
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -2054,7 +2088,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-    instances_liveliness_update(info_writer_id);
+    instances_liveliness_update(info_writer_id, publication_handle);
 
     if (liveliness_changed) {
       set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2158,6 +2192,15 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 
   const WriterInfo::WriterState info_state = info.state();
 
+  DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+    RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(info_writer_id);
+    if (pos != publication_id_to_handle_map_.end()) {
+      publication_handle = pos->second;
+    }
+  }
+
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
@@ -2196,7 +2239,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
       this->monitor_->report();
     }
 
-    instances_liveliness_update(info_writer_id);
+    instances_liveliness_update(info_writer_id, publication_handle);
 
     // Call listener only when there are liveliness status changes.
     if (liveliness_changed) {
@@ -2207,7 +2250,8 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 }
 
 void
-DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
+DataReaderImpl::instances_liveliness_update(const PublicationId& writer,
+                                            DDS::InstanceHandle_t publication_handle)
 {
   // sample_lock_ must be held.
   InstanceSet localinsts;
@@ -2225,7 +2269,7 @@ DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
   }
 
   for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
-    set_instance_state_i(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    set_instance_state_i(*iter, publication_handle, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
   }
 }
 
@@ -2247,6 +2291,7 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
+                                        DDS::InstanceHandle_t,
                                         SubscriptionInstance_rch&)
 {
   if (DCPS_debug_level > 0) {

@@ -268,8 +268,8 @@ bool value_writer_generator::gen_struct(AST_Structure*,
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
       be_global->impl_ <<
-        "  value_writer.begin_struct_member(XTypes::MemberDescriptor(\"" << field_name << "\", "
-                                                                         << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
+        "  value_writer.begin_struct_member(XTypes::MemberDescriptorImpl(\"" << field_name << "\", "
+                                                                             << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
       be_global->impl_ <<
         "  value_writer.end_struct_member();\n";

@@ -28,7 +28,7 @@ TEST(dds_DCPS_PrinterValueWriter, begin_struct_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("aField", false));
   EXPECT_STREQ(pvw.str().c_str(), "    aField: ");
 }
 
@@ -36,7 +36,7 @@ TEST(dds_DCPS_PrinterValueWriter, end_struct_member)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("aField", false));
   pvw.write_int16(5);
   pvw.end_struct_member();
   EXPECT_STREQ(pvw.str().c_str(), "    aField: 5");
@@ -98,10 +98,10 @@ TEST(dds_DCPS_PrinterValueWriter, complete_struct)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("aField", false));
   pvw.write_int16(5);
   pvw.end_struct_member();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("bField", false));
+  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("bField", false));
   pvw.write_int16(6);
   pvw.end_struct_member();
   pvw.end_struct();
@@ -208,7 +208,7 @@ TEST(dds_DCPS_PrinterValueWriter, complete_struct_with_complete_array)
 {
   PrinterValueWriter pvw;
   pvw.begin_struct();
-  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("a", false));
+  pvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("a", false));
   pvw.begin_array();
   pvw.begin_element(0);
   pvw.write_int16(5);

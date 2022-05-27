@@ -45,7 +45,7 @@ public:
 
   void begin_struct();
   void end_struct();
-  void begin_struct_member(const XTypes::MemberDescriptor& /*descriptor*/);
+  void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/);
   void end_struct_member();
 
   void begin_union();
@@ -101,9 +101,9 @@ void JsonValueWriter<Writer>::end_struct()
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::begin_struct_member(const XTypes::MemberDescriptor& descriptor)
+void JsonValueWriter<Writer>::begin_struct_member(const DDS::MemberDescriptor& descriptor)
 {
-  writer_.Key(descriptor.name.c_str());
+  writer_.Key(descriptor.name());
 }
 
 template <typename Writer>
@@ -338,22 +338,22 @@ std::string to_json(const DDS::TopicDescription_ptr topic,
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("topic", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("topic", false));
   jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("name", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("name", false));
   CORBA::String_var topic_name = topic->get_name();
   static_cast<ValueWriter&>(jvw).write_string(topic_name);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("type_name", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("type_name", false));
   CORBA::String_var type_name = topic->get_type_name();
   static_cast<ValueWriter&>(jvw).write_string(type_name);
   jvw.end_struct_member();
   jvw.end_struct();
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("sample", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("sample", false));
   vwrite(jvw, sample);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("sample_info", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("sample_info", false));
   vwrite(jvw, sample_info);
   jvw.end_struct_member();
   jvw.end_struct();

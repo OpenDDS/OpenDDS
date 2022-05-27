@@ -8,7 +8,7 @@
 #include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/XTypes/DynamicData.h>
+#include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -34,7 +34,7 @@ public:
   virtual void on_sample_data_received(Recorder* rec,
                                        const RawDataSample& sample)
   {
-    OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
+    DDS::DynamicData_var dd = rec->get_dynamic_data(sample);
     String my_type;
     String indent;
     if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {
@@ -46,12 +46,12 @@ public:
 
     String struct_string_final =
       "struct ::Dynamic::my_struct_final\n"
-      "  Array my_long_struct_arr ::Dynamic::long_struct_final[2] =\n"
+      "  ::Dynamic::long_struct_arr_final my_long_struct_arr ::Dynamic::long_struct_final[2] =\n"
       "    [0]struct ::Dynamic::long_struct_final\n"
       "      Int32 my_long = 1\n"
       "    [1]struct ::Dynamic::long_struct_final\n"
       "      Int32 my_long = 2\n"
-      "  Sequence my_inner_union_seq ::Dynamic::inner_union_final[2] =\n"
+      "  ::Dynamic::inner_union_seq_final my_inner_union_seq ::Dynamic::inner_union_final[2] =\n"
       "    [0]union ::Dynamic::inner_union_final\n"
       "      Int32 discriminator = -2147483647\n"
       "      Boolean b = true\n"
@@ -60,7 +60,7 @@ public:
       "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = true\n"
       "        [1] = false\n"
-      "  Array my_enum_arr ::Dynamic::EnumType[2] =\n"
+      "  ::Dynamic::enum_arr my_enum_arr ::Dynamic::EnumType[2] =\n"
       "    [0] = V1\n"
       "    [1] = V2\n"
       "  Int8 my_int8 = 1\n"
@@ -80,10 +80,10 @@ public:
       "  Char16 my_wchar = L'e'\n"
       "  String8 my_string = \"Hello\"\n"
       "  WString16 my_wstring = L\"World\"\n"
-      "  Sequence my_alias_seq Boolean[2] =\n"
+      "  ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "    [0] = true\n"
       "    [1] = false\n"
-      "  Array my_alias_array Char8[2] =\n"
+      "  ::Dynamic::char_arr my_alias_array Char8[2] =\n"
       "    [0] = 'a'\n"
       "    [1] = 'b'\n"
       "  Sequence my_anon_seq ::Dynamic::EnumType[2] =\n"
@@ -117,12 +117,12 @@ public:
 
     String struct_string_appendable =
       "struct ::Dynamic::my_struct_appendable\n"
-      "  Array my_long_struct_arr ::Dynamic::long_struct_appendable[2] =\n"
+      "  ::Dynamic::long_struct_arr_appendable my_long_struct_arr ::Dynamic::long_struct_appendable[2] =\n"
       "    [0]struct ::Dynamic::long_struct_appendable\n"
       "      Int32 my_long = 1\n"
       "    [1]struct ::Dynamic::long_struct_appendable\n"
       "      Int32 my_long = 2\n"
-      "  Sequence my_inner_union_seq ::Dynamic::inner_union_appendable[2] =\n"
+      "  ::Dynamic::inner_union_seq_appendable my_inner_union_seq ::Dynamic::inner_union_appendable[2] =\n"
       "    [0]union ::Dynamic::inner_union_appendable\n"
       "      Int32 discriminator = -2147483647\n"
       "      Boolean b = true\n"
@@ -131,7 +131,7 @@ public:
       "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = true\n"
       "        [1] = false\n"
-      "  Array my_enum_arr ::Dynamic::EnumType[2] =\n"
+      "  ::Dynamic::enum_arr my_enum_arr ::Dynamic::EnumType[2] =\n"
       "    [0] = V1\n"
       "    [1] = V2\n"
       "  Int8 my_int8 = 1\n"
@@ -151,10 +151,10 @@ public:
       "  Char16 my_wchar = L'e'\n"
       "  String8 my_string = \"Hello\"\n"
       "  WString16 my_wstring = L\"World\"\n"
-      "  Sequence my_alias_seq Boolean[2] =\n"
+      "  ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "    [0] = true\n"
       "    [1] = false\n"
-      "  Array my_alias_array Char8[2] =\n"
+      "  ::Dynamic::char_arr my_alias_array Char8[2] =\n"
       "    [0] = 'a'\n"
       "    [1] = 'b'\n"
       "  Sequence my_anon_seq ::Dynamic::EnumType[2] =\n"
@@ -188,12 +188,12 @@ public:
 
     String struct_string_mutable =
       "struct ::Dynamic::my_struct_mutable\n"
-      "  Array my_long_struct_arr ::Dynamic::long_struct_mutable[2] =\n"
+      "  ::Dynamic::long_struct_arr_mutable my_long_struct_arr ::Dynamic::long_struct_mutable[2] =\n"
       "    [0]struct ::Dynamic::long_struct_mutable\n"
       "      Int32 my_long = 1\n"
       "    [1]struct ::Dynamic::long_struct_mutable\n"
       "      Int32 my_long = 2\n"
-      "  Sequence my_inner_union_seq ::Dynamic::inner_union_mutable[2] =\n"
+      "  ::Dynamic::inner_union_seq_mutable my_inner_union_seq ::Dynamic::inner_union_mutable[2] =\n"
       "    [0]union ::Dynamic::inner_union_mutable\n"
       "      Int32 discriminator = -2147483647\n"
       "      Boolean b = true\n"
@@ -202,7 +202,7 @@ public:
       "      ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "        [0] = true\n"
       "        [1] = false\n"
-      "  Array my_enum_arr ::Dynamic::EnumType[2] =\n"
+      "  ::Dynamic::enum_arr my_enum_arr ::Dynamic::EnumType[2] =\n"
       "    [0] = V1\n"
       "    [1] = V2\n"
       "  Int8 my_int8 = 1\n"
@@ -222,10 +222,10 @@ public:
       "  Char16 my_wchar = L'e'\n"
       "  String8 my_string = \"Hello\"\n"
       "  WString16 my_wstring = L\"World\"\n"
-      "  Sequence my_alias_seq Boolean[2] =\n"
+      "  ::Dynamic::bool_seq my_alias_seq Boolean[2] =\n"
       "    [0] = true\n"
       "    [1] = false\n"
-      "  Array my_alias_array Char8[2] =\n"
+      "  ::Dynamic::char_arr my_alias_array Char8[2] =\n"
       "    [0] = 'a'\n"
       "    [1] = 'b'\n"
       "  Sequence my_anon_seq ::Dynamic::EnumType[2] =\n"
