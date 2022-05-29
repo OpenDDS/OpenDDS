@@ -876,7 +876,7 @@ Monitor::MonitorTask::readBuiltinTopicData(
       ACE_TEXT("id: %C ==> BuiltinTopic key: ")
       ACE_TEXT("[0x%x, 0x%x, 0x%x], handle %d.\n"),
       topicName,
-      LogGuid(id).c_str(),
+      OpenDDS::DCPS::LogGuid(id).c_str(),
       data.key.value[0], data.key.value[1], data.key.value[2],
       instance
     ));
@@ -887,7 +887,7 @@ Monitor::MonitorTask::readBuiltinTopicData(
       ACE_TEXT("(%P|%t) MonitorTask::readBuiltinTopicData<%s>() - ")
       ACE_TEXT("no data for id %C at this time.\n"),
       topicName,
-      LogGuid(id).c_str()
+      OpenDDS::DCPS::LogGuid(id).c_str()
     ));
     return false;
   }

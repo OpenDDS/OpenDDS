@@ -252,7 +252,7 @@ Monitor::MonitorDataStorage::createParticipantNode(
   // DomainParticipant data.
   QList<QVariant> list;
   list << QString("DomainParticipant")
-       << QString( QObject::tr( LogGuid(id).c_str()));
+       << QString( QObject::tr( OpenDDS::DCPS::LogGuid(id).c_str()));
   TreeNode* node = new TreeNode( list, parent);
   if( parent) {
     parent->append( node);
@@ -390,7 +390,7 @@ Monitor::MonitorDataStorage::getEndpointNode(
     // Node data.
     QList<QVariant> list;
     list << QString( QObject::tr( label.c_str()))
-         << QString( QObject::tr( LogGuid( id).c_str()));
+         << QString( QObject::tr( OpenDDS::DCPS::LogGuid( id).c_str()));
     node = new TreeNode( list, parent);
     if( parent) {
       parent->append( node);
@@ -453,7 +453,7 @@ Monitor::MonitorDataStorage::getNode(
     // Node data.
     QList<QVariant> list;
     list << QString( QObject::tr( label.c_str()))
-         << QString( QObject::tr( LogGuid( id).c_str()));
+         << QString( QObject::tr( OpenDDS::DCPS::LogGuid( id).c_str()));
     node = new TreeNode( list, parent);
     if( parent) {
       parent->append( node);
