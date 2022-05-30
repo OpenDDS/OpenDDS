@@ -158,10 +158,9 @@ namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
-      LogGuid gc(peer);
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
                  "from %C %C secure RTPS processing failed: %C\n",
-                 DCPS::LogAddr(remote).c_str(), gc.c_str(), msg));
+                 DCPS::LogAddr(remote).c_str(), LogGuid(peer).c_str(), msg));
     }
     stop = true;
     return 0;
@@ -322,14 +321,14 @@ bool RtpsUdpReceiveStrategy::check_encoded(const EntityId_t& sender)
 #ifdef OPENDDS_SECURITY
   using namespace DDS::Security;
   const GUID_t sendGuid = make_id(receiver_.source_guid_prefix_, sender);
-  const LogGuid conv(sendGuid);
+  const GuidConverter conv(sendGuid);
 
   if (link_->local_crypto_handle() != DDS::HANDLE_NIL
       && !encoded_rtps_ && !RtpsUdpDataLink::separate_message(sender)) {
     if (security_debug.encdec_warn) {
       ACE_DEBUG((LM_WARNING, "(%P|%t) RtpsUdpReceiveStrategy::check_encoded "
                  "Full message from %C requires protection, dropping\n",
-                 conv.c_str()));
+                 OPENDDS_STRING(conv).c_str()));
     }
     return false;
   }
@@ -460,10 +459,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       if (!readers_withheld_.count(reader) &&
           (directedWriteReaders.empty() || directedWriteReaders.find(reader) != directedWriteReaders.end())) {
         if (Transport_debug_level > 5) {
-          LogGuid reader_conv(reader);
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
             ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
-            this, sample.header_.sequence_.getValue(), reader_conv.c_str()));
+            this, sample.header_.sequence_.getValue(), LogGuid(reader).c_str()));
         }
         link_->data_received(sample, reader);
       }
