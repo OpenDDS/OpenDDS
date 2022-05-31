@@ -2819,19 +2819,17 @@ RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in, double scale)
 }
 
 void
-RtpsUdpDataLink::RtpsWriter::update_required_acknack_count(const RepoId& id, CORBA::Long previous, CORBA::Long current)
+RtpsUdpDataLink::RtpsWriter::update_required_acknack_count(const RepoId& id, CORBA::Long current)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ReaderInfoMap::iterator ri = remote_readers_.find(id);
   if (ri != remote_readers_.end()) {
-    if (ri->second->required_acknack_count_ == previous) {
-      ri->second->required_acknack_count_ = current;
-    }
+    ri->second->required_acknack_count_ = current;
   }
 }
 
 void
-RtpsUdpDataLink::update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long previous, CORBA::Long current)
+RtpsUdpDataLink::update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long current)
 {
   RtpsWriter_rch writer;
   {
@@ -2842,7 +2840,7 @@ RtpsUdpDataLink::update_required_acknack_count(const RepoId& local_id, const Rep
     }
   }
   if (writer) {
-    writer->update_required_acknack_count(remote_id, previous, current);
+    writer->update_required_acknack_count(remote_id, current);
   }
 }
 
@@ -2924,7 +2922,7 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
               ++mapping.next_directed_unassigned_;
               if (res.sm_.heartbeat_sm().smHeader.flags & RTPS::OPENDDS_FLAG_R) {
                 if (res.sm_.heartbeat_sm().count.value != map_pair.new_) {
-                  update_required_acknack_count(res.src_guid_, res.dst_guid_, res.sm_.heartbeat_sm().count.value, map_pair.new_);
+                  update_required_acknack_count(res.src_guid_, res.dst_guid_, map_pair.new_);
                 }
                 res.sm_.heartbeat_sm().smHeader.flags &= ~RTPS::OPENDDS_FLAG_R;
               }
@@ -3831,6 +3829,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
       meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::OPENDDS_FLAG_R;
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
       reader->required_acknack_count_ = heartbeat_count_;
+      meta_submessage.sm_.heartbeat_sm().smHeader.flags &= ~RTPS::OPENDDS_FLAG_R;
     } else {
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
     }
@@ -3842,13 +3841,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
   for (ReaderInfoSet::const_iterator pos = readers_expecting_heartbeat_.begin(), limit = readers_expecting_heartbeat_.end();
        pos != limit; ++pos) {
     const ReaderInfo_rch& reader = *pos;
-    if (reader->reflects_heartbeat_count()) {
-      meta_submessage.sm_.heartbeat_sm().smHeader.flags |= RTPS::OPENDDS_FLAG_R;
-      gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
-      reader->required_acknack_count_ = heartbeat_count_;
-    } else {
-      gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
-    }
+    gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, reader);
   }
   readers_expecting_heartbeat_.clear();
 }
