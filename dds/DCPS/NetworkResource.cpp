@@ -107,7 +107,8 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
     } else {
       for (size_t i = 0; i < addr_count; i++) {
-        VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
+        //VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()));
       }
 
 #ifdef ACE_HAS_IPV6
@@ -655,6 +656,17 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
 ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback, bool allow_ipv4_fallback)
 {
   ACE_INET_Addr result;
+  struct LogGuard {
+    LogGuard()
+    {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Starting...\n"));
+    }
+    ~LogGuard()
+    {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Returning address %C\n",
+                 LogAddr::ip(result).c_str()));
+    }
+  } log_guard;
 
   if (address.empty()) {
     return ACE_INET_Addr();
@@ -809,6 +821,10 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   }
   AddrCacheMap::iterator it = addr_cache_map_.find(host_name);
   if (it != addr_cache_map_.end()) {
+    for (OPENDDS_SET::iterator i = it->second.second.begin(); i != it->second.second.end(); ++i) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): From cache, adding %C\n",
+                 LogAddr::ip(*i).c_str()));
+    }
     addresses.insert(addresses.end(), it->second.second.begin(), it->second.second.end());
     it->second.first = now;
   }
@@ -836,6 +852,8 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     temp.set_port_number(port_number, 1 /*encode*/);
     addresses.push_back(temp);
 #ifdef ACE_WIN32
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Adding address %C to cache\n",
+               LogAddr::ip(temp).c_str()));
     if (it != addr_cache_map_.end()) {
       it->second.second.insert(temp);
     } else {
