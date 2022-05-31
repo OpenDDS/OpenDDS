@@ -462,6 +462,11 @@ RecorderImpl::add_association(const RepoId&            yourId,
 
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
+
+      if (!writers_.count(writer.writerId)) {
+        return;
+      }
 
       this->writers_[writer.writerId]->handle(handle);
     }
