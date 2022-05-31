@@ -656,17 +656,19 @@ ACE_INET_Addr choose_single_coherent_address(const OPENDDS_VECTOR(ACE_INET_Addr)
 ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_loopback, bool allow_ipv4_fallback)
 {
   ACE_INET_Addr result;
+
   struct LogGuard {
-    LogGuard()
+    LogGuard(ACE_INET_Addr* addr) : addr_(addr)
     {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Starting...\n"));
     }
     ~LogGuard()
     {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Returning address %C\n",
-                 LogAddr::ip(result).c_str()));
+                 LogAddr::ip(*addr_).c_str()));
     }
-  } log_guard;
+    ACE_INET_Addr* const addr_;
+  } log_guard(&result);
 
   if (address.empty()) {
     return ACE_INET_Addr();
@@ -868,7 +870,8 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   g.release();
 #endif /* ACE_WIN32 */
 
-  return choose_single_coherent_address(addresses, prefer_loopback, host_name);
+  result = choose_single_coherent_address(addresses, prefer_loopback, host_name);
+  return result;
 }
 
 int locator_to_address(ACE_INET_Addr& dest,
