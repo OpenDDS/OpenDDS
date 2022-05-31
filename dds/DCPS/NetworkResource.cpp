@@ -823,7 +823,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   }
   AddrCacheMap::iterator it = addr_cache_map_.find(host_name);
   if (it != addr_cache_map_.end()) {
-    for (OPENDDS_SET::iterator i = it->second.second.begin(); i != it->second.second.end(); ++i) {
+    for (OPENDDS_SET(ACE_INET_Addr)::iterator i = it->second.second.begin(); i != it->second.second.end(); ++i) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): From cache, adding %C\n",
                  LogAddr::ip(*i).c_str()));
     }
