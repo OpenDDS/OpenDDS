@@ -557,7 +557,7 @@ private:
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(RcHandle<ConstSharedRepoIdSet> additional_guids,
                            MetaSubmessageVec& meta_submessages);
-    void update_required_acknack_count(const RepoId& id, CORBA::Long previous, CORBA::Long current);
+    void update_required_acknack_count(const RepoId& id, CORBA::Long current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
   };
@@ -715,7 +715,7 @@ private:
     CountKeeper& counts);
 
   void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
-  void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long previous, CORBA::Long current);
+  void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long current);
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
   ThreadedRtpsSendQueue sq_;
