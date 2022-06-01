@@ -45,6 +45,18 @@ int
 ACE_TMAIN(int, ACE_TCHAR*[])
 {
   using namespace OpenDDS::DCPS;
+
+  const MonotonicTimePoint qual_start = MonotonicTimePoint::now();
+  for (int i = 0; i < 10; ++i) {
+    ACE_OS::sleep(ACE_Time_Value(0, 5000));
+  }
+  const MonotonicTimePoint qual_end = MonotonicTimePoint::now();
+
+  if (TimeDuration::from_msec(55) < (qual_end - qual_start)) {
+    ACE_DEBUG((LM_DEBUG, "Machine timing is too slow (taking %C to sleep 0.05 s), skipping test.\n", (qual_end - qual_start).str().c_str()));
+    return 0;
+  }
+
   ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
   reactor_task.open_reactor_task(0, &tsm);
