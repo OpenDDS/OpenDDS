@@ -72,9 +72,13 @@ bool verify_hostname(String hostname, ACE_INET_Addr* addr_array, size_t addr_cou
   const ACE_INET_Addr addr = choose_single_coherent_address(hostname, prefer_loopback, allow_ipv4_fallback);
   for (size_t i = 0; i < addr_count; ++i) {
     if (addr == addr_array[i]) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: verify_hostname: IP interface %C is chosen from hostname %C",
+                 LogAddr::ip(addr).c_str(), hostname.c_str()));
       return true;
     }
   }
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: verify_hostname: Bogus IP %C is chosen. Ignoring hostname %C\n",
+             LogAddr::ip(addr).c_str(), hostname.c_str()));
   return false;
 }
 
@@ -130,7 +134,8 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
         // Discover the fully qualified hostname
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
-          VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Considering fqdn %C\n", hostname), 4);
+          //VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Considering fqdn %C\n", hostname), 4);
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: get_fully_qualified_hostname: Considering fqdn %C (from address %C)\n", hostname, LogAddr::ip(addr_array[i]).c_str()));
           // Find the first FQDN that resolves to an IP interface address.
           if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 &&
               verify_hostname(hostname, addr_array, addr_count, false, false)) {
@@ -664,7 +669,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
     }
     ~LogGuard()
     {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Returning address %C\n",
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Returning address %C\n\n",
                  LogAddr::ip(*addr_).c_str()));
     }
     ACE_INET_Addr* const addr_;
