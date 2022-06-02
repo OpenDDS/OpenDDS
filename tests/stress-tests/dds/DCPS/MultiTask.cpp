@@ -7,6 +7,8 @@
 
 #include "ace/OS_NS_unistd.h"
 
+#include "TimingChecker.h"
+
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/MultiTask.h"
 #include "dds/DCPS/ReactorTask.h"
@@ -46,16 +48,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 {
   using namespace OpenDDS::DCPS;
 
-  const MonotonicTimePoint qual_start = MonotonicTimePoint::now();
-  for (int i = 0; i < 10; ++i) {
-    ACE_OS::sleep(ACE_Time_Value(0, 5000));
-  }
-  const MonotonicTimePoint qual_end = MonotonicTimePoint::now();
-
-  if (TimeDuration::from_msec(55) < (qual_end - qual_start)) {
-    ACE_DEBUG((LM_DEBUG, "Machine timing is too slow (taking %C to sleep 0.05 s), skipping test.\n", (qual_end - qual_start).str().c_str()));
-    return 0;
-  }
+  bool tight_timing = Utils::TimingChecker::check_timing();
 
   ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
@@ -80,10 +73,24 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   ACE_OS::sleep(ACE_Time_Value(0, 110000)); // sleep for 0.11 seconds to catch final "fast" executions
   ACE_DEBUG((LM_DEBUG, "enable_calls = %d\n", enable_calls));
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 22); // 2 from initial slow period, 20 from fast period (2.0 / 0.1)
+  // 1 from the slow period, 20 from the fast period (2.0 / 0.1)
+  if (tight_timing) {
+    TEST_CHECK(total_count == 22);
+  }
+  else {
+    TEST_CHECK(total_count >= 17);
+    TEST_CHECK(total_count <= 22);
+  }
   ACE_OS::sleep(5); // sleep for 5.0 more seconds, should fall back to 2.0 second default period
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 24); // 2 from initial slow period, 20 from fast period, 2 more from last slow period
+  // 1 from the slow period, 20 from the fast period (2.0 / 0.1), 2 more from last slow period
+  if (tight_timing) {
+    TEST_CHECK(total_count == 24);
+  }
+  else {
+    TEST_CHECK(total_count >= 19);
+    TEST_CHECK(total_count <= 24);
+  }
   obj->multi_->disable();
 
   reactor_task.stop();
