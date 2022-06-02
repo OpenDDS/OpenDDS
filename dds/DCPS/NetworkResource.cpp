@@ -901,6 +901,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   // "some_domain.com:1234". We would expect to have address 10.1.0.71:1234 returned. However,
   // address 10.1.0.71:0 can be returned if it is still in the cache when the second call is made.
 
+
   // Maybe a better way to maintain the address cache is to have it only store IP addresses and
   // leave out the port number (by setting it to 0). This is because the choose_single_coherent_address
   // vector version only cares about IP part. That way we can reduce the number of entries in the cache
