@@ -675,17 +675,19 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   ACE_INET_Addr result;
 
   struct LogGuard {
-    LogGuard(const ACE_INET_Addr& addr) : addr_(addr)
+    LogGuard(const String& hostname, const ACE_INET_Addr& addr) : hostname_(hostname), addr_(addr)
     {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Starting...\n"));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Starting( %C )...\n",
+                 hostname_.c_str()));
     }
     ~LogGuard()
     {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Returning address %C\n\n",
                  LogAddr(addr_).c_str()));
     }
+    const String& hostname_;
     const ACE_INET_Addr& addr_;
-  } log_guard(result);
+  } log_guard(address, result);
 
   if (address.empty()) {
     return ACE_INET_Addr();
@@ -888,6 +890,22 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 #endif /* ACE_WIN32 */
 
   result = choose_single_coherent_address(addresses, prefer_loopback, host_name);
+  // NOTE(sonndinh):
+  // Make sure to set the port number since the returned address can have a different port number
+  // than the desired one. This can happen if that address is a residue from a previous call to
+  // this function and the cache hasn't been cleanup since then.
+  // Example: Suppose a first call to this function with hostname "some_domain.com" returns
+  // 10.1.0.71:0. The port is 0 because there is no port number in the hostname argument, and
+  // the addresses returned from the getaddrinfo with that hostname typically have 0 as port number.
+  // Next, this function is called with the same hostname but now with a port number
+  // "some_domain.com:1234". We would expect to have address 10.1.0.71:1234 returned. However,
+  // address 10.1.0.71:0 can be returned if it is still in the cache when the second call is made.
+
+  // Maybe a better way to maintain the address cache is to have it only store IP addresses and
+  // leave out the port number (by setting it to 0). This is because the choose_single_coherent_address
+  // vector version only cares about IP part. That way we can reduce the number of entries in the cache
+  // and simplify the logic which would help reduce future bugs.
+  result.set_port_number(port_number, 1);
   return result;
 }
 
