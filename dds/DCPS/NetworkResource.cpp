@@ -870,7 +870,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 
     ACE_INET_Addr temp;
     temp.set_addr(&addr, sizeof addr);
-    temp.set_port_number(port_number, 1 /*encode*/);
+    //temp.set_port_number(port_number, 1 /*encode*/);
     addresses.push_back(temp);
 #ifdef ACE_WIN32
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Adding address %C to cache\n",
