@@ -54,5 +54,3 @@ bool TimingChecker::check_timing(const OpenDDS::DCPS::TimeDuration& epsilon, con
 }
 
 }
-
-
