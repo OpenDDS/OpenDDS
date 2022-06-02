@@ -9631,7 +9631,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS -Config DCPS_MIN"/>
+        <command name="auto_run_tests" options="script_path=tests dir=C:/OpenDDS -Config XERCES3 -Config OPENDDS_SECURITY --security --cmake"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
