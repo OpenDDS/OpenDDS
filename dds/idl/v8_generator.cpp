@@ -210,7 +210,7 @@ namespace {
           ip << "}\n" <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls));\n" <<
           ip << "  for (uint32_t i = 0; i < " << array << "_size; ++i) {\n" <<
           ip << "    if (ss == " << array << "[i]) {\n" <<
           ip << "      " << propName << assign_prefix << "static_cast<" << scoped(type->name()) << ">(i)" << assign_suffix << ";\n" <<
@@ -224,13 +224,13 @@ namespace {
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n";
         if (cls & CL_WIDE) {
           strm <<
-            ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+            ip << "  std::string ss(*Nan::Utf8String(ls));\n" <<
             ip << "  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> wconv;\n" <<
             ip << "  std::wstring ws = wconv.from_bytes(ss);\n" <<
             ip << "  " << propName << assign_prefix << "ws.c_str()" << assign_suffix << ";\n";
         } else {
           strm <<
-            ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+            ip << "  std::string ss(*Nan::Utf8String(ls));\n" <<
             ip << "  " << propName << assign_prefix << "ss.c_str()" << assign_suffix << ";\n";
         }
         strm <<
@@ -239,7 +239,7 @@ namespace {
         strm <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls));\n" <<
           ip << "  const char temp_c = ss[0];\n" <<
           ip << "  " << propName << assign_prefix << "temp_c" << assign_suffix << ";\n" <<
           ip << "}\n";
@@ -247,7 +247,7 @@ namespace {
         strm <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
-          ip << "  std::string ss(*Nan::Utf8String(ls))\n;" <<
+          ip << "  std::string ss(*Nan::Utf8String(ls));\n" <<
           ip << "  std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> wconv;\n" <<
           ip << "  std::wstring ws = wconv.from_bytes(ss);\n" <<
           ip << "  const wchar temp_wc = ws[0];\n" <<
@@ -283,12 +283,19 @@ namespace {
           ip << "  }\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_float
-              || pt == AST_PredefinedType::PT_double
-              || pt == AST_PredefinedType::PT_longdouble) {
+              || pt == AST_PredefinedType::PT_double) {
         strm <<
           ip << "if (lv->IsNumber()) {\n" <<
           ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
           ip << "  " << propName << assign_prefix << "ln->Value()" << assign_suffix << ";\n" <<
+          ip << "}\n";
+      } else if (pt == AST_PredefinedType::PT_longdouble) {
+        strm <<
+          ip << "if (lv->IsNumber()) {\n" <<
+          ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
+          ip << "  ACE_CDR::LongDouble ld;\n" <<
+          ip << "  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld, ln->Value());\n" <<
+          ip << "  " << propName << assign_prefix << "ld" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_boolean) {
         strm <<
