@@ -2428,10 +2428,12 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
   size_t addrset_min_size = std::numeric_limits<size_t>::max();
   size_t addrset_max_size = 0;
 
+  BundlingCache::ScopedAccess global_access(bundling_cache_);
+
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVec::iterator it = meta_submessages.begin(), limit = meta_submessages.end(); it != limit; ++it) {
     const BundlingCacheKey key(it->src_guid_, it->dst_guid_, it->addr_guids_);
-    BundlingCache::ScopedAccess entry(bundling_cache_, key);
+    BundlingCache::ScopedAccess entry(bundling_cache_, key, false);
     if (entry.is_new_) {
 
       AddrSet& addrs = entry.value().addrs_;
@@ -2451,6 +2453,9 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
         addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
       }
 #endif
+#if defined ACE_HAS_CPP11
+      entry.recalculate_hash();
+#endif
       ++cache_misses;
     } else {
       ++cache_hits;
@@ -2468,12 +2473,13 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
 #endif
     }
 
+    DestMetaSubmessageMap& dest_map = addr_map[AddressCacheEntryProxy(const_entry.rch_)];
     if (std::memcmp(&(it->dst_guid_.guidPrefix), &GUIDPREFIX_UNKNOWN, sizeof(GuidPrefix_t)) != 0) {
-      MetaSubmessageIterVec& vec = addr_map[AddressCacheEntryProxy(entry.rch_)][make_unknown_guid(it->dst_guid_.guidPrefix)];
+      MetaSubmessageIterVec& vec = dest_map[make_unknown_guid(it->dst_guid_.guidPrefix)];
       vec.reserve(meta_submessages.size());
       vec.push_back(it);
     } else {
-      MetaSubmessageIterVec& vec = addr_map[AddressCacheEntryProxy(entry.rch_)][GUID_UNKNOWN];
+      MetaSubmessageIterVec& vec = dest_map[GUID_UNKNOWN];
       vec.reserve(meta_submessages.size());
       vec.push_back(it);
     }
