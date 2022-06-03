@@ -72,13 +72,9 @@ bool verify_hostname(String hostname, ACE_INET_Addr* addr_array, size_t addr_cou
   const ACE_INET_Addr addr = choose_single_coherent_address(hostname, prefer_loopback, allow_ipv4_fallback);
   for (size_t i = 0; i < addr_count; ++i) {
     if (addr == addr_array[i]) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: verify_hostname: IP interface %C is chosen from hostname %C\n",
-                 LogAddr(addr).c_str(), hostname.c_str()));
       return true;
     }
   }
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: verify_hostname: Bogus IP %C is chosen. Ignoring hostname %C\n",
-             LogAddr(addr).c_str(), hostname.c_str()));
   return false;
 }
 
@@ -88,18 +84,6 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
   // address to be used on subsequent calls
   static String fullname;
   static ACE_INET_Addr selected_address;
-
-  struct LogGuard {
-    LogGuard(const String& name, const ACE_INET_Addr& addr) : name_(name), addr_(addr) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) XXXXXX DEBUG: get_fully_qualified_hostname: Beginning...\n"));
-    }
-    ~LogGuard() {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) XXXXXX DEBUG: get_fully_qualified_hostname: Returning hostname %C, address %C\n",
-                 name_.c_str(), LogAddr(addr_).c_str()));
-    }
-    const String& name_;
-    const ACE_INET_Addr& addr_;
-  } log_guard(fullname, selected_address);
 
   if (fullname.length() == 0) {
     size_t addr_count;
@@ -123,8 +107,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
     } else {
       for (size_t i = 0; i < addr_count; i++) {
-        //VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found IP interface %C\n", LogAddr(addr_array[i]).c_str()));
+        VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Found IP interface %C\n", LogAddr::ip(addr_array[i]).c_str()), 4);
       }
 
 #ifdef ACE_HAS_IPV6
@@ -146,8 +129,7 @@ String get_fully_qualified_hostname(ACE_INET_Addr* addr)
 
         // Discover the fully qualified hostname
         if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
-          //VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Considering fqdn %C\n", hostname), 4);
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: get_fully_qualified_hostname: Considering fqdn %C (from address %C)\n", hostname, LogAddr(addr_array[i]).c_str()));
+          VDBG_LVL((LM_DEBUG, "(%P|%t) get_fully_qualified_hostname: Considering fqdn %C\n", hostname), 4);
           // Find the first FQDN that resolves to an IP interface address.
           if (!addr_array[i].is_loopback() && ACE_OS::strchr(hostname, '.') != 0 &&
               verify_hostname(hostname, addr_array, addr_count, false, false)) {
@@ -674,21 +656,6 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 {
   ACE_INET_Addr result;
 
-  struct LogGuard {
-    LogGuard(const String& hostname, const ACE_INET_Addr& addr) : hostname_(hostname), addr_(addr)
-    {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Starting( %C )...\n",
-                 hostname_.c_str()));
-    }
-    ~LogGuard()
-    {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Returning address %C\n\n",
-                 LogAddr(addr_).c_str()));
-    }
-    const String& hostname_;
-    const ACE_INET_Addr& addr_;
-  } log_guard(address, result);
-
   if (address.empty()) {
     return ACE_INET_Addr();
   }
@@ -842,10 +809,6 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
   }
   AddrCacheMap::iterator it = addr_cache_map_.find(host_name);
   if (it != addr_cache_map_.end()) {
-    for (OPENDDS_SET(ACE_INET_Addr)::iterator i = it->second.second.begin(); i != it->second.second.end(); ++i) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): From cache, adding %C\n",
-                 LogAddr(*i).c_str()));
-    }
     addresses.insert(addresses.end(), it->second.second.begin(), it->second.second.end());
     it->second.first = now;
   }
@@ -870,11 +833,8 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 
     ACE_INET_Addr temp;
     temp.set_addr(&addr, sizeof addr);
-    //temp.set_port_number(port_number, 1 /*encode*/);
     addresses.push_back(temp);
 #ifdef ACE_WIN32
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: choose_single_coherent_address(string): Adding address %C to cache\n",
-               LogAddr(temp).c_str()));
     if (it != addr_cache_map_.end()) {
       it->second.second.insert(temp);
     } else {
@@ -890,23 +850,7 @@ ACE_INET_Addr choose_single_coherent_address(const String& address, bool prefer_
 #endif /* ACE_WIN32 */
 
   result = choose_single_coherent_address(addresses, prefer_loopback, host_name);
-  // NOTE(sonndinh):
-  // Make sure to set the port number since the returned address can have a different port number
-  // than the desired one. This can happen if that address is a residue from a previous call to
-  // this function and the cache hasn't been cleanup since then.
-  // Example: Suppose a first call to this function with hostname "some_domain.com" returns
-  // 10.1.0.71:0. The port is 0 because there is no port number in the hostname argument, and
-  // the addresses returned from the getaddrinfo with that hostname typically have 0 as port number.
-  // Next, this function is called with the same hostname but now with a port number
-  // "some_domain.com:1234". We would expect to have address 10.1.0.71:1234 returned. However,
-  // address 10.1.0.71:0 can be returned if it is still in the cache when the second call is made.
-
-
-  // Maybe a better way to maintain the address cache is to have it only store IP addresses and
-  // leave out the port number (by setting it to 0). This is because the choose_single_coherent_address
-  // vector version only cares about IP part. That way we can reduce the number of entries in the cache
-  // and simplify the logic which would help reduce future bugs.
-  result.set_port_number(port_number, 1);
+  result.set_port_number(port_number, 1 /*encode*/);
   return result;
 }
 
