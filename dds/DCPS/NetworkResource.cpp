@@ -66,7 +66,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-bool verify_hostname(String hostname, ACE_INET_Addr* addr_array, size_t addr_count,
+bool verify_hostname(const String& hostname, ACE_INET_Addr* addr_array, size_t addr_count,
                      bool prefer_loopback, bool allow_ipv4_fallback)
 {
   const ACE_INET_Addr addr = choose_single_coherent_address(hostname, prefer_loopback, allow_ipv4_fallback);
