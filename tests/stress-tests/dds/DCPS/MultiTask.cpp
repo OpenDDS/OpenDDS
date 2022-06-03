@@ -76,8 +76,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1)
   if (tight_timing) {
     TEST_CHECK(total_count == 22);
-  }
-  else {
+  } else {
     TEST_CHECK(total_count >= 17);
     TEST_CHECK(total_count <= 22);
   }
@@ -86,8 +85,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1), 2 more from last slow period
   if (tight_timing) {
     TEST_CHECK(total_count == 24);
-  }
-  else {
+  } else {
     TEST_CHECK(total_count >= 19);
     TEST_CHECK(total_count <= 24);
   }

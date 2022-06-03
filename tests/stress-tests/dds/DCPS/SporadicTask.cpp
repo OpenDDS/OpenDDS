@@ -90,8 +90,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   // No lingering enables / executions mean total count should be unchanged
   if (tight_timing) {
     TEST_CHECK(total_count == 21);
-  }
-  else {
+  } else {
     TEST_CHECK(total_count >= 16);
     TEST_CHECK(total_count <= 21);
   }
