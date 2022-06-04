@@ -3,6 +3,7 @@ project(*SporadicTask): dcpsexe, dcps_test {
 
   Source_Files {
     SporadicTask.cpp
+    TimingChecker.cpp
   }
 }
 
@@ -11,5 +12,6 @@ project(*MultiTask): dcpsexe, dcps_test {
 
   Source_Files {
     MultiTask.cpp
+    TimingChecker.cpp
   }
 }
