@@ -98,8 +98,18 @@ public:
   virtual ~AddressCache() {}
 
   struct ScopedAccess {
-    ScopedAccess(AddressCache& cache, const Key& key)
+    ScopedAccess(AddressCache& cache)
       : guard_(cache.mutex_)
+      , rch_()
+      , is_new_(false)
+#if defined ACE_HAS_CPP11
+      , non_const_touch_(false)
+#endif
+    {
+    }
+
+    ScopedAccess(AddressCache& cache, const Key& key, bool block = true)
+      : guard_(cache.mutex_, block)
       , rch_()
       , is_new_(false)
 #if defined ACE_HAS_CPP11
@@ -131,9 +141,7 @@ public:
     ~ScopedAccess()
     {
 #if defined ACE_HAS_CPP11
-      if (non_const_touch_) {
-        rch_->addrs_hash_ = calculate_hash(rch_->addrs_);
-      }
+      recalculate_hash();
 #endif
     }
 
@@ -149,6 +157,15 @@ public:
       OPENDDS_ASSERT(rch_);
       return *rch_;
     }
+
+#if defined ACE_HAS_CPP11
+    inline void recalculate_hash() {
+      if (non_const_touch_) {
+        rch_->addrs_hash_ = calculate_hash(rch_->addrs_);
+        non_const_touch_ = false;
+      }
+    }
+#endif
 
     ACE_Guard<ACE_Thread_Mutex> guard_;
     RcHandle<AddressCacheEntry> rch_;
