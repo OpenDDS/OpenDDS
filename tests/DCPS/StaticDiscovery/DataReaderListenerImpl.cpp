@@ -92,6 +92,9 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           it->second.insert(0);
         }
       }
+
+      ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from writer %C)\n", OpenDDS::DCPS::LogGuid(reader_guid_).c_str(), received_samples_, message.value, OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
+
       if (reliable_ && !it->second.empty()) {
         int expected = *(it->second.rbegin()) + 1;
         if (message.value != expected) {
@@ -101,7 +104,6 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
       }
       it->second.insert(message.value);
 
-      ACE_DEBUG((LM_INFO, "(%P|%t) Reader %C got message %d (#%d from writer %C)\n", OpenDDS::DCPS::LogGuid(reader_guid_).c_str(), received_samples_, message.value, OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
       if (++received_samples_ == expected_samples_) {
         done_callback_(builtin_read_error_, reader_guid_);
       }

@@ -1834,37 +1834,6 @@ RtpsUdpDataLink::RtpsReader::process_gap_i(const RTPS::GapSubmessage& gap,
 }
 
 void
-RtpsUdpDataLink::send_interesting_ack_nack(const RepoId& writerid,
-                                           const RepoId& readerid,
-                                           CORBA::Long count,
-                                           MetaSubmessageVec& meta_submessages)
-{
-  using namespace OpenDDS::RTPS;
-
-  SequenceNumber ack;
-  LongSeq8 bitmap;
-  bitmap.length(0);
-
-  AckNackSubmessage acknack = {
-    {ACKNACK,
-     CORBA::Octet(FLAG_E | FLAG_F),
-     0 /*length*/},
-    readerid.entityId,
-    writerid.entityId,
-    { // SequenceNumberSet: acking bitmapBase - 1
-      to_rtps_seqnum(ack),
-      0 /* num_bits */, bitmap
-    },
-    {count}
-  };
-
-  MetaSubmessage meta_submessage(readerid, writerid);
-  meta_submessage.sm_.acknack_sm(acknack);
-
-  meta_submessages.push_back(meta_submessage);
-}
-
-void
 RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
                           const GuidPrefix_t& src_prefix,
                           bool directed,
@@ -1887,17 +1856,6 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
            limit = interesting_writers_.upper_bound(src);
          pos != limit;
          ++pos) {
-      const RepoId& writerid = src;
-      const RepoId& readerid = pos->second.localid;
-
-      RtpsReaderMap::const_iterator riter = readers_.find(readerid);
-      if (riter == readers_.end()) {
-        // Reader has no associations.
-        send_interesting_ack_nack(writerid, readerid, heartbeat.count.value, meta_submessages);
-      } else if (!riter->second->has_writer(writerid)) {
-        // Reader is not associated with this writer.
-        send_interesting_ack_nack(writerid, readerid, heartbeat.count.value, meta_submessages);
-      }
       pos->second.last_activity = now;
       if (pos->second.status == InterestingRemote::DOES_NOT_EXIST) {
         callbacks.push_back(pos->second);
