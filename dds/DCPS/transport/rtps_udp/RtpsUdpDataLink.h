@@ -560,6 +560,7 @@ private:
     void update_required_acknack_count(const RepoId& id, CORBA::Long current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
+    RcHandle<ConstSharedRepoIdSet> get_remote_reader_guids() { return remote_reader_guids_; }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 

@@ -4148,6 +4148,11 @@ RtpsUdpDataLink::RtpsWriter::gather_directed_heartbeat_i(const SingleSendBuffer:
 void
 RtpsUdpDataLink::RtpsWriter::update_remote_guids_cache_i(bool add, const RepoId& guid)
 {
+  RtpsUdpDataLink_rch link = link_.lock();
+  if (!link) {
+    return;
+  }
+
   // We make a new RcHandle to prevent changing what's being pointed to by existing references in the send queue (i.e. to preserve historic values)
   RcHandle<ConstSharedRepoIdSet> temp = make_rch<ConstSharedRepoIdSet>();
   if (remote_reader_guids_) {
@@ -4159,6 +4164,8 @@ RtpsUdpDataLink::RtpsWriter::update_remote_guids_cache_i(bool add, const RepoId&
     const_cast<RepoIdSet&>(temp->guids_).erase(guid);
   }
   remote_reader_guids_ = temp;
+
+  link->bundling_cache_.remove_id(GUID_UNKNOWN);
 }
 
 void
@@ -4209,7 +4216,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(MetaSubmessageVec& meta_submess
       meta_submessage.sm_.heartbeat_sm().readerId = ENTITYID_UNKNOWN;
       meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(firstSN);
       meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(lastSN);
-      meta_submessage.addr_guids_ = remote_reader_guids_;
+      //meta_submessage.addr_guids_ = remote_reader_guids_;
 
       meta_submessages.push_back(meta_submessage);
       meta_submessage.reset_destination();
@@ -4247,7 +4254,7 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(RcHandle<ConstSharedRepoIdSet> ad
   initialize_heartbeat(proxy, meta_submessage);
 
   // Non-directed, non-final.
-  meta_submessage.addr_guids_ = additional_guids;
+  //meta_submessage.addr_guids_ = additional_guids;
   meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
   meta_submessages.push_back(meta_submessage);
   meta_submessage.reset_destination();
@@ -4518,19 +4525,22 @@ RtpsUdpDataLink::receive_strategy()
 }
 
 AddrSet
-RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId& remote) const {
+RtpsUdpDataLink::get_addresses(const RepoId& local, const RepoId& remote) const
+{
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local, remote);
 }
 
 AddrSet
-RtpsUdpDataLink::get_addresses(const RepoId& local) const {
+RtpsUdpDataLink::get_addresses(const RepoId& local) const
+{
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, locators_lock_, AddrSet());
   return get_addresses_i(local);
 }
 
 AddrSet
-RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const {
+RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) const
+{
   AddrSet retval;
 
   accumulate_addresses(local, remote, retval, true);
@@ -4539,13 +4549,38 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local, const RepoId& remote) cons
 }
 
 AddrSet
-RtpsUdpDataLink::get_addresses_i(const RepoId& local) const {
+RtpsUdpDataLink::get_addresses_i(const RepoId& local) const
+{
   AddrSet retval;
+  bool use_peers = true;
 
-  const GUIDSeq_var peers = peer_ids(local);
-  if (peers.ptr()) {
-    for (CORBA::ULong i = 0; i < peers->length(); ++i) {
-      accumulate_addresses(local, peers[i], retval);
+  // For reliable writers, use remote_reader_guids()
+  const GuidConverter conv(local);
+  if (conv.isWriter()) {
+    RtpsWriter_rch writer;
+    ACE_Guard<ACE_Thread_Mutex> guard(writers_lock_);
+    RtpsWriterMap::const_iterator pos = writers_.find(local);
+    if (pos != writers_.end()) {
+      writer = pos->second;
+    }
+    guard.release();
+    RcHandle<ConstSharedRepoIdSet> addr_guids = writer->get_remote_reader_guids();
+    if (addr_guids) {
+      for (RepoIdSet::const_iterator it = addr_guids->guids_.begin(),
+        limit = addr_guids->guids_.end(); it != limit; ++it) {
+        accumulate_addresses(local, *it, retval);
+
+      }
+      use_peers = false;
+    }
+  }
+
+  if (use_peers) {
+    const GUIDSeq_var peers = peer_ids(local);
+    if (peers.ptr()) {
+      for (CORBA::ULong i = 0; i < peers->length(); ++i) {
+        accumulate_addresses(local, peers[i], retval);
+      }
     }
   }
 
