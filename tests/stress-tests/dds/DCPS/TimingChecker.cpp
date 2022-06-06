@@ -30,27 +30,34 @@ bool TimingChecker::check_timing(const OpenDDS::DCPS::TimeDuration& epsilon, con
 {
   using namespace OpenDDS::DCPS;
 
+  bool result = true;
+
   ThreadStatusManager tsm;
   ReactorTask reactor_task(false);
   reactor_task.open_reactor_task(0, &tsm);
 
-  RcHandle<TimingChecker> checker = make_rch<TimingChecker>();
-  const MonotonicTimePoint start = MonotonicTimePoint::now();
-  reactor_task.get_reactor()->schedule_timer(checker.in(), 0, requested.value());
-  const MonotonicTimePoint stop = checker->wait_timeout();
-  reactor_task.stop();
-  const TimeDuration elapsed = stop - start;
-  if (elapsed < requested) {
-    const TimeDuration delta = requested - elapsed;
-    ACE_DEBUG((LM_DEBUG, "Checking that timer with requested delay of %C falls within epsilon value of %C: requested - elapsed = %C (%C)\n",
-      requested.str().c_str(), epsilon.str().c_str(), delta.str().c_str(), delta < epsilon ? "PASS" : "FAIL"));
-    return delta < epsilon;
-  } else {
-    const TimeDuration delta = elapsed - requested;
-    ACE_DEBUG((LM_DEBUG, "Checking that timer with requested delay of %C falls within epsilon value of %C: elapsed - requested = %C (%C)\n",
-      requested.str().c_str(), epsilon.str().c_str(), delta.str().c_str(), delta < epsilon ? "PASS" : "FAIL"));
-    return delta < epsilon;
+  for (int i = 0; result && i < 5; ++i) {
+    RcHandle<TimingChecker> checker = make_rch<TimingChecker>();
+    const MonotonicTimePoint start = MonotonicTimePoint::now();
+    reactor_task.get_reactor()->schedule_timer(checker.in(), 0, requested.value());
+    const MonotonicTimePoint stop = checker->wait_timeout();
+    const TimeDuration elapsed = stop - start;
+    if (elapsed < requested) {
+      const TimeDuration delta = requested - elapsed;
+      ACE_DEBUG((LM_DEBUG, "Checking that timer with requested delay of %C falls within epsilon value of %C: requested - elapsed = %C (%C)\n",
+        requested.str().c_str(), epsilon.str().c_str(), delta.str().c_str(), delta < epsilon ? "PASS" : "FAIL"));
+      result = result && delta < epsilon;
+    } else {
+      const TimeDuration delta = elapsed - requested;
+      ACE_DEBUG((LM_DEBUG, "Checking that timer with requested delay of %C falls within epsilon value of %C: elapsed - requested = %C (%C)\n",
+        requested.str().c_str(), epsilon.str().c_str(), delta.str().c_str(), delta < epsilon ? "PASS" : "FAIL"));
+      result = result && delta < epsilon;
+    }
   }
+
+  reactor_task.stop();
+
+  return result;
 }
 
 }
