@@ -605,6 +605,13 @@ TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+    // The transport impl may have resource for a pending connection.
+    for (size_t i = 0; i < it->second->impls_.size(); ++i) {
+      RcHandle<TransportImpl> impl = it->second->impls_[i].lock();
+      if (impl) {
+        impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_, true, true);
+      }
+    }
     it->second->reset_client();
     pending_assoc_timer_->cancel_timer(it->second);
     prev_pending_.insert(std::make_pair(it->first, it->second));
@@ -623,6 +630,13 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
     for (CORBA::ULong i = 0; i < length; ++i) {
       PendingMap::iterator iter = pending_.find(repos[i]);
       if (iter != pending_.end()) {
+        // The transport impl may have resource for a pending connection.
+        for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+          RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
+          if (impl) {
+            impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+          }
+        }
         iter->second->reset_client();
         pending_assoc_timer_->cancel_timer(iter->second);
         prev_pending_.insert(std::make_pair(iter->first, iter->second));
