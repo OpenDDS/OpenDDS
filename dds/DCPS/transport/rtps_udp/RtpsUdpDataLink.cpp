@@ -4564,14 +4564,16 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const
       writer = pos->second;
     }
     guard.release();
-    RcHandle<ConstSharedRepoIdSet> addr_guids = writer->get_remote_reader_guids();
-    if (addr_guids) {
-      for (RepoIdSet::const_iterator it = addr_guids->guids_.begin(),
-        limit = addr_guids->guids_.end(); it != limit; ++it) {
-        accumulate_addresses(local, *it, retval);
+    if (writer) {
+      RcHandle<ConstSharedRepoIdSet> addr_guids = writer->get_remote_reader_guids();
+      if (addr_guids) {
+        for (RepoIdSet::const_iterator it = addr_guids->guids_.begin(),
+          limit = addr_guids->guids_.end(); it != limit; ++it) {
+          accumulate_addresses(local, *it, retval);
 
+        }
+        use_peers = false;
       }
-      use_peers = false;
     }
   }
 
