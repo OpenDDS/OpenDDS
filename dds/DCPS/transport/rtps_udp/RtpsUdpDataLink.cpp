@@ -1195,11 +1195,11 @@ RtpsUdpDataLink::RtpsWriter::customize_queue_element_helper(
         ri->second->durable_data_[rtps->sequence()] = rtps;
         ri->second->durable_timestamp_.set_to_now();
         if (Transport_debug_level > 3) {
-          const GuidConverter conv(pub_id), sub_conv(sub);
+          const LogGuid conv(pub_id), sub_conv(sub);
           ACE_DEBUG((LM_DEBUG,
             "(%P|%t) RtpsUdpDataLink::customize_queue_element() - "
             "storing durable data for local %C remote %C seq %q\n",
-            OPENDDS_STRING(conv).c_str(), OPENDDS_STRING(sub_conv).c_str(),
+            conv.c_str(), sub_conv.c_str(),
             rtps->sequence().getValue()));
         }
         return 0;
@@ -1403,9 +1403,9 @@ RtpsUdpDataLink::RtpsWriter::request_ack_i(const DataSampleHeader& header,
       initialize_heartbeat(proxy, meta_submessage);
       gather_directed_heartbeat_i(proxy, meta_submessages, meta_submessage, iter->second);
       if (Transport_debug_level > 3) {
-        const GuidConverter conv(id_), sub_conv(sub);
+        const LogGuid conv(id_), sub_conv(sub);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::request_ack"
-                   " local %C remote %C\n", LogGuid(id_).c_str(), LogGuid(sub).c_str()));
+                   " local %C remote %C\n", conv.c_str(), sub_conv.c_str()));
       }
     }
   }
@@ -3133,7 +3133,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
   meta_submessage.sm_.gap_sm(gap);
 
   if (Transport_debug_level > 5) {
-    const GuidConverter conv(id_);
+    const LogGuid conv(id_);
     SequenceRange sr;
     sr.first = to_opendds_seqnum(gap.gapStart);
     const SequenceNumber srbase = to_opendds_seqnum(gap.gapList.bitmapBase);
@@ -3141,7 +3141,7 @@ RtpsUdpDataLink::RtpsWriter::gather_gaps_i(const ReaderInfo_rch& reader,
     ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::gather_gaps_i "
               "GAP with range [%q, %q] from %C\n",
               sr.first.getValue(), sr.second.getValue(),
-              OPENDDS_STRING(conv).c_str()));
+              conv.c_str()));
   }
 
   meta_submessages.push_back(meta_submessage);
@@ -3276,11 +3276,11 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
 
     if (!reader->durable_data_.empty()) {
       if (Transport_debug_level > 5) {
-        const GuidConverter local_conv(id_), remote_conv(src);
+        const LogGuid local_conv(id_), remote_conv(src);
         ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: "
                    "local %C has durable for remote %C\n",
-                   OPENDDS_STRING(local_conv).c_str(),
-                   OPENDDS_STRING(remote_conv).c_str()));
+                   local_conv.c_str(),
+                   remote_conv.c_str()));
       }
       const SequenceNumber& dd_last = reader->durable_data_.rbegin()->first;
       if (Transport_debug_level > 5) {
@@ -4014,10 +4014,10 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
   }
   const AddrSet addrs = get_addresses(element->publication_id(), element->subscription_id());
   if (addrs.empty()) {
-    const GuidConverter conv(element->subscription_id());
+    const LogGuid conv(element->subscription_id());
     ACE_ERROR((LM_ERROR,
                "(%P|%t) ERROR: RtpsUdpDataLink::durability_resend() - "
-               "no locator for remote %C\n", OPENDDS_STRING(conv).c_str()));
+               "no locator for remote %C\n", conv.c_str()));
     return;
   }
 
@@ -4524,11 +4524,11 @@ RtpsUdpDataLink::RtpsReader::deliver_held_data(const RepoId& src)
 
   for (OPENDDS_VECTOR(ReceivedDataSample)::iterator it = to_deliver.begin(); it != to_deliver.end(); ++it) {
     if (Transport_debug_level > 5) {
-      GuidConverter reader(dst);
+      LogGuid reader(dst);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData -")
                  ACE_TEXT(" deliver sequence: %q to %C\n"),
                  it->header_.sequence_.getValue(),
-                 OPENDDS_STRING(reader).c_str()));
+                 reader.c_str()));
     }
     link->data_received(*it, dst);
   }
