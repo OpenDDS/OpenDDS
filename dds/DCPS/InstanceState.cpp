@@ -150,9 +150,8 @@ bool InstanceState::dispose_was_received(const PublicationId& writer_id)
 bool InstanceState::unregister_was_received(const PublicationId& writer_id)
 {
   if (DCPS_debug_level > 1) {
-    GuidConverter conv(writer_id);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) InstanceState::unregister_was_received on %C\n"),
-      OPENDDS_STRING(conv).c_str()
+      LogGuid(writer_id).c_str()
     ));
   }
 

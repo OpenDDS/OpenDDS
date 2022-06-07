@@ -1032,7 +1032,7 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    "(%P|%t) DCPS_IR_Domain::publish_participant_bit: %C, handle %d.\n",
-                   OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
+                   OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
       }
 
       bitParticipantDataWriter_->write(data, handle);
@@ -1088,7 +1088,7 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DCPS_IR_Domain::publish_topic_bit: %C, handle %d.\n",
-                     OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
+                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
         }
 
         bitTopicDataWriter_->write(data, handle);
@@ -1154,7 +1154,7 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DCPS_IR_Domain::publish_subscription_bit: %C, handle %d.\n",
-                     OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
+                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
         }
 
         bitSubscriptionDataWriter_->write(data,
@@ -1230,7 +1230,7 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DCPS_IR_Domain::publish_publication_bit: %C, handle %d.\n",
-                     OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(OpenDDS::DCPS::bit_key_to_repo_id(data.key))).c_str(), handle));
+                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
         }
 
         DDS::ReturnCode_t status = bitPublicationDataWriter_->write(data, handle);

@@ -158,10 +158,9 @@ namespace {
   ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
-      GuidConverter gc(peer);
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
                  "from %C %C secure RTPS processing failed: %C\n",
-                 DCPS::LogAddr(remote).c_str(), OPENDDS_STRING(gc).c_str(), msg));
+                 DCPS::LogAddr(remote).c_str(), LogGuid(peer).c_str(), msg));
     }
     stop = true;
     return 0;
@@ -268,7 +267,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
       if (security_debug.encdec_warn) {
         ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes: ")
                    ACE_TEXT("decode_rtps_message no remote participant crypto handle for %C, dropping\n"),
-                   OPENDDS_STRING(GuidConverter(peer)).c_str()));
+                   LogGuid(peer).c_str()));
       }
       stop = true;
       return ret;
@@ -460,10 +459,9 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
       if (!readers_withheld_.count(reader) &&
           (directedWriteReaders.empty() || directedWriteReaders.find(reader) != directedWriteReaders.end())) {
         if (Transport_debug_level > 5) {
-          GuidConverter reader_conv(reader);
           ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) RtpsUdpReceiveStrategy[%@]::deliver_sample_i - ")
             ACE_TEXT("calling DataLink::data_received for seq: %q to reader %C\n"),
-            this, sample.header_.sequence_.getValue(), OPENDDS_STRING(reader_conv).c_str()));
+            this, sample.header_.sequence_.getValue(), LogGuid(reader).c_str()));
         }
         link_->data_received(sample, reader);
       }
@@ -473,7 +471,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
         bool first = true;
         RepoIdSet::iterator iter = readers_selected_.begin();
         while (iter != readers_selected_.end()) {
-          included_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter));
+          included_ids += (first ? "" : "\n") + LogGuid(*iter).conv_;
           first = false;
           ++iter;
         }
@@ -481,7 +479,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
         first = true;
         RepoIdSet::iterator iter2 = this->readers_withheld_.begin();
         while (iter2 != readers_withheld_.end()) {
-          excluded_ids += (first ? "" : "\n") + OPENDDS_STRING(GuidConverter(*iter2));
+          excluded_ids += (first ? "" : "\n") + LogGuid(*iter2).conv_;
           first = false;
           ++iter2;
         }
@@ -654,7 +652,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
     if (security_debug.encdec_warn) {
       ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
                  ACE_TEXT("preprocess_secure_submsg failed remote %C RPCH %d, [%d.%d]: %C\n"),
-                 OPENDDS_STRING(GuidConverter(peer)).c_str(), peer_pch, ex.code, ex.minor_code, ex.message.in()));
+                 LogGuid(peer).c_str(), peer_pch, ex.code, ex.minor_code, ex.message.in()));
     }
     return;
   }
