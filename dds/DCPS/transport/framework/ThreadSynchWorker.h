@@ -20,7 +20,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Dcps_Export ThreadSynchWorker
-  : public RcObject {
+  : public virtual RcObject {
 public:
 
   virtual ~ThreadSynchWorker();

@@ -32,20 +32,49 @@ typedef OPENDDS_SET_CMP(GUID_t, GUID_tKeyLessThan) GuidSet;
 
 struct AddressCacheEntry : public virtual RcObject {
 
-  AddressCacheEntry() : addrs_(), expires_(MonotonicTimePoint::max_value) {}
-  AddressCacheEntry(const AddrSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires) {}
+  AddressCacheEntry() : addrs_(), expires_(MonotonicTimePoint::max_value)
+#if defined ACE_HAS_CPP11
+    , addrs_hash_(0)
+#endif
+  {}
+
+  AddressCacheEntry(const AddrSet& addrs, const MonotonicTimePoint& expires) : addrs_(addrs), expires_(expires)
+#if defined ACE_HAS_CPP11
+  , addrs_hash_(calculate_hash(addrs_))
+#endif
+  {}
 
   AddrSet addrs_;
   MonotonicTimePoint expires_;
+#if defined ACE_HAS_CPP11
+  size_t addrs_hash_;
+#endif
 };
 
 struct AddressCacheEntryProxy {
   AddressCacheEntryProxy(RcHandle<AddressCacheEntry> rch) : entry_(rch) {}
 
-  bool operator<(const AddressCacheEntryProxy& rhs) const {
-    return (rhs.entry_ && (!entry_ || (entry_->addrs_ < rhs.entry_->addrs_)));
+  bool operator==(const AddressCacheEntryProxy& rhs) const {
+#if defined ACE_HAS_CPP11
+    return entry_ && rhs.entry_ && entry_->addrs_hash_ == rhs.entry_->addrs_hash_ && entry_->addrs_ == rhs.entry_->addrs_;
+#else
+    return entry_ && rhs.entry_ && entry_->addrs_ == rhs.entry_->addrs_;
+#endif
   }
-  const AddrSet& addrs() { return entry_->addrs_; }
+
+  bool operator<(const AddressCacheEntryProxy& rhs) const {
+#if defined ACE_HAS_CPP11
+    return (rhs.entry_ && (!entry_ || (entry_->addrs_hash_ < rhs.entry_->addrs_hash_ || (entry_->addrs_hash_ == rhs.entry_->addrs_hash_ && entry_->addrs_ < rhs.entry_->addrs_))));
+#else
+    return (rhs.entry_ && (!entry_ || (entry_->addrs_ < rhs.entry_->addrs_)));
+#endif
+  }
+
+  const AddrSet& addrs() const { return entry_->addrs_; }
+
+#if defined ACE_HAS_CPP11
+  size_t hash() const noexcept { return entry_ ? entry_->addrs_hash_ : 0; }
+#endif
 
 private:
   RcHandle<AddressCacheEntry> entry_;
@@ -69,10 +98,23 @@ public:
   virtual ~AddressCache() {}
 
   struct ScopedAccess {
-    ScopedAccess(AddressCache& cache, const Key& key)
+    ScopedAccess(AddressCache& cache)
       : guard_(cache.mutex_)
       , rch_()
       , is_new_(false)
+#if defined ACE_HAS_CPP11
+      , non_const_touch_(false)
+#endif
+    {
+    }
+
+    ScopedAccess(AddressCache& cache, const Key& key, bool block = true)
+      : guard_(cache.mutex_, block)
+      , rch_()
+      , is_new_(false)
+#if defined ACE_HAS_CPP11
+      , non_const_touch_(false)
+#endif
     {
       const typename MapType::iterator pos = cache.map_.find(key);
       if (pos == cache.map_.end()) {
@@ -96,8 +138,18 @@ public:
       }
     }
 
+    ~ScopedAccess()
+    {
+#if defined ACE_HAS_CPP11
+      recalculate_hash();
+#endif
+    }
+
     inline AddressCacheEntry& value() {
       OPENDDS_ASSERT(rch_);
+#if defined ACE_HAS_CPP11
+      non_const_touch_ = true;
+#endif
       return *rch_;
     }
 
@@ -106,9 +158,21 @@ public:
       return *rch_;
     }
 
+#if defined ACE_HAS_CPP11
+    inline void recalculate_hash() {
+      if (non_const_touch_) {
+        rch_->addrs_hash_ = calculate_hash(rch_->addrs_);
+        non_const_touch_ = false;
+      }
+    }
+#endif
+
     ACE_Guard<ACE_Thread_Mutex> guard_;
     RcHandle<AddressCacheEntry> rch_;
     bool is_new_;
+#if defined ACE_HAS_CPP11
+    bool non_const_touch_;
+#endif
 
   private:
     ScopedAccess();

@@ -367,7 +367,7 @@ struct DiscoveredParticipant {
 #endif
 };
 
-class Sedp : public DCPS::RcEventHandler {
+class Sedp : public virtual DCPS::RcEventHandler {
 private:
   struct DiscoveredSubscription : PoolAllocationBase {
     DiscoveredSubscription()

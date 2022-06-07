@@ -16,7 +16,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class PeriodicTask : public RcEventHandler {
+class PeriodicTask : public virtual RcEventHandler {
 public:
   explicit PeriodicTask(RcHandle<ReactorInterceptor> interceptor)
     : user_enabled_(false)

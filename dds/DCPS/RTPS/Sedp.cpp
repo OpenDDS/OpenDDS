@@ -7551,7 +7551,7 @@ void Sedp::WriterRemoveAssociations::execute()
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Sedp::WriterRemoveAssociations::execute - ")
-                 ACE_TEXT("removing writer %C association for writer %C\n"), LogGuid(record_->writer_id()).c_str(),
+                 ACE_TEXT("removing writer %C association for reader %C\n"), LogGuid(record_->writer_id()).c_str(),
                  LogGuid(record_->reader_id()).c_str()));
     }
     DCPS::ReaderIdSeq reader_seq(1);

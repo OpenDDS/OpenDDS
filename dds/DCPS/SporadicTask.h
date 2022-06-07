@@ -18,7 +18,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class SporadicTask : public RcEventHandler {
+class SporadicTask : public virtual RcEventHandler {
 public:
   SporadicTask(const TimeSource& time_source,
                RcHandle<ReactorInterceptor> interceptor)

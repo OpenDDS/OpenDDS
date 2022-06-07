@@ -22,7 +22,7 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
   bool result = false;
   switch (ms.sm_._d()) {
     case RTPS::HEARTBEAT: {
-      const std::pair<RepoId, RepoId> key = std::make_pair(ms.src_guid_, ms.dst_guid_);
+      const KeyType key(ms.src_guid_, ms.dst_guid_);
       const MapType::iterator pos = heartbeat_map_.find(key);
       if (pos == heartbeat_map_.end()) {
         heartbeat_map_.insert(std::make_pair(key, ms));
@@ -36,7 +36,7 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
       break;
     }
     case RTPS::ACKNACK: {
-      const std::pair<RepoId, RepoId> key = std::make_pair(ms.src_guid_, ms.dst_guid_);
+      const KeyType key(ms.src_guid_, ms.dst_guid_);
       const MapType::iterator pos = acknack_map_.find(key);
       if (pos == acknack_map_.end()) {
         acknack_map_.insert(std::make_pair(key, ms));
@@ -132,14 +132,14 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
 void RtpsSendQueue::purge_remote(const RepoId& id)
 {
   for (MapType::iterator it = heartbeat_map_.begin(), limit = heartbeat_map_.end(); it != limit;) {
-    if (it->first.second == id) {
+    if (it->first.dst_ == id) {
       heartbeat_map_.erase(it++);
     } else {
       ++it;
     }
   }
   for (MapType::iterator it = acknack_map_.begin(), limit = acknack_map_.end(); it != limit;) {
-    if (it->first.second == id) {
+    if (it->first.dst_ == id) {
       acknack_map_.erase(it++);
     } else {
       ++it;
@@ -150,14 +150,14 @@ void RtpsSendQueue::purge_remote(const RepoId& id)
 void RtpsSendQueue::purge_local(const RepoId& id)
 {
   for (MapType::iterator it = heartbeat_map_.begin(), limit = heartbeat_map_.end(); it != limit;) {
-    if (it->first.first == id) {
+    if (it->first.src_ == id) {
       heartbeat_map_.erase(it++);
     } else {
       ++it;
     }
   }
   for (MapType::iterator it = acknack_map_.begin(), limit = acknack_map_.end(); it != limit;) {
-    if (it->first.first == id) {
+    if (it->first.src_ == id) {
       acknack_map_.erase(it++);
     } else {
       ++it;

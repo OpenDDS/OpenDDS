@@ -8,6 +8,7 @@
 
 #include "Rtps_Udp_Export.h"
 #include "MetaSubmessage.h"
+#include "RoutedGuidPair.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -52,8 +53,13 @@ public:
   bool enabled() const;
 
 private:
-  typedef std::pair<RepoId, RepoId> KeyType;
+
+  typedef RoutedGuidPair KeyType;
+#if defined ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(KeyType, MetaSubmessage) MapType;
+#else
   typedef OPENDDS_MAP(KeyType, MetaSubmessage) MapType;
+#endif
   MapType heartbeat_map_;
   MapType acknack_map_;
   MetaSubmessageVec queue_;

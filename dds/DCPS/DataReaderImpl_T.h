@@ -57,7 +57,7 @@ namespace OpenDDS {
     typedef OPENDDS_MAP(DDS::InstanceHandle_t, typename InstanceMap::iterator) ReverseInstanceMap;
 
     class SharedInstanceMap
-      : public RcObject
+      : public virtual RcObject
       , public InstanceMap
     {
     };

@@ -35,9 +35,9 @@ typedef std::vector<FoundationType> FoundationList;
 
 class AgentImpl
   : public virtual Agent
-  , public virtual DCPS::ReactorInterceptor
   , public virtual DCPS::ShutdownListener
   , public virtual DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>
+  , public DCPS::ReactorInterceptor
 {
 public:
   AgentImpl();

@@ -128,7 +128,7 @@ public:
 
 class StaticParticipant;
 class StaticEndpointManager
-  : public RcEventHandler
+  : public virtual RcEventHandler
   , public DiscoveryListener
 {
 protected:
@@ -521,7 +521,7 @@ private:
   OrigSeqNumberMap orig_seq_numbers_;
 };
 
-class StaticParticipant : public RcObject {
+class StaticParticipant : public virtual RcObject {
 public:
   StaticParticipant(RepoId& guid,
                     const DDS::DomainParticipantQos& qos,

@@ -334,7 +334,7 @@ private:
   typedef OPENDDS_MAP(FragmentNumberValue, RTPS::FragmentNumberSet) RequestedFragMap;
   typedef OPENDDS_MAP(SequenceNumber, RequestedFragMap) RequestedFragSeqMap;
 
-  struct ReaderInfo : public RcObject {
+  struct ReaderInfo : public virtual RcObject {
     const RepoId id_;
     const MonotonicTime_t participant_discovered_at_;
     CORBA::Long acknack_recvd_count_, nackfrag_recvd_count_;
@@ -415,7 +415,7 @@ private:
     }
   };
 
-  class RtpsWriter : public RcObject {
+  class RtpsWriter : public virtual RcObject {
   private:
     ReaderInfoMap remote_readers_;
     RcHandle<ConstSharedRepoIdSet> remote_reader_guids_;
@@ -557,7 +557,7 @@ private:
     void gather_heartbeats_i(MetaSubmessageVec& meta_submessages);
     void gather_heartbeats(RcHandle<ConstSharedRepoIdSet> additional_guids,
                            MetaSubmessageVec& meta_submessages);
-    void update_required_acknack_count(const RepoId& id, CORBA::Long previous, CORBA::Long current);
+    void update_required_acknack_count(const RepoId& id, CORBA::Long current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
   };
@@ -606,7 +606,7 @@ private:
 #endif
   typedef OPENDDS_SET(WriterInfo_rch) WriterInfoSet;
 
-  class RtpsReader : public RcObject {
+  class RtpsReader : public virtual RcObject {
   public:
     RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id)
       : link_(link)
@@ -676,12 +676,12 @@ private:
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
-#ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, MetaSubmessageIterVec) DestMetaSubmessageMap;
-#else
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
-#endif
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+#else
   typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+#endif
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
   typedef OPENDDS_MAP_CMP(EntityId_t, CountSet, EntityId_tKeyLessThan) IdCountSet;
@@ -714,7 +714,7 @@ private:
     CountKeeper& counts);
 
   void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
-  void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long previous, CORBA::Long current);
+  void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long current);
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
   ThreadedRtpsSendQueue sq_;
@@ -934,6 +934,21 @@ private:
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#if defined ACE_HAS_CPP11
+namespace std
+{
+
+  template<> struct OpenDDS_Rtps_Udp_Export hash<OpenDDS::DCPS::AddressCacheEntryProxy>
+  {
+    std::size_t operator()(const OpenDDS::DCPS::AddressCacheEntryProxy& val) const noexcept
+    {
+      return val.hash();
+    }
+  };
+
+} // namespace std
+#endif
 
 #ifdef __ACE_INLINE__
 # include "RtpsUdpDataLink.inl"

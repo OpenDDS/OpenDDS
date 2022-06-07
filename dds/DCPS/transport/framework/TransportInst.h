@@ -58,7 +58,7 @@ namespace DCPS {
  * The TransportInst object is supplied to the
  * TransportImpl::configure() method.
  */
-class OpenDDS_Dcps_Export TransportInst : public RcObject {
+class OpenDDS_Dcps_Export TransportInst : public virtual RcObject {
 public:
 
   const OPENDDS_STRING& name() const { return name_; }

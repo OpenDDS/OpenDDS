@@ -39,7 +39,7 @@ namespace Federator {
  * registered with a reactor and should be initialized with the
  * ior of the  service to be multicasted.
  */
-class OpenDDS_Federator_Export InfoRepoMulticastResponder : public ACE_Event_Handler {
+class OpenDDS_Federator_Export InfoRepoMulticastResponder : public virtual ACE_Event_Handler {
 public:
   InfoRepoMulticastResponder();
 
