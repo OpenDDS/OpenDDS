@@ -85,8 +85,10 @@ def main(serve_root, fake_latest_version):
     chdir(serve_root)
     port = 8000
     socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", port), http.server.SimpleHTTPRequestHandler) as httpd:
-        print("serving at port", port)
+    with socketserver.TCPServer(('', port), http.server.SimpleHTTPRequestHandler) as httpd:
+        print('URL is http://localhost:{}\n'
+          'Pass "--sftp-base-dir={}" to the release script'.format(
+          port, str(serve_root.resolve())))
         httpd.serve_forever()
 
 
