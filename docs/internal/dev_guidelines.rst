@@ -494,7 +494,7 @@ Message Content
   We shouldn't go out of our way to replace it in existing logging points, but it should be avoided it in new ones.
 
   - ``ACE_TEXT``'s purpose is to wrap strings and characters in ``L`` on builds where ``uses_wchar=1``, so they become the wide versions.
-  - While not doing it might result in a performance hit for character encoding conversion at runtime, the builds where this happens are rare, so the it's outweighed by the added visual noise to the code and the possibility of bugs introduced by improper use of ``ACE_TEXT``.
+  - While not doing it might result in a performance hit for character encoding conversion at runtime, the builds where this happens are rare, so it's outweighed by the added visual noise to the code and the possibility of bugs introduced by improper use of ``ACE_TEXT``.
 
 - Avoid new usage of ``ACE_ERROR_RETURN`` in order to not hide the return statement within a macro.
 
@@ -504,7 +504,7 @@ Examples
 .. code-block:: C++
 
   if (log_level >= LogLevel::Error) {
-    ACE_ERROR((LM_DEBUG, "(%P|%t) ERROR: example_function: Hello, World!\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: example_function: Hello, World!\n"));
   }
 
   if (log_level >= LogLevel::Warning) {
