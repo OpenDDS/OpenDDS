@@ -14,7 +14,7 @@ use JSON::PP;
 use Storable qw/dclone/;
 
 use LWP::UserAgent;
-use Net::FTP::File;
+use Net::SFTP::Foreign;
 use Time::Piece;
 use Pithub;
 
@@ -41,6 +41,9 @@ my $ace_root = "ACE_wrappers";
 my $git_name_prefix = "DDS-";
 my $default_post_release_metadata = "dev";
 my $workspace_info_filename = "info.json";
+my $default_sftp_base_dir = "";
+my $sftp_downloads_path = "downloads/OpenDDS";
+my $sftp_previous_releases_path = 'previous-releases/';
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -158,7 +161,7 @@ sub help {
     "  --branch=NAME          Valid git branch for cloning (default: ${default_branch})\n" .
     "  --github-user=NAME     User or organization name for github updates\n" .
     "                         (default: ${default_github_user})\n" .
-    "  --download-url=URL     URL to verify FTP uploads\n" .
+    "  --download-url=URL     URL to verify SFTP uploads\n" .
     "                         (default: ${default_download_url})\n" .
     "  --mock                 Enable mock release-specific checks and fake the\n" .
     "                         Doxygen and Devguide steps if they're not being\n" .
@@ -180,16 +183,21 @@ sub help {
     "  --skip-doxygen         Skip getting ACE/TAO and generating and including the\n" .
     "                         doxygen docs\n" .
     "  --skip-website         Skip updating the website\n" .
-    "  --skip-ftp             Skip the FTP upload\n" .
-    "  --ignore-github-token  Don't require GITHUB_TOKEN\n" .
-    "  --ftp-active           Use an active FTP connection. (default is passive)\n" .
+    "  --skip-sftp            Skip the SFTP upload\n" .
+    "  --sftp-base-dir        Change to this directory before file operations.\n".
+    "                         (default: \"$default_sftp_base_dir\")\n" .
+    "  --skip-github [1|0]    Skip anything having to do with GitHub\n" .
+    "                         GitHub is used to determine if the release is the\n" .
+    "                         highest version and if --skip-github 1 is passed it will\n" .
+    "                         be assumed it's always the highest version. Passing 0\n" .
+    "                         forces it to consider this to be a update to an earlier\n" .
+    "                         micro series.\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
     "                         GitHub.\n" .
-    "  FTP_USERNAME           FTP Username\n" .
-    "  FTP_PASSWD             FTP Password\n" .
-    "  FTP_HOST               FTP Server Address\n" .
+    "  SFTP_USERNAME          SFTP Username\n" .
+    "  SFTP_HOST              SFTP Server Address\n" .
     "\n" .
     "Step Expressions\n" .
     "  The STEPS argument accepts a specific notation for what steps to run. They\n" .
@@ -339,7 +347,7 @@ sub create_dummy_release_file {
 sub new_pithub {
   my $settings = shift();
 
-  return undef if ($settings->{ignore_github_token});
+  return undef if ($settings->{skip_github});
 
   if (!defined($settings->{github_token})) {
     die("GITHUB_TOKEN must be defined");
@@ -408,6 +416,7 @@ sub write_workspace_info {
     version => $settings->{version},
     next_version => $settings->{next_version},
     is_highest_version => $settings->{is_highest_version},
+    retcon => $settings->{retcon},
     release_occurred => $settings->{release_occurred},
   });
 }
@@ -444,11 +453,15 @@ sub check_workspace {
     $invalid |= compare_workspace_info($settings, $info, 'micro');
     $invalid |= compare_workspace_info($settings, $info, 'version');
     $invalid |= compare_workspace_info($settings, $info, 'next_version');
+    $invalid |= compare_workspace_info($settings, $info, 'retcon');
     if ($invalid) {
       die("Inconsistent with existing workspace, see above for details");
     }
 
     $settings->{is_highest_version} = $info->{is_highest_version};
+    if ($info->{retcon} && $info->{is_highest_version}) {
+      die("retcon and is_highest_version can't both be true");
+    }
     if ($info->{release_occurred}) {
       print("Release occurred flag set, assuming $info->{version} was released!\n");
     }
@@ -459,6 +472,9 @@ sub check_workspace {
     $settings->{is_highest_version} = scalar(@{$previous_releases}) == 0 ||
       version_greater_equal($settings->{parsed_version},
         $previous_releases->[0]->{version});
+    if ($settings->{retcon}) {
+      $settings->{is_highest_version} = 0;
+    }
     $settings->{release_occurred} = 0;
     write_workspace_info($settings);
   }
@@ -1991,7 +2007,7 @@ sub get_github_release_files {
   return @files;
 }
 
-sub get_ftp_release_files {
+sub get_sftp_release_files {
   my $settings = shift();
 
   my @files = get_github_release_files($settings);
@@ -2007,23 +2023,21 @@ sub get_ftp_release_files {
   return @files;
 }
 
-my $PRIOR_RELEASE_PATH = 'previous-releases/';
-
-sub verify_ftp_upload {
+sub verify_sftp_upload {
   my $settings = shift();
 
   my $url = "$settings->{download_url}/";
   if ($url !~ /^https?:\/\//) {
     $url = "http://$url";
   }
-  $url .= $PRIOR_RELEASE_PATH if (!$settings->{is_highest_version});
+  $url .= $sftp_previous_releases_path if (!$settings->{is_highest_version});
   my $content;
   if (!download($url, content_ref => \$content)) {
     print "Could not get current release files from $url";
     return 0;
   }
 
-  foreach my $file (get_ftp_release_files($settings)) {
+  foreach my $file (get_sftp_release_files($settings)) {
     if ($content !~ /$file/) {
       print "$file not found in $url\n";
       return 0;
@@ -2032,30 +2046,24 @@ sub verify_ftp_upload {
   return 1;
 }
 
-sub message_ftp_upload {
-  return "Release needs to be uploaded to ftp site";
+sub message_sftp_upload {
+  return "Release needs to be uploaded to SFTP site";
 }
 
-sub remedy_ftp_upload {
+sub remedy_sftp_upload {
   my $settings = shift();
-  my $FTP_DIR = "downloads/OpenDDS";
 
-  # login to ftp server and setup binary file transfers
-  my $ftp = Net::FTP->new(
-    $settings->{ftp_host},
-    Debug => 0,
-    Port => $settings->{ftp_port},
-    Passive => !$settings->{ftp_active},
-  ) or die "Cannot connect to $settings->{ftp_host}: $@";
-  $ftp->login($settings->{ftp_user}, $settings->{ftp_password})
-    or die "Cannot login ", $ftp->message();
-  $ftp->cwd($FTP_DIR)
-    or die "Cannot change dir to $FTP_DIR ", $ftp->message();
-  my @current_release_files = $ftp->ls()
-    or die "Cannot ls() $FTP_DIR ", $ftp->message();
-  $ftp->binary();
+  my $sftp = Net::SFTP::Foreign->new(
+    host => $settings->{sftp_host},
+    user => $settings->{sftp_user},
+    autodie => 1,
+  );
 
-  my @new_release_files = get_ftp_release_files($settings);
+  $sftp->setcwd($settings->{sftp_base_dir});
+  $sftp->setcwd($sftp_downloads_path);
+
+  my @current_release_files = map {$_->{filename}} @{$sftp->ls()};
+  my @new_release_files = get_sftp_release_files($settings);
 
   if ($settings->{is_highest_version}) {
     # Identify Old Versioned Release Files Using the New Ones
@@ -2082,14 +2090,13 @@ sub remedy_ftp_upload {
       foreach my $file_info (@release_file_re) {
         if ($file =~ $file_info->{re}) {
           if ($file_info->{versioned}) {
-            my $new_path = $PRIOR_RELEASE_PATH . $file;
+            my $new_path = $sftp_previous_releases_path . $file;
             print "moving $file to $new_path\n";
-            $ftp->rename($file, $new_path)
-              or die "Could not rename $file to $new_path: " . $ftp->message();
+            $sftp->rename($file, $new_path);
           }
           else {
             print "deleting $file\n";
-            $ftp->delete($file) or die "Could not delete $file: " . $ftp->message();
+            $sftp->remove($file);
           }
           last;
         }
@@ -2097,19 +2104,17 @@ sub remedy_ftp_upload {
     }
   }
   else {
-    print "Not highest version release, cd-ing to $PRIOR_RELEASE_PATH\n";
-    $ftp->cwd($PRIOR_RELEASE_PATH)
-      or die "Cannot change dir to $PRIOR_RELEASE_PATH ", $ftp->message();
+    print "Not highest version release, cd-ing to $sftp_previous_releases_path\n";
+    $sftp->setcwd($sftp_previous_releases_path);
   }
 
   # upload new release files
   foreach my $file (@new_release_files) {
     print "uploading $file\n";
     my $local_file = join("/", $settings->{workspace}, $file);
-    $ftp->put($local_file, $file) or die "Failed to upload $file: " . $ftp->message();
+    $sftp->put($local_file, $file);
   }
 
-  $ftp->quit();
   return 1;
 }
 
@@ -2445,10 +2450,10 @@ my $metadata = $default_post_release_metadata;
 my $skip_devguide = 0;
 my $skip_doxygen = 0;
 my $skip_website = 0;
-my $skip_ftp = 0;
-my $ignore_github_token = 0;
-my $ftp_active = 0;
-my $ftp_port = 0;
+my $skip_sftp = 0;
+my $skip_github = undef;
+my $retcon = 0;
+my $sftp_base_dir = $default_sftp_base_dir;
 
 GetOptions(
   'help' => \$print_help,
@@ -2469,10 +2474,9 @@ GetOptions(
   'skip-devguide' => \$skip_devguide,
   'skip-doxygen' => \$skip_doxygen ,
   'skip-website' => \$skip_website ,
-  'skip-ftp' => \$skip_ftp,
-  'ftp-active' => \$ftp_active,
-  'ftp-port=s' => \$ftp_port,
-  'ignore-github-token' => \$ignore_github_token,
+  'skip-sftp' => \$skip_sftp,
+  'sftp-base-dir=s' => \$sftp_base_dir,
+  'skip-github=i' => \$skip_github,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2486,6 +2490,11 @@ if ($print_list_all) {
 }
 
 $mock = 1 if ($mock_with_doxygen);
+
+if (defined($skip_github)) {
+  $retcon = $skip_github ? 0 : 1;
+  $skip_github = 1;
+}
 
 my $workspace = "";
 my $parsed_version;
@@ -2554,9 +2563,9 @@ else {
     arg_error("Invalid version: $version");
   }
 
-  if (!$skip_ftp) {
-    die("FTP_USERNAME, FTP_PASSWD, FTP_HOST need to be defined")
-      if (!(defined($ENV{FTP_USERNAME}) && defined($ENV{FTP_PASSWD}) && defined($ENV{FTP_HOST})));
+  if (!$skip_sftp) {
+    die("SFTP_USERNAME, SFTP_HOST need to be defined")
+      if (!(defined($ENV{SFTP_USERNAME}) && defined($ENV{SFTP_HOST})));
   }
 }
 
@@ -2594,9 +2603,9 @@ my %global_settings = (
     git_url => "git\@github.com:${github_user}/${repo_name}.git",
     github_repo => $repo_name,
     github_token => $ENV{GITHUB_TOKEN},
-    ftp_user => $ENV{FTP_USERNAME},
-    ftp_password => $ENV{FTP_PASSWD},
-    ftp_host => $ENV{FTP_HOST},
+    sftp_user => $ENV{SFTP_USERNAME},
+    sftp_host => $ENV{SFTP_HOST},
+    sftp_base_dir => $sftp_base_dir,
     changelog => "docs/history/ChangeLog-$version",
     modified => {
         "NEWS.md" => 1,
@@ -2605,7 +2614,7 @@ my %global_settings = (
         "dds/Version.h" => 1,
         "docs/history/ChangeLog-$version" => 1,
     },
-    skip_ftp => $skip_ftp,
+    skip_sftp => $skip_sftp,
     skip_devguide => $skip_devguide,
     skip_doxygen => $skip_doxygen,
     skip_website => $skip_website,
@@ -2613,11 +2622,10 @@ my %global_settings = (
     workspace_info_file_path => "$workspace/$workspace_info_filename",
     download_url => $download_url,
     ace_root => "$workspace/$ace_root",
-    ftp_active => $ftp_active,
-    ftp_port => $ftp_port,
     mock => $mock,
     dummy_doxygen => $mock && !$mock_with_doxygen,
-    ignore_github_token => $ignore_github_token,
+    skip_github => $skip_github,
+    retcon => $retcon,
 );
 
 if (!$ignore_args) {
@@ -2626,11 +2634,11 @@ if (!$ignore_args) {
   check_workspace(\%global_settings);
 
   if ($mock) {
-    if ($github_user eq $default_github_user) {
+    if (!$skip_github && $github_user eq $default_github_user) {
       die("--github-user can't be left to default when using --mock!");
     }
 
-    if (!$skip_ftp && $download_url eq $default_download_url) {
+    if (!$skip_sftp && $download_url eq $default_download_url) {
       die("--download-url can't be left to default when using --mock!");
     }
   }
@@ -2663,11 +2671,6 @@ my @release_steps = (
     message => sub{message_update_prf_file(@_)},
     remedy  => sub{remedy_update_prf_file(@_)},
     can_force => 1,
-  },
-  {
-    name    => 'Verify Remote',
-    verify  => sub{verify_git_remote(@_)},
-    message => sub{message_git_remote(@_)},
   },
   {
     name    => 'Create ChangeLog File',
@@ -2711,20 +2714,27 @@ my @release_steps = (
       return verify_git_status_clean($settings, {%{$step_options}, strict => 1});
     },
     message => sub{message_commit_git_changes(@_)},
-    remedy  => sub{remedy_git_status_clean(@_)}
+    remedy  => sub{remedy_git_status_clean(@_)},
   },
   {
     name    => 'Create Tag',
     verify  => sub{verify_git_tag(@_)},
     message => sub{message_git_tag(@_)},
-    remedy  => sub{remedy_git_tag(@_)}
+    remedy  => sub{remedy_git_tag(@_)},
+  },
+  {
+    name    => 'Verify Remote',
+    verify  => sub{verify_git_remote(@_)},
+    message => sub{message_git_remote(@_)},
+    skip => $global_settings{skip_github},
   },
   {
     name    => 'Push Release Changes',
     prereqs => ['Verify Remote'],
     verify  => sub{verify_git_changes_pushed(@_)},
     message => sub{message_git_changes_pushed(@_)},
-    remedy  => sub{remedy_git_changes_pushed(@_)}
+    remedy  => sub{remedy_git_changes_pushed(@_)},
+    skip => $global_settings{skip_github},
   },
   {
     name    => 'Create Release Branch',
@@ -2739,32 +2749,32 @@ my @release_steps = (
     verify  => sub{verify_push_release_branch(@_)},
     message => sub{message_push_release_branch(@_)},
     remedy  => sub{remedy_push_release_branch(@_)},
-    skip    => !$global_settings{release_branch},
+    skip => !$global_settings{release_branch} || $global_settings{skip_github},
   },
   {
     name    => 'Clone Tag',
     prereqs => ['Verify Remote'],
     verify  => sub{verify_clone_tag(@_)},
     message => sub{message_clone_tag(@_)},
-    remedy  => sub{remedy_clone_tag(@_)}
+    remedy  => sub{remedy_clone_tag(@_)},
   },
   {
     name    => 'Move ChangeLog File',
     verify  => sub{verify_move_changelog(@_)},
     message => sub{message_move_changelog(@_)},
-    remedy  => sub{remedy_move_changelog(@_)}
+    remedy  => sub{remedy_move_changelog(@_)},
   },
   {
     name    => 'Create Unix Release Archive',
     verify  => sub{verify_tgz_source(@_)},
     message => sub{message_tgz_source(@_)},
-    remedy  => sub{remedy_tgz_source(@_)}
+    remedy  => sub{remedy_tgz_source(@_)},
   },
   {
     name    => 'Create Windows Release Archive',
     verify  => sub{verify_zip_source(@_)},
     message => sub{message_zip_source(@_)},
-    remedy  => sub{remedy_zip_source(@_)}
+    remedy  => sub{remedy_zip_source(@_)},
   },
   {
     name    => 'Create MD5 Checksum File',
@@ -2833,24 +2843,25 @@ my @release_steps = (
     skip    => $global_settings{skip_devguide},
   },
   {
-    name    => 'Upload to FTP Site',
-    verify  => sub{verify_ftp_upload(@_)},
-    message => sub{message_ftp_upload(@_)},
-    remedy  => sub{remedy_ftp_upload(@_)},
-    skip    => $global_settings{skip_ftp},
+    name    => 'Upload to SFTP Site',
+    verify  => sub{verify_sftp_upload(@_)},
+    message => sub{message_sftp_upload(@_)},
+    remedy  => sub{remedy_sftp_upload(@_)},
+    skip    => $global_settings{skip_sftp},
   },
   {
     name    => 'Upload to GitHub',
     verify  => sub{verify_github_upload(@_)},
     message => sub{message_github_upload(@_)},
     remedy  => sub{remedy_github_upload(@_)},
+    skip => $global_settings{skip_github},
   },
   {
     name    => 'Release Website',
     verify  => sub{verify_website_release(@_)},
     message => sub{message_website_release(@_)},
     remedy  => sub{remedy_website_release(@_)},
-    skip    => $global_settings{skip_website},
+    skip    => $global_settings{skip_website} || $global_settings{skip_github},
   },
   {
     name => 'Record that the Release Occurred',
@@ -2919,6 +2930,7 @@ my @release_steps = (
     message => sub{message_git_changes_pushed(@_)},
     remedy  => sub{remedy_git_changes_pushed(@_, 0)},
     post_release => 1,
+    skip => $global_settings{skip_github},
   },
   {
     name    => 'Email DDS-Release-Announce list',
