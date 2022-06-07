@@ -75,7 +75,7 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
     Messenger::Message message;
     DDS::SampleInfo si;
 
-    if (message_dr->take_next_sample(message, si) == DDS::RETCODE_OK) {
+    while (message_dr->take_next_sample(message, si) == DDS::RETCODE_OK) {
       if (si.valid_data) {
 
         stringstream ss;
