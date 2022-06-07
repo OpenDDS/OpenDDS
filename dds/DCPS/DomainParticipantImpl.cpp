@@ -605,11 +605,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
     TopicImpl* the_topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
     if (!the_topic_servant) {
-      if (DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                   ACE_TEXT("%p\n"),
-                   ACE_TEXT("failed to obtain TopicImpl.")));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: %p\n"
+                   "failed to obtain TopicImpl."));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -620,22 +618,20 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
       dynamic_cast<DomainParticipantImpl*>(dp.in());
 
     if (the_dp_servant != this) {
-      if (DCPS_debug_level >= 1) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-                   ACE_TEXT("will return PRECONDITION_NOT_MET because this is not the ")
-                   ACE_TEXT("participant that owns this topic\n")));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: "
+                   "will return PRECONDITION_NOT_MET because this is not the "
+                   "participant that owns this topic\n"));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
     if (!remove_objref && the_topic_servant->has_entity_refs()) {
       // If entity_refs is true (nonzero), then some reader or writer is using
       // this topic and the spec requires delete_topic() to fail with the error:
-      if (DCPS_debug_level >= 1) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-                   ACE_TEXT("will return PRECONDITION_NOT_MET because there are still ")
-                   ACE_TEXT("outstanding references to this topic\n")));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: "
+                   "will return PRECONDITION_NOT_MET because there are still "
+                   "outstanding references to this topic\n"));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -658,9 +654,8 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
         }
       }
       if (entry == 0) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, not found\n")));
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: not found\n"));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -676,11 +671,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
           the_dp_servant->get_domain_id(), the_dp_servant->get_id(), topicId);
 
         if (status != REMOVED) {
-          if (DCPS_debug_level > 0) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                       ACE_TEXT("remove_topic failed with return value <%C>\n"),
-                       topicstatus_to_string(status)));
+          if (log_level >= LogLevel::Notice) {
+            ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i, "
+                       "remove_topic failed with return value <%C>\n", topicstatus_to_string(status)));
            }
           return DDS::RETCODE_ERROR;
         }
@@ -689,19 +682,17 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
 
       } else {
         if (DCPS_debug_level > 4) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-            ACE_TEXT("Didn't remove topic from the map, remove_objref %d client_refs %d\n"),
-            remove_objref, client_refs));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::delete_topic_i: "
+                     "Didn't remove topic from the map, remove_objref %d client_refs %d\n",
+                     remove_objref, client_refs));
         }
       }
     }
 
   } catch (...) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                 ACE_TEXT(" Caught Unknown Exception\n")));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i, "
+                 " Caught Unknown Exception\n"));
     }
     ret = DDS::RETCODE_ERROR;
   }
