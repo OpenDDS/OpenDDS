@@ -949,11 +949,6 @@ private:
     NetworkInterface_rch nic_;
     CmgAction action_;
   };
-
-  void send_interesting_ack_nack(const RepoId& writerid,
-                                 const RepoId& readerid,
-                                 CORBA::Long count,
-                                 MetaSubmessageVec& meta_submessages);
 };
 
 } // namespace DCPS
