@@ -53,6 +53,30 @@ private:
   PMF function_;
 };
 
+template <typename Delegate>
+class PmfNowEvent : public EventBase
+{
+public:
+  typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
+
+  PmfNowEvent(RcHandle<Delegate> delegate, PMF function)
+    : delegate_(delegate)
+    , function_(function)
+  {}
+
+  void handle_event()
+  {
+    RcHandle<Delegate> handle = delegate_.lock();
+    if (handle) {
+      ((*handle).*function_)(MonotonicTimePoint::now());
+    }
+  }
+
+private:
+  WeakRcHandle<Delegate> delegate_;
+  PMF function_;
+};
+
 class OpenDDS_Dcps_Export EventDispatcher : public virtual RcObject
 {
 public:
@@ -86,9 +110,30 @@ public:
   void handle_event();
 
 private:
-  ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex mutex_;
   WeakRcHandle<EventDispatcher> dispatcher_;
   RcHandle<EventBase> event_;
+  MonotonicTimePoint expiration_;
+  long timer_id_;
+};
+
+class OpenDDS_Dcps_Export PeriodicEvent : public EventBase
+{
+public:
+  PeriodicEvent(EventDispatcher_rch dispatcher, EventBase_rch event);
+
+  void enable(const TimeDuration& period, bool strict_timing = true);
+  void disable();
+  bool enabled() const;
+
+  void handle_event();
+
+private:
+  mutable ACE_Thread_Mutex mutex_;
+  WeakRcHandle<EventDispatcher> dispatcher_;
+  RcHandle<EventBase> event_;
+  TimeDuration period_;
+  bool strict_timing_;
   MonotonicTimePoint expiration_;
   long timer_id_;
 };
