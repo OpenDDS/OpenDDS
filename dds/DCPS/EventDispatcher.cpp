@@ -168,10 +168,9 @@ void SporadicEvent::handle_event()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   timer_id_ = 0;
-  RcHandle<EventBase> event = event_.lock();
-  if (event) {
+  if (event_) {
     guard.release();
-    event->handle_event();
+    event_->handle_event();
   }
 }
 

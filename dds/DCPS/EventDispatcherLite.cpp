@@ -166,7 +166,7 @@ void EventDispatcherLite::run_event_loop()
     // - Check for early exit before execution
     // - Run first task from event queue
 
-    if (allow_dispatch_) {
+    if (allow_dispatch_ && !timer_queue_map_.empty()) {
       const MonotonicTimePoint now = MonotonicTimePoint::now();
 
       TimerQueueMap::iterator last = timer_queue_map_.upper_bound(now), pos = last;

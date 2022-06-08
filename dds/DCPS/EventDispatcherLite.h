@@ -31,7 +31,7 @@ void* fun_ptr_proxy(void* arg)
   return 0;
 }
 
-class OpenDDS_Dcps_Export EventDispatcherLite : public RcObject
+class OpenDDS_Dcps_Export EventDispatcherLite : public virtual RcObject
 {
 public:
 
