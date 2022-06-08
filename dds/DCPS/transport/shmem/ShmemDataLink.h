@@ -88,6 +88,10 @@ public:
 
   bool open(const std::string& peer_address);
 
+  void send_association_msg(const RepoId& local, const RepoId& remote);
+
+  void request_ack_received(const ReceivedDataSample& sample);
+
   void control_received(ReceivedDataSample& sample);
 
   std::string local_address();

@@ -63,7 +63,7 @@ protected:
 private:
 
   /// Create a new link (using make_datalink) and add it to the map
-  DataLink_rch add_datalink(const std::string& remote_address);
+  ShmemDataLink_rch add_datalink(const std::string& remote_address);
 
   /// Create the DataLink object and start it
   ShmemDataLink_rch make_datalink(const std::string& remote_address);

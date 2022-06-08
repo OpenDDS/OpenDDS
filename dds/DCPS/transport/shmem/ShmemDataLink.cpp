@@ -11,6 +11,9 @@
 #include "ShmemSendStrategy.h"
 #include "ShmemReceiveStrategy.h"
 
+#include "dds/DCPS/transport/framework/TransportControlElement.h"
+#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+
 #include "ace/Log_Msg.h"
 
 #include <cstdlib>
@@ -20,6 +23,11 @@
 #endif  /* __ACE_INLINE__ */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
+
+namespace {
+  using OpenDDS::DCPS::Encoding;
+  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
+}
 
 namespace OpenDDS {
 namespace DCPS {
@@ -93,6 +101,54 @@ ShmemDataLink::open(const std::string& peer_address)
             this, peer_address_.c_str()), 1);
 
   return true;
+}
+
+void
+OpenDDS::DCPS::ShmemDataLink::send_association_msg(const RepoId& local, const RepoId& remote)
+{
+  DataSampleHeader header_data;
+  header_data.message_id_ = REQUEST_ACK;
+  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
+  header_data.message_length_ = sizeof(remote);
+  header_data.sequence_ = -1;
+  header_data.publication_id_ = local;
+  header_data.publisher_id_ = remote;
+
+  Message_Block_Ptr message(
+    new ACE_Message_Block(header_data.get_max_serialized_size(),
+                          ACE_Message_Block::MB_DATA,
+                          0, //cont
+                          0, //data
+                          0, //allocator_strategy
+                          0, //locking_strategy
+                          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+                          ACE_Time_Value::zero,
+                          ACE_Time_Value::max_time,
+                          0,
+                          0));
+
+  *message << header_data;
+  DCPS::Serializer ser(message.get(), encoding_unaligned_native);
+  ser << remote;
+  send_strategy_->link_released(false);
+  TransportControlElement* send_element = new TransportControlElement(move(message));
+  this->send_i(send_element, false);
+  VDBG((LM_INFO, "(%P|%t) ShmemDataLink send_association_msg sent\n"));
+}
+
+void
+OpenDDS::DCPS::ShmemDataLink::request_ack_received(const ReceivedDataSample& sample)
+{
+  VDBG((LM_INFO, "(%P|%t) ShmemDataLink request_ack_received\n"));
+  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
+    VDBG((LM_INFO, "(%P|%t) ShmemDataLink received association msg\n"));
+    RepoId local;
+    DCPS::Serializer ser(&(*sample.sample_), encoding_unaligned_native);
+    if (ser >> local) {
+      invoke_on_start_callbacks(local, sample.header_.publication_id_, true);
+    }
+    return;
+  }
 }
 
 void

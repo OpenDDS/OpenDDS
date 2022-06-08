@@ -15,8 +15,8 @@ my $status = 0;
 
 my $test = new PerlDDS::TestFramework();
 
-$test->{dcps_debug_level} = 4;
-$test->{dcps_transport_debug_level} = 2;
+$test->{dcps_debug_level} = 10;
+$test->{dcps_transport_debug_level} = 10;
 # will manually set -DCPSConfigFile
 $test->{add_transport_config} = 0;
 my $dbg_lvl = '-ORBDebugLevel 1';
@@ -116,8 +116,8 @@ elsif ($test->flag('rtps_unicast')) {
     $sub_opts .= " -DCPSConfigFile rtps_uni.ini";
 }
 elsif ($test->flag('shmem')) {
-    $pub_opts .= " -DCPSConfigFile shmem.ini";
-    $sub_opts .= " -DCPSConfigFile shmem.ini";
+    $pub_opts .= " -DCPSConfigFile shmem.ini -DCPSBit=0";
+    $sub_opts .= " -DCPSConfigFile shmem.ini -DCPSBit=0";
 }
 elsif ($test->flag('all')) {
     @original_ARGV = grep { $_ ne 'all' } @original_ARGV;
@@ -140,7 +140,7 @@ $test->report_unused_flags(!$flag_found);
 
 $pub_opts .= $thread_per_connection;
 
-$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+$test->setup_discovery("-NOBITS -ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
                        "$repo_bit_opt") unless $is_rtps_disc;
 
 $test->process("publisher", "publisher", $pub_opts);
@@ -152,4 +152,4 @@ $test->start_process("publisher");
 
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
-exit $test->finish(120);
+exit $test->finish(60);

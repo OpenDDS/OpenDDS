@@ -181,7 +181,14 @@ void
 ShmemReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                                      const ACE_INET_Addr& /*remote_address*/)
 {
+
+  VDBG((LM_DEBUG, "(%P|%t) deliver_sample\n"));
   switch (sample.header_.message_id_) {
+
+  case REQUEST_ACK:
+    VDBG((LM_DEBUG, "(%P|%t) DBG:  received REQUEST_ACK\n"));
+    link_->request_ack_received(sample);
+    break;
 
   case TRANSPORT_CONTROL:
     link_->control_received(sample);

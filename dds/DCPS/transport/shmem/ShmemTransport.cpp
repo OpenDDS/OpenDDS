@@ -13,6 +13,7 @@
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
 
 #include <ace/Log_Msg.h>
 
@@ -56,7 +57,7 @@ ShmemTransport::make_datalink(const std::string& remote_address)
 TransportImpl::AcceptConnectResult
 ShmemTransport::connect_datalink(const RemoteTransport& remote,
                                  const ConnectionAttribs&,
-                                 const TransportClient_rch&)
+                                 const TransportClient_rch& client)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
   if (key.first != this->config().hostname()) {
@@ -75,10 +76,13 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
   }
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
             ACE_TEXT("new link %C:%C.\n"), key.first.c_str(), key.second.c_str()), 2);
-  return AcceptConnectResult(add_datalink(key.second));
+  ShmemDataLink_rch link = add_datalink(key.second);
+  link->add_on_start_callback(client, remote.repo_id_);
+  add_pending_connection(client, link);
+  return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
 }
 
-DataLink_rch
+ShmemDataLink_rch
 ShmemTransport::add_datalink(const std::string& remote_address)
 {
   ShmemDataLink_rch link = make_datalink(remote_address);
@@ -91,7 +95,26 @@ ShmemTransport::accept_datalink(const RemoteTransport& remote,
                                 const ConnectionAttribs& attribs,
                                 const TransportClient_rch& client)
 {
-  return connect_datalink(remote, attribs, client);
+  const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
+  if (key.first != this->config().hostname()) {
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::accept_datalink ")
+              ACE_TEXT("link %C:%C not found, hostname %C.\n"),
+              key.first.c_str(), key.second.c_str(), this->config().hostname().c_str()), 2);
+    return AcceptConnectResult();
+  }
+  GuardType guard(links_lock_);
+  ShmemDataLinkMap::iterator iter = links_.find(key.second);
+  if (iter != links_.end()) {
+    ShmemDataLink_rch link = iter->second;
+    VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::accept_datalink ")
+              ACE_TEXT("link %C:%C found.\n"), key.first.c_str(), key.second.c_str()), 2);
+    return AcceptConnectResult(link);
+  }
+  VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::accept_datalink ")
+            ACE_TEXT("new link %C:%C.\n"), key.first.c_str(), key.second.c_str()), 2);
+  ShmemDataLink_rch link = add_datalink(key.second);
+  link->send_association_msg(attribs.local_id_, remote.repo_id_);
+  return AcceptConnectResult(link);
 }
 
 void
@@ -256,7 +279,9 @@ ShmemTransport::ReadTask::svc()
   ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "ShmemTransport");
 
   while (!stopped_.value()) {
+    VDBG((LM_INFO, "Calling into sema_wait\n"));
     ACE_OS::sema_wait(&semaphore_);
+    VDBG((LM_INFO, "Out of sema_wait\n"));
     if (stopped_.value()) {
       return 0;
     }
