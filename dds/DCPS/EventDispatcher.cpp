@@ -128,9 +128,10 @@ void SporadicEvent::schedule(const TimeDuration& duration)
   if (timer_id_ < 1) {
     EventDispatcher_rch dispatcher = dispatcher_.lock();
     if (dispatcher) {
-      expiration_ = now + duration;
-      long id = dispatcher->schedule(rchandle_from(this), expiration_);
+      const MonotonicTimePoint expiration = now + duration;
+      long id = dispatcher->schedule(rchandle_from(this), expiration);
       if (id > 0) {
+        expiration_ = expiration;
         timer_id_ = id;
       }
     }
@@ -140,9 +141,10 @@ void SporadicEvent::schedule(const TimeDuration& duration)
       if (dispatcher) {
         if (dispatcher->cancel(timer_id_)) {
           timer_id_ = 0;
-          expiration_ = now + duration;
-          long id = dispatcher->schedule(rchandle_from(this), expiration_);
+          const MonotonicTimePoint expiration = now + duration;
+          long id = dispatcher->schedule(rchandle_from(this), expiration);
           if (id > 0) {
+            expiration_ = expiration;
             timer_id_ = id;
           }
         }
@@ -168,6 +170,70 @@ void SporadicEvent::handle_event()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   timer_id_ = 0;
+  if (event_) {
+    guard.release();
+    event_->handle_event();
+  }
+}
+
+PeriodicEvent::PeriodicEvent(EventDispatcher_rch dispatcher, EventBase_rch event)
+ : dispatcher_(dispatcher)
+ , event_(event)
+ , timer_id_(0)
+{
+}
+
+void PeriodicEvent::enable(const TimeDuration& period, bool strict_timing)
+{
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (timer_id_ < 1) {
+    EventDispatcher_rch dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      const MonotonicTimePoint expiration = now + period;
+      long id = dispatcher->schedule(rchandle_from(this), expiration);
+      if (id > 0) {
+        period_ = period;
+        expiration_ = expiration;
+        timer_id_ = id;
+        strict_timing_ = strict_timing;
+      }
+    }
+  }
+}
+
+void PeriodicEvent::disable()
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (timer_id_ > 0) {
+    EventDispatcher_rch dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      if (dispatcher->cancel(timer_id_)) {
+        timer_id_ = 0;
+      }
+    }
+  }
+}
+
+bool PeriodicEvent::enabled() const
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  return timer_id_ > 0;
+}
+
+void PeriodicEvent::handle_event()
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  timer_id_ = 0;
+  EventDispatcher_rch dispatcher = dispatcher_.lock();
+  if (dispatcher) {
+    const MonotonicTimePoint expiration = (strict_timing_ ? expiration_ : MonotonicTimePoint::now()) + period_;
+    long id = dispatcher->schedule(rchandle_from(this), expiration);
+    if (id > 0) {
+      expiration_ = expiration;
+      timer_id_ = id;
+    }
+  }
   if (event_) {
     guard.release();
     event_->handle_event();
