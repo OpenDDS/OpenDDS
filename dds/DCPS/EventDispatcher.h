@@ -17,7 +17,7 @@ namespace OpenDDS
 namespace DCPS
 {
 
-struct OpenDDS_Dcps_Export EventBase : public RcObject
+struct OpenDDS_Dcps_Export EventBase : public virtual RcObject
 {
   virtual ~EventBase();
 
@@ -29,7 +29,31 @@ struct OpenDDS_Dcps_Export EventBase : public RcObject
 };
 typedef RcHandle<EventBase> EventBase_rch;
 
-class OpenDDS_Dcps_Export EventDispatcher : public RcObject
+template <typename Delegate>
+class PmfEvent : public EventBase
+{
+public:
+  typedef void (Delegate::*PMF)();
+
+  PmfEvent(RcHandle<Delegate> delegate, PMF function)
+    : delegate_(delegate)
+    , function_(function)
+  {}
+
+  void handle_event()
+  {
+    RcHandle<Delegate> handle = delegate_.lock();
+    if (handle) {
+      ((*handle).*function_)();
+    }
+  }
+
+private:
+  WeakRcHandle<Delegate> delegate_;
+  PMF function_;
+};
+
+class OpenDDS_Dcps_Export EventDispatcher : public virtual RcObject
 {
 public:
 
@@ -64,7 +88,7 @@ public:
 private:
   ACE_Thread_Mutex mutex_;
   WeakRcHandle<EventDispatcher> dispatcher_;
-  WeakRcHandle<EventBase> event_;
+  RcHandle<EventBase> event_;
   MonotonicTimePoint expiration_;
   long timer_id_;
 };
