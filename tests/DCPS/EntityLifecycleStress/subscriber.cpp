@@ -213,14 +213,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
 #ifdef ACE_HAS_CPP11
-    std::atomic<bool> still_cleaning(true);
-    thread t([&](){
-      this_thread::sleep_for(chrono::seconds(3));
-      while (still_cleaning) {
-        stringstream ss;
-        ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
-        cout << ss.str() << flush;
-        this_thread::sleep_for(chrono::seconds(1));
+    bool cleaning = true;
+    std::mutex cleaning_mutex;
+    std::condition_variable cleaning_cv;
+    std::thread cleanup_monitor([&](){
+      std::unique_lock<std::mutex> lock(cleaning_mutex);
+      int count = 0;
+      while (cleaning) {
+        cleaning_cv.wait_for(lock, chrono::seconds(1));
+        if (++count >= 3) {
+          stringstream ss;
+          ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
+          cout << ss.str() << flush;
+        }
       }
     });
 #endif
@@ -229,8 +234,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dpf->delete_participant(participant.in());
 
 #ifdef ACE_HAS_CPP11
-    still_cleaning = false;
-    t.join();
+    {
+      std::unique_lock<std::mutex> lock(cleaning_mutex);
+      cleaning = false;
+    }
+    cleaning_cv.notify_all();
+    cleanup_monitor.join();
 #endif
   }
   catch (const CORBA::Exception& e)
@@ -239,6 +248,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        << e << endl;
      exit(1);
   }
+
   TheServiceParticipant->shutdown();
 
   return 0;
