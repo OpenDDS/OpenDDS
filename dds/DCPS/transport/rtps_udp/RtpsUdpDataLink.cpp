@@ -79,16 +79,16 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
              false)     // is_active
   , reactor_task_(reactor_task)
   , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
+  , event_dispatcher_(transport.event_dispatcher())
   , mb_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , db_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , multi_buff_(this, config.nak_depth_)
-  , flush_send_queue_event_(make_rch<FlushSendQueueEvent>(rchandle_from(this)))
-  , flush_send_queue_sporadic_(make_rch<SporadicEvent>(transport.event_dispatcher(), flush_send_queue_event_))
+  , flush_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::flush_send_queue)))
   , best_effort_heartbeat_count_(0)
-  , heartbeat_(make_rch<Periodic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::send_heartbeats))
-  , heartbeatchecker_(make_rch<Periodic>(reactor_task->interceptor(), *this, &RtpsUdpDataLink::check_heartbeats))
+  , heartbeat_(make_rch<PeriodicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::send_heartbeats)))
+  , heartbeatchecker_(make_rch<PeriodicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::check_heartbeats)))
   , max_bundle_size_(config.max_message_size_ - RTPS::RTPSHDR_SZ) // default maximum bundled message size is max udp message size (see TransportStrategy) minus RTPS header
   , transport_statistics_(transport_statistics)
   , transport_statistics_mutex_(transport_statistics_mutex)
@@ -682,7 +682,7 @@ RtpsUdpDataLink::register_for_reader(const RepoId& writerid,
   }
   g.release();
   if (enableheartbeat) {
-    heartbeat_->enable(false, config().heartbeat_period_);
+    heartbeat_->enable(config().heartbeat_period_);
   }
 }
 
@@ -717,7 +717,7 @@ RtpsUdpDataLink::register_for_writer(const RepoId& readerid,
       InterestingRemote(readerid, addresses, listener)));
   g.release();
   if (enableheartbeatchecker) {
-    heartbeatchecker_->enable(false, config().heartbeat_period_);
+    heartbeatchecker_->enable(config().heartbeat_period_);
   }
 }
 
@@ -3206,7 +3206,7 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RtpsUdpDataLink::RtpsWriter::process_acknack: enqueuing ReplayDurableData\n"));
         }
         reader->durable_data_.swap(pendingCallbacks);
-        link->job_queue_->enqueue(make_rch<ReplayDurableData>(link_, id_, src));
+        link->event_dispatcher()->dispatch(make_rch<ReplayDurableData>(link_, id_, src));
         reader->durable_timestamp_ = MonotonicTimePoint::zero_value;
       }
     }
@@ -4382,8 +4382,8 @@ RtpsUdpDataLink::RtpsWriter::RtpsWriter(TransportClient_rch client, RcHandle<Rtp
  , is_pvs_writer_(id_.entityId == RTPS::ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER)
  , is_ps_writer_(id_.entityId == RTPS::ENTITYID_SPDP_RELIABLE_BUILTIN_PARTICIPANT_SECURE_WRITER)
 #endif
- , heartbeat_(make_rch<RtpsWriter::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), rchandle_from(this), &RtpsWriter::send_heartbeats))
- , nack_response_(make_rch<RtpsWriter::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), rchandle_from(this), &RtpsWriter::send_nack_responses))
+ , heartbeat_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsWriter> >(rchandle_from(this), &RtpsWriter::send_heartbeats)))
+ , nack_response_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsWriter> >(rchandle_from(this), &RtpsWriter::send_nack_responses)))
  , fallback_(link->config().heartbeat_period_)
 {
   send_buff_->bind(link->send_strategy().in());

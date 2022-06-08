@@ -31,9 +31,9 @@ namespace DCPS {
 
 TransportImpl::TransportImpl(TransportInst& config)
   : config_(config)
+  , event_dispatcher_(make_rch<EventDispatcher>(1))
   , last_link_(0)
   , is_shut_down_(false)
-  , event_dispatcher_(make_rch<EventDispatcher>(1))
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);
   if (TheServiceParticipant->monitor_factory_) {
