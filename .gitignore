@@ -7,3 +7,4 @@ _site
 vendor
 .vscode/
 /Gemfile.lock
+/.bundle

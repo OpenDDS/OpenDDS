@@ -4,8 +4,8 @@ reverse %}
   <div class="minutes-sidebar-content">
     <h2>MINUTES ARCHIVE</h2>
     <ul>
-      {% assign groups = sorted_pages | group_by_exp:"item", 'item.date | date:
-      "%Y"' %} {% for group in groups %}
+      {% assign groups = sorted_pages | group_by_exp:"item", 'item.date | date: "%Y"' %}
+      {% for group in groups %}
 
       <h4>{{ group.name }}</h4>
       {% for p in group.items %}
@@ -15,7 +15,7 @@ reverse %}
         </a>
       </li>
       {% endfor %}
+      {% endfor %}
     </ul>
-    {% endfor %}
   </div>
 </div>
