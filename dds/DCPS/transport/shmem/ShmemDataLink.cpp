@@ -137,7 +137,7 @@ OpenDDS::DCPS::ShmemDataLink::send_association_msg(const RepoId& local, const Re
 }
 
 void
-OpenDDS::DCPS::ShmemDataLink::request_ack_received(const ReceivedDataSample& sample)
+OpenDDS::DCPS::ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
 {
   VDBG((LM_INFO, "(%P|%t) ShmemDataLink request_ack_received\n"));
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
@@ -149,6 +149,7 @@ OpenDDS::DCPS::ShmemDataLink::request_ack_received(const ReceivedDataSample& sam
     }
     return;
   }
+  data_received(sample);
 }
 
 void

@@ -90,7 +90,7 @@ public:
 
   void send_association_msg(const RepoId& local, const RepoId& remote);
 
-  void request_ack_received(const ReceivedDataSample& sample);
+  void request_ack_received(ReceivedDataSample& sample);
 
   void control_received(ReceivedDataSample& sample);
 
