@@ -218,6 +218,13 @@ OpenDDS::DCPS::TransportInst::reactor_task()
   return temp ? temp->reactor_task() : OpenDDS::DCPS::ReactorTask_rch();
 }
 
+OpenDDS::DCPS::EventDispatcher_rch
+OpenDDS::DCPS::TransportInst::event_dispatcher()
+{
+  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  return temp ? temp->event_dispatcher() : OpenDDS::DCPS::EventDispatcher_rch();
+}
+
 bool
 OpenDDS::DCPS::TransportInst::should_drop(ssize_t length) const
 {

@@ -226,6 +226,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
+  , quick_resend_ratio_(disco_->config()->quick_resend_ratio())
+  , min_resend_delay_(disco_->config()->min_resend_delay())
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
@@ -272,6 +274,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
+  , quick_resend_ratio_(disco_->config()->quick_resend_ratio())
+  , min_resend_delay_(disco_->config()->min_resend_delay())
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
@@ -989,7 +993,7 @@ Spdp::validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::Se
 {
   if (seq.getValue() != 0 && iter->second.max_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.max_seq_) {
-      const bool honeymoon_period = now < iter->second.discovered_at_ + config_->min_resend_delay();
+      const bool honeymoon_period = now < iter->second.discovered_at_ + min_resend_delay_;
       if (!honeymoon_period) {
         ++iter->second.seq_reset_count_;
       }
@@ -2678,9 +2682,8 @@ Spdp::SpdpTransport::shorten_local_sender_delay_i()
   if (!outer) return;
 
   if (local_send_task_) {
-    const TimeDuration quick_resend = outer->config_->resend_period() * outer->config_->quick_resend_ratio();
-    const TimeDuration min_resend = outer->config_->min_resend_delay();
-    local_send_task_->enable(std::max(quick_resend, min_resend));
+    const TimeDuration quick_resend = outer->config_->resend_period() * outer->quick_resend_ratio_;
+    local_send_task_->enable(std::max(quick_resend, outer->min_resend_delay_));
   }
 }
 
