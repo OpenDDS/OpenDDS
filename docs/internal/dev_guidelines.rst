@@ -51,9 +51,11 @@ Dependencies
 * ACE is a library used for cross-platform compatibility, especially networking and event loops.
   It is used both directly and through TAO.
 * TAO is a C++ CORBA implementation built on ACE.
+
   * It's used to communicate with DCPSInfoRepo, which is one option for Discovery.
   * TAO's data types and support for the OMG IDL-to-C++ mapping are also used in the End User DDS API.
   * The TAO IDL compiler is used internally and by the end user to allow OpenDDS to use user-defined IDL types as topic data.
+
 * Perl is an interpreted language used in the configure script, the tests, and any other scripting in OpenDDS codebase.
 * Google Test is required for OpenDDS tests.
   By default, CMake will be used to build a specific version of Google Test that we have as a submodule.
