@@ -4079,10 +4079,13 @@ RtpsUdpDataLink::send_heartbeats(const MonotonicTimePoint& now)
           {count}
         };
 
-        MetaSubmessage meta_submessage(pos->first, GUID_UNKNOWN, pos->second);
-        meta_submessage.sm_.heartbeat_sm(hb);
+        for (RepoIdSet::const_iterator it = pos->second->guids_.begin(),
+          limit = pos->second->guids_.end(); it != limit; ++it) {
 
-        meta_submessages.push_back(meta_submessage);
+          MetaSubmessage meta_submessage(pos->first, *it);
+          meta_submessage.sm_.heartbeat_sm(hb);
+          meta_submessages.push_back(meta_submessage);
+        }
       }
     }
   }
@@ -4253,11 +4256,15 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats(RcHandle<ConstSharedRepoIdSet> ad
   MetaSubmessage meta_submessage(id_, GUID_UNKNOWN);
   initialize_heartbeat(proxy, meta_submessage);
 
-  // Non-directed, non-final.
-  //meta_submessage.addr_guids_ = additional_guids;
-  meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
-  meta_submessages.push_back(meta_submessage);
-  meta_submessage.reset_destination();
+  for (RepoIdSet::const_iterator it = additional_guids->guids_.begin(),
+    limit = additional_guids->guids_.end(); it != limit; ++it) {
+
+    // Semi-directed (INFO_DST but ENTITYID_UNKNOWN, non-final.
+    meta_submessage.dst_guid_ = *it;
+    meta_submessage.sm_.heartbeat_sm().count.value = ++heartbeat_count_;
+    meta_submessages.push_back(meta_submessage);
+    meta_submessage.reset_destination();
+  }
 }
 
 void
