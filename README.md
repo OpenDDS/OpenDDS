@@ -22,6 +22,24 @@ bundle exec jekyll serve
 
 It will print the URL of the locally hosted site.
 
+## Running `htmlproofer.sh` Locally
+
+[`htmlproofer.sh'](htmlproofer.sh) is a wrapper around
+[the html-proofer Ruby program](https://github.com/gjtorikian/html-proofer).
+
+It is run as part of GitHub Actions workflow on this branch, but can be run
+locally by first building the site:
+
+```
+bundle exec jekyll serve
+```
+
+A `\_site` directory will appear, and then the script can be run on it:
+
+```
+bash htmlproofer.sh
+```
+
 ### GitHub API Limits
 
 Generating the site uses the GitHub API, which [has limits for unauthorized
