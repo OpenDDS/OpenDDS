@@ -11,9 +11,9 @@
 
 using namespace OpenDDS::DCPS;
 
-struct TestKey : public virtual RcObject {
+struct TestKey {
   TestKey(const RepoId& from, const RepoId& to) : from_(from), to_(to) {}
-  TestKey(const TestKey& val) : RcObject(), from_(val.from_), to_(val.to_) {}
+  TestKey(const TestKey& val) : from_(val.from_), to_(val.to_) {}
   bool operator<(const TestKey& rhs) const {
     return std::memcmp(static_cast<const void*>(&from_), static_cast<const void*>(&rhs.from_), 2 * sizeof (RepoId)) < 0;
   }
