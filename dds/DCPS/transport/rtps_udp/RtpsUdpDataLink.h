@@ -560,7 +560,7 @@ private:
     void update_required_acknack_count(const RepoId& id, CORBA::Long current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
-    RcHandle<ConstSharedRepoIdSet> get_remote_reader_guids() { return remote_reader_guids_; }
+    RcHandle<ConstSharedRepoIdSet> get_remote_reader_guids() { ACE_Guard<ACE_Thread_Mutex> guard(mutex_); return remote_reader_guids_; }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
@@ -679,9 +679,9 @@ private:
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+  typedef OPENDDS_UNORDERED_MAP(NetworkAddress, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #else
-  typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+  typedef OPENDDS_MAP(NetworkAddress, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #endif
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
@@ -705,13 +705,22 @@ private:
     IdCountSet nackfrag_counts_;
   };
 
+public:
+  struct BundleStruct {
+    BundleStruct(const NetworkAddress& addr) : addr_(addr), size_(0) { submessages_.reserve(32); }
+    MetaSubmessageIterVec submessages_; // a vectors of iterators pointing to meta_submessages
+    NetworkAddress addr_; // a bundle's destination address
+    size_t size_; // bundle message size
+  };
+
+  typedef OPENDDS_VECTOR(BundleStruct) BundleVec;
+
+private:
   void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& addr_map);
   void bundle_mapped_meta_submessages(
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& addr_map,
-    MetaSubmessageIterVecVec& meta_submessage_bundles,
-    OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
-    OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
+    BundleVec& bundles,
     CountKeeper& counts);
 
   void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
@@ -721,6 +730,7 @@ private:
   ThreadedRtpsSendQueue sq_;
   ACE_Thread_Mutex fsq_mutex_;
   MetaSubmessageVec fsq_vec_;
+  AddrDestMetaSubmessageMap fsq_addr_map_;
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
   RcHandle<Sporadic> flush_send_queue_task_;
   void flush_send_queue(const MonotonicTimePoint& now);
