@@ -75,9 +75,9 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
             }
           }
         } else {
-          if (log_level >= LogLevel::Error) {
-            ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: ACE_SOCK_Dgram_Mcast::join failed: %m\n"));
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) WARNING: MulticastManager::process: ACE_SOCK_Dgram_Mcast::join failed: %m\n"));
           }
         }
       }
@@ -113,9 +113,9 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
             }
           }
         } else {
-          if (log_level >= LogLevel::Error) {
-            ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: ipv6 ACE_SOCK_Dgram_Mcast::join failed: %m\n"));
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) WARNING: MulticastManager::process: ipv6 ACE_SOCK_Dgram_Mcast::join failed: %m\n"));
           }
         }
       }
@@ -168,6 +168,11 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
     }
       break;
     }
+  }
+
+  if (!any_joined && log_level >= LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MulticastManager::process: "
+      "Couldn't join any multicast group\n"));
   }
 
   return any_joined;
