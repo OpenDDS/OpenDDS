@@ -282,6 +282,7 @@ bool InstanceState::is_exclusive() const
 
 bool InstanceState::registered()
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   const bool ret = registered_;
   registered_ = true;
   return ret;
@@ -289,11 +290,13 @@ bool InstanceState::registered()
 
 void InstanceState::registered(bool flag)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   registered_ = flag;
 }
 
 void InstanceState::reset_ownership(DDS::InstanceHandle_t instance)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
   set_owner(GUID_UNKNOWN);
   registered_ = false;
 
