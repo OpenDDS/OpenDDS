@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_EVENTDISPATCHER_H
 #define OPENDDS_DCPS_EVENTDISPATCHER_H
 
-#include "EventDispatcherLite.h"
+#include "Definitions.h"
+#include "RcObject.h"
+#include "TimeTypes.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -81,62 +83,19 @@ class OpenDDS_Dcps_Export EventDispatcher : public virtual RcObject
 {
 public:
 
-  EventDispatcher(size_t count = 1);
+  EventDispatcher();
   virtual ~EventDispatcher();
 
-  void shutdown(bool immediate = false);
+  virtual void shutdown(bool immediate = false) = 0;
 
-  bool dispatch(EventBase_rch event);
+  virtual bool dispatch(EventBase_rch event) = 0;
 
-  long schedule(EventBase_rch event, const MonotonicTimePoint& expiration = MonotonicTimePoint::now());
+  virtual long schedule(EventBase_rch event, const MonotonicTimePoint& expiration = MonotonicTimePoint::now()) = 0;
 
-  size_t cancel(long id);
+  virtual size_t cancel(long id) = 0;
 
-private:
-
-  mutable ACE_Thread_Mutex mutex_;
-  EventDispatcherLite_rch dispatcher_;
 };
 typedef RcHandle<EventDispatcher> EventDispatcher_rch;
-
-class OpenDDS_Dcps_Export SporadicEvent : public EventBase
-{
-public:
-  SporadicEvent(EventDispatcher_rch dispatcher, EventBase_rch event);
-
-  void schedule(const TimeDuration& duration);
-  void cancel();
-
-  void handle_event();
-
-private:
-  mutable ACE_Thread_Mutex mutex_;
-  WeakRcHandle<EventDispatcher> dispatcher_;
-  RcHandle<EventBase> event_;
-  MonotonicTimePoint expiration_;
-  long timer_id_;
-};
-
-class OpenDDS_Dcps_Export PeriodicEvent : public EventBase
-{
-public:
-  PeriodicEvent(EventDispatcher_rch dispatcher, EventBase_rch event);
-
-  void enable(const TimeDuration& period, bool strict_timing = true);
-  void disable();
-  bool enabled() const;
-
-  void handle_event();
-
-private:
-  mutable ACE_Thread_Mutex mutex_;
-  WeakRcHandle<EventDispatcher> dispatcher_;
-  RcHandle<EventBase> event_;
-  TimeDuration period_;
-  bool strict_timing_;
-  MonotonicTimePoint expiration_;
-  long timer_id_;
-};
 
 } // DCPS
 } // OpenDDS
