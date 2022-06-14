@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_THREADPOOL_H
-#define OPENDDS_DCPS_THREADPOOL_H
+#ifndef OPENDDS_DCPS_THREAD_POOL_H
+#define OPENDDS_DCPS_THREAD_POOL_H
 
 #include "dcps_export.h"
 
@@ -52,4 +52,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_THREADPOOL_H
+#endif // OPENDDS_DCPS_THREAD_POOL_H

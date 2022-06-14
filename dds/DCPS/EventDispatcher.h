@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_EVENTDISPATCHER_H
-#define OPENDDS_DCPS_EVENTDISPATCHER_H
+#ifndef OPENDDS_DCPS_EVENT_DISPATCHER_H
+#define OPENDDS_DCPS_EVENT_DISPATCHER_H
 
 #include "Definitions.h"
 #include "RcObject.h"
@@ -102,4 +102,4 @@ typedef RcHandle<EventDispatcher> EventDispatcher_rch;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_EVENTDISPATCHER_H
+#endif // OPENDDS_DCPS_EVENT_DISPATCHER_H
