@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_PERIODICEVENT_H
-#define OPENDDS_DCPS_PERIODICEVENT_H
+#ifndef OPENDDS_DCPS_PERIODIC_EVENT_H
+#define OPENDDS_DCPS_PERIODIC_EVENT_H
 
 #include "EventDispatcher.h"
 
@@ -43,4 +43,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif // OPENDDS_DCPS_PERIODICEVENT_H
+#endif // OPENDDS_DCPS_PERIODIC_EVENT_H
