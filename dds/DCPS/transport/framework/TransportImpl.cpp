@@ -17,6 +17,7 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/ServiceEventDispatcher.h"
 #include "tao/debug.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 
@@ -31,7 +32,7 @@ namespace DCPS {
 
 TransportImpl::TransportImpl(TransportInst& config)
   : config_(config)
-  , event_dispatcher_(make_rch<EventDispatcher>(1))
+  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
   , last_link_(0)
   , is_shut_down_(false)
 {

@@ -36,6 +36,8 @@
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/MulticastManager.h>
+#include <dds/DCPS/SporadicEvent.h>
+#include <dds/DCPS/PeriodicEvent.h>
 
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
