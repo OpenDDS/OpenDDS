@@ -5,7 +5,10 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/ServiceEventDispatcher.h>
+
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/ThreadStatusManager.h>
 
 #include <ace/OS_NS_unistd.h>
 
@@ -93,32 +96,32 @@ struct RecursiveTestEventTwo : public TestEventBase
 
 } // (anonymous) namespace
 
-TEST(dds_DCPS_EventDispatcher, DefaultConstructor)
+TEST(dds_DCPS_ServiceEventDispatcher, DefaultConstructor)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
 }
 
-TEST(dds_DCPS_EventDispatcher, ArgConstructorFour)
+TEST(dds_DCPS_ServiceEventDispatcher, ArgConstructorFour)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(4);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(4);
 }
 
-TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderAlpha)
+TEST(dds_DCPS_ServiceEventDispatcher, ArgConstructorOrderAlpha)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_four = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(4);
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_two = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(2);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_four = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(4);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_two = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(2);
 }
 
-TEST(dds_DCPS_EventDispatcher, ArgConstructorOrderBeta)
+TEST(dds_DCPS_ServiceEventDispatcher, ArgConstructorOrderBeta)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_two = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(2);
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_four = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(4);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_two = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(2);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_four = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(4);
 }
 
-TEST(dds_DCPS_EventDispatcher, SimpleDispatchAlpha)
+TEST(dds_DCPS_ServiceEventDispatcher, SimpleDispatchAlpha)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
 
   dispatcher->dispatch(test_event);
   dispatcher->dispatch(test_event);
@@ -130,10 +133,10 @@ TEST(dds_DCPS_EventDispatcher, SimpleDispatchAlpha)
   EXPECT_EQ(test_event->call_count(), 3u);
 }
 
-TEST(dds_DCPS_EventDispatcher, SimpleDispatchBeta)
+TEST(dds_DCPS_ServiceEventDispatcher, SimpleDispatchBeta)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
 
   dispatcher->dispatch(test_event);
   dispatcher->dispatch(test_event);
@@ -147,9 +150,9 @@ TEST(dds_DCPS_EventDispatcher, SimpleDispatchBeta)
   EXPECT_EQ(test_event->call_count(), 5u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchAlpha)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
 
   dispatcher->dispatch(test_event);
@@ -162,9 +165,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha)
   EXPECT_GE(test_event->call_count(), 6u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha_IS)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchAlpha_IS)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
 
   dispatcher->dispatch(test_event);
@@ -177,9 +180,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchAlpha_IS)
   EXPECT_GE(test_event->call_count(), 6u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchBeta)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
   OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
 
   dispatcher->dispatch(test_event);
@@ -194,9 +197,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta)
   EXPECT_GE(test_event->call_count(), 10u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta_IS)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchBeta_IS)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
   OpenDDS::DCPS::RcHandle<RecursiveTestEventOne> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventOne>(dispatcher);
 
   dispatcher->dispatch(test_event);
@@ -211,9 +214,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchBeta_IS)
   EXPECT_GE(test_event->call_count(), 10u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchGamma)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 1);
 
   dispatcher->dispatch(test_event);
@@ -225,9 +228,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma)
   EXPECT_GE(test_event->call_count(), 1000u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma_IS)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchGamma_IS)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 1);
 
   dispatcher->dispatch(test_event);
@@ -239,9 +242,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchGamma_IS)
   EXPECT_GE(test_event->call_count(), 1000u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchDelta)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
   OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 2);
 
   dispatcher->dispatch(test_event);
@@ -253,9 +256,9 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta)
   EXPECT_GE(test_event->call_count(), 100000u);
 }
 
-TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta_IS)
+TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchDelta_IS)
 {
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(8);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(8);
   OpenDDS::DCPS::RcHandle<RecursiveTestEventTwo> test_event = OpenDDS::DCPS::make_rch<RecursiveTestEventTwo>(dispatcher, 2);
 
   dispatcher->dispatch(test_event);
@@ -267,10 +270,10 @@ TEST(dds_DCPS_EventDispatcher, RecursiveDispatchDelta_IS)
   EXPECT_GE(test_event->call_count(), 100000u);
 }
 
-TEST(dds_DCPS_EventDispatcher, TimedDispatch)
+TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatch)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(4);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(4);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -321,10 +324,10 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatch)
   EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
 }
 
-TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
+TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatchSingleThreaded)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(1);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -375,10 +378,10 @@ TEST(dds_DCPS_EventDispatcher, TimedDispatchSingleThreaded)
   EXPECT_GE(after12, now + OpenDDS::DCPS::TimeDuration::from_double(0.9));
 }
 
-TEST(dds_DCPS_EventDispatcher, CancelDispatch)
+TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatch)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(4);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(4);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 
@@ -401,10 +404,10 @@ TEST(dds_DCPS_EventDispatcher, CancelDispatch)
   EXPECT_EQ(test_event->call_count(), 2u);
 }
 
-TEST(dds_DCPS_EventDispatcher, CancelDispatchSingleThreaded)
+TEST(dds_DCPS_ServiceEventDispatcher, CancelDispatchSingleThreaded)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
-  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::EventDispatcher>(1);
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>(1);
 
   const OpenDDS::DCPS::MonotonicTimePoint now = OpenDDS::DCPS::MonotonicTimePoint::now();
 

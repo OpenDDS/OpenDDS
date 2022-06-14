@@ -8,13 +8,13 @@
 #ifndef OPENDDS_DCPS_EVENTDISPATCHERLITE_H
 #define OPENDDS_DCPS_EVENTDISPATCHERLITE_H
 
+#include "ConditionVariable.h"
 #include "Definitions.h"
 #include "RcObject.h"
 #include "ThreadPool.h"
 #include "TimePoint_T.h"
 
 #include <ace/Thread_Mutex.h>
-#include "ConditionVariable.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -31,7 +31,7 @@ void* fun_ptr_proxy(void* arg)
   return 0;
 }
 
-class OpenDDS_Dcps_Export EventDispatcherLite : public virtual RcObject
+class OpenDDS_Dcps_Export DispatchService : public virtual RcObject
 {
 public:
 
@@ -45,8 +45,8 @@ public:
   typedef std::pair<FunPtr, void*> FunArgPair;
   typedef OPENDDS_DEQUE(FunArgPair) EventQueue;
 
-  EventDispatcherLite(size_t count = 1);
-  virtual ~EventDispatcherLite();
+  DispatchService(size_t count = 1);
+  virtual ~DispatchService();
 
   void shutdown(bool immediate = false, EventQueue* const pending = 0);
 
@@ -95,7 +95,7 @@ private:
   ThreadStatusManager tsm_;
   ThreadPool pool_;
 };
-typedef RcHandle<EventDispatcherLite> EventDispatcherLite_rch;
+typedef RcHandle<DispatchService> DispatchService_rch;
 
 } // DCPS
 } // OpenDDS
