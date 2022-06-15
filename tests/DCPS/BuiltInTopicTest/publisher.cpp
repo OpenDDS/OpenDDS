@@ -32,7 +32,8 @@ char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
 char UPDATED_GROUP_DATA[] = "Updated GroupData";
 
 ACE_TString synch_dir;
-ACE_TCHAR synch_fname[] = ACE_TEXT("monitor1_done");
+ACE_TCHAR mon1_fname[] = ACE_TEXT("monitor1_done");
+ACE_TCHAR mon2_fname[] = ACE_TEXT("monitor2_done");
 
 int num_messages = 10;
 
@@ -180,19 +181,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       }
 
       // wait for Monitor 1 done
-      FILE* fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
-      int i = 0;
-      while (fp == 0 &&  i < 15)
-      {
-        ACE_DEBUG ((LM_DEBUG,
-          ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
-        ACE_OS::sleep (1);
-        ++ i;
-        fp = ACE_OS::fopen ((synch_dir + synch_fname).c_str (), ACE_TEXT("r"));
+      FILE* fp = ACE_OS::fopen((synch_dir + mon1_fname).c_str(), ACE_TEXT("r"));
+      while (fp == 0) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
+        ACE_OS::sleep(1);
+        fp = ACE_OS::fopen((synch_dir + mon1_fname).c_str(), ACE_TEXT("r"));
       }
-
-      if (fp != 0)
-        ACE_OS::fclose (fp);
+      if (fp != 0) {
+        ACE_OS::fclose(fp);
+      }
 
       // Now change the changeable qos. The second monitor should get the updated qos from BIT.
 
@@ -235,6 +232,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[]) {
       // Cleanup
       writer->end ();
       delete writer;
+
+      // Wait for monitor2 to finish
+      fp = ACE_OS::fopen((synch_dir + mon2_fname).c_str(), ACE_TEXT("r"));
+      while (fp == 0) {
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) waiting monitor2 done ...\n")));
+        ACE_OS::sleep(1);
+        fp = ACE_OS::fopen((synch_dir + mon2_fname).c_str(), ACE_TEXT("r"));
+      }
+      if (fp != 0) {
+        ACE_OS::fclose(fp);
+      }
+
       participant->delete_contained_entities();
       dpf->delete_participant(participant.in ());
       TheServiceParticipant->shutdown ();
