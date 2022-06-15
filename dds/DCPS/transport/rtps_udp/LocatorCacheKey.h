@@ -43,12 +43,12 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
 
   bool operator<(const LocatorCacheKey& rhs) const
   {
-    return std::memcmp(static_cast<const void*>(&remote_), static_cast<const void*>(&rhs.remote_), 2 * sizeof (OpenDDS::DCPS::GUID_t) + sizeof (bool)) < 0;
+    return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (LocatorCacheKey)) < 0;
   }
 
   bool operator==(const LocatorCacheKey& rhs) const
   {
-    return std::memcmp(static_cast<const void*>(&remote_), static_cast<const void*>(&rhs.remote_), 2 * sizeof (OpenDDS::DCPS::GUID_t) + sizeof (bool)) == 0;
+    return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (LocatorCacheKey)) == 0;
   }
 
   LocatorCacheKey& operator=(const LocatorCacheKey& rhs)
@@ -71,7 +71,7 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
 #if defined ACE_HAS_CPP11
   inline size_t calculate_hash() const
   {
-    return static_cast<size_t>(OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&remote_), 2 * sizeof (OpenDDS::DCPS::GUID_t) + sizeof (bool)));
+    return static_cast<size_t>(OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(this), sizeof (LocatorCacheKey)));
   }
 #endif
 
