@@ -679,9 +679,9 @@ private:
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
   typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(NetworkAddress, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+  typedef OPENDDS_UNORDERED_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #else
-  typedef OPENDDS_MAP(NetworkAddress, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
+  typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #endif
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
   typedef OPENDDS_SET(CORBA::Long) CountSet;
@@ -707,9 +707,9 @@ private:
 
 public:
   struct BundleStruct {
-    BundleStruct(const NetworkAddress& addr) : addr_(addr), size_(0) { submessages_.reserve(32); }
+    BundleStruct(const AddressCacheEntryProxy& proxy) : proxy_(proxy), size_(0) { submessages_.reserve(32); }
     MetaSubmessageIterVec submessages_; // a vectors of iterators pointing to meta_submessages
-    NetworkAddress addr_; // a bundle's destination address
+    AddressCacheEntryProxy proxy_; // a bundle's destination address
     size_t size_; // bundle message size
   };
 
@@ -730,7 +730,6 @@ private:
   ThreadedRtpsSendQueue sq_;
   ACE_Thread_Mutex fsq_mutex_;
   MetaSubmessageVec fsq_vec_;
-  AddrDestMetaSubmessageMap fsq_addr_map_;
   typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
   RcHandle<Sporadic> flush_send_queue_task_;
   void flush_send_queue(const MonotonicTimePoint& now);
