@@ -47,7 +47,7 @@ void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& prox
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: "
                "RelayParticipantStatusReporter::remove_participant participant %C not found\n",
                guid_to_string(repoid).c_str()));
     return;
