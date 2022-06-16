@@ -51,16 +51,6 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
     return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (LocatorCacheKey)) == 0;
   }
 
-  LocatorCacheKey& operator=(const LocatorCacheKey& rhs)
-  {
-    if (this != &rhs) {
-      const_cast<GUID_t&>(remote_) = rhs.remote_;
-      const_cast<GUID_t&>(local_) = rhs.local_;
-      const_cast<bool&>(prefer_unicast_) = rhs.prefer_unicast_;
-    }
-    return *this;
-  }
-
   void get_contained_guids(GuidSet& set) const
   {
     set.clear();
@@ -68,16 +58,9 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
     set.insert(local_);
   }
 
-#if defined ACE_HAS_CPP11
-  inline size_t calculate_hash() const
-  {
-    return static_cast<size_t>(OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(this), sizeof (LocatorCacheKey)));
-  }
-#endif
-
-  const GUID_t remote_;
-  const GUID_t local_;
-  const bool prefer_unicast_;
+  GUID_t remote_;
+  GUID_t local_;
+  bool prefer_unicast_;
 };
 
 #pragma pack(pop)
@@ -88,18 +71,7 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined ACE_HAS_CPP11
-namespace std
-{
-
-template<> struct OpenDDS_Rtps_Udp_Export hash<OpenDDS::DCPS::LocatorCacheKey>
-{
-  std::size_t operator()(const OpenDDS::DCPS::LocatorCacheKey& val) const noexcept
-  {
-    return val.calculate_hash();
-  }
-};
-
-}
+OPENDDS_OOAT_STD_HASH(OpenDDS::DCPS::LocatorCacheKey, OpenDDS_Rtps_Udp_Export);
 #endif
 
 #endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_LOCATORCACHEKEY_H */

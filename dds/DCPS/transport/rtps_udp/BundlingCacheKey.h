@@ -57,15 +57,8 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
     set.insert(dst_guid_);
   }
 
-  const GUID_t src_guid_;
-  const GUID_t dst_guid_;
-
-#if defined ACE_HAS_CPP11
-  inline size_t calculate_hash() const
-  {
-    return static_cast<size_t>(OpenDDS::DCPS::one_at_a_time_hash(reinterpret_cast<const uint8_t*>(&src_guid_), 2 * sizeof (OpenDDS::DCPS::GUID_t)));
-  }
-#endif
+  GUID_t src_guid_;
+  GUID_t dst_guid_;
 };
 
 #pragma pack(pop)
@@ -76,18 +69,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #if defined ACE_HAS_CPP11
-namespace std
-{
-
-template<> struct OpenDDS_Rtps_Udp_Export hash<OpenDDS::DCPS::BundlingCacheKey>
-{
-  std::size_t operator()(const OpenDDS::DCPS::BundlingCacheKey& val) const noexcept
-  {
-    return val.calculate_hash();
-  }
-};
-
-} // namespace std
+OPENDDS_OOAT_STD_HASH(OpenDDS::DCPS::BundlingCacheKey, OpenDDS_Rtps_Udp_Export);
 #endif
 
 #endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_BUNDLINGCACHEKEY_H */
