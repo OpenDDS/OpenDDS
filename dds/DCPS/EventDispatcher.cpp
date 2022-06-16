@@ -35,6 +35,13 @@ void EventBase::operator()()
   } catch (...) {
     handle_error();
   }
+  /// In order to avoid extra allocations for containers of RcHandle<EventBase>
+  /// implementations of EventDispatcher will increase the reference count of
+  /// all queued EventBase objects, and decrement them when they are dispatched
+  /// or canceled.
+  /// Since the EventDispatcher does not directly hold copies of the events,
+  /// decrementing the reference count after a normal dispatch currently needs
+  /// to happen here in the call to EventBase::operator()() after handle_event.
   this->_remove_ref();
 }
 
