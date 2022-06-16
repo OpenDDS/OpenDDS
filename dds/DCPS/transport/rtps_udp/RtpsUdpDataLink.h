@@ -87,6 +87,8 @@ typedef AddressCache<BundlingCacheKey> BundlingCache;
 
 typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 
+const size_t initial_bundle_size = 32;
+
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
   : public virtual DataLink
   , public virtual InternalDataReaderListener<NetworkInterfaceAddress>
@@ -706,14 +708,14 @@ private:
   };
 
 public:
-  struct BundleStruct {
-    BundleStruct(const AddressCacheEntryProxy& proxy) : proxy_(proxy), size_(0) { submessages_.reserve(32); }
+  struct Bundle {
+    explicit Bundle(const AddressCacheEntryProxy& proxy) : proxy_(proxy), size_(0) { submessages_.reserve(initial_bundle_size); }
     MetaSubmessageIterVec submessages_; // a vectors of iterators pointing to meta_submessages
     AddressCacheEntryProxy proxy_; // a bundle's destination address
     size_t size_; // bundle message size
   };
 
-  typedef OPENDDS_VECTOR(BundleStruct) BundleVec;
+  typedef OPENDDS_VECTOR(Bundle) BundleVec;
 
 private:
   void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& addr_map);

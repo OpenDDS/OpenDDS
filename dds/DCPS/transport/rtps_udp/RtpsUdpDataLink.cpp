@@ -2547,7 +2547,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
   for (AddrDestMetaSubmessageMap::iterator addr_it = addr_map.begin(), limit = addr_map.end(); addr_it != limit; ++addr_it) {
 
     // A new address set always starts a new bundle
-    bundles.push_back(BundleStruct(addr_it->first));
+    bundles.push_back(Bundle(addr_it->first));
 
     prev_dst = GUID_UNKNOWN;
 
@@ -2560,7 +2560,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
       // Check to see if we're sending separate messages per destination guid
       if (new_bundle_per_dest_guid && bundles.back().submessages_.size()) {
         helper.end_bundle();
-        bundles.push_back(BundleStruct(addr_it->first));
+        bundles.push_back(Bundle(addr_it->first));
         prev_dst = GUID_UNKNOWN;
       }
 
@@ -2571,7 +2571,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
           // If adding an INFO_DST prefix bumped us over the limit, push the
           // size difference into the next bundle, reset prev_dst, and keep going
           if (!helper.add_to_bundle(idst)) {
-            bundles.push_back(BundleStruct(addr_it->first));
+            bundles.push_back(Bundle(addr_it->first));
           }
         }
 
@@ -2613,7 +2613,7 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
         // If adding the submessage bumped us over the limit, push the size
         // difference into the next bundle, reset prev_dst, and keep going
         if (!result) {
-          bundles.push_back(BundleStruct(addr_it->first));
+          bundles.push_back(Bundle(addr_it->first));
           prev_dst = GUID_UNKNOWN;
         }
         bundles.back().submessages_.push_back(*resp_it);
