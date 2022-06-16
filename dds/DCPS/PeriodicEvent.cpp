@@ -75,8 +75,9 @@ void PeriodicEvent::handle_event()
     }
   }
   if (event_) {
+    RcHandle<EventBase> event_copy(event_);
     guard.release();
-    event_->handle_event();
+    event_copy->handle_event();
   }
 }
 

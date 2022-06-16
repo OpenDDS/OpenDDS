@@ -47,7 +47,7 @@ public:
   explicit DispatchService(size_t count = 1);
   virtual ~DispatchService();
 
-  void shutdown(bool immediate = false, EventQueue* const pending = 0);
+  void shutdown(bool immediate = false, EventQueue* pending = 0);
 
   DispatchStatus dispatch(FunPtr fun, void* arg = 0);
 
