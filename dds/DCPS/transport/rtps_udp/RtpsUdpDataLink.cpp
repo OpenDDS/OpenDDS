@@ -2404,9 +2404,6 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
       } else {
         addrs = get_addresses_i(it->src_guid_);
       }
-      for (RepoIdSet::const_iterator it2 = it->addr_guids_->guids_.begin(), limit2 = it->addr_guids_->guids_.end(); it2 != limit2; ++it2) {
-        accumulate_addresses(it->src_guid_, *it2, addrs, directed);
-      }
 #ifdef OPENDDS_SECURITY
       if (local_crypto_handle() != DDS::HANDLE_NIL && separate_message(it->src_guid_.entityId)) {
         addrs.insert(BUNDLING_PLACEHOLDER); // removed in bundle_mapped_meta_submessages
@@ -4200,7 +4197,6 @@ RtpsUdpDataLink::RtpsWriter::gather_heartbeats_i(MetaSubmessageVec& meta_submess
       meta_submessage.sm_.heartbeat_sm().readerId = ENTITYID_UNKNOWN;
       meta_submessage.sm_.heartbeat_sm().firstSN = to_rtps_seqnum(firstSN);
       meta_submessage.sm_.heartbeat_sm().lastSN = to_rtps_seqnum(lastSN);
-      //meta_submessage.addr_guids_ = remote_reader_guids_;
 
       meta_submessages.push_back(meta_submessage);
       meta_submessage.reset_destination();

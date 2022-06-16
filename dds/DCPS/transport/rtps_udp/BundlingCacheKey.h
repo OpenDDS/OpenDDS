@@ -50,6 +50,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
     return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (BundlingCacheKey)) == 0;
   }
 
+  /*
   BundlingCacheKey& operator=(const BundlingCacheKey& rhs)
   {
     if (this != &rhs) {
@@ -58,6 +59,7 @@ struct OpenDDS_Rtps_Udp_Export BundlingCacheKey {
     }
     return *this;
   }
+  */
 
   void get_contained_guids(GuidSet& set) const
   {
