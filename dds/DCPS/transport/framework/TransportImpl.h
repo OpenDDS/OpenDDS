@@ -299,8 +299,7 @@ public:
   /// subclass (of TransportImpl) doesn't require a reactor.
   ReactorTask_rch reactor_task_;
 
-  struct DoClear : public EventBase
-  {
+  struct DoClear : EventBase {
     DoClear(RcHandle<DataLink> link) : link_(link) {}
     void handle_event() {
       DataLink_rch link = link_.lock();

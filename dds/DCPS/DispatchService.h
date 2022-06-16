@@ -31,8 +31,7 @@ void* fun_ptr_proxy(void* arg)
   return 0;
 }
 
-class OpenDDS_Dcps_Export DispatchService : public virtual RcObject
-{
+class OpenDDS_Dcps_Export DispatchService : public virtual RcObject {
 public:
 
   typedef bool DispatchStatus;
@@ -41,16 +40,16 @@ public:
   static const bool DS_SUCCESS = true;
   static const bool DS_ERROR = false;
 
-  typedef void*(*FunPtr)(void*);
+  typedef void* (*FunPtr)(void*);
   typedef std::pair<FunPtr, void*> FunArgPair;
   typedef OPENDDS_DEQUE(FunArgPair) EventQueue;
 
-  DispatchService(size_t count = 1);
+  explicit DispatchService(size_t count = 1);
   virtual ~DispatchService();
 
   void shutdown(bool immediate = false, EventQueue* const pending = 0);
 
-  DispatchStatus dispatch(FunPtr fun, void* arg = NULL);
+  DispatchStatus dispatch(FunPtr fun, void* arg = 0);
 
   template <typename T>
   DispatchStatus dispatch(T& ref) {

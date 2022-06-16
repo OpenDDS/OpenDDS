@@ -148,7 +148,7 @@ size_t DispatchService::cancel(FunPtr fun, void* arg)
 
 ACE_THR_FUNC_RETURN DispatchService::run(void* arg)
 {
-  DispatchService& dispatcher = *(static_cast<DispatchService*>(arg));
+  DispatchService& dispatcher = *static_cast<DispatchService*>(arg);
   dispatcher.run_event_loop();
   return 0;
 }
