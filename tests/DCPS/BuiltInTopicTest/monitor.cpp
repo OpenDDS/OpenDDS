@@ -1,19 +1,12 @@
-#include "tests/Utils/ExceptionStreams.h"
 #include "tests/Utils/WaitForSample.h"
+#include "common.h"
 
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/Discovery.h>
+#include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsSubscriptionC.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/Discovery.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/StaticIncludes.h>
 
-#include <ace/streams.h>
-#include <ace/Get_Opt.h>
 #include <ace/OS_NS_unistd.h>
 
 using namespace std;
@@ -23,30 +16,13 @@ unsigned int num_parts = 3;
 unsigned int num_topics = 2;
 unsigned int num_subs = 1;
 unsigned int num_pubs = 1;
-const char* topic_name = "Movie Discussion List";
-const char* topic_type_name = "Messenger";
-
-char PART_USER_DATA[] = "Initial DomainParticipant UserData";
-char DW_USER_DATA[] = "Initial DataWriter UserData";
-char DR_USER_DATA[] = "Initial DataReader UserData";
-char TOPIC_DATA[] = "Initial Topic TopicData";
-char GROUP_DATA[] = "Initial GroupData";
-char UPDATED_PART_USER_DATA[] = "Updated DomainParticipant UserData";
-char UPDATED_DW_USER_DATA[] = "Updated DataWriter UserData";
-char UPDATED_DR_USER_DATA[] = "Updated DataReader UserData";
-char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
-char UPDATED_GROUP_DATA[] = "Updated GroupData";
+unsigned int dps_with_user_data = 2;
 
 char* CUR_PART_USER_DATA = PART_USER_DATA;
 char* CUR_DW_USER_DATA = DW_USER_DATA;
 char* CUR_DR_USER_DATA = DR_USER_DATA;
 char* CUR_TOPIC_DATA = TOPIC_DATA;
 char* CUR_GROUP_DATA = GROUP_DATA;
-
-unsigned int dps_with_user_data = 2;
-ACE_TString synch_dir;
-ACE_TCHAR mon1_fname[] = ACE_TEXT("monitor1_done");
-ACE_TCHAR mon2_fname[] = ACE_TEXT("monitor2_done");
 
 int parse_args(int argc, ACE_TCHAR *argv[])
 {
@@ -116,11 +92,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     if (CUR_PART_USER_DATA == UPDATED_PART_USER_DATA) {
       // wait for Monitor 1 done
-      FILE* fp = ACE_OS::fopen((synch_dir + synch_fname).c_str(), ACE_TEXT("r"));
+      FILE* fp = ACE_OS::fopen((synch_dir + mon1_fname).c_str(), ACE_TEXT("r"));
       while (fp == 0) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) waiting monitor1 done ...\n")));
         ACE_OS::sleep(1);
-        fp = ACE_OS::fopen((synch_dir + synch_fname).c_str(), ACE_TEXT("r"));
+        fp = ACE_OS::fopen((synch_dir + mon1_fname).c_str(), ACE_TEXT("r"));
       }
       if (fp != 0) {
         ACE_OS::fclose(fp);
@@ -269,8 +245,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (num_dws_with_data == len) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataWriter changeable qos test PASSED.\n"));
     } else {
-      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor: DataWriter changeable qos test FAILED.\n"),
-                        1);
+      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor: DataWriter changeable qos test FAILED.\n"), 1);
     }
 
     ::DDS::SampleInfoSeq subinfos(10);
@@ -283,8 +258,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                            ::DDS::ALIVE_INSTANCE_STATE);
 
     if (ret != ::DDS::RETCODE_OK && ret != ::DDS::RETCODE_NO_DATA) {
-      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor: failed to read BIT subsciption data.\n"),
-                       1);
+      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor: failed to read BIT subsciption data.\n"), 1);
     }
 
     len = subdata.length();
@@ -295,8 +269,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       } else {
         ACE_ERROR_RETURN((LM_ERROR,
                           "(%P|%t) monitor:  read %d BIT sub data, "
-                          "expected %d subs.\n", len, num_subs),
-                         1);
+                          "expected %d subs.\n", len, num_subs), 1);
       }
     }
 
@@ -334,8 +307,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     if (num_drs_with_data == len) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: DataReader changeable qos test PASSED.\n"));
     } else {
-      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor: DataReader changeable qos test FAILED.\n"),
-                       1);
+      ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor: DataReader changeable qos test FAILED.\n"), 1);
     }
 
     // wait before checking discovered participants
@@ -359,7 +331,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       if (len != num_parts - 1) {
         ACE_ERROR_RETURN((LM_ERROR,
           "(%P|%t) ERROR: monitor: get_discovered_participants expected %d got %d.\n",
-          num_parts, len), 1);
+          num_parts - 1, len), 1);
       }
 
       for (CORBA::ULong i = 0; i < len; ++i) {
@@ -404,7 +376,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Do not constantly poll.
       const ACE_Time_Value delay(0, 100000); // 100ms
       ACE_OS::sleep(delay);
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample expected %u have %u\n", expected_part_count, partdata.length()));
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor: waiting for participant sample expected %u have %u\n",
+                 expected_part_count, partdata.length()));
       Utils::waitForSample(part_rdr);
       ::DDS::SampleInfoSeq pinfos(10);
       ::DDS::ParticipantBuiltinTopicDataSeq pdata(10);
@@ -565,20 +538,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dpf->delete_participant(participant.in());
     TheServiceParticipant->shutdown();
 
+    const ACE_TCHAR* synch_fname = 0;
     if (CUR_PART_USER_DATA == PART_USER_DATA) {
-      // Create synch file.
-      ACE_TString path = synch_dir + synch_fname;
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor1 creating %C\n", path.c_str()));
-      FILE* fp = ACE_OS::fopen(path.c_str(), ACE_TEXT("w"));
-      if (fp != 0) {
-        // Write one byte so that PerlACE::waitforfile_timed works.
-        const char c = 'c';
-        ACE_OS::fwrite(&c, 1, 1, fp);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) monitor1 is done\n")));
-        ACE_OS::fclose(fp);
-      }
+      synch_fname = mon1_fname;
+    } else if (CUR_PART_USER_DATA == UPDATED_PART_USER_DATA) {
+      synch_fname = mon2_fname;
     }
-
+    // Create synch file.
+    ACE_TString path = synch_dir + synch_fname;
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) %C creating %C\n",
+               CUR_PART_USER_DATA == PART_USER_DATA ? "monitor1" : "monitor2",
+               path.c_str()));
+    FILE* fp = ACE_OS::fopen(path.c_str(), ACE_TEXT("w"));
+    if (fp != 0) {
+      // Write one byte so that PerlACE::waitforfile_timed works.
+      const char c = 'c';
+      ACE_OS::fwrite(&c, 1, 1, fp);
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %C is done\n"),
+                 CUR_PART_USER_DATA == PART_USER_DATA ? "monitor1" : "monitor2"));
+      ACE_OS::fclose(fp);
+    }
+    
     ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor main done\n"));
 
   } catch (CORBA::Exception& e) {

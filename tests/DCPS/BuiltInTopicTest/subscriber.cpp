@@ -1,32 +1,10 @@
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
-#include "tests/Utils/ExceptionStreams.h"
+#include "common.h"
 
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/SubscriberImpl.h>
-#include <dds/DCPS/BuiltInTopicUtils.h>
-#include <dds/DCPS/StaticIncludes.h>
-
-#include <ace/streams.h>
-#include <ace/Get_Opt.h>
 
 using namespace std;
-
-char PART_USER_DATA[] = "Initial DomainParticipant UserData";
-char DR_USER_DATA[] = "Initial DataReader UserData";
-char TOPIC_DATA[] = "Initial Topic TopicData";
-char GROUP_DATA[] = "Initial GroupData";
-char UPDATED_PART_USER_DATA[] = "Updated DomainParticipant UserData";
-char UPDATED_DR_USER_DATA[] = "Updated DataReader UserData";
-char UPDATED_TOPIC_DATA[] = "Updated Topic TopicData";
-char UPDATED_GROUP_DATA[] = "Updated GroupData";
-
-ACE_TString synch_dir;
-ACE_TCHAR mon1_fname[] = ACE_TEXT("monitor1_done");
-ACE_TCHAR mon2_fname[] = ACE_TEXT("monitor2_done");
-
-int num_messages = 10;
 
 int parse_args(int argc, ACE_TCHAR *argv[])
 {
@@ -90,7 +68,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     ::Messenger::MessageTypeSupport_var mts = new ::Messenger::MessageTypeSupportImpl();
 
-    if (DDS::RETCODE_OK != mts->register_type(participant.in(), "Messenger")) {
+    if (DDS::RETCODE_OK != mts->register_type(participant.in(), topic_type_name)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: Failed to register the MessageTypeTypeSupport.\n")));
       exit(1);
     }
@@ -103,8 +81,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     topic_qos.topic_data.value.length(topic_data_len);
     topic_qos.topic_data.value.replace(topic_data_len, topic_data_len, reinterpret_cast<CORBA::Octet*>(TOPIC_DATA));
 
-    DDS::Topic_var topic = participant->create_topic("Movie Discussion List",
-                                                     "Messenger",
+    DDS::Topic_var topic = participant->create_topic(topic_name,
+                                                     topic_type_name,
                                                      topic_qos,
                                                      DDS::TopicListener::_nil(),
                                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
