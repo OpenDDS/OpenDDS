@@ -202,7 +202,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::sleep(1);
     }
 
-    if (listener_servant->read_bit_instance()) {
+    if (!listener_servant->read_bit_instance()) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: Built in topic read failure.\n")));
       result = 1;
     }

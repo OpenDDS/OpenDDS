@@ -120,8 +120,8 @@ bool DataReaderListenerImpl::read_bit_instance()
     } else if (publication_handle_ != ::DDS::HANDLE_NIL) {
       handle = publication_handle_;
     } else {
-      ACE_DEBUG((LM_ERROR, ACE_TEXT(
-        "(%P|%t) Can't read bit instance, pre and post restart handles are invalid.\n")));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataReaderListenerImpl::read_bit_instance:"
+                 " Can't read bit instance, pre and post restart handles are invalid.\n"));
       return false;
     }
     DDS::PublicationBuiltinTopicDataSeq data;
@@ -134,27 +134,27 @@ bool DataReaderListenerImpl::read_bit_instance()
     switch (ret) {
     case DDS::RETCODE_OK:
       ACE_DEBUG((LM_DEBUG, ACE_TEXT(
-        "(%P|%t) read bit instance returned ok\n")));
-      return false;
+        "(%P|%t) DataReaderListenerImpl::read_bit_instance: returned ok\n")));
+      return true;
     case DDS::RETCODE_NO_DATA:
-      ACE_ERROR((LM_WARNING, ACE_TEXT(
-        "(%P|%t) read bit instance returned no data\n")));
+      ACE_ERROR((LM_NOTICE, ACE_TEXT(
+        "(%P|%t) NOTICE: DataReaderListenerImpl::read_bit_instance: returned no data. Retrying...\n")));
       break;
     case DDS::RETCODE_BAD_PARAMETER:
-      ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "(%P|%t) read bit instance returned bad parameter\n")));
+      ACE_ERROR((LM_NOTICE, ACE_TEXT(
+        "(%P|%t) NOTICE: DataReaderListenerImpl::read_bit_instance: returned bad parameter. Retrying...\n")));
       break;
     default:
       ACE_ERROR((LM_ERROR, ACE_TEXT(
-        "(%P|%t) ERROR read bit instance returned %i\n"), ret));
-      return true;
+        "(%P|%t) ERROR: DataReaderListenerImpl::read_bit_instance: returned %i\n"), ret));
+      return false;
     }
     ACE_OS::sleep(ACE_Time_Value(0, 100000));
   }
 
   ACE_ERROR((LM_ERROR, ACE_TEXT(
-    "(%P|%t) ERROR read bit instance: giving up after retries\n")));
-  return true;
+    "(%P|%t) ERROR: DataReaderListenerImpl::read_bit_instance: giving up after retries\n")));
+  return false;
 }
 
 void DataReaderListenerImpl::on_sample_rejected(
