@@ -10,8 +10,6 @@
 #include <dds/DCPS/ConditionVariable.h>
 #include <dds/DCPS/ThreadStatusManager.h>
 
-#include <ace/OS_NS_unistd.h>
-
 #include <gtest/gtest.h>
 
 namespace
