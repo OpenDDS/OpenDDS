@@ -558,7 +558,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  CUR_PART_USER_DATA == PART_USER_DATA ? "monitor1" : "monitor2"));
       ACE_OS::fclose(fp);
     }
-    
+
     ACE_DEBUG((LM_DEBUG, "(%P|%t) monitor main done\n"));
 
   } catch (CORBA::Exception& e) {
