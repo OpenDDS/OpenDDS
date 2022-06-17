@@ -87,7 +87,7 @@ TEST(dds_DCPS_PeriodicEvent, Nominal)
   EXPECT_EQ(periodic->enabled(), false);
 
   periodic->enable(OpenDDS::DCPS::TimeDuration(0, 1000), true);
-  
+
   EXPECT_EQ(periodic->enabled(), true);
 
   test_event->wait(3);
