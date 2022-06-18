@@ -84,7 +84,15 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
     if (info.valid_data) {
       DDS::Subscriber_var subscriber = reader->get_subscriber();
       DDS::DomainParticipant_var participant = subscriber->get_participant();
-      const OpenDDS::DCPS::GUID_t writer_guid = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in())->get_repoid(info.publication_handle);
+      OpenDDS::DCPS::DomainParticipantImpl* participant_impl = dynamic_cast<OpenDDS::DCPS::DomainParticipantImpl*>(participant.in());
+      if (!participant_impl) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("ERROR: %N:%l: on_data_available() -")
+                   ACE_TEXT(" could not cast participant!\n")));
+        ACE_OS::exit(-1);
+        return;
+      }
+      const OpenDDS::DCPS::GUID_t writer_guid = participant_impl->get_repoid(info.publication_handle);
       SampleSetMap::iterator it = guid_received_samples_.find(writer_guid);
       if (it == guid_received_samples_.end()) {
         it = guid_received_samples_.insert(SampleSetMap::value_type(writer_guid, std::set<int>())).first;
