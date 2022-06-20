@@ -107,9 +107,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                           PARTICIPANT_QOS_DEFAULT,
                                           DDS::DomainParticipantListener::_nil(),
                                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(participant.in())) {
+    if (!participant) {
       ACE_ERROR((LM_ERROR, "(%P|%t) monitor: create_participant failed.\n"));
-      return 1 ;
+      return 1;
     }
 
     OpenDDS::DCPS::Discovery_rch disc =
@@ -140,7 +140,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     ::DDS::ParticipantBuiltinTopicDataDataReader_var part_reader
         = ::DDS::ParticipantBuiltinTopicDataDataReader::_narrow(part_rdr.in());
-    if (CORBA::is_nil(part_reader.in())) {
+    if (!part_reader) {
       ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_PARTICIPANT_TOPIC datareader.\n"));
       return 1;
     }
@@ -151,7 +151,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_TOPIC_TOPIC);
     ::DDS::TopicBuiltinTopicDataDataReader_var topic_reader
         = ::DDS::TopicBuiltinTopicDataDataReader::_narrow(topic_rdr.in());
-    if (CORBA::is_nil(topic_reader.in())) {
+    if (!topic_reader) {
       ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_TOPIC_TOPIC datareader.\n"));
       return 1;
     }
@@ -164,7 +164,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
     ::DDS::SubscriptionBuiltinTopicDataDataReader_var sub_reader
         = ::DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(subscription_rdr.in());
-    if (CORBA::is_nil(sub_reader.in())) {
+    if (!sub_reader) {
       ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_SUBSCRIPTION_TOPIC datareader.\n"));
       return 1;
     }
@@ -176,7 +176,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
     ::DDS::PublicationBuiltinTopicDataDataReader_var pub_reader
         = ::DDS::PublicationBuiltinTopicDataDataReader::_narrow(publication_rdr.in());
-    if (CORBA::is_nil(pub_reader.in())) {
+    if (!pub_reader) {
       ACE_ERROR((LM_ERROR, "(%P|%t) monitor: failed to get BUILT_IN_PUBLICATION_TOPIC datareader.\n"));
       return 1;
     }
@@ -311,7 +311,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // wait before checking discovered participants
-    ACE_OS::sleep(1);
+    ACE_OS::sleep(5);
 
     {
       ::DDS::InstanceHandleSeq handles;

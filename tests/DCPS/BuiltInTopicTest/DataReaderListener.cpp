@@ -29,7 +29,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 
   try {
     ::Messenger::MessageDataReader_var message_dr = ::Messenger::MessageDataReader::_narrow(reader);
-    if (CORBA::is_nil(message_dr.in())) {
+    if (!message_dr) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderListener: read: _narrow failed.\n")));
       exit(1);
     }

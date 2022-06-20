@@ -61,7 +61,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                           partQos,
                                           DDS::DomainParticipantListener::_nil(),
                                           ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(participant.in())) {
+    if (!participant) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: create_participant failed.\n")));
       return 1;
     }
@@ -86,7 +86,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                      topic_qos,
                                                      DDS::TopicListener::_nil(),
                                                      ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(topic.in())) {
+    if (!topic) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: Failed to create_topic.\n")));
       exit(1);
     }
@@ -103,13 +103,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::Subscriber_var sub = participant->create_subscriber(sub_qos,
                                                              DDS::SubscriberListener::_nil(),
                                                              ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(sub.in())) {
+    if (!sub) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: Failed to create_subscriber.\n")));
       exit(1);
     }
 
     // activate the listener
     DDS::DataReaderListener_var listener(new DataReaderListenerImpl);
+    if (!listener) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: listener is nil.\n")));
+      exit(1);
+    }
+
     DataReaderListenerImpl* listener_servant = dynamic_cast<DataReaderListenerImpl*>(listener.in());
     if (!listener_servant) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -120,16 +125,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::Subscriber_var builtin = participant->get_builtin_subscriber();
     DDS::DataReader_var bitdr = builtin->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
     listener_servant->set_builtin_datareader(bitdr.in());
-
-    if (CORBA::is_nil(listener.in())) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: listener is nil.\n")));
-      exit(1);
-    }
-    if (!listener_servant) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("(%P|%t) %N:%l main()")
-                        ACE_TEXT(" ERROR: listener_servant is nil (dynamic_cast failed)!\n")), -1);
-    }
 
     // Create the Datareaders
     DDS::DataReaderQos dr_qos;
@@ -153,7 +148,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                     dr_qos,
                                                     listener.in(),
                                                     ::OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-    if (CORBA::is_nil(dr.in())) {
+    if (!dr) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) subscriber: create_datareader failed.\n")));
       exit(1);
     }
@@ -222,10 +217,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_OS::fclose(fp);
     }
 
-    if (!CORBA::is_nil(participant.in())) {
+    if (participant) {
       participant->delete_contained_entities();
     }
-    if (!CORBA::is_nil(dpf.in())) {
+    if (dpf) {
       dpf->delete_participant(participant.in());
     }
 
