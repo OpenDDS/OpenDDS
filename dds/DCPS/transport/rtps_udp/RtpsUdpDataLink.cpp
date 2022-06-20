@@ -4134,17 +4134,21 @@ RtpsUdpDataLink::RtpsWriter::update_remote_guids_cache_i(bool add, const RepoId&
     return;
   }
 
-  // We make a new RcHandle to prevent changing what's being pointed to by existing references in the send queue (i.e. to preserve historic values)
-  RcHandle<ConstSharedRepoIdSet> temp = make_rch<ConstSharedRepoIdSet>();
-  if (remote_reader_guids_) {
-    const_cast<RepoIdSet&>(temp->guids_) = remote_reader_guids_->guids_;
+  {
+    ACE_Guard<ACE_Thread_Mutex> rrg_guard(remote_reader_guids_mutex_);
+
+    // We make a new RcHandle to prevent changing what's being pointed to by existing references in the send queue (i.e. to preserve historic values)
+    RcHandle<ConstSharedRepoIdSet> temp = make_rch<ConstSharedRepoIdSet>();
+    if (remote_reader_guids_) {
+      const_cast<RepoIdSet&>(temp->guids_) = remote_reader_guids_->guids_;
+    }
+    if (add) {
+      const_cast<RepoIdSet&>(temp->guids_).insert(guid);
+    } else {
+      const_cast<RepoIdSet&>(temp->guids_).erase(guid);
+    }
+    remote_reader_guids_ = temp;
   }
-  if (add) {
-    const_cast<RepoIdSet&>(temp->guids_).insert(guid);
-  } else {
-    const_cast<RepoIdSet&>(temp->guids_).erase(guid);
-  }
-  remote_reader_guids_ = temp;
 
   link->bundling_cache_.remove_id(GUID_UNKNOWN);
 }
