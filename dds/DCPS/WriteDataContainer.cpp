@@ -380,16 +380,14 @@ WriteDataContainer::reenqueue_all(const RepoId& reader_id,
   }
 
   if (DCPS_debug_level > 9 && resend_data_.size()) {
-    GuidConverter converter(publication_id_);
-    GuidConverter reader(reader_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) WriteDataContainer::reenqueue_all: ")
                ACE_TEXT("domain %d topic %C publication %C copying ")
                ACE_TEXT("sending/sent to resend to %C.\n"),
                domain_id_,
                topic_name_,
-               OPENDDS_STRING(converter).c_str(),
-               OPENDDS_STRING(reader).c_str()));
+               LogGuid(publication_id_).c_str(),
+               LogGuid(reader_id).c_str()));
   }
 
   return DDS::RETCODE_OK;
@@ -707,13 +705,12 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
       if (stale->get_header().message_id_ != SAMPLE_DATA) {
         //this message was a control message so release it
         if (DCPS_debug_level > 9) {
-          GuidConverter converter(publication_id_);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                      ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
                      domain_id_,
                      topic_name_,
-                     OPENDDS_STRING(converter).c_str()));
+                     LogGuid(publication_id_).c_str()));
         }
         writer_->controlTracker.message_delivered();
       }
@@ -748,13 +745,12 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
   if (stale->get_header().message_id_ != SAMPLE_DATA) {
     //this message was a control message so release it
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C control message delivered.\n"),
                  domain_id_,
                  topic_name_,
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(publication_id_).c_str()));
     }
     release_buffer(stale);
     stale = 0;
@@ -776,13 +772,12 @@ WriteDataContainer::data_delivered(const DataSampleElement* sample)
     }
 
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::data_delivered: ")
                  ACE_TEXT("domain %d topic %C publication %C seq# %q %s.\n"),
                  domain_id_,
                  topic_name_,
-                 OPENDDS_STRING(converter).c_str(),
+                 LogGuid(publication_id_).c_str(),
                  acked_seq.getValue(),
                  max_durable_per_instance_
                  ? ACE_TEXT("stored for durability")
@@ -905,13 +900,12 @@ WriteDataContainer::data_dropped(const DataSampleElement* sample,
       if (stale->get_header().message_id_ != SAMPLE_DATA) {
         //this message was a control message so release it
         if (DCPS_debug_level > 9) {
-          GuidConverter converter(publication_id_);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) WriteDataContainer::data_dropped: ")
                      ACE_TEXT("domain %d topic %C publication %C control message dropped.\n"),
                      domain_id_,
                      topic_name_,
-                     OPENDDS_STRING(converter).c_str()));
+                     LogGuid(publication_id_).c_str()));
         }
         writer_->controlTracker.message_dropped();
       }
@@ -975,12 +969,11 @@ WriteDataContainer::remove_excess_durable()
   }
 
   if (n_released && DCPS_debug_level > 9) {
-    const GuidConverter converter(publication_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) WriteDataContainer::remove_excess_durable: ")
                ACE_TEXT("domain %d topic %C publication %C %B samples removed ")
                ACE_TEXT("from durable data.\n"), domain_id_, topic_name_,
-               OPENDDS_STRING(converter).c_str(), n_released));
+               LogGuid(publication_id_).c_str(), n_released));
   }
 }
 
@@ -1073,13 +1066,12 @@ WriteDataContainer::remove_oldest_sample(
     released = true;
 
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
                  ACE_TEXT("domain %d topic %C publication %C sample removed from HISTORY.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(publication_id_).c_str()));
     }
 
   } else if (containing_list == &this->unsent_data_) {
@@ -1092,13 +1084,12 @@ WriteDataContainer::remove_oldest_sample(
     released = true;
 
     if (DCPS_debug_level > 9) {
-      GuidConverter converter(publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) WriteDataContainer::remove_oldest_sample: ")
                  ACE_TEXT("domain %d topic %C publication %C sample removed from unsent.\n"),
                  this->domain_id_,
                  this->topic_name_,
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(publication_id_).c_str()));
     }
   } else {
     ACE_ERROR_RETURN((LM_ERROR,

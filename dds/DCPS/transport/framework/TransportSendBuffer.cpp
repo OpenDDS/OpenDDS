@@ -173,11 +173,11 @@ void
 SingleSendBuffer::retain_all(const RepoId& pub_id)
 {
   if (Transport_debug_level > 5) {
-    GuidConverter converter(pub_id);
+    LogGuid logger(pub_id);
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) SingleSendBuffer::retain_all() - ")
       ACE_TEXT("copying out blocks for publication: %C\n"),
-      OPENDDS_STRING(converter).c_str()
+      logger.c_str()
     ));
   }
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -185,12 +185,12 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
        it != buffers_.end();) {
     if (it->second.first && it->second.second) {
       if (retain_buffer(pub_id, it->second) == REMOVE_ERROR) {
-        GuidConverter converter(pub_id);
+        LogGuid logger(pub_id);
         ACE_ERROR((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: ")
                    ACE_TEXT("SingleSendBuffer::retain_all: ")
                    ACE_TEXT("failed to retain data from publication: %C!\n"),
-                   OPENDDS_STRING(converter).c_str()));
+                   logger.c_str()));
         release_i(it++);
       } else {
         ++it;
@@ -202,12 +202,12 @@ SingleSendBuffer::retain_all(const RepoId& pub_id)
         for (BufferMap::iterator bm_it = fm_it->second.begin();
              bm_it != fm_it->second.end();) {
           if (retain_buffer(pub_id, bm_it->second) == REMOVE_ERROR) {
-            GuidConverter converter(pub_id);
+            LogGuid logger(pub_id);
             ACE_ERROR((LM_WARNING,
                        ACE_TEXT("(%P|%t) WARNING: ")
                        ACE_TEXT("SingleSendBuffer::retain_all: failed to ")
                        ACE_TEXT("retain fragment data from publication: %C!\n"),
-                       OPENDDS_STRING(converter).c_str()));
+                       logger.c_str()));
             release_i(bm_it++);
           } else {
             ++bm_it;

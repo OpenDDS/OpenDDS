@@ -350,13 +350,12 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       }
       if (DCPS_debug_level > 0) {
         RepoId id = dr_servant->get_repo_id();
-        GuidConverter converter(id);
         ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("SubscriberImpl::delete_datareader: ")
                   ACE_TEXT("datareader(topic_name=%C) %C not found.\n"),
                   topic_name.in(),
-                  OPENDDS_STRING(converter).c_str()));
+                  LogGuid(id).c_str()));
       }
       return ::DDS::RETCODE_ERROR;
     }
@@ -663,11 +662,10 @@ SubscriberImpl::set_qos(
 
           if (!pair.second) {
             if (DCPS_debug_level > 0) {
-              GuidConverter converter(id);
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
                         ACE_TEXT("insert %C to DrIdToQosMap failed.\n"),
-                        OPENDDS_STRING(converter).c_str()));
+                        LogGuid(id).c_str()));
             }
             return ::DDS::RETCODE_ERROR;
           }

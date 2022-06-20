@@ -50,9 +50,12 @@ Dependencies
 * MPC is the build system, used to configure the build and generate platform specific build files (Makefiles, VS solution files, etc.).
 * ACE is a library used for cross-platform compatibility, especially networking and event loops.
   It is used both directly and through TAO.
-* TAO is a C++ CORBA implementation built on ACE used extensively in the traditional OpenDDS operating mode which uses the DCPSInfoRepo.
-  TAO types are also used in the End User DDS API.
-  The TAO IDL compiler is used internally and by the end user to allow OpenDDS to use user defined IDL types as topic data.
+* TAO is a C++ CORBA implementation built on ACE.
+
+  * It's used to communicate with DCPSInfoRepo, which is one option for Discovery.
+  * TAO's data types and support for the OMG IDL-to-C++ mapping are also used in the End User DDS API.
+  * The TAO IDL compiler is used internally and by the end user to allow OpenDDS to use user-defined IDL types as topic data.
+
 * Perl is an interpreted language used in the configure script, the tests, and any other scripting in OpenDDS codebase.
 * Google Test is required for OpenDDS tests.
   By default, CMake will be used to build a specific version of Google Test that we have as a submodule.
@@ -80,17 +83,23 @@ These apply to C++ source code, Perl scripts, MPC files, and any other plaintext
   I don't think it makes sense to strictly enforce an 80-column limit, but overly long lines are harder to read.
   Try to keep lines to roughly 80 characters.
 
+.. _dev_guidelines-cxx_standard:
+
 ************
 C++ Standard
 ************
 
-The C++ standard used in OpenDDS is C++03.
-There are some caveats to this but the OpenDDS must be able to be compiled with C++ 2003 compilers.
+The base C++ standard used in OpenDDS is C++03.
+There are some optional features that are only built when a newer C++ standard level is used.  See uses of the MPC feature no_cxx11 and the base project opendds_cxx11.mpb.
+Avoid using implementation-defined extensions (including ``#pragma``). Exceptions are:
+* ``#pragma once`` which only impacts preprocessing and is understood across all supported compilers, or harmlessly ignored if not understood
+* ``#pragma pack`` can only be used on POD structs to influence alignment/padding
 
 Use the C++ standard library as much as possible.
-The standard library should be preferred over ACE, which in turn should be preferred over system specific
+The standard library should be preferred over ACE, which in turn should be preferred over system-specific
 libraries.
 The C++ standard library includes the C standard library by reference, making those identifiers available in namespace std.
+Using C's standard library identifiers in namespace std is preferred over the global namespace -- ``#include <cstring>`` instead of ``#include <string.h>``.
 Not all supported platforms have standard library support for wide characters (``wchar_t``) but this is rarely needed.
 Preprocessor macro ``DDS_HAS_WCHAR`` can be used to detect those platforms.
 
@@ -275,6 +284,7 @@ Preprocessor
 * Prefer ``#ifdef`` and ``#ifndef`` to ``#if defined`` and ``#if !defined`` when testing if a single macro is defined.
 * Leave parentheses off preprocessor operators.  For example, use ``#if defined X && defined Y`` instead of ``#if defined(X) && defined(Y)``.
 * As stated before, preprocessor macros visible to user code must begin with ``OPENDDS_``.
+* See section :ref:`dev_guidelines-cxx_standard` above for notes on ``#pragma``.
 * Ignoring the header guard if there is one, preprocessor statements should be indented using two spaces starting at the pound symbol, like so:
 
 .. code-block:: C++
@@ -494,7 +504,7 @@ Message Content
   We shouldn't go out of our way to replace it in existing logging points, but it should be avoided it in new ones.
 
   - ``ACE_TEXT``'s purpose is to wrap strings and characters in ``L`` on builds where ``uses_wchar=1``, so they become the wide versions.
-  - While not doing it might result in a performance hit for character encoding conversion at runtime, the builds where this happens are rare, so the it's outweighed by the added visual noise to the code and the possibility of bugs introduced by improper use of ``ACE_TEXT``.
+  - While not doing it might result in a performance hit for character encoding conversion at runtime, the builds where this happens are rare, so it's outweighed by the added visual noise to the code and the possibility of bugs introduced by improper use of ``ACE_TEXT``.
 
 - Avoid new usage of ``ACE_ERROR_RETURN`` in order to not hide the return statement within a macro.
 
@@ -504,7 +514,7 @@ Examples
 .. code-block:: C++
 
   if (log_level >= LogLevel::Error) {
-    ACE_ERROR((LM_DEBUG, "(%P|%t) ERROR: example_function: Hello, World!\n"));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: example_function: Hello, World!\n"));
   }
 
   if (log_level >= LogLevel::Warning) {
