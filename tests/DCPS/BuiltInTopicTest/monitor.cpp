@@ -310,31 +310,21 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) monitor: DataReader changeable qos test FAILED.\n"), 1);
     }
 
-    // wait before checking discovered participants
-    ACE_OS::sleep(5);
-
     {
+      // Wait for the expected number of participants to be discovered.
       ::DDS::InstanceHandleSeq handles;
-      const DDS::ReturnCode_t discpart_error = participant->get_discovered_participants(handles);
-      if (discpart_error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants failed: %C\n",
-                   OpenDDS::DCPS::retcode_to_string(discpart_error)));
-        return 1;
-      }
-      if (handles.length() == 0) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants gave no handles, "
-                   "but we expected some\n"));
-        return 1;
-      }
-
-      CORBA::ULong len = handles.length();
-      if (len != num_parts - 1) {
-        ACE_ERROR_RETURN((LM_ERROR,
-          "(%P|%t) ERROR: monitor: get_discovered_participants expected %d got %d.\n",
-          num_parts - 1, len), 1);
+      while (handles.length() < num_parts - 1) {
+        ACE_OS::sleep(1);
+        handles.length(0);
+        const DDS::ReturnCode_t discpart_error = participant->get_discovered_participants(handles);
+        if (discpart_error != DDS::RETCODE_OK) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: monitor: get_discovered_participants failed: %C\n",
+                     OpenDDS::DCPS::retcode_to_string(discpart_error)));
+          return 1;
+        }
       }
 
-      for (CORBA::ULong i = 0; i < len; ++i) {
+      for (CORBA::ULong i = 0; i < handles.length(); ++i) {
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) monitor: participant %d examining participant handle %d.\n"),
                    participant->get_instance_handle(), handles[i]));
