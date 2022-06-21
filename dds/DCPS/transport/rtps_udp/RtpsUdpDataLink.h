@@ -460,6 +460,7 @@ private:
     const bool is_ps_writer_;
 #endif
     mutable ACE_Thread_Mutex mutex_;
+    mutable ACE_Thread_Mutex remote_reader_guids_mutex_;
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;
 
     typedef PmfSporadicTask<RtpsWriter> Sporadic;
@@ -570,7 +571,11 @@ private:
     void update_required_acknack_count(const RepoId& id, CORBA::Long current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
-    RcHandle<ConstSharedRepoIdSet> get_remote_reader_guids() { return remote_reader_guids_; }
+    RcHandle<ConstSharedRepoIdSet> get_remote_reader_guids()
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(remote_reader_guids_mutex_);
+      return remote_reader_guids_;
+    }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
