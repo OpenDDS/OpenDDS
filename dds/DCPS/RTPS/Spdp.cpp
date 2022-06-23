@@ -438,7 +438,7 @@ Spdp::~Spdp()
 void
 Spdp::write_secure_updates()
 {
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -700,7 +700,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1027,7 +1027,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ACE_INET_Addr& from)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1149,7 +1149,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1461,7 +1461,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1735,7 +1735,7 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1786,7 +1786,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -3652,6 +3652,9 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
   if (!outer) return;
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  if (outer->shutting_down()) {
+    return;
+  }
 
   DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
@@ -4454,7 +4457,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    if (initialized_flag_ == false || shutdown_flag_ == true) {
+    if (!initialized_flag_ || shutdown_flag_) {
       return;
     }
     if (sedp_) {
