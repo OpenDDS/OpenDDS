@@ -18,13 +18,26 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+/**
+ * Barrier provides thread-coordination across an expected number of threads
+ *
+ * Threads which call Barrier::wait() will all wait until the expected number
+ * of threads have called Barrier::wait(), at which point they will all be woken
+ * up and the next "phase" of waiting will begin (again, being released when the
+ * expected number of waiting threads is reached
+ */
 class OpenDDS_Dcps_Export Barrier {
 public:
 
+  /**
+   * Creates a Barrier class of the specified number of expected calls to wait
+   * @param expected the number of threads to call wait before being waking
+   */
   explicit Barrier(size_t expected);
 
   virtual ~Barrier();
 
+  /// Waits until the expected number of waiting threads has been reached
   void wait();
 
 private:

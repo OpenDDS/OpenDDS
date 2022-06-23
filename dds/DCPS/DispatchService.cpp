@@ -14,10 +14,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 DispatchService::DispatchService(size_t count)
  : cv_(mutex_)

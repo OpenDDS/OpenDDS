@@ -11,10 +11,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
  : barrier_(count + 1)

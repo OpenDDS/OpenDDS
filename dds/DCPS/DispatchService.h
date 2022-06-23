@@ -18,10 +18,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 template <typename T>
 void* fun_ptr_proxy(void* arg)

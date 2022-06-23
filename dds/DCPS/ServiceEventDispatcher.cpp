@@ -11,10 +11,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 ServiceEventDispatcher::ServiceEventDispatcher(size_t count)
  : dispatcher_(make_rch<DispatchService>(count))

@@ -11,10 +11,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 SporadicEvent::SporadicEvent(EventDispatcher_rch dispatcher, EventBase_rch event)
  : dispatcher_(dispatcher)

@@ -12,10 +12,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 class OpenDDS_Dcps_Export PeriodicEvent : public EventBase
 {

@@ -17,23 +17,41 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
+/**
+ * ThreadPool is a light-weight utility class for starting a group of threads
+ *
+ * ThreadPool creates several threads at construction and attempts to join them
+ * at destruction. Users of ThreadPool are responsible for making sure the
+ * running threads are in a joinable state before the destruction of ThreadPool
+ */
 class OpenDDS_Dcps_Export ThreadPool
 {
 public:
 
+  /// A typedef for the starting point of the ThreadPool
   typedef ACE_THR_FUNC_RETURN(*FunPtr)(void*);
 
+  /**
+   * Creates a ThreadPool with the specifed size, starting point, and argument
+   * @param count number of threads
+   * @param fun starting point for the threads of the ThreadPool
+   * @param arg an optional argument to pass to the starting function
+   */
   ThreadPool(size_t count, FunPtr fun, void* arg = 0);
   virtual ~ThreadPool();
 
+  /// A static helper function used to redirect to requested thread start point
   static ACE_THR_FUNC_RETURN run(void* arg);
 
-  bool contains(ACE_thread_t) const;
+  /**
+   * Check if a specific thread id belongs to this ThreadPool
+   * @param id thread id to check
+   * @returns true if the ThreadPool contains thread with specified id, false otherwise
+   */
+  bool contains(ACE_thread_t id) const;
 
 private:
 
