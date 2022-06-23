@@ -15,13 +15,10 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
-class OpenDDS_Dcps_Export Barrier
-{
+class OpenDDS_Dcps_Export Barrier {
 public:
 
   explicit Barrier(size_t expected);

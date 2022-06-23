@@ -73,7 +73,7 @@ private:
 };
 
 /**
- * PmfEvent is a helper class for adapting MonotonicTimePoint-accepting member
+ * PmfNowEvent is a helper class for adapting MonotonicTimePoint-accepting member
  * funtions of existing classes into dispatchable events. (c.f. PmfEvent)
  */
 template <typename Delegate>
@@ -139,7 +139,7 @@ public:
 
   /*
    * Cancel a scheduled event dispatch.
-   * @param id the ide of the event timer to cancel
+   * @param id the id of the event timer to cancel
    * @return the number of canceled events (0 for failure to cancel, 1 for success)
    */
   virtual size_t cancel(long id) = 0;

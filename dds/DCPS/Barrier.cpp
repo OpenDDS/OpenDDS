@@ -11,19 +11,17 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 Barrier::Barrier(size_t expected)
- : mutex_()
- , tsm_()
- , cv_(mutex_)
- , expected_(expected)
- , count_(0)
- , waiting_(0)
- , running_(true)
+  : mutex_()
+  , tsm_()
+  , cv_(mutex_)
+  , expected_(expected)
+  , count_(0)
+  , waiting_(0)
+  , running_(true)
 {
 }
 
