@@ -88,7 +88,8 @@ ShmemDataLink::open(const std::string& peer_address)
   }
 
   if (start(static_rchandle_cast<TransportSendStrategy>(send_strategy_),
-            static_rchandle_cast<TransportStrategy>(recv_strategy_))
+            static_rchandle_cast<TransportStrategy>(recv_strategy_),
+            false)
       != 0) {
     stop_i();
     ACE_ERROR_RETURN((LM_ERROR,
