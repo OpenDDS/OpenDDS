@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.21.0 of OpenDDS
-OpenDDS 3.21.0 is currently in development, so this list might change.
+OpenDDS 3.21.0 was released on Jun 24 2022.
 
 ### Additions:
 - Reduced code generation for XTypes (#3456)
