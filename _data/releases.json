@@ -2,6 +2,22 @@
    {
       "assets" : [
          {
+            "browser_download_url" : "https://github.com/objectcomputing/OpenDDS/releases/download/DDS-3.21/OpenDDS-3.21.zip",
+            "name" : "OpenDDS-3.21.zip"
+         },
+         {
+            "browser_download_url" : "https://github.com/objectcomputing/OpenDDS/releases/download/DDS-3.21/OpenDDS-3.21.tar.gz",
+            "name" : "OpenDDS-3.21.tar.gz"
+         }
+      ],
+      "html_url" : "https://github.com/objectcomputing/OpenDDS/releases/tag/DDS-3.21",
+      "latest_in_series" : 1,
+      "published_at" : "2022-06-24T20:15:35Z",
+      "version" : "3.21.0"
+   },
+   {
+      "assets" : [
+         {
             "browser_download_url" : "https://github.com/objectcomputing/OpenDDS/releases/download/DDS-3.20/OpenDDS-3.20.zip",
             "name" : "OpenDDS-3.20.zip"
          },
