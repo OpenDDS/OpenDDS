@@ -1858,47 +1858,6 @@ sub remedy_gen_doxygen {
 
 ############################################################################
 
-sub verify_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tgz_dox});
-  my $good = 0;
-  if (-f $file) {
-    open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
-    my $target = "html/dds/index.html";
-    while (<TGZ>) {
-      if (/$target/) {
-        $good = 1;
-        last;
-      }
-    }
-    close TGZ;
-  }
-  return $good;
-}
-
-sub message_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tgz_dox});
-  return "Could not find file $file";
-}
-
-sub remedy_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tar_dox});
-  my $curdir = getcwd;
-  chdir($settings->{clone_dir});
-  print "Creating file $settings->{tar_dox}\n";
-  my $result = system("tar -cf ../$settings->{tar_dox} html");
-  if (!$result) {
-    print "Gzipping file $settings->{tar_dox}\n";
-    $result = system("gzip -9 ../$settings->{tar_dox}");
-  }
-  chdir($curdir);
-  return !$result;
-}
-
-############################################################################
-
 sub verify_zip_doxygen {
   my $settings = shift();
   my $file = join("/", $settings->{workspace}, $settings->{zip_dox});
@@ -2016,7 +1975,6 @@ sub get_sftp_release_files {
     push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
   }
   if (!$settings->{skip_doxygen}) {
-    push(@files, $settings->{tgz_dox});
     push(@files, $settings->{zip_dox});
   }
 
@@ -2594,8 +2552,6 @@ my %global_settings = (
     zip_src => "${base_name}.zip",
     md5_src => "${base_name}.md5",
     sha256_src => "${base_name}.sha256",
-    tar_dox => "${base_name}-doxygen.tar",
-    tgz_dox => "${base_name}-doxygen.tar.gz",
     zip_dox => "${base_name}-doxygen.zip",
     devguide_ver => "${base_name_prefix}$parsed_version->{series_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
@@ -2820,15 +2776,7 @@ my @release_steps = (
     skip    => $global_settings{skip_doxygen},
   },
   {
-    name    => 'Create Unix Doxygen Archive',
-    prereqs => ['Generate Doxygen'],
-    verify  => sub{verify_tgz_doxygen(@_)},
-    message => sub{message_tgz_doxygen(@_)},
-    remedy  => sub{remedy_tgz_doxygen(@_)},
-    skip    => $global_settings{skip_doxygen},
-  },
-  {
-    name    => 'Create Windows Doxygen Archive',
+    name    => 'Create Doxygen Archive',
     prereqs => ['Generate Doxygen'],
     verify  => sub{verify_zip_doxygen(@_)},
     message => sub{message_zip_doxygen(@_)},
