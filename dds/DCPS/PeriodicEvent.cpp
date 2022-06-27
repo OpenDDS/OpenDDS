@@ -79,6 +79,16 @@ void PeriodicEvent::handle_event()
   }
 }
 
+void PeriodicEvent::handle_cancel()
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  if (event_) {
+    RcHandle<EventBase> event_copy(event_);
+    guard.release();
+    event_copy->handle_cancel();
+  }
+}
+
 } // DCPS
 } // OpenDDS
 
