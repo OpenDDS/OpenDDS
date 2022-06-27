@@ -22,8 +22,6 @@ struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
     : src_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), redundant_(false) {}
   MetaSubmessage(const RepoId& src, const RepoId& dst)
     : src_guid_(src), dst_guid_(dst), redundant_(false) {}
-  MetaSubmessage(const RepoId& src, const RepoId& dst, RcHandle<ConstSharedRepoIdSet> addr_guids)
-    : src_guid_(src), dst_guid_(dst), redundant_(false) {}
 
   void reset_destination()
   {

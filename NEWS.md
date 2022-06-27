@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
-## Version 3.21.0 of OpenDDS
-OpenDDS 3.21.0 is currently in development, so this list might change.
+## Version 3.22.0 of OpenDDS
+OpenDDS 3.22.0 is currently in development, so this list might change.
 
 ### Additions:
 - TODO: Add your features here
@@ -11,6 +11,28 @@ OpenDDS 3.21.0 is currently in development, so this list might change.
 
 ### Notes:
 - TODO: Add your notes here
+
+## Version 3.21.0 of OpenDDS
+OpenDDS 3.21.0 was released on Jun 24 2022.
+
+### Additions:
+- Reduced code generation for XTypes (#3456)
+- `ValueWriter::begin_struct_member` now takes a member descriptor for identifying key fields (#3459)
+- Added detailed logging for invalid QoS (#3475)
+- Added example usage for `inspect` (#3493)
+- RTPS:
+  - Added debug logging for non-final RTPS messages (#3504)
+  - `ConnectionRecord` now reports the round-trip latency to the RtpsRelay (#3506)
+
+### Fixes:
+- Add locking to `RecorderImpl` (#3531)
+- Fixed minor issues with choosing addresses and hostnames in `NetworkResource` (#3527)
+- RTPS:
+  - `PropertySeq` now checks for invalid length (#3432)
+  - `UseXTypes` RTPS discovery option now accepts descriptive values (#3493)
+    - This was added in OpenDDS 3.20.0, but wasn't functional.
+  - Performance improvements for RTPS (#3500, #3508)
+  - Fixed a bug where heartbeats were being sent to readers that didn't exist anymore (#3540)
 
 ## Version 3.20.0 of OpenDDS
 OpenDDS 3.20.0 was released on Mar 25 2022.
