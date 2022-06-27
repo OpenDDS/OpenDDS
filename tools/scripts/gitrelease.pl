@@ -42,6 +42,9 @@ my $workspace_info_filename = "info.json";
 my $default_sftp_base_dir = "";
 my $sftp_downloads_path = "downloads/OpenDDS";
 my $sftp_previous_releases_path = 'previous-releases/';
+my $rtd_url_base = 'https://readthedocs.org/api/v3/';
+my $rtd_project_url = "${rtd_url_base}projects/opendds/";
+my $json_mime = 'application/json';
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -192,6 +195,7 @@ sub help {
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
     "                         GitHub.\n" .
+    "  READ_THE_DOCS_TOKEN    Access token for Read the Docs Admin\n" .
     "  SFTP_USERNAME          SFTP Username\n" .
     "  SFTP_HOST              SFTP Server Address\n" .
     "\n" .
@@ -461,23 +465,67 @@ sub download {
   my %args = @_;
 
   my $agent = LWP::UserAgent->new();
+  if ($args{curl_user_agent}) {
+    $agent->agent('curl/7.71.0');
+  }
 
-  my %get_args = ();
+  my @header = ();
+  my $req_content = undef;
+
+  if (exists($args{token})) {
+    push(@header, Authorization => "Token $args{token}");
+  }
+
+  if (exists($args{req_json_ref})) {
+    $args{req_content_ref} = [$json_mime, JSON::PP::encode_json($args{req_json_ref})];
+  }
+  if (exists($args{req_content_ref})) {
+    push(@header, 'Content-Type' => $args{req_content_ref}->[0]);
+    $req_content = $args{req_content_ref}->[1];
+  }
+
+  my $method = $args{method} // 'GET';
+  my $request = HTTP::Request->new($method, $url, \@header, $req_content);
+
   my $to = "";
+  my $content_file = undef;
   if (exists($args{save_path})) {
-    $get_args{':content_file'} = $args{save_path};
+    $content_file = $args{save_path};
     $to = " to \"$args{save_path}\"";
   }
 
-  print("Downloading $url$to...\n");
-  my $response = $agent->get($url, %get_args);
+  print("Downloading ($method) $url$to...\n");
+  if ($args{debug}) {
+    print($request->as_string());
+  }
+  my $response = $agent->request($request, $content_file);
+  if ($args{debug}) {
+    print($response->as_string());
+  }
+  if (exists($args{response_ref})) {
+    ${$args{response_ref}} = $response;
+  }
   if (!$response->is_success()) {
     print STDERR "ERROR: ", $response->status_line(), "\n";
+    print STDERR "CONTENT TYPE: ", $response->content_type(), "\n";
+    print STDERR "CONTENT ", "=" x 72, "\n", $response->content(),
+      "\nEND CONTENT ", "=" x 68, "\n";
+
     return 0;
   }
 
   if (exists($args{content_ref})) {
     ${$args{content_ref}} = $response->decoded_content();
+  }
+
+  if (exists($args{res_json_ref})) {
+    if ($response->content_type() ne $json_mime) {
+      print STDERR "ERROR: Expected $json_mime response, not ", $response->content_type(), "\n";
+      print STDERR "CONTENT ", "=" x 72, "\n", $response->content(),
+        "\nEND CONTENT ", "=" x 68, "\n";
+      return 0;
+    }
+    ${$args{res_json_ref}} = JSON::PP::decode_json($response->content());
   }
 
   return 1;
@@ -1766,47 +1814,6 @@ sub remedy_gen_doxygen {
 
 ############################################################################
 
-sub verify_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tgz_dox});
-  my $good = 0;
-  if (-f $file) {
-    open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
-    my $target = "html/dds/index.html";
-    while (<TGZ>) {
-      if (/$target/) {
-        $good = 1;
-        last;
-      }
-    }
-    close TGZ;
-  }
-  return $good;
-}
-
-sub message_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tgz_dox});
-  return "Could not find file $file";
-}
-
-sub remedy_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tar_dox});
-  my $curdir = getcwd;
-  chdir($settings->{clone_dir});
-  print "Creating file $settings->{tar_dox}\n";
-  my $result = system("tar -cf ../$settings->{tar_dox} html");
-  if (!$result) {
-    print "Gzipping file $settings->{tar_dox}\n";
-    $result = system("gzip -9 ../$settings->{tar_dox}");
-  }
-  chdir($curdir);
-  return !$result;
-}
-
-############################################################################
-
 sub verify_zip_doxygen {
   my $settings = shift();
   my $file = join("/", $settings->{workspace}, $settings->{zip_dox});
@@ -1886,7 +1893,6 @@ sub get_release_files {
     push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
   }
   if (!$settings->{skip_doxygen}) {
-    push(@files, $settings->{tgz_dox});
     push(@files, $settings->{zip_dox});
   }
   return @files;
@@ -2203,6 +2209,75 @@ sub remedy_website_release {
 }
 
 ############################################################################
+
+sub rtd_api {
+  my $settings = shift();
+  my $method = shift();
+  my $suburl = shift();
+  my %args = @_;
+
+  if (!defined($settings->{read_the_docs_token})) {
+    die("READ_THE_DOCS_TOKEN must be defined");
+  }
+
+  my $response;
+  return 0 unless(download(
+    $rtd_project_url . $suburl,
+    method => $method,
+    curl_user_agent => 1, # Read the Docs gives back a weird error without this
+    token => $settings->{read_the_docs_token},
+    response_ref => \$response,
+    @_,
+  ));
+
+  if (exists($args{expected_status}) && $response->code() != $args{expected_status}) {
+    print STDERR "ERROR: Expected HTTP Status $args{expected_code}, got ", $response->code(), "\n";
+    return 0;
+  }
+
+  return 1;
+}
+
+sub rtd_api_version {
+  my $settings = shift();
+  my $method = shift();
+
+  my $name = lc($settings->{git_tag});
+  return rtd_api($settings, $method, "versions/$name/", @_);
+}
+
+sub verify_rtd_activate {
+  my $settings = shift();
+
+  my $version_info;
+  die("Failed to get version info") unless(rtd_api_version(
+    $settings, 'GET',
+    res_json_ref => \$version_info,
+  ));
+  return $version_info->{active} && !$version_info->{hidden};
+}
+
+sub message_rtd_activate {
+  my $settings = shift();
+  return "Read the docs version for the new release has to be activated";
+}
+
+sub remedy_rtd_activate {
+  my $settings = shift();
+
+  die("Failed to set read the docs version to active") unless(rtd_api_version(
+    $settings, 'PATCH',
+    req_json_ref => {
+      active => $JSON::PP::true,
+      hidden => $JSON::PP::false,
+    },
+    expect_status => 204,
+  ));
+  return 1;
+}
+
+############################################################################
+
 sub verify_email_list {
   # Can't verify
   my $settings = shift;
@@ -2428,8 +2503,6 @@ my %global_settings = (
     tgz_src => "${base_name}.tar.gz",
     zip_src => "${base_name}.zip",
     md5_src => "${base_name}.md5",
-    tar_dox => "${base_name}-doxygen.tar",
-    tgz_dox => "${base_name}-doxygen.tar.gz",
     zip_dox => "${base_name}-doxygen.zip",
     devguide_ver => "${base_name_prefix}$parsed_version->{series_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
@@ -2437,6 +2510,7 @@ my %global_settings = (
     git_url => "git\@github.com:${github_user}/${repo_name}.git",
     github_repo => $repo_name,
     github_token => $ENV{GITHUB_TOKEN},
+    read_the_docs_token => $ENV{READ_THE_DOCS_TOKEN},
     sftp_user => $ENV{SFTP_USERNAME},
     sftp_host => $ENV{SFTP_HOST},
     sftp_base_dir => $sftp_base_dir,
@@ -2639,15 +2713,7 @@ my @release_steps = (
     skip    => $global_settings{skip_doxygen},
   },
   {
-    name    => 'Create Unix Doxygen Archive',
-    prereqs => ['Generate Doxygen'],
-    verify  => sub{verify_tgz_doxygen(@_)},
-    message => sub{message_tgz_doxygen(@_)},
-    remedy  => sub{remedy_tgz_doxygen(@_)},
-    skip    => $global_settings{skip_doxygen},
-  },
-  {
-    name    => 'Create Windows Doxygen Archive',
+    name    => 'Create Doxygen Archive',
     prereqs => ['Generate Doxygen'],
     verify  => sub{verify_zip_doxygen(@_)},
     message => sub{message_zip_doxygen(@_)},
@@ -2734,6 +2800,14 @@ my @release_steps = (
     remedy  => sub{remedy_git_changes_pushed(@_, 0)},
     post_release => 1,
     skip => $global_settings{skip_github},
+  },
+  {
+    name => 'Activate Version on Read the Docs',
+    verify => sub{verify_rtd_activate(@_)},
+    message => sub{message_rtd_activate(@_)},
+    remedy => sub{remedy_rtd_activate(@_)},
+    post_release => 1,
+    can_force => 1,
   },
   {
     name    => 'Email DDS-Release-Announce list',
