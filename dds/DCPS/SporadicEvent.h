@@ -65,6 +65,7 @@ public:
 
 private:
   mutable ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex event_mutex_;
   WeakRcHandle<EventDispatcher> dispatcher_;
   RcHandle<EventBase> event_;
   MonotonicTimePoint expiration_;

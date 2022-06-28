@@ -69,7 +69,11 @@ public:
   void handle_cancel();
 
 private:
+
+  void handle_event_scheduling();
+
   mutable ACE_Thread_Mutex mutex_;
+  mutable ACE_Thread_Mutex event_mutex_;
   WeakRcHandle<EventDispatcher> dispatcher_;
   RcHandle<EventBase> event_;
   TimeDuration period_;

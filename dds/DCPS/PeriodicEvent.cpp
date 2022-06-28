@@ -59,7 +59,7 @@ bool PeriodicEvent::enabled() const
   return timer_id_ > 0;
 }
 
-void PeriodicEvent::handle_event()
+void PeriodicEvent::handle_event_scheduling()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   timer_id_ = 0;
@@ -72,6 +72,12 @@ void PeriodicEvent::handle_event()
       timer_id_ = id;
     }
   }
+}
+
+void PeriodicEvent::handle_event()
+{
+  handle_event_scheduling();
+  ACE_Guard<ACE_Thread_Mutex> guard(event_mutex_);
   if (event_) {
     RcHandle<EventBase> event_copy(event_);
     guard.release();
@@ -81,7 +87,7 @@ void PeriodicEvent::handle_event()
 
 void PeriodicEvent::handle_cancel()
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  ACE_Guard<ACE_Thread_Mutex> guard(event_mutex_);
   if (event_) {
     RcHandle<EventBase> event_copy(event_);
     guard.release();
