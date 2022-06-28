@@ -47,6 +47,7 @@ struct FieldInfo {
   const AstTypeClassification::Classification cls_;
   AST_Array* arr_;
   AST_Sequence* seq_;
+  AST_Map* map_;
   AST_Type* as_base_;
   AST_Type* as_act_;
   const AstTypeClassification::Classification as_cls_;

@@ -30,6 +30,7 @@
 
 class AST_Array;
 class AST_Sequence;
+class AST_Map;
 class AST_Decl;
 class AST_Union;
 class AST_Annotation_Decl;

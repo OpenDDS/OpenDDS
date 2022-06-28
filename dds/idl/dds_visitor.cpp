@@ -36,6 +36,7 @@
 #include <ast_predefined_type.h>
 #include <ast_root.h>
 #include <ast_sequence.h>
+#include <ast_map.h>
 #include <ast_structure.h>
 #include <ast_union.h>
 #include <ast_valuetype.h>
@@ -476,6 +477,14 @@ dds_visitor::visit_sequence(AST_Sequence*)
   //sequences always appear as typedefs, see visit_typedef ()
   return 0;
 }
+
+int
+dds_visitor::visit_map(AST_Map*)
+{
+  //maps always appear as typedefs, see visit_typedef ()
+  return 0;
+}
+
 
 int
 dds_visitor::visit_operation(AST_Operation*)

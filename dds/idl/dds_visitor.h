@@ -92,6 +92,8 @@ public:
 
   virtual int visit_sequence(AST_Sequence* node);
 
+  virtual int visit_map(AST_Map* node);
+
   virtual int visit_string(AST_String* node);
 
   virtual int visit_typedef(AST_Typedef* node);

@@ -381,7 +381,7 @@ namespace AstTypeClassification {
   const Classification CL_UNKNOWN = 0, CL_SCALAR = 1, CL_PRIMITIVE = 2,
     CL_STRUCTURE = 4, CL_STRING = 8, CL_ENUM = 16, CL_UNION = 32, CL_ARRAY = 64,
     CL_SEQUENCE = 128, CL_WIDE = 256, CL_BOUNDED = 512, CL_INTERFACE = 1024,
-    CL_FIXED = 2048;
+    CL_FIXED = 2048, CL_MAP = 4096;
 
   inline Classification classify(AST_Type* type)
   {
@@ -409,6 +409,8 @@ namespace AstTypeClassification {
         ((dynamic_cast<AST_String*>(type)->max_size()->ev()->u.ulval == 0)
         ? 0 : CL_BOUNDED) |
         ((type->node_type() == AST_Decl::NT_wstring) ? CL_WIDE : 0);
+    case AST_Decl::NT_map:
+      return CL_MAP;
     case AST_Decl::NT_sequence:
       return CL_SEQUENCE |
         ((dynamic_cast<AST_Sequence*>(type)->unbounded()) ? 0 : CL_BOUNDED);
@@ -418,10 +420,6 @@ namespace AstTypeClassification {
       return CL_SCALAR | CL_ENUM;
     case AST_Decl::NT_interface:
       return CL_INTERFACE;
-#ifdef ACE_HAS_CDR_FIXED
-    case AST_Decl::NT_fixed:
-      return CL_FIXED;
-#endif
     default:
       return CL_UNKNOWN;
     }

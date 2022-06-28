@@ -819,6 +819,15 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       break;
     }
 
+  case AST_ConcreteType::NT_map:
+    {
+      AST_Map* const n = dynamic_cast<AST_Map*>(type);
+      v.name = anonymous_name + ".s";
+      consider(v, n->key_type(), v.name);
+      consider(v, n->value_type(), v.name);
+      break;
+    }
+
   case AST_ConcreteType::NT_sequence:
     {
       AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
@@ -1336,6 +1345,67 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
 }
 
 void
+typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_type_object)
+{
+  AST_Map* const n = dynamic_cast<AST_Map*>(type);
+
+  ACE_CDR::ULong bound = 0;
+  if (!n->unbounded()) {
+    bound = n->max_size()->ev()->u.ulval;
+  }
+
+  const TryConstructFailAction trycon = be_global->try_construct(n->key_type());
+  OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
+  if (be_global->is_external(n->key_type())) {
+    cef |= OpenDDS::XTypes::IS_EXTERNAL;
+  }
+  const OpenDDS::XTypes::TypeIdentifier minimal_elem_ti = get_minimal_type_identifier(n->key_type());
+  const OpenDDS::XTypes::TypeIdentifier complete_elem_ti = get_complete_type_identifier(n->key_type());
+
+  if (be_global->is_plain(type) && !force_type_object) {
+    const OpenDDS::XTypes::EquivalenceKind minimal_ek =
+      OpenDDS::XTypes::is_fully_descriptive(minimal_elem_ti) ? OpenDDS::XTypes::EK_BOTH : OpenDDS::XTypes::EK_MINIMAL;
+    const OpenDDS::XTypes::EquivalenceKind complete_ek =
+      minimal_ek == OpenDDS::XTypes::EK_BOTH ? minimal_ek : OpenDDS::XTypes::EK_COMPLETE;
+    if (bound < 256) {
+      OpenDDS::XTypes::TypeIdentifier minimal_ti(OpenDDS::XTypes::TI_PLAIN_MAP_SMALL);
+      minimal_ti.map_sdefn().header.equiv_kind = minimal_ek;
+      minimal_ti.map_sdefn().header.element_flags = cef;
+      minimal_ti.map_sdefn().bound = bound;
+      minimal_ti.map_sdefn().element_identifier = minimal_elem_ti;
+
+      if (minimal_ek == OpenDDS::XTypes::EK_BOTH) {
+        fully_desc_type_identifier_map_[type] = minimal_ti;
+      } else {
+        OpenDDS::XTypes::TypeIdentifier complete_ti(OpenDDS::XTypes::TI_PLAIN_MAP_SMALL);
+        complete_ti.map_sdefn().header.equiv_kind = complete_ek;
+        complete_ti.map_sdefn().header.element_flags = cef;
+        complete_ti.map_sdefn().bound = bound;
+        complete_ti.map_sdefn().element_identifier = complete_elem_ti;
+
+        const TypeIdentifierPair ti_pair = {minimal_ti, complete_ti};
+        hash_type_identifier_map_[type] = ti_pair;
+      }
+    }
+  } else {
+    OpenDDS::XTypes::TypeObject minimal_to, complete_to;
+    minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
+    minimal_to.minimal.kind = OpenDDS::XTypes::TK_SEQUENCE;
+    minimal_to.minimal.sequence_type.header.common.bound = bound;
+    minimal_to.minimal.sequence_type.element.common.element_flags = cef;
+    minimal_to.minimal.sequence_type.element.common.type = minimal_elem_ti;
+
+    complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
+    complete_to.complete.kind = OpenDDS::XTypes::TK_SEQUENCE;
+    complete_to.complete.sequence_type.header.common.bound = bound;
+    complete_to.complete.sequence_type.element.common.element_flags = cef;
+    complete_to.complete.sequence_type.element.common.type = complete_elem_ti;
+
+    update_maps(type, minimal_to, complete_to);
+  }
+}
+
+void
 typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool force_type_object)
 {
   AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
@@ -1555,6 +1625,12 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
   case AST_ConcreteType::NT_array:
     {
       generate_array_type_identifier(type, force_type_object);
+      break;
+    }
+
+  case AST_ConcreteType::NT_map:
+    {
+      generate_map_type_identifier(type, force_type_object);
       break;
     }
 

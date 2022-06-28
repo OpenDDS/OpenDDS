@@ -111,7 +111,7 @@ struct GeneratorBase
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
       return map_type_string(chartype, false);
     }
-    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_ARRAY | CL_ENUM | CL_FIXED)) {
+    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
     if (cls & CL_INTERFACE) {
@@ -1484,6 +1484,7 @@ struct Cxx11Generator : GeneratorBase
         gen_array(af.arr_, af.type_name_, elem_type, "  ");
       } else if (af.seq_) {
         gen_sequence(af.type_name_, elem_type, "  ");
+      } else if (af.map_) {
       }
     }
 

@@ -75,6 +75,7 @@ private:
   void generate_enum_type_identifier(AST_Type* type);
   void generate_array_type_identifier(AST_Type* type, bool force_type_object);
   void generate_sequence_type_identifier(AST_Type* type, bool force_type_object);
+  void generate_map_type_identifier(AST_Type* type, bool force_type_object);
   void generate_alias_type_identifier(AST_Type* type);
   void generate_primitive_type_identifier(AST_Type* type);
   void update_maps(AST_Type* type,
