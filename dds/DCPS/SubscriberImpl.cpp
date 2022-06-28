@@ -582,7 +582,7 @@ SubscriberImpl::notify_datareaders()
         }
         it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(this), listener, it->second, listener, true, false));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(listener, it->second, listener, true, false));
       }
     }
   }

@@ -2028,7 +2028,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
           set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
         } else {
-          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(sub, listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, true, true));
+          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, true, true));
         }
       } else {
         notify_status_condition_no_sample_lock();

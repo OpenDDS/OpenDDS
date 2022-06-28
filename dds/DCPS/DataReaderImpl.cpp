@@ -3054,7 +3054,7 @@ DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
         set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
         subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(subscriber, listener, rchandle_from(this), reader == this, true, true));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(listener, rchandle_from(this), reader == this, true, true));
       }
     }
     else
@@ -3509,21 +3509,20 @@ void DataReaderImpl::OnDataOnReaders::execute()
 
 void DataReaderImpl::OnDataAvailable::execute()
 {
-  RcHandle<SubscriberImpl> subscriber = subscriber_.lock();
   RcHandle<DataReaderImpl> data_reader = data_reader_.lock();
-  if (!subscriber || !data_reader) {
-    return;
-  }
 
-  if (call_ && (data_reader->get_status_changes() & ::DDS::DATA_AVAILABLE_STATUS)) {
+  if (call_ && data_reader && (data_reader->get_status_changes() & ::DDS::DATA_AVAILABLE_STATUS)) {
     listener_->on_data_available(data_reader.in());
   }
 
-  if (set_reader_status_) {
+  if (data_reader && set_reader_status_) {
     data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
   }
-  if (set_subscriber_status_) {
-    subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+  if (data_reader && set_subscriber_status_) {
+    RcHandle<SubscriberImpl> subscriber = data_reader->get_subscriber_servant();
+    if (subscriber) {
+      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+    }
   }
 }
 void DataReaderImpl::initialize_lookup_maps()

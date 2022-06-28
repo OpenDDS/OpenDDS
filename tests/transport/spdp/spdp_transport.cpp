@@ -281,8 +281,8 @@ bool run_test()
   RepoId id = rd.generate_participant_guid();
   const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd, OpenDDS::XTypes::TypeLookupService_rch()));
 
-  const DDS::Subscriber_var sVar;
-  spdp->init_bit(sVar);
+  RcHandle<BitSubscriber> bit_subscriber = make_rch<BitSubscriber>();
+  spdp->init_bit(bit_subscriber);
   reactor_wait();
 
   // Check if the port override worked.

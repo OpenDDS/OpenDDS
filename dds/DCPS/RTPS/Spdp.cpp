@@ -137,9 +137,10 @@ namespace {
 void Spdp::init(DDS::DomainId_t /*domain*/,
                 DCPS::RepoId& guid,
                 const DDS::DomainParticipantQos& qos,
-                RtpsDiscovery* disco,
                 XTypes::TypeLookupService_rch tls)
 {
+  type_lookup_service_ = tls;
+
   bool enable_endpoint_announcements = true;
   bool enable_type_lookup_service = config_->use_xtypes();
 
@@ -215,17 +216,6 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 
   guid = guid_; // may have changed in SpdpTransport constructor
   sedp_->ignore(guid);
-  sedp_->init(guid_, *disco, domain_, tls);
-  tport_->open(sedp_->reactor_task());
-
-#ifdef OPENDDS_SECURITY
-  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
-  if (sedp_endpoint) {
-    const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
-    ice_agent_->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<AgentInfoListener>(rchandle_from(this)));
-  }
-#endif
-  initialized_flag_ = true;
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
@@ -262,7 +252,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  init(domain, guid, qos, disco, tls);
+  init(domain, guid, qos, tls);
 
 #ifdef OPENDDS_SECURITY
   init_participant_sec_attributes(participant_sec_attr_);
@@ -307,7 +297,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  init(domain, guid_, qos, disco, tls);
+  init(domain, guid_, qos, tls);
 
   DDS::Security::Authentication_var auth = security_config_->get_authentication();
   DDS::Security::AccessControl_var access = security_config_->get_access_control();
@@ -579,10 +569,7 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, boo
 void
 Spdp::publish_location_update_i(const DiscoveredParticipantIter& iter)
 {
-  DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* locbit = part_loc_bit();
-  if (locbit) {
-    iter->second.location_ih_ = locbit->store_synthetic_data(iter->second.location_data_, DDS::NEW_VIEW_STATE);
-  }
+  iter->second.location_ih_ = bit_subscriber_->add_participant_location(iter->second.location_data_, DDS::NEW_VIEW_STATE);
 }
 #endif
 
@@ -945,16 +932,10 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       if (discoveredBit.user_data != pdataBit.user_data ||
           (from_sedp && iter->second.bit_ih_ == DDS::HANDLE_NIL)) {
         discoveredBit.user_data = pdataBit.user_data;
-#ifndef DDS_HAS_MINIMUM_BIT
-        DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-        if (bit) {
-          // If secure user data, this is the first time we should be seeing
-          // the real user data.
-          iter->second.bit_ih_ =
-            bit->store_synthetic_data(pdataBit,
-                                      secure_part_user_data() ? DDS::NEW_VIEW_STATE : DDS::NOT_NEW_VIEW_STATE);
-        }
-#endif /* DDS_HAS_MINIMUM_BIT */
+
+        // If secure user data, this is the first time we should be
+        // seeing the real user data.
+        iter->second.bit_ih_ = bit_subscriber_->add_participant(pdataBit, secure_part_user_data() ? DDS::NEW_VIEW_STATE : DDS::NOT_NEW_VIEW_STATE);
       }
       if (locators_changed(iter->second.pdata_.participantProxy, pdata.participantProxy)) {
         sedp_->update_locators(pdata);
@@ -1086,12 +1067,7 @@ Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
 {
 #ifndef DDS_HAS_MINIMUM_BIT
   if (!secure_part_user_data()) { // else the user data is assumed to be blank
-    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-    if (bit) {
-      DDS::ParticipantBuiltinTopicData pbtd = partBitData(dp_iter->second.pdata_);
-      dp_iter->second.bit_ih_ =
-        bit->store_synthetic_data(pbtd, DDS::NEW_VIEW_STATE);
-    }
+    dp_iter->second.bit_ih_ = bit_subscriber_->add_participant(partBitData(dp_iter->second.pdata_), DDS::NEW_VIEW_STATE);
   }
 
   process_location_updates_i(dp_iter);
@@ -2169,35 +2145,32 @@ Spdp::remove_discovered_participant_i(const DiscoveredParticipantIter& iter)
 }
 
 void
-Spdp::init_bit(const DDS::Subscriber_var& bit_subscriber)
+Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
 {
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    bit_subscriber_ = bit_subscriber;
-  }
+  OPENDDS_ASSERT(bit_subscriber);
 
-  // This is here to make sure thread status gets a valid BIT Subscriber
+  bit_subscriber_ = bit_subscriber;
+
+  // Defer initilization until we have the bit subscriber.
+  sedp_->init(guid_, *disco_, domain_, type_lookup_service_);
+  tport_->open(sedp_->reactor_task());
   tport_->enable_periodic_tasks();
-}
 
-class Noop : public DCPS::ReactorInterceptor::Command {
-public:
-  void execute() {}
-};
+#ifdef OPENDDS_SECURITY
+  DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
+  if (sedp_endpoint) {
+    const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
+    ice_agent_->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<AgentInfoListener>(rchandle_from(this)));
+  }
+#endif
+
+  initialized_flag_ = true;
+}
 
 void
 Spdp::fini_bit()
 {
-  DCPS::ReactorTask_rch reactor_task;
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    bit_subscriber_ = 0;
-    reactor_task = sedp_->reactor_task();
-  }
-  if (!reactor_task->is_shut_down()) {
-    DCPS::ReactorInterceptor::CommandPtr command = reactor_task->interceptor()->execute_or_enqueue(DCPS::make_rch<Noop>());
-    command->wait();
-  }
+  bit_subscriber_->clear();
 }
 
 namespace {
@@ -4342,18 +4315,13 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
   connection_record.protocol = DCPS::RTPS_RELAY_STUN_PROTOCOL;
   connection_record.latency = DCPS::TimeDuration::zero_value.to_dds_duration();
 
-  DCPS::ConnectionRecordDataReaderImpl* dr = outer->connection_record_bit();
-  if (!dr) {
-    return;
-  }
-
   switch (sc) {
   case ICE::ServerReflexiveStateMachine::SRSM_None:
     if (relay_srsm_.latency_available()) {
       connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
       connection_record.latency = relay_srsm_.latency().to_dds_duration();
       relay_srsm_.latency_available(false);
-      outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber(), true, connection_record));
+      outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, true, connection_record));
     }
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
@@ -4363,11 +4331,11 @@ void Spdp::SpdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::St
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     connection_record.latency = relay_srsm_.latency().to_dds_duration();
     relay_srsm_.latency_available(false);
-    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber(), true, connection_record));
+    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, true, connection_record));
     break;
   case ICE::ServerReflexiveStateMachine::SRSM_Unset:
     connection_record.address = DCPS::LogAddr(relay_srsm_.unset_stun_server_address()).c_str();
-    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber(), false, connection_record));
+    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
     break;
   }
 #else
@@ -4387,10 +4355,9 @@ void Spdp::SpdpTransport::disable_relay_stun_task()
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = DCPS::RTPS_RELAY_STUN_PROTOCOL;
 
-  DCPS::ConnectionRecordDataReaderImpl* dr = outer->connection_record_bit();
-  if (dr && relay_srsm_.stun_server_address() != ACE_INET_Addr())  {
+  if (relay_srsm_.stun_server_address() != ACE_INET_Addr())  {
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
-    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber(), false, connection_record));
+    outer->sedp_->job_queue()->enqueue(DCPS::make_rch<DCPS::WriteConnectionRecords>(outer->bit_subscriber_, false, connection_record));
   }
 
   relay_srsm_ = ICE::ServerReflexiveStateMachine();
@@ -4464,29 +4431,21 @@ void Spdp::SpdpTransport::thread_status_task(const DCPS::MonotonicTimePoint& now
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
-  DCPS::InternalThreadBuiltinTopicDataDataReaderImpl* bit = outer->internal_thread_bit();
-
   typedef DCPS::ThreadStatusManager::List List;
   List running;
   List removed;
   TheServiceParticipant->get_thread_status_manager().harvest(last_harvest, running, removed);
   last_harvest = now;
-  if (bit) {
-    for (List::const_iterator i = removed.begin(); i != removed.end(); ++i) {
-      DCPS::InternalThreadBuiltinTopicData data;
-      data.thread_id = i->bit_key().c_str();
-      bit->set_instance_state(bit->lookup_instance(data), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-    }
-    for (List::const_iterator i = running.begin(); i != running.end(); ++i) {
-      DCPS::InternalThreadBuiltinTopicData data;
-      data.thread_id = i->bit_key().c_str();
-      data.utilization = i->utilization(now);
-      bit->store_synthetic_data(data, DDS::NEW_VIEW_STATE, i->timestamp());
-    }
-  } else if (DCPS::DCPS_debug_level >= 2) {
-    // Not necessarily an error. App could be shutting down.
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Spdp::SpdpTransport::thread_status_task(): "
-               "Could not get thread data reader.\n"));
+  for (List::const_iterator i = removed.begin(); i != removed.end(); ++i) {
+    DCPS::InternalThreadBuiltinTopicData data;
+    data.thread_id = i->bit_key().c_str();
+    outer->bit_subscriber_->remove_thread_status(data);
+  }
+  for (List::const_iterator i = running.begin(); i != running.end(); ++i) {
+    DCPS::InternalThreadBuiltinTopicData data;
+    data.thread_id = i->bit_key().c_str();
+    data.utilization = i->utilization(now);
+    outer->bit_subscriber_->add_thread_status(data, DDS::NEW_VIEW_STATE, i->timestamp());
   }
 
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -4862,27 +4821,7 @@ void Spdp::remove_discovered_participant(const DiscoveredParticipantIter& iter)
   }
   bool removed = endpoint_manager().disassociate(iter->second);
   if (removed) {
-#ifndef DDS_HAS_MINIMUM_BIT
-    DCPS::ParticipantBuiltinTopicDataDataReaderImpl* bit = part_bit();
-    DCPS::ParticipantLocationBuiltinTopicDataDataReaderImpl* loc_bit = part_loc_bit();
-    // bit may be null if the DomainParticipant is shutting down
-    if ((bit && iter->second.bit_ih_ != DDS::HANDLE_NIL) ||
-        (loc_bit && iter->second.location_ih_ != DDS::HANDLE_NIL)) {
-      {
-        const DDS::InstanceHandle_t bit_ih = iter->second.bit_ih_;
-        const DDS::InstanceHandle_t location_ih = iter->second.location_ih_;
-
-        if (bit && bit_ih != DDS::HANDLE_NIL) {
-          bit->set_instance_state(bit_ih,
-                                  DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-        }
-        if (loc_bit && location_ih != DDS::HANDLE_NIL) {
-          loc_bit->set_instance_state(location_ih,
-                                      DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-        }
-      }
-    }
-#endif /* DDS_HAS_MINIMUM_BIT */
+    bit_subscriber_->remove_participant(iter->second.bit_ih_, iter->second.location_ih_);
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalParticipant::remove_discovered_participant: "
         "erasing %C (%B)\n",

@@ -20,6 +20,7 @@
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/DiscoveryListener.h>
 #include <dds/DCPS/RcEventHandler.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 
 #include <ace/Time_Value.h>
 #include <ace/Event_Handler.h>
@@ -128,7 +129,7 @@ public:
 
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
   virtual RepoId get_repo_id() const = 0;
-  virtual DDS::Subscriber_var get_builtin_subscriber() const { return DDS::Subscriber_var(); }
+  virtual RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const { return RcHandle<BitSubscriber>(); }
 
   void terminate_send_if_suspended();
 
