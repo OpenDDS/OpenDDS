@@ -8,7 +8,8 @@ use Cwd;
 use File::Basename;
 use File::stat;
 use File::Temp qw/tempdir/;
-use File::Path qw/make_path/;
+use File::Path qw/make_path remove_tree/;
+use File::Copy qw/copy/;
 use Getopt::Long;
 use JSON::PP;
 use Storable qw/dclone/;
@@ -195,6 +196,9 @@ sub help {
     "                         be assumed it's always the highest version. Passing 0\n" .
     "                         forces it to consider this to be a update to an earlier\n" .
     "                         micro series.\n" .
+    "  --upload-shapes-demo   Check GitHub for a finished shapes demo build workflow\n" .
+    "                         run. Then download, repackage, and upload the results\n" .
+    "                         to the download server.\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
@@ -567,6 +571,235 @@ sub get_current_branch {
   close($fh);
   die("Couldn't get branch name") if (!$branch_name);
   return $branch_name;
+}
+
+sub create_archive {
+  my $src_dir = shift();
+  my $arc = shift();
+
+  my $arc_name = basename($arc);
+  my $src_dir_parent = dirname($src_dir);
+  my $src_dir_name = basename($src_dir);
+  my $chdir = ChangeDir->new($src_dir_parent);
+
+  my $cmd;
+  if ($arc_name =~ /\.tar\.gz$/) {
+    $cmd = ['tar', '--create', '--use-compress-program', 'gzip -9', '--file', $arc, $src_dir_name];
+  }
+  elsif ($arc_name =~ /\.zip$/) {
+    $cmd = ['zip', '--quiet', '-9', '--recurse-paths', $arc, $src_dir_name];
+  }
+  else {
+    die("Can't guess archive type from name: $arc_name");
+  }
+
+  return run_command($cmd);
+}
+
+sub extract_archive {
+  my $arc = shift();
+  my $dst_dir = shift();
+
+  my $arc_name = basename($arc);
+  my $chdir = ChangeDir->new($dst_dir);
+
+  my $cmd;
+  if ($arc_name =~ /\.zip$/) {
+    $cmd = ['unzip', $arc];
+  }
+  else {
+    die("Can't guess archive type from name: $arc_name");
+  }
+
+  return run_command($cmd);
+}
+
+sub sftp_missing {
+  my $settings = shift();
+  my $sub_dir = shift();
+
+  my $url = "$settings->{download_url}/";
+  if ($url !~ /^https?:\/\//) {
+    $url = "http://$url";
+  }
+
+  my $content;
+  if (!download($url, content_ref => \$content)) {
+    die("Couldn't get SFTP contents from $url");
+  }
+
+  my @missing;
+  for my $file (@_) {
+    if ($content !~ /$file/) {
+      push(@missing, $file);
+    }
+  }
+
+  return @missing;
+}
+
+sub new_sftp {
+  my $settings = shift();
+
+  my $sftp = Net::SFTP::Foreign->new(
+    host => $settings->{sftp_host},
+    user => $settings->{sftp_user},
+    autodie => 1,
+  );
+
+  $sftp->setcwd($settings->{sftp_base_dir});
+  $sftp->setcwd($sftp_downloads_path);
+
+  return $sftp;
+}
+
+sub get_actions_url {
+  my $settings = shift();
+
+  my $ph = $settings->{pithub};
+  return "/repos/$ph->{user}/$ph->{repo}/actions";
+}
+
+sub is_shapes_workflow_path {
+  my $path = shift();
+  return $path =~ /ishapes/;
+}
+
+sub get_last_shapes_run {
+  my $settings = shift();
+
+  my $result = $settings->{pithub}->request(
+    method => 'GET',
+    path => get_actions_url($settings) . '/runs',
+    params => {
+      branch => $settings->{git_tag},
+    },
+  );
+  for my $run (@{$result->content->{workflow_runs}}) {
+    if (is_shapes_workflow_path($run->{path})) {
+      print("Last workflow run for $settings->{git_tag} was $run->{html_url}\n");
+      return $run;
+    }
+  }
+
+  return undef;
+}
+
+sub upload_shapes_demo {
+  my $settings = shift();
+
+  my $ws_subdir = "$settings->{workspace}/shapes-demo";
+  if (-d $ws_subdir) {
+    remove_tree($ws_subdir);
+  }
+  mkdir($ws_subdir) or die ("mkdir failed: $!");
+
+  my $ph = $settings->{pithub};
+  my $actions_url = get_actions_url($settings);
+
+  # Get the last successful shapes run
+  my $run = get_last_shapes_run($settings);
+  if (!defined($run)) {
+    die("No shapes demo run found!");
+  }
+  if ($run->{status} ne 'completed') {
+    print("It's listed as not finished, run this again when it finishes succesfully.\n");
+    exit(0);
+  }
+  if ($run->{conclusion} ne 'success') {
+    die("Conclusion is listed as: $run->{conclusion}\n",
+      "Try rerunning the specfic job that failed?\n");
+  }
+
+  # Get the artifacts from that run
+  my $result = $ph->request(
+    method => 'GET',
+    path => "$actions_url/runs/$run->{id}/artifacts",
+  );
+  my @artifacts;
+  for my $artifact (@{$result->content->{'artifacts'}}) {
+    print("FOUND ID: $artifact->{id} NAME: $artifact->{name}\n");
+    my $filename = "$artifact->{name}.zip";
+    push(@artifacts, {
+      id => $artifact->{id},
+      name => $artifact->{name},
+      filename => $filename,
+      path => "$ws_subdir/$filename",
+    });
+  }
+  for my $artifact (@artifacts) {
+    print("Getting $artifact->{filename}...\n");
+    $result = $ph->request(
+      method => 'GET',
+      path => "$actions_url/artifacts/$artifact->{id}/zip",
+    );
+    open(my $fd, '>', $artifact->{path}) or die ("Could not open $artifact->{path}: $!");
+    binmode($fd);
+    print $fd $result->raw_content();
+    close($fd);
+  }
+
+  # Prepare and archive demo files
+  my $base_name = "ShapesDemo-${base_name_prefix}$settings->{version}-";
+  my @to_upload = ();
+  for my $artifact (@artifacts) {
+    my $os_name;
+    if ($artifact->{name} =~ /^(.*)_artifact$/) {
+      $os_name = $1;
+    }
+    else {
+      die("Unexpected artifact name: $artifact->{name}");
+    }
+    my $dir_name = $base_name . $os_name;
+    my $dir_path = "$ws_subdir/$dir_name";
+    mkdir($dir_path) or die ("mkdir failed: $!");
+
+    print("Unzipping $artifact->{filename} to $dir_name...\n");
+    extract_archive($artifact->{path}, $dir_path) or die("Extract artifact failed");
+
+    my $ishapes_src = 'examples/DCPS/ishapes';
+    my @files = (
+      "$ishapes_src/SHAPESDEMO_README",
+    );
+    for my $file (@files) {
+      my $filename = basename($file);
+      copy($file, "$dir_path/$filename") or die("copy $filename failed: $!");
+    }
+
+    print("Archiving $dir_name...\n");
+    my $arc_ext;
+    if ($os_name =~ /windows/i) {
+      $arc_ext = '.zip';
+    }
+    elsif ($os_name =~ /linux/i) {
+      $arc_ext = '.tar.gz';
+      # Make sure the executable has the exec bit
+      chmod(0755, "$dir_path/ishapes") or die("Failed to chmod ishapes: $!");
+    }
+    else {
+      die("Can't derive archive type from artifact name: $os_name (new OS?)");
+    }
+    my $arc = $dir_path . $arc_ext;
+    push(@to_upload, $arc);
+    create_archive($dir_path, $arc) or die("Failed to create demo archive $arc");
+  }
+
+  # Delete old files
+  my $sftp = new_sftp($settings);
+  $sftp->setcwd('ShapesDemo');
+  foreach my $file (map {$_->{filename}} @{$sftp->ls()}) {
+    if ($file =~ /^ShapesDemo-/) {
+      print("deleting $file\n");
+      $sftp->remove($file);
+    }
+  }
+
+  # Upload new ones
+  foreach my $upload (@to_upload) {
+    my $name = basename($upload);
+    print("putting $name\n");
+    $sftp->put($upload, $name);
+  }
 }
 
 ############################################################################
@@ -2032,24 +2265,13 @@ sub get_sftp_release_files {
 sub verify_sftp_upload {
   my $settings = shift();
 
-  my $url = "$settings->{download_url}/";
-  if ($url !~ /^https?:\/\//) {
-    $url = "http://$url";
+  my $sub_dir = "";
+  $sub_dir = $sftp_previous_releases_path if (!$settings->{is_highest_version});
+  my @missing = sftp_missing($settings, $sub_dir, get_sftp_release_files($settings));
+  for my $file (@missing) {
+    print "$file not found\n";
   }
-  $url .= $sftp_previous_releases_path if (!$settings->{is_highest_version});
-  my $content;
-  if (!download($url, content_ref => \$content)) {
-    print "Could not get current release files from $url";
-    return 0;
-  }
-
-  foreach my $file (get_sftp_release_files($settings)) {
-    if ($content !~ /$file/) {
-      print "$file not found in $url\n";
-      return 0;
-    }
-  }
-  return 1;
+  return scalar(@missing) ? 0 : 1;
 }
 
 sub message_sftp_upload {
@@ -2059,14 +2281,7 @@ sub message_sftp_upload {
 sub remedy_sftp_upload {
   my $settings = shift();
 
-  my $sftp = Net::SFTP::Foreign->new(
-    host => $settings->{sftp_host},
-    user => $settings->{sftp_user},
-    autodie => 1,
-  );
-
-  $sftp->setcwd($settings->{sftp_base_dir});
-  $sftp->setcwd($sftp_downloads_path);
+  my $sftp = new_sftp($settings);
 
   my @current_release_files = map {$_->{filename}} @{$sftp->ls()};
   my @new_release_files = get_sftp_release_files($settings);
@@ -2529,6 +2744,7 @@ my $skip_sftp = 0;
 my $skip_github = undef;
 my $retcon = 0;
 my $sftp_base_dir = $default_sftp_base_dir;
+my $upload_shapes_demo = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2552,6 +2768,7 @@ GetOptions(
   'skip-sftp' => \$skip_sftp,
   'sftp-base-dir=s' => \$sftp_base_dir,
   'skip-github=i' => \$skip_github,
+  'upload-shapes-demo' => \$upload_shapes_demo,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -3147,7 +3364,11 @@ sub run_step {
   $step->{verified} = 1;
 }
 
-if ($ignore_args || ($workspace && $parsed_version)) {
+my $alt = $upload_shapes_demo;
+if ($upload_shapes_demo) {
+  upload_shapes_demo(\%global_settings);
+}
+elsif (!$alt && ($ignore_args || ($workspace && $parsed_version))) {
   my @steps_to_do;
   my $no_steps = scalar(@release_steps);
   if ($step_expr) {
@@ -3171,7 +3392,7 @@ if ($ignore_args || ($workspace && $parsed_version)) {
 }
 else {
   $status = 1;
-  print STDERR "ERROR: Invalid Arguments, see --help for Valid Usage\n";
+  print STDERR "ERROR: Invalid arguments, see --help for valid usage\n";
 }
 
 exit $status;
