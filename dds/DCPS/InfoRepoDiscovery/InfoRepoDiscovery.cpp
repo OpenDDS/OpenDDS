@@ -14,6 +14,7 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"
@@ -305,19 +306,19 @@ InfoRepoDiscovery::bit_config()
 #endif
 }
 
-DDS::Subscriber_ptr
+RcHandle<BitSubscriber>
 InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 {
 #if defined (DDS_HAS_MINIMUM_BIT)
   ACE_UNUSED_ARG(participant);
-  return 0;
+  return RcHandle<BitSubscriber>();
 #else
   if (!TheServiceParticipant->get_BIT()) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   if (create_bit_topics(participant) != DDS::RETCODE_OK) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   DDS::Subscriber_var bit_subscriber =
@@ -331,7 +332,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during transport initialization\n"));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   // DataReaders
@@ -397,15 +398,15 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::init_bit")
                    ACE_TEXT(" - Error <%C> enabling subscriber\n"), retcode_to_string(ret)));
       }
-      return 0;
+      return RcHandle<BitSubscriber>();
     }
 
   } catch (const CORBA::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during DataReader initialization\n"));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
-  return bit_subscriber._retn();
+  return make_rch<BitSubscriber>(bit_subscriber);
 #endif
 }
 
