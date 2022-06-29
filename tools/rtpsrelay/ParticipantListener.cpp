@@ -35,7 +35,7 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
     const auto& data = datas[idx];
     const auto& info = infos[idx];
 
-    switch (infos[idx].instance_state) {
+    switch (info.instance_state) {
     case DDS::ALIVE_INSTANCE_STATE:
       if (info.valid_data) {
         GuidAddrSet::Proxy proxy(guid_addr_set_);
