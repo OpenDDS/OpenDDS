@@ -72,7 +72,9 @@ module RtpsRelay {
     @key string relay_id;
     @key GUID_t guid;
     boolean active;
+    DDS::Time_t active_ts;
     boolean alive;
+    DDS::Time_t alive_ts;
     DDS::UserDataQosPolicy user_data;
   };
 
