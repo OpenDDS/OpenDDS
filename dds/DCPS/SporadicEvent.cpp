@@ -66,10 +66,16 @@ void SporadicEvent::cancel()
   }
 }
 
+void SporadicEvent::handle_event_scheduling()
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  timer_id_ = 0;
+}
+
 void SporadicEvent::handle_event()
 {
+  handle_event_scheduling();
   ACE_Guard<ACE_Thread_Mutex> guard(event_mutex_);
-  timer_id_ = 0;
   if (event_) {
     RcHandle<EventBase> event_copy(event_);
     guard.release();
