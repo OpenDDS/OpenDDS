@@ -85,9 +85,7 @@ void RelayParticipantStatusReporter::set_alive(const GuidAddrSet::Proxy& /*proxy
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
-    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: "
-               "RelayParticipantStatusReporter::set_alive participant %C not found\n",
-               guid_to_string(repoid).c_str()));
+    // Okay.
     return;
   }
 
@@ -114,9 +112,7 @@ void RelayParticipantStatusReporter::set_active(const GuidAddrSet::Proxy& /*prox
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
-    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: "
-               "RelayParticipantStatusReporter::set_active participant %C not found\n",
-               guid_to_string(repoid).c_str()));
+    // Okay.
     return;
   }
 
@@ -144,9 +140,7 @@ void RelayParticipantStatusReporter::set_alive_active(const GuidAddrSet::Proxy& 
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
-    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: "
-               "RelayParticipantStatusReporter::set_alive_active participant %C not found\n",
-               guid_to_string(repoid).c_str()));
+    // Okay.
     return;
   }
 
