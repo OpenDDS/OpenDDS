@@ -21,7 +21,7 @@ PeriodicEvent::PeriodicEvent(EventDispatcher_rch dispatcher, EventBase_rch event
 {
 }
 
-void PeriodicEvent::enable(const TimeDuration& period, bool strict_timing)
+void PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, bool strict_timing)
 {
   const MonotonicTimePoint now = MonotonicTimePoint::now();
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -35,6 +35,11 @@ void PeriodicEvent::enable(const TimeDuration& period, bool strict_timing)
         expiration_ = expiration;
         timer_id_ = id;
         strict_timing_ = strict_timing;
+        if (immediate_dispatch) {
+          dispatcher->dispatch(rchandle_from(this));
+        }
+      } else {
+        ACE_ERROR((LM_ERROR, "(%P|%t) PeriodicEvent::enable: failed to schedule\n"));
       }
     }
   }

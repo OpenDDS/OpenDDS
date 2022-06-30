@@ -43,9 +43,10 @@ public:
    * strict timing may potentially lead to CPU starvation if the dispatch takes
    * longer than the requested period.
    * @param period the time period used to schedule / reschedule the base event
+   * @param immediate_dispatch set to true to immediately dispatch base event
    * @param strict_timing set to true to strictly calculate scheduled dispatch times
    */
-  void enable(const TimeDuration& period, bool strict_timing = true);
+  void enable(const TimeDuration& period, bool immediate_dispatch = true, bool strict_timing = true);
 
   /**
    * Disable the PeriodicEvent, canceling the scheduled base event if enabled.
