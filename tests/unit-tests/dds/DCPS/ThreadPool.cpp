@@ -7,6 +7,7 @@
 
 #include <dds/DCPS/ThreadPool.h>
 
+#include <ace/Atomic_Op.h>
 #include <ace/OS_NS_unistd.h>
 
 #include <gtest/gtest.h>

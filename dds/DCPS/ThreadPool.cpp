@@ -9,6 +9,8 @@
 
 #include "ThreadPool.h"
 
+#include <ace/Guard_T.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -26,7 +28,9 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
       ACE_Thread::spawn(run, this, THR_NEW_LWP | THR_JOINABLE, 0, &(ids_[i]));
     }
   }
-  barrier_.wait();
+  if (count) {
+    barrier_.wait();
+  }
 }
 
 ThreadPool::~ThreadPool()

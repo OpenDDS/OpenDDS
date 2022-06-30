@@ -10,9 +10,9 @@
 
 #include "dcps_export.h"
 
-#include "Barrier.h"
 #include "PoolAllocator.h"
 
+#include <ace/Barrier.h>
 #include <ace/Thread.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -57,7 +57,7 @@ private:
 
   void join_all();
 
-  Barrier barrier_;
+  ACE_Barrier barrier_;
   FunPtr fun_;
   void* arg_;
   mutable ACE_Thread_Mutex mutex_;
