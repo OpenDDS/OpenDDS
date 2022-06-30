@@ -42,7 +42,7 @@ void DispatchService::shutdown(bool immediate, EventQueue* const pending)
   cv_.notify_all();
 
   if (pool_.contains(ACE_Thread::self())) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Warning :: DispatchService::shutdown: Contained Thread Attempting To Call Shutdown."));
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR :: DispatchService::shutdown: Contained Thread Attempting To Call Shutdown."));
     if (pending) {
       pending->clear();
     }
