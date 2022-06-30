@@ -232,11 +232,12 @@ public:
   {
     const auto pos = cache_.find(name);
     if (pos != cache_.end()) {
-      guids = pos->second;
+      guids.insert(pos->second.begin(), pos->second.end());
       return;
     }
-    TrieNodeT::lookup(root_, Name(name), guids);
-    cache_[name] = guids;
+    T& cache_temp = cache_[name];
+    TrieNodeT::lookup(root_, Name(name), cache_temp);
+    guids.insert(cache_temp.begin(), cache_temp.end());
   }
 
 private:
