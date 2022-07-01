@@ -79,10 +79,10 @@ TEST(dds_DCPS_PeriodicEvent, Nominal)
   // First call should happen immediately due to default args
 
   test_event->wait(2);
-  EXPECT_EQ(test_event->call_count(), 2u);
+  EXPECT_GE(test_event->call_count(), 2u);
 
   test_event->wait(3);
-  EXPECT_EQ(test_event->call_count(), 3u);
+  EXPECT_GE(test_event->call_count(), 3u);
 
   periodic->disable();
 
@@ -93,10 +93,10 @@ TEST(dds_DCPS_PeriodicEvent, Nominal)
   EXPECT_EQ(periodic->enabled(), true);
 
   test_event->wait(4);
-  EXPECT_EQ(test_event->call_count(), 4u);
+  EXPECT_GE(test_event->call_count(), 4u);
 
   test_event->wait(5);
-  EXPECT_EQ(test_event->call_count(), 5u);
+  EXPECT_GE(test_event->call_count(), 5u);
 
   periodic->disable();
   dispatcher->shutdown(true);
@@ -108,18 +108,18 @@ TEST(dds_DCPS_PeriodicEvent, NoDoubleExec)
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::PeriodicEvent> periodic = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::PeriodicEvent>(dispatcher, test_event);
 
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, false);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, false);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, true);
+  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false);
+  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false);
+  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true);
 
   test_event->wait(1);
   EXPECT_EQ(test_event->call_count(), 1u);
 
   periodic->disable();
 
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, true);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, true);
-  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 200000), false, false);
+  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true);
+  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, true);
+  periodic->enable(OpenDDS::DCPS::TimeDuration(0, 500000), false, false);
 
   test_event->wait(2);
   EXPECT_EQ(test_event->call_count(), 2u);
