@@ -239,6 +239,7 @@ public:
   ServerReflexiveStateMachine()
     : message_class_(STUN::REQUEST)
     , send_count_(0)
+    , latency_available_(false)
   {}
 
   // Return Unset if transitioning from a determined SRA to an undetermined SRA.
@@ -261,6 +262,26 @@ public:
     return message.transaction_id == message_.transaction_id;
   }
 
+  DCPS::TimeDuration latency() const
+  {
+    return latency_;
+  }
+
+  bool latency_available() const
+  {
+    return latency_available_;
+  }
+
+  void latency_available(bool flag)
+  {
+    latency_available_ = flag;
+  }
+
+  bool connected() const
+  {
+    return server_reflexive_address_ != ACE_INET_Addr();
+  }
+
 private:
   StateChange start(const ACE_INET_Addr& address, size_t indication_count_limit, const DCPS::GuidPrefix_t& guid_prefix);
   StateChange stop();
@@ -274,6 +295,9 @@ private:
   ACE_INET_Addr stun_server_address_;
   ACE_INET_Addr server_reflexive_address_;
   size_t send_count_;
+  DCPS::MonotonicTimePoint timestamp_;
+  DCPS::TimeDuration latency_;
+  bool latency_available_;
  };
 
 } // namespace ICE

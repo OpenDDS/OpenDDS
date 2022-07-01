@@ -23,7 +23,7 @@ class TcpConnection;
 
 class TcpReceiveStrategy
   : public TransportReceiveStrategy<>,
-    public RcEventHandler
+    public virtual RcEventHandler
 {
 public:
 

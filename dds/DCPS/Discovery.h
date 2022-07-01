@@ -53,7 +53,7 @@ class DataReaderImpl;
  * InfoRepo-based discovery and RTPS Discovery.
  *
  */
-class OpenDDS_Dcps_Export Discovery : public RcObject {
+class OpenDDS_Dcps_Export Discovery : public virtual RcObject {
 public:
   /// Key type for storing discovery objects.
   /// Probably should just be Discovery::Key

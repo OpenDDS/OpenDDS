@@ -36,7 +36,7 @@ TEST(dds_DCPS_NetworkResource, choose_single_coherent_address_double)
   ACE_INET_Addr addr2 = choose_single_coherent_address("www.bizinta.com:80", false);
 
   if (addr1 == ACE_INET_Addr()) {
-    EXPECT_NE(addr2, ACE_INET_Addr());
+    EXPECT_EQ(addr2, ACE_INET_Addr());
   } else {
     EXPECT_NE(addr2, ACE_INET_Addr());
     EXPECT_EQ(addr1, addr2);

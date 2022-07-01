@@ -270,7 +270,7 @@ public:
     bool reactor_is_shut_down() const;
   };
 
-  class ImmediateStart : public ReactorInterceptor::Command {
+  class ImmediateStart : public virtual ReactorInterceptor::Command {
   public:
     ImmediateStart(RcHandle<DataLink> link, WeakRcHandle<TransportClient> client, const RepoId& remote) : link_(link), client_(client), remote_(remote) {}
     void execute();

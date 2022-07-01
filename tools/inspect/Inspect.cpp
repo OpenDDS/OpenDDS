@@ -120,10 +120,10 @@ bool writer_count = false;
 
 void print_usage(bool for_error = false)
 {
-  std::ostream& os = for_error ? std::cout : std::cerr;
+  std::ostream& os = for_error ? std::cerr : std::cout;
   os <<
     "usage: " << prog_name << " [OPTIONS] TOPIC_NAME TYPE_NAME DOMAIN_ID\n"
-    "usage: " << prog_name << " [--help|-h]\n";
+    "usage: " << prog_name << " --help|-h|--version|-v\n";
   if (for_error) {
     os << "See -h for more details\n";
   }
@@ -140,18 +140,21 @@ void print_help()
     "Positional Arguments:\n"
     "  TOPIC_NAME              The name of the topic to listen for.\n"
     "  TYPE_NAME               The full name (including any modules) of the topic\n"
-    "                          type.\n"
+    "                          type. This should NOT include a leading ::.\n"
     "  DOMAIN_ID               The DDS Domain to participant in.\n"
     "\n"
-    "Options\n"
+    "OPTIONS:\n"
+    "  All OpenDDS command line options listed in section 7.2 of the OpenDDS\n"
+    "  Developer's Guide are also available.\n"
     "  -h | --help             Displays this message.\n"
+    "  -v | --version          Displays the version. This is the same as OpenDDS's.\n"
     "  -w | --writer-count     Print number of associated writers when they change.\n"
-    "                          Default is not to.\n"
+    "                          Default is to not to.\n"
     "  --samples COUNT         Wait for at least this number of samples and exit.\n"
     "                          May actually print more. Default is to print samples\n"
     "                          forever.\n"
-    "  --time SECONDS          Print samples for an ammount of seconds and exit.\n"
-    "                          Default to print samples forever.\n";
+    "  --time SECONDS          Print samples for the given number of seconds and\n"
+    "                          exit. Default is to print samples forever.\n";
 }
 
 // parse the command line arguments
@@ -170,6 +173,10 @@ int parse_args(int argc, ACE_TCHAR* argv[])
     // Parse options
     if (has_option(args, "-h") || has_option(args, "--help")) {
       print_help();
+      std::exit(0);
+    }
+    if (has_option(args, "-v") || has_option(args, "--version")) {
+      std::cout << "Version " OPENDDS_VERSION << std::endl;
       std::exit(0);
     }
     writer_count = has_option(args, "-w") || has_option(args, "--writer-count");

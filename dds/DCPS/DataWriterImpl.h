@@ -733,7 +733,7 @@ private:
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
 
 
-class LivenessTimer : public RcEventHandler
+class LivenessTimer : public virtual RcEventHandler
 {
 public:
   LivenessTimer(DataWriterImpl& writer)

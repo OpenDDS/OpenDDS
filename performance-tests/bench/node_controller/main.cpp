@@ -242,7 +242,7 @@ private:
 using SpawnedProcessPtr = std::shared_ptr<SpawnedProcess>;
 using ProcessStatsCollectorPtr = std::shared_ptr<ProcessStatsCollector>;
 
-class SpawnedProcessManager : public ACE_Event_Handler {
+class SpawnedProcessManager : public virtual ACE_Event_Handler {
 public:
 
   explicit SpawnedProcessManager(const std::string& node_name, const NodeId& node_id, ProcessManagerPtr process_manager)

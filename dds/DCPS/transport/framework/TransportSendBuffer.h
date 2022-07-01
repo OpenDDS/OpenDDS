@@ -70,7 +70,7 @@ private:
 /// domain of SequenceNumbers -- for a given SingleSendBuffer object, the
 /// sequence numbers passed to insert() must be generated from the same place.
 class OpenDDS_Dcps_Export SingleSendBuffer
-  : public TransportSendBuffer, public RcObject {
+  : public TransportSendBuffer, public virtual RcObject {
 public:
 
   static const size_t UNLIMITED;

@@ -32,7 +32,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class OpenDDS_Multicast_Export MulticastSession
-  : public RcObject {
+  : public virtual RcObject {
 public:
   virtual ~MulticastSession();
 

@@ -25,7 +25,7 @@ namespace {
   class MyReactor : public ACE_Reactor {
   public:
     MOCK_METHOD4(schedule_timer, long(ACE_Event_Handler*, const void*, const ACE_Time_Value&, const ACE_Time_Value&));
-    MOCK_METHOD2(cancel_timer, int(ACE_Event_Handler*, int));
+    MOCK_METHOD3(cancel_timer, int(long, const void**, int));
   };
 
   class MyReactorInterceptor : public ReactorInterceptor {
@@ -43,11 +43,12 @@ namespace {
                    RcHandle<ReactorInterceptor> interceptor)
       : SporadicTask(time_source, interceptor)
     {}
+    long timer_id() { return get_timer_id(); }
 
     MOCK_METHOD1(execute, void(const MonotonicTimePoint&));
   };
 
-  class MyTestClass : public RcObject {
+  class MyTestClass : public virtual RcObject {
   public:
     MyTestClass(const TimeSource& time_source,
                 RcHandle<ReactorInterceptor> interceptor)
@@ -172,12 +173,13 @@ TEST(dds_DCPS_SporadicTask, schedule_earlier)
 
   EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, two_seconds.value(), ACE_Time_Value::zero))
     .WillOnce(testing::Return(1));
+  sporadic_task->schedule(two_seconds);
+
+  EXPECT_CALL(reactor, cancel_timer(sporadic_task->timer_id(), 0, 1))
+    .WillOnce(testing::Return(1));
   EXPECT_CALL(reactor, schedule_timer(sporadic_task.get(), 0, one_second.value(), ACE_Time_Value::zero))
     .WillOnce(testing::Return(1));
-  EXPECT_CALL(reactor, cancel_timer(sporadic_task.get(), 1))
-    .WillOnce(testing::Return(0));
 
-  sporadic_task->schedule(two_seconds);
   sporadic_task->schedule(one_second);
 }
 
@@ -246,10 +248,11 @@ TEST(dds_DCPS_SporadicTask, cancel_scheduled)
     .Times(1)
     .WillOnce(testing::Return(1));
 
-  EXPECT_CALL(reactor, cancel_timer(sporadic_task.get(), 1))
-    .WillOnce(testing::Return(0));
-
   sporadic_task->schedule(two_seconds);
+
+  EXPECT_CALL(reactor, cancel_timer(sporadic_task->timer_id(), 0, 1))
+    .WillOnce(testing::Return(1));
+
   sporadic_task->cancel();
 }
 

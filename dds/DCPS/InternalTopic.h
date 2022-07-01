@@ -25,7 +25,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 template <typename T>
-class InternalTopic : public RcObject {
+class InternalTopic : public virtual RcObject {
 public:
   typedef RcHandle<InternalDataWriter<T> > InternalDataWriter_rch;
   typedef WeakRcHandle<InternalDataWriter<T> > InternalDataWriter_wrch;

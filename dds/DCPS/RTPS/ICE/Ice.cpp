@@ -129,6 +129,8 @@ ServerReflexiveStateMachine::send(const ACE_INET_Addr& address,
                                   size_t indication_count_limit,
                                   const DCPS::GuidPrefix_t& guid_prefix)
 {
+  timestamp_ = DCPS::MonotonicTimePoint::now();
+
   if (stun_server_address_ == ACE_INET_Addr() &&
       address == ACE_INET_Addr()) {
     // Do nothing.
@@ -153,6 +155,9 @@ ServerReflexiveStateMachine::send(const ACE_INET_Addr& address,
 ServerReflexiveStateMachine::StateChange
 ServerReflexiveStateMachine::receive(const STUN::Message& message)
 {
+  latency_ = DCPS::MonotonicTimePoint::now() - timestamp_;
+  latency_available_ = true;
+
   switch (message.class_) {
   case STUN::SUCCESS_RESPONSE:
     return success_response(message);
