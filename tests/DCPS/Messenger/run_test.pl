@@ -152,4 +152,4 @@ $test->start_process("publisher");
 
 # ignore this issue that is already being tracked in redmine
 $test->ignore_error("(Redmine Issue# 1446)");
-exit $test->finish(60);
+exit $test->finish(30);

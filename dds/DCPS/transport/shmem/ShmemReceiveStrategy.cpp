@@ -29,14 +29,14 @@ ShmemReceiveStrategy::ShmemReceiveStrategy(ShmemDataLink* link)
 {
 }
 
-void
+bool
 ShmemReceiveStrategy::read()
 {
   if (partial_recv_remaining_) {
     VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
           "resuming partial recv\n", link_));
     handle_dds_input(ACE_INVALID_HANDLE);
-    return;
+    return false;
   }
 
   if (bound_name_.empty()) {
@@ -50,7 +50,7 @@ ShmemReceiveStrategy::read()
               "peer allocator not found, receive_bytes will close link\n",
               link_), 1);
     handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TRecvStrateg.
-    return;
+    return false;
   }
 
   if (!current_data_) {
@@ -62,7 +62,7 @@ ShmemReceiveStrategy::read()
     if (!start) {
       start = current_data_;
     } else if (start == current_data_) {
-      return; // none found => don't call handle_dds_input()
+      return false; // none found => don't call handle_dds_input()
     }
     if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
       current_data_ = reinterpret_cast<ShmemData*>(mem) - 1; // incremented by the for loop
@@ -75,6 +75,7 @@ ShmemReceiveStrategy::read()
   // If we get this far, current_data_ points to the first SHMEM_DATA_IN_USE.
   // handle_dds_input() will call our receive_bytes() to get the data.
   handle_dds_input(ACE_INVALID_HANDLE);
+  return true;
 }
 
 ssize_t

@@ -27,7 +27,7 @@ class OpenDDS_Shmem_Export ShmemReceiveStrategy
 public:
   explicit ShmemReceiveStrategy(ShmemDataLink* link);
 
-  void read();
+  bool read();
 
 protected:
   virtual ssize_t receive_bytes(iovec iov[],

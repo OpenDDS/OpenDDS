@@ -285,7 +285,13 @@ ShmemTransport::ReadTask::svc()
     if (stopped_.value()) {
       return 0;
     }
-    outer_->read_from_links();
+    bool did_read = false;
+    while (!did_read) {
+      did_read = outer_->read_from_links();
+      if (!did_read) {
+       ACE_OS::sleep(1);
+      }
+    }
   }
   return 0;
 }
@@ -311,7 +317,7 @@ ShmemTransport::ReadTask::signal_semaphore()
   ACE_OS::sema_post(&semaphore_);
 }
 
-void
+bool
 ShmemTransport::read_from_links()
 {
   std::vector<ShmemDataLink_rch> dl_copies;
@@ -325,8 +331,9 @@ ShmemTransport::read_from_links()
 
   typedef std::vector<ShmemDataLink_rch>::iterator dl_iter_t;
   for (dl_iter_t dl_it = dl_copies.begin(); !is_shut_down() && dl_it != dl_copies.end(); ++dl_it) {
-    dl_it->in()->read();
+    return dl_it->in()->read();
   }
+  return false;
 }
 
 void

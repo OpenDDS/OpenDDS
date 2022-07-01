@@ -101,7 +101,7 @@ public:
   ShmemAllocator* local_allocator();
   ShmemAllocator* peer_allocator();
 
-  void read() { recv_strategy_->read(); }
+  bool read() { return recv_strategy_->read(); }
   void signal_semaphore();
   ShmemTransport& impl() const;
 
