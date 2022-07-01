@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "debug.h"
 #include "PeriodicEvent.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -38,8 +39,8 @@ void PeriodicEvent::enable(const TimeDuration& period, bool immediate_dispatch, 
         if (immediate_dispatch) {
           dispatcher->dispatch(rchandle_from(this));
         }
-      } else {
-        ACE_ERROR((LM_ERROR, "(%P|%t) PeriodicEvent::enable: failed to schedule\n"));
+      } else if (log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) PeriodicEvent::enable: failed to schedule\n"));
       }
     }
   }

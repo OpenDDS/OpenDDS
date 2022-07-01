@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "debug.h"
 #include "DispatchService.h"
 #include "TimeDuration.h"
 
@@ -42,7 +43,9 @@ void DispatchService::shutdown(bool immediate, EventQueue* const pending)
   cv_.notify_all();
 
   if (pool_.contains(ACE_Thread::self())) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR :: DispatchService::shutdown: Contained Thread Attempting To Call Shutdown."));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR :: DispatchService::shutdown: Contained Thread Attempting To Call Shutdown."));
+    }
     if (pending) {
       pending->clear();
     }
