@@ -1,4 +1,4 @@
 struct Data {
-  // sequence<int32> seqData;
+  sequence<int32> seqData;
   map<int32, int32> mapData;
 };

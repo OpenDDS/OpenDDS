@@ -95,7 +95,7 @@ FieldInfo::FieldInfo(AST_Field& field)
   , cls_(classify(act_))
   , arr_(dynamic_cast<AST_Array*>(type_))
   , seq_(dynamic_cast<AST_Sequence*>(type_))
-  // , map_(dynamic_cast<AST_Map*>(type_))
+  , map_(dynamic_cast<AST_Map*>(type_))
   , as_base_(container_base_type(type_))
   , as_act_(as_base_ ? resolveActualType(as_base_) : 0)
   , as_cls_(as_act_ ? classify(as_act_) : CL_UNKNOWN)
@@ -113,10 +113,9 @@ FieldInfo::FieldInfo(AST_Field& field)
   } else if (seq_) {
     length_ = "length";
     arg_ = "seq";
-  } 
-  // else if (map_) {
-  //   arg_ = "map";
-  // }
+  } else if (map_) {
+    arg_ = "map";
+  }
 
   if (cxx11()) {
     unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";

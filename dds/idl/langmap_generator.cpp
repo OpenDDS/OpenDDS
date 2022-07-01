@@ -89,6 +89,7 @@ struct GeneratorBase
   virtual ~GeneratorBase() {}
   virtual void init() = 0;
   virtual void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq) = 0;
+  virtual void gen_map(UTL_ScopedName* tdname, AST_Map* map) {}
   virtual bool gen_struct(AST_Structure* s, UTL_ScopedName* name, const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE size, const char* x) = 0;
 
   virtual std::string const_keyword(AST_Expression::ExprType)
@@ -111,7 +112,7 @@ struct GeneratorBase
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
       return map_type_string(chartype, false);
     }
-    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_ARRAY | CL_ENUM | CL_FIXED)) {
+    if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_MAP | CL_MAP | CL_ARRAY | CL_ENUM | CL_FIXED)) {
       return scoped(type->name());
     }
     if (cls & CL_INTERFACE) {
@@ -1459,6 +1460,17 @@ struct Cxx11Generator : GeneratorBase
     gen_sequence(tdname->last_component()->get_string(), map_type(seq->base_type()));
   }
 
+  static void gen_map(const std::string& type, const std::string& key, const std::string& val, const std::string& ind = "") 
+  {
+    be_global->add_include("<map>", BE_GlobalData::STREAM_LANG_H);
+    be_global->lang_header_ << ind << "using " << type << " = std::map<" << key << "," << val << ">;\n";
+  }
+
+  void gen_map(UTL_ScopedName* tdname, AST_Map* map)
+  {
+    gen_map(tdname->last_component()->get_string(), map_type(map->key_type()), map_type(map->value_type()));
+  }
+
   static void gen_common_strunion_pre(const char* nm)
   {
     be_global->lang_header_ <<
@@ -1484,8 +1496,13 @@ struct Cxx11Generator : GeneratorBase
         gen_array(af.arr_, af.type_name_, elem_type, "  ");
       } else if (af.seq_) {
         gen_sequence(af.type_name_, elem_type, "  ");
-      } else if (af.map_) {
       }
+    }
+
+    if (af.map_) {
+      const std::string key_type = generator_->map_type(af.map_->key_type());
+      const std::string value_type = generator_->map_type(af.map_->value_type());
+      gen_map(af.type_name_, key_type, value_type, " ");
     }
 
     const std::string lang_field_type = generator_->map_type(field);
@@ -1910,6 +1927,9 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     switch (base->node_type()) {
     case AST_Decl::NT_sequence:
       generator_->gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
+      break;
+    case AST_Decl::NT_map:
+      generator_->gen_map(name, dynamic_cast<AST_Map*>(base));
       break;
     case AST_Decl::NT_array:
       generator_->gen_array(name, arr = dynamic_cast<AST_Array*>(base));
