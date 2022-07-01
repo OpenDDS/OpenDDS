@@ -272,6 +272,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -747,6 +748,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -1056,6 +1058,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -1315,6 +1318,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -1600,6 +1604,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install lldb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -1884,6 +1889,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install lldb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -2149,6 +2155,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -2413,6 +2420,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -2672,6 +2680,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -3167,6 +3176,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -3451,6 +3461,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install lldb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -3987,6 +3998,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install lldb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -4281,6 +4293,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -4484,6 +4497,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -4744,6 +4758,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -4947,6 +4962,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -5295,6 +5311,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -5425,6 +5442,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -5554,6 +5572,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -5683,6 +5702,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -5798,6 +5818,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
@@ -6072,6 +6093,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install gdb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
     - name: change core file pattern
       shell: bash
       run: |
