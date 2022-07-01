@@ -221,8 +221,8 @@ OpenDDS::DCPS::TransportInst::reactor_task()
 OpenDDS::DCPS::EventDispatcher_rch
 OpenDDS::DCPS::TransportInst::event_dispatcher()
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
-  return temp ? temp->event_dispatcher() : OpenDDS::DCPS::EventDispatcher_rch();
+  const TransportImpl_rch temp = impl();
+  return temp ? temp->event_dispatcher() : EventDispatcher_rch();
 }
 
 bool

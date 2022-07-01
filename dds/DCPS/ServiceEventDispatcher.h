@@ -19,7 +19,7 @@ namespace DCPS {
 class OpenDDS_Dcps_Export ServiceEventDispatcher : public EventDispatcher
 {
 public:
-  ServiceEventDispatcher(size_t count = 1);
+  explicit ServiceEventDispatcher(size_t count = 1);
   virtual ~ServiceEventDispatcher();
 
   void shutdown(bool immediate = false);

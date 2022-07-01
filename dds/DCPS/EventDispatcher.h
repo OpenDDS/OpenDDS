@@ -26,8 +26,7 @@ namespace DCPS
  * an EventDispatcher. Derived classes are required to implement handle_event
  * which will be called when the event is dispatched by the event dispatcher
  */
-struct OpenDDS_Dcps_Export EventBase : public virtual RcObject
-{
+struct OpenDDS_Dcps_Export EventBase : virtual RcObject {
   virtual ~EventBase();
 
   /// Called when the event is dispatched by an EventDispatcher
