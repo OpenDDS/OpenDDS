@@ -113,12 +113,12 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                           pub_id
   if (dup_map.empty()) {
     // similar to the "no links" case in TransportClient::send()
     if (DCPS_debug_level > 4) {
-      const GuidConverter converter(pub_id);
+      const LogGuid logger(pub_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLinkSet::send_control: ")
                  ACE_TEXT("no links for publication %C, ")
                  ACE_TEXT("not sending control message.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 logger.c_str()));
     }
     listener->control_delivered(msg);
     return SEND_CONTROL_OK;

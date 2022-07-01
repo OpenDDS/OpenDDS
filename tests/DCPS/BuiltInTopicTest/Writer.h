@@ -4,23 +4,23 @@
 #define WRITER_H
 
 #include <dds/DdsDcpsPublicationC.h>
+
 #include <ace/Task.h>
 
-class Writer : public ACE_Task_Base
-{
+class Writer : public ACE_Task_Base {
 public:
-  Writer (::DDS::DataWriter_ptr writer);
+  Writer(::DDS::DataWriter_ptr writer);
 
-  void start ();
+  void start();
 
-  void end ();
+  void end();
 
   /** Lanch a thread to write. **/
-  virtual int svc ();
+  virtual int svc();
 
-  bool is_finished () const;
+  bool is_finished() const;
 
-  int get_timeout_writes () const;
+  int get_timeout_writes() const;
 
 private:
   ::DDS::DataWriter_var writer_;

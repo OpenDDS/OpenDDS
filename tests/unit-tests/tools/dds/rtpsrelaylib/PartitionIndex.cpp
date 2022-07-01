@@ -177,6 +177,17 @@ TEST(tools_dds_rtpsrelaylib_PartitionIndex, maintest)
 
     pi.lookup("?pp[lmnop][!i]", actual);
     test_equal("general find '?pp[lmnop][!i]'", actual, expected);
+
+    // Ensure that lookup inserts.
+    expected.clear();
+    expected.insert(guid1);
+    expected.insert(guid4);
+    actual.clear();
+    actual.insert(guid4);
+
+    pi.lookup("avocado", actual);
+    test_equal("insert find 'avocado'", actual, expected);
+
   }
 }
 

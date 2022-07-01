@@ -1825,68 +1825,14 @@ void Sedp::remove_entities_belonging_to(
 void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-  // bit may be null if the DomainParticipant is shutting down
-  if (bit && pub.bit_ih_ != DDS::HANDLE_NIL) {
-    bit->set_instance_state(pub.bit_ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  }
-#else
-  ACE_UNUSED_ARG(pub);
-#endif /* DDS_HAS_MINIMUM_BIT */
+  spdp_.bit_subscriber_->remove_publication(pub.bit_ih_);
 }
 
 void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-  // bit may be null if the DomainParticipant is shutting down
-  if (bit && sub.bit_ih_ != DDS::HANDLE_NIL) {
-    bit->set_instance_state(sub.bit_ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  }
-#else
-  ACE_UNUSED_ARG(sub);
-#endif /* DDS_HAS_MINIMUM_BIT */
+  spdp_.bit_subscriber_->remove_subscription(sub.bit_ih_);
 }
-
-#ifndef DDS_HAS_MINIMUM_BIT
-DCPS::TopicBuiltinTopicDataDataReaderImpl* Sedp::topic_bit()
-{
-  DDS::Subscriber_var sub = spdp_.bit_subscriber();
-  if (!sub.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    sub->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
-  return dynamic_cast<DCPS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DCPS::PublicationBuiltinTopicDataDataReaderImpl* Sedp::pub_bit()
-{
-  DDS::Subscriber_var sub = spdp_.bit_subscriber();
-  if (!sub.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    sub->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
-  return dynamic_cast<DCPS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* Sedp::sub_bit()
-{
-  DDS::Subscriber_var sub = spdp_.bit_subscriber();
-  if (!sub.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-  return dynamic_cast<DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-#endif /* DDS_HAS_MINIMUM_BIT */
 
 bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
@@ -2241,15 +2187,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       assign_bit_key(pub);
       wdata_copy = pub.writer_data_;
 
-#ifndef DDS_HAS_MINIMUM_BIT
-      DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-      if (bit) { // bit may be null if the DomainParticipant is shutting down
-        pub.bit_ih_ =
-          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                    DDS::NEW_VIEW_STATE);
-      }
+      pub.bit_ih_ = spdp_.bit_subscriber_->add_publication(wdata_copy.ddsPublicationData, DDS::NEW_VIEW_STATE);
       if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
@@ -2263,15 +2202,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       if (checkAndAssignQos(iter->second.writer_data_.ddsPublicationData,
                             wdata.ddsPublicationData)) { // update existing
 
-#ifndef DDS_HAS_MINIMUM_BIT
-        DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-        if (bit) { // bit may be null if the DomainParticipant is shutting down
-          wdata_copy = iter->second.writer_data_;
-          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                    DDS::NOT_NEW_VIEW_STATE);
-        }
+        spdp_.bit_subscriber_->add_publication(iter->second.writer_data_.ddsPublicationData, DDS::NOT_NEW_VIEW_STATE);
         if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local subscription(s)
         topic_name = iter->second.get_topic_name();
@@ -2556,15 +2488,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       assign_bit_key(sub);
       rdata_copy = sub.reader_data_;
 
-#ifndef DDS_HAS_MINIMUM_BIT
-      DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-      if (bit) { // bit may be null if the DomainParticipant is shutting down
-        sub.bit_ih_ =
-          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                    DDS::NEW_VIEW_STATE);
-      }
+      sub.bit_ih_ = spdp_.bit_subscriber_->add_subscription(rdata_copy.ddsSubscriptionData, DDS::NEW_VIEW_STATE);
       if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
@@ -2577,15 +2502,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     } else { // update existing
       if (checkAndAssignQos(iter->second.reader_data_.ddsSubscriptionData,
                             rdata.ddsSubscriptionData)) {
-#ifndef DDS_HAS_MINIMUM_BIT
-        DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-        if (bit) { // bit may be null if the DomainParticipant is shutting down
-          rdata_copy = iter->second.reader_data_;
-          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                    DDS::NOT_NEW_VIEW_STATE);
-        }
+
+        spdp_.bit_subscriber_->add_subscription(iter->second.reader_data_.ddsSubscriptionData, DDS::NOT_NEW_VIEW_STATE);
         if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local publication(s)
         topic_name = iter->second.get_topic_name();
@@ -3201,12 +3120,6 @@ Sedp::Endpoint::~Endpoint()
 {
   remove_all_msgs();
   transport_stop();
-}
-
-DDS::Subscriber_var
-Sedp::Endpoint::get_builtin_subscriber() const
-{
-  return sedp_.spdp_.bit_subscriber();
 }
 
 EntityId_t Sedp::Endpoint::counterpart_entity_id() const
@@ -4677,7 +4590,7 @@ Sedp::populate_discovered_reader_msg(
   drd.readerProxy.allLocators = sub.trans_info_;
 
   drd.contentFilterProperty.contentFilteredTopicName =
-    OPENDDS_STRING(DCPS::GuidConverter(subscription_id)).c_str();
+    DCPS::LogGuid(subscription_id).c_str();
   drd.contentFilterProperty.relatedTopicName = topic_name.c_str();
   drd.contentFilterProperty.filterClassName = ""; // PLConverter adds default
   drd.contentFilterProperty.filterExpression = sub.filterProperties.filterExpression;
@@ -7638,7 +7551,7 @@ void Sedp::WriterRemoveAssociations::execute()
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Sedp::WriterRemoveAssociations::execute - ")
-                 ACE_TEXT("removing writer %C association for writer %C\n"), LogGuid(record_->writer_id()).c_str(),
+                 ACE_TEXT("removing writer %C association for reader %C\n"), LogGuid(record_->writer_id()).c_str(),
                  LogGuid(record_->reader_id()).c_str()));
     }
     DCPS::ReaderIdSeq reader_seq(1);

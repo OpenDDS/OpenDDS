@@ -7,12 +7,15 @@ void RelayParticipantStatusReporter::add_participant(GuidAddrSet::Proxy& proxy,
                                                      const DDS::ParticipantBuiltinTopicData& data)
 {
   const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+  const DDS::Time_t timestamp = now.to_dds_time();
 
   RelayParticipantStatus status;
   status.relay_id(config_.relay_id());
   status.guid(rtps_guid_to_relay_guid(repoid));
   status.active(true);
+  status.active_ts(timestamp);
   status.alive(true);
+  status.active_ts(timestamp);
   status.user_data(data.user_data);
 
   if (writer_->write(status, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
@@ -47,7 +50,7 @@ void RelayParticipantStatusReporter::remove_participant(GuidAddrSet::Proxy& prox
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: "
                "RelayParticipantStatusReporter::remove_participant participant %C not found\n",
                guid_to_string(repoid).c_str()));
     return;
@@ -76,10 +79,13 @@ void RelayParticipantStatusReporter::set_alive(const GuidAddrSet::Proxy& /*proxy
                                                const OpenDDS::DCPS::GUID_t& repoid,
                                                bool alive)
 {
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
+    // Okay.
     return;
   }
 
@@ -88,6 +94,7 @@ void RelayParticipantStatusReporter::set_alive(const GuidAddrSet::Proxy& /*proxy
   }
 
   pos->second.alive(alive);
+  pos->second.alive_ts(now.to_dds_time());
 
   if (writer_->write(pos->second, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
@@ -99,10 +106,13 @@ void RelayParticipantStatusReporter::set_active(const GuidAddrSet::Proxy& /*prox
                                                 const OpenDDS::DCPS::GUID_t& repoid,
                                                 bool active)
 {
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
+    // Okay.
     return;
   }
 
@@ -111,6 +121,7 @@ void RelayParticipantStatusReporter::set_active(const GuidAddrSet::Proxy& /*prox
   }
 
   pos->second.active(active);
+  pos->second.active_ts(now.to_dds_time());
 
   if (writer_->write(pos->second, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
@@ -123,10 +134,13 @@ void RelayParticipantStatusReporter::set_alive_active(const GuidAddrSet::Proxy& 
                                                       bool alive,
                                                       bool active)
 {
+  const auto now = OpenDDS::DCPS::MonotonicTimePoint::now();
+
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   const auto pos = guids_.find(repoid);
   if (pos == guids_.end()) {
+    // Okay.
     return;
   }
 
@@ -134,8 +148,16 @@ void RelayParticipantStatusReporter::set_alive_active(const GuidAddrSet::Proxy& 
     return;
   }
 
-  pos->second.alive(alive);
-  pos->second.active(active);
+  const DDS::Time_t timestamp = now.to_dds_time();
+  if (pos->second.alive() != alive) {
+    pos->second.alive(alive);
+    pos->second.alive_ts(timestamp);
+  }
+
+  if (pos->second.active() != active) {
+    pos->second.active(active);
+    pos->second.active_ts(timestamp);
+  }
 
   if (writer_->write(pos->second, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "

@@ -19,10 +19,11 @@ struct OpenDDS_Rtps_Udp_Export RoutedGuidPair {
   RoutedGuidPair(const GUID_t& src, const GUID_t dst) : src_(src), dst_(dst) {}
 
   bool operator<(const RoutedGuidPair& rhs) const {
-    return std::memcmp(static_cast<const void*>(&src_), static_cast<const void*>(&rhs.src_), 2 * sizeof(GUID_t)) < 0;
+    return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (RoutedGuidPair)) < 0;
   }
+
   bool operator==(const RoutedGuidPair& rhs) const {
-    return std::memcmp(static_cast<const void*>(&src_), static_cast<const void*>(&rhs.src_), 2 * sizeof(GUID_t)) == 0;
+    return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (RoutedGuidPair)) == 0;
   }
 
   // Note: The comparison operators for RoutedGuidPair assume a tightly packed pair of GUIDs

@@ -303,11 +303,11 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
                                   ACE_UINT32 total_frags)
 {
   if (Transport_debug_level > 5) {
-    GuidConverter conv(data.header_.publication_id_);
+    LogGuid logger(data.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
       "tseq %q-%q first %d dseq %q pub %C\n", seqRange.first.getValue(),
       seqRange.second.getValue(), firstFrag ? 1 : 0,
-      data.header_.sequence_.getValue(), OPENDDS_STRING(conv).c_str()));
+      data.header_.sequence_.getValue(), logger.c_str()));
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();

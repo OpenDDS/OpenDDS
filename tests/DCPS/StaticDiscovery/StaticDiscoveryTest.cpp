@@ -124,7 +124,14 @@ public:
                        -1);
     }
 
-    const OpenDDS::DCPS::GUID_t writer_guid = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in())->get_repo_id();
+    OpenDDS::DCPS::DataWriterImpl* writer_impl = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer.in());
+    if (!writer_impl) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("ERROR: %N:%l: main() -")
+                        ACE_TEXT(" casting datawriter failed!\n")),
+                       -1);
+    }
+    const OpenDDS::DCPS::GUID_t writer_guid = writer_impl->get_repo_id();
 
     ACE_DEBUG((LM_INFO, "(%P|%t) DataWriter %C created\n", OpenDDS::DCPS::LogGuid(writer_guid).c_str()));
 
@@ -368,7 +375,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                           ACE_TEXT(" create_datareader failed!\n")), -1);
       }
 
-      drl_impl->set_guid(dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in())->get_repo_id());
+      OpenDDS::DCPS::DataReaderImpl* reader_impl = dynamic_cast<OpenDDS::DCPS::DataReaderImpl*>(reader.in());
+      if (!reader_impl) {
+        ACE_ERROR_RETURN((LM_ERROR,
+                          ACE_TEXT("ERROR: %N:%l: main() -")
+                          ACE_TEXT(" casting datareader failed!\n")), -1);
+      }
+      drl_impl->set_guid(reader_impl->get_repo_id());
 
       datareaders.push_back(reader);
 

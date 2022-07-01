@@ -75,7 +75,7 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
     Messenger::Message message;
     DDS::SampleInfo si;
 
-    if (message_dr->take_next_sample(message, si) == DDS::RETCODE_OK) {
+    while (message_dr->take_next_sample(message, si) == DDS::RETCODE_OK) {
       if (si.valid_data) {
 
         stringstream ss;
@@ -97,20 +97,20 @@ struct DataReaderListenerImpl : public virtual OpenDDS::DCPS::LocalObject<DDS::D
 
   bool wait_valid_data(size_t expected, const OpenDDS::DCPS::MonotonicTimePoint& deadline) {
 #ifdef ACE_HAS_CPP11
-    std::chrono::milliseconds ms((deadline - OpenDDS::DCPS::MonotonicTimePoint::now()).value().get_msec());
     std::unique_lock<std::mutex> lock(mutex_);
 #else
     ACE_Guard<ACE_Thread_Mutex> g(mutex_);
 #endif
 #ifdef ACE_HAS_CPP11
-    auto wait_result = cv_.wait_for(lock, ms);
+    auto wait_result = cv_status::no_timeout;
     while (valid_data_seen_ < expected && wait_result != cv_status::timeout) {
+      std::chrono::milliseconds ms((deadline - OpenDDS::DCPS::MonotonicTimePoint::now()).value().get_msec());
       wait_result = cv_.wait_for(lock, ms);
     }
     return wait_result != cv_status::timeout;
 #else
     OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-    OpenDDS::DCPS::CvStatus wait_result = cv_.wait_until(deadline, thread_status_manager);
+    OpenDDS::DCPS::CvStatus wait_result = OpenDDS::DCPS::CvStatus_NoTimeout;
     while (valid_data_seen_ < expected && wait_result != OpenDDS::DCPS::CvStatus_Timeout) {
       wait_result = cv_.wait_until(deadline, thread_status_manager);
     }
@@ -250,14 +250,19 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
 #ifdef ACE_HAS_CPP11
-    std::atomic<bool> still_cleaning(true);
-    thread t([&](){
-      this_thread::sleep_for(chrono::seconds(3));
-      while (still_cleaning) {
-        stringstream ss;
-        ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
-        cout << ss.str() << flush;
-        this_thread::sleep_for(chrono::seconds(1));
+    bool cleaning = true;
+    std::mutex cleaning_mutex;
+    std::condition_variable cleaning_cv;
+    std::thread cleanup_monitor([&](){
+      std::unique_lock<std::mutex> lock(cleaning_mutex);
+      int count = 0;
+      while (cleaning) {
+        cleaning_cv.wait_for(lock, chrono::seconds(1));
+        if (++count >= 3) {
+          stringstream ss;
+          ss << "Subscriber " << ACE_OS::getpid() << " is taking a long time to clean up." << endl;
+          cout << ss.str() << flush;
+        }
       }
     });
 #endif
@@ -266,8 +271,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     dpf->delete_participant(participant.in());
 
 #ifdef ACE_HAS_CPP11
-    still_cleaning = false;
-    t.join();
+    {
+      std::unique_lock<std::mutex> lock(cleaning_mutex);
+      cleaning = false;
+    }
+    cleaning_cv.notify_all();
+    cleanup_monitor.join();
 #endif
   }
   catch (const CORBA::Exception& e)
@@ -276,6 +285,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
        << e << endl;
      exit(1);
   }
+
   TheServiceParticipant->shutdown();
 
   return got_all_data ? 0 : 1;

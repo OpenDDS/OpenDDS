@@ -1433,10 +1433,9 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
       msg += state_obj->instance_state_string();
       msg += " while the validity mask is " + InstanceState::instance_state_mask_string(instance_states);
     }
-    const GuidConverter conv(get_repo_id());
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")
                ACE_TEXT("will return no data reading sub %C because:\n  %C\n"),
-               OPENDDS_STRING(conv).c_str(), msg.c_str()));
+               LogGuid(get_repo_id()).c_str(), msg.c_str()));
   }
 
   results.copy_to_user();
@@ -2010,9 +2009,9 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         sub->listener_for(DDS::DATA_ON_READERS_STATUS);
     if (!CORBA::is_nil(sub_listener.in()) && !coherent_) {
       if (!is_bit()) {
+        sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
         sub_listener->on_data_on_readers(sub.in());
-        sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
       } else {
         TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(sub, sub_listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, false));
       }
@@ -2024,12 +2023,12 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 
       if (!CORBA::is_nil(listener.in())) {
         if (!is_bit()) {
-          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
-          listener->on_data_available(this);
           set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+          ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          listener->on_data_available(this);
         } else {
-          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(sub, listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, true, true));
+          TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(listener, rchandle_from(static_cast<DataReaderImpl*>(this)), true, true, true));
         }
       } else {
         notify_status_condition_no_sample_lock();

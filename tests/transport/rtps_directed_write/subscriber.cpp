@@ -47,7 +47,7 @@ public:
     if (!associate(publication, false)) {
       throw std::string("subscriber TransportClient::associate() failed");
     }
-    std::cerr << "Reader " << OPENDDS_STRING(GuidConverter(get_repo_id())) << " called associate()\n";
+    std::cerr << "Reader " << LogGuid(get_repo_id()).conv_ << " called associate()\n";
   }
 
   virtual ~SimpleDataReader() { disassociate(config.getPubWtrId()); }
@@ -116,7 +116,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 
   if (data.key == 99) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("%C received terminating sample\n"),
-      OPENDDS_STRING(GuidConverter(get_repo_id())).c_str()));
+      LogGuid(get_repo_id()).c_str()));
     done_ = true;
     return;
   }
@@ -129,7 +129,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
   ACE_TCHAR buffer[32];
   std::string timestr(ACE_TEXT_ALWAYS_CHAR(ACE_OS::ctime_r(&seconds, buffer, 32)));
   std::ostringstream oss;
-  oss << "data_received() by " << OPENDDS_STRING(GuidConverter(get_repo_id())).c_str() << "\n\t"
+  oss << "data_received() by " << LogGuid(get_repo_id()).c_str() << "\n\t"
     "id = "          << int(sample.header_.message_id_) << "\n\t"
     "timestamp = "   << atv.usec() << " usec " << timestr << "\t"
     "seq# = "        << sample.header_.sequence_.getValue() << "\n\t"

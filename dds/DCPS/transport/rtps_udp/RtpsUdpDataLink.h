@@ -87,6 +87,8 @@ typedef AddressCache<BundlingCacheKey> BundlingCache;
 
 typedef OPENDDS_MAP_CMP(RepoId, SeqReaders, GUID_tKeyLessThan) WriterToSeqReadersMap;
 
+const size_t initial_bundle_size = 32;
+
 class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
   : public virtual DataLink
   , public virtual InternalDataReaderListener<NetworkInterfaceAddress>
@@ -450,6 +452,7 @@ private:
     const bool is_ps_writer_;
 #endif
     mutable ACE_Thread_Mutex mutex_;
+    mutable ACE_Thread_Mutex remote_reader_guids_mutex_;
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;
 
     typedef PmfSporadicTask<RtpsWriter> Sporadic;
@@ -560,6 +563,11 @@ private:
     void update_required_acknack_count(const RepoId& id, CORBA::Long current);
 
     RcHandle<SingleSendBuffer> get_send_buff() { return send_buff_; }
+    RcHandle<ConstSharedRepoIdSet> get_remote_reader_guids()
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(remote_reader_guids_mutex_);
+      return remote_reader_guids_;
+    }
   };
   typedef RcHandle<RtpsWriter> RtpsWriter_rch;
 
@@ -676,11 +684,10 @@ private:
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
   typedef OPENDDS_VECTOR(MetaSubmessageVec::iterator) MetaSubmessageIterVec;
+  typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
 #ifdef ACE_HAS_CPP11
-  typedef OPENDDS_UNORDERED_MAP(RepoId, MetaSubmessageIterVec) DestMetaSubmessageMap;
   typedef OPENDDS_UNORDERED_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #else
-  typedef OPENDDS_MAP_CMP(RepoId, MetaSubmessageIterVec, GUID_tKeyLessThan) DestMetaSubmessageMap;
   typedef OPENDDS_MAP(AddressCacheEntryProxy, DestMetaSubmessageMap) AddrDestMetaSubmessageMap;
 #endif
   typedef OPENDDS_VECTOR(MetaSubmessageIterVec) MetaSubmessageIterVecVec;
@@ -705,13 +712,22 @@ private:
     IdCountSet nackfrag_counts_;
   };
 
+public:
+  struct Bundle {
+    explicit Bundle(const AddressCacheEntryProxy& proxy) : proxy_(proxy), size_(0) { submessages_.reserve(initial_bundle_size); }
+    MetaSubmessageIterVec submessages_; // a vectors of iterators pointing to meta_submessages
+    AddressCacheEntryProxy proxy_; // a bundle's destination address
+    size_t size_; // bundle message size
+  };
+
+  typedef OPENDDS_VECTOR(Bundle) BundleVec;
+
+private:
   void build_meta_submessage_map(MetaSubmessageVec& meta_submessages, AddrDestMetaSubmessageMap& addr_map);
   void bundle_mapped_meta_submessages(
     const Encoding& encoding,
     AddrDestMetaSubmessageMap& addr_map,
-    MetaSubmessageIterVecVec& meta_submessage_bundles,
-    OPENDDS_VECTOR(AddressCacheEntryProxy)& meta_submessage_bundle_addrs,
-    OPENDDS_VECTOR(size_t)& meta_submessage_bundle_sizes,
+    BundleVec& bundles,
     CountKeeper& counts);
 
   void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
@@ -924,11 +940,6 @@ private:
 
   RcHandle<InternalDataReader<NetworkInterfaceAddress> > network_interface_address_reader_;
   MulticastManager multicast_manager_;
-
-  void send_interesting_ack_nack(const RepoId& writerid,
-                                 const RepoId& readerid,
-                                 CORBA::Long count,
-                                 MetaSubmessageVec& meta_submessages);
 };
 
 } // namespace DCPS

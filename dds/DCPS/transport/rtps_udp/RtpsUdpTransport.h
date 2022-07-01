@@ -141,7 +141,7 @@ private:
   typedef ACE_Guard<LockType> GuardType;
   LockType connections_lock_;
 
-  DDS::Subscriber_var bit_sub_;
+  RcHandle<BitSubscriber> bit_sub_;
   GuidPrefix_t local_prefix_;
 
   /// RTPS uses only one link per transport.

@@ -350,13 +350,12 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       }
       if (DCPS_debug_level > 0) {
         RepoId id = dr_servant->get_repo_id();
-        GuidConverter converter(id);
         ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("SubscriberImpl::delete_datareader: ")
                   ACE_TEXT("datareader(topic_name=%C) %C not found.\n"),
                   topic_name.in(),
-                  OPENDDS_STRING(converter).c_str()));
+                  LogGuid(id).c_str()));
       }
       return ::DDS::RETCODE_ERROR;
     }
@@ -578,12 +577,12 @@ SubscriberImpl::notify_datareaders()
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (!it->second->is_bit()) {
+        it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
         if (listener) {
           listener->on_data_available(it->second.in());
         }
-        it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(this), listener, it->second, listener, true, false));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(listener, it->second, listener, true, false));
       }
     }
   }
@@ -614,10 +613,10 @@ SubscriberImpl::notify_datareaders()
 
     if (dri->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = dri->get_listener();
+      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       if (!CORBA::is_nil(listener)) {
         listener->on_data_available(dri);
       }
-      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
     }
   }
 #endif
@@ -663,11 +662,10 @@ SubscriberImpl::set_qos(
 
           if (!pair.second) {
             if (DCPS_debug_level > 0) {
-              GuidConverter converter(id);
               ACE_ERROR((LM_ERROR,
                         ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::set_qos: ")
                         ACE_TEXT("insert %C to DrIdToQosMap failed.\n"),
-                        OPENDDS_STRING(converter).c_str()));
+                        LogGuid(id).c_str()));
             }
             return ::DDS::RETCODE_ERROR;
           }

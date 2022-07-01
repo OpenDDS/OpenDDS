@@ -6,8 +6,8 @@ project: dcps_ts_defaults {
 
   specific(prop:microsoft) {
     lit_libs += node
-    x64::libpaths += $(V8_ROOT)/x64
-    Win32::libpaths += $(V8_ROOT)/ia32
+    x64::libpaths += $(V8_ROOT)\x64
+    Win32::libpaths += $(V8_ROOT)\ia32
   }
 
 }
