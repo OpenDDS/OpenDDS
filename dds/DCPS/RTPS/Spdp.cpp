@@ -2154,7 +2154,6 @@ Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
   // Defer initilization until we have the bit subscriber.
   sedp_->init(guid_, *disco_, domain_, type_lookup_service_);
   tport_->open(sedp_->reactor_task());
-  tport_->enable_periodic_tasks();
 
 #ifdef OPENDDS_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
@@ -2165,6 +2164,7 @@ Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
 #endif
 
   initialized_flag_ = true;
+  tport_->enable_periodic_tasks();
 }
 
 void
