@@ -94,8 +94,6 @@ sub wait_kill {
   my $wait_time = shift;
   my $name = shift;
   my $verbose = shift;
-  my $opts = shift;
-
   $verbose = 0 if !defined($verbose);
   my $opts = shift;
 
