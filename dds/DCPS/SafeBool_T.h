@@ -63,14 +63,14 @@ protected:
 };
 
 template <typename X, typename Y>
-bool operator==(const SafeBool_T<X>& x, const SafeBool_T<Y>& y)
+bool operator==(const SafeBool_T<X>& x, const SafeBool_T<Y>&)
 {
   x.this_type_does_not_support_comparisons();
   return false;
 }
 
 template <typename X, typename Y>
-bool operator!=(const SafeBool_T<X>& x, const SafeBool_T<Y>& y)
+bool operator!=(const SafeBool_T<X>& x, const SafeBool_T<Y>&)
 {
   x.this_type_does_not_support_comparisons();
   return false;
