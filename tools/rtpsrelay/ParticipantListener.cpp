@@ -26,6 +26,9 @@ void ParticipantListener::on_data_available(DDS::DataReader_ptr reader)
                                    DDS::NOT_READ_SAMPLE_STATE,
                                    DDS::ANY_VIEW_STATE,
                                    DDS::ANY_INSTANCE_STATE);
+  if (ret == DDS::RETCODE_NO_DATA) {
+    return;
+  }
   if (ret != DDS::RETCODE_OK) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ParticipantListener::on_data_available failed to take %C\n"), OpenDDS::DCPS::retcode_to_string(ret)));
     return;
