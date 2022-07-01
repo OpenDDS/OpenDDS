@@ -330,10 +330,13 @@ ShmemTransport::read_from_links()
   }
 
   typedef std::vector<ShmemDataLink_rch>::iterator dl_iter_t;
+  bool read_once = false;
   for (dl_iter_t dl_it = dl_copies.begin(); !is_shut_down() && dl_it != dl_copies.end(); ++dl_it) {
-    return dl_it->in()->read();
+    if (dl_it->in()->read()) {
+      read_once = true;
+    }
   }
-  return false;
+  return read_once;
 }
 
 void
