@@ -300,8 +300,9 @@ public:
   ReactorTask_rch reactor_task_;
 
   struct DoClear : EventBase {
-    DoClear(RcHandle<DataLink> link) : link_(link) {}
-    void handle_event() {
+    explicit DoClear(RcHandle<DataLink> link) : link_(link) {}
+    void handle_event()
+    {
       DataLink_rch link = link_.lock();
       if (link) {
         link->clear_associations();

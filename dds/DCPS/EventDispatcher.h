@@ -14,10 +14,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace OpenDDS
-{
-namespace DCPS
-{
+namespace OpenDDS {
+namespace DCPS {
 
 /**
  * EventBase is an abstract base class for events
@@ -48,8 +46,7 @@ typedef RcHandle<EventBase> EventBase_rch;
  * classes into dispatchable events
  */
 template <typename Delegate>
-class PmfEvent : public EventBase
-{
+class PmfEvent : public EventBase {
 public:
   typedef void (Delegate::*PMF)();
 
@@ -76,8 +73,7 @@ private:
  * funtions of existing classes into dispatchable events. (c.f. PmfEvent)
  */
 template <typename Delegate>
-class PmfNowEvent : public EventBase
-{
+class PmfNowEvent : public EventBase {
 public:
   typedef void (Delegate::*PMF)(const MonotonicTimePoint&);
 
@@ -107,8 +103,7 @@ private:
  * or for future scheduled dispatch (schedule). Scheduled dispatches return id
  * values which can be used to cancel the dispatch before the scheduled time.
  */
-class OpenDDS_Dcps_Export EventDispatcher : public virtual RcObject
-{
+class OpenDDS_Dcps_Export EventDispatcher : public virtual RcObject {
 public:
 
   EventDispatcher();

@@ -87,7 +87,7 @@ DispatchService::DispatchStatus DispatchService::dispatch(FunPtr fun, void* arg)
 DispatchService::TimerId DispatchService::schedule(FunPtr fun, void* arg, const MonotonicTimePoint& expiration)
 {
   if (!fun) {
-    return -1;
+    return TI_FAILURE;
   }
 
   TimerId id = 0;
@@ -99,14 +99,14 @@ DispatchService::TimerId DispatchService::schedule(FunPtr fun, void* arg, const 
     do {
       id = max_timer_id_ = max_timer_id_ == LONG_MAX ? 1 : max_timer_id_ + 1;
       if (id == starting_id) {
-        return -1; // all ids in use ?!
+        return TI_FAILURE; // all ids in use ?!
       }
       pos->second.second = id;
     } while (timer_id_map_.insert(std::make_pair(id, pos)).second == false);
     cv_.notify_one();
     return id;
   }
-  return -1;
+  return TI_FAILURE;
 }
 
 size_t DispatchService::cancel(DispatchService::TimerId id, void** arg)

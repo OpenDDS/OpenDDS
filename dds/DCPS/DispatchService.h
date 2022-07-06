@@ -21,22 +21,24 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-template <typename T>
-void* fun_ptr_proxy(void* arg)
-{
-  T& ref = *static_cast<T*>(arg);
-  ref();
-  return 0;
-}
-
 class OpenDDS_Dcps_Export DispatchService : public virtual RcObject {
 public:
+
+  template <typename T>
+  static void* fun_ptr_proxy(void* arg)
+  {
+    T& ref = *static_cast<T*>(arg);
+    ref();
+    return 0;
+  }
 
   typedef bool DispatchStatus;
   typedef long TimerId;
 
   static const bool DS_SUCCESS = true;
   static const bool DS_ERROR = false;
+
+  static const long TI_FAILURE = -1;
 
   typedef void* (*FunPtr)(void*);
   typedef std::pair<FunPtr, void*> FunArgPair;
@@ -50,20 +52,22 @@ public:
   DispatchStatus dispatch(FunPtr fun, void* arg = 0);
 
   template <typename T>
-  DispatchStatus dispatch(T& ref) {
+  DispatchStatus dispatch(T& ref)
+  {
     return dispatch(fun_ptr_proxy<T>, &ref);
   }
 
-  TimerId schedule(FunPtr fun, void* arg = NULL, const MonotonicTimePoint& expiration = MonotonicTimePoint::now());
+  TimerId schedule(FunPtr fun, void* arg = 0, const MonotonicTimePoint& expiration = MonotonicTimePoint::now());
 
   template <typename T>
-  TimerId schedule(T& ref, const MonotonicTimePoint& expiration = MonotonicTimePoint::now()) {
+  TimerId schedule(T& ref, const MonotonicTimePoint& expiration = MonotonicTimePoint::now())
+  {
     return schedule(fun_ptr_proxy<T>, &ref, expiration);
   }
 
-  size_t cancel(TimerId id, void** arg = NULL);
+  size_t cancel(TimerId id, void** arg = 0);
 
-  size_t cancel(FunPtr fun, void* arg = NULL);
+  size_t cancel(FunPtr fun, void* arg = 0);
 
   template <typename T>
   size_t cancel(T& ref) {

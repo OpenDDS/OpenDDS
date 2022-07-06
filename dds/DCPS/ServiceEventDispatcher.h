@@ -16,8 +16,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export ServiceEventDispatcher : public EventDispatcher
-{
+class OpenDDS_Dcps_Export ServiceEventDispatcher : public EventDispatcher {
 public:
   explicit ServiceEventDispatcher(size_t count = 1);
   virtual ~ServiceEventDispatcher();

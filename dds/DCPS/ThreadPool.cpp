@@ -17,7 +17,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
- : barrier_(count + 1)
+ : barrier_(static_cast<unsigned int>(count + 1))
  , fun_(fun)
  , arg_(arg)
  , ids_(count, 0)
@@ -40,7 +40,7 @@ ThreadPool::~ThreadPool()
 
 ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
 {
-  ThreadPool& pool = *(static_cast<ThreadPool*>(arg));
+  ThreadPool& pool = *static_cast<ThreadPool*>(arg);
   {
     ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
     pool.id_set_.insert(ACE_Thread::self());

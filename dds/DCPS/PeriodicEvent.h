@@ -24,8 +24,7 @@ namespace DCPS {
  * of scheduling, rescheduling, and canceling the base event with the
  * EventDispatcher.
  */
-class OpenDDS_Dcps_Export PeriodicEvent : public EventBase
-{
+class OpenDDS_Dcps_Export PeriodicEvent : public EventBase {
 public:
 
   /**

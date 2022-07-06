@@ -32,7 +32,7 @@ class OpenDDS_Dcps_Export ThreadPool
 public:
 
   /// A typedef for the starting point of the ThreadPool
-  typedef ACE_THR_FUNC_RETURN(*FunPtr)(void*);
+  typedef ACE_THR_FUNC_RETURN (*FunPtr)(void*);
 
   /**
    * Creates a ThreadPool with the specifed size, starting point, and argument

@@ -18,18 +18,16 @@ namespace DCPS {
 /**
  * SporadicEvent is an event which can be scheduled multiple times but will only dispatch once
  *
- * SporadicEvent serves as a helpful utility class for allowing repeated calls
- * to schedule (when the application is unsure if the event has already been
- * scheduled, but cumulative calls to schedule will only result in a single
- * dispatch. After the base event dispatches, additional calls to schedule
- * will result in another dispatch. Additional calls to schedule may, however,
- * shorten the scheduled time until the base event dispatches. The SporadicEvent
- * takes both an EventDispatcher and a base event (c.f. EventBase) and handles
- * the logic of scheduling, rescheduling, and canceling the base event with the
- * EventDispatcher.
+ * SporadicEvent allows repeated calls to schedule (when the application is
+ * unsure if the event has already been scheduled, but cumulative calls to
+ * schedule will only result in a single dispatch. After the base event
+ * dispatches, additional calls to schedule will result in another dispatch.
+ * Additional calls to schedule may, however, shorten the scheduled time until
+ * the base event dispatches. The SporadicEvent takes both an EventDispatcher
+ * and a base event (c.f. EventBase) and handles the logic of scheduling,
+ * rescheduling, and canceling the base event with the EventDispatcher.
  */
-class OpenDDS_Dcps_Export SporadicEvent : public EventBase
-{
+class OpenDDS_Dcps_Export SporadicEvent : public EventBase {
 public:
 
   /**

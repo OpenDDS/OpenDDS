@@ -35,18 +35,16 @@ void SporadicEvent::schedule(const TimeDuration& duration)
         timer_id_ = id;
       }
     }
-  } else {
-    if (now + duration < expiration_) {
-      EventDispatcher_rch dispatcher = dispatcher_.lock();
-      if (dispatcher) {
-        if (dispatcher->cancel(timer_id_)) {
-          timer_id_ = 0;
-          const MonotonicTimePoint expiration = now + duration;
-          long id = dispatcher->schedule(rchandle_from(this), expiration);
-          if (id > 0) {
-            expiration_ = expiration;
-            timer_id_ = id;
-          }
+  } else if (now + duration < expiration_) {
+    EventDispatcher_rch dispatcher = dispatcher_.lock();
+    if (dispatcher) {
+      if (dispatcher->cancel(timer_id_)) {
+        timer_id_ = 0;
+        const MonotonicTimePoint expiration = now + duration;
+        long id = dispatcher->schedule(rchandle_from(this), expiration);
+        if (id > 0) {
+          expiration_ = expiration;
+          timer_id_ = id;
         }
       }
     }
