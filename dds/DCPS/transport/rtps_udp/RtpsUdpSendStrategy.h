@@ -108,14 +108,16 @@ private:
     DDS::OctetSeq encoded_;
   };
 
-  bool encode_writer_submessage(const RepoId& receiver,
+  bool encode_writer_submessage(const GUID_t& sender,
+                                const GUID_t& receiver,
                                 OPENDDS_VECTOR(Chunk)& replacements,
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
                                 DDS::Security::DatawriterCryptoHandle sender_dwch,
                                 const char* submessage_start, CORBA::Octet msgId);
 
-  bool encode_reader_submessage(const RepoId& receiver,
+  bool encode_reader_submessage(const GUID_t& sender,
+                                const GUID_t& receiver,
                                 OPENDDS_VECTOR(Chunk)& replacements,
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
