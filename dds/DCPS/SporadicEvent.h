@@ -19,7 +19,7 @@ namespace DCPS {
  * SporadicEvent is an event which can be scheduled multiple times but will only dispatch once
  *
  * SporadicEvent allows repeated calls to schedule (when the application is
- * unsure if the event has already been scheduled, but cumulative calls to
+ * unsure if the event has already been scheduled), but cumulative calls to
  * schedule will only result in a single dispatch. After the base event
  * dispatches, additional calls to schedule will result in another dispatch.
  * Additional calls to schedule may, however, shorten the scheduled time until
