@@ -20,19 +20,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 ReactorInterceptor::Command::Command()
-  : executed_(false)
-  , condition_(mutex_)
-  , reactor_(0)
+  : reactor_(0)
 {}
-
-void ReactorInterceptor::Command::wait() const
-{
-  ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  while (!executed_) {
-    condition_.wait(thread_status_manager);
-  }
-}
 
 ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
@@ -106,7 +95,6 @@ void ReactorInterceptor::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& gu
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
       (*pos)->execute();
-      (*pos)->executed();
     }
   }
   if (!command_queue_.empty()) {

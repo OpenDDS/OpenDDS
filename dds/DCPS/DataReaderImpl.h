@@ -9,34 +9,35 @@
 #define OPENDDS_DCPS_DATAREADERIMPL_H
 
 #include "dcps_export.h"
-#include "EntityImpl.h"
-#include "Definitions.h"
-#include "DataReaderCallbacks.h"
-#include "transport/framework/ReceivedDataSample.h"
-#include "transport/framework/TransportReceiveListener.h"
-#include "transport/framework/TransportClient.h"
-#include "DisjointSequence.h"
-#include "SubscriptionInstance.h"
-#include "InstanceState.h"
-#include "Cached_Allocator_With_Overflow_T.h"
-#include "ZeroCopyInfoSeq_T.h"
-#include "Stats_T.h"
-#include "OwnershipManager.h"
-#include "ContentFilteredTopicImpl.h"
-#include "MultiTopicImpl.h"
-#include "GroupRakeData.h"
-#include "CoherentChangeControl.h"
+
 #include "AssociationData.h"
-#include "RcHandle_T.h"
-#include "RcObject.h"
-#include "WriterInfo.h"
-#include "ReactorInterceptor.h"
-#include "Service_Participant.h"
+#include "Cached_Allocator_With_Overflow_T.h"
+#include "CoherentChangeControl.h"
+#include "ContentFilteredTopicImpl.h"
+#include "DataReaderCallbacks.h"
+#include "Definitions.h"
+#include "DisjointSequence.h"
+#include "DomainParticipantImpl.h"
+#include "EntityImpl.h"
+#include "GroupRakeData.h"
+#include "InstanceState.h"
+#include "MultiTopicImpl.h"
+#include "OwnershipManager.h"
 #include "PoolAllocator.h"
 #include "RcEventHandler.h"
-#include "TopicImpl.h"
-#include "DomainParticipantImpl.h"
+#include "RcHandle_T.h"
+#include "RcObject.h"
+#include "ReactorInterceptor.h"
+#include "Service_Participant.h"
+#include "Stats_T.h"
+#include "SubscriptionInstance.h"
 #include "TimeTypes.h"
+#include "TopicImpl.h"
+#include "WriterInfo.h"
+#include "ZeroCopyInfoSeq_T.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/TransportClient.h"
+#include "transport/framework/TransportReceiveListener.h"
 
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>
@@ -67,7 +68,6 @@ class DomainParticipantImpl;
 class SubscriptionInstance;
 class TopicImpl;
 class TopicDescriptionImpl;
-class RequestedDeadlineWatchdog;
 class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
@@ -442,9 +442,6 @@ public:
   /// Release all instances held by the reader.
   virtual void release_all_instances() = 0;
 
-  // Reset time interval for each instance.
-  void reschedule_deadline();
-
   ACE_Reactor_Timer_Interface* get_reactor();
 
   RepoId get_topic_id();
@@ -744,7 +741,8 @@ protected:
   bool ownership_filter_instance(const SubscriptionInstance_rch& instance,
                                  const PublicationId& pubid);
   bool time_based_filter_instance(const SubscriptionInstance_rch& instance,
-                                  TimeDuration& filter_time_expired);
+                                  MonotonicTimePoint& now,
+                                  MonotonicTimePoint& deadline);
 
   void accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance);
 
@@ -973,7 +971,24 @@ private:
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  RcHandle<RequestedDeadlineWatchdog> watchdog_;
+  TimeDuration deadline_period_;
+  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, SubscriptionInstance_rch) DeadlineQueue;
+  DeadlineQueue deadline_queue_;
+  bool deadline_queue_enabled_;
+  typedef PmfSporadicTask<DataReaderImpl> DRISporadicTask;
+  RcHandle<DRISporadicTask> deadline_task_;
+
+  void schedule_deadline(SubscriptionInstance_rch instance,
+                         bool timer_called);
+  void reset_deadline_period(const TimeDuration& deadline_period);
+  void reschedule_deadline(SubscriptionInstance_rch instance,
+                           const MonotonicTimePoint& now);
+  void cancel_deadline(SubscriptionInstance_rch instance);
+  void cancel_all_deadlines();
+  void deadline_task(const MonotonicTimePoint& now);
+  void process_deadline(SubscriptionInstance_rch instance,
+                        const MonotonicTimePoint& now,
+                        bool timer_called);
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.
