@@ -25,11 +25,10 @@ class OpenDDS_Dcps_Export DispatchService : public virtual RcObject {
 public:
 
   template <typename T>
-  static void* fun_ptr_proxy(void* arg)
+  static void fun_ptr_proxy(void* arg)
   {
     T& ref = *static_cast<T*>(arg);
     ref();
-    return 0;
   }
 
   typedef bool DispatchStatus;
@@ -40,7 +39,7 @@ public:
 
   static const long TI_FAILURE = -1;
 
-  typedef void* (*FunPtr)(void*);
+  typedef void (*FunPtr)(void*);
   typedef std::pair<FunPtr, void*> FunArgPair;
   typedef OPENDDS_DEQUE(FunArgPair) EventQueue;
 
