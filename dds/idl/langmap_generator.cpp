@@ -124,7 +124,12 @@ struct GeneratorBase
   std::string map_type(AST_Field* field)
   {
     FieldInfo af(*field);
-    return (af.type_->anonymous() && af.as_base_) ? af.type_name_ : map_type(af.type_);
+    if ((af.type_->anonymous() && af.as_base_) || af.map_)
+    {
+      return af.type_name_;
+    }
+
+    return map_type(af.type_);
   }
 
   virtual std::string map_type_string(AST_PredefinedType::PredefinedType chartype, bool constant)
@@ -1502,7 +1507,7 @@ struct Cxx11Generator : GeneratorBase
     if (af.map_) {
       const std::string key_type = generator_->map_type(af.map_->key_type());
       const std::string value_type = generator_->map_type(af.map_->value_type());
-      gen_map(af.type_name_, key_type, value_type, " ");
+      gen_map(af.type_name_, key_type, value_type, "  ");
     }
 
     const std::string lang_field_type = generator_->map_type(field);

@@ -64,7 +64,15 @@ std::string FieldInfo::scoped_type(AST_Type& field_type, const std::string& fiel
     return n;
   }
   n = n.substr(0, n.rfind(scope_op) + 2) + at_pfx() + field_name;
-  return (field_type.node_type() == AST_Decl::NT_sequence) ? (n + "_seq") : n;
+  if (field_type.node_type() == AST_Decl::NT_sequence)
+  {
+      return n + "_seq";
+  } else if (field_type.node_type() == AST_Decl::NT_map)
+  {
+    return n + "_map";
+  }
+
+  return n;
 }
 
 std::string FieldInfo::underscore(const std::string& scoped)
