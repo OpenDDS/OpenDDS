@@ -3873,20 +3873,6 @@ AuthState Spdp::lookup_participant_auth_state(const GUID_t& id) const
 }
 #endif
 
-#ifndef OPENDDS_SAFETY_PROFILE
-bool
-operator==(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
-{
-  return x.kind == y.kind && x.port == y.port && x.address == y.address;
-}
-
-bool
-operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
-{
-  return x.kind != y.kind && x.port != y.port && x.address != y.address;
-}
-#endif
-
 #ifdef OPENDDS_SECURITY
 void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, RepoId r, BuiltinEndpointSet_t avail,
                      DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
