@@ -299,23 +299,22 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
+                     si_guard,
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
 
+    DDS::TopicDescription_var td = a_datareader->get_topicdescription();
+    CORBA::String_var topic_name = td->get_name();
+    std::pair<DataReaderMap::iterator, DataReaderMap::iterator> range =
+      datareader_map_.equal_range(topic_name.in());
     DataReaderMap::iterator it;
-
-    for (it = datareader_map_.begin();
-         it != datareader_map_.end();
-         ++it) {
+    for (it = range.first; it != range.second; ++it) {
       if (it->second == dr_servant) {
         break;
       }
     }
 
-    if (it == datareader_map_.end()) {
-      DDS::TopicDescription_var td = a_datareader->get_topicdescription();
-      CORBA::String_var topic_name = td->get_name();
+    if (it == range.second) {
 #ifndef OPENDDS_NO_MULTI_TOPIC
       MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
@@ -361,6 +360,11 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     }
 
     datareader_map_.erase(it);
+
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     dr_set_guard,
+                     this->dr_set_lock_,
+                     DDS::RETCODE_ERROR);
     datareader_set_.erase(dr_servant);
   }
 
@@ -368,17 +372,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     this->monitor_->report();
   }
 
-  if (!dr_servant) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("SubscriberImpl::delete_datareader: ")
-                ACE_TEXT("could not remove unknown subscription.\n")));
-    }
-    return ::DDS::RETCODE_ERROR;
-  }
-
-  RepoId subscription_id = dr_servant->get_repo_id();
+  const RepoId subscription_id = dr_servant->get_repo_id();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   this->dp_id_,
@@ -519,7 +513,7 @@ SubscriberImpl::get_datareaders(
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
-                     this->si_lock_,
+                     this->dr_set_lock_,
                      DDS::RETCODE_ERROR);
     localreaders = datareader_set_;
   }
@@ -752,7 +746,7 @@ SubscriberImpl::begin_access()
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
-                     si_lock_,
+                     dr_set_lock_,
                      DDS::RETCODE_ERROR);
 
     ++access_depth_;
@@ -789,7 +783,7 @@ SubscriberImpl::end_access()
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
-                     si_lock_,
+                     dr_set_lock_,
                      DDS::RETCODE_ERROR);
 
     if (access_depth_ == 0) {
@@ -920,7 +914,7 @@ SubscriberImpl::data_received(DataReaderImpl* reader)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
-            this->si_lock_);
+            this->dr_set_lock_);
   datareader_set_.insert(rchandle_from(reader));
 }
 
@@ -961,7 +955,7 @@ SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
 void
 SubscriberImpl::remove_from_datareader_set(DataReaderImpl* reader)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, si_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dr_set_lock_);
   datareader_set_.erase(rchandle_from(reader));
 }
 #endif
@@ -1045,7 +1039,7 @@ SubscriberImpl::coherent_change_received (const RepoId& publisher_id,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
-              this->si_lock_);
+              this->dr_set_lock_);
      localdrs = datareader_set_;
   }
   // Verify if all readers complete the coherent changes. The result

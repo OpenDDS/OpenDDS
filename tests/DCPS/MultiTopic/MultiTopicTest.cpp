@@ -326,10 +326,15 @@ void waitForMatch(const DataWriter_var& dw, int count = 1)
   ws->attach_condition(sc);
   ConditionSeq active;
   PublicationMatchedStatus pubmatched;
-  while (dw->get_publication_matched_status(pubmatched) == RETCODE_OK
-         && pubmatched.current_count != count) {
+  DDS::ReturnCode_t ret = dw->get_publication_matched_status(pubmatched);
+  //while (dw->get_publication_matched_status(pubmatched) == RETCODE_OK
+  //         && pubmatched.current_count != count) {
+  while (ret == RETCODE_OK && pubmatched.current_count != count) {
+    std::cout << "Pubmatched count is " << pubmatched.current_count << ". Expected: " << count << std::endl;
     check_rc(ws->wait(active, max_wait), "wait for match");
+    ret = dw->get_publication_matched_status(pubmatched);
   }
+  std::cout << "Return value: " << OpenDDS::DCPS::retcode_to_string(ret) << std::endl;
   ws->detach_condition(sc);
 }
 
@@ -375,6 +380,7 @@ bool check_bits(const Publisher_var& pub)
   DomainParticipant_var pub_dp = pub->get_participant();
   Subscriber_var bit_sub = pub_dp->get_builtin_subscriber();
   DataReader_var bit_dr = bit_sub->lookup_datareader(BUILT_IN_SUBSCRIPTION_TOPIC);
+  std::cout << "Waiting for BIT samples...\n";
   Utils::waitForSample(bit_dr);
   SubscriptionBuiltinTopicDataDataReader_var dr =
     SubscriptionBuiltinTopicDataDataReader::_narrow(bit_dr);
@@ -415,6 +421,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
   DDS::DataReader_var dr;
 
   for (int i = 0; i < N_ITERATIONS; ++i) {
+    std::cout << "======= ITERATION #" << i << std::endl;
 
     MultiTopic_var mt = sub_dp->create_multitopic("MyMultiTopic", type_name,
       "SELECT flight_name, type, destination, alternative_destinations, "
@@ -427,6 +434,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     dr = sub->create_datareader(mt, DATAREADER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
     // Write samples (Location)
+    std::cout << "Location pub waiting for a match...\n";
     waitForMatch(location.dw_);
     LocationInfoDataWriter_var locdw = LocationInfoDataWriter::_narrow(location.dw_);
 
@@ -463,6 +471,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     check_rc(locdw->write(loc98, HANDLE_NIL), "write loc98"); // filtered out, no PlanInfo
 
     // Write samples (FlightPlan)
+    std::cout << "FlightPlan pub waiting for a match...\n";
     waitForMatch(flightplan.dw_);
     PlanInfoDataWriter_var pidw = PlanInfoDataWriter::_narrow(flightplan.dw_);
 
@@ -499,6 +508,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     check_rc(pidw->write(plan96, HANDLE_NIL), "write plan96");
 
     // Write samples (More)
+    std::cout << "More pub waiting for a match...\n";
     waitForMatch(more.dw_);
 
     mi.departure_date() = 299;
@@ -516,6 +526,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     check_rc(midw->write(mi, HANDLE_NIL), "write second mi");
 
     // Write samples (Unrelated)
+    std::cout << "Unrelated pub waiting for a match...\n";
     waitForMatch(unrelated.dw_);
     UnrelatedInfoDataWriter_var uidw = UnrelatedInfoDataWriter::_narrow(unrelated.dw_);
     UnrelatedInfoWrapper ui;
@@ -559,6 +570,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     std::cout << "} \"" << rw.misc() << "\" " << rw.misc_union() << std::endl;
 
     // Check the Result
+    std::cout << "Checking result...\n";
     bool invalid_result = false;
     invalid_result |= expect("flight_id", rw.flight_id(), plan99.flight_id());
     invalid_result |= expect("departure_date", rw.departure_date(), plan99.departure_date());
@@ -581,6 +593,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     // Check return get_key_value
     // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
     {
+      std::cout << "Checking return from get_key_value...\n";
       Resulting resulting_value;
       ReturnCode_t rc = res_dr->get_key_value(resulting_value, HANDLE_NIL);
       if (rc != RETCODE_BAD_PARAMETER) {
@@ -594,6 +607,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     data.length(0);
     info.length(0);
     {
+      std::cout << "Try another read, should get no data...\n";
       ReturnCode_t ret = res_dr->read_w_condition(data, info, LENGTH_UNLIMITED, rc);
       if (ret != RETCODE_NO_DATA) {
         throw std::runtime_error(
@@ -603,16 +617,24 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     }
     dr->delete_readcondition(rc);
 
+    std::cout << "Checking built-in data...\n";
     if (!check_bits(pub)) {
       return false;
     }
 
     // Reader cleanup
     if (i != N_ITERATIONS - 1) {
+      std::cout << "Deleting multitopic data reader...\n";
       sub->delete_datareader(dr);
+      dr = 0;
+      std::cout << "Deleted the multitopic data reader!\n";
+      std::cout << "Waiting for Location pub to leave...\n";
       waitForMatch(location.dw_, 0);
+      std::cout << "Waiting for FlightPlan pub to leave...\n";
       waitForMatch(flightplan.dw_, 0);
+      std::cout << "Waiting for More pub to leave...\n";
       waitForMatch(more.dw_, 0);
+      std::cout << "Waiting for Unrelated pub to leave...\n";
       waitForMatch(unrelated.dw_, 0);
       sub_dp->delete_multitopic(mt);
     }
