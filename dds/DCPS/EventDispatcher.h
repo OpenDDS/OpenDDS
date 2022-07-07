@@ -116,14 +116,14 @@ public:
    */
   virtual void shutdown(bool immediate = false) = 0;
 
-  /*
+  /**
    * Dispatch an event.
    * @param event the event to dispatch
    * @return true if event successfully enqueue, otherwise false
    */
   virtual bool dispatch(EventBase_rch event) = 0;
 
-  /*
+  /**
    * Schedule the future dispatch of an event.
    * @param event the event to dispatch
    * @param expiration the requested dispatch time (no earlier than)
@@ -131,7 +131,7 @@ public:
    */
   virtual long schedule(EventBase_rch event, const MonotonicTimePoint& expiration = MonotonicTimePoint::now()) = 0;
 
-  /*
+  /**
    * Cancel a scheduled event dispatch.
    * @param id the id of the event timer to cancel
    * @return the number of canceled events (0 for failure to cancel, 1 for success)

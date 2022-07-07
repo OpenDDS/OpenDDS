@@ -18,6 +18,10 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export ServiceEventDispatcher : public EventDispatcher {
 public:
+  /**
+   * Create a ServiceEventDispatcher
+   * @param count the requested size of the internal thread pool (see DispatchService)
+   */
   explicit ServiceEventDispatcher(size_t count = 1);
   virtual ~ServiceEventDispatcher();
 
