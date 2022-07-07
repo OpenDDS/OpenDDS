@@ -198,7 +198,7 @@ RtpsUdpTransport::connect_datalink(const RemoteTransport& remote,
                                    const ConnectionAttribs& attribs,
                                    const TransportClient_rch& client)
 {
-  bit_sub_ = client->get_builtin_subscriber();
+  bit_sub_ = client->get_builtin_subscriber_proxy();
 
   GuardThreadType guard_links(links_lock_);
 
@@ -233,7 +233,7 @@ RtpsUdpTransport::accept_datalink(const RemoteTransport& remote,
                                   const ConnectionAttribs& attribs,
                                   const TransportClient_rch& client)
 {
-  bit_sub_ = client->get_builtin_subscriber();
+  bit_sub_ = client->get_builtin_subscriber_proxy();
 
   GuardThreadType guard_links(links_lock_);
 

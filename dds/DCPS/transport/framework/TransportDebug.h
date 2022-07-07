@@ -49,11 +49,23 @@ class OpenDDS_Dcps_Export TransportDebug {
 public:
   TransportDebug();
 
+  /// Log all RTPS messages sent or recieved.
   bool log_messages;
+  /// Log progress for RTPS entity discovery and association.
   bool log_progress;
+  /// Log received RTPS messages that were dropped.
   bool log_dropped_messages;
+  /**
+   * Log non-final RTPS messages send or received. Useful to gauge lost
+   * messages and resends.
+   */
   bool log_nonfinal_messages;
+  /**
+   * Log message fragment reassembly process for transports where that applies.
+   * Also logged when the transport debug level is set to the most verbose.
+   */
   bool log_fragment_storage;
+  /// Log number of associations and pending associations of RTPS entities.
   bool log_remote_counts;
 };
 extern OpenDDS_Dcps_Export TransportDebug transport_debug;

@@ -571,12 +571,12 @@ SubscriberImpl::notify_datareaders()
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (!it->second->is_bit()) {
+        it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
         if (listener) {
           listener->on_data_available(it->second.in());
         }
-        it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(this), listener, it->second, listener, true, false));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(listener, it->second, listener, true, false));
       }
     }
   }
@@ -607,10 +607,10 @@ SubscriberImpl::notify_datareaders()
 
     if (dri->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = dri->get_listener();
+      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       if (!CORBA::is_nil(listener)) {
         listener->on_data_available(dri);
       }
-      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
     }
   }
 #endif
