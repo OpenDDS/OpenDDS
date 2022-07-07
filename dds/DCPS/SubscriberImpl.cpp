@@ -729,30 +729,33 @@ SubscriberImpl::get_listener()
 DDS::ReturnCode_t
 SubscriberImpl::begin_access()
 {
-  if (enabled_ == false) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
-                ACE_TEXT(" Subscriber is not enabled!\n")));
-    }
-    return DDS::RETCODE_NOT_ENABLED;
-  }
-
-  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
-    return DDS::RETCODE_OK;
-  }
-
   DataReaderSet to_call;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     dr_set_lock_,
+                     si_guard,
+                     si_lock_,
                      DDS::RETCODE_ERROR);
+    if (!enabled_) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
+                   ACE_TEXT(" Subscriber is not enabled!\n")));
+      }
+      return DDS::RETCODE_NOT_ENABLED;
+    }
+
+    if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+      return DDS::RETCODE_OK;
+    }
 
     ++access_depth_;
     // We should only notify subscription on the first
     // and last change to the current change set:
     if (access_depth_ == 1) {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       dr_set_guard,
+                       dr_set_lock_,
+                       DDS::RETCODE_ERROR);
       to_call = datareader_set_;
     }
   }
@@ -766,31 +769,30 @@ SubscriberImpl::begin_access()
 DDS::ReturnCode_t
 SubscriberImpl::end_access()
 {
-  if (enabled_ == false) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
-                ACE_TEXT(" Publisher is not enabled!\n")));
-    }
-    return DDS::RETCODE_NOT_ENABLED;
-  }
-
-  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
-    return DDS::RETCODE_OK;
-  }
-
   DataReaderSet to_call;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     dr_set_lock_,
+                     si_guard,
+                     si_lock_,
                      DDS::RETCODE_ERROR);
+    if (!enabled_) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                   ACE_TEXT(" Publisher is not enabled!\n")));
+      }
+      return DDS::RETCODE_NOT_ENABLED;
+    }
+
+    if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+      return DDS::RETCODE_OK;
+    }
 
     if (access_depth_ == 0) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
-                  ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                   ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -799,6 +801,10 @@ SubscriberImpl::end_access()
     // We should only notify subscription on the first
     // and last change to the current change set:
     if (access_depth_ == 0) {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       dr_set_guard,
+                       dr_set_lock_,
+                       DDS::RETCODE_ERROR);
       to_call = datareader_set_;
     }
   }
