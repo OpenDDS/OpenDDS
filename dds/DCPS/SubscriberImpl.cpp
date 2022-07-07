@@ -305,7 +305,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
     DDS::TopicDescription_var td = a_datareader->get_topicdescription();
     CORBA::String_var topic_name = td->get_name();
-    std::pair<DataReaderMap::iterator, DataReaderMap::iterator> range =
+    const std::pair<DataReaderMap::iterator, DataReaderMap::iterator> range =
       datareader_map_.equal_range(topic_name.in());
     DataReaderMap::iterator it;
     for (it = range.first; it != range.second; ++it) {
