@@ -26,7 +26,6 @@ SubscriptionInstance::SubscriptionInstance(DataReaderImpl* reader,
   , sample_states_(0)
   , instance_handle_(handle)
   , owns_handle_(owns_handle)
-  , deadline_timer_id_(-1)
 {
   switch (qos.destination_order.kind) {
   case DDS::BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS:

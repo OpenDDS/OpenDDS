@@ -70,7 +70,7 @@ public:
 
   MonotonicTimePoint cur_sample_tv_;
 
-  long deadline_timer_id_;
+  MonotonicTimePoint deadline_;
 
   MonotonicTimePoint last_accepted_;
 };
