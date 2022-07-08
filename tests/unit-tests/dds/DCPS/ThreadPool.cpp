@@ -12,10 +12,10 @@
 
 #include <gtest/gtest.h>
 
-namespace
-{
+namespace {
 
-ACE_THR_FUNC_RETURN inc_count(void* arg) {
+ACE_THR_FUNC_RETURN inc_count(void* arg)
+{
   if (arg) {
     ACE_Atomic_Op<ACE_Thread_Mutex, size_t>* count = reinterpret_cast<ACE_Atomic_Op<ACE_Thread_Mutex, size_t>*>(arg);
     ++(*count);
@@ -25,7 +25,8 @@ ACE_THR_FUNC_RETURN inc_count(void* arg) {
 
 OpenDDS::DCPS::ThreadPool* global_pool = 0;
 
-ACE_THR_FUNC_RETURN check_membership(void* arg) {
+ACE_THR_FUNC_RETURN check_membership(void* arg)
+{
   if (arg) {
     OpenDDS::DCPS::ThreadPool& pool = *global_pool;
     EXPECT_TRUE(pool.contains(ACE_Thread::self()));

@@ -11,11 +11,9 @@
 
 #include <gtest/gtest.h>
 
-namespace
-{
+namespace {
 
-class TestObjBase : public OpenDDS::DCPS::RcObject
-{
+class TestObjBase : public OpenDDS::DCPS::RcObject {
 public:
   TestObjBase() : cv_(mutex_), call_count_(0) {}
 
@@ -48,14 +46,12 @@ private:
   size_t call_count_;
 };
 
-struct SimpleTestObj : public TestObjBase
-{
+struct SimpleTestObj : public TestObjBase {
   SimpleTestObj() {}
   void operator()() { increment_call_count(); }
 };
 
-struct RecursiveTestObjOne : public TestObjBase
-{
+struct RecursiveTestObjOne : public TestObjBase {
   RecursiveTestObjOne(OpenDDS::DCPS::DispatchService& dispatcher) : dispatcher_(dispatcher) {}
 
   void operator()() { if (increment_call_count() % 2) { dispatcher_.dispatch(*this); } }
@@ -63,11 +59,17 @@ struct RecursiveTestObjOne : public TestObjBase
   OpenDDS::DCPS::DispatchService& dispatcher_;
 };
 
-struct RecursiveTestObjTwo : public TestObjBase
-{
+struct RecursiveTestObjTwo : public TestObjBase {
   RecursiveTestObjTwo(OpenDDS::DCPS::DispatchService& dispatcher, size_t dispatch_scale) : dispatcher_(dispatcher), dispatch_scale_(dispatch_scale) {}
 
-  void operator()() { increment_call_count(); const size_t scale = dispatch_scale_.value(); for (size_t i = 0; i < scale; ++i) { dispatcher_.dispatch(*this); } }
+  void operator()()
+  {
+    increment_call_count();
+    const size_t scale = dispatch_scale_.value();
+    for (size_t i = 0; i < scale; ++i) {
+      dispatcher_.dispatch(*this);
+    }
+  }
 
   OpenDDS::DCPS::DispatchService& dispatcher_;
   ACE_Atomic_Op<ACE_Thread_Mutex, size_t> dispatch_scale_;

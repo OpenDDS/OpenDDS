@@ -116,7 +116,8 @@ public:
 
   /// Helper function to cancel arbitrary function objects (see fun_ptr_proxy)
   template <typename T>
-  size_t cancel(T& ref) {
+  size_t cancel(T& ref)
+  {
     return cancel(fun_ptr_proxy<T>, &ref);
   }
 

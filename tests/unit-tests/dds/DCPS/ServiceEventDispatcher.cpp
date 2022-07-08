@@ -12,11 +12,9 @@
 
 #include <gtest/gtest.h>
 
-namespace
-{
+namespace {
 
-class TestEventBase : public OpenDDS::DCPS::EventBase
-{
+class TestEventBase : public OpenDDS::DCPS::EventBase {
 public:
   TestEventBase() : cv_(mutex_), call_count_(0) {}
 
@@ -49,14 +47,12 @@ private:
   size_t call_count_;
 };
 
-struct SimpleTestEvent : public TestEventBase
-{
+struct SimpleTestEvent : public TestEventBase {
   SimpleTestEvent() {}
   void handle_event() { increment_call_count(); }
 };
 
-struct RecursiveTestEventOne : public TestEventBase
-{
+struct RecursiveTestEventOne : public TestEventBase {
   RecursiveTestEventOne(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher) : dispatcher_(dispatcher) {}
 
   void handle_event()
@@ -72,8 +68,7 @@ struct RecursiveTestEventOne : public TestEventBase
   OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_;
 };
 
-struct RecursiveTestEventTwo : public TestEventBase
-{
+struct RecursiveTestEventTwo : public TestEventBase {
   RecursiveTestEventTwo(OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher, size_t dispatch_scale) : dispatcher_(dispatcher), dispatch_scale_(dispatch_scale) {}
 
   void handle_event()
