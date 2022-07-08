@@ -1542,7 +1542,37 @@ Sedp::disassociate(DiscoveredParticipant& participant)
 
   associated_participants_.erase(part);
 
+  OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
+  OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
+
+  bool result = false;
+  if (spdp_.has_discovered_participant(part)) {
+    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
+    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
+    result = true;
+  }
+
+  for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
+  for (OPENDDS_VECTOR(DiscoveredSubscription)::iterator it = subs_to_remove_from_bit.begin(); it != subs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
+  participant.builtin_pending_records_.clear();
+
+  for (DiscoveredParticipant::BuiltinAssociationRecords::const_iterator pos = participant.builtin_associated_records_.begin(), limit = participant.builtin_associated_records_.end(); pos != limit; ++pos) {
+    const BuiltinAssociationRecord& record = *pos;
+    record.transport_client_->disassociate(record.remote_id());
+  }
+
+  participant.builtin_associated_records_.clear();
+
+  //FUTURE: if/when topic propagation is supported, add it here
+
 #ifdef OPENDDS_SECURITY
+  // Clean up crypto handles after diassociation because the transport might be using them.
   if (spdp_.is_security_enabled()) {
     static const EntityId_t secure_entities[] = {
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
@@ -1597,35 +1627,6 @@ Sedp::disassociate(DiscoveredParticipant& participant)
     }
   }
 #endif
-
-  OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
-  OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
-
-  bool result = false;
-  if (spdp_.has_discovered_participant(part)) {
-    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
-    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
-    result = true;
-  }
-
-  for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
-    remove_from_bit_i(*it);
-  }
-
-  for (OPENDDS_VECTOR(DiscoveredSubscription)::iterator it = subs_to_remove_from_bit.begin(); it != subs_to_remove_from_bit.end(); ++it) {
-    remove_from_bit_i(*it);
-  }
-
-  participant.builtin_pending_records_.clear();
-
-  for (DiscoveredParticipant::BuiltinAssociationRecords::const_iterator pos = participant.builtin_associated_records_.begin(), limit = participant.builtin_associated_records_.end(); pos != limit; ++pos) {
-    const BuiltinAssociationRecord& record = *pos;
-    record.transport_client_->disassociate(record.remote_id());
-  }
-
-  participant.builtin_associated_records_.clear();
-
-  //FUTURE: if/when topic propagation is supported, add it here
 
   return result;
 }
