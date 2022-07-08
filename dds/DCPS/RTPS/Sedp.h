@@ -1223,6 +1223,7 @@ private:
   DCPS::TransportConfig_rch transport_cfg_;
   DCPS::ReactorTask_rch reactor_task_;
   DCPS::JobQueue_rch job_queue_;
+  DCPS::EventDispatcher_rch event_dispatcher_;
 
   void populate_discovered_writer_msg(
       DCPS::DiscoveredWriterData& dwd,
@@ -1767,50 +1768,50 @@ protected:
                                   const GUID_t& writer);
 
 
-  class WriterAddAssociation : public DCPS::JobQueue::Job {
+  class WriterAddAssociation : public DCPS::EventBase {
   public:
     explicit WriterAddAssociation(const WriterAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const WriterAssociationRecord_rch record_;
   };
 
-  class WriterRemoveAssociations : public DCPS::JobQueue::Job {
+  class WriterRemoveAssociations : public DCPS::EventBase {
   public:
     explicit WriterRemoveAssociations(const WriterAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const WriterAssociationRecord_rch record_;
   };
 
-  class ReaderAddAssociation : public DCPS::JobQueue::Job {
+  class ReaderAddAssociation : public DCPS::EventBase {
   public:
     explicit ReaderAddAssociation(const ReaderAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const ReaderAssociationRecord_rch record_;
   };
 
-  class ReaderRemoveAssociations : public DCPS::JobQueue::Job {
+  class ReaderRemoveAssociations : public DCPS::EventBase {
   public:
     explicit ReaderRemoveAssociations(const ReaderAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const ReaderAssociationRecord_rch record_;
   };

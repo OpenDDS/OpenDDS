@@ -12,6 +12,7 @@
 
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
