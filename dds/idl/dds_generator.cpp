@@ -377,6 +377,8 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     } else {
       def_val = scoped(item->name());
     }
+  } else if (fld_cls & CL_MAP) {
+    return indent + name + ".clear();\n";
   } else if (fld_cls & CL_SEQUENCE) {
     string seq_resize_func = (use_cxx11) ? "resize" : "length";
     if (is_union) {
