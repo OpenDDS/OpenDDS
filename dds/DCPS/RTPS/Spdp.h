@@ -396,6 +396,8 @@ private:
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
+  const double quick_resend_ratio_;
+  const DCPS::TimeDuration min_resend_delay_;
   DCPS::TimeDuration lease_duration_;
   DCPS::TimeDuration lease_extension_;
   XTypes::TypeLookupService_rch type_lookup_service_;
