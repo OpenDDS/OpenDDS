@@ -101,7 +101,7 @@ bool LinuxNetworkConfigMonitor::open()
 
   ReactorInterceptor_rch interceptor = interceptor_.lock();
   if (interceptor) {
-    interceptor->execute_or_enqueue(make_rch<RegisterHandler>(this));
+    interceptor->execute_or_enqueue(make_rch<RegisterHandler>(rchandle_from(this)));
   }
 
   return true;
@@ -111,17 +111,19 @@ bool LinuxNetworkConfigMonitor::close()
 {
   bool retval = true;
 
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (interceptor) {
-    ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(make_rch<RemoveHandler>(this));
-    command->wait();
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
+    if (socket_.close() != 0) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n"));
+      }
+      retval = false;
+    }
   }
 
-  if (socket_.close() != 0) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n"));
-    }
-    retval = false;
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (interceptor) {
+    interceptor->execute_or_enqueue(make_rch<RemoveHandler>(rchandle_from(this)));
   }
 
   return retval;
@@ -145,7 +147,14 @@ void LinuxNetworkConfigMonitor::read_messages()
   char buffer[MAX_NETLINK_MESSAGE_SIZE];
 
   for (;;) {
-    ssize_t buffer_length = socket_.recv(buffer, 4096, 0);
+    ssize_t buffer_length;
+    {
+      ACE_GUARD(ACE_Thread_Mutex, g, socket_mutex_);
+      if (socket_.get_handle() == -1) {
+        return;
+      }
+      buffer_length = socket_.recv(buffer, 4096, 0);
+    }
     if (buffer_length < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
         return;

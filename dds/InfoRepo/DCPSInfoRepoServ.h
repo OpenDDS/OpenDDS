@@ -69,8 +69,8 @@ private:
   bool servant_finalized_;
 
   /// Repository Federation behaviors
-  OpenDDS::Federator::ManagerImpl federator_;
   OpenDDS::Federator::Config      federatorConfig_;
+  OpenDDS::Federator::ManagerImpl federator_;
 
   PortableServer::Servant_var<TAO_DDS_DCPSInfo_i> info_servant_;
 

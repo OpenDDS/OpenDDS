@@ -21,7 +21,6 @@
 #include "Util.h"
 #include "DCPS_Utils.h"
 #include "MonitorFactory.h"
-#include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
 #include "Service_Participant.h"
@@ -382,7 +381,13 @@ DomainParticipantImpl::delete_subscriber(
 DDS::Subscriber_ptr
 DomainParticipantImpl::get_builtin_subscriber()
 {
-  return DDS::Subscriber::_duplicate(bit_subscriber_.in());
+  return bit_subscriber_->get();
+}
+
+RcHandle<BitSubscriber>
+DomainParticipantImpl::get_builtin_subscriber_proxy()
+{
+  return bit_subscriber_;
 }
 
 DDS::Topic_ptr
@@ -1081,7 +1086,7 @@ DomainParticipantImpl::delete_contained_entities()
     shutdown_mutex_.release();
   }
 
-  bit_subscriber_ = DDS::Subscriber::_nil();
+  bit_subscriber_.reset();
 
   Registered_Data_Types->unregister_participant(this);
 
@@ -1540,9 +1545,8 @@ DomainParticipantImpl::get_discovered_participants(DDS::InstanceHandleSeq& parti
 }
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_discovered_participant_data(
-  DDS::ParticipantBuiltinTopicData & participant_data,
-  DDS::InstanceHandle_t participant_handle)
+DomainParticipantImpl::get_discovered_participant_data(DDS::ParticipantBuiltinTopicData& participant_data,
+                                                       DDS::InstanceHandle_t participant_handle)
 {
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
@@ -1563,37 +1567,7 @@ DomainParticipantImpl::get_discovered_participant_data(
       return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::SampleInfoSeq info;
-  DDS::ParticipantBuiltinTopicDataSeq data;
-  DDS::ParticipantBuiltinTopicDataDataReader_var bit_part_dr;
-
-  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
-  if (bit_subscriber) {
-    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-    bit_part_dr = DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr);
-  }
-
-  if (!bit_part_dr) {
-    return DDS::RETCODE_NO_DATA;
-  }
-
-  DDS::ReturnCode_t ret = bit_part_dr->read_instance(data,
-                                                     info,
-                                                     1,
-                                                     participant_handle,
-                                                     DDS::ANY_SAMPLE_STATE,
-                                                     DDS::ANY_VIEW_STATE,
-                                                     DDS::ANY_INSTANCE_STATE);
-
-  if (ret == DDS::RETCODE_OK) {
-    if (info[0].valid_data) {
-      participant_data = data[0];
-    } else {
-      return DDS::RETCODE_NO_DATA;
-    }
-  }
-
-  return ret;
+  return bit_subscriber_->get_discovered_participant_data(participant_data, participant_handle);
 }
 
 DDS::ReturnCode_t
@@ -1617,9 +1591,8 @@ DomainParticipantImpl::get_discovered_topics(DDS::InstanceHandleSeq& topic_handl
 }
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_discovered_topic_data(
-  DDS::TopicBuiltinTopicData & topic_data,
-  DDS::InstanceHandle_t topic_handle)
+DomainParticipantImpl::get_discovered_topic_data(DDS::TopicBuiltinTopicData& topic_data,
+                                                 DDS::InstanceHandle_t topic_handle)
 {
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
@@ -1638,38 +1611,7 @@ DomainParticipantImpl::get_discovered_topic_data(
       return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::TopicBuiltinTopicDataDataReader_var bit_topic_dr;
-
-  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
-  if (bit_subscriber) {
-    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_TOPIC_TOPIC);
-    bit_topic_dr = DDS::TopicBuiltinTopicDataDataReader::_narrow(dr);
-  }
-
-  if (!bit_topic_dr) {
-    return DDS::RETCODE_NO_DATA;
-  }
-
-  DDS::SampleInfoSeq info;
-  DDS::TopicBuiltinTopicDataSeq data;
-  DDS::ReturnCode_t ret =
-    bit_topic_dr->read_instance(data,
-                                info,
-                                1,
-                                topic_handle,
-                                DDS::ANY_SAMPLE_STATE,
-                                DDS::ANY_VIEW_STATE,
-                                DDS::ANY_INSTANCE_STATE);
-
-  if (ret == DDS::RETCODE_OK) {
-    if (info[0].valid_data) {
-      topic_data = data[0];
-    } else {
-      return DDS::RETCODE_NO_DATA;
-    }
-  }
-
-  return ret;
+  return bit_subscriber_->get_discovered_topic_data(topic_data, topic_handle);
 }
 
 #endif
@@ -2156,28 +2098,14 @@ OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-
-  DDS::PublicationBuiltinTopicDataDataReader_var bit_pub_dr;
-
-  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
-  if (bit_subscriber) {
-    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-    bit_pub_dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
-  }
-
-  if (bit_pub_dr) {
-    DDS::DataReaderListener_var listener = bit_pub_dr->get_listener();
-    if (CORBA::is_nil(listener.in())) {
-      DDS::DataReaderListener_var bit_pub_listener =
-        new BitPubListenerImpl(this);
-      bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
-      // Must call on_data_available when attaching a listener late - samples may be waiting
-      SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber_.in());
-      DataReaderImpl* reader = dynamic_cast<DataReaderImpl*>(bit_pub_dr.in());
-      TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(sub), bit_pub_listener, rchandle_from(reader), true, false, false));
+  if (bit_subscriber_) {
+    bit_subscriber_->bit_pub_listener_hack(this);
+  } else {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: DomainParticipantImpl::ownership_manager: bit_subscriber_ is null"));
     }
   }
-
 #endif
   return &owner_man_;
 }
