@@ -451,7 +451,7 @@ namespace {
       return value_access_pre_ + get_var_name(var_name) + value_access_post_;
     }
 
-    std::string map_check_empty() const 
+    std::string map_check_empty() const
     {
       return value_access() + ".empty() == 0";
     }

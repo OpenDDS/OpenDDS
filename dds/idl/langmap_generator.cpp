@@ -1465,7 +1465,7 @@ struct Cxx11Generator : GeneratorBase
     gen_sequence(tdname->last_component()->get_string(), map_type(seq->base_type()));
   }
 
-  static void gen_map(const std::string& type, const std::string& key, const std::string& val, const std::string& ind = "") 
+  static void gen_map(const std::string& type, const std::string& key, const std::string& val, const std::string& ind = "")
   {
     be_global->add_include("<map>", BE_GlobalData::STREAM_LANG_H);
     be_global->lang_header_ << ind << "using " << type << " = std::map<" << key << "," << val << ">;\n";
