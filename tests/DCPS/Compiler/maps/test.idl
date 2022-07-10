@@ -1,22 +1,26 @@
-// struct TestStruct {
-//     int32 id;
-//     string msg;
-// };
+struct TestStruct {
+    int32 id;
+    string msg;
+};
+
+enum TEST_ENUM {TEST1, TEST2, TEST3};
+
+typedef sequence<TestStruct> TestStructSeq;
+// typedef map<int32, TestStruct> TestStructMap;
+// typedef map<int32, string> TestIntStringMap;
 
 struct Data {
-  sequence<int32> testSeq;
-  int32 intTest;
   map<int32, int32> intIntMap;
-  // map<int32, int32, 4> intIntMapBounded;
 
-  // map<string, TestStruct> stringStructsMap;
-  // map<string, TestStruct, 4> stringStructsMapBounded;
+  map<string, TestStruct> stringStructsMap;
+  // map<TestStruct, string> structStringMap; // Does not compile
 
-  // map<string, TestStructSeq> stringSequenceMap;
-  // map<string, TestStructSeq, 2> stringSequenceMapBounded;
+  map<TEST_ENUM, int32> enumIntMap;
+  map<int32, TEST_ENUM> intEnumMap;
+
+  map<string, TestStructSeq> stringSequenceMap;
 
   // map<string, TestStructMap> stringMapMap;
-  // map<string, TestStructMap, 2> stringMapMapBounded;
 
   // map<TestIntStringMap, string> mapStringMap;
 };
