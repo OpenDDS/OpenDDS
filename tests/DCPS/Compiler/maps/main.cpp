@@ -46,6 +46,21 @@ TEST(MapsMarshalling, MapStringStrct)
   EXPECT_EQ(testData.stringStructsMap()["Hello"].msg(), expectedData.stringStructsMap()["Hello"].msg());
 }
 
+TEST(MapsMarshalling, MapEnumInt)
+{
+  OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
+  OpenDDS::DCPS::Serializer strm(b.get(), encoding);
+
+  Data expectedData;
+
+  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
+
+  auto testData = TestMarshalling(strm, expectedData);
+
+  // EXPECT_EQ(testData.stringStructsMap(), expectedData.stringStructsMap());
+  EXPECT_EQ(testData.enumIntMap()[TEST_ENUM::TEST1], expectedData.enumIntMap()[TEST_ENUM::TEST1]);
+}
+
 int main(int argc, char* argv[])
 {
   ::testing::InitGoogleTest(&argc, argv);
