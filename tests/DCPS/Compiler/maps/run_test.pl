@@ -24,7 +24,7 @@ for my $file (@files) {
 my @kinds = scalar(@ARGV) ? @ARGV : @all_kinds;
 my $failed = 0;
 for my $kind (@kinds) {
-  my $path = "$kind/explicit-ints-$kind";
+  my $path = "$kind/maps-$kind";
 
   my $test = new PerlDDS::TestFramework();
   $test->process('test', $path);
