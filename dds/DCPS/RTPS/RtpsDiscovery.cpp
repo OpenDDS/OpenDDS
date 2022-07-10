@@ -1167,17 +1167,18 @@ RtpsDiscovery::append_transport_statistics(DDS::DomainId_t domain,
   }
 }
 
-DDS::Subscriber_ptr RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
+RcHandle<DCPS::BitSubscriber> RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* participant)
 {
   DDS::Subscriber_var bit_subscriber;
 #ifndef DDS_HAS_MINIMUM_BIT
   if (!TheServiceParticipant->get_BIT()) {
-    get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
-    return 0;
+    DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_rch = DCPS::make_rch<DCPS::BitSubscriber>();
+    get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber_rch);
+    return DCPS::RcHandle<DCPS::BitSubscriber>();
   }
 
   if (create_bit_topics(participant) != DDS::RETCODE_OK) {
-    return 0;
+    return RcHandle<DCPS::BitSubscriber>();
   }
 
   bit_subscriber =
@@ -1188,7 +1189,7 @@ DDS::Subscriber_ptr RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* partici
   if (sub == 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
                ACE_TEXT(" - Could not cast Subscriber to SubscriberImpl\n")));
-    return 0;
+    return RcHandle<DCPS::BitSubscriber>();
   }
 
   DDS::DataReaderQos dr_qos;
@@ -1241,13 +1242,14 @@ DDS::Subscriber_ptr RtpsDiscovery::init_bit(DCPS::DomainParticipantImpl* partici
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
                  ACE_TEXT(" - Error %d enabling subscriber\n"), ret));
     }
-    return 0;
+    return RcHandle<DCPS::BitSubscriber>();
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
-  get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
+  DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber_rch = DCPS::make_rch<DCPS::BitSubscriber>(bit_subscriber);
+  get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber_rch);
 
-  return bit_subscriber._retn();
+  return bit_subscriber_rch;
 }
 
 void RtpsDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant)

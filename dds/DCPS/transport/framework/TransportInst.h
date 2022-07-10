@@ -17,6 +17,7 @@
 #include "dds/DCPS/RcObject.h"
 #include "dds/DCPS/PoolAllocator.h"
 #include "dds/DCPS/ReactorTask_rch.h"
+#include "dds/DCPS/EventDispatcher.h"
 #include "dds/DCPS/NetworkAddress.h"
 #include "dds/DCPS/TimeDuration.h"
 
@@ -142,6 +143,7 @@ public:
   virtual void rtps_relay_address_change() {}
 
   ReactorTask_rch reactor_task();
+  EventDispatcher_rch event_dispatcher();
 
   /**
    * @{

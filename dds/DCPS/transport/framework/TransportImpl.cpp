@@ -17,6 +17,7 @@
 #include "dds/DCPS/Util.h"
 #include "dds/DCPS/MonitorFactory.h"
 #include "dds/DCPS/Service_Participant.h"
+#include "dds/DCPS/ServiceEventDispatcher.h"
 #include "tao/debug.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 
@@ -31,6 +32,7 @@ namespace DCPS {
 
 TransportImpl::TransportImpl(TransportInst& config)
   : config_(config)
+  , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
   , last_link_(0)
   , is_shut_down_(false)
 {
@@ -43,6 +45,7 @@ TransportImpl::TransportImpl(TransportInst& config)
 TransportImpl::~TransportImpl()
 {
   DBG_ENTRY_LVL("TransportImpl", "~TransportImpl", 6);
+  event_dispatcher_->shutdown(true);
 }
 
 bool
@@ -58,12 +61,11 @@ TransportImpl::shutdown()
 
   is_shut_down_ = true;
 
-  // Stop datalink clean task.
-  this->dl_clean_task_.close(1);
-
   if (!this->reactor_task_.is_nil()) {
     this->reactor_task_->stop();
   }
+
+  event_dispatcher_->shutdown(true);
 
   // Tell our subclass about the "shutdown event".
   this->shutdown_i();
@@ -73,15 +75,6 @@ TransportImpl::shutdown()
 bool
 TransportImpl::open()
 {
-  // Open the DL Cleanup task
-  // We depend upon the existing config logic to ensure the
-  // DL Cleanup task is opened only once
-  if (this->dl_clean_task_.open()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: DL Cleanup task failed to open : %p\n",
-                      ACE_TEXT("open")), false);
-  }
-
   // Success.
   if (this->monitor_) {
     this->monitor_->report();
@@ -133,9 +126,9 @@ TransportImpl::release_link_resources(DataLink* link)
 {
   DBG_ENTRY_LVL("TransportImpl", "release_link_resources",6);
 
-  // Create a smart pointer without ownership (bumps up ref count)
-  dl_clean_task_.add(rchandle_from(link));
-
+  DataLink_rch link_rch = rchandle_from(link);
+  EventBase_rch do_clear = make_rch<DoClear>(link_rch);
+  event_dispatcher_->dispatch(do_clear);
   return true;
 }
 

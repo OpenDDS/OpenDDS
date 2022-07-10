@@ -838,8 +838,6 @@ private:
 
     void shutting_down() { shutting_down_ = true; }
 
-    DDS::Subscriber_var get_builtin_subscriber() const;
-
     // Return instance_name field in RPC type lookup request for a given RepoId
     // (as per chapter 7.6.3.3.4 of XTypes spec)
     OPENDDS_STRING get_instance_name(const DCPS::RepoId& id) const
@@ -1225,12 +1223,7 @@ private:
   DCPS::TransportConfig_rch transport_cfg_;
   DCPS::ReactorTask_rch reactor_task_;
   DCPS::JobQueue_rch job_queue_;
-
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::TopicBuiltinTopicDataDataReaderImpl* topic_bit();
-  DCPS::PublicationBuiltinTopicDataDataReaderImpl* pub_bit();
-  DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* sub_bit();
-#endif /* DDS_HAS_MINIMUM_BIT */
+  DCPS::EventDispatcher_rch event_dispatcher_;
 
   void populate_discovered_writer_msg(
       DCPS::DiscoveredWriterData& dwd,
@@ -1775,50 +1768,50 @@ protected:
                                   const GUID_t& writer);
 
 
-  class WriterAddAssociation : public DCPS::JobQueue::Job {
+  class WriterAddAssociation : public DCPS::EventBase {
   public:
     explicit WriterAddAssociation(const WriterAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const WriterAssociationRecord_rch record_;
   };
 
-  class WriterRemoveAssociations : public DCPS::JobQueue::Job {
+  class WriterRemoveAssociations : public DCPS::EventBase {
   public:
     explicit WriterRemoveAssociations(const WriterAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const WriterAssociationRecord_rch record_;
   };
 
-  class ReaderAddAssociation : public DCPS::JobQueue::Job {
+  class ReaderAddAssociation : public DCPS::EventBase {
   public:
     explicit ReaderAddAssociation(const ReaderAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const ReaderAssociationRecord_rch record_;
   };
 
-  class ReaderRemoveAssociations : public DCPS::JobQueue::Job {
+  class ReaderRemoveAssociations : public DCPS::EventBase {
   public:
     explicit ReaderRemoveAssociations(const ReaderAssociationRecord_rch& record)
       : record_(record)
     {}
 
   private:
-    virtual void execute();
+    virtual void handle_event();
 
     const ReaderAssociationRecord_rch record_;
   };
