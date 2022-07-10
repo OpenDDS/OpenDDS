@@ -20,7 +20,7 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
  : barrier_(static_cast<unsigned int>(count + 1))
  , fun_(fun)
  , arg_(arg)
- , ids_(count, 0)
+ , ids_(count, ACE_thread_t())
 {
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

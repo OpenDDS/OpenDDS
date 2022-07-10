@@ -59,7 +59,8 @@ void DispatchService::shutdown(bool immediate, EventQueue* const pending)
   if (pending) {
     pending->clear();
     pending->swap(event_queue_);
-    for (TimerQueueMap::const_iterator it = timer_queue_map_.begin(), limit = timer_queue_map_.end(); it != limit; ++it) {
+    const TimerQueueMap& cmap = timer_queue_map_;
+    for (TimerQueueMap::const_iterator it = cmap.begin(), limit = cmap.end(); it != limit; ++it) {
       pending->push_back(it->second.first);
     }
   } else {
