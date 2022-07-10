@@ -164,16 +164,16 @@ namespace {
     //   }
     // }
 
-    be_global->impl_ <<
-        indent << (use_cxx11 ? "size_t" : "::CORBA::ULong") << " i = 0;\n" << 
-        indent << "for (auto data : " <<  expression << ") {\n" <<
-        indent << "  value_writer.begin_element(" << idx << ");\n";
-      generate_write("data.first", map->key_type(), idx + "i", level + 1);
-      generate_write("data.second", map->value_type(), idx + "i", level + 1);
-      be_global->impl_ <<
-        indent << "  value_writer.end_element();\n" <<
-        indent << "i++;\n" << 
-        indent << "}\n";
+    // be_global->impl_ <<
+    //     indent << (use_cxx11 ? "size_t" : "::CORBA::ULong") << " i = 0;\n" <<
+    //     indent << "for (auto data : " <<  expression << ") {\n" <<
+    //     indent << "  value_writer.begin_element(" << idx << ");\n";
+    //   generate_write("data.first", map->key_type(), idx + "i", level + 1);
+    //   generate_write("data.second", map->value_type(), idx + "i", level + 1);
+    //   be_global->impl_ <<
+    //     indent << "  value_writer.end_element();\n" <<
+    //     indent << "i++;\n" <<
+    //     indent << "}\n";
 
     // if (use_optimized_write_) {
     //   const AST_PredefinedType::PredefinedType pt =
@@ -192,7 +192,7 @@ namespace {
     // }
 
     be_global->impl_ <<
-      indent << "value_writer.end_sequence();\n";
+      indent << "value_writer.end_map();\n";
   }
 
   void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level)

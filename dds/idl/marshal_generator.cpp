@@ -1273,6 +1273,7 @@ namespace {
     }
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    // FIXME(tyler) Need to get the proper name for a primitive type
     const std::string key_cxx_elem = (use_cxx11 ? " " + dds_generator::scoped_helper(map->key_type()->name(), "::") : scoped(map->key_type()->name()));
     const std::string val_cxx_elem = (use_cxx11 ? " " + dds_generator::scoped_helper(map->value_type()->name(), "::") : scoped(map->value_type()->name()));;
 
@@ -1540,10 +1541,32 @@ namespace {
         be_global->impl_ <<
             "   " << key_cxx_elem << " key;\n";
         // Key
-        be_global->impl_ <<
-          "    strm >> key;\n";
+        if (key_cls & CL_PRIMITIVE) {
+          be_global->impl_ <<
+            "    strm >> key;\n";
+        } else {
+          if (key_cls & CL_STRING){
+            const std::string check_not_empty =
+              use_cxx11 ? "!key.empty()" : "key.in()";
+            const std::string get_length =
+              use_cxx11 ? "key.length()" : "ACE_OS::strlen(key.in())";
+            const string inout = use_cxx11 ? "" : ".inout()";
+            be_global->impl_ <<
+              "        if (" + construct_bound_fail + " && " << check_not_empty << " && (" <<
+              bounded_arg(key) << " < " << get_length << ")) {\n"
+              "          "  << "key" << inout <<
+              (use_cxx11 ? (".resize(" + bounded_arg(key) +  ");\n") : ("[" + bounded_arg(key) + "] = 0;\n")) <<
+              "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
+              "        } else {\n"
+              "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
+            // skip_to_end_map("          ", "i", "length", named_as, use_cxx11, elem_cls, map);
+            be_global->impl_ <<
+              "        return false;\n"
+              "      }\n";
+          }
+        }
 
-        // Value
+        // Value)
         be_global->impl_ <<
           "    strm >> " << value_access << "[key];\n";
       }
