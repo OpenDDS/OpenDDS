@@ -56,6 +56,8 @@ public:
   virtual void end_array() {}
   virtual void begin_sequence() {}
   virtual void end_sequence() {}
+  virtual void begin_map() {}
+  virtual void end_map() {}
   virtual void begin_element(size_t /*idx*/) {}
   virtual void end_element() {}
 

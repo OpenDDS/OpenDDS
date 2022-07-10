@@ -142,6 +142,59 @@ namespace {
       indent << "value_writer.end_sequence();\n";
   }
 
+  void map_helper(const std::string& expression, AST_Map* map, const std::string& idx, int level)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string indent(level * 2, ' ');
+    be_global->impl_ << indent << "value_writer.begin_map();\n";
+
+    // const Classification c_key = classify(map->key_type());
+    // AST_Type* const actual_key = resolveActualType(map->key_type());
+
+    // const Classification c_val = classify(map->value_type());
+    // AST_Type* const actual_val = resolveActualType(map->value_type());
+
+    // bool use_optimized_write_ = false;
+    // if (c_key & CL_PRIMITIVE && c_val & CL_PRIMITIVE) {
+    //   if (use_cxx11) {
+    //     const AST_PredefinedType::PredefinedType pt = dynamic_cast<AST_PredefinedType*>(actual_key)->pt();
+    //     use_optimized_write_ = !(pt == AST_PredefinedType::PT_boolean);
+    //   } else {
+    //     use_optimized_write_ = true;
+    //   }
+    // }
+
+    be_global->impl_ <<
+        indent << (use_cxx11 ? "size_t" : "::CORBA::ULong") << " i = 0;\n" << 
+        indent << "for (auto data : " <<  expression << ") {\n" <<
+        indent << "  value_writer.begin_element(" << idx << ");\n";
+      generate_write("data.first", map->key_type(), idx + "i", level + 1);
+      generate_write("data.second", map->value_type(), idx + "i", level + 1);
+      be_global->impl_ <<
+        indent << "  value_writer.end_element();\n" <<
+        indent << "i++;\n" << 
+        indent << "}\n";
+
+    // if (use_optimized_write_) {
+    //   const AST_PredefinedType::PredefinedType pt =
+    //     dynamic_cast<AST_PredefinedType*>(actual_key)->pt();
+    //   be_global->impl_ << indent <<
+    //     "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : ".get_buffer()") << ", " << expression << ".size());\n";
+    // } else {
+    //   be_global->impl_ <<
+    //     indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
+    //     << idx << " != " << expression << ".size(); ++" << idx << ") {\n" <<
+    //     indent << "  value_writer.begin_element(" << idx << ");\n";
+    //   generate_write(expression + "[" + idx + "]", map->key_type(), idx + "i", level + 1);
+    //   be_global->impl_ <<
+    //     indent << "  value_writer.end_element();\n" <<
+    //     indent << "}\n";
+    // }
+
+    be_global->impl_ <<
+      indent << "value_writer.end_sequence();\n";
+  }
+
   void generate_write(const std::string& expression, AST_Type* type, const std::string& idx, int level)
   {
     AST_Type* const actual = resolveActualType(type);
@@ -155,6 +208,10 @@ namespace {
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression, array, 0, idx, level);
+      return;
+    } else if (c & CL_MAP) {
+      AST_Map * const map = dynamic_cast<AST_Map*>(actual);
+      map_helper(expression, map, idx, level);
       return;
     }
 

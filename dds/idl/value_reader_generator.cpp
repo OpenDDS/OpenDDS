@@ -103,6 +103,29 @@ namespace {
     }
   }
 
+  void map_helper(const std::string& expression, AST_Map* map,
+                       const std::string& idx, int level)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string indent(level * 2, ' ');
+    be_global->impl_ <<
+      indent << "if (!value_reader.begin_map()) return false;\n" <<
+      indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
+        "value_reader.elements_remaining(); ++" << idx << ") {\n";
+    // if (use_cxx11) {
+    //   be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
+    // } else {
+    //   be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
+    // }
+    // be_global->impl_ <<
+    //   indent << "  if (!value_reader.begin_element()) return false;\n";
+    // generate_read(expression + "[" + idx + "]", "", map->key_type(), idx + "i", level + 1);
+    be_global->impl_ <<
+    //   indent << "  if (!value_reader.end_element()) return false;\n" <<
+      indent << "}\n" <<
+      indent << "if (!value_reader.end_map()) return false;\n";
+  }
+
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
   {
@@ -141,6 +164,10 @@ namespace {
     } else if (c & CL_ARRAY) {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression + accessor, array, 0, idx, level);
+      return;
+    } else if (c & CL_MAP) {
+      AST_Map* const map = dynamic_cast<AST_Map*>(actual);
+      map_helper(expression + accessor, map, idx, level);
       return;
     }
 
