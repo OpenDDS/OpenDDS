@@ -18,6 +18,7 @@ namespace DCPS {
 PeriodicEvent::PeriodicEvent(EventDispatcher_rch dispatcher, EventBase_rch event)
  : dispatcher_(dispatcher)
  , event_(event)
+ , strict_timing_(true)
  , timer_id_(0)
 {
 }
