@@ -7,6 +7,7 @@
 
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
+#include "Definitions.h"
 #include "ThreadPool.h"
 
 #include <ace/Guard_T.h>
@@ -65,7 +66,9 @@ void ThreadPool::join_all()
   }
 
   for (size_t i = 0; i < ids.size(); ++i) {
-    ACE_Thread::join(ids[i], 0);
+    const int result = ACE_Thread::join(ids[i], 0);
+    ACE_UNUSED_ARG(result);
+    OPENDDS_ASSERT(result == 0);
   }
 }
 
