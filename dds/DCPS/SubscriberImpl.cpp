@@ -735,7 +735,7 @@ SubscriberImpl::begin_access()
                      si_guard,
                      si_lock_,
                      DDS::RETCODE_ERROR);
-    if (!enabled_) {
+    if (enabled_ == false) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
@@ -775,7 +775,7 @@ SubscriberImpl::end_access()
                      si_guard,
                      si_lock_,
                      DDS::RETCODE_ERROR);
-    if (!enabled_) {
+    if (enabled_ == false) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
