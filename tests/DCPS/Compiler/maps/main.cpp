@@ -4,7 +4,7 @@
 
 const OpenDDS::DCPS::Encoding encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR);
 
-template<typename T> 
+template<typename T>
 T TestMarshalling(OpenDDS::DCPS::Serializer strm, T original) {
   strm << original;
   T t;
@@ -21,7 +21,7 @@ TEST(MapsMarshalling, MapIntInt)
   expectedData.intIntMap()[10] = 10;
 
   Data testData = TestMarshalling(strm, expectedData);
-  
+
   EXPECT_EQ(testData.intIntMap(), expectedData.intIntMap());
   EXPECT_EQ(testData.intIntMap()[10], expectedData.intIntMap()[10]);
 }
@@ -35,7 +35,7 @@ TEST(MapsMarshalling, MapStringString)
   expectedData.stringStringMap()["Hello"] = "World";
 
   Data testData = TestMarshalling(strm, expectedData);
-  
+
   EXPECT_EQ(testData.stringStringMap(), expectedData.stringStringMap());
   EXPECT_EQ(testData.stringStringMap()["Hello"], expectedData.stringStringMap()["Hello"]);
 }

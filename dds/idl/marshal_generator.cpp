@@ -1524,7 +1524,7 @@ namespace {
         "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
 
       if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
-        be_global->impl_ << 
+        be_global->impl_ <<
           "    return false; // map with either a key or value of objrefs is not marshaled\n";
       } else if (key_cls & CL_UNKNOWN || val_cls & CL_UNKNOWN) {
         be_global->impl_ <<
