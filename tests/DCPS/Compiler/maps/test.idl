@@ -6,21 +6,22 @@ struct TestStruct {
 enum TEST_ENUM {TEST1, TEST2, TEST3};
 
 typedef sequence<TestStruct> TestStructSeq;
-// typedef map<int32, TestStruct> TestStructMap;
-// typedef map<int32, string> TestIntStringMap;
+typedef map<int32, TestStruct> TestStructMap;
+// typedef map<int32, string> TestIntStringMap; //TODO Not compiling
 
 struct Data {
   map<int32, int32> intIntMap;
+  map<string, string> stringStringMap;
 
   map<string, TestStruct> stringStructsMap;
-  // map<TestStruct, string> structStringMap; // Does not compile
+  // map<TestStruct, string> structStringMap; // Will not compile
 
   map<TEST_ENUM, int32> enumIntMap;
   map<int32, TEST_ENUM> intEnumMap;
 
-  map<string, TestStructSeq> stringSequenceMap;
+  // map<string, TestStructSeq> stringSequenceMap;
 
-  // map<string, TestStructMap> stringMapMap;
+  map<string, TestStructMap> stringMapMap;
 
   // map<TestIntStringMap, string> mapStringMap;
 };
