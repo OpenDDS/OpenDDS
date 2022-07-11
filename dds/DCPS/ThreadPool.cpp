@@ -10,6 +10,8 @@
 #include "Definitions.h"
 #include "ThreadPool.h"
 
+#include "Definitions.h"
+
 #include <ace/Guard_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -18,9 +20,12 @@ namespace OpenDDS {
 namespace DCPS {
 
 ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
- : barrier_(static_cast<unsigned int>(count + 1))
- , fun_(fun)
+ : fun_(fun)
  , arg_(arg)
+ , mutex_()
+ , condition_(mutex_)
+ , active_threads_(0)
+ , exited_threads_(0)
  , ids_(count, ACE_thread_t())
 {
   {
@@ -30,7 +35,10 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
     }
   }
   if (count) {
-    barrier_.wait();
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    while (active_threads_ != count) {
+      condition_.wait();
+    }
   }
 }
 
@@ -45,9 +53,20 @@ ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
     pool.id_set_.insert(ACE_Thread::self());
+    ++pool.active_threads_;
+    pool.condition_.broadcast();
+    while (pool.active_threads_ != pool.ids_.size()) {
+      pool.condition_.wait();
+    }
   }
-  pool.barrier_.wait();
   (*pool.fun_)(pool.arg_);
+#if defined OPENDDS_NO_THREAD_JOIN
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
+    ++pool.exited_threads_;
+    pool.condition_.signal();
+  }
+#endif
   return 0;
 }
 
@@ -59,6 +78,14 @@ bool ThreadPool::contains(ACE_thread_t id) const
 
 void ThreadPool::join_all()
 {
+#if defined OPENDDS_NO_THREAD_JOIN
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    while (exited_threads_ != ids_.size()) {
+      condition_.wait();
+    }
+  }
+#else
   OPENDDS_VECTOR(ACE_hthread_t) ids;
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -70,6 +97,7 @@ void ThreadPool::join_all()
     ACE_UNUSED_ARG(result);
     OPENDDS_ASSERT(result == 0);
   }
+#endif
 }
 
 } // DCPS

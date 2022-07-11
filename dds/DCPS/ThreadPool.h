@@ -12,8 +12,12 @@
 
 #include "PoolAllocator.h"
 
-#include <ace/Barrier.h>
+#include <ace/Condition_Thread_Mutex.h>
 #include <ace/Thread.h>
+
+#if ! defined ACE_HAS_THREAD || (! defined ACE_HAS_STHREADS && defined ACE_HAS_PTHREADS && defined ACE_LACKS_PTHREAD_JOIN)
+#define OPENDDS_NO_THREAD_JOIN
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -57,10 +61,12 @@ private:
 
   void join_all();
 
-  ACE_Barrier barrier_;
   FunPtr fun_;
   void* arg_;
   mutable ACE_Thread_Mutex mutex_;
+  mutable ACE_Condition<ACE_Thread_Mutex> condition_;
+  size_t active_threads_;
+  size_t exited_threads_;
   OPENDDS_VECTOR(ACE_hthread_t) ids_;
   OPENDDS_SET(ACE_thread_t) id_set_;
 };
