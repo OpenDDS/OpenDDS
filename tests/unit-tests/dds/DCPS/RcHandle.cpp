@@ -8,7 +8,7 @@ namespace {
     Count() : c_(1) {}
     virtual ~Count() {} // vtbl needed for test of dynamic_rchandle_cast
     void _add_ref() const { ++c_; }
-    void _remove_ref() const { --c_; }
+    void _remove_ref() const { if (--c_ == 0) delete this; }
     int ref_count() const { return c_; } // only used in rchandle_from()
   };
 
@@ -113,8 +113,8 @@ TEST(dds_DCPS_RcHandle_T, access)
 namespace {
   Count* params(Count* /*in*/, Count*& inout, Count*& out)
   {
-    Handle h(inout, OpenDDS::DCPS::inc_count());
-    inout = 0;
+    Handle h(inout, OpenDDS::DCPS::keep_count());
+    inout = new Count;
     out = new Count;
     return h._retn();
   }
@@ -126,7 +126,7 @@ TEST(dds_DCPS_RcHandle_T, param_passing)
   Handle h2(h1);
   Handle h3;
   Handle h4(params(h1.in(), h2.inout(), h3.out()), OpenDDS::DCPS::keep_count());
-  EXPECT_TRUE(h2.is_nil());
+  EXPECT_FALSE(h2.is_nil());
   EXPECT_FALSE(h3.is_nil());
   EXPECT_FALSE(h4.is_nil());
 }
