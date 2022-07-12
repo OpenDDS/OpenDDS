@@ -21,6 +21,11 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+#ifndef OPENDDS_UTIL_BUILD
+OpenDDS_Dcps_Export unsigned int Transport_debug_level = 0;
+OpenDDS_Dcps_Export TransportDebug transport_debug;
+#endif
+
 OpenDDS_Dcps_Export LogLevel log_level(LogLevel::Warning);
 OpenDDS_Dcps_Export unsigned int DCPS_debug_level = 0;
 #ifdef OPENDDS_SECURITY
