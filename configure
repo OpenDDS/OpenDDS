@@ -1368,6 +1368,7 @@ if (exists $opts{'gtest'} || $tests) {
       $opts{'gtest'} = $sm_dir;
       # No need to set env. variable with submodule UNLESS we're in safetyprofile
       if ($opts{'safety-profile'}) {
+        print "Setting GTEST_ROOT to ${gtest_root} for use in safety-profile.\n" if $opts{'verbose'};
         setEnv('GTEST_ROOT', $gtest_root);
       }
     }
