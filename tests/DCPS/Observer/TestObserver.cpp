@@ -156,6 +156,7 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 void TestObserver::on_sample_sent(DDS::DataWriter_ptr w, const Sample& s)
 {
+  ACE_UNUSED_ARG(s);
   ++sent_;
   std::cout << "on_sample_sent " << sent_ << to_str(w) <<
 #if OPENDDS_HAS_JSON_VALUE_WRITER
@@ -166,6 +167,7 @@ void TestObserver::on_sample_sent(DDS::DataWriter_ptr w, const Sample& s)
 
 void TestObserver::on_sample_received(DDS::DataReader_ptr r, const Sample& s)
 {
+  ACE_UNUSED_ARG(s);
   ++received_;
   std::cout << "on_sample_received " << received_ << to_str(r) <<
 #if OPENDDS_HAS_JSON_VALUE_WRITER
@@ -176,6 +178,7 @@ void TestObserver::on_sample_received(DDS::DataReader_ptr r, const Sample& s)
 
 void TestObserver::on_sample_read(DDS::DataReader_ptr r, const Sample& s)
 {
+  ACE_UNUSED_ARG(s);
   ++read_;
   std::cout << "on_sample_read " << read_ << to_str(r) <<
 #if OPENDDS_HAS_JSON_VALUE_WRITER
@@ -186,6 +189,7 @@ void TestObserver::on_sample_read(DDS::DataReader_ptr r, const Sample& s)
 
 void TestObserver::on_sample_taken(DDS::DataReader_ptr r, const Sample& s)
 {
+  ACE_UNUSED_ARG(s);
   ++taken_;
   std::cout << "on_sample_taken " << taken_ << to_str(r) <<
 #if OPENDDS_HAS_JSON_VALUE_WRITER
