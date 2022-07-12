@@ -34,7 +34,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
-  : BaseReceiveStrategy(link->config())
+  : BaseReceiveStrategy(link->config(), BUFFER_COUNT)
   , link_(link)
   , last_received_()
   , recvd_sample_(0)

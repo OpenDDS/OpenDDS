@@ -82,7 +82,8 @@ public:
   DSH& received_sample_header();
 
 protected:
-  explicit TransportReceiveStrategy(const TransportInst& config);
+  TransportReceiveStrategy(const TransportInst& config,
+                           size_t receive_buffers_count = RECEIVE_BUFFERS);
 
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],
@@ -160,7 +161,7 @@ private:
   ACE_Lock_Adapter<ACE_SYNCH_MUTEX> receive_lock_;
 
   /// Set of receive buffers in use.
-  ACE_Message_Block* receive_buffers_[RECEIVE_BUFFERS];
+  OPENDDS_VECTOR(ACE_Message_Block*) receive_buffers_;
 
   /// Current receive buffer index in use.
   size_t buffer_index_;

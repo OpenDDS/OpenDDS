@@ -22,12 +22,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 template<typename TH, typename DSH>
-TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config)
+TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config,
+                                                            size_t receive_buffers_count)
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
     mb_allocator_(config.receive_preallocated_message_blocks_ ? config.receive_preallocated_message_blocks_ : MESSAGE_BLOCKS),
     db_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : DATA_BLOCKS),
-    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : RECEIVE_BUFFERS * 2),
+    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : receive_buffers_count * 2),
+    receive_buffers_(receive_buffers_count, 0),
     buffer_index_(0),
     payload_(0),
     good_pdu_(true),
@@ -46,8 +48,6 @@ TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst&
                " Cached_Allocator_With_Overflow %@ with %B chunks\n",
                &data_allocator_, data_allocator_.n_chunks()));
   }
-
-  ACE_OS::memset(this->receive_buffers_, 0, sizeof(this->receive_buffers_));
 }
 
 template<typename TH, typename DSH>
@@ -66,7 +66,7 @@ TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
     }
   }
 
-  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (size_t index = 0; index < receive_buffers_.size(); ++index) {
     if (receive_buffers_[index] != 0) {
       ACE_DES_FREE(
                    receive_buffers_[index],
@@ -96,7 +96,7 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
 {
   DBG_ENTRY_LVL("TransportReceiveStrategy", "handle_simple_dds_input", 6);
 
-  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (size_t index = 0; index < receive_buffers_.size(); ++index) {
     if (receive_buffers_[index] == 0) {
       ACE_NEW_MALLOC_RETURN(
         receive_buffers_[index],
@@ -190,17 +190,32 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
         return 0;
       }
       const size_t dsh_ml = data_sample_header_.message_length();
+      const bool alloc_new_data_buffer = data_sample_header_.expect_hold();
       ACE_Message_Block* current_sample_block = 0;
-      ACE_NEW_MALLOC_RETURN(
-        current_sample_block,
-        (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
-        ACE_Message_Block(
-          cur_rb->data_block()->duplicate(),
-          0,
-          &mb_allocator_),
-        -1);
-      current_sample_block->rd_ptr(cur_rb->rd_ptr());
-      current_sample_block->wr_ptr(current_sample_block->rd_ptr() + dsh_ml);
+      if (alloc_new_data_buffer) {
+        ACE_NEW_MALLOC_RETURN(
+          current_sample_block,
+          (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
+          ACE_Message_Block(
+            cur_rb->data_block()->clone_nocopy(0, dsh_ml),
+            0,
+            &mb_allocator_),
+          -1);
+        current_sample_block->reset();
+        std::memcpy(current_sample_block->wr_ptr(), cur_rb->rd_ptr(), dsh_ml);
+        current_sample_block->wr_ptr(dsh_ml);
+      } else {
+        ACE_NEW_MALLOC_RETURN(
+          current_sample_block,
+          (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
+          ACE_Message_Block(
+            cur_rb->data_block()->duplicate(),
+            0,
+            &mb_allocator_),
+          -1);
+        current_sample_block->rd_ptr(cur_rb->rd_ptr());
+        current_sample_block->wr_ptr(current_sample_block->rd_ptr() + dsh_ml);
+      }
       cur_rb->rd_ptr(dsh_ml);
       bytes_remaining -= dsh_ml;
       ReceivedDataSample rds(current_sample_block);
@@ -232,8 +247,8 @@ TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
   // Attempt to quickly switch to unreferenced buffer for next read
   size_t index_count = 0;
   size_t new_buffer_index = buffer_index_;
-  while (receive_buffers_[new_buffer_index]->data_block()->reference_count() > 1 && index_count++ <= RECEIVE_BUFFERS) {
-    new_buffer_index = (new_buffer_index + 1) % RECEIVE_BUFFERS;
+  while (receive_buffers_[new_buffer_index]->data_block()->reference_count() > 1 && index_count++ <= receive_buffers_.size()) {
+    new_buffer_index = (new_buffer_index + 1) % receive_buffers_.size();
   }
   buffer_index_ = new_buffer_index;
 
@@ -346,7 +361,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   //
   size_t index;
 
-  for (index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (index = 0; index < receive_buffers_.size(); ++index) {
     if ((this->receive_buffers_[index] != 0)
         && (this->receive_buffers_[index]->length() == 0)
         && (this->receive_buffers_[index]->space() < BUFFER_LOW_WATER)) {
@@ -357,7 +372,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
       // unlink any Message_Block that continues to this one
       // being removed.
       // This avoids a possible infinite ->cont() loop.
-      for (size_t ii =0; ii < RECEIVE_BUFFERS; ii++) {
+      for (size_t ii =0; ii < receive_buffers_.size(); ii++) {
         if ((0 != this->receive_buffers_[ii]) &&
             (this->receive_buffers_[ii]->cont() ==
              this->receive_buffers_[index])) {
@@ -449,7 +464,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   size_t current = this->buffer_index_;
 
   for (index = 0;
-       index < RECEIVE_BUFFERS;
+       index < receive_buffers_.size();
        ++index, current = this->successor_index(current)) {
     // Invariant.  ASSERT?
     if (this->receive_buffers_[current] == 0) {
@@ -1073,7 +1088,7 @@ TransportReceiveStrategy<TH, DSH>::reset()
   this->payload_ = 0;
   this->good_pdu_ = true;
   this->pdu_remaining_ = 0;
-  for (size_t i = 0; i < RECEIVE_BUFFERS; ++i) {
+  for (size_t i = 0; i < receive_buffers_.size(); ++i) {
     ACE_Message_Block& rb = *this->receive_buffers_[i];
     rb.rd_ptr(rb.wr_ptr());
   }

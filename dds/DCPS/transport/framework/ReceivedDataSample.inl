@@ -17,7 +17,7 @@ ACE_INLINE
 ReceivedDataSample::ReceivedDataSample(ACE_Message_Block* payload)
   : sample_(payload)
 {
-  DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample",6);
+  DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample(payload)",6);
 }
 
 ACE_INLINE
