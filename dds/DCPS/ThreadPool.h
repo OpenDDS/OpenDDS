@@ -15,7 +15,17 @@
 
 #include <ace/Thread.h>
 
-#if ! defined ACE_HAS_THREAD || (! defined ACE_HAS_STHREADS && defined ACE_HAS_PTHREADS && defined ACE_LACKS_PTHREAD_JOIN)
+#if defined ACE_HAS_THREADS
+# if defined ACE_HAS_STHREADS
+# elif defined ACE_HAS_PTHREADS
+#  if defined ACE_LACKS_PTHREAD_JOIN
+#define OPENDDS_NO_THREAD_JOIN
+#  endif
+# elif defined (ACE_HAS_WTHREADS)
+# else
+#define OPENDDS_NO_THREAD_JOIN
+# endif
+#else
 #define OPENDDS_NO_THREAD_JOIN
 #endif
 
