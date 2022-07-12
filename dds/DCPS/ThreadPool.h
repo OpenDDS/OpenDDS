@@ -77,7 +77,9 @@ private:
   mutable ConditionVariable<ACE_Thread_Mutex> cv_;
   ThreadStatusManager tsm_;
   size_t active_threads_;
-  size_t exited_threads_;
+#if defined OPENDDS_NO_THREAD_JOIN
+  size_t finished_threads_;
+#endif
   OPENDDS_VECTOR(ACE_hthread_t) ids_;
   OPENDDS_SET(ACE_thread_t) id_set_;
 };
