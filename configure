@@ -1367,7 +1367,11 @@ if (exists $opts{'gtest'} || $tests) {
       $gtest_root = File::Spec->catdir($sm_dir, 'build', 'install');
       $build_gtest = ! -d $gtest_root;
       $opts{'gtest'} = $sm_dir;
-      # No need to set env. variable with submodule.
+      # No need to set env. variable with submodule UNLESS we're in safetyprofile
+      if ($opts{'safety-profile'}) {
+        print "Setting GTEST_ROOT to ${gtest_root} for use in safety-profile.\n" if $opts{'verbose'};
+        setEnv('GTEST_ROOT', $gtest_root);
+      }
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
       $opts{'gtest'} = $sys_dir;
