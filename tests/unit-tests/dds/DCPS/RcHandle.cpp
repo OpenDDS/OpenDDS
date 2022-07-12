@@ -153,12 +153,12 @@ TEST(dds_DCPS_RcHandle_T, relational)
 TEST(dds_DCPS_RcHandle_T, casts)
 {
   Handle hc(new Derived, OpenDDS::DCPS::keep_count());
-  OpenDDS::DCPS::RcHandle<Derived> hd = static_rchandle_cast<Derived>(hc);
+  OpenDDS::DCPS::RcHandle<Derived> hd = OpenDDS::DCPS::static_rchandle_cast<Derived>(hc);
   EXPECT_TRUE(hd);
-  hd = dynamic_rchandle_cast<Derived>(hc);
+  hd = OpenDDS::DCPS::dynamic_rchandle_cast<Derived>(hc);
   EXPECT_TRUE(hd);
   OpenDDS::DCPS::RcHandle<const Count> const_handle(new Count, OpenDDS::DCPS::keep_count());
-  hc = const_rchandle_cast<Count>(const_handle);
+  hc = OpenDDS::DCPS::const_rchandle_cast<Count>(const_handle);
   EXPECT_TRUE(hc);
 }
 
