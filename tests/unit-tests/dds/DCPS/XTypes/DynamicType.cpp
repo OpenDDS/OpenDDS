@@ -43,7 +43,7 @@ public:
     EXPECT_TRUE(pos != com_map.end());
     const XTypes::TypeObject& com_to = pos->second;
     XTypes::DynamicType_rch converted_dt = DCPS::make_rch<XTypes::DynamicType>();
-    DCPS::GUID_t fake_guid;
+    DCPS::GUID_t fake_guid = OpenDDS::DCPS::GUID_UNKNOWN;
     converted_dt = tls_->complete_to_dynamic(com_to.complete, fake_guid);
     EXPECT_EQ(*expected_dynamic_type, *converted_dt);
   }
