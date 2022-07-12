@@ -23,7 +23,7 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
  : fun_(fun)
  , arg_(arg)
  , mutex_()
- , condition_(mutex_)
+ , cv_(mutex_)
  , active_threads_(0)
  , exited_threads_(0)
  , ids_(count, ACE_thread_t())
@@ -37,7 +37,7 @@ ThreadPool::ThreadPool(size_t count, FunPtr fun, void* arg)
   if (count) {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     while (active_threads_ != count) {
-      condition_.wait();
+      cv_.wait(tsm_);
     }
   }
 }
@@ -54,9 +54,9 @@ ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
     ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
     pool.id_set_.insert(ACE_Thread::self());
     ++pool.active_threads_;
-    pool.condition_.broadcast();
+    pool.cv_.broadcast();
     while (pool.active_threads_ != pool.ids_.size()) {
-      pool.condition_.wait();
+      pool.cv_.wait(tsm_);
     }
   }
   (*pool.fun_)(pool.arg_);
@@ -64,7 +64,7 @@ ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
     ++pool.exited_threads_;
-    pool.condition_.signal();
+    pool.cv_.signal();
   }
 #endif
   return 0;
@@ -82,7 +82,7 @@ void ThreadPool::join_all()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     while (exited_threads_ != ids_.size()) {
-      condition_.wait();
+      cv_.wait(tsm_);
     }
   }
 #else

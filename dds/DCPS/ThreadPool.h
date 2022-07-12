@@ -10,9 +10,9 @@
 
 #include "dcps_export.h"
 
+#include "ConditionVariable.h"
 #include "PoolAllocator.h"
 
-#include <ace/Condition_Thread_Mutex.h>
 #include <ace/Thread.h>
 
 #if ! defined ACE_HAS_THREAD || (! defined ACE_HAS_STHREADS && defined ACE_HAS_PTHREADS && defined ACE_LACKS_PTHREAD_JOIN)
@@ -64,7 +64,8 @@ private:
   FunPtr fun_;
   void* arg_;
   mutable ACE_Thread_Mutex mutex_;
-  mutable ACE_Condition<ACE_Thread_Mutex> condition_;
+  mutable ConditionVariable<ACE_Thread_Mutex> cv_;
+  ThreadStatusManager tsm_;
   size_t active_threads_;
   size_t exited_threads_;
   OPENDDS_VECTOR(ACE_hthread_t) ids_;
