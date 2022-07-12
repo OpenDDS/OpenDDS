@@ -56,7 +56,7 @@ ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
     ++pool.active_threads_;
     pool.cv_.notify_all();
     while (pool.active_threads_ != pool.ids_.size()) {
-      pool.cv_.wait(tsm_);
+      pool.cv_.wait(pool.tsm_);
     }
   }
   (*pool.fun_)(pool.arg_);
