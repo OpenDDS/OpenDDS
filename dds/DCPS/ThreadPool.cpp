@@ -54,7 +54,7 @@ ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
     ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
     pool.id_set_.insert(ACE_Thread::self());
     ++pool.active_threads_;
-    pool.cv_.broadcast();
+    pool.cv_.notify_all();
     while (pool.active_threads_ != pool.ids_.size()) {
       pool.cv_.wait(tsm_);
     }
@@ -64,7 +64,7 @@ ACE_THR_FUNC_RETURN ThreadPool::run(void* arg)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(pool.mutex_);
     ++pool.exited_threads_;
-    pool.cv_.signal();
+    pool.cv_.notify_one();
   }
 #endif
   return 0;
