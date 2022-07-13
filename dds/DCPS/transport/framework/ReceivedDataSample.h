@@ -32,7 +32,7 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export ReceivedDataSample {
 public:
-  explicit ReceivedDataSample(ACE_Message_Block* payload);
+  ReceivedDataSample(ACE_Message_Block* payload, bool take_ownership = true);
 
   ReceivedDataSample(const ReceivedDataSample&);
 
@@ -45,6 +45,7 @@ public:
 
   /// The "data" part (ie, no "header" part) of the sample.
   Message_Block_Ptr sample_;
+  bool owns_sample_;
 };
 
 void swap(ReceivedDataSample&, ReceivedDataSample&);

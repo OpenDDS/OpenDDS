@@ -152,6 +152,8 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
       }
       const size_t dsh_ml = data_sample_header_.message_length();
       const bool alloc_new_data_buffer = data_sample_header_.expect_hold();
+      const size_t cur_rb_rd_pos = cur_rb->rd_ptr() - cur_rb->base();
+      const size_t cur_rb_wr_pos = cur_rb->wr_ptr() - cur_rb->base();
       ACE_Message_Block* current_sample_block = 0;
       if (alloc_new_data_buffer) {
         ACE_NEW_MALLOC_RETURN(
@@ -166,36 +168,38 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
         std::memcpy(current_sample_block->wr_ptr(), cur_rb->rd_ptr(), dsh_ml);
         current_sample_block->wr_ptr(dsh_ml);
       } else {
-        ACE_NEW_MALLOC_RETURN(
-          current_sample_block,
-          (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
-          ACE_Message_Block(
-            cur_rb->data_block()->duplicate(),
-            0,
-            &mb_allocator_),
-          -1);
+        current_sample_block = cur_rb;
         current_sample_block->rd_ptr(cur_rb->rd_ptr());
         current_sample_block->wr_ptr(current_sample_block->rd_ptr() + dsh_ml);
+        OPENDDS_ASSERT(current_sample_block->data_block()->reference_count() == 1);
+      }
+      {
+        ReceivedDataSample rds(current_sample_block, alloc_new_data_buffer);
+        if (data_sample_header_.into_received_data_sample(rds)) {
+
+          if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
+
+            if (reassemble(rds)) {
+              VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
+              deliver_sample(rds, remote_address);
+            }
+            // If reassemble() returned false, it takes ownership of the data
+            // just like deliver_sample() does.
+
+          } else {
+            deliver_sample(rds, remote_address);
+          }
+        }
+      }
+      if (!alloc_new_data_buffer) {
+        OPENDDS_ASSERT(current_sample_block->data_block()->reference_count() == 1);
+        cur_rb->reset();
+        cur_rb->rd_ptr(cur_rb_rd_pos);
+        cur_rb->wr_ptr(cur_rb_wr_pos);
       }
       cur_rb->rd_ptr(dsh_ml);
       bytes_remaining -= dsh_ml;
-      ReceivedDataSample rds(current_sample_block);
-      if (data_sample_header_.into_received_data_sample(rds)) {
-
-        if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
-          VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
-
-          if (reassemble(rds)) {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
-            deliver_sample(rds, remote_address);
-          }
-          // If reassemble() returned false, it takes ownership of the data
-          // just like deliver_sample() does.
-
-        } else {
-          deliver_sample(rds, remote_address);
-        }
-      }
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
