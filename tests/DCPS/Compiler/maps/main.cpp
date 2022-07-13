@@ -19,8 +19,9 @@ TEST(MapsTests, Marshalling)
 
   Data expectedData;
   expectedData.intIntMap()[10] = 10;
-  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
   expectedData.stringStringMap()["Hello"] = "World";
+  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
+  expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
 
   TestStruct stru;
   stru.msg("World");
@@ -34,14 +35,16 @@ TEST(MapsTests, Marshalling)
 
   expectedData.stringMapMap()["Hello World"] = testMap;
 
-  Data testData = TestMarshalling(strm, expectedData);  
+  Data testData = TestMarshalling(strm, expectedData);
 
   EXPECT_EQ(testData.intIntMap(), expectedData.intIntMap());
   EXPECT_EQ(testData.intIntMap()[10], expectedData.intIntMap()[10]);
-  EXPECT_EQ(testData.enumIntMap()[TEST_ENUM::TEST1], expectedData.enumIntMap()[TEST_ENUM::TEST1]);
 
   EXPECT_EQ(testData.stringStringMap(), expectedData.stringStringMap());
   EXPECT_EQ(testData.stringStringMap()["Hello"], expectedData.stringStringMap()["Hello"]);
+
+  EXPECT_EQ(testData.enumIntMap()[TEST_ENUM::TEST1], expectedData.enumIntMap()[TEST_ENUM::TEST1]);
+  EXPECT_EQ(testData.intEnumMap()[10], expectedData.intEnumMap()[10]);
 
   EXPECT_EQ(testData.stringStructsMap()["Hello"].msg(), expectedData.stringStructsMap()["Hello"].msg());
 
