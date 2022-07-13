@@ -31,7 +31,7 @@ use ChangeDir;
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
 my $doc_tao2_version = '6.5.17';
-my $doc_tao3_version = '7.0.7';
+my $doc_tao3_version = '7.0.8';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -1014,8 +1014,9 @@ my %all_sanitizers = (
     fsanitize => 'address',
     env => {
       LSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/asan-suppr.txt",
-      ASAN_OPTIONS => 'detect_leaks=1:fast_unwind_on_malloc=0',
+      ASAN_OPTIONS => 'detect_leaks=1:fast_unwind_on_malloc=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1',
     },
+    compiler_args => ['-fsanitize-address-use-after-scope'],
   },
   tsan => {
     fsanitize => 'thread',
@@ -1366,7 +1367,11 @@ if (exists $opts{'gtest'} || $tests) {
       $gtest_root = File::Spec->catdir($sm_dir, 'build', 'install');
       $build_gtest = ! -d $gtest_root;
       $opts{'gtest'} = $sm_dir;
-      # No need to set env. variable with submodule.
+      # No need to set env. variable with submodule UNLESS we're in safetyprofile
+      if ($opts{'safety-profile'}) {
+        print "Setting GTEST_ROOT to ${gtest_root} for use in safety-profile.\n" if $opts{'verbose'};
+        setEnv('GTEST_ROOT', $gtest_root);
+      }
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
       $opts{'gtest'} = $sys_dir;

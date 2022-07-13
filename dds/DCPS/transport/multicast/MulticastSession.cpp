@@ -56,7 +56,8 @@ MulticastSession::acked()
 }
 
 void
-MulticastSession::set_acked() {
+MulticastSession::set_acked()
+{
   ACE_GUARD(ACE_SYNCH_MUTEX, guard, this->ack_lock_);
   this->acked_ = true;
 }
