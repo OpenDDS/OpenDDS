@@ -3171,6 +3171,11 @@ bool Sedp::Endpoint::associated_with_counterpart_if_not_pending(
   return associated_with(counterpart) || !pending_association_with(counterpart);
 }
 
+RcHandle<DCPS::BitSubscriber> Sedp::Endpoint::get_builtin_subscriber_proxy() const
+{
+  return sedp_.spdp_.bit_subscriber_;
+}
+
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp), seq_(seq_init)
