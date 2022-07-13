@@ -64,9 +64,9 @@ TEST(dds_DCPS_RcHandle_T, reset)
   h.reset();
   EXPECT_TRUE(h.is_nil());
 
-  Count c;
-  h.reset(&c, OpenDDS::DCPS::inc_count());
+  h.reset(new Count, OpenDDS::DCPS::inc_count());
   EXPECT_FALSE(h.is_nil());
+  Handle h2(h.get(), OpenDDS::DCPS::keep_count());
 }
 
 TEST(dds_DCPS_RcHandle_T, assign)
