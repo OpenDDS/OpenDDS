@@ -1268,9 +1268,17 @@ namespace {
     }
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    // FIXME(tyler) Need to get the proper name for a type (i.e string returns char * with just the scoped name)
-    const std::string key_cxx_elem = (use_cxx11 ? " " + dds_generator::scoped_helper(key->name(), "::") : scoped(key->name()));
-    const std::string val_cxx_elem = (use_cxx11 ? " " + dds_generator::scoped_helper(val->name(), "::") : scoped(val->name()));
+    std::string key_cxx_elem;
+    std::string val_cxx_elem;
+    if (anonymous) {
+      AST_Type* const act = AstTypeClassification::resolveActualType(map);
+      AST_Map * const m = dynamic_cast<AST_Map*>(act);
+      key_cxx_elem = scoped(m->key_type()->name());
+      val_cxx_elem = scoped(m->value_type()->name());
+    } else {
+      key_cxx_elem = scoped(key->name());
+      val_cxx_elem = scoped(val->name());
+    }
 
     base_wrapper.generate_tag();
 

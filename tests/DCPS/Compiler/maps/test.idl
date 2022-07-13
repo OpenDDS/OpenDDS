@@ -20,7 +20,7 @@ struct Data {
   map<string, TestStruct> stringStructsMap;
   // map<TestStruct, string> structStringMap; // Will not compile
 
-  // map<string, TestStructSeq> stringSequenceMap;
+  map<string, TestStructSeq> stringSequenceMap;
 
   map<string, TestStructMap> stringMapMap;
 
