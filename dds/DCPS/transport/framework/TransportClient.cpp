@@ -1001,6 +1001,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
                     itr->second.in()));
             }
           }
+          guard.release();
 
           if (!subset.in()) {
             VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
