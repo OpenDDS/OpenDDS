@@ -75,8 +75,8 @@ public:
   DSH& received_sample_header();
 
 protected:
-  TransportReceiveStrategy(const TransportInst& config,
-                           size_t receive_buffers_count = RECEIVE_BUFFERS);
+  explicit TransportReceiveStrategy(const TransportInst& config,
+                                    size_t receive_buffers_count = RECEIVE_BUFFERS);
 
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],

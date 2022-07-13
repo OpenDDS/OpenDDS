@@ -44,6 +44,8 @@ ReceivedDataSample::~ReceivedDataSample()
 {
   DBG_ENTRY_LVL("ReceivedDataSample", "~ReceivedDataSample", 6);
   if (!owns_sample_) {
+    // Note that this is unique_ptr_::release() and in this case is being called
+    // to avoid calling ACE_Message_Block::release() in sample_'s destructor
     sample_.release();
   }
 }
