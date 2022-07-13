@@ -18,7 +18,7 @@ ReceivedDataSample::ReceivedDataSample(ACE_Message_Block* payload, bool take_own
   : sample_(payload)
   , owns_sample_(take_ownership)
 {
-  DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample(payload)",6);
+  DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample",6);
 }
 
 ACE_INLINE
