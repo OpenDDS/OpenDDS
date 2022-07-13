@@ -453,18 +453,13 @@ namespace {
 
     std::string map_check_empty() const
     {
-      return value_access() + ".empty() == 0";
+      return value_access() + ".empty()";
     }
 
     std::string map_get_length() const
     {
       const std::string value = value_access();
       return "static_cast<uint32_t>(" + value + ".size())";
-    }
-
-    std::string map_get_buffer() const
-    {
-      return value_access() + ".data()";
     }
 
     std::string seq_check_empty() const
@@ -1292,13 +1287,7 @@ namespace {
       serialized_size.addArg("map", wrapper.wrapped_type_name());
       serialized_size.endArgs();
 
-      if ((key_cls & CL_INTERFACE) == 0) {
-        marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !key_primitive, false);
-        intro.join(be_global->impl_, "  ");
-        be_global->impl_ <<
-          "  primitive_serialized_size_ulong(encoding, size);\n";
-      }
-      if ((val_cls & CL_INTERFACE) == 0) {
+      if ((key_cls & CL_INTERFACE) == 0 || (val_cls & CL_INTERFACE) == 0) {
         marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !val_primitive, false);
         intro.join(be_global->impl_, "  ");
         be_global->impl_ <<
@@ -1308,8 +1297,6 @@ namespace {
           "  }\n";
       }
 
-      be_global->impl_ <<
-        "  for (auto it = " << value_access << ".begin(); it != " << value_access << ".end(); ++it) {\n";
       if (key_cls & CL_INTERFACE || val_cls & CL_INTERFACE) {
         be_global->impl_ <<
           "  // map with either a key or value of objrefs is not marshaled\n";
@@ -1317,70 +1304,88 @@ namespace {
         be_global->impl_ <<
           "  // map with either key or value of unknown/unsupported type\n";
       } else {
-        // Key
+
+        // Simple Types
+        bool key_generated = false;
         if (key_cls & CL_ENUM) {
-        be_global->impl_ <<
-          "    primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+          be_global->impl_ <<
+            "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+          key_generated = true;
         } else if (key_cls & CL_PRIMITIVE) {
           be_global->impl_ << checkAlignment(key) <<
-            "    " + getSizeExprPrimitive(key, get_length) << ";\n";
-        } else { // String, Struct, Array, Sequence, Union
-          if (key_cls & CL_MAP) {
-
-          } else if (key_cls & CL_STRING) {
-            be_global->impl_ <<
-              "    primitive_serialized_size_ulong(encoding, size);\n";
-            const string strlen_suffix = (key_cls & CL_WIDE)
-              ? " * char16_cdr_size;\n" : " + 1;\n";
-            if (use_cxx11) {
-              be_global->impl_ <<
-                "    size += it->first.size()" << strlen_suffix;
-            } else {
-              be_global->impl_ <<
-                "    if (it->first) {\n"
-                "      size += ACE_OS::strlen(it->first)" << strlen_suffix <<
-                "    }\n";
-            }
-          } else {
-            Wrapper elem_wrapper(key, key_cxx_elem, "it->first");
-            elem_wrapper.nested_key_only_ = nested_key_only;
-            Intro intro;
-            elem_wrapper.done(&intro);
-            const std::string indent = "    ";
-            intro.join(be_global->impl_, indent);
-            be_global->impl_ <<
-              indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
-          }
+            "  " + getSizeExprPrimitive(key, get_length) << ";\n";
+          key_generated = true;
         }
 
-        // Value
+        bool val_generated = false;
         if (val_cls & CL_ENUM) {
           be_global->impl_ <<
-            "    primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+            "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
+          val_generated = true;
         } else if (val_cls & CL_PRIMITIVE) {
           be_global->impl_ << checkAlignment(val) <<
-            "    " + getSizeExprPrimitive(val, get_length) << ";\n";
-        } else { // String, Struct, Array, Sequence, Union
-          if (val_cls & CL_STRING) {
-            be_global->impl_ <<
-              "    primitive_serialized_size_ulong(encoding, size);\n";
-            const string strlen_suffix = (val_cls & CL_WIDE)
-              ? " * char16_cdr_size;\n" : " + 1;\n";
-            be_global->impl_ <<
-              "    size += it->second.size()" << strlen_suffix;
-          } else {
-            Wrapper elem_wrapper(key, key_cxx_elem, "it->second");
-            elem_wrapper.nested_key_only_ = nested_key_only;
-            Intro intro;
-            elem_wrapper.done(&intro);
-            const std::string indent = "    ";
-            intro.join(be_global->impl_, indent);
-            be_global->impl_ <<
-              indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
-          }
+            "  " + getSizeExprPrimitive(val, get_length) << ";\n";
+          val_generated = true;
         }
-        be_global->impl_ <<
-          "  }\n";
+
+        // Complex Types
+        if (!key_generated || !val_generated) {
+          be_global->impl_ <<
+            "  for (auto it = " << value_access << ".begin(); it != " << value_access << ".end(); ++it) {\n";
+          const std::string indent = "    ";
+
+          if (!key_generated) { // Key
+            // String, Struct, Array, Sequence, Union
+            if (key_cls & CL_STRING) {
+              be_global->impl_ << indent <<
+                "primitive_serialized_size_ulong(encoding, size);\n";
+              const string strlen_suffix = (key_cls & CL_WIDE)
+                ? " * char16_cdr_size;\n" : " + 1;\n";
+              if (use_cxx11) {
+                be_global->impl_ << indent <<
+                  "size += it->first.size()" << strlen_suffix;
+              } else {
+                be_global->impl_ << indent <<
+                  "if (it->first) {\n" << indent <<
+                  "  size += ACE_OS::strlen(it->first)" << strlen_suffix <<
+                  "}\n";
+              }
+            } else {
+              Wrapper elem_wrapper(key, key_cxx_elem, "it->first");
+              elem_wrapper.nested_key_only_ = nested_key_only;
+              Intro intro;
+              elem_wrapper.done(&intro);
+              const std::string indent = "    ";
+              intro.join(be_global->impl_, indent);
+              be_global->impl_ <<
+                indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
+            }
+          }
+
+          if (!val_generated) { // Value
+            // String, Struct, Array, Sequence, Union
+            if (val_cls & CL_STRING) {
+              be_global->impl_ << indent <<
+                "primitive_serialized_size_ulong(encoding, size);\n";
+              const string strlen_suffix = (val_cls & CL_WIDE)
+                ? " * char16_cdr_size;\n" : " + 1;\n";
+              be_global->impl_ << indent <<
+                "size += it->second.size()" << strlen_suffix;
+            } else {
+              Wrapper elem_wrapper(key, key_cxx_elem, "it->second");
+              elem_wrapper.nested_key_only_ = nested_key_only;
+              Intro intro;
+              elem_wrapper.done(&intro);
+              const std::string indent = "    ";
+              intro.join(be_global->impl_, indent);
+              be_global->impl_ <<
+                indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
+            }
+          }
+
+          be_global->impl_ <<
+            "  }\n";
+        }
       }
     }
 
@@ -1391,7 +1396,6 @@ namespace {
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.map_get_length();
       const std::string check_empty = wrapper.map_check_empty();
-      const std::string get_buffer = wrapper.map_get_buffer();
       Function insertion("operator<<", "bool");
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("map", wrapper.wrapped_type_name());
@@ -1479,7 +1483,6 @@ namespace {
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.map_get_length();
       const std::string check_empty = wrapper.map_check_empty();
-      const std::string get_buffer = wrapper.map_get_buffer();
       Function extraction("operator>>", "bool");
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("map", wrapper.wrapped_type_name());

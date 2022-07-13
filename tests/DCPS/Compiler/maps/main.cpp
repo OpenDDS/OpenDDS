@@ -53,6 +53,7 @@ TEST(MapsTests, SerializedSize)
 {
   Data expectedData;
 
+  // intIntMap
   auto size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
   EXPECT_EQ(size, 4);
   expectedData.intIntMap()[10] = 10;
@@ -61,6 +62,50 @@ TEST(MapsTests, SerializedSize)
   expectedData.intIntMap()[20] = 10;
   size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intIntMap());
   EXPECT_EQ(size, 20);
+
+  // stringStringMap
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStringMap());
+  EXPECT_EQ(size, 4);
+  expectedData.stringStringMap()["Hello"] = "World!";
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStringMap());
+  EXPECT_EQ(size, 25);
+
+  // enumIntMap
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
+  EXPECT_EQ(size, 4);
+  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.enumIntMap());
+  EXPECT_EQ(size, 12);
+
+  // intEnumMap
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
+  EXPECT_EQ(size, 4);
+  expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.intEnumMap());
+  EXPECT_EQ(size, 12);
+
+  // stringStructsMap
+  TestStruct stru;
+  stru.msg("World");
+
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStructsMap());
+  EXPECT_EQ(size, 4);
+  expectedData.stringStructsMap()["Hello"] = stru;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringStructsMap());
+  EXPECT_EQ(size, 28);
+
+  // stringMapMap
+  std::map<int32_t, TestStruct> testMap;
+  TestStruct t;
+  t.id(190);
+  t.msg("Hello World");
+  testMap[10] = t;
+
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringMapMap());
+  EXPECT_EQ(size, 4);
+  expectedData.stringMapMap()["Hello World"] = testMap;
+  size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringMapMap());
+  EXPECT_EQ(size, 48);
 }
 
 int main(int argc, char* argv[])

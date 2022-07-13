@@ -9,16 +9,16 @@ typedef sequence<TestStruct> TestStructSeq;
 typedef map<int32, TestStruct> TestStructMap;
 // typedef map<int32, string> TestIntStringMap; //TODO Not compiling
 
-@topic
+// @topic
 struct Data {
   map<int32, int32> intIntMap;
   map<string, string> stringStringMap;
 
-  map<string, TestStruct> stringStructsMap;
-  // map<TestStruct, string> structStringMap; // Will not compile
-
   map<TEST_ENUM, int32> enumIntMap;
   map<int32, TEST_ENUM> intEnumMap;
+
+  map<string, TestStruct> stringStructsMap;
+  // map<TestStruct, string> structStringMap; // Will not compile
 
   // map<string, TestStructSeq> stringSequenceMap;
 
