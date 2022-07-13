@@ -46,6 +46,8 @@ public:
 
   explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
 
+  int handle_simple_dds_input(ACE_HANDLE fd);
+
   virtual int handle_input(ACE_HANDLE fd);
 
   /// For each "1" bit in the bitmap, change it to a "0" if there are

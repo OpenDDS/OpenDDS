@@ -57,13 +57,6 @@ public:
   int start();
   void stop();
 
-  /// Useful as a simpler alternative to handle_dds_input
-  /// when dealing with UDP protocols with maximum packet size.
-  /// Behaves the same as handle_dds_input, but only makes use
-  /// of a single receive buffer and doesn't require message block
-  /// chains that need to be updated / maintained
-  int handle_simple_dds_input(ACE_HANDLE fd);
-
   int handle_dds_input(ACE_HANDLE fd);
 
   /// The subclass needs to provide the implementation
@@ -136,7 +129,7 @@ protected:
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;
 
-private:
+protected:
 
   /// Manage an index into the receive buffer array.
   size_t successor_index(size_t index) const;
