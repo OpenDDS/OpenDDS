@@ -15,7 +15,9 @@
 #include "dds/DdsDcpsInfoUtilsC.h"
 
 // make sure we get set_default overloads in scope
+#ifdef OPENDDS_SECURITY
 #include "dds/DdsSecurityCoreTypeSupportImpl.h"
+#endif
 #include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
