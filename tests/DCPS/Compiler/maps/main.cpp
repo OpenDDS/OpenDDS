@@ -52,7 +52,7 @@ TEST(MapsTests, Marshalling)
   EXPECT_EQ(testData.stringMapMap()["Hello World"][190].msg(), expectedData.stringMapMap()["Hello World"][190].msg());
 }
 
-TEST(MapsTests, SerializedSize) 
+TEST(MapsTests, SerializedSize)
 {
   Data expectedData;
 
