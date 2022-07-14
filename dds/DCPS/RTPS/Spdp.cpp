@@ -2546,6 +2546,10 @@ void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor
   }
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
+  if (outer->shutdown_flag_ == true) {
+    return;
+  }
+
   ACE_Reactor* const reactor = reactor_task->get_reactor();
   register_unicast_socket(reactor, unicast_socket_, "IPV4");
 #ifdef ACE_HAS_IPV6
