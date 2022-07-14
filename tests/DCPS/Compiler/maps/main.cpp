@@ -1,3 +1,5 @@
+#include <dds/DCPS/JsonValueReader.h>
+#include <dds/DCPS/JsonValueWriter.h>
 #include "testTypeSupportImpl.h"
 
 #include <gtest/gtest.h>
@@ -110,6 +112,61 @@ TEST(MapsTests, SerializedSize)
   size = (int32_t) OpenDDS::DCPS::serialized_size(encoding, expectedData.stringMapMap());
   EXPECT_EQ(size, 48);
 }
+
+#if OPENDDS_HAS_JSON_VALUE_WRITER
+typedef rapidjson::Writer<rapidjson::StringBuffer> Writer;
+
+TEST(MapsTests, ValueWriterReader)
+{
+  rapidjson::StringBuffer buffer;
+  Writer writer(buffer);
+  OpenDDS::DCPS::JsonValueWriter<Writer> testWriter(writer);
+
+  Data expectedData;
+  expectedData.intIntMap()[10] = 10;
+  expectedData.stringStringMap()["Hello"] = "World";
+  expectedData.enumIntMap()[TEST_ENUM::TEST1] = 10;
+  expectedData.intEnumMap()[10] = TEST_ENUM::TEST1;
+
+  TestStruct stru;
+  stru.msg("World");
+  expectedData.stringStructsMap()["Hello"] = stru;
+
+  std::map<int32_t, TestStruct> testMap;
+  TestStruct t;
+  t.id(190);
+  t.msg("Hello World");
+  testMap[10] = t;
+
+  expectedData.stringMapMap()["Hello World"] = testMap;
+
+  vwrite(testWriter, expectedData);
+
+  // std::cout << buffer.GetString() << std::endl;
+
+  rapidjson::StringStream stream = "{'intIntMap':[{'key':10,'value':10}],'stringStringMap':[{'key':'Hello','value':'World'}],'enumIntMap':[{'key':'TEST1','value':10}],'intEnumMap':[{'key':10,'value':'TEST1'}],'stringStructsMap':[{'key':'Hello','value':{'id':0,'msg':'World'}}],'stringSequenceMap':[],'stringMapMap':[{'key':'Hello World','value':[{'key':10,'value':{'id':190,'msg':'Hello World'}}]}]}";
+
+  OpenDDS::DCPS::JsonValueReader<> testReader(stream);
+
+  Data testData;
+  vread(testReader, testData);
+
+  // Test everything is the same
+  EXPECT_EQ(testData.intIntMap(), expectedData.intIntMap());
+  EXPECT_EQ(testData.intIntMap()[10], expectedData.intIntMap()[10]);
+
+  EXPECT_EQ(testData.stringStringMap(), expectedData.stringStringMap());
+  EXPECT_EQ(testData.stringStringMap()["Hello"], expectedData.stringStringMap()["Hello"]);
+
+  EXPECT_EQ(testData.enumIntMap()[TEST_ENUM::TEST1], expectedData.enumIntMap()[TEST_ENUM::TEST1]);
+  EXPECT_EQ(testData.intEnumMap()[10], expectedData.intEnumMap()[10]);
+
+  EXPECT_EQ(testData.stringStructsMap()["Hello"].msg(), expectedData.stringStructsMap()["Hello"].msg());
+
+  EXPECT_EQ(testData.stringMapMap()["Hello World"][190].id(), expectedData.stringMapMap()["Hello World"][190].id());
+  EXPECT_EQ(testData.stringMapMap()["Hello World"][190].msg(), expectedData.stringMapMap()["Hello World"][190].msg());
+}
+#endif
 
 int main(int argc, char* argv[])
 {
