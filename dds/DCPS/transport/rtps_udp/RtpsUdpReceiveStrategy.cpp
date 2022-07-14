@@ -57,29 +57,30 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
-  for (size_t index = 0; index < receive_buffers_.size(); ++index) {
-    if (receive_buffers_[index] == 0) {
-      ACE_NEW_MALLOC_RETURN(
-        receive_buffers_[index],
-        (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
-        ACE_Message_Block(
-          RECEIVE_DATA_BUFFER_SIZE,           // Buffer size
-          ACE_Message_Block::MB_DATA,         // Default
-          0,                                  // Start with no continuation
-          0,                                  // Let the constructor allocate
-          &data_allocator_,                   // Our buffer cache
-          &receive_lock_,                     // Our locking strategy
-          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // Default
-          ACE_Time_Value::zero,               // Default
-          ACE_Time_Value::max_time,           // Default
-          &db_allocator_,                     // Our data block cache
-          &mb_allocator_                      // Our message block cache
-        ),
-        -1);
-    }
+  // Since BUFFER_COUNT is 1, the index will always be 0
+  const size_t INDEX = 0;
+
+  if (receive_buffers_[INDEX] == 0) {
+    ACE_NEW_MALLOC_RETURN(
+      receive_buffers_[INDEX],
+      (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
+      ACE_Message_Block(
+        RECEIVE_DATA_BUFFER_SIZE,           // Buffer size
+        ACE_Message_Block::MB_DATA,         // Default
+        0,                                  // Start with no continuation
+        0,                                  // Let the constructor allocate
+        &data_allocator_,                   // Our buffer cache
+        &receive_lock_,                     // Our locking strategy
+        ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // Default
+        ACE_Time_Value::zero,               // Default
+        ACE_Time_Value::max_time,           // Default
+        &db_allocator_,                     // Our data block cache
+        &mb_allocator_                      // Our message block cache
+      ),
+      -1);
   }
 
-  ACE_Message_Block* cur_rb = receive_buffers_[buffer_index_];
+  ACE_Message_Block* const cur_rb = receive_buffers_[INDEX];
   cur_rb->reset();
 
   iovec iov;
@@ -209,23 +210,15 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 
   finish_message();
 
-  // Attempt to quickly switch to unreferenced buffer for next read
-  size_t index_count = 0;
-  size_t new_buffer_index = buffer_index_;
-  while (receive_buffers_[new_buffer_index]->data_block()->reference_count() > 1 && index_count++ <= receive_buffers_.size()) {
-    new_buffer_index = (new_buffer_index + 1) % receive_buffers_.size();
-  }
-  buffer_index_ = new_buffer_index;
-
   // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
-  if (receive_buffers_[buffer_index_]->data_block()->reference_count() > 1) {
+  if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
     ACE_DES_FREE(
-      receive_buffers_[buffer_index_],
+      receive_buffers_[INDEX],
       mb_allocator_.free,
       ACE_Message_Block);
 
     ACE_NEW_MALLOC_RETURN(
-      receive_buffers_[buffer_index_],
+      receive_buffers_[INDEX],
       (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
       ACE_Message_Block(
         RECEIVE_DATA_BUFFER_SIZE,           // Buffer size
