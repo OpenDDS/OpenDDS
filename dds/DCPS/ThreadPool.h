@@ -10,10 +10,14 @@
 
 #include "dcps_export.h"
 
+#include "ConditionVariable.h"
 #include "PoolAllocator.h"
 
-#include <ace/Barrier.h>
 #include <ace/Thread.h>
+
+#if defined ACE_HAS_PTHREADS && defined ACE_LACKS_PTHREAD_JOIN
+#define OPENDDS_NO_THREAD_JOIN
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -57,10 +61,15 @@ private:
 
   void join_all();
 
-  ACE_Barrier barrier_;
   FunPtr fun_;
   void* arg_;
   mutable ACE_Thread_Mutex mutex_;
+  mutable ConditionVariable<ACE_Thread_Mutex> cv_;
+  ThreadStatusManager tsm_;
+  size_t active_threads_;
+#if defined OPENDDS_NO_THREAD_JOIN
+  size_t finished_threads_;
+#endif
   OPENDDS_VECTOR(ACE_hthread_t) ids_;
   OPENDDS_SET(ACE_thread_t) id_set_;
 };
