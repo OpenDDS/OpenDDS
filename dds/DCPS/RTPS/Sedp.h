@@ -855,6 +855,8 @@ private:
     bool pending_association_with_counterpart(const DCPS::GUID_t& remote_part) const;
     bool associated_with_counterpart_if_not_pending(const DCPS::GUID_t& remote_part) const;
 
+    RcHandle<DCPS::BitSubscriber> get_builtin_subscriber_proxy() const;
+
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
