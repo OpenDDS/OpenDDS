@@ -626,7 +626,7 @@ EOF
       }
     }
     elsif ($opts{'compiler'} =~ /clang/ && $version_string !~ /^Apple / &&
-	   $version_string =~ /(\d+)\.(\d+)\.(\d+)/ && $1 > 6) {
+           $version_string =~ /(\d+)\.(\d+)\.(\d+)/ && $1 > 6) {
       # Apple's version of Clang doesn't default to c++11 or higher, users
       # can pass --std= to change the C++ standard version used.
       # Other builds of Clang, if version 6 or newer, default to C++14 like GCC
