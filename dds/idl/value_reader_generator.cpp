@@ -117,11 +117,12 @@ namespace {
     // } else {
     //   be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
     // }
-    // be_global->impl_ <<
-    //   indent << "  if (!value_reader.begin_element()) return false;\n";
-    // generate_read(expression + "[" + idx + "]", "", map->key_type(), idx + "i", level + 1);
     be_global->impl_ <<
-    //   indent << "  if (!value_reader.end_element()) return false;\n" <<
+      indent << "  if (!value_reader.begin_pair()) return false;\n";
+    // generate_read("auto key", "", map->key_type(), idx + "i", level + 1);
+    // generate_read(expression + "[key]" , "", map->value_type(), idx + "i", level + 1);
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_pair()) return false;\n" <<
       indent << "}\n" <<
       indent << "if (!value_reader.end_map()) return false;\n";
   }

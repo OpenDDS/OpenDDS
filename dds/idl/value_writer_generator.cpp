@@ -164,14 +164,18 @@ namespace {
     //   }
     // }
 
-    // be_global->impl_ <<
-    //     indent << (use_cxx11 ? "size_t" : "::CORBA::ULong") << " i = 0;\n" <<
-    //     indent << "for (auto data : " <<  expression << ") {\n" <<
-    //     indent << "  value_writer.begin_element(" << idx << ");\n";
-    //   generate_write("data.first", map->key_type(), idx + "i", level + 1);
-    //   generate_write("data.second", map->value_type(), idx + "i", level + 1);
-    //   be_global->impl_ <<
-    //     indent << "  value_writer.end_element();\n" <<
+    be_global->impl_ <<
+        indent << "for (auto "<< idx << " = " <<  expression << ".begin(); " << idx << " != " << expression << ".end(); ++" << idx << ") {\n" <<
+        indent << "  value_writer.begin_pair();\n" <<
+        indent << "  value_writer.write_key();\n";
+    generate_write(idx + "->first", map->key_type(), idx + "i", level + 1);
+    
+    be_global->impl_ <<
+        indent << "  value_writer.write_value();\n";
+    
+    generate_write(idx + "->second", map->value_type(), idx + "i", level + 1);
+    be_global->impl_ <<
+      indent << "  value_writer.end_pair();\n";
     //     indent << "i++;\n" <<
     //     indent << "}\n";
 
@@ -186,12 +190,10 @@ namespace {
     //     << idx << " != " << expression << ".size(); ++" << idx << ") {\n" <<
     //     indent << "  value_writer.begin_element(" << idx << ");\n";
     //   generate_write(expression + "[" + idx + "]", map->key_type(), idx + "i", level + 1);
-    //   be_global->impl_ <<
-    //     indent << "  value_writer.end_element();\n" <<
-    //     indent << "}\n";
     // }
 
     be_global->impl_ <<
+      indent << "}\n" <<
       indent << "value_writer.end_map();\n";
   }
 

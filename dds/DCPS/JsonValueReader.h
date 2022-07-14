@@ -66,6 +66,11 @@ public:
   bool begin_element();
   bool end_element();
 
+  bool begin_map();
+  bool end_map();
+  bool begin_pair();
+  bool end_pair();
+
   bool read_boolean(ACE_CDR::Boolean& value);
   bool read_byte(ACE_CDR::Octet& value);
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -287,6 +292,26 @@ template <typename InputStream>
 bool JsonValueReader<InputStream>::end_element()
 {
   return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::begin_map() {
+  return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_map() {
+  return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::begin_pair() {
+  return true;
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_pair() {
+  return true;  
 }
 
 template <typename InputStream>

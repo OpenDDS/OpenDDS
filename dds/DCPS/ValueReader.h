@@ -124,6 +124,8 @@ public:
   virtual bool end_sequence() = 0;
   virtual bool begin_map() = 0;
   virtual bool end_map() = 0;
+  virtual bool begin_pair() = 0;
+  virtual bool end_pair() = 0;
   virtual bool begin_element() = 0;
   virtual bool end_element() = 0;
 

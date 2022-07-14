@@ -58,6 +58,10 @@ public:
   virtual void end_sequence() {}
   virtual void begin_map() {}
   virtual void end_map() {}
+  virtual void begin_pair() {}
+  virtual void end_pair() {}
+  virtual void write_key() {}
+  virtual void write_value() {}
   virtual void begin_element(size_t /*idx*/) {}
   virtual void end_element() {}
 
