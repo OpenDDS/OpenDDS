@@ -144,7 +144,58 @@ TEST(MapsTests, ValueWriterReader)
 
   // std::cout << buffer.GetString() << std::endl;
 
-  rapidjson::StringStream stream = "{'intIntMap':[{'key':10,'value':10}],'stringStringMap':[{'key':'Hello','value':'World'}],'enumIntMap':[{'key':'TEST1','value':10}],'intEnumMap':[{'key':10,'value':'TEST1'}],'stringStructsMap':[{'key':'Hello','value':{'id':0,'msg':'World'}}],'stringSequenceMap':[],'stringMapMap':[{'key':'Hello World','value':[{'key':10,'value':{'id':190,'msg':'Hello World'}}]}]}";
+  rapidjson::StringStream stream = R"(
+    {
+      "intIntMap":[
+        {
+          "key":10,
+          "value":10
+        }
+      ],
+      "stringStringMap":[
+        {
+          "key":"Hello",
+          "value":"World"
+        }
+      ],
+      "enumIntMap":[
+        {
+          "key":"TEST1",
+          "value":10
+        }
+      ],
+      "intEnumMap":[
+        {
+          "key":10,
+          "value":"TEST1"
+        }
+      ],
+      "stringStructsMap":[
+        {
+          "key":"Hello",
+          "value":
+            {
+              "id":0,
+              "msg":"World"
+            }
+        }
+      ],
+      "stringSequenceMap":[],
+      "stringMapMap":[
+        {
+          "key":"Hello World",
+          "value":[
+            {
+              "key":10,
+              "value":{
+                "id":190,
+                "msg":"Hello World"
+                }
+            }
+          ]
+        }
+      ]
+    })";
 
   OpenDDS::DCPS::JsonValueReader<> testReader(stream);
 

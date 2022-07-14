@@ -9,12 +9,8 @@ typedef sequence<TestStruct> TestStructSeq;
 typedef map<int32, TestStruct> TestStructMap;
 // typedef map<int32, string> TestIntStringMap; //TODO Not compiling
 
-typedef sequence<int32> intSeq;
-typedef sequence<intSeq> intSeqSeq;
-
 // @topic
 struct Data {
-  sequence<intSeqSeq> intSeqSeqSeq;
   map<int32, int32> intIntMap;
   map<string, string> stringStringMap;
 
