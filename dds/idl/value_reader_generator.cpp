@@ -111,17 +111,40 @@ namespace {
     be_global->impl_ <<
       indent << "if (!value_reader.begin_map()) return false;\n" <<
       indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
-        "value_reader.elements_remaining(); ++" << idx << ") {\n";
+        "value_reader.pairs_remaining(); ++" << idx << ") {\n";
     // if (use_cxx11) {
     //   be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
     // } else {
     //   be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
     // }
+    auto key_name = scoped(map->key_type()->name());
+
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_pair()) return false;\n";
-    // generate_read("auto key", "", map->key_type(), idx + "i", level + 1);
-    // generate_read(expression + "[key]" , "", map->value_type(), idx + "i", level + 1);
+
+    Classification key_cls = classify(map->key_type());
+
+    if (key_cls & CL_STRING) {
+      be_global->impl_ <<
+        indent << "  std::string k" << idx << ";\n";
+    }
+    else {
+      be_global->impl_ <<
+        indent << " " << key_name << " k" << idx << ";\n";
+    }
+
+    // TODO (tyler) Is there a better way to do this
     be_global->impl_ <<
+      indent << "  if (!value_reader.begin_pair_key()) return false;\n";
+    generate_read("k" + idx, "", map->key_type(), idx + "i", level + 1);
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_pair_key()) return false;\n";
+
+    be_global->impl_ <<
+      indent << "  if (!value_reader.begin_pair_value()) return false;\n";
+    generate_read(expression + "[k" + idx + "]", "", map->value_type(), idx + "i", level + 1);
+    be_global->impl_ <<
+      indent << "  if (!value_reader.end_pair_value()) return false;\n" <<
       indent << "  if (!value_reader.end_pair()) return false;\n" <<
       indent << "}\n" <<
       indent << "if (!value_reader.end_map()) return false;\n";
