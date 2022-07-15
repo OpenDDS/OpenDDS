@@ -219,9 +219,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     return;
   }
 
-  if (GUID_UNKNOWN == publication_id_) {
-    publication_id_ = yourId;
-  }
+  check_and_set_repo_id(yourId);
 
   {
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
