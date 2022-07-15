@@ -47,21 +47,11 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , encoded_submsg_(false)
 #endif
 {
-#ifdef OPENDDS_SECURITY
-  secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
-#endif
-}
-
-int
-RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
-{
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
-
   // Since BUFFER_COUNT is 1, the index will always be 0
   const size_t INDEX = 0;
 
   if (receive_buffers_[INDEX] == 0) {
-    ACE_NEW_MALLOC_RETURN(
+    ACE_NEW_MALLOC(
       receive_buffers_[INDEX],
       (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
       ACE_Message_Block(
@@ -76,9 +66,21 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
         ACE_Time_Value::max_time,           // Default
         &db_allocator_,                     // Our data block cache
         &mb_allocator_                      // Our message block cache
-      ),
-      -1);
+      ));
   }
+
+#ifdef OPENDDS_SECURITY
+  secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
+#endif
+}
+
+int
+RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
+{
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
+  // Since BUFFER_COUNT is 1, the index will always be 0
+  const size_t INDEX = 0;
 
   ACE_Message_Block* const cur_rb = receive_buffers_[INDEX];
   cur_rb->reset();
@@ -212,6 +214,11 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 
   // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
   if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
+
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"));
+    }
+
     ACE_DES_FREE(
       receive_buffers_[INDEX],
       mb_allocator_.free,
