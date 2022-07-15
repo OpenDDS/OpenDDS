@@ -91,10 +91,10 @@ struct BrokenTestEvent : public TestEventBase {
 };
 
 struct TestEventDispatcher : public OpenDDS::DCPS::EventDispatcher {
-  void shutdown(bool immediate = false) {}
-  bool dispatch(OpenDDS::DCPS::EventBase_rch event) { return false; }
-  long schedule(OpenDDS::DCPS::EventBase_rch event, const OpenDDS::DCPS::MonotonicTimePoint& expiration = OpenDDS::DCPS::MonotonicTimePoint::now()) { return -1; }
-  size_t cancel(long id) { return 0; }
+  void shutdown(bool) {}
+  bool dispatch(OpenDDS::DCPS::EventBase_rch) { return false; }
+  long schedule(OpenDDS::DCPS::EventBase_rch, const OpenDDS::DCPS::MonotonicTimePoint&) { return -1; }
+  size_t cancel(long) { return 0; }
 };
 
 } // (anonymous) namespace
@@ -108,7 +108,7 @@ TEST(dds_DCPS_EventDispatcher, EventBasePassThrough)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
 
-  test_event->add_ref();
+  test_event->_add_ref();
   (*test_event)();
 
   test_event->handle_error();
@@ -126,7 +126,7 @@ TEST(dds_DCPS_EventDispatcher, EventBaseHandleException)
 {
   OpenDDS::DCPS::RcHandle<BrokenTestEvent> test_event = OpenDDS::DCPS::make_rch<BrokenTestEvent>();
 
-  test_event->add_ref();
+  test_event->_add_ref();
   (*test_event)();
 
   test_event->handle_error();
@@ -140,7 +140,12 @@ TEST(dds_DCPS_EventDispatcher, EventBaseHandleException)
   EXPECT_EQ(test_event->cancel_count(), 3u);
 }
 
-TEST(dds_DCPS_EventDispatcher, ConstructDestruct)
+TEST(dds_DCPS_EventDispatcher, TestEventDispatcher)
 {
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<TestEventDispatcher>();
+  EXPECT_EQ(dispatcher->dispatch(test_event), false);
+  EXPECT_EQ(dispatcher->schedule(test_event, OpenDDS::DCPS::MonotonicTimePoint::now()), -1);
+  EXPECT_EQ(dispatcher->cancel(-1), 0);
+  dispatcher->shutdown();
 }
