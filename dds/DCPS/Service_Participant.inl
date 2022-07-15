@@ -14,9 +14,9 @@ ACE_INLINE
 Discovery::RepoKey
 Service_Participant::domain_to_repo(const DDS::DomainId_t domain) const
 {
-  DomainRepoMap::const_iterator where = this->domainRepoMap_.find(domain);
+  DomainRepoMap::const_iterator where = domainRepoMap_.find(domain);
 
-  if (where == this->domainRepoMap_.end()) {
+  if (where == domainRepoMap_.end()) {
     return Discovery::DEFAULT_REPO;
 
   } else {
@@ -254,77 +254,77 @@ ACE_INLINE
 int&
 Service_Participant::federation_recovery_duration()
 {
-  return this->federation_recovery_duration_;
+  return federation_recovery_duration_;
 }
 
 ACE_INLINE
 int
 Service_Participant::federation_recovery_duration() const
 {
-  return this->federation_recovery_duration_;
+  return federation_recovery_duration_;
 }
 
 ACE_INLINE
 int&
 Service_Participant::federation_initial_backoff_seconds()
 {
-  return this->federation_initial_backoff_seconds_;
+  return federation_initial_backoff_seconds_;
 }
 
 ACE_INLINE
 int
 Service_Participant::federation_initial_backoff_seconds() const
 {
-  return this->federation_initial_backoff_seconds_;
+  return federation_initial_backoff_seconds_;
 }
 
 ACE_INLINE
 int&
 Service_Participant::federation_backoff_multiplier()
 {
-  return this->federation_backoff_multiplier_;
+  return federation_backoff_multiplier_;
 }
 
 ACE_INLINE
 int
 Service_Participant::federation_backoff_multiplier() const
 {
-  return this->federation_backoff_multiplier_;
+  return federation_backoff_multiplier_;
 }
 
 ACE_INLINE
 int&
 Service_Participant::federation_liveliness()
 {
-  return this->federation_liveliness_;
+  return federation_liveliness_;
 }
 
 ACE_INLINE
 int
 Service_Participant::federation_liveliness() const
 {
-  return this->federation_liveliness_;
+  return federation_liveliness_;
 }
 
 ACE_INLINE
 long&
 Service_Participant::scheduler()
 {
-  return this->scheduler_;
+  return scheduler_;
 }
 
 ACE_INLINE
 long
 Service_Participant::scheduler() const
 {
-  return this->scheduler_;
+  return scheduler_;
 }
 
 ACE_INLINE
 TimeDuration
 Service_Participant::pending_timeout() const
 {
-  return this->pending_timeout_;
+  return pending_timeout_;
 }
 
 ACE_INLINE
@@ -344,35 +344,36 @@ ACE_INLINE
 int
 Service_Participant::priority_min() const
 {
-  return this->priority_min_;
+  return priority_min_;
 }
 
 ACE_INLINE
 int
 Service_Participant::priority_max() const
 {
-  return this->priority_max_;
+  return priority_max_;
 }
 
 ACE_INLINE
 bool&
 Service_Participant::publisher_content_filter()
 {
-  return this->publisher_content_filter_;
+  return publisher_content_filter_;
 }
 
 ACE_INLINE
 bool
 Service_Participant::publisher_content_filter() const
 {
-  return this->publisher_content_filter_;
+  return publisher_content_filter_;
 }
 
 ACE_INLINE
 bool
 Service_Participant::is_shut_down() const
 {
-  return this->shut_down_;
+  ACE_Guard<ACE_Thread_Mutex> guard(factory_lock_);
+  return shut_down_;
 }
 
 ACE_INLINE
