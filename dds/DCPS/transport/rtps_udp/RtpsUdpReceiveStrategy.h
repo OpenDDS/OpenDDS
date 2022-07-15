@@ -42,6 +42,8 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
     public virtual RcEventHandler
 {
 public:
+  static const size_t BUFFER_COUNT = 1u;
+
   explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
 
   virtual int handle_input(ACE_HANDLE fd);
