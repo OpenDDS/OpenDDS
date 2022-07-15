@@ -613,29 +613,30 @@ EOF
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
   }
-  elsif ($opts{'compiler'} =~ /g\+\+/) {
+  elsif ($opts{'compiler'} =~ /g\+\+/) { # GCC or Clang
     my $version_string = `$opts{'compiler'} --version`;
     if ($opts{'std'}) {
       push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
     }
-    elsif (!($opts{'compiler'} =~ /clang/)) {
+    elsif ($opts{'compiler'} !~ /clang/) {
       if ($version_string =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
         $opts{'std'} = 'gnu++14';
-        print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+        print "Detected GCC >= 6, default -std=gnu++14\n" if $opts{'verbose'};
       }
     }
-
-    if ($opts{'compiler'} =~ /clang/ && $version_string =~ /(\d+)\.(\d+)\.(\d+)/) {
-      if ($1 > 3 || ($1 == 3 && $2 >= 3)) {
-        push(@{$opts{'features'}}, 'no_cxx11=0');
-        print "Compiler has C++11 support\n" if $opts{'verbose'};
-      }
+    elsif ($opts{'compiler'} =~ /clang/ && $version_string !~ /^Apple / &&
+           $version_string =~ /(\d+)\.(\d+)\.(\d+)/ && $1 > 6) {
+      # Apple's version of Clang doesn't default to c++11 or higher, users
+      # can pass --std= to change the C++ standard version used.
+      # Other builds of Clang, if version 6 or newer, default to C++14 like GCC
+      $opts{'std'} = 'gnu++14';
+      print "Detected Clang >= 6, default -std=gnu++14\n" if $opts{'verbose'};
     }
 
-    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20)$/) {
+    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20|2b|23)$/) {
       push(@{$opts{'features'}}, 'no_cxx11=0');
-      print "Compiler has C++11 support\n" if $opts{'verbose'};
+      print "Compiler has >= C++11 support\n" if $opts{'verbose'};
     }
   }
 }
