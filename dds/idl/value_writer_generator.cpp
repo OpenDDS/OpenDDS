@@ -169,10 +169,10 @@ namespace {
         indent << "  value_writer.begin_pair();\n" <<
         indent << "  value_writer.write_key();\n";
     generate_write(idx + "->first", map->key_type(), idx + "i", level + 1);
-    
+
     be_global->impl_ <<
         indent << "  value_writer.write_value();\n";
-    
+
     generate_write(idx + "->second", map->value_type(), idx + "i", level + 1);
     be_global->impl_ <<
       indent << "  value_writer.end_pair();\n";

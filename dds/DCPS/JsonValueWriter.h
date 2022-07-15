@@ -196,13 +196,13 @@ void JsonValueWriter<Writer>::end_pair() {
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_key() 
+void JsonValueWriter<Writer>::write_key()
 {
   writer_.Key("key");
 }
 
 template <typename Writer>
-void JsonValueWriter<Writer>::write_value() 
+void JsonValueWriter<Writer>::write_value()
 {
   writer_.Key("value");
 }
