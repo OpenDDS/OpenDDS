@@ -132,7 +132,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
   if (!receive_transport_header_.valid()) {
     cur_rb->reset();
     if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: TransportHeader invalid.\n")));
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsUdpReceiveStrategy::handle_input: TransportHeader invalid.\n")));
     }
     return 0;
   }
