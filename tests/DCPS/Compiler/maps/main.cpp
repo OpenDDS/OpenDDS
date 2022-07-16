@@ -14,6 +14,43 @@ T TestMarshalling(OpenDDS::DCPS::Serializer strm, T original) {
   return t;
 }
 
+template<typename T>
+bool CheckMaps(T map1, T map2) {
+  if (map1.size() != map2.size()) {
+    return false;
+  }
+  for (auto it = map1.begin(); it != map1.end(); ++it) {
+    if (map2.find(it->first) == map2.end()) {
+      return false;
+    }
+    if (it->second != map2[it->first]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+// equals operator for TestStruct
+bool operator==(const TestStruct& lhs, const TestStruct& rhs) {
+  return lhs.id() == rhs.id() && lhs.msg() == rhs.msg();
+}
+
+bool operator!=(const TestStruct& lhs, const TestStruct& rhs) {
+  return !(lhs == rhs);
+}
+
+bool CheckData(Data test, Data expected) {
+  if (!CheckMaps(test.intIntMap(), expected.intIntMap())) return false;
+  if (!CheckMaps(test.stringStringMap(), expected.stringStringMap())) return false;
+  if (!CheckMaps(test.enumIntMap(), expected.enumIntMap())) return false;
+  if (!CheckMaps(test.intEnumMap(), expected.intEnumMap())) return false;
+  if (!CheckMaps(test.stringStructsMap(), expected.stringStructsMap())) return false;
+  if (!CheckMaps(test.stringSequenceMap(), expected.stringSequenceMap())) return false;
+  if (!CheckMaps(test.stringMapMap(), expected.stringMapMap())) return false;
+
+  return true;
+}
+
 TEST(MapsTests, Marshalling)
 {
   OpenDDS::DCPS::Message_Block_Ptr b(new ACE_Message_Block(100000));
@@ -39,19 +76,7 @@ TEST(MapsTests, Marshalling)
 
   Data testData = TestMarshalling(strm, expectedData);
 
-  EXPECT_EQ(testData.intIntMap(), expectedData.intIntMap());
-  EXPECT_EQ(testData.intIntMap()[10], expectedData.intIntMap()[10]);
-
-  EXPECT_EQ(testData.stringStringMap(), expectedData.stringStringMap());
-  EXPECT_EQ(testData.stringStringMap()["Hello"], expectedData.stringStringMap()["Hello"]);
-
-  EXPECT_EQ(testData.enumIntMap()[TEST_ENUM::TEST1], expectedData.enumIntMap()[TEST_ENUM::TEST1]);
-  EXPECT_EQ(testData.intEnumMap()[10], expectedData.intEnumMap()[10]);
-
-  EXPECT_EQ(testData.stringStructsMap()["Hello"].msg(), expectedData.stringStructsMap()["Hello"].msg());
-
-  EXPECT_EQ(testData.stringMapMap()["Hello World"][190].id(), expectedData.stringMapMap()["Hello World"][190].id());
-  EXPECT_EQ(testData.stringMapMap()["Hello World"][190].msg(), expectedData.stringMapMap()["Hello World"][190].msg());
+  CheckData(testData, expectedData);
 }
 
 TEST(MapsTests, SerializedSize)
@@ -142,8 +167,6 @@ TEST(MapsTests, ValueWriterReader)
 
   vwrite(testWriter, expectedData);
 
-  // std::cout << buffer.GetString() << std::endl;
-
   rapidjson::StringStream stream = R"(
     {
       "intIntMap":[
@@ -203,20 +226,9 @@ TEST(MapsTests, ValueWriterReader)
   vread(testReader, testData);
 
   // Test everything is the same
-  EXPECT_EQ(testData.intIntMap(), expectedData.intIntMap());
-  EXPECT_EQ(testData.intIntMap()[10], expectedData.intIntMap()[10]);
-
-  EXPECT_EQ(testData.stringStringMap(), expectedData.stringStringMap());
-  EXPECT_EQ(testData.stringStringMap()["Hello"], expectedData.stringStringMap()["Hello"]);
-
-  EXPECT_EQ(testData.enumIntMap()[TEST_ENUM::TEST1], expectedData.enumIntMap()[TEST_ENUM::TEST1]);
-  EXPECT_EQ(testData.intEnumMap()[10], expectedData.intEnumMap()[10]);
-
-  EXPECT_EQ(testData.stringStructsMap()["Hello"].msg(), expectedData.stringStructsMap()["Hello"].msg());
-
-  EXPECT_EQ(testData.stringMapMap()["Hello World"][190].id(), expectedData.stringMapMap()["Hello World"][190].id());
-  EXPECT_EQ(testData.stringMapMap()["Hello World"][190].msg(), expectedData.stringMapMap()["Hello World"][190].msg());
+  CheckData(testData, expectedData);
 }
+
 #endif
 
 int main(int argc, char* argv[])
