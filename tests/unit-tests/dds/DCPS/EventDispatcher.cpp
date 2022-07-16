@@ -15,7 +15,7 @@ namespace {
 
 class TestEventBase : public OpenDDS::DCPS::EventBase {
 public:
-  TestEventBase() : cv_(mutex_), call_count_(0) {}
+  TestEventBase() : cv_(mutex_), call_count_(0), error_count_(0), cancel_count_(0) {}
 
   size_t increment_call_count()
   {
