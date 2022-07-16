@@ -108,6 +108,7 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
+    const std::string kidx = "k" + idx;
     be_global->impl_ <<
       indent << "if (!value_reader.begin_map()) return false;\n" <<
       indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
@@ -126,23 +127,23 @@ namespace {
 
     if (key_cls & CL_STRING) {
       be_global->impl_ <<
-        indent << "  std::string k" << idx << ";\n";
+        indent << "  std::string " << kidx << ";\n";
     }
     else {
       be_global->impl_ <<
-        indent << " " << key_name << " k" << idx << ";\n";
+        indent << " " << key_name << " " << kidx << ";\n";
     }
 
     // TODO (tyler) Is there a better way to do this
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_pair_key()) return false;\n";
-    generate_read("k" + idx, "", map->key_type(), idx + "i", level + 1);
+    generate_read(kidx, "", map->key_type(), idx + "i", level + 1);
     be_global->impl_ <<
       indent << "  if (!value_reader.end_pair_key()) return false;\n";
 
     be_global->impl_ <<
       indent << "  if (!value_reader.begin_pair_value()) return false;\n";
-    generate_read(expression + "[k" + idx + "]", "", map->value_type(), idx + "i", level + 1);
+    generate_read(expression + "[" + kidx + "]", "", map->value_type(), idx + "i", level + 1);
     be_global->impl_ <<
       indent << "  if (!value_reader.end_pair_value()) return false;\n" <<
       indent << "  if (!value_reader.end_pair()) return false;\n" <<

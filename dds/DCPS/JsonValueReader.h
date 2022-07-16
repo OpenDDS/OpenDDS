@@ -306,24 +306,17 @@ bool JsonValueReader<InputStream>::begin_map() {
 }
 
 template <typename InputStream>
-bool JsonValueReader<InputStream>::end_map() {
-  peek();
-  return consume(kEndArray);
-}
-
-template <typename InputStream>
 bool JsonValueReader<InputStream>::pairs_remaining()
 {
   peek();
-  bool remaining = token_type_ != kEndArray;
-  token_type_ = kUnknown;
-  return remaining;
+  return token_type_ != kEndArray;
 }
 
 template <typename InputStream>
 bool JsonValueReader<InputStream>::begin_pair()
 {
-  return true;
+  peek();
+  return consume(kStartObject);
 }
 
 template <typename InputStream>
@@ -361,6 +354,12 @@ bool JsonValueReader<InputStream>::end_pair()
 {
   peek();
   return consume(kEndObject);
+}
+
+template <typename InputStream>
+bool JsonValueReader<InputStream>::end_map() {
+  peek();
+  return consume(kEndArray);
 }
 
 template <typename InputStream>
