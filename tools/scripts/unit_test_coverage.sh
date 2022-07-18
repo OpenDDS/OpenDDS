@@ -87,18 +87,6 @@ do
         fi
     )
 
-    # Delete gcda files not related to the unit.
-    for path in $(find . -name "*.gcda")
-    do
-        derived_unit_name=$(echo "${path}" | sed -e 's@^\./@@' -e 's@/\.shobj@@g' -e 's@/\.obj@@g' -e 's@^tests/unit-tests/@@' -e 's@\.gcda$@@')
-        if [[ ${derived_unit_name} != ${unit_name} ]]
-        then
-            rm $path
-        else
-            echo "Considering ${path} for ${unit_name}"
-        fi
-    done
-
     # Collect data.
     rm -f coverage.info
     { lcov --capture --directory . --output-file coverage.info --no-external &&
