@@ -3633,6 +3633,10 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
+  if (outer->shutdown_flag_ == true) {
+    return;
+  }
+
   DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
 
