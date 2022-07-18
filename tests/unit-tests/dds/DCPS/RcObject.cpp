@@ -55,8 +55,19 @@ TEST(dds_DCPS_RcObject, lock_reset_weak)
   WeakRcHandle<Counted> w1(h1);
   RcHandle<Counted> h2 = w1.lock();
   EXPECT_EQ(h1, h2);
-  h2.reset();
-  EXPECT_FALSE(h2);
+  w1.reset();
+  EXPECT_FALSE(w1);
+}
+
+TEST(dds_DCPS_RcObject, lock_failed)
+{
+  WeakRcHandle<Counted> w1;
+  {
+    RcHandle<Counted> h1 = make_rch<Counted>();
+    w1 = h1;
+  }
+  RcHandle<Counted> locked = w1.lock();
+  EXPECT_TRUE(locked.is_nil());
 }
 
 TEST(dds_DCPS_RcObject, compare_weak)
