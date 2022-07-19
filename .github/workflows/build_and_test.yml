@@ -326,9 +326,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  build_u18_o1d0v1_xer0_j12:
+  build_u22_o1d0v1_xer0_j11:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: checkout OpenDDS
@@ -341,7 +341,7 @@ jobs:
         cd OpenDDS
         ./configure \
           --ace-github-latest \
-          --java=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64 \
+          --java=$JAVA_HOME_11_X64 \
           --rapidjson \
           --optimize \
           --no-debug \
@@ -379,7 +379,7 @@ jobs:
         source \$OPENDDS_INSTALL_PREFIX/share/ace/ace-devel.sh
         source \$OPENDDS_INSTALL_PREFIX/share/tao/tao-devel.sh
         source \$OPENDDS_INSTALL_PREFIX/share/dds/dds-devel.sh
-        export JAVA_HOME=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64
+        export JAVA_HOME=$JAVA_HOME_11_X64
         export JAVA_PLATFORM=linux
         export PATH="\$OPENDDS_INSTALL_PREFIX/bin:\$PATH"
         export MPC_ROOT=$ACE_ROOT/MPC
@@ -433,11 +433,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  inst_u18_o1d0v1_xer0_j12:
+  inst_u22_o1d0v1_xer0_j11:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_o1d0v1_xer0_j12
+    needs: build_u22_o1d0v1_xer0_j11
 
     steps:
     - name: checkout MPC
@@ -458,13 +458,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_o1d0v1_xer0_j12_artifact
+        name: build_u22_o1d0v1_xer0_j11_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_o1d0v1_xer0_j12.tar.xz
+        tar xvfJ build_u22_o1d0v1_xer0_j11.tar.xz
     - name: test make install messenger
       shell: bash
       run: |
@@ -483,7 +483,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        rm build_u18_o1d0v1_xer0_j12.tar.xz
+        rm build_u22_o1d0v1_xer0_j11.tar.xz
         rm -rf install_temp install_prefix install_setenv.sh
     - name: gitclean
       shell: bash
@@ -493,9 +493,9 @@ jobs:
         git clean -nd -e ext | tee ../output.txt
         if [ -s ../output.txt ]; then exit 1; fi
 
-  ACE_TAO_u18_esafe_js0:
+  ACE_TAO_u22_esafe_js0:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: checkout OpenDDS
@@ -588,11 +588,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_esafe_js0:
+  build_u22_esafe_js0:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_esafe_js0
+    needs: ACE_TAO_u22_esafe_js0
 
     steps:
     - name: checkout MPC
@@ -636,13 +636,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_esafe_js0_artifact
+        name: ACE_TAO_u22_esafe_js0_artifact
         path: OpenDDS
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ ACE_TAO_u18_esafe_js0.tar.xz
+        tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
     - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
@@ -687,11 +687,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_esafe_js0:
+  test_u22_esafe_js0:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_esafe_js0
+    needs: build_u22_esafe_js0
 
     steps:
     - name: checkout MPC
@@ -713,23 +713,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_esafe_js0_artifact
+        name: ACE_TAO_u22_esafe_js0_artifact
         path: OpenDDS
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ ACE_TAO_u18_esafe_js0.tar.xz
+        tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_esafe_js0_artifact
+        name: build_u22_esafe_js0_artifact
         path: OpenDDS/build
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS/build
-        tar xvfJ build_u18_esafe_js0.tar.xz
+        tar xvfJ build_u22_esafe_js0.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout autobuild
@@ -801,9 +801,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u18_bsafe_js0_FM-1f:
+  ACE_TAO_u22_bsafe_js0_FM-1f:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: checkout OpenDDS
@@ -897,11 +897,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_bsafe_js0_FM-1f:
+  build_u22_bsafe_js0_FM-1f:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_bsafe_js0_FM-1f
+    needs: ACE_TAO_u22_bsafe_js0_FM-1f
 
     steps:
     - name: checkout MPC
@@ -946,13 +946,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
+        name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
     - uses: ammaraskar/gcc-problem-matcher@0.1
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
@@ -997,11 +997,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_bsafe_js0_FM-1f:
+  test_u22_bsafe_js0_FM-1f:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_bsafe_js0_FM-1f
+    needs: build_u22_bsafe_js0_FM-1f
 
     steps:
     - name: checkout MPC
@@ -1023,23 +1023,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_bsafe_js0_FM-1f_artifact
+        name: ACE_TAO_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ ACE_TAO_u18_bsafe_js0_FM-1f.tar.xz
+        tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_bsafe_js0_FM-1f_artifact
+        name: build_u22_bsafe_js0_FM-1f_artifact
         path: OpenDDS/build
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS/build
-        tar xvfJ build_u18_bsafe_js0_FM-1f.tar.xz
+        tar xvfJ build_u22_bsafe_js0_FM-1f.tar.xz
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout autobuild
@@ -1111,9 +1111,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/build/target/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u18_d0i0v1_sec_js0_FM-08:
+  ACE_TAO_u22_d0i0v1_sec_js0_FM-08:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: checkout OpenDDS
@@ -1183,11 +1183,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_d0i0v1_sec_js0_FM-08:
+  build_u22_d0i0v1_sec_js0_FM-08:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_d0i0v1_sec_js0_FM-08
+    needs: ACE_TAO_u22_d0i0v1_sec_js0_FM-08
 
     steps:
     - name: install xerces
@@ -1206,13 +1206,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_d0i0v1_sec_js0_FM-08_artifact
+        name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_d0i0v1_sec_js0_FM-08.tar.xz
+        tar xvfJ ACE_TAO_u22_d0i0v1_sec_js0_FM-08.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -1257,11 +1257,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_d0i0v1_sec_js0_FM-08:
+  test_u22_d0i0v1_sec_js0_FM-08:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_d0i0v1_sec_js0_FM-08
+    needs: build_u22_d0i0v1_sec_js0_FM-08
 
     steps:
     - name: install xerces
@@ -1285,13 +1285,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_d0i0v1_sec_js0_FM-08_artifact
+        name: ACE_TAO_u22_d0i0v1_sec_js0_FM-08_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_d0i0v1_sec_js0_FM-08.tar.xz
+        tar xvfJ ACE_TAO_u22_d0i0v1_sec_js0_FM-08.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -1300,13 +1300,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_d0i0v1_sec_js0_FM-08_artifact
+        name: build_u22_d0i0v1_sec_js0_FM-08_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_d0i0v1_sec_js0_FM-08.tar.xz
+        tar xvfJ build_u22_d0i0v1_sec_js0_FM-08.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -2474,9 +2474,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u18_gcc11_i0_xer0:
+  ACE_TAO_u22_gcc11_i0_xer0:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: install gcc and g++
@@ -2546,11 +2546,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_gcc11_i0_xer0:
+  build_u22_gcc11_i0_xer0:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_gcc11_i0_xer0
+    needs: ACE_TAO_u22_gcc11_i0_xer0
 
     steps:
     - name: install gcc and g++
@@ -2570,13 +2570,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_gcc11_i0_xer0_artifact
+        name: ACE_TAO_u22_gcc11_i0_xer0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_gcc11_i0_xer0.tar.xz
+        tar xvfJ ACE_TAO_u22_gcc11_i0_xer0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -2621,11 +2621,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_u18_gcc11_i0_xer0:
+  cmake_u22_gcc11_i0_xer0:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_gcc11_i0_xer0
+    needs: build_u22_gcc11_i0_xer0
 
     steps:
     - name: checkout MPC
@@ -2647,13 +2647,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_gcc11_i0_xer0_artifact
+        name: ACE_TAO_u22_gcc11_i0_xer0_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_gcc11_i0_xer0.tar.xz
+        tar xvfJ ACE_TAO_u22_gcc11_i0_xer0.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -2662,13 +2662,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_gcc11_i0_xer0_artifact
+        name: build_u22_gcc11_i0_xer0_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_gcc11_i0_xer0.tar.xz
+        tar xvfJ build_u22_gcc11_i0_xer0.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -4288,9 +4288,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u18_w1:
+  ACE_TAO_u22_w1:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: checkout OpenDDS
@@ -4360,11 +4360,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_w1_sec:
+  build_u22_w1_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_w1
+    needs: ACE_TAO_u22_w1
 
     steps:
     - name: install xerces
@@ -4383,13 +4383,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_w1_artifact
+        name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_w1.tar.xz
+        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4434,11 +4434,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_w1_sec:
+  test_u22_w1_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_w1_sec
+    needs: build_u22_w1_sec
 
     steps:
     - name: install xerces
@@ -4462,13 +4462,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_w1_artifact
+        name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_w1.tar.xz
+        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4477,13 +4477,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_w1_sec_artifact
+        name: build_u22_w1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_w1_sec.tar.xz
+        tar xvfJ build_u22_w1_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -4549,11 +4549,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  build_u18_w1_j_FM-2f:
+  build_u22_w1_j_FM-2f:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_w1
+    needs: ACE_TAO_u22_w1
 
     steps:
     - name: install xerces
@@ -4572,13 +4572,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_w1_artifact
+        name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_w1.tar.xz
+        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4638,11 +4638,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_w1_j_FM-2f:
+  test_u22_w1_j_FM-2f:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_w1_j_FM-2f
+    needs: build_u22_w1_j_FM-2f
 
     steps:
     - name: install xerces
@@ -4666,13 +4666,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_w1_artifact
+        name: ACE_TAO_u22_w1_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_w1.tar.xz
+        tar xvfJ ACE_TAO_u22_w1.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4681,13 +4681,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_w1_j_FM-2f_artifact
+        name: build_u22_w1_j_FM-2f_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_w1_j_FM-2f.tar.xz
+        tar xvfJ build_u22_w1_j_FM-2f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -4753,9 +4753,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u18_stat_qt_ws_sec:
+  ACE_TAO_u22_stat_qt_ws_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: checkout OpenDDS
@@ -4824,11 +4824,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_stat_qt_ws_sec:
+  build_u22_stat_qt_ws_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_stat_qt_ws_sec
+    needs: ACE_TAO_u22_stat_qt_ws_sec
 
     steps:
     - name: install xerces
@@ -4853,14 +4853,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -4985,11 +4985,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_u18_stat_qt_ws_sec:
+  cmake_u22_stat_qt_ws_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_stat_qt_ws_sec
+    needs: build_u22_stat_qt_ws_sec
 
     steps:
     - name: install xerces
@@ -5013,14 +5013,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -5029,14 +5029,14 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_stat_qt_ws_sec_artifact
+        name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-        rm build_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
+        rm build_u22_stat_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -5102,11 +5102,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  messenger_u18_stat_qt_ws_sec:
+  messenger_u22_stat_qt_ws_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_stat_qt_ws_sec
+    needs: build_u22_stat_qt_ws_sec
 
     steps:
     - name: install xerces
@@ -5139,25 +5139,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_stat_qt_ws_sec_artifact
+        name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-        rm build_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
+        rm build_u22_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5232,11 +5232,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  compiler_u18_stat_qt_ws_sec:
+  compiler_u22_stat_qt_ws_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_stat_qt_ws_sec
+    needs: build_u22_stat_qt_ws_sec
 
     steps:
     - name: install xerces
@@ -5269,25 +5269,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_stat_qt_ws_sec_artifact
+        name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-        rm build_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
+        rm build_u22_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5362,11 +5362,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  unit_u18_stat_qt_ws_sec:
+  unit_u22_stat_qt_ws_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_stat_qt_ws_sec
+    needs: build_u22_stat_qt_ws_sec
 
     steps:
     - name: install xerces
@@ -5399,25 +5399,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_stat_qt_ws_sec_artifact
+        name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-        rm build_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
+        rm build_u22_stat_qt_ws_sec.tar.xz
     - name: setup gtest
       run: |
         cd OpenDDS/tests/googletest
@@ -5492,11 +5492,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  security_u18_stat_qt_ws_sec:
+  security_u22_stat_qt_ws_sec:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_stat_qt_ws_sec
+    needs: build_u22_stat_qt_ws_sec
     timeout-minutes: 150
 
     steps:
@@ -5520,14 +5520,14 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_stat_qt_ws_sec_artifact
+        name: ACE_TAO_u22_stat_qt_ws_sec_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_stat_qt_ws_sec.tar.xz
-        rm ACE_TAO_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ ACE_TAO_u22_stat_qt_ws_sec.tar.xz
+        rm ACE_TAO_u22_stat_qt_ws_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -5536,14 +5536,14 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_stat_qt_ws_sec_artifact
+        name: build_u22_stat_qt_ws_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_stat_qt_ws_sec.tar.xz
-        rm build_u18_stat_qt_ws_sec.tar.xz
+        tar xvfJ build_u22_stat_qt_ws_sec.tar.xz
+        rm build_u22_stat_qt_ws_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -5607,9 +5607,9 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u18_j_cft0_FM-37:
+  ACE_TAO_u22_j_cft0_FM-37:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: checkout OpenDDS
@@ -5679,11 +5679,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u18_j_cft0_FM-37:
+  build_u22_j_cft0_FM-37:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: ACE_TAO_u18_j_cft0_FM-37
+    needs: ACE_TAO_u22_j_cft0_FM-37
 
     steps:
     - name: install xerces
@@ -5702,13 +5702,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_j_cft0_FM-37_artifact
+        name: ACE_TAO_u22_j_cft0_FM-37_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_j_cft0_FM-37.tar.xz
+        tar xvfJ ACE_TAO_u22_j_cft0_FM-37.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -5768,11 +5768,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u18_j_cft0_FM-37:
+  test_u22_j_cft0_FM-37:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
-    needs: build_u18_j_cft0_FM-37
+    needs: build_u22_j_cft0_FM-37
 
     steps:
     - name: install xerces
@@ -5796,13 +5796,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u18_j_cft0_FM-37_artifact
+        name: ACE_TAO_u22_j_cft0_FM-37_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u18_j_cft0_FM-37.tar.xz
+        tar xvfJ ACE_TAO_u22_j_cft0_FM-37.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -5811,13 +5811,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u18_j_cft0_FM-37_artifact
+        name: build_u22_j_cft0_FM-37_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u18_j_cft0_FM-37.tar.xz
+        tar xvfJ build_u22_j_cft0_FM-37.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -11984,7 +11984,7 @@ jobs:
 
   build_u14_gcc4:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout OpenDDS
