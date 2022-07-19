@@ -1030,7 +1030,7 @@ my %all_sanitizers = (
     env => {
       UBSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/ubsan-suppr.txt:print_stacktrace=1",
     },
-    configh => ['#define ACE_INITILAIZE_MEMORY_BEFORE_USE'],
+    configh => ['#define ACE_INITIALIZE_MEMORY_BEFORE_USE'],
     compiler_args => ['-fsanitize-coverage=trace-pc-guard'],
   },
 );
