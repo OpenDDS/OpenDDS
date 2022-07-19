@@ -65,6 +65,13 @@ echo ''
 
 rm -f coverage-total.info
 
+lcov --zerocounters --directory .
+(
+    cd "${DDS_ROOT}/tests/unit-tests"
+    ./UnitTests --gtest_filter="DOES NOT MATCH"
+)
+find . -name "*.gcda" | xargs md5sum | sort -k2,2 > baseline
+
 for unit_name in $(get-units)
 do
     echo "Testing coverage of ${unit_name}"
@@ -86,6 +93,11 @@ do
             result=1
         fi
     )
+
+    # Delete gcda files that did not change.
+    find . -name "*.gcda" | xargs md5sum | sort -k2,2 > current
+    diff baseline current | grep '^<' | cut -d' ' -f4 > files_to_keep
+    find . -name "*.gcda" | grep -v -F -f files_to_keep | xargs rm
 
     # Collect data.
     rm -f coverage.info
