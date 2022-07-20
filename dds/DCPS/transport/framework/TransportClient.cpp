@@ -1003,6 +1003,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
           }
 
           if (!subset.in()) {
+            guard.release();
             VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
             // similar to the "if (pub_links.is_nil())" case above, no links
             cur->get_send_listener()->data_delivered(cur);
