@@ -275,7 +275,7 @@ TEST(dds_DCPS_ServiceEventDispatcher, TestShutdown)
 
   EXPECT_EQ(false, dispatcher->dispatch(test_event));
   EXPECT_EQ(-1, dispatcher->schedule(test_event, OpenDDS::DCPS::MonotonicTimePoint::now()));
-  EXPECT_EQ(0, dispatcher->cancel(1));
+  EXPECT_EQ(0u, dispatcher->cancel(1));
 
   EXPECT_EQ(test_event->call_count(), 1u);
 }
