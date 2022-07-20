@@ -2370,11 +2370,15 @@ void DomainParticipantImpl::LivelinessTimer::execute(const MonotonicTimePoint& n
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
-  while (recalculate_interval_) {
-    recalculate_interval_ = false;
-    ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
-    interval_ = impl_.liveliness_check_interval(kind_);
+  if (recalculate_interval_) {
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    TimeDuration interval;
+    while (recalculate_interval_) {
+      recalculate_interval_ = false;
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
+      interval = impl_.liveliness_check_interval(kind_);
+    }
+    interval_ = interval;
   }
 
   scheduled_ = false;
