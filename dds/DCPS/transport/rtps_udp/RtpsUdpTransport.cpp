@@ -985,8 +985,10 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
     return;
   }
 
-  job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
-  deferred_connection_records_.clear();
+  if (!deferred_connection_records_.empty()) {
+    job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
+    deferred_connection_records_.clear();
+  }
 
 #else
   ACE_UNUSED_ARG(sc);
@@ -1012,8 +1014,10 @@ RtpsUdpTransport::disable_relay_stun_task()
     return;
   }
 
-  job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
-  deferred_connection_records_.clear();
+  if (!deferred_connection_records_.empty()) {
+    job_queue_->enqueue(DCPS::make_rch<WriteConnectionRecords>(bit_sub_, deferred_connection_records_));
+    deferred_connection_records_.clear();
+  }
 
   relay_srsm_ = ICE::ServerReflexiveStateMachine();
 #endif

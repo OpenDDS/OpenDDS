@@ -154,6 +154,7 @@ public:
 
   void handle_participant_data(DCPS::MessageId id,
                                const ParticipantData_t& pdata,
+                               const DCPS::MonotonicTimePoint& now,
                                const DCPS::SequenceNumber& seq,
                                const ACE_INET_Addr& from,
                                bool from_sedp);

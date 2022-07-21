@@ -14,6 +14,13 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DdsDcpsInfoUtilsC.h"
 
+// make sure we get set_default overloads in scope
+#ifdef OPENDDS_SECURITY
+#include "dds/DdsSecurityCoreTypeSupportImpl.h"
+#endif
+#include "dds/DdsDcpsInfoUtilsTypeSupportImpl.h"
+#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
+
 #include "gtest/gtest.h"
 
 #include <cstring>
@@ -57,21 +64,21 @@ namespace {
     }
 
     OpenDDS::RTPS::SPDPdiscoveredParticipantData spdp_participant(
-      const void* user_data = NULL,
+      const void* user_data = 0,
       CORBA::ULong user_data_len = 0,
       char major_protocol_version = 0,
       char minor_protocol_version = 0,
-      char* vendor_id = NULL,
-      GUID_t* guid = NULL,
+      char* vendor_id = 0,
+      GUID_t* guid = 0,
       bool expects_inline_qos = false,
       unsigned long builtin_endpoints = 0,
-      Locator_t* mtu_locs = NULL,
+      Locator_t* mtu_locs = 0,
       CORBA::ULong num_mtu_locs = 0,
-      Locator_t* mtm_locs = NULL,
+      Locator_t* mtm_locs = 0,
       CORBA::ULong num_mtm_locs = 0,
-      Locator_t* du_locs = NULL,
+      Locator_t* du_locs = 0,
       CORBA::ULong num_du_locs = 0,
-      Locator_t* dm_locs = NULL,
+      Locator_t* dm_locs = 0,
       CORBA::ULong num_dm_locs = 0,
       long liveliness_count = 0,
       long lease_dur_seconds = 100,
@@ -79,6 +86,7 @@ namespace {
     )
     {
       OpenDDS::RTPS::SPDPdiscoveredParticipantData result;
+      OpenDDS::DCPS::set_default(result);
       if (user_data_len && user_data) {
         result.ddsParticipantData.user_data.value.length(user_data_len);
         for (CORBA::ULong i = 0; i < user_data_len; ++i) {
@@ -144,6 +152,7 @@ namespace {
     OpenDDS::RTPS::SPDPdiscoveredParticipantData default_participant_data()
     {
       OpenDDS::RTPS::SPDPdiscoveredParticipantData part_data;
+      OpenDDS::DCPS::set_default(part_data);
       part_data.ddsParticipantData.user_data =
           TheServiceParticipant->initial_UserDataQosPolicy();
       part_data.participantProxy.expectsInlineQos = false;
@@ -228,8 +237,8 @@ namespace {
 
     DiscoveredWriterData
     writer_data(
-        const char* topic_name = NULL,
-        const char* type_name  = NULL,
+        const char* topic_name = 0,
+        const char* type_name  = 0,
         DurabilityQosPolicyKind durability
                                = VOLATILE_DURABILITY_QOS,
         long svc_del_sec = 0L,
@@ -248,7 +257,7 @@ namespace {
               BEST_EFFORT_RELIABILITY_QOS,
         long mbt_sec = 0L, unsigned long mbt_nsec = 0L,
         long ls_sec = 0L, unsigned long ls_nsec = 0L,
-        const void* user_data = NULL, CORBA::ULong user_data_len = 0,
+        const void* user_data = 0, CORBA::ULong user_data_len = 0,
         OwnershipQosPolicyKind ownership =
               SHARED_OWNERSHIP_QOS,
         long ownership_strength = 0L,
@@ -257,11 +266,11 @@ namespace {
         PresentationQosPolicyAccessScopeKind presentation =
               INSTANCE_PRESENTATION_QOS,
         bool coherent = false, bool ordered = false,
-        const char* partition = NULL,
-        const void* topic_data = NULL, CORBA::ULong topic_data_len = 0,
-        const void* group_data = NULL, CORBA::ULong group_data_len = 0,
-        Locator_t* uc_locs = NULL, CORBA::ULong num_uc_locs = 0,
-        Locator_t* mc_locs = NULL, CORBA::ULong num_mc_locs = 0
+        const char* partition = 0,
+        const void* topic_data = 0, CORBA::ULong topic_data_len = 0,
+        const void* group_data = 0, CORBA::ULong group_data_len = 0,
+        Locator_t* uc_locs = 0, CORBA::ULong num_uc_locs = 0,
+        Locator_t* mc_locs = 0, CORBA::ULong num_mc_locs = 0
     ) {
       DiscoveredWriterData result;
       if (topic_name) {
@@ -351,8 +360,8 @@ namespace {
 
     DiscoveredReaderData
     reader_data(
-        const char* topic_name = NULL,
-        const char* type_name  = NULL,
+        const char* topic_name = 0,
+        const char* type_name  = 0,
         DurabilityQosPolicyKind durability
                                = VOLATILE_DURABILITY_QOS,
         long deadline_sec = 0L, unsigned long deadline_nsec = 0L,
@@ -363,7 +372,7 @@ namespace {
         ReliabilityQosPolicyKind reliability =
               BEST_EFFORT_RELIABILITY_QOS,
         long mbt_sec = 0L, unsigned long mbt_nsec = 0L,
-        const void* user_data = NULL, CORBA::ULong user_data_len = 0,
+        const void* user_data = 0, CORBA::ULong user_data_len = 0,
         OwnershipQosPolicyKind ownership =
               SHARED_OWNERSHIP_QOS,
         DestinationOrderQosPolicyKind destination_order =
@@ -371,14 +380,14 @@ namespace {
         PresentationQosPolicyAccessScopeKind presentation =
               INSTANCE_PRESENTATION_QOS,
         bool coherent = false, bool ordered = false,
-        const char* partition = NULL,
-        const void* topic_data = NULL, CORBA::ULong topic_data_len = 0,
-        const void* group_data = NULL, CORBA::ULong group_data_len = 0,
-        Locator_t* uc_locs = NULL, CORBA::ULong num_uc_locs = 0,
-        Locator_t* mc_locs = NULL, CORBA::ULong num_mc_locs = 0,
-        const char* cf_topic_name = NULL, const char* rel_topic_name = NULL,
-        const char* filter_name = NULL, const char* filter_expr = NULL,
-        const char** params = NULL, CORBA::ULong num_params = 0
+        const char* partition = 0,
+        const void* topic_data = 0, CORBA::ULong topic_data_len = 0,
+        const void* group_data = 0, CORBA::ULong group_data_len = 0,
+        Locator_t* uc_locs = 0, CORBA::ULong num_uc_locs = 0,
+        Locator_t* mc_locs = 0, CORBA::ULong num_mc_locs = 0,
+        const char* cf_topic_name = 0, const char* rel_topic_name = 0,
+        const char* filter_name = 0, const char* filter_expr = 0,
+        const char** params = 0, CORBA::ULong num_params = 0
     ) {
       DiscoveredReaderData result;
       if (topic_name) {
@@ -473,21 +482,21 @@ namespace {
 
 #ifdef OPENDDS_SECURITY
   OpenDDS::RTPS::SPDPdiscoveredParticipantData spdp_participant(
-    const void* user_data = NULL,
+    const void* user_data = 0,
     CORBA::ULong user_data_len = 0,
     char major_protocol_version = 0,
     char minor_protocol_version = 0,
-    char* vendor_id = NULL,
-    OpenDDS::DCPS::GUID_t* guid = NULL,
+    char* vendor_id = 0,
+    OpenDDS::DCPS::GUID_t* guid = 0,
     bool expects_inline_qos = false,
     unsigned long builtin_endpoints = 0,
-    OpenDDS::DCPS::Locator_t* mtu_locs = NULL,
+    OpenDDS::DCPS::Locator_t* mtu_locs = 0,
     CORBA::ULong num_mtu_locs = 0,
-    OpenDDS::DCPS::Locator_t* mtm_locs = NULL,
+    OpenDDS::DCPS::Locator_t* mtm_locs = 0,
     CORBA::ULong num_mtm_locs = 0,
-    OpenDDS::DCPS::Locator_t* du_locs = NULL,
+    OpenDDS::DCPS::Locator_t* du_locs = 0,
     CORBA::ULong num_du_locs = 0,
-    OpenDDS::DCPS::Locator_t* dm_locs = NULL,
+    OpenDDS::DCPS::Locator_t* dm_locs = 0,
     CORBA::ULong num_dm_locs = 0,
     long liveliness_count = 0,
     long lease_dur_seconds = 100,
@@ -495,6 +504,7 @@ namespace {
   )
   {
     OpenDDS::RTPS::SPDPdiscoveredParticipantData result;
+    OpenDDS::DCPS::set_default(result);
     if (user_data_len && user_data) {
       result.ddsParticipantData.user_data.value.length(user_data_len);
       for (CORBA::ULong i = 0; i < user_data_len; ++i) {
@@ -669,9 +679,22 @@ Parameter get(const ParameterList& param_list,
 }
 
 #ifdef OPENDDS_SECURITY
+namespace {
+  void init(OpenDDS::Security::SPDPdiscoveredParticipantData& s)
+  {
+    s.dataKind = OpenDDS::Security::DPDK_NONE;
+    OpenDDS::DCPS::set_default(s.ddsParticipantDataSecure);
+    OpenDDS::DCPS::set_default(s.participantProxy);
+    OpenDDS::DCPS::set_default(s.leaseDuration);
+    OpenDDS::DCPS::set_default(s.discoveredAt);
+  }
+}
+
 TEST(dds_DCPS_RTPS_ParameterListConverter, From_SPDPdiscoveredParticipantData_IdentityStatusToken)
 {
   OpenDDS::Security::SPDPdiscoveredParticipantData w1, w2;
+  init(w1);
+  init(w2);
 
   OpenDDS::RTPS::SPDPdiscoveredParticipantData temp = spdp_participant("Test-Test-Test", 10);
 
@@ -811,7 +834,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode participant protocol version properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 3, 8);
+      Factory::spdp_participant(0, 0, 3, 8);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -824,7 +847,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant protocol version properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 9, 1);
+      Factory::spdp_participant(0, 0, 9, 1);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -840,7 +863,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode participant vendor id properly
     char vendor_id[] = {7, 9};
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
+      Factory::spdp_participant(0, 0, 0, 0, vendor_id);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -854,7 +877,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should decode participant vendor id properly
     char vendor_id[] = {7, 9};
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, vendor_id);
+      Factory::spdp_participant(0, 0, 0, 0, vendor_id);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -870,7 +893,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     GUID_t guid_in;
     memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, &guid_in);
+      Factory::spdp_participant(0, 0, 0, 0, 0, &guid_in);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -884,7 +907,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     GUID_t guid_in;
     memcpy(guid_in.guidPrefix, "GUID-ABC                 ", 12);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, &guid_in);
+      Factory::spdp_participant(0, 0, 0, 0, 0, &guid_in);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -898,7 +921,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode participant expects inline qos properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, true);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -909,7 +932,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant expects inline qos properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, true);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, true);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -928,7 +951,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode participant builtin endpoints properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 72393L);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -942,7 +965,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant builtin endpoints properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 72393L);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 72393L);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -964,7 +987,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
                                 locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -992,7 +1015,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
                                 locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -1023,8 +1046,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, locators, 2);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -1054,8 +1077,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, locators, 2);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -1086,8 +1109,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, locators, 2);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -1114,8 +1137,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, locators, 2);
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
     EXPECT_TRUE(status == true);
@@ -1146,8 +1169,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, NULL, 0,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, 0, 0,
                                 locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -1175,8 +1198,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, NULL, 0,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, 0, 0,
                                 locators, 2);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -1200,8 +1223,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode participant liveliness count properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0,
                                 7);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -1213,8 +1236,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant liveliness count properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, NULL, 0, NULL, 0,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0,
                                 6);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -1228,8 +1251,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode participant lease duration properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 7,
                                 12, 300);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -1242,8 +1265,8 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode participant lease duration properly
     OpenDDS::RTPS::SPDPdiscoveredParticipantData participant_data =
-      Factory::spdp_participant(NULL, 0, 0, 0, NULL, NULL, false, 0,
-                                NULL, 0, NULL, 0, NULL, 0, NULL, 0, 7,
+      Factory::spdp_participant(0, 0, 0, 0, 0, 0, false, 0,
+                                0, 0, 0, 0, 0, 0, 0, 0, 7,
                                 12, 300);
     ParameterList param_list;
     bool status = to_param_list(participant_data, param_list);
@@ -1464,7 +1487,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode writer durability qos policy
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL,
+                                                            0, 0,
                                                             TRANSIENT_LOCAL_DURABILITY_QOS);
 
     ParameterList param_list;
@@ -1481,7 +1504,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode writer durability
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL,
+                                                            0, 0,
                                                             TRANSIENT_LOCAL_DURABILITY_QOS);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -1498,7 +1521,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should set writer durability default if not present in param list
     DiscoveredWriterData writer_data_out = Factory::writer_data(
-                                                                NULL, NULL, TRANSIENT_LOCAL_DURABILITY_QOS);
+                                                                0, 0, TRANSIENT_LOCAL_DURABILITY_QOS);
     ParameterList empty_param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -1514,7 +1537,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   { // Should encode writer durabiltiy service
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL,
+                                                            0, 0,
                                                             TRANSIENT_LOCAL_DURABILITY_QOS,
                                                             4, 2000,
                                                             KEEP_LAST_HISTORY_QOS, 172,
@@ -1542,7 +1565,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode writer durability service
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, TRANSIENT_LOCAL_DURABILITY_QOS,
+                                                            0, 0, TRANSIENT_LOCAL_DURABILITY_QOS,
                                                             4, 2000,
                                                             KEEP_LAST_HISTORY_QOS, 172,
                                                             389, 102, 20);
@@ -1572,7 +1595,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should set writer durability service default if not present in param list
     DiscoveredWriterData writer_data_out = Factory::writer_data(
-                                                                NULL, NULL, PERSISTENT_DURABILITY_QOS,
+                                                                0, 0, PERSISTENT_DURABILITY_QOS,
                                                                 4, 2000,
                                                                 KEEP_LAST_HISTORY_QOS, 172,
                                                                 389, 102, 20);
@@ -1600,7 +1623,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode writer deadline
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
                                                             127, 35000);
 
@@ -1619,7 +1642,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode writer deadline
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1,
                                                             127, 35000);
     ParameterList param_list;
@@ -1658,7 +1681,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should enode writer latency budget
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
                                                             5, 25000);
     ParameterList param_list;
@@ -1676,7 +1699,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode writer latency budget
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0,
                                                             5, 25000);
     ParameterList param_list;
@@ -1712,7 +1735,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should encode writer liveliness
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
     ParameterList param_list;
@@ -1731,7 +1754,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode writer liveliness
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
     ParameterList param_list;
@@ -1775,7 +1798,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should encode writer reliability
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             RELIABLE_RELIABILITY_QOS, 8, 100);
@@ -1795,7 +1818,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode writer reliability
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             RELIABLE_RELIABILITY_QOS, 8, 100);
@@ -1840,7 +1863,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should encode writer lifespan
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             BEST_EFFORT_RELIABILITY_QOS, 0, 0,
@@ -1859,7 +1882,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode writer lifespan
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             BEST_EFFORT_RELIABILITY_QOS, 0, 0,
@@ -1901,7 +1924,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
@@ -1924,7 +1947,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
@@ -1945,7 +1968,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredWriterData writer_data_out = Factory::writer_data(
-                                                                NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                                0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                                 KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                                 AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                                 BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
@@ -1965,10 +1988,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode writer ownership
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             EXCLUSIVE_OWNERSHIP_QOS);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -1984,10 +2007,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode writer ownership
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             EXCLUSIVE_OWNERSHIP_QOS);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2019,10 +2042,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode writer ownership strength
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             29);
     ParameterList param_list;
@@ -2041,10 +2064,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   { // Should decode writer ownership strength
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             29);
     ParameterList param_list;
@@ -2078,10 +2101,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 #endif
   { // Should encode writer destination order
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
     ParameterList param_list;
@@ -2098,10 +2121,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode writer destination order
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
     ParameterList param_list;
@@ -2135,10 +2158,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode writer presentation
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             GROUP_PRESENTATION_QOS, true, true);
@@ -2158,10 +2181,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode writer presentation
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             GROUP_PRESENTATION_QOS, true, true);
@@ -2207,10 +2230,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode writer partition
     const char* part = "TESTPARTITION";
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             INSTANCE_PRESENTATION_QOS, false, false,
@@ -2230,10 +2253,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should decode writer partition
     const char* part = "TESTPARTITION";
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             INSTANCE_PRESENTATION_QOS, false, false,
@@ -2255,10 +2278,10 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should set writer partition to default if not present in param list
     const char* part = "TESTPARTITION";
     DiscoveredWriterData writer_data_out = Factory::writer_data(
-                                                                NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                                0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                                 KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                                 AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                                BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                                BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                                 SHARED_OWNERSHIP_QOS, 0,
                                                                 BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                                 INSTANCE_PRESENTATION_QOS, false, false,
@@ -2276,13 +2299,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode writer topic data
     const char* topic_data = "TEST TD";
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                             topic_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2302,13 +2325,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should decode writer topic data
     const char* topic_data = "TEST TD";
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                             topic_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2326,13 +2349,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should set writer presentation to default if not present in param list
     const char* topic_data = "TEST TD";
     DiscoveredWriterData writer_data_out = Factory::writer_data(
-                                                                NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                                0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                                 KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                                 AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                                BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                                BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                                 SHARED_OWNERSHIP_QOS, 0,
                                                                 BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                                INSTANCE_PRESENTATION_QOS, false, false, NULL,
+                                                                INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                                 topic_data, 7);
 
     ParameterList empty_param_list;
@@ -2346,13 +2369,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode writer group data
     const char* group_data = "TEST GD";
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                             group_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2372,13 +2395,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should decode writer group data
     const char* group_data = "TEST GD";
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                             group_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2396,13 +2419,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should set writer presentation to default if not present in param list
     const char* group_data = "TEST GD";
     DiscoveredWriterData writer_data_out = Factory::writer_data(
-                                                                NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                                0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                                 KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                                 AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                                BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                                BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                                 SHARED_OWNERSHIP_QOS, 0,
                                                                 BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                                INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+                                                                INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                                 group_data, 7);
 
     ParameterList empty_param_list;
@@ -2415,13 +2438,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should encode writer guid
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -2456,13 +2479,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                             locators, 2
                                                             );
     ParameterList param_list;
@@ -2485,13 +2508,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                             locators, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2515,14 +2538,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    237, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-                                                            NULL, 0, locators, 2);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
+                                                            0, 0, locators, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -2543,14 +2566,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredWriterData writer_data = Factory::writer_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             KEEP_LAST_HISTORY_QOS, 1, 1, 1, 1, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS, 0,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-                                                            NULL, 0, locators, 2);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
+                                                            0, 0, locators, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -2638,7 +2661,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader durability qos policy
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL,
+                                                            0, 0,
                                                             TRANSIENT_LOCAL_DURABILITY_QOS);
 
     ParameterList param_list;
@@ -2655,7 +2678,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode reader durability
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL,
+                                                            0, 0,
                                                             TRANSIENT_LOCAL_DURABILITY_QOS);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2672,7 +2695,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader deadline
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS,
+                                                            0, 0, VOLATILE_DURABILITY_QOS,
                                                             127, 35000);
 
     ParameterList param_list;
@@ -2690,7 +2713,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode reader deadline
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS,
+                                                            0, 0, VOLATILE_DURABILITY_QOS,
                                                             127, 35000);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2709,7 +2732,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should enode reader latency budget
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             5, 25000);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2726,7 +2749,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode reader latency budget
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0,
                                                             5, 25000);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2743,7 +2766,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader liveliness
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2761,7 +2784,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode reader liveliness
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             MANUAL_BY_PARTICIPANT_LIVELINESS_QOS, 17, 15000);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2782,7 +2805,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader reliability
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             RELIABLE_RELIABILITY_QOS, 8, 100);
     ParameterList param_list;
@@ -2801,7 +2824,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode reader reliability
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             RELIABLE_RELIABILITY_QOS, 8, 100);
     ParameterList param_list;
@@ -2825,7 +2848,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             BEST_EFFORT_RELIABILITY_QOS, 0, 0,
                                                             ud, ud_len);
@@ -2847,7 +2870,7 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     const char* ud = "USERDATA TEST";
     CORBA::ULong ud_len = (CORBA::ULong)strlen(ud) + 1;
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
                                                             BEST_EFFORT_RELIABILITY_QOS, 0, 0,
                                                             ud, ud_len);
@@ -2866,9 +2889,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader ownership
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             EXCLUSIVE_OWNERSHIP_QOS);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2884,9 +2907,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should decode reader ownership
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             EXCLUSIVE_OWNERSHIP_QOS);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -2903,9 +2926,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader destination order
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
     ParameterList param_list;
@@ -2922,9 +2945,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode reader destination order
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS);
     ParameterList param_list;
@@ -2942,9 +2965,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader presentation
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             GROUP_PRESENTATION_QOS, true, true);
@@ -2964,9 +2987,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should decode reader presentation
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             GROUP_PRESENTATION_QOS, true, true);
@@ -2990,9 +3013,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode reader partition
     const char* part = "TESTPARTITION";
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             INSTANCE_PRESENTATION_QOS, false, false,
@@ -3012,9 +3035,9 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should decode reader partition
     const char* part = "TESTPARTITION";
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
                                                             INSTANCE_PRESENTATION_QOS, false, false,
@@ -3036,12 +3059,12 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode reader topic data
     const char* topic_data = "TEST TD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                             topic_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -3061,12 +3084,12 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should decode reader topic data
     const char* topic_data = "TEST TD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0,
                                                             topic_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -3084,12 +3107,12 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should encode reader group data
     const char* group_data = "TEST GD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                             group_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -3109,12 +3132,12 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   { // Should decode reader group data
     const char* group_data = "TEST GD";
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0,
                                                             group_data, 7);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -3131,12 +3154,12 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
 
   { // Should encode reader guid
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -3171,12 +3194,12 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                             locators, 2
                                                             );
     ParameterList param_list;
@@ -3199,12 +3222,12 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    107, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
                                                             locators, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -3227,13 +3250,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    237, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-                                                            NULL, 0, locators, 2);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
+                                                            0, 0, locators, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -3258,13 +3281,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
                                    7734,
                                    237, 9, 8, 21);
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-                                                            NULL, 0, locators, 2);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
+                                                            0, 0, locators, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -3284,14 +3307,14 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     const char* params[] = { "17", "32" };
 
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-                                                            NULL, 0, NULL, 0,
-                                                            cf_topic_name, rel_topic_name, NULL, filter_expr, params, 2);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
+                                                            0, 0, 0, 0,
+                                                            cf_topic_name, rel_topic_name, 0, filter_expr, params, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
     type_info.minimal.typeid_with_size.typeobject_serialized_size = 0;
@@ -3313,13 +3336,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
     const char* params[] = { "17", "32" };
 
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-                                                            NULL, 0, NULL, 0,
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
+                                                            0, 0, 0, 0,
                                                             cf_topic_name, rel_topic_name, filter_name, filter_expr, params, 2);
     ParameterList param_list;
     OpenDDS::XTypes::TypeInformation type_info;
@@ -3350,13 +3373,13 @@ TEST(dds_DCPS_RTPS_ParameterListConverter, maintest)
   }
   { // Should encode/decode reader assoicated guid list properly
     DiscoveredReaderData reader_data = Factory::reader_data(
-                                                            NULL, NULL, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
+                                                            0, 0, VOLATILE_DURABILITY_QOS, 0, 0, 0, 0,
                                                             AUTOMATIC_LIVELINESS_QOS, 0, 0,
-                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, NULL, 0,
+                                                            BEST_EFFORT_RELIABILITY_QOS, 0, 0, 0, 0,
                                                             SHARED_OWNERSHIP_QOS,
                                                             BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS,
-                                                            INSTANCE_PRESENTATION_QOS, false, false, NULL, NULL, 0, NULL, 0,
-                                                            NULL, 0, NULL, 0);
+                                                            INSTANCE_PRESENTATION_QOS, false, false, 0, 0, 0, 0, 0,
+                                                            0, 0, 0, 0);
     OpenDDS::DCPS::GUID_t writer0, writer1;
     OpenDDS::DCPS::GuidBuilder gb0(writer0);
     OpenDDS::DCPS::GuidBuilder gb1(writer1);

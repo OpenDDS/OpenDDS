@@ -57,13 +57,6 @@ public:
   int start();
   void stop();
 
-  /// Useful as a simpler alternative to handle_dds_input
-  /// when dealing with UDP protocols with maximum packet size.
-  /// Behaves the same as handle_dds_input, but only makes use
-  /// of a single receive buffer and doesn't require message block
-  /// chains that need to be updated / maintained
-  int handle_simple_dds_input(ACE_HANDLE fd);
-
   int handle_dds_input(ACE_HANDLE fd);
 
   /// The subclass needs to provide the implementation
@@ -82,7 +75,8 @@ public:
   DSH& received_sample_header();
 
 protected:
-  explicit TransportReceiveStrategy(const TransportInst& config);
+  explicit TransportReceiveStrategy(const TransportInst& config,
+                                    size_t receive_buffers_count = RECEIVE_BUFFERS);
 
   /// Only our subclass knows how to do this.
   virtual ssize_t receive_bytes(iovec          iov[],
@@ -135,7 +129,7 @@ protected:
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;
 
-private:
+protected:
 
   /// Manage an index into the receive buffer array.
   size_t successor_index(size_t index) const;
@@ -160,7 +154,7 @@ private:
   ACE_Lock_Adapter<ACE_SYNCH_MUTEX> receive_lock_;
 
   /// Set of receive buffers in use.
-  ACE_Message_Block* receive_buffers_[RECEIVE_BUFFERS];
+  OPENDDS_VECTOR(ACE_Message_Block*) receive_buffers_;
 
   /// Current receive buffer index in use.
   size_t buffer_index_;

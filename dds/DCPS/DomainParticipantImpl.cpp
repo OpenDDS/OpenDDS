@@ -2361,7 +2361,7 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
 void
 DomainParticipantImpl::LivelinessTimer::remove_adjust()
 {
-  ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   recalculate_interval_ = true;
 }
@@ -2370,12 +2370,18 @@ void DomainParticipantImpl::LivelinessTimer::execute(const MonotonicTimePoint& n
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  scheduled_ = false;
-
   if (recalculate_interval_) {
-    interval_ = impl_.liveliness_check_interval(kind_);
-    recalculate_interval_ = false;
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    TimeDuration interval;
+    while (recalculate_interval_) {
+      recalculate_interval_ = false;
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
+      interval = impl_.liveliness_check_interval(kind_);
+    }
+    interval_ = interval;
   }
+
+  scheduled_ = false;
 
   if (!interval_.is_max()) {
     dispatch(now);
@@ -2392,18 +2398,18 @@ DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(Domain
 void
 DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const MonotonicTimePoint& /* tv */)
 {
-  impl_.signal_liveliness (kind_);
+  impl_.signal_liveliness(kind_);
 }
 
 DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(DomainParticipantImpl& impl)
-  : LivelinessTimer (impl, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS)
+  : LivelinessTimer(impl, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS)
 { }
 
 void
 DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const MonotonicTimePoint& tv)
 {
   if (impl_.participant_liveliness_activity_after (tv - interval())) {
-    impl_.signal_liveliness (kind_);
+    impl_.signal_liveliness(kind_);
   }
 }
 
@@ -2412,14 +2418,13 @@ DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind ki
 {
   TimeDuration tv(TimeDuration::max_value);
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    tao_mon,
-                    this->publishers_protector_,
-                    tv);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   tao_mon,
+                   publishers_protector_,
+                   tv);
 
-  for (PublisherSet::iterator it(publishers_.begin());
-       it != publishers_.end(); ++it) {
-    tv = std::min (tv, it->svt_->liveliness_check_interval(kind));
+  for (PublisherSet::iterator it = publishers_.begin(); it != publishers_.end(); ++it) {
+    tv = std::min(tv, it->svt_->liveliness_check_interval(kind));
   }
 
   return tv;
