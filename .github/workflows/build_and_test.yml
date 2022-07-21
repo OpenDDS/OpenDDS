@@ -4156,6 +4156,7 @@ jobs:
         . setenv.sh
         cd tests/unit-tests
         export ACE_RUN_VALGRIND_CMD="valgrind --leak-check=yes --show-leak-kinds=definite --errors-for-leak-kinds=definite --num-callers=50 --error-exitcode=86"
+        export ACE_RUNTEST_DELAY 10
         ./run_test.pl
 
   build_u20_p1_j8_FM-1f:
