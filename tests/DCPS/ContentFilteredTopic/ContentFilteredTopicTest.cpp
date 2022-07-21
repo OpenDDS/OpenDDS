@@ -266,10 +266,8 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  ReturnCode_t ret = sub->delete_datareader(dr);
-  //  if (sub->delete_datareader(dr) != RETCODE_OK) {
-  if (ret != RETCODE_OK) {
-    cout << "ERROR: delete_datareader: " << retcode_to_string(ret) << endl;
+  if (sub->delete_datareader(dr) != RETCODE_OK) {
+    cout << "ERROR: delete_datareader" << endl;
     return false;
   }
   dr = DataReader::_nil();

@@ -16,7 +16,7 @@ my $DCPScfg = "dcps.ini";
 unlink $dcpsrepo_ior;
 
 my $is_rtps_disc = 0;
-my $opts = '-DCPSDebugLevel 1';
+my $opts = '';
 while (scalar @ARGV) {
   if ($ARGV[0] =~ /^-d/i) {
     shift;
