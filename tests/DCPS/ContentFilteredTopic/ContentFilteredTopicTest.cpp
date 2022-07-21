@@ -4,7 +4,6 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
-#include "dds/DCPS/DCPS_Utils.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
