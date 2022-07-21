@@ -146,6 +146,6 @@ TEST(dds_DCPS_EventDispatcher, TestEventDispatcher)
   OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<TestEventDispatcher>();
   EXPECT_EQ(dispatcher->dispatch(test_event), false);
   EXPECT_EQ(dispatcher->schedule(test_event, OpenDDS::DCPS::MonotonicTimePoint::now()), -1);
-  EXPECT_EQ(dispatcher->cancel(-1), 0);
+  EXPECT_EQ(dispatcher->cancel(-1), 0u);
   dispatcher->shutdown();
 }
