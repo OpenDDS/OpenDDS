@@ -4100,8 +4100,8 @@ jobs:
       run: |
         tar xvJf openssl3_u20.tar.xz
         rm -f openssl3_u20.tar.xz
-    - name: install xerces
-      run: sudo apt-get -y install libxerces-c-dev
+    - name: install xerces and valgrind
+      run: sudo apt-get -y install libxerces-c-dev valgrind
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
