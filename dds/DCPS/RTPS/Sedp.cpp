@@ -4440,7 +4440,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
     const GUID_t guid = make_part_guid(sample.header_.publication_id_);
     sedp_.spdp_.process_participant_ice(data, pdata, guid);
-    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
+    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::MonotonicTimePoint::now(), DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 
 #endif
   }

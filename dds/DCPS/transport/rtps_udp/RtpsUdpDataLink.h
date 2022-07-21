@@ -296,7 +296,7 @@ private:
 #endif
   RemoteInfoMap locators_;
 
-  void update_last_recv_addr(const RepoId& src, const NetworkAddress& addr);
+  void update_last_recv_addr(const RepoId& src, const NetworkAddress& addr, const MonotonicTimePoint& now = MonotonicTimePoint::now());
 
   mutable LocatorCache locator_cache_;
   mutable BundlingCache bundling_cache_;

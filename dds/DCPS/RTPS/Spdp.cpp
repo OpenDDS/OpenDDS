@@ -678,12 +678,11 @@ bool ip_in_AgentInfo(const ACE_INET_Addr& from, const ParameterList& plist)
 void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
+                              const DCPS::MonotonicTimePoint& now,
                               const DCPS::SequenceNumber& seq,
                               const ACE_INET_Addr& from,
                               bool from_sedp)
 {
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
-
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
 
@@ -1016,10 +1015,11 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   ParticipantData_t pdata = ParticipantData_t();
 
   pdata.participantProxy.domainId = domain_;
-  pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
+  pdata.discoveredAt = now.to_monotonic_time();
 
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
@@ -1078,7 +1078,7 @@ Spdp::data_received(const DataSubmessage& data,
   guard.release();
 #endif
 
-  handle_participant_data(msg_id, pdata, to_opendds_seqnum(data.writerSN), from, false);
+  handle_participant_data(msg_id, pdata, now, to_opendds_seqnum(data.writerSN), from, false);
 }
 
 void
