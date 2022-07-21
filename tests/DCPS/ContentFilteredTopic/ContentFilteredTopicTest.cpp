@@ -4,6 +4,7 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/DCPS_Utils.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -265,8 +266,10 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  if (sub->delete_datareader(dr) != RETCODE_OK) {
-    cout << "ERROR: delete_datareader" << endl;
+  ReturnCode_t ret = sub->delete_datareader(dr);
+  //  if (sub->delete_datareader(dr) != RETCODE_OK) {
+  if (ret != RETCODE_OK) {
+    cout << "ERROR: delete_datareader: " << retcode_to_string(ret) << endl;
     return false;
   }
   dr = DataReader::_nil();

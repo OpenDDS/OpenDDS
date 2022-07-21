@@ -303,18 +303,22 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
 
-    DDS::TopicDescription_var td = a_datareader->get_topicdescription();
-    CORBA::String_var topic_name = td->get_name();
-    const std::pair<DataReaderMap::iterator, DataReaderMap::iterator> range =
-      datareader_map_.equal_range(topic_name.in());
+    //DDS::TopicDescription_var td = a_datareader->get_topicdescription();
+    //CORBA::String_var topic_name = td->get_name();
+    //const std::pair<DataReaderMap::iterator, DataReaderMap::iterator> range =
+    //  datareader_map_.equal_range(topic_name.in());
     DataReaderMap::iterator it;
-    for (it = range.first; it != range.second; ++it) {
+    //for (it = range.first; it != range.second; ++it) {
+    for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
       if (it->second == dr_servant) {
         break;
       }
     }
 
-    if (it == range.second) {
+    //if (it == range.second) {
+    if (it == datareader_map_.end()) {
+      DDS::TopicDescription_var td = a_datareader->get_topicdescription();
+      CORBA::String_var topic_name = td->get_name();
 #ifndef OPENDDS_NO_MULTI_TOPIC
       MultitopicReaderMap::iterator mt_iter = multitopic_reader_map_.find(topic_name.in());
       if (mt_iter != multitopic_reader_map_.end()) {
