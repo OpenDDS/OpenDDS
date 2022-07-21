@@ -344,7 +344,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
 
-      shut_down_ = true;
+      set_shut_down(true);
 
       dp_factory_servant_.reset();
 
@@ -405,7 +405,8 @@ Service_Participant::get_domain_participant_factory(int &argc,
   if (!dp_factory_servant_) {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
-    shut_down_ = false;
+    set_shut_down(false);
+
     if (!dp_factory_servant_) {
       // This used to be a call to ORB_init().  Since the ORB is now managed
       // by InfoRepoDiscovery, just save the -ORB* args for later use.
