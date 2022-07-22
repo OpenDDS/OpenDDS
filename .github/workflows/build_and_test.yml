@@ -4084,6 +4084,81 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
+  valgrind_u20_p1_sec:
+
+    runs-on: ubuntu-20.04
+
+    needs: build_u20_p1_sec
+
+    steps:
+    - name: download openssl artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: openssl3_u20_artifact
+    - name: extract openssl artifact
+      shell: bash
+      run: |
+        tar xvJf openssl3_u20.tar.xz
+        rm -f openssl3_u20.tar.xz
+    - name: install xerces and valgrind
+      run: sudo apt-get -y install libxerces-c-dev valgrind
+    - name: checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ACE_TAO_u20_p1_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u20_p1.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build_u20_p1_sec_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u20_p1_sec.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: run unit tests with valgrind
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        cd tests/unit-tests
+        export ACE_RUN_VALGRIND_CMD="valgrind --leak-check=yes --show-leak-kinds=definite --errors-for-leak-kinds=definite --num-callers=50 --error-exitcode=86"
+        export ACE_RUNTEST_DELAY=10
+        ./run_test.pl
+
   build_u20_p1_j8_FM-1f:
 
     runs-on: ubuntu-20.04
