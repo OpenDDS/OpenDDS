@@ -617,6 +617,8 @@ public:
         return 1;
       }
     }
+    OSSL_PARAM_free(params);
+    params = 0;
 
     if ((param_bld = OSSL_PARAM_BLD_new()) == 0) {
       OPENDDS_SSL_LOG_ERR("OSSL_PARAM_BLD_new failed");
