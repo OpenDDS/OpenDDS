@@ -28,6 +28,18 @@ public:
   {
     return make_rch<ShmemInst>(name);
   }
+
+  void first_activity()
+  {
+    //FUTURE: when we're ready, add a ShmemInst to the default config, like so:
+    /*
+      TransportInst_rch default_inst =
+      registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX + "0200_SHMEM",
+      SHMEM_NAME);
+      registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
+      ->sorted_insert(default_inst);
+    */
+  }
 };
 
 int
@@ -37,19 +49,10 @@ ShmemLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TransportRegistry* registry = TheTransportRegistry;
-  if (!registry->register_type(make_rch<ShmemType>())) {
+  if (!TheTransportRegistry->register_type(make_rch<ShmemType>())) {
     return 0;
   }
 
-  //FUTURE: when we're ready, add a ShmemInst to the default config, like so:
-  /*
-  TransportInst_rch default_inst =
-    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX + "0200_SHMEM",
-                          SHMEM_NAME, false);
-  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
-    ->sorted_insert(default_inst);
-  */
   initialized = true;
 
   return 0;

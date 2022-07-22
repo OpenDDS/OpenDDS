@@ -28,6 +28,30 @@ public:
   {
     return make_rch<MulticastInst>(name);
   }
+
+  void first_activity()
+  {
+    TransportRegistry* registry = TheTransportRegistry;
+    TransportConfig_rch cfg =
+      registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME);
+
+    TransportInst_rch default_unrel =
+      registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
+                            + std::string("0410_MCAST_UNRELIABLE"),
+                            MULTICAST_NAME);
+    MulticastInst* mi = dynamic_cast<MulticastInst*>(default_unrel.in());
+    if (!mi) {
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) MulticastLoader::init:")
+                 ACE_TEXT(" failed to obtain MulticastInst.\n")));
+    }
+    mi->reliable_ = false;
+    cfg->sorted_insert(default_unrel);
+
+    TransportInst_rch default_rel =
+      registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
+                            + std::string("0420_MCAST_RELIABLE"), MULTICAST_NAME);
+    cfg->sorted_insert(default_rel);
+  }
 };
 
 int
@@ -37,30 +61,9 @@ MulticastLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
   if (initialized) return 0;  // already initialized
 
-  TransportRegistry* registry = TheTransportRegistry;
-  if (!registry->register_type(make_rch<MulticastType>())) {
+  if (!TheTransportRegistry->register_type(make_rch<MulticastType>())) {
     return 0;
   }
-
-  TransportConfig_rch cfg =
-    registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME);
-
-  TransportInst_rch default_unrel =
-    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
-                          + std::string("0410_MCAST_UNRELIABLE"),
-                          MULTICAST_NAME, false);
-  MulticastInst* mi = dynamic_cast<MulticastInst*>(default_unrel.in());
-  if (!mi) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) MulticastLoader::init:")
-      ACE_TEXT(" failed to obtain MulticastInst.\n")), -1);
-  }
-  mi->reliable_ = false;
-  cfg->sorted_insert(default_unrel);
-
-  TransportInst_rch default_rel =
-    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX
-                          + std::string("0420_MCAST_RELIABLE"), MULTICAST_NAME, false);
-  cfg->sorted_insert(default_rel);
 
   initialized = true;
 

@@ -17,7 +17,7 @@
 #include "dds/DCPS/EntityImpl.h"
 #include "dds/DCPS/SafetyProfileStreams.h"
 #include <dds/DdsDcpsInfrastructureC.h>
-
+#include "dds/DCPS/debug.h"
 
 #include "ace/Singleton.h"
 #include "ace/OS_NS_strings.h"
@@ -71,20 +71,48 @@ const OPENDDS_STRING TransportRegistry::CUSTOM_ADD_DOMAIN_TO_PORT = "add_domain_
 TransportRegistry::TransportRegistry()
   : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
   , released_(false)
-  , load_complete_(lock_)
+  , dynamic_loaded_(false)
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
+}
 
-  lib_directive_map_["tcp"]       = "dynamic OpenDDS_Tcp Service_Object * OpenDDS_Tcp:_make_TcpLoader()";
-  lib_directive_map_["udp"]       = "dynamic OpenDDS_Udp Service_Object * OpenDDS_Udp:_make_UdpLoader()";
-  lib_directive_map_["multicast"] = "dynamic OpenDDS_Multicast Service_Object * OpenDDS_Multicast:_make_MulticastLoader()";
-  lib_directive_map_["rtps_udp"]  = "dynamic OpenDDS_Rtps_Udp Service_Object * OpenDDS_Rtps_Udp:_make_RtpsUdpLoader()";
-  lib_directive_map_["shmem"]     = "dynamic OpenDDS_Shmem Service_Object * OpenDDS_Shmem:_make_ShmemLoader()";
+#if !defined(ACE_AS_STATIC_LIBS)
+namespace {
+void load_dynamic_library(const char* directive)
+{
+  const ACE_TString d = ACE_TEXT_CHAR_TO_TCHAR(directive);
+  if (ACE_Service_Config::process_directive(d.c_str()) != 0) {
+    if (log_level >= LogLevel::Info) {
+      ACE_DEBUG((LM_INFO,
+                 ACE_TEXT("(%P|%t) INFO: load_dynamic_library: ")
+                 ACE_TEXT("Could not load %C\n"),
+                 directive));
+    }
+  }
+}
+}
+#endif
 
-  // load_transport_lib() is used for discovery as well:
-  lib_directive_map_["rtps_discovery"] = lib_directive_map_["rtps_udp"];
-  lib_directive_map_["repository"] = "dynamic OpenDDS_InfoRepoDiscovery Service_Object * OpenDDS_InfoRepoDiscovery:_make_IRDiscoveryLoader()";
+void
+TransportRegistry::load_dynamic_libraries() const
+{
+#if !defined(ACE_AS_STATIC_LIBS)
+  {
+    GuardType guard(lock_);
+    if (dynamic_loaded_) {
+      return;
+    }
+    dynamic_loaded_ = true;
+  }
+
+  load_dynamic_library("dynamic OpenDDS_Tcp Service_Object * OpenDDS_Tcp:_make_TcpLoader()");
+  load_dynamic_library("dynamic OpenDDS_Udp Service_Object * OpenDDS_Udp:_make_UdpLoader()");
+  load_dynamic_library("dynamic OpenDDS_Multicast Service_Object * OpenDDS_Multicast:_make_MulticastLoader()");
+  load_dynamic_library("dynamic OpenDDS_Rtps_Udp Service_Object * OpenDDS_Rtps_Udp:_make_RtpsUdpLoader()");
+  load_dynamic_library("dynamic OpenDDS_Shmem Service_Object * OpenDDS_Shmem:_make_ShmemLoader()");
+  load_dynamic_library("dynamic OpenDDS_InfoRepoDiscovery Service_Object * OpenDDS_InfoRepoDiscovery:_make_IRDiscoveryLoader()");
+#endif
 }
 
 int
@@ -479,68 +507,19 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
   return 0;
 }
 
-void
-TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type,
-                                      bool wait)
-{
-  GuardType guard(lock_);
-  if (!load_transport_lib_i(transport_type, wait)) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_lib: ")
-               ACE_TEXT("could not load transport_type=%C.\n"),
-               transport_type.c_str()));
-  }
-}
-
-TransportType_rch
-TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type,
-                                        bool wait)
-{
-  TransportType_rch type;
-  if (find(type_map_, transport_type, type) == 0) {
-    return type;
-  }
-
-#if !defined(ACE_AS_STATIC_LIBS)
-  // Attempt to load it.
-  LibDirectiveMap::iterator lib_iter = lib_directive_map_.find(transport_type);
-  if (lib_iter == lib_directive_map_.end()) {
-    ACE_ERROR((LM_ERROR,
-               ACE_TEXT("(%P|%t) TransportRegistry::load_transport_lib_i: ")
-               ACE_TEXT("no directive for transport_type=%C.\n"),
-               transport_type.c_str()));
-    return type;
-  }
-
-  ACE_TString directive = ACE_TEXT_CHAR_TO_TCHAR(lib_iter->second.c_str());
-  // Release the lock because the transport will call back into the registry.
-  ACE_Reverse_Lock<LockType> rev_lock(lock_);
-  {
-    ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
-    ACE_Service_Config::process_directive(directive.c_str());
-  }
-#endif
-
-  if (wait) {
-    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-    while (find(type_map_, transport_type, type) != 0) {
-      load_complete_.wait(thread_status_manager);
-    }
-    return type;
-  }
-
-  find(type_map_, transport_type, type);
-  return type;
-}
-
 TransportInst_rch
 TransportRegistry::create_inst(const OPENDDS_STRING& name,
-                               const OPENDDS_STRING& transport_type,
-                               bool wait)
+                               const OPENDDS_STRING& transport_type)
 {
+  load_dynamic_libraries();
+
   GuardType guard(lock_);
 
-  TransportType_rch type = load_transport_lib_i(transport_type, wait);
+  first_activity_i(transport_type);
+
+  TransportType_rch type;
+  find(type_map_, transport_type, type);
+
   if (!type) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
@@ -565,6 +544,8 @@ TransportRegistry::create_inst(const OPENDDS_STRING& name,
 TransportInst_rch
 TransportRegistry::get_inst(const OPENDDS_STRING& name) const
 {
+  load_dynamic_libraries();
+
   GuardType guard(lock_);
   InstMap::const_iterator found = inst_map_.find(name);
   if (found != inst_map_.end()) {
@@ -712,6 +693,7 @@ TransportConfig_rch
 TransportRegistry::fix_empty_default()
 {
   DBG_ENTRY_LVL("TransportRegistry", "fix_empty_default", 6);
+  load_dynamic_libraries();
   GuardType guard(lock_);
   if (global_config_.is_nil()
       || !global_config_->instances_.empty()
@@ -719,7 +701,7 @@ TransportRegistry::fix_empty_default()
     return global_config_;
   }
   TransportConfig_rch global_config = global_config_;
-  load_transport_lib_i(FALLBACK_TYPE, true);
+  first_activity_i(FALLBACK_TYPE);
   return global_config;
 }
 
@@ -736,12 +718,8 @@ TransportRegistry::register_type(const TransportType_rch& type)
   }
 
   type_map_[name] = type;
+  first_activity_[name] = type;
 
-  if (name == "rtps_udp") {
-    type_map_["rtps_discovery"] = type;
-  }
-
-  load_complete_.notify_all();
   return true;
 }
 
@@ -1178,6 +1156,22 @@ TransportRegistry::get_transport_info(const ACE_TString& config_name, TransportE
 bool TransportRegistry::has_transports() const
 {
   return !transports_.empty();
+}
+
+void TransportRegistry::first_activity_i(const OPENDDS_STRING& name)
+{
+  TypeMap::iterator pos = first_activity_.find(name);
+  if (pos == first_activity_.end()) {
+    return;
+  }
+
+  TransportType_rch type = pos->second;
+  first_activity_.erase(pos);
+
+  ACE_Reverse_Lock<LockType> rev_lock(lock_);
+  ACE_Guard<ACE_Reverse_Lock<LockType> > rev_guard(rev_lock);
+
+  type->first_activity();
 }
 
 }

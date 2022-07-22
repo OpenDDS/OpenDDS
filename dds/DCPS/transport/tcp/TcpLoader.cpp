@@ -43,6 +43,16 @@ public:
   {
     return make_rch<TcpInst>(name);
   }
+
+  void first_activity()
+  {
+    TransportRegistry* registry = TheTransportRegistry;
+    TransportInst_rch default_inst =
+      registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
+                            std::string("0500_TCP"), TCP_NAME);
+    registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
+      ->sorted_insert(default_inst);
+  }
 };
 
 int
@@ -56,16 +66,9 @@ TcpLoader::init(int, ACE_TCHAR*[])
   if (initialized)
     return 0;
 
-  TransportRegistry* registry = TheTransportRegistry;
-  if (!registry->register_type(make_rch<TcpType>())) {
+  if (!TheTransportRegistry->register_type(make_rch<TcpType>())) {
     return 0;
   }
-
-  TransportInst_rch default_inst =
-    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
-                          std::string("0500_TCP"), TCP_NAME, false);
-  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
-    ->sorted_insert(default_inst);
 
   initialized = true;
   return 0;

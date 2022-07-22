@@ -57,9 +57,10 @@ public:
   /// framework.
   void release();
 
+  void load_dynamic_libraries() const;
+
   TransportInst_rch create_inst(const OPENDDS_STRING& name,
-                                const OPENDDS_STRING& transport_type,
-                                bool wait = true);
+                                const OPENDDS_STRING& transport_type);
   TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
 
   /// Removing a TransportInst from the registry shuts down the underlying
@@ -115,11 +116,6 @@ public:
   /// TransportRegistry to attempt to load a fallback option.
   TransportConfig_rch fix_empty_default();
 
-  /// For internal use by OpenDDS DCPS layer:
-  /// Dynamically load the library for the supplied transport type.
-  void load_transport_lib(const OPENDDS_STRING& transport_type,
-                          bool wait = true);
-
   bool released() const;
 
   bool config_has_transport_template(const ACE_TString& config_name) const;
@@ -144,7 +140,6 @@ private:
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportType_rch) TypeMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportConfig_rch) ConfigMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, TransportInst_rch) InstMap;
-  typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) LibDirectiveMap;
   typedef OPENDDS_MAP(DDS::DomainId_t, TransportConfig_rch) DomainConfigMap;
   typedef OPENDDS_MAP(OPENDDS_STRING, OPENDDS_STRING) ConfigTemplateToInstanceMap;
 
@@ -152,18 +147,17 @@ private:
   typedef ACE_Guard<LockType> GuardType;
 
   TypeMap type_map_;
+  TypeMap first_activity_;
   ConfigMap config_map_;
   InstMap inst_map_;
-  LibDirectiveMap lib_directive_map_;
   DomainConfigMap domain_default_config_map_;
   ConfigTemplateToInstanceMap config_template_to_instance_map_;
 
   TransportConfig_rch global_config_;
   bool released_;
+  mutable bool dynamic_loaded_;
 
   mutable LockType lock_;
-  // This condition is signaled when a load is completed.
-  mutable ConditionVariable<LockType> load_complete_;
 
   // transport template support
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
@@ -177,9 +171,6 @@ private:
     ValueMap customizations;
     ValueMap transport_info;
   };
-
-  TransportType_rch load_transport_lib_i(const OPENDDS_STRING& transport_type,
-                                         bool wait);
 
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 
@@ -201,6 +192,8 @@ private:
   bool get_transport_info(const ACE_TString& config_name, TransportEntry& inst);
 
   bool has_transports() const;
+
+  void first_activity_i(const OPENDDS_STRING& name);
 };
 
 } // namespace DCPS

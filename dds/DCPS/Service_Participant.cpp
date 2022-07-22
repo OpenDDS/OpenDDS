@@ -1087,11 +1087,8 @@ Service_Participant::set_repo_ior(const char* ior,
 
   const OPENDDS_STRING repo_type = ACE_TEXT_ALWAYS_CHAR(REPO_SECTION_NAME);
   if (!discovery_types_.count(repo_type)) {
-    // Re-use a transport registry function to attempt a dynamic load of the
-    // library that implements the 'repo_type' (InfoRepoDiscovery)
-    TheTransportRegistry->load_transport_lib(repo_type);
+    TheTransportRegistry->load_dynamic_libraries();
   }
-
   if (discovery_types_.count(repo_type)) {
     ACE_Configuration_Heap cf;
     cf.open();
@@ -2441,8 +2438,7 @@ Service_Participant::load_discovery_configuration(ACE_Configuration_Heap& cf,
       this->discovery_types_.find(sect_name);
 
     if (iter == this->discovery_types_.end()) {
-      // See if we can dynamically load the required libraries
-      TheTransportRegistry->load_transport_lib(sect_name);
+      TheTransportRegistry->load_dynamic_libraries();
       iter = this->discovery_types_.find(sect_name);
     }
 

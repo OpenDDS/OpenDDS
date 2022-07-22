@@ -28,6 +28,22 @@ public:
   {
     return make_rch<RtpsUdpInst>(name);
   }
+
+  void first_activity()
+  {
+    // Don't create a default for RTPS.  At least for the initial implementation,
+    // the user needs to explicitly configure it...
+#ifdef OPENDDS_SAFETY_PROFILE
+    TransportRegistry* registry = TheTransportRegistry;
+    // ...except for Safety Profile where RTPS is the only option.
+    TransportInst_rch default_inst =
+      registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
+                            OPENDDS_STRING("0600_RTPS_UDP"),
+                            RTPS_UDP_NAME);
+    registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
+      ->sorted_insert(default_inst);
+#endif
+  }
 };
 
 int
@@ -39,23 +55,8 @@ RtpsUdpLoader::init(int /*argc*/, ACE_TCHAR* /*argv*/[])
 
 void RtpsUdpLoader::load()
 {
-  TransportRegistry* registry = TheTransportRegistry;
   TransportType_rch type = make_rch<RtpsUdpType>();
-  if (!registry->register_type(type)) {
-    return;
-  }
-
-  // Don't create a default for RTPS.  At least for the initial implementation,
-  // the user needs to explicitly configure it...
-#ifdef OPENDDS_SAFETY_PROFILE
-  // ...except for Safety Profile where RTPS is the only option.
-  TransportInst_rch default_inst =
-    registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
-                          OPENDDS_STRING("0600_RTPS_UDP"),
-                          RTPS_UDP_NAME, false);
-  registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
-    ->sorted_insert(default_inst);
-#endif
+  TheTransportRegistry->register_type(type);
 }
 
 ACE_FACTORY_DEFINE(OpenDDS_Rtps_Udp, RtpsUdpLoader);

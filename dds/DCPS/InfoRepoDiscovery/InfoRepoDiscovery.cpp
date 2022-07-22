@@ -1051,20 +1051,8 @@ InfoRepoDiscovery::OrbRunner::svc()
   return 0;
 }
 
-class InfoRepoType : public TransportType {
-public:
-  const char* name() { return "repository"; }
-
-  TransportInst_rch new_inst(const std::string&)
-  {
-    return TransportInst_rch();
-  }
-};
-
 InfoRepoDiscovery::StaticInitializer::StaticInitializer()
 {
-  TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(make_rch<InfoRepoType>());
   TheServiceParticipant->register_discovery_type("repository", new Config);
 }
 

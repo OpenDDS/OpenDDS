@@ -41,6 +41,8 @@ public:
 
   virtual TransportInst_rch new_inst(const OPENDDS_STRING& name) = 0;
 
+  virtual void first_activity() = 0;
+
 protected:
 
   TransportType();
