@@ -372,16 +372,7 @@ ACE_INLINE
 bool
 Service_Participant::is_shut_down() const
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(shut_down_lock_);
-  return shut_down_;
-}
-
-ACE_INLINE
-void
-Service_Participant::set_shut_down(bool shut_down)
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(shut_down_lock_);
-  shut_down_ = shut_down;
+  return shut_down_.value();
 }
 
 ACE_INLINE

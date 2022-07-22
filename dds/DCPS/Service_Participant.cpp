@@ -310,7 +310,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
   }
 
-  if (is_shut_down()) {
+  if (shut_down_.value()) {
     return DDS::RETCODE_ALREADY_DELETED;
   }
 
@@ -344,7 +344,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
 
-      set_shut_down(true);
+      shut_down_ = true;
 
       dp_factory_servant_.reset();
 
@@ -405,7 +405,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
   if (!dp_factory_servant_) {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
-    set_shut_down(false);
+    shut_down_ = false;
 
     if (!dp_factory_servant_) {
       // This used to be a call to ORB_init().  Since the ORB is now managed

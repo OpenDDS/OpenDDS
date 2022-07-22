@@ -474,9 +474,6 @@ public:
 
 private:
 
-  /// Track shut down state
-  void set_shut_down(bool shut_down);
-
   /// Initialize default qos.
   void initialize();
 
@@ -762,10 +759,7 @@ private:
   bool monitor_enabled_;
 
   /// Used to track state of service participant
-  bool shut_down_;
-
-  /// Protects the internal shutdown state tracking
-  mutable ACE_Thread_Mutex shut_down_lock_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> shut_down_;
 
   RcHandle<ShutdownListener> shutdown_listener_;
 
