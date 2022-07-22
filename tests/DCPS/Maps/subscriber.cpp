@@ -1,5 +1,5 @@
 // -*- C++ -*-
-#include "HelloWorldTypeSupportImpl.h"
+#include "mapsTypeSupportImpl.h"
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 
@@ -23,16 +23,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DomainParticipantFactory_var domain_participant_factory = TheParticipantFactoryWithArgs(argc, argv);
   DDS::DomainParticipant_var participant =
-    domain_participant_factory->create_participant(HelloWorld::HELLO_WORLD_DOMAIN,
+    domain_participant_factory->create_participant(MapsTest::MAPS_DOMAIN,
                                                    PARTICIPANT_QOS_DEFAULT,
                                                    0,
                                                    0);
 
-  HelloWorld::MessageTypeSupport_var type_support = new HelloWorld::MessageTypeSupportImpl;
+  MapsTest::MessageTypeSupport_var type_support = new MapsTest::MessageTypeSupportImpl;
   type_support->register_type(participant, "");
   CORBA::String_var type_name = type_support->get_type_name ();
 
-  DDS::Topic_var topic = participant->create_topic(HelloWorld::MESSAGE_TOPIC_NAME,
+  DDS::Topic_var topic = participant->create_topic(MapsTest::MESSAGE_TOPIC_NAME,
                                                    type_name,
                                                    TOPIC_QOS_DEFAULT,
                                                    0,
@@ -51,10 +51,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
                                                                   0,
                                                                   0);
 
-  HelloWorld::MessageDataReader_var message_data_reader = HelloWorld::MessageDataReader::_narrow(data_reader);
+  MapsTest::MessageDataReader_var message_data_reader = MapsTest::MessageDataReader::_narrow(data_reader);
 
   Utils::wait_match(data_reader, 1);
-  distributed_condition_set->post(HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_READY);
+  distributed_condition_set->post(MapsTest::SUBSCRIBER, MapsTest::SUBSCRIBER_READY);
 
   DDS::ReadCondition_var read_condition =
     data_reader->create_readcondition(DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
@@ -68,14 +68,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     const DDS::Duration_t timeout = { 1, 0 };
     wait_set->wait(conditions, timeout);
 
-    HelloWorld::MessageSeq messages;
+    MapsTest::MessageSeq messages;
     DDS::SampleInfoSeq infos;
     message_data_reader->take(messages, infos, DDS::LENGTH_UNLIMITED,
                               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
     for (unsigned int idx = 0; idx != messages.length(); ++idx) {
       if (infos[idx].valid_data) {
-        ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].value.in()));
-        distributed_condition_set->post(HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_DONE);
+        ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].intIntMap[idx]));
+        distributed_condition_set->post(MapsTest::SUBSCRIBER, MapsTest::SUBSCRIBER_DONE);
         done = true;
       }
     }

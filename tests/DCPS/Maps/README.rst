@@ -1,5 +1,5 @@
 ###############
-HelloWorld Test
+Maps Test
 ###############
 
 This test creates a publisher process and subscriber process.

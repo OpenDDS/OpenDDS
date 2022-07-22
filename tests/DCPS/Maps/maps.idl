@@ -5,9 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-module HelloWorld {
+module MapsTest {
 
-  const long HELLO_WORLD_DOMAIN = 111;
+  const long MAPS_DOMAIN = 111;
 
   @topic
   struct Message {

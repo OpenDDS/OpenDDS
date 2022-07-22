@@ -1,4 +1,3 @@
-# `explicit_ints` Test
+# `maps` Test
 
-This test checks that IDL4 explicitly-named integer types like `int8` or
-`uint64` work in various situations.
+This test checks that IDL4 maps work
