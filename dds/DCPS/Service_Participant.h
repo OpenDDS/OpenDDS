@@ -759,7 +759,7 @@ private:
   bool monitor_enabled_;
 
   /// Used to track state of service participant
-  bool shut_down_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> shut_down_;
 
   RcHandle<ShutdownListener> shutdown_listener_;
 
