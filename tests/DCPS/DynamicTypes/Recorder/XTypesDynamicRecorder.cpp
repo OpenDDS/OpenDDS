@@ -354,6 +354,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
                                        DEFAULT_STATUS_MASK);
 
       if (!topic) {
+        ws->detach_condition(gc);
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_topic failed!\n"));
         }
@@ -382,6 +383,7 @@ int run_test(int argc, ACE_TCHAR* argv[])
                                  recorder_listener);
 
       if (!recorder.in()) {
+        ws->detach_condition(gc);
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): create_recorder failed!\n"));
         }
@@ -393,6 +395,8 @@ int run_test(int argc, ACE_TCHAR* argv[])
       ret = ws->wait(conditions, timeout);
 
       ret_val = recorder_listener->ret_val_;
+      ws->detach_condition(gc);
+
       if (ret != DDS::RETCODE_OK) {
         if (log_level >= LogLevel::Error) {
           ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): wait failed!\n"));

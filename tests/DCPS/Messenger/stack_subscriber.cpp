@@ -106,6 +106,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     DDS::ConditionSeq conditions;
     ret = ws->wait(conditions, timeout);
+    ws->detach_condition(gc);
 
     // Clean-up!
     participant->delete_contained_entities();

@@ -81,6 +81,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  wait_set->detach_condition(read_condition);
+
   participant->delete_contained_entities();
   domain_participant_factory->delete_participant(participant);
   TheServiceParticipant->shutdown();
