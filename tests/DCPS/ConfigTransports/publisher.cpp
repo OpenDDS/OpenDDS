@@ -60,7 +60,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         if (!configopt.negotiated_str.empty()) {
           TEST_ASSERT(assert_negotiated(configopt, w.writer_));
         }
-        
+
       } else if (configopt.collocation_str == "process") {
         participant1 = fc.participant(dpf);
         Pusher w1(fc, dpf, participant1, dwl1);
