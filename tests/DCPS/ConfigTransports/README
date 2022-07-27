@@ -8,10 +8,10 @@ Use Case Partitioning
 
 Individual use-cases can be identified by a tuple of values: (s, e, c, t), where s is the Configuration name to use, e is the Entity, c is the Collocation type, and t is the Effective transport. Each combination of Entity, Source, Collocation and Transport describes a use-case. A test based on the use case will assertain that in the given configuration, a specific transport has been selected by the data writer and the reader.
 
-For example, (ReaderWriter, None, Host, _OPENDDS_0500_TCP) describes an use where entities run on the same host, but in separate address spaces; the configuration data file is not provided; the case applies to both the Reader and the Writer. Possible Entities are None (none), ReaderWriter (rw), PublisherSubscriber (pubsub), and domain Participant (participant). Configuration is either None, or a named configuration of potentialy many transports, provided through a configuration file. Collocation type determines relative entity distribution: None, Memory, Host, and Network.
+For example, (None, ReaderWriter, Host, _OPENDDS_0500_TCP) describes an use where entities run on the same host, but in separate address spaces; the configuration data file is not provided; the case applies to both the Reader and the Writer. Possible Entities are None (none), ReaderWriter (rw), PublisherSubscriber (pubsub), and domain Participant (participant). Configuration is either None, or a named configuration of potentially many transports, provided through a configuration file. Collocation type determines relative entity distribution: None, Memory, Host, and Network.
 
 Source: None
-No explicitly provided configuration and DDS defults apply.
+No explicitly provided configuration and DDS defaults apply.
 
 Source: (name)
 Transport configuration name is explicitly provided in the accompanying INI-formatted file.

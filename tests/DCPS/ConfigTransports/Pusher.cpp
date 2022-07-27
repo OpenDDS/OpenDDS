@@ -8,31 +8,30 @@
 #include "dds/DCPS/WaitSet.h"
 #include "ace/OS_NS_unistd.h"
 
-Pusher::Pusher(const Factory& f,
-               const DDS::DomainParticipantFactory_var& factory,
+Pusher::Pusher(const Factory& factory,
+               const DDS::DomainParticipantFactory_var& dpf,
                const DDS::DomainParticipant_var& participant,
-               const DDS::DataWriterListener_var& listener) :
-        dpf(factory),
-        dp(participant),
-        pub(f.publisher(dp)),
-        topic(f.topic(dp)),
-        writer_(f.writer(pub, topic, listener))
+               const DDS::DataWriterListener_var& listener)
+  : dpf_(dpf)
+  , dp_(participant)
+  , pub_(factory.publisher(dp_))
+  , topic_(factory.topic(dp_))
+  , writer_(factory.writer(pub_, topic_, listener))
 {
 }
 
-Pusher::Pusher(const Factory& f,
-               const DDS::DomainParticipantFactory_var& factory,
+Pusher::Pusher(const Factory& factory,
+               const DDS::DomainParticipantFactory_var& dpf,
                const DDS::DomainParticipant_var& participant,
                const DDS::Publisher_var& publisher,
-               const DDS::DataWriterListener_var& listener) :
-        dpf(factory),
-        dp(participant),
-        pub(publisher),
-        topic(f.topic(dp)),
-        writer_(f.writer(pub, topic, listener))
+               const DDS::DataWriterListener_var& listener)
+  : dpf_(dpf)
+  , dp_(participant)
+  , pub_(publisher)
+  , topic_(factory.topic(dp_))
+  , writer_(factory.writer(pub_, topic_, listener))
 {
 }
-
 
 Pusher::~Pusher()
 {
@@ -45,30 +44,24 @@ Pusher::~Pusher()
 const int default_key = 101010;
 
 int
-Pusher::push (const ACE_Time_Value& duration)
+Pusher::push(const ACE_Time_Value& duration)
 {
-  ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::run_test begins.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Pusher::push: begins.\n")));
 
-
-  ACE_Time_Value started = ACE_OS::gettimeofday ();
+  const ACE_Time_Value started = ACE_OS::gettimeofday();
   unsigned int pass = 0;
 
-  while(ACE_OS::gettimeofday() < started + duration)
-  {
+  while(ACE_OS::gettimeofday() < started + duration) {
     ++pass;
-    try
-    {
+    try {
       ::Xyz::Foo foo;
       //foo.key set below.
       foo.x = -1;
       foo.y = -1;
-
       foo.key = default_key;
 
-      ::Xyz::FooDataWriter_var foo_dw
-        = ::Xyz::FooDataWriter::_narrow(writer_.in ());
-      TEST_ASSERT (! CORBA::is_nil (foo_dw.in ()));
+      ::Xyz::FooDataWriter_var foo_dw = ::Xyz::FooDataWriter::_narrow(writer_.in());
+      TEST_ASSERT(!CORBA::is_nil(foo_dw.in()));
 
       // Block until Subscriber is available
       DDS::StatusCondition_var condition = foo_dw->get_statuscondition();
@@ -81,8 +74,8 @@ Pusher::push (const ACE_Time_Value& duration)
         DDS::PublicationMatchedStatus matches;
         if (foo_dw->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: (%P|%t) %T Writer::run_test -")
-                            ACE_TEXT(" get_publication_matched_status failed!\n")),
+                            ACE_TEXT("(%P|%t) ERROR: Pusher::push: ")
+                            ACE_TEXT(" get_publication_matched_status failed (%T)!\n")),
                            -1);
         }
 
@@ -92,10 +85,13 @@ Pusher::push (const ACE_Time_Value& duration)
 
         DDS::ConditionSeq conditions;
         DDS::Duration_t timeout = { 60, 0 };
+        // TODO(sonndinh): The while (true) seems to tell that it wants to wait infinitely
+        // until a subscriber matches. But the call to wait below means it only waits 60s.
+        // May need to change if the intention was to wait forever.
         if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
           ACE_ERROR_RETURN((LM_ERROR,
-                            ACE_TEXT("ERROR: (%P|%t) %T Writer::run_test() -")
-                            ACE_TEXT(" wait failed!\n")),
+                            ACE_TEXT("(%P|%t) ERROR: Pusher::push:")
+                            ACE_TEXT(" wait failet (%T)!\n")),
                            -1);
         }
       }
@@ -103,29 +99,22 @@ Pusher::push (const ACE_Time_Value& duration)
       ws->detach_condition(condition);
 
       ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) %T Writer::run_test starting to write pass %d\n"),
-                pass));
+                 ACE_TEXT("(%P|%t) Pusher::push: starting to write pass %d (%T)\n"),
+                 pass));
 
-      ::DDS::InstanceHandle_t handle
-          = foo_dw->register_instance(foo);
+      ::DDS::InstanceHandle_t handle = foo_dw->register_instance(foo);
 
       foo.x = 5.0;
-      foo.y = (float)(pass) ;
+      foo.y = (float)(pass);
 
-      foo_dw->write(foo,
-                    handle);
+      TEST_CHECK(DDS::RETCODE_OK == foo_dw->write(foo, handle));
 
-      ACE_DEBUG((LM_DEBUG,
-                ACE_TEXT("(%P|%t) %T Writer::run_test done writing.\n")));
-
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Pusher::push: done writing (%T).\n")));
       ACE_OS::sleep(1);
-    }
-    catch (const CORBA::Exception& ex)
-    {
-      ex._tao_print_exception ("Exception caught in run_test:");
+    } catch (const CORBA::Exception& ex) {
+      ex._tao_print_exception("Exception caught in run_test:");
     }
   }
-  ACE_DEBUG((LM_DEBUG,
-              ACE_TEXT("(%P|%t) Writer::run_test finished.\n")));
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Pusher::push: finished.\n")));
   return 0;
 }

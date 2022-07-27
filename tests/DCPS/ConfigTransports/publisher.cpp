@@ -51,20 +51,17 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       DDS::DataWriterListener_var dwl1(new DataWriterListenerImpl);
       DDS::DataWriterListener_var dwl2(new DataWriterListenerImpl);
 
-      if (configopt.collocation_str == "none")
-      {
+      if (configopt.collocation_str == "none") {
         participant1 = fc.participant(dpf);
         Pusher w(fc, dpf, participant1, dwl1);
         TEST_ASSERT(assert_supported(configopt, w.writer_));
 
         w.push(ACE_Time_Value(configopt.test_duration));
-        if (!configopt.negotiated_str.empty())
-        {
+        if (!configopt.negotiated_str.empty()) {
           TEST_ASSERT(assert_negotiated(configopt, w.writer_));
         }
-      }
-      else if (configopt.collocation_str == "process")
-      {
+        
+      } else if (configopt.collocation_str == "process") {
         participant1 = fc.participant(dpf);
         Pusher w1(fc, dpf, participant1, dwl1);
 //          TEST_ASSERT(wait_publication_matched_status(configopt, w1.writer_));
@@ -74,24 +71,19 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 //          TEST_ASSERT(wait_publication_matched_status(configopt, w2.writer_));
 
         TEST_ASSERT(assert_supported(configopt, w1.writer_));
-        if (configopt.entity_str == "none")
-        {
+        if (configopt.entity_str == "none") {
           TEST_ASSERT(assert_supported(configopt, w2.writer_));
-        }
-        else
-        {
+        } else {
           TEST_ASSERT(!assert_supported(configopt, w2.writer_));
           TEST_ASSERT(assert_supported(plainopt, w2.writer_));
         }
 
         w1.push(ACE_Time_Value(1));
-        if (!configopt.negotiated_str.empty())
-        {
+        if (!configopt.negotiated_str.empty()) {
           TEST_ASSERT(assert_negotiated(configopt, w1.writer_));
         }
-      }
-      else if (configopt.collocation_str == "participant")
-      {
+
+      } else if (configopt.collocation_str == "participant") {
         participant1 = fc.participant(dpf);
         participant2 = participant1;
 
@@ -105,13 +97,11 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         TEST_ASSERT(assert_supported(configopt, w2.writer_));
 
         w1.push(ACE_Time_Value(1));
-        if (!configopt.negotiated_str.empty())
-        {
+        if (!configopt.negotiated_str.empty()) {
           TEST_ASSERT(assert_negotiated(configopt, w1.writer_));
         }
-      }
-      else if (configopt.collocation_str == "pubsub")
-      {
+
+      } else if (configopt.collocation_str == "pubsub") {
         participant1 = fc.participant(dpf);
         participant2 = participant1;
         DDS::Publisher_var publisher1(fc.publisher(participant1));
@@ -124,28 +114,20 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         TEST_ASSERT(assert_supported(configopt, w2.writer_));
 
         w1.push(ACE_Time_Value(1));
-        if (!configopt.negotiated_str.empty())
-        {
+        if (!configopt.negotiated_str.empty()) {
           TEST_ASSERT(assert_negotiated(configopt, w1.writer_));
         }
       }
 
-      if (configopt.collocation_str == "none")
-      {
+      if (configopt.collocation_str == "none") {
         TEST_ASSERT(assert_publication_matched(configopt, dwl1));
-      }
-      else if (configopt.collocation_str == "process")
-      {
+      } else if (configopt.collocation_str == "process") {
         TEST_ASSERT(assert_publication_matched(configopt, dwl1)
                     && assert_publication_matched(configopt, dwl2));
-      }
-      else if (configopt.collocation_str == "participant")
-      {
+      } else if (configopt.collocation_str == "participant") {
         TEST_ASSERT(assert_publication_matched(configopt, dwl1)
                     && assert_publication_matched(configopt, dwl2));
-      }
-      else if (configopt.collocation_str == "pubsub")
-      {
+      } else if (configopt.collocation_str == "pubsub") {
         TEST_ASSERT(assert_publication_matched(configopt, dwl1)
                     && assert_publication_matched(configopt, dwl2));
       }

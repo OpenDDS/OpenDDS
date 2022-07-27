@@ -1,21 +1,19 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 
+#include "dds/DCPS/PoolAllocator.h"
 #include "dds/DdsDcpsDomainC.h"
 #include "dds/DdsDcpsTopicC.h"
 #include "dds/DdsDcpsPublicationC.h"
 #include "dds/DdsDcpsTypeSupportExtC.h"
 
 #include <vector>
-#include "dds/DCPS/PoolAllocator.h"
 
-class Options
-{
+class Options {
 public:
   Options();
   Options(int argc, ACE_TCHAR *argv[]);
   virtual ~Options();
-
 
 protected:
   ::DDS::DurabilityQosPolicyKind get_durability_kind(const std::string& argument);
