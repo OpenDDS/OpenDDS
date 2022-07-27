@@ -642,25 +642,28 @@ void TAO_DDS_DCPSInfo_i::remove_publication(
   }
 
   // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = where->second->participant(participantId);
-
-  if (0 == partPtr) {
+  DCPS_IR_Participant* const partPtr = where->second->participant(participantId);
+  if (!partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
+  const bool in_cleanup =
+#ifdef DDS_HAS_MINIMUM_BIT
+    false;
+#else
+    in_cleanup_all_built_in_topics_;
+#endif
+
   if (partPtr->remove_publication(publicationId) != 0) {
-    where->second->remove_dead_participants(in_cleanup_all_built_in_topics_);
+    where->second->remove_dead_participants(in_cleanup);
 
     // throw exception because the publication was not removed!
     throw OpenDDS::DCPS::Invalid_Publication();
   }
 
-  where->second->remove_dead_participants(in_cleanup_all_built_in_topics_);
+  where->second->remove_dead_participants(in_cleanup);
 
-  if (this->um_
-      && (partPtr->isOwner() == true)
-      && (partPtr->isBitPublisher() == false)) {
+  if (um_ && partPtr->isOwner() && !partPtr->isBitPublisher()) {
     Update::IdPath path(domainId, participantId, publicationId);
     this->um_->destroy(path, Update::Actor, Update::DataWriter);
 
@@ -971,10 +974,8 @@ void TAO_DDS_DCPSInfo_i::remove_subscription(
   }
 
   // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = where->second->participant(participantId);
-
-  if (0 == partPtr) {
+  DCPS_IR_Participant* const partPtr = where->second->participant(participantId);
+  if (!partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -983,11 +984,15 @@ void TAO_DDS_DCPSInfo_i::remove_subscription(
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 
-  where->second->remove_dead_participants(in_cleanup_all_built_in_topics_);
+  where->second->remove_dead_participants(
+#ifdef DDS_HAS_MINIMUM_BIT
+    false
+#else
+    in_cleanup_all_built_in_topics_
+#endif
+    );
 
-  if (this->um_
-      && (partPtr->isOwner() == true)
-      && (partPtr->isBitPublisher() == false)) {
+  if (um_ && partPtr->isOwner() && !partPtr->isBitPublisher()) {
     Update::IdPath path(domainId, participantId, subscriptionId);
     this->um_->destroy(path, Update::Actor, Update::DataReader);
 
