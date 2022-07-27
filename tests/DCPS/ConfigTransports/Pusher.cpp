@@ -36,8 +36,8 @@ Pusher::Pusher(const Factory& factory,
 Pusher::~Pusher()
 {
   // Clean up and shut down DDS objects
-  pub->delete_contained_entities();
-  dp->delete_contained_entities();
+  pub_->delete_contained_entities();
+  dp_->delete_contained_entities();
 }
 
 
