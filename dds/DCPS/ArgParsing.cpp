@@ -3,6 +3,9 @@
 #include <dds/Version.h>
 
 #include <ace/Log_Msg.h>
+#ifdef ACE_USES_WCHAR
+#  include <ace/Argv_Type_Converter.h>
+#endif
 
 #include <cstring>
 
@@ -146,7 +149,10 @@ Positional::Positional(ArgParser& arg_parser, const String& name, const String& 
 
 Positional::Positional(ArgParser& arg_parser, const String& name, const String& help,
   Handler* handler)
-  : Positional(arg_parser, name, help, handler, arg_parser.optional_positionals())
+  : Argument(arg_parser, help, handler)
+  , name_(name)
+  , optional_(arg_parser.optional_positionals())
+  , string_dest_(0)
 {
 }
 
@@ -162,7 +168,11 @@ Positional::Positional(ArgParser& arg_parser, const String& name, const String& 
 
 Positional::Positional(ArgParser& arg_parser, const String& name, const String& help,
   String& string_dest)
-  : Positional(arg_parser, name, help, string_dest, arg_parser.optional_positionals())
+  : Argument(arg_parser, help, &default_handler_)
+  , name_(name)
+  , default_handler_(string_dest)
+  , optional_(arg_parser.optional_positionals())
+  , string_dest_(&string_dest)
 {
 }
 
@@ -262,7 +272,7 @@ StrVecIt Option::handle_find_result(ArgParseState& state, StrVecIt found)
     *present_dest_ = present_;
   }
 
-  // Get attached value if its there
+  // Get attached value if it's there
   for (StrVecIt name_it = names_.begin(); name_it != names_.end(); ++name_it) {
     const String opt = get_option_from_name(*name_it);
     String value;
@@ -538,6 +548,14 @@ bool ArgParser::parse(int argc, char* argv[])
   }
   return true;
 }
+
+#ifdef ACE_USES_WCHAR
+bool ArgParser::parse(int argc, ACE_TCHAR* argv[])
+{
+  ACE_Argv_Type_Converter atc(argc_copy, argv);
+  return parse(atc.get_argc(), atc.get_ASCII_argv());
+}
+#endif
 
 namespace {
   const String opendds_options_blurb =

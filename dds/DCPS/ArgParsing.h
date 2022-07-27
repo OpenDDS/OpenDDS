@@ -2,7 +2,7 @@
  * @file ArgParsing.h
  *
  * Command line argument parsing loosely inspired by Python's argparse library.
- * Programs should create a ArgParser object and a Positional and Option object
+ * Programs should create a ArgParser object and a Positional or Option object
  * for each kind of argument, then call the parse method of the ArgParser
  * object.
  *
@@ -50,6 +50,10 @@ public:
   {
   }
 
+  virtual ~ArgParsingError() throw()
+  {
+  }
+
   virtual const char* what() const throw()
   {
     return what_.c_str();
@@ -59,7 +63,7 @@ protected:
   String what_;
 };
 
-class ArgParseState;
+struct ArgParseState;
 
 /// Thrown when parsed arguments are invalid
 class OpenDDS_Dcps_Export ParseError : public ArgParsingError {
@@ -382,15 +386,13 @@ protected:
 template <typename HandlerType>
 class PositionalDo : public Positional {
 public:
-  PositionalDo(ArgParser& arg_parser, const String& name, const String& help,
-    typename HandlerType::ValueType& dest, bool optional)
+  PositionalDo(ArgParser& arg_parser, const String& name, const String& help, bool optional)
     : Positional(arg_parser, name, help, &handler, optional)
     , handler()
   {
   }
 
-  PositionalDo(ArgParser& arg_parser, const String& name, const String& help,
-    typename HandlerType::ValueType& dest)
+  PositionalDo(ArgParser& arg_parser, const String& name, const String& help)
     : Positional(arg_parser, name, help, &handler)
     , handler()
   {
@@ -626,7 +628,9 @@ public:
   }
 
   WordWrapper(size_t indent, size_t maxlen)
-    : WordWrapper(0, indent, maxlen)
+    : left_indent_(0)
+    , right_indent_(indent)
+    , maxlen_(maxlen)
   {
   }
 
@@ -719,8 +723,13 @@ public:
    * were passed or if the auto generated --help or --version options were
    * passed. If call_exit_ is false, then it will be able to return false on
    * invalid arguments.
+   * @{
    */
   bool parse(int argc, char* argv[]);
+#ifdef ACE_USES_WCHAR
+  bool parse(int argc, ACE_TCHAR* argv[]);
+#endif
+  /// @}
 
   virtual void print_usage(ArgParseState& state, std::ostream& os);
   virtual void print_help(ArgParseState& state, std::ostream& os);
