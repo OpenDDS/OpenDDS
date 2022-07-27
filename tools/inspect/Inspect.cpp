@@ -8,6 +8,7 @@
 #include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/ArgParsing.h>
 #include <dds/DCPS/XTypes/DynamicData.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
@@ -19,94 +20,10 @@
 #endif
 
 #include <iostream>
-#include <vector>
 #include <string>
-#include <utility>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
-
-typedef std::vector<std::string> Args;
-typedef Args::iterator ArgsIt;
-typedef std::pair<bool, ArgsIt> AfterOpt;
-
-AfterOpt get_option(Args& args, const std::string& opt)
-{
-  for (ArgsIt args_it = args.begin(); args_it != args.end(); ++args_it) {
-    if (*args_it == "--") {
-      // Remaining arguments should be interpreted as positional arguments
-      return AfterOpt(false, args.end());
-    }
-    if (opt.length() <= args_it->length()) {
-      const bool starts_with = args_it->substr(0, opt.length()) == opt;
-      const bool same_size = args_it->length() == opt.length();
-      if (starts_with && !same_size && args_it->at(opt.length()) == '=') {
-        // Form is OPT=VALUE, replace current with VALUE
-        *args_it = args_it->substr(opt.length() + 1);
-        return AfterOpt(true, args_it);
-      } else if (same_size && starts_with) {
-        // Form is OPT VALUE?, return next argument
-        return AfterOpt(true, args.erase(args_it));
-      }
-    }
-  }
-  return AfterOpt(false, args.end());
-}
-
-bool has_option(Args& args, const std::string& opt)
-{
-  return get_option(args, opt).first;
-}
-
-std::string get_option_argument(Args& args, AfterOpt& after_opt, const std::string& opt)
-{
-  ArgsIt& args_it = after_opt.second;
-  if (args_it == args.end()) {
-    std::cerr << "ERROR: Option " << opt << " requires an argument" << std::endl;
-    throw 1;
-  }
-  const std::string value = *args_it;
-  args_it = args.erase(args_it);
-  return value;
-}
-
-template <typename UintType>
-UintType get_option_argument_uint(Args& args, AfterOpt& after_opt, const std::string& opt)
-{
-  UintType value;
-  if (!convertToInteger(get_option_argument(args, after_opt, opt), value)) {
-    std::cerr << "ERROR: Option " << opt
-      << " requires an argument that's a valid non-negative number" << std::endl;
-    throw 1;
-  }
-  return value;
-}
-
-void check_for_unknown_options(Args& args)
-{
-  for (ArgsIt args_it = args.begin(); args_it != args.end(); ++args_it) {
-    if (*args_it == "--") {
-      // Remaining arguments should be interpreted as positional arguments
-      return;
-    }
-    if (args_it->length() && args_it->at(0) == '-') {
-      std::cerr << "ERROR: Option " << *args_it << " is invalid" << std::endl;
-      throw 1;
-    }
-  }
-}
-
-template <typename IntType>
-IntType get_pos_argument_int(Args& args, size_t pos, const std::string& what)
-{
-  IntType value;
-  if (!convertToInteger(args[pos], value)) {
-    std::cerr << "ERROR: positional argument " << what
-      << " should be a valid number" << std::endl;
-    throw 1;
-  }
-  return value;
-}
 
 std::string prog_name;
 
@@ -115,101 +32,42 @@ std::string type_name;
 DDS::DomainId_t domainid = 0;
 unsigned num_samples = 0;
 unsigned num_seconds = 0;
-bool help = false;
 bool writer_count = false;
 
-void print_usage(bool for_error = false)
+void parse_args(int argc, ACE_TCHAR* argv[])
 {
-  std::ostream& os = for_error ? std::cerr : std::cout;
-  os <<
-    "usage: " << prog_name << " [OPTIONS] TOPIC_NAME TYPE_NAME DOMAIN_ID\n"
-    "usage: " << prog_name << " --help|-h|--version|-v\n";
-  if (for_error) {
-    os << "See -h for more details\n";
-  }
-}
+  using namespace OpenDDS::DCPS::ArgParsing;
 
-void print_help()
-{
-  print_usage();
-  std::cout <<
-    "\n"
-    "Print samples written to the given topic when the remotes support DDS XTypes\n"
-    "complete TypeObjects.\n"
-    "\n"
-    "Positional Arguments:\n"
-    "  TOPIC_NAME              The name of the topic to listen for.\n"
-    "  TYPE_NAME               The full name (including any modules) of the topic\n"
-    "                          type. This should NOT include a leading ::.\n"
-    "  DOMAIN_ID               The DDS Domain to participant in.\n"
-    "\n"
-    "OPTIONS:\n"
-    "  All OpenDDS command line options listed in section 7.2 of the OpenDDS\n"
-    "  Developer's Guide are also available.\n"
-    "  -h | --help             Displays this message.\n"
-    "  -v | --version          Displays the version. This is the same as OpenDDS's.\n"
-    "  -w | --writer-count     Print number of associated writers when they change.\n"
-    "                          Default is to not to.\n"
-    "  --samples COUNT         Wait for at least this number of samples and exit.\n"
-    "                          May actually print more. Default is to print samples\n"
-    "                          forever.\n"
-    "  --time SECONDS          Print samples for the given number of seconds and\n"
-    "                          exit. Default is to print samples forever.\n";
-}
+  ArgParser arg_parser(
+    "Print samples written to the given topic when the remotes support DDS XTypes "
+    "complete TypeObjects.");
 
-// parse the command line arguments
-int parse_args(int argc, ACE_TCHAR* argv[])
-{
-  unsigned long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
-  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
+  Positional topic_name_arg(arg_parser, "TOPIC_NAME",
+    "The name of the topic to listen for.",
+    topic_name);
+  Positional type_name_arg(arg_parser, "TYPE_NAME",
+    "The full name (including any modules) of the topic type. "
+    "This should NOT include a leading ::.",
+    type_name);
+  PositionalAs<IntValue<DDS::DomainId_t> > domainid_arg(arg_parser, "DOMAIN_ID",
+    "The DDS Domain to participant in.",
+    domainid);
 
-  prog_name = ACE_TEXT_ALWAYS_CHAR(argv[0]);
-  Args args;
-  for (int i = 1; i < argc; ++i) {
-    args.push_back(ACE_TEXT_ALWAYS_CHAR(argv[i]));
-  }
+  Option write_count_opt(arg_parser, "writer-count",
+    "Print number of associated writers when they change. "
+    "Default is to not to.",
+    writer_count);
+  write_count_opt.add_alias("w");
+  OptionAs<IntValue<unsigned> > samples_opt(arg_parser, "samples",
+    "Wait for at least this number of samples and exit. "
+    "May actually print more. Default is to print samples forever.",
+    num_samples, "COUNT");
+  OptionAs<IntValue<unsigned> > time_opt(arg_parser, "time",
+    "Print samples for the given number of seconds and exit. "
+    "Default is to print samples forever.",
+    num_seconds, "SECONDS");
 
-  try {
-    // Parse options
-    if (has_option(args, "-h") || has_option(args, "--help")) {
-      print_help();
-      std::exit(0);
-    }
-    if (has_option(args, "-v") || has_option(args, "--version")) {
-      std::cout << "Version " OPENDDS_VERSION << std::endl;
-      std::exit(0);
-    }
-    writer_count = has_option(args, "-w") || has_option(args, "--writer-count");
-    {
-      const std::string opt = "--samples";
-      AfterOpt after_opt = get_option(args, opt);
-      if (after_opt.first) {
-        num_samples = get_option_argument_uint<unsigned>(args, after_opt, opt);
-      }
-    }
-    {
-      const std::string opt = "--time";
-      AfterOpt after_opt = get_option(args, opt);
-      if (after_opt.first) {
-        num_seconds = get_option_argument_uint<unsigned>(args, after_opt, opt);
-      }
-    }
-    check_for_unknown_options(args);
-
-    // Parse positional arguments
-    if (args.size() != 3) {
-      std::cerr << "ERROR: incorrect number of arguments: expected 3, received " << args.size() << "\n";
-      throw 1;
-    }
-    topic_name = args[0];
-    type_name = args[1];
-    domainid = get_pos_argument_int<DDS::DomainId_t>(args, 2, "DOMAIN_ID");
-  } catch(int value) {
-    print_usage(true);
-    return value;
-  }
-
-  return 0;
+  arg_parser.parse(argc, argv);
 }
 
 class RecorderListenerImpl : public RecorderListener {
@@ -257,6 +115,9 @@ private:
 
 int run(int argc, ACE_TCHAR* argv[])
 {
+  unsigned long mask = ACE_LOG_MSG->priority_mask(ACE_Log_Msg::PROCESS);
+  ACE_LOG_MSG->priority_mask(mask | LM_TRACE | LM_DEBUG, ACE_Log_Msg::PROCESS);
+
   int ret_val = 0;
   try {
     TransportConfig_rch transport_config =
@@ -268,10 +129,8 @@ int run(int argc, ACE_TCHAR* argv[])
 
     DDS::DomainParticipantFactory_var dpf =
       TheParticipantFactoryWithArgs(argc, argv);
-    ret_val = parse_args(argc, argv);
-    if (ret_val) {
-      return ret_val;
-    }
+
+    parse_args(argc, argv);
 
     OpenDDS::RTPS::RtpsDiscovery_rch disc =
       make_rch<OpenDDS::RTPS::RtpsDiscovery>("rtps_disc");

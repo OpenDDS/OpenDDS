@@ -6,12 +6,11 @@
 #ifndef MESSENGER_TEST_ARGS_H
 #define MESSENGER_TEST_ARGS_H
 
+#include <dds/DCPS/ArgParsing.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
 #include <dds/DCPS/transport/framework/TransportInst.h>
 
-#include <ace/Argv_Type_Converter.h>
-#include <ace/Get_Opt.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
 
@@ -23,34 +22,24 @@ const size_t num_messages = 40;
 inline
 int parse_args(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Get_Opt get_opts(argc, argv, ACE_TEXT("t:pw"));
-
   OpenDDS::DCPS::String transport_type;
-  int c;
   bool thread_per_connection = false;
-  while ((c = get_opts()) != -1) {
-    switch (c) {
-    case 't':
+  {
+    using namespace OpenDDS::DCPS::ArgParsing;
+    ArgParser arg_parser("");
 
-      if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("udp")) == 0) {
-        transport_type = "udp";
+    Option thread_per_connection_opt(arg_parser, "thread-per-connection",
+      "Set thread-per-connection on the transport", thread_per_connection);
+    thread_per_connection_opt.add_alias("p");
 
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("multicast")) == 0) {
-        transport_type = "multicast";
+    OptionAs<StringChoiceValue> transport_opt(arg_parser, "transport",
+      "Select a transport type", transport_type, "");
+    transport_opt.handler.choices.insert("udp");
+    transport_opt.handler.choices.insert("multicast");
+    transport_opt.handler.choices.insert("tcp");
+    transport_opt.add_alias("t");
 
-      } else if (ACE_OS::strcmp(get_opts.opt_arg(), ACE_TEXT("tcp")) == 0) {
-        transport_type = "tcp";
-      }
-
-      break;
-    case 'p':
-      thread_per_connection = true;
-      break;
-    case '?':
-    default:
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_args: usage: %s [-t transport]\n", argv[0]));
-      return EXIT_FAILURE;
-    }
+    arg_parser.parse(argc, argv);
   }
 
   if (!transport_type.empty()) {
@@ -63,15 +52,13 @@ int parse_args(int argc, ACE_TCHAR* argv[])
   if (thread_per_connection) {
     OpenDDS::DCPS::TransportConfig_rch config =
       TheTransportRegistry->fix_empty_default();
-    if (config.in() == 0) {
+    if (!config) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_args: no default config\n"));
       return EXIT_FAILURE;
-    }
-    else if (config->instances_.size() < 1) {
+    } else if (config->instances_.size() < 1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_args: no instances on default config\n"));
       return EXIT_FAILURE;
-    }
-    else if (config->instances_.size() > 1) {
+    } else if (config->instances_.size() > 1) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: parse_args: too many instances on default config, using first\n"));
     }
     OpenDDS::DCPS::TransportInst_rch inst = *(config->instances_.begin());
