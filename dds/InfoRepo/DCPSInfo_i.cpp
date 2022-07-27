@@ -73,39 +73,37 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
   if (arg == this) {
-    if ( !CORBA::is_nil(this->dispatchingOrb_.in())){
-      if (this->dispatchingOrb_->work_pending())
-      {
+    if (dispatchingOrb_) {
+      if (dispatchingOrb_->work_pending()) {
         // Ten microseconds
-        ACE_Time_Value smallval(0,10);
-        this->dispatchingOrb_->perform_work(smallval);
+        ACE_Time_Value smallval(0, 10);
+        dispatchingOrb_->perform_work(smallval);
       }
     }
-  }
-  else {
-  // NOTE: This is a purposefully naive approach to addressing defunct
-  // associations.  In the future, it may be worthwhile to introduce a
-  // callback model to fix the heinous runtime cost below:
-  for (DCPS_IR_Domain_Map::const_iterator dom(this->domains_.begin());
-       dom != this->domains_.end(); ++dom) {
+  } else {
+    // NOTE: This is a purposefully naive approach to addressing defunct
+    // associations.  In the future, it may be worthwhile to introduce a
+    // callback model to fix the heinous runtime cost below:
+    for (DCPS_IR_Domain_Map::const_iterator dom(this->domains_.begin());
+         dom != this->domains_.end(); ++dom) {
 
-    const DCPS_IR_Participant_Map& participants(dom->second->participants());
-    for (DCPS_IR_Participant_Map::const_iterator part(participants.begin());
-         part != participants.end(); ++part) {
+      const DCPS_IR_Participant_Map& participants(dom->second->participants());
+      for (DCPS_IR_Participant_Map::const_iterator part(participants.begin());
+           part != participants.end(); ++part) {
 
-      const DCPS_IR_Subscription_Map& subscriptions(part->second->subscriptions());
-      for (DCPS_IR_Subscription_Map::const_iterator sub(subscriptions.begin());
-           sub != subscriptions.end(); ++sub) {
-        sub->second->reevaluate_defunct_associations();
-      }
+        const DCPS_IR_Subscription_Map& subscriptions(part->second->subscriptions());
+        for (DCPS_IR_Subscription_Map::const_iterator sub(subscriptions.begin());
+             sub != subscriptions.end(); ++sub) {
+          sub->second->reevaluate_defunct_associations();
+        }
 
-      const DCPS_IR_Publication_Map& publications(part->second->publications());
-      for (DCPS_IR_Publication_Map::const_iterator pub(publications.begin());
-           pub != publications.end(); ++pub) {
-        pub->second->reevaluate_defunct_associations();
+        const DCPS_IR_Publication_Map& publications(part->second->publications());
+        for (DCPS_IR_Publication_Map::const_iterator pub(publications.begin());
+             pub != publications.end(); ++pub) {
+          pub->second->reevaluate_defunct_associations();
+        }
       }
     }
-  }
   }
 
   return 0;
@@ -652,13 +650,13 @@ void TAO_DDS_DCPSInfo_i::remove_publication(
   }
 
   if (partPtr->remove_publication(publicationId) != 0) {
-    where->second->remove_dead_participants();
+    where->second->remove_dead_participants(in_cleanup_all_built_in_topics_);
 
     // throw exception because the publication was not removed!
     throw OpenDDS::DCPS::Invalid_Publication();
   }
 
-  where->second->remove_dead_participants();
+  where->second->remove_dead_participants(in_cleanup_all_built_in_topics_);
 
   if (this->um_
       && (partPtr->isOwner() == true)
@@ -985,7 +983,7 @@ void TAO_DDS_DCPSInfo_i::remove_subscription(
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 
-  where->second->remove_dead_participants();
+  where->second->remove_dead_participants(in_cleanup_all_built_in_topics_);
 
   if (this->um_
       && (partPtr->isOwner() == true)
