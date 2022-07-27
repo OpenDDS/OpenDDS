@@ -381,7 +381,7 @@ private:
   unsigned start_counter_;
 
   /// This mode determines how send() calls will be handled.
-  SendMode mode_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, SendMode> mode_;
 
   /// This mode remembers the mode before send is suspended and is
   /// used after the send is resumed because the connection is

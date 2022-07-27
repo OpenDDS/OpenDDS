@@ -17,6 +17,11 @@ namespace DCPS {
 struct Message_Block_Deleter
 {
   void operator()(ACE_Message_Block* ptr) const {
+    ACE_Message_Block* cont = ptr->cont();
+    if (cont) {
+      ptr->cont(0);
+      operator()(cont);
+    }
     ACE_Message_Block::release(ptr);
   }
 };
