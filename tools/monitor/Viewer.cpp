@@ -5,6 +5,8 @@
 * See: http://www.opendds.org/license.html
 */
 
+#define QT_NO_DEPRECATED_WARNINGS
+
 #include <QtGui/QtGui>
 #include <QtGui/QPixmap>
 #include <QtWidgets/QScrollBar>
