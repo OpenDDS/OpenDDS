@@ -71,7 +71,6 @@ const OPENDDS_STRING TransportRegistry::CUSTOM_ADD_DOMAIN_TO_PORT = "add_domain_
 TransportRegistry::TransportRegistry()
   : global_config_(make_rch<TransportConfig>(DEFAULT_CONFIG_NAME))
   , released_(false)
-  , load_complete_(lock_)
 {
   DBG_ENTRY_LVL("TransportRegistry", "TransportRegistry", 6);
   config_map_[DEFAULT_CONFIG_NAME] = global_config_;
@@ -480,11 +479,10 @@ TransportRegistry::load_transport_templates(ACE_Configuration_Heap& cf)
 }
 
 void
-TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type,
-                                      bool wait)
+TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type)
 {
   GuardType guard(lock_);
-  if (!load_transport_lib_i(transport_type, wait)) {
+  if (!load_transport_lib_i(transport_type)) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) TransportRegistry::load_transport_lib: ")
                ACE_TEXT("could not load transport_type=%C.\n"),
@@ -493,8 +491,7 @@ TransportRegistry::load_transport_lib(const OPENDDS_STRING& transport_type,
 }
 
 TransportType_rch
-TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type,
-                                        bool wait)
+TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type)
 {
   TransportType_rch type;
   if (find(type_map_, transport_type, type) == 0) {
@@ -517,17 +514,11 @@ TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type,
   ACE_Reverse_Lock<LockType> rev_lock(lock_);
   {
     ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
-    ACE_Service_Config::process_directive(directive.c_str());
+    if (0 != ACE_Service_Config::process_directive(directive.c_str())) {
+      return TransportType_rch();
+    }
   }
 #endif
-
-  if (wait) {
-    ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-    while (find(type_map_, transport_type, type) != 0) {
-      load_complete_.wait(thread_status_manager);
-    }
-    return type;
-  }
 
   find(type_map_, transport_type, type);
   return type;
@@ -535,12 +526,11 @@ TransportRegistry::load_transport_lib_i(const OPENDDS_STRING& transport_type,
 
 TransportInst_rch
 TransportRegistry::create_inst(const OPENDDS_STRING& name,
-                               const OPENDDS_STRING& transport_type,
-                               bool wait)
+                               const OPENDDS_STRING& transport_type)
 {
   GuardType guard(lock_);
 
-  TransportType_rch type = load_transport_lib_i(transport_type, wait);
+  TransportType_rch type = load_transport_lib_i(transport_type);
   if (!type) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) TransportRegistry::create_inst: ")
@@ -719,7 +709,7 @@ TransportRegistry::fix_empty_default()
     return global_config_;
   }
   TransportConfig_rch global_config = global_config_;
-  load_transport_lib_i(FALLBACK_TYPE, true);
+  load_transport_lib_i(FALLBACK_TYPE);
   return global_config;
 }
 
@@ -741,7 +731,6 @@ TransportRegistry::register_type(const TransportType_rch& type)
     type_map_["rtps_discovery"] = type;
   }
 
-  load_complete_.notify_all();
   return true;
 }
 

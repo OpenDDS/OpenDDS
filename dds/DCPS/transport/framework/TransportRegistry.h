@@ -58,8 +58,7 @@ public:
   void release();
 
   TransportInst_rch create_inst(const OPENDDS_STRING& name,
-                                const OPENDDS_STRING& transport_type,
-                                bool wait = true);
+                                const OPENDDS_STRING& transport_type);
   TransportInst_rch get_inst(const OPENDDS_STRING& name) const;
 
   /// Removing a TransportInst from the registry shuts down the underlying
@@ -117,8 +116,7 @@ public:
 
   /// For internal use by OpenDDS DCPS layer:
   /// Dynamically load the library for the supplied transport type.
-  void load_transport_lib(const OPENDDS_STRING& transport_type,
-                          bool wait = true);
+  void load_transport_lib(const OPENDDS_STRING& transport_type);
 
   bool released() const;
 
@@ -162,8 +160,6 @@ private:
   bool released_;
 
   mutable LockType lock_;
-  // This condition is signaled when a load is completed.
-  mutable ConditionVariable<LockType> load_complete_;
 
   // transport template support
   static const OPENDDS_STRING CUSTOM_ADD_DOMAIN_TO_IP;
@@ -178,8 +174,7 @@ private:
     ValueMap transport_info;
   };
 
-  TransportType_rch load_transport_lib_i(const OPENDDS_STRING& transport_type,
-                                         bool wait);
+  TransportType_rch load_transport_lib_i(const OPENDDS_STRING& transport_type);
 
   OPENDDS_VECTOR(TransportTemplate) transport_templates_;
 
