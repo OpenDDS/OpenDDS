@@ -11,7 +11,7 @@ categories: [opendds]
 
 Members of the core OpenDDS development team are available to provide [training](https://objectcomputing.com/products/opendds/training), consulting, code review, troubleshooting, and more.
 
-[OCI's pre-paid support packages](https://objectcomputing.com/products/opendds/opendds-consulting-and-support) enable you and your team to get the help you need when you need it at economical hourly rates. Fully managed project delivery is also available; [contact OCI for a custom quote](https://objectcomputing.com/products/opendds/opendds-consulting-and-support#contact").
+[OCI's pre-paid support packages](https://objectcomputing.com/products/opendds/opendds-consulting-and-support) enable you and your team to get the help you need when you need it at economical hourly rates. Fully managed project delivery is also available; [contact OCI for a custom quote](https://objectcomputing.com/products/opendds/opendds-consulting-and-support#contact).
 
 ### Remedy IT
 
