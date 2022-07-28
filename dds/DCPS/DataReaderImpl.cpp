@@ -3429,20 +3429,20 @@ void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
 {
   static const ACE_Time_Value ten_seconds(10);
   info_->schedule_historic_samples_timer(sweeper_, ten_seconds);
-  sweeper_->info_set_.insert(info_);
+  const bool insert_result = sweeper_->info_set_.insert(info_).second;
 
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - Scheduled sweeper %@\n", info_.in()));
+  if (insert_result && DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - sweeper %@ is now scheduled\n", info_.in()));
   }
 }
 
 void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
 {
   info_->cancel_historic_samples_timer(sweeper_);
-  sweeper_->info_set_.erase(info_);
+  const bool erase_result = sweeper_->info_set_.erase(info_) > 0;
 
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %@\n", info_.in()));
+  if (erase_result && DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - sweeper %@ is no longer scheduled\n", info_.in()));
   }
 }
 
