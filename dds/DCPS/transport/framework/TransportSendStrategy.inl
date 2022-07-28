@@ -17,7 +17,7 @@ TransportSendStrategy::SendMode TransportSendStrategy::mode() const
 {
   DBG_ENTRY_LVL("TransportSendStrategy","mode",6);
 
-  return mode_;
+  return mode_.value();
 }
 
 ACE_INLINE
@@ -69,7 +69,7 @@ void TransportSendStrategy::suspend_send()
   GuardType guard(this->lock_);
 
   if (this->mode_ != MODE_TERMINATED && this->mode_ != MODE_SUSPEND) {
-    this->mode_before_suspend_ = this->mode_;
+    this->mode_before_suspend_ = this->mode_.value();
     this->mode_ = MODE_SUSPEND;
   }
 }
