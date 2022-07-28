@@ -33,16 +33,13 @@ $test->process("monitor1", "monitor", "-l 7 $rtps_mon $rtps_cfg");
 $test->process("monitor2", "monitor", "-u $rtps_mon $rtps_cfg");
 
 $test->add_temporary_file("monitor1", "monitor1_done");
+$test->add_temporary_file("monitor2", "monitor2_done");
 
 $test->start_process("monitor1", "-T");
-
 $test->start_process("publisher", "-T");
 $test->start_process("subscriber", "-T");
-
-sleep (15);
-
 $test->start_process("monitor2", "-T");
 
-my $status = $test->finish(300, "monitor1");
+my $status = $test->finish(180, "monitor1");
 
 exit $status;

@@ -11,6 +11,7 @@
 #include "JobQueue.h"
 #include "dcps_export.h"
 
+#include "BuiltInTopicUtils.h"
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -23,13 +24,13 @@ typedef OPENDDS_VECTOR(ActionConnectionRecord) ConnectionRecords;
 
 class OpenDDS_Dcps_Export WriteConnectionRecords : public DCPS::JobQueue::Job {
  public:
-  WriteConnectionRecords(DDS::Subscriber_var bit_sub,
+  WriteConnectionRecords(WeakRcHandle<BitSubscriber> bit_sub,
                          const ConnectionRecords& records)
     : bit_sub_(bit_sub)
     , records_(records)
   {}
 
-  WriteConnectionRecords(DDS::Subscriber_var bit_sub,
+  WriteConnectionRecords(WeakRcHandle<BitSubscriber> bit_sub,
                          bool action,
                          const ConnectionRecord& record)
     : bit_sub_(bit_sub)
@@ -40,7 +41,7 @@ class OpenDDS_Dcps_Export WriteConnectionRecords : public DCPS::JobQueue::Job {
   void execute();
 
  private:
-  DDS::Subscriber_var bit_sub_;
+  WeakRcHandle<BitSubscriber> bit_sub_;
   ConnectionRecords records_;
 };
 

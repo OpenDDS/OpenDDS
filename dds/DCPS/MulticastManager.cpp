@@ -123,10 +123,6 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
     }
       break;
     case ISIK_UNREGISTER:
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MulticastManager::process: unexpected UNREGISTER\n"));
-      }
-      break;
     case ISIK_DISPOSE: {
       if (joined_interfaces_.count(nia.name) != 0 && !nia.is_ipv4()) {
         if (log_level >= LogLevel::Info) {

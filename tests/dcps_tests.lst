@@ -405,7 +405,7 @@ tests/DCPS/StaticDiscovery/run_test.pl mp: !DCPS_MIN !NO_MCAST !DDS_NO_OWNERSHIP
 tests/DCPS/StaticDiscovery/run_test.pl mp delay: !DCPS_MIN !NO_MCAST !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/StaticDiscovery/run_test.pl mr: !DCPS_MIN !NO_MCAST !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/StaticDiscovery/run_test.pl mw: !DCPS_MIN !NO_MCAST !DDS_NO_OWNERSHIP_PROFILE
-tests/DCPS/StaticDiscovery/run_test.pl mpmrmw: !DCPS_MIN !NO_MCAST !TARGET !DDS_NO_OWNERSHIP_PROFILE
+tests/DCPS/StaticDiscovery/run_test.pl mini: !DCPS_MIN !NO_MCAST !TARGET !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/StaticDiscoveryReconnect/run_test.pl: !DCPS_MIN !NO_MCAST !GH_ACTIONS_M10
 tests/DCPS/SubscriberCycle/run_test.pl: !DCPS_MIN !DDS_NO_CONTENT_FILTERED_TOPIC !DDS_NO_CONTENT_SUBSCRIPTION !DDS_NO_OWNERSHIP_PROFILE
 

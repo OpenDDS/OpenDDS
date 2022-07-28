@@ -125,7 +125,7 @@ int Publisher::publish()
     ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_repo_id()).c_str()));
   }
 
-  DDS::Duration_t interval = {300, 0};
+  DDS::Duration_t interval = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
   ACE_DEBUG((LM_INFO, (pfx_ + "  waiting for acks\n").c_str()));
   if (DDS::RETCODE_OK != dw_->wait_for_acknowledgments(interval)) {
     ACE_ERROR((LM_ERROR, (pfx_ + " ERROR: timed out waiting for acks!\n").c_str()));

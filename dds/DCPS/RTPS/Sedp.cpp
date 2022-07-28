@@ -458,6 +458,7 @@ Sedp::init(const RepoId& guid,
   // may not be reflected.
   ACE_Reactor* reactor = reactor_task_->get_reactor();
   job_queue_ = DCPS::make_rch<DCPS::JobQueue>(reactor);
+  event_dispatcher_ = transport_inst_->event_dispatcher();
   type_lookup_init(reactor_task_->interceptor());
 
   // Configure and enable each reader/writer
@@ -1292,7 +1293,7 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
     const WriterAssociationRecord& record = **pos;
     // The local tokens have already been sent.
     if (ready(participant, record.writer_id(), record.reader_id(), true)) {
-      job_queue_->enqueue(DCPS::make_rch<WriterAddAssociation>(*pos));
+      event_dispatcher_->dispatch(DCPS::make_rch<WriterAddAssociation>(*pos));
 
       participant.writer_associated_records_.push_back(*pos);
       participant.writer_pending_records_.erase(pos++);
@@ -1310,7 +1311,7 @@ void Sedp::process_association_records_i(DiscoveredParticipant& participant)
     const ReaderAssociationRecord& record = **pos;
     // The local tokens have already been sent.
     if (ready(participant, record.reader_id(), record.writer_id(), true)) {
-      job_queue_->enqueue(DCPS::make_rch<ReaderAddAssociation>(*pos));
+      event_dispatcher_->dispatch(DCPS::make_rch<ReaderAddAssociation>(*pos));
 
       participant.reader_associated_records_.push_back(*pos);
       participant.reader_pending_records_.erase(pos++);
@@ -1541,7 +1542,37 @@ Sedp::disassociate(DiscoveredParticipant& participant)
 
   associated_participants_.erase(part);
 
+  OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
+  OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
+
+  bool result = false;
+  if (spdp_.has_discovered_participant(part)) {
+    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
+    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
+    result = true;
+  }
+
+  for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
+  for (OPENDDS_VECTOR(DiscoveredSubscription)::iterator it = subs_to_remove_from_bit.begin(); it != subs_to_remove_from_bit.end(); ++it) {
+    remove_from_bit_i(*it);
+  }
+
+  participant.builtin_pending_records_.clear();
+
+  for (DiscoveredParticipant::BuiltinAssociationRecords::const_iterator pos = participant.builtin_associated_records_.begin(), limit = participant.builtin_associated_records_.end(); pos != limit; ++pos) {
+    const BuiltinAssociationRecord& record = *pos;
+    record.transport_client_->disassociate(record.remote_id());
+  }
+
+  participant.builtin_associated_records_.clear();
+
+  //FUTURE: if/when topic propagation is supported, add it here
+
 #ifdef OPENDDS_SECURITY
+  // Clean up crypto handles after diassociation because the transport might be using them.
   if (spdp_.is_security_enabled()) {
     static const EntityId_t secure_entities[] = {
       ENTITYID_SEDP_BUILTIN_PUBLICATIONS_SECURE_READER,
@@ -1596,35 +1627,6 @@ Sedp::disassociate(DiscoveredParticipant& participant)
     }
   }
 #endif
-
-  OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
-  OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
-
-  bool result = false;
-  if (spdp_.has_discovered_participant(part)) {
-    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
-    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
-    result = true;
-  }
-
-  for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
-    remove_from_bit_i(*it);
-  }
-
-  for (OPENDDS_VECTOR(DiscoveredSubscription)::iterator it = subs_to_remove_from_bit.begin(); it != subs_to_remove_from_bit.end(); ++it) {
-    remove_from_bit_i(*it);
-  }
-
-  participant.builtin_pending_records_.clear();
-
-  for (DiscoveredParticipant::BuiltinAssociationRecords::const_iterator pos = participant.builtin_associated_records_.begin(), limit = participant.builtin_associated_records_.end(); pos != limit; ++pos) {
-    const BuiltinAssociationRecord& record = *pos;
-    record.transport_client_->disassociate(record.remote_id());
-  }
-
-  participant.builtin_associated_records_.clear();
-
-  //FUTURE: if/when topic propagation is supported, add it here
 
   return result;
 }
@@ -1825,68 +1827,14 @@ void Sedp::remove_entities_belonging_to(
 void
 Sedp::remove_from_bit_i(const DiscoveredPublication& pub)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-  // bit may be null if the DomainParticipant is shutting down
-  if (bit && pub.bit_ih_ != DDS::HANDLE_NIL) {
-    bit->set_instance_state(pub.bit_ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  }
-#else
-  ACE_UNUSED_ARG(pub);
-#endif /* DDS_HAS_MINIMUM_BIT */
+  spdp_.bit_subscriber_->remove_publication(pub.bit_ih_);
 }
 
 void
 Sedp::remove_from_bit_i(const DiscoveredSubscription& sub)
 {
-#ifndef DDS_HAS_MINIMUM_BIT
-  DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-  // bit may be null if the DomainParticipant is shutting down
-  if (bit && sub.bit_ih_ != DDS::HANDLE_NIL) {
-    bit->set_instance_state(sub.bit_ih_,
-                            DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
-  }
-#else
-  ACE_UNUSED_ARG(sub);
-#endif /* DDS_HAS_MINIMUM_BIT */
+  spdp_.bit_subscriber_->remove_subscription(sub.bit_ih_);
 }
-
-#ifndef DDS_HAS_MINIMUM_BIT
-DCPS::TopicBuiltinTopicDataDataReaderImpl* Sedp::topic_bit()
-{
-  DDS::Subscriber_var sub = spdp_.bit_subscriber();
-  if (!sub.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    sub->lookup_datareader(DCPS::BUILT_IN_TOPIC_TOPIC);
-  return dynamic_cast<DCPS::TopicBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DCPS::PublicationBuiltinTopicDataDataReaderImpl* Sedp::pub_bit()
-{
-  DDS::Subscriber_var sub = spdp_.bit_subscriber();
-  if (!sub.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    sub->lookup_datareader(DCPS::BUILT_IN_PUBLICATION_TOPIC);
-  return dynamic_cast<DCPS::PublicationBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* Sedp::sub_bit()
-{
-  DDS::Subscriber_var sub = spdp_.bit_subscriber();
-  if (!sub.in())
-    return 0;
-
-  DDS::DataReader_var d =
-    sub->lookup_datareader(DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
-  return dynamic_cast<DCPS::SubscriptionBuiltinTopicDataDataReaderImpl*>(d.in());
-}
-
-#endif /* DDS_HAS_MINIMUM_BIT */
 
 bool
 Sedp::update_topic_qos(const RepoId& topicId, const DDS::TopicQos& qos)
@@ -2241,15 +2189,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       assign_bit_key(pub);
       wdata_copy = pub.writer_data_;
 
-#ifndef DDS_HAS_MINIMUM_BIT
-      DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-      if (bit) { // bit may be null if the DomainParticipant is shutting down
-        pub.bit_ih_ =
-          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                    DDS::NEW_VIEW_STATE);
-      }
+      pub.bit_ih_ = spdp_.bit_subscriber_->add_publication(wdata_copy.ddsPublicationData, DDS::NEW_VIEW_STATE);
       if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_writer_data - ")
@@ -2263,15 +2204,8 @@ void Sedp::process_discovered_writer_data(DCPS::MessageId message_id,
       if (checkAndAssignQos(iter->second.writer_data_.ddsPublicationData,
                             wdata.ddsPublicationData)) { // update existing
 
-#ifndef DDS_HAS_MINIMUM_BIT
-        DCPS::PublicationBuiltinTopicDataDataReaderImpl* bit = pub_bit();
-        if (bit) { // bit may be null if the DomainParticipant is shutting down
-          wdata_copy = iter->second.writer_data_;
-          bit->store_synthetic_data(wdata_copy.ddsPublicationData,
-                                    DDS::NOT_NEW_VIEW_STATE);
-        }
+        spdp_.bit_subscriber_->add_publication(iter->second.writer_data_.ddsPublicationData, DDS::NOT_NEW_VIEW_STATE);
         if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local subscription(s)
         topic_name = iter->second.get_topic_name();
@@ -2556,15 +2490,8 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
       assign_bit_key(sub);
       rdata_copy = sub.reader_data_;
 
-#ifndef DDS_HAS_MINIMUM_BIT
-      DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-      if (bit) { // bit may be null if the DomainParticipant is shutting down
-        sub.bit_ih_ =
-          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                    DDS::NEW_VIEW_STATE);
-      }
+      sub.bit_ih_ = spdp_.bit_subscriber_->add_subscription(rdata_copy.ddsSubscriptionData, DDS::NEW_VIEW_STATE);
       if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
       if (DCPS::DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Sedp::process_discovered_reader_data - ")
@@ -2577,15 +2504,9 @@ void Sedp::process_discovered_reader_data(DCPS::MessageId message_id,
     } else { // update existing
       if (checkAndAssignQos(iter->second.reader_data_.ddsSubscriptionData,
                             rdata.ddsSubscriptionData)) {
-#ifndef DDS_HAS_MINIMUM_BIT
-        DCPS::SubscriptionBuiltinTopicDataDataReaderImpl* bit = sub_bit();
-        if (bit) { // bit may be null if the DomainParticipant is shutting down
-          rdata_copy = iter->second.reader_data_;
-          bit->store_synthetic_data(rdata_copy.ddsSubscriptionData,
-                                    DDS::NOT_NEW_VIEW_STATE);
-        }
+
+        spdp_.bit_subscriber_->add_subscription(iter->second.reader_data_.ddsSubscriptionData, DDS::NOT_NEW_VIEW_STATE);
         if (spdp_.shutting_down()) { return; }
-#endif /* DDS_HAS_MINIMUM_BIT */
 
         // Match/unmatch local publication(s)
         topic_name = iter->second.get_topic_name();
@@ -3203,12 +3124,6 @@ Sedp::Endpoint::~Endpoint()
   transport_stop();
 }
 
-DDS::Subscriber_var
-Sedp::Endpoint::get_builtin_subscriber() const
-{
-  return sedp_.spdp_.bit_subscriber();
-}
-
 EntityId_t Sedp::Endpoint::counterpart_entity_id() const
 {
   EntityId_t rv = repo_id_.entityId;
@@ -3254,6 +3169,11 @@ bool Sedp::Endpoint::associated_with_counterpart_if_not_pending(
 {
   const GUID_t counterpart = make_counterpart_guid(remote_part);
   return associated_with(counterpart) || !pending_association_with(counterpart);
+}
+
+RcHandle<DCPS::BitSubscriber> Sedp::Endpoint::get_builtin_subscriber_proxy() const
+{
+  return sedp_.spdp_.bit_subscriber_;
 }
 
 //---------------------------------------------------------------
@@ -4520,7 +4440,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
     const GUID_t guid = make_part_guid(sample.header_.publication_id_);
     sedp_.spdp_.process_participant_ice(data, pdata, guid);
-    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
+    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::MonotonicTimePoint::now(), DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 
 #endif
   }
@@ -6784,7 +6704,7 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
 
     for (DiscoveredParticipant::WriterAssociationRecords::iterator pos = part_iter->second.writer_associated_records_.begin(), limit = part_iter->second.writer_associated_records_.end(); pos != limit; ++pos) {
       if ((*pos)->writer_id() == writer && (*pos)->reader_id() == reader) {
-        job_queue_->enqueue(DCPS::make_rch<WriterRemoveAssociations>(*pos));
+        event_dispatcher_->dispatch(DCPS::make_rch<WriterRemoveAssociations>(*pos));
         part_iter->second.writer_associated_records_.erase(pos);
         break;
       }
@@ -6792,7 +6712,7 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
   } else if (equal_guid_prefixes(writer, participant_id_) && equal_guid_prefixes(reader, participant_id_)) {
     DCPS::ReaderAssociation ra = DCPS::ReaderAssociation();
     ra.readerId = reader;
-    job_queue_->enqueue(DCPS::make_rch<WriterRemoveAssociations>(DCPS::make_rch<WriterAssociationRecord>(callbacks, writer, ra)));
+    event_dispatcher_->dispatch(DCPS::make_rch<WriterRemoveAssociations>(DCPS::make_rch<WriterAssociationRecord>(callbacks, writer, ra)));
   }
 }
 
@@ -6811,7 +6731,7 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
 
     for (DiscoveredParticipant::ReaderAssociationRecords::iterator pos = part_iter->second.reader_associated_records_.begin(), limit = part_iter->second.reader_associated_records_.end(); pos != limit; ++pos) {
       if ((*pos)->reader_id() == reader && (*pos)->writer_id() == writer) {
-        job_queue_->enqueue(DCPS::make_rch<ReaderRemoveAssociations>(*pos));
+        event_dispatcher_->dispatch(DCPS::make_rch<ReaderRemoveAssociations>(*pos));
         part_iter->second.reader_associated_records_.erase(pos);
         break;
       }
@@ -6819,7 +6739,7 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
   } else if (equal_guid_prefixes(reader, participant_id_) && equal_guid_prefixes(writer, participant_id_)) {
     DCPS::WriterAssociation wa = DCPS::WriterAssociation();
     wa.writerId = writer;
-    job_queue_->enqueue(DCPS::make_rch<ReaderRemoveAssociations>(DCPS::make_rch<ReaderAssociationRecord>(callbacks, reader, wa)));
+    event_dispatcher_->dispatch(DCPS::make_rch<ReaderRemoveAssociations>(DCPS::make_rch<ReaderAssociationRecord>(callbacks, reader, wa)));
   }
 }
 
@@ -7385,8 +7305,8 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
 
     if (call_reader && call_writer) {
       // Associate immediately.
-      job_queue_->enqueue(DCPS::make_rch<ReaderAddAssociation>(rar));
-      job_queue_->enqueue(DCPS::make_rch<WriterAddAssociation>(war));
+      event_dispatcher_->dispatch(DCPS::make_rch<ReaderAddAssociation>(rar));
+      event_dispatcher_->dispatch(DCPS::make_rch<WriterAddAssociation>(war));
     } else if (call_reader) {
       if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
         // Reader is a local recorder using complete types
@@ -7617,13 +7537,13 @@ void Sedp::match_continue_security_enabled(
 }
 #endif
 
-void Sedp::WriterAddAssociation::execute()
+void Sedp::WriterAddAssociation::handle_event()
 {
   DCPS::DataWriterCallbacks_rch lock = record_->callbacks_.lock();
   if (lock) {
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Sedp::WriterAddAssociation::execute - ")
+                 ACE_TEXT("(%P|%t) Sedp::WriterAddAssociation::handle_event - ")
                  ACE_TEXT("adding writer %C association for reader %C\n"), LogGuid(record_->writer_id()).c_str(),
                  LogGuid(record_->reader_id()).c_str()));
     }
@@ -7631,13 +7551,13 @@ void Sedp::WriterAddAssociation::execute()
   }
 }
 
-void Sedp::WriterRemoveAssociations::execute()
+void Sedp::WriterRemoveAssociations::handle_event()
 {
   DCPS::DataWriterCallbacks_rch lock = record_->callbacks_.lock();
   if (lock) {
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Sedp::WriterRemoveAssociations::execute - ")
+                 ACE_TEXT("(%P|%t) Sedp::WriterRemoveAssociations::handle_event - ")
                  ACE_TEXT("removing writer %C association for reader %C\n"), LogGuid(record_->writer_id()).c_str(),
                  LogGuid(record_->reader_id()).c_str()));
     }
@@ -7648,13 +7568,13 @@ void Sedp::WriterRemoveAssociations::execute()
   }
 }
 
-void Sedp::ReaderAddAssociation::execute()
+void Sedp::ReaderAddAssociation::handle_event()
 {
   DCPS::DataReaderCallbacks_rch lock = record_->callbacks_.lock();
   if (lock) {
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Sedp::ReaderAddAssociation::execute - ")
+                 ACE_TEXT("(%P|%t) Sedp::ReaderAddAssociation::handle_event - ")
                  ACE_TEXT("adding reader %C association for writer %C\n"), LogGuid(record_->reader_id()).c_str(),
                  LogGuid(record_->writer_id()).c_str()));
     }
@@ -7662,13 +7582,13 @@ void Sedp::ReaderAddAssociation::execute()
   }
 }
 
-void Sedp::ReaderRemoveAssociations::execute()
+void Sedp::ReaderRemoveAssociations::handle_event()
 {
   DCPS::DataReaderCallbacks_rch lock = record_->callbacks_.lock();
   if (lock) {
     if (DCPS_debug_level > 3) {
       ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) Sedp::ReaderRemoveAssociations::execute - ")
+                 ACE_TEXT("(%P|%t) Sedp::ReaderRemoveAssociations::handle_event - ")
                  ACE_TEXT("removing reader %C association for writer %C\n"), LogGuid(record_->reader_id()).c_str(),
                  LogGuid(record_->writer_id()).c_str()));
     }

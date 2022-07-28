@@ -86,11 +86,11 @@ public:
 
 #if defined ACE_HAS_CPP11
   typedef OPENDDS_UNORDERED_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef OPENDDS_VECTOR(RcHandle<Key>) KeyVec;
+  typedef OPENDDS_VECTOR(Key) KeyVec;
   typedef OPENDDS_UNORDERED_MAP_T(GUID_t, KeyVec) IdMapType;
 #else
   typedef OPENDDS_MAP_T(Key, RcHandle<AddressCacheEntry>) MapType;
-  typedef OPENDDS_VECTOR(RcHandle<Key>) KeyVec;
+  typedef OPENDDS_VECTOR(Key) KeyVec;
   typedef OPENDDS_MAP_T(GUID_t, KeyVec) IdMapType;
 #endif
 
@@ -108,7 +108,7 @@ public:
     {
     }
 
-    ScopedAccess(AddressCache& cache, const Key& key, bool block = true)
+    ScopedAccess(AddressCache& cache, const Key& key, bool block = true, const MonotonicTimePoint& now = MonotonicTimePoint::now())
       : guard_(cache.mutex_, block)
       , rch_()
       , is_new_(false)
@@ -120,18 +120,17 @@ public:
       if (pos == cache.map_.end()) {
         rch_ = make_rch<AddressCacheEntry>();
         cache.map_[key] = rch_;
-        const RcHandle<Key> key_rch = make_rch<Key>(key);
         GuidSet set;
         key.get_contained_guids(set);
         for (GuidSet::const_iterator it = set.begin(), limit = set.end(); it != limit; ++it) {
-          cache.id_map_[*it].push_back(key_rch);
+          cache.id_map_[*it].push_back(key);
         }
         is_new_ = true;
       } else {
         rch_ = pos->second;
       }
 
-      if (rch_->expires_ < MonotonicTimePoint::now()) {
+      if (rch_->expires_ < now) {
         rch_->addrs_.clear();
         rch_->expires_ = MonotonicTimePoint::max_value;
         is_new_ = true;
@@ -205,11 +204,10 @@ public:
       rch->expires_ = expires;
     } else {
       rch = make_rch<AddressCacheEntry>(addrs, expires);
-      const RcHandle<Key> key_rch = make_rch<Key>(key);
       GuidSet set;
       key.get_contained_guids(set);
       for (GuidSet::const_iterator it = set.begin(), limit = set.end(); it != limit; ++it) {
-        id_map_[*it].push_back(key_rch);
+        id_map_[*it].push_back(key);
       }
     }
   }
@@ -226,7 +224,7 @@ public:
     const typename IdMapType::iterator pos = id_map_.find(val);
     if (pos != id_map_.end()) {
       for (typename KeyVec::iterator it = pos->second.begin(), limit = pos->second.end(); it != limit; ++it) {
-        map_.erase(**it);
+        map_.erase(*it);
       }
       id_map_.erase(pos);
     }

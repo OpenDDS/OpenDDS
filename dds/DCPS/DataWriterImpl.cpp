@@ -186,15 +186,15 @@ void DataWriterImpl::return_handle(DDS::InstanceHandle_t handle)
   }
 }
 
-DDS::Subscriber_var
-DataWriterImpl::get_builtin_subscriber() const
+RcHandle<BitSubscriber>
+DataWriterImpl::get_builtin_subscriber_proxy() const
 {
   RcHandle<DomainParticipantImpl> participant_servant = participant_servant_.lock();
   if (participant_servant) {
-    return participant_servant->get_builtin_subscriber();
+    return participant_servant->get_builtin_subscriber_proxy();
   }
 
-  return DDS::Subscriber_var();
+  return RcHandle<BitSubscriber>();
 }
 
 void
@@ -219,9 +219,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     return;
   }
 
-  if (GUID_UNKNOWN == publication_id_) {
-    publication_id_ = yourId;
-  }
+  check_and_set_repo_id(yourId);
 
   {
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);

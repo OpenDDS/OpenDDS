@@ -12,6 +12,7 @@
 
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
@@ -141,7 +142,7 @@ private:
   typedef ACE_Guard<LockType> GuardType;
   LockType connections_lock_;
 
-  DDS::Subscriber_var bit_sub_;
+  RcHandle<BitSubscriber> bit_sub_;
   GuidPrefix_t local_prefix_;
 
   /// RTPS uses only one link per transport.

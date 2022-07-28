@@ -8,7 +8,9 @@
 #ifndef OPENDDS_DCPS_ASSOCIATIONDATA_H
 #define OPENDDS_DCPS_ASSOCIATIONDATA_H
 
+#include "GuidUtils.h"
 #include "NetworkResource.h"
+#include "Time_Helper.h"
 #include "transport/framework/TransportDefs.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>

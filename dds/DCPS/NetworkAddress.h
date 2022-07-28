@@ -16,6 +16,7 @@
 
 #include "Definitions.h"
 #include "PoolAllocator.h"
+#include "Hash.h"
 
 #include "ace/INET_Addr.h"
 
@@ -95,5 +96,9 @@ bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#if defined ACE_HAS_CPP11
+OPENDDS_OOAT_STD_HASH(OpenDDS::DCPS::NetworkAddress, OpenDDS_Dcps_Export);
+#endif
 
 #endif /*OPENDDS_DCPS_NETWORK_ADDRESS_H*/

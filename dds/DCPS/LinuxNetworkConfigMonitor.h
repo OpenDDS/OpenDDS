@@ -37,33 +37,43 @@ public:
 private:
   class RegisterHandler : public ReactorInterceptor::Command {
   public:
-    RegisterHandler(LinuxNetworkConfigMonitor* lncm)
+    RegisterHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
     {}
 
   private:
     void execute()
     {
-      if (reactor()->register_handler(lncm_, READ_MASK) != 0) {
+      RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
+      if (!lncm) {
+        return;
+      }
+      ACE_GUARD(ACE_Thread_Mutex, g, lncm->socket_mutex_);
+      if (reactor()->register_handler(lncm.get(), READ_MASK) != 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
       }
     }
 
-    LinuxNetworkConfigMonitor* lncm_;
+    WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
   };
 
   class RemoveHandler : public ReactorInterceptor::Command {
   public:
-    RemoveHandler(LinuxNetworkConfigMonitor* lncm)
+    RemoveHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
     {}
 
     void execute()
     {
-      reactor()->remove_handler(lncm_, READ_MASK);
+      RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
+      if (!lncm) {
+        return;
+      }
+      ACE_GUARD(ACE_Thread_Mutex, g, lncm->socket_mutex_);
+      reactor()->remove_handler(lncm.get(), READ_MASK);
     }
 
-    LinuxNetworkConfigMonitor* lncm_;
+    WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
   };
 
   ACE_HANDLE get_handle() const;
@@ -72,6 +82,7 @@ private:
   void process_message(const nlmsghdr* header);
 
   ACE_SOCK_Netlink socket_;
+  ACE_Thread_Mutex socket_mutex_;
   ReactorInterceptor_wrch interceptor_;
 
   struct NetworkInterface {
