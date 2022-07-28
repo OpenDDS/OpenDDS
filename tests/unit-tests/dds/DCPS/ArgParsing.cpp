@@ -12,39 +12,67 @@ using namespace OpenDDS::DCPS::ArgParsing;
 using OpenDDS::DCPS::String;
 
 namespace {
-  char** strvec_to_argv(std::vector<std::string> args, int& argc)
-  {
-    char** argv = new char*[args.size() + 1];
-    argc = 0;
-    for (std::vector<std::string>::iterator it = args.begin(); it != args.end(); it++) {
-      argv[argc++] = std::strcpy(new char[it->size() + 1], it->c_str());
-    }
-    argv[argc] = 0;
-    return argv;
-  }
+  struct ArgvMaker {
+    int argc;
+    char** argv;
+    StrVec args;
 
-  void delete_argv(int argc, char** argv)
-  {
-    for (int i = 0; i < argc; i++) {
-      if (argv[i]) {
-        delete [] argv[i];
-      }
+    ArgvMaker()
+      : argc(0)
+      , argv(0)
+    {
+      reset();
     }
-    delete [] argv;
-  }
+
+    virtual ~ArgvMaker()
+    {
+      reset();
+    }
+
+    ArgvMaker& operator()(const char* argument)
+    {
+      args.push_back(argument);
+      return *this;
+    }
+
+    void done()
+    {
+      clear_argv();
+      argv = new char*[args.size() + 1];
+      for (StrVecIt it = args.begin(); it != args.end(); it++) {
+        argv[argc++] = std::strcpy(new char[it->size() + 1], it->c_str());
+      }
+      argv[argc] = 0;
+    }
+
+    void clear_argv()
+    {
+      if (argv) {
+        for (int i = 0; i < argc; i++) {
+          if (argv[i]) {
+            delete [] argv[i];
+          }
+        }
+        delete [] argv;
+        argv = 0;
+      }
+      argc = 0;
+    }
+
+    void reset()
+    {
+      clear_argv();
+      args.clear();
+    }
+  };
 }
 
 TEST(dds_DCPS_ArgParsing_ArgParser, realistic_example)
 {
-  std::vector<std::string> args;
-  args.push_back("./prog");
-  args.push_back("foo");
-  args.push_back("bar");
-  args.push_back("-x");
-  args.push_back("--y-opt");
-  args.push_back("3");
-  int argc;
-  char** argv = strvec_to_argv(args, argc);
+  ArgvMaker am;
+  am("./prog")("foo")("bar")("-x")("--y-opt")("3").done();
+  int argc = am.argc;
+  char** argv = am.argv;
 
   // Start of what should be copied to real code
   String a;
@@ -78,51 +106,28 @@ TEST(dds_DCPS_ArgParsing_ArgParser, realistic_example)
   EXPECT_EQ(c, static_cast<unsigned>(2));
   EXPECT_TRUE(x);
   EXPECT_EQ(y, static_cast<int>(3));
-
-  delete_argv(argc, argv);
 }
 
 namespace {
-  struct Helper {
+  struct Helper : public ArgvMaker {
     ArgParser arg_parser;
-    int argc;
-    char** argv;
-    std::vector<std::string> args;
 
     Helper()
       : arg_parser("TEST DESCRIPTION")
-      , argc(0)
-      , argv(0)
     {
       reset();
     }
 
     void reset()
     {
-      if (argv) {
-        delete_argv(argc, argv);
-        argv = 0;
-      }
-      argc = 0;
-      args.clear();
+      ArgvMaker::reset();
       args.push_back("PROGRAM NAME");
-    }
-
-    virtual ~Helper()
-    {
-      reset();
-    }
-
-    Helper& operator()(const char* argument)
-    {
-      args.push_back(argument);
-      return *this;
     }
 
     bool parse(bool assert_success = true)
     {
       if (!argv) {
-        argv = strvec_to_argv(args, argc);
+        done();
       }
 
       bool expected_result = true;
@@ -150,9 +155,9 @@ namespace {
 
 namespace {
   struct BasicHelper : public Helper {
-    std::string a;
+    String a;
     Positional a_arg;
-    std::string b;
+    String b;
     Positional b_arg;
     unsigned c;
     PositionalAs<IntValue<unsigned> > c_arg;
@@ -431,7 +436,7 @@ TEST(dds_DCPS_ArgParsing_StringChoicesValue, parse)
 }
 
 namespace {
-  const std::string wrap_text =
+  const String wrap_text =
     "This is the first line with explicit break\n"
     "Shorter line with explicit break\n"
     "\n"
@@ -448,7 +453,7 @@ namespace {
 TEST(dds_DCPS_ArgParsing_WordWrapper, wrap)
 {
   WordWrapper ww(0, 50);
-  const std::string result = ww.wrap(wrap_text);
+  const String result = ww.wrap(wrap_text);
   const char* expected =
     "This is the first line with explicit break\n"
     "Shorter line with explicit break\n"
@@ -469,7 +474,7 @@ TEST(dds_DCPS_ArgParsing_WordWrapper, wrap)
 TEST(dds_DCPS_ArgParsing_WordWrapper, wrap_indent)
 {
   WordWrapper ww(10, 50);
-  const std::string result = ww.wrap(wrap_text);
+  const String result = ww.wrap(wrap_text);
   const char* expected =
     "          This is the first line with explicit\n"
     "          break\n"
@@ -495,7 +500,7 @@ TEST(dds_DCPS_ArgParsing_WordWrapper, wrap_indent)
 TEST(dds_DCPS_ArgParsing_WordWrapper, wrap_with_left_text)
 {
   WordWrapper ww(4, 10, 50);
-  const std::string result = ww.wrap("Left", wrap_text);
+  const String result = ww.wrap("Left", wrap_text);
   const char* expected =
     "    Left  This is the first line with explicit\n"
     "          break\n"
@@ -521,7 +526,7 @@ TEST(dds_DCPS_ArgParsing_WordWrapper, wrap_with_left_text)
 TEST(dds_DCPS_ArgParsing_WordWrapper, wrap_with_long_left_text)
 {
   WordWrapper ww(10, 50);
-  const std::string result = ww.wrap("Left text that goes on too long", wrap_text);
+  const String result = ww.wrap("Left text that goes on too long", wrap_text);
   const char* expected =
     "Left text that goes on too long\n"
     "          This is the first line with explicit\n"
@@ -551,12 +556,12 @@ TEST(dds_DCPS_ArgParsing_ArgParser, print_help)
     "This is testing the generated help message.\n"
     "This is testing the generated help message. This is testing the generated help message.");
 
-  std::string a;
+  String a;
   Positional a_arg(arg_parser, "A",
     "This is argument A, required.\nThis is some text that I'm adding to make "
     "the string long enough to wrap to the next line...", a);
   arg_parser.start_optional_positionals();
-  std::string b;
+  String b;
   Positional b_arg(arg_parser, "B", "This is argument B, optional", b);
   unsigned c = 0;
   PositionalAs<IntValue<unsigned> > c_arg(arg_parser,
@@ -565,7 +570,7 @@ TEST(dds_DCPS_ArgParsing_ArgParser, print_help)
   bool x = false;
   Option x_opt(arg_parser, "x", "This is option x", x);
   x_opt.show_in_usage_ = true;
-  std::string y;
+  String y;
   OptionAs<StringValue> y_opt(arg_parser, "y-opt-long-name",
     "This is option y, string\nThis line should be next to -y STRING", y, "STRING");
   y_opt.add_alias("y");
@@ -581,12 +586,9 @@ TEST(dds_DCPS_ArgParsing_ArgParser, print_help)
   arg_parser.out_stream_ = &out;
   arg_parser.call_exit_ = false;
 
-  std::vector<std::string> args;
-  args.push_back("./prog");
-  args.push_back("--help");
-  int argc;
-  char** argv = strvec_to_argv(args, argc);
-  arg_parser.parse(argc, argv);
+  ArgvMaker am;
+  am("./prog")("--help").done();
+  arg_parser.parse(am.argc, am.argv);
 
   ASSERT_STREQ(
     "Usage:\n"

@@ -1,3 +1,5 @@
+#include <DCPS/DdsDcps_pch.h>
+
 #include "ArgParsing.h"
 
 #include <dds/Version.h>
@@ -552,7 +554,7 @@ bool ArgParser::parse(int argc, char* argv[])
 #ifdef ACE_USES_WCHAR
 bool ArgParser::parse(int argc, ACE_TCHAR* argv[])
 {
-  ACE_Argv_Type_Converter atc(argc_copy, argv);
+  ACE_Argv_Type_Converter atc(argc, argv);
   return parse(atc.get_argc(), atc.get_ASCII_argv());
 }
 #endif
