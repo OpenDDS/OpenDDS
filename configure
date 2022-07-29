@@ -954,7 +954,7 @@ sub write_config_h {
   my %buildEnv = %{shift()};
   my $platform = $opts{$buildEnv{'build'}};
   my $pi = $platforminfo{$platform};
-  $opts{'optimize'} = 0 if !exists $opts{'optimize'};
+  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} && !exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
   if ($buildEnv{'build'} eq 'target') {
@@ -1031,7 +1031,7 @@ my %all_sanitizers = (
       UBSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/ubsan-suppr.txt:print_stacktrace=1",
     },
     configh => ['#define ACE_INITIALIZE_MEMORY_BEFORE_USE'],
-    compiler_args => ['-fsanitize-coverage=trace-pc-guard'],
+    compiler_args => ['-fno-sanitize=enum'],
   },
 );
 my %enabled_sanitizers = ();

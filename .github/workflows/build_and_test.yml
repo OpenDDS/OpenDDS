@@ -3261,7 +3261,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install clang-12
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install clang-12
@@ -3282,6 +3282,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
+          --std=c++11 \
           --sanitize asan \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
@@ -3547,7 +3548,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install clang-12
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install clang-12
@@ -3568,6 +3569,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
+          --std=c++11 \
           --sanitize tsan \
           --ipv6 \
           --tests \
@@ -3641,6 +3643,7 @@ jobs:
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
+          --std=c++11 \
           --sanitize tsan \
           --ipv6 \
           --tests \
@@ -3773,6 +3776,296 @@ jobs:
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
         <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/tsan_tests.lst"/>
+        <command name="log" options="off"/>
+        <command name="process_logs" options="prettify"/>
+        </autobuild>
+        EOF
+        $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
+    - name: upload autobuild output
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.job }}_autobuild_output
+        path: OpenDDS/${{ github.job }}_autobuild_workspace
+    - name: check results
+      shell: bash
+      run: |
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+
+  ACE_TAO_u20_p1_ubsan:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: OpenDDS/ACE_TAO
+    - name: get ACE_TAO commit
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        export ACE_COMMIT=$(git rev-parse HEAD)
+        echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: get compiler version
+      shell: bash
+      run: |
+        export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
+        echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: Cache Artifact
+      id: cache-artifact
+      uses: actions/cache@v3
+      with:
+        path: ${{ github.job }}.tar.xz
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+    - name: install clang-12
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install clang-12
+    - name: install xerces
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: configure OpenDDS
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-12 \
+          --std=c++11 \
+          --sanitize ubsan \
+          --features=no_hidden_visibility=1 \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
+          --ipv6 \
+          --tests \
+          --security
+    - name: build ACE and TAO
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        export UBSAN_OPTIONS=print_stacktrace=1
+        cd ACE_TAO/ACE
+        make -j2
+        cd ../TAO
+        make -j2
+    - name: create ACE_TAO tar.xz artifact
+      if: steps.cache-artifact.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        cd OpenDDS/ACE_TAO
+        perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        xz -3 ../../${{ github.job }}.tar
+    - name: upload ACE_TAO artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  build_u20_p1_ubsan_sec:
+
+    runs-on: ubuntu-20.04
+
+    needs: ACE_TAO_u20_p1_ubsan
+
+    steps:
+    - name: install clang-12
+      run: sudo apt-get -y install clang-12
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ACE_TAO_u20_p1_ubsan_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u20_p1_ubsan.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: configure OpenDDS
+      run: |
+        cd OpenDDS
+        ./configure \
+          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
+          --mpc=$GITHUB_WORKSPACE/MPC \
+          --compiler=clang++-12 \
+          --std=c++11 \
+          --sanitize ubsan \
+          --features=no_hidden_visibility=1 \
+          --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
+          --ipv6 \
+          --tests \
+          --security \
+          --rapidjson
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - name: build OpenDDS
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        export UBSAN_OPTIONS=print_stacktrace=1
+        make -j2
+    - name: Build CMake Tests
+      run: |
+        source OpenDDS/setenv.sh
+        cd OpenDDS/tests/cmake
+        cmake -DCMAKE_CXX_COMPILER=clang++-12 -DCMAKE_CXX_STANDARD=11 -S . -B build
+        UBSAN_OPTIONS=print_stacktrace=1 cmake --build build -- -j2
+    - name: create OpenDDS tar.xz artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        rm -rf ACE_TAO
+        find . -iname "*\.o" | xargs rm
+        tar cvf ../${{ github.job }}.tar setenv.sh
+        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        xz -3 ../${{ github.job }}.tar
+    - name: upload OpenDDS artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ github.job }}_artifact
+        path: ${{ github.job }}.tar.xz
+
+  test_u20_p1_ubsan_sec:
+
+    runs-on: ubuntu-20.04
+
+    needs: build_u20_p1_ubsan_sec
+
+    steps:
+    - name: install xerces
+      run: sudo apt-get -y install libxerces-c-dev
+    - name: checkout MPC
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/MPC
+        path: MPC
+    - name: checkout autobuild
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/autobuild
+        path: autobuild
+    - name: checkout ACE_TAO
+      uses: actions/checkout@v3
+      with:
+        repository: DOCGroup/ACE_TAO
+        ref: ace6tao2
+        path: ACE_TAO
+    - name: download ACE_TAO artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ACE_TAO_u20_p1_ubsan_artifact
+        path: ACE_TAO
+    - name: extract ACE_TAO artifact
+      shell: bash
+      run: |
+        cd ACE_TAO
+        tar xvfJ ACE_TAO_u20_p1_ubsan.tar.xz
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
+    - name: download OpenDDS artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: build_u20_p1_ubsan_sec_artifact
+        path: OpenDDS
+    - name: extract OpenDDS artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvfJ build_u20_p1_ubsan_sec.tar.xz
+    - name: check build configuration
+      shell: bash
+      run: |
+        cd OpenDDS
+        . setenv.sh
+        tools/scripts/show_build_config.pl
+    - name: install lldb
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install lldb
+        echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
+    - name: change core file pattern
+      shell: bash
+      run: |
+        sudo sysctl -w kernel.core_pattern=core.%e.%p
+        echo Core file pattern set to:
+        cat /proc/sys/kernel/core_pattern
+    - name: run OpenDDS tests
+      shell: bash
+      run: |
+        ulimit -c unlimited
+        cd OpenDDS
+        echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
+        echo "export ACE_TEST_DEBUGGER=lldb" >> setenv.sh
+        echo "export UBSAN_OPTIONS=print_stacktrace=1" >> setenv.sh
+        . setenv.sh
+        mkdir ${{ github.job }}_autobuild_workspace
+        cd ${{ github.job }}_autobuild_workspace
+        echo using commit $TRIGGERING_COMMIT for SHA
+        echo $TRIGGERING_COMMIT >> ./SHA
+        cat > config.xml <<EOF
+        <autobuild>
+        <configuration>
+        <variable name="log_file" value="output.log"/>
+        <variable name="log_root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="project_root" value="$DDS_ROOT"/>
+        <variable name="root" value="$DDS_ROOT/${{ github.job }}_autobuild_workspace"/>
+        <variable name="junit_xml_output" value="Tests"/>
+        </configuration>
+        <command name="log" options="on"/>
+        <command name="print_os_version"/>
+        <command name="print_env_vars"/>
+        <command name="print_ace_config"/>
+        <command name="print_cmake_version"/>
+        <command name="print_make_version"/>
+        <command name="check_compiler" options="gcc"/>
+        <command name="print_perl_version"/>
+        <command name="print_autobuild_config"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config IPV6 -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON --no-dcps tests/ubsan_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
