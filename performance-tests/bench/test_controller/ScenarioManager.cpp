@@ -285,6 +285,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
 
   // Timeout Thread
   size_t reports_left = allocated_scenario.expected_process_reports;
+  report.missing_reports = reports_left;
   std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
   const std::chrono::seconds timeout(allocated_scenario.timeout + SCENARIO_TIMEOUT_GRACE_PERIOD);
@@ -378,7 +379,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
           }
           std::stringstream ss;
           ss << "Got " << process_report_count << " out of "
-            << allocated_scenario.expected_process_reports << " expected reports";
+            << allocated_scenario.expected_process_reports << " expected process reports";
           if (worker_failures != 0 || parse_failures != 0) {
             ss << " (with " << worker_failures << " worker failures and "
               << parse_failures << " parse failures)";
@@ -394,6 +395,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
       reports_left = static_cast<size_t>(allocated_scenario.expected_process_reports) - process_report_count;
+      report.missing_reports = reports_left + worker_failures + parse_failures;
       if (reports_left == 0) {
         break;
       }
