@@ -92,6 +92,8 @@ typedef OPENDDS_VECTOR(String) StrVec;
 typedef StrVec::iterator StrVecIt;
 
 class ArgParser;
+class Option;
+typedef OPENDDS_MAP(String, Option*) OptMap;
 
 struct OpenDDS_Dcps_Export ArgParseState {
   ArgParseState(ArgParser& parser)
@@ -108,6 +110,7 @@ struct OpenDDS_Dcps_Export ArgParseState {
   StrVec args;
   // Name to use to reference the current argument in error messages
   String current_arg_ref;
+  OptMap options;
 };
 
 class Argument;
@@ -165,33 +168,17 @@ public:
   }
 };
 
-template <typename TheValueType>
-class Value : public Handler {
+class OpenDDS_Dcps_Export StringValue : public Handler {
 public:
-  typedef TheValueType ValueType;
+  typedef String ValueType;
 
-  Value()
+  StringValue()
     : dest_(0)
   {
   }
 
-  Value(ValueType& dest)
-    : dest_(&dest)
-  {
-  }
-
-protected:
-  ValueType* const dest_;
-};
-
-class OpenDDS_Dcps_Export StringValue : public Value<String> {
-public:
-  StringValue()
-  {
-  }
-
   StringValue(String& dest)
-    : Value(dest)
+    : dest_(&dest)
   {
   }
 
@@ -215,6 +202,9 @@ public:
     }
     state.args.erase(values);
   }
+
+protected:
+  String* const dest_;
 };
 
 class OpenDDS_Dcps_Export StringChoiceValue : public StringValue {
@@ -407,14 +397,14 @@ class PositionalAs : public Positional {
 public:
   PositionalAs(ArgParser& arg_parser, const String& name, const String& help,
     typename HandlerType::ValueType& dest, bool optional)
-    : Positional(arg_parser, name, help, &handler, optional)
+    : Positional(arg_parser, name, help, dynamic_cast<Handler*>(&handler), optional)
     , handler(dest)
   {
   }
 
   PositionalAs(ArgParser& arg_parser, const String& name, const String& help,
     typename HandlerType::ValueType& dest)
-    : Positional(arg_parser, name, help, &handler)
+    : Positional(arg_parser, name, help, dynamic_cast<Handler*>(&handler))
     , handler(dest)
   {
   }
@@ -559,8 +549,12 @@ public:
 };
 
 template <typename IntType>
-class IntValue : public Value<IntType> {
+class IntValue : public Handler {
+protected:
+  IntType* const dest_;
+
 public:
+  typedef IntType ValueType;
   typedef std::numeric_limits<IntType> Limits;
 
   IntType min_value;
@@ -568,7 +562,7 @@ public:
 
   IntValue(IntType& dest,
       IntType min_value = (Limits::min)(), IntType max_value = (Limits::max)())
-    : Value<IntType>(dest)
+    : dest_(&dest)
     , min_value(min_value)
     , max_value(max_value)
   {
@@ -589,7 +583,7 @@ public:
     if (values == state.args.end()) {
       return;
     }
-    IntType& dest = *Value<IntType>::dest_;
+    IntType& dest = *dest_;
     if (!convertToInteger(*values, dest)) {
       throw ParseError(state, "was passed \"" + *values + "\", which is not a valid integer");
     }
