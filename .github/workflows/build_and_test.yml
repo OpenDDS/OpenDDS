@@ -4435,7 +4435,7 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u22_w1_sec:
+  build_u22_w1a1_sec:
 
     runs-on: ubuntu-22.04
 
@@ -4473,7 +4473,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --features=uses_wchar=1 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --features=uses_wchar=1 --features=dds_suppress_anys=0 --tests --security --rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -4509,11 +4509,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_u22_w1_sec:
+  test_u22_w1a1_sec:
 
     runs-on: ubuntu-22.04
 
-    needs: build_u22_w1_sec
+    needs: build_u22_w1a1_sec
 
     steps:
     - name: install xerces
@@ -4552,13 +4552,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u22_w1_sec_artifact
+        name: build_u22_w1a1_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u22_w1_sec.tar.xz
+        tar xvfJ build_u22_w1a1_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
