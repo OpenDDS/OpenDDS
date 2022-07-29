@@ -118,19 +118,12 @@ void address_info() {
 
   ACE_DEBUG((LM_DEBUG, "address_info: There are %d interfaces\n", addr_count));
   for (size_t i = 0; i < addr_count; ++i) {
-      char buffer[256] = { '\0' };
-      if (addr_array[i].get_host_addr(buffer, sizeof(buffer)) == 0) {
-          ACE_ERROR((LM_ERROR, "ERROR: address_info: Failed to convert address to string\n"));
-      } else {
-          ACE_DEBUG((LM_DEBUG, "DEBUG: address_info: Found IP interface %C\n", buffer));
-      }
-  }
-
-  for (size_t i = 0; i < addr_count; ++i) {
     ACE_DEBUG((LM_DEBUG, "address_info: Considering interface %d\n", i));
     char buffer[256] = {'\0'};
     if (addr_array[i].get_host_addr(buffer, sizeof(buffer)) == 0) {
       ACE_ERROR((LM_ERROR, "ERROR: address_info: Failed to convert address to string\n"));
+    } else {
+      ACE_DEBUG((LM_DEBUG, "DEBUG: address_info: Found IP interface %C\n", buffer));
     }
 
     // Find the hostname of the interface

@@ -18,7 +18,7 @@ use strict;
 my $test = new PerlDDS::TestFramework();
 $test->process("AddressLookup", "main", "");
 $test->start_process("AddressLookup");
-my $retcode = $test->finish(15);
+my $retcode = $test->finish(30);
 if ($retcode != 0) {
     exit 1;
 }
