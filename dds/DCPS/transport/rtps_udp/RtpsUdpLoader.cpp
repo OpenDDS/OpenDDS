@@ -52,7 +52,7 @@ void RtpsUdpLoader::load()
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
                           OPENDDS_STRING("0600_RTPS_UDP"),
-                          RTPS_UDP_NAME, false);
+                          RTPS_UDP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
 #endif
