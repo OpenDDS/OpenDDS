@@ -3919,6 +3919,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
+        sed -i 's/DevGuideExamples/tests\/unit-tests/' DDS_TAOv2.mwc
         ./configure \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
@@ -3928,7 +3929,6 @@ jobs:
           --features=no_hidden_visibility=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
           --ipv6 \
-          --tests \
           --security \
           --rapidjson
     - name: check build configuration
