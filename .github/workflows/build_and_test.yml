@@ -3919,7 +3919,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        sed -i 's/DevGuideExamples/tests\/unit-tests/' DDS_TAOv2.mwc
+        sed -i 's/DevGuideExamples/tests\/unit-tests/' DDS_no_tests.mwc
         ./configure \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
