@@ -3920,6 +3920,9 @@ jobs:
       run: |
         cd OpenDDS
         sed -i 's/DevGuideExamples/tests\/unit-tests/' DDS_no_tests.mwc
+        echo "---"
+        cat DDS_no_tests.mwc
+        echo "---"
         ./configure \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
@@ -3931,7 +3934,6 @@ jobs:
           --ipv6 \
           --security \
           --rapidjson
-        ls -la
     - name: check build configuration
       shell: bash
       run: |
