@@ -3920,14 +3920,12 @@ jobs:
       run: |
         cd OpenDDS
         sed -i 's/DevGuideExamples/tests\/unit-tests/' DDS_no_tests.mwc
-        echo "---"
-        cat DDS_no_tests.mwc
-        echo "---"
         ./configure \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
           --std=c++11 \
+          --gtest \
           --sanitize ubsan \
           --features=no_hidden_visibility=1 \
           --macros=SOFLAGS+=-Wl,-h,\$\(SONAME\) \
