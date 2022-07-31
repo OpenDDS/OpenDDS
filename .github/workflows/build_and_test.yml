@@ -4111,6 +4111,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: DOCGroup/autobuild
+        ref: 'handle_valgrind_error_summary'
         path: autobuild
     - name: checkout ACE_TAO
       uses: actions/checkout@v3
