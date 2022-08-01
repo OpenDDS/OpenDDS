@@ -126,15 +126,15 @@ bool
 
       if (datalink->impl().config().name() == name)
         {
-//          ACE_DEBUG((LM_DEBUG,
-//                     ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
-//                     name.c_str()));
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
+                     name.c_str()));
           return true;
         }
     }
 
-//  ACE_DEBUG((LM_DEBUG,
-//             ACE_TEXT("(%P|%t) No. Transport '%C' was not negotiated.\n"),
-//             name.c_str()));
+  ACE_DEBUG((LM_DEBUG,
+             ACE_TEXT("(%P|%t) No. Transport '%C' was not negotiated.\n"),
+             name.c_str()));
   return false;
 }

@@ -4,7 +4,7 @@
 // if COND fails then log error and abort with -1.
 #define TEST_CHECK(COND) \
   if (!( COND )) \
-      ACE_ERROR((LM_ERROR,"(%P|%t) TEST_ASSERT(%C) FAILED at %N:%l\n%a\n",\
+      ACE_ERROR((LM_ERROR,"(%P|%t) TEST_CHECK(%C) FAILED at %N:%l\n%a\n",\
         #COND , -1));
 
 // if COND fails then log error and throw.

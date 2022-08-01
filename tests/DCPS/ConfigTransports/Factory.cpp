@@ -47,20 +47,20 @@ Factory::topic(const DDS::DomainParticipant_var& dp) const
 
   // When collocation doesn't matter we choose a topic name that will not match
   // the publisher's topic name
-  std::string topicname((opts_.collocation_str == "none") ? MY_OTHER_TOPIC : MY_SAME_TOPIC);
+  std::string topic_name((opts_.collocation_str == "none") ? MY_OTHER_TOPIC : MY_SAME_TOPIC);
 
   DDS::TopicQos topic_qos;
   TEST_CHECK(DDS::RETCODE_OK == dp->get_default_topic_qos(topic_qos));
 
-  CORBA::String_var tn = typsup_->get_type_name();
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Topic name: %C\n"), tn.in()));
-  DDS::Topic_var p(dp->create_topic(topicname.c_str(),
-                                    tn,
-                                    TOPIC_QOS_DEFAULT,
-                                    DDS::TopicListener::_nil(),
-                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK));
-  TEST_CHECK(!CORBA::is_nil(p.in()));
-  return p;
+  CORBA::String_var type_name = typsup_->get_type_name();
+  ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Topic type name: %C\n"), type_name.in()));
+  DDS::Topic_var topic(dp->create_topic(topic_name.c_str(),
+                                        type_name,
+                                        TOPIC_QOS_DEFAULT,
+                                        DDS::TopicListener::_nil(),
+                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK));
+  TEST_CHECK(!CORBA::is_nil(topic.in()));
+  return topic;
 }
 
 DDS::Publisher_var
@@ -168,7 +168,7 @@ Factory::reader(const DDS::Subscriber_var& sub, const DDS::Topic_var& topic, con
   DDS::TopicDescription_var description = dp->lookup_topicdescription(tn);
   TEST_ASSERT(!CORBA::is_nil(description.in()));
 
-  DDS::DataReader_var rd(sub->create_datareader(description.in(),
+  DDS::DataReader_var dr(sub->create_datareader(description.in(),
                                                 dr_qos,
                                                 drl.in(),
                                                 ::OpenDDS::DCPS::DEFAULT_STATUS_MASK));
@@ -179,12 +179,12 @@ Factory::reader(const DDS::Subscriber_var& sub, const DDS::Topic_var& topic, con
     {
 
       OpenDDS::DCPS::TransportRegistry::instance()->bind_config(opts_.configuration_str,
-                                                                rd.in());
+                                                                dr.in());
       if (!opts_.entity_autoenable)
         {
-          TEST_ASSERT(DDS::RETCODE_OK == rd->enable());
+          TEST_ASSERT(DDS::RETCODE_OK == dr->enable());
         }
     }
 
-  return rd;
+  return dr;
 }
