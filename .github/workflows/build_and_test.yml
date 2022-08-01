@@ -3983,7 +3983,6 @@ jobs:
       uses: actions/checkout@v3
       with:
         repository: DOCGroup/autobuild
-        ref: update_prettify_for_ubsan
         path: autobuild
     - name: checkout ACE_TAO
       uses: actions/checkout@v3
