@@ -3858,7 +3858,6 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        export UBSAN_OPTIONS=print_stacktrace=1
         cd ACE_TAO/ACE
         make -j2
         cd ../TAO
@@ -3944,14 +3943,13 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        export UBSAN_OPTIONS=print_stacktrace=1
         make -j2
     - name: Build CMake Tests
       run: |
         source OpenDDS/setenv.sh
         cd OpenDDS/tests/cmake
         cmake -DCMAKE_CXX_COMPILER=clang++-12 -DCMAKE_CXX_STANDARD=11 -S . -B build
-        UBSAN_OPTIONS=print_stacktrace=1 cmake --build build -- -j2
+        cmake --build build -- -j2
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
@@ -4043,7 +4041,6 @@ jobs:
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         echo "export ACE_TEST_DEBUGGER=lldb" >> setenv.sh
-        echo "export UBSAN_OPTIONS=print_stacktrace=1" >> setenv.sh
         . setenv.sh
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
