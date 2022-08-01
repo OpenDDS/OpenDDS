@@ -84,6 +84,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
               }
 
             r1.pull(ACE_Time_Value(1));
+            r2.pull(ACE_Time_Value(1));
           }
         else if (configopt.collocation_str == "participant")
           {
