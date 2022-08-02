@@ -1306,14 +1306,14 @@ private:
   void setup(FreeIndex& index, size_t free_size = 1024) {
     memset(pool_ptr_, 0, sizeof(pool_ptr_));
     next_alloc_ = pool_ptr_ + (sizeof(AllocHeader*) - reinterpret_cast<uint64_t>(pool_ptr_) % sizeof(AllocHeader*));
-    EXPECT_EQ(reinterpret_cast<uint64_t>(next_alloc_) % 8, 0u);
+    EXPECT_EQ(reinterpret_cast<uint64_t>(next_alloc_) % sizeof (AllocHeader*), 0u);
     largest_free_ = reinterpret_cast<FreeHeader*>(pool_ptr_);
     if (free_size) {
       largest_free_->init_free_block(static_cast<unsigned int>(free_size + sizeof(AllocHeader)));
       index.init(largest_free_);
-      EXPECT_EQ(free_size % 8, 0u);
+      EXPECT_EQ(free_size % sizeof (AllocHeader*), 0u);
       next_alloc_ += free_size + (sizeof(AllocHeader)*2) + 32;
-      EXPECT_EQ(reinterpret_cast<uint64_t>(next_alloc_) % 8, 0u);
+      EXPECT_EQ(reinterpret_cast<uint64_t>(next_alloc_) % sizeof (AllocHeader*), 0u);
     }
   }
 
@@ -1322,7 +1322,7 @@ private:
     block->set_size(size);
     block->set_free();
     next_alloc_ += size + (sizeof(AllocHeader*) - static_cast<uint64_t>(size) % sizeof(AllocHeader*));
-    EXPECT_EQ(reinterpret_cast<uint64_t>(next_alloc_) % 8, 0u);
+    EXPECT_EQ(reinterpret_cast<uint64_t>(next_alloc_) % sizeof (AllocHeader*), 0u);
     list_add(block);
     return block;
   }
