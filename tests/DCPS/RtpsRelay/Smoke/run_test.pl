@@ -57,6 +57,7 @@ sub get_relay_args {
     "-ApplicationDomain 42",
     "-VerticalAddress ${port_digit}444",
     "-HorizontalAddress 127.0.0.1:11${port_digit}44",
+    "-MetaDiscoveryAddress 127.0.0.1:808${n}",
     "-ORBVerboseLogging 1"
   );
 }
@@ -66,6 +67,7 @@ $test->process("relay1", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(1) . $re
 $test->process("relay2", "$ENV{DDS_ROOT}/bin/RtpsRelay", get_relay_args(2) . $relay_security_opts);
 $test->process("publisher", "publisher", "-ORBDebugLevel 1 -DCPSConfigFile". $pub_ini . $pub_sub_security_opts);
 $test->process("subscriber", "subscriber", "-ORBDebugLevel 1 -DCPSConfigFile" . $sub_ini . $pub_sub_security_opts);
+$test->process("metachecker", "metachecker");
 
 # start a response monitor checking for
 # > 500 ms of clock drift every second.
@@ -90,7 +92,9 @@ if ($test->flag('join')) {
     sleep 1;
     $test->start_process("subscriber");
 }
+$test->start_process("metachecker");
 
+$test->stop_process(5, "metachecker");
 $test->stop_process(20, "subscriber");
 $test->stop_process(5, "publisher");
 
