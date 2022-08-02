@@ -1,0 +1,52 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL
+#define OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL
+
+#include <tao/LongSeq.pidl>
+#include <tao/ULongSeq.pidl>
+#include <tao/Int8Seq.pidl>
+#include <tao/UInt8Seq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/UShortSeq.pidl>
+#include <tao/LongLongSeq.pidl>
+#include <tao/ULongLongSeq.pidl>
+#include <tao/FloatSeq.pidl>
+#include <tao/DoubleSeq.pidl>
+#include <tao/LongDoubleSeq.pidl>
+#include <tao/CharSeq.pidl>
+#include <tao/WCharSeq.pidl>
+#include <tao/OctetSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/StringSeq.pidl>
+#include <tao/WStringSeq.pidl>
+
+module DDS {
+
+  typedef sequence<long> Int32Seq;
+  typedef sequence<unsigned long> UInt32Seq;
+  typedef sequence<int8> Int8Seq;
+  typedef sequence<uint8> UInt8Seq;
+  typedef sequence<short> Int16Seq;
+  typedef sequence<unsigned short> UInt16Seq;
+  typedef sequence<long long> Int64Seq;
+  typedef sequence<unsigned long long> UInt64Seq;
+  typedef sequence<float> Float32Seq;
+  typedef sequence<double> Float64Seq;
+  typedef sequence<long double> Float128Seq;
+  typedef sequence<char> CharSeq;
+  typedef sequence<wchar> WcharSeq;
+  typedef sequence<boolean> BooleanSeq;
+  typedef sequence<octet> ByteSeq;
+  // Already defined in DdsDcpsCore.idl
+  // typedef sequence<string> StringSeq;
+  typedef sequence<wstring> WstringSeq;
+
+};
+
+#endif /* OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL */

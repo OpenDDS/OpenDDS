@@ -17,6 +17,8 @@
 #include "Comparator_T.h"
 #include "RcObject.h"
 
+#include <dds/DdsDynamicDataC.h>
+
 #include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -185,6 +187,7 @@ class OpenDDS_Dcps_Export MetaStruct {
 public:
   virtual ~MetaStruct();
 
+  virtual Value getValue(const void* stru, DDS::MemberId memberId) const = 0;
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
   virtual Value getValue(Serializer& ser, const char* fieldSpec) const = 0;
 

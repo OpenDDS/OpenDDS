@@ -110,6 +110,13 @@ DataWriterImpl::DataWriterImpl()
 DataWriterImpl::~DataWriterImpl()
 {
   DBG_ENTRY_LVL("DataWriterImpl","~DataWriterImpl",6);
+#ifndef OPENDDS_SAFETY_PROFILE
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+    type_lookup_service->remove_guid_from_dynamic_map(publication_id_);
+  }
+#endif
 }
 
 // this method is called when delete_datawriter is called.
@@ -1511,6 +1518,12 @@ DataWriterImpl::enable()
     data_container_->shutdown_ = true;
     return DDS::RETCODE_ERROR;
   }
+
+#if defined(OPENDDS_SECURITY)
+  security_config_ = participant->get_security_config();
+  participant_permissions_handle_ = participant->permissions_handle();
+  dynamic_type_ = type_lookup_service->type_identifier_to_dynamic(typesupport->getCompleteTypeIdentifier(), publication_id);
+#endif
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "

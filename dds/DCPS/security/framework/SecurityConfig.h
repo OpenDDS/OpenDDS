@@ -82,7 +82,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
     return transform_plugin_;
   }
 
-  Utility* get_utility() const
+  DCPS::RcHandle<Utility> get_utility() const
   {
     return utility_plugin_;
   }
@@ -135,7 +135,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
                  CryptoKeyExchange_var key_exchange_plugin,
                  CryptoKeyFactory_var key_factory_plugin,
                  CryptoTransform_var transform_plugin,
-                 Utility* utility_plugin,
+                 DCPS::RcHandle<Utility> utility_plugin,
 #endif
                  const ConfigPropertyList& properties);
 
@@ -155,7 +155,7 @@ class OpenDDS_Dcps_Export SecurityConfig : public DCPS::RcObject {
   CryptoKeyExchange_var key_exchange_plugin_;
   CryptoKeyFactory_var key_factory_plugin_;
   CryptoTransform_var transform_plugin_;
-  Utility* utility_plugin_;
+  DCPS::RcHandle<Utility> utility_plugin_;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, HandleRegistry_rch, DCPS::GUID_tKeyLessThan) HandleRegistryMap;
   HandleRegistryMap handle_registry_map_;
   mutable ACE_Thread_Mutex mutex_;

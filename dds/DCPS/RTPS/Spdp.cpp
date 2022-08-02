@@ -1935,6 +1935,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   Security::AccessControl_var access = security_config_->get_access_control();
   Security::CryptoKeyFactory_var key_factory = security_config_->get_crypto_key_factory();
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
+  Security::HandleRegistry_rch handle_registry = security_config_->get_handle_registry(guid_);
 
   if (iter->second.shared_secret_handle_ != 0) {
     // Return the shared secret.
@@ -2007,6 +2008,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   iter->second.permissions_handle_ = access->validate_remote_permissions(
     auth, identity_handle_, iter->second.identity_handle_,
     iter->second.permissions_token_, iter->second.authenticated_peer_credential_token_, se);
+  handle_registry->insert_remote_participant_permissions_handle(guid, iter->second.permissions_handle_);
+
   if (participant_sec_attr_.is_access_protected &&
       iter->second.permissions_handle_ == DDS::HANDLE_NIL) {
     if (DCPS::security_debug.auth_warn) {
@@ -2127,6 +2130,7 @@ Spdp::remove_discovered_participant_i(const DiscoveredParticipantIter& iter)
       }
     }
     sedp_->get_handle_registry()->erase_remote_participant_crypto_handle(iter->first);
+    sedp_->get_handle_registry()->erase_remote_participant_permissions_handle(iter->first);
 
     if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
       if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {

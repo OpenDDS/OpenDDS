@@ -12,6 +12,7 @@
 #include "TokenReader.h"
 
 #include <dds/DCPS/SequenceIterator.h>
+#include <dds/DCPS/RcObject.h>
 #include <dds/Versioned_Namespace.h>
 
 #include <dds/DdsSecurityCoreC.h>
@@ -25,7 +26,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace Security {
 
-class OpenDDS_Security_Export Utility {
+class OpenDDS_Security_Export Utility : public DCPS::RcObject {
 public:
   virtual ~Utility() {}
   virtual void generate_random_bytes(void* ptr, size_t size) = 0;

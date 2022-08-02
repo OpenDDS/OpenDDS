@@ -736,6 +736,13 @@ private:
   RcHandle<LivenessTimer> liveness_timer_;
 
   MonotonicTimePoint wait_pending_deadline_;
+
+#if defined(OPENDDS_SECURITY)
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::Security::PermissionsHandle participant_permissions_handle_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;

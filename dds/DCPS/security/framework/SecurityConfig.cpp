@@ -24,7 +24,7 @@ SecurityConfig::SecurityConfig(const OPENDDS_STRING& name,
                                CryptoKeyExchange_var key_exchange_plugin,
                                CryptoKeyFactory_var key_factory_plugin,
                                CryptoTransform_var transform_plugin,
-                               Utility* utility_plugin,
+                               DCPS::RcHandle<Utility> utility_plugin,
 #endif
                                const ConfigPropertyList& properties)
   : name_(name)

@@ -2,5 +2,5 @@ feature(!no_opendds_safety_profile) : acelib, dds_corba {
   includes    += $(TAO_ROOT)
 }
 
-feature(no_opendds_safety_profile) : taolib, portableserver {
+feature(no_opendds_safety_profile) : taolib, portableserver, valuetype {
 }

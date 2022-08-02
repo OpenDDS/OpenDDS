@@ -159,11 +159,11 @@ class MockAuthentication : public DDS::Security::Authentication {
   MOCK_METHOD6(validate_local_identity,
       ::DDS::Security::ValidationResult_t(::DDS::Security::IdentityHandle & local_identity_handle, ::OpenDDS::DCPS::GUID_t & adjusted_participant_guid, ::DDS::Security::DomainId_t domain_id, const ::DDS::DomainParticipantQos & participant_qos, const ::OpenDDS::DCPS::GUID_t & candidate_participant_guid, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD3(get_identity_token,
-      ::CORBA::Boolean(::DDS::Security::IdentityToken & identity_token, ::DDS::Security::IdentityHandle handle, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::IdentityToken & identity_token, ::DDS::Security::IdentityHandle handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD3(get_identity_status_token,
-      ::CORBA::Boolean(::DDS::Security::IdentityStatusToken & identity_status_token, ::DDS::Security::IdentityHandle handle, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::IdentityStatusToken & identity_status_token, ::DDS::Security::IdentityHandle handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD4(set_permissions_credential_and_token,
-      ::CORBA::Boolean(::DDS::Security::IdentityHandle handle, const ::DDS::Security::PermissionsCredentialToken & permissions_credential, const ::DDS::Security::PermissionsToken & permissions_token, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::IdentityHandle handle, const ::DDS::Security::PermissionsCredentialToken & permissions_credential, const ::DDS::Security::PermissionsToken & permissions_token, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD7(validate_remote_identity,
       ::DDS::Security::ValidationResult_t(::DDS::Security::IdentityHandle & remote_identity_handle, ::DDS::Security::AuthRequestMessageToken & local_auth_request_token, const ::DDS::Security::AuthRequestMessageToken & remote_auth_request_token, ::DDS::Security::IdentityHandle local_identity_handle, const ::DDS::Security::IdentityToken & remote_identity_token, const ::OpenDDS::DCPS::GUID_t & remote_participant_guid, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD6(begin_handshake_request,
@@ -175,21 +175,21 @@ class MockAuthentication : public DDS::Security::Authentication {
   MOCK_METHOD2(get_shared_secret,
       ::DDS::Security::SharedSecretHandle*(::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD3(get_authenticated_peer_credential_token,
-      ::CORBA::Boolean(::DDS::Security::AuthenticatedPeerCredentialToken & peer_credential_token, ::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::AuthenticatedPeerCredentialToken & peer_credential_token, ::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(set_listener,
-      ::CORBA::Boolean(::DDS::Security::AuthenticationListener_ptr listener, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::AuthenticationListener_ptr listener, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(return_identity_token,
-      ::CORBA::Boolean(const ::DDS::Security::IdentityToken & token, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(const ::DDS::Security::IdentityToken & token, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(return_identity_status_token,
-      ::CORBA::Boolean(const ::DDS::Security::IdentityStatusToken & token, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(const ::DDS::Security::IdentityStatusToken & token, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(return_authenticated_peer_credential_token,
-      ::CORBA::Boolean(const ::DDS::Security::AuthenticatedPeerCredentialToken & peer_credential_token, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(const ::DDS::Security::AuthenticatedPeerCredentialToken & peer_credential_token, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(return_handshake_handle,
-      ::CORBA::Boolean(::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::HandshakeHandle handshake_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(return_identity_handle,
-      ::CORBA::Boolean(::DDS::Security::IdentityHandle identity_handle, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::IdentityHandle identity_handle, ::DDS::Security::SecurityException & ex));
   MOCK_METHOD2(return_sharedsecret_handle,
-      ::CORBA::Boolean(::DDS::Security::SharedSecretHandle* sharedsecret_handle, ::DDS::Security::SecurityException & ex));
+      CORBA::Boolean(::DDS::Security::SharedSecretHandle* sharedsecret_handle, ::DDS::Security::SecurityException & ex));
 };
 
 class MockAccessControlListener : public DDS::Security::AccessControlListener
@@ -202,13 +202,13 @@ class MockAccessControlListener : public DDS::Security::AccessControlListener
 #endif
 
   MOCK_METHOD2(on_revoke_permissions,
-    ::CORBA::Boolean(::DDS::Security::AccessControl_ptr plugin, ::DDS::Security::PermissionsHandle handle));
+    CORBA::Boolean(::DDS::Security::AccessControl_ptr plugin, ::DDS::Security::PermissionsHandle handle));
 };
 
 // A Mock can't be made for this class as it has no abstract interface,
 // but the constructor isn't public either, so it can only exist by creating
 // a child class
-class FakeDynamicData : public virtual DDS::Security::DynamicData
+class FakeDynamicData : public virtual DDS::DynamicData
 {
 public:
 #ifdef OPENDDS_HAS_STD_SHARED_PTR
@@ -216,6 +216,90 @@ public:
 #else
     typedef ACE_Strong_Bound_Ptr<FakeDynamicData, ACE_Null_Mutex> SmartPtr;
 #endif
+
+  MOCK_METHOD0(type, DDS::DynamicType_ptr(void));
+  MOCK_METHOD2(get_descriptor, DDS::ReturnCode_t(DDS::MemberDescriptor *& value, DDS::MemberId id));
+  MOCK_METHOD2(set_descriptor, DDS::ReturnCode_t(DDS::MemberId id, DDS::MemberDescriptor * value));
+  MOCK_METHOD1(equals, CORBA::Boolean(DDS::DynamicData_ptr other));
+  MOCK_METHOD1(get_member_id_by_name, DDS::MemberId(const char * name));
+  MOCK_METHOD1(get_member_id_at_index, DDS::MemberId(CORBA::ULong index));
+  MOCK_METHOD0(get_item_count, CORBA::ULong(void));
+  MOCK_METHOD0(clear_all_values, DDS::ReturnCode_t(void));
+  MOCK_METHOD0(clear_nonkey_values, DDS::ReturnCode_t(void));
+  MOCK_METHOD1(clear_value, DDS::ReturnCode_t(DDS::MemberId id));
+  MOCK_METHOD1(loan_value, DDS::DynamicData_ptr(DDS::MemberId id));
+  MOCK_METHOD1(return_loaned_value, DDS::ReturnCode_t(DDS::DynamicData_ptr value));
+  MOCK_METHOD0(clone, DDS::DynamicData_ptr(void));
+  MOCK_METHOD2(get_int32_value, DDS::ReturnCode_t(CORBA::Long & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int32_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Long value));
+  MOCK_METHOD2(get_uint32_value, DDS::ReturnCode_t(CORBA::ULong & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint32_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::ULong value));
+  MOCK_METHOD2(get_int8_value, DDS::ReturnCode_t(CORBA::Int8 & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int8_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Int8 value));
+  MOCK_METHOD2(get_uint8_value, DDS::ReturnCode_t(CORBA::UInt8 & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint8_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::UInt8 value));
+  MOCK_METHOD2(get_int16_value, DDS::ReturnCode_t(CORBA::Short & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int16_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Short value));
+  MOCK_METHOD2(get_uint16_value, DDS::ReturnCode_t(CORBA::UShort & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint16_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::UShort value));
+  MOCK_METHOD2(get_int64_value, DDS::ReturnCode_t(CORBA::LongLong & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int64_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::LongLong value));
+  MOCK_METHOD2(get_uint64_value, DDS::ReturnCode_t(CORBA::ULongLong & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint64_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::ULongLong value));
+  MOCK_METHOD2(get_float32_value, DDS::ReturnCode_t(CORBA::Float & value, DDS::MemberId id));
+  MOCK_METHOD2(set_float32_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Float value));
+  MOCK_METHOD2(get_float64_value, DDS::ReturnCode_t(CORBA::Double & value, DDS::MemberId id));
+  MOCK_METHOD2(set_float64_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Double value));
+  MOCK_METHOD2(get_float128_value, DDS::ReturnCode_t(CORBA::LongDouble & value, DDS::MemberId id));
+  MOCK_METHOD2(set_float128_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::LongDouble value));
+  MOCK_METHOD2(get_char8_value, DDS::ReturnCode_t(CORBA::Char & value, DDS::MemberId id));
+  MOCK_METHOD2(set_char8_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Char value));
+  MOCK_METHOD2(get_char16_value, DDS::ReturnCode_t(CORBA::WChar & value, DDS::MemberId id));
+  MOCK_METHOD2(set_char16_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::WChar value));
+  MOCK_METHOD2(get_byte_value, DDS::ReturnCode_t(CORBA::Octet & value, DDS::MemberId id));
+  MOCK_METHOD2(set_byte_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Octet value));
+  MOCK_METHOD2(get_boolean_value, DDS::ReturnCode_t(CORBA::Boolean & value, DDS::MemberId id));
+  MOCK_METHOD2(set_boolean_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Boolean value));
+  MOCK_METHOD2(get_string_value, DDS::ReturnCode_t(char *& value, DDS::MemberId id));
+  MOCK_METHOD2(set_string_value, DDS::ReturnCode_t(DDS::MemberId id, const char * value));
+  MOCK_METHOD2(get_wstring_value, DDS::ReturnCode_t(CORBA::WChar *& value, DDS::MemberId id));
+  MOCK_METHOD2(set_wstring_value, DDS::ReturnCode_t(DDS::MemberId id, const CORBA::WChar * value));
+  MOCK_METHOD2(get_complex_value, DDS::ReturnCode_t(DDS::DynamicData_ptr & value, DDS::MemberId id));
+  MOCK_METHOD2(set_complex_value, DDS::ReturnCode_t(DDS::MemberId id, DDS::DynamicData_ptr value));
+  MOCK_METHOD2(get_int32_values, DDS::ReturnCode_t(DDS::Int32Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int32_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::Int32Seq & value));
+  MOCK_METHOD2(get_uint32_values, DDS::ReturnCode_t(DDS::UInt32Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint32_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::UInt32Seq & value));
+  MOCK_METHOD2(get_int8_values, DDS::ReturnCode_t(DDS::Int8Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int8_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::Int8Seq & value));
+  MOCK_METHOD2(get_uint8_values, DDS::ReturnCode_t(DDS::UInt8Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint8_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::UInt8Seq & value));
+  MOCK_METHOD2(get_int16_values, DDS::ReturnCode_t(DDS::Int16Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int16_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::Int16Seq & value));
+  MOCK_METHOD2(get_uint16_values, DDS::ReturnCode_t(DDS::UInt16Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint16_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::UInt16Seq & value));
+  MOCK_METHOD2(get_int64_values, DDS::ReturnCode_t(DDS::Int64Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_int64_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::Int64Seq & value));
+  MOCK_METHOD2(get_uint64_values, DDS::ReturnCode_t(DDS::UInt64Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_uint64_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::UInt64Seq & value));
+  MOCK_METHOD2(get_float32_values, DDS::ReturnCode_t(DDS::Float32Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_float32_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::Float32Seq & value));
+  MOCK_METHOD2(get_float64_values, DDS::ReturnCode_t(DDS::Float64Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_float64_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::Float64Seq & value));
+  MOCK_METHOD2(get_float128_values, DDS::ReturnCode_t(DDS::Float128Seq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_float128_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::Float128Seq & value));
+  MOCK_METHOD2(get_char8_values, DDS::ReturnCode_t(DDS::CharSeq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_char8_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::CharSeq & value));
+  MOCK_METHOD2(get_char16_values, DDS::ReturnCode_t(DDS::WcharSeq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_char16_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::WcharSeq & value));
+  MOCK_METHOD2(get_byte_values, DDS::ReturnCode_t(DDS::ByteSeq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_byte_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::ByteSeq & value));
+  MOCK_METHOD2(get_boolean_values, DDS::ReturnCode_t(DDS::BooleanSeq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_boolean_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::BooleanSeq & value));
+  MOCK_METHOD2(get_string_values, DDS::ReturnCode_t(DDS::StringSeq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_string_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::StringSeq & value));
+  MOCK_METHOD2(get_wstring_values, DDS::ReturnCode_t(DDS::WstringSeq & value, DDS::MemberId id));
+  MOCK_METHOD2(set_wstring_values, DDS::ReturnCode_t(DDS::MemberId id, const DDS::WstringSeq & value));
 };
 
 class dds_DCPS_security_AccessControlBuiltInImpl : public Test
@@ -364,7 +448,7 @@ public:
     throw(errno);
   }
 
-  ::CORBA::Boolean clean_smime_content(std::string& content_) {
+  CORBA::Boolean clean_smime_content(std::string& content_) {
     std::string search_str("<?xml");
 
     size_t found = content_.find(search_str);
@@ -1173,37 +1257,33 @@ TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_regis
 {
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::InstanceHandle_t pub_handle = 2;
-  ::DDS::InstanceHandle_t in_handle = 3;
   MockDataReader::SmartPtr reader(new MockDataReader());
   FakeDynamicData::SmartPtr key(new FakeDynamicData());
   ::DDS::Security::SecurityException ex;
 
   // Nil handles
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    DDS::HANDLE_NIL, reader.get(), pub_handle, key.get(), in_handle, ex));
+    DDS::HANDLE_NIL, reader.get(), pub_handle, key.get(), ex));
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), DDS::HANDLE_NIL, key.get(), in_handle, ex));
-  EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, key.get(), DDS::HANDLE_NIL, ex));
+    perm_handle, reader.get(), DDS::HANDLE_NIL, key.get(), ex));
 
   // Null pointers
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, 0, pub_handle, key.get(), in_handle, ex));
+    perm_handle, 0, pub_handle, key.get(), ex));
   EXPECT_FALSE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, 0, in_handle, ex));
+    perm_handle, reader.get(), pub_handle, 0, ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_register_instance_Success)
 {
   ::DDS::Security::PermissionsHandle perm_handle = 1;
   ::DDS::InstanceHandle_t pub_handle = 2;
-  ::DDS::InstanceHandle_t in_handle = 3;
   MockDataReader::SmartPtr reader(new MockDataReader());
   FakeDynamicData::SmartPtr key(new FakeDynamicData());
   ::DDS::Security::SecurityException ex;
 
   EXPECT_TRUE(get_inst().check_remote_datawriter_register_instance(
-    perm_handle, reader.get(), pub_handle, key.get(), in_handle, ex));
+    perm_handle, reader.get(), pub_handle, key.get(), ex));
 }
 
 TEST_F(dds_DCPS_security_AccessControlBuiltInImpl, check_remote_datawriter_dispose_instance_InvalidInput)
