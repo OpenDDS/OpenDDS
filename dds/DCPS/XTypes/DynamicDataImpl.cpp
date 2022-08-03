@@ -278,8 +278,7 @@ MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
       }
       const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
       if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
-        size_t dheader;
-        if (!strm_.read_delimiter(dheader)) {
+        if (!strm_.skip_delimiter()) {
           return MEMBER_ID_INVALID;
         }
       }
@@ -442,8 +441,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
       const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
       if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
         if (ek == DDS::APPENDABLE) {
-          size_t dheader = 0;
-          if (!strm_.read_delimiter(dheader)) {
+          if (!strm_.skip_delimiter()) {
             return 0;
           }
         }
@@ -505,8 +503,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
     {
       const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
       if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
-        size_t size;
-        if (!strm_.read_delimiter(size)) {
+        if (!strm_.skip_delimiter()) {
           return 0;
         }
       }
@@ -543,8 +540,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
     {
       const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
       if (!is_primitive(elem_type->get_kind())) {
-        size_t dheader;
-        if (!strm_.read_delimiter(dheader)) {
+        if (!strm_.skip_delimiter()) {
           return 0;
         }
       }
@@ -711,8 +707,7 @@ DDS::MemberDescriptor* DynamicDataImpl::get_union_selected_member()
 
   const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
   if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
-    size_t size;
-    if (!strm_.read_delimiter(size)) {
+    if (!strm_.skip_delimiter()) {
       return 0;
     }
   }
@@ -801,8 +796,7 @@ bool DynamicDataImpl::get_value_from_union(MemberType& value, MemberId id,
   if (id == DISCRIMINATOR_ID) {
     const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
     if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
-      size_t size;
-      if (!strm_.read_delimiter(size)) {
+      if (!strm_.skip_delimiter()) {
         return false;
       }
     }
@@ -883,9 +877,8 @@ bool DynamicDataImpl::skip_to_sequence_element(MemberId id, DDS::DynamicType_ptr
       get_index_from_id(id, index, length) &&
       strm_.skip(index, size);
   } else {
-    size_t dheader;
     ACE_CDR::ULong length, index;
-    if (!strm_.read_delimiter(dheader) || !(strm_ >> length)) {
+    if (!strm_.skip_delimiter() || !(strm_ >> length)) {
       return false;
     }
     if (skip_all) {
@@ -938,11 +931,10 @@ bool DynamicDataImpl::skip_to_array_element(MemberId id, DDS::DynamicType_ptr co
     ACE_CDR::ULong index;
     return get_index_from_id(id, index, length) && strm_.skip(index, size);
   } else {
-    size_t dheader;
-    ACE_CDR::ULong index;
-    if (!strm_.read_delimiter(dheader)) {
+    if (!strm_.skip_delimiter()) {
       return false;
     }
+    ACE_CDR::ULong index;
     if (skip_all) {
       index = length;
     } else if (!get_index_from_id(id, index, length)) {
@@ -1442,8 +1434,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
     {
       if (id == DISCRIMINATOR_ID) {
         if (descriptor->extensibility_kind() == DDS::APPENDABLE || descriptor->extensibility_kind() == DDS::MUTABLE) {
-          size_t size;
-          if (!strm_.read_delimiter(size)) {
+          if (!strm_.skip_delimiter()) {
             good = false;
             break;
           }
@@ -1539,8 +1530,7 @@ bool DynamicDataImpl::read_values(SequenceType& value, TypeKind elem_tk)
   case TK_ENUM:
   case TK_BITMASK:
     {
-      size_t dheader;
-      if (!strm_.read_delimiter(dheader)) {
+      if (!strm_.skip_delimiter()) {
         return false;
       }
       return strm_ >> value;
@@ -1971,8 +1961,7 @@ bool DynamicDataImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, 
   const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
   if (ek == DDS::FINAL || ek == DDS::APPENDABLE) {
     if (ek == DDS::APPENDABLE) {
-      size_t dheader = 0;
-      if (!strm_.read_delimiter(dheader)) {
+      if (!strm_.skip_delimiter()) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::skip_to_struct_member -")
                      ACE_TEXT(" Failed to read DHEADER for member ID %d\n"), id));
@@ -2387,16 +2376,16 @@ bool DynamicDataImpl::skip_collection_member(DDS::DynamicType_ptr coll_type)
     return false;
   }
   const char* kind_str = typekind_to_string(kind);
-  size_t dheader;
-  if (!strm_.read_delimiter(dheader)) {
-    if (DCPS::DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::skip_collection_member -")
-                 ACE_TEXT(" Failed to deserialize DHEADER of a non-primitive %C member\n"),
-                 kind_str));
-    }
-    return false;
-  }
   if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2) {
+    size_t dheader;
+    if (!strm_.read_delimiter(dheader)) {
+      if (DCPS::DCPS_debug_level >= 1) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::skip_collection_member -")
+                   ACE_TEXT(" Failed to deserialize DHEADER of a non-primitive %C member\n"),
+                   kind_str));
+      }
+      return false;
+    }
     const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
     return skip("skip_collection_member", err_msg.c_str(), dheader);
   } else if (kind == TK_SEQUENCE) {

@@ -899,6 +899,15 @@ Serializer::align_cont_w()
 }
 
 ACE_INLINE
+bool Serializer::skip_delimiter()
+{
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
+    return skip(uint32_cdr_size);
+  }
+  return true;
+}
+
+ACE_INLINE
 bool Serializer::read_delimiter(size_t& size)
 {
   if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
