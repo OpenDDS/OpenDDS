@@ -907,6 +907,8 @@ bool Serializer::read_delimiter(size_t& size)
       return false;
     }
     size = dheader;
+  } else {
+    size = 0;
   }
   return true;
 }
