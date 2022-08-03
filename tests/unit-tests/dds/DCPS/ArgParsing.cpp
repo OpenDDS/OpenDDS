@@ -124,13 +124,14 @@ namespace {
       args.push_back("PROGRAM NAME");
     }
 
-    bool parse(bool assert_success = true)
+    bool parse(const std::string& exception = "")
     {
       if (!argv) {
         done();
       }
 
-      bool expected_result = true;
+      const bool assert_success = exception.length() == 0;
+      bool got_expected_result = true;
       bool parse_error = false;
       try {
         arg_parser.parse_no_exit(argc, argv);
@@ -138,17 +139,21 @@ namespace {
         parse_error = true;
         if (assert_success) {
           ADD_FAILURE() << "parse failed: " << e.what();
-          expected_result = false;
+          got_expected_result = false;
+        } else if (exception != e.what()) {
+          ADD_FAILURE() << "parse got expected \"" << exception
+            << "\" but got \"" << e.what() << "\"";
+          got_expected_result = false;
         }
       }
 
       if (!assert_success && !parse_error) {
         ADD_FAILURE() << "parse should have failed";
-        expected_result = false;
+        got_expected_result = false;
       }
 
       reset();
-      return expected_result;
+      return got_expected_result;
     }
   };
 }
@@ -216,13 +221,13 @@ TEST(dds_DCPS_ArgParsing_ArgParser, empty_parse_with_args)
   // There are no arguments setup, so this should fail.
   Helper h;
   h("this is invalid");
-  h.parse(false);
+  h.parse("expected no positional argument(s), received 1");
 }
 
 TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_no_args)
 {
   BasicHelper h;
-  h.parse(false);
+  h.parse("expected between 1 and 3 positional argument(s), received 0");
 }
 
 TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_a)
@@ -245,7 +250,8 @@ TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_abx)
     // -x doesn't accept any values, so this should fail.
     BasicHelper h;
     h("a again")("-x=INVALID_ARG")("b too");
-    h.parse(false);
+    h.parse("option -x has the value \"INVALID_ARG\" attached, "
+      "but isn't supposed to be passed anything");
   }
 
   {
@@ -267,22 +273,22 @@ TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_abc)
   {
     BasicHelper h;
     h("a again")("b too")("not int");
-    h.parse(false);
+    h.parse("positional argument C was passed \"not int\", which is not a valid integer");
   }
   {
     BasicHelper h;
     h("a again")("b too")("-1");
-    h.parse(false);
+    h.parse("positional argument C was passed \"-1\", which is not a positive integer");
   }
   {
     BasicHelper h;
     h("a again")("b too")("0");
-    h.parse(false);
+    h.parse("positional argument C was passed \"0\", which which is less than 2");
   }
   {
     BasicHelper h;
     h("a again")("b too")("100");
-    h.parse(false);
+    h.parse("positional argument C was passed \"100\", which which is greater than 4");
   }
 
   {
@@ -312,13 +318,13 @@ TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_too_many_args)
   {
     BasicHelper h;
     h("a again")("b too")("c too")("INVALID");
-    h.parse(false);
+    h.parse("expected between 1 and 3 positional argument(s), received 4");
   }
 
   {
     BasicHelper h;
     h("a again")("b too")("-x")("c too")("INVALID");
-    h.parse(false);
+    h.parse("expected between 1 and 3 positional argument(s), received 4");
   }
 }
 
@@ -328,7 +334,7 @@ TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_multics_style)
     BasicHelper h;
     h.arg_parser.default_option_style(OptionStyleMultics);
     h("a")("--y-opt")("12");
-    h.parse(false);
+    h.parse("option --y-opt is invalid");
   }
   {
     BasicHelper h;
@@ -345,7 +351,7 @@ TEST(dds_DCPS_ArgParsing_ArgParser, allow_multiple)
     BasicHelper h;
     h.y_opt.allow_multiple_ = false;
     h("a again")("b too")("3")("-x")("-y=4")("--y-opt")("-1");
-    h.parse(false);
+    h.parse("option --y-opt was passed multiple times");
   }
 
   {
@@ -361,7 +367,8 @@ TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_abcxy)
   {
     BasicHelper h;
     h("a again")("b too")("3")("-x")("--y-opt");
-    h.parse(false);
+    h.parse("option --y-opt requires exactly 1 argument(s) to be passed after it, "
+      "but there are only 0");
   }
 
   {
@@ -397,7 +404,7 @@ TEST(dds_DCPS_ArgParsing_ArgParser, unknown_option)
   PositionalAs<IntValue<int> > i_arg(h.arg_parser, "INT", "Int", i);
 
   h("-1x");
-  h.parse(false);
+  h.parse("option -1x is invalid");
 
   h("-1");
   h.parse();
@@ -429,10 +436,10 @@ TEST(dds_DCPS_ArgParsing_StringChoicesValue, parse)
   EXPECT_STREQ(opt.c_str(), "foo");
 
   h("zar");
-  h.parse(false);
+  h.parse("positional argument POS was passed invalid value \"zar\"");
 
   h("bar")("-o")("zar");
-  h.parse(false);
+  h.parse("option -o was passed invalid value \"zar\"");
 }
 
 namespace {
@@ -441,7 +448,8 @@ namespace {
     "Shorter line with explicit break\n"
     "\n"
     "\n"
-    "This is another line, it it's long and should be always be broken long before the explicit break.\n"
+    "This is another line, it it's long and should be always be broken long before "
+      "the explicit break.\n"
     "This line has 39 characters ...........\n"
     "This line has 40 characters ............\n"
     "This line has 41 characters .............\n"

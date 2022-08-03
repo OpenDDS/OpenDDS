@@ -583,16 +583,24 @@ public:
     if (values == state.args.end()) {
       return;
     }
+    const String& value = *values;
+    if (value.empty()) {
+      throw ParseError(state, "was passed an empty string, which is not a valid integer");
+    }
+    if (!Limits::is_signed && value[0] == '-') {
+      throw ParseError(state, "was passed \"" + value +
+        "\", which is not a positive integer");
+    }
     IntType& dest = *dest_;
-    if (!convertToInteger(*values, dest)) {
-      throw ParseError(state, "was passed \"" + *values + "\", which is not a valid integer");
+    if (!convertToInteger(value, dest)) {
+      throw ParseError(state, "was passed \"" + value + "\", which is not a valid integer");
     }
     if (min_value > (Limits::min)() && dest < min_value) {
-      throw ParseError(state, "was passed \"" + *values + "\", which which is less than " +
+      throw ParseError(state, "was passed \"" + value + "\", which which is less than " +
         to_dds_string(min_value));
     }
     if (max_value < (Limits::max)() && dest > max_value) {
-      throw ParseError(state, "was passed \"" + *values + "\", which which is greater than " +
+      throw ParseError(state, "was passed \"" + value + "\", which which is greater than " +
         to_dds_string(max_value));
     }
     state.args.erase(values);
