@@ -1,0 +1,5 @@
+project: dcps_test {
+  Source_Files {
+    main.cpp
+  }
+}
