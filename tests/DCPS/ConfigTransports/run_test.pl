@@ -369,6 +369,21 @@ my @scenario = (
 
 );
 
+# Scenarios for which the test timed out.
+my @timeout_scenarios = (
+                {
+                 entity => 'participant',
+                 collocation => 'process',
+                 configuration => 'Udp_Only',
+                 protocol => ['udp1'],
+                 compatibility => 'true',
+                 publisher => $qos,
+                 subscriber => $qos,
+                 name => 'Someone'
+                }
+);
+
+
 
 # Returns an array of publisher or subscriber command lines
 sub parse($$$) {
@@ -393,7 +408,7 @@ sub parse($$$) {
   my $pub_lease_time = $$s{$pubsub}{lease_time} || $$s{lease_time};
   my $pub_reliability_kind = $$s{$pubsub}{reliability} || $$s{reliability};
 
-  my $pub_builtins = "-DCPSBIT 0" unless $hasbuiltins;
+  my $pub_builtins = "-DCPSBit 0" unless $hasbuiltins;
 
   my $level = "-ORBDebugLevel " . $$s{verbosity} if $$s{verbosity};
   my $config = "-DCPSConfigFile transports.ini" if $pub_configuration;
@@ -444,13 +459,15 @@ sub parse($$$) {
 
 my $count = 0;
 my $failed = 0;
+my $stop = 0;
 
 # Only run with the built-in topics when not debugging
 my @builtinscases = $debug ? (undef) : (undef, 'true');
 
 for my $hasbuiltins (@builtinscases) {
 
-    for my $i (@scenario) {
+    #for my $i (@scenario) {
+    for my $i (@timeout_scenarios) {
         my $test = new PerlDDS::TestFramework();
         $test->enable_console_logging();
         $test->report_unused_flags();
@@ -471,16 +488,18 @@ for my $hasbuiltins (@builtinscases) {
         my $status = $test->finish(($pub_time + 30) * 2, "publisher");
 
         $count++;
+        $failed++ if (0 != $status);
         print "count->$count\nstatus->$status\nfailed->$failed\n";
 
         # Which test failed, exactly?
         if (0 != $status) {
-            $failed++;
             $Data::Dumper::Terse = 1;
             print "Test FAILED (hasbuiltins=" . $hasbuiltins . ")" . Dumper(\%$i) . "\n";
-            exit(-1);
+            $stop = 1;
+            last;
         }
     }
+    last if ($stop);
 }
 
 
