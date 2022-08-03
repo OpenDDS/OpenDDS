@@ -7,29 +7,34 @@
 #include <ace/SOCK_Connector.h>
 #include <ace/SOCK_Stream.h>
 
-int ACE_TMAIN(int, ACE_TCHAR*[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
+  if (argc < 2) {
+    ACE_ERROR((LM_ERROR, "Usage: metachecker IP:PORT\n"));
+    return EXIT_FAILURE;
+  }
+
   ACE_SOCK_Connector connector;
   ACE_SOCK_Stream stream;
-  ACE_INET_Addr remote("127.0.0.1:8081");
+  ACE_INET_Addr remote(argv[1]);
 
   {
     if (connector.connect(stream, remote) != 0) {
-      ACE_ERROR((LM_ERROR, "Could not connect\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Could not connect\n"));
       return EXIT_FAILURE;
     }
 
-    const char request[] = "GET / HTTP/1.1\r\n\r\n";
+    const char request[] = "GET /config HTTP/1.1\r\n\r\n";
     const ssize_t size = sizeof(request) - 1;
     if (stream.send(request, size) != size) {
-      ACE_ERROR((LM_ERROR, "Could not send request\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Could not send request\n"));
       return EXIT_FAILURE;
     }
 
     char response[64 * 1024];
     ssize_t bytes = stream.recv(response, sizeof(response));
     if (bytes <= 0) {
-      ACE_ERROR((LM_ERROR, "Could not read response\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Could not read response\n"));
       return EXIT_FAILURE;
     }
     response[bytes] = 0;
@@ -46,28 +51,28 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       "{}";
 
     if (strcmp(response, expected_response) != 0) {
-      ACE_ERROR((LM_ERROR, "Did not get expected response\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Did not get expected response\n"));
       return EXIT_FAILURE;
     }
   }
 
   {
     if (connector.connect(stream, remote) != 0) {
-      ACE_ERROR((LM_ERROR, "Could not connect\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Could not connect\n"));
       return EXIT_FAILURE;
     }
 
     const char request[] = "GET /healthcheck HTTP/1.1\r\n\r\n";
     const ssize_t size = sizeof(request) - 1;
     if (stream.send(request, size) != size) {
-      ACE_ERROR((LM_ERROR, "Could not send request\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Could not send request\n"));
       return EXIT_FAILURE;
     }
 
     char response[64 * 1024];
     ssize_t bytes = stream.recv(response, sizeof(response));
     if (bytes <= 0) {
-      ACE_ERROR((LM_ERROR, "Could not read response\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Could not read response\n"));
       return EXIT_FAILURE;
     }
     response[bytes] = 0;
@@ -76,7 +81,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
 
     stream.close();
 
-    const char expected_response[]=
+    const char expected_response[] =
       "HTTP/1.1 200 OK\r\n"
       "Content-Type: text/plain\r\n"
       "Content-Length: 2\r\n"
@@ -84,7 +89,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
       "OK";
 
     if (strcmp(response, expected_response) != 0) {
-      ACE_ERROR((LM_ERROR, "Did not get expected response\n"));
+      ACE_ERROR((LM_ERROR, "ERROR: Did not get expected response\n"));
       return EXIT_FAILURE;
     }
   }

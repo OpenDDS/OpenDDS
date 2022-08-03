@@ -23,7 +23,7 @@ int HttpConnection::open(void* x)
 {
   relay_http_meta_discovery_ = static_cast<RelayHttpMetaDiscovery*>(x);
 
-  if (-1 == reactor()->register_handler(this, READ_MASK)) {
+  if (HANDLER_ERROR == reactor()->register_handler(this, READ_MASK)) {
     return HANDLER_ERROR;
   }
   return HANDLER_OK;
@@ -65,7 +65,7 @@ bool RelayHttpMetaDiscovery::processRequest(ACE_SOCK_Stream& peer,
   std::string target;
   if (requestIsComplete(request, target)) {
     std::stringstream response;
-    if (target == "/") {
+    if (target == "/config") {
       respond(response);
     } else if (target == "/healthcheck") {
       respondHealthcheck(response);
@@ -125,12 +125,7 @@ void RelayHttpMetaDiscovery::respond(std::stringstream& response) const
 void RelayHttpMetaDiscovery::respondHealthcheck(std::stringstream& response) const
 {
   GuidAddrSet::Proxy proxy(guid_addr_set_);
-
-  if (proxy.admitting()) {
-    respondStatus(response, HTTP_OK);
-  } else {
-    respondStatus(response, HTTP_SERVICE_UNAVAILABLE);
-  }
+  respondStatus(response, proxy.admitting() ? HTTP_OK : HTTP_SERVICE_UNAVAILABLE);
 }
 
 void RelayHttpMetaDiscovery::respondStatus(std::stringstream& response,
