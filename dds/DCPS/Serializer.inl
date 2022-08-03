@@ -903,14 +903,12 @@ bool Serializer::read_delimiter(size_t& size)
 {
   if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
     ACE_CDR::ULong dheader;
-    if (!(*this >> dheader)) {
-      return false;
+    if (*this >> dheader) {
+      size = dheader;
+      return true;
     }
-    size = dheader;
-  } else {
-    size = 0;
   }
-  return true;
+  return false;
 }
 
 ACE_INLINE
