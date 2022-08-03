@@ -12,9 +12,6 @@
  * Possible Improvements:
  *  - Make it possible to use this to process OpenDDS builtin options (shift mode)
  *  - Short option bundling ("-abc" would be the same as "-a -b -c")
- *  - Process options in order they were passed, not the order the Options were
- *    declared in the code. Right now "program --version --help" will always
- *    print the help when it should probably print the "--version".
  *  - More customizable usage and help
  *  - Subcommands and child parsers
  *  - Wrapper value handler for some multiple of the same kind of value.
@@ -92,8 +89,6 @@ typedef OPENDDS_VECTOR(String) StrVec;
 typedef StrVec::iterator StrVecIt;
 
 class ArgParser;
-class Option;
-typedef OPENDDS_MAP(String, Option*) OptMap;
 
 struct OpenDDS_Dcps_Export ArgParseState {
   ArgParseState(ArgParser& parser)
@@ -110,7 +105,6 @@ struct OpenDDS_Dcps_Export ArgParseState {
   StrVec args;
   // Name to use to reference the current argument in error messages
   String current_arg_ref;
-  OptMap options;
 };
 
 class Argument;
@@ -148,7 +142,7 @@ public:
     return String();
   }
 
-  virtual void handle(Argument& arg, ArgParseState& state, StrVecIt values) = 0;
+  virtual StrVecIt handle(Argument& arg, ArgParseState& state, StrVecIt values) = 0;
 };
 
 class NullHandler : public Handler {
@@ -163,8 +157,9 @@ public:
     return 0;
   }
 
-  void handle(Argument& /*arg*/, ArgParseState& /*state*/, StrVecIt /*values*/)
+  StrVecIt handle(Argument& /*arg*/, ArgParseState& /*state*/, StrVecIt values)
   {
+    return values;
   }
 };
 
@@ -192,15 +187,15 @@ public:
     return 1;
   }
 
-  void handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
+  StrVecIt handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
   {
     if (values == state.args.end()) {
-      return;
+      return values;
     }
     if (dest_) {
       *dest_ = *values;
     }
-    state.args.erase(values);
+    return state.args.erase(values);
   }
 
 protected:
@@ -230,7 +225,7 @@ public:
     return rv;
   }
 
-  void handle(Argument& arg, ArgParseState& state, StrVecIt values);
+  StrVecIt handle(Argument& arg, ArgParseState& state, StrVecIt values);
 };
 
 /// Base class for argument prototypes
@@ -301,6 +296,8 @@ public:
   virtual StrVecIt find(ArgParseState& state) = 0;
 
   virtual StrVecIt handle_find_result(ArgParseState& state, StrVecIt found) = 0;
+
+  StrVecIt handle_found(ArgParseState& state, StrVecIt found_it);
 
   virtual bool process_args(ArgParseState& state);
 
@@ -423,11 +420,21 @@ enum OptionStyle {
   OptionStyleMultics,
 };
 
+class Option;
+typedef OPENDDS_MAP(String, Option*) OptMap;
+
 // Optional arguments that can appear in any order in between other arguments
 class OpenDDS_Dcps_Export Option : public Argument {
 public:
   /// Allow passing it multiple times, ignoring all except the last.
   bool allow_multiple_;
+
+  /**
+   * Seperator for "attached values". By default it's '=', which allows
+   * something like "--foo=bar" (option "foo" value "bar"). If cleared it
+   * allows something like "-Da=b" (option "D" value "a=b").
+   */
+  String attached_value_seperator_;
 
   Option(ArgParser& arg_parser, const String& name, const String& help,
     Handler* handler, OptionStyle style = OptionStyleDefault)
@@ -497,18 +504,12 @@ public:
     return true;
   }
 
+  void add_all_aliases(OptMap& options);
+  void confirm(ArgParseState& state, const String& opt, StrVecIt found);
+
   StrVecIt find(ArgParseState& state);
 
   StrVecIt handle_find_result(ArgParseState& state, StrVecIt found);
-
-  bool process_args(ArgParseState& state);
-
-  /**
-   * Seperator for "attached values". By default it's '=', which allows
-   * something like "--foo=bar" (option "foo" value "bar"). If cleared it
-   * allows something like "-Da=b" (option "D" value "a=b").
-   */
-  String attached_value_seperator_;
 
 protected:
   bool attached_value(const String& arg, const String& opt, String* value = 0);
@@ -578,10 +579,10 @@ public:
     return 1;
   }
 
-  void handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
+  StrVecIt handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
   {
     if (values == state.args.end()) {
-      return;
+      return values;
     }
     const String& value = *values;
     if (value.empty()) {
@@ -603,7 +604,7 @@ public:
       throw ParseError(state, "was passed \"" + value + "\", which which is greater than " +
         to_dds_string(max_value));
     }
-    state.args.erase(values);
+    return state.args.erase(values);
   }
 };
 
@@ -660,12 +661,12 @@ private:
 
 class OpenDDS_Dcps_Export HelpHandler : public NullHandler {
 public:
-  void handle(Argument& arg, ArgParseState& state, StrVecIt values);
+  StrVecIt handle(Argument& arg, ArgParseState& state, StrVecIt values);
 };
 
 class OpenDDS_Dcps_Export VersionHandler : public NullHandler {
 public:
-  void handle(Argument& arg, ArgParseState& state, StrVecIt values);
+  StrVecIt handle(Argument& arg, ArgParseState& state, StrVecIt values);
 };
 
 class OpenDDS_Dcps_Export ArgParser {

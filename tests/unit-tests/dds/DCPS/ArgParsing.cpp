@@ -411,6 +411,41 @@ TEST(dds_DCPS_ArgParsing_ArgParser, unknown_option)
   EXPECT_EQ(i, -1);
 }
 
+namespace {
+  StrVec ordered_values;
+
+  class OrderedValue : public StringValue {
+  public:
+    OrderedValue(String& dest)
+      : StringValue(dest)
+    {
+    }
+
+    StrVecIt handle(Argument& arg, ArgParseState& state, StrVecIt values)
+    {
+      const StrVecIt rv = StringValue::handle(arg, state, values);
+      ordered_values.push_back(*dest_);
+      return rv;
+    }
+  };
+}
+
+TEST(dds_DCPS_ArgParsing_ArgParser, option_order)
+{
+  Helper h;
+  String str;
+  OptionAs<OrderedValue> o1(h.arg_parser, "o1", "Ordered option 1", str, "STR");
+  OptionAs<OrderedValue> o2(h.arg_parser, "o2", "Ordered option 2", str, "STR");
+  OptionAs<OrderedValue> o3(h.arg_parser, "o3", "Ordered option 3", str, "STR");
+
+  h("--o3")("C")("--o1")("A")("--o2")("B");
+  h.parse();
+  ASSERT_EQ(ordered_values.size(), 3lu);
+  EXPECT_STREQ(ordered_values[0].c_str(), "C");
+  EXPECT_STREQ(ordered_values[1].c_str(), "A");
+  EXPECT_STREQ(ordered_values[2].c_str(), "B");
+}
+
 TEST(dds_DCPS_ArgParsing_StringChoicesValue, parse)
 {
   Helper h;

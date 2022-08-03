@@ -68,10 +68,10 @@ String count_required(size_t min_count, size_t max_count)
   }
 }
 
-void StringChoiceValue::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
+StrVecIt StringChoiceValue::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
 {
   if (values == state.args.end()) {
-    return;
+    return values;
   }
   String value = *values;
   if (!choices.count(value)) {
@@ -80,7 +80,7 @@ void StringChoiceValue::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt
   if (dest_) {
     *dest_ = value;
   }
-  state.args.erase(values);
+  return state.args.erase(values);
 }
 
 Argument::Argument(ArgParser& arg_parser, const String& help,
@@ -122,6 +122,15 @@ bool Argument::process_args(ArgParseState& state)
       "found \"%C\"\n", prototype(0, true).c_str()));
   }
 
+  handle_found(state, found_it);
+
+  return found;
+}
+
+StrVecIt Argument::handle_found(ArgParseState& state, StrVecIt found_it)
+{
+  const bool found = found_it != state.args.end();
+
   // Take the start of the argument and transform into the values
   // handle_find_result should be called even if the argument isn't found so
   // the argument can handle that case if it needs to.
@@ -134,10 +143,10 @@ bool Argument::process_args(ArgParseState& state)
       throw ParseError(state, "requires " + handler_->arg_count_required() +
         " argument(s) to be passed after it, but there are only " + to_dds_string(left));
     }
-    handler_->handle(*this, state, values);
+    return handler_->handle(*this, state, values);
   }
 
-  return found;
+  return values;
 }
 
 Positional::Positional(ArgParser& arg_parser, const String& name, const String& help,
@@ -245,6 +254,29 @@ String Option::get_prototype_from_name(const String& name) const
   return get_option_from_name(name) + (mv.length() ? " " + mv : "");
 }
 
+void Option::add_all_aliases(OptMap& options)
+{
+  for (StrVecIt name_it = names_.begin(); name_it != names_.end(); ++name_it) {
+    const String opt = get_option_from_name(*name_it);
+    if (!options.insert(std::make_pair(opt, this)).second) {
+      throw ArgParsingError("Option conflicts with an existing one: " + opt);
+    }
+  }
+}
+
+void Option::confirm(ArgParseState& state, const String& opt, StrVecIt found)
+{
+  state.current_arg_ref = "option " + opt;
+  if (*found == opt || attached_value(*found, opt)) {
+    if (present_ && !allow_multiple_) {
+      throw ParseError(state, "was passed multiple times");
+    }
+    present_ = true;
+    return;
+  }
+  throw ParseError(state, "is being invoked incorrectly: \"" + *found + "\"");
+}
+
 StrVecIt Option::find(ArgParseState& state)
 {
   for (StrVecIt it = state.args.begin(); it != state.args.end(); ++it) {
@@ -297,20 +329,6 @@ StrVecIt Option::handle_find_result(ArgParseState& state, StrVecIt found)
   // If the first value is separate, we need to erase the option flag to get to
   // the start of the possible values.
   return state.args.erase(found);
-}
-
-bool Option::process_args(ArgParseState& state)
-{
-  const bool found = Argument::process_args(state);
-  if (found && allow_multiple_) {
-    while (Argument::process_args(state)) {
-    }
-  } else {
-    if (Argument::process_args(state)) {
-      throw ParseError(state, "was passed multiple times");
-    }
-  }
-  return found;
 }
 
 String WordWrapper::wrap(const String& left_text, const String& right_text)
@@ -404,13 +422,13 @@ void WordWrapper::add_line()
   line_.clear();
 }
 
-void HelpHandler::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt /*values*/)
+StrVecIt HelpHandler::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt /*values*/)
 {
   state.parser.print_help(state, *state.parser.out_stream_);
   throw ExitSuccess();
 }
 
-void VersionHandler::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt /*values*/)
+StrVecIt VersionHandler::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt /*values*/)
 {
   state.parser.print_version(*state.parser.out_stream_);
   throw ExitSuccess();
@@ -461,10 +479,7 @@ bool ArgParser::looks_like_option(const String& arg)
   if (starts_with(arg, "-")) {
     // Ignore it if it's a negative number
     long int_value;
-    if (convertToInteger(arg, int_value) && int_value < 0) {
-      return false;
-    }
-    return true;
+    return !(convertToInteger(arg, int_value) && int_value < 0);
   }
   return false;
 }
@@ -472,21 +487,41 @@ bool ArgParser::looks_like_option(const String& arg)
 void ArgParser::parse_i(ArgParseState& state)
 {
   // Parse options
+  OptMap options;
   for (ArgumentsIt it = arguments_.begin(); it != arguments_.end(); ++it) {
     if ((*it)->option()) {
-      (*it)->process_args(state);
+      dynamic_cast<Option*>(*it)->add_all_aliases(options);
     }
   }
-
-  // Check what's left over for invalid options
-  for (StrVecIt it = state.args.begin(); it != state.args.end(); ++it) {
-    if (state.parser.is_positional_only_sentinal(*it)) {
-      // Remaining arguments should be interpreted as positional arguments
-      state.args.erase(it);
+  for (StrVecIt it = state.args.begin(); it != state.args.end();) {
+    const String& arg = *it;
+    if (is_positional_only_sentinal(arg)) {
       break;
     }
-    if (looks_like_option(*it)) {
-      throw ParseError("option " + *it + " is invalid");
+    if (!looks_like_option(arg)) {
+      ++it;
+      continue;
+    }
+    /*
+     * Check if it's a valid option by trying to match the whole thing and then
+     * reduce what we're looking for. This is account for the possibility of
+     * different attached value seperators being used for different options.
+     */
+    bool found = false;
+    for (size_t find_end = arg.length(); find_end; --find_end) {
+      const String consider = arg.substr(0, find_end);
+      const OptMap::iterator found_it = options.find(consider);
+      found = found_it != options.end();
+      if (found) {
+        Option* opt = found_it->second;
+        // Make sure it matches. Value seperator might be wrong.
+        opt->confirm(state, found_it->first, it);
+        it = opt->handle_found(state, it);
+        break;
+      }
+    }
+    if (!found) {
+      throw ParseError("option " + arg + " is invalid");
     }
   }
 
