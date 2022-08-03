@@ -20,7 +20,6 @@
 #include "Transient_Kludge.h"
 #include "Util.h"
 #include "DCPS_Utils.h"
-#include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
@@ -59,35 +58,34 @@ namespace OpenDDS {
 namespace DCPS {
 
 DataReaderImpl::DataReaderImpl()
-: has_subscription_id_(false),
-  subscription_id_mutex_(),
-  subscription_id_condition_(subscription_id_mutex_),
-  qos_(TheServiceParticipant->initial_DataReaderQos()),
-  reverse_sample_lock_(sample_lock_),
-  topic_servant_(0),
+  : has_subscription_id_(false)
+  , subscription_id_mutex_()
+  , subscription_id_condition_(subscription_id_mutex_)
+  , qos_(TheServiceParticipant->initial_DataReaderQos())
+  , reverse_sample_lock_(sample_lock_)
+  , topic_servant_(0)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  is_exclusive_ownership_(false),
+  , is_exclusive_ownership_(false)
 #endif
-  coherent_(false),
-  subqos_(TheServiceParticipant->initial_SubscriberQos()),
-  topic_desc_(0),
-  listener_mask_(DEFAULT_STATUS_MASK),
-  domain_id_(0),
-  end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(
-    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-  n_chunks_(TheServiceParticipant->n_chunks()),
-  reverse_pub_handle_lock_(publication_handle_lock_),
-  reactor_(0),
-  liveliness_timer_(make_rch<LivelinessTimer>(
-    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-  last_deadline_missed_total_count_(0),
-  watchdog_(),
-  is_bit_(false),
-  always_get_history_(false),
-  statistics_enabled_(false),
-  raw_latency_buffer_size_(0),
-  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-  transport_disabled_(false)
+  , coherent_(false)
+  , subqos_(TheServiceParticipant->initial_SubscriberQos())
+  , topic_desc_(0)
+  , listener_mask_(DEFAULT_STATUS_MASK)
+  , domain_id_(0)
+  , end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
+  , n_chunks_(TheServiceParticipant->n_chunks())
+  , reverse_pub_handle_lock_(publication_handle_lock_)
+  , reactor_(0)
+  , liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
+  , last_deadline_missed_total_count_(0)
+  , deadline_queue_enabled_(false)
+  , deadline_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataReaderImpl::deadline_task))
+  , is_bit_(false)
+  , always_get_history_(false)
+  , statistics_enabled_(false)
+  , raw_latency_buffer_size_(0)
+  , raw_latency_buffer_type_(DataCollector<double>::KeepOldest)
+  , transport_disabled_(false)
 {
   reactor_ = TheServiceParticipant->timer();
 
@@ -136,6 +134,16 @@ DataReaderImpl::DataReaderImpl()
 DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
+
+  deadline_task_->cancel();
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+    type_lookup_service->remove_guid_from_dynamic_map(subscription_id_);
+  }
+#endif
 }
 
 // this method is called when delete_datareader is called.
@@ -225,12 +233,10 @@ DataReaderImpl::add_association(const RepoId& yourId,
     bool active)
 {
   if (DCPS_debug_level) {
-    GuidConverter reader_converter(yourId);
-    GuidConverter writer_converter(writer.writerId);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::add_association - ")
         ACE_TEXT("bit %d local %C remote %C\n"), is_bit_,
-        OPENDDS_STRING(reader_converter).c_str(),
-        OPENDDS_STRING(writer_converter).c_str()));
+        LogGuid(yourId).c_str(),
+        LogGuid(writer.writerId).c_str()));
   }
 
   if (get_deleted()) {
@@ -293,24 +299,21 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
 
     if (DCPS_debug_level > 4) {
-      GuidConverter converter(writer_id);
       ACE_DEBUG((LM_DEBUG,
           "(%P|%t) DataReaderImpl::add_association: "
           "inserted writer %C.return %d\n",
-          OPENDDS_STRING(converter).c_str(), bpair.second));
+          LogGuid(writer_id).c_str(), bpair.second));
 
       WriterMapType::iterator iter = writers_.find(writer_id);
       if (iter != writers_.end()) {
         // This may not be an error since it could happen that the sample
         // is delivered to the datareader after the write is dis-associated
         // with this datareader.
-        GuidConverter reader_converter(get_repo_id());
-        GuidConverter writer_converter(writer_id);
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
             ACE_TEXT("reader %C is associated with writer %C.\n"),
-            OPENDDS_STRING(reader_converter).c_str(),
-            OPENDDS_STRING(writer_converter).c_str()));
+            LogGuid(get_repo_id()).c_str(),
+            LogGuid(writer_id).c_str()));
       }
     }
   }
@@ -357,11 +360,10 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
 {
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
-      const GuidConverter conv(remote_id);
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
           ACE_TEXT("ERROR: transport layer failed to associate %C\n"),
-          OPENDDS_STRING(conv).c_str()));
+          LogGuid(remote_id).c_str()));
     }
     return;
   }
@@ -373,11 +375,10 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     // LIVELINESS policy timers are managed here.
     if (!liveliness_lease_duration_.is_zero()) {
       if (DCPS_debug_level >= 5) {
-        GuidConverter converter(get_repo_id());
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
             ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-            OPENDDS_STRING(converter).c_str()));
+            LogGuid(get_repo_id()).c_str()));
       }
       // this call will start the timer if it is not already set
       liveliness_timer_->check_liveliness();
@@ -400,22 +401,20 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
       // This insertion is idempotent.
-      id_to_handle_map_.insert(
-          RepoIdToHandleMap::value_type(remote_id, handle));
+      publication_id_to_handle_map_.insert(RepoIdToHandleMap::value_type(remote_id, handle));
 
       if (DCPS_debug_level > 4) {
-        GuidConverter converter(remote_id);
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
             ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-            OPENDDS_STRING(converter).c_str(),
+            LogGuid(remote_id).c_str(),
             handle));
       }
 
       // We need to adjust these after the insertions have all completed
       // since insertions are not guaranteed to increase the number of
       // currently matched publications.
-      const int matchedPublications = static_cast<int>(id_to_handle_map_.size());
+      const int matchedPublications = static_cast<int>(publication_id_to_handle_map_.size());
       subscription_match_status_.current_count_change =
           matchedPublications - subscription_match_status_.current_count;
       subscription_match_status_.current_count = matchedPublications;
@@ -478,14 +477,12 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
   }
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter reader_converter(get_repo_id());
-    GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
         ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
         is_bit_,
-        OPENDDS_STRING(reader_converter).c_str(),
-        OPENDDS_STRING(writer_converter).c_str(),
+        LogGuid(get_repo_id()).c_str(),
+        LogGuid(writers[0]).c_str(),
         writers.length()));
   }
   if (!get_deleted()) {
@@ -520,14 +517,12 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter reader_converter(get_repo_id());
-    GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
         ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
         is_bit_,
-        OPENDDS_STRING(reader_converter).c_str(),
-        OPENDDS_STRING(writer_converter).c_str(),
+        LogGuid(get_repo_id()).c_str(),
+        LogGuid(writers[0]).c_str(),
         writers.length()));
   }
   DDS::InstanceHandleSeq handles;
@@ -566,11 +561,10 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 1) {
-          GuidConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
               ACE_TEXT("the writer local %C was already removed.\n"),
-              OPENDDS_STRING(converter).c_str()));
+              LogGuid(writer_id).c_str()));
         }
 
       } else {
@@ -596,7 +590,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     this->lookup_instance_handles(updated_writers, handles);
 
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
-      id_to_handle_map_.erase(updated_writers[i]);
+      publication_id_to_handle_map_.erase(updated_writers[i]);
     }
   }
 
@@ -609,7 +603,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
     // Derive the change in the number of publications writing to this reader.
-    int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
+    int matchedPublications = static_cast<int>(this->publication_id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
     = matchedPublications - this->subscription_match_status_.current_count;
 
@@ -908,21 +902,14 @@ void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
       qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
     if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
         qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-
-          this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
-                  ref(this->sample_lock_),
-                  qos.deadline,
-                  ref(*this),
-                  ref(this->requested_deadline_missed_status_),
-                  ref(this->last_deadline_missed_total_count_));
-
+      deadline_period_ = TimeDuration(qos.deadline.period);
+      deadline_queue_enabled_ = true;
     } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
                qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-      watchdog_->cancel_all();
-      watchdog_.reset();
+      cancel_all_deadlines();
+      deadline_queue_enabled_ = false;
     } else {
-      watchdog_->reset_interval(
-        TimeDuration(qos.deadline.period));
+      reset_deadline_period(TimeDuration(qos.deadline.period));
     }
   }
 }
@@ -1099,11 +1086,11 @@ DataReaderImpl::get_matched_publications(
 
   // Copy out the handles for the current set of publications.
   int index = 0;
-  publication_handles.length(static_cast<CORBA::ULong>(this->id_to_handle_map_.size()));
+  publication_handles.length(static_cast<CORBA::ULong>(this->publication_id_to_handle_map_.size()));
 
   for (RepoIdToHandleMap::iterator
-      current = this->id_to_handle_map_.begin();
-      current != this->id_to_handle_map_.end();
+      current = this->publication_id_to_handle_map_.begin();
+      current != this->publication_id_to_handle_map_.end();
       ++current, ++index) {
     publication_handles[ index] = current->second;
   }
@@ -1234,15 +1221,11 @@ DataReaderImpl::enable()
   // period is not the default (infinite).
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
 
-  if (!this->watchdog_
+  if (!deadline_queue_enabled_
       && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
           || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
-    this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
-            ref(this->sample_lock_),
-            this->qos_.deadline,
-            ref(*this),
-            ref(this->requested_deadline_missed_status_),
-            ref(this->last_deadline_missed_total_count_));
+    deadline_period_ = TimeDuration(qos_.deadline.period);
+    deadline_queue_enabled_ = true;
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -1306,6 +1289,14 @@ DataReaderImpl::enable()
         filterExpression,
         exprParams,
         type_info);
+
+#if defined(OPENDDS_SECURITY)
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
+      security_config_ = participant->get_security_config();
+      dynamic_type_ = type_lookup_service->type_identifier_to_dynamic(typesupport->getCompleteTypeIdentifier(), subscription_id);
+    }
+#endif
 
     {
       ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
@@ -1372,13 +1363,11 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
       // This may not be an error since it could happen that the sample
       // is delivered to the datareader after the write is dis-associated
       // with this datareader.
-      GuidConverter reader_converter(get_repo_id());
-      GuidConverter writer_converter(header.publication_id_);
       ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
           ACE_TEXT("reader %C is not associated with writer %C.\n"),
-          OPENDDS_STRING(reader_converter).c_str(),
-          OPENDDS_STRING(writer_converter).c_str()));
+          LogGuid(get_repo_id()).c_str(),
+          LogGuid(header.publication_id_).c_str()));
     }
   }
 
@@ -1405,6 +1394,15 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("DataReaderImpl","data_received",6);
 
+  DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+    RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(sample.header_.publication_id_);
+    if (pos != publication_id_to_handle_map_.end()) {
+      publication_handle = pos->second;
+    }
+  }
+
   // ensure some other thread is not changing the sample container
   // or statuses related to samples.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
@@ -1412,16 +1410,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   if (get_deleted()) return;
 
   if (DCPS_debug_level > 9) {
-    GuidConverter converter(get_repo_id());
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
         ACE_TEXT("%C received sample: %C.\n"),
-        OPENDDS_STRING(converter).c_str(),
+        LogGuid(get_repo_id()).c_str(),
         to_string(sample.header_).c_str()));
   }
 
   const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+
   RcHandle<MessageHolder> real_data;
   SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
@@ -1452,21 +1450,18 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool is_new_instance = false;
     bool filtered = false;
     if (sample.header_.key_fields_only_) {
-      dds_demarshal(sample, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
+      dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
     } else {
-      real_data = dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vwd);
+      real_data = dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vwd);
     }
 
     // Per sample logging
     if (DCPS_debug_level >= 8) {
-      GuidConverter reader_converter(get_repo_id());
-      GuidConverter writer_converter(header.publication_id_);
-
       ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
           ACE_TEXT("instance %d is_new_instance %d filtered %d\n"),
-          OPENDDS_STRING(reader_converter).c_str(),
-          OPENDDS_STRING(writer_converter).c_str(),
+          LogGuid(get_repo_id()).c_str(),
+          LogGuid(header.publication_id_).c_str(),
           instance ? instance->instance_handle_ : 0,
           is_new_instance, filtered));
     }
@@ -1510,14 +1505,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
           this->writers_.find(sample.header_.publication_id_);
 
       if (it == this->writers_.end()) {
-        GuidConverter sub_id(get_repo_id());
-        GuidConverter pub_id(sample.header_.publication_id_);
         ACE_DEBUG((LM_WARNING,
             ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
             ACE_TEXT(" subscription %C failed to find ")
             ACE_TEXT(" publication data for %C!\n"),
-            OPENDDS_STRING(sub_id).c_str(),
-            OPENDDS_STRING(pub_id).c_str()));
+            LogGuid(get_repo_id()).c_str(),
+            LogGuid(sample.header_.publication_id_).c_str()));
         return;
       }
       else {
@@ -1535,13 +1528,11 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case DATAWRITER_LIVELINESS: {
     if (DCPS_debug_level >= 4) {
-      GuidConverter reader_converter(get_repo_id());
-      GuidConverter writer_converter(sample.header_.publication_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
                  ACE_TEXT("reader %C got datawriter liveliness from writer %C\n"),
-                 OPENDDS_STRING(reader_converter).c_str(),
-                 OPENDDS_STRING(writer_converter).c_str()));
+                 LogGuid(get_repo_id()).c_str(),
+                 LogGuid(sample.header_.publication_id_).c_str()));
     }
     this->writer_activity(sample.header_);
 
@@ -1565,7 +1556,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
+    if (deadline_queue_enabled_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1580,13 +1571,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && (owner_manager->is_owner(instance->instance_handle_,
                   sample.header_.publication_id_)))) {
 #endif
-        this->watchdog_->cancel_timer(instance);
+        cancel_deadline(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1596,7 +1587,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
+    if (deadline_queue_enabled_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1608,14 +1599,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             || (this->is_exclusive_ownership_
                 && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
-          this->watchdog_->cancel_timer(instance);
+          cancel_deadline(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         }
 #endif
       }
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1625,7 +1616,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
+    if (deadline_queue_enabled_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1643,14 +1634,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
         if (instance) {
-          this->watchdog_->cancel_timer(instance);
+          cancel_deadline(instance);
         }
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1676,11 +1667,10 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     guard.release();
     resume_sample_processing(sample.header_.publication_id_);
     if (DCPS_debug_level > 4) {
-      GuidConverter pub_id(sample.header_.publication_id_);
       ACE_DEBUG((
           LM_INFO,
           "(%P|%t) Resumed sample processing for durable writer %C\n",
-          OPENDDS_STRING(pub_id).c_str()));
+          LogGuid(sample.header_.publication_id_).c_str()));
     }
     break;
   }
@@ -1877,11 +1867,10 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
 
   if (local_timer_id != -1 && cancel) {
     if (DCPS_debug_level >= 5) {
-      GuidConverter converter(data_reader->get_repo_id());
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 LogGuid(data_reader->get_repo_id()).c_str()));
     }
 
     // called from add_associations and there is already a timer
@@ -1943,11 +1932,10 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
   }
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter converter(data_reader->get_repo_id());
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
-        OPENDDS_STRING(converter).c_str(),
+        LogGuid(data_reader->get_repo_id()).c_str(),
         alive_writers,
         !cancel));
   }
@@ -2056,13 +2044,11 @@ DataReaderImpl::writer_removed(WriterInfo& info)
   const PublicationId info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter reader_converter(get_repo_id());
-    GuidConverter writer_converter(info_writer_id);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
         ACE_TEXT("reader %C from writer %C.\n"),
-        OPENDDS_STRING(reader_converter).c_str(),
-        OPENDDS_STRING(writer_converter).c_str()));
+        LogGuid(get_repo_id()).c_str(),
+        LogGuid(info_writer_id).c_str()));
   }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -2074,6 +2060,15 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 #endif
 
   {
+    DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+      RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(info_writer_id);
+      if (pos != publication_id_to_handle_map_.end()) {
+        publication_handle = pos->second;
+      }
+    }
+
     bool liveliness_changed = false;
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -2093,7 +2088,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-    instances_liveliness_update(info_writer_id);
+    instances_liveliness_update(info_writer_id, publication_handle);
 
     if (liveliness_changed) {
       set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2108,12 +2103,10 @@ DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& 
   const PublicationId info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter reader_converter(get_repo_id());
-    GuidConverter writer_converter(info_writer_id);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
                ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str(),
+               LogGuid(get_repo_id()).c_str(),
+               LogGuid(info_writer_id).c_str(),
                info.get_state_str()));
   }
 
@@ -2180,12 +2173,10 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
   const PublicationId info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
-    GuidConverter reader_converter(get_repo_id());
-    GuidConverter writer_converter(info_writer_id);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
                ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str(),
+               LogGuid(get_repo_id()).c_str(),
+               LogGuid(info_writer_id).c_str(),
                info.get_state_str()));
   }
 
@@ -2200,6 +2191,15 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
   bool liveliness_changed = false;
 
   const WriterInfo::WriterState info_state = info.state();
+
+  DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+    RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(info_writer_id);
+    if (pos != publication_id_to_handle_map_.end()) {
+      publication_handle = pos->second;
+    }
+  }
 
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -2239,7 +2239,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
       this->monitor_->report();
     }
 
-    instances_liveliness_update(info_writer_id);
+    instances_liveliness_update(info_writer_id, publication_handle);
 
     // Call listener only when there are liveliness status changes.
     if (liveliness_changed) {
@@ -2250,7 +2250,8 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 }
 
 void
-DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
+DataReaderImpl::instances_liveliness_update(const PublicationId& writer,
+                                            DDS::InstanceHandle_t publication_handle)
 {
   // sample_lock_ must be held.
   InstanceSet localinsts;
@@ -2268,7 +2269,7 @@ DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
   }
 
   for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
-    set_instance_state_i(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    set_instance_state_i(*iter, publication_handle, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
   }
 }
 
@@ -2290,6 +2291,7 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
+                                        DDS::InstanceHandle_t,
                                         SubscriptionInstance_rch&)
 {
   if (DCPS_debug_level > 0) {
@@ -2342,13 +2344,11 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
     ///     association has been torn down).  We may want to promote this
     ///     to a warning if other conditions causing this symptom are
     ///     discovered.
-    GuidConverter reader_converter(get_repo_id());
-    GuidConverter writer_converter(sample.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
         ACE_TEXT("reader %C is not associated with writer %C (late sample?).\n"),
-        OPENDDS_STRING(reader_converter).c_str(),
-        OPENDDS_STRING(writer_converter).c_str()));
+        LogGuid(get_repo_id()).c_str(),
+        LogGuid(sample.header_.publication_id_).c_str()));
   }
 }
 
@@ -2577,7 +2577,7 @@ DataReaderImpl::lookup_instance_handles(const WriterIdSeq& ids,
 
     for (CORBA::ULong i = 0; i < num_wrts; ++i) {
       guids += separator;
-      guids += OPENDDS_STRING(GuidConverter(ids[i]));
+      guids += LogGuid(ids[i]).conv_;
       separator = ", ";
     }
 
@@ -2659,13 +2659,11 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
         // This may not be an error since it could happen that the sample
         // is delivered to the datareader after the write is dis-associated
         // with this datareader.
-        GuidConverter reader_converter(get_repo_id());
-        GuidConverter writer_converter(pubid);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                    ACE_TEXT("reader %C is not associated with writer %C.\n"),
-                   OPENDDS_STRING(reader_converter).c_str(),
-                   OPENDDS_STRING(writer_converter).c_str()));
+                   LogGuid(get_repo_id()).c_str(),
+                   LogGuid(pubid).c_str()));
       }
       return true;
     }
@@ -2686,30 +2684,24 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 
       if (! is_owner) {
         if (DCPS_debug_level >= 1) {
-          GuidConverter reader_converter(get_repo_id());
-          GuidConverter writer_converter(pubid);
-          GuidConverter owner_converter(instance->instance_state_->get_owner());
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                      ACE_TEXT("reader %C writer %C is not elected as owner %C\n"),
-                     OPENDDS_STRING(reader_converter).c_str(),
-                     OPENDDS_STRING(writer_converter).c_str(),
-                     OPENDDS_STRING(owner_converter).c_str()));
+                     LogGuid(get_repo_id()).c_str(),
+                     LogGuid(pubid).c_str(),
+                     LogGuid(instance->instance_state_->get_owner()).c_str()));
         }
         return true;
       }
     }
     else if (! (instance->instance_state_->get_owner() == pubid)) {
       if (DCPS_debug_level >= 1) {
-        GuidConverter reader_converter(get_repo_id());
-        GuidConverter writer_converter(pubid);
-        GuidConverter owner_converter(instance->instance_state_->get_owner());
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                    ACE_TEXT("reader %C writer %C is not owner %C\n"),
-                   OPENDDS_STRING(reader_converter).c_str(),
-                   OPENDDS_STRING(writer_converter).c_str(),
-                   OPENDDS_STRING(owner_converter).c_str()));
+                   LogGuid(get_repo_id()).c_str(),
+                   LogGuid(pubid).c_str(),
+                   LogGuid(instance->instance_state_->get_owner()).c_str()));
       }
       return true;
     }
@@ -2722,18 +2714,18 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 }
 
 bool
-DataReaderImpl::time_based_filter_instance(
-  const SubscriptionInstance_rch& instance,
-  TimeDuration& filter_time_expired)
+DataReaderImpl::time_based_filter_instance(const SubscriptionInstance_rch& instance,
+                                           MonotonicTimePoint& now,
+                                           MonotonicTimePoint& deadline)
 {
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  now = MonotonicTimePoint::now();
   const TimeDuration minimum_separation(qos_.time_based_filter.minimum_separation);
 
   // TIME_BASED_FILTER processing; expire data samples
   // if minimum separation is not met for instance.
   if (!minimum_separation.is_zero()) {
-    filter_time_expired = now - instance->last_accepted_;
-    if (filter_time_expired < minimum_separation) {
+    if (now - instance->last_accepted_ < minimum_separation) {
+      deadline = now + minimum_separation;
       return true; // Data filtered.
     }
   }
@@ -2792,7 +2784,7 @@ void DataReaderImpl::notify_liveliness_change()
     ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
     OPENDDS_STRING output_str;
     output_str += "subscription ";
-    output_str += OPENDDS_STRING(GuidConverter(get_repo_id()));
+    output_str += LogGuid(get_repo_id()).conv_;
     output_str += ", listener at: 0x";
     output_str += to_dds_string(this->listener_.in());
 
@@ -2801,7 +2793,7 @@ void DataReaderImpl::notify_liveliness_change()
          ++current) {
       const RepoId id = current->first;
       output_str += "\n\tNOTIFY: writer[ ";
-      output_str += OPENDDS_STRING(GuidConverter(id));
+      output_str += LogGuid(id).conv_;
       output_str += "] == ";
       output_str += current->second->get_state_str();
     }
@@ -2823,23 +2815,6 @@ void DataReaderImpl::post_read_or_take()
   if (subscriber)
     subscriber->set_status_changed_flag(
       DDS::DATA_ON_READERS_STATUS, false);
-}
-
-void DataReaderImpl::reschedule_deadline()
-{
-  if (this->watchdog_.in()) {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
-        iter != this->instances_.end();
-        ++iter) {
-      if (iter->second->deadline_timer_id_ != -1) {
-        if (this->watchdog_->reset_timer_interval(iter->second->deadline_timer_id_) == -1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::reschedule_deadline %p\n"),
-              ACE_TEXT("reset_timer_interval")));
-        }
-      }
-    }
-  }
 }
 
 ACE_Reactor_Timer_Interface*
@@ -2900,13 +2875,11 @@ DataReaderImpl::update_ownership_strength(const PublicationId& pub_id,
     if (iter->second->writer_id() == pub_id) {
       if (ownership_strength != iter->second->writer_qos_ownership_strength()) {
         if (DCPS_debug_level >= 1) {
-          GuidConverter reader_converter(get_repo_id());
-          GuidConverter writer_converter(pub_id);
           ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataReaderImpl::update_ownership_strength - ")
               ACE_TEXT("local %C update remote %C strength from %d to %d\n"),
-              OPENDDS_STRING(reader_converter).c_str(),
-              OPENDDS_STRING(writer_converter).c_str(),
+              LogGuid(get_repo_id()).c_str(),
+              LogGuid(pub_id).c_str(),
               iter->second->writer_qos_ownership_strength(), ownership_strength));
         }
         iter->second->writer_qos_ownership_strength(ownership_strength);
@@ -2959,15 +2932,12 @@ void DataReaderImpl::accept_coherent(const PublicationId& writer_id,
     const RepoId& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
-    GuidConverter reader (get_repo_id());
-    GuidConverter writer (writer_id);
-    GuidConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::accept_coherent()")
         ACE_TEXT(" reader %C writer %C publisher %C\n"),
-        OPENDDS_STRING(reader).c_str(),
-        OPENDDS_STRING(writer).c_str(),
-        OPENDDS_STRING(publisher).c_str()));
+        LogGuid(get_repo_id()).c_str(),
+        LogGuid(writer_id).c_str(),
+        LogGuid(publisher_id).c_str()));
   }
   SubscriptionInstanceSet localsubs;
   {
@@ -2989,15 +2959,12 @@ void DataReaderImpl::reject_coherent(const PublicationId& writer_id,
     const RepoId& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
-    GuidConverter reader (get_repo_id());
-    GuidConverter writer (writer_id);
-    GuidConverter publisher (publisher_id);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::reject_coherent()")
         ACE_TEXT(" reader %C writer %C publisher %C\n"),
-        OPENDDS_STRING(reader).c_str(),
-        OPENDDS_STRING(writer).c_str(),
-        OPENDDS_STRING(publisher).c_str()));
+        LogGuid(get_repo_id()).c_str(),
+        LogGuid(writer_id).c_str(),
+        LogGuid(publisher_id).c_str()));
   }
 
   SubscriptionInstanceSet localsubs;
@@ -3072,14 +3039,13 @@ DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
   if (!CORBA::is_nil(sub_listener.in()))
   {
     if (!is_bit()) {
+      this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       if (reader == this) {
         // Release the sample_lock before listener callback.
         ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
         sub_listener->on_data_on_readers(subscriber.in());
       }
-
-      this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
     } else {
       TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(subscriber, sub_listener, rchandle_from(this), reader == this, true));
     }
@@ -3094,6 +3060,8 @@ DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
     if (!CORBA::is_nil(listener.in()))
     {
       if (!is_bit()) {
+        set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+        subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
         if (reader == this) {
           // Release the sample_lock before listener callback.
           ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
@@ -3101,10 +3069,8 @@ DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
         } else {
           listener->on_data_available(this);
         }
-        set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-        subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(subscriber, listener, rchandle_from(this), reader == this, true, true));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(listener, rchandle_from(this), reader == this, true, true));
       }
     }
     else
@@ -3414,14 +3380,12 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
       }
     }
     else {
-      GuidConverter subscriptionBuffer(get_repo_id());
-      GuidConverter publicationBuffer(header.publication_id_);
       ACE_DEBUG((LM_WARNING,
         ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::accept_sample_processing - ")
         ACE_TEXT("subscription %C failed to find ")
         ACE_TEXT("publication data for %C.\n"),
-        OPENDDS_STRING(subscriptionBuffer).c_str(),
-        OPENDDS_STRING(publicationBuffer).c_str()));
+        LogGuid(get_repo_id()).c_str(),
+        LogGuid(header.publication_id_).c_str()));
     }
   }
 
@@ -3431,16 +3395,14 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 #endif
 
-  if (instance && watchdog_.in()) {
+  if (instance && deadline_queue_enabled_) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_.set_to_now();
 
-    // Watchdog can't be called with sample_lock_ due to reactor deadlock
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
     if (is_new_instance) {
-      watchdog_->schedule_timer(instance);
+      schedule_deadline(instance, false);
     } else {
-      watchdog_->execute(instance, false);
+      process_deadline(instance, MonotonicTimePoint::now(), false);
     }
   }
 
@@ -3499,11 +3461,9 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
     return 0;
 
   if (DCPS_debug_level >= 1) {
-    GuidConverter sub_repo(reader->get_repo_id());
-    GuidConverter pub_repo(pub_id);
     ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
-               OPENDDS_STRING(sub_repo).c_str(),
-               OPENDDS_STRING(pub_repo).c_str()));
+               LogGuid(reader->get_repo_id()).c_str(),
+               LogGuid(pub_id).c_str()));
   }
 
   reader->resume_sample_processing(pub_id);
@@ -3514,20 +3474,20 @@ void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
 {
   static const ACE_Time_Value ten_seconds(10);
   info_->schedule_historic_samples_timer(sweeper_, ten_seconds);
-  sweeper_->info_set_.insert(info_);
+  const bool insert_result = sweeper_->info_set_.insert(info_).second;
 
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - Scheduled sweeper %@\n", info_.in()));
+  if (insert_result && DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - sweeper %@ is now scheduled\n", info_.in()));
   }
 }
 
 void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
 {
   info_->cancel_historic_samples_timer(sweeper_);
-  sweeper_->info_set_.erase(info_);
+  const bool erase_result = sweeper_->info_set_.erase(info_) > 0;
 
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %@\n", info_.in()));
+  if (erase_result && DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - sweeper %@ is no longer scheduled\n", info_.in()));
   }
 }
 
@@ -3551,35 +3511,36 @@ void DataReaderImpl::OnDataOnReaders::execute()
     return;
   }
 
-  if (call_) {
-    sub_listener_->on_data_on_readers(subscriber.in());
-  }
-
   if (set_reader_status_) {
     data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
   }
   subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+
+  if (call_) {
+    sub_listener_->on_data_on_readers(subscriber.in());
+  }
 }
 
 void DataReaderImpl::OnDataAvailable::execute()
 {
-  RcHandle<SubscriberImpl> subscriber = subscriber_.lock();
   RcHandle<DataReaderImpl> data_reader = data_reader_.lock();
-  if (!subscriber || !data_reader) {
-    return;
-  }
 
-  if (call_ && (data_reader->get_status_changes() & ::DDS::DATA_AVAILABLE_STATUS)) {
-    listener_->on_data_available(data_reader.in());
-  }
-
-  if (set_reader_status_) {
+  if (data_reader && set_reader_status_) {
     data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
   }
-  if (set_subscriber_status_) {
-    subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+
+  if (data_reader && set_subscriber_status_) {
+    RcHandle<SubscriberImpl> subscriber = data_reader->get_subscriber_servant();
+    if (subscriber) {
+      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+    }
+  }
+
+  if (call_ && data_reader) {
+    listener_->on_data_available(data_reader.in());
   }
 }
+
 void DataReaderImpl::initialize_lookup_maps()
 {
   // These all start at 1 (0 mask is bogus) and include the full mask (any)
@@ -3622,6 +3583,185 @@ const DataReaderImpl::HandleSet& DataReaderImpl::lookup_matching_instances(CORBA
   LookupMap::const_iterator ci = combined_state_lookup_.find(combined_states);
   OPENDDS_ASSERT(ci != combined_state_lookup_.end());
   return ci->second;
+}
+
+void DataReaderImpl::schedule_deadline(SubscriptionInstance_rch instance,
+                                       bool timer_called)
+{
+  // Should be called with sample_lock_.
+  if (instance->deadline_ == MonotonicTimePoint::zero_value) {
+    instance->deadline_ = MonotonicTimePoint::now() + deadline_period_;
+    const bool schedule = deadline_queue_.empty();
+    deadline_queue_.insert(std::make_pair(instance->deadline_, instance));
+    if (!timer_called) {
+      if (schedule) {
+        deadline_task_->schedule(deadline_period_);
+      } else if (deadline_queue_.begin()->second == instance) {
+        // Moved to front.
+        deadline_task_->cancel();
+        deadline_task_->schedule(deadline_period_);
+      }
+    }
+  }
+}
+
+void DataReaderImpl::cancel_deadline(SubscriptionInstance_rch instance)
+{
+  // Should be called with sample_lock_.
+  if (instance->deadline_ != MonotonicTimePoint::zero_value) {
+    for (DeadlineQueue::iterator pos = deadline_queue_.lower_bound(instance->deadline_), limit = deadline_queue_.upper_bound(instance->deadline_); pos != limit; ++pos) {
+      if (pos->second == instance) {
+        deadline_queue_.erase(pos);
+        break;
+      }
+    }
+    instance->deadline_ = MonotonicTimePoint::zero_value;
+  }
+}
+
+void DataReaderImpl::process_deadline(SubscriptionInstance_rch instance,
+                                      const MonotonicTimePoint& now,
+                                      bool timer_called)
+{
+  // Should be called with sample_lock_.
+
+  if (instance->deadline_ != MonotonicTimePoint::zero_value) {
+    bool missed = false;
+
+    if (instance->cur_sample_tv_.is_zero()) { // not received any sample.
+      missed = true;
+
+    } else if (timer_called) { // handle_timeout is called
+      missed = (now - instance->cur_sample_tv_) >= deadline_period_;
+
+    } else { // upon receiving sample.
+      missed = (instance->cur_sample_tv_ - instance->last_sample_tv_) > deadline_period_;
+    }
+
+    if (missed) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, monitor, sample_lock_);
+      // Only update the status upon timer is called and not
+      // when receiving a sample after the interval.
+      // Otherwise the counter is doubled.
+      if (timer_called) {
+        ++requested_deadline_missed_status_.total_count;
+        requested_deadline_missed_status_.total_count_change =
+          requested_deadline_missed_status_.total_count - last_deadline_missed_total_count_;
+        requested_deadline_missed_status_.last_instance_handle = instance->instance_handle_;
+
+        set_status_changed_flag(DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
+
+        DDS::DataReaderListener_var listener = listener_for(DDS::REQUESTED_DEADLINE_MISSED_STATUS);
+
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+        if (instance->instance_state_->is_exclusive()) {
+          DataReaderImpl::OwnershipManagerPtr owner_manager = ownership_manager();
+          if (owner_manager)
+            owner_manager->remove_writers (instance->instance_handle_);
+        }
+#endif
+
+        if (!CORBA::is_nil(listener.in())) {
+          // Copy before releasing the lock.
+          DDS::RequestedDeadlineMissedStatus const status = requested_deadline_missed_status_;
+
+          // Release the lock during the upcall.
+          ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          // @todo Will this operation ever throw?  If so we may want to
+          //       catch all exceptions, and act accordingly.
+          listener->on_requested_deadline_missed(this, status);
+
+          // We need to update the last total count value to our current total
+          // so that the next time we will calculate the correct total_count_change;
+          last_deadline_missed_total_count_ = requested_deadline_missed_status_.total_count;
+        }
+
+        notify_status_condition();
+      }
+    }
+
+    // This next part is without status_lock_ held to avoid reactor deadlock.
+    if (timer_called) {
+      instance->deadline_ = MonotonicTimePoint::zero_value;
+      schedule_deadline(instance, timer_called);
+    } else {
+      cancel_deadline(instance);
+      schedule_deadline(instance, timer_called);
+    }
+  }
+}
+
+void DataReaderImpl::cancel_all_deadlines()
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  deadline_queue_.clear();
+  deadline_task_->cancel();
+}
+
+void DataReaderImpl::reset_deadline_period(const TimeDuration& deadline_period)
+{
+  if (deadline_period_ != deadline_period) {
+    deadline_period_ = deadline_period;
+
+    if (deadline_queue_enabled_) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      const MonotonicTimePoint now = MonotonicTimePoint::now();
+      for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+           iter != this->instances_.end();
+           ++iter) {
+        if (iter->second->deadline_ != MonotonicTimePoint::zero_value) {
+          reschedule_deadline(iter->second, now);
+        }
+      }
+    }
+  }
+}
+
+void DataReaderImpl::reschedule_deadline(SubscriptionInstance_rch instance,
+                                         const MonotonicTimePoint& now)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+  // So the datareader can call back into us.
+  if (instance->deadline_ != MonotonicTimePoint::zero_value) {
+
+    // Remove.
+    for (DeadlineQueue::iterator pos = deadline_queue_.lower_bound(instance->deadline_), limit = deadline_queue_.upper_bound(instance->deadline_); pos != limit; ++pos) {
+      if (pos->second == instance) {
+        deadline_queue_.erase(pos);
+        break;
+      }
+    }
+
+    instance->deadline_ = now + (deadline_period_ - (instance->deadline_ - now));
+
+    const bool schedule = deadline_queue_.empty();
+    deadline_queue_.insert(std::make_pair(instance->deadline_, instance));
+    if (schedule) {
+      deadline_task_->schedule(deadline_period_);
+    } else if (deadline_queue_.begin()->second == instance) {
+      // Moved to front.
+      deadline_task_->cancel();
+      deadline_task_->schedule(deadline_period_);
+    }
+  }
+}
+
+void DataReaderImpl::deadline_task(const MonotonicTimePoint& now)
+{
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  for (DeadlineQueue::iterator pos = deadline_queue_.begin(), limit = deadline_queue_.end(); pos != limit && pos->first <= now;) {
+    SubscriptionInstance_rch instance = pos->second;
+    deadline_queue_.erase(pos++);
+    // pos is no longer valid.
+    process_deadline(instance, now, true);
+  }
+
+  if (!deadline_queue_.empty()) {
+    deadline_task_->schedule(deadline_queue_.begin()->first - now);
+  }
 }
 
 } // namespace DCPS

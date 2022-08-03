@@ -310,7 +310,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
   }
 
-  if (shut_down_) {
+  if (shut_down_.value()) {
     return DDS::RETCODE_ALREADY_DELETED;
   }
 
@@ -339,11 +339,12 @@ DDS::ReturnCode_t Service_Participant::shutdown()
   }
 
   DDS::ReturnCode_t rc = DDS::RETCODE_OK;
-  shut_down_ = true;
   try {
     TransportRegistry::instance()->release();
     {
       ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+
+      shut_down_ = true;
 
       dp_factory_servant_.reset();
 
@@ -405,6 +406,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
     shut_down_ = false;
+
     if (!dp_factory_servant_) {
       // This used to be a call to ORB_init().  Since the ORB is now managed
       // by InfoRepoDiscovery, just save the -ORB* args for later use.
@@ -1205,11 +1207,10 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
               repoList.push_back(std::make_pair(disc_iter->second, id));
 
               if (DCPS_debug_level > 0) {
-                GuidConverter converter(id);
                 ACE_DEBUG((LM_DEBUG,
                            ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                            ACE_TEXT("participant %C attached to Repo[ %C].\n"),
-                           OPENDDS_STRING(converter).c_str(),
+                           LogGuid(id).c_str(),
                            key.c_str()));
               }
 
@@ -1227,12 +1228,11 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
   // Make all of the remote calls after releasing the lock.
   for (unsigned int index = 0; index < repoList.size(); ++index) {
     if (DCPS_debug_level > 0) {
-      GuidConverter converter(repoList[ index].second);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                  ACE_TEXT("(%d of %d) attaching domain %d participant %C to Repo[ %C].\n"),
                  (1+index), repoList.size(), domain,
-                 OPENDDS_STRING(converter).c_str(),
+                 LogGuid(repoList[ index].second).c_str(),
                  key.c_str()));
     }
 

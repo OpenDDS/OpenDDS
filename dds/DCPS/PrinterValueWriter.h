@@ -38,7 +38,7 @@ public:
 
   void begin_struct();
   void end_struct();
-  void begin_struct_member(const XTypes::MemberDescriptor& /*descriptor*/);
+  void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/);
   void end_struct_member();
 
   void begin_union();
@@ -109,9 +109,9 @@ void PrinterValueWriter::end_struct()
   current_indent_ -= indent_;
 }
 
-void PrinterValueWriter::begin_struct_member(const XTypes::MemberDescriptor& descriptor)
+void PrinterValueWriter::begin_struct_member(const DDS::MemberDescriptor& descriptor)
 {
-  stream_ << newline() << std::string(current_indent_, ' ') << descriptor.name.c_str() << ": ";
+  stream_ << newline() << std::string(current_indent_, ' ') << descriptor.name() << ": ";
   at_newline_ = false;
 }
 

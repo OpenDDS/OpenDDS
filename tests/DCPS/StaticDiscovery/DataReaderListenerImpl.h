@@ -24,7 +24,8 @@ class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
 public:
   DataReaderListenerImpl(const std::string& id, bool reliable, bool expect_all_samples, const int total_writers, const int expected_samples, callback_t done_callback, bool check_bits)
-    : id_(id)
+    : reader_guid_(OpenDDS::DCPS::GUID_UNKNOWN)
+    , id_(id)
     , reliable_(reliable)
     , expect_all_samples_(expect_all_samples)
     , total_writers_(total_writers)

@@ -478,6 +478,14 @@ public:
 
 protected:
 
+  void check_and_set_repo_id(const RepoId& id)
+  {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+    if (GUID_UNKNOWN == publication_id_) {
+      publication_id_ = id;
+    }
+  }
+
   SequenceNumber get_next_sn()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(sn_lock_);
@@ -589,7 +597,7 @@ private:
   void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  DDS::Subscriber_var get_builtin_subscriber() const;
+  RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const;
 
   DDS::DomainId_t domain_id() const {
     return this->domain_id_;
@@ -728,6 +736,13 @@ private:
   RcHandle<LivenessTimer> liveness_timer_;
 
   MonotonicTimePoint wait_pending_deadline_;
+
+#if defined(OPENDDS_SECURITY)
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::Security::PermissionsHandle participant_permissions_handle_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;

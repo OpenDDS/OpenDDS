@@ -52,7 +52,7 @@ class SubscriberImpl;
 class DataWriterImpl;
 class DomainParticipantFactoryImpl;
 class Monitor;
-
+class BitSubscriber;
 
 class RecorderImpl;
 class ReplayerImpl;
@@ -152,6 +152,8 @@ public:
     DDS::Subscriber_ptr s);
 
   virtual DDS::Subscriber_ptr get_builtin_subscriber();
+
+  RcHandle<DCPS::BitSubscriber> get_builtin_subscriber_proxy();
 
   virtual DDS::Topic_ptr create_topic(
     const char *           topic_name,
@@ -399,8 +401,14 @@ public:
   XTypes::TypeLookupService_rch get_type_lookup_service() { return type_lookup_service_; }
 
 #if defined(OPENDDS_SECURITY)
-  void set_security_config(const Security::SecurityConfig_rch& config);
-
+  Security::SecurityConfig_rch get_security_config() const
+  {
+    return security_config_;
+  }
+  DDS::Security::PermissionsHandle permissions_handle() const
+  {
+    return perm_handle_;
+  }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const
   {
     return part_crypto_handle_;
@@ -526,7 +534,7 @@ private:
   bool shutdown_complete_;
 
   /// The built in topic subscriber.
-  DDS::Subscriber_var bit_subscriber_;
+  RcHandle<BitSubscriber> bit_subscriber_;
 
   /// Get instances handles from DomainParticipantFactory (use handle_protector_)
   InstanceHandleGenerator& participant_handles_;

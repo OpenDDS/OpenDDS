@@ -78,6 +78,13 @@ extern OpenDDS_Dcps_Export unsigned int DCPS_debug_level;
 /// This function allows for possible side-effects of setting the level.
 extern void OpenDDS_Dcps_Export set_DCPS_debug_level(unsigned int lvl);
 
+#ifndef OPENDDS_UTIL_BUILD
+/// Transport Logging verbosity level.
+// This needs to be initialized somewhere.
+extern OpenDDS_Dcps_Export unsigned int Transport_debug_level;
+extern OpenDDS_Dcps_Export TransportDebug transport_debug;
+#endif
+
 #ifdef OPENDDS_SECURITY
 /**
  * Global Security Debug Settings

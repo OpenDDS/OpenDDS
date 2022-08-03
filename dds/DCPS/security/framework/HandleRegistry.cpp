@@ -197,6 +197,49 @@ HandleRegistry::erase_remote_participant_crypto_handle(const DCPS::RepoId& id)
 }
 
 void
+HandleRegistry::insert_remote_participant_permissions_handle(const DCPS::RepoId& id,
+                                                        DDS::Security::PermissionsHandle handle)
+{
+  if (handle != DDS::HANDLE_NIL) {
+    ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+    remote_participant_permissions_handles_[id] = handle;
+
+    if (DCPS::security_debug.bookkeeping) {
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+                 ACE_TEXT("HandleRegistry::insert_remote_participant_permissions_handle %C %d (total %B)\n"),
+                 DCPS::LogGuid(id).c_str(),
+                 handle,
+                 remote_participant_permissions_handles_.size()));
+    }
+  }
+}
+
+DDS::Security::PermissionsHandle
+HandleRegistry::get_remote_participant_permissions_handle(const DCPS::RepoId& id) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::HANDLE_NIL);
+  PermissionsHandleMap::const_iterator pos = remote_participant_permissions_handles_.find(id);
+  if (pos != remote_participant_permissions_handles_.end()) {
+    return pos->second;
+  }
+  return DDS::HANDLE_NIL;
+}
+
+void
+HandleRegistry::erase_remote_participant_permissions_handle(const DCPS::RepoId& id)
+{
+  ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
+  remote_participant_permissions_handles_.erase(id);
+
+  if (DCPS::security_debug.bookkeeping) {
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {bookkeeping} ")
+               ACE_TEXT("HandleRegistry::erase_remote_participant_permissions_handle %C (total %B)\n"),
+               DCPS::LogGuid(id).c_str(),
+               remote_participant_permissions_handles_.size()));
+  }
+}
+
+void
 HandleRegistry::insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
                                                        DDS::Security::DatareaderCryptoHandle handle,
                                                        const DDS::Security::EndpointSecurityAttributes& attributes)

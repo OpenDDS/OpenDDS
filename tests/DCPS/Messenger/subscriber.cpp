@@ -176,6 +176,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     DDS::ConditionSeq conditions;
     ret = ws->wait(conditions, timeout);
+    ws->detach_condition(gc);
 
     if (!listener_servant->is_valid()) {
       status = EXIT_FAILURE;

@@ -222,6 +222,79 @@ DDS::BuiltinTopicKey_t keyFromSample(TopicType*)
   return key;
 }
 
+class OpenDDS_Dcps_Export BitSubscriber : public RcObject {
+public:
+  BitSubscriber()
+  {}
+
+  explicit BitSubscriber(const DDS::Subscriber_var& bit_subscriber)
+    : bit_subscriber_(bit_subscriber)
+  {}
+
+  DDS::Subscriber_ptr get() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, 0);
+    return DDS::Subscriber::_duplicate(bit_subscriber_.in());
+  }
+
+  void clear()
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+    bit_subscriber_ = 0;
+  }
+
+  DDS::InstanceHandle_t add_participant(const DDS::ParticipantBuiltinTopicData& part,
+                                        DDS::ViewStateKind view_state);
+  void remove_participant(DDS::InstanceHandle_t part_ih,
+                          DDS::InstanceHandle_t loc_ih);
+
+  DDS::ReturnCode_t get_discovered_participant_data(DDS::ParticipantBuiltinTopicData& participant_data,
+                                                    DDS::InstanceHandle_t participant_handle);
+
+  DDS::ReturnCode_t get_discovered_topic_data(DDS::TopicBuiltinTopicData& topic_data,
+                                              DDS::InstanceHandle_t topic_handle);
+
+  DDS::InstanceHandle_t add_publication(const DDS::PublicationBuiltinTopicData& pub,
+                                        DDS::ViewStateKind view_state);
+  void remove_publication(DDS::InstanceHandle_t pub_ih);
+
+  DDS::InstanceHandle_t add_subscription(const DDS::SubscriptionBuiltinTopicData& sub,
+                                         DDS::ViewStateKind view_state);
+  void remove_subscription(DDS::InstanceHandle_t sub_ih);
+
+  DDS::InstanceHandle_t add_participant_location(const ParticipantLocationBuiltinTopicData& loc,
+                                                 DDS::ViewStateKind view_state);
+
+  DDS::InstanceHandle_t add_connection_record(const ConnectionRecord& cr,
+                                              DDS::ViewStateKind view_state);
+  void remove_connection_record(const ConnectionRecord& cr);
+
+  DDS::InstanceHandle_t add_thread_status(const InternalThreadBuiltinTopicData& ts,
+                                          DDS::ViewStateKind view_state,
+                                          const SystemTimePoint& timestamp);
+  void remove_thread_status(const InternalThreadBuiltinTopicData& ts);
+
+  /*
+    The Ownership QoS is implemented by creating a listener for the
+    Publication BIT that reads the ownership strength and makes
+    adjustments.  This is bad (a hack) because it prevents the user
+    from installing a listener for the built-in topics.
+   */
+  void bit_pub_listener_hack(DomainParticipantImpl* participant);
+
+private:
+  template <typename DataReaderImpl, typename Sample>
+  DDS::InstanceHandle_t add_i(const char* topic_name,
+                              const Sample& sample,
+                              DDS::ViewStateKind view_state);
+
+  void remove_i(const char* topic_name,
+                DDS::InstanceHandle_t ih);
+
+  DDS::Subscriber_var bit_subscriber_;
+  mutable ACE_Thread_Mutex mutex_;
+};
+
 } // namespace DCPS
 } // namespace OpenDDS
 

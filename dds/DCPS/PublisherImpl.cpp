@@ -194,13 +194,11 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
     if (dw_publisher.in() != this) {
       if (DCPS_debug_level > 0) {
-        RepoId id = dw_servant->get_repo_id();
-        GuidConverter converter(id);
         ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
             ACE_TEXT("the data writer %C doesn't ")
             ACE_TEXT("belong to this subscriber\n"),
-            OPENDDS_STRING(converter).c_str()));
+            LogGuid(dw_servant->get_repo_id()).c_str()));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -228,12 +226,11 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
 
     if (it == publication_map_.end()) {
       if (DCPS_debug_level > 0) {
-        GuidConverter converter(publication_id);
         ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("PublisherImpl::delete_datawriter, ")
             ACE_TEXT("datawriter %C not found.\n"),
-            OPENDDS_STRING(converter).c_str()));
+            LogGuid(publication_id).c_str()));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -407,14 +404,13 @@ DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
 
     if (ret != DDS::RETCODE_OK) {
       if (DCPS_debug_level > 0) {
-        GuidConverter converter(pub_id);
         ACE_ERROR((LM_ERROR,
             ACE_TEXT("(%P|%t) ERROR: ")
             ACE_TEXT("PublisherImpl::")
             ACE_TEXT("delete_contained_entities: ")
             ACE_TEXT("failed to delete ")
             ACE_TEXT("datawriter %C.\n"),
-            OPENDDS_STRING(converter).c_str()));
+            LogGuid(pub_id).c_str()));
       }
       return ret;
     }
@@ -460,13 +456,12 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
 
           if (!pair.second) {
             if (DCPS_debug_level > 0) {
-              GuidConverter converter(id);
               ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ")
                   ACE_TEXT("PublisherImpl::set_qos: ")
                   ACE_TEXT("insert id %C to DwIdToQosMap ")
                   ACE_TEXT("failed.\n"),
-                  OPENDDS_STRING(converter).c_str()));
+                  LogGuid(id).c_str()));
             }
             return DDS::RETCODE_ERROR;
           }
@@ -923,12 +918,11 @@ PublisherImpl::writer_enabled(const char*     topic_name,
 
   if (!pair.second) {
     if (DCPS_debug_level > 0) {
-      GuidConverter converter(publication_id);
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")
           ACE_TEXT("PublisherImpl::writer_enabled: ")
           ACE_TEXT("insert publication %C failed.\n"),
-          OPENDDS_STRING(converter).c_str()));
+          LogGuid(publication_id).c_str()));
     }
     return DDS::RETCODE_ERROR;
   }

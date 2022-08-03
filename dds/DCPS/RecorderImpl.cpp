@@ -18,7 +18,6 @@
 #include "SubscriberImpl.h"
 #include "Transient_Kludge.h"
 #include "Util.h"
-#include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
@@ -227,12 +226,12 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 {
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 void
 RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti)
 {
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
-  XTypes::TypeObject cto = tls->get_type_object(ti);
-  XTypes::DynamicType_rch dt = tls->complete_to_dynamic(cto.complete, pub_id);
+  DDS::DynamicType_var dt = tls->type_identifier_to_dynamic(ti, pub_id);
   if (DCPS_debug_level >= 4) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) RecorderImpl::add_association: "
@@ -240,6 +239,7 @@ RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes:
   }
   dt_map_.insert(std::make_pair(pub_id, dt));
 }
+#endif
 
 void
 RecorderImpl::add_association(const RepoId&            yourId,
@@ -420,11 +420,10 @@ RecorderImpl::add_association(const RepoId&            yourId,
         RepoIdToHandleMap::value_type(writer.writerId, handle));
 
       if (DCPS_debug_level > 4) {
-        GuidConverter converter(writer.writerId);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) RecorderImpl::add_association: ")
                    ACE_TEXT("id_to_handle_map_[ %C] = 0x%x.\n"),
-                   OPENDDS_STRING(converter).c_str(),
+                   LogGuid(writer.writerId).c_str(),
                    handle));
       }
 
@@ -462,6 +461,11 @@ RecorderImpl::add_association(const RepoId&            yourId,
 
     {
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
+      ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
+
+      if (!writers_.count(writer.writerId)) {
+        return;
+      }
 
       this->writers_[writer.writerId]->handle(handle);
     }
@@ -509,14 +513,12 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
   }
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter reader_converter(subscription_id_);
-    GuidConverter writer_converter(writers[0]);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
                is_bit_,
-               OPENDDS_STRING(reader_converter).c_str(),
-               OPENDDS_STRING(writer_converter).c_str(),
+               LogGuid(subscription_id_).c_str(),
+               LogGuid(writers[0]).c_str(),
                writers.length()));
   }
   DDS::InstanceHandleSeq handles;
@@ -542,12 +544,14 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     for (CORBA::ULong i = 0; i < wr_len; i++) {
       PublicationId writer_id = writers[i];
 
+#ifndef OPENDDS_SAFETY_PROFILE
       if (dt_map_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
           ACE_DEBUG((LM_DEBUG, "(%P|%t) RecorderImpl::remove_associations_i: -"
             "failed to find writer_id in the DynamicTypeByPubId map.\n"));
         }
       }
+#endif
 
       WriterMapType::iterator it = this->writers_.find(writer_id);
       if (it != this->writers_.end()) {
@@ -556,11 +560,10 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
 
       if (this->writers_.erase(writer_id) == 0) {
         if (DCPS_debug_level >= 4) {
-          GuidConverter converter(writer_id);
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) RecorderImpl::remove_associations_i: ")
                      ACE_TEXT("the writer local %C was already removed.\n"),
-                     OPENDDS_STRING(converter).c_str()));
+                     LogGuid(writer_id).c_str()));
         }
 
       } else {
@@ -843,7 +846,7 @@ RecorderImpl::lookup_instance_handles(const WriterIdSeq&       ids,
     OPENDDS_STRING buffer;
 
     for (CORBA::ULong i = 0; i < num_wrts; ++i) {
-      buffer += separator + OPENDDS_STRING(GuidConverter(ids[i]));
+      buffer += separator + LogGuid(ids[i]).conv_;
       separator = ", ";
     }
 
@@ -992,7 +995,8 @@ RecorderImpl::repoid_to_bit_key(const GUID_t& id,
 }
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-XTypes::DynamicData RecorderImpl::get_dynamic_data(const RawDataSample& sample)
+#ifndef OPENDDS_SAFETY_PROFILE
+DDS::DynamicData_ptr RecorderImpl::get_dynamic_data(const RawDataSample& sample)
 {
   const Encoding enc(sample.encoding_kind_, sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
   const DynamicTypeByPubId::const_iterator dt_found = dt_map_.find(sample.publication_id_);
@@ -1001,20 +1005,22 @@ XTypes::DynamicData RecorderImpl::get_dynamic_data(const RawDataSample& sample)
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: RecorderImpl::get_dynamic_data: "
         "failed to find GUID: %C in DynamicTypeByPubId.\n", LogGuid(sample.publication_id_).c_str()));
     }
-    return XTypes::DynamicData();
+    return 0;
   }
 
-  const XTypes::DynamicType_rch dt = dt_found->second;
-  XTypes::DynamicData dd(sample.sample_.get(), enc, dt);
-  if (!dd.check_xcdr1_mutable(dt)) {
+  DDS::DynamicType_var dt = dt_found->second;
+  XTypes::DynamicDataImpl* dd = new XTypes::DynamicDataImpl(sample.sample_.get(), enc, dt);
+  DDS::DynamicData_var dd_var = dd;
+  if (!dd->check_xcdr1_mutable(dt)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RecorderImpl::get_dynamic_data: "
         "Encountered unsupported combination of XCDR1 encoding and mutable extensibility.\n"));
     }
-    return XTypes::DynamicData();
+    return 0;
   }
-  return dd;
+  return dd_var._retn();
 }
+#endif
 
 } // namespace DCPS
 } // namespace

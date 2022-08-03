@@ -54,7 +54,7 @@ public:
   virtual CryptoKeyExchange_var create_crypto_key_exchange() = 0;
   virtual CryptoKeyFactory_var create_crypto_key_factory() = 0;
   virtual CryptoTransform_var create_crypto_transform() = 0;
-  virtual Utility* create_utility() = 0;
+  virtual DCPS::RcHandle<Utility> create_utility() = 0;
 #endif
 
   // Perform any logic needed when shutting down the plugin

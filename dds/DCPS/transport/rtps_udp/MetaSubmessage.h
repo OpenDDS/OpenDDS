@@ -19,21 +19,17 @@ namespace DCPS {
 
 struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
   MetaSubmessage()
-    : src_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), addr_guids_(make_rch<ConstSharedRepoIdSet>()), redundant_(false) {}
+    : src_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), redundant_(false) {}
   MetaSubmessage(const RepoId& src, const RepoId& dst)
-    : src_guid_(src), dst_guid_(dst), addr_guids_(make_rch<ConstSharedRepoIdSet>()), redundant_(false) {}
-  MetaSubmessage(const RepoId& src, const RepoId& dst, RcHandle<ConstSharedRepoIdSet> addr_guids)
-    : src_guid_(src), dst_guid_(dst), addr_guids_(addr_guids), redundant_(false) {}
+    : src_guid_(src), dst_guid_(dst), redundant_(false) {}
 
   void reset_destination()
   {
     dst_guid_ = GUID_UNKNOWN;
-    addr_guids_ = make_rch<ConstSharedRepoIdSet>();
   }
 
   RepoId src_guid_;
   RepoId dst_guid_;
-  RcHandle<ConstSharedRepoIdSet> addr_guids_;
   RTPS::Submessage sm_;
   bool redundant_;
 };

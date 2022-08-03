@@ -132,7 +132,7 @@ TransportSendStrategy::perform_work()
   { // scope for the guard(lock_);
     GuardType guard(lock_);
 
-    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str(mode_)), 5);
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str(mode_.value())), 5);
 
     if (mode_ == MODE_TERMINATED) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -161,7 +161,7 @@ TransportSendStrategy::perform_work()
     if (mode_ != MODE_QUEUE && mode_ != MODE_SUSPEND) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Entered perform_work() and mode_ is %C - just return "
-                "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str(mode_)), 5);
+                "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str(mode_.value())), 5);
       return WORK_OUTCOME_NO_MORE_TO_DO;
     }
 
@@ -978,7 +978,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       if (mode_ == MODE_QUEUE || mode_ == MODE_SUSPEND) {
         VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "mode_ == %C, so queue elem and leave.\n",
-                  mode_as_str(mode_)), 5);
+                  mode_as_str(mode_.value())), 5);
 
         queue_.put(element);
 
@@ -1259,7 +1259,7 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "But since we are in %C, we don't have to do "
             "anything more in this important send_stop().\n",
-            mode_as_str(mode_)));
+            mode_as_str(mode_.value())));
       // We don't do anything if we are in MODE_QUEUE.  Just leave.
       return;
     }
@@ -1503,7 +1503,7 @@ TransportSendStrategy::direct_send(bool do_relink)
                 "Now flip to MODE_SUSPEND before we try to reconnect.\n"), 5);
 
       if (mode_ != MODE_SUSPEND) {
-        mode_before_suspend_ = mode_;
+        mode_before_suspend_ = mode_.value();
         mode_ = MODE_SUSPEND;
       }
 
@@ -1917,7 +1917,7 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
     }
   }
 
-  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_));
+  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_.value()));
 }
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)

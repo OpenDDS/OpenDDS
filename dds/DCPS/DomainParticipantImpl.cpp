@@ -21,7 +21,6 @@
 #include "Util.h"
 #include "DCPS_Utils.h"
 #include "MonitorFactory.h"
-#include "BitPubListenerImpl.h"
 #include "ContentFilteredTopicImpl.h"
 #include "MultiTopicImpl.h"
 #include "Service_Participant.h"
@@ -382,7 +381,13 @@ DomainParticipantImpl::delete_subscriber(
 DDS::Subscriber_ptr
 DomainParticipantImpl::get_builtin_subscriber()
 {
-  return DDS::Subscriber::_duplicate(bit_subscriber_.in());
+  return bit_subscriber_->get();
+}
+
+RcHandle<BitSubscriber>
+DomainParticipantImpl::get_builtin_subscriber_proxy()
+{
+  return bit_subscriber_;
 }
 
 DDS::Topic_ptr
@@ -605,11 +610,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
     TopicImpl* the_topic_servant = dynamic_cast<TopicImpl*>(a_topic);
 
     if (!the_topic_servant) {
-      if (DCPS_debug_level > 0) {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                   ACE_TEXT("%p\n"),
-                   ACE_TEXT("failed to obtain TopicImpl.")));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: %p\n"
+                   "failed to obtain TopicImpl."));
       }
       return DDS::RETCODE_ERROR;
     }
@@ -620,22 +623,20 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
       dynamic_cast<DomainParticipantImpl*>(dp.in());
 
     if (the_dp_servant != this) {
-      if (DCPS_debug_level >= 1) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-                   ACE_TEXT("will return PRECONDITION_NOT_MET because this is not the ")
-                   ACE_TEXT("participant that owns this topic\n")));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: "
+                   "will return PRECONDITION_NOT_MET because this is not the "
+                   "participant that owns this topic\n"));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
     if (!remove_objref && the_topic_servant->has_entity_refs()) {
       // If entity_refs is true (nonzero), then some reader or writer is using
       // this topic and the spec requires delete_topic() to fail with the error:
-      if (DCPS_debug_level >= 1) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-                   ACE_TEXT("will return PRECONDITION_NOT_MET because there are still ")
-                   ACE_TEXT("outstanding references to this topic\n")));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: "
+                   "will return PRECONDITION_NOT_MET because there are still "
+                   "outstanding references to this topic\n"));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -658,9 +659,8 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
         }
       }
       if (entry == 0) {
-        if (DCPS_debug_level > 0) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, not found\n")));
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i: not found\n"));
         }
         return DDS::RETCODE_ERROR;
       }
@@ -676,11 +676,9 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
           the_dp_servant->get_domain_id(), the_dp_servant->get_id(), topicId);
 
         if (status != REMOVED) {
-          if (DCPS_debug_level > 0) {
-            ACE_ERROR((LM_ERROR,
-                       ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                       ACE_TEXT("remove_topic failed with return value <%C>\n"),
-                       topicstatus_to_string(status)));
+          if (log_level >= LogLevel::Notice) {
+            ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i, "
+                       "remove_topic failed with return value <%C>\n", topicstatus_to_string(status)));
            }
           return DDS::RETCODE_ERROR;
         }
@@ -689,19 +687,17 @@ DDS::ReturnCode_t DomainParticipantImpl::delete_topic_i(
 
       } else {
         if (DCPS_debug_level > 4) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DomainParticipantImpl::delete_topic_i: ")
-            ACE_TEXT("Didn't remove topic from the map, remove_objref %d client_refs %d\n"),
-            remove_objref, client_refs));
+          ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::delete_topic_i: "
+                     "Didn't remove topic from the map, remove_objref %d client_refs %d\n",
+                     remove_objref, client_refs));
         }
       }
     }
 
   } catch (...) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::delete_topic_i, ")
-                 ACE_TEXT(" Caught Unknown Exception\n")));
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::delete_topic_i, "
+                 " Caught Unknown Exception\n"));
     }
     ret = DDS::RETCODE_ERROR;
   }
@@ -1090,7 +1086,7 @@ DomainParticipantImpl::delete_contained_entities()
     shutdown_mutex_.release();
   }
 
-  bit_subscriber_ = DDS::Subscriber::_nil();
+  bit_subscriber_.reset();
 
   Registered_Data_Types->unregister_participant(this);
 
@@ -1251,11 +1247,10 @@ DomainParticipantImpl::ignore_participant(
   }
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter converter(dp_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
                ACE_TEXT("%C ignoring handle %x.\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(dp_id_).c_str(),
                handle));
   }
 
@@ -1273,11 +1268,10 @@ DomainParticipantImpl::ignore_participant(
 
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter converter(dp_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_participant: ")
                ACE_TEXT("%C repo call returned.\n"),
-               OPENDDS_STRING(converter).c_str()));
+               LogGuid(dp_id_).c_str()));
   }
 
   return DDS::RETCODE_OK;
@@ -1313,11 +1307,10 @@ DomainParticipantImpl::ignore_topic(
   }
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter converter(dp_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_topic: ")
                ACE_TEXT("%C ignoring handle %x.\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(dp_id_).c_str(),
                handle));
   }
 
@@ -1355,11 +1348,10 @@ DomainParticipantImpl::ignore_publication(
   }
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter converter(dp_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_publication: ")
                ACE_TEXT("%C ignoring handle %x.\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(dp_id_).c_str(),
                handle));
   }
 
@@ -1399,11 +1391,10 @@ DomainParticipantImpl::ignore_subscription(
   }
 
   if (DCPS_debug_level >= 4) {
-    GuidConverter converter(dp_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DomainParticipantImpl::ignore_subscription: ")
                ACE_TEXT("%C ignoring handle %d.\n"),
-               OPENDDS_STRING(converter).c_str(),
+               LogGuid(dp_id_).c_str(),
                handle));
   }
 
@@ -1554,9 +1545,8 @@ DomainParticipantImpl::get_discovered_participants(DDS::InstanceHandleSeq& parti
 }
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_discovered_participant_data(
-  DDS::ParticipantBuiltinTopicData & participant_data,
-  DDS::InstanceHandle_t participant_handle)
+DomainParticipantImpl::get_discovered_participant_data(DDS::ParticipantBuiltinTopicData& participant_data,
+                                                       DDS::InstanceHandle_t participant_handle)
 {
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
@@ -1577,37 +1567,7 @@ DomainParticipantImpl::get_discovered_participant_data(
       return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::SampleInfoSeq info;
-  DDS::ParticipantBuiltinTopicDataSeq data;
-  DDS::ParticipantBuiltinTopicDataDataReader_var bit_part_dr;
-
-  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
-  if (bit_subscriber) {
-    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_PARTICIPANT_TOPIC);
-    bit_part_dr = DDS::ParticipantBuiltinTopicDataDataReader::_narrow(dr);
-  }
-
-  if (!bit_part_dr) {
-    return DDS::RETCODE_NO_DATA;
-  }
-
-  DDS::ReturnCode_t ret = bit_part_dr->read_instance(data,
-                                                     info,
-                                                     1,
-                                                     participant_handle,
-                                                     DDS::ANY_SAMPLE_STATE,
-                                                     DDS::ANY_VIEW_STATE,
-                                                     DDS::ANY_INSTANCE_STATE);
-
-  if (ret == DDS::RETCODE_OK) {
-    if (info[0].valid_data) {
-      participant_data = data[0];
-    } else {
-      return DDS::RETCODE_NO_DATA;
-    }
-  }
-
-  return ret;
+  return bit_subscriber_->get_discovered_participant_data(participant_data, participant_handle);
 }
 
 DDS::ReturnCode_t
@@ -1631,9 +1591,8 @@ DomainParticipantImpl::get_discovered_topics(DDS::InstanceHandleSeq& topic_handl
 }
 
 DDS::ReturnCode_t
-DomainParticipantImpl::get_discovered_topic_data(
-  DDS::TopicBuiltinTopicData & topic_data,
-  DDS::InstanceHandle_t topic_handle)
+DomainParticipantImpl::get_discovered_topic_data(DDS::TopicBuiltinTopicData& topic_data,
+                                                 DDS::InstanceHandle_t topic_handle)
 {
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_protector_, DDS::RETCODE_ERROR);
@@ -1652,38 +1611,7 @@ DomainParticipantImpl::get_discovered_topic_data(
       return DDS::RETCODE_PRECONDITION_NOT_MET;
   }
 
-  DDS::TopicBuiltinTopicDataDataReader_var bit_topic_dr;
-
-  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
-  if (bit_subscriber) {
-    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_TOPIC_TOPIC);
-    bit_topic_dr = DDS::TopicBuiltinTopicDataDataReader::_narrow(dr);
-  }
-
-  if (!bit_topic_dr) {
-    return DDS::RETCODE_NO_DATA;
-  }
-
-  DDS::SampleInfoSeq info;
-  DDS::TopicBuiltinTopicDataSeq data;
-  DDS::ReturnCode_t ret =
-    bit_topic_dr->read_instance(data,
-                                info,
-                                1,
-                                topic_handle,
-                                DDS::ANY_SAMPLE_STATE,
-                                DDS::ANY_VIEW_STATE,
-                                DDS::ANY_INSTANCE_STATE);
-
-  if (ret == DDS::RETCODE_OK) {
-    if (info[0].valid_data) {
-      topic_data = data[0];
-    } else {
-      return DDS::RETCODE_NO_DATA;
-    }
-  }
-
-  return ret;
+  return bit_subscriber_->get_discovered_topic_data(topic_data, topic_handle);
 }
 
 #endif
@@ -1865,7 +1793,7 @@ DomainParticipantImpl::enable()
   if (DCPS_debug_level > 1) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DomainParticipantImpl::enable: ")
                ACE_TEXT("enabled participant %C in domain %d\n"),
-               OPENDDS_STRING(GuidConverter(dp_id_)).c_str(), domain_id_));
+               LogGuid(dp_id_).c_str(), domain_id_));
   }
 
   if (ret == DDS::RETCODE_OK && !TheTransientKludge->is_enabled()) {
@@ -2170,28 +2098,14 @@ OwnershipManager*
 DomainParticipantImpl::ownership_manager()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
-
-  DDS::PublicationBuiltinTopicDataDataReader_var bit_pub_dr;
-
-  DDS::Subscriber_var bit_subscriber(bit_subscriber_);
-  if (bit_subscriber) {
-    DDS::DataReader_var dr = bit_subscriber->lookup_datareader(BUILT_IN_PUBLICATION_TOPIC);
-    bit_pub_dr = DDS::PublicationBuiltinTopicDataDataReader::_narrow(dr);
-  }
-
-  if (bit_pub_dr) {
-    DDS::DataReaderListener_var listener = bit_pub_dr->get_listener();
-    if (CORBA::is_nil(listener.in())) {
-      DDS::DataReaderListener_var bit_pub_listener =
-        new BitPubListenerImpl(this);
-      bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
-      // Must call on_data_available when attaching a listener late - samples may be waiting
-      SubscriberImpl* sub = dynamic_cast<SubscriberImpl*>(bit_subscriber_.in());
-      DataReaderImpl* reader = dynamic_cast<DataReaderImpl*>(bit_pub_dr.in());
-      TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(sub), bit_pub_listener, rchandle_from(reader), true, false, false));
+  if (bit_subscriber_) {
+    bit_subscriber_->bit_pub_listener_hack(this);
+  } else {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING,
+                 "(%P|%t) WARNING: DomainParticipantImpl::ownership_manager: bit_subscriber_ is null"));
     }
   }
-
 #endif
   return &owner_man_;
 }
@@ -2447,7 +2361,7 @@ DomainParticipantImpl::LivelinessTimer::add_adjust(OpenDDS::DCPS::DataWriterImpl
 void
 DomainParticipantImpl::LivelinessTimer::remove_adjust()
 {
-  ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   recalculate_interval_ = true;
 }
@@ -2456,12 +2370,18 @@ void DomainParticipantImpl::LivelinessTimer::execute(const MonotonicTimePoint& n
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
-  scheduled_ = false;
-
   if (recalculate_interval_) {
-    interval_ = impl_.liveliness_check_interval(kind_);
-    recalculate_interval_ = false;
+    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(lock_);
+    TimeDuration interval;
+    while (recalculate_interval_) {
+      recalculate_interval_ = false;
+      ACE_GUARD(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock);
+      interval = impl_.liveliness_check_interval(kind_);
+    }
+    interval_ = interval;
   }
+
+  scheduled_ = false;
 
   if (!interval_.is_max()) {
     dispatch(now);
@@ -2478,18 +2398,18 @@ DomainParticipantImpl::AutomaticLivelinessTimer::AutomaticLivelinessTimer(Domain
 void
 DomainParticipantImpl::AutomaticLivelinessTimer::dispatch(const MonotonicTimePoint& /* tv */)
 {
-  impl_.signal_liveliness (kind_);
+  impl_.signal_liveliness(kind_);
 }
 
 DomainParticipantImpl::ParticipantLivelinessTimer::ParticipantLivelinessTimer(DomainParticipantImpl& impl)
-  : LivelinessTimer (impl, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS)
+  : LivelinessTimer(impl, DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS)
 { }
 
 void
 DomainParticipantImpl::ParticipantLivelinessTimer::dispatch(const MonotonicTimePoint& tv)
 {
   if (impl_.participant_liveliness_activity_after (tv - interval())) {
-    impl_.signal_liveliness (kind_);
+    impl_.signal_liveliness(kind_);
   }
 }
 
@@ -2498,14 +2418,13 @@ DomainParticipantImpl::liveliness_check_interval(DDS::LivelinessQosPolicyKind ki
 {
   TimeDuration tv(TimeDuration::max_value);
 
-  ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                    tao_mon,
-                    this->publishers_protector_,
-                    tv);
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   tao_mon,
+                   publishers_protector_,
+                   tv);
 
-  for (PublisherSet::iterator it(publishers_.begin());
-       it != publishers_.end(); ++it) {
-    tv = std::min (tv, it->svt_->liveliness_check_interval(kind));
+  for (PublisherSet::iterator it = publishers_.begin(); it != publishers_.end(); ++it) {
+    tv = std::min(tv, it->svt_->liveliness_check_interval(kind));
   }
 
   return tv;
@@ -2535,14 +2454,6 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
 {
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
 }
-
-#ifdef OPENDDS_SECURITY
-void
-DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& cfg)
-{
-  security_config_ = cfg;
-}
-#endif
 
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)

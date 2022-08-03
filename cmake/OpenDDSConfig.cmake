@@ -147,6 +147,7 @@ set(_tao_libs
   TAO_BiDirGIOP
   TAO_PI
   TAO_CodecFactory
+  TAO_Valuetype
   TAO_AnyTypeCode
   TAO
 )
@@ -215,6 +216,7 @@ set(OPENDDS_DCPS_DEPS
   TAO::BiDirGIOP
   TAO::PI
   TAO::CodecFactory
+  TAO::Valuetype
   TAO::AnyTypeCode
   TAO::TAO
   ACE::ACE

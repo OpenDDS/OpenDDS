@@ -565,7 +565,7 @@ private:
 
   /// The lock to serialize DomainParticipantFactory singleton
   /// creation and shutdown.
-  ACE_Thread_Mutex factory_lock_;
+  mutable ACE_Thread_Mutex factory_lock_;
 
   /// The initial values of qos policies.
   DDS::UserDataQosPolicy              initial_UserDataQosPolicy_;
@@ -759,7 +759,7 @@ private:
   bool monitor_enabled_;
 
   /// Used to track state of service participant
-  bool shut_down_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> shut_down_;
 
   RcHandle<ShutdownListener> shutdown_listener_;
 

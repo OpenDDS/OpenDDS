@@ -43,6 +43,7 @@ namespace DCPS {
 class DomainParticipantImpl;
 class DataWriterImpl;
 class DataReaderImpl;
+class BitSubscriber;
 
 /**
  * @class Discovery
@@ -69,7 +70,7 @@ public:
   // TODO: NEED TO REMOVE THIS once Service_Participant::repository_lost has been refactored
   virtual bool active() { return true; }
 
-  virtual DDS::Subscriber_ptr init_bit(DomainParticipantImpl* participant) = 0;
+  virtual RcHandle<BitSubscriber> init_bit(DomainParticipantImpl* participant) = 0;
 
   virtual void fini_bit(DCPS::DomainParticipantImpl* participant) = 0;
 
