@@ -31,7 +31,7 @@ int SummaryJsonDashboardFormatter::format(const Bench::TestController::Report& r
   document.SetObject();
 
   rapidjson::Value& errors_val = document.AddMember("errors", rapidjson::Value(0).Move(), document.GetAllocator())["errors"].SetObject();
-  errors_val.AddMember("total", rapidjson::Value(untagged_error_counts.total_).Move(), document.GetAllocator());
+  errors_val.AddMember("total", rapidjson::Value(report.missing_reports + untagged_error_counts.total_).Move(), document.GetAllocator());
   errors_val.AddMember("discovery", rapidjson::Value(untagged_error_counts.discovery_).Move(), document.GetAllocator());
 
   rapidjson::Value& untagged_stat_val = document.AddMember("stats", rapidjson::Value(0).Move(), document.GetAllocator())["stats"].SetObject();
