@@ -87,7 +87,7 @@ int TimeSeriesGnuplotFormatter::format(const Bench::TestController::Report& repo
           }
         }
       }
-      // Write gnuplot index seperator (two new lines)
+      // Write gnuplot index separator (two new lines)
       output_stream << std::endl << std::endl;
 
       write_series(tagged_stat_map[*tags_it], output_stream, tagged_rows);

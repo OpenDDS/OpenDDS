@@ -192,9 +192,10 @@ OptionStyle Option::style() const
   return style_ == OptionStyleDefault ? arg_parser_.default_option_style() : style_;
 }
 
-String Option::get_option_from_name(const String& name) const
+String Option::get_option_from_name(const String& name, OptionStyle style) const
 {
-  return ((name.length() > 1 && style() == OptionStyleGnu) ? "--" : "-") + name;
+  OptionStyle use_style = style == OptionStyleDefault ? this->style() : style;
+  return ((name.length() > 1 && use_style == OptionStyleGnu) ? "--" : "-") + name;
 }
 
 namespace {
@@ -238,7 +239,7 @@ String Option::prototype(size_t single_line_limit, bool force_single_line) const
 
 bool Option::attached_value(const String& arg, const String& opt, String* value)
 {
-  const String optsep = opt + attached_value_seperator_;
+  const String optsep = opt + attached_value_separator_;
   const bool attached = starts_with(arg, optsep);
 
   if (attached && value) {
@@ -254,17 +255,30 @@ String Option::get_prototype_from_name(const String& name) const
   return get_option_from_name(name) + (mv.length() ? " " + mv : "");
 }
 
-void Option::add_all_aliases(OptMap& options)
+void Option::add_all_aliases(OptMap& options, bool short_only)
 {
   for (StrVecIt name_it = names_.begin(); name_it != names_.end(); ++name_it) {
-    const String opt = get_option_from_name(*name_it);
-    if (!options.insert(std::make_pair(opt, this)).second) {
-      throw ArgParsingError("Option conflicts with an existing one: " + opt);
+    const bool long_opt = name_it->length() > 1;
+    if (short_only && (long_opt || min_args_required() > 0)) {
+      continue;
+    }
+    {
+      const String optstr = short_only ? *name_it : get_option_from_name(*name_it);
+      if (!options.insert(std::make_pair(optstr, this)).second) {
+        throw ArgParsingError("Option conflicts with an existing one: " + optstr);
+      }
+    }
+    // Also add a GNU alias if we're using Multics style.
+    if (!short_only && long_opt && style() == OptionStyleMultics) {
+      const String optstr = get_option_from_name(*name_it, OptionStyleGnu);
+      if (!options.insert(std::make_pair(optstr, this)).second) {
+        throw ArgParsingError("Option conflicts with an existing one: " + optstr);
+      }
     }
   }
 }
 
-void Option::confirm(ArgParseState& state, const String& opt, StrVecIt found)
+bool Option::confirm(ArgParseState& state, const String& opt, StrVecIt found)
 {
   state.current_arg_ref = "option " + opt;
   if (*found == opt || attached_value(*found, opt)) {
@@ -272,28 +286,13 @@ void Option::confirm(ArgParseState& state, const String& opt, StrVecIt found)
       throw ParseError(state, "was passed multiple times");
     }
     present_ = true;
-    return;
+    return true;
   }
-  throw ParseError(state, "is being invoked incorrectly: \"" + *found + "\"");
+  return false;
 }
 
 StrVecIt Option::find(ArgParseState& state)
 {
-  for (StrVecIt it = state.args.begin(); it != state.args.end(); ++it) {
-    if (state.parser.is_positional_only_sentinal(*it)) {
-      // Remaining arguments should be interpreted as positional arguments
-      break;
-    }
-
-    for (StrVecIt name_it = names_.begin(); name_it != names_.end(); ++name_it) {
-      const String opt = get_option_from_name(*name_it);
-      if (*it == opt || attached_value(*it, opt)) {
-        state.current_arg_ref = "option " + opt;
-        return it;
-      }
-    }
-  }
-
   return state.args.end();
 }
 
@@ -488,9 +487,12 @@ void ArgParser::parse_i(ArgParseState& state)
 {
   // Parse options
   OptMap options;
+  OptMap short_options;
   for (ArgumentsIt it = arguments_.begin(); it != arguments_.end(); ++it) {
     if ((*it)->option()) {
-      dynamic_cast<Option*>(*it)->add_all_aliases(options);
+      Option* const opt = dynamic_cast<Option*>(*it);
+      opt->add_all_aliases(options);
+      opt->add_all_aliases(short_options, true /* short_only */);
     }
   }
   for (StrVecIt it = state.args.begin(); it != state.args.end();) {
@@ -502,10 +504,11 @@ void ArgParser::parse_i(ArgParseState& state)
       ++it;
       continue;
     }
+
     /*
      * Check if it's a valid option by trying to match the whole thing and then
-     * reduce what we're looking for. This is account for the possibility of
-     * different attached value seperators being used for different options.
+     * reduce what we're looking for. This is to account for the possibility of
+     * different attached value separators being used for different options.
      */
     bool found = false;
     for (size_t find_end = arg.length(); find_end; --find_end) {
@@ -513,13 +516,38 @@ void ArgParser::parse_i(ArgParseState& state)
       const OptMap::iterator found_it = options.find(consider);
       found = found_it != options.end();
       if (found) {
-        Option* opt = found_it->second;
-        // Make sure it matches. Value seperator might be wrong.
-        opt->confirm(state, found_it->first, it);
-        it = opt->handle_found(state, it);
-        break;
+        Option* const opt = found_it->second;
+        // Make sure it matches. Value separator might be wrong.
+        if (opt->confirm(state, found_it->first, it) ) {
+          it = opt->handle_found(state, it);
+          break;
+        }
       }
     }
+
+    // Check for short option bundling, replace with separate args
+    if (!found && short_options.size() > 1 && arg.length() > 2 &&
+        !starts_with(arg, "--") && starts_with(arg, "-")) {
+      StrVec replace;
+      for (size_t i = 1; i < arg.length(); ++i) {
+        const String c = arg.substr(i, 1);
+        const OptMap::iterator found_it = short_options.find(c);
+        if (found_it == short_options.end()) {
+          // Assume if one is bad then entire thing is bad.
+          replace.clear();
+          // TODO: Way to offer more help if just one is completely wrong or
+          // requires a value?
+          break;
+        } else {
+          replace.push_back("-" + c);
+        }
+      }
+      if (replace.size()) {
+        found = true;
+        it = state.args.insert(state.args.erase(it), replace.begin(), replace.end());
+      }
+    }
+
     if (!found) {
       throw ParseError("option " + arg + " is invalid");
     }
@@ -665,9 +693,7 @@ void ArgParser::print_help(ArgParseState& state, std::ostream& os)
         help_indent = std::max(help_indent, single_line_width);
       } else if (multi_line_width <= help_max_indent) {
         help_indent = std::max(help_indent, multi_line_width);
-      } else {
       }
-      /* help_indent = std::max(single_line_len <= help_max_indent); */
     }
   }
   const size_t name_indent = help_min_indent;

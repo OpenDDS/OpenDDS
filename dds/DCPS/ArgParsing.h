@@ -11,7 +11,6 @@
  *
  * Possible Improvements:
  *  - Make it possible to use this to process OpenDDS builtin options (shift mode)
- *  - Short option bundling ("-abc" would be the same as "-a -b -c")
  *  - More customizable usage and help
  *  - Subcommands and child parsers
  *  - Wrapper value handler for some multiple of the same kind of value.
@@ -114,7 +113,7 @@ const size_t size_t_max = (std::numeric_limits<size_t>::max)();
 String OpenDDS_Dcps_Export count_required(size_t min_count, size_t max_count);
 
 /*
- * Base class for handling found arugments.
+ * Base class for handling found arguments.
  */
 class OpenDDS_Dcps_Export Handler {
 public:
@@ -416,7 +415,7 @@ enum OptionStyle {
   // https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
   OptionStyleGnu,
   // The same as GNU, but using '-' instead of '--' to prefix long options,
-  // which was apparently first used on Multics.
+  // which was apparently first used on Multics. Will also accept --.
   OptionStyleMultics,
 };
 
@@ -430,17 +429,17 @@ public:
   bool allow_multiple_;
 
   /**
-   * Seperator for "attached values". By default it's '=', which allows
+   * Separator for "attached values". By default it's '=', which allows
    * something like "--foo=bar" (option "foo" value "bar"). If cleared it
    * allows something like "-Da=b" (option "D" value "a=b").
    */
-  String attached_value_seperator_;
+  String attached_value_separator_;
 
   Option(ArgParser& arg_parser, const String& name, const String& help,
     Handler* handler, OptionStyle style = OptionStyleDefault)
     : Argument(arg_parser, help, handler)
     , allow_multiple_(true)
-    , attached_value_seperator_("=")
+    , attached_value_separator_("=")
     , style_(style)
     , present_dest_(0)
   {
@@ -452,7 +451,7 @@ public:
     OptionStyle style = OptionStyleDefault)
     : Argument(arg_parser, help, &default_handler_)
     , allow_multiple_(true)
-    , attached_value_seperator_("=")
+    , attached_value_separator_("=")
     , style_(style)
     , present_dest_(&present)
   {
@@ -472,7 +471,7 @@ public:
     names_.push_back(alias);
   }
 
-  String get_option_from_name(const String& name) const;
+  String get_option_from_name(const String& name, OptionStyle style = OptionStyleDefault) const;
 
   String metavar() const
   {
@@ -504,8 +503,8 @@ public:
     return true;
   }
 
-  void add_all_aliases(OptMap& options);
-  void confirm(ArgParseState& state, const String& opt, StrVecIt found);
+  void add_all_aliases(OptMap& options, bool short_only = false);
+  bool confirm(ArgParseState& state, const String& opt, StrVecIt found);
 
   StrVecIt find(ArgParseState& state);
 

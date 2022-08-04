@@ -156,9 +156,7 @@ namespace {
       return got_expected_result;
     }
   };
-}
 
-namespace {
   struct BasicHelper : public Helper {
     String a;
     Positional a_arg;
@@ -332,15 +330,20 @@ TEST(dds_DCPS_ArgParsing_ArgParser, basic_parse_multics_style)
 {
   {
     BasicHelper h;
-    h.arg_parser.default_option_style(OptionStyleMultics);
-    h("a")("--y-opt")("12");
-    h.parse("option --y-opt is invalid");
+    h("a")("-y-opt")("12");
+    h.parse("option -y-opt is invalid");
   }
   {
     BasicHelper h;
     h.arg_parser.default_option_style(OptionStyleMultics);
     h("a")("-y-opt")("12");
     h.expect("a", "DEFAULT B VALUE", 2, false, 12);
+  }
+  {
+    BasicHelper h;
+    h.arg_parser.default_option_style(OptionStyleMultics);
+    h("a")("--y-opt")("23");
+    h.expect("a", "DEFAULT B VALUE", 2, false, 23);
   }
 }
 
@@ -444,6 +447,74 @@ TEST(dds_DCPS_ArgParsing_ArgParser, option_order)
   EXPECT_STREQ(ordered_values[0].c_str(), "C");
   EXPECT_STREQ(ordered_values[1].c_str(), "A");
   EXPECT_STREQ(ordered_values[2].c_str(), "B");
+}
+
+TEST(dds_DCPS_ArgParsing_ArgParser, attached_value_separator)
+{
+  Helper h;
+  h.arg_parser.default_option_style(OptionStyleMultics);
+
+  int x = 0;
+  OptionAs<IntValue<int> > x_opt(h.arg_parser, "x", "Default =", x, "INT");
+  int y = 0;
+  OptionAs<IntValue<int> > y_opt(h.arg_parser, "y", "Try multiple char separator", y, "INT");
+  y_opt.attached_value_separator_ = "->";
+
+  String define;
+  OptionAs<StringValue> define_opt(h.arg_parser, "d", "Something like -D or -I", define, "NAME=VALUE");
+  define_opt.attached_value_separator_ = "";
+
+  String detach;
+  OptionAs<StringValue> detach_opt(h.arg_parser, "detach", "Try to throw off -d", detach, "VALUE");
+  detach_opt.attached_value_separator_ = "";
+
+  {
+    h("-x=3")("-y->4")("-detachvalue")("-dname=value");
+    h.parse();
+    EXPECT_EQ(x, 3);
+    EXPECT_EQ(y, 4);
+    EXPECT_STREQ(define.c_str(), "name=value");
+    EXPECT_STREQ(detach.c_str(), "value");
+  }
+
+  {
+    y = 0;
+    h("-y=5");
+    h.parse("option -y=5 is invalid");
+  }
+}
+
+TEST(dds_DCPS_ArgParsing_ArgParser, bundling)
+{
+  Helper h;
+
+  bool x = false;
+  Option x_opt(h.arg_parser, "x", "x", x);
+  bool y = false;
+  Option y_opt(h.arg_parser, "y", "y", y);
+  bool z = false;
+  Option z_opt(h.arg_parser, "z", "z", z);
+
+  {
+    h("-zy");
+    h.parse();
+    EXPECT_FALSE(x);
+    EXPECT_TRUE(y);
+    EXPECT_TRUE(y);
+  }
+
+  {
+    h("-zyx");
+    h.parse();
+    EXPECT_TRUE(x);
+    EXPECT_TRUE(y);
+    EXPECT_TRUE(y);
+  }
+
+  {
+    h("-xyw");
+    h.parse("option -xyw is invalid");
+  }
 }
 
 TEST(dds_DCPS_ArgParsing_StringChoicesValue, parse)
