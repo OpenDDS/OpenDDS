@@ -1022,7 +1022,7 @@ my %all_sanitizers = (
   tsan => {
     fsanitize => 'thread',
     env => {
-      TSAN_OPTIONS => "history_size=7 suppressions=$FindBin::RealBin/etc/tsan-suppr.txt",
+      TSAN_OPTIONS => "history_size=7 second_deadlock_stack=1 suppressions=$FindBin::RealBin/etc/tsan-suppr.txt",
     },
   },
   ubsan => {
