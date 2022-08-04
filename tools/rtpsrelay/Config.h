@@ -26,6 +26,7 @@ public:
     , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
+    , log_http_(false)
     , log_thread_status_(false)
     , thread_status_safety_factor_(3)
     , utilization_limit_(.95)
@@ -142,6 +143,16 @@ public:
   bool log_activity() const
   {
     return log_activity_;
+  }
+
+  void log_http(bool flag)
+  {
+    log_http_ = flag;
+  }
+
+  bool log_http() const
+  {
+    return log_http_;
   }
 
   void log_thread_status(bool flag)
@@ -276,6 +287,7 @@ private:
   bool log_entries_;
   bool log_discovery_;
   bool log_activity_;
+  bool log_http_;
   bool log_thread_status_;
   int thread_status_safety_factor_;
   double utilization_limit_;
