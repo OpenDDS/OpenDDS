@@ -9,12 +9,12 @@
 #include <cstring>
 
 
-void print_addr(const ACE_INET_Addr& addr, const char* str) {
+void print_addr(const ACE_INET_Addr& addr, const char* prefix) {
   char buffer[256] = {'\0'};
   if (addr.get_host_addr(buffer, sizeof(buffer)) == 0) {
-    ACE_ERROR((LM_ERROR, "ERROR: print_addr: Failed to convert address to string\n"));
+    ACE_DEBUG((LM_WARNING, "WARNING: print_addr: Failed to convert address to string\n"));
   } else {
-    ACE_DEBUG((LM_DEBUG, "DEBUG: print_addr: %C %C\n", str, buffer));
+    ACE_DEBUG((LM_DEBUG, "DEBUG: print_addr: %C %C\n", prefix, buffer));
   }
 }
 
@@ -55,13 +55,14 @@ void hostname_to_ip(std::string address) {
   addrinfo *res = 0;
   const int error = ACE_OS::getaddrinfo(address.c_str(), 0, &hints, &res);
   if (error) {
-    ACE_ERROR((LM_ERROR, "hostname_to_ip: Call to getaddrinfo() for hostname %C returned error: %d\n", address.c_str(), gai_strerror(error)));
+    ACE_DEBUG((LM_WARNING, "WARNING: hostname_to_ip: Call to getaddrinfo() for hostname %C returned error: %d\n",
+               address.c_str(), gai_strerror(error)));
     return;
   }
 
   for (addrinfo* curr = res; curr; curr = curr->ai_next) {
     if (curr->ai_family != AF_INET && curr->ai_family != AF_INET6) {
-      ACE_DEBUG((LM_DEBUG, "hostname_to_ip: Encounter an address that is not AF_INET or AF_INET6\n"));
+      ACE_DEBUG((LM_DEBUG, "DEBUG: hostname_to_ip: Encounter an address that is not AF_INET or AF_INET6\n"));
       continue;
     }
 
@@ -74,9 +75,10 @@ void hostname_to_ip(std::string address) {
     std::memset(&addr, 0, sizeof(addr));
 
 #ifdef ACE_HAS_IPV6
-    ACE_DEBUG((LM_DEBUG, "ip46.in6_ size is %d\n", sizeof(addr.in6_)));
+    ACE_DEBUG((LM_DEBUG, "DEBUG: hostname_to_ip: ip46.in6_ size is %d\n", sizeof(addr.in6_)));
 #endif
-    ACE_DEBUG((LM_DEBUG, "addr size is %d, curr addrinfo size is %d, curr->ai_addrlen is %d, curr->ai_addr size is %d, curr family is %d\n",
+    ACE_DEBUG((LM_DEBUG, "DEBUG: hostname_to_ip: addr size is %d, curr addrinfo size is %d,"
+               " curr->ai_addrlen is %d, curr->ai_addr size is %d, curr family is %d\n",
                sizeof(addr), sizeof(*curr), curr->ai_addrlen, sizeof(*(curr->ai_addr)), curr->ai_family));
     std::memcpy(&addr, curr->ai_addr, curr->ai_addrlen);
 
@@ -104,7 +106,7 @@ void address_info() {
   ACE_INET_Addr *addr_array = 0;
   const int result = ACE::get_ip_interfaces(addr_count, addr_array);
   if (result != 0 || addr_count < 1) {
-    ACE_ERROR((LM_ERROR, "ERROR: print_address_info: ACE::get_ip_interfaces: Unable to probe network interfaces\n"));
+    ACE_ERROR((LM_ERROR, "ERROR: address_info: Unable to probe network interfaces\n"));
     return;
   }
 
@@ -116,12 +118,12 @@ void address_info() {
     ACE_INET_Addr* const ptr_;
   } guardObject(addr_array);
 
-  ACE_DEBUG((LM_DEBUG, "address_info: There are %d interfaces\n", addr_count));
+  ACE_DEBUG((LM_DEBUG, "DEBUG: address_info: There are %d interfaces\n", addr_count));
   for (size_t i = 0; i < addr_count; ++i) {
-    ACE_DEBUG((LM_DEBUG, "address_info: Considering interface %d\n", i));
+    ACE_DEBUG((LM_DEBUG, "DEBUG: address_info: Considering interface %d\n", i));
     char buffer[256] = {'\0'};
     if (addr_array[i].get_host_addr(buffer, sizeof(buffer)) == 0) {
-      ACE_ERROR((LM_ERROR, "ERROR: address_info: Failed to convert address to string\n"));
+      ACE_DEBUG((LM_WARNING, "WARNING: address_info: Failed to convert address to string\n"));
     } else {
       ACE_DEBUG((LM_DEBUG, "DEBUG: address_info: Found IP interface %C\n", buffer));
     }
@@ -131,7 +133,7 @@ void address_info() {
     if (ACE::get_fqdn(addr_array[i], hostname, MAXHOSTNAMELEN+1) == 0) {
       ACE_DEBUG((LM_DEBUG, "DEBUG: address_info: IP address %C maps to hostname %C\n", buffer, hostname));
     } else {
-      ACE_ERROR((LM_ERROR, "ERROR: address_info: Failed to get FQDN\n"));
+      ACE_DEBUG((LM_WARNING, "WARNING: address_info: Failed to get FQDN\n\n"));
       continue;
     }
 
