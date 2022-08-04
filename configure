@@ -954,7 +954,7 @@ sub write_config_h {
   my %buildEnv = %{shift()};
   my $platform = $opts{$buildEnv{'build'}};
   my $pi = $platforminfo{$platform};
-  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} && !exists $opts{'sanitize'});
+  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} || exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
   if ($buildEnv{'build'} eq 'target') {
