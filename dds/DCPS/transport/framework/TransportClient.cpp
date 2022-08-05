@@ -262,6 +262,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   }
 
   PendingAssoc_rch pend = iter->second;
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
   pend->active_ = active;
   pend->impls_.clear();
   pend->blob_index_ = 0;
