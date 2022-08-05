@@ -472,7 +472,14 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
           if (!res.link_.is_nil()) {
 
-            tc->use_datalink_i(data_.remote_id_, res.link_, guard);
+            {
+              // TransportClient's use_datalink_i calls PendingAssoc::reset_client which
+              // needs the PendingAssoc object's mutex_. So we release mutex_ here.
+              // Probably don't need to re-lock since this code path will return true anyway,
+              // i.e., don't need a Reverse_Lock_t.
+              ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_mutex_, false);
+              tc->use_datalink_i(data_.remote_id_, res.link_, guard);
+            }
           } else {
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
