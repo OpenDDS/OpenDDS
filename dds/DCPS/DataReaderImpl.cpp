@@ -259,10 +259,6 @@ DataReaderImpl::add_association(const RepoId& yourId,
     }
   }
 
-  // Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
-
   // For each writer in the list of writers to associate with, we
   // create a WriterInfo and a WriterStats object and store them in
   // our internal maps.
@@ -335,12 +331,6 @@ DataReaderImpl::add_association(const RepoId& yourId,
   data.remote_durable_ =
       (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
-  //Do not hold publication_handle_lock_ when calling associate due to possible reactor
-  //deadlock on passive side completion
-  //associate does not access id_to_handle_map_, thus not clear why publication_handle_lock_
-  //is held here anyway
-  guard.release();
-
   if (associate(data, active)) {
     const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
     if (observer) {
@@ -368,24 +358,17 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     return;
   }
 
-  {
-
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
-    // LIVELINESS policy timers are managed here.
-    if (!liveliness_lease_duration_.is_zero()) {
-      if (DCPS_debug_level >= 5) {
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
-            ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-            LogGuid(get_repo_id()).c_str()));
-      }
-      // this call will start the timer if it is not already set
-      liveliness_timer_->check_liveliness();
+  // LIVELINESS policy timers are managed here.
+  if (!liveliness_lease_duration_.is_zero()) {
+    if (DCPS_debug_level >= 5) {
+      ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
+          ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
+          LogGuid(get_repo_id()).c_str()));
     }
+    // this call will start the timer if it is not already set
+    liveliness_timer_->check_liveliness();
   }
-  // We no longer hold the publication_handle_lock_.
-
 
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
 
@@ -534,8 +517,6 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     resume_sample_processing(writers[i]);
   }
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
   // This is used to hold the list of writers which were actually
   // removed, which is a proper subset of the writers which were
   // requested to be removed.
@@ -588,6 +569,8 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
   if (!is_bit_) {
     // The writer should be in the id_to_handle map at this time.
     this->lookup_instance_handles(updated_writers, handles);
+
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(publication_handle_lock_);
 
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
       publication_id_to_handle_map_.erase(updated_writers[i]);
@@ -654,8 +637,6 @@ DataReaderImpl::remove_all_associations()
   OpenDDS::DCPS::WriterIdSeq writers;
   int size;
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -691,11 +672,6 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataReaderListener_var listener =
       listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
-
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->publication_handle_lock_);
-
 
   if (this->requested_incompatible_qos_status_.total_count == status.total_count) {
     // This test should make the method idempotent.
@@ -1020,10 +996,6 @@ DDS::ReturnCode_t
 DataReaderImpl::get_requested_incompatible_qos_status(
     DDS::RequestedIncompatibleQosStatus & status)
 {
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
-      this->publication_handle_lock_);
-
   set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
       false);
   status = requested_incompatible_qos_status_;
@@ -1036,10 +1008,6 @@ DDS::ReturnCode_t
 DataReaderImpl::get_subscription_matched_status(
     DDS::SubscriptionMatchedStatus & status)
 {
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
-      this->publication_handle_lock_);
-
   set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, false);
   status = subscription_match_status_;
   subscription_match_status_.total_count_change = 0;
@@ -1052,8 +1020,6 @@ DDS::ReturnCode_t
 DataReaderImpl::get_sample_lost_status(
     DDS::SampleLostStatus & status)
 {
-  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(this->sample_lock_);
-
   set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, false);
   status = sample_lost_status_;
   sample_lost_status_.total_count_change = 0;
@@ -1092,7 +1058,7 @@ DataReaderImpl::get_matched_publications(
       current = this->publication_id_to_handle_map_.begin();
       current != this->publication_id_to_handle_map_.end();
       ++current, ++index) {
-    publication_handles[ index] = current->second;
+    publication_handles[index] = current->second;
   }
 
   return DDS::RETCODE_OK;
@@ -1111,12 +1077,6 @@ DataReaderImpl::get_matched_publication_data(
         ACE_TEXT("Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
-
-
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->publication_handle_lock_,
-      DDS::RETCODE_ERROR);
 
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
 
