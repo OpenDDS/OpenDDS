@@ -476,6 +476,8 @@ public:
     return sequence_number_;
   }
 
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+
 protected:
 
   void check_and_set_repo_id(const RepoId& id)
@@ -511,8 +513,6 @@ protected:
 
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
-
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   /**
    * Setup CDR serialization options in type-specific DataWrtier.

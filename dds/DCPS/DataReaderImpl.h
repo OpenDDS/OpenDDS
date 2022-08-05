@@ -637,6 +637,8 @@ public:
 
   void return_handle(DDS::InstanceHandle_t handle);
 
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+
 protected:
 
   // Update max flag if the spec ever changes
@@ -705,8 +707,6 @@ protected:
 
   // type specific DataReader's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
-
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   void sample_info(DDS::SampleInfo & sample_info,
                    const ReceivedDataElement *ptr);
