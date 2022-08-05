@@ -1035,13 +1035,15 @@ my %all_sanitizers = (
   },
 );
 my %enabled_sanitizers = ();
-for my $arg (@{$opts{sanitize}}) {
-  for my $name (split(/,/, $arg)) {
-    if (exists($all_sanitizers{$name})) {
-      $enabled_sanitizers{$name} = $all_sanitizers{$name};
-    }
-    else {
-      die("ERROR: \"$name\" isn't a valid sanitizer to pass to --sanitize\nStopped");
+if (exists $opts{'sanitize'}) {
+  for my $arg (@{$opts{'sanitize'}}) {
+    for my $name (split(/,/, $arg)) {
+      if (exists($all_sanitizers{$name})) {
+        $enabled_sanitizers{$name} = $all_sanitizers{$name};
+      }
+      else {
+        die("ERROR: \"$name\" isn't a valid sanitizer to pass to --sanitize\nStopped");
+      }
     }
   }
 }
