@@ -3636,6 +3636,9 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
   if (!outer) return;
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  if (outer->shutting_down()) {
+    return;
+  }
 
   if (outer->shutdown_flag_ == true) {
     return;
