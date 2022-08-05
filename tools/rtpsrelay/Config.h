@@ -23,7 +23,6 @@ public:
     , application_domain_(1)
     , allow_empty_partition_(true)
     , log_warnings_(false)
-    , log_entries_(false)
     , log_discovery_(false)
     , log_activity_(false)
     , log_thread_status_(false)
@@ -112,16 +111,6 @@ public:
   bool log_warnings() const
   {
     return log_warnings_;
-  }
-
-  void log_entries(bool flag)
-  {
-    log_entries_ = flag;
-  }
-
-  bool log_entries() const
-  {
-    return log_entries_;
   }
 
   void log_discovery(bool flag)
@@ -273,7 +262,6 @@ private:
   DDS::DomainId_t application_domain_;
   bool allow_empty_partition_;
   bool log_warnings_;
-  bool log_entries_;
   bool log_discovery_;
   bool log_activity_;
   bool log_thread_status_;
