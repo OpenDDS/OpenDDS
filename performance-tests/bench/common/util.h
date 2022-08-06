@@ -1,28 +1,23 @@
 #ifndef BENCH_UTIL_HEADER
 #define BENCH_UTIL_HEADER
 
+#include "PropertyStatBlock.h"
+#include "Bench_Common_Export.h"
+
+#include <ace/ace_wchar.h> // For ACE_TCHAR
+#include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
+#include <ace/SString.h>
+#include <ace/Time_Value.h>
+
 #include <chrono>
 #include <string>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
 
-#include <ace/ace_wchar.h> // For ACE_TCHAR
-#include <ace/Default_Constants.h> // For ACE_DIRECTORY_SEPARATOR_*
-#include <ace/SString.h>
-#include "ace/Time_Value.h"
-
-#include "PropertyStatBlock.h"
-#include "Bench_Common_Export.h"
-
 const ACE_Time_Value ZERO_TIME(0, 0);
 
 namespace Bench {
-
-// Argument Parsing
-Bench_Common_Export std::string get_option_argument(int& i, int argc, ACE_TCHAR* argv[]);
-Bench_Common_Export int get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[]);
-Bench_Common_Export unsigned get_option_argument_uint(int& i, int argc, ACE_TCHAR* argv[]);
 
 Bench_Common_Export std::string& string_replace(std::string& input, const std::string& oldstr, const std::string& newstr);
 

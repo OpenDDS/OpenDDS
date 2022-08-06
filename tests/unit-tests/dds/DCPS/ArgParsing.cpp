@@ -129,27 +129,35 @@ namespace {
       if (!argv) {
         done();
       }
+      arg_parser.reset_arg_counts();
 
-      const bool assert_success = exception.length() == 0;
-      bool got_expected_result = true;
-      bool parse_error = false;
+      const bool expecting_exception = exception.length();
+      bool got_exception = false;
+      bool got_expected_result = false;
       try {
         arg_parser.parse_no_exit(argc, argv);
+        got_expected_result = true;
       } catch (const ParseError& e) {
-        parse_error = true;
-        if (assert_success) {
+        got_exception = true;
+        if (!expecting_exception) {
           ADD_FAILURE() << "parse failed: " << e.what();
-          got_expected_result = false;
         } else if (exception != e.what()) {
           ADD_FAILURE() << "parse got expected \"" << exception
             << "\" but got \"" << e.what() << "\"";
-          got_expected_result = false;
+        } else {
+          got_expected_result = true;
+        }
+      } catch (const ExitSuccess&) {
+        got_exception = true;
+        if (exception == "ExitSuccess") {
+          got_expected_result = true;
+        } else {
+          ADD_FAILURE() << "parse got unexpected ExitSuccess";
         }
       }
 
-      if (!assert_success && !parse_error) {
-        ADD_FAILURE() << "parse should have failed";
-        got_expected_result = false;
+      if (expecting_exception && !got_exception) {
+        ADD_FAILURE() << "parse should have failed: " << exception;
       }
 
       reset();
@@ -352,7 +360,6 @@ TEST(dds_DCPS_ArgParsing_ArgParser, allow_multiple)
   {
     // -y and --y-opt should conflict here
     BasicHelper h;
-    h.y_opt.allow_multiple_ = false;
     h("a again")("b too")("3")("-x")("-y=4")("--y-opt")("-1");
     h.parse("option --y-opt was passed multiple times");
   }
@@ -360,8 +367,10 @@ TEST(dds_DCPS_ArgParsing_ArgParser, allow_multiple)
   {
     // ... but not here
     BasicHelper h;
+    h.y_opt.allow_multiple_ = true;
     h("a again")("b too")("3")("-x")("-y=4")("--y-opt")("-1");
     h.expect("a again", "b too", 3, true, -1);
+    EXPECT_EQ(h.y_opt.count(), 2ul);
   }
 }
 
@@ -517,35 +526,97 @@ TEST(dds_DCPS_ArgParsing_ArgParser, bundling)
   }
 }
 
-TEST(dds_DCPS_ArgParsing_StringChoicesValue, parse)
+TEST(dds_DCPS_ArgParsing_ChoicesValue, parse)
 {
   Helper h;
-  String pos;
-  String opt;
+  String pos1;
+  int pos2 = 0;
+  String opt1;
+  int opt2 = 0;
 
-  StringChoiceValue::Choices choices;
-  choices.insert("foo");
-  choices.insert("bar");
-  PositionalAs<StringChoiceValue> pos_arg(h.arg_parser, "POS", "Positional Choice", pos);
-  pos_arg.handler.choices = choices;
-  OptionAs<StringChoiceValue> opt_arg(h.arg_parser, "o", "Option Choice", opt, "CHOICE");
-  opt_arg.handler.choices = choices;
+  PositionalAs<StringChoiceValue> pos_arg1(h.arg_parser, "POS", "Positional Choice 1", pos1);
+  pos_arg1.handler.add_choice("foo", "foo choice");
+  pos_arg1.handler.add_choice("bar", "bar choice");
+  PositionalAs<ChoiceValue<int> > pos_arg2(h.arg_parser, "", "Positional Choice 2", pos2);
+  pos_arg2.handler.add_choice("one", 1, "one choice");
+  pos_arg2.handler.add_choice("two", 2, "two choice");
+  OptionAs<StringChoiceValue> opt_arg1(h.arg_parser, "a", "Option Choice 1", opt1, "CHOICE");
+  opt_arg1.handler.add_choice("foo", "foo choice");
+  opt_arg1.handler.add_choice("bar", "bar choice");
+  OptionAs<ChoiceValue<int> > opt_arg2(h.arg_parser, "b", "Option Choice 2", opt2, "");
+  opt_arg2.handler.add_choice("one", 1, "one choice");
+  opt_arg2.handler.add_choice("two", 2, "");
 
-  h("foo");
+  h("foo")("one");
   h.parse();
-  EXPECT_STREQ(pos.c_str(), "foo");
-  EXPECT_STREQ(opt.c_str(), "");
+  EXPECT_STREQ(pos1.c_str(), "foo");
+  EXPECT_EQ(pos2, 1);
+  EXPECT_STREQ(opt1.c_str(), "");
+  EXPECT_EQ(opt2, 0);
 
-  h("bar")("-o=foo");
+  h("bar")("two")("-a")("foo")("-b=one");
   h.parse();
-  EXPECT_STREQ(pos.c_str(), "bar");
-  EXPECT_STREQ(opt.c_str(), "foo");
+  EXPECT_STREQ(pos1.c_str(), "bar");
+  EXPECT_EQ(pos2, 2);
+  EXPECT_STREQ(opt1.c_str(), "foo");
+  EXPECT_EQ(opt2, 1);
 
-  h("zar");
-  h.parse("positional argument POS was passed invalid value \"zar\"");
+  h("zar")("one");
+  h.parse(
+    "positional argument POS was passed invalid value \"zar\".\n"
+    "Valid choices are:\n"
+    "foo: foo choice\n"
+    "bar: bar choice"
+  );
 
-  h("bar")("-o")("zar");
-  h.parse("option -o was passed invalid value \"zar\"");
+  h("foo")("one")("-b")("1");
+  h.parse(
+    "option -b was passed invalid value \"1\".\n"
+    "Valid choices are:\n"
+    "one: one choice\n"
+    "two"
+  );
+
+  std::ostringstream out;
+  h.arg_parser.out_stream_ = &out;
+  h.arg_parser.call_exit_ = false;
+
+  h("--help");
+  h.parse("ExitSuccess");
+  ASSERT_STREQ(
+    "Usage:\n"
+    "  PROGRAM NAME [OPTION...] POS one|two\n"
+    "  PROGRAM NAME --help | -h\n"
+    "  PROGRAM NAME --version | -v\n"
+    "\n"
+    "Description:\n"
+    "  TEST DESCRIPTION\n"
+    "\n"
+    "Positional arguments:\n"
+    "  POS             Positional Choice 1\n"
+    "                  Valid choices are:\n"
+    "                  foo: foo choice\n"
+    "                  bar: bar choice\n"
+    "  one|two         Positional Choice 2\n"
+    "                  Valid choices are:\n"
+    "                  one: one choice\n"
+    "                  two: two choice\n"
+    "\n"
+    "Options:\n"
+    "  All OpenDDS command line options listed in section 7.2 of the OpenDDS\n"
+    "  Developer's Guide are also available.\n"
+    "  --help | -h     Print this message.\n"
+    "  --version | -v  Print the program version.\n"
+    "  -a CHOICE       Option Choice 1\n"
+    "                  Valid choices are:\n"
+    "                  foo: foo choice\n"
+    "                  bar: bar choice\n"
+    "  -b one|two      Option Choice 2\n"
+    "                  Valid choices are:\n"
+    "                  one: one choice\n"
+    "                  two\n",
+    out.str().c_str()
+  );
 }
 
 namespace {

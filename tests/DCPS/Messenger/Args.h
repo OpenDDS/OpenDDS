@@ -22,7 +22,8 @@ const size_t num_messages = 40;
 inline
 int parse_args(int argc, ACE_TCHAR* argv[])
 {
-  OpenDDS::DCPS::String transport_type;
+  using OpenDDS::DCPS::String;
+  String transport_type;
   bool thread_per_connection = false;
   {
     using namespace OpenDDS::DCPS::ArgParsing;
@@ -34,9 +35,9 @@ int parse_args(int argc, ACE_TCHAR* argv[])
 
     OptionAs<StringChoiceValue> transport_opt(arg_parser, "transport",
       "Select a transport type", transport_type, "");
-    transport_opt.handler.choices.insert("udp");
-    transport_opt.handler.choices.insert("multicast");
-    transport_opt.handler.choices.insert("tcp");
+    transport_opt.handler.add_choice("udp", "UDP transport");
+    transport_opt.handler.add_choice("multicast", "Multicast transport");
+    transport_opt.handler.add_choice("tcp", "TCP transport");
     transport_opt.add_alias("t");
 
     arg_parser.parse(argc, argv);

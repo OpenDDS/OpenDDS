@@ -68,21 +68,6 @@ String count_required(size_t min_count, size_t max_count)
   }
 }
 
-StrVecIt StringChoiceValue::handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
-{
-  if (values == state.args.end()) {
-    return values;
-  }
-  String value = *values;
-  if (!choices.count(value)) {
-    throw ParseError(state, "was passed invalid value \"" + value + "\"");
-  }
-  if (dest_) {
-    *dest_ = value;
-  }
-  return state.args.erase(values);
-}
-
 Argument::Argument(ArgParser& arg_parser, const String& help,
   Handler* handler)
   : show_in_help_(true)
@@ -91,9 +76,19 @@ Argument::Argument(ArgParser& arg_parser, const String& help,
   , arg_parser_(arg_parser)
   , help_(help)
   , handler_(handler)
-  , present_(false)
+  , count_(0)
 {
   arg_parser.add_argument(this);
+}
+
+String Argument::help() const
+{
+  String help = help_;
+  const String value_help = handler_->value_help();
+  if (value_help.length()) {
+    help += "\n" + value_help;
+  }
+  return help;
 }
 
 bool Argument::process_args(ArgParseState& state)
@@ -111,7 +106,7 @@ bool Argument::process_args(ArgParseState& state)
   StrVecIt found_it = find(state);
   const bool found = found_it != state.args.end();
   if (found) {
-    present_ = true;
+    ++count_;
   }
   if (!found) {
     state.current_arg_ref.clear();
@@ -282,10 +277,10 @@ bool Option::confirm(ArgParseState& state, const String& opt, StrVecIt found)
 {
   state.current_arg_ref = "option " + opt;
   if (*found == opt || attached_value(*found, opt)) {
-    if (present_ && !allow_multiple_) {
+    if (present() && !allow_multiple_) {
       throw ParseError(state, "was passed multiple times");
     }
-    present_ = true;
+    ++count_;
     return true;
   }
   return false;
@@ -298,11 +293,11 @@ StrVecIt Option::find(ArgParseState& state)
 
 StrVecIt Option::handle_find_result(ArgParseState& state, StrVecIt found)
 {
-  if (!present_ || found == state.args.end()) {
+  if (!present() || found == state.args.end()) {
     return state.args.end();
   }
   if (present_dest_) {
-    *present_dest_ = present_;
+    *present_dest_ = present();
   }
 
   // Get attached value if it's there
@@ -732,6 +727,13 @@ void ArgParser::print_help(ArgParseState& state, std::ostream& os)
 void ArgParser::print_version(std::ostream& os)
 {
   os << "Version " << version_ << std::endl;
+}
+
+void ArgParser::reset_arg_counts()
+{
+  for (ArgumentsIt it = arguments_.begin(); it != arguments_.end(); ++it) {
+    (*it)->reset_count();
+  }
 }
 
 } // namespace ArgParsing

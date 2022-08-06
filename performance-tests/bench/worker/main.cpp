@@ -44,6 +44,7 @@
 #include <json_conversion.h>
 
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/ArgParsing.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
@@ -76,7 +77,8 @@ using Bench::get_option_argument;
 const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
 const size_t DEFAULT_THREAD_POOL_SIZE = 4u;
 
-void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero_equals_key_press = true) {
+void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero_equals_key_press = true)
+{
   if (zero_equals_key_press && ts == ZERO) {
     std::stringstream ss;
     ss << "No " << ts_name << " time specified. Press enter to continue." << std::endl;
@@ -99,7 +101,8 @@ void do_wait(const Builder::TimeStamp& ts, const std::string& ts_name, bool zero
   }
 }
 
-int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
+{
   Builder::NullStream null_stream_i;
   std::ostream null_stream(&null_stream_i);
 
@@ -107,28 +110,22 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   std::string report_file_path;
   std::string config_file_path;
 
-  try {
-    for (int i = 1; i < argc; i++) {
-      const ACE_TCHAR* argument = argv[i];
-      if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--log"))) {
-        log_file_path = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--report"))) {
-        report_file_path = get_option_argument(i, argc, argv);
-      } else if (config_file_path.empty()) {
-        config_file_path = ACE_TEXT_ALWAYS_CHAR(argument);
-      } else {
-        std::cerr << "Invalid option: " << argument << std::endl;
-        return 1;
-      }
-    }
+  {
+    using namespace OpenDDS::DCPS::ArgParsing;
 
-    if (config_file_path.empty()) {
-      std::cerr << "Must pass a configuration file" << std::endl;
-      throw 1;
-    }
-  } catch (int value) {
-    std::cerr << "See DDS_ROOT/performance-tests/bench/README.md for usage" << std::endl;
-    return value;
+    ArgParser arg_parser("Application that tries to mimic a single arbitrary OpenDDS application. "
+      "See bench documentation for details.");
+
+    Positional config_file_path_pos(arg_parser, "CONFIG_FILE",
+      "Path to worker config json file.", config_file_path);
+    OptionAs<StringValue> name_opt(arg_parser, "log",
+      "The log file path. Will log to stdout if not passed.",
+      log_file_path, "PATH");
+    OptionAs<StringValue> report_opt(arg_parser, "report",
+      "The report file path.",
+      report_file_path, "PATH");
+
+    arg_parser.parse(argc, argv);
   }
 
   std::ifstream config_file(config_file_path);

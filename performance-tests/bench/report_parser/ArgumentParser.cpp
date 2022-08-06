@@ -4,9 +4,46 @@
 #include <json_conversion.h>
 #include <BenchTypeSupportImpl.h>
 
+#include <dds/DCPS/ArgParsing.h>
+
 #include <unordered_map>
 
 using namespace Bench;
+using namespace OpenDDS::DCPS::ArgParsing;
+
+namespace {
+  class RemainingArgs : public Handler {
+  public:
+    using ValueType = std::unordered_set<std::string>;
+
+    ValueType& values;
+
+    RemainingArgs(ValueType& values)
+      : values(values)
+    {
+    }
+
+    size_t min_args_required() const
+    {
+      return 1;
+    }
+
+    size_t max_args_required() const
+    {
+      return size_t_max;
+    }
+
+    StrVecIt handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
+    {
+      StrVecIt it = values;
+      for (; it != state.args.end() || !state.parser.looks_like_option(*it);) {
+        this->values.insert(*values);
+        it = state.args.erase(values);
+      }
+      return it;
+    }
+  };
+}
 
 bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
     OutputFormat& output_format, Bench::TestController::Report& report, std::shared_ptr<std::ostream>& output_stream,
@@ -15,129 +52,45 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
   std::string input_file_path;
   std::string output_file_path;
 
-  if (argc == 1) {
-    show_usage_prompt();
-  } else {
-    try {
-      for (int i = 1; i < argc; i++) {
-        const ACE_TCHAR* argument = argv[i];
+  {
+    ArgParser arg_parser("");
 
-        if (!ACE_OS::strcmp(argument, ACE_TEXT("--help"))
-            || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
-          show_usage();
-          return false;
-        }
+    OptionAs<StringValue> input_file_opt(arg_parser, "input-file",
+      "Input report file. Default is standard input.", input_file_path, "PATH");
+    OptionAs<StringValue> output_file_opt(arg_parser, "output-file",
+      "Output file. Default is standard output.", input_file_path, "PATH");
 
-        if (!ACE_OS::strcmp(argument, ACE_TEXT("--input-file"))) {
-          std::string option_argument = get_option_argument(i, argc, argv);
-          input_file_path = option_argument;
-        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-file"))) {
-          std::string option_argument = get_option_argument(i, argc, argv);
-          output_file_path = option_argument;
-        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-type"))) {
-          std::string option_argument = get_option_argument(i, argc, argv);
-          static std::unordered_map<std::string, OutputType> const table = {
-            { "single-statistic", OutputType::SingleStatistic },
-            { "time-series", OutputType::TimeSeries },
-            { "summary", OutputType::Summary }
-          };
+    OptionAs<ChoiceValue<OutputType> > output_type_opt(arg_parser, "output-type",
+      "Specifies type of data to parse.", output_type, "");
+    output_type_opt.handler.add_choice("single-statistic", OutputType::SingleStatistic,
+      "Parses out single statistic.");
+    output_type_opt.handler.add_choice("time-series", OutputType::TimeSeries,
+      "Parses out time-series data.");
+    output_type_opt.handler.add_choice("summary", OutputType::Summary,
+      "Parses out summary data.");
 
-          auto it = table.find(option_argument);
+    OptionAs<ChoiceValue<OutputFormat> > output_format_opt(arg_parser, "output-format",
+      "Specifies format of output.", output_format, "");
+    output_format_opt.handler.add_choice("stat-block", OutputFormat::StatBlock,
+      "Formats output for printing a single consolidated stat block.");
+    output_format_opt.handler.add_choice("gnuplot", OutputFormat::Gnuplot,
+      "Formats output for plotting with gnuplot.");
+    output_format_opt.handler.add_choice("json", OutputFormat::Json,
+      "Formats output for json.");
 
-          if (it != table.end()) {
-            output_type = it->second;
-          } else {
-            show_option_argument_error(option_argument);
-            return false;
-          }
-        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--output-format"))) {
-          std::string option_argument = get_option_argument(i, argc, argv);
-          static std::unordered_map<std::string, OutputFormat> const table = {
-            { "stat-block", OutputFormat::StatBlock },
-            { "gnuplot", OutputFormat::Gnuplot },
-            { "json", OutputFormat::Json }
-          };
+    OptionAs<RemainingArgs> tags_opt(arg_parser, "tags",
+      "Specifies the status block types to output.",
+      parse_parameters.tags, "TAG...");
 
-          auto it = table.find(option_argument);
+    OptionAs<RemainingArgs> stats_opt(arg_parser, "stats",
+      "Specifies the status block value types to output.",
+      parse_parameters.stats, "STATUS_TYPE...");
 
-          if (it != table.end()) {
-            output_format = it->second;
-          } else {
-            show_option_argument_error(option_argument);
-            return false;
-          }
-        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tags"))) {
-          if (!parse_parameters.tags.empty()) {
-            continue;
-          }
+    OptionAs<RemainingArgs> values_opt(arg_parser, "values",
+      "Specifies the status block values to output.",
+      parse_parameters.values, "STATUS_VALUE...");
 
-          if (i + 1 < argc) {
-            for (int index = i + 1; index < argc; index++) {
-              std::string option = ACE_TEXT_ALWAYS_CHAR(argv[index]);
-              if (option[0] == '-') {
-                break;
-              } else {
-                parse_parameters.tags.insert(option);
-                i++;
-              }
-            }
-          }
-
-          if (parse_parameters.tags.empty()) {
-            std::cout << "Missing tag types" << std::endl;
-            return false;
-          }
-        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--stats"))) {
-          if (!parse_parameters.stats.empty()) {
-            continue;
-          }
-
-          if (i + 1 < argc) {
-            for (int index = i + 1; index < argc; index++) {
-              std::string option = ACE_TEXT_ALWAYS_CHAR(argv[index]);
-              if (option[0] == '-') {
-                break;
-              } else {
-                parse_parameters.stats.insert(option);
-                i++;
-              }
-            }
-          }
-
-          if (parse_parameters.stats.empty()) {
-            std::cout << "Missing stat types" << std::endl;
-            return false;
-          }
-        } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--values"))) {
-          if (!parse_parameters.values.empty()) {
-            continue;
-          }
-
-          if (i + 1 < argc) {
-            for (int index = i + 1; index < argc; index++) {
-              std::string option = ACE_TEXT_ALWAYS_CHAR(argv[index]);
-              if (option[0] == '-') {
-                break;
-              } else {
-                parse_parameters.values.insert(option);
-                i++;
-              }
-            }
-          }
-
-          if (parse_parameters.values.empty()) {
-            std::cout << "Missing value types" << std::endl;
-            return false;
-          }
-        } else {
-          show_option_error(ACE_TEXT_ALWAYS_CHAR(argument));
-          return false;
-        }
-      }
-    } catch (int) {
-      show_usage_prompt();
-      return false;
-    }
+    arg_parser.parse(argc, argv);
   }
 
   std::shared_ptr<std::ifstream> ifs;
@@ -172,45 +125,6 @@ bool ArgumentParser::parse(int argc, ACE_TCHAR* argv[], OutputType& output_type,
   check_for_iperf(report);
 
   return true;
-}
-
-void ArgumentParser::show_usage_prompt()
-{
-  std::cerr << "Use -h or --help to see the full help message" << std::endl;
-}
-
-void ArgumentParser::show_option_error(std::string option)
-{
-  std::cerr << "Invalid option: " << option << std::endl;
-  show_usage_prompt();
-}
-
-void ArgumentParser::show_option_argument_error(std::string option_argument)
-{
-  std::cerr << "Invalid option argument: " << option_argument << std::endl;
-  show_usage_prompt();
-}
-
-void ArgumentParser::show_usage()
-{
-  std::cout
-    << "usage: report_parser [-h|--help] | [OPTIONS...]" << std::endl
-    << "OPTIONS:" << std::endl
-    << "--input-file  <filename>      The report file to read" << std::endl
-    << "--output-file <filename>      The parsed file to generate" << std::endl
-    << "--output-type <type>          Specifies type of data to parse." << std::endl
-    << "     Options:" << std::endl
-    << "            single-statistic: Parses out single statistic" << std::endl
-    << "            time-series:      Parses out time-series data" << std::endl
-    << "            summary:          Parses out summary data" << std::endl
-    << "--output-format <format>      Specifies format of output." << std::endl
-    << "     Options:" << std::endl
-    << "            stat-block:       Formats output for printing a single consolidated stat block" << std::endl
-    << "            gnuplot:          Formats output for plotting with gnuplot" << std::endl
-    << "            json:             Formats output for json" << std::endl
-    << "--tags   <list of tags>       Specifies the status block types to output." << std::endl
-    << "--stats  <list of stats>      Specifies the status block value types to output." << std::endl
-    << "--values <list of values>     Specifies the status block values to output." << std::endl;
 }
 
 void ArgumentParser::check_for_iperf(Bench::TestController::Report& report)

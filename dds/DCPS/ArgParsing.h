@@ -29,6 +29,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <limits>
+#include <functional>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -141,6 +142,11 @@ public:
     return String();
   }
 
+  virtual String value_help() const
+  {
+    return "";
+  }
+
   virtual StrVecIt handle(Argument& arg, ArgParseState& state, StrVecIt values) = 0;
 };
 
@@ -201,30 +207,122 @@ protected:
   String* const dest_;
 };
 
-class OpenDDS_Dcps_Export StringChoiceValue : public StringValue {
+template <typename Value>
+class ChoiceValue : public StringValue {
 public:
-  typedef OPENDDS_SET(String) Choices;
-  Choices choices;
+  typedef Value ValueType;
 
-  StringChoiceValue(String& dest)
-    : StringValue(dest)
+  struct Choice {
+    String name;
+    ValueType value;
+    String help;
+  };
+
+  typedef OPENDDS_MAP(String, Choice) ChoicesMap;
+  typedef OPENDDS_VECTOR(String) ChoicesVec;
+  String str_choice;
+  ChoicesMap choices_map;
+  ChoicesVec choices_vec;
+  ValueType& dest;
+
+  ChoiceValue(ValueType& dest)
+    : StringValue(str_choice)
+    , dest(dest)
   {
+  }
+
+  void add_choice(const String& name, ValueType value, const String& help)
+  {
+    Choice choice;
+    choice.name = name;
+    choice.value = value;
+    choice.help = help;
+    if (!choices_map.insert(std::make_pair(name, choice)).second) {
+      throw ArgParsingError("ChoiceValue has duplicate of " + name);
+    }
+    choices_vec.push_back(name);
+  }
+
+  const Choice* get_choice(const String& name) const
+  {
+    typename ChoicesMap::const_iterator it = choices_map.find(name);
+    if (it == choices_map.end()) {
+      return 0;
+    }
+    return &it->second;
   }
 
   String metavar() const
   {
+    if (choices_map.empty()) {
+      throw ArgParsingError("ChoiceValue has no choices!");
+    }
     String rv;
-    Choices::iterator it = choices.begin();
-    if (it != choices.end()) {
-      rv += *it;
-      for (++it; it != choices.end(); ++it) {
-        rv += "|" + *it;
+    typename ChoicesVec::const_iterator it = choices_vec.begin();
+    if (it != choices_vec.end()) {
+      rv += get_choice(*it)->name;
+      for (++it; it != choices_vec.end(); ++it) {
+        rv += "|" + get_choice(*it)->name;
       }
     }
     return rv;
   }
 
-  StrVecIt handle(Argument& arg, ArgParseState& state, StrVecIt values);
+  String choice_help(typename ChoicesVec::const_iterator it) const
+  {
+    const Choice* const choice = get_choice(*it);
+    String rv = choice->name;
+    if (choice->help.length()) {
+      rv += ": " + choice->help;
+    }
+    return rv;
+  }
+
+  String value_help() const
+  {
+    if (choices_map.empty()) {
+      throw ArgParsingError("ChoiceValue has no choices!");
+    }
+    typename ChoicesVec::const_iterator it = choices_vec.begin();
+    String rv = "Valid choices are:\n" + choice_help(it);
+    for (++it; it != choices_vec.end(); ++it) {
+      rv += "\n" + choice_help(it);
+    }
+    return rv;
+  }
+
+  StrVecIt handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
+  {
+    if (values == state.args.end()) {
+      return values;
+    }
+    const String& name = *values;
+    const Choice* const choice = get_choice(name);
+    if (!choice) {
+      throw ParseError(state, "was passed invalid value \"" + name  + "\".\n" + value_help());
+    }
+    if (dest_) {
+      *dest_ = name;
+    }
+    if (dest_ != &str_choice) {
+      str_choice = name;
+    }
+    dest = choice->value;
+    return state.args.erase(values);
+  }
+};
+
+class StringChoiceValue : public ChoiceValue<String> {
+public:
+  StringChoiceValue(String& dest)
+    : ChoiceValue<String>(dest)
+  {
+  }
+
+  void add_choice(const String& value, const String& help)
+  {
+    ChoiceValue<String>::add_choice(value, value, help);
+  }
 };
 
 /// Base class for argument prototypes
@@ -240,10 +338,7 @@ public:
   {
   }
 
-  virtual String help() const
-  {
-    return help_;
-  }
+  virtual String help() const;
 
   virtual void help(const String& value)
   {
@@ -277,9 +372,19 @@ public:
 
   virtual bool optional() const = 0;
 
+  size_t count() const
+  {
+    return count_;
+  }
+
+  void reset_count()
+  {
+    count_ = 0;
+  }
+
   bool present() const
   {
-    return present_;
+    return count_ > 0;
   }
 
   size_t min_args_required() const
@@ -304,7 +409,7 @@ protected:
   ArgParser& arg_parser_;
   String help_;
   Handler* const handler_;
-  bool present_;
+  size_t count_;
 };
 
 typedef OPENDDS_VECTOR(Argument*) Arguments;
@@ -333,11 +438,18 @@ public:
 
   size_t prototype_max_width(bool /*single_line*/) const
   {
-    return name_.length();
+    return prototype(0).length();
   }
 
   String prototype(size_t /*single_line_limit*/, bool /*force_single_line*/ = false) const
   {
+    if (name_.empty()) {
+      const String handler_metavar = handler_->metavar();
+      if (handler_metavar.empty()) {
+        throw ArgParsingError("Can't get Positional prototype, name is empty");
+      }
+      return handler_metavar;
+    }
     return name_;
   }
 
@@ -438,7 +550,7 @@ public:
   Option(ArgParser& arg_parser, const String& name, const String& help,
     Handler* handler, OptionStyle style = OptionStyleDefault)
     : Argument(arg_parser, help, handler)
-    , allow_multiple_(true)
+    , allow_multiple_(false)
     , attached_value_separator_("=")
     , style_(style)
     , present_dest_(0)
@@ -450,7 +562,7 @@ public:
   Option(ArgParser& arg_parser, const String& name, const String& help, bool& present,
     OptionStyle style = OptionStyleDefault)
     : Argument(arg_parser, help, &default_handler_)
-    , allow_multiple_(true)
+    , allow_multiple_(false)
     , attached_value_separator_("=")
     , style_(style)
     , present_dest_(&present)
@@ -547,6 +659,39 @@ public:
 
   HandlerType handler;
 };
+
+#ifdef ACE_HAS_CPP11
+template <typename HandlerType>
+class OptionPass : public Option {
+public:
+  using ValueType = typename HandlerType::ValueType;
+  using FuncType = std::function<void(const ValueType&)>;
+
+  HandlerType handler;
+  ValueType value;
+  FuncType pass_to;
+
+  OptionPass(ArgParser& arg_parser, const String& name, const String& help,
+      FuncType pass_to, const String& metavar)
+    : Option(arg_parser, name, help, &handler)
+    , handler(value)
+    , value()
+    , pass_to(pass_to)
+  {
+    this->metavar(metavar);
+  }
+
+  StrVecIt handle_found(ArgParseState& state, StrVecIt found_it)
+  {
+    const bool found = found_it != state.args.end();
+    const StrVecIt rv = Option::handle_found(state, found_it);
+    if (found) {
+      pass_to(value);
+    }
+    return rv;
+  }
+};
+#endif
 
 template <typename IntType>
 class IntValue : public Handler {
@@ -749,6 +894,8 @@ public:
     default_option_style_ = (new_style == OptionStyleDefault ?
       default_default_option_style : new_style);
   }
+
+  void reset_arg_counts();
 
 protected:
   virtual void parse_i(ArgParseState& state);
