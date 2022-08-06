@@ -74,7 +74,6 @@ DataReaderImpl::DataReaderImpl()
   , domain_id_(0)
   , end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
   , n_chunks_(TheServiceParticipant->n_chunks())
-  , reverse_pub_handle_lock_(publication_handle_lock_)
   , reactor_(0)
   , liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
   , last_deadline_missed_total_count_(0)
@@ -996,8 +995,9 @@ DDS::ReturnCode_t
 DataReaderImpl::get_requested_incompatible_qos_status(
     DDS::RequestedIncompatibleQosStatus & status)
 {
-  set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
-      false);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publication_handle_lock_);
+
+  set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS, false);
   status = requested_incompatible_qos_status_;
   requested_incompatible_qos_status_.total_count_change = 0;
 
@@ -1008,6 +1008,8 @@ DDS::ReturnCode_t
 DataReaderImpl::get_subscription_matched_status(
     DDS::SubscriptionMatchedStatus & status)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publication_handle_lock_);
+
   set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, false);
   status = subscription_match_status_;
   subscription_match_status_.total_count_change = 0;
@@ -1020,6 +1022,8 @@ DDS::ReturnCode_t
 DataReaderImpl::get_sample_lost_status(
     DDS::SampleLostStatus & status)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(this->sample_lock_);
+
   set_status_changed_flag(DDS::SAMPLE_LOST_STATUS, false);
   status = sample_lost_status_;
   sample_lost_status_.total_count_change = 0;
@@ -1047,7 +1051,7 @@ DataReaderImpl::get_matched_publications(
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
-      this->publication_handle_lock_,
+      publication_handle_lock_,
       DDS::RETCODE_ERROR);
 
   // Copy out the handles for the current set of publications.
