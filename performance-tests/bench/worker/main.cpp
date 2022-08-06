@@ -72,7 +72,6 @@
 
 using Builder::Log;
 using Builder::ZERO;
-using Bench::get_option_argument;
 
 const size_t DEFAULT_MAX_DECIMAL_PLACES = 9u;
 const size_t DEFAULT_THREAD_POOL_SIZE = 4u;

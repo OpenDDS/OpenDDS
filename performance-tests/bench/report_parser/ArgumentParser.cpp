@@ -36,7 +36,7 @@ namespace {
     StrVecIt handle(Argument& /*arg*/, ArgParseState& state, StrVecIt values)
     {
       StrVecIt it = values;
-      for (; it != state.args.end() || !state.parser.looks_like_option(*it);) {
+      while (it != state.args.end() && !state.parser.looks_like_option(*it)) {
         this->values.insert(*values);
         it = state.args.erase(values);
       }

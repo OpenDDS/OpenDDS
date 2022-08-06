@@ -539,7 +539,15 @@ void ArgParser::parse_i(ArgParseState& state)
       }
       if (replace.size()) {
         found = true;
+#ifdef ACE_HAS_CPP11
         it = state.args.insert(state.args.erase(it), replace.begin(), replace.end());
+#else
+        // In C++03 the above insert has a void return value.
+        it = state.args.erase(it);
+        for (StrVecIt rit = replace.begin(); rit != replace.end(); ++rit) {
+          it = state.args.insert(it, *rit);
+        }
+#endif
       }
     }
 
