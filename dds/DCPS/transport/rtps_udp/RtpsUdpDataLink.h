@@ -26,6 +26,7 @@
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/DataBlockLockPool.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/DiscoveryListener.h>
 #include <dds/DCPS/ReactorInterceptor.h>
@@ -312,6 +313,7 @@ private:
   DataBlockAllocator db_allocator_;
   Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> custom_allocator_;
   Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> bundle_allocator_;
+  unique_ptr<DataBlockLockPool> db_lock_pool_;
 
   ACE_Message_Block* alloc_msgblock(size_t size, ACE_Allocator* data_allocator);
   ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm);
