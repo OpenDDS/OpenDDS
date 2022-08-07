@@ -584,6 +584,8 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publication_handle_lock_);
+
     // Derive the change in the number of publications writing to this reader.
     int matchedPublications = static_cast<int>(this->publication_id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
