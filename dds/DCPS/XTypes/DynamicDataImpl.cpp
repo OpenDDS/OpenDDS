@@ -519,6 +519,9 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
         return 0;
       }
       DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
+      if (!members_impl) {
+        return 0;
+      }
       for (DynamicTypeMembersByIdImpl::const_iterator it = members_impl->begin(); it != members_impl->end(); ++it) {
         DDS::MemberDescriptor_var md;
         if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
@@ -723,6 +726,9 @@ DDS::MemberDescriptor* DynamicDataImpl::get_union_selected_member()
     return 0;
   }
   DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
+  if (!members_impl) {
+    return 0;
+  }
 
   bool has_default = false;
   DDS::MemberDescriptor_var default_member;
@@ -2372,34 +2378,34 @@ bool DynamicDataImpl::skip_map_member(DDS::DynamicType_ptr map_type)
 bool DynamicDataImpl::skip_collection_member(DDS::DynamicType_ptr coll_type)
 {
   const TypeKind kind = coll_type->get_kind();
-  if (kind != TK_SEQUENCE && kind != TK_ARRAY && kind != TK_MAP) {
-    return false;
-  }
-  const char* kind_str = typekind_to_string(kind);
-  if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2) {
-    size_t dheader;
-    if (!strm_.read_delimiter(dheader)) {
-      if (DCPS::DCPS_debug_level >= 1) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::skip_collection_member -")
-                   ACE_TEXT(" Failed to deserialize DHEADER of a non-primitive %C member\n"),
-                   kind_str));
+  if (kind == TK_SEQUENCE || kind == TK_ARRAY || kind == TK_MAP) {
+    const char* kind_str = typekind_to_string(kind);
+    if (strm_.encoding().kind() == DCPS::Encoding::KIND_XCDR2) {
+      size_t dheader;
+      if (!strm_.read_delimiter(dheader)) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::skip_collection_member -")
+                     ACE_TEXT(" Failed to deserialize DHEADER of a non-primitive %C member\n"),
+                     kind_str));
+        }
+        return false;
+      }
+      const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
+      return skip("skip_collection_member", err_msg.c_str(), dheader);
+    } else if (kind == TK_SEQUENCE) {
+      return skip_to_sequence_element(0, coll_type);
+    } else if (kind == TK_ARRAY) {
+      return skip_to_array_element(0, coll_type);
+    } else if (kind == TK_MAP) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::skip_collection_member: "
+                   "DynamicData does not currently support XCDR1 maps\n"));
       }
       return false;
     }
-    const DCPS::String err_msg = DCPS::String("Failed to skip a non-primitive ") + kind_str + " member";
-    return skip("skip_collection_member", err_msg.c_str(), dheader);
-  } else if (kind == TK_SEQUENCE) {
-    return skip_to_sequence_element(0, coll_type);
-  } else if (kind == TK_ARRAY) {
-    return skip_to_array_element(0, coll_type);
-  } else if (kind == TK_MAP) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::skip_collection_member: "
-                 "DynamicData does not currently support XCDR1 maps\n"));
-    }
-    return false;
   }
-  return true;
+
+  return false;
 }
 
 bool DynamicDataImpl::skip_aggregated_member(DDS::DynamicType_ptr member_type)
@@ -2868,7 +2874,9 @@ bool print_struct(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
         member_base_type_descriptor->kind() == TK_ARRAY) {
       DDS::TypeDescriptor_var td;
-      member_base_type_descriptor->element_type()->get_descriptor(td);
+      if (member_base_type_descriptor->element_type()->get_descriptor(td) != DDS::RETCODE_OK) {
+        return false;
+      }
       DCPS::String ele_type_name = td->name();
       type_string += " " + ele_type_name;
     }
@@ -2939,7 +2947,9 @@ bool print_union(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Strin
       if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
           member_base_type_descriptor->kind() == TK_ARRAY) {
         DDS::TypeDescriptor_var td;
-        member_base_type_descriptor->element_type()->get_descriptor(td);
+        if (member_base_type_descriptor->element_type()->get_descriptor(td) != DDS::RETCODE_OK) {
+          return false;
+        }
         DCPS::String ele_type_name = td->name();
         type_string += " " + ele_type_name;
       }
@@ -2998,9 +3008,16 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
       val = my_long;
     }
     DDS::DynamicTypeMember_var temp_dtm;
-    member_base_type->get_member_by_index(temp_dtm, val);
+    if (member_base_type->get_member_by_index(temp_dtm, val) != DDS::RETCODE_OK) {
+      return false;
+    }
     DDS::MemberDescriptor_var descriptor;
-    temp_dtm->get_descriptor(descriptor);
+    if (temp_dtm->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to get descriptor for enum\n"));
+      }
+      return false;
+    }
     type_string += " = " + DCPS::String(descriptor->name()) + "\n";
     break;
   }
