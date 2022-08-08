@@ -303,7 +303,14 @@ TransportClient::associate(const AssociationData& data, bool active)
             // To avoid deadlock, we must reverse the lock.
             TransportImpl::ConnectionAttribs attribs = pend->attribs_;
             RcHandle<TransportClient> client = rchandle_from(this);
-            ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+            // NOTE(sonndinh): Release the PendingAssoc's mutex_ here, otherwise, when this scope
+            // exits the lock order will be PendingAssoc's mutex_ -> TransportClient's lock_.
+            // There exists some other thread that acquires these locks in the reverse order, causing
+            // a deadlock. The order of these ACE_GUARD_RETURNs is important because when these
+            // ACE_Guard objects are destructed, the locks are acquired in the correct order, i.e.,
+            // TransportClient's lock_ -> PendingAssoc's mutex_.
+            ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, pend->reverse_mutex_, false);
+            ACE_GUARD_RETURN(Reverse_Lock_t, rev_tc_guard, reverse_lock_, false);
             res = impl->accept_datalink(remote, attribs, client);
           }
 
@@ -315,6 +322,10 @@ TransportClient::associate(const AssociationData& data, bool active)
             //active side connection and completed, thus pend was removed from pending_.  Can return true.
             return true;
           }
+          // NOTE(sonndinh): Can this assign pend to point to a different PendingAssoc object? If yes,
+          // the mutex_ of that object needs to be acquired because that object can be modified in the
+          // next iteration of either the inner or outer for-loop. The mutex_ of the old PendingAssoc
+          // object also needs to be released if it's still valid.
           pend = iter->second;
 
           if (res.success_) {
