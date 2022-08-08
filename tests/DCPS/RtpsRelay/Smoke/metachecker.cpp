@@ -32,7 +32,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     char response[64 * 1024];
-    ssize_t bytes = stream.recv(response, sizeof(response));
+    ssize_t bytes = stream.recv(response, sizeof(response) - 1);
     if (bytes <= 0) {
       ACE_ERROR((LM_ERROR, "ERROR: Could not read response\n"));
       return EXIT_FAILURE;
@@ -70,7 +70,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     char response[64 * 1024];
-    ssize_t bytes = stream.recv(response, sizeof(response));
+    ssize_t bytes = stream.recv(response, sizeof(response) - 1);
     if (bytes <= 0) {
       ACE_ERROR((LM_ERROR, "ERROR: Could not read response\n"));
       return EXIT_FAILURE;

@@ -324,206 +324,212 @@ void append(DDS::PropertySeq& props, const char* name, const OpenDDS::DCPS::Stri
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
-  // Parse options.
-  OpenDDS::DCPS::String DDS_ROOT;
+  try {
+    // Parse options.
+    OpenDDS::DCPS::String DDS_ROOT;
 
-  const char* value = ACE_OS::getenv("DDS_ROOT");
-  if (value) {
-    DDS_ROOT = value;
-  }
+    const char* value = ACE_OS::getenv("DDS_ROOT");
+    if (value) {
+      DDS_ROOT = value;
+    }
 
-  ACE_DEBUG((LM_DEBUG, "DDS_ROOT = %C\n", DDS_ROOT.c_str()));
+    ACE_DEBUG((LM_DEBUG, "DDS_ROOT = %C\n", DDS_ROOT.c_str()));
 
-  DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-  TheServiceParticipant->set_security(true);
+    TheServiceParticipant->set_security(true);
 
-  const DDS::DomainId_t domain = 0;
-  const OpenDDS::DCPS::String prefix = "file:" + DDS_ROOT + "/tests/security/";
+    const DDS::DomainId_t domain = 0;
+    const OpenDDS::DCPS::String prefix = "file:" + DDS_ROOT + "/tests/security/";
 
-  const RcHandle<RtpsDiscovery> disc = make_rch<RtpsDiscovery>("RtpsDiscovery");
-  TheServiceParticipant->add_discovery(disc);
-  TheServiceParticipant->set_default_discovery(disc->key());
+    const RcHandle<RtpsDiscovery> disc = make_rch<RtpsDiscovery>("RtpsDiscovery");
+    TheServiceParticipant->add_discovery(disc);
+    TheServiceParticipant->set_default_discovery(disc->key());
 
-  // Create a participant without the custom plugin.
-  DDS::DomainParticipantQos participant1_qos;
-  dpf->get_default_participant_qos(participant1_qos);
+    // Create a participant without the custom plugin.
+    DDS::DomainParticipantQos participant1_qos;
+    dpf->get_default_participant_qos(participant1_qos);
 
-  DDS::PropertySeq& props1 = participant1_qos.property.value;
-  append(props1, DDS::Security::Properties::AuthIdentityCA, prefix + "certs/identity/identity_ca_cert.pem");
-  append(props1, DDS::Security::Properties::AuthPrivateKey, prefix + "certs/identity/test_participant_01_private_key.pem");
-  append(props1, DDS::Security::Properties::AuthIdentityCertificate, prefix + "certs/identity/test_participant_01_cert.pem");
-  append(props1, DDS::Security::Properties::AccessPermissionsCA, prefix + "certs/permissions/permissions_ca_cert.pem");
-  append(props1, DDS::Security::Properties::AccessGovernance, prefix + "governance/governance_SC1_ProtectedDomain1_signed.p7s");
-  append(props1, DDS::Security::Properties::AccessPermissions, prefix + "permissions/permissions_test_participant_01_signed.p7s");
+    DDS::PropertySeq& props1 = participant1_qos.property.value;
+    append(props1, DDS::Security::Properties::AuthIdentityCA, prefix + "certs/identity/identity_ca_cert.pem");
+    append(props1, DDS::Security::Properties::AuthPrivateKey, prefix + "certs/identity/test_participant_01_private_key.pem");
+    append(props1, DDS::Security::Properties::AuthIdentityCertificate, prefix + "certs/identity/test_participant_01_cert.pem");
+    append(props1, DDS::Security::Properties::AccessPermissionsCA, prefix + "certs/permissions/permissions_ca_cert.pem");
+    append(props1, DDS::Security::Properties::AccessGovernance, prefix + "governance/governance_SC1_ProtectedDomain1_signed.p7s");
+    append(props1, DDS::Security::Properties::AccessPermissions, prefix + "permissions/permissions_test_participant_01_signed.p7s");
 
-  DDS::DomainParticipant_var participant1 = dpf->create_participant(domain, participant1_qos, 0, 0);
+    DDS::DomainParticipant_var participant1 = dpf->create_participant(domain, participant1_qos, 0, 0);
 
-  TransportConfig_rch config1 = TheTransportRegistry->create_config("config1");
-  TransportInst_rch inst1 = TheTransportRegistry->create_inst("inst1", "rtps_udp");
-  config1->instances_.push_back(inst1);
-  TheTransportRegistry->bind_config(config1, participant1);
+    TransportConfig_rch config1 = TheTransportRegistry->create_config("config1");
+    TransportInst_rch inst1 = TheTransportRegistry->create_inst("inst1", "rtps_udp");
+    config1->instances_.push_back(inst1);
+    TheTransportRegistry->bind_config(config1, participant1);
 
-  Messenger::MessageTypeSupport_var type_support1 = new Messenger::MessageTypeSupportImpl();
-  if (type_support1->register_type(participant1.in(), "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type failed!\n"));
-    return EXIT_FAILURE;
-  }
+    Messenger::MessageTypeSupport_var type_support1 = new Messenger::MessageTypeSupportImpl();
+    if (type_support1->register_type(participant1.in(), "") != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type failed!\n"));
+      return EXIT_FAILURE;
+    }
 
-  CORBA::String_var type_name1 = type_support1->get_type_name();
-  DDS::Topic_var topic1 = participant1->create_topic("Movie Discussion List",
-                                                     type_name1.in(),
-                                                     TOPIC_QOS_DEFAULT,
-                                                     DDS::TopicListener::_nil(),
-                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    CORBA::String_var type_name1 = type_support1->get_type_name();
+    DDS::Topic_var topic1 = participant1->create_topic("Movie Discussion List",
+                                                       type_name1.in(),
+                                                       TOPIC_QOS_DEFAULT,
+                                                       DDS::TopicListener::_nil(),
+                                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  DDS::Publisher_var publisher1 = participant1->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                                                 DDS::PublisherListener::_nil(),
-                                                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::Publisher_var publisher1 = participant1->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                                                   DDS::PublisherListener::_nil(),
+                                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  // Install the custom plugin.
-  RcHandle<CustomSecurityPluginInst> custom_plugin = OpenDDS::DCPS::make_rch<CustomSecurityPluginInst>();
-  TheSecurityRegistry->register_plugin("Custom", custom_plugin);
-  OpenDDS::Security::SecurityConfig_rch custom_config = TheSecurityRegistry->create_config("Custom", custom_plugin);
-  TheSecurityRegistry->default_config(custom_config);
+    // Install the custom plugin.
+    RcHandle<CustomSecurityPluginInst> custom_plugin = OpenDDS::DCPS::make_rch<CustomSecurityPluginInst>();
+    TheSecurityRegistry->register_plugin("Custom", custom_plugin);
+    OpenDDS::Security::SecurityConfig_rch custom_config = TheSecurityRegistry->create_config("Custom", custom_plugin);
+    TheSecurityRegistry->default_config(custom_config);
 
-  // Create a participant without the custom plugin.
-  DDS::DomainParticipantQos participant2_qos;
-  dpf->get_default_participant_qos(participant2_qos);
+    // Create a participant without the custom plugin.
+    DDS::DomainParticipantQos participant2_qos;
+    dpf->get_default_participant_qos(participant2_qos);
 
-  DDS::PropertySeq& props2 = participant2_qos.property.value;
-  append(props2, DDS::Security::Properties::AuthIdentityCA, prefix + "certs/identity/identity_ca_cert.pem");
-  append(props2, DDS::Security::Properties::AuthPrivateKey, prefix + "certs/identity/test_participant_02_private_key.pem");
-  append(props2, DDS::Security::Properties::AuthIdentityCertificate, prefix + "certs/identity/test_participant_02_cert.pem");
-  append(props2, DDS::Security::Properties::AccessPermissionsCA, prefix + "certs/permissions/permissions_ca_cert.pem");
-  append(props2, DDS::Security::Properties::AccessGovernance, prefix + "governance/governance_SC1_ProtectedDomain1_signed.p7s");
-  append(props2, DDS::Security::Properties::AccessPermissions, prefix + "permissions/permissions_test_participant_02_signed.p7s");
+    DDS::PropertySeq& props2 = participant2_qos.property.value;
+    append(props2, DDS::Security::Properties::AuthIdentityCA, prefix + "certs/identity/identity_ca_cert.pem");
+    append(props2, DDS::Security::Properties::AuthPrivateKey, prefix + "certs/identity/test_participant_02_private_key.pem");
+    append(props2, DDS::Security::Properties::AuthIdentityCertificate, prefix + "certs/identity/test_participant_02_cert.pem");
+    append(props2, DDS::Security::Properties::AccessPermissionsCA, prefix + "certs/permissions/permissions_ca_cert.pem");
+    append(props2, DDS::Security::Properties::AccessGovernance, prefix + "governance/governance_SC1_ProtectedDomain1_signed.p7s");
+    append(props2, DDS::Security::Properties::AccessPermissions, prefix + "permissions/permissions_test_participant_02_signed.p7s");
 
-  DDS::DomainParticipant_var participant2 = dpf->create_participant(domain, participant2_qos, 0, 0);
+    DDS::DomainParticipant_var participant2 = dpf->create_participant(domain, participant2_qos, 0, 0);
 
-  TransportConfig_rch config2 = TheTransportRegistry->create_config("config2");
-  TransportInst_rch inst2 = TheTransportRegistry->create_inst("inst2", "rtps_udp");
-  config2->instances_.push_back(inst2);
-  TheTransportRegistry->bind_config(config2, participant2);
+    TransportConfig_rch config2 = TheTransportRegistry->create_config("config2");
+    TransportInst_rch inst2 = TheTransportRegistry->create_inst("inst2", "rtps_udp");
+    config2->instances_.push_back(inst2);
+    TheTransportRegistry->bind_config(config2, participant2);
 
-  Messenger::MessageTypeSupport_var type_support2 = new Messenger::MessageTypeSupportImpl();
-  if (type_support2->register_type(participant2.in(), "") != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type failed!\n"));
-    return EXIT_FAILURE;
-  }
+    Messenger::MessageTypeSupport_var type_support2 = new Messenger::MessageTypeSupportImpl();
+    if (type_support2->register_type(participant2.in(), "") != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): register_type failed!\n"));
+      return EXIT_FAILURE;
+    }
 
-  CORBA::String_var type_name2 = type_support2->get_type_name();
-  DDS::Topic_var topic2 = participant2->create_topic("Movie Discussion List",
-                                                     type_name2.in(),
-                                                     TOPIC_QOS_DEFAULT,
-                                                     DDS::TopicListener::_nil(),
-                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    CORBA::String_var type_name2 = type_support2->get_type_name();
+    DDS::Topic_var topic2 = participant2->create_topic("Movie Discussion List",
+                                                       type_name2.in(),
+                                                       TOPIC_QOS_DEFAULT,
+                                                       DDS::TopicListener::_nil(),
+                                                       OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
 
-  DDS::Publisher_var publisher2 = participant2->create_publisher(PUBLISHER_QOS_DEFAULT,
-                                                                 DDS::PublisherListener::_nil(),
-                                                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    DDS::Publisher_var publisher2 = participant2->create_publisher(PUBLISHER_QOS_DEFAULT,
+                                                                   DDS::PublisherListener::_nil(),
+                                                                   OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  DDS::DataWriter_var datawriter2 = publisher2->create_datawriter(topic2.in(),
-                                                                  DATAWRITER_QOS_DEFAULT,
-                                                                  DDS::DataWriterListener::_nil(),
-                                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  Messenger::MessageDataWriter_var mdatawriter2 = Messenger::MessageDataWriter::_narrow(datawriter2);
-
-  DDS::Subscriber_var subscriber2 = participant2->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
-                                                                    DDS::SubscriberListener::_nil(),
+    DDS::DataWriter_var datawriter2 = publisher2->create_datawriter(topic2.in(),
+                                                                    DATAWRITER_QOS_DEFAULT,
+                                                                    DDS::DataWriterListener::_nil(),
                                                                     OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    Messenger::MessageDataWriter_var mdatawriter2 = Messenger::MessageDataWriter::_narrow(datawriter2);
 
-  Messenger::Message message;
-  message.subject_id = 0;
+    DDS::Subscriber_var subscriber2 = participant2->create_subscriber(SUBSCRIBER_QOS_DEFAULT,
+                                                                      DDS::SubscriberListener::_nil(),
+                                                                      OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_register_instance failure\n"));
-  custom_plugin->reset_flags();
-  custom_plugin->set_return(false, false);
-  if (mdatawriter2->register_instance(message) != DDS::HANDLE_NIL) {
-    ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_register_instance allowed an instance to be registered when not expected\n"));
+    Messenger::Message message;
+    message.subject_id = 0;
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_register_instance failure\n"));
+    custom_plugin->reset_flags();
+    custom_plugin->set_return(false, false);
+    if (mdatawriter2->register_instance(message) != DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_register_instance allowed an instance to be registered when not expected\n"));
+      return EXIT_FAILURE;
+    }
+    custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_REGISTER_INSTANCE_FALSE);
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_register_instance sucess\n"));
+    custom_plugin->reset_flags();
+    custom_plugin->set_return(true, true);
+    const DDS::InstanceHandle_t ih = mdatawriter2->register_instance(message);
+    if (ih == DDS::HANDLE_NIL) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_register_instance did not allow an instance to be registered when expected\n"));
+      return EXIT_FAILURE;
+    }
+    custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_REGISTER_INSTANCE_TRUE);
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_dispose_instance failure\n"));
+    custom_plugin->reset_flags();
+    custom_plugin->set_return(false, false);
+    DDS::ReturnCode_t rc = mdatawriter2->dispose(message, ih);
+    if (rc != DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_dispose_instance allowed an instance to be dipsosed when not expected\n"));
+      return EXIT_FAILURE;
+    }
+    custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_DISPOSE_INSTANCE_FALSE);
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_dispose_instance success\n"));
+    custom_plugin->reset_flags();
+    custom_plugin->set_return(true, true);
+    if (mdatawriter2->dispose(message, ih) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_dispose_instance did not allow an instance to be disposed when expected\n"));
+      return EXIT_FAILURE;
+    }
+    custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_DISPOSE_INSTANCE_TRUE);
+
+    // Done with writer2.
+    publisher2->delete_datawriter(datawriter2);
+
+    DDS::DataWriter_var datawriter1 = publisher1->create_datawriter(topic1.in(),
+                                                                    DATAWRITER_QOS_DEFAULT,
+                                                                    DDS::DataWriterListener::_nil(),
+                                                                    OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    Messenger::MessageDataWriter_var mdatawriter1 = Messenger::MessageDataWriter::_narrow(datawriter1);
+
+    DDS::DataReaderQos dr_qos;
+    subscriber2->get_default_datareader_qos(dr_qos);
+    dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    DDS::DataReader_var reader2 = subscriber2->create_datareader(topic2.in(),
+                                                                 dr_qos,
+                                                                 DDS::DataReaderListener::_nil(),
+                                                                 OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    Utils::wait_match(datawriter1, 1);
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_register_instance failure\n"));
+    custom_plugin->reset_flags();
+    custom_plugin->set_return(false, false);
+    mdatawriter1->write(message, 0);
+    custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_REGISTER_INSTANCE_FALSE);
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_register_instance success\n"));
+    custom_plugin->reset_flags();
+    custom_plugin->set_return(true, true);
+    mdatawriter1->write(message, 0);
+    custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_REGISTER_INSTANCE_TRUE);
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_dispose_instance failure\n"));
+    custom_plugin->reset_flags();
+    custom_plugin->set_return(false, false);
+    mdatawriter1->dispose(message, 0);
+    custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_DISPOSE_INSTANCE_FALSE);
+
+    ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_dispose_instance success\n"));
+    custom_plugin->reset_flags();
+    mdatawriter1->write(message, 0);
+    custom_plugin->set_return(true, true);
+    mdatawriter1->dispose(message, 0);
+    custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_DISPOSE_INSTANCE_TRUE);
+
+    participant1->delete_contained_entities();
+    dpf->delete_participant(participant1);
+    participant2->delete_contained_entities();
+    dpf->delete_participant(participant2);
+    TheServiceParticipant->shutdown();
+
+  } catch (...) {
+    ACE_ERROR((LM_ERROR, "ERROR: exception\n"));
     return EXIT_FAILURE;
   }
-  custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_REGISTER_INSTANCE_FALSE);
-
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_register_instance sucess\n"));
-  custom_plugin->reset_flags();
-  custom_plugin->set_return(true, true);
-  const DDS::InstanceHandle_t ih = mdatawriter2->register_instance(message);
-  if (ih == DDS::HANDLE_NIL) {
-    ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_register_instance did not allow an instance to be registered when expected\n"));
-    return EXIT_FAILURE;
-  }
-  custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_REGISTER_INSTANCE_TRUE);
-
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_dispose_instance failure\n"));
-  custom_plugin->reset_flags();
-  custom_plugin->set_return(false, false);
-  DDS::ReturnCode_t rc = mdatawriter2->dispose(message, ih);
-  if (rc != DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY) {
-    ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_dispose_instance allowed an instance to be dipsosed when not expected\n"));
-    return EXIT_FAILURE;
-  }
-  custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_DISPOSE_INSTANCE_FALSE);
-
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_local_datawriter_dispose_instance success\n"));
-  custom_plugin->reset_flags();
-  custom_plugin->set_return(true, true);
-  if (mdatawriter2->dispose(message, ih) != DDS::RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: check_local_datawriter_dispose_instance did not allow an instance to be disposed when expected\n"));
-    return EXIT_FAILURE;
-  }
-  custom_plugin->wait_for(CHECK_LOCAL_DATAWRITER_DISPOSE_INSTANCE_TRUE);
-
-  // Done with writer2.
-  publisher2->delete_datawriter(datawriter2);
-
-  DDS::DataWriter_var datawriter1 = publisher1->create_datawriter(topic1.in(),
-                                                                  DATAWRITER_QOS_DEFAULT,
-                                                                  DDS::DataWriterListener::_nil(),
-                                                                  OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-  Messenger::MessageDataWriter_var mdatawriter1 = Messenger::MessageDataWriter::_narrow(datawriter1);
-
-  DDS::DataReaderQos dr_qos;
-  subscriber2->get_default_datareader_qos(dr_qos);
-  dr_qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
-  DDS::DataReader_var reader2 = subscriber2->create_datareader(topic2.in(),
-                                                               dr_qos,
-                                                               DDS::DataReaderListener::_nil(),
-                                                               OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-
-  Utils::wait_match(datawriter1, 1);
-
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_register_instance failure\n"));
-  custom_plugin->reset_flags();
-  custom_plugin->set_return(false, false);
-  mdatawriter1->write(message, 0);
-  custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_REGISTER_INSTANCE_FALSE);
-
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_register_instance success\n"));
-  custom_plugin->reset_flags();
-  custom_plugin->set_return(true, true);
-  mdatawriter1->write(message, 0);
-  custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_REGISTER_INSTANCE_TRUE);
-
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_dispose_instance failure\n"));
-  custom_plugin->reset_flags();
-  custom_plugin->set_return(false, false);
-  mdatawriter1->dispose(message, 0);
-  custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_DISPOSE_INSTANCE_FALSE);
-
-  ACE_DEBUG((LM_DEBUG, "SCENARIO: check_remote_datawriter_dispose_instance success\n"));
-  custom_plugin->reset_flags();
-  mdatawriter1->write(message, 0);
-  custom_plugin->set_return(true, true);
-  mdatawriter1->dispose(message, 0);
-  custom_plugin->wait_for(CHECK_REMOTE_DATAWRITER_DISPOSE_INSTANCE_TRUE);
-
-  participant1->delete_contained_entities();
-  dpf->delete_participant(participant1);
-  participant2->delete_contained_entities();
-  dpf->delete_participant(participant2);
-  TheServiceParticipant->shutdown();
 
   return EXIT_SUCCESS;
 }
