@@ -882,7 +882,6 @@ private:
 
   //Used to protect access to id_to_handle_map_
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
-  Reverse_Lock_t reverse_pub_handle_lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap            publication_id_to_handle_map_;
