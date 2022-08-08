@@ -157,7 +157,7 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
 ACE_INLINE
 bool
 OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
-                                           ACE_Message_Block* buffer)
+                                           const ACE_Message_Block* buffer)
 {
   char* base = buffer->base();
 
@@ -170,7 +170,7 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
 
   // Test flag bit.
   bool result;
-  ACE_Lock* lock = buffer->locking_strategy();
+  ACE_Lock* lock = const_cast<ACE_Message_Block*>(buffer)->locking_strategy();
   if (lock) {
     ACE_Guard<ACE_Lock> guard(*lock);
     result = base[FLAGS_OFFSET] & mask_flag(flag);
