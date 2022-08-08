@@ -334,6 +334,8 @@ TransportClient::associate(const AssociationData& data, bool active)
               // established.  Just wait without trying other transports.
               pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
             } else {
+              //ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, pend->reverse_mutex_, false);
+              pend_guard.release();
               use_datalink_i(data.remote_id_, res.link_, guard);
               return true;
             }
@@ -484,7 +486,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           if (!res.link_.is_nil()) {
 
             {
-              // TransportClient's use_datalink_i calls PendingAssoc::reset_client which
+              // NOTE(sonndinh): TransportClient's use_datalink_i calls PendingAssoc::reset_client which
               // needs the PendingAssoc object's mutex_. So we release mutex_ here.
               // Probably don't need to re-lock since this code path will return true anyway,
               // i.e., don't need a Reverse_Lock_t.
@@ -555,6 +557,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   }
 
   PendingAssoc_rch pend = iter->second;
+  ACE_GUARD(ACE_Thread_Mutex, pend_guard, pend->mutex_);
   const int active_flag = pend->active_ ? ASSOC_ACTIVE : 0;
   bool ok = false;
 
@@ -593,7 +596,10 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
-  iter->second->reset_client();
+  {
+    ACE_GUARD(Reverse_Lock_t, rev_pend_guard, pend->reverse_mutex_);
+    pend->reset_client();
+  }
   pending_assoc_timer_->cancel_timer(pend);
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
