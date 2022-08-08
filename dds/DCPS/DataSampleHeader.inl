@@ -121,7 +121,13 @@ OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
     return;
   }
 
-  base[FLAGS_OFFSET] &= ~mask_flag(flag);
+  ACE_Lock* lock = buffer->locking_strategy();
+  if (lock) {
+    ACE_Guard<ACE_Lock> guard(*lock);
+    base[FLAGS_OFFSET] &= ~mask_flag(flag);
+  } else {
+    base[FLAGS_OFFSET] &= ~mask_flag(flag);
+  }
 }
 
 ACE_INLINE
@@ -139,13 +145,19 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
     return;
   }
 
-  base[FLAGS_OFFSET] |= mask_flag(flag);
+  ACE_Lock* lock = buffer->locking_strategy();
+  if (lock) {
+    ACE_Guard<ACE_Lock> guard(*lock);
+    base[FLAGS_OFFSET] |= mask_flag(flag);
+  } else {
+    base[FLAGS_OFFSET] |= mask_flag(flag);
+  }
 }
 
 ACE_INLINE
 bool
 OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
-                                           const ACE_Message_Block* buffer)
+                                           ACE_Message_Block* buffer)
 {
   char* base = buffer->base();
 
@@ -157,7 +169,15 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
   }
 
   // Test flag bit.
-  return base[FLAGS_OFFSET] & mask_flag(flag);
+  bool result;
+  ACE_Lock* lock = buffer->locking_strategy();
+  if (lock) {
+    ACE_Guard<ACE_Lock> guard(*lock);
+    result = base[FLAGS_OFFSET] & mask_flag(flag);
+  } else {
+    result = base[FLAGS_OFFSET] & mask_flag(flag);
+  }
+  return result;
 }
 
 ACE_INLINE

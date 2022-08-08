@@ -192,7 +192,7 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
                        ACE_Message_Block* buffer);
 
   static bool test_flag(DataSampleHeaderFlag flag,
-                        const ACE_Message_Block* buffer);
+                        ACE_Message_Block* buffer);
 
   /// Does the data in this mb constitute a partial Sample Header?
   static bool partial(const ACE_Message_Block& mb);
