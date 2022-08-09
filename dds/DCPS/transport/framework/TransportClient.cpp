@@ -418,7 +418,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
       if (DCPS_debug_level) {
         LogGuid writer_log(repo_id_);
         LogGuid reader_log(remote.repo_id_);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i - ")
                    ACE_TEXT("connect_datalink between local %C remote %C not successful\n"),
                    writer_log.c_str(),
                    reader_log.c_str()));
@@ -462,7 +462,16 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           data_.remote_reliable_, data_.remote_durable_};
 
         TransportImpl::AcceptConnectResult res;
-        if (!tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard)) {
+        bool ret;
+        {
+          // NOTE(sonndinh): Release the PendingAssoc object's mutex_ since TransportClient's
+          // initiate_connect_i doesn't need it. Also, when this scope exits, these locks are
+          // reacquired in a consistent order: TransportClient's lock_ -> PendingAssoc's mutex_.
+          ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, reverse_mutex_, false);
+          ret = tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard);
+        }
+        //if (!tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard)) {
+        if (!ret) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
           if (res.success_ ) {
