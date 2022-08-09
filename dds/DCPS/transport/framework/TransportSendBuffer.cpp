@@ -114,7 +114,7 @@ SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
     buffer.first->accept_remove_visitor(visitor);
     delete buffer.first;
 
-    buffer.second->release();
+    Message_Block_Ptr to_release(buffer.second);
     buffer.second = 0;
 
   } else {
@@ -127,7 +127,7 @@ SingleSendBuffer::release_i(BufferMap::iterator buffer_iter)
         bm_it->second.first->accept_remove_visitor(visitor);
         delete bm_it->second.first;
 
-        bm_it->second.second->release();
+        Message_Block_Ptr to_release(bm_it->second.second);
         bm_it->second.second = 0;
       }
       fragments_.erase(fm_it);
@@ -280,7 +280,7 @@ SingleSendBuffer::insert(SequenceNumber sequence,
     RemoveAllVisitor visitor;
     removed[i].first->accept_remove_visitor(visitor);
     delete removed[i].first;
-    removed[i].second->release();
+    Message_Block_Ptr to_release(removed[i].second);
   }
 }
 
@@ -341,7 +341,7 @@ SingleSendBuffer::insert_fragment(SequenceNumber sequence,
     RemoveAllVisitor visitor;
     removed[i].first->accept_remove_visitor(visitor);
     delete removed[i].first;
-    removed[i].second->release();
+    Message_Block_Ptr to_release(removed[i].second);
   }
 }
 
