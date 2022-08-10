@@ -105,10 +105,6 @@ void address_info() {
   size_t addr_count;
   ACE_INET_Addr *addr_array = 0;
   const int result = ACE::get_ip_interfaces(addr_count, addr_array);
-  if (result != 0 || addr_count < 1) {
-    ACE_ERROR((LM_ERROR, "ERROR: address_info: Unable to probe network interfaces\n"));
-    return;
-  }
 
   struct Array_Guard {
     Array_Guard(ACE_INET_Addr *ptr) : ptr_(ptr) {}
@@ -117,6 +113,11 @@ void address_info() {
     }
     ACE_INET_Addr* const ptr_;
   } guardObject(addr_array);
+
+  if (result != 0 || addr_count < 1) {
+    ACE_ERROR((LM_ERROR, "ERROR: address_info: Unable to probe network interfaces\n"));
+    return;
+  }
 
   ACE_DEBUG((LM_DEBUG, "DEBUG: address_info: There are %d interfaces\n", addr_count));
   for (size_t i = 0; i < addr_count; ++i) {
