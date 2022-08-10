@@ -725,31 +725,38 @@ namespace {
     std::string start, std::string end, std::string seq_type_name,
     bool use_cxx11, Classification cls, AST_Sequence* seq)
   {
-    const std::string seq_resize_func = use_cxx11 ? "resize" : "length";
+    std::string elem_type_name = seq_type_name + "::value_type";
+
+    if (cls & CL_STRING) {
+      if (cls & CL_WIDE) {
+        elem_type_name = use_cxx11 ? "std::wstring" : "CORBA::WString_var";
+      } else {
+        elem_type_name = use_cxx11 ? "std::string" : "CORBA::String_var";
+      }
+    }
+
     std::string tempvar = "tempvar";
     be_global->impl_ <<
       indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
       indent << "  strm.skip(end_of_seq - strm.rpos());\n" <<
-      indent << "} else {\n" <<
-      indent << "  " << seq_type_name << " " << tempvar << ";\n" <<
-      indent << "  " << tempvar << "." << seq_resize_func << "(1);\n" <<
-      indent << "  for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n";
+      indent << "} else {\n";
 
-    std::string stream_to = tempvar + "[0]";
+    const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
+
+    if (!classic_array_copy) {
+      be_global->impl_ <<
+        indent << "  " << elem_type_name << " " << tempvar << ";\n";
+    }
+
+    std::string stream_to = tempvar;
     if (cls & CL_STRING) {
       if (cls & CL_BOUNDED) {
         AST_Type* elem = resolveActualType(seq->base_type());
         const string args = stream_to + (use_cxx11 ? ", " : ".out(), ") + bounded_arg(elem);
         stream_to = getWrapper(args, elem, WD_INPUT);
-      } else {
-        const string getbuffer =
-          (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
-          ? ".get_buffer()" : "";
-        stream_to = tempvar + getbuffer + "[0];\n";
       }
     } else {
       Intro intro;
-      const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
       Wrapper wrapper(seq->base_type(), scoped(seq->base_type()->name()),
         classic_array_copy ? tempvar : stream_to, false);
       wrapper.classic_array_copy_ = classic_array_copy;
@@ -759,6 +766,7 @@ namespace {
     }
 
     be_global->impl_ <<
+      indent << "  for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n" <<
       indent << "    strm >> " << stream_to << ";\n" <<
       indent << "  }\n" <<
       indent << "}\n";
