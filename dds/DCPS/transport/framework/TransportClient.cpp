@@ -605,14 +605,14 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
-  {
-    ACE_GUARD(Reverse_Lock_t, rev_pend_guard, pend->reverse_mutex_);
-    pend->reset_client();
-  }
+  // NOTE(sonndinh): No need to hold PendingAssoc's mutex_ after reset_client() below?
+  pend_guard.release();
+  pend->reset_client();
   pending_assoc_timer_->cancel_timer(pend);
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
+  // Release TransportClient's lock as we're done updating its data.
   guard.release();
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
