@@ -94,7 +94,7 @@ Example Usage
 Once that's all set up, run ``./run_test.pl --rtps`` in ``DevGuideExamples/DCPS/Messenger`` and ``inspect "Movie Discussion List" "Messenger::Message" 42 --writer-count`` in a separate command line session.
 This should result in ``inspect`` printing messages like these after a short period of time::
 
-    struct ::Messenger::Message
+    struct Messenger::Message
       String8 from = "Comic Book Guy"
       String8 subject = "Review"
       Int32 subject_id = 99

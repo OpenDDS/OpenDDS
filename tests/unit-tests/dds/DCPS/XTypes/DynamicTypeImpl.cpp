@@ -57,7 +57,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyInnerStruct)
   DDS::DynamicType_var expected_dt_var = expected_dt;
   DDS::TypeDescriptor_var expected_td = new XTypes::TypeDescriptorImpl();
   expected_td->kind(XTypes::TK_STRUCTURE);
-  expected_td->name("::MyModCompleteToDynamic::MyInnerStruct");
+  expected_td->name("MyModCompleteToDynamic::MyInnerStruct");
   expected_td->bound().length(0);
   expected_td->extensibility_kind(DDS::MUTABLE);
   expected_td->is_nested(false);
@@ -100,7 +100,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyOuterStruct)
   DDS::DynamicType_var expected_outer_dt_var = expected_outer_dt;
   DDS::TypeDescriptor_var outer_td = new XTypes::TypeDescriptorImpl();
   outer_td->kind(XTypes::TK_STRUCTURE);
-  outer_td->name("::MyModCompleteToDynamic::MyOuterStruct");
+  outer_td->name("MyModCompleteToDynamic::MyOuterStruct");
   outer_td->bound().length(0);
   outer_td->extensibility_kind(DDS::APPENDABLE);
   outer_td->is_nested(0);
@@ -116,7 +116,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyOuterStruct)
   DDS::DynamicType_var expected_inner_dt_var = expected_inner_dt;
   DDS::TypeDescriptor_var inner_td = new XTypes::TypeDescriptorImpl();
   inner_td->kind(XTypes::TK_STRUCTURE);
-  inner_td->name("::MyModCompleteToDynamic::MyInnerStruct");
+  inner_td->name("MyModCompleteToDynamic::MyInnerStruct");
   inner_td->bound().length(0);
   inner_td->extensibility_kind(DDS::MUTABLE);
   inner_td->is_nested(0);
@@ -152,7 +152,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAliasStruct)
   DDS::DynamicType_var expected_alias_dt_var = expected_alias_dt;
   DDS::TypeDescriptor_var alias_td = new XTypes::TypeDescriptorImpl();
   alias_td->kind(XTypes::TK_ALIAS);
-  alias_td->name("::MyModCompleteToDynamic::MyAliasStruct");
+  alias_td->name("MyModCompleteToDynamic::MyAliasStruct");
   alias_td->bound().length(0);
   alias_td->extensibility_kind(DDS::FINAL);
   alias_td->is_nested(0);
@@ -160,7 +160,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAliasStruct)
   DDS::DynamicType_var expected_outer_dt_var = expected_outer_dt;
   DDS::TypeDescriptor_var outer_td = new XTypes::TypeDescriptorImpl();
   outer_td->kind(XTypes::TK_STRUCTURE);
-  outer_td->name("::MyModCompleteToDynamic::MyOuterStruct");
+  outer_td->name("MyModCompleteToDynamic::MyOuterStruct");
   outer_td->bound().length(0);
   outer_td->extensibility_kind(DDS::APPENDABLE);
   outer_td->is_nested(0);
@@ -176,7 +176,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAliasStruct)
   DDS::DynamicType_var expected_inner_dt_var = expected_inner_dt;
   DDS::TypeDescriptor_var inner_td = new XTypes::TypeDescriptorImpl();
   inner_td->kind(XTypes::TK_STRUCTURE);
-  inner_td->name("::MyModCompleteToDynamic::MyInnerStruct");
+  inner_td->name("MyModCompleteToDynamic::MyInnerStruct");
   inner_td->bound().length(0);
   inner_td->extensibility_kind(DDS::MUTABLE);
   inner_td->is_nested(0);
@@ -214,7 +214,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_PrimitiveKind)
   DDS::DynamicType_var expected_dt_var = expected_dt;
   DDS::TypeDescriptor_var td = new XTypes::TypeDescriptorImpl();
   td->kind(XTypes::TK_ENUM);
-  td->name("::MyModCompleteToDynamic::PrimitiveKind");
+  td->name("MyModCompleteToDynamic::PrimitiveKind");
   td->bound().length(1);
   td->bound()[0] = 32;
   td->extensibility_kind(DDS::FINAL);
@@ -254,7 +254,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   DDS::DynamicType_var expected_union_dt_var = expected_union_dt;
   DDS::TypeDescriptor_var td = new XTypes::TypeDescriptorImpl();
   td->kind(XTypes::TK_UNION);
-  td->name("::MyModCompleteToDynamic::MyUnion");
+  td->name("MyModCompleteToDynamic::MyUnion");
   td->bound().length(0);
   td->extensibility_kind(DDS::APPENDABLE);
   td->is_nested(0);
@@ -318,7 +318,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   DDS::DynamicType_var enum_expected_dt_var = enum_expected_dt;
   DDS::TypeDescriptor_var enum_td = new XTypes::TypeDescriptorImpl();
   enum_td->kind(XTypes::TK_ENUM);
-  enum_td->name("::MyModCompleteToDynamic::PrimitiveKind");
+  enum_td->name("MyModCompleteToDynamic::PrimitiveKind");
   enum_td->bound().length(1);
   enum_td->bound()[0] = 32;
   enum_td->extensibility_kind(DDS::FINAL);
@@ -372,7 +372,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyInnerArray)
   DDS::DynamicType_var alias_inner_expected_dt_var = alias_inner_expected_dt;
   DDS::TypeDescriptor_var alias_inner_td = new XTypes::TypeDescriptorImpl();
   alias_inner_td->kind(XTypes::TK_ALIAS);
-  alias_inner_td->name("::MyModCompleteToDynamic::MyInnerArray");
+  alias_inner_td->name("MyModCompleteToDynamic::MyInnerArray");
   alias_inner_td->bound().length(0);
   alias_inner_td->extensibility_kind(DDS::FINAL);
   XTypes::DynamicTypeImpl* inner_expected_dt = new XTypes::DynamicTypeImpl();
@@ -404,7 +404,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyOuterArray)
   DDS::DynamicType_var alias_outer_expected_dt_var = alias_outer_expected_dt;
   DDS::TypeDescriptor_var alias_outer_td = new XTypes::TypeDescriptorImpl();
   alias_outer_td->kind(XTypes::TK_ALIAS);
-  alias_outer_td->name("::MyModCompleteToDynamic::MyOuterArray");
+  alias_outer_td->name("MyModCompleteToDynamic::MyOuterArray");
   alias_outer_td->bound().length(0);
   alias_outer_td->extensibility_kind(DDS::FINAL);
   XTypes::DynamicTypeImpl* outer_expected_dt = new XTypes::DynamicTypeImpl();
@@ -420,7 +420,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyOuterArray)
   DDS::DynamicType_var alias_inner_expected_dt_var = alias_inner_expected_dt;
   DDS::TypeDescriptor_var alias_inner_td = new XTypes::TypeDescriptorImpl();
   alias_inner_td->kind(XTypes::TK_ALIAS);
-  alias_inner_td->name("::MyModCompleteToDynamic::MyInnerArray");
+  alias_inner_td->name("MyModCompleteToDynamic::MyInnerArray");
   alias_inner_td->bound().length(0);
   alias_inner_td->extensibility_kind(DDS::FINAL);
   XTypes::DynamicTypeImpl* inner_expected_dt = new XTypes::DynamicTypeImpl();
@@ -456,7 +456,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MySeq)
   DDS::DynamicType_var alias_expected_dt_var = alias_expected_dt;
   DDS::TypeDescriptor_var alias_td = new XTypes::TypeDescriptorImpl();
   alias_td->kind(XTypes::TK_ALIAS);
-  alias_td->name("::MyModCompleteToDynamic::MySeq");
+  alias_td->name("MyModCompleteToDynamic::MySeq");
   alias_td->bound().length(0);
   alias_td->extensibility_kind(DDS::FINAL);
   XTypes::DynamicTypeImpl* expected_dt = new XTypes::DynamicTypeImpl();
@@ -488,7 +488,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAnonStruct)
   DDS::DynamicType_var expected_dt_var = expected_dt;
   DDS::TypeDescriptor_var td = new XTypes::TypeDescriptorImpl();
   td->kind(XTypes::TK_STRUCTURE);
-  td->name("::MyModCompleteToDynamic::MyAnonStruct");
+  td->name("MyModCompleteToDynamic::MyAnonStruct");
   td->bound().length(0);
   td->extensibility_kind(DDS::APPENDABLE);
   td->is_nested(0);
@@ -552,7 +552,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_CircularStruct)
   DDS::DynamicType_var struct_expected_dt_var = struct_expected_dt;
   DDS::TypeDescriptor_var struct_td = new XTypes::TypeDescriptorImpl();
   struct_td->kind(XTypes::TK_STRUCTURE);
-  struct_td->name("::MyModCompleteToDynamic::CircularStruct");
+  struct_td->name("MyModCompleteToDynamic::CircularStruct");
   struct_td->bound().length(0);
   struct_td->extensibility_kind(DDS::MUTABLE);
   struct_td->is_nested(0);
@@ -575,7 +575,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_CircularStruct)
   DDS::DynamicType_var struct2_expected_dt_var = struct2_expected_dt;
   DDS::TypeDescriptor_var struct2_td = new XTypes::TypeDescriptorImpl();
   struct2_td->kind(XTypes::TK_STRUCTURE);
-  struct2_td->name("::MyModCompleteToDynamic::CircularStruct2");
+  struct2_td->name("MyModCompleteToDynamic::CircularStruct2");
   struct2_td->bound().length(0);
   struct2_td->extensibility_kind(DDS::MUTABLE);
   struct2_td->is_nested(0);
