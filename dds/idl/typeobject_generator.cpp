@@ -542,6 +542,12 @@ void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
   }
 }
 
+OpenDDS::DCPS::String canonical_name(UTL_ScopedName* sn)
+{
+  // NOTE: Names should not have leading "::" according to the XTypes IDL.
+  return dds_generator::scoped_helper(sn, "::", EscapeContext_StripEscapes);
+}
+
 }
 
 void
@@ -772,7 +778,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_union:
     {
       AST_Union* const n = dynamic_cast<AST_Union*>(type);
-      v.name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = canonical_name(n->name());
 
       AST_Type* discriminator = n->disc_type();
       const Fields fields(n);
@@ -794,7 +800,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_struct:
     {
       AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
-      v.name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = canonical_name(n->name());
 
       // TODO: Struct inheritance.
 
@@ -830,7 +836,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_typedef:
     {
       AST_Typedef* const n = dynamic_cast<AST_Typedef*>(type);
-      v.name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = canonical_name(n->name());
       // TODO: What is the member name for an anonymous type in a typedef?
       // 7.3.4.9.2
       consider(v, n->base_type(), v.name + ".0");
@@ -840,7 +846,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   case AST_ConcreteType::NT_enum:
     {
       AST_Enum* const n = dynamic_cast<AST_Enum*>(type);
-      v.name = dds_generator::scoped_helper(n->name(), "::");
+      v.name = canonical_name(n->name());
       break;
     }
 
@@ -1054,8 +1060,7 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 
   complete_to.complete.struct_type.struct_flags = minimal_to.minimal.struct_type.struct_flags;
   complete_to.complete.struct_type.header.base_type = OpenDDS::XTypes::TypeIdentifier(OpenDDS::XTypes::TK_NONE);
-  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
-  complete_to.complete.struct_type.header.detail.type_name = name;
+  complete_to.complete.struct_type.header.detail.type_name = canonical_name(type->name());
   // @verbatim and custom annotations are not supported.
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
@@ -1137,8 +1142,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   complete_to.complete.kind = OpenDDS::XTypes::TK_UNION;
   complete_to.complete.union_type.union_flags = minimal_to.minimal.union_type.union_flags;
 
-  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
-  complete_to.complete.union_type.header.detail.type_name = name;
+  complete_to.complete.union_type.header.detail.type_name = canonical_name(type->name());
 
   complete_to.complete.union_type.discriminator.common.member_flags =
     minimal_to.minimal.union_type.discriminator.common.member_flags;
@@ -1223,8 +1227,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ENUM;
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
-  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
-  complete_to.complete.enumerated_type.header.detail.type_name = name;
+  complete_to.complete.enumerated_type.header.detail.type_name = canonical_name(type->name());
 
   for (size_t i = 0; i != contents.size(); ++i) {
     OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
@@ -1325,8 +1328,7 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
     complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
     complete_to.complete.kind = OpenDDS::XTypes::TK_ARRAY;
     complete_to.complete.array_type.header.common.bound_seq = minimal_to.minimal.array_type.header.common.bound_seq;
-    OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
-    complete_to.complete.array_type.header.detail.type_name = name;
+    complete_to.complete.array_type.header.detail.type_name = canonical_name(type->name());
 
     complete_to.complete.array_type.element.common.element_flags = cef;
     complete_to.complete.array_type.element.common.type = complete_elem_ti;
@@ -1427,8 +1429,7 @@ typeobject_generator::generate_alias_type_identifier(AST_Type* type)
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ALIAS;
-  OpenDDS::DCPS::String name = "::" + scoped_helper(type->name(), "::", EscapeContext_StripEscapes);
-  complete_to.complete.alias_type.header.detail.type_name = name;
+  complete_to.complete.alias_type.header.detail.type_name = canonical_name(type->name());
   complete_to.complete.alias_type.body.common.related_type = get_complete_type_identifier(n->base_type());
 
   update_maps(type, minimal_to, complete_to);
