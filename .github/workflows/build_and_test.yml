@@ -11807,6 +11807,8 @@ jobs:
         echo $TAO_ROOT
         echo OpenDDS path
         echo $DDS_ROOT
+        echo CMake config file
+        cat OpenDDS/cmake/config.cmake
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
         cmake -DCMAKE_CXX_STANDARD=11 ..
