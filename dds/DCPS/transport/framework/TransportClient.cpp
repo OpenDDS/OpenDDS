@@ -669,7 +669,7 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
       if (iter != pending_.end()) {
         {
           // The transport impl may have resource for a pending connection.
-          ACE_Guard<ACE_Thread_Mutex> guard(iter->mutex_);
+          ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
           for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
             RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
             if (impl) {
