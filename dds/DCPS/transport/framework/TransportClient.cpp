@@ -243,7 +243,17 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>(this))).first;
+    PendingAssoc_rch pa = make_rch<PendingAssoc>(this);
+    pa->active_ = active;
+    pa->impls_.clear();
+    pa->blob_index_ = 0;
+    pa->data_ = data;
+    pa->attribs_.local_id_ = repo_id_;
+    pa->attribs_.priority_ = get_priority_value(data);
+    pa->attribs_.local_reliable_ = reliable_;
+    pa->attribs_.local_durable_ = durable_;
+    pa->attribs_.max_sn_ = get_max_sn();
+    iter = pending_.insert(std::make_pair(remote_copy, pend)).first;
 
     LogGuid tc_assoc_log(repo_id_);
     LogGuid remote_log(data.remote_id_);
@@ -263,15 +273,6 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   PendingAssoc_rch pend = iter->second;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
-  pend->active_ = active;
-  pend->impls_.clear();
-  pend->blob_index_ = 0;
-  pend->data_ = data;
-  pend->attribs_.local_id_ = repo_id_;
-  pend->attribs_.priority_ = get_priority_value(data);
-  pend->attribs_.local_reliable_ = reliable_;
-  pend->attribs_.local_durable_ = durable_;
-  pend->attribs_.max_sn_ = get_max_sn();
 
   if (active) {
     pend->impls_.reserve(impls_.size());
