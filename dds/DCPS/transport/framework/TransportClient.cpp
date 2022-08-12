@@ -253,7 +253,7 @@ TransportClient::associate(const AssociationData& data, bool active)
     pa->attribs_.local_reliable_ = reliable_;
     pa->attribs_.local_durable_ = durable_;
     pa->attribs_.max_sn_ = get_max_sn();
-    iter = pending_.insert(std::make_pair(remote_copy, pend)).first;
+    iter = pending_.insert(std::make_pair(remote_copy, pa)).first;
 
     LogGuid tc_assoc_log(repo_id_);
     LogGuid remote_log(data.remote_id_);
