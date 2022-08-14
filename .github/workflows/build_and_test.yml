@@ -11757,16 +11757,16 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
         name: ACE_TAO_m12_o1d0_sec_artifact
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -11776,7 +11776,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
@@ -11853,16 +11853,16 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
         name: ACE_TAO_m12_o1d0_sec_artifact
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -11956,16 +11956,16 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
         name: ACE_TAO_m12_o1d0_sec_artifact
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -12128,16 +12128,16 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
         name: ACE_TAO_m12_i0_j_FM-1f_artifact
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -12147,7 +12147,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-inline --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --no-inline --std=c++11 --tests --rapidjson --java --no-built-in-topics --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -12223,16 +12223,16 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
         name: ACE_TAO_m12_i0_j_FM-1f_artifact
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -12326,16 +12326,16 @@ jobs:
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
         name: ACE_TAO_m12_i0_j_FM-1f_artifact
-        path: ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd ACE_TAO
+        cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
