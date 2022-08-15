@@ -11744,6 +11744,11 @@ jobs:
     needs: ACE_TAO_m12_o1d0_sec
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
     - name: install xerces-c
       run: |
         brew install xerces-c
@@ -11768,11 +11773,6 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -11835,6 +11835,11 @@ jobs:
     needs: build_m12_o1d0_sec
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
     - name: install xerces-c
       run: |
         brew install xerces-c
@@ -11864,11 +11869,6 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -11938,6 +11938,11 @@ jobs:
     needs: build_m12_o1d0_sec
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
     - name: install xerces-c
       run: |
         brew install xerces-c
@@ -11967,11 +11972,6 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -12115,6 +12115,11 @@ jobs:
     needs: ACE_TAO_m12_i0_j_FM-1f
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
     - name: install xerces-c
       run: |
         brew install xerces-c
@@ -12139,11 +12144,6 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -12205,6 +12205,11 @@ jobs:
     needs: build_m12_i0_j_FM-1f
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
     - name: install xerces-c
       run: |
         brew install xerces-c
@@ -12234,11 +12239,6 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -12308,6 +12308,11 @@ jobs:
     needs: build_m12_i0_j_FM-1f
 
     steps:
+    - name: checkout OpenDDS
+      uses: actions/checkout@v3
+      with:
+        path: OpenDDS
+        submodules: true
     - name: install xerces-c
       run: |
         brew install xerces-c
@@ -12337,11 +12342,6 @@ jobs:
       run: |
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
-    - name: checkout OpenDDS
-      uses: actions/checkout@v3
-      with:
-        path: OpenDDS
-        submodules: true
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
