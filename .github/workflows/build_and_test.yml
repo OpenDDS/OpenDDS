@@ -11794,21 +11794,7 @@ jobs:
       run: |
         echo Show setenv.sh
         cat OpenDDS/setenv.sh
-        echo List workspace
-        ls $GITHUB_WORKSPACE
-        echo List ACE lib
-        ls $GITHUB_WORKSPACE/ACE_TAO/ACE/lib
-        echo List TAO_IDL
-        ls $GITHUB_WORKSPACE/ACE_TAO/TAO/TAO_IDL
         source OpenDDS/setenv.sh
-        echo ACE path
-        echo $ACE_ROOT
-        echo TAO path
-        echo $TAO_ROOT
-        echo OpenDDS path
-        echo $DDS_ROOT
-        echo CMake config file
-        cat OpenDDS/cmake/config.cmake
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
         cmake -DCMAKE_CXX_STANDARD=11 ..
