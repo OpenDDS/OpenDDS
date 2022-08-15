@@ -706,11 +706,14 @@ TransportClient::disassociate(const RepoId& peerId)
 
   PendingMap::iterator iter = pending_.find(peerId);
   if (iter != pending_.end()) {
-    // The transport impl may have resource for a pending connection.
-    for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
-      RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
-      if (impl) {
-        impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+    {
+      // The transport impl may have resource for a pending connection.
+      ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
+      for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+        RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
+        if (impl) {
+          impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+        }
       }
     }
     iter->second->reset_client();
