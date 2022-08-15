@@ -11792,8 +11792,6 @@ jobs:
         make -j4
     - name: Build CMake Tests
       run: |
-        echo Show setenv.sh
-        cat OpenDDS/setenv.sh
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
