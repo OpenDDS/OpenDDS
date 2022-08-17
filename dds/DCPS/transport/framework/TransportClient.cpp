@@ -298,17 +298,21 @@ TransportClient::associate(const AssociationData& data, bool active)
 
           TransportImpl::AcceptConnectResult res;
           {
-            // This thread acquired lock_ at the beginning of this method.  Calling accept_datalink might require getting the lock for the transport's reactor.
-            // If the current thread is not an event handler for the transport's reactor, e.g., the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
-            // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
+            // This thread acquired lock_ at the beginning of this method.
+            // Calling accept_datalink might require getting the lock for the transport's reactor.
+            // If the current thread is not an event handler for the transport's reactor, e.g.,
+            // the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
+            // Event handlers in the transport reactor may call passive_connection which calls use_datalink
+            // which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
             TransportImpl::ConnectionAttribs attribs = pend->attribs_;
             RcHandle<TransportClient> client = rchandle_from(this);
-            // NOTE(sonndinh): Release the PendingAssoc's mutex_ here, otherwise, when this scope
+
+            // Release the PendingAssoc's mutex_ here, otherwise, when this scope
             // exits the lock order will be PendingAssoc's mutex_ -> TransportClient's lock_.
             // There exists some other thread that acquires these locks in the reverse order, causing
             // a deadlock. The order of these ACE_GUARD_RETURNs is important because when these
-            // ACE_Guard objects are destructed, the locks are acquired in the correct order, i.e.,
+            // ACE_Guard objects are destructed, the locks are reacquired in the consistent order, i.e.,
             // TransportClient's lock_ -> PendingAssoc's mutex_.
             ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, pend->reverse_mutex_, false);
             ACE_GUARD_RETURN(Reverse_Lock_t, rev_tc_guard, reverse_lock_, false);
@@ -323,10 +327,6 @@ TransportClient::associate(const AssociationData& data, bool active)
             //active side connection and completed, thus pend was removed from pending_.  Can return true.
             return true;
           }
-          // NOTE(sonndinh): Can this assign pend to point to a different PendingAssoc object? If yes,
-          // the mutex_ of that object needs to be acquired because that object can be modified in the
-          // next iteration of either the inner or outer for-loop. The mutex_ of the old PendingAssoc
-          // object also needs to be released if it's still valid.
           pend = iter->second;
 
           if (res.success_) {
@@ -335,7 +335,6 @@ TransportClient::associate(const AssociationData& data, bool active)
               // established.  Just wait without trying other transports.
               pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
             } else {
-              //ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, pend->reverse_mutex_, false);
               pend_guard.release();
               use_datalink_i(data.remote_id_, res.link_, guard);
               return true;
@@ -458,20 +457,17 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
         const TransportImpl::RemoteTransport remote_transport = {
-          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.discovery_locator_.data, data_.participant_discovered_at_, data_.remote_transport_context_,
-          data_.publication_transport_priority_,
-          data_.remote_reliable_, data_.remote_durable_};
+          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.discovery_locator_.data,
+          data_.participant_discovered_at_, data_.remote_transport_context_,
+          data_.publication_transport_priority_, data_.remote_reliable_, data_.remote_durable_};
 
         TransportImpl::AcceptConnectResult res;
         bool ret;
         {
-          // NOTE(sonndinh): Release the PendingAssoc object's mutex_ since TransportClient's
-          // initiate_connect_i doesn't need it. Also, when this scope exits, these locks are
-          // reacquired in a consistent order: TransportClient's lock_ -> PendingAssoc's mutex_.
+          // Release the PendingAssoc object's mutex_ since initiate_connect_i doesn't need it.
           ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, reverse_mutex_, false);
           ret = tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard);
         }
-        //if (!tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard)) {
         if (!ret) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
@@ -496,10 +492,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
           if (!res.link_.is_nil()) {
 
             {
-              // NOTE(sonndinh): TransportClient's use_datalink_i calls PendingAssoc::reset_client which
-              // needs the PendingAssoc object's mutex_. So we release mutex_ here.
-              // Probably don't need to re-lock since this code path will return true anyway,
-              // i.e., don't need a Reverse_Lock_t.
+              // use_datalink_i calls PendingAssoc::reset_client which needs the PendingAssoc's mutex_.
               ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_mutex_, false);
               tc->use_datalink_i(data_.remote_id_, res.link_, guard);
             }
@@ -606,7 +599,6 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
-  // NOTE(sonndinh): No need to hold PendingAssoc's mutex_ after reset_client() below?
   pend_guard.release();
   pend->reset_client();
   pending_assoc_timer_->cancel_timer(pend);

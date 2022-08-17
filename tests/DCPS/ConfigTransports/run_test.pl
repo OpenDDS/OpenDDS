@@ -369,22 +369,6 @@ my @scenario = (
 
 );
 
-# Scenarios for which the test timed out.
-my @timeout_scenarios = (
-                {
-                 entity => 'participant',
-                 collocation => 'process',
-                 configuration => 'Udp_Only',
-                 protocol => ['udp1'],
-                 compatibility => 'true',
-                 publisher => $qos,
-                 subscriber => $qos,
-                 name => 'Someone'
-                }
-);
-
-
-
 # Returns an array of publisher or subscriber command lines
 sub parse($$$) {
 
@@ -466,8 +450,7 @@ my @builtinscases = $debug ? (undef) : (undef, 'true');
 
 for my $hasbuiltins (@builtinscases) {
 
-    #for my $i (@scenario) {
-    for my $i (@timeout_scenarios) {
+    for my $i (@scenario) {
         my $test = new PerlDDS::TestFramework();
         $test->enable_console_logging();
         $test->report_unused_flags();
