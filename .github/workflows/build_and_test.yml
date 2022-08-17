@@ -11873,6 +11873,7 @@ jobs:
       shell: bash
       run: |
         ulimit -c unlimited
+        sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -11977,6 +11978,7 @@ jobs:
       shell: bash
       run: |
         ulimit -c unlimited
+        sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -12245,6 +12247,7 @@ jobs:
       shell: bash
       run: |
         ulimit -c unlimited
+        sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -12349,6 +12352,7 @@ jobs:
       shell: bash
       run: |
         ulimit -c unlimited
+        sudo chmod o+w /cores
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
