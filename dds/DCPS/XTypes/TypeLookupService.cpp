@@ -132,7 +132,10 @@ void TypeLookupService::add_type_objects_to_cache(const TypeIdentifierTypeObject
   for (unsigned i = 0; i < types.length(); ++i) {
     const TypeMap::iterator pos = type_map_.find(types[i].type_identifier);
     if (pos == type_map_.end()) {
-      type_map_.insert(std::make_pair(types[i].type_identifier, types[i].type_object));
+      TypeObject to = types[i].type_object;
+      if (set_type_object_defaults(to)) {
+        type_map_.insert(std::make_pair(types[i].type_identifier, to));
+      }
     }
   }
 }
@@ -283,6 +286,137 @@ bool TypeLookupService::get_minimal_type_identifier(const TypeIdentifier& ct, Ty
     return false;
   }
   mt = pos->second;
+  return true;
+}
+
+bool TypeLookupService::set_type_object_defaults(TypeObject& to)
+{
+  switch (to.minimal.kind) {
+  case TK_STRUCTURE:
+    {
+      const TypeFlag flags = to.minimal.struct_type.struct_flags & TypeFlagMinimalMask;
+      if (!(flags == IS_FINAL || flags == IS_APPENDABLE || flags == IS_MUTABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_STRUCTURE\n"));
+        }
+        return false;
+      }
+    }
+    break;
+  case TK_UNION:
+    {
+      const TypeFlag flags = to.minimal.union_type.union_flags & TypeFlagMinimalMask;
+      if (!(flags == IS_FINAL || flags == IS_APPENDABLE || flags == IS_MUTABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_UNION\n"));
+        }
+        return false;
+      }
+    }
+    break;
+  case TK_ENUM:
+    {
+      const TypeFlag flags = to.minimal.enumerated_type.enum_flags & TypeFlagMinimalMask;
+      // flags == 0 is for backwards compatibility.
+      if (!(flags == 0 || flags == IS_FINAL || flags == IS_APPENDABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_ENUM\n"));
+        }
+        return false;
+      }
+      if (flags == 0 && DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: TypeLookupService::set_type_object_defaults: "
+                   "Zero extensibility flags in TK_ENUM\n"));
+      }
+    }
+    break;
+  case TK_BITMASK:
+    {
+      const TypeFlag flags = to.minimal.bitmask_type.bitmask_flags & TypeFlagMinimalMask;
+      if (!(flags == IS_FINAL || flags == IS_APPENDABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_BITMASK\n"));
+        }
+        return false;
+      }
+    }
+    break;
+  default:
+    break;
+  }
+
+  switch (to.complete.kind) {
+  case TK_STRUCTURE:
+    {
+      const TypeFlag flags = to.complete.struct_type.struct_flags & TypeFlagMinimalMask;
+      if (!(flags == IS_FINAL || flags == IS_APPENDABLE || flags == IS_MUTABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_STRUCTURE\n"));
+        }
+        return false;
+      }
+    }
+    break;
+  case TK_UNION:
+    {
+      const TypeFlag flags = to.complete.union_type.union_flags & TypeFlagMinimalMask;
+      if (!(flags == IS_FINAL || flags == IS_APPENDABLE || flags == IS_MUTABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_UNION\n"));
+        }
+        return false;
+      }
+    }
+    break;
+  case TK_ENUM:
+    {
+      const TypeFlag flags = to.complete.enumerated_type.enum_flags & TypeFlagMinimalMask;
+      // flags == 0 is for backwards compatibility.
+      if (!(flags == 0 || flags == IS_FINAL || flags == IS_APPENDABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_ENUM\n"));
+        }
+        return false;
+      }
+      if (flags == 0 && DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: TypeLookupService::set_type_object_defaults: "
+                   "Zero extensibility flags in TK_ENUM\n"));
+      }
+    }
+    break;
+  case TK_BITMASK:
+    {
+      const TypeFlag flags = to.complete.bitmask_type.bitmask_flags & TypeFlagMinimalMask;
+      if (!(flags == IS_FINAL || flags == IS_APPENDABLE)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: TypeLookupService::set_type_object_defaults: "
+                     "Invalid extensibility kind in TK_BITMASK\n"));
+        }
+        return false;
+      }
+    }
+    break;
+  default:
+    break;
+  }
+
   return true;
 }
 
@@ -542,6 +676,21 @@ DDS::DynamicType_ptr TypeLookupService::complete_to_dynamic(const CompleteTypeOb
   return dt_var._retn();
 }
 
+namespace {
+
+  DDS::ExtensibilityKind type_flags_to_extensibility(TypeFlag flags)
+  {
+    if (flags & IS_MUTABLE) {
+      return DDS::MUTABLE;
+    }
+    if (flags & IS_APPENDABLE) {
+      return DDS::APPENDABLE;
+    }
+    return DDS::FINAL;
+  }
+
+}
+
 void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
                                               const CompleteTypeObject& cto,
                                               const DCPS::GUID_t& guid)
@@ -560,6 +709,11 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
   case TK_ENUM:
     td->kind(TK_ENUM);
     td->name(cto.enumerated_type.header.detail.type_name.c_str());
+    if ((cto.enumerated_type.enum_flags & TypeFlagMinimalMask) == 0) {
+      td->extensibility_kind(DDS::APPENDABLE);
+    } else {
+      td->extensibility_kind(type_flags_to_extensibility(cto.enumerated_type.enum_flags));
+    }
     td->bound().length(1);
     td->bound()[0] = cto.enumerated_type.header.common.bit_bound;
     for (ACE_CDR::ULong i = 0; i < cto.enumerated_type.literal_seq.length(); ++i) {
@@ -578,6 +732,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
   case TK_BITMASK: {
     td->kind(TK_BITMASK);
     td->name(cto.bitmask_type.header.detail.type_name.c_str());
+    td->extensibility_kind(type_flags_to_extensibility(cto.bitmask_type.bitmask_flags));
     td->bound().length(1);
     td->bound()[0] = cto.bitmask_type.header.common.bit_bound;
     const DDS::DynamicType_var temp = type_identifier_to_dynamic(TypeIdentifier(TK_BOOLEAN), guid);
@@ -616,16 +771,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->bound().length(0);
     const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.struct_type.header.base_type, guid);
     td->base_type(temp);
-    if (cto.struct_type.struct_flags & IS_FINAL) {
-      td->extensibility_kind(DDS::FINAL);
-    } else if (cto.struct_type.struct_flags & IS_APPENDABLE) {
-      td->extensibility_kind(DDS::APPENDABLE);
-    } else if (cto.struct_type.struct_flags & IS_MUTABLE) {
-      td->extensibility_kind(DDS::MUTABLE);
-    } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::complete_to_dynamic_i -")
-                 ACE_TEXT(" Invalid extensibility kind in TK_STRUCTURE\n")));
-    }
+    td->extensibility_kind(type_flags_to_extensibility(cto.struct_type.struct_flags));
     td->is_nested(cto.struct_type.struct_flags & IS_NESTED);
     for (ACE_CDR::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
       DynamicTypeMemberImpl* dtm = new DynamicTypeMemberImpl();
@@ -643,16 +789,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->bound().length(0);
     const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.union_type.discriminator.common.type_id, guid);
     td->discriminator_type(temp);
-    if (cto.union_type.union_flags & IS_FINAL) {
-      td->extensibility_kind(DDS::FINAL);
-    } else if (cto.union_type.union_flags & IS_APPENDABLE) {
-      td->extensibility_kind(DDS::APPENDABLE);
-    } else if (cto.union_type.union_flags & IS_MUTABLE) {
-      td->extensibility_kind(DDS::MUTABLE);
-    } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::complete_to_dynamic_i -")
-                 ACE_TEXT(" Invalid extensibility kind in TK_UNION\n")));
-    }
+    td->extensibility_kind(type_flags_to_extensibility(cto.union_type.union_flags));
     td->is_nested(cto.union_type.union_flags & IS_NESTED);
     for (ACE_CDR::ULong i = 0; i < cto.union_type.member_seq.length(); ++i) {
       DDS::MemberDescriptor_var md = complete_union_member_to_member_descriptor(cto.union_type.member_seq[i], guid);

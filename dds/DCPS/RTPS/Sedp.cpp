@@ -7307,6 +7307,21 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       // Associate immediately.
       event_dispatcher_->dispatch(DCPS::make_rch<ReaderAddAssociation>(rar));
       event_dispatcher_->dispatch(DCPS::make_rch<WriterAddAssociation>(war));
+
+#ifndef OPENDDS_SAFETY_PROFILE
+      if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+        // Reader is a local recorder using complete types
+        DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();
+        OpenDDS::DCPS::RecorderImpl* ri = dynamic_cast<OpenDDS::DCPS::RecorderImpl*>(lock.in());
+        if (ri) {
+          XTypes::TypeInformation type_info;
+          if (XTypes::deserialize_type_info(type_info, rar->writer_association_.serializedTypeInfo)) {
+            ri->add_to_dynamic_type_map(rar->writer_id(), type_info.complete.typeid_with_size.type_id);
+          }
+        }
+      }
+#endif
+
     } else if (call_reader) {
 #ifndef OPENDDS_SAFETY_PROFILE
       if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {

@@ -95,6 +95,9 @@ private:
 
   bool get_minimal_type_identifier(const TypeIdentifier& ct, TypeIdentifier& mt) const;
 
+  // Initialize received TypeObjects to defaults.
+  bool set_type_object_defaults(TypeObject& to);
+
   bool complete_to_minimal_struct(const CompleteStructType& ct, MinimalStructType& mt) const;
   bool complete_to_minimal_union(const CompleteUnionType& ct, MinimalUnionType& mt) const;
   bool complete_to_minimal_annotation(const CompleteAnnotationType& ct, MinimalAnnotationType& mt) const;

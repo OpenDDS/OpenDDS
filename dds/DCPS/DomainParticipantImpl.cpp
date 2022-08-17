@@ -2225,7 +2225,7 @@ DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
 
   recorder->init(dynamic_cast<TopicDescriptionImpl*>(a_topic),
     dr_qos, a_listener,
-    mask, this, subscriber_qos);
+    mask, this, sub_qos);
 
   if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
     recorder->enable();
