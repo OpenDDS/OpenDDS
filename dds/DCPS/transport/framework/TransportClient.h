@@ -212,7 +212,7 @@ private:
       , active_(false)
       , scheduled_(false)
       , blob_index_(0)
-      , client_(RcHandle<TransportClient>(tc, inc_count()))
+      , client_(*tc)
     {}
 
     void reset_client();
