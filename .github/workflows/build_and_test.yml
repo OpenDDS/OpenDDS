@@ -11872,6 +11872,7 @@ jobs:
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -11975,6 +11976,7 @@ jobs:
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -12242,6 +12244,7 @@ jobs:
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
@@ -12345,6 +12348,7 @@ jobs:
     - name: run OpenDDS tests
       shell: bash
       run: |
+        ulimit -c unlimited
         cd OpenDDS
         echo "export ACE_TEST_LOG_STUCK_STACKS=1" >> setenv.sh
         . setenv.sh
