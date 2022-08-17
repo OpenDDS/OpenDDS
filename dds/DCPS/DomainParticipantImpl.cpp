@@ -2455,14 +2455,6 @@ DomainParticipantImpl::signal_liveliness (DDS::LivelinessQosPolicyKind kind)
   TheServiceParticipant->get_discovery(domain_id_)->signal_liveliness (domain_id_, get_id(), kind);
 }
 
-#ifdef OPENDDS_SECURITY
-void
-DomainParticipantImpl::set_security_config(const Security::SecurityConfig_rch& cfg)
-{
-  security_config_ = cfg;
-}
-#endif
-
 int
 DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
 {

@@ -11,6 +11,7 @@
 #include "PublicationListener.h"
 #include "RelayAddressListener.h"
 #include "RelayHandler.h"
+#include "RelayHttpMetaDiscovery.h"
 #include "RelayPartitionTable.h"
 #include "RelayPartitionsListener.h"
 #include "RelayStatisticsReporter.h"
@@ -74,6 +75,10 @@ namespace {
     }
     return ACE_INET_Addr();
   }
+
+  const unsigned short DEFAULT_HORIZONTAL = 17400;
+  const unsigned short DEFAULT_VERTICAL = 7400;
+  const unsigned short DEFAULT_META = 8080;
 }
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
@@ -85,7 +90,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   DDS::DomainId_t relay_domain = 0;
-  ACE_INET_Addr nic_horizontal, nic_vertical;
+  ACE_INET_Addr nic_horizontal, nic_vertical, meta_discovery_addr;
+  std::string meta_discovery_content_type = "application/json";
+  std::string meta_discovery_content = "{}";
+  std::string meta_discovery_content_path;
   std::string user_data;
   Config config;
 
@@ -112,6 +120,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-VerticalAddress"))) {
       nic_vertical = ACE_INET_Addr(arg);
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-MetaDiscoveryAddress"))) {
+      meta_discovery_addr = ACE_INET_Addr(arg);
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-MetaDiscoveryContentType"))) {
+      meta_discovery_content_type = arg;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-MetaDiscoveryContentPath"))) {
+      meta_discovery_content_path = arg;
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-MetaDiscoveryContent"))) {
+      meta_discovery_content = arg;
+      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-RelayDomain"))) {
       relay_domain = ACE_OS::atoi(arg);
       args.consume_arg();
@@ -136,14 +156,14 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-LogWarnings"))) {
       config.log_warnings(ACE_OS::atoi(arg));
       args.consume_arg();
-    } else if ((arg = args.get_the_parameter("-LogEntries"))) {
-      config.log_entries(ACE_OS::atoi(arg));
-      args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogDiscovery"))) {
       config.log_discovery(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogActivity"))) {
       config.log_activity(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-LogHttp"))) {
+      config.log_http(ACE_OS::atoi(arg));
       args.consume_arg();
     } else if ((arg = args.get_the_parameter("-LogThreadStatus"))) {
       config.log_thread_status(ACE_OS::atoi(arg));
@@ -216,12 +236,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
   }
 
+  if (!meta_discovery_content_path.empty()) {
+    std::ifstream in(meta_discovery_content_path.c_str());
+    if (!in) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: Could not open %C\n", meta_discovery_content_path.c_str()));
+      return EXIT_FAILURE;
+    }
+    std::stringstream x;
+    x << in.rdbuf();
+    meta_discovery_content = x.str();
+  }
+
   if (nic_horizontal == ACE_INET_Addr()) {
-    nic_horizontal = get_bind_addr(17400);
+    nic_horizontal = get_bind_addr(DEFAULT_HORIZONTAL);
   }
 
   if (nic_vertical == ACE_INET_Addr()) {
-    nic_vertical = ACE_INET_Addr(7400);
+    nic_vertical = ACE_INET_Addr(DEFAULT_VERTICAL);
+  }
+
+  if (meta_discovery_addr == ACE_INET_Addr()) {
+    meta_discovery_addr = ACE_INET_Addr(DEFAULT_META);
   }
 
   if (config.relay_id().empty()) {
@@ -879,6 +914,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   RelayStatusReporter relay_status_reporter(config, guid_addr_set, relay_status_writer, reactor);
 
   OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+
+  RelayHttpMetaDiscovery relay_http_meta_discovery(config, meta_discovery_content_type, meta_discovery_content, guid_addr_set);
+  if (relay_http_meta_discovery.open(meta_discovery_addr, reactor) != 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: could not open RelayHttpMetaDiscovery\n")));
+    return EXIT_FAILURE;
+  }
+  ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Meta Discovery listening on %C\n"), OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
   if (thread_status_manager.update_thread_status()) {
     if (relay_thread_monitor->start() == -1) {

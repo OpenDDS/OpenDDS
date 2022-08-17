@@ -25,6 +25,18 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsSubscriptionExt.idl
     DdsDcpsTopic.idl
     DdsDcpsTypeSupportExt.idl
+    DdsDynamicDataSeq.idl
+  }
+
+  IDL_Files {
+    // valuetypes in DdsDynamicData.idl require -Scdr
+    // -Scdr requires -Sa whether or not the dds_suppress_anys feature is on
+    idlflags += -Scdr -Sa
+    DdsDynamicData.idl
+  }
+
+  TypeSupport_Files {
+    DdsDynamicDataSeq.idl
   }
 
   Source_Files {
@@ -57,6 +69,7 @@ project(OpenDDS_Dcps): core, coverage_optional, \
     DdsDcpsSubscriptionExtS.h
     DdsDcpsTopicS.h
     DdsDcpsTypeSupportExtS.h
+    DdsDynamicDataS.h
   }
 
   // Should this be removed?

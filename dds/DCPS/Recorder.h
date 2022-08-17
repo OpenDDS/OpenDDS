@@ -16,7 +16,7 @@
 
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#include "XTypes/DynamicData.h"
+#include "XTypes/DynamicDataImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -103,7 +103,10 @@ public:
    */
   virtual RecorderListener_rch get_listener() = 0;
 
-  virtual XTypes::DynamicData get_dynamic_data(const RawDataSample& sample) = 0;
+#ifndef OPENDDS_SAFETY_PROFILE
+  virtual DDS::DynamicData_ptr get_dynamic_data(const RawDataSample& sample) = 0;
+#endif
+
   virtual void check_encap(bool b) = 0;
   virtual bool check_encap() const = 0;
 };

@@ -88,6 +88,7 @@ public:
   void release_all_instances() {}
   virtual OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::MessageHolder>
   dds_demarshal(const OpenDDS::DCPS::ReceivedDataSample&,
+                DDS::InstanceHandle_t,
                 OpenDDS::DCPS::SubscriptionInstance_rch &,
                 bool&,
                 bool&,
@@ -126,8 +127,11 @@ public:
 #endif
 
 private:
-  void set_instance_state_i(DDS::InstanceHandle_t, DDS::InstanceStateKind,
-    const OpenDDS::DCPS::SystemTimePoint&, const OpenDDS::DCPS::GUID_t&)
+  void set_instance_state_i(DDS::InstanceHandle_t,
+                            DDS::InstanceHandle_t,
+                            DDS::InstanceStateKind,
+                            const OpenDDS::DCPS::SystemTimePoint&,
+                            const OpenDDS::DCPS::GUID_t&)
   {}
 };
 

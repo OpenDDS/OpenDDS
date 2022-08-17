@@ -227,6 +227,7 @@ module Bench {
       string scenario_name;
       Builder::TimeStamp time;
       NodeReportSeq node_reports;
+      unsigned long missing_reports;
       Builder::PropertySeq properties;
     };
   };

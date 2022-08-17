@@ -41,13 +41,13 @@ void log_message(const char* format,
   rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
   DCPS::JsonValueWriter<rapidjson::Writer<rapidjson::StringBuffer> > jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("guidPrefix", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("guidPrefix", false));
   vwrite(jvw, prefix);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("send", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("send", false));
   jvw.write_boolean(send);
   jvw.end_struct_member();
-  jvw.begin_struct_member(XTypes::MemberDescriptor("message", false));
+  jvw.begin_struct_member(XTypes::MemberDescriptorImpl("message", false));
   vwrite(jvw, message);
   jvw.end_struct_member();
   jvw.end_struct();

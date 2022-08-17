@@ -476,6 +476,8 @@ public:
     return sequence_number_;
   }
 
+  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+
 protected:
 
   void check_and_set_repo_id(const RepoId& id)
@@ -511,8 +513,6 @@ protected:
 
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
-
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   /**
    * Setup CDR serialization options in type-specific DataWrtier.
@@ -736,6 +736,13 @@ private:
   RcHandle<LivenessTimer> liveness_timer_;
 
   MonotonicTimePoint wait_pending_deadline_;
+
+#if defined(OPENDDS_SECURITY)
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::Security::PermissionsHandle participant_permissions_handle_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;
