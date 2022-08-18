@@ -146,21 +146,24 @@ public:
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& timestamp)
   {
-    if (instance_handle == DDS::HANDLE_NIL) {
-      instance_handle = this->lookup_instance(instance_data);
-      if (instance_handle == DDS::HANDLE_NIL) {
-        ACE_ERROR_RETURN((
-            LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::unregister_instance_w_timestamp: ")
-            ACE_TEXT("The instance sample is not registered.\n"),
-            TraitsType::type_name()),
-          DDS::RETCODE_ERROR);
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
+      typename InstanceMap::iterator pos = instance_map_.find(instance_data);
+      if (pos == instance_map_.end()) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::unregister_instance_w_timestamp: ")
+                          ACE_TEXT("The instance sample is not registered.\n"),
+                          TraitsType::type_name()),
+                         DDS::RETCODE_ERROR);
       }
+
+      if (instance_handle != DDS::HANDLE_NIL && instance_handle != pos->second) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+      instance_handle = pos->second;
+      instance_map_.erase(pos);
     }
 
-    // DataWriterImpl::unregister_instance_i will call back to inform the
-    // DataWriter.
-    // That the instance handle is removed from there and hence
-    // DataWriter can remove the instance here.
     return OpenDDS::DCPS::DataWriterImpl::unregister_instance_i(instance_handle, timestamp);
   }
 
@@ -255,16 +258,21 @@ public:
     }
 #endif
 
-    if (instance_handle == DDS::HANDLE_NIL) {
-      instance_handle = this->lookup_instance(instance_data);
-      if (instance_handle == DDS::HANDLE_NIL) {
-        ACE_ERROR_RETURN((
-            LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dispose_w_timestamp, ")
-            ACE_TEXT("The instance sample is not registered.\n"),
-            TraitsType::type_name()),
-          DDS::RETCODE_ERROR);
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
+      typename InstanceMap::iterator pos = instance_map_.find(instance_data);
+      if (pos == instance_map_.end()) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dispose_w_timestamp: ")
+                          ACE_TEXT("The instance sample is not registered.\n"),
+                          TraitsType::type_name()),
+                         DDS::RETCODE_ERROR);
       }
+
+      if (instance_handle != DDS::HANDLE_NIL && instance_handle != pos->second) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+      instance_handle = pos->second;
     }
 
     return OpenDDS::DCPS::DataWriterImpl::dispose(instance_handle, source_timestamp);
@@ -602,7 +610,7 @@ private:
       handle = it->second;
       OpenDDS::DCPS::PublicationInstance_rch instance = get_handle_instance(handle);
 
-      if (instance && instance->unregistered_ == false) {
+      if (instance) {
         needs_registration = false;
       }
       // else: The instance is unregistered and now register again.

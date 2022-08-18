@@ -440,8 +440,6 @@ WriteDataContainer::register_instance(
 
       return DDS::RETCODE_ERROR;
     } // if (0 != find_attempt)
-
-    instance->unregistered_ = false;
   }
 
   // The registered_sample is shallow copied.
@@ -456,30 +454,28 @@ WriteDataContainer::unregister(
   Message_Block_Ptr& registered_sample,
   bool                    dup_registered_sample)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                   guard,
+                   lock_,
+                   DDS::RETCODE_ERROR);
+
   PublicationInstance_rch instance;
-
-  int const find_attempt = find(instances_, instance_handle, instance);
-
-  if (0 != find_attempt) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("WriteDataContainer::unregister, ")
-                      ACE_TEXT("The instance(handle=%X) ")
-                      ACE_TEXT("is not registered yet.\n"),
-                      instance_handle),
-                     DDS::RETCODE_PRECONDITION_NOT_MET);
-  } // if (0 != find_attempt)
-
-  instance->unregistered_ = true;
-
-  if (dup_registered_sample) {
-    // The registered_sample is shallow copied.
-    registered_sample.reset(instance->registered_sample_->duplicate());
+  {
+    PublicationInstanceMapType::iterator pos = instances_.find(instance_handle);
+    if (pos == instances_.end()) {
+      ACE_ERROR_RETURN((LM_ERROR,
+                        ACE_TEXT("(%P|%t) ERROR: ")
+                        ACE_TEXT("WriteDataContainer::unregister, ")
+                        ACE_TEXT("The instance(handle=%X) ")
+                        ACE_TEXT("is not registered yet.\n"),
+                        instance_handle),
+                       DDS::RETCODE_PRECONDITION_NOT_MET);
+    }
+    instance = pos->second;
+    instances_.erase(pos);
   }
 
-  cancel_deadline(instance);
-
-  return DDS::RETCODE_OK;
+  return remove_instance(instance, registered_sample, dup_registered_sample);
 }
 
 DDS::ReturnCode_t
@@ -506,6 +502,14 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
                      DDS::RETCODE_PRECONDITION_NOT_MET);
   }
 
+  return remove_instance(instance, registered_sample, dup_registered_sample);
+}
+
+DDS::ReturnCode_t
+WriteDataContainer::remove_instance(PublicationInstance_rch instance,
+                                    Message_Block_Ptr& registered_sample,
+                                    bool dup_registered_sample)
+{
   if (dup_registered_sample) {
     // The registered_sample is shallow copied.
     registered_sample.reset(instance->registered_sample_->duplicate());
@@ -519,14 +523,11 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
   // any write sample between them and hence not temporarily move into the
   // Alive state.
   // We have chosen to NOT remove the sending samples.
-
   InstanceDataSampleList& instance_list = instance->samples_;
 
   while (instance_list.size() > 0) {
     bool released = false;
-    DDS::ReturnCode_t ret
-    = remove_oldest_sample(instance_list, released);
-
+    const DDS::ReturnCode_t ret = remove_oldest_sample(instance_list, released);
     if (ret != DDS::RETCODE_OK) {
       return ret;
     }
@@ -1322,57 +1323,32 @@ WriteDataContainer::unregister_all()
   DBG_ENTRY_LVL("WriteDataContainer","unregister_all",6);
   shutdown_ = true;
 
-  {
-    //The internal list needs protection since this call may result from the
-    //the delete_datawriter call which does not acquire the lock in advance.
-    ACE_GUARD(ACE_Recursive_Thread_Mutex,
-              guard,
-              lock_);
-    // Tell transport remove all control messages currently
-    // transport is processing.
-    (void) this->writer_->remove_all_msgs();
+  //The internal list needs protection since this call may result from the
+  //the delete_datawriter call which does not acquire the lock in advance.
+  ACE_GUARD(ACE_Recursive_Thread_Mutex,
+            guard,
+            lock_);
+  // Tell transport remove all control messages currently
+  // transport is processing.
+  (void) this->writer_->remove_all_msgs();
 
-    // Broadcast to wake up all waiting threads.
-    if (waiting_on_release_) {
-      condition_.notify_all();
-    }
+  // Broadcast to wake up all waiting threads.
+  if (waiting_on_release_) {
+    condition_.notify_all();
   }
-  DDS::ReturnCode_t ret;
+
   Message_Block_Ptr registered_sample;
-  PublicationInstanceMapType::iterator it = instances_.begin();
 
-  while (it != instances_.end()) {
+  for (PublicationInstanceMapType::iterator pos = instances_.begin(), limit = instances_.end(); pos != limit;) {
     // Release the instance data.
-    ret = dispose(it->first, registered_sample, false);
-
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::unregister_all, ")
-                 ACE_TEXT("dispose instance %X failed\n"),
-                 it->first));
-    }
-    // Mark the instance unregistered.
-    ret = unregister(it->first, registered_sample, false);
-
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::unregister_all, ")
-                 ACE_TEXT("unregister instance %X failed\n"),
-                 it->first));
+    if (remove_instance(pos->second, registered_sample, false) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::unregister_all, "
+                 "remove_instance %X failed\n", pos->first));
     }
 
-    // Get the next iterator before erase the instance handle.
-    PublicationInstanceMapType::iterator it_next = it;
-    ++it_next;
-    writer_->return_handle(it->first);
-    // Remove the instance from the instance list.
-    unbind(instances_, it->first);
-    it = it_next;
+    writer_->return_handle(pos->first);
+    instances_.erase(pos++);
   }
-
-  ACE_UNUSED_ARG(registered_sample);
 }
 
 PublicationInstance_rch

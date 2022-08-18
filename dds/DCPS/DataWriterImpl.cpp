@@ -1813,21 +1813,10 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 {
-  {
-    ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
 
-    PublicationInstanceMapType::iterator it =
-      this->data_container_->instances_.begin();
-
-    while (it != this->data_container_->instances_.end()) {
-      if (!it->second->unregistered_) {
-        const DDS::InstanceHandle_t handle = it->first;
-        ++it; // avoid mangling the iterator
-        this->unregister_instance_i(handle, source_timestamp);
-      } else {
-        ++it;
-      }
-    }
+  while (!this->data_container_->instances_.empty()) {
+    this->unregister_instance_i(this->data_container_->instances_.begin()->first, source_timestamp);
   }
 }
 
