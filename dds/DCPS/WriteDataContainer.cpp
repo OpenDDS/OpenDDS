@@ -475,23 +475,7 @@ WriteDataContainer::unregister(
     instances_.erase(pos);
   }
 
-  return unregister_i(instance, registered_sample, dup_registered_sample);
-}
-
-DDS::ReturnCode_t
-WriteDataContainer::unregister_i(
-  PublicationInstance_rch instance,
-  Message_Block_Ptr& registered_sample,
-  bool dup_registered_sample)
-{
-  if (dup_registered_sample) {
-    // The registered_sample is shallow copied.
-    registered_sample.reset(instance->registered_sample_->duplicate());
-  }
-
-  cancel_deadline(instance);
-
-  return DDS::RETCODE_OK;
+  return remove_instance(instance, registered_sample, dup_registered_sample);
 }
 
 DDS::ReturnCode_t
@@ -518,13 +502,13 @@ WriteDataContainer::dispose(DDS::InstanceHandle_t instance_handle,
                      DDS::RETCODE_PRECONDITION_NOT_MET);
   }
 
-  return dispose_i(instance, registered_sample, dup_registered_sample);
+  return remove_instance(instance, registered_sample, dup_registered_sample);
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::dispose_i(PublicationInstance_rch instance,
-                              Message_Block_Ptr& registered_sample,
-                              bool dup_registered_sample)
+WriteDataContainer::remove_instance(PublicationInstance_rch instance,
+                                    Message_Block_Ptr& registered_sample,
+                                    bool dup_registered_sample)
 {
   if (dup_registered_sample) {
     // The registered_sample is shallow copied.
@@ -539,14 +523,11 @@ WriteDataContainer::dispose_i(PublicationInstance_rch instance,
   // any write sample between them and hence not temporarily move into the
   // Alive state.
   // We have chosen to NOT remove the sending samples.
-
   InstanceDataSampleList& instance_list = instance->samples_;
 
   while (instance_list.size() > 0) {
     bool released = false;
-    DDS::ReturnCode_t ret
-    = remove_oldest_sample(instance_list, released);
-
+    const DDS::ReturnCode_t ret = remove_oldest_sample(instance_list, released);
     if (ret != DDS::RETCODE_OK) {
       return ret;
     }
@@ -1355,29 +1336,14 @@ WriteDataContainer::unregister_all()
   if (waiting_on_release_) {
     condition_.notify_all();
   }
-  DDS::ReturnCode_t ret;
+
   Message_Block_Ptr registered_sample;
 
   for (PublicationInstanceMapType::iterator pos = instances_.begin(), limit = instances_.end(); pos != limit;) {
     // Release the instance data.
-    ret = dispose_i(pos->second, registered_sample, false);
-
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::unregister_all, ")
-                 ACE_TEXT("dispose instance %X failed\n"),
-                 pos->first));
-    }
-    // Mark the instance unregistered.
-    ret = unregister_i(pos->second, registered_sample, false);
-
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("WriteDataContainer::unregister_all, ")
-                 ACE_TEXT("unregister instance %X failed\n"),
-                 pos->first));
+    if (remove_instance(pos->second, registered_sample, false) != DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: WriteDataContainer::unregister_all, "
+                 "remove_instance %X failed\n", pos->first));
     }
 
     writer_->return_handle(pos->first);

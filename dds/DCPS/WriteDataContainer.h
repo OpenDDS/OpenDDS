@@ -347,13 +347,9 @@ public:
 
 private:
 
-  DDS::ReturnCode_t unregister_i(PublicationInstance_rch instance,
-                                 Message_Block_Ptr& registered_sample,
-                                 bool dup_registered_sample);
-
-  DDS::ReturnCode_t dispose_i(PublicationInstance_rch instance,
-                              Message_Block_Ptr& registered_sample,
-                              bool dup_registered_sample);
+  DDS::ReturnCode_t remove_instance(PublicationInstance_rch instance,
+                                    Message_Block_Ptr& registered_sample,
+                                    bool dup_registered_sample);
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.
