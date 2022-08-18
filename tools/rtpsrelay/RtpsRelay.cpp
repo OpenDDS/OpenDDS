@@ -502,7 +502,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
-  auto participant_statistics_writer_var = relay_publisher->create_datawriter(participant_statistics_topic, writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+  auto participant_statistics_writer_qos = writer_qos;
+  participant_statistics_writer_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
+  auto participant_statistics_writer_var = relay_publisher->create_datawriter(participant_statistics_topic, participant_statistics_writer_qos, nullptr, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
   if (!participant_statistics_writer_var) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: failed to create Participant Statistics data writer\n")));
     return EXIT_FAILURE;
@@ -619,8 +621,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return EXIT_FAILURE;
   }
 
+  auto relay_participant_status_writer_qos = writer_qos;
+  relay_participant_status_writer_qos.writer_data_lifecycle.autodispose_unregistered_instances = false;
   DDS::DataWriter_var relay_participant_status_writer_var =
-    relay_publisher->create_datawriter(relay_participant_status_topic, writer_qos, nullptr,
+    relay_publisher->create_datawriter(relay_participant_status_topic, relay_participant_status_writer_qos, nullptr,
                                        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
 
   if (!relay_participant_status_writer_var) {

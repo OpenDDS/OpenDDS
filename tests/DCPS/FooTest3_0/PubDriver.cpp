@@ -580,12 +580,17 @@ PubDriver::unregister_test ()
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
 
+  TEST_CHECK(DDS::HANDLE_NIL == foo_datawriter_->lookup_instance(foo1));
+
   foo2.sample_sequence = 2;
 
   ret = foo_datawriter_->write(foo2,
                                ::DDS::HANDLE_NIL);
 
   TEST_CHECK (ret == ::DDS::RETCODE_OK);
+
+  handle = foo_datawriter_->lookup_instance(foo2);
+  TEST_CHECK (handle != ::DDS::HANDLE_NIL);
 
   foo2.sample_sequence = 3;
 

@@ -43,7 +43,6 @@ struct OpenDDS_Dcps_Export PublicationInstance : public virtual RcObject {
     : sequence_(),
       group_id_(0),
       registered_sample_(registered_sample.release()),
-      unregistered_(false),
       instance_handle_(0),
       durable_samples_remaining_(0),
       deadline_()
@@ -64,9 +63,6 @@ struct OpenDDS_Dcps_Export PublicationInstance : public virtual RcObject {
 
   /// History of the instance samples.
   InstanceDataSampleList samples_;
-
-  /// The flag to indicate whether the instance is unregistered.
-  bool unregistered_;
 
   /// The instance handle for the registered object
   DDS::InstanceHandle_t instance_handle_;
