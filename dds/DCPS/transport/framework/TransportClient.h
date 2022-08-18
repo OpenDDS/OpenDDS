@@ -207,8 +207,7 @@ private:
     WeakRcHandle<TransportClient> client_;
 
     explicit PendingAssoc(RcHandle<TransportClient> tc_rch)
-      : reverse_mutex_(mutex_)
-      , active_(false)
+      : active_(false)
       , scheduled_(false)
       , blob_index_(0)
       , client_(tc_rch)
