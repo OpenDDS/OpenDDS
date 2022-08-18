@@ -199,7 +199,6 @@ private:
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   struct PendingAssoc : RcEventHandler {
     ACE_Thread_Mutex mutex_;
-    Reverse_Lock_t reverse_mutex_;
     bool active_, scheduled_;
     ImplsType impls_;
     CORBA::ULong blob_index_;
@@ -207,12 +206,12 @@ private:
     TransportImpl::ConnectionAttribs attribs_;
     WeakRcHandle<TransportClient> client_;
 
-    explicit PendingAssoc(TransportClient* tc)
+    explicit PendingAssoc(RcHandle<TransportClient> tc_rch)
       : reverse_mutex_(mutex_)
       , active_(false)
       , scheduled_(false)
       , blob_index_(0)
-      , client_(*tc)
+      , client_(tc_rch)
     {}
 
     void reset_client();

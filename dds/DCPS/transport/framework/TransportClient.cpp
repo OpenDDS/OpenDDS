@@ -243,7 +243,7 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    PendingAssoc_rch pa = make_rch<PendingAssoc>(this);
+    PendingAssoc_rch pa = make_rch<PendingAssoc>(rchandle_from(this));
     pa->active_ = active;
     pa->impls_.clear();
     pa->blob_index_ = 0;
@@ -314,7 +314,8 @@ TransportClient::associate(const AssociationData& data, bool active)
             // a deadlock. The order of these ACE_GUARD_RETURNs is important because when these
             // ACE_Guard objects are destructed, the locks are reacquired in the consistent order, i.e.,
             // TransportClient's lock_ -> PendingAssoc's mutex_.
-            ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, pend->reverse_mutex_, false);
+            Reverse_Lock_t rev_pend_mutex(pend->mutex_);
+            ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_pend_mutex, false);
             ACE_GUARD_RETURN(Reverse_Lock_t, rev_tc_guard, reverse_lock_, false);
             res = impl->accept_datalink(remote, attribs, client);
           }
@@ -465,7 +466,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
         bool ret;
         {
           // Release the PendingAssoc object's mutex_ since initiate_connect_i doesn't need it.
-          ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, reverse_mutex_, false);
+          Reverse_Lock_t rev_mutex(mutex_);
+          ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_mutex, false);
           ret = tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard);
         }
         if (!ret) {
@@ -493,7 +495,8 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
             {
               // use_datalink_i calls PendingAssoc::reset_client which needs the PendingAssoc's mutex_.
-              ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_mutex_, false);
+              Reverse_Lock_t rev_mutex(mutex_);
+              ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_mutex, false);
               tc->use_datalink_i(data_.remote_id_, res.link_, guard);
             }
           } else {
