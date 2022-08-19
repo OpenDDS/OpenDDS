@@ -272,9 +272,9 @@ TransportClient::associate(const AssociationData& data, bool active)
   }
 
   PendingAssoc_rch pend = iter->second;
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
 
   if (active) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
     pend->impls_.reserve(impls_.size());
     std::reverse_copy(impls_.begin(), impls_.end(),
                       std::back_inserter(pend->impls_));
@@ -285,8 +285,17 @@ TransportClient::associate(const AssociationData& data, bool active)
 
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
+      // Release the PendingAssoc object's mutex_ since the nested for-loop does not access
+      // the PendingAssoc object directly and the functions called by the nested loop can
+      // lead to a PendingAssoc object's mutex_ being acquired, which will cause deadlock if
+      // it is not released here.
+      TransportImpl::ConnectionAttribs attribs;
       RcHandle<TransportImpl> impl = impls_[i].lock();
-      pend->impls_.push_back(impl);
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
+        pend->impls_.push_back(impl);
+        attribs = pend->attribs_;
+      }
       const OPENDDS_STRING type = impl->transport_type();
 
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
@@ -305,17 +314,7 @@ TransportClient::associate(const AssociationData& data, bool active)
             // Event handlers in the transport reactor may call passive_connection which calls use_datalink
             // which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
-            TransportImpl::ConnectionAttribs attribs = pend->attribs_;
             RcHandle<TransportClient> client = rchandle_from(this);
-
-            // Release the PendingAssoc's mutex_ here, otherwise, when this scope
-            // exits the lock order will be PendingAssoc's mutex_ -> TransportClient's lock_.
-            // There exists some other thread that acquires these locks in the reverse order, causing
-            // a deadlock. The order of these ACE_GUARD_RETURNs is important because when these
-            // ACE_Guard objects are destructed, the locks are reacquired in the consistent order, i.e.,
-            // TransportClient's lock_ -> PendingAssoc's mutex_.
-            Reverse_Lock_t rev_pend_mutex(pend->mutex_);
-            ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_pend_mutex, false);
             ACE_GUARD_RETURN(Reverse_Lock_t, rev_tc_guard, reverse_lock_, false);
             res = impl->accept_datalink(remote, attribs, client);
           }
@@ -336,7 +335,6 @@ TransportClient::associate(const AssociationData& data, bool active)
               // established.  Just wait without trying other transports.
               pending_assoc_timer_->schedule_timer(rchandle_from(this), iter->second);
             } else {
-              pend_guard.release();
               use_datalink_i(data.remote_id_, res.link_, guard);
               return true;
             }
