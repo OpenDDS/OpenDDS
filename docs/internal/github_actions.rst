@@ -18,7 +18,7 @@ Operating System
 
 * u18/u20/u22 - Ubuntu 18/20/22.04
 * w19/w22 - Windows Server 2019/Windows Server 2022
-* m10/m11 - macOS 10.15/11
+* m11/m12 - macOS 11/12
 
 .. seealso::
 
