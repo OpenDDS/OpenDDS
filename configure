@@ -425,6 +425,51 @@ sub run_command {
   );
 }
 
+sub git_clone {
+  my $dest = shift;
+  my $url = shift;
+  my $branch = shift;
+  print "Cloning git repo $url branch $branch\n";
+  my $rv = run_command(['git', 'clone', '-q', '--depth=1', '-b', $branch, $url, $dest]);
+  if (!$rv) {
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => $dest);
+  }
+  return $rv;
+}
+
+sub git_clone_sm_manually {
+  my $path = shift;
+
+  my $sm_file = '.gitmodules';
+  my $in_section = 0;
+  my $url = undef;
+  my $branch = undef;
+
+  open(my $fd, $sm_file) or die("Could't open $sm_file: $!.\nStopped");
+  while (my $line = <$fd>) {
+    chomp ($line);
+    if ($line =~ /\[submodule "([^"]+)"\]/) {
+      $in_section = $1 eq $path;
+    }
+    elsif ($in_section && $line =~ /^\s*url = (.*)$/) {
+      $url = $1;
+    }
+    elsif ($in_section && $line =~ /^\s*branch = (.*)$/) {
+      $branch = $1;
+    }
+    if (defined($url) && defined($branch)) {
+      last;
+    }
+  }
+  close($fd);
+
+  if (!defined($url) || !defined($branch)) {
+    die("Couldn't find url and branch for $path submodule\nStopped");
+  }
+
+  return git_clone($path, $url, $branch);
+}
+
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
 my %hostEnv = ('build' => 'host', 'PATH' => $curpathRef);
 my %targetEnv = ('build' => 'target', 'PATH' => $curpathRef);
@@ -742,23 +787,16 @@ if (!$ace_src || !$tao_src) {
 
     my $urlbase = 'https://github.com/DOCGroup';
 
-    print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = run_command(['git', 'clone', '-q', '--depth=1',
-                           '-b', 'ace6tao2', "$urlbase/ACE_TAO"]);
+    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", 'ace6tao2');
     die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
-    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => 'ACE_TAO');
-
-    print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = run_command(['git', 'clone', '-q', '--depth=1', "$urlbase/MPC", 'ACE_TAO/ACE/MPC']);
+    $err = git_clone('ACE_TAO/ACE/MPC', "$urlbase/MPC", 'master');
     die "ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
-
-    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => 'ACE_TAO/ACE/MPC');
 
     $ace_src = normalizePath('ACE_TAO/ACE');
     $tao_src = normalizePath('ACE_TAO/TAO');
@@ -1360,7 +1398,8 @@ if (exists $opts{'gtest'} || $tests) {
 
   }
   else {
-    my $sm_dir = Cwd::abs_path('./tests/googletest');
+    my $rel_path = 'tests/googletest';
+    my $sm_dir = Cwd::abs_path($rel_path);
     my $sm_src = File::Spec->catdir($sm_dir, 'googletest');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'googletest-distribution' : ''));
@@ -1375,10 +1414,8 @@ if (exists $opts{'gtest'} || $tests) {
       setEnv('GTEST_ROOT', $gtest_root);
     }
     else {
-      my $url = 'https://github.com/oci-labs/googletest';
-      my $branch = 'v1.8.x';
-      print "Could not find Google Test, cloning git repo $url $branch\n" if $opts{'verbose'};
-      if (!run_command(['git', 'clone', '-q', '--depth=1', $url, $sm_dir, '-b', $branch])) {
+      print "Could not find Google Test, cloning...\n" if $opts{'verbose'};
+      if (!git_clone_sm_manually($rel_path)) {
         $use_sm_dir = 1;
       }
     }
@@ -1415,7 +1452,8 @@ if ($build_gtest && !$has_cmake) {
 if (exists $opts{'rapidjson'}) {
   if ($opts{'rapidjson'} eq '') {
     my $sanity = $optdep{'rapidjson'}->{sanity};
-    my $sm_dir = Cwd::abs_path('./tools/rapidjson');
+    my $rel_path = 'tools/rapidjson';
+    my $sm_dir = Cwd::abs_path($rel_path);
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'RapidJSON' : ''));
 
@@ -1423,21 +1461,30 @@ if (exists $opts{'rapidjson'}) {
       "Could not find RapidJSON (using '$sanity') in:\n".
       "    Git Submodule: '$sm_dir'\n" .
       "    Default Install Prefix: '$sys_dir'\n";
+    my $rapidjson = undef;
     if (-f File::Spec->catfile($sm_dir, $sanity)) {
-      $opts{'rapidjson'} = $sm_dir;
+      $rapidjson = $sm_dir;
     }
     elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
-      $opts{'rapidjson'} = $sys_dir;
+      $rapidjson = $sys_dir;
     }
-    elsif (exists $defaulted->{'rapidjson'}) {
+    else {
+      print "Could not find RapidJSON, cloning...\n" if $opts{'verbose'};
+      if (!git_clone_sm_manually($rel_path)) {
+        $rapidjson = $sm_dir;
+      }
+    }
+
+    if (defined($rapidjson)) {
+      print "Using '$rapidjson' for RapidJSON\n" if ($opts{'verbose'});
+      $opts{'rapidjson'} = $rapidjson;
+    }
+    elsif (exists($defaulted->{'rapidjson'})) {
       print "${rapidjson_msg}Continuing without it.\n" if $opts{'verbose'};
       delete $opts{'rapidjson'};
     }
     else {
       die "ERROR: ${rapidjson_msg}Stopped";
-    }
-    if ($opts{'verbose'} && exists $opts{'rapidjson'}) {
-      print "Using '$opts{'rapidjson'}' for RapidJSON\n";
     }
   }
 }
