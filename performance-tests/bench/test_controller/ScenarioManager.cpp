@@ -285,7 +285,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
 
   // Timeout Thread
   size_t reports_left = allocated_scenario.expected_process_reports;
-  report.missing_reports = reports_left;
+  report.missing_reports = static_cast<CORBA::ULong>(reports_left);
   std::mutex reports_left_mutex;
   std::condition_variable timeout_cv;
   const std::chrono::seconds timeout(allocated_scenario.timeout + SCENARIO_TIMEOUT_GRACE_PERIOD);
@@ -395,7 +395,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
     {
       std::lock_guard<std::mutex> guard(reports_left_mutex);
       reports_left = static_cast<size_t>(allocated_scenario.expected_process_reports) - process_report_count;
-      report.missing_reports = reports_left + worker_failures + parse_failures;
+      report.missing_reports = static_cast<CORBA::ULong>(reports_left + worker_failures + parse_failures);
       if (reports_left == 0) {
         break;
       }

@@ -250,8 +250,10 @@ public:
   MOCK_METHOD2(set_float32_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Float value));
   MOCK_METHOD2(get_float64_value, DDS::ReturnCode_t(CORBA::Double & value, DDS::MemberId id));
   MOCK_METHOD2(set_float64_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Double value));
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244)
   MOCK_METHOD2(get_float128_value, DDS::ReturnCode_t(CORBA::LongDouble & value, DDS::MemberId id));
   MOCK_METHOD2(set_float128_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::LongDouble value));
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
   MOCK_METHOD2(get_char8_value, DDS::ReturnCode_t(CORBA::Char & value, DDS::MemberId id));
   MOCK_METHOD2(set_char8_value, DDS::ReturnCode_t(DDS::MemberId id, CORBA::Char value));
   MOCK_METHOD2(get_char16_value, DDS::ReturnCode_t(CORBA::WChar & value, DDS::MemberId id));
