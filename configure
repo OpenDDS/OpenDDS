@@ -1349,7 +1349,7 @@ sub system_default_install_dir {
 my $build_gtest = 0;
 if (exists $opts{'gtest'} || $tests) {
   my $gtest_sanity = 'include/gtest/gtest.h';
-  my $gtest_root = "";
+  my $gtest_root = undef;
 
   if ($opts{'gtest'}) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
@@ -1365,7 +1365,25 @@ if (exists $opts{'gtest'} || $tests) {
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'googletest-distribution' : ''));
 
+    my $use_sm_dir = 0;
     if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
+      $use_sm_dir = 1;
+    }
+    elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
+      $opts{'gtest'} = $sys_dir;
+      $gtest_root = $sys_dir;
+      setEnv('GTEST_ROOT', $gtest_root);
+    }
+    else {
+      my $url = 'https://github.com/oci-labs/googletest';
+      my $branch = 'v1.8.x';
+      print "Could not find Google Test, cloning git repo $url $branch\n" if $opts{'verbose'};
+      if (!run_command(['git', 'clone', '-q', '--depth=1', $url, $sm_dir, '-b', $branch])) {
+        $use_sm_dir = 1;
+      }
+    }
+
+    if ($use_sm_dir) {
       # Check for existing build
       $gtest_root = File::Spec->catdir($sm_dir, 'build', 'install');
       $build_gtest = ! -d $gtest_root;
@@ -1376,12 +1394,8 @@ if (exists $opts{'gtest'} || $tests) {
         setEnv('GTEST_ROOT', $gtest_root);
       }
     }
-    elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
-      $opts{'gtest'} = $sys_dir;
-      $gtest_root = $sys_dir;
-      setEnv('GTEST_ROOT', $gtest_root);
-    }
-    else {
+
+    if (!defined($gtest_root)) {
       die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
         "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
     }
