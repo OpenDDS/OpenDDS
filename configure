@@ -437,37 +437,24 @@ sub git_clone {
   return $rv;
 }
 
+sub git_sm_prop {
+  my $path = shift;
+  my $prop_name = shift;
+  my $full_prop_name = "submodule.$path.$prop_name";
+  open(my $fd, "-|", "git config --file .gitmodules --get $full_prop_name")
+    or die("git_submodule_prop open failed: $!\nStopped");
+  my $prop_value = <$fd>;
+  close($fd);
+  chomp($prop_value);
+  if (!$prop_value) {
+    die("Couldn't get $full_prop_name");
+  }
+  return $prop_value;
+}
+
 sub git_clone_sm_manually {
   my $path = shift;
-
-  my $sm_file = '.gitmodules';
-  my $in_section = 0;
-  my $url = undef;
-  my $branch = undef;
-
-  open(my $fd, $sm_file) or die("Could't open $sm_file: $!.\nStopped");
-  while (my $line = <$fd>) {
-    chomp ($line);
-    if ($line =~ /\[submodule "([^"]+)"\]/) {
-      $in_section = $1 eq $path;
-    }
-    elsif ($in_section && $line =~ /^\s*url = (.*)$/) {
-      $url = $1;
-    }
-    elsif ($in_section && $line =~ /^\s*branch = (.*)$/) {
-      $branch = $1;
-    }
-    if (defined($url) && defined($branch)) {
-      last;
-    }
-  }
-  close($fd);
-
-  if (!defined($url) || !defined($branch)) {
-    die("Couldn't find url and branch for $path submodule\nStopped");
-  }
-
-  return git_clone($path, $url, $branch);
+  return git_clone($path, git_sm_prop($path, 'url'), git_sm_prop($path, 'branch'));
 }
 
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
