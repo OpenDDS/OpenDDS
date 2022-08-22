@@ -8,6 +8,8 @@
 #ifndef OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL
 #define OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL
 
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include <tao/LongSeq.pidl>
 #include <tao/ULongSeq.pidl>
 #include <tao/Int8Seq.pidl>
@@ -48,5 +50,7 @@ module DDS {
   typedef sequence<wstring> WstringSeq;
 
 };
+
+#endif // OPENDDS_SAFETY_PROFILE
 
 #endif /* OPENDDS_DDS_DYNAMIC_DATA_SEQ_IDL */
