@@ -7,7 +7,7 @@
 # Prerequisite: docker
 ##############################################################################
 
-buildbits=32
+buildbits=64
 docker_image=phusion/holy-build-box-${buildbits}
 MOUNT_DIR=/OpenDDS
 
@@ -84,18 +84,21 @@ threads = 0
 debug = 0
 static_stdlibs = 1
 dynamic_loader = 0
+tao_idl_fe_gen = 1
 include \$(ACE_ROOT)/include/makeinclude/platform_linux.GNU
 EEOF
 fi
 
 cat << 'EEOF' > tao_dds_idl.mwc
 workspace {
+  cmdline += -features tao_idl_fe_gen=1
   $(ACE_ROOT)/ace/ace.mpc
   $(ACE_ROOT)/apps/gperf/src
   $(TAO_ROOT)/TAO_IDL/tao_idl.mpc
   $(TAO_ROOT)/TAO_IDL/tao_idl_fe.mpc
   $(TAO_ROOT)/TAO_IDL/tao_idl_be.mpc
   $(DDS_ROOT)/dds/idl/opendds_idl.mpc
+  $(DDS_ROOT)/dds/DCPS/OpenDDS_Util.mpc
 }
 EEOF
 
