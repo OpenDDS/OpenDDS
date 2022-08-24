@@ -163,6 +163,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
 # <default>OPT is a custom token marking a string option that
 # defaults to $opts{'OPT'} = '' and can be overridden by opts by passing
 # --no-OPT or --OPT with a value.
+# <hidden>OPT hides the option from --help
   (
    ['Options controlling the configure script:',
     'help|h|?', 'Show this help and exit',
@@ -170,6 +171,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'verbose|v', 'Trace script execution',
     'dry-run|n', 'Don\'t do anything',
     'backup!', 'Make backup of build configuration files (yes)',
+    '<hidden>force-clone-submodules', 'Get submodules as if this wasn\'t a git repo',
    ],
    ['Build platform and compiler:',
     'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
@@ -312,6 +314,9 @@ EOT
             $optkey .= '=VAL' if $opt =~ /=s/;
             $optkey .= '[=VAL]' if $opt =~ /:s/;
             $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)/);
+            if ($optkey =~ /^\<hidden\>/) {
+              return;
+            }
             $optkey =~ s/^\<default\>(.*)$/\[no-\]$1/g;
             $optkey .= '...' if $opt =~ /s\@$/;
             my $pad = $argPadding - length $optkey;
@@ -335,6 +340,7 @@ sub parseArgs {
               push @default, $1;
             }
             else  {
+              $opt =~ s/^\<hidden\>(.*)$/$1/;
               push @getopts, $opt;
             }
           }
@@ -428,13 +434,32 @@ sub run_command {
 sub git_clone {
   my $dest = shift;
   my $url = shift;
-  my $branch = shift;
-  print "Cloning git repo $url branch $branch\n";
-  my $rv = run_command(['git', 'clone', '-q', '--depth=1', '-b', $branch, $url, $dest]);
-  if (!$rv) {
+  my %args = @_;
+  my $branch = $args{branch};
+  my $commit = $args{commit};
+
+  print "Cloning git repo $url ", $branch // $commit, "\n";
+
+  my $failed;
+  if (defined($commit)) {
+    # Git can't directly clone a specific commit. Could use clone and checkout,
+    # but can't do a single shallow clone that way.
+    my $chdir = ChangeDir->new($dest);
+    $failed = run_command(['git', 'init', '--quiet']) ||
+      run_command(['git', 'remote', 'add', 'origin', $url]) ||
+      run_command(['git', 'fetch', '--quiet', '--depth=1', 'origin', $commit]) ||
+      run_command(['git', 'checkout', '--quiet', 'FETCH_HEAD']);
+  }
+  else {
+    my @cmd = ('git', 'clone', '--quiet', '--depth=1', $url, $dest);
+    push(@cmd, '--branch', $branch) if (defined($branch));
+    $failed = run_command(\@cmd);
+  }
+
+  if (!$failed) {
     run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => $dest);
   }
-  return $rv;
+  return $failed;
 }
 
 sub git_submodule_prop {
@@ -447,14 +472,42 @@ sub git_submodule_prop {
   close($fd);
   chomp($prop_value);
   if (!$prop_value) {
-    die("Couldn't get $full_prop_name");
+    die("Couldn't get $full_prop_name from .gitmodules\nStopped");
   }
   return $prop_value;
 }
 
-sub git_clone_submodule_manually {
+sub git_ensure_submodule {
   my $path = shift;
-  return git_clone($path, git_submodule_prop($path, 'url'), git_submodule_prop($path, 'branch'));
+
+  if (!which('git')) {
+    print STDERR "Can't ensure we have $path becuase we can't find the git command\n";
+    return 0;
+  }
+
+  my $commit_prop = 'openddsConfigureCommit';
+  my $commit = git_submodule_prop($path, $commit_prop);
+
+  if (!$opts{'force-clone-submodules'} &&
+      !run_command(['git', 'submodule', 'update', '--init', $path])) {
+    # This doesn't affect us in this run, but since we can get the actual
+    # submodule commit, make sure it matches the commit from .gitmodules for
+    # the case when the source tree is not a git repo.
+    open(my $fd, "-|", "git ls-tree HEAD $path")
+      or die("git_ensure_submodule open failed: $!\nStopped");
+    my $real_commit = <$fd>;
+    close($fd);
+    chomp($real_commit);
+    $real_commit =~ s/^\S+ \S+ ([0-9a-f]+).*$/$1/;
+    if ($real_commit ne $commit) {
+      print STDERR "WARNING: for submodule $path $commit_prop = $commit ",
+        "from .gitmodules doesn't match actual commit $real_commit\n";
+    }
+
+    return 1;
+  }
+
+  return !git_clone($path, git_submodule_prop($path, 'url'), commit => $commit);
 }
 
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
@@ -774,13 +827,13 @@ if (!$ace_src || !$tao_src) {
 
     my $urlbase = 'https://github.com/DOCGroup';
 
-    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", 'ace6tao2');
+    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", branch => 'ace6tao2');
     die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
-    $err = git_clone('ACE_TAO/ACE/MPC', "$urlbase/MPC", 'master');
+    $err = git_clone('ACE_TAO/ACE/MPC', "$urlbase/MPC", branch => 'master');
     die "ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
@@ -1402,7 +1455,7 @@ if (exists $opts{'gtest'} || $tests) {
     }
     else {
       print "Could not find Google Test, cloning...\n" if $opts{'verbose'};
-      if (!git_clone_submodule_manually($rel_path)) {
+      if (git_ensure_submodule($rel_path)) {
         $use_sm_dir = 1;
       }
     }
@@ -1457,7 +1510,7 @@ if (exists $opts{'rapidjson'}) {
     }
     else {
       print "Could not find RapidJSON, cloning...\n" if $opts{'verbose'};
-      if (!git_clone_submodule_manually($rel_path)) {
+      if (git_ensure_submodule($rel_path)) {
         $rapidjson = $sm_dir;
       }
     }
