@@ -2953,7 +2953,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: OpenDDS
-        submodules: true
+        submodules: false # Test that the configure script can download Google Test and RapidJSON
     - name: checkout ACE_TAO
       uses: actions/checkout@v3
       with:
@@ -3054,7 +3054,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: OpenDDS
-        submodules: true
+        submodules: false # Test that the configure script can download Google Test and RapidJSON
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -3153,7 +3153,7 @@ jobs:
       uses: actions/checkout@v3
       with:
         path: OpenDDS
-        submodules: true
+        submodules: false # Test that the configure script can download Google Test and RapidJSON
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:

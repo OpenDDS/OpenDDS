@@ -437,7 +437,7 @@ sub git_clone {
   return $rv;
 }
 
-sub git_sm_prop {
+sub git_submodule_prop {
   my $path = shift;
   my $prop_name = shift;
   my $full_prop_name = "submodule.$path.$prop_name";
@@ -452,9 +452,9 @@ sub git_sm_prop {
   return $prop_value;
 }
 
-sub git_clone_sm_manually {
+sub git_clone_submodule_manually {
   my $path = shift;
-  return git_clone($path, git_sm_prop($path, 'url'), git_sm_prop($path, 'branch'));
+  return git_clone($path, git_submodule_prop($path, 'url'), git_submodule_prop($path, 'branch'));
 }
 
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
@@ -1402,7 +1402,7 @@ if (exists $opts{'gtest'} || $tests) {
     }
     else {
       print "Could not find Google Test, cloning...\n" if $opts{'verbose'};
-      if (!git_clone_sm_manually($rel_path)) {
+      if (!git_clone_submodule_manually($rel_path)) {
         $use_sm_dir = 1;
       }
     }
@@ -1457,7 +1457,7 @@ if (exists $opts{'rapidjson'}) {
     }
     else {
       print "Could not find RapidJSON, cloning...\n" if $opts{'verbose'};
-      if (!git_clone_sm_manually($rel_path)) {
+      if (!git_clone_submodule_manually($rel_path)) {
         $rapidjson = $sm_dir;
       }
     }
