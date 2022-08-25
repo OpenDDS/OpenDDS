@@ -449,6 +449,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
   while (!impls_.empty()) {
     RcHandle<TransportImpl> impl = impls_.back().lock();
     if (!impl) {
+      impls_.pop_back();
       continue;
     }
     const OPENDDS_STRING type = impl->transport_type();
