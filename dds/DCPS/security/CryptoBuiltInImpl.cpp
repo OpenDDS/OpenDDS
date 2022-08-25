@@ -1386,7 +1386,6 @@ bool CryptoBuiltInImpl::encode_submessage(
   NativeCryptoHandle sender_handle,
   SecurityException& ex)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   const KeyTable_t::const_iterator iter = keys_.find(sender_handle);
   if (iter == keys_.end()) {
     encoded_rtps_submessage = plain_rtps_submessage;
@@ -1524,8 +1523,6 @@ bool CryptoBuiltInImpl::encode_datawriter_submessage(
     }
   }
 
-  guard.release();
-
   const bool ok = encode_submessage(encoded_rtps_submessage,
                                     plain_rtps_submessage, encode_handle, ex);
   if (ok) {
@@ -1552,8 +1549,8 @@ bool CryptoBuiltInImpl::encode_datareader_submessage(
   }
 
   NativeCryptoHandle encode_handle = sending_datareader_crypto;
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (receiving_datawriter_crypto_list.length() == 1) {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     const KeyTable_t::const_iterator iter = keys_.find(encode_handle);
     if (iter != keys_.end()) {
       const KeySeq& dr_keys = iter->second;

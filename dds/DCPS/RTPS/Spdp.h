@@ -154,6 +154,7 @@ public:
 
   void handle_participant_data(DCPS::MessageId id,
                                const ParticipantData_t& pdata,
+                               const DCPS::MonotonicTimePoint& now,
                                const DCPS::SequenceNumber& seq,
                                const ACE_INET_Addr& from,
                                bool from_sedp);
@@ -397,6 +398,8 @@ private:
   DiscoveredParticipantMap participants_;
   RtpsDiscovery* disco_;
   DCPS::RcHandle<RtpsDiscoveryConfig> config_;
+  const double quick_resend_ratio_;
+  const DCPS::TimeDuration min_resend_delay_;
   DCPS::TimeDuration lease_duration_;
   DCPS::TimeDuration lease_extension_;
   XTypes::TypeLookupService_rch type_lookup_service_;

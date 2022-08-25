@@ -22,12 +22,14 @@ namespace OpenDDS {
 namespace DCPS {
 
 template<typename TH, typename DSH>
-TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config)
+TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst& config,
+                                                            size_t receive_buffers_count)
   : gracefully_disconnected_(false),
     receive_sample_remaining_(0),
     mb_allocator_(config.receive_preallocated_message_blocks_ ? config.receive_preallocated_message_blocks_ : MESSAGE_BLOCKS),
     db_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : DATA_BLOCKS),
-    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : RECEIVE_BUFFERS * 2),
+    data_allocator_(config.receive_preallocated_data_blocks_ ? config.receive_preallocated_data_blocks_ : receive_buffers_count * 2),
+    receive_buffers_(receive_buffers_count, 0),
     buffer_index_(0),
     payload_(0),
     good_pdu_(true),
@@ -46,8 +48,6 @@ TransportReceiveStrategy<TH, DSH>::TransportReceiveStrategy(const TransportInst&
                " Cached_Allocator_With_Overflow %@ with %B chunks\n",
                &data_allocator_, data_allocator_.n_chunks()));
   }
-
-  ACE_OS::memset(this->receive_buffers_, 0, sizeof(this->receive_buffers_));
 }
 
 template<typename TH, typename DSH>
@@ -66,7 +66,7 @@ TransportReceiveStrategy<TH, DSH>::~TransportReceiveStrategy()
     }
   }
 
-  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (size_t index = 0; index < receive_buffers_.size(); ++index) {
     if (receive_buffers_[index] != 0) {
       ACE_DES_FREE(
                    receive_buffers_[index],
@@ -88,182 +88,6 @@ bool
 TransportReceiveStrategy<TH, DSH>::check_header(const DSH& /*header*/)
 {
   return true;
-}
-
-template<typename TH, typename DSH>
-int
-TransportReceiveStrategy<TH, DSH>::handle_simple_dds_input(ACE_HANDLE fd)
-{
-  DBG_ENTRY_LVL("TransportReceiveStrategy", "handle_simple_dds_input", 6);
-
-  for (size_t index = 0; index < RECEIVE_BUFFERS; ++index) {
-    if (receive_buffers_[index] == 0) {
-      ACE_NEW_MALLOC_RETURN(
-        receive_buffers_[index],
-        (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
-        ACE_Message_Block(
-          RECEIVE_DATA_BUFFER_SIZE,           // Buffer size
-          ACE_Message_Block::MB_DATA,         // Default
-          0,                                  // Start with no continuation
-          0,                                  // Let the constructor allocate
-          &data_allocator_,                   // Our buffer cache
-          &receive_lock_,                     // Our locking strategy
-          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // Default
-          ACE_Time_Value::zero,               // Default
-          ACE_Time_Value::max_time,           // Default
-          &db_allocator_,                     // Our data block cache
-          &mb_allocator_                      // Our message block cache
-        ),
-        -1);
-    }
-  }
-
-  ACE_Message_Block* cur_rb = receive_buffers_[buffer_index_];
-  cur_rb->reset();
-
-  iovec iov;
-#ifdef _MSC_VER
-#pragma warning(push)
-// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
-// since on other platforms iov_len is 64-bit
-#pragma warning(disable : 4267)
-#endif
-  iov.iov_len = cur_rb->space();
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
-  iov.iov_base = cur_rb->wr_ptr();
-
-  ACE_INET_Addr remote_address;
-  bool stop = false;
-  ssize_t bytes_remaining = receive_bytes(&iov,
-                                          1,
-                                          remote_address,
-                                          fd,
-                                          stop);
-
-  if (stop) {
-    return 0;
-  }
-
-  if (bytes_remaining < 0) {
-    relink();
-    return -1;
-  }
-
-  cur_rb->wr_ptr(bytes_remaining);
-
-  if (bytes_remaining == 0) {
-    if (gracefully_disconnected_) {
-      return -1;
-    } else {
-      relink();
-      return -1;
-    }
-  }
-
-  if (!pdu_remaining_) {
-    receive_transport_header_.length_ = static_cast<ACE_UINT32>(bytes_remaining);
-  }
-
-  receive_transport_header_ = *cur_rb;
-  if (!receive_transport_header_.valid()) {
-    cur_rb->reset();
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: TransportHeader invalid.\n")));
-    }
-    return 0;
-  }
-
-  bytes_remaining = receive_transport_header_.length_;
-  if (!check_header(receive_transport_header_)) {
-    return 0;
-  }
-
-  {
-    const ScopedHeaderProcessing shp(*this);
-    while (bytes_remaining > 0) {
-      data_sample_header_.pdu_remaining(bytes_remaining);
-      data_sample_header_ = *cur_rb;
-      bytes_remaining -= data_sample_header_.get_serialized_size();
-      if (!check_header(data_sample_header_)) {
-        return 0;
-      }
-      const size_t dsh_ml = data_sample_header_.message_length();
-      ACE_Message_Block* current_sample_block = 0;
-      ACE_NEW_MALLOC_RETURN(
-        current_sample_block,
-        (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
-        ACE_Message_Block(
-          cur_rb->data_block()->duplicate(),
-          0,
-          &mb_allocator_),
-        -1);
-      current_sample_block->rd_ptr(cur_rb->rd_ptr());
-      current_sample_block->wr_ptr(current_sample_block->rd_ptr() + dsh_ml);
-      cur_rb->rd_ptr(dsh_ml);
-      bytes_remaining -= dsh_ml;
-      ReceivedDataSample rds(current_sample_block);
-      if (data_sample_header_.into_received_data_sample(rds)) {
-
-        if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
-          VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
-
-          if (reassemble(rds)) {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
-            deliver_sample(rds, remote_address);
-          }
-          // If reassemble() returned false, it takes ownership of the data
-          // just like deliver_sample() does.
-
-        } else {
-          deliver_sample(rds, remote_address);
-        }
-      }
-
-      // For the reassembly algorithm, the 'last_fragment_' header bit only
-      // applies to the first DataSampleHeader in the TransportHeader
-      receive_transport_header_.last_fragment(false);
-    }
-  }
-
-  finish_message();
-
-  // Attempt to quickly switch to unreferenced buffer for next read
-  size_t index_count = 0;
-  size_t new_buffer_index = buffer_index_;
-  while (receive_buffers_[new_buffer_index]->data_block()->reference_count() > 1 && index_count++ <= RECEIVE_BUFFERS) {
-    new_buffer_index = (new_buffer_index + 1) % RECEIVE_BUFFERS;
-  }
-  buffer_index_ = new_buffer_index;
-
-  // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
-  if (receive_buffers_[buffer_index_]->data_block()->reference_count() > 1) {
-    ACE_DES_FREE(
-      receive_buffers_[buffer_index_],
-      mb_allocator_.free,
-      ACE_Message_Block);
-
-    ACE_NEW_MALLOC_RETURN(
-      receive_buffers_[buffer_index_],
-      (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
-      ACE_Message_Block(
-        RECEIVE_DATA_BUFFER_SIZE,           // Buffer size
-        ACE_Message_Block::MB_DATA,         // Default
-        0,                                  // Start with no continuation
-        0,                                  // Let the constructor allocate
-        &data_allocator_,                   // Our buffer cache
-        &receive_lock_,                     // Our locking strategy
-        ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // Default
-        ACE_Time_Value::zero,               // Default
-        ACE_Time_Value::max_time,           // Default
-        &db_allocator_,                     // Our data block cache
-        &mb_allocator_                      // Our message block cache
-      ),
-      -1);
-  }
-
-  return 0;
 }
 
 /// Note that this is just an initial implementation.  We may take
@@ -346,7 +170,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   //
   size_t index;
 
-  for (index = 0; index < RECEIVE_BUFFERS; ++index) {
+  for (index = 0; index < receive_buffers_.size(); ++index) {
     if ((this->receive_buffers_[index] != 0)
         && (this->receive_buffers_[index]->length() == 0)
         && (this->receive_buffers_[index]->space() < BUFFER_LOW_WATER)) {
@@ -357,7 +181,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
       // unlink any Message_Block that continues to this one
       // being removed.
       // This avoids a possible infinite ->cont() loop.
-      for (size_t ii =0; ii < RECEIVE_BUFFERS; ii++) {
+      for (size_t ii =0; ii < receive_buffers_.size(); ii++) {
         if ((0 != this->receive_buffers_[ii]) &&
             (this->receive_buffers_[ii]->cont() ==
              this->receive_buffers_[index])) {
@@ -449,7 +273,7 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
   size_t current = this->buffer_index_;
 
   for (index = 0;
-       index < RECEIVE_BUFFERS;
+       index < receive_buffers_.size();
        ++index, current = this->successor_index(current)) {
     // Invariant.  ASSERT?
     if (this->receive_buffers_[current] == 0) {
@@ -1073,7 +897,7 @@ TransportReceiveStrategy<TH, DSH>::reset()
   this->payload_ = 0;
   this->good_pdu_ = true;
   this->pdu_remaining_ = 0;
-  for (size_t i = 0; i < RECEIVE_BUFFERS; ++i) {
+  for (size_t i = 0; i < receive_buffers_.size(); ++i) {
     ACE_Message_Block& rb = *this->receive_buffers_[i];
     rb.rd_ptr(rb.wr_ptr());
   }

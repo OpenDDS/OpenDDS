@@ -128,7 +128,7 @@ public:
   void add_dead_participant(DCPS_IR_Participant_rch participant);
 
   /// Remove any participants currently marked as dead
-  void remove_dead_participants();
+  void remove_dead_participants(bool part_of_cleanup = false);
 
   DDS::DomainId_t get_id();
 

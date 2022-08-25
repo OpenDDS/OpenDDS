@@ -508,18 +508,20 @@ public:
         OPENDDS_SSL_LOG_ERR("failed to find Nid");
         return 1;
       }
-      const EC_GROUP* const ecg = EC_GROUP_new_by_curve_name(nid);
+      EC_GROUP* const ecg = EC_GROUP_new_by_curve_name(nid);
       const point_conversion_form_t cf = EC_GROUP_get_point_conversion_form(ecg);
       EC_POINT* const ec = EC_POINT_new(ecg);
       if (!EC_POINT_oct2point(ecg, ec, pubbuf, pubbuflen, 0)) {
         OPENDDS_SSL_LOG_ERR("failed to extract ec point from octet sequence");
         EC_POINT_free(ec);
+        EC_GROUP_free(ecg);
         return 1;
       }
       const size_t eclen = EC_POINT_point2oct(ecg, ec, cf, 0, 0u, 0);
       dst.length(static_cast<ACE_CDR::ULong>(eclen));
       EC_POINT_point2oct(ecg, ec, cf, dst.get_buffer(), eclen, 0);
       EC_POINT_free(ec);
+      EC_GROUP_free(ecg);
     }
 #endif
     return 0;
@@ -632,7 +634,10 @@ public:
       OPENDDS_SSL_LOG_ERR("Building prarms list failed");
       return 1;
     }
+
+    OSSL_PARAM* old_params = params;
     params = OSSL_PARAM_BLD_to_param(param_bld);
+    OSSL_PARAM_free(old_params);
 
     if ((fd_ctx = EVP_PKEY_CTX_new(keypair,0)) == 0) {
       OPENDDS_SSL_LOG_ERR("new ctx from name ECBH failed.");

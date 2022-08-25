@@ -30,8 +30,8 @@ use ChangeDir;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.17';
-my $doc_tao3_version = '7.0.7';
+my $doc_tao2_version = '6.5.18';
+my $doc_tao3_version = '7.0.8';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -163,6 +163,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
 # <default>OPT is a custom token marking a string option that
 # defaults to $opts{'OPT'} = '' and can be overridden by opts by passing
 # --no-OPT or --OPT with a value.
+# <hidden>OPT hides the option from --help
   (
    ['Options controlling the configure script:',
     'help|h|?', 'Show this help and exit',
@@ -170,6 +171,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'verbose|v', 'Trace script execution',
     'dry-run|n', 'Don\'t do anything',
     'backup!', 'Make backup of build configuration files (yes)',
+    '<hidden>force-clone-submodules', 'Get submodules as if this wasn\'t a git repo',
    ],
    ['Build platform and compiler:',
     'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
@@ -312,6 +314,9 @@ EOT
             $optkey .= '=VAL' if $opt =~ /=s/;
             $optkey .= '[=VAL]' if $opt =~ /:s/;
             $optkey = "[no-]$optkey" if ($opt =~ /!$/ && $descr =~ / \(yes\)/);
+            if ($optkey =~ /^\<hidden\>/) {
+              return;
+            }
             $optkey =~ s/^\<default\>(.*)$/\[no-\]$1/g;
             $optkey .= '...' if $opt =~ /s\@$/;
             my $pad = $argPadding - length $optkey;
@@ -335,6 +340,7 @@ sub parseArgs {
               push @default, $1;
             }
             else  {
+              $opt =~ s/^\<hidden\>(.*)$/$1/;
               push @getopts, $opt;
             }
           }
@@ -423,6 +429,85 @@ sub run_command {
     verbose => $opts{'verbose'},
     @_,
   );
+}
+
+sub git_clone {
+  my $dest = shift;
+  my $url = shift;
+  my %args = @_;
+  my $branch = $args{branch};
+  my $commit = $args{commit};
+
+  print "Cloning git repo $url ", $branch // $commit, "\n";
+
+  my $failed;
+  if (defined($commit)) {
+    # Git can't directly clone a specific commit. Could use clone and checkout,
+    # but can't do a single shallow clone that way.
+    my $chdir = ChangeDir->new($dest);
+    $failed = run_command(['git', 'init', '--quiet']) ||
+      run_command(['git', 'remote', 'add', 'origin', $url]) ||
+      run_command(['git', 'fetch', '--quiet', '--depth=1', 'origin', $commit]) ||
+      run_command(['git', 'checkout', '--quiet', 'FETCH_HEAD']);
+  }
+  else {
+    my @cmd = ('git', 'clone', '--quiet', '--depth=1', $url, $dest);
+    push(@cmd, '--branch', $branch) if (defined($branch));
+    $failed = run_command(\@cmd);
+  }
+
+  if (!$failed) {
+    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => $dest);
+  }
+  return $failed;
+}
+
+sub git_submodule_prop {
+  my $path = shift;
+  my $prop_name = shift;
+  my $full_prop_name = "submodule.$path.$prop_name";
+  open(my $fd, "-|", "git config --file .gitmodules --get $full_prop_name")
+    or die("git_submodule_prop open failed: $!\nStopped");
+  my $prop_value = <$fd>;
+  close($fd);
+  chomp($prop_value);
+  if (!$prop_value) {
+    die("Couldn't get $full_prop_name from .gitmodules\nStopped");
+  }
+  return $prop_value;
+}
+
+sub git_ensure_submodule {
+  my $path = shift;
+
+  if (!which('git')) {
+    print STDERR "Can't ensure we have $path becuase we can't find the git command\n";
+    return 0;
+  }
+
+  my $commit_prop = 'openddsConfigureCommit';
+  my $commit = git_submodule_prop($path, $commit_prop);
+
+  if (!$opts{'force-clone-submodules'} &&
+      !run_command(['git', 'submodule', 'update', '--init', $path])) {
+    # This doesn't affect us in this run, but since we can get the actual
+    # submodule commit, make sure it matches the commit from .gitmodules for
+    # the case when the source tree is not a git repo.
+    open(my $fd, "-|", "git ls-tree HEAD $path")
+      or die("git_ensure_submodule open failed: $!\nStopped");
+    my $real_commit = <$fd>;
+    close($fd);
+    chomp($real_commit);
+    $real_commit =~ s/^\S+ \S+ ([0-9a-f]+).*$/$1/;
+    if ($real_commit ne $commit) {
+      print STDERR "WARNING: for submodule $path $commit_prop = $commit ",
+        "from .gitmodules doesn't match actual commit $real_commit\n";
+    }
+
+    return 1;
+  }
+
+  return !git_clone($path, git_submodule_prop($path, 'url'), commit => $commit);
 }
 
 my $curpathRef = $specific{'refpre'} . 'PATH' . $specific{'refpost'};
@@ -613,29 +698,30 @@ EOF
     print "Detected Visual C++ version: $opts{'compiler_version'}\n"
       if $opts{'verbose'};
   }
-  elsif ($opts{'compiler'} =~ /g\+\+/) {
+  elsif ($opts{'compiler'} =~ /g\+\+/) { # GCC or Clang
     my $version_string = `$opts{'compiler'} --version`;
     if ($opts{'std'}) {
       push(@{$opts{'macros'}}, 'CCFLAGS += -std=' . $opts{'std'});
       print "Added platform_macros for -std=$opts{std}\n" if $opts{'verbose'};
     }
-    elsif (!($opts{'compiler'} =~ /clang/)) {
+    elsif ($opts{'compiler'} !~ /clang/) {
       if ($version_string =~ /\(.*\) (\d+)\.\d+/ && $1 >= 6) {
         $opts{'std'} = 'gnu++14';
-        print "Detected GCC >=6, default -std=gnu++14\n" if $opts{'verbose'};
+        print "Detected GCC >= 6, default -std=gnu++14\n" if $opts{'verbose'};
       }
     }
-
-    if ($opts{'compiler'} =~ /clang/ && $version_string =~ /(\d+)\.(\d+)\.(\d+)/) {
-      if ($1 > 3 || ($1 == 3 && $2 >= 3)) {
-        push(@{$opts{'features'}}, 'no_cxx11=0');
-        print "Compiler has C++11 support\n" if $opts{'verbose'};
-      }
+    elsif ($opts{'compiler'} =~ /clang/ && $version_string !~ /^Apple / &&
+           $version_string =~ /(\d+)\.(\d+)\.(\d+)/ && $1 > 6) {
+      # Apple's version of Clang doesn't default to c++11 or higher, users
+      # can pass --std= to change the C++ standard version used.
+      # Other builds of Clang, if version 6 or newer, default to C++14 like GCC
+      $opts{'std'} = 'gnu++14';
+      print "Detected Clang >= 6, default -std=gnu++14\n" if $opts{'verbose'};
     }
 
-    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20)$/) {
+    if ($opts{'std'} && $opts{'std'} =~ /(0x|11|1y|14|1z|17|2a|20|2b|23)$/) {
       push(@{$opts{'features'}}, 'no_cxx11=0');
-      print "Compiler has C++11 support\n" if $opts{'verbose'};
+      print "Compiler has >= C++11 support\n" if $opts{'verbose'};
     }
   }
 }
@@ -741,23 +827,16 @@ if (!$ace_src || !$tao_src) {
 
     my $urlbase = 'https://github.com/DOCGroup';
 
-    print "Cloning git repo: $urlbase/ACE_TAO\n";
-    my $err = run_command(['git', 'clone', '-q', '--depth=1',
-                           '-b', 'ace6tao2', "$urlbase/ACE_TAO"]);
+    my $err = git_clone('ACE_TAO', "$urlbase/ACE_TAO", branch => 'ace6tao2');
     die "ERROR: Failed to clone ACE/TAO from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/ace/ACE.h' ||
           ! -r 'ACE_TAO/TAO/tao/ORB.h';
 
-    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => 'ACE_TAO');
-
-    print "Cloning git repo: $urlbase/MPC into ACE_TAO/ACE/MPC\n";
-    $err = run_command(['git', 'clone', '-q', '--depth=1', "$urlbase/MPC", 'ACE_TAO/ACE/MPC']);
+    $err = git_clone('ACE_TAO/ACE/MPC', "$urlbase/MPC", branch => 'master');
     die "ERROR: Failed to clone MPC (into ACE_TAO/ACE/MPC) from GitHub\nStopped"
       if $err ||
         ! -r 'ACE_TAO/ACE/MPC/mwc.pl';
-
-    run_command(['git', '--no-pager', 'log', '-1', '--oneline'], chdir => 'ACE_TAO/ACE/MPC');
 
     $ace_src = normalizePath('ACE_TAO/ACE');
     $tao_src = normalizePath('ACE_TAO/TAO');
@@ -953,7 +1032,7 @@ sub write_config_h {
   my %buildEnv = %{shift()};
   my $platform = $opts{$buildEnv{'build'}};
   my $pi = $platforminfo{$platform};
-  $opts{'optimize'} = 0 if !exists $opts{'optimize'};
+  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} || exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
   if ($buildEnv{'build'} eq 'target') {
@@ -1014,13 +1093,14 @@ my %all_sanitizers = (
     fsanitize => 'address',
     env => {
       LSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/asan-suppr.txt",
-      ASAN_OPTIONS => 'detect_leaks=1:fast_unwind_on_malloc=0',
+      ASAN_OPTIONS => 'detect_leaks=1:fast_unwind_on_malloc=0:strict_string_checks=1:detect_stack_use_after_return=1:check_initialization_order=1:strict_init_order=1',
     },
+    compiler_args => ['-fsanitize-address-use-after-scope'],
   },
   tsan => {
     fsanitize => 'thread',
     env => {
-      TSAN_OPTIONS => "history_size=7 suppressions=$FindBin::RealBin/etc/tsan-suppr.txt",
+      TSAN_OPTIONS => "history_size=7 second_deadlock_stack=1 suppressions=$FindBin::RealBin/etc/tsan-suppr.txt",
     },
   },
   ubsan => {
@@ -1028,18 +1108,20 @@ my %all_sanitizers = (
     env => {
       UBSAN_OPTIONS => "suppressions=$FindBin::RealBin/etc/ubsan-suppr.txt:print_stacktrace=1",
     },
-    configh => ['#define ACE_INITILAIZE_MEMORY_BEFORE_USE'],
-    compiler_args => ['-fsanitize-coverage=trace-pc-guard'],
+    configh => ['#define ACE_INITIALIZE_MEMORY_BEFORE_USE'],
+    compiler_args => ['-fno-sanitize=enum'],
   },
 );
 my %enabled_sanitizers = ();
-for my $arg (@{$opts{sanitize}}) {
-  for my $name (split(/,/, $arg)) {
-    if (exists($all_sanitizers{$name})) {
-      $enabled_sanitizers{$name} = $all_sanitizers{$name};
-    }
-    else {
-      die("ERROR: \"$name\" isn't a valid sanitizer to pass to --sanitize\nStopped");
+if (exists $opts{'sanitize'}) {
+  for my $arg (@{$opts{'sanitize'}}) {
+    for my $name (split(/,/, $arg)) {
+      if (exists($all_sanitizers{$name})) {
+        $enabled_sanitizers{$name} = $all_sanitizers{$name};
+      }
+      else {
+        die("ERROR: \"$name\" isn't a valid sanitizer to pass to --sanitize\nStopped");
+      }
     }
   }
 }
@@ -1345,7 +1427,7 @@ sub system_default_install_dir {
 my $build_gtest = 0;
 if (exists $opts{'gtest'} || $tests) {
   my $gtest_sanity = 'include/gtest/gtest.h';
-  my $gtest_root = "";
+  my $gtest_root = undef;
 
   if ($opts{'gtest'}) {
     die "ERROR: '$gtest_sanity' not found in supplied gtest directory '$opts{'gtest'}'"
@@ -1356,17 +1438,15 @@ if (exists $opts{'gtest'} || $tests) {
 
   }
   else {
-    my $sm_dir = Cwd::abs_path('./tests/googletest');
+    my $rel_path = 'tests/googletest';
+    my $sm_dir = Cwd::abs_path($rel_path);
     my $sm_src = File::Spec->catdir($sm_dir, 'googletest');
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'googletest-distribution' : ''));
 
+    my $use_sm_dir = 0;
     if (-f File::Spec->catfile($sm_src, $gtest_sanity)) {
-      # Check for existing build
-      $gtest_root = File::Spec->catdir($sm_dir, 'build', 'install');
-      $build_gtest = ! -d $gtest_root;
-      $opts{'gtest'} = $sm_dir;
-      # No need to set env. variable with submodule.
+      $use_sm_dir = 1;
     }
     elsif (-f File::Spec->catfile($sys_dir, $gtest_sanity)) {
       $opts{'gtest'} = $sys_dir;
@@ -1374,6 +1454,25 @@ if (exists $opts{'gtest'} || $tests) {
       setEnv('GTEST_ROOT', $gtest_root);
     }
     else {
+      print "Could not find Google Test, cloning...\n" if $opts{'verbose'};
+      if (git_ensure_submodule($rel_path)) {
+        $use_sm_dir = 1;
+      }
+    }
+
+    if ($use_sm_dir) {
+      # Check for existing build
+      $gtest_root = File::Spec->catdir($sm_dir, 'build', 'install');
+      $build_gtest = ! -d $gtest_root;
+      $opts{'gtest'} = $sm_dir;
+      # No need to set env. variable with submodule UNLESS we're in safetyprofile
+      if ($opts{'safety-profile'}) {
+        print "Setting GTEST_ROOT to ${gtest_root} for use in safety-profile.\n" if $opts{'verbose'};
+        setEnv('GTEST_ROOT', $gtest_root);
+      }
+    }
+
+    if (!defined($gtest_root)) {
       die "ERROR: Google Test '$gtest_sanity' not found in submodule src '$sm_src' or " .
         "default install dir '$sys_dir', please pass a correct version of Google Test to --gtest\nStopped";
     }
@@ -1393,7 +1492,8 @@ if ($build_gtest && !$has_cmake) {
 if (exists $opts{'rapidjson'}) {
   if ($opts{'rapidjson'} eq '') {
     my $sanity = $optdep{'rapidjson'}->{sanity};
-    my $sm_dir = Cwd::abs_path('./tools/rapidjson');
+    my $rel_path = 'tools/rapidjson';
+    my $sm_dir = Cwd::abs_path($rel_path);
     my $sys_dir = File::Spec->catdir((system_default_install_dir(),
                               $is_windows ? 'RapidJSON' : ''));
 
@@ -1401,21 +1501,30 @@ if (exists $opts{'rapidjson'}) {
       "Could not find RapidJSON (using '$sanity') in:\n".
       "    Git Submodule: '$sm_dir'\n" .
       "    Default Install Prefix: '$sys_dir'\n";
+    my $rapidjson = undef;
     if (-f File::Spec->catfile($sm_dir, $sanity)) {
-      $opts{'rapidjson'} = $sm_dir;
+      $rapidjson = $sm_dir;
     }
     elsif (-f File::Spec->catfile($sys_dir, $sanity)) {
-      $opts{'rapidjson'} = $sys_dir;
+      $rapidjson = $sys_dir;
     }
-    elsif (exists $defaulted->{'rapidjson'}) {
+    else {
+      print "Could not find RapidJSON, cloning...\n" if $opts{'verbose'};
+      if (git_ensure_submodule($rel_path)) {
+        $rapidjson = $sm_dir;
+      }
+    }
+
+    if (defined($rapidjson)) {
+      print "Using '$rapidjson' for RapidJSON\n" if ($opts{'verbose'});
+      $opts{'rapidjson'} = $rapidjson;
+    }
+    elsif (exists($defaulted->{'rapidjson'})) {
       print "${rapidjson_msg}Continuing without it.\n" if $opts{'verbose'};
       delete $opts{'rapidjson'};
     }
     else {
       die "ERROR: ${rapidjson_msg}Stopped";
-    }
-    if ($opts{'verbose'} && exists $opts{'rapidjson'}) {
-      print "Using '$opts{'rapidjson'}' for RapidJSON\n";
     }
   }
 }

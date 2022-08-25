@@ -39,7 +39,7 @@ class Listener : public DDS::DataReaderListener {
     OpenDDS::DCPS::ConnectionRecord sample;
     DDS::SampleInfo sample_info;
     while (r->take_next_sample(sample, sample_info) == DDS::RETCODE_OK) {
-#ifdef OPENDDS_RAPIDJSON
+#if OPENDDS_HAS_JSON_VALUE_WRITER
       DDS::TopicDescription_var topic = r->get_topicdescription();
       ACE_DEBUG((LM_INFO,
                  ACE_TEXT("%C\n"),

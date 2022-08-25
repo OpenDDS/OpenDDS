@@ -204,7 +204,13 @@ private:
   /// Type of raw latency data buffers.
   DataCollector<double>::OnFull raw_latency_buffer_type_;
 
-  /// this lock protects the data structures in this class.
+  /// This lock protects datareader_set_. Only this lock needs to
+  /// be acquired if only datareader_set_ is accessed.
+  ACE_Recursive_Thread_Mutex dr_set_lock_;
+
+  /// General lock protects the data structures in this class.
+  /// If datareader_set_ is accessed together with other data members,
+  /// acquire dr_set_lock_ in the scope of this lock.
   ACE_Recursive_Thread_Mutex   si_lock_;
 
   /// Monitor object for this entity

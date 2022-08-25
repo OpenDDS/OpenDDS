@@ -14,8 +14,9 @@ namespace OpenDDS {
 namespace DCPS {
 
 ACE_INLINE
-ReceivedDataSample::ReceivedDataSample(ACE_Message_Block* payload)
+ReceivedDataSample::ReceivedDataSample(ACE_Message_Block* payload, bool take_ownership)
   : sample_(payload)
+  , owns_sample_(take_ownership)
 {
   DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample",6);
 }
@@ -23,7 +24,8 @@ ReceivedDataSample::ReceivedDataSample(ACE_Message_Block* payload)
 ACE_INLINE
 ReceivedDataSample::ReceivedDataSample(const ReceivedDataSample& other)
   : header_(other.header_)
-  , sample_(ACE_Message_Block::duplicate(other.sample_.get()))
+  , sample_(other.owns_sample_ ? ACE_Message_Block::duplicate(other.sample_.get()) : other.sample_.get())
+  , owns_sample_(other.owns_sample_)
 {
   DBG_ENTRY_LVL("ReceivedDataSample", "ReceivedDataSample(copy)", 6);
 }
@@ -41,6 +43,11 @@ ACE_INLINE
 ReceivedDataSample::~ReceivedDataSample()
 {
   DBG_ENTRY_LVL("ReceivedDataSample", "~ReceivedDataSample", 6);
+  if (!owns_sample_) {
+    // Note that this is unique_ptr::release() and in this case is being called
+    // to avoid calling ACE_Message_Block::release() in sample_'s destructor
+    sample_.release();
+  }
 }
 
 ACE_INLINE void
@@ -49,6 +56,7 @@ swap(ReceivedDataSample& a, ReceivedDataSample& b)
   using std::swap;
   swap(a.header_, b.header_);
   swap(a.sample_, b.sample_);
+  swap(a.owns_sample_, b.owns_sample_);
 }
 
 }

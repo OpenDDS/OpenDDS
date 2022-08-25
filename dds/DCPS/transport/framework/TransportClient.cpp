@@ -243,7 +243,17 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>(this))).first;
+    PendingAssoc_rch pa = make_rch<PendingAssoc>(rchandle_from(this));
+    pa->active_ = active;
+    pa->impls_.clear();
+    pa->blob_index_ = 0;
+    pa->data_ = data;
+    pa->attribs_.local_id_ = repo_id_;
+    pa->attribs_.priority_ = get_priority_value(data);
+    pa->attribs_.local_reliable_ = reliable_;
+    pa->attribs_.local_durable_ = durable_;
+    pa->attribs_.max_sn_ = get_max_sn();
+    iter = pending_.insert(std::make_pair(remote_copy, pa)).first;
 
     LogGuid tc_assoc_log(repo_id_);
     LogGuid remote_log(data.remote_id_);
@@ -262,17 +272,9 @@ TransportClient::associate(const AssociationData& data, bool active)
   }
 
   PendingAssoc_rch pend = iter->second;
-  pend->active_ = active;
-  pend->impls_.clear();
-  pend->blob_index_ = 0;
-  pend->data_ = data;
-  pend->attribs_.local_id_ = repo_id_;
-  pend->attribs_.priority_ = get_priority_value(data);
-  pend->attribs_.local_reliable_ = reliable_;
-  pend->attribs_.local_durable_ = durable_;
-  pend->attribs_.max_sn_ = get_max_sn();
 
   if (active) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
     pend->impls_.reserve(impls_.size());
     std::reverse_copy(impls_.begin(), impls_.end(),
                       std::back_inserter(pend->impls_));
@@ -283,8 +285,17 @@ TransportClient::associate(const AssociationData& data, bool active)
 
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
+      // Release the PendingAssoc object's mutex_ since the nested for-loop does not access
+      // the PendingAssoc object directly and the functions called by the nested loop can
+      // lead to a PendingAssoc object's mutex_ being acquired, which will cause deadlock if
+      // it is not released here.
+      TransportImpl::ConnectionAttribs attribs;
       RcHandle<TransportImpl> impl = impls_[i].lock();
-      pend->impls_.push_back(impl);
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
+        pend->impls_.push_back(impl);
+        attribs = pend->attribs_;
+      }
       const OPENDDS_STRING type = impl->transport_type();
 
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
@@ -296,13 +307,15 @@ TransportClient::associate(const AssociationData& data, bool active)
 
           TransportImpl::AcceptConnectResult res;
           {
-            // This thread acquired lock_ at the beginning of this method.  Calling accept_datalink might require getting the lock for the transport's reactor.
-            // If the current thread is not an event handler for the transport's reactor, e.g., the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
-            // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
+            // This thread acquired lock_ at the beginning of this method.
+            // Calling accept_datalink might require getting the lock for the transport's reactor.
+            // If the current thread is not an event handler for the transport's reactor, e.g.,
+            // the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
+            // Event handlers in the transport reactor may call passive_connection which calls use_datalink
+            // which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
-            TransportImpl::ConnectionAttribs attribs = pend->attribs_;
             RcHandle<TransportClient> client = rchandle_from(this);
-            ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+            ACE_GUARD_RETURN(Reverse_Lock_t, rev_tc_guard, reverse_lock_, false);
             res = impl->accept_datalink(remote, attribs, client);
           }
 
@@ -404,7 +417,7 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
       if (DCPS_debug_level) {
         LogGuid writer_log(repo_id_);
         LogGuid reader_log(remote.repo_id_);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i - ")
                    ACE_TEXT("connect_datalink between local %C remote %C not successful\n"),
                    writer_log.c_str(),
                    reader_log.c_str()));
@@ -436,6 +449,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
   while (!impls_.empty()) {
     RcHandle<TransportImpl> impl = impls_.back().lock();
     if (!impl) {
+      impls_.pop_back();
       continue;
     }
     const OPENDDS_STRING type = impl->transport_type();
@@ -443,12 +457,19 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
         const TransportImpl::RemoteTransport remote_transport = {
-          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.discovery_locator_.data, data_.participant_discovered_at_, data_.remote_transport_context_,
-          data_.publication_transport_priority_,
-          data_.remote_reliable_, data_.remote_durable_};
+          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.discovery_locator_.data,
+          data_.participant_discovered_at_, data_.remote_transport_context_,
+          data_.publication_transport_priority_, data_.remote_reliable_, data_.remote_durable_};
 
         TransportImpl::AcceptConnectResult res;
-        if (!tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard)) {
+        bool ret;
+        {
+          // Release the PendingAssoc object's mutex_ since initiate_connect_i doesn't need it.
+          Reverse_Lock_t rev_mutex(mutex_);
+          ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_mutex, false);
+          ret = tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard);
+        }
+        if (!ret) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
           if (res.success_ ) {
@@ -471,7 +492,12 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
           if (!res.link_.is_nil()) {
 
-            tc->use_datalink_i(data_.remote_id_, res.link_, guard);
+            {
+              // use_datalink_i calls PendingAssoc::reset_client which needs the PendingAssoc's mutex_.
+              Reverse_Lock_t rev_mutex(mutex_);
+              ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_mutex, false);
+              tc->use_datalink_i(data_.remote_id_, res.link_, guard);
+            }
           } else {
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
@@ -536,6 +562,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   }
 
   PendingAssoc_rch pend = iter->second;
+  ACE_GUARD(ACE_Thread_Mutex, pend_guard, pend->mutex_);
   const int active_flag = pend->active_ ? ASSOC_ACTIVE : 0;
   bool ok = false;
 
@@ -574,11 +601,13 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
     }
   }
 
-  iter->second->reset_client();
+  pend_guard.release();
+  pend->reset_client();
   pending_assoc_timer_->cancel_timer(pend);
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
+  // Release TransportClient's lock as we're done updating its data.
   guard.release();
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
@@ -605,11 +634,14 @@ TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
-    // The transport impl may have resource for a pending connection.
-    for (size_t i = 0; i < it->second->impls_.size(); ++i) {
-      RcHandle<TransportImpl> impl = it->second->impls_[i].lock();
-      if (impl) {
-        impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_, true, true);
+    {
+      // The transport impl may have resource for a pending connection.
+      ACE_Guard<ACE_Thread_Mutex> guard(it->second->mutex_);
+      for (size_t i = 0; i < it->second->impls_.size(); ++i) {
+        RcHandle<TransportImpl> impl = it->second->impls_[i].lock();
+        if (impl) {
+          impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_, true, true);
+        }
       }
     }
     it->second->reset_client();
@@ -630,11 +662,14 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
     for (CORBA::ULong i = 0; i < length; ++i) {
       PendingMap::iterator iter = pending_.find(repos[i]);
       if (iter != pending_.end()) {
-        // The transport impl may have resource for a pending connection.
-        for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
-          RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
-          if (impl) {
-            impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+        {
+          // The transport impl may have resource for a pending connection.
+          ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
+          for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+            RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
+            if (impl) {
+              impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+            }
           }
         }
         iter->second->reset_client();
@@ -665,11 +700,14 @@ TransportClient::disassociate(const RepoId& peerId)
 
   PendingMap::iterator iter = pending_.find(peerId);
   if (iter != pending_.end()) {
-    // The transport impl may have resource for a pending connection.
-    for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
-      RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
-      if (impl) {
-        impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+    {
+      // The transport impl may have resource for a pending connection.
+      ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
+      for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+        RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
+        if (impl) {
+          impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+        }
       }
     }
     iter->second->reset_client();
@@ -1003,6 +1041,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
           }
 
           if (!subset.in()) {
+            guard.release();
             VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
             // similar to the "if (pub_links.is_nil())" case above, no links
             cur->get_send_listener()->data_delivered(cur);

@@ -38,3 +38,11 @@ project(RtpsRelayMonitor): dcps_test, opendds_optional_security, dcps_rtps_udp, 
     monitor.cpp
   }
 }
+
+project(RtpsRelayMetaChecker): dcps_test, opendds_cxx11 {
+  exename   = metachecker
+
+  Source_Files {
+    metachecker.cpp
+  }
+}

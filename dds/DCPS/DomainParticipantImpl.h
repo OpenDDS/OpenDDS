@@ -401,8 +401,14 @@ public:
   XTypes::TypeLookupService_rch get_type_lookup_service() { return type_lookup_service_; }
 
 #if defined(OPENDDS_SECURITY)
-  void set_security_config(const Security::SecurityConfig_rch& config);
-
+  Security::SecurityConfig_rch get_security_config() const
+  {
+    return security_config_;
+  }
+  DDS::Security::PermissionsHandle permissions_handle() const
+  {
+    return perm_handle_;
+  }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const
   {
     return part_crypto_handle_;

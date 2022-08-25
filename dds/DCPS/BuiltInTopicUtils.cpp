@@ -186,6 +186,10 @@ void BitSubscriber::remove_connection_record(const ConnectionRecord& cr)
   }
 
   ConnectionRecordDataReaderImpl* bit = dynamic_cast<ConnectionRecordDataReaderImpl*>(d.in());
+  if (!bit) {
+    return;
+  }
+
   bit->set_instance_state(bit->lookup_instance(cr), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 #else
   ACE_UNUSED_ARG(cr);
@@ -209,6 +213,9 @@ DDS::InstanceHandle_t BitSubscriber::add_thread_status(const InternalThreadBuilt
   }
 
   InternalThreadBuiltinTopicDataDataReaderImpl* bit = dynamic_cast<InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
+  if (!bit) {
+    return DDS::HANDLE_NIL;
+  }
 
   return bit->store_synthetic_data(ts, view_state, timestamp);
 #else
@@ -235,6 +242,10 @@ void BitSubscriber::remove_thread_status(const InternalThreadBuiltinTopicData& t
   }
 
   InternalThreadBuiltinTopicDataDataReaderImpl* bit = dynamic_cast<InternalThreadBuiltinTopicDataDataReaderImpl*>(d.in());
+  if (!bit) {
+    return;
+  }
+
   bit->set_instance_state(bit->lookup_instance(ts), DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
 #else
   ACE_UNUSED_ARG(ts);
@@ -263,6 +274,9 @@ void BitSubscriber::bit_pub_listener_hack(DomainParticipantImpl* participant)
       bit_pub_dr->set_listener(bit_pub_listener, DDS::DATA_AVAILABLE_STATUS);
       // Must call on_data_available when attaching a listener late - samples may be waiting
       DataReaderImpl* reader = dynamic_cast<DataReaderImpl*>(bit_pub_dr.in());
+      if (!reader) {
+        return;
+      }
       TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(bit_pub_listener, rchandle_from(reader), true, false, false));
     }
   }
@@ -289,6 +303,9 @@ DDS::InstanceHandle_t BitSubscriber::add_i(const char* topic_name,
   }
 
   DataReaderImpl* bit = dynamic_cast<DataReaderImpl*>(d.in());
+  if (!bit) {
+    return DDS::HANDLE_NIL;
+  }
 
   return bit->store_synthetic_data(sample, view_state);
 #else
@@ -316,6 +333,9 @@ void BitSubscriber::remove_i(const char* topic_name,
     }
 
     DataReaderImpl* bit = dynamic_cast<DataReaderImpl*>(d.in());
+    if (!bit) {
+      return;
+    }
     bit->set_instance_state(ih, DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE);
   }
 #else

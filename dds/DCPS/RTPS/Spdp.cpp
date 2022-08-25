@@ -226,6 +226,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
+  , quick_resend_ratio_(disco_->config()->quick_resend_ratio())
+  , min_resend_delay_(disco_->config()->min_resend_delay())
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
@@ -272,6 +274,8 @@ Spdp::Spdp(DDS::DomainId_t domain,
   : qos_(qos)
   , disco_(disco)
   , config_(disco_->config())
+  , quick_resend_ratio_(disco_->config()->quick_resend_ratio())
+  , min_resend_delay_(disco_->config()->min_resend_delay())
   , lease_duration_(disco_->config()->lease_duration())
   , lease_extension_(disco_->config()->lease_extension())
   , domain_(domain)
@@ -674,12 +678,11 @@ bool ip_in_AgentInfo(const ACE_INET_Addr& from, const ParameterList& plist)
 void
 Spdp::handle_participant_data(DCPS::MessageId id,
                               const ParticipantData_t& cpdata,
+                              const DCPS::MonotonicTimePoint& now,
                               const DCPS::SequenceNumber& seq,
                               const ACE_INET_Addr& from,
                               bool from_sedp)
 {
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
-
   // Make a (non-const) copy so we can tweak values below
   ParticipantData_t pdata(cpdata);
 
@@ -989,7 +992,7 @@ Spdp::validateSequenceNumber(const DCPS::MonotonicTimePoint& now, const DCPS::Se
 {
   if (seq.getValue() != 0 && iter->second.max_seq_ != DCPS::SequenceNumber::MAX_VALUE) {
     if (seq < iter->second.max_seq_) {
-      const bool honeymoon_period = now < iter->second.discovered_at_ + config_->min_resend_delay();
+      const bool honeymoon_period = now < iter->second.discovered_at_ + min_resend_delay_;
       if (!honeymoon_period) {
         ++iter->second.seq_reset_count_;
       }
@@ -1012,10 +1015,11 @@ Spdp::data_received(const DataSubmessage& data,
     return;
   }
 
+  const MonotonicTimePoint now = MonotonicTimePoint::now();
   ParticipantData_t pdata = ParticipantData_t();
 
   pdata.participantProxy.domainId = domain_;
-  pdata.discoveredAt = MonotonicTimePoint::now().to_monotonic_time();
+  pdata.discoveredAt = now.to_monotonic_time();
 
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
@@ -1074,7 +1078,7 @@ Spdp::data_received(const DataSubmessage& data,
   guard.release();
 #endif
 
-  handle_participant_data(msg_id, pdata, to_opendds_seqnum(data.writerSN), from, false);
+  handle_participant_data(msg_id, pdata, now, to_opendds_seqnum(data.writerSN), from, false);
 }
 
 void
@@ -1931,6 +1935,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   Security::AccessControl_var access = security_config_->get_access_control();
   Security::CryptoKeyFactory_var key_factory = security_config_->get_crypto_key_factory();
   Security::CryptoKeyExchange_var key_exchange = security_config_->get_crypto_key_exchange();
+  Security::HandleRegistry_rch handle_registry = security_config_->get_handle_registry(guid_);
 
   if (iter->second.shared_secret_handle_ != 0) {
     // Return the shared secret.
@@ -2003,6 +2008,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   iter->second.permissions_handle_ = access->validate_remote_permissions(
     auth, identity_handle_, iter->second.identity_handle_,
     iter->second.permissions_token_, iter->second.authenticated_peer_credential_token_, se);
+  handle_registry->insert_remote_participant_permissions_handle(guid, iter->second.permissions_handle_);
+
   if (participant_sec_attr_.is_access_protected &&
       iter->second.permissions_handle_ == DDS::HANDLE_NIL) {
     if (DCPS::security_debug.auth_warn) {
@@ -2123,6 +2130,7 @@ Spdp::remove_discovered_participant_i(const DiscoveredParticipantIter& iter)
       }
     }
     sedp_->get_handle_registry()->erase_remote_participant_crypto_handle(iter->first);
+    sedp_->get_handle_registry()->erase_remote_participant_permissions_handle(iter->first);
 
     if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
       if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
@@ -2542,6 +2550,10 @@ void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor
   }
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
+  if (outer->shutdown_flag_ == true) {
+    return;
+  }
+
   ACE_Reactor* const reactor = reactor_task->get_reactor();
   register_unicast_socket(reactor, unicast_socket_, "IPV4");
 #ifdef ACE_HAS_IPV6
@@ -2678,9 +2690,8 @@ Spdp::SpdpTransport::shorten_local_sender_delay_i()
   if (!outer) return;
 
   if (local_send_task_) {
-    const TimeDuration quick_resend = outer->config_->resend_period() * outer->config_->quick_resend_ratio();
-    const TimeDuration min_resend = outer->config_->min_resend_delay();
-    local_send_task_->enable(std::max(quick_resend, min_resend));
+    const TimeDuration quick_resend = outer->config_->resend_period() * outer->quick_resend_ratio_;
+    local_send_task_->enable(std::max(quick_resend, outer->min_resend_delay_));
   }
 }
 
@@ -3625,6 +3636,13 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
   if (!outer) return;
 
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
+  if (outer->shutting_down()) {
+    return;
+  }
+
+  if (outer->shutdown_flag_ == true) {
+    return;
+  }
 
   DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
   DCPS::InternalSampleInfoSequence infos;
@@ -3870,20 +3888,6 @@ AuthState Spdp::lookup_participant_auth_state(const GUID_t& id) const
     return pi->second.auth_state_;
   }
   return AUTH_STATE_HANDSHAKE;
-}
-#endif
-
-#ifndef OPENDDS_SAFETY_PROFILE
-bool
-operator==(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
-{
-  return x.kind == y.kind && x.port == y.port && x.address == y.address;
-}
-
-bool
-operator!=(const DCPS::Locator_t& x, const DCPS::Locator_t& y)
-{
-  return x.kind != y.kind && x.port != y.port && x.address != y.address;
 }
 #endif
 

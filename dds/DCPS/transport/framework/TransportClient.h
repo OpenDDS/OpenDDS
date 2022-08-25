@@ -196,6 +196,7 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, DataLink_rch, GUID_tKeyLessThan) DataLinkIndex;
   typedef OPENDDS_VECTOR(WeakRcHandle<TransportImpl>) ImplsType;
 
+  typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   struct PendingAssoc : RcEventHandler {
     ACE_Thread_Mutex mutex_;
     bool active_, scheduled_;
@@ -205,11 +206,11 @@ private:
     TransportImpl::ConnectionAttribs attribs_;
     WeakRcHandle<TransportClient> client_;
 
-    explicit PendingAssoc(TransportClient* tc)
+    explicit PendingAssoc(RcHandle<TransportClient> tc_rch)
       : active_(false)
       , scheduled_(false)
       , blob_index_(0)
-      , client_(RcHandle<TransportClient>(tc, inc_count()))
+      , client_(tc_rch)
     {}
 
     void reset_client();
@@ -345,7 +346,6 @@ private:
   /// Seems to protect accesses to impls_, pending_, links_, data_link_index_
   mutable ACE_Thread_Mutex lock_;
 
-  typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_lock_;
 
   RepoId repo_id_;

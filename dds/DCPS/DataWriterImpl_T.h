@@ -9,6 +9,11 @@
 #include "dcps_export.h"
 #include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
+#include "XTypes/DynamicDataAdapter.h"
+
+#ifdef OPENDDS_SECURITY
+#include "dds/DdsSecurityCoreC.h"
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -121,11 +126,11 @@ public:
     DDS::InstanceHandle_t registered_handle = DDS::HANDLE_NIL;
 
     const DDS::ReturnCode_t ret = get_or_create_instance_handle(registered_handle, instance, timestamp);
-    if (ret != DDS::RETCODE_OK) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::register_instance_w_timestamp: ")
-        ACE_TEXT("register failed: %C\n"),
-        TraitsType::type_name(),
-        retcode_to_string(ret)));
+    if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: %CDataWriterImpl::register_instance_w_timestamp: ")
+                 ACE_TEXT("register failed: %C\n"),
+                 TraitsType::type_name(),
+                 retcode_to_string(ret)));
     }
 
     return registered_handle;
@@ -141,21 +146,24 @@ public:
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& timestamp)
   {
-    if (instance_handle == DDS::HANDLE_NIL) {
-      instance_handle = this->lookup_instance(instance_data);
-      if (instance_handle == DDS::HANDLE_NIL) {
-        ACE_ERROR_RETURN((
-            LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::unregister_instance_w_timestamp: ")
-            ACE_TEXT("The instance sample is not registered.\n"),
-            TraitsType::type_name()),
-          DDS::RETCODE_ERROR);
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
+      typename InstanceMap::iterator pos = instance_map_.find(instance_data);
+      if (pos == instance_map_.end()) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::unregister_instance_w_timestamp: ")
+                          ACE_TEXT("The instance sample is not registered.\n"),
+                          TraitsType::type_name()),
+                         DDS::RETCODE_ERROR);
       }
+
+      if (instance_handle != DDS::HANDLE_NIL && instance_handle != pos->second) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+      instance_handle = pos->second;
+      instance_map_.erase(pos);
     }
 
-    // DataWriterImpl::unregister_instance_i will call back to inform the
-    // DataWriter.
-    // That the instance handle is removed from there and hence
-    // DataWriter can remove the instance here.
     return OpenDDS::DCPS::DataWriterImpl::unregister_instance_i(instance_handle, timestamp);
   }
 
@@ -183,13 +191,12 @@ public:
       DDS::InstanceHandle_t registered_handle = DDS::HANDLE_NIL;
       const DDS::ReturnCode_t ret =
         this->get_or_create_instance_handle(registered_handle, instance_data, source_timestamp);
-      if (ret != DDS::RETCODE_OK) {
-        ACE_ERROR_RETURN((
-            LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::write_w_timestamp: ")
-            ACE_TEXT("register failed: %C.\n"),
-            TraitsType::type_name(),
-            retcode_to_string(ret)),
-          ret);
+      if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
+        ACE_ERROR_RETURN((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: %CDataWriterImpl::write_w_timestamp: ")
+                          ACE_TEXT("register failed: %C.\n"),
+                          TraitsType::type_name(),
+                          retcode_to_string(ret)),
+                         ret);
       }
 
       handle = registered_handle;
@@ -235,16 +242,37 @@ public:
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& source_timestamp)
   {
-    if (instance_handle == DDS::HANDLE_NIL) {
-      instance_handle = this->lookup_instance(instance_data);
-      if (instance_handle == DDS::HANDLE_NIL) {
-        ACE_ERROR_RETURN((
-            LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dispose_w_timestamp, ")
-            ACE_TEXT("The instance sample is not registered.\n"),
-            TraitsType::type_name()),
-          DDS::RETCODE_ERROR);
+#if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
+    XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), instance_data);
+    DDS::Security::SecurityException ex;
+
+    if (security_config_ &&
+        participant_permissions_handle_ != DDS::HANDLE_NIL &&
+        !security_config_->get_access_control()->check_local_datawriter_dispose_instance(participant_permissions_handle_, this, &dda, ex)) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE,
+                   "(%P|%t) NOTICE: DataWriterImpl_T::dispose_instance_w_timestamp: unable to dispose instance SecurityException[%d.%d]: %C\n",
+                   ex.code, ex.minor_code, ex.message.in()));
       }
+      return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
+    }
+#endif
+
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
+      typename InstanceMap::iterator pos = instance_map_.find(instance_data);
+      if (pos == instance_map_.end()) {
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dispose_w_timestamp: ")
+                          ACE_TEXT("The instance sample is not registered.\n"),
+                          TraitsType::type_name()),
+                         DDS::RETCODE_ERROR);
+      }
+
+      if (instance_handle != DDS::HANDLE_NIL && instance_handle != pos->second) {
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+
+      instance_handle = pos->second;
     }
 
     return OpenDDS::DCPS::DataWriterImpl::dispose(instance_handle, source_timestamp);
@@ -582,13 +610,29 @@ private:
       handle = it->second;
       OpenDDS::DCPS::PublicationInstance_rch instance = get_handle_instance(handle);
 
-      if (instance && instance->unregistered_ == false) {
+      if (instance) {
         needs_registration = false;
       }
       // else: The instance is unregistered and now register again.
     }
 
     if (needs_registration) {
+#if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
+      XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), instance_data);
+      DDS::Security::SecurityException ex;
+
+      if (security_config_ &&
+          participant_permissions_handle_ != DDS::HANDLE_NIL &&
+          !security_config_->get_access_control()->check_local_datawriter_register_instance(participant_permissions_handle_, this, &dda, ex)) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE,
+                     "(%P|%t) NOTICE: DataWriterImpl_T::get_or_create_instance_handle: unable to register instance SecurityException[%d.%d]: %C\n",
+                     ex.code, ex.minor_code, ex.message.in()));
+        }
+        return DDS::Security::RETCODE_NOT_ALLOWED_BY_SECURITY;
+      }
+#endif
+
       // don't use fast allocator for registration.
       Message_Block_Ptr marshalled(
         this->dds_marshal(instance_data,

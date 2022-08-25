@@ -28,7 +28,7 @@ if($test->flag('callback')) {
 if ($callback eq '' && $config eq 'face_config.ini' &&
     (new PerlACE::ConfigList)->check_config('OPENDDS_SAFETY_PROFILE') &&
     (new PerlACE::ConfigList)->check_config('SAFETY_BASE')) {
-    system('$DDS_ROOT/tools/scripts/analyze_operator_new.sh $ACE_ROOT/lib/libACE.so $DDS_ROOT/lib/libOpenDDS_Corba.so $DDS_ROOT/lib/libOpenDDS_Dcps.so $DDS_ROOT/lib/libOpenDDS_Rtps.so $DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so $DDS_ROOT/lib/libOpenDDS_FACE.so Idl/libFaceMessengerIdl.so Publisher/publisher Subscriber/subscriber | awk \'{ print "ERROR: Call to global operator new: " $2; }\'');
+    system('$DDS_ROOT/tools/scripts/analyze_operator_new.sh $ACE_ROOT/lib/libACE.so $DDS_ROOT/lib/libOpenDDS_Corba.so $DDS_ROOT/lib/libOpenDDS_Dcps.so $DDS_ROOT/lib/libOpenDDS_Rtps.so $DDS_ROOT/lib/libOpenDDS_Rtps_Udp.so $DDS_ROOT/lib/libOpenDDS_FACE.so Idl/libFaceMessengerIdl.so Publisher/publisher Subscriber/subscriber | awk \'! /Processing/ { print "ERROR: Call to global operator new: " $2; }\'');
 }
 
 $test->enable_console_logging();

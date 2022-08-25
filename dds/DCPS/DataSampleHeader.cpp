@@ -696,6 +696,8 @@ DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   return true;
 }
 
+DataSampleHeader::MaybeGuard::NoOpLock DataSampleHeader::MaybeGuard::non_lock;
+
 } // namespace DCPS
 } // namespace OpenDDS
 

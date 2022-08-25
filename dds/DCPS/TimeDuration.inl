@@ -27,7 +27,7 @@ TimeDuration::from_double(double duration)
 
 ACE_INLINE
 TimeDuration::TimeDuration()
-: value_(zero_value.value())
+: value_(ACE_Time_Value())
 {
 }
 

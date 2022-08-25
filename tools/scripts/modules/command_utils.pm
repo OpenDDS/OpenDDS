@@ -191,8 +191,7 @@ sub die_with_stack_trace {
 #
 # chdir
 #   Change to the given directory before executing the command, returning
-#   afterwards. Any other path to passed will be relative to this one. Default
-#   is undef, which does not change directories.
+#   afterwards. All other paths passed will be relative to this one.
 #
 # capture
 #   Instead of outputting to the stdout and stderr of the script, capture or

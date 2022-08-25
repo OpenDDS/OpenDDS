@@ -28,6 +28,17 @@ private:
 
 // Tests
 
+TEST(dds_DCPS_NetworkResource, hostname_info)
+{
+  HostnameInfo info_1;
+  info_1.index_ = 3;
+  info_1.hostname_ = "test.com";
+  HostnameInfo info_3((HostnameInfo(info_1))); // info_2 is unnamed
+
+  EXPECT_EQ(info_1.index_, info_3.index_);
+  EXPECT_EQ(info_1.hostname_, info_3.hostname_);
+}
+
 TEST(dds_DCPS_NetworkResource, fully_qualified_domain_hostname_basic)
 {
   //ScopedDebugLevels sdl(6); // Uncomment for greater debug levels
