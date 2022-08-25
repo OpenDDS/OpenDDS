@@ -936,7 +936,6 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       add_delayed_notification(element);
 
     } else {
-
       if (mode_ == MODE_TERMINATED && !graceful_disconnecting_) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
               "TransportSendStrategy::send: mode is MODE_TERMINATED and not in "

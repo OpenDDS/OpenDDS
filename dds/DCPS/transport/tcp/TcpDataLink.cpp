@@ -585,6 +585,7 @@ OpenDDS::DCPS::TcpDataLink::receive_strategy()
   GuardType guard(strategy_lock_);
   return static_rchandle_cast<OpenDDS::DCPS::TcpReceiveStrategy>(receive_strategy_);
 }
+
 int
 OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_id,
                                              const RepoId& local_publication_id,
