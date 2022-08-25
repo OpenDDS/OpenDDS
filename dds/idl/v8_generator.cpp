@@ -17,7 +17,6 @@ void v8_generator::gen_includes()
 {
   be_global->add_include("<v8.h>", BE_GlobalData::STREAM_H);
   be_global->add_include("<nan.h>", BE_GlobalData::STREAM_CPP);
-  be_global->add_include("<sstream>", BE_GlobalData::STREAM_CPP);
   be_global->add_include("<codecvt>", BE_GlobalData::STREAM_CPP);
 }
 
@@ -260,21 +259,18 @@ namespace {
               || pt == AST_PredefinedType::PT_short
               || pt == AST_PredefinedType::PT_ulong
               || pt == AST_PredefinedType::PT_long) {
-        const std::string underscores =
-          dds_generator::scoped_helper(type->name(), "_"),
+        const bool is_unsigned = (pt == AST_PredefinedType::PT_ulonglong || pt == AST_PredefinedType::PT_ulong || pt == AST_PredefinedType::PT_ushort || pt == AST_PredefinedType::PT_octet),
+          is_longlong = (pt == AST_PredefinedType::PT_ulonglong || pt == AST_PredefinedType::PT_longlong);
+        const std::string underscores = dds_generator::scoped_helper(type->name(), "_"),
           temp_type = ltrim(scoped(type->name())),
-          temp_name = "temp_" + underscores;
+          temp_name = "temp_" + underscores,
+          conv_fun = std::string("std::strto") + (is_unsigned ? "u" : "") + (is_longlong ? "ll" : "l");
         strm <<
           ip << "if (lv->IsString()) {\n" <<
           ip << "  v8::Local<v8::String> ls = Nan::To<v8::String>(lv).ToLocalChecked();\n" <<
           ip << "  std::string ss(*Nan::Utf8String(ls));\n" <<
-          ip << "  std::istringstream iss(ss);\n" <<
-          ip << "  " << (pt == AST_PredefinedType::PT_octet ? "uint16_t" : temp_type.c_str()) << " " << temp_name << ";\n" <<
-          ip << "  if (ss.find(\"0x\") != std::string::npos) {\n" <<
-          ip << "    iss >> std::hex >> " << temp_name << ";\n" <<
-          ip << "  } else {\n" <<
-          ip << "    iss >> " << temp_name << ";\n" <<
-          ip << "  }\n" <<
+          ip << "  " << temp_type << " " << temp_name << ";\n" <<
+          ip << "  " << temp_name << " = static_cast<" << temp_type << ">(" << conv_fun << "(ss.c_str(), 0, ss.find(\"0x\") != std::string::npos ? 16 : 10));" <<
           ip << "  " << propName << assign_prefix << temp_name << assign_suffix << ";\n" <<
           ip << "} else {\n" <<
           ip << "  Nan::Maybe<int64_t> miv = Nan::To<int64_t>(lv);\n" <<
