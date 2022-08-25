@@ -2,7 +2,11 @@
 	path = tools/rapidjson
 	url = https://github.com/miloyip/rapidjson.git
 	branch = version1.1.0
+	shallow = true
+	openddsConfigureCommit = fd3dc29a5c2852df569e1ea81dbde2c412ac5051
 [submodule "tests/googletest"]
 	path = tests/googletest
 	url = https://github.com/oci-labs/googletest
 	branch = v1.8.x
+	shallow = true
+	openddsConfigureCommit = e6cfde4af187808e97308dfc8a4fab00632447cc
