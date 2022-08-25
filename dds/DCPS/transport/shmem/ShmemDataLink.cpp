@@ -1,20 +1,19 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "ShmemDataLink.h"
+
 #include "ShmemTransport.h"
 #include "ShmemInst.h"
 #include "ShmemSendStrategy.h"
 #include "ShmemReceiveStrategy.h"
 
-#include "dds/DCPS/transport/framework/TransportControlElement.h"
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include <dds/DCPS/transport/framework/TransportControlElement.h>
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 #include <cstdlib>
 
@@ -49,10 +48,11 @@ ShmemDataLink::open(const std::string& peer_address)
 {
   peer_address_ = peer_address;
   const ACE_TString name = ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str());
-  ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
+  ShmemAllocator::MEMORY_POOL_OPTIONS* alloc_opts_ptr = 0;
 
 #ifdef OPENDDS_SHMEM_WINDOWS
-  const bool use_opts = true;
+  ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
+  alloc_opts_ptr = &alloc_opts;
   const ACE_TString name_under = name + ACE_TEXT('_');
   // Find max size of peer's pool so enough local address space is reserved.
   HANDLE fm = ACE_TEXT_CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READONLY,
@@ -71,12 +71,9 @@ ShmemDataLink::open(const std::string& peer_address)
   alloc_opts.max_size_ = *pmax;
   UnmapViewOfFile(view);
   CloseHandle(fm);
-#else
-  const bool use_opts = false;
 #endif
 
-  peer_alloc_ = new ShmemAllocator(name.c_str(), 0 /*lock_name*/,
-                                   use_opts ? &alloc_opts : 0);
+  peer_alloc_ = new ShmemAllocator(name.c_str(), 0 /*lock_name*/, alloc_opts_ptr);
 
   if (-1 == peer_alloc_->find("Semaphore")) {
     stop_i();
@@ -104,13 +101,21 @@ ShmemDataLink::open(const std::string& peer_address)
   return true;
 }
 
+int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& local_sub,
+  const TransportReceiveListener_wrch& receive_listener, bool reliable)
+{
+  const int result = DataLink::make_reservation(remote_pub, local_sub, receive_listener, reliable);
+  send_association_msg(local_sub, remote_pub);
+  return result;
+}
+
 void
-OpenDDS::DCPS::ShmemDataLink::send_association_msg(const RepoId& local, const RepoId& remote)
+ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
 {
   DataSampleHeader header_data;
   header_data.message_id_ = REQUEST_ACK;
   header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
-  header_data.message_length_ = sizeof(remote);
+  header_data.message_length_ = guid_cdr_size;
   header_data.sequence_ = -1;
   header_data.publication_id_ = local;
   header_data.publisher_id_ = remote;
@@ -138,12 +143,12 @@ OpenDDS::DCPS::ShmemDataLink::send_association_msg(const RepoId& local, const Re
 }
 
 void
-OpenDDS::DCPS::ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
+ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
 {
   VDBG((LM_INFO, "(%P|%t) ShmemDataLink request_ack_received\n"));
-  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
+  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
     VDBG((LM_INFO, "(%P|%t) ShmemDataLink received association msg\n"));
-    RepoId local;
+    GUID_t local;
     DCPS::Serializer ser(&(*sample.sample_), encoding_unaligned_native);
     if (ser >> local) {
       invoke_on_start_callbacks(local, sample.header_.publication_id_, true);

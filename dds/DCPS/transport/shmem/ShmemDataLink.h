@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,20 +7,19 @@
 #define OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEMDATALINK_H
 
 #include "Shmem_Export.h"
-
 #include "ShmemSendStrategy.h"
 #include "ShmemSendStrategy_rch.h"
 #include "ShmemReceiveStrategy.h"
 #include "ShmemReceiveStrategy_rch.h"
 
-#include "dds/DCPS/transport/framework/DataLink.h"
+#include <dds/DCPS/transport/framework/DataLink.h>
 
-#include "ace/Local_Memory_Pool.h"
-#include "ace/Malloc_T.h"
-#include "ace/Pagefile_Memory_Pool.h"
-#include "ace/PI_Malloc.h"
-#include "ace/Process_Mutex.h"
-#include "ace/Shared_Memory_Pool.h"
+#include <ace/Local_Memory_Pool.h>
+#include <ace/Malloc_T.h>
+#include <ace/Pagefile_Memory_Pool.h>
+#include <ace/PI_Malloc.h>
+#include <ace/Process_Mutex.h>
+#include <ace/Shared_Memory_Pool.h>
 
 #include <string>
 
@@ -88,7 +85,12 @@ public:
 
   bool open(const std::string& peer_address);
 
-  void send_association_msg(const RepoId& local, const RepoId& remote);
+  int make_reservation(const GUID_t& remote_pub,
+                       const GUID_t& local_sub,
+                       const TransportReceiveListener_wrch& receive_listener,
+                       bool reliable);
+
+  void send_association_msg(const GUID_t& local, const GUID_t& remote);
 
   void request_ack_received(ReceivedDataSample& sample);
 

@@ -92,8 +92,8 @@ ShmemTransport::add_datalink(const std::string& remote_address)
 
 TransportImpl::AcceptConnectResult
 ShmemTransport::accept_datalink(const RemoteTransport& remote,
-                                const ConnectionAttribs& attribs,
-                                const TransportClient_rch& client)
+                                const ConnectionAttribs& /*attribs*/,
+                                const TransportClient_rch& /*client*/)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
   if (key.first != this->config().hostname()) {
@@ -113,7 +113,6 @@ ShmemTransport::accept_datalink(const RemoteTransport& remote,
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::accept_datalink ")
             ACE_TEXT("new link %C:%C.\n"), key.first.c_str(), key.second.c_str()), 2);
   ShmemDataLink_rch link = add_datalink(key.second);
-  link->send_association_msg(attribs.local_id_, remote.repo_id_);
   return AcceptConnectResult(link);
 }
 
@@ -279,9 +278,9 @@ ShmemTransport::ReadTask::svc()
   ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "ShmemTransport");
 
   while (!stopped_.value()) {
-    VDBG((LM_INFO, "Calling into sema_wait\n"));
+    VDBG((LM_INFO, "(%P|%t) Calling into sema_wait\n"));
     ACE_OS::sema_wait(&semaphore_);
-    VDBG((LM_INFO, "Out of sema_wait\n"));
+    VDBG((LM_INFO, "(%P|%t) Out of sema_wait\n"));
     if (stopped_.value()) {
       return 0;
     }
