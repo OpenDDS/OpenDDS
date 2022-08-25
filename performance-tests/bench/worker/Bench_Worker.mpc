@@ -1,6 +1,6 @@
 project: ../bench_builder_exe, ../bench_exe, opendds_optional_security, dcps_rtps_udp, dcps_tcp, dcps_udp, dcps_multicast {
   exename = worker
-  verbatim(gnuace, local) {
+  verbatim(gnuace, local, 1) {
     CPPFLAGS += -Wno-nonnull
   }
 }
