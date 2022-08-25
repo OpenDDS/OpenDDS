@@ -275,15 +275,16 @@ namespace {
           ip << "} else {\n" <<
           ip << "  Nan::Maybe<int64_t> miv = Nan::To<int64_t>(lv);\n" <<
           ip << "  if (miv.IsJust()) {\n" <<
-          ip << "    " << propName << assign_prefix << "miv.FromJust()" << assign_suffix << ";\n" <<
+          ip << "    " << propName << assign_prefix << "static_cast<" << temp_type << ">(miv.FromJust())" << assign_suffix << ";\n" <<
           ip << "  }\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_float
               || pt == AST_PredefinedType::PT_double) {
+        const std::string temp_type = ltrim(scoped(type->name()));
         strm <<
           ip << "if (lv->IsNumber()) {\n" <<
           ip << "  v8::Local<v8::Number> ln = Nan::To<v8::Number>(lv).ToLocalChecked();\n" <<
-          ip << "  " << propName << assign_prefix << "ln->Value()" << assign_suffix << ";\n" <<
+          ip << "  " << propName << assign_prefix << "static_cast<" << temp_type << ">(ln->Value())" << assign_suffix << ";\n" <<
           ip << "}\n";
       } else if (pt == AST_PredefinedType::PT_longdouble) {
         strm <<
