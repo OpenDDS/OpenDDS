@@ -165,26 +165,12 @@ set_partition_name_qos(
   if (!std::strcmp(name, "partition.name")) {
     // Value can be a comma-separated list
     const char* start = value;
-    char buffer[128];
-    std::memset(buffer, 0, sizeof(buffer));
     while (const char* next_comma = std::strchr(start, ',')) {
       const size_t size = next_comma - start;
-      if (size < sizeof(buffer)) {
-        // Copy into temp buffer, won't have null
-        std::strncpy(buffer, start, size);
-        // Append null
-        buffer[size] = '\0';
-        // Add to QOS
-        target.name.length(target.name.length() + 1);
-        target.name[target.name.length() - 1] = static_cast<const char*>(buffer);
-      } else {
-        if (DCPS::log_level >= DCPS::LogLevel::Error) {
-          ACE_ERROR((LM_ERROR,
-                     ACE_TEXT("(%P|%t) ERROR: set_partition_name_qos: ")
-                     ACE_TEXT("partition name of length %B exceeds maximum length of %B\n"),
-                     size, sizeof(buffer) - 1));
-        }
-      }
+      const OPENDDS_STRING temp(start, size);
+      // Add to QOS
+      target.name.length(target.name.length() + 1);
+      target.name[target.name.length() - 1] = temp.c_str();
       // Advance pointer
       start = next_comma + 1;
     }
