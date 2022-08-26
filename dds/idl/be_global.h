@@ -217,6 +217,8 @@ public:
    */
   bool warn_about_dcps_data_type();
 
+  ExtensibilityKind extensibility(AST_Decl* node, ExtensibilityKind default_extensibility, bool& has_annotation) const;
+  ExtensibilityKind extensibility(AST_Decl* node, ExtensibilityKind default_extensibility) const;
   ExtensibilityKind extensibility(AST_Decl* node) const;
   AutoidKind autoid(AST_Decl* node) const;
   bool id(AST_Decl* node, ACE_CDR::ULong& value) const;
@@ -239,6 +241,11 @@ public:
 
   bool is_nested(AST_Decl* node);
 
+  bool default_enum_extensibility_zero() const
+  {
+    return default_enum_extensibility_zero_;
+  }
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
@@ -260,6 +267,7 @@ private:
   bool root_default_nested_;
   bool warn_about_dcps_data_type_;
   ExtensibilityKind default_extensibility_;
+  bool default_enum_extensibility_zero_;
   OpenDDS::DataRepresentation default_data_representation_;
   AutoidKind root_default_autoid_;
   TryConstructFailAction default_try_construct_;

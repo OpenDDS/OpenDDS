@@ -1209,6 +1209,12 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   AST_Enum* const n = dynamic_cast<AST_Enum*>(type);
   std::vector<AST_EnumVal*> contents;
   scope2vector(contents, n, AST_Decl::NT_enum_val);
+  bool has_extensibility_annotation = false;
+  const ExtensibilityKind ek = be_global->extensibility(type, extensibilitykind_appendable, has_extensibility_annotation);
+
+  if (ek == extensibilitykind_mutable) {
+    be_util::misc_error_and_abort("MUTABLE extensibility for enum is not allowed", type);
+  }
 
   size_t default_literal_idx = 0;
   for (size_t i = 0; i != contents.size(); ++i) {
@@ -1221,11 +1227,17 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   OpenDDS::XTypes::TypeObject minimal_to, complete_to;
   minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
   minimal_to.minimal.kind = OpenDDS::XTypes::TK_ENUM;
+  if (has_extensibility_annotation || !be_global->default_enum_extensibility_zero()) {
+    minimal_to.minimal.enumerated_type.enum_flags = extensibility_to_type_flag(ek);
+  }
   // TODO: Add support for @bit_bound.
   minimal_to.minimal.enumerated_type.header.common.bit_bound = 32;
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ENUM;
+  if (has_extensibility_annotation || !be_global->default_enum_extensibility_zero()) {
+    complete_to.complete.enumerated_type.enum_flags = extensibility_to_type_flag(ek);
+  }
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
   complete_to.complete.enumerated_type.header.detail.type_name = canonical_name(type->name());
 

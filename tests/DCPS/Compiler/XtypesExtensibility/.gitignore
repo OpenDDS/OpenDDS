@@ -12,3 +12,16 @@ ExtensibilityTypeSupportImpl.cpp
 ExtensibilityTypeSupportImpl.h
 ExtensibilityTypeSupportS.cpp
 ExtensibilityTypeSupportS.h
+ZeroEnumC.cpp
+ZeroEnumC.h
+ZeroEnumC.inl
+ZeroEnumS.cpp
+ZeroEnumS.h
+ZeroEnumTypeSupport.idl
+ZeroEnumTypeSupportC.cpp
+ZeroEnumTypeSupportC.h
+ZeroEnumTypeSupportC.inl
+ZeroEnumTypeSupportImpl.cpp
+ZeroEnumTypeSupportImpl.h
+ZeroEnumTypeSupportS.cpp
+ZeroEnumTypeSupportS.h

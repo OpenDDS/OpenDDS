@@ -1,0 +1,26 @@
+
+project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
+  requires += no_opendds_safety_profile
+
+  TypeSupport_Files {
+    idlflags += -Gxtypes-complete --default-enum-extensibility-zero
+    ZeroEnum.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
+  requires += no_opendds_safety_profile
+
+  TypeSupport_Files {
+    idlflags += -Gxtypes-complete --default-enum-extensibility-zero
+    ZeroEnum.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

@@ -60,6 +60,7 @@ BE_GlobalData::BE_GlobalData()
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
+  , default_enum_extensibility_zero_(false)
   , root_default_autoid_(autoidkind_sequential)
   , default_try_construct_(tryconstructfailaction_discard)
   , old_typeobject_encoding_(false)
@@ -459,6 +460,8 @@ BE_GlobalData::parse_args(long& i, char** av)
           ACE_TEXT("Invalid argument to --default-extensibility: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
+    } else if (!strcmp(av[i], "--default-enum-extensibility-zero")) {
+      default_enum_extensibility_zero_ = true;
     } else if (!strcmp(av[i], "--default-autoid")) {
       if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-autoid\n")));
@@ -835,7 +838,34 @@ bool BE_GlobalData::warn_about_dcps_data_type()
   return idl_global->print_warnings();
 }
 
-ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node, ExtensibilityKind default_extensibility, bool& has_annotation) const
+{
+  has_annotation = true;
+
+  if (builtin_annotations_["::@final"]->find_on(node)) {
+    return extensibilitykind_final;
+  }
+
+  if (builtin_annotations_["::@appendable"]->find_on(node)) {
+    return extensibilitykind_appendable;
+  }
+
+  if (builtin_annotations_["::@mutable"]->find_on(node)) {
+    return extensibilitykind_mutable;
+  }
+
+  ExtensibilityAnnotation* extensibility_annotation =
+    dynamic_cast<ExtensibilityAnnotation*>(
+      builtin_annotations_["::@extensibility"]);
+  ExtensibilityKind value;
+  if (!extensibility_annotation->node_value_exists(node, value)) {
+    value = default_extensibility;
+    has_annotation = false;
+  }
+  return value;
+}
+
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node, ExtensibilityKind default_extensibility) const
 {
   if (builtin_annotations_["::@final"]->find_on(node)) {
     return extensibilitykind_final;
@@ -854,9 +884,14 @@ ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
       builtin_annotations_["::@extensibility"]);
   ExtensibilityKind value;
   if (!extensibility_annotation->node_value_exists(node, value)) {
-    value = default_extensibility_;
+    value = default_extensibility;
   }
   return value;
+}
+
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
+{
+  return extensibility(node, default_extensibility_);
 }
 
 AutoidKind BE_GlobalData::autoid(AST_Decl* node) const

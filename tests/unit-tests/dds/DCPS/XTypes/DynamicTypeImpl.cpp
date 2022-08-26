@@ -217,7 +217,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_PrimitiveKind)
   td->name("MyModCompleteToDynamic::PrimitiveKind");
   td->bound().length(1);
   td->bound()[0] = 32;
-  td->extensibility_kind(DDS::FINAL);
+  td->extensibility_kind(DDS::APPENDABLE);
   td->is_nested(0);
   XTypes::DynamicTypeMemberImpl* first_expected_dtm = new XTypes::DynamicTypeMemberImpl();
   DDS::DynamicTypeMember_var first_expected_dtm_var = first_expected_dtm;
@@ -321,7 +321,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   enum_td->name("MyModCompleteToDynamic::PrimitiveKind");
   enum_td->bound().length(1);
   enum_td->bound()[0] = 32;
-  enum_td->extensibility_kind(DDS::FINAL);
+  enum_td->extensibility_kind(DDS::APPENDABLE);
   enum_td->is_nested(0);
   XTypes::DynamicTypeMemberImpl* first_expected_dtm = new XTypes::DynamicTypeMemberImpl();
   DDS::DynamicTypeMember_var first_expected_dtm_var = first_expected_dtm;
