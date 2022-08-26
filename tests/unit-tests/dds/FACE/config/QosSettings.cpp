@@ -61,16 +61,6 @@ TEST(dds_FACE_config_QosSettings, test_set_publisher_multiple_partitions) {
   EXPECT_TRUE(!strcmp(qos.partition.name[1], "Bar234"));
 }
 
-TEST(dds_FACE_config_QosSettings, test_set_publisher_partition_too_long) {
-  QosSettings settings;
-
-  settings.set_qos(QosSettings::publisher, "partition.name", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
-  DDS::PublisherQos qos;
-  settings.apply_to(qos);
-
-  EXPECT_TRUE(0 == qos.partition.name.length());
-}
-
 TEST(dds_FACE_config_QosSettings, test_set_publisher_presentation_access_scope_instance) {
   QosSettings settings;
 
