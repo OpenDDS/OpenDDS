@@ -2360,7 +2360,15 @@ Spdp::SpdpTransport::SpdpTransport(DCPS::RcHandle<Spdp> outer)
   hdr_.vendorId = VENDORID_OPENDDS;
   DCPS::assign(hdr_.guidPrefix, outer->guid_.guidPrefix);
   data_.smHeader.submessageId = DATA;
+
+#if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+  // Little Endian
   data_.smHeader.flags = FLAG_E | FLAG_D;
+#else
+  // Big Endian
+  data_.smHeader.flags = FLAG_D;
+#endif
+
   data_.smHeader.submessageLength = 0; // last submessage in the Message
   data_.extraFlags = 0;
   data_.octetsToInlineQos = DATA_OCTETS_TO_IQOS;
@@ -2595,7 +2603,15 @@ Spdp::SpdpTransport::dispose_unregister()
 
   // Send the dispose/unregister SPDP sample
   data_.writerSN = to_rtps_seqnum(seq_);
+
+#if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+  // Little Endian
   data_.smHeader.flags = FLAG_E | FLAG_Q | FLAG_K_IN_DATA;
+#else
+  // Big Endian
+  data_.smHeader.flags = FLAG_Q | FLAG_K_IN_DATA;
+#endif
+
   data_.inlineQos.length(1);
   static const StatusInfo_t dispose_unregister = { {0, 0, 0, 3} };
   data_.inlineQos[0].status_info(dispose_unregister);
@@ -2894,7 +2910,15 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
 
   InfoDestinationSubmessage info_dst;
   info_dst.smHeader.submessageId = INFO_DST;
+
+#if (ACE_BYTE_ORDER == ACE_LITTLE_ENDIAN)
+  // Little Endian
   info_dst.smHeader.flags = FLAG_E;
+#else
+  // Big Endian
+  info_dst.smHeader.flags = 0;
+#endif
+
   info_dst.smHeader.submessageLength = sizeof(guid.guidPrefix);
   DCPS::assign(info_dst.guidPrefix, guid.guidPrefix);
 
