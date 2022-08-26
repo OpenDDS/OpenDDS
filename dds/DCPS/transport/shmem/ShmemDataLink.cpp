@@ -23,13 +23,12 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-namespace {
-  using OpenDDS::DCPS::Encoding;
-  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
-}
-
 namespace OpenDDS {
 namespace DCPS {
+
+namespace {
+  const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
+}
 
 ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
   : DataLink(transport,
