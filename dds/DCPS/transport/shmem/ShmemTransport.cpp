@@ -112,8 +112,7 @@ ShmemTransport::accept_datalink(const RemoteTransport& remote,
   }
   VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::accept_datalink ")
             ACE_TEXT("new link %C:%C.\n"), key.first.c_str(), key.second.c_str()), 2);
-  ShmemDataLink_rch link = add_datalink(key.second);
-  return AcceptConnectResult(link);
+  return AcceptConnectResult(add_datalink(key.second));
 }
 
 void
@@ -197,14 +196,14 @@ ShmemTransport::configure_i(ShmemInst& config)
 void
 ShmemTransport::shutdown_i()
 {
-  // Shutdown reserved datalinks and release configuration:
-  GuardType guard(links_lock_);
   if (read_task_) {
     read_task_->stop();
     ThreadStatusManager::Sleeper s(TheServiceParticipant->get_thread_status_manager());
     read_task_->wait();
   }
 
+  // Shutdown reserved datalinks and release configuration:
+  GuardType guard(links_lock_);
   for (ShmemDataLinkMap::iterator it(links_.begin());
        it != links_.end(); ++it) {
     it->second->transport_shutdown();
@@ -278,18 +277,12 @@ ShmemTransport::ReadTask::svc()
   ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "ShmemTransport");
 
   while (!stopped_.value()) {
-    VDBG((LM_INFO, "(%P|%t) Calling into sema_wait\n"));
     ACE_OS::sema_wait(&semaphore_);
-    VDBG((LM_INFO, "(%P|%t) Out of sema_wait\n"));
     if (stopped_.value()) {
       return 0;
     }
-    bool did_read = false;
-    while (!did_read) {
-      did_read = outer_->read_from_links();
-      if (!did_read) {
-       ACE_OS::sleep(1);
-      }
+    while (!(outer_->read_from_links() || stopped_.value())) {
+      ACE_OS::sleep(1);
     }
   }
   return 0;

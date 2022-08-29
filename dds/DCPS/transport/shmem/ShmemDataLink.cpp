@@ -113,7 +113,7 @@ ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
 {
   DataSampleHeader header_data;
   header_data.message_id_ = REQUEST_ACK;
-  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
+  header_data.byte_order_ = ACE_CDR_BYTE_ORDER;
   header_data.message_length_ = guid_cdr_size;
   header_data.sequence_ = -1;
   header_data.publication_id_ = local;
@@ -133,7 +133,7 @@ ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
                           0));
 
   *message << header_data;
-  DCPS::Serializer ser(message.get(), encoding_unaligned_native);
+  Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
   send_strategy_->link_released(false);
   TransportControlElement* send_element = new TransportControlElement(move(message));
@@ -148,7 +148,7 @@ ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
     VDBG((LM_INFO, "(%P|%t) ShmemDataLink received association msg\n"));
     GUID_t local;
-    DCPS::Serializer ser(&(*sample.sample_), encoding_unaligned_native);
+    Serializer ser(&(*sample.sample_), encoding_unaligned_native);
     if (ser >> local) {
       invoke_on_start_callbacks(local, sample.header_.publication_id_, true);
     }

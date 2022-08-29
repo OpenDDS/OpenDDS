@@ -451,7 +451,7 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 void
 OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sample)
 {
-  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
+  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
     RepoId local;
     DCPS::Serializer ser(&(*sample.sample_), encoding_unaligned_native);
     if (ser >> local) {
@@ -467,7 +467,7 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
   // Other data in the DataSampleHeader are not necessary set. The bogus values
   // can be used.
 
-  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
+  header_data.byte_order_ = ACE_CDR_BYTE_ORDER;
   header_data.message_length_ = 0;
   header_data.sequence_ = sample.header_.sequence_;
   header_data.publication_id_ = sample.header_.publication_id_;
@@ -533,8 +533,8 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
 {
   DataSampleHeader header_data;
   header_data.message_id_ = REQUEST_ACK;
-  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
-  header_data.message_length_ = sizeof(remote);
+  header_data.byte_order_ = ACE_CDR_BYTE_ORDER;
+  header_data.message_length_ = guid_cdr_size;
   header_data.sequence_ = -1;
   header_data.publication_id_ = local;
   header_data.publisher_id_ = remote;
