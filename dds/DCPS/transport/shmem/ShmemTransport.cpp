@@ -278,11 +278,7 @@ ShmemTransport::ReadTask::svc()
 
   while (!stopped_.value()) {
     ACE_OS::sema_wait(&semaphore_);
-    if (stopped_.value()) {
-      return 0;
-    }
-    while (!(outer_->read_from_links() || stopped_.value())) {
-      ACE_OS::sleep(1);
+    while (!(stopped_.value() || outer_->read_from_links())) {
     }
   }
   return 0;
