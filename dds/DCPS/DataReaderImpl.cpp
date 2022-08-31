@@ -2792,7 +2792,7 @@ DataReaderImpl::get_reactor()
 OpenDDS::DCPS::RepoId
 DataReaderImpl::get_topic_id()
 {
-  return this->topic_servant_->get_id();
+  return topic_servant_ ? topic_servant_->get_id() : GUID_UNKNOWN;
 }
 
 OpenDDS::DCPS::RepoId
