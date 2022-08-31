@@ -46,7 +46,7 @@ namespace DCPS {
     /**
      * Answer if there are any messages that have not been accounted for.
      */
-    bool pending_messages();
+    bool pending_messages() const;
 
     /**
      * Block until all messages have been accounted for or timeouts out based
@@ -63,15 +63,17 @@ namespace DCPS {
     /**
      * For testing.
      */
-    int dropped_count();
+    int dropped_count() const;
 
   private:
+    bool pending_messages_i() const;
+
     const OPENDDS_STRING msg_src_;         // Source of tracked messages
     int                  dropped_count_;
     int                  delivered_count_; // Messages transmitted by transport layer
     int                  sent_count_;      // Messages sent to transport layer
 
-    ACE_Thread_Mutex lock_;
+    mutable ACE_Thread_Mutex lock_;
 
     /// All messages have been transported condition variable.
     typedef ConditionVariable<ACE_Thread_Mutex> ConditionVariableType;

@@ -96,9 +96,6 @@ $test->process("subscriber", "subscriber", $sub_opts);
 $test->start_process("subscriber");
 $test->start_process("publisher");
 
-# ignore this issue that is already being tracked in redmine
-$test->ignore_error("(Redmine Issue# 1446)");
-
 # Ignore normal disconnect/reconnect messages
 $test->ignore_error("TcpConnection::active_reconnect_i error Connection refused");
 
