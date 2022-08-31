@@ -245,6 +245,40 @@ TEST(dds_DCPS_NetworkAddress, OperatorsIpSix)
 
 #endif
 
+TEST(dds_DCPS_NetworkAddress, IsAnyIpFour)
+{
+  const NetworkAddress sa1;
+  const NetworkAddress sa2(1234, "0.0.0.0");
+  const NetworkAddress sa3(1234, "192.168.10.3");
+
+  EXPECT_TRUE(sa1.is_any());
+  EXPECT_TRUE(sa2.is_any());
+
+  EXPECT_FALSE(sa3.is_any());
+}
+
+#if defined (ACE_HAS_IPV6)
+
+TEST(dds_DCPS_NetworkAddress, IsAnyIpSix)
+{
+  const NetworkAddress sa1;
+  const NetworkAddress sa2(1234, "::");
+  const NetworkAddress sa3(8080, "::ffff:0:0");
+  const NetworkAddress sa4(8080, "0000:0000:0000:0000:0000:FFFF:0000:0000");
+  const NetworkAddress sa5(8080, "0000:0000:0000:0000:0000:FFFF:C0A8:0A04");
+  const NetworkAddress sa6(5678, "0101:0101:0101:0101:0101:0101:0101:0101");
+
+  EXPECT_TRUE(sa1.is_any());
+  EXPECT_TRUE(sa2.is_any());
+  EXPECT_TRUE(sa3.is_any());
+  EXPECT_TRUE(sa4.is_any());
+
+  EXPECT_FALSE(sa5.is_any());
+  EXPECT_FALSE(sa6.is_any());
+}
+
+#endif
+
 TEST(dds_DCPS_NetworkAddress, IsLoopbackIpFour)
 {
   NetworkAddress sa1(1234, "1.2.3.4");

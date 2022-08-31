@@ -206,7 +206,12 @@ bool NetworkAddress::is_any() const
     return inet_addr_.in4_.sin_addr.s_addr == INADDR_ANY;
 #if defined (ACE_HAS_IPV6)
   } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
-    return IN6_IS_ADDR_UNSPECIFIED(&inet_addr_.in6_.sin6_addr);
+    const bool ipv6_unspec = IN6_IS_ADDR_UNSPECIFIED(&inet_addr_.in6_.sin6_addr);
+    if (!ipv6_unspec) {
+      const unsigned char buff[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0, 0, 0, 0 };
+      return memcmp(buff, &inet_addr_.in6_.sin6_addr, sizeof (buff)) == 0;
+    }
+    return true;
 #endif
   }
   return false;

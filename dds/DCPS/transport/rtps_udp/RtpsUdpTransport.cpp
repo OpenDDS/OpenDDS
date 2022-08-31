@@ -605,7 +605,11 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
-  config.ipv6_local_address(NetworkAddress(address));
+  NetworkAddress temp(address);
+  if (address.is_ipv4_mapped_ipv6() && temp.is_any()) {
+    temp = NetworkAddress(address.get_port_number(), "::");
+  }
+  config.ipv6_local_address(temp);
 
 #ifdef ACE_RECVPKTINFO6
   if (ipv6_unicast_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
