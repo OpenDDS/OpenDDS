@@ -183,13 +183,6 @@ sub report_errors_in_file {
                   $error = 1;
               }
           }
-
-          if (!$report && $line =~ /wait_(?:messages_)?pending /) {  # REMOVE LATER
-              if ($line =~ s/ERROR/ERR0R/g) {
-                  $line .= "(TestFramework ignored this as a problem)";
-              }
-              print STDERR "$file: $line";
-          }
       }
       close FILE;
   }

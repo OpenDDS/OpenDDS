@@ -397,7 +397,6 @@ tests/DCPS/ConfigFile/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/ConfigTransports/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/DCPS/RtpsMessages/run_test.pl: !DCPS_MIN RTPS
 tests/DCPS/RtpsDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST RTPS !NO_BUILT_IN_TOPICS
-tests/DCPS/RtiSerialization/run_test.pl rtps: !DCPS_MIN RTPS
 tests/DCPS/MultiDiscovery/run_test.pl: !DCPS_MIN !NO_MCAST !TARGET
 tests/DCPS/DomainRange/run_test.pl: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
 tests/DCPS/InternalThreadStatus/run_test.pl: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !NO_BUILT_IN_TOPICS !DDS_NO_OWNERSHIP_PROFILE
