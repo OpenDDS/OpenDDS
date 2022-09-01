@@ -111,6 +111,7 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
 void
 ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
 {
+  VDBG((LM_INFO, "(%P|%t) ShmemDataLink::send_association_msg\n"));
   DataSampleHeader header_data;
   header_data.message_id_ = REQUEST_ACK;
   header_data.byte_order_ = ACE_CDR_BYTE_ORDER;
@@ -138,15 +139,13 @@ ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
   send_strategy_->link_released(false);
   TransportControlElement* send_element = new TransportControlElement(move(message));
   this->send_i(send_element, false);
-  VDBG((LM_INFO, "(%P|%t) ShmemDataLink send_association_msg sent\n"));
 }
 
 void
 ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
 {
-  VDBG((LM_INFO, "(%P|%t) ShmemDataLink request_ack_received\n"));
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
-    VDBG((LM_INFO, "(%P|%t) ShmemDataLink received association msg\n"));
+    VDBG((LM_INFO, "(%P|%t) ShmemDataLink::request_ack_received: association msg\n"));
     GUID_t local;
     Serializer ser(&(*sample.sample_), encoding_unaligned_native);
     if (ser >> local) {
