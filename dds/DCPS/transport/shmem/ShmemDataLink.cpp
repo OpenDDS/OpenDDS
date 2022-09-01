@@ -47,9 +47,11 @@ ShmemDataLink::open(const std::string& peer_address)
 {
   peer_address_ = peer_address;
   const ACE_TString name = ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str());
+  ShmemAllocator::MEMORY_POOL_OPTIONS* alloc_opts_ptr = 0;
 
 #ifdef OPENDDS_SHMEM_WINDOWS
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
+  alloc_opts_ptr = &alloc_opts;
   const ACE_TString name_under = name + ACE_TEXT('_');
   // Find max size of peer's pool so enough local address space is reserved.
   HANDLE fm = ACE_TEXT_CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READONLY,
@@ -70,13 +72,7 @@ ShmemDataLink::open(const std::string& peer_address)
   CloseHandle(fm);
 #endif
 
-  peer_alloc_ = new ShmemAllocator(name.c_str(), 0 /*lock_name*/,
-#ifdef OPENDDS_SHMEM_WINDOWS
-    &alloc_opts
-#else
-    0
-#endif
-    );
+  peer_alloc_ = new ShmemAllocator(name.c_str(), 0 /*lock_name*/, alloc_opts_ptr);
 
   if (-1 == peer_alloc_->find("Semaphore")) {
     stop_i();
