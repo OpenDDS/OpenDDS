@@ -1,4 +1,3 @@
-#include <ace/Init_ACE.h>
 #include <ace/INET_Addr.h>
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_netdb.h>
@@ -146,16 +145,14 @@ void address_info() {
 }
 
 
-int main(int argc, char* argv[]) {
+int ACE_TMAIN(int argc, char* argv[]) {
   ACE_UNUSED_ARG(argc);
   ACE_UNUSED_ARG(argv);
-  ACE::init();
   const int attempts = 3;
   for (int i = 0; i < attempts; ++i) {
     ACE_DEBUG((LM_DEBUG, "========= Attempt %d....\n", i));
     address_info();
     ACE_OS::sleep((i+1)*2);
   }
-  ACE::fini();
   return 0;
 }
