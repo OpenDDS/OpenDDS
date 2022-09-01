@@ -101,9 +101,8 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
     case CvStatus_Timeout:
       if (DCPS_debug_level && pending_messages()) {
         ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending: %T ")
-                   ACE_TEXT("(caller: %C)\n"),
-                   ACE_TEXT("Timed out waiting for messages to be transported"),
+                   "(%P|%t) MessageTracker::wait_messages_pending: "
+                   "Timed out waiting for messages to be transported (caller: %C)\n",
                    caller));
       }
       loop = false;
