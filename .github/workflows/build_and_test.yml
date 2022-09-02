@@ -170,7 +170,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --no-inline --tests --java=/usr/lib/jvm/adoptopenjdk-12-hotspot-amd64 --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        ./configure --no-inline --tests --java=$JAVA_HOME_17_X64 --no-rapidjson --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -1377,9 +1377,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - name: install clang++
-      run: |
-        sudo apt-get install -y clang-5.0
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -1400,7 +1397,7 @@ jobs:
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(clang++-5.0 --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(clang++-12 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1424,7 +1421,7 @@ jobs:
         ./configure \
           --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
-          --compiler=clang++-5.0 \
+          --compiler=clang++-12 \
           --std=c++11 \
           --no-inline \
           --features=uses_wchar=1 \
@@ -1465,9 +1462,6 @@ jobs:
     steps:
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
-    - name: install clang++
-      run: |
-        sudo apt-get install -y clang-5.0
     - name: checkout MPC
       uses: actions/checkout@v3
       with:
@@ -1664,9 +1658,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - name: install clang++
-      run: |
-        sudo apt-get install -y clang-10
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -1749,9 +1740,6 @@ jobs:
     needs: ACE_TAO_u20_clang10_sec_js0
 
     steps:
-    - name: install clang++
-      run: |
-        sudo apt-get install -y clang-10
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -1949,9 +1937,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - name: install gcc and g++
-      run: |
-        sudo apt-get install g++-6
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -1972,7 +1957,7 @@ jobs:
     - name: get compiler version
       shell: bash
       run: |
-        export COMPILER_VERSION=$(g++-6 --version 2>&1 | head -n 1)
+        export COMPILER_VERSION=$(g++-9 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
@@ -1995,7 +1980,7 @@ jobs:
         cd OpenDDS
         ./configure \
           --force-clone-submodules \
-          --compiler=g++-6 \
+          --compiler=g++-9 \
           --no-debug \
           --features=uses_wchar=1 \
           --std=c++03 \
@@ -2034,9 +2019,6 @@ jobs:
     needs: ACE_TAO_u20_gcc6_d0w1_cpp03
 
     steps:
-    - name: install gcc and g++
-      run: |
-        sudo apt-get install g++-6
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -2070,7 +2052,7 @@ jobs:
         cd OpenDDS
         ./configure \
           --force-clone-submodules \
-          --compiler=g++-6 \
+          --compiler=g++-9 \
           --no-debug \
           --features=uses_wchar=1 \
           --std=c++03 \
@@ -2756,9 +2738,6 @@ jobs:
     runs-on: ubuntu-20.04
 
     steps:
-    - name: install gcc and g++
-      run: |
-        sudo apt-get install g++-10
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout OpenDDS
@@ -2862,9 +2841,6 @@ jobs:
     needs: ACE_TAO_u20_gcc10_bsafe_js0_FM-2c
 
     steps:
-    - name: install gcc and g++
-      run: |
-        sudo apt-get install g++-10
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3279,9 +3255,6 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: install clang-12
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: sudo apt-get -y install clang-12
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3338,8 +3311,6 @@ jobs:
     needs: ACE_TAO_u20_p1_asan
 
     steps:
-    - name: install clang-12
-      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3566,9 +3537,6 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: install clang-12
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: sudo apt-get -y install clang-12
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3623,8 +3591,6 @@ jobs:
     needs: ACE_TAO_u20_p1_tsan
 
     steps:
-    - name: install clang-12
-      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
@@ -3843,9 +3809,6 @@ jobs:
       with:
         path: ${{ github.job }}.tar.xz
         key: c10_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
-    - name: install clang-12
-      if: steps.cache-artifact.outputs.cache-hit != 'true'
-      run: sudo apt-get -y install clang-12
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -3902,8 +3865,6 @@ jobs:
     needs: ACE_TAO_u20_p1_ubsan
 
     steps:
-    - name: install clang-12
-      run: sudo apt-get -y install clang-12
     - name: install xerces
       run: sudo apt-get -y install libxerces-c-dev
     - name: checkout MPC
