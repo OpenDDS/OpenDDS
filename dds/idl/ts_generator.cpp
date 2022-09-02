@@ -232,6 +232,9 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual OpenDDS::DCPS::Extensibility getExtensibility() const;\n"
       "\n"
       "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
+      "\n"
+      "private:\n"
+      "  OpenDDS::DCPS::NativeTopicType<" << short_name << "> topic_type_;\n"
       "};\n";
   }
   be_global->header_ << be_global->versioning_end() << "\n";
@@ -245,7 +248,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  typedef OpenDDS::DCPS::DataWriterImpl_T<" << short_name << "> DataWriterImplType;\n"
       "  ::DDS::DataWriter_ptr writer_impl = ::DDS::DataWriter::_nil();\n"
       "  ACE_NEW_NORETURN(writer_impl,\n"
-      "                   DataWriterImplType());\n"
+      "                   DataWriterImplType(&topic_type_));\n"
       "  return writer_impl;\n"
       "}\n\n"
       "::DDS::DataReader_ptr " << ts_short_name << "TypeSupportImpl::create_datareader()\n"

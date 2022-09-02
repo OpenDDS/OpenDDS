@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -57,31 +55,33 @@ namespace DCPS {
 //      currently this is not needed because auto_enable_created_entities
 //      cannot be false.
 
-DataWriterImpl::DataWriterImpl()
-  : data_dropped_count_(0),
-    data_delivered_count_(0),
-    controlTracker("DataWriterImpl"),
-    n_chunks_(TheServiceParticipant->n_chunks()),
-    association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier()),
-    qos_(TheServiceParticipant->initial_DataWriterQos()),
-    db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks())),
-    topic_id_(GUID_UNKNOWN),
-    topic_servant_(0),
-    listener_mask_(DEFAULT_STATUS_MASK),
-    domain_id_(0),
-    publication_id_(GUID_UNKNOWN),
-    sequence_number_(SequenceNumber::SEQUENCENUMBER_UNKNOWN()),
-    coherent_(false),
-    coherent_samples_(0),
-    liveliness_lost_(false),
-    reactor_(0),
-    liveliness_check_interval_(TimeDuration::max_value),
-    last_deadline_missed_total_count_(0),
-    is_bit_(false),
-    min_suspended_transaction_id_(0),
-    max_suspended_transaction_id_(0),
-    liveliness_asserted_(false),
-    liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
+DataWriterImpl::DataWriterImpl(const AbstractTopicType* topic_type)
+  : data_dropped_count_(0)
+  , data_delivered_count_(0)
+  , controlTracker("DataWriterImpl")
+  , n_chunks_(TheServiceParticipant->n_chunks())
+  , association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier())
+  , qos_(TheServiceParticipant->initial_DataWriterQos())
+  , topic_type_(topic_type)
+  , skip_serialize_(false)
+  , db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks()))
+  , topic_id_(GUID_UNKNOWN)
+  , topic_servant_(0)
+  , listener_mask_(DEFAULT_STATUS_MASK)
+  , domain_id_(0)
+  , publication_id_(GUID_UNKNOWN)
+  , sequence_number_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , coherent_(false)
+  , coherent_samples_(0)
+  , liveliness_lost_(false)
+  , reactor_(0)
+  , liveliness_check_interval_(TimeDuration::max_value)
+  , last_deadline_missed_total_count_(0)
+  , is_bit_(false)
+  , min_suspended_transaction_id_(0)
+  , max_suspended_transaction_id_(0)
+  , liveliness_asserted_(false)
+  , liveness_timer_(make_rch<LivenessTimer>(ref(*this)))
 {
   liveliness_lost_status_.total_count = 0;
   liveliness_lost_status_.total_count_change = 0;
@@ -1368,9 +1368,6 @@ DataWriterImpl::enable()
   const CORBA::Long max_durable_per_instance =
     qos_.durability.kind == DDS::VOLATILE_DURABILITY_QOS ? 0 : history_depth;
 
-  // enable the type specific part of this DataWriter
-  this->enable_specific();
-
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   // Get data durability cache if DataWriter QoS requires durable
   // samples.  Publisher servant retains ownership of the cache.
@@ -1380,9 +1377,9 @@ DataWriterImpl::enable()
 
   //Note: the QoS used to set n_chunks_ is Changeable=No so
   // it is OK that we cannot change the size of our allocators.
-  data_container_ = RcHandle<WriteDataContainer>
-    (new WriteDataContainer
-     (this,
+  data_container_ = RcHandle<WriteDataContainer>(
+    new WriteDataContainer(
+      this,
       max_samples_per_instance,
       history_depth,
       max_durable_per_instance,
@@ -1446,8 +1443,9 @@ DataWriterImpl::enable()
     }
   }
 
-  if (!participant)
+  if (!participant) {
     return DDS::RETCODE_ERROR;
+  }
 
   participant->add_adjust_liveliness_timers(this);
 
@@ -2824,6 +2822,253 @@ void DataWriterImpl::transport_discovery_change()
                                      dp_id_copy,
                                      publication_id_copy,
                                      trans_conf_info);
+}
+
+DDS::ReturnCode_t DataWriterImpl::setup_serialization()
+{
+  if (qos_.representation.value.length() > 0 &&
+      qos_.representation.value[0] != UNALIGNED_CDR_DATA_REPRESENTATION) {
+    // If the QoS explicitly sets XCDR, XCDR2, or XML, force encapsulation
+    cdr_encapsulation(true);
+  }
+
+  if (cdr_encapsulation()) {
+    Encoding::Kind encoding_kind;
+    // There should only be one data representation in a DataWriter, so
+    // simply use qos_.representation.value[0].
+    if (repr_to_encoding_kind(qos_.representation.value[0], encoding_kind)) {
+      encoding_mode_ = EncodingMode(topic_type_, encoding_kind, swap_bytes());
+      if (encoding_kind == Encoding::KIND_XCDR1 &&
+          topic_type_->max_extensibility() == MUTABLE) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::setup_serialization: "
+            "Encountered unsupported combination of XCDR1 encoding and mutable extensibility "
+            "for writer of type %C\n",
+            topic_type_->name().c_str()));
+        }
+        return DDS::RETCODE_ERROR;
+      } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::setup_serialization: "
+            "Unaligned CDR is not supported by transport types that require encapsulation\n"));
+        }
+        return DDS::RETCODE_ERROR;
+      }
+    } else if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DataWriterImpl::setup_serialization: "
+                 "Encountered unsupported or unknown data representation: %C ",
+                 "for writer of type %C\n",
+                 repr_to_string(qos_.representation.value[0]).c_str(),
+                 topic_type_->name().c_str()));
+    }
+  } else {
+    // Pick unaligned CDR as it is the implicit representation for non-encapsulated
+    encoding_mode_ = EncodingMode(topic_type_, Encoding::KIND_UNALIGNED_CDR, swap_bytes());
+  }
+  if (!encoding_mode_.valid()) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::setup_serialization: "
+                 "Could not find a valid data representation\n"));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) WriterImpl::setup_serialization: "
+      "Setup successfully with %C data representation.\n",
+      Encoding::kind_to_string(encoding_mode_.encoding().kind()).c_str()));
+  }
+
+  // Set up allocator with reserved space for data if it is bounded
+  const SerializedSizeBound buffer_size_bound = encoding_mode_.buffer_size_bound();
+  if (buffer_size_bound) {
+    const size_t chunk_size = buffer_size_bound.get();
+    data_allocator_.reset(new DataAllocator(n_chunks_, chunk_size));
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::setup_serialization: "
+        "using data allocator at %x with %u %u byte chunks\n",
+        data_allocator_.get(),
+        n_chunks_,
+        chunk_size));
+    }
+  } else if (DCPS_debug_level >= 2) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::setup_serialization: "
+      "sample size is unbounded, not using data allocator, "
+      "always allocating from heap\n"));
+  }
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DataWriterImpl::get_key_value(
+  AbstractSample_rch& sample, DDS::InstanceHandle_t handle)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
+  const InstanceHandlesToValues::const_iterator it = instance_handles_to_values_.find(handle);
+  if (it == instance_handles_to_values_.end()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  sample = it->second;
+  return DDS::RETCODE_OK;
+}
+
+DDS::InstanceHandle_t DataWriterImpl::lookup_instance(AbstractSample_rch& sample)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
+  const InstanceValuesToHandles::const_iterator it = instance_values_to_handles_.find(sample);
+  return it == instance_values_to_handles_.end() ? DDS::HANDLE_NIL : it->second;
+}
+
+DDS::ReturnCode_t DataWriterImpl::unregister_instance_w_timestamp(
+  AbstractSample_rch& sample,
+  DDS::InstanceHandle_t instance_handle,
+  const DDS::Time_t& timestamp)
+{
+  const DDS::ReturnCode_t rc = instance_must_exist(
+    "unregister_instance_w_timestamp", sample, instance_handle, /* remove = */ true);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return unregister_instance_i(instance_handle, timestamp);
+}
+
+DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
+  AbstractSample_rch& sample,
+  DDS::InstanceHandle_t instance_handle,
+  const DDS::Time_t& source_timestamp)
+{
+  const DDS::ReturnCode_t rc = instance_must_exist(
+    "dispose_w_timestamp", sample, instance_handle);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return dispose(instance_handle, source_timestamp);
+}
+
+ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
+{
+  const bool encapsulated = cdr_encapsulation();
+  const Encoding& encoding = encoding_mode_.encoding();
+  Message_Block_Ptr mb;
+  ACE_Message_Block* tmp_mb;
+
+  // Don't use the cached allocator for the registered sample message
+  // block.
+  if (sample->key_only() && !skip_serialize_) {
+    ACE_NEW_RETURN(tmp_mb,
+      ACE_Message_Block(
+        encoding_mode_.buffer_size(sample),
+        ACE_Message_Block::MB_DATA,
+        0, // cont
+        0, // data
+        0, // alloc_strategy
+        get_db_lock()),
+      0);
+  } else {
+    ACE_NEW_MALLOC_RETURN(tmp_mb,
+      static_cast<ACE_Message_Block*>(
+        mb_allocator_->malloc(sizeof(ACE_Message_Block))),
+      ACE_Message_Block(
+        encoding_mode_.buffer_size(sample),
+        ACE_Message_Block::MB_DATA,
+        0, // cont
+        0, // data
+        data_allocator_.get(), // allocator_strategy
+        get_db_lock(), // data block locking_strategy
+        ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
+        ACE_Time_Value::zero,
+        ACE_Time_Value::max_time,
+        db_allocator_.get(),
+        mb_allocator_.get()),
+      0);
+  }
+  mb.reset(tmp_mb);
+
+  if (skip_serialize_ && !sample->to_message_block(*mb)) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
+                 "to_message_block failed\n"));
+    }
+    return 0;
+  } else {
+    Serializer serializer(mb.get(), encoding);
+    if (encapsulated) {
+      EncapsulationHeader encap;
+      if (!encap.from_encoding(encoding, topic_type_->base_extensibility())) {
+        // from_encoding logged the error
+        return 0;
+      }
+      if (!(serializer << encap)) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
+            "failed to serialize data encapsulation header\n"));
+        }
+        return 0;
+      }
+    }
+    if (!sample->serialize(serializer)) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
+          "failed to serialize sample data\n"));
+      }
+      return 0;
+    }
+    if (encapsulated && !EncapsulationHeader::set_encapsulation_options(mb)) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
+          "set_encapsulation_options failed\n"));
+      }
+      return 0;
+    }
+  }
+
+  return mb.release();
+}
+
+bool DataWriterImpl::insert_instance(DDS::InstanceHandle_t handle, AbstractSample_rch& sample)
+{
+  AbstractSample_rch copy = sample->copy(/* read_only = */ true);
+  if (!instance_handles_to_values_.insert(
+      InstanceHandlesToValues::value_type(handle, copy)).second) {
+    return false;
+  }
+  if (!instance_values_to_handles_.insert(
+        InstanceValuesToHandles::value_type(copy, handle)).second) {
+    instance_handles_to_values_.erase(handle);
+    return false;
+  }
+  return true;
+}
+
+DDS::ReturnCode_t DataWriterImpl::instance_must_exist(
+  const char* const method_name,
+  AbstractSample_rch& sample,
+  DDS::InstanceHandle_t& instance_handle,
+  bool remove)
+{
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
+
+  InstanceValuesToHandles::iterator pos = instance_values_to_handles_.find(sample);
+  if (pos == instance_values_to_handles_.end()) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::%C: "
+        "The instance sample is not registered\n",
+        method_name));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (instance_handle != DDS::HANDLE_NIL && instance_handle != pos->second) {
+    return DDS::RETCODE_PRECONDITION_NOT_MET;
+  }
+
+  instance_handle = pos->second;
+
+  if (remove) {
+    instance_values_to_handles_.erase(pos);
+    instance_handles_to_values_.erase(instance_handle);
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 } // namespace DCPS

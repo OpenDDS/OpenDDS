@@ -71,6 +71,70 @@ private:
   size_t bound_;
 };
 
+// TODO: Can be merged with TypeSupportImpl?
+class OpenDDS_Dcps_Export AbstractTopicType {
+public:
+  virtual ~AbstractTopicType() {}
+
+  virtual const String& name() const = 0;
+  virtual size_t key_count() const = 0;
+  virtual void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq) const = 0;
+  virtual Extensibility base_extensibility() const = 0;
+  virtual Extensibility max_extensibility() const = 0;
+  virtual SerializedSizeBound serialized_size_bound(const Encoding& encoding) const = 0;
+  virtual SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const = 0;
+};
+
+template <typename NativeType>
+class NativeTopicType : public AbstractTopicType {
+public:
+  typedef DDSTraits<NativeType> TraitsType;
+  typedef MarshalTraits<NativeType> MarshalTraitsType;
+
+  NativeTopicType()
+  : name_(TraitsType::type_name())
+  {
+  }
+
+  const String& name() const
+  {
+    return name_;
+  }
+
+  size_t key_count() const
+  {
+    return TraitsType::key_count();
+  }
+
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq) const
+  {
+    MarshalTraitsType::representations_allowed_by_type(seq);
+  }
+
+  Extensibility base_extensibility() const
+  {
+    return MarshalTraitsType::extensibility();
+  }
+
+  Extensibility max_extensibility() const
+  {
+    return MarshalTraitsType::max_extensibility_level();
+  }
+
+  SerializedSizeBound serialized_size_bound(const Encoding& encoding) const
+  {
+    return MarshalTraitsType::serialized_size_bound(encoding);
+  }
+
+  SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const
+  {
+    return MarshalTraitsType::key_only_serialized_size_bound(encoding);
+  }
+
+private:
+  const String name_;
+};
+
 class OpenDDS_Dcps_Export TypeSupportImpl
   : public virtual LocalObject<TypeSupport> {
 public:

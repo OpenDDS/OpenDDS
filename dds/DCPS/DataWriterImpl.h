@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,8 +6,7 @@
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
-#include "dds/DdsDcpsDomainC.h"
-#include "dds/DdsDcpsTopicC.h"
+#include "AbstractSample.h"
 #include "DataWriterCallbacks.h"
 #include "transport/framework/TransportSendListener.h"
 #include "transport/framework/TransportClient.h"
@@ -27,18 +24,20 @@
 #include "unique_ptr.h"
 #include "Message_Block_Ptr.h"
 #include "TimeTypes.h"
-
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
-#include "FilterEvaluator.h"
+#  include "FilterEvaluator.h"
 #endif
 
-#include "ace/Event_Handler.h"
-#include "ace/OS_NS_sys_time.h"
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsTopicC.h>
+
+#include <ace/Event_Handler.h>
+#include <ace/OS_NS_sys_time.h>
 
 #include <memory>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
 class DDS_TEST;
@@ -57,37 +56,39 @@ struct AssociationData;
 class LivenessTimer;
 
 /**
-* @class DataWriterImpl
-*
-* @brief Implements the OpenDDS::DCPS::DataWriterRemote interfaces and
-*        DDS::DataWriter interfaces.
-*
-* See the DDS specification, OMG formal/2015-04-10, for a description of
-* the interface this class is implementing.
-*
-* This class must be inherited by the type-specific datawriter which
-* is specific to the data-type associated with the topic.
-*
-* @note: This class is responsible for allocating memory for the
-*        header message block
-*        (MessageBlock + DataBlock + DataSampleHeader) and the
-*        DataSampleElement.
-*        The data-type datawriter is responsible for allocating
-*        memory for the sample data message block.
-*        (e.g. MessageBlock + DataBlock + Foo data). But it gives
-*        up ownership to this WriteDataContainer.
-*/
+ * @class DataWriterImpl
+ *
+ * @brief Implements the OpenDDS::DCPS::DataWriterRemote interfaces and
+ *        DDS::DataWriter interfaces.
+ *
+ * See the DDS specification, OMG formal/2015-04-10, for a description of
+ * the interface this class is implementing.
+ *
+ * This class must be inherited by the type-specific datawriter which
+ * is specific to the data-type associated with the topic.
+ *
+ * @note: This class is responsible for allocating memory for the
+ *        header message block
+ *        (MessageBlock + DataBlock + DataSampleHeader) and the
+ *        DataSampleElement.
+ *        The data-type datawriter is responsible for allocating
+ *        memory for the sample data message block.
+ *        (e.g. MessageBlock + DataBlock + Foo data). But it gives
+ *        up ownership to this WriteDataContainer.
+ */
 class OpenDDS_Dcps_Export DataWriterImpl
-  : public virtual LocalObject<DDS::DataWriter>,
-    public virtual DataWriterCallbacks,
-    public virtual EntityImpl,
-    public virtual TransportClient,
-    public virtual TransportSendListener {
+  : public virtual LocalObject<DDS::DataWriter>
+  , public virtual DataWriterCallbacks
+  , public virtual EntityImpl
+  , public virtual TransportClient
+  , public virtual TransportSendListener
+{
 public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
 
   typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
+  typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> DataAllocator;
 
   struct AckToken {
     MonotonicTimePoint tstamp_;
@@ -115,9 +116,30 @@ public:
     }
   };
 
-  DataWriterImpl();
+  DataWriterImpl(const AbstractTopicType* topic_type);
 
   virtual ~DataWriterImpl();
+
+  const AbstractTopicType* topic_type() const
+  {
+    return topic_type_;
+  }
+
+  void set_skip_serialize(bool value)
+  {
+    skip_serialize_ = value;
+  }
+
+  bool get_skip_serialize() const
+  {
+    return skip_serialize_;
+  }
+
+  ACE_INLINE
+  DataAllocator* data_allocator() const
+  {
+    return data_allocator_.get();
+  }
 
   virtual DDS::InstanceHandle_t get_instance_handle();
 
@@ -190,7 +212,6 @@ public:
   virtual void update_subscription_params(const RepoId& readerId,
                                           const DDS::StringSeq& params);
 
-
   /**
    * cleanup the DataWriter.
    */
@@ -200,12 +221,12 @@ public:
    * Initialize the data members.
    */
   void init(
-    TopicImpl*                            topic_servant,
-    const DDS::DataWriterQos &            qos,
-    DDS::DataWriterListener_ptr           a_listener,
-    const DDS::StatusMask &               mask,
-    WeakRcHandle<OpenDDS::DCPS::DomainParticipantImpl> participant_servant,
-    OpenDDS::DCPS::PublisherImpl*         publisher_servant);
+    TopicImpl* topic_servant,
+    const DDS::DataWriterQos& qos,
+    DDS::DataWriterListener_ptr a_listener,
+    const DDS::StatusMask& mask,
+    WeakRcHandle<DomainParticipantImpl> participant_servant,
+    PublisherImpl* publisher_servant);
 
   void send_all_to_flush_control(ACE_Guard<ACE_Recursive_Thread_Mutex>& guard);
 
@@ -276,12 +297,13 @@ public:
   /**
    * Retrieve the unsent data from the WriteDataContainer.
    */
-   ACE_UINT64 get_unsent_data(SendStateDataSampleList& list)
+  ACE_UINT64 get_unsent_data(SendStateDataSampleList& list)
   {
     return data_container_->get_unsent_data(list);
   }
 
-  SendStateDataSampleList get_resend_data() {
+  SendStateDataSampleList get_resend_data()
+  {
     return data_container_->get_resend_data();
   }
 
@@ -478,6 +500,17 @@ public:
 
   virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
+  DDS::ReturnCode_t get_key_value(AbstractSample_rch& sample, DDS::InstanceHandle_t handle);
+  DDS::InstanceHandle_t lookup_instance(AbstractSample_rch& sample);
+  DDS::ReturnCode_t unregister_instance_w_timestamp(
+    AbstractSample_rch& sample,
+    DDS::InstanceHandle_t instance_handle,
+    const DDS::Time_t& timestamp);
+  DDS::ReturnCode_t dispose_w_timestamp(
+    AbstractSample_rch& sample,
+    DDS::InstanceHandle_t instance_handle,
+    const DDS::Time_t& source_timestamp);
+
 protected:
 
   void check_and_set_repo_id(const RepoId& id)
@@ -511,13 +544,14 @@ protected:
 
   void prepare_to_delete();
 
-  // type specific DataWriter's part of enable.
-  virtual DDS::ReturnCode_t enable_specific() = 0;
-
   /**
-   * Setup CDR serialization options in type-specific DataWrtier.
+   * Setup CDR serialization options.
    */
-  virtual DDS::ReturnCode_t setup_serialization() = 0;
+  DDS::ReturnCode_t setup_serialization();
+
+  ACE_Message_Block* serialize_sample(AbstractSample_rch& sample);
+
+  bool insert_instance(DDS::InstanceHandle_t handle, AbstractSample_rch& sample);
 
   /// The number of chunks for the cached allocator.
   size_t                     n_chunks_;
@@ -569,6 +603,64 @@ protected:
   virtual SendControlStatus send_control(const DataSampleHeader& header,
                                          Message_Block_Ptr msg);
 
+  const AbstractTopicType* const topic_type_;
+  bool skip_serialize_;
+
+  /**
+   * Used to hold the encoding and get the buffer sizes needed to store the
+   * results of the encoding.
+   */
+  class EncodingMode {
+  public:
+    EncodingMode()
+    : valid_(false)
+    , header_size_(0)
+    {
+    }
+
+    EncodingMode(const AbstractTopicType* topic_type, Encoding::Kind kind, bool swap_the_bytes)
+    : valid_(true)
+    , encoding_(kind, swap_the_bytes)
+    , header_size_(encoding_.is_encapsulated() ? EncapsulationHeader::serialized_size : 0)
+    , bound_(topic_type->serialized_size_bound(encoding_))
+    , key_only_bound_(topic_type->key_only_serialized_size_bound(encoding_))
+    {
+    }
+
+    bool valid() const
+    {
+      return valid_;
+    }
+
+    const Encoding& encoding() const
+    {
+      return encoding_;
+    }
+
+    bool bound() const
+    {
+      return bound_;
+    }
+
+    SerializedSizeBound buffer_size_bound() const
+    {
+      return bound_ ? SerializedSizeBound(header_size_ + bound_.get()) : SerializedSizeBound();
+    }
+
+    size_t buffer_size(AbstractSample_rch& sample) const
+    {
+      const SerializedSizeBound bound = sample->key_only() ? key_only_bound_ : bound_;
+      return header_size_ + (bound ? bound.get() : sample->serialized_size(encoding_));
+    }
+
+  private:
+    bool valid_;
+    Encoding encoding_;
+    size_t header_size_;
+    SerializedSizeBound bound_;
+    SerializedSizeBound key_only_bound_;
+  } encoding_mode_;
+
 private:
 
   void track_sequence_number(GUIDSeq* filter_out);
@@ -599,21 +691,29 @@ private:
 
   RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const;
 
-  DDS::DomainId_t domain_id() const {
+  DDS::DomainId_t domain_id() const
+  {
     return this->domain_id_;
   }
 
-  CORBA::Long get_priority_value(const AssociationData&) const {
+  CORBA::Long get_priority_value(const AssociationData&) const
+  {
     return this->qos_.transport_priority.value;
   }
 
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
   void association_complete_i(const RepoId& remote_id);
 
   void return_handle(DDS::InstanceHandle_t handle);
+
+  DDS::ReturnCode_t instance_must_exist(
+    const char* const method_name,
+    AbstractSample_rch& sample,
+    DDS::InstanceHandle_t& instance_handle,
+    bool remove = false);
 
   friend class ::DDS_TEST; // allows tests to get at privates
 
@@ -687,11 +787,12 @@ private:
   // PublicationReconnectingStatus       publication_reconnecting_status_;
 
   /// The message block allocator.
-  unique_ptr<MessageBlockAllocator>     mb_allocator_;
+  unique_ptr<MessageBlockAllocator> mb_allocator_;
   /// The data block allocator.
-  unique_ptr<DataBlockAllocator>        db_allocator_;
+  unique_ptr<DataBlockAllocator> db_allocator_;
   /// The header data allocator.
   unique_ptr<DataSampleHeaderAllocator> header_allocator_;
+  unique_ptr<DataAllocator> data_allocator_;
 
   /// The orb's reactor to be used to register the liveliness
   /// timer.
@@ -711,7 +812,7 @@ private:
   /// The cached available data while suspending and associated transaction ids.
   ACE_UINT64 min_suspended_transaction_id_;
   ACE_UINT64 max_suspended_transaction_id_;
-  SendStateDataSampleList             available_data_list_;
+  SendStateDataSampleList available_data_list_;
 
   /// Monitor object for this entity
   unique_ptr<Monitor> monitor_;
@@ -737,7 +838,13 @@ private:
 
   MonotonicTimePoint wait_pending_deadline_;
 
-#if defined(OPENDDS_SECURITY)
+  typedef OPENDDS_MAP_T(DDS::InstanceHandle_t, AbstractSample_rch) InstanceHandlesToValues;
+  InstanceHandlesToValues instance_handles_to_values_;
+  typedef OPENDDS_MAP_CMP_T(
+    AbstractSample_rch, DDS::InstanceHandle_t, AbstractSampleRchCmp) InstanceValuesToHandles;
+  InstanceValuesToHandles instance_values_to_handles_;
+
+#ifdef OPENDDS_SECURITY
 protected:
   Security::SecurityConfig_rch security_config_;
   DDS::Security::PermissionsHandle participant_permissions_handle_;

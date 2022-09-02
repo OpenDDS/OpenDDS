@@ -1,9 +1,14 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_T_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_T_H
 
+#include "AbstractSample.h"
 #include "PublicationInstance.h"
 #include "DataWriterImpl.h"
-#include "DataReaderImpl.h"
 #include "Util.h"
 #include "TypeSupportImpl.h"
 #include "dcps_export.h"
@@ -12,7 +17,7 @@
 #include "XTypes/DynamicDataAdapter.h"
 
 #ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -37,77 +42,10 @@ DataWriterImpl_T
 , public ValueWriterDispatcher
 {
 public:
-  typedef DDSTraits<MessageType> TraitsType;
-  typedef MarshalTraits<MessageType> MarshalTraitsType;
-  typedef KeyOnly<const MessageType> KeyOnlyType;
+  typedef NativeSample<MessageType> Sample;
 
-  typedef OPENDDS_MAP_CMP_T(MessageType, DDS::InstanceHandle_t,
-                            typename TraitsType::LessThanType) InstanceMap;
-  typedef ::OpenDDS::DCPS::Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> DataAllocator;
-
-  /**
-   * Used to hold the encoding and get the buffer sizes needed to store the
-   * results of the encoding.
-   */
-  class EncodingMode {
-  public:
-    EncodingMode()
-    : valid_(false)
-    , header_size_(0)
-    {
-    }
-
-    EncodingMode(Encoding::Kind kind, bool swap_the_bytes)
-    : valid_(true)
-    , encoding_(kind, swap_the_bytes)
-    , header_size_(encoding_.is_encapsulated() ? EncapsulationHeader::serialized_size : 0)
-    , bound_(MarshalTraitsType::serialized_size_bound(encoding_))
-    , key_only_bound_(MarshalTraitsType::key_only_serialized_size_bound(encoding_))
-    {
-    }
-
-    bool valid() const
-    {
-      return valid_;
-    }
-
-    const Encoding& encoding() const
-    {
-      return encoding_;
-    }
-
-    bool bound() const
-    {
-      return bound_;
-    }
-
-    SerializedSizeBound buffer_size_bound() const
-    {
-      return bound_ ? SerializedSizeBound(header_size_ + bound_.get()) : SerializedSizeBound();
-    }
-
-    /// Size of a buffer needed to store a specific sample
-    size_t buffer_size(const MessageType& x) const
-    {
-      return header_size_ + (bound_ ? bound_.get() : serialized_size(encoding_, x));
-    }
-
-    /// Size of a buffer needed to store a specific key only sample
-    size_t buffer_size(const KeyOnlyType& x) const
-    {
-      return header_size_ + (key_only_bound_ ? key_only_bound_.get() : serialized_size(encoding_, x));
-    }
-
-  private:
-    bool valid_;
-    Encoding encoding_;
-    size_t header_size_;
-    SerializedSizeBound bound_;
-    SerializedSizeBound key_only_bound_;
-  };
-
-  DataWriterImpl_T()
-    : marshal_skip_serialize_(false)
+  DataWriterImpl_T(const AbstractTopicType* topic_type)
+    : DataWriterImpl(topic_type)
   {
   }
 
@@ -129,7 +67,7 @@ public:
     if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: %CDataWriterImpl::register_instance_w_timestamp: ")
                  ACE_TEXT("register failed: %C\n"),
-                 TraitsType::type_name(),
+                 topic_type_->name().c_str(),
                  retcode_to_string(ret)));
     }
 
@@ -146,25 +84,8 @@ public:
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& timestamp)
   {
-    {
-      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
-      typename InstanceMap::iterator pos = instance_map_.find(instance_data);
-      if (pos == instance_map_.end()) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::unregister_instance_w_timestamp: ")
-                          ACE_TEXT("The instance sample is not registered.\n"),
-                          TraitsType::type_name()),
-                         DDS::RETCODE_ERROR);
-      }
-
-      if (instance_handle != DDS::HANDLE_NIL && instance_handle != pos->second) {
-        return DDS::RETCODE_PRECONDITION_NOT_MET;
-      }
-
-      instance_handle = pos->second;
-      instance_map_.erase(pos);
-    }
-
-    return OpenDDS::DCPS::DataWriterImpl::unregister_instance_i(instance_handle, timestamp);
+    AbstractSample_rch sample = make_sample(instance_data);
+    return DataWriterImpl::unregister_instance_w_timestamp(sample, instance_handle, timestamp);
   }
 
   //WARNING: If the handle is non-nil and the instance is not registered
@@ -194,7 +115,7 @@ public:
       if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
         ACE_ERROR_RETURN((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: %CDataWriterImpl::write_w_timestamp: ")
                           ACE_TEXT("register failed: %C.\n"),
-                          TraitsType::type_name(),
+                          topic_type_->name().c_str(),
                           retcode_to_string(ret)),
                          ret);
       }
@@ -222,9 +143,8 @@ public:
     }
 #endif
 
-    Message_Block_Ptr marshalled(
-      dds_marshal(instance_data, OpenDDS::DCPS::FULL_MARSHALING));
-    return OpenDDS::DCPS::DataWriterImpl::write(move(marshalled),
+    Message_Block_Ptr serialized(serialize_sample(instance_data));
+    return OpenDDS::DCPS::DataWriterImpl::write(move(serialized),
                                                 handle,
                                                 source_timestamp,
                                                 filter_out._retn(),
@@ -258,81 +178,26 @@ public:
     }
 #endif
 
-    {
-      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
-      typename InstanceMap::iterator pos = instance_map_.find(instance_data);
-      if (pos == instance_map_.end()) {
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::dispose_w_timestamp: ")
-                          ACE_TEXT("The instance sample is not registered.\n"),
-                          TraitsType::type_name()),
-                         DDS::RETCODE_ERROR);
-      }
-
-      if (instance_handle != DDS::HANDLE_NIL && instance_handle != pos->second) {
-        return DDS::RETCODE_PRECONDITION_NOT_MET;
-      }
-
-      instance_handle = pos->second;
-    }
-
-    return OpenDDS::DCPS::DataWriterImpl::dispose(instance_handle, source_timestamp);
+    AbstractSample_rch sample = make_sample(instance_data);
+    return DataWriterImpl::dispose_w_timestamp(sample, instance_handle, source_timestamp);
   }
 
   virtual DDS::ReturnCode_t get_key_value(
     MessageType& key_holder,
     DDS::InstanceHandle_t handle)
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
-
-    typename InstanceMap::iterator const the_end = instance_map_.end();
-    for (typename InstanceMap::iterator it = instance_map_.begin(); it != the_end; ++it) {
-      if (it->second == handle) {
-        key_holder = it->first;
-        return DDS::RETCODE_OK;
-      }
+    AbstractSample_rch sample;
+    const DDS::ReturnCode_t rc = DataWriterImpl::get_key_value(sample, handle);
+    if (sample) {
+      key_holder = get_data(sample);
     }
-
-    return DDS::RETCODE_BAD_PARAMETER;
+    return rc;
   }
 
-  virtual DDS::InstanceHandle_t lookup_instance(
-    const MessageType& instance_data)
+  DDS::InstanceHandle_t lookup_instance(const MessageType& instance_data)
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
-
-    typename InstanceMap::const_iterator const it = instance_map_.find(instance_data);
-    if (it == instance_map_.end()) {
-      return DDS::HANDLE_NIL;
-    } else {
-      return it->second;
-    }
-  }
-
-  /**
-   * Do parts of enable specific to the datatype.
-   * Called by DataWriterImpl::enable().
-   */
-  virtual DDS::ReturnCode_t enable_specific()
-  {
-    mb_allocator_.reset(new ::OpenDDS::DCPS::MessageBlockAllocator(n_chunks_ * association_chunk_multiplier_));
-    db_allocator_.reset(new ::OpenDDS::DCPS::DataBlockAllocator(n_chunks_));
-
-    if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataWriterImpl::enable_specific-mb ")
-                 ACE_TEXT("Cached_Allocator_With_Overflow ")
-                 ACE_TEXT("%x with %d chunks\n"),
-                 TraitsType::type_name(),
-                 mb_allocator_.get(),
-                 n_chunks_ * association_chunk_multiplier_));
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) %CDataWriterImpl::enable_specific-db ")
-                 ACE_TEXT("Cached_Allocator_With_Overflow ")
-                 ACE_TEXT("%x with %d chunks\n"),
-                 TraitsType::type_name(),
-                 db_allocator_.get(),
-                 n_chunks_));
-    }
-
-    return DDS::RETCODE_OK;
+    AbstractSample_rch sample = make_sample(instance_data);
+    return DataWriterImpl::lookup_instance(sample);
   }
 
   const ValueWriterDispatcher* get_value_writer_dispatcher() const { return this; }
@@ -342,248 +207,28 @@ public:
     vwrite(value_writer, *static_cast<const MessageType*>(data));
   }
 
-  /**
-   * Accessor to the marshalled data sample allocator.
-   */
-  ACE_INLINE
-  DataAllocator* data_allocator() const
-  {
-    return data_allocator_.get();
-  }
-
-  DDS::ReturnCode_t setup_serialization()
-  {
-    if (qos_.representation.value.length() > 0 &&
-        qos_.representation.value[0] != OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION) {
-      // If the QoS explicitly sets XCDR, XCDR2, or XML, force encapsulation
-      cdr_encapsulation(true);
-    }
-    if (cdr_encapsulation()) {
-      Encoding::Kind encoding_kind;
-      // There should only be one data representation in a DataWriter, so
-      // simply use qos_.representation.value[0].
-      if (repr_to_encoding_kind(qos_.representation.value[0], encoding_kind)) {
-        encoding_mode_ = EncodingMode(encoding_kind, swap_bytes());
-        if (encoding_kind == Encoding::KIND_XCDR1 &&
-            MarshalTraitsType::max_extensibility_level() == MUTABLE) {
-          if (::OpenDDS::DCPS::DCPS_debug_level) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
-              "%CDataWriterImpl::setup_serialization: "
-              "Encountered unsupported combination of XCDR1 encoding and mutable extensibility\n",
-              TraitsType::type_name()));
-          }
-          return DDS::RETCODE_ERROR;
-        } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR) {
-          if (::OpenDDS::DCPS::DCPS_debug_level) {
-            ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
-              "%CDataWriterImpl::setup_serialization: "
-              "Unaligned CDR is not supported by transport types that require encapsulation\n",
-              TraitsType::type_name()));
-          }
-        }
-      } else if (::OpenDDS::DCPS::DCPS_debug_level) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
-                    ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                    ACE_TEXT("Encountered unsupported or unknown data representation: %C\n"),
-                    TraitsType::type_name(),
-                    repr_to_string(qos_.representation.value[0]).c_str()));
-      }
-    } else {
-      // Pick unaligned CDR as it is the implicit representation for non-encapsulated
-      encoding_mode_ = EncodingMode(Encoding::KIND_UNALIGNED_CDR, swap_bytes());
-    }
-    if (!encoding_mode_.valid()) {
-      if (::OpenDDS::DCPS::DCPS_debug_level) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                   ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-                   ACE_TEXT("Could not find a valid data representation\n"),
-                   TraitsType::type_name()));
-      }
-      return DDS::RETCODE_ERROR;
-    }
-    if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-        ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-        ACE_TEXT("Setup successfully with %C data representation.\n"),
-        TraitsType::type_name(),
-        Encoding::kind_to_string(encoding_mode_.encoding().kind()).c_str()));
-    }
-
-    // Set up allocator with reserved space for data if it is bounded
-    const SerializedSizeBound buffer_size_bound = encoding_mode_.buffer_size_bound();
-    if (buffer_size_bound) {
-      const size_t chunk_size = buffer_size_bound.get();
-      data_allocator_.reset(new DataAllocator(n_chunks_, chunk_size));
-      if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-          ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-          ACE_TEXT("using data allocator at %x with %u %u byte chunks\n"),
-          TraitsType::type_name(),
-          data_allocator_.get(),
-          n_chunks_,
-          chunk_size));
-      }
-    } else if (::OpenDDS::DCPS::DCPS_debug_level >= 2) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) ")
-        ACE_TEXT("%CDataWriterImpl::setup_serialization: ")
-        ACE_TEXT("sample size is unbounded, not using data allocator, ")
-        ACE_TEXT("always allocating from heap\n"),
-        TraitsType::type_name()));
-    }
-    return DDS::RETCODE_OK;
-  }
-
-  void set_marshal_skip_serialize(bool value)
-  {
-    marshal_skip_serialize_ = value;
-  }
-
-  bool get_marshal_skip_serialize() const
-  {
-    return marshal_skip_serialize_;
-  }
-
 private:
+  AbstractSample_rch make_sample(const MessageType& data, bool key_only = false)
+  {
+    return dynamic_rchandle_cast<AbstractSample>(make_rch<Sample>(data, key_only));
+  }
+
+  const MessageType& get_data(AbstractSample_rch& sample)
+  {
+    return dynamic_rchandle_cast<Sample>(sample)->data();
+  }
 
   /**
    * Serialize the instance data.
    *
    * @param instance_data The data to serialize.
-   * @param marshaling_type Enumerated type specifying whether to marshal
-   *        just the keys or the entire message.
+   * @param key_only Only serialize key fields
    * @return returns the serialized data.
    */
-  ACE_Message_Block* dds_marshal(const MessageType& instance_data,
-                                 OpenDDS::DCPS::MarshalingType marshaling_type)
+  ACE_Message_Block* serialize_sample(const MessageType& instance_data, bool key_only = false)
   {
-    const bool encapsulated = cdr_encapsulation();
-    const Encoding& encoding = encoding_mode_.encoding();
-    Message_Block_Ptr mb;
-    ACE_Message_Block* tmp_mb;
-
-    if (marshal_skip_serialize_) {
-      const size_t effective_size = encoding_mode_.buffer_size(instance_data);
-      ACE_NEW_MALLOC_RETURN(tmp_mb,
-        static_cast<ACE_Message_Block*>(
-          mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-        ACE_Message_Block(
-          effective_size,
-          ACE_Message_Block::MB_DATA,
-          0, // cont
-          0, // data
-          data_allocator_.get(), // allocator_strategy
-          get_db_lock(), // data block locking_strategy
-          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-          ACE_Time_Value::zero,
-          ACE_Time_Value::max_time,
-          db_allocator_.get(),
-          mb_allocator_.get()),
-          0);
-      mb.reset(tmp_mb);
-      if (!MarshalTraitsType::to_message_block(*mb, instance_data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::dds_marshal: ")
-                   ACE_TEXT("attempting to skip serialize but bad from_message_block.\n")));
-      }
-      return mb.release();
-    }
-
-    if (marshaling_type == OpenDDS::DCPS::KEY_ONLY_MARSHALING) {
-      // Don't use the cached allocator for the registered sample message
-      // block.
-      KeyOnlyType ko_instance_data(instance_data);
-      ACE_NEW_RETURN(tmp_mb,
-        ACE_Message_Block(
-          encoding_mode_.buffer_size(ko_instance_data),
-          ACE_Message_Block::MB_DATA,
-          0, // cont
-          0, // data
-          0, // alloc_strategy
-          get_db_lock()),
-        0);
-      mb.reset(tmp_mb);
-
-      OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      if (encapsulated) {
-        EncapsulationHeader encap;
-        if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
-          return 0;
-        }
-        if (!(serializer << encap)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-            ACE_TEXT("key only data encapsulation header serialization error.\n"),
-            TraitsType::type_name()));
-          return 0;
-        }
-      }
-      if (!(serializer << ko_instance_data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-          ACE_TEXT("key only data serialization error.\n"),
-          TraitsType::type_name()));
-        return 0;
-      }
-      if (encapsulated) {
-        if (!EncapsulationHeader::set_encapsulation_options(mb)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-            ACE_TEXT("set_encapsulation_options error.\n"),
-            TraitsType::type_name()));
-          return 0;
-        }
-      }
-    } else { // OpenDDS::DCPS::FULL_MARSHALING
-      ACE_NEW_MALLOC_RETURN(tmp_mb,
-        static_cast<ACE_Message_Block*>(
-          mb_allocator_->malloc(sizeof(ACE_Message_Block))),
-        ACE_Message_Block(
-          encoding_mode_.buffer_size(instance_data),
-          ACE_Message_Block::MB_DATA,
-          0, // cont
-          0, // data
-          data_allocator_.get(), // allocator_strategy
-          get_db_lock(), // data block locking_strategy
-          ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
-          ACE_Time_Value::zero,
-          ACE_Time_Value::max_time,
-          db_allocator_.get(),
-          mb_allocator_.get()),
-        0);
-      mb.reset(tmp_mb);
-
-      OpenDDS::DCPS::Serializer serializer(mb.get(), encoding);
-      if (encapsulated) {
-        EncapsulationHeader encap;
-        if (!encap.from_encoding(encoding, MarshalTraitsType::extensibility())) {
-          return 0;
-        }
-        if (!(serializer << encap)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-            ACE_TEXT("data encapsulation header serialization error.\n"),
-            TraitsType::type_name()));
-          return 0;
-        }
-      }
-      if (!(serializer << instance_data)) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-          ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-          ACE_TEXT("data serialization error.\n"),
-          TraitsType::type_name()));
-        return 0;
-      }
-      if (encapsulated) {
-        if (!EncapsulationHeader::set_encapsulation_options(mb)) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-            ACE_TEXT("%CDataWriterImpl::dds_marshal(): ")
-            ACE_TEXT("set_encapsulation_options error.\n"),
-            TraitsType::type_name()));
-          return 0;
-        }
-      }
-    }
-
-    return mb.release();
+    AbstractSample_rch sample = make_sample(instance_data, key_only);
+    return DataWriterImpl::serialize_sample(sample);
   }
 
   /**
@@ -598,25 +243,11 @@ private:
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
 
-    handle = DDS::HANDLE_NIL;
-    typename InstanceMap::const_iterator it = instance_map_.find(instance_data);
+    AbstractSample_rch sample = make_sample(instance_data);
+    handle = DataWriterImpl::lookup_instance(sample);
+    const bool needs_creation = handle == DDS::HANDLE_NIL;
 
-    bool needs_creation = true;
-    bool needs_registration = true;
-
-    if (it != instance_map_.end()) {
-      needs_creation = false;
-
-      handle = it->second;
-      OpenDDS::DCPS::PublicationInstance_rch instance = get_handle_instance(handle);
-
-      if (instance) {
-        needs_registration = false;
-      }
-      // else: The instance is unregistered and now register again.
-    }
-
-    if (needs_registration) {
+    if (needs_creation || get_handle_instance(handle)) {
 #if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
       XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), instance_data);
       DDS::Security::SecurityException ex;
@@ -634,52 +265,36 @@ private:
 #endif
 
       // don't use fast allocator for registration.
-      Message_Block_Ptr marshalled(
-        this->dds_marshal(instance_data,
-                          OpenDDS::DCPS::KEY_ONLY_MARSHALING));
-      if (!marshalled) {
+      Message_Block_Ptr serialized(serialize_sample(instance_data, /* key_only = */ true));
+      if (!serialized) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: %CDataWriterImpl::get_or_create_instance_handle: "
           "failed to serialize sample\n",
-          TraitsType::type_name()));
+          topic_type_->name().c_str()));
         return DDS::RETCODE_ERROR;
       }
 
       // tell DataWriterLocal and Publisher about the instance.
-      DDS::ReturnCode_t ret = register_instance_i(handle, move(marshalled), source_timestamp);
+      const DDS::ReturnCode_t ret = register_instance_i(handle, move(serialized), source_timestamp);
       // note: the WriteDataContainer/PublicationInstance maintains ownership
       // of the marshalled sample.
-
       if (ret != DDS::RETCODE_OK) {
         handle = DDS::HANDLE_NIL;
         return ret;
       }
 
-      if (needs_creation) {
-        std::pair<typename InstanceMap::iterator, bool> pair =
-          instance_map_.insert(typename InstanceMap::value_type(instance_data, handle));
-
-        if (pair.second == false) {
-          handle = DDS::HANDLE_NIL;
-          ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::get_or_create_instance_handle ")
-                            ACE_TEXT("insert %C failed.\n"),
-                            TraitsType::type_name(), TraitsType::type_name()),
-                           DDS::RETCODE_ERROR);
-        }
-      } // end of if (needs_creation)
+      if (needs_creation && !insert_instance(handle, sample)) {
+        handle = DDS::HANDLE_NIL;
+        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::get_or_create_instance_handle: ")
+                          ACE_TEXT("insert instance failed\n"),
+                          topic_type_->name().c_str()),
+                         DDS::RETCODE_ERROR);
+      }
 
       send_all_to_flush_control(guard);
-
-    } // end of if (needs_registration)
+    }
 
     return DDS::RETCODE_OK;
   }
-
-  InstanceMap instance_map_;
-  unique_ptr<DataAllocator> data_allocator_;
-  unique_ptr<MessageBlockAllocator> mb_allocator_;
-  unique_ptr<DataBlockAllocator> db_allocator_;
-  EncodingMode encoding_mode_;
-  bool marshal_skip_serialize_;
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.
