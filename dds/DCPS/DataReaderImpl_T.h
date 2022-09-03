@@ -45,7 +45,6 @@ namespace OpenDDS {
   DataReaderImpl_T
     : public virtual LocalObject<typename DDSTraits<MessageType>::DataReaderType>
     , public virtual DataReaderImpl
-    , public ValueWriterDispatcher
   {
   public:
     typedef DDSTraits<MessageType> TraitsType;
@@ -130,13 +129,6 @@ namespace OpenDDS {
                    get_n_chunks ()));
 
       return DDS::RETCODE_OK;
-    }
-
-    virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return this; }
-
-    void write(ValueWriter& value_writer, const void* data) const
-    {
-      vwrite(value_writer, *static_cast<const MessageType*>(data));
     }
 
     virtual DDS::ReturnCode_t read (

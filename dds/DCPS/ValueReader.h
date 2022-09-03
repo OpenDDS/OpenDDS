@@ -185,8 +185,36 @@ public:
   ///@}
 };
 
+// Implementations of this interface will call vread(value_reader, v)
+// where v is the result of casting data to the appropriate type.
+struct OpenDDS_Dcps_Export ValueReaderDispatcher {
+  virtual ~ValueReaderDispatcher() {}
+
+  virtual void* new_value() const = 0;
+  virtual void delete_value(void* data) const = 0;
+  virtual void read(ValueReader& value_reader, void* data) const = 0;
+};
+
 template <typename T>
-bool vread(ValueReader& value_reader, T& value);
+struct ValueReaderDispatcher_T : public virtual ValueReaderDispatcher {
+  virtual ~ValueReaderDispatcher_T() {}
+
+  virtual void* new_value() const
+  {
+    return new T();
+  }
+
+  virtual void delete_value(void* data) const
+  {
+    T* tbd = static_cast<T*>(data);
+    delete tbd;
+  }
+
+  virtual void read(ValueReader& value_reader, void* data) const
+  {
+    vread(value_reader, *static_cast<T*>(data));
+  }
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -476,7 +476,10 @@ public:
     return sequence_number_;
   }
 
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+  const ValueWriterDispatcher* get_value_writer_dispatcher() const
+  {
+    return topic_servant_ ? dynamic_cast<const ValueWriterDispatcher*>(topic_servant_->get_type_support()) : 0;
+  }
 
 protected:
 
@@ -619,14 +622,14 @@ private:
 
 
   // Data block local pool for this data writer.
-  unique_ptr<DataBlockLockPool>  db_lock_pool_;
+  unique_ptr<DataBlockLockPool>   db_lock_pool_;
 
   /// The name of associated topic.
   CORBA::String_var               topic_name_;
   /// The associated topic repository id.
   RepoId                          topic_id_;
   /// The topic servant.
-  TopicDescriptionPtr<TopicImpl>                 topic_servant_;
+  TopicDescriptionPtr<TopicImpl>  topic_servant_;
 
   /// Mutex to protect listener info
   ACE_Thread_Mutex                listener_mutex_;
