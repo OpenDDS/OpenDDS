@@ -6,11 +6,9 @@
 #ifndef OPENDDS_DCPS_ABSTRACT_SAMPLE_H
 #define OPENDDS_DCPS_ABSTRACT_SAMPLE_H
 
-#include "PoolAllocator.h"
 #include "Serializer.h"
 #include "TypeSupportImpl.h"
 #include "RcHandle_T.h"
-#include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,9 +19,9 @@ class AbstractSample;
 typedef RcHandle<AbstractSample> AbstractSample_rch;
 
 /**
- * Represents a sample that can either be instance of C++ value generated from
- * opendds_idl or a DynamicData. This is meant to be used by DataReaderImpl and
- * DataWriterImpl.
+ * Represents a sample that can either be an instance of a C++ generated Type
+ * from opendds_idl or a DynamicData. This is meant to be used by
+ * DataReaderImpl and DataWriterImpl.
  */
 class OpenDDS_Dcps_Export AbstractSample : public virtual RcObject {
 public:
@@ -193,10 +191,6 @@ public:
 
 private:
   const NativeType* data_;
-};
-
-class DynamicSample : public AbstractSample {
-public:
 };
 
 } // namespace DCPS

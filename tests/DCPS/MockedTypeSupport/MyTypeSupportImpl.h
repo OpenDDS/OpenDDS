@@ -31,7 +31,6 @@
  */
 class MyTypeSupportImpl : public virtual OpenDDS::DCPS::LocalObject<MyTypeSupport>
 {
-
 public:
   MyTypeSupportImpl();
 
@@ -138,17 +137,12 @@ private:
 class MyDataWriterImpl :  public virtual OpenDDS::DCPS::DataWriterImpl
 {
 public:
-  ::DDS::ReturnCode_t enable_specific()
+  MyDataWriterImpl(OpenDDS::DCPS::AbstractTopicType* topic_type)
+  : DataWriterImpl(topic_type)
   {
-    return ::DDS::RETCODE_OK;
   }
 
   virtual void unregistered(DDS::InstanceHandle_t /* instance_handle */) {};
-
-  DDS::ReturnCode_t setup_serialization()
-  {
-    return DDS::RETCODE_OK;
-  }
 };
 
 #endif /* MYTYPESUPPORTIMPL_H_  */

@@ -9,6 +9,52 @@
 
 #include <stdexcept>
 
+using namespace OpenDDS::DCPS;
+
+class TopicType : public AbstractTopicType {
+public:
+  const String the_name;
+
+  TopicType()
+  : the_name("MyType")
+  {
+  }
+
+  const String& name() const
+  {
+    return the_name;
+  }
+
+  size_t key_count() const
+  {
+    return 0;
+  }
+
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq&) const
+  {
+  }
+
+  Extensibility base_extensibility() const
+  {
+    return FINAL;
+  }
+
+  Extensibility max_extensibility() const
+  {
+    return FINAL;
+  }
+
+  SerializedSizeBound serialized_size_bound(const Encoding&) const
+  {
+    return SerializedSizeBound();
+  }
+
+  SerializedSizeBound key_only_serialized_size_bound(const Encoding&) const
+  {
+    return SerializedSizeBound();
+  }
+} topic_type;
+
 MyTypeSupportImpl::MyTypeSupportImpl()
 {
 }
@@ -53,7 +99,7 @@ char* MyTypeSupportImpl::get_type_name()
 ::DDS::DataWriter_ptr MyTypeSupportImpl::create_datawriter()
 {
   MyDataWriterImpl* writer_impl;
-  ACE_NEW_RETURN(writer_impl, MyDataWriterImpl(), ::DDS::DataWriter::_nil());
+  ACE_NEW_RETURN(writer_impl, MyDataWriterImpl(&topic_type), ::DDS::DataWriter::_nil());
 
   return writer_impl;
 }
