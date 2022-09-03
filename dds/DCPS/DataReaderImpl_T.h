@@ -269,9 +269,9 @@ namespace OpenDDS {
         inst->instance_state_->sample_info(sample_info_ref, item);
         inst->rcvd_samples_.mark_read(item);
 
-        const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-        if (observer && item->registered_data_ && vwd) {
-          Observer::Sample s(sample_info_ref.instance_handle, sample_info_ref.instance_state, *item, *vwd);
+        const ValueDispatcher* vd = get_value_dispatcher();
+        if (observer && item->registered_data_ && vd) {
+          Observer::Sample s(sample_info_ref.instance_handle, sample_info_ref.instance_state, *item, *vd);
           observer->on_sample_read(this, s);
         }
 
@@ -323,9 +323,9 @@ namespace OpenDDS {
         inst->instance_state_->sample_info(sample_info_ref, item);
         inst->rcvd_samples_.mark_read(item);
 
-        const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-        if (observer && item->registered_data_ && vwd) {
-          Observer::Sample s(sample_info_ref.instance_handle, sample_info_ref.instance_state, *item, *vwd);
+        const ValueDispatcher* vd = get_value_dispatcher();
+        if (observer && item->registered_data_ && vd) {
+          Observer::Sample s(sample_info_ref.instance_handle, sample_info_ref.instance_state, *item, *vd);
           observer->on_sample_taken(this, s);
         }
 
@@ -852,10 +852,10 @@ namespace OpenDDS {
       notify_read_conditions();
     }
 
-    const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+    const ValueDispatcher* vd = get_value_dispatcher();
     const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
-    if (observer && vwd) {
-      Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, header.instance_state(), now, header.sequence_, &sample, *vwd);
+    if (observer && vd) {
+      Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, header.instance_state(), now, header.sequence_, &sample, *vd);
       observer->on_sample_received(this, s);
     }
 
@@ -1352,9 +1352,9 @@ private:
            item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
         results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
 
-        const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-        if (observer && item->registered_data_ && vwd) {
-          Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
+        const ValueDispatcher* vd = get_value_dispatcher();
+        if (observer && item->registered_data_ && vd) {
+          Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vd);
           observer->on_sample_read(this, s);
         }
       }
@@ -1363,11 +1363,11 @@ private:
   } else {
     const RakeData item = group_coherent_ordered_data_.get_data();
     results.insert_sample(item.rde_, item.rdel_, item.si_, item.index_in_instance_);
-    const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-    if (observer && item.rde_->registered_data_ && vwd) {
+    const ValueDispatcher* vd = get_value_dispatcher();
+    if (observer && item.rde_->registered_data_ && vd) {
       typename InstanceMap::iterator i = instance_map_.begin();
       const DDS::InstanceHandle_t handle = (i != instance_map_.end()) ? i->second : DDS::HANDLE_NIL;
-      Observer::Sample s(handle, item.si_->instance_state_->instance_state(), *item.rde_, *vwd);
+      Observer::Sample s(handle, item.si_->instance_state_->instance_state(), *item.rde_, *vd);
       observer->on_sample_read(this, s);
     }
   }
@@ -1439,9 +1439,9 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
            item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
         results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
 
-        const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-        if (observer && item->registered_data_ && vwd) {
-          Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vwd);
+        const ValueDispatcher* vd = get_value_dispatcher();
+        if (observer && item->registered_data_ && vd) {
+          Observer::Sample s(handle, inst->instance_state_->instance_state(), *item, *vd);
           observer->on_sample_taken(this, s);
         }
       }
@@ -1498,9 +1498,9 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
     for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0); item;
          item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
       results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
-      const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-      if (observer && item->registered_data_ && vwd) {
-        Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item, *vwd);
+      const ValueDispatcher* vd = get_value_dispatcher();
+      if (observer && item->registered_data_ && vd) {
+        Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item, *vd);
         observer->on_sample_read(this, s);
       }
     }
@@ -1565,9 +1565,9 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
     for (ReceivedDataElement* item = inst->rcvd_samples_.get_next_match(sample_states, 0); item;
          item = inst->rcvd_samples_.get_next_match(sample_states, item)) {
       results.insert_sample(item, &inst->rcvd_samples_, inst, ++i);
-      const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
-      if (observer && item->registered_data_ && vwd) {
-        Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item, *vwd);
+      const ValueDispatcher* vd = get_value_dispatcher();
+      if (observer && item->registered_data_ && vd) {
+        Observer::Sample s(a_handle, inst->instance_state_->instance_state(), *item, *vd);
         observer->on_sample_taken(this, s);
       }
     }

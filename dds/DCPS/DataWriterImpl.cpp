@@ -1917,10 +1917,10 @@ DataWriterImpl::write(Message_Block_Ptr data,
     this->send(list, transaction_id);
   }
 
-  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+  const ValueDispatcher* vd = get_value_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
-  if (observer && real_data && vwd) {
-    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vwd);
+  if (observer && real_data && vd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vd);
     observer->on_sample_sent(this, s);
   }
 

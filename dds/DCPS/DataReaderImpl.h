@@ -637,9 +637,9 @@ public:
 
   void return_handle(DDS::InstanceHandle_t handle);
 
-  const ValueWriterDispatcher* get_value_writer_dispatcher() const
+  const ValueDispatcher* get_value_dispatcher() const
   {
-    return topic_servant_ ? dynamic_cast<const ValueWriterDispatcher*>(topic_servant_->get_type_support()) : 0;
+    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
   }
 
 protected:

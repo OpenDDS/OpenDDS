@@ -13,8 +13,7 @@
 #include "LocalObject.h"
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
-#include "ValueReader.h"
-#include "ValueWriter.h"
+#include "ValueDispatcher.h"
 #include "XTypes/TypeObject.h"
 
 #include <dds/DdsDcpsTypeSupportExtC.h>
