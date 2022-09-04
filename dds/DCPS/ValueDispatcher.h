@@ -24,6 +24,10 @@ struct OpenDDS_Dcps_Export ValueDispatcher {
   virtual void read(ValueReader& value_reader, void* data) const = 0;
   virtual void write(ValueWriter& value_writer, const void* data) const = 0;
 
+  virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const;
+  virtual DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const;
+  virtual DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const;
+  virtual DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const;
 };
 
 template <typename T>
@@ -51,27 +55,28 @@ struct ValueDispatcher_T : public virtual ValueDispatcher {
     vwrite(value_writer, *static_cast<const T*>(data));
   }
 
-  typedef typename DDSTraits<T>::DataWriterType DataWriterType;
+  typedef typename OpenDDS::DCPS::DDSTraits<T> TraitsType;
+  typedef typename TraitsType::DataWriterType DataWriterType;
 
-  DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const
+  virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const
   {
     DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
     return dw_t ? dw_t->register_instance(*static_cast<const T*>(data)) : DDS::HANDLE_NIL;
   }
 
-  DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
+  virtual DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
   {
     DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
     return dw_t ? dw_t->write(*static_cast<const T*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;
   }
 
-  DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
+  virtual DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
   {
     DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
     return dw_t ? dw_t->unregister_instance(*static_cast<const T*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;
   }
 
-  DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
+  virtual DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
   {
     DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
     return dw_t ? dw_t->dispose(*static_cast<const T*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;
