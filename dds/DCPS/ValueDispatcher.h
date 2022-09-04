@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DCPS_VALUE_DISPATCHER_H
 #define OPENDDS_DCPS_VALUE_DISPATCHER_H
 
+#include "TypeSupportImpl.h"
 #include "ValueReader.h"
 #include "ValueWriter.h"
 
@@ -48,6 +49,32 @@ struct ValueDispatcher_T : public virtual ValueDispatcher {
   virtual void write(ValueWriter& value_writer, const void* data) const
   {
     vwrite(value_writer, *static_cast<const T*>(data));
+  }
+
+  typedef typename DDSTraits<T>::DataWriterType DataWriterType;
+
+  DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const
+  {
+    DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
+    return dw_t ? dw_t->register_instance(*static_cast<const T*>(data)) : DDS::HANDLE_NIL;
+  }
+
+  DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
+  {
+    DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
+    return dw_t ? dw_t->write(*static_cast<const T*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
+  {
+    DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
+    return dw_t ? dw_t->unregister_instance(*static_cast<const T*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const
+  {
+    DataWriterType* dw_t = dynamic_cast<DataWriterType*>(dw);
+    return dw_t ? dw_t->dispose(*static_cast<const T*>(data), inst) : DDS::RETCODE_BAD_PARAMETER;
   }
 };
 
