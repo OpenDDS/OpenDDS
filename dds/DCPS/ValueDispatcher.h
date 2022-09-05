@@ -24,10 +24,10 @@ struct OpenDDS_Dcps_Export ValueDispatcher {
   virtual void read(ValueReader& value_reader, void* data) const = 0;
   virtual void write(ValueWriter& value_writer, const void* data) const = 0;
 
-  virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const;
-  virtual DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const;
-  virtual DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const;
-  virtual DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const;
+  virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const = 0;
+  virtual DDS::ReturnCode_t write_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const = 0;
+  virtual DDS::ReturnCode_t unregister_instance_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const = 0;
+  virtual DDS::ReturnCode_t dispose_helper(DDS::DataWriter* dw, const void* data, DDS::InstanceHandle_t inst) const = 0;
 };
 
 template <typename T>
