@@ -611,7 +611,7 @@ void Checklist::error_response(const ACE_INET_Addr& /*local_address*/,
       }
     }
 
-    if (a_message.get_error_code() == STUN::BAD_REQUEST && a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE) {
+    if (a_message.get_error_code() == STUN::BAD_REQUEST || a_message.get_error_code() == STUN::UNKNOWN_ATTRIBUTE) {
       // Waiting and/or resending won't fix these errors.
       failed(cc);
       connectivity_checks_.erase(pos);
