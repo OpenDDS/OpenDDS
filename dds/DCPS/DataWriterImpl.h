@@ -125,12 +125,12 @@ public:
     return topic_type_;
   }
 
-  void set_skip_serialize(bool value)
+  void set_marshal_skip_serialize(bool value)
   {
     skip_serialize_ = value;
   }
 
-  bool get_skip_serialize() const
+  bool get_marshal_skip_serialize() const
   {
     return skip_serialize_;
   }
@@ -554,24 +554,24 @@ protected:
   bool insert_instance(DDS::InstanceHandle_t handle, AbstractSample_rch& sample);
 
   /// The number of chunks for the cached allocator.
-  size_t                     n_chunks_;
+  size_t n_chunks_;
 
   /// The multiplier for allocators affected by associations
-  size_t                     association_chunk_multiplier_;
+  size_t association_chunk_multiplier_;
 
 
   /// The type name of associated topic.
-  CORBA::String_var               type_name_;
+  CORBA::String_var type_name_;
 
   /// The qos policy list of this datawriter.
-  DDS::DataWriterQos              qos_;
+  DDS::DataWriterQos qos_;
   /// The qos policy passed in by the user.
   /// Differs from qos_ because representation has been interpreted.
-  DDS::DataWriterQos              passed_qos_;
+  DDS::DataWriterQos passed_qos_;
 
   /// The participant servant which creats the publisher that
   /// creates this datawriter.
-  WeakRcHandle<DomainParticipantImpl>          participant_servant_;
+  WeakRcHandle<DomainParticipantImpl> participant_servant_;
 
   //This lock should be used to protect access to reader_info_
   ACE_Thread_Mutex reader_info_lock_;
@@ -719,56 +719,55 @@ private:
 
 
   // Data block local pool for this data writer.
-  unique_ptr<DataBlockLockPool>  db_lock_pool_;
+  unique_ptr<DataBlockLockPool> db_lock_pool_;
 
   /// The name of associated topic.
-  CORBA::String_var               topic_name_;
+  CORBA::String_var topic_name_;
   /// The associated topic repository id.
-  RepoId                          topic_id_;
+  GUID_t topic_id_;
   /// The topic servant.
-  TopicDescriptionPtr<TopicImpl>                 topic_servant_;
+  TopicDescriptionPtr<TopicImpl> topic_servant_;
 
   /// Mutex to protect listener info
-  ACE_Thread_Mutex                listener_mutex_;
+  ACE_Thread_Mutex listener_mutex_;
   /// The StatusKind bit mask indicates which status condition change
   /// can be notified by the listener of this entity.
-  DDS::StatusMask                 listener_mask_;
+  DDS::StatusMask listener_mask_;
   /// Used to notify the entity for relevant events.
-  DDS::DataWriterListener_var     listener_;
+  DDS::DataWriterListener_var listener_;
   /// The domain id.
-  DDS::DomainId_t                 domain_id_;
-  RepoId                          dp_id_;
+  DDS::DomainId_t domain_id_;
+  GUID_t dp_id_;
   /// The publisher servant which creates this datawriter.
-  WeakRcHandle<PublisherImpl>     publisher_servant_;
+  WeakRcHandle<PublisherImpl> publisher_servant_;
   /// The repository id of this datawriter/publication.
-  PublicationId                   publication_id_;
+  PublicationId publication_id_;
   /// The sequence number unique in DataWriter scope.
-  SequenceNumber                  sequence_number_;
+  SequenceNumber sequence_number_;
   /// Mutex for sequence_number_
-  mutable ACE_Thread_Mutex        sn_lock_;
+  mutable ACE_Thread_Mutex sn_lock_;
   /// Flag indicating DataWriter current belongs to
   /// a coherent change set.
-  bool                            coherent_;
+  bool coherent_;
   /// The number of samples belonging to the current
   /// coherent change set.
-  ACE_UINT32                      coherent_samples_;
+  ACE_UINT32 coherent_samples_;
   /// The sample data container.
-  RcHandle<WriteDataContainer>    data_container_;
+  RcHandle<WriteDataContainer> data_container_;
   /// The lock to protect the activate subscriptions
   /// and status changes.
   mutable ACE_Recursive_Thread_Mutex lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
-
-  RepoIdToHandleMap               id_to_handle_map_;
+  RepoIdToHandleMap id_to_handle_map_;
 
   RepoIdSet readers_;
 
   /// Status conditions.
-  DDS::LivelinessLostStatus           liveliness_lost_status_ ;
-  DDS::OfferedDeadlineMissedStatus    offered_deadline_missed_status_ ;
-  DDS::OfferedIncompatibleQosStatus   offered_incompatible_qos_status_ ;
-  DDS::PublicationMatchedStatus       publication_match_status_ ;
+  DDS::LivelinessLostStatus liveliness_lost_status_ ;
+  DDS::OfferedDeadlineMissedStatus offered_deadline_missed_status_ ;
+  DDS::OfferedIncompatibleQosStatus offered_incompatible_qos_status_ ;
+  DDS::PublicationMatchedStatus publication_match_status_ ;
 
   /// True if the writer failed to actively signal its liveliness within
   /// its offered liveliness period.
@@ -781,10 +780,10 @@ private:
    *       and get_publication_reconnecting_status() methods.
    */
   // Statistics of the lost publications due to lost connection.
-  // PublicationLostStatus               publication_lost_status_;
+  // PublicationLostStatus publication_lost_status_;
   // Statistics of the publications that associates with a
   // reconnecting datalink.
-  // PublicationReconnectingStatus       publication_reconnecting_status_;
+  // PublicationReconnectingStatus publication_reconnecting_status_;
 
   /// The message block allocator.
   unique_ptr<MessageBlockAllocator> mb_allocator_;
