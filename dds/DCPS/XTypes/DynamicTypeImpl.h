@@ -97,8 +97,7 @@ private:
   MapType map_;
 };
 
-class OpenDDS_Dcps_Export DynamicTypeImpl : public DDS::DynamicType
-{
+class OpenDDS_Dcps_Export DynamicTypeImpl : public DDS::DynamicType {
 public:
   DynamicTypeImpl();
   ~DynamicTypeImpl();
@@ -120,7 +119,8 @@ public:
   bool equals(DDS::DynamicType_ptr other);
   void insert_dynamic_member(DDS::DynamicTypeMember_ptr dtm);
   void clear();
- private:
+
+private:
   DynamicTypeMembersByNameImpl member_by_name_;
   DynamicTypeMembersByIdImpl member_by_id_;
   typedef OPENDDS_VECTOR(DDS::DynamicTypeMember_var) DynamicTypeMembersByIndex;

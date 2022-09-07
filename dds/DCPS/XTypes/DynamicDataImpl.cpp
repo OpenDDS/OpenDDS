@@ -1089,7 +1089,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, MemberId i
   const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
   if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   const TypeKind tk = base_type->get_kind();
@@ -2732,68 +2732,6 @@ bool DynamicDataImpl::get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_
     }
   }
   return false;
-}
-
-const char* DynamicDataImpl::typekind_to_string(TypeKind tk) const
-{
-  switch (tk) {
-  case TK_BOOLEAN:
-    return "boolean";
-  case TK_BYTE:
-    return "byte";
-  case TK_INT16:
-    return "int16";
-  case TK_INT32:
-    return "int32";
-  case TK_INT64:
-    return "int64";
-  case TK_UINT16:
-    return "uint16";
-  case TK_UINT32:
-    return "uint32";
-  case TK_UINT64:
-    return "uint64";
-  case TK_FLOAT32:
-    return "float32";
-  case TK_FLOAT64:
-    return "float64";
-  case TK_FLOAT128:
-    return "float128";
-  case TK_INT8:
-    return "int8";
-  case TK_UINT8:
-    return "uint8";
-  case TK_CHAR8:
-    return "char8";
-  case TK_CHAR16:
-    return "char16";
-  case TK_STRING8:
-    return "string";
-  case TK_STRING16:
-    return "wstring";
-  case TK_ALIAS:
-    return "alias";
-  case TK_ENUM:
-    return "enum";
-  case TK_BITMASK:
-    return "bitmask";
-  case TK_ANNOTATION:
-    return "annotation";
-  case TK_STRUCTURE:
-    return "structure";
-  case TK_UNION:
-    return "union";
-  case TK_BITSET:
-    return "bitset";
-  case TK_SEQUENCE:
-    return "sequence";
-  case TK_ARRAY:
-    return "array";
-  case TK_MAP:
-    return "map";
-  default:
-    return "unknown";
-  }
 }
 
 bool DynamicDataImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, DynamicTypeNameSet& dtns)

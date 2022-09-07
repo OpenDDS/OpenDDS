@@ -20,11 +20,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-// To align with XTypes v1.3 Annex C, names for sequences of built-in types are
-// provided in the same namespace as the DynamicData class.  If Safety Profile
-// is enabled, these sequences are defined in OpenDDS.  Otherwise they come from
-// TAO since they are part of the IDL-to-C++ mapping spec.
-
 class OpenDDS_Dcps_Export DynamicDataImpl : public virtual DCPS::LocalObject<DDS::DynamicData> {
 public:
   DynamicDataImpl();
@@ -192,7 +187,7 @@ public:
   DDS::ReturnCode_t get_wstring_value(CORBA::WChar*& value,
                                       DDS::MemberId id);
   DDS::ReturnCode_t set_wstring_value(DDS::MemberId,
-                                      const CORBA::WChar *)
+                                      const CORBA::WChar*)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
@@ -532,7 +527,6 @@ private:
   bool has_optional_member(bool& has_optional) const;
 
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
-  const char* typekind_to_string(TypeKind tk) const;
 
   /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
   typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;
