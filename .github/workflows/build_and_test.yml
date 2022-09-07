@@ -1932,7 +1932,7 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  ACE_TAO_u20_gcc6_d0w1_cpp03:
+  ACE_TAO_u20_gcc9_d0w1_cpp03:
 
     runs-on: ubuntu-20.04
 
@@ -2012,11 +2012,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_u20_gcc6_d0w1_cpp03:
+  build_u20_gcc9_d0w1_cpp03:
 
     runs-on: ubuntu-20.04
 
-    needs: ACE_TAO_u20_gcc6_d0w1_cpp03
+    needs: ACE_TAO_u20_gcc9_d0w1_cpp03
 
     steps:
     - name: install xerces
@@ -2035,13 +2035,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u20_gcc6_d0w1_cpp03_artifact
+        name: ACE_TAO_u20_gcc9_d0w1_cpp03_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_gcc6_d0w1_cpp03.tar.xz
+        tar xvfJ ACE_TAO_u20_gcc9_d0w1_cpp03.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -2095,11 +2095,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  cmake_u20_gcc6_d0w1_cpp03:
+  cmake_u20_gcc9_d0w1_cpp03:
 
     runs-on: ubuntu-20.04
 
-    needs: build_u20_gcc6_d0w1_cpp03
+    needs: build_u20_gcc9_d0w1_cpp03
 
     steps:
     - name: checkout MPC
@@ -2121,13 +2121,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_u20_gcc6_d0w1_cpp03_artifact
+        name: ACE_TAO_u20_gcc9_d0w1_cpp03_artifact
         path: ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd ACE_TAO
-        tar xvfJ ACE_TAO_u20_gcc6_d0w1_cpp03.tar.xz
+        tar xvfJ ACE_TAO_u20_gcc9_d0w1_cpp03.tar.xz
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
@@ -2136,13 +2136,13 @@ jobs:
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_u20_gcc6_d0w1_cpp03_artifact
+        name: build_u20_gcc9_d0w1_cpp03_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_u20_gcc6_d0w1_cpp03.tar.xz
+        tar xvfJ build_u20_gcc9_d0w1_cpp03.tar.xz
     - name: check build configuration
       shell: bash
       run: |
