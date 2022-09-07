@@ -58,9 +58,9 @@ public:
 protected:
 
   enum ReactorState {
-    NONE,
-    NOTIFIED,
-    PROCESSING
+    RS_NONE,
+    RS_NOTIFIED,
+    RS_PROCESSING
   };
 
   ReactorInterceptor(ACE_Reactor* reactor,
