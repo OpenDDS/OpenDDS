@@ -36,7 +36,7 @@ public:
 
 private:
 #ifdef ACE_HAS_CPP11
-  std::atomic<int32_t> sequence_;
+  std::atomic<long> sequence_;
 #else
   ACE_Atomic_Op<ACE_Thread_Mutex, long> sequence_;
 #endif

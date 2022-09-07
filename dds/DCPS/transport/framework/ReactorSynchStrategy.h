@@ -49,7 +49,7 @@ public:
   virtual ThreadSynch* create_synch_object(
     ThreadSynchResource* synch_resource,
     long                 priority = 0,
-    int                  scheduler = 0);
+    long                 scheduler = 0);
 
   private:
     /// Raw pointer to the strategy.  This is the strategy that contains
