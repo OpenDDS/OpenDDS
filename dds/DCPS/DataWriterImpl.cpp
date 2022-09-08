@@ -1408,19 +1408,19 @@ DataWriterImpl::enable()
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-mb"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
+               " Cached_Allocator_With_Overflow %x with %B chunks\n",
                mb_allocator_.get(),
                n_chunks_));
 
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-db"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
+               " Cached_Allocator_With_Overflow %x with %B chunks\n",
                db_allocator_.get(),
                n_chunks_));
 
     ACE_DEBUG((LM_DEBUG,
                "(%P|%t) DataWriterImpl::enable-header"
-               " Cached_Allocator_With_Overflow %x with %d chunks\n",
+               " Cached_Allocator_With_Overflow %x with %B chunks\n",
                header_allocator_.get(),
                n_chunks_));
   }
@@ -2886,7 +2886,7 @@ DDS::ReturnCode_t DataWriterImpl::setup_serialization()
     data_allocator_.reset(new DataAllocator(n_chunks_, chunk_size));
     if (DCPS_debug_level >= 2) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::setup_serialization: "
-        "using data allocator at %x with %u %u byte chunks\n",
+        "using data allocator at %x with %B %B byte chunks\n",
         data_allocator_.get(),
         n_chunks_,
         chunk_size));
@@ -2983,12 +2983,14 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
   }
   mb.reset(tmp_mb);
 
-  if (skip_serialize_ && !sample->to_message_block(*mb)) {
-    if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
-                 "to_message_block failed\n"));
+  if (skip_serialize_) {
+    if (!sample->to_message_block(*mb)) {
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
+                   "to_message_block failed\n"));
+      }
+      return 0;
     }
-    return 0;
   } else {
     Serializer serializer(mb.get(), encoding);
     if (encapsulated) {
