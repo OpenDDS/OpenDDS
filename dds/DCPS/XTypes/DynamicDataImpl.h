@@ -559,7 +559,7 @@ private:
   /// calling skip_aggregated_member().
   IntermediateChains chains_to_release;
 
-  /// This DynamicData object holds data for this type.
+  /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
 
   static const ACE_CDR::ULong ITEM_COUNT_INVALID = ACE_UINT32_MAX;

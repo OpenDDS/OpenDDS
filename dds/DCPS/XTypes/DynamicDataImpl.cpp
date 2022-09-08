@@ -62,7 +62,7 @@ DynamicDataImpl::DynamicDataImpl(ACE_Message_Block* chain,
   , encoding_(encoding)
   , reset_align_state_(false)
   , strm_(chain_, encoding_)
-  , type_(DDS::DynamicType::_duplicate(type))
+  , type_(get_base_type(type))
   , item_count_(ITEM_COUNT_INVALID)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
@@ -77,7 +77,7 @@ DynamicDataImpl::DynamicDataImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr typ
   , reset_align_state_(true)
   , align_state_(ser.rdstate())
   , strm_(chain_, encoding_)
-  , type_(DDS::DynamicType::_duplicate(type))
+  , type_(get_base_type(type))
   , item_count_(ITEM_COUNT_INVALID)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
@@ -126,7 +126,6 @@ void DynamicDataImpl::copy(const DynamicDataImpl& other)
 
 DDS::ReturnCode_t DynamicDataImpl::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::DynamicTypeMember_var dtm;
   if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
@@ -142,9 +141,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescripto
 
 MemberId DynamicDataImpl::get_member_id_by_name(const char* name)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_BOOLEAN:
   case TK_BYTE:
@@ -179,7 +176,7 @@ MemberId DynamicDataImpl::get_member_id_by_name(const char* name)
   case TK_UNION:
     {
       DDS::DynamicTypeMember_var member;
-      if (base_type->get_member_by_name(member, name) != DDS::RETCODE_OK) {
+      if (type_->get_member_by_name(member, name) != DDS::RETCODE_OK) {
         return MEMBER_ID_INVALID;
       }
       DDS::MemberDescriptor_var descriptor;
@@ -204,16 +201,14 @@ MemberId DynamicDataImpl::get_member_id_by_name(const char* name)
 
 bool DynamicDataImpl::has_optional_member(bool& has_optional) const
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
-  if (base_type->get_kind() != TK_STRUCTURE) {
+  if (type_->get_kind() != TK_STRUCTURE) {
     return false;
   }
 
-  const ACE_CDR::ULong count = base_type->get_member_count();
+  const ACE_CDR::ULong count = type_->get_member_count();
   for (unsigned i = 0; i < count; ++i) {
     DDS::DynamicTypeMember_var member;
-    if (base_type->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+    if (type_->get_member_by_index(member, i) != DDS::RETCODE_OK) {
       return false;
     }
     DDS::MemberDescriptor_var descriptor;
@@ -240,9 +235,7 @@ MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 
   ScopedChainManager chain_manager(*this);
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_BOOLEAN:
   case TK_BYTE:
@@ -273,7 +266,7 @@ MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
   case TK_STRUCTURE:
     {
       DDS::TypeDescriptor_var descriptor;
-      if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
         return MEMBER_ID_INVALID;
       }
       const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
@@ -291,14 +284,14 @@ MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 
         if (!has_optional) {
           DDS::DynamicTypeMember_var member;
-          if (base_type->get_member_by_index(member, index) != DDS::RETCODE_OK) {
+          if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
             return MEMBER_ID_INVALID;
           }
           return member->get_id();
         } else {
           MemberId id = MEMBER_ID_INVALID;
           ACE_CDR::ULong total_skipped = 0;
-          for (ACE_CDR::ULong i = 0; i < base_type->get_member_count(); ++i) {
+          for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
             ACE_CDR::ULong num_skipped;
             if (!skip_struct_member_at_index(i, num_skipped)) {
               break;
@@ -306,7 +299,7 @@ MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
             total_skipped += num_skipped;
             if (total_skipped == index + 1) {
               DDS::DynamicTypeMember_var member;
-              if (base_type->get_member_by_index(member, i) == DDS::RETCODE_OK) {
+              if (type_->get_member_by_index(member, i) == DDS::RETCODE_OK) {
                 id = member->get_id();
               }
               break;
@@ -326,7 +319,7 @@ MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
           }
 
           DDS::DynamicTypeMember_var dtm;
-          if (base_type->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+          if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
             good = false;
             break;
           }
@@ -389,13 +382,12 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
 
   ScopedChainManager chain_manager(*this);
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return 0;
   }
 
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_BOOLEAN:
   case TK_BYTE:
@@ -421,7 +413,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
       if (!(strm_ >> bytes)) {
         return 0;
       }
-      return (base_type->get_kind() == TK_STRING8) ? bytes : bytes/2;
+      return (type_->get_kind() == TK_STRING8) ? bytes : bytes/2;
     }
   case TK_BITMASK:
     return descriptor->bound()[0];
@@ -433,7 +425,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
       }
 
       if (!has_optional) {
-        return base_type->get_member_count();
+        return type_->get_member_count();
       }
 
       // Optional members can be omitted, so we need to count members one by one.
@@ -445,7 +437,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
             return 0;
           }
         }
-        for (ACE_CDR::ULong i = 0; i < base_type->get_member_count(); ++i) {
+        for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
           ACE_CDR::ULong num_skipped;
           if (!skip_struct_member_at_index(i, num_skipped)) {
             actual_count = 0;
@@ -470,7 +462,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
           }
 
           DDS::DynamicTypeMember_var dtm;
-          if (base_type->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+          if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
             actual_count = 0;
             break;
           }
@@ -515,7 +507,7 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
       }
 
       DDS::DynamicTypeMembersById_var members;
-      if (base_type->get_all_members(members) != DDS::RETCODE_OK) {
+      if (type_->get_all_members(members) != DDS::RETCODE_OK) {
         return 0;
       }
       DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
@@ -702,9 +694,8 @@ bool DynamicDataImpl::get_value_from_struct(MemberType& value, MemberId id,
 
 DDS::MemberDescriptor* DynamicDataImpl::get_union_selected_member()
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return 0;
   }
 
@@ -722,7 +713,7 @@ DDS::MemberDescriptor* DynamicDataImpl::get_union_selected_member()
   }
 
   DDS::DynamicTypeMembersById_var members;
-  if (base_type->get_all_members(members) != DDS::RETCODE_OK) {
+  if (type_->get_all_members(members) != DDS::RETCODE_OK) {
     return 0;
   }
   DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
@@ -792,9 +783,8 @@ template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataImpl::get_value_from_union(MemberType& value, MemberId id,
                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -858,9 +848,8 @@ bool DynamicDataImpl::get_value_from_union(MemberType& value, MemberId id,
 
 bool DynamicDataImpl::skip_to_sequence_element(MemberId id, DDS::DynamicType_ptr coll_type)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -903,9 +892,8 @@ bool DynamicDataImpl::skip_to_sequence_element(MemberId id, DDS::DynamicType_ptr
 
 bool DynamicDataImpl::skip_to_array_element(MemberId id, DDS::DynamicType_ptr coll_type)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -915,7 +903,7 @@ bool DynamicDataImpl::skip_to_array_element(MemberId id, DDS::DynamicType_ptr co
 
   if (!coll_type) {
     elem_type = get_base_type(descriptor->element_type());
-    coll_type = get_base_type(type_);
+    coll_type = type_;
     if (coll_type->get_descriptor(coll_descriptor) != DDS::RETCODE_OK) {
       return false;
     }
@@ -957,9 +945,8 @@ bool DynamicDataImpl::skip_to_array_element(MemberId id, DDS::DynamicType_ptr co
 
 bool DynamicDataImpl::skip_to_map_element(MemberId id)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -1001,9 +988,8 @@ template<TypeKind ElementTypeKind, typename ElementType>
 bool DynamicDataImpl::get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
                                                 TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -1086,13 +1072,12 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, MemberId i
 
   ScopedChainManager chain_manager(*this);
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
   }
 
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   bool good = true;
 
   if (tk == enum_or_bitmask) {
@@ -1196,9 +1181,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, MemberId id)
 {
   ScopedChainManager chain_manager(*this);
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   bool good = true;
 
   switch (tk) {
@@ -1301,13 +1284,12 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(ACE_CDR::Boolean& value, Me
 {
   ScopedChainManager chain_manager(*this);
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   bool good = true;
 
   switch (tk) {
@@ -1396,20 +1378,19 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
 {
   ScopedChainManager chain_manager(*this);
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   bool good = true;
 
   switch (tk) {
   case TK_STRUCTURE:
     {
       DDS::DynamicTypeMember_var member;
-      const DDS::ReturnCode_t retcode = base_type->get_member(member, id);
+      const DDS::ReturnCode_t retcode = type_->get_member(member, id);
       if (retcode != DDS::RETCODE_OK) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::get_complex_value -")
@@ -1623,9 +1604,8 @@ bool DynamicDataImpl::get_values_from_union(SequenceType& value, MemberId id,
     return false;
   }
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -1655,9 +1635,8 @@ template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::get_values_from_sequence(SequenceType& value, MemberId id,
                                                TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -1709,9 +1688,8 @@ template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::get_values_from_array(SequenceType& value, MemberId id,
                                             TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -1755,9 +1733,8 @@ template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::get_values_from_map(SequenceType& value, MemberId id,
                                           TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -1807,9 +1784,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_sequence_values(SequenceType& value, Memb
 
   ScopedChainManager chain_manager(*this);
 
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   bool good = true;
 
   switch (tk) {
@@ -1958,9 +1933,8 @@ CORBA::Boolean DynamicDataImpl::equals(DDS::DynamicData_ptr)
 
 bool DynamicDataImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
@@ -2023,7 +1997,7 @@ bool DynamicDataImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, 
       }
 
       DDS::DynamicTypeMember_var dtm;
-      if (base_type->get_member(dtm, member_id) != DDS::RETCODE_OK) {
+      if (type_->get_member(dtm, member_id) != DDS::RETCODE_OK) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::skip_to_struct_member -")
                      ACE_TEXT(" Failed to get DynamicTypeMember at ID %d\n"), member_id));
@@ -2071,10 +2045,8 @@ bool DynamicDataImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, 
 
 bool DynamicDataImpl::get_from_struct_common_checks(DDS::MemberDescriptor_var& md, MemberId id, TypeKind kind, bool is_sequence)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
   DDS::DynamicTypeMember_var member;
-  const DDS::ReturnCode_t retcode = base_type->get_member(member, id);
+  const DDS::ReturnCode_t retcode = type_->get_member(member, id);
   if (retcode != DDS::RETCODE_OK) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::get_from_struct_common_checks -")
@@ -2138,10 +2110,8 @@ bool DynamicDataImpl::get_from_struct_common_checks(DDS::MemberDescriptor_var& m
 
 bool DynamicDataImpl::skip_struct_member_at_index(ACE_CDR::ULong index, ACE_CDR::ULong& num_skipped)
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
   DDS::DynamicTypeMember_var member;
-  if (base_type->get_member_by_index(member, index) != DDS::RETCODE_OK) {
+  if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::skip_struct_member_at_index -")
                  ACE_TEXT(" Failed to get DynamicTypeMember for member index %d\n"), index));
@@ -2557,13 +2527,12 @@ bool DynamicDataImpl::read_discriminator(const DDS::DynamicType_ptr disc_type, D
 
 bool DynamicDataImpl::skip_all()
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
   DDS::TypeDescriptor_var descriptor;
-  if (base_type->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
 
-  const TypeKind tk = base_type->get_kind();
+  const TypeKind tk = type_->get_kind();
   if (tk != TK_STRUCTURE && tk != TK_UNION) {
     return false;
   }
@@ -2580,9 +2549,8 @@ bool DynamicDataImpl::skip_all()
     }
     return skip("skip_all", "Failed to skip the whole DynamicData object\n", dheader);
   } else {
-    const TypeKind tk = base_type->get_kind();
     if (tk == TK_STRUCTURE) {
-      const ACE_CDR::ULong member_count = base_type->get_member_count();
+      const ACE_CDR::ULong member_count = type_->get_member_count();
       bool good = true;
       for (ACE_CDR::ULong i = 0; i < member_count; ++i) {
         ACE_CDR::ULong num_skipped;
@@ -2600,7 +2568,7 @@ bool DynamicDataImpl::skip_all()
       }
 
       DDS::DynamicTypeMembersById_var members;
-      if (base_type->get_all_members(members) != DDS::RETCODE_OK) {
+      if (type_->get_all_members(members) != DDS::RETCODE_OK) {
         return false;
       }
       DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
@@ -2714,9 +2682,7 @@ bool DynamicDataImpl::get_primitive_size(DDS::DynamicType_ptr dt, ACE_CDR::ULong
 
 bool DynamicDataImpl::get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const
 {
-  const DDS::DynamicType_var base_type = get_base_type(type_);
-
-  switch (base_type->get_kind()) {
+  switch (type_->get_kind()) {
   case TK_STRING8:
   case TK_STRING16:
   case TK_BITMASK:

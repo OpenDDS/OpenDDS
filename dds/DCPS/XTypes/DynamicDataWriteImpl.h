@@ -318,7 +318,7 @@ public:
                                        const DDS::WstringSeq& value);
 
 private:
-  // The actual, non-alias DynamicType of the associated type.
+  // The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
 
   // TODO: Contain data for an instance of a basic type.

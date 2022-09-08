@@ -9,7 +9,8 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-#include <dds/DdsDynamicDataC.h>
+#include "DynamicTypeImpl.h"
+
 #include <dds/DCPS/FilterEvaluator.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -23,7 +24,7 @@ public:
   DynamicDataAdapter(DDS::DynamicType_ptr type,
                     const DCPS::MetaStruct& meta_struct,
                     const T& value)
-    : type_(DDS::DynamicType::_duplicate(type))
+    : type_(get_base_type(type))
     , meta_struct_(meta_struct)
     , value_(value)
   {}
