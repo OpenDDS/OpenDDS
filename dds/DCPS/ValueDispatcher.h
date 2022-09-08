@@ -21,7 +21,7 @@ struct OpenDDS_Dcps_Export ValueDispatcher {
   virtual void* new_value() const = 0;
   virtual void delete_value(void* data) const = 0;
 
-  virtual void read(ValueReader& value_reader, void* data) const = 0;
+  virtual bool read(ValueReader& value_reader, void* data) const = 0;
   virtual void write(ValueWriter& value_writer, const void* data) const = 0;
 
   virtual DDS::InstanceHandle_t register_instance_helper(DDS::DataWriter* dw, const void* data) const = 0;
@@ -45,9 +45,9 @@ struct ValueDispatcher_T : public virtual ValueDispatcher {
     delete tbd;
   }
 
-  virtual void read(ValueReader& value_reader, void* data) const
+  virtual bool read(ValueReader& value_reader, void* data) const
   {
-    vread(value_reader, *static_cast<T*>(data));
+    return vread(value_reader, *static_cast<T*>(data));
   }
 
   virtual void write(ValueWriter& value_writer, const void* data) const
