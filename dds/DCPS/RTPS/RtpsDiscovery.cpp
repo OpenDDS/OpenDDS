@@ -172,7 +172,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->resend_period(TimeDuration(resend));
         } else if (name == "QuickResendRatio") {
           const OPENDDS_STRING& value = it->second;
-          double ratio = 0;
+          double ratio = 0.0;
           if (!DCPS::convertToDouble(value, ratio)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -643,7 +643,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "AuthResendPeriod") {
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
-          double double_value = 0;
+          double double_value = 0.0;
           if (DCPS::convertToDouble(string_value, double_value)) {
             config->auth_resend_period(TimeDuration::from_double(double_value));
           } else {

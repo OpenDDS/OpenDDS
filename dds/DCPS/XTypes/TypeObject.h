@@ -1973,7 +1973,7 @@ namespace XTypes {
     MinimalBitflagSeq flag_seq;
 
     MinimalBitmaskType()
-      : bitmaks_flags(0)
+      : bitmask_flags(0)
     {}
   };
 
