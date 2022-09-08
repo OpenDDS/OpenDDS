@@ -197,6 +197,93 @@ DDS::ReturnCode_t set_wstring_values(DDS::MemberId id, const DDS::WstringSeq& va
 {
 }
 
+DynamicData::SingleValue::SingleValue(CORBA::Long i32)
+  : kind_(TK_INT32), i32_(i32)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::ULong ui32)
+  : kind_(TK_UINT32), ui32_(ui32)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::Int8 i8)
+  : kind_(TK_INT8), i8_(i8)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::UInt8 ui8)
+  : kind_(TK_UINT8), ui8_(ui8)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::Short i16)
+  : kind_(TK_INT16), i16_(i16)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::UShort ui16)
+  : kind_(TK_UINT16), ui16_(ui16)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::LongLong i64)
+  : kind_(TK_INT64), i64_(i64)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::ULongLong ui64)
+  : kind_(TK_UINT64), ui64_(ui64)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::Float f32)
+  : kind_(TK_FLOAT32), f32_(f32)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::Double f64)
+  : kind_(TK_FLOAT64), f64_(f64)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::LongDouble f128)
+  : kind_(TK_FLOAT128), f128_(f128)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::Char c8)
+  : kind_(TK_CHAR8), c8_(c8)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::WChar c16)
+  : kind_(TK_CHAR16), c16_(c16)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::Octet byte)
+  : kind_(TK_BYTE), byte_(byte)
+{}
+
+DynamicData::SingleValue::SingleValue(CORBA::Boolean boolean)
+  : kind_(TK_BOOLEAN), boolean_(boolean)
+{}
+
+DynamicData::SingleValue::SingleValue(const char* str)
+  : kind_(TK_STRING8), str_(ACE_OS::strdup(str))
+{}
+
+// TODO: Make the wide string functionalities conditional on DDS_HAS_WCHAR.
+DynamicData::SingleValue::SingleValue(const CORBA::WChar* wstr)
+  : kind_(TK_STRING16), wstr_(ACE_OS::strdup(wstr))
+{}
+
+DynamicData::SingleValue::~SingleValue()
+{
+  if (kind_ == TK_STRING8 || kind_ == TK_STRING16) {
+    // TODO: Does this work for wstring?
+    ACE_OS::free((void*)str_);
+  }
+}
+
+namespace DCPS {
+
+bool operator<<(Serializer& ser, const DynamicDataWriteImpl& dd)
+{
+  // TODO
+  return true;
+}
+
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 

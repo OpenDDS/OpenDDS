@@ -8,6 +8,8 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
+#include "DynamicTypeImpl.h"
+
 #include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -321,8 +323,48 @@ private:
   // The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
 
-  // TODO: Contain data for an instance of a basic type.
+  // Contain data for an instance of a basic type.
   struct SingleValue {
+    SingleValue(CORBA::Long i32);
+    SingleValue(CORBA::ULong ui32);
+    SingleValue(CORBA::Int8 i8);
+    SingleValue(CORBA::UInt8 ui8);
+    SingleValue(CORBA::Short i16);
+    SingleValue(CORBA::UShort ui16);
+    SingleValue(CORBA::LongLong i64);
+    SingleValue(CORBA::ULongLong ui64);
+    SingleValue(CORBA::Float f32);
+    SingleValue(CORBA::Double f64);
+    SingleValue(CORBA::LongDouble f128);
+    SingleValue(CORBA::Char c8);
+    SingleValue(CORBA::WChar c16);
+    SingleValue(CORBA::Octet byte);
+    SingleValue(CORBA::Boolean boolean);
+    SingleValue(const char* str);
+    SingleValue(CORBA::WChar* wstr);
+
+    ~SingleValue();
+
+    TypeKind kind_;
+    union {
+      CORBA::Long i32_;
+      CORBA::ULong ui32_;
+      CORBA::Int8 i8_;
+      CORBA::UInt8 ui8_;
+      CORBA::Short i16_;
+      CORBA::UShort ui16_;
+      CORBA::LongLong i64_;
+      CORBA::ULongLong ui64_;
+      CORBA::Float f32_;
+      CORBA::Double f64_;
+      CORBA::LongDouble f128_;
+      CORBA::Char c8_;
+      CORBA::WChar c16_;
+      CORBA::Octet byte_;
+      CORBA::Boolean boolean_;
+      const char* str_;
+      const CORBA::WChar* wstr_;
+    };
   };
 
   // TODO: Contain data for an instance of a sequence of a basic type.
@@ -340,6 +382,14 @@ private:
 };
 
 } // namespace XTypes
+
+namespace DCPS {
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const DynamicDataWriteImpl& dd);
+
+} // namespace DCPS
+
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
