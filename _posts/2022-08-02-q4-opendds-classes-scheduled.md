@@ -11,9 +11,9 @@ A new set of OpenDDS training classes has been added to the schedule in October!
 
 [Building OpenDDS Applications with DDS Security](https://objectcomputing.com/services/training/catalog/middleware/opendds-security) | October 12 to October 13
 
-[OpenDDS Essentials I: QoS, Keys and Instances, and Built-in Topics](https://objectcomputing.com/services/training/catalog/middleware/opendds-essentials) | October 17 to October 18
+[OpenDDS Essentials I: QoS, Keys and Instances, and Built-in Topics](https://objectcomputing.com/services/training/catalog/middleware/opendds-essentials) | October 24 to October 25
 
-[OpenDDS Essentials II: Configuration, Listeners, Conditions, and Content Subscription](https://objectcomputing.com/services/training/catalog/middleware/opendds-essentials-2) | October 19 to October 20
+[OpenDDS Essentials II: Configuration, Listeners, Conditions, and Content Subscription](https://objectcomputing.com/services/training/catalog/middleware/opendds-essentials-2) | October 26 to October 27
 
 All four 6-hour classes offer C++ and Java users hands-on practice building powerful, secure distributed applications with open source software.
 
