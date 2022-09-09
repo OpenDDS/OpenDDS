@@ -163,7 +163,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         const OPENDDS_STRING& name = it->first;
         if (name == "ResendPeriod") {
           const OPENDDS_STRING& value = it->second;
-          int resend;
+          int resend = 0;
           if (!DCPS::convertToInteger(value, resend)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -174,7 +174,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->resend_period(TimeDuration(resend));
         } else if (name == "QuickResendRatio") {
           const OPENDDS_STRING& value = it->second;
-          double ratio;
+          double ratio = 0.0;
           if (!DCPS::convertToDouble(value, ratio)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -185,7 +185,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->quick_resend_ratio(ratio);
         } else if (name == "MinResendDelay") {
           const OPENDDS_STRING& value = it->second;
-          int delay;
+          int delay = 0;
           if (!DCPS::convertToInteger(value, delay)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -196,7 +196,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->min_resend_delay(TimeDuration::from_msec(delay));
         } else if (name == "LeaseDuration") {
           const OPENDDS_STRING& value = it->second;
-          int duration;
+          int duration = 0;
           if (!DCPS::convertToInteger(value, duration)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -230,7 +230,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->security_unsecure_lease_duration(TimeDuration(duration));
         } else if (name == "MaxParticipantsInAuthentication") {
           const OPENDDS_STRING& value = it->second;
-          unsigned int max_participants;
+          unsigned int max_participants = 0;
           if (!DCPS::convertToInteger(value, max_participants)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -242,7 +242,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 #endif
         } else if (name == "LeaseExtension") {
           const OPENDDS_STRING& value = it->second;
-          int extension;
+          int extension = 0;
           if (!DCPS::convertToInteger(value, extension)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -253,7 +253,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->lease_extension(TimeDuration(extension));
         } else if (name == "PB") {
           const OPENDDS_STRING& value = it->second;
-          u_short pb;
+          u_short pb = 0;
           if (!DCPS::convertToInteger(value, pb)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -264,7 +264,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->pb(pb);
         } else if (name == "DG") {
           const OPENDDS_STRING& value = it->second;
-          u_short dg;
+          u_short dg = 0;
           if (!DCPS::convertToInteger(value, dg)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -275,7 +275,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->dg(dg);
         } else if (name == "PG") {
           const OPENDDS_STRING& value = it->second;
-          u_short pg;
+          u_short pg = 0;
           if (!DCPS::convertToInteger(value, pg)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -286,7 +286,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->pg(pg);
         } else if (name == "D0") {
           const OPENDDS_STRING& value = it->second;
-          u_short d0;
+          u_short d0 = 0;
           if (!DCPS::convertToInteger(value, d0)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -297,7 +297,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->d0(d0);
         } else if (name == "D1") {
           const OPENDDS_STRING& value = it->second;
-          u_short d1;
+          u_short d1 = 0;
           if (!DCPS::convertToInteger(value, d1)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -308,7 +308,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->d1(d1);
         } else if (name == "DX") {
           const OPENDDS_STRING& value = it->second;
-          u_short dx;
+          u_short dx = 0;
           if (!DCPS::convertToInteger(value, dx)) {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -319,7 +319,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->dx(dx);
         } else if (name == "TTL") {
           const OPENDDS_STRING& value = it->second;
-          unsigned short ttl_us;
+          unsigned short ttl_us = 0;
           if (!DCPS::convertToInteger(value, ttl_us) || ttl_us > UCHAR_MAX) {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -330,7 +330,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->ttl(static_cast<unsigned char>(ttl_us));
         } else if (name == "SendBufferSize") {
           const OPENDDS_STRING& value = it->second;
-          ACE_INT32 send_buffer_size;
+          ACE_INT32 send_buffer_size = 0;
           if (!DCPS::convertToInteger(value, send_buffer_size)) {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -341,7 +341,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->send_buffer_size(send_buffer_size);
         } else if (name == "RecvBufferSize") {
           const OPENDDS_STRING& value = it->second;
-          ACE_INT32 recv_buffer_size;
+          ACE_INT32 recv_buffer_size = 0;
           if (!DCPS::convertToInteger(value, recv_buffer_size)) {
             ACE_ERROR_RETURN((LM_ERROR,
                ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -444,7 +444,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                      ACE_TEXT("Entry SpdpRtpsRelayBeaconPeriod is deprecated and will be ignored.\n")));
         } else if (name == "SpdpRtpsRelaySendPeriod") {
           const OPENDDS_STRING& value = it->second;
-          int period;
+          int period = 0;
           if (!DCPS::convertToInteger(value, period)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -469,7 +469,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                      ACE_TEXT("Entry SedpRtpsRelayBeaconPeriod is deprecated and will be ignored.\n")));
         } else if (name == "RtpsRelayOnly") {
           const OPENDDS_STRING& value = it->second;
-          int smInt;
+          int smInt = 0;
           if (!DCPS::convertToInteger(value, smInt)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
@@ -579,7 +579,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "IceNominatedTTL") {
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
-          int int_value;
+          int int_value = 0;
           if (DCPS::convertToInteger(string_value, int_value)) {
             ICE::Configuration::instance()->nominated_ttl(TimeDuration(int_value));
           } else {
@@ -656,7 +656,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "AuthResendPeriod") {
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
-          double double_value;
+          double double_value = 0.0;
           if (DCPS::convertToDouble(string_value, double_value)) {
             config->auth_resend_period(TimeDuration::from_double(double_value));
           } else {
@@ -681,7 +681,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
         } else if (name == "SedpMaxMessageSize") {
           const OPENDDS_STRING& string_value = it->second;
-          size_t value;
+          size_t value = 0;
           if (DCPS::convertToInteger(string_value, value)) {
             config->sedp_max_message_size(value);
           } else {
@@ -793,7 +793,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->periodic_directed_spdp(bool(smInt));
         } else if (name == "TypeLookupServiceReplyTimeout") {
           const OPENDDS_STRING& value = it->second;
-          int timeout;
+          int timeout = 0;
           if (!DCPS::convertToInteger(value, timeout)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
