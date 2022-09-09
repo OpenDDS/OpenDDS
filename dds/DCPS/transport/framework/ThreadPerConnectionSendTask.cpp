@@ -93,7 +93,7 @@ int ThreadPerConnectionSendTask::open(void*)
   int priority = mapper.thread_priority();
 
   long flags  = THR_NEW_LWP | THR_JOINABLE ;//|THR_SCOPE_PROCESS | THR_SCOPE_THREAD;
-  int policy = TheServiceParticipant->scheduler();
+  long policy = TheServiceParticipant->scheduler();
 
   if (policy >= 0) {
     flags |= policy;
