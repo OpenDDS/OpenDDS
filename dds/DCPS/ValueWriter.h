@@ -134,17 +134,6 @@ public:
   ///@}
 };
 
-template <typename T>
-void vwrite(ValueWriter& value_writer, const T& value);
-
-// Implementations of this interface will call vwrite(value_writer, v)
-// where v is the resulting of casting data to the appropriate type.
-struct ValueWriterDispatcher {
-  virtual ~ValueWriterDispatcher() {}
-
-  virtual void write(ValueWriter& value_writer, const void* data) const = 0;
-};
-
 } // namespace DCPS
 } // namespace OpenDDS
 

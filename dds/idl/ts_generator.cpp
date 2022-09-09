@@ -125,7 +125,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   be_global->add_include(dc.c_str());
 
   static const char* h_includes[] = {
-    "dds/DCPS/TypeSupportImpl.h"
+    "dds/DCPS/TypeSupportImpl.h", "dds/DCPS/ValueDispatcher.h"
   };
   add_includes(h_includes, BE_GlobalData::STREAM_H);
 
@@ -199,6 +199,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "class " << be_global->export_macro() << " " << ts_short_name << "TypeSupportImpl\n"
       "  : public virtual OpenDDS::DCPS::LocalObject<" << ts_short_name << "TypeSupport>\n"
       "  , public virtual OpenDDS::DCPS::TypeSupportImpl\n"
+      "  , public virtual OpenDDS::DCPS::ValueDispatcher_T<" << short_name << ">\n"
       "{\n"
       "public:\n"
       "  typedef OpenDDS::DCPS::DDSTraits<" << short_name << "> TraitsType;\n"
