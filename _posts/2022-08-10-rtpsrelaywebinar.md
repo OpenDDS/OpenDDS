@@ -20,6 +20,4 @@ The following topics are covered in this webinar:
 * Configuring OpenDDS applications to use the RtpsRelay
 * Gotchas when operating over the public internet
 
-Join us on Aug 25, 2022 10:00 AM Central Time (US and Canada) to expand your skills and learn how to build more powerful IoT and IIoT applications!
-
-[Register today!](https://us02web.zoom.us/webinar/register/9716595432101/WN_Es166sb1QgK9R_AGlroICg)
+[Watch the Webinar](https://objectcomputing.com/products/opendds/resources/rtpsrelay-iot)
