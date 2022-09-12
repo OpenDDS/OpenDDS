@@ -16,13 +16,13 @@ Legend for GitHub Actions Build Names
 Operating System
 ================
 
-* u18/u20/u22 - Ubuntu 18/20/22.04
+* u20/u22 - Ubuntu 20.04/22.04
 * w19/w22 - Windows Server 2019/Windows Server 2022
 * m11/m12 - macOS 11/12
 
 .. seealso::
 
-  `GitHub Virtual Environments <https://github.com/actions/virtual-environments>`_
+  `GitHub Runner Images <https://github.com/actions/runner-images>`
 
 Build Configuration
 ===================
@@ -52,7 +52,7 @@ Build Options
 * w1 - enables wide characters
 * v1 - enables versioned namespace
 * cpp03 - ``--std=c++03``
-* j/j8/j12 - Java (default version)/8/12
+* j/j<N> - Java version default/N
 * ace7 - uses ace7tao3 rather than ace6tao2
 * xer0 - disables xerces
 * qt - enables ``--qt``
