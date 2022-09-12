@@ -785,6 +785,7 @@ protected:
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
+  RepoId topic_id_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
