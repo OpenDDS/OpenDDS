@@ -64,6 +64,7 @@ DataReaderImpl::DataReaderImpl()
   , qos_(TheServiceParticipant->initial_DataReaderQos())
   , reverse_sample_lock_(sample_lock_)
   , topic_servant_(0)
+  , topic_id_(GUID_UNKNOWN)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   , is_exclusive_ownership_(false)
 #endif
@@ -187,6 +188,7 @@ void DataReaderImpl::init(
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
+    topic_id_ = a_topic->get_id();
   }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -2792,7 +2794,7 @@ DataReaderImpl::get_reactor()
 OpenDDS::DCPS::RepoId
 DataReaderImpl::get_topic_id()
 {
-  return topic_servant_ ? topic_servant_->get_id() : GUID_UNKNOWN;
+  return topic_id_;
 }
 
 OpenDDS::DCPS::RepoId
