@@ -2,11 +2,11 @@ version: '2'
 services:
   subscriber:
     image: objectcomputing/opendds
-    command: ["subscriber", "-DCPSConfigFile",  "rtps.ini" ]
+    command: ["./subscriber", "-DCPSConfigFile",  "rtps.ini" ]
     volumes:
       - $PWD:/opt/workspace
   publisher:
     image: objectcomputing/opendds
-    command: ["publisher", "-DCPSConfigFile",  "rtps.ini" ]
+    command: ["./publisher", "-DCPSConfigFile",  "rtps.ini" ]
     volumes:
       - $PWD:/opt/workspace
