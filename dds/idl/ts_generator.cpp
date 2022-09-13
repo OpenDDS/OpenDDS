@@ -107,11 +107,14 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     return true;
   }
 
-  const std::string cxxName = scoped(name);
+  const std::string cxx_name = scoped(name);
   const std::string short_name = name->last_component()->get_string();
   const std::string ts_name = scoped(name, EscapeContext_FromGenIdl);
   const std::string ts_short_name = to_string(
     name->last_component(), EscapeContext_FromGenIdl);
+  const std::string unescaped_name =
+    dds_generator::scoped_helper(name, "::", EscapeContext_StripEscapes);
+  const std::string name_underscores = dds_generator::scoped_helper(name, "_");
 
   static const char* idl_includes[] = {
     "dds/DdsDcpsInfrastructure.idl", "dds/DdsDcpsTopic.idl",
@@ -166,22 +169,20 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
-  const std::string unescaped_name =
-    dds_generator::scoped_helper(name, "::", EscapeContext_StripEscapes);
   be_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
     "namespace OpenDDS {\n"
     "namespace DCPS {\n"
     "template <>\n"
-    "struct DDSTraits<" << cxxName << "> {\n"
-    "  typedef " << cxxName << " MessageType;\n"
+    "struct DDSTraits<" << cxx_name << "> {\n"
+    "  typedef " << cxx_name << " MessageType;\n"
     "  typedef " << ts_name << be_global->sequence_suffix() << " MessageSequenceType;\n"
     "  typedef " << ts_name << "TypeSupport TypeSupportType;\n"
     "  typedef " << ts_name << "TypeSupportImpl TypeSupportImplType;\n"
     "  typedef " << ts_name << "DataWriter DataWriterType;\n"
     "  typedef " << ts_name << "DataReader DataReaderType;\n"
-    "  typedef " << cxxName << "_OpenDDS_KeyLessThan LessThanType;\n"
-    "  typedef OpenDDS::DCPS::KeyOnly<const " << cxxName << "> KeyOnlyType;\n"
+    "  typedef " << cxx_name << "_OpenDDS_KeyLessThan LessThanType;\n"
+    "  typedef OpenDDS::DCPS::KeyOnly<const " << cxx_name << "> KeyOnlyType;\n"
     "\n"
     "  static const char* type_name() { return \"" << unescaped_name << "\"; }\n"
     "  static bool gen_has_key() { return " << (key_count ? "true" : "false") << "; }\n"
@@ -233,7 +234,16 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual OpenDDS::DCPS::Extensibility getExtensibility() const;\n"
       "\n"
       "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
-      "};\n";
+      "};\n\n"
+      "namespace {\n"
+      "struct " << name_underscores << "_Initializer {\n"
+      "  " << name_underscores << "_Initializer()\n"
+      "  {\n"
+      "    " << ts_name << "TypeSupport_var ts = new " << ts_short_name << "TypeSupportImpl;\n"
+      "    ts->register_type(0, \"\");\n"
+      "  }\n"
+      "} init_" << name_underscores << ";\n"
+      "}\n\n";
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
@@ -452,7 +462,7 @@ namespace java_ts_generator {
 namespace face_ts_generator {
 
   void generate(UTL_ScopedName* name) {
-    const std::string name_cxx = scoped(name),
+    const std::string cxx_name = scoped(name),
       name_underscores = dds_generator::scoped_helper(name, "_"),
       exportMacro = be_global->export_macro().c_str(),
       exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
@@ -465,7 +475,7 @@ namespace face_ts_generator {
       "  {\n"
       "    typedef void (*send_event_" << name_underscores << "_Ptr) (\n"
       "      /* in */ TRANSACTION_ID_TYPE transaction_id,\n"
-      "      /* inout */ " << name_cxx << "& message,\n"
+      "      /* inout */ " << cxx_name << "& message,\n"
       "      /* in */ MESSAGE_TYPE_GUID message_type_id,\n"
       "      /* in */ MESSAGE_SIZE_TYPE message_size,\n"
       "      /* in */ const WAITSET_TYPE waitset,\n"
@@ -477,14 +487,14 @@ namespace face_ts_generator {
       "      /* in */ CONNECTION_ID_TYPE connection_id,\n"
       "      /* in */ TIMEOUT_TYPE timeout,\n"
       "      /* inout */ TRANSACTION_ID_TYPE& transaction_id,\n"
-      "      /* out */ " << name_cxx << "& message,\n"
+      "      /* out */ " << cxx_name << "& message,\n"
       "      /* in */ MESSAGE_SIZE_TYPE message_size,\n"
       "      /* out */ RETURN_CODE_TYPE& return_code);\n\n" << exporter <<
       "    void Send_Message(\n"
       "      /* in */ CONNECTION_ID_TYPE connection_id,\n"
       "      /* in */ TIMEOUT_TYPE timeout,\n"
       "      /* inout */ TRANSACTION_ID_TYPE& transaction_id,\n"
-      "      /* inout */ " << name_cxx << "& message,\n"
+      "      /* inout */ " << cxx_name << "& message,\n"
       "      /* inout */ MESSAGE_SIZE_TYPE& message_size,\n"
       "      /* out */ RETURN_CODE_TYPE& return_code);\n\n" << exporter <<
       "    void Register_Callback(\n"
@@ -500,7 +510,7 @@ namespace face_ts_generator {
       "void Receive_Message(CONNECTION_ID_TYPE connection_id,\n"
       "                     TIMEOUT_TYPE timeout,\n"
       "                     TRANSACTION_ID_TYPE& transaction_id,\n"
-      "                     " << name_cxx << "& message,\n"
+      "                     " << cxx_name << "& message,\n"
       "                     MESSAGE_SIZE_TYPE message_size,\n"
       "                     RETURN_CODE_TYPE& return_code) {\n"
       "  OpenDDS::FaceTSS::receive_message(connection_id, timeout,\n"
@@ -510,7 +520,7 @@ namespace face_ts_generator {
       "void Send_Message(CONNECTION_ID_TYPE connection_id,\n"
       "                  TIMEOUT_TYPE timeout,\n"
       "                  TRANSACTION_ID_TYPE& transaction_id,\n"
-      "                  " << name_cxx << "& message,\n"
+      "                  " << cxx_name << "& message,\n"
       "                  MESSAGE_SIZE_TYPE& message_size,\n"
       "                  RETURN_CODE_TYPE& return_code) {\n"
       "  OpenDDS::FaceTSS::send_message(connection_id, timeout,\n"
@@ -526,14 +536,6 @@ namespace face_ts_generator {
       "  OpenDDS::FaceTSS::register_callback(connection_id, waitset,\n"
       "                                      data_callback,\n"
       "                                      max_message_size, return_code);\n"
-      "}\n\n"
-      "struct " << name_underscores << "_Initializer {\n"
-      "  " << name_underscores << "_Initializer()\n"
-      "  {\n"
-      "    " << ts_name << "TypeSupport_var ts = new " << name_cxx
-                          << "TypeSupportImpl;\n"
-      "    ts->register_type(0, \"\");\n"
-      "  }\n"
-      "} init_" << name_underscores << ";\n\n";
+      "}\n\n";
   }
 }
