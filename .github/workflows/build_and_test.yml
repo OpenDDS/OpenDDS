@@ -11706,8 +11706,8 @@ jobs:
         cd OpenDDS/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        gtar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v3
@@ -11750,7 +11750,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -11783,8 +11783,8 @@ jobs:
         rm -rf ACE_TAO
         find . -iname "*\.o" | xargs rm
         find bin dds lib tests -type f -print0 | xargs -0 shasum > manifest 2> manifest_errors || true
-        tar cvf ../${{ github.job }}.tar setenv.sh manifest manifest_errors
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        gtar cvf ../${{ github.job }}.tar setenv.sh manifest manifest_errors
+        git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v3
@@ -11832,7 +11832,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -11842,7 +11842,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_m12_o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -11937,7 +11937,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -11947,7 +11947,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_m12_o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12066,8 +12066,8 @@ jobs:
         cd OpenDDS/ACE_TAO
         perl -ni.bak -e "print unless /opendds/" ACE/bin/MakeProjectCreator/config/default.features # remove opendds features from here, let individual build configure scripts handle those
         find . -iname "*\.o" | xargs rm
-        tar cvf ../../${{ github.job }}.tar ACE/ace/config.h
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../../${{ github.job }}.tar
+        gtar cvf ../../${{ github.job }}.tar ACE/ace/config.h
+        git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../../${{ github.job }}.tar
         xz -3 ../../${{ github.job }}.tar
     - name: upload ACE_TAO artifact
       uses: actions/upload-artifact@v3
@@ -12111,7 +12111,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
+        gtar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -12159,8 +12159,8 @@ jobs:
         rm -rf ACE_TAO
         find . -iname "*\.o" | xargs rm
         find bin dds lib tests -type f -print0 | xargs -0 shasum > manifest 2> manifest_errors || true
-        tar cvf ../${{ github.job }}.tar setenv.sh manifest manifest_errors
-        git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
+        gtar cvf ../${{ github.job }}.tar setenv.sh manifest manifest_errors
+        git clean -xdfn | cut -d ' ' -f 3- | xargs gtar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v3
@@ -12208,7 +12208,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
+        gtar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -12218,7 +12218,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_m12_i0_j_FM-1f.tar.xz
+        gtar xvfJ build_m12_i0_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12313,7 +12313,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        tar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
+        gtar xvfJ ACE_TAO_m12_i0_j_FM-1f.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -12323,7 +12323,7 @@ jobs:
       shell: bash
       run: |
         cd OpenDDS
-        tar xvfJ build_m12_i0_j_FM-1f.tar.xz
+        gtar xvfJ build_m12_i0_j_FM-1f.tar.xz
     - name: check build configuration
       shell: bash
       run: |
