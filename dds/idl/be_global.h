@@ -134,9 +134,6 @@ public:
   bool itl() const;
   void itl(bool b);
 
-  bool v8() const;
-  void v8(bool b);
-
   bool value_reader_writer() const;
   void value_reader_writer(bool b);
 
@@ -251,7 +248,7 @@ private:
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
-    no_default_gen_, generate_itl_, generate_v8_,
+    no_default_gen_, generate_itl_,
     generate_value_reader_writer_,
     generate_xtypes_complete_, face_ts_;
 
