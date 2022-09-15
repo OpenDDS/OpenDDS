@@ -7,11 +7,11 @@ services:
       - $PWD:/opt/workspace
   subscriber:
     image: objectcomputing/opendds
-    command: ["./wait-for-it.sh", "inforepo:3897", "--", "subscriber", "-DCPSInfoRepo",  "inforepo:3897" ]
+    command: ["./wait-for-it.sh", "inforepo:3897", "--", "./subscriber", "-DCPSInfoRepo",  "inforepo:3897" ]
     volumes:
       - $PWD:/opt/workspace
   publisher:
     image: objectcomputing/opendds
-    command: ["./wait-for-it.sh", "inforepo:3897", "--", "publisher", "-DCPSInfoRepo",  "inforepo:3897" ]
+    command: ["./wait-for-it.sh", "inforepo:3897", "--", "./publisher", "-DCPSInfoRepo",  "inforepo:3897" ]
     volumes:
       - $PWD:/opt/workspace

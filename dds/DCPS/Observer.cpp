@@ -24,7 +24,7 @@ Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
                          const DDS::Time_t& a_timestamp,
                          const SequenceNumber& a_sequence_number,
                          const void* a_data,
-                         const ValueWriterDispatcher& a_data_dispatcher)
+                         const ValueDispatcher& a_data_dispatcher)
   : instance(a_instance)
   , instance_state(a_instance_state)
   , timestamp(a_timestamp)
@@ -36,7 +36,7 @@ Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
 Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
                          DDS::InstanceStateKind a_instance_state,
                          const ReceivedDataElement& a_rde,
-                         const ValueWriterDispatcher& a_data_dispatcher)
+                         const ValueDispatcher& a_data_dispatcher)
   : instance(a_instance)
   , instance_state(a_instance_state)
   , timestamp(a_rde.source_timestamp_)

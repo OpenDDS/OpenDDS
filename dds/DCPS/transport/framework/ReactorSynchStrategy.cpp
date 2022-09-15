@@ -20,7 +20,7 @@ OpenDDS::DCPS::ReactorSynchStrategy::~ReactorSynchStrategy()
 
 OpenDDS::DCPS::ThreadSynch*
 OpenDDS::DCPS::ReactorSynchStrategy::create_synch_object(
-  ThreadSynchResource* synch_resource, long, int)
+  ThreadSynchResource* synch_resource, long, long)
 {
   DBG_ENTRY_LVL("ReactorSynchStrategy","create_synch_object",6);
   return new ReactorSynch(

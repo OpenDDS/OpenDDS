@@ -3593,7 +3593,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
   const SystemTimePoint now = SystemTimePoint::now();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.value().sec());
-  dsh.source_timestamp_nanosec_ = now.value().usec() * 1000;
+  dsh.source_timestamp_nanosec_ = static_cast<ACE_UINT32>(now.value().usec() * 1000);
 }
 
 Sedp::SecurityWriter::~SecurityWriter()

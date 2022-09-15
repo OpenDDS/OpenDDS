@@ -1008,6 +1008,7 @@ RtpsUdpTransport::disable_relay_stun_task()
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
+  connection_record.latency = TimeDuration::zero_value.to_dds_duration();
 
   if (relay_srsm_.stun_server_address() != ACE_INET_Addr()) {
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();

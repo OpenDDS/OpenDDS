@@ -39,7 +39,6 @@ class
 DataWriterImpl_T
 : public virtual LocalObject<typename DDSTraits<MessageType>::DataWriterType>
 , public virtual DataWriterImpl
-, public ValueWriterDispatcher
 {
 public:
   typedef NativeSample<MessageType> Sample;
@@ -198,13 +197,6 @@ public:
   {
     AbstractSample_rch sample = make_sample(instance_data);
     return DataWriterImpl::lookup_instance(sample);
-  }
-
-  const ValueWriterDispatcher* get_value_writer_dispatcher() const { return this; }
-
-  void write(ValueWriter& value_writer, const void* data) const
-  {
-    vwrite(value_writer, *static_cast<const MessageType*>(data));
   }
 
 private:

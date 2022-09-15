@@ -498,7 +498,10 @@ public:
     return sequence_number_;
   }
 
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+  const ValueDispatcher* get_value_dispatcher() const
+  {
+    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+  }
 
   DDS::ReturnCode_t get_key_value(AbstractSample_rch& sample, DDS::InstanceHandle_t handle);
   DDS::InstanceHandle_t lookup_instance(AbstractSample_rch& sample);
