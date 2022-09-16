@@ -458,7 +458,7 @@ section.foundation-boards .foundation-board-content h2 {
   right: 0;
   min-height: 100vh;
   overflow-y: scroll;
-  z-index: 2000;
+  z-index: 9000;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
   transition: 0.6s all ease;
 }
@@ -509,7 +509,7 @@ body.drawer-active {
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 9999;
+  z-index: 8000;
   opacity: 0;
   pointer-events: none;
   transition: 0.3s all ease;

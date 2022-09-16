@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Q2 OpenDDS Class Schedule"
+title: "2022 Q2 OpenDDS Class Schedule"
 categories: news
 author: Object Computing, Inc.
 ---
