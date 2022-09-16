@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.22.0 of OpenDDS
-OpenDDS 3.22.0 is currently in development, so this list might change.
+OpenDDS 3.22.0 was released on Sep 16 2022.
 
 ### Additions:
 - Sequences in FACE mapping: support == for any type (#3604)
