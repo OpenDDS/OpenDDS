@@ -8,8 +8,10 @@
 #include "DCPS/DdsDcps_pch.h"
 
 #include "Observer.h"
+
 #include "DataSampleElement.h"
 #include "ReceivedDataElementList.h"
+#include "XTypes/MemberDescriptorImpl.h"
 #include "transport/framework/ReceivedDataSample.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -22,7 +24,7 @@ Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
                          const DDS::Time_t& a_timestamp,
                          const SequenceNumber& a_sequence_number,
                          const void* a_data,
-                         const ValueWriterDispatcher& a_data_dispatcher)
+                         const ValueDispatcher& a_data_dispatcher)
   : instance(a_instance)
   , instance_state(a_instance_state)
   , timestamp(a_timestamp)
@@ -34,7 +36,7 @@ Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
 Observer::Sample::Sample(DDS::InstanceHandle_t a_instance,
                          DDS::InstanceStateKind a_instance_state,
                          const ReceivedDataElement& a_rde,
-                         const ValueWriterDispatcher& a_data_dispatcher)
+                         const ValueDispatcher& a_data_dispatcher)
   : instance(a_instance)
   , instance_state(a_instance_state)
   , timestamp(a_rde.source_timestamp_)
@@ -49,19 +51,19 @@ void
 vwrite(ValueWriter& vw, const Observer::Sample& sample)
 {
   vw.begin_struct();
-  vw.begin_struct_member(XTypes::MemberDescriptor("instance", false));
+  vw.begin_struct_member(XTypes::MemberDescriptorImpl("instance", false));
   vw.write_int32(sample.instance);
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptor("instance_state", false));
+  vw.begin_struct_member(XTypes::MemberDescriptorImpl("instance_state", false));
   vw.write_uint32(sample.instance_state);
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptor("timestamp", false));
+  vw.begin_struct_member(XTypes::MemberDescriptorImpl("timestamp", false));
   vwrite(vw, sample.timestamp);
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptor("sequence_number", false));
+  vw.begin_struct_member(XTypes::MemberDescriptorImpl("sequence_number", false));
   vw.write_int64(sample.sequence_number.getValue());
   vw.end_struct_member();
-  vw.begin_struct_member(XTypes::MemberDescriptor("data", false));
+  vw.begin_struct_member(XTypes::MemberDescriptorImpl("data", false));
   sample.data_dispatcher.write(vw, sample.data);
   vw.end_struct_member();
   vw.end_struct();

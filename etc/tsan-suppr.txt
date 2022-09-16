@@ -3,7 +3,6 @@
 #   https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
 
 deadlock:^CORBA::ORB_init
-deadlock:^ACE_Data_Block::release_no_delete
 
 race_top:^ACE_Data_Block::ACE_Data_Block
 race_top:^ACE_Data_Block::release_i

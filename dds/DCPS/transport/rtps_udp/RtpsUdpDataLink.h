@@ -20,14 +20,13 @@
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorTask_rch.h>
-#include <dds/DCPS/PeriodicTask.h>
-#include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/NetworkConfigMonitor.h>
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/GuidConverter.h>
+#include <dds/DCPS/DataBlockLockPool.h>
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/DiscoveryListener.h>
 #include <dds/DCPS/ReactorInterceptor.h>
@@ -38,6 +37,8 @@
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/FibonacciSequence.h>
 #include <dds/DCPS/MulticastManager.h>
+#include <dds/DCPS/SporadicEvent.h>
+#include <dds/DCPS/PeriodicEvent.h>
 
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityConfig.h>
@@ -246,6 +247,8 @@ public:
 
   bool requires_inline_qos(const GUIDSeq_var& peers);
 
+  EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
+
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);
 
@@ -267,6 +270,7 @@ private:
 
   ReactorTask_rch reactor_task_;
   RcHandle<JobQueue> job_queue_;
+  EventDispatcher_rch event_dispatcher_;
 
   RtpsUdpSendStrategy_rch send_strategy();
   RtpsUdpReceiveStrategy_rch receive_strategy();
@@ -293,7 +297,7 @@ private:
 #endif
   RemoteInfoMap locators_;
 
-  void update_last_recv_addr(const RepoId& src, const NetworkAddress& addr);
+  void update_last_recv_addr(const RepoId& src, const NetworkAddress& addr, const MonotonicTimePoint& now = MonotonicTimePoint::now());
 
   mutable LocatorCache locator_cache_;
   mutable BundlingCache bundling_cache_;
@@ -309,6 +313,7 @@ private:
   DataBlockAllocator db_allocator_;
   Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> custom_allocator_;
   Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> bundle_allocator_;
+  unique_ptr<DataBlockLockPool> db_lock_pool_;
 
   ACE_Message_Block* alloc_msgblock(size_t size, ACE_Allocator* data_allocator);
   ACE_Message_Block* submsgs_to_msgblock(const RTPS::SubmessageSeq& subm);
@@ -393,7 +398,7 @@ private:
   typedef RcHandle<ReaderInfoSetHolder> ReaderInfoSetHolder_rch;
   typedef OPENDDS_MAP(SequenceNumber, ReaderInfoSetHolder_rch) SNRIS;
 
-  class ReplayDurableData : public JobQueue::Job {
+  class ReplayDurableData : public EventBase {
   public:
     ReplayDurableData(WeakRcHandle<RtpsUdpDataLink> link, const RepoId& local_pub_id, const RepoId& remote_sub_id)
       : link_(link)
@@ -406,7 +411,7 @@ private:
     const RepoId local_pub_id_;
     const RepoId remote_sub_id_;
 
-    void execute() {
+    void handle_event() {
       RtpsUdpDataLink_rch link = link_.lock();
 
       if (!link) {
@@ -455,10 +460,8 @@ private:
     mutable ACE_Thread_Mutex remote_reader_guids_mutex_;
     mutable ACE_Thread_Mutex elems_not_acked_mutex_;
 
-    typedef PmfSporadicTask<RtpsWriter> Sporadic;
-
-    RcHandle<Sporadic> heartbeat_;
-    RcHandle<Sporadic> nack_response_;
+    RcHandle<SporadicEvent> heartbeat_;
+    RcHandle<SporadicEvent> nack_response_;
 
     FibonacciSequence<TimeDuration> fallback_;
 
@@ -621,7 +624,7 @@ private:
       , id_(id)
       , stopping_(false)
       , nackfrag_count_(0)
-      , preassociation_task_(make_rch<RtpsReader::Sporadic>(TheServiceParticipant->time_source(), link->reactor_task_->interceptor(), rchandle_from(this), &RtpsReader::send_preassociation_acknacks))
+      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks)))
     {}
 
     ~RtpsReader();
@@ -678,8 +681,7 @@ private:
     WriterInfoSet preassociation_writers_;
     bool stopping_;
     CORBA::Long nackfrag_count_;
-    typedef PmfSporadicTask<RtpsReader> Sporadic;
-    RcHandle<Sporadic> preassociation_task_;
+    RcHandle<SporadicEvent> preassociation_task_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
@@ -737,9 +739,10 @@ private:
   ThreadedRtpsSendQueue sq_;
   ACE_Thread_Mutex fsq_mutex_;
   MetaSubmessageVec fsq_vec_;
-  typedef PmfSporadicTask<RtpsUdpDataLink> Sporadic;
-  RcHandle<Sporadic> flush_send_queue_task_;
+
   void flush_send_queue(const MonotonicTimePoint& now);
+
+  RcHandle<SporadicEvent> flush_send_queue_sporadic_;
 
   RepoIdSet pending_reliable_readers_;
 
@@ -859,9 +862,8 @@ private:
 
   CORBA::Long best_effort_heartbeat_count_;
 
-  typedef PmfPeriodicTask<RtpsUdpDataLink> Periodic;
-  RcHandle<Periodic> heartbeat_;
-  RcHandle<Periodic> heartbeatchecker_;
+  RcHandle<PeriodicEvent> heartbeat_;
+  RcHandle<PeriodicEvent> heartbeatchecker_;
 
   /// Data structure representing an "interesting" remote entity for static discovery.
   struct InterestingRemote {

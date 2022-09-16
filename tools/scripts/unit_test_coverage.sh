@@ -10,13 +10,17 @@
 # single unit, the script can be used to geneerate the coverage for
 # that unit in isolation.
 
-set -e
-
 start=$(date +'%s')
 
 args=($@)
 
 cd "${DDS_ROOT}"
+
+function cleanup {
+    rm -f baseline current files_to_keep files_to_remove
+}
+
+trap cleanup EXIT
 
 function get-all-files {
     git ls-files |
@@ -65,6 +69,13 @@ echo ''
 
 rm -f coverage-total.info
 
+lcov --zerocounters --directory .
+(
+    cd "${DDS_ROOT}/tests/unit-tests"
+    ./UnitTests --gtest_filter="DOES NOT MATCH"
+)
+find . -name "*.gcda" | xargs md5sum | sort -k2,2 > baseline
+
 for unit_name in $(get-units)
 do
     echo "Testing coverage of ${unit_name}"
@@ -87,17 +98,14 @@ do
         fi
     )
 
-    # Delete gcda files not related to the unit.
-    for path in $(find . -name "*.gcda")
-    do
-        derived_unit_name=$(echo "${path}" | sed -e 's@^\./@@' -e 's@/\.shobj@@g' -e 's@/\.obj@@g' -e 's@^tests/unit-tests/@@' -e 's@\.gcda$@@')
-        if [[ ${derived_unit_name} != ${unit_name} ]]
-        then
-            rm $path
-        else
-            echo "Considering ${path} for ${unit_name}"
-        fi
-    done
+    # Delete gcda files that did not change.
+    find . -name "*.gcda" | xargs md5sum | sort -k2,2 > current
+    diff baseline current | grep '^<' | cut -d' ' -f4 > files_to_keep
+    find . -name "*.gcda" | grep -v -F -f files_to_keep > files_to_remove
+    if [ -s files_to_remove ]
+    then
+        cat files_to_remove | xargs rm
+    fi
 
     # Collect data.
     rm -f coverage.info

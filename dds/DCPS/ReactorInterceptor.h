@@ -36,15 +36,6 @@ public:
 
     virtual void execute() = 0;
 
-    void executed()
-    {
-      ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-      executed_ = true;
-      condition_.notify_all();
-    }
-
-    void wait() const;
-
   protected:
     const ACE_Reactor* reactor() const { return reactor_; }
     ACE_Reactor* reactor() { return reactor_; }
@@ -53,9 +44,6 @@ public:
     friend class OpenDDS::DCPS::ReactorInterceptor;
     void set_reactor(ACE_Reactor* reactor) { reactor_ = reactor; }
 
-    bool executed_;
-    mutable ACE_Thread_Mutex mutex_;
-    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
     ACE_Reactor* reactor_;
   };
   typedef RcHandle<Command> CommandPtr;
@@ -70,9 +58,9 @@ public:
 protected:
 
   enum ReactorState {
-    NONE,
-    NOTIFIED,
-    PROCESSING
+    RS_NONE,
+    RS_NOTIFIED,
+    RS_PROCESSING
   };
 
   ReactorInterceptor(ACE_Reactor* reactor,

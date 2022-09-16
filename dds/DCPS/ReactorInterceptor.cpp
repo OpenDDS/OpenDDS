@@ -20,24 +20,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 ReactorInterceptor::Command::Command()
-  : executed_(false)
-  , condition_(mutex_)
-  , reactor_(0)
+  : reactor_(0)
 {}
-
-void ReactorInterceptor::Command::wait() const
-{
-  ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
-  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  while (!executed_) {
-    condition_.wait(thread_status_manager);
-  }
-}
 
 ReactorInterceptor::ReactorInterceptor(ACE_Reactor* reactor,
                                        ACE_thread_t owner)
   : owner_(owner)
-  , state_(NONE)
+  , state_(RS_NONE)
 {
   RcEventHandler::reactor(reactor);
 }
@@ -58,7 +47,7 @@ ReactorInterceptor::CommandPtr ReactorInterceptor::execute_or_enqueue(CommandPtr
 
   // If state is set to processing, the conents of command_queue_ have been swapped out
   // so immediate execution may run jobs out of the expected order.
-  const bool is_not_processing = state_ != PROCESSING;
+  const bool is_not_processing = state_ != RS_PROCESSING;
 
   // If the command_queue_ is not empty, allowing execution will potentially run unexpected code
   // which is problematic since we may be holding locks used by the unexpected code.
@@ -78,8 +67,8 @@ ReactorInterceptor::CommandPtr ReactorInterceptor::execute_or_enqueue(CommandPtr
   // But depending on whether we're running it immediately or not, we either process or notify
   if (immediate) {
     process_command_queue_i(guard);
-  } else if (state_ == NONE) {
-    state_ = NOTIFIED;
+  } else if (state_ == RS_NONE) {
+    state_ = RS_NOTIFIED;
     guard.release();
     local_reactor->notify(this);
   }
@@ -100,22 +89,21 @@ void ReactorInterceptor::process_command_queue_i(ACE_Guard<ACE_Thread_Mutex>& gu
   Queue cq;
   ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
 
-  state_ = PROCESSING;
+  state_ = RS_PROCESSING;
   if (!command_queue_.empty()) {
     cq.swap(command_queue_);
     ACE_Guard<ACE_Reverse_Lock<ACE_Thread_Mutex> > rev_guard(rev_lock);
     for (Queue::const_iterator pos = cq.begin(), limit = cq.end(); pos != limit; ++pos) {
       (*pos)->execute();
-      (*pos)->executed();
     }
   }
   if (!command_queue_.empty()) {
-    state_ = NOTIFIED;
+    state_ = RS_NOTIFIED;
     ACE_Reactor* const reactor = ACE_Event_Handler::reactor();
     guard.release();
     reactor->notify(this);
   } else {
-    state_ = NONE;
+    state_ = RS_NONE;
   }
 }
 

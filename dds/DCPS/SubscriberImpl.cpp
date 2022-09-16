@@ -299,15 +299,12 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
 
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
+                     si_guard,
                      this->si_lock_,
                      DDS::RETCODE_ERROR);
 
     DataReaderMap::iterator it;
-
-    for (it = datareader_map_.begin();
-         it != datareader_map_.end();
-         ++it) {
+    for (it = datareader_map_.begin(); it != datareader_map_.end(); ++it) {
       if (it->second == dr_servant) {
         break;
       }
@@ -361,6 +358,11 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     }
 
     datareader_map_.erase(it);
+
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     dr_set_guard,
+                     this->dr_set_lock_,
+                     DDS::RETCODE_ERROR);
     datareader_set_.erase(dr_servant);
   }
 
@@ -368,17 +370,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     this->monitor_->report();
   }
 
-  if (!dr_servant) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: ")
-                ACE_TEXT("SubscriberImpl::delete_datareader: ")
-                ACE_TEXT("could not remove unknown subscription.\n")));
-    }
-    return ::DDS::RETCODE_ERROR;
-  }
-
-  RepoId subscription_id = dr_servant->get_repo_id();
+  const RepoId subscription_id = dr_servant->get_repo_id();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   this->dp_id_,
@@ -519,7 +511,7 @@ SubscriberImpl::get_datareaders(
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      guard,
-                     this->si_lock_,
+                     this->dr_set_lock_,
                      DDS::RETCODE_ERROR);
     localreaders = datareader_set_;
   }
@@ -577,12 +569,12 @@ SubscriberImpl::notify_datareaders()
     if (it->second->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = it->second->get_listener();
       if (!it->second->is_bit()) {
+        it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
         if (listener) {
           listener->on_data_available(it->second.in());
         }
-        it->second->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(rchandle_from(this), listener, it->second, listener, true, false));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<DataReaderImpl::OnDataAvailable>(listener, it->second, listener, true, false));
       }
     }
   }
@@ -613,10 +605,10 @@ SubscriberImpl::notify_datareaders()
 
     if (dri->have_sample_states(DDS::NOT_READ_SAMPLE_STATE)) {
       DDS::DataReaderListener_var listener = dri->get_listener();
+      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
       if (!CORBA::is_nil(listener)) {
         listener->on_data_available(dri);
       }
-      dri->set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
     }
   }
 #endif
@@ -735,30 +727,33 @@ SubscriberImpl::get_listener()
 DDS::ReturnCode_t
 SubscriberImpl::begin_access()
 {
-  if (enabled_ == false) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
-                ACE_TEXT(" Subscriber is not enabled!\n")));
-    }
-    return DDS::RETCODE_NOT_ENABLED;
-  }
-
-  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
-    return DDS::RETCODE_OK;
-  }
-
   DataReaderSet to_call;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
+                     si_guard,
                      si_lock_,
                      DDS::RETCODE_ERROR);
+    if (enabled_ == false) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
+                   ACE_TEXT(" Subscriber is not enabled!\n")));
+      }
+      return DDS::RETCODE_NOT_ENABLED;
+    }
+
+    if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+      return DDS::RETCODE_OK;
+    }
 
     ++access_depth_;
     // We should only notify subscription on the first
     // and last change to the current change set:
     if (access_depth_ == 1) {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       dr_set_guard,
+                       dr_set_lock_,
+                       DDS::RETCODE_ERROR);
       to_call = datareader_set_;
     }
   }
@@ -772,31 +767,30 @@ SubscriberImpl::begin_access()
 DDS::ReturnCode_t
 SubscriberImpl::end_access()
 {
-  if (enabled_ == false) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
-                ACE_TEXT(" Publisher is not enabled!\n")));
-    }
-    return DDS::RETCODE_NOT_ENABLED;
-  }
-
-  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
-    return DDS::RETCODE_OK;
-  }
-
   DataReaderSet to_call;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
+                     si_guard,
                      si_lock_,
                      DDS::RETCODE_ERROR);
+    if (enabled_ == false) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                   ACE_TEXT(" Publisher is not enabled!\n")));
+      }
+      return DDS::RETCODE_NOT_ENABLED;
+    }
+
+    if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+      return DDS::RETCODE_OK;
+    }
 
     if (access_depth_ == 0) {
       if (DCPS_debug_level > 0) {
         ACE_ERROR((LM_ERROR,
-                  ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
-                  ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                   ACE_TEXT(" No matching call to begin_coherent_changes!\n")));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -805,6 +799,10 @@ SubscriberImpl::end_access()
     // We should only notify subscription on the first
     // and last change to the current change set:
     if (access_depth_ == 0) {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       dr_set_guard,
+                       dr_set_lock_,
+                       DDS::RETCODE_ERROR);
       to_call = datareader_set_;
     }
   }
@@ -920,7 +918,7 @@ SubscriberImpl::data_received(DataReaderImpl* reader)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
             guard,
-            this->si_lock_);
+            this->dr_set_lock_);
   datareader_set_.insert(rchandle_from(reader));
 }
 
@@ -961,7 +959,7 @@ SubscriberImpl::multitopic_reader_enabled(DDS::DataReader_ptr reader)
 void
 SubscriberImpl::remove_from_datareader_set(DataReaderImpl* reader)
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, si_lock_);
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, dr_set_lock_);
   datareader_set_.erase(rchandle_from(reader));
 }
 #endif
@@ -1045,7 +1043,7 @@ SubscriberImpl::coherent_change_received (const RepoId& publisher_id,
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex,
               guard,
-              this->si_lock_);
+              this->dr_set_lock_);
      localdrs = datareader_set_;
   }
   // Verify if all readers complete the coherent changes. The result

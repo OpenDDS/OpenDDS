@@ -623,8 +623,8 @@ public:
         return true;
       }
     }
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: RtpsDiscoveryConfig::use_xtypes: "
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsDiscoveryConfig::use_xtypes: "
                  "invalid XTypes configuration: %C\n", str));
     }
     return false;
@@ -956,7 +956,7 @@ public:
                                    const DCPS::RepoId& local_participant,
                                    DCPS::TransportStatisticsSequence& seq);
 
-  DDS::Subscriber_ptr init_bit(DCPS::DomainParticipantImpl* participant);
+  RcHandle<DCPS::BitSubscriber> init_bit(DCPS::DomainParticipantImpl* participant);
 
   void fini_bit(DCPS::DomainParticipantImpl* participant);
 

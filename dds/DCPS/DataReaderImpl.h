@@ -9,34 +9,35 @@
 #define OPENDDS_DCPS_DATAREADERIMPL_H
 
 #include "dcps_export.h"
-#include "EntityImpl.h"
-#include "Definitions.h"
-#include "DataReaderCallbacks.h"
-#include "transport/framework/ReceivedDataSample.h"
-#include "transport/framework/TransportReceiveListener.h"
-#include "transport/framework/TransportClient.h"
-#include "DisjointSequence.h"
-#include "SubscriptionInstance.h"
-#include "InstanceState.h"
-#include "Cached_Allocator_With_Overflow_T.h"
-#include "ZeroCopyInfoSeq_T.h"
-#include "Stats_T.h"
-#include "OwnershipManager.h"
-#include "ContentFilteredTopicImpl.h"
-#include "MultiTopicImpl.h"
-#include "GroupRakeData.h"
-#include "CoherentChangeControl.h"
+
 #include "AssociationData.h"
-#include "RcHandle_T.h"
-#include "RcObject.h"
-#include "WriterInfo.h"
-#include "ReactorInterceptor.h"
-#include "Service_Participant.h"
+#include "Cached_Allocator_With_Overflow_T.h"
+#include "CoherentChangeControl.h"
+#include "ContentFilteredTopicImpl.h"
+#include "DataReaderCallbacks.h"
+#include "Definitions.h"
+#include "DisjointSequence.h"
+#include "DomainParticipantImpl.h"
+#include "EntityImpl.h"
+#include "GroupRakeData.h"
+#include "InstanceState.h"
+#include "MultiTopicImpl.h"
+#include "OwnershipManager.h"
 #include "PoolAllocator.h"
 #include "RcEventHandler.h"
-#include "TopicImpl.h"
-#include "DomainParticipantImpl.h"
+#include "RcHandle_T.h"
+#include "RcObject.h"
+#include "ReactorInterceptor.h"
+#include "Service_Participant.h"
+#include "Stats_T.h"
+#include "SubscriptionInstance.h"
 #include "TimeTypes.h"
+#include "TopicImpl.h"
+#include "WriterInfo.h"
+#include "ZeroCopyInfoSeq_T.h"
+#include "transport/framework/ReceivedDataSample.h"
+#include "transport/framework/TransportClient.h"
+#include "transport/framework/TransportReceiveListener.h"
 
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>
@@ -67,7 +68,6 @@ class DomainParticipantImpl;
 class SubscriptionInstance;
 class TopicImpl;
 class TopicDescriptionImpl;
-class RequestedDeadlineWatchdog;
 class Monitor;
 class DataReaderImpl;
 class FilterEvaluator;
@@ -393,6 +393,7 @@ public:
 #endif
 
   virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
+                                                DDS::InstanceHandle_t publication_handle,
                                                 SubscriptionInstance_rch& instance,
                                                 bool& is_new_instance,
                                                 bool& filtered,
@@ -400,6 +401,7 @@ public:
                                                 bool full_copy) = 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
+                                  DDS::InstanceHandle_t publication_handle,
                                   SubscriptionInstance_rch& instance);
 
   void process_latency(const ReceivedDataSample& sample);
@@ -441,9 +443,6 @@ public:
 
   /// Release all instances held by the reader.
   virtual void release_all_instances() = 0;
-
-  // Reset time interval for each instance.
-  void reschedule_deadline();
 
   ACE_Reactor_Timer_Interface* get_reactor();
 
@@ -568,8 +567,17 @@ public:
                           const SystemTimePoint& timestamp = SystemTimePoint::now(),
                           const GUID_t& guid = GUID_UNKNOWN)
   {
+    DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+      RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(guid);
+      if (pos != publication_id_to_handle_map_.end()) {
+        publication_handle = pos->second;
+      }
+    }
+
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-    set_instance_state_i(instance, state, timestamp, guid);
+    set_instance_state_i(instance, publication_handle, state, timestamp, guid);
   }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -628,6 +636,11 @@ public:
   }
 
   void return_handle(DDS::InstanceHandle_t handle);
+
+  const ValueDispatcher* get_value_dispatcher() const
+  {
+    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+  }
 
 protected:
 
@@ -698,8 +711,6 @@ protected:
   // type specific DataReader's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
 
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
-
   void sample_info(DDS::SampleInfo & sample_info,
                    const ReceivedDataElement *ptr);
 
@@ -744,7 +755,8 @@ protected:
   bool ownership_filter_instance(const SubscriptionInstance_rch& instance,
                                  const PublicationId& pubid);
   bool time_based_filter_instance(const SubscriptionInstance_rch& instance,
-                                  TimeDuration& filter_time_expired);
+                                  MonotonicTimePoint& now,
+                                  MonotonicTimePoint& deadline);
 
   void accept_sample_processing(const SubscriptionInstance_rch& instance, const DataSampleHeader& header, bool is_new_instance);
 
@@ -773,6 +785,7 @@ protected:
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
+  RepoId topic_id_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
@@ -802,6 +815,7 @@ protected:
 private:
 
   virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
+                                    DDS::InstanceHandle_t publication_handle,
                                     DDS::InstanceStateKind state,
                                     const SystemTimePoint& timestamp,
                                     const GUID_t& guid) = 0;
@@ -812,21 +826,22 @@ private:
   void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void instances_liveliness_update(const PublicationId& writer);
+  void instances_liveliness_update(const PublicationId& writer,
+                                   DDS::InstanceHandle_t publication_handle);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
   bool coherent_change_received(WriterInfo* writer);
 #endif
 
-  DDS::Subscriber_var get_builtin_subscriber() const
+  RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const
   {
     RcHandle<DomainParticipantImpl> participant_servant = participant_servant_.lock();
     if (participant_servant) {
-      return participant_servant->get_builtin_subscriber();
+      return participant_servant->get_builtin_subscriber_proxy();
     }
 
-    return DDS::Subscriber_var();
+    return RcHandle<BitSubscriber>();
   }
 
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
@@ -871,10 +886,9 @@ private:
 
   //Used to protect access to id_to_handle_map_
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
-  Reverse_Lock_t reverse_pub_handle_lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
-  RepoIdToHandleMap            id_to_handle_map_;
+  RepoIdToHandleMap            publication_id_to_handle_map_;
 
   // Status conditions.
   DDS::LivelinessChangedStatus         liveliness_changed_status_;
@@ -973,7 +987,24 @@ private:
   CORBA::Long last_deadline_missed_total_count_;
   /// Watchdog responsible for reporting missed offered
   /// deadlines.
-  RcHandle<RequestedDeadlineWatchdog> watchdog_;
+  TimeDuration deadline_period_;
+  typedef OPENDDS_MULTIMAP(MonotonicTimePoint, SubscriptionInstance_rch) DeadlineQueue;
+  DeadlineQueue deadline_queue_;
+  bool deadline_queue_enabled_;
+  typedef PmfSporadicTask<DataReaderImpl> DRISporadicTask;
+  RcHandle<DRISporadicTask> deadline_task_;
+
+  void schedule_deadline(SubscriptionInstance_rch instance,
+                         bool timer_called);
+  void reset_deadline_period(const TimeDuration& deadline_period);
+  void reschedule_deadline(SubscriptionInstance_rch instance,
+                           const MonotonicTimePoint& now);
+  void cancel_deadline(SubscriptionInstance_rch instance);
+  void cancel_all_deadlines();
+  void deadline_task(const MonotonicTimePoint& now);
+  void process_deadline(SubscriptionInstance_rch instance,
+                        const MonotonicTimePoint& now,
+                        bool timer_called);
 
   /// Flag indicates that this datareader is a builtin topic
   /// datareader.
@@ -1046,14 +1077,12 @@ public:
 
   class OpenDDS_Dcps_Export OnDataAvailable : public JobQueue::Job {
   public:
-    OnDataAvailable(WeakRcHandle<SubscriberImpl> subscriber,
-                    DDS::DataReaderListener_var listener,
+    OnDataAvailable(DDS::DataReaderListener_var listener,
                     WeakRcHandle<DataReaderImpl> data_reader,
                     bool call,
                     bool set_reader_status,
                     bool set_subscriber_status)
-      : subscriber_(subscriber)
-      , listener_(listener)
+      : listener_(listener)
       , data_reader_(data_reader)
       , call_(call)
       , set_reader_status_(set_reader_status)
@@ -1063,13 +1092,18 @@ public:
   private:
     virtual void execute();
 
-    WeakRcHandle<SubscriberImpl> subscriber_;
     DDS::DataReaderListener_var listener_;
     WeakRcHandle<DataReaderImpl> data_reader_;
     const bool call_;
     const bool set_reader_status_;
     const bool set_subscriber_status_;
   };
+
+#if defined(OPENDDS_SECURITY)
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

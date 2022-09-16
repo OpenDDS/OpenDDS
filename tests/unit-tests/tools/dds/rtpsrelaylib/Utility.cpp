@@ -66,7 +66,7 @@ TEST(tools_dds_rtpsrelaylib_Utility, AddrPort_less_than)
 
 TEST(tools_dds_rtpsrelaylib_Utility, GuidAddr_ctor)
 {
-  OpenDDS::DCPS::GUID_t guid;
+  OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::GUID_UNKNOWN;
   ACE_INET_Addr addr("127.0.0.1");
   AddrPort ap(addr, SPDP);
   GuidAddr ga(guid, ap);
@@ -76,7 +76,7 @@ TEST(tools_dds_rtpsrelaylib_Utility, GuidAddr_ctor)
 
 TEST(tools_dds_rtpsrelaylib_Utility, GuidAddr_equal)
 {
-  OpenDDS::DCPS::GUID_t guid;
+  OpenDDS::DCPS::GUID_t guid = OpenDDS::DCPS::GUID_UNKNOWN;
   ACE_INET_Addr addr("127.0.0.1:1234");
   AddrPort ap(addr, SPDP);
   GuidAddr ga1(guid, ap);

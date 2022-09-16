@@ -2,6 +2,13 @@ project(*Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for
 
   exename = subscriber
 
+  IDL_Files {
+    Common.idl
+    Subscriber.idl
+    CommonTypeSupport.idl
+    SubscriberTypeSupport.idl
+  }
+
   TypeSupport_Files {
     Common.idl
     Subscriber.idl
@@ -16,6 +23,13 @@ project(*Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_
 
   exename = publisher
   after += *Subscriber
+
+  IDL_Files {
+    Common.idl
+    Publisher.idl
+    CommonTypeSupport.idl
+    PublisherTypeSupport.idl
+  }
 
   TypeSupport_Files {
     Common.idl

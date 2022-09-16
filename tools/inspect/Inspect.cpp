@@ -8,7 +8,7 @@
 #include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/XTypes/DynamicData.h>
+#include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportConfig.h>
@@ -223,7 +223,7 @@ public:
   virtual void on_sample_data_received(Recorder* rec,
                                        const RawDataSample& sample)
   {
-    OpenDDS::XTypes::DynamicData dd = rec->get_dynamic_data(sample);
+    DDS::DynamicData_var dd = rec->get_dynamic_data(sample);
     String my_type;
     String indent;
     if (!OpenDDS::XTypes::print_dynamic_data(dd, my_type, indent)) {

@@ -20,7 +20,6 @@
 #include "Transient_Kludge.h"
 #include "Util.h"
 #include "DCPS_Utils.h"
-#include "RequestedDeadlineWatchdog.h"
 #include "QueryConditionImpl.h"
 #include "ReadConditionImpl.h"
 #include "MonitorFactory.h"
@@ -59,35 +58,34 @@ namespace OpenDDS {
 namespace DCPS {
 
 DataReaderImpl::DataReaderImpl()
-: has_subscription_id_(false),
-  subscription_id_mutex_(),
-  subscription_id_condition_(subscription_id_mutex_),
-  qos_(TheServiceParticipant->initial_DataReaderQos()),
-  reverse_sample_lock_(sample_lock_),
-  topic_servant_(0),
+  : has_subscription_id_(false)
+  , subscription_id_mutex_()
+  , subscription_id_condition_(subscription_id_mutex_)
+  , qos_(TheServiceParticipant->initial_DataReaderQos())
+  , reverse_sample_lock_(sample_lock_)
+  , topic_servant_(0)
+  , topic_id_(GUID_UNKNOWN)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  is_exclusive_ownership_(false),
+  , is_exclusive_ownership_(false)
 #endif
-  coherent_(false),
-  subqos_(TheServiceParticipant->initial_SubscriberQos()),
-  topic_desc_(0),
-  listener_mask_(DEFAULT_STATUS_MASK),
-  domain_id_(0),
-  end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(
-    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-  n_chunks_(TheServiceParticipant->n_chunks()),
-  reverse_pub_handle_lock_(publication_handle_lock_),
-  reactor_(0),
-  liveliness_timer_(make_rch<LivelinessTimer>(
-    TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this)),
-  last_deadline_missed_total_count_(0),
-  watchdog_(),
-  is_bit_(false),
-  always_get_history_(false),
-  statistics_enabled_(false),
-  raw_latency_buffer_size_(0),
-  raw_latency_buffer_type_(DataCollector<double>::KeepOldest),
-  transport_disabled_(false)
+  , coherent_(false)
+  , subqos_(TheServiceParticipant->initial_SubscriberQos())
+  , topic_desc_(0)
+  , listener_mask_(DEFAULT_STATUS_MASK)
+  , domain_id_(0)
+  , end_historic_sweeper_(make_rch<EndHistoricSamplesMissedSweeper>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
+  , n_chunks_(TheServiceParticipant->n_chunks())
+  , reactor_(0)
+  , liveliness_timer_(make_rch<LivelinessTimer>(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner(), this))
+  , last_deadline_missed_total_count_(0)
+  , deadline_queue_enabled_(false)
+  , deadline_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataReaderImpl::deadline_task))
+  , is_bit_(false)
+  , always_get_history_(false)
+  , statistics_enabled_(false)
+  , raw_latency_buffer_size_(0)
+  , raw_latency_buffer_type_(DataCollector<double>::KeepOldest)
+  , transport_disabled_(false)
 {
   reactor_ = TheServiceParticipant->timer();
 
@@ -136,6 +134,16 @@ DataReaderImpl::DataReaderImpl()
 DataReaderImpl::~DataReaderImpl()
 {
   DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
+
+  deadline_task_->cancel();
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+    type_lookup_service->remove_guid_from_dynamic_map(subscription_id_);
+  }
+#endif
 }
 
 // this method is called when delete_datareader is called.
@@ -180,6 +188,7 @@ void DataReaderImpl::init(
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
+    topic_id_ = a_topic->get_id();
   }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -250,10 +259,6 @@ DataReaderImpl::add_association(const RepoId& yourId,
       subscription_id_condition_.notify_all();
     }
   }
-
-  // Why do we need the publication_handle_lock_ here?  No access to id_to_handle_map_...
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
 
   // For each writer in the list of writers to associate with, we
   // create a WriterInfo and a WriterStats object and store them in
@@ -327,12 +332,6 @@ DataReaderImpl::add_association(const RepoId& yourId,
   data.remote_durable_ =
       (writer.writerQos.durability.kind > DDS::VOLATILE_DURABILITY_QOS);
 
-  //Do not hold publication_handle_lock_ when calling associate due to possible reactor
-  //deadlock on passive side completion
-  //associate does not access id_to_handle_map_, thus not clear why publication_handle_lock_
-  //is held here anyway
-  guard.release();
-
   if (associate(data, active)) {
     const Observer_rch observer = get_observer(Observer::e_ASSOCIATED);
     if (observer) {
@@ -360,24 +359,17 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
     return;
   }
 
-  {
-
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
-    // LIVELINESS policy timers are managed here.
-    if (!liveliness_lease_duration_.is_zero()) {
-      if (DCPS_debug_level >= 5) {
-        ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
-            ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-            LogGuid(get_repo_id()).c_str()));
-      }
-      // this call will start the timer if it is not already set
-      liveliness_timer_->check_liveliness();
+  // LIVELINESS policy timers are managed here.
+  if (!liveliness_lease_duration_.is_zero()) {
+    if (DCPS_debug_level >= 5) {
+      ACE_DEBUG((LM_DEBUG,
+          ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
+          ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
+          LogGuid(get_repo_id()).c_str()));
     }
+    // this call will start the timer if it is not already set
+    liveliness_timer_->check_liveliness();
   }
-  // We no longer hold the publication_handle_lock_.
-
 
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
 
@@ -393,8 +385,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
 
       // This insertion is idempotent.
-      id_to_handle_map_.insert(
-          RepoIdToHandleMap::value_type(remote_id, handle));
+      publication_id_to_handle_map_.insert(RepoIdToHandleMap::value_type(remote_id, handle));
 
       if (DCPS_debug_level > 4) {
         ACE_DEBUG((LM_DEBUG,
@@ -407,7 +398,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       // We need to adjust these after the insertions have all completed
       // since insertions are not guaranteed to increase the number of
       // currently matched publications.
-      const int matchedPublications = static_cast<int>(id_to_handle_map_.size());
+      const int matchedPublications = static_cast<int>(publication_id_to_handle_map_.size());
       subscription_match_status_.current_count_change =
           matchedPublications - subscription_match_status_.current_count;
       subscription_match_status_.current_count = matchedPublications;
@@ -527,8 +518,6 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     resume_sample_processing(writers[i]);
   }
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
   // This is used to hold the list of writers which were actually
   // removed, which is a proper subset of the writers which were
   // requested to be removed.
@@ -582,8 +571,10 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     // The writer should be in the id_to_handle map at this time.
     this->lookup_instance_handles(updated_writers, handles);
 
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(publication_handle_lock_);
+
     for (CORBA::ULong i = 0; i < wr_len; ++i) {
-      id_to_handle_map_.erase(updated_writers[i]);
+      publication_id_to_handle_map_.erase(updated_writers[i]);
     }
   }
 
@@ -595,8 +586,10 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
 
   // Mirror the add_associations SUBSCRIPTION_MATCHED_STATUS processing.
   if (!this->is_bit_) {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publication_handle_lock_);
+
     // Derive the change in the number of publications writing to this reader.
-    int matchedPublications = static_cast<int>(this->id_to_handle_map_.size());
+    int matchedPublications = static_cast<int>(this->publication_id_to_handle_map_.size());
     this->subscription_match_status_.current_count_change
     = matchedPublications - this->subscription_match_status_.current_count;
 
@@ -647,8 +640,6 @@ DataReaderImpl::remove_all_associations()
   OpenDDS::DCPS::WriterIdSeq writers;
   int size;
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
-
   {
     ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -684,11 +675,6 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 {
   DDS::DataReaderListener_var listener =
       listener_for(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS);
-
-  ACE_GUARD(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->publication_handle_lock_);
-
 
   if (this->requested_incompatible_qos_status_.total_count == status.total_count) {
     // This test should make the method idempotent.
@@ -895,21 +881,14 @@ void DataReaderImpl::qos_change(const DDS::DataReaderQos & qos)
       qos_.deadline.period.nanosec != qos.deadline.period.nanosec) {
     if (qos_.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
         qos_.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-
-          this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
-                  ref(this->sample_lock_),
-                  qos.deadline,
-                  ref(*this),
-                  ref(this->requested_deadline_missed_status_),
-                  ref(this->last_deadline_missed_total_count_));
-
+      deadline_period_ = TimeDuration(qos.deadline.period);
+      deadline_queue_enabled_ = true;
     } else if (qos.deadline.period.sec == DDS::DURATION_INFINITE_SEC &&
                qos.deadline.period.nanosec == DDS::DURATION_INFINITE_NSEC) {
-      watchdog_->cancel_all();
-      watchdog_.reset();
+      cancel_all_deadlines();
+      deadline_queue_enabled_ = false;
     } else {
-      watchdog_->reset_interval(
-        TimeDuration(qos.deadline.period));
+      reset_deadline_period(TimeDuration(qos.deadline.period));
     }
   }
 }
@@ -1020,12 +999,9 @@ DDS::ReturnCode_t
 DataReaderImpl::get_requested_incompatible_qos_status(
     DDS::RequestedIncompatibleQosStatus & status)
 {
+  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publication_handle_lock_);
 
-  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
-      this->publication_handle_lock_);
-
-  set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS,
-      false);
+  set_status_changed_flag(DDS::REQUESTED_INCOMPATIBLE_QOS_STATUS, false);
   status = requested_incompatible_qos_status_;
   requested_incompatible_qos_status_.total_count_change = 0;
 
@@ -1036,9 +1012,7 @@ DDS::ReturnCode_t
 DataReaderImpl::get_subscription_matched_status(
     DDS::SubscriptionMatchedStatus & status)
 {
-
-  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(
-      this->publication_handle_lock_);
+  ACE_Guard<ACE_Recursive_Thread_Mutex> justMe(publication_handle_lock_);
 
   set_status_changed_flag(DDS::SUBSCRIPTION_MATCHED_STATUS, false);
   status = subscription_match_status_;
@@ -1081,18 +1055,18 @@ DataReaderImpl::get_matched_publications(
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
       guard,
-      this->publication_handle_lock_,
+      publication_handle_lock_,
       DDS::RETCODE_ERROR);
 
   // Copy out the handles for the current set of publications.
   int index = 0;
-  publication_handles.length(static_cast<CORBA::ULong>(this->id_to_handle_map_.size()));
+  publication_handles.length(static_cast<CORBA::ULong>(this->publication_id_to_handle_map_.size()));
 
   for (RepoIdToHandleMap::iterator
-      current = this->id_to_handle_map_.begin();
-      current != this->id_to_handle_map_.end();
+      current = this->publication_id_to_handle_map_.begin();
+      current != this->publication_id_to_handle_map_.end();
       ++current, ++index) {
-    publication_handles[ index] = current->second;
+    publication_handles[index] = current->second;
   }
 
   return DDS::RETCODE_OK;
@@ -1111,12 +1085,6 @@ DataReaderImpl::get_matched_publication_data(
         ACE_TEXT("Entity is not enabled.\n")),
         DDS::RETCODE_NOT_ENABLED);
   }
-
-
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-      guard,
-      this->publication_handle_lock_,
-      DDS::RETCODE_ERROR);
 
   RcHandle<DomainParticipantImpl> participant = this->participant_servant_.lock();
 
@@ -1221,15 +1189,11 @@ DataReaderImpl::enable()
   // period is not the default (infinite).
   DDS::Duration_t const deadline_period = this->qos_.deadline.period;
 
-  if (!this->watchdog_
+  if (!deadline_queue_enabled_
       && (deadline_period.sec != DDS::DURATION_INFINITE_SEC
           || deadline_period.nanosec != DDS::DURATION_INFINITE_NSEC)) {
-    this->watchdog_ = make_rch<RequestedDeadlineWatchdog>(
-            ref(this->sample_lock_),
-            this->qos_.deadline,
-            ref(*this),
-            ref(this->requested_deadline_missed_status_),
-            ref(this->last_deadline_missed_total_count_));
+    deadline_period_ = TimeDuration(qos_.deadline.period);
+    deadline_queue_enabled_ = true;
   }
 
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
@@ -1293,6 +1257,14 @@ DataReaderImpl::enable()
         filterExpression,
         exprParams,
         type_info);
+
+#if defined(OPENDDS_SECURITY)
+    {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
+      security_config_ = participant->get_security_config();
+      dynamic_type_ = type_lookup_service->type_identifier_to_dynamic(typesupport->getCompleteTypeIdentifier(), subscription_id);
+    }
+#endif
 
     {
       ACE_Guard<ACE_Thread_Mutex> guard(subscription_id_mutex_);
@@ -1390,6 +1362,15 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 {
   DBG_ENTRY_LVL("DataReaderImpl","data_received",6);
 
+  DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+    RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(sample.header_.publication_id_);
+    if (pos != publication_id_to_handle_map_.end()) {
+      publication_handle = pos->second;
+    }
+  }
+
   // ensure some other thread is not changing the sample container
   // or statuses related to samples.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
@@ -1404,8 +1385,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
-  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+  const ValueDispatcher* vd = get_value_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
+
   RcHandle<MessageHolder> real_data;
   SubscriptionInstance_rch instance;
   switch (sample.header_.message_id_) {
@@ -1436,9 +1418,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     bool is_new_instance = false;
     bool filtered = false;
     if (sample.header_.key_fields_only_) {
-      dds_demarshal(sample, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
+      dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
     } else {
-      real_data = dds_demarshal(sample, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vwd);
+      real_data = dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vd);
     }
 
     // Per sample logging
@@ -1542,7 +1524,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
+    if (deadline_queue_enabled_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1557,13 +1539,13 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && (owner_manager->is_owner(instance->instance_handle_,
                   sample.header_.publication_id_)))) {
 #endif
-        this->watchdog_->cancel_timer(instance);
+        cancel_deadline(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1573,7 +1555,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
+    if (deadline_queue_enabled_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1585,14 +1567,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             || (this->is_exclusive_ownership_
                 && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
-          this->watchdog_->cancel_timer(instance);
+          cancel_deadline(instance);
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
         }
 #endif
       }
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1602,7 +1584,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     this->writer_activity(sample.header_);
     SubscriptionInstance_rch instance;
 
-    if (this->watchdog_.in()) {
+    if (deadline_queue_enabled_) {
       // Find the instance first for timer cancellation since
       // the instance may be deleted during dispose and can
       // not be accessed.
@@ -1620,14 +1602,14 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
               && instance->instance_state_->is_last(sample.header_.publication_id_))) {
 #endif
         if (instance) {
-          this->watchdog_->cancel_timer(instance);
+          cancel_deadline(instance);
         }
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
       }
 #endif
     }
     instance.reset();
-    this->dispose_unregister(sample, instance);
+    this->dispose_unregister(sample, publication_handle, instance);
   }
   this->notify_read_conditions();
   break;
@@ -1669,12 +1651,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     break;
   }
 
-  if (observer && real_data && vwd) {
+  if (observer && real_data && vd) {
     const DDS::Time_t timestamp = {
       sample.header_.source_timestamp_sec_,
       sample.header_.source_timestamp_nanosec_
     };
-    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get(), *vwd);
+    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get(), *vd);
     observer->on_sample_received(this, s);
   }
 }
@@ -2046,6 +2028,15 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 #endif
 
   {
+    DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+      RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(info_writer_id);
+      if (pos != publication_id_to_handle_map_.end()) {
+        publication_handle = pos->second;
+      }
+    }
+
     bool liveliness_changed = false;
 
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
@@ -2065,7 +2056,7 @@ DataReaderImpl::writer_removed(WriterInfo& info)
     }
 
     liveliness_changed_status_.last_publication_handle = info.handle();
-    instances_liveliness_update(info_writer_id);
+    instances_liveliness_update(info_writer_id, publication_handle);
 
     if (liveliness_changed) {
       set_status_changed_flag(DDS::LIVELINESS_CHANGED_STATUS, true);
@@ -2169,6 +2160,15 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 
   const WriterInfo::WriterState info_state = info.state();
 
+  DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+    RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(info_writer_id);
+    if (pos != publication_id_to_handle_map_.end()) {
+      publication_handle = pos->second;
+    }
+  }
+
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
@@ -2207,7 +2207,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
       this->monitor_->report();
     }
 
-    instances_liveliness_update(info_writer_id);
+    instances_liveliness_update(info_writer_id, publication_handle);
 
     // Call listener only when there are liveliness status changes.
     if (liveliness_changed) {
@@ -2218,7 +2218,8 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 }
 
 void
-DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
+DataReaderImpl::instances_liveliness_update(const PublicationId& writer,
+                                            DDS::InstanceHandle_t publication_handle)
 {
   // sample_lock_ must be held.
   InstanceSet localinsts;
@@ -2236,7 +2237,7 @@ DataReaderImpl::instances_liveliness_update(const PublicationId& writer)
   }
 
   for (InstanceSet::iterator iter = localinsts.begin(); iter != localinsts.end(); ++iter) {
-    set_instance_state_i(*iter, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
+    set_instance_state_i(*iter, publication_handle, DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE, SystemTimePoint::now(), writer);
   }
 }
 
@@ -2258,6 +2259,7 @@ DataReaderImpl::set_sample_rejected_status(
 }
 
 void DataReaderImpl::dispose_unregister(const ReceivedDataSample&,
+                                        DDS::InstanceHandle_t,
                                         SubscriptionInstance_rch&)
 {
   if (DCPS_debug_level > 0) {
@@ -2680,18 +2682,18 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
 }
 
 bool
-DataReaderImpl::time_based_filter_instance(
-  const SubscriptionInstance_rch& instance,
-  TimeDuration& filter_time_expired)
+DataReaderImpl::time_based_filter_instance(const SubscriptionInstance_rch& instance,
+                                           MonotonicTimePoint& now,
+                                           MonotonicTimePoint& deadline)
 {
-  const MonotonicTimePoint now = MonotonicTimePoint::now();
+  now = MonotonicTimePoint::now();
   const TimeDuration minimum_separation(qos_.time_based_filter.minimum_separation);
 
   // TIME_BASED_FILTER processing; expire data samples
   // if minimum separation is not met for instance.
   if (!minimum_separation.is_zero()) {
-    filter_time_expired = now - instance->last_accepted_;
-    if (filter_time_expired < minimum_separation) {
+    if (now - instance->last_accepted_ < minimum_separation) {
+      deadline = now + minimum_separation;
       return true; // Data filtered.
     }
   }
@@ -2783,23 +2785,6 @@ void DataReaderImpl::post_read_or_take()
       DDS::DATA_ON_READERS_STATUS, false);
 }
 
-void DataReaderImpl::reschedule_deadline()
-{
-  if (this->watchdog_.in()) {
-    ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
-    for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
-        iter != this->instances_.end();
-        ++iter) {
-      if (iter->second->deadline_timer_id_ != -1) {
-        if (this->watchdog_->reset_timer_interval(iter->second->deadline_timer_id_) == -1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::reschedule_deadline %p\n"),
-              ACE_TEXT("reset_timer_interval")));
-        }
-      }
-    }
-  }
-}
-
 ACE_Reactor_Timer_Interface*
 DataReaderImpl::get_reactor()
 {
@@ -2809,7 +2794,7 @@ DataReaderImpl::get_reactor()
 OpenDDS::DCPS::RepoId
 DataReaderImpl::get_topic_id()
 {
-  return this->topic_servant_->get_id();
+  return topic_id_;
 }
 
 OpenDDS::DCPS::RepoId
@@ -3022,14 +3007,13 @@ DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
   if (!CORBA::is_nil(sub_listener.in()))
   {
     if (!is_bit()) {
+      this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       if (reader == this) {
         // Release the sample_lock before listener callback.
         ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
         sub_listener->on_data_on_readers(subscriber.in());
       }
-
-      this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
     } else {
       TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataOnReaders>(subscriber, sub_listener, rchandle_from(this), reader == this, true));
     }
@@ -3044,6 +3028,8 @@ DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
     if (!CORBA::is_nil(listener.in()))
     {
       if (!is_bit()) {
+        set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
+        subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
         if (reader == this) {
           // Release the sample_lock before listener callback.
           ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
@@ -3051,10 +3037,8 @@ DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
         } else {
           listener->on_data_available(this);
         }
-        set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
-        subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
       } else {
-        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(subscriber, listener, rchandle_from(this), reader == this, true, true));
+        TheServiceParticipant->job_queue()->enqueue(make_rch<OnDataAvailable>(listener, rchandle_from(this), reader == this, true, true));
       }
     }
     else
@@ -3379,16 +3363,14 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
   }
 #endif
 
-  if (instance && watchdog_.in()) {
+  if (instance && deadline_queue_enabled_) {
     instance->last_sample_tv_ = instance->cur_sample_tv_;
     instance->cur_sample_tv_.set_to_now();
 
-    // Watchdog can't be called with sample_lock_ due to reactor deadlock
-    ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
     if (is_new_instance) {
-      watchdog_->schedule_timer(instance);
+      schedule_deadline(instance, false);
     } else {
-      watchdog_->execute(instance, false);
+      process_deadline(instance, MonotonicTimePoint::now(), false);
     }
   }
 
@@ -3460,20 +3442,20 @@ void EndHistoricSamplesMissedSweeper::ScheduleCommand::execute()
 {
   static const ACE_Time_Value ten_seconds(10);
   info_->schedule_historic_samples_timer(sweeper_, ten_seconds);
-  sweeper_->info_set_.insert(info_);
+  const bool insert_result = sweeper_->info_set_.insert(info_).second;
 
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - Scheduled sweeper %@\n", info_.in()));
+  if (insert_result && DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::ScheduleCommand::execute() - sweeper %@ is now scheduled\n", info_.in()));
   }
 }
 
 void EndHistoricSamplesMissedSweeper::CancelCommand::execute()
 {
   info_->cancel_historic_samples_timer(sweeper_);
-  sweeper_->info_set_.erase(info_);
+  const bool erase_result = sweeper_->info_set_.erase(info_) > 0;
 
-  if (DCPS_debug_level) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - Unscheduled sweeper %@\n", info_.in()));
+  if (erase_result && DCPS_debug_level) {
+    ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::CancelCommand::execute() - sweeper %@ is no longer scheduled\n", info_.in()));
   }
 }
 
@@ -3497,35 +3479,36 @@ void DataReaderImpl::OnDataOnReaders::execute()
     return;
   }
 
-  if (call_) {
-    sub_listener_->on_data_on_readers(subscriber.in());
-  }
-
   if (set_reader_status_) {
     data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
   }
   subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+
+  if (call_) {
+    sub_listener_->on_data_on_readers(subscriber.in());
+  }
 }
 
 void DataReaderImpl::OnDataAvailable::execute()
 {
-  RcHandle<SubscriberImpl> subscriber = subscriber_.lock();
   RcHandle<DataReaderImpl> data_reader = data_reader_.lock();
-  if (!subscriber || !data_reader) {
-    return;
-  }
 
-  if (call_ && (data_reader->get_status_changes() & ::DDS::DATA_AVAILABLE_STATUS)) {
-    listener_->on_data_available(data_reader.in());
-  }
-
-  if (set_reader_status_) {
+  if (data_reader && set_reader_status_) {
     data_reader->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, false);
   }
-  if (set_subscriber_status_) {
-    subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+
+  if (data_reader && set_subscriber_status_) {
+    RcHandle<SubscriberImpl> subscriber = data_reader->get_subscriber_servant();
+    if (subscriber) {
+      subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, false);
+    }
+  }
+
+  if (call_ && data_reader) {
+    listener_->on_data_available(data_reader.in());
   }
 }
+
 void DataReaderImpl::initialize_lookup_maps()
 {
   // These all start at 1 (0 mask is bogus) and include the full mask (any)
@@ -3568,6 +3551,185 @@ const DataReaderImpl::HandleSet& DataReaderImpl::lookup_matching_instances(CORBA
   LookupMap::const_iterator ci = combined_state_lookup_.find(combined_states);
   OPENDDS_ASSERT(ci != combined_state_lookup_.end());
   return ci->second;
+}
+
+void DataReaderImpl::schedule_deadline(SubscriptionInstance_rch instance,
+                                       bool timer_called)
+{
+  // Should be called with sample_lock_.
+  if (instance->deadline_ == MonotonicTimePoint::zero_value) {
+    instance->deadline_ = MonotonicTimePoint::now() + deadline_period_;
+    const bool schedule = deadline_queue_.empty();
+    deadline_queue_.insert(std::make_pair(instance->deadline_, instance));
+    if (!timer_called) {
+      if (schedule) {
+        deadline_task_->schedule(deadline_period_);
+      } else if (deadline_queue_.begin()->second == instance) {
+        // Moved to front.
+        deadline_task_->cancel();
+        deadline_task_->schedule(deadline_period_);
+      }
+    }
+  }
+}
+
+void DataReaderImpl::cancel_deadline(SubscriptionInstance_rch instance)
+{
+  // Should be called with sample_lock_.
+  if (instance->deadline_ != MonotonicTimePoint::zero_value) {
+    for (DeadlineQueue::iterator pos = deadline_queue_.lower_bound(instance->deadline_), limit = deadline_queue_.upper_bound(instance->deadline_); pos != limit; ++pos) {
+      if (pos->second == instance) {
+        deadline_queue_.erase(pos);
+        break;
+      }
+    }
+    instance->deadline_ = MonotonicTimePoint::zero_value;
+  }
+}
+
+void DataReaderImpl::process_deadline(SubscriptionInstance_rch instance,
+                                      const MonotonicTimePoint& now,
+                                      bool timer_called)
+{
+  // Should be called with sample_lock_.
+
+  if (instance->deadline_ != MonotonicTimePoint::zero_value) {
+    bool missed = false;
+
+    if (instance->cur_sample_tv_.is_zero()) { // not received any sample.
+      missed = true;
+
+    } else if (timer_called) { // handle_timeout is called
+      missed = (now - instance->cur_sample_tv_) >= deadline_period_;
+
+    } else { // upon receiving sample.
+      missed = (instance->cur_sample_tv_ - instance->last_sample_tv_) > deadline_period_;
+    }
+
+    if (missed) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, monitor, sample_lock_);
+      // Only update the status upon timer is called and not
+      // when receiving a sample after the interval.
+      // Otherwise the counter is doubled.
+      if (timer_called) {
+        ++requested_deadline_missed_status_.total_count;
+        requested_deadline_missed_status_.total_count_change =
+          requested_deadline_missed_status_.total_count - last_deadline_missed_total_count_;
+        requested_deadline_missed_status_.last_instance_handle = instance->instance_handle_;
+
+        set_status_changed_flag(DDS::REQUESTED_DEADLINE_MISSED_STATUS, true);
+
+        DDS::DataReaderListener_var listener = listener_for(DDS::REQUESTED_DEADLINE_MISSED_STATUS);
+
+#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
+        if (instance->instance_state_->is_exclusive()) {
+          DataReaderImpl::OwnershipManagerPtr owner_manager = ownership_manager();
+          if (owner_manager)
+            owner_manager->remove_writers (instance->instance_handle_);
+        }
+#endif
+
+        if (!CORBA::is_nil(listener.in())) {
+          // Copy before releasing the lock.
+          DDS::RequestedDeadlineMissedStatus const status = requested_deadline_missed_status_;
+
+          // Release the lock during the upcall.
+          ACE_GUARD(Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
+          // @todo Will this operation ever throw?  If so we may want to
+          //       catch all exceptions, and act accordingly.
+          listener->on_requested_deadline_missed(this, status);
+
+          // We need to update the last total count value to our current total
+          // so that the next time we will calculate the correct total_count_change;
+          last_deadline_missed_total_count_ = requested_deadline_missed_status_.total_count;
+        }
+
+        notify_status_condition();
+      }
+    }
+
+    // This next part is without status_lock_ held to avoid reactor deadlock.
+    if (timer_called) {
+      instance->deadline_ = MonotonicTimePoint::zero_value;
+      schedule_deadline(instance, timer_called);
+    } else {
+      cancel_deadline(instance);
+      schedule_deadline(instance, timer_called);
+    }
+  }
+}
+
+void DataReaderImpl::cancel_all_deadlines()
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  deadline_queue_.clear();
+  deadline_task_->cancel();
+}
+
+void DataReaderImpl::reset_deadline_period(const TimeDuration& deadline_period)
+{
+  if (deadline_period_ != deadline_period) {
+    deadline_period_ = deadline_period;
+
+    if (deadline_queue_enabled_) {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, instance_guard, this->instances_lock_);
+      const MonotonicTimePoint now = MonotonicTimePoint::now();
+      for (SubscriptionInstanceMapType::iterator iter = this->instances_.begin();
+           iter != this->instances_.end();
+           ++iter) {
+        if (iter->second->deadline_ != MonotonicTimePoint::zero_value) {
+          reschedule_deadline(iter->second, now);
+        }
+      }
+    }
+  }
+}
+
+void DataReaderImpl::reschedule_deadline(SubscriptionInstance_rch instance,
+                                         const MonotonicTimePoint& now)
+{
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+
+  // So the datareader can call back into us.
+  if (instance->deadline_ != MonotonicTimePoint::zero_value) {
+
+    // Remove.
+    for (DeadlineQueue::iterator pos = deadline_queue_.lower_bound(instance->deadline_), limit = deadline_queue_.upper_bound(instance->deadline_); pos != limit; ++pos) {
+      if (pos->second == instance) {
+        deadline_queue_.erase(pos);
+        break;
+      }
+    }
+
+    instance->deadline_ = now + (deadline_period_ - (instance->deadline_ - now));
+
+    const bool schedule = deadline_queue_.empty();
+    deadline_queue_.insert(std::make_pair(instance->deadline_, instance));
+    if (schedule) {
+      deadline_task_->schedule(deadline_period_);
+    } else if (deadline_queue_.begin()->second == instance) {
+      // Moved to front.
+      deadline_task_->cancel();
+      deadline_task_->schedule(deadline_period_);
+    }
+  }
+}
+
+void DataReaderImpl::deadline_task(const MonotonicTimePoint& now)
+{
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
+  for (DeadlineQueue::iterator pos = deadline_queue_.begin(), limit = deadline_queue_.end(); pos != limit && pos->first <= now;) {
+    SubscriptionInstance_rch instance = pos->second;
+    deadline_queue_.erase(pos++);
+    // pos is no longer valid.
+    process_deadline(instance, now, true);
+  }
+
+  if (!deadline_queue_.empty()) {
+    deadline_task_->schedule(deadline_queue_.begin()->first - now);
+  }
 }
 
 } // namespace DCPS

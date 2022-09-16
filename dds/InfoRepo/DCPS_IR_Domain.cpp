@@ -34,6 +34,8 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+using OpenDDS::DCPS::LogGuid;
+
 DCPS_IR_Domain::DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator)
   : id_(id),
     participantIdGenerator_(generator),
@@ -945,8 +947,7 @@ int DCPS_IR_Domain::add_topic_description(OpenDDS::DCPS::unique_ptr<DCPS_IR_Topi
 
 int DCPS_IR_Domain::remove_topic_description(DCPS_IR_Topic_Description* desc)
 {
-  DCPS_IR_Topic_Description_Set::iterator where
-  = this->topicDescriptions_.find(desc->get_name());
+  DCPS_IR_Topic_Description_Set::iterator where = topicDescriptions_.find(desc->get_name());
 
   if (where != this->topicDescriptions_.end()) {
     this->topicDescriptions_.erase(where);
@@ -967,7 +968,7 @@ void DCPS_IR_Domain::add_dead_participant(DCPS_IR_Participant_rch participant)
   deadParticipants_.insert(participant);
 }
 
-void DCPS_IR_Domain::remove_dead_participants()
+void DCPS_IR_Domain::remove_dead_participants(bool part_of_cleanup)
 {
   if (0 < deadParticipants_.size()) {
     DCPS_IR_Participant_rch dead;
@@ -979,18 +980,25 @@ void DCPS_IR_Domain::remove_dead_participants()
       dead = *iter;
       ++iter;
 
-      OpenDDS::DCPS::RepoIdConverter converter(dead->get_id());
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: DCPS_IR_Domain::remove_dead_participants () ")
-                 ACE_TEXT("Removing dead participant 0x%x id %C\n"),
-                 dead.in(),
-                 std::string(converter).c_str()));
+      if (part_of_cleanup) {
+        // If part of cleanup, then this is expected, especially if this is
+        // part of a test that failed.
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) DCPS_IR_Domain::remove_dead_participants: "
+                   "Removing dead participant 0x%x id %C\n",
+                   dead.in(),
+                   LogGuid(dead->get_id()).c_str()));
+      } else {
+        ACE_ERROR((LM_WARNING,
+                   "(%P|%t) WARNING: DCPS_IR_Domain::remove_dead_participants: "
+                   "Removing dead participant 0x%x id %C\n",
+                   dead.in(),
+                   LogGuid(dead->get_id()).c_str()));
+      }
+
       deadParticipants_.erase(dead);
-
-      dead->set_alive(0);
-
-      CORBA::Boolean notify_lost = 1;
-      remove_participant(dead->get_id(), notify_lost);
+      dead->set_alive(false);
+      remove_participant(dead->get_id(), true);
     }
   }
 }
@@ -1024,8 +1032,7 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
       data.key = repo_id_to_bit_key(participant->get_id());
       data.user_data = participantQos->user_data;
 
-      DDS::InstanceHandle_t handle
-      = bitParticipantDataWriter_->register_instance(data);
+      DDS::InstanceHandle_t handle = bitParticipantDataWriter_->register_instance(data);
 
       participant->set_handle(handle);
 

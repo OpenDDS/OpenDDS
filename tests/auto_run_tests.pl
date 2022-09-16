@@ -364,9 +364,13 @@ foreach my $test_lst (@file_list) {
 }
 
 if ($cmake) {
+    my $fake_name = "Run CMake Tests";
+    if (!$list_tests) {
+        mark_test_start($fake_name);
+    }
+
     cd($cmake_build_dir);
 
-    my $fake_name;
     my $process_name;
     my $process_func;
     my @process_cmd = (
@@ -382,8 +386,6 @@ if ($cmake) {
         push(@process_cmd, '--list');
     }
     else {
-        $fake_name = "Run CMake Tests";
-        mark_test_start($fake_name);
         my @run_test_cmd = ($ctest, '--no-compress-output', '-T', 'Test');
         if ($ctest_args) {
             push(@run_test_cmd, $ctest_args);

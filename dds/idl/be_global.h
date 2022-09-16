@@ -134,9 +134,6 @@ public:
   bool itl() const;
   void itl(bool b);
 
-  bool v8() const;
-  void v8(bool b);
-
   bool value_reader_writer() const;
   void value_reader_writer(bool b);
 
@@ -217,6 +214,8 @@ public:
    */
   bool warn_about_dcps_data_type();
 
+  ExtensibilityKind extensibility(AST_Decl* node, ExtensibilityKind default_extensibility, bool& has_annotation) const;
+  ExtensibilityKind extensibility(AST_Decl* node, ExtensibilityKind default_extensibility) const;
   ExtensibilityKind extensibility(AST_Decl* node) const;
   AutoidKind autoid(AST_Decl* node) const;
   bool id(AST_Decl* node, ACE_CDR::ULong& value) const;
@@ -239,12 +238,17 @@ public:
 
   bool is_nested(AST_Decl* node);
 
+  bool default_enum_extensibility_zero() const
+  {
+    return default_enum_extensibility_zero_;
+  }
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
-    no_default_gen_, generate_itl_, generate_v8_,
+    no_default_gen_, generate_itl_,
     generate_value_reader_writer_,
     generate_xtypes_complete_, face_ts_;
 
@@ -260,6 +264,7 @@ private:
   bool root_default_nested_;
   bool warn_about_dcps_data_type_;
   ExtensibilityKind default_extensibility_;
+  bool default_enum_extensibility_zero_;
   OpenDDS::DataRepresentation default_data_representation_;
   AutoidKind root_default_autoid_;
   TryConstructFailAction default_try_construct_;

@@ -92,10 +92,9 @@ protected:
 
   virtual void syn_hook(const SequenceNumber& /*seq*/) {}
 
+  ACE_Thread_Mutex start_lock_;
   typedef ACE_Reverse_Lock<ACE_Thread_Mutex> Reverse_Lock_t;
   Reverse_Lock_t reverse_start_lock_;
-
-  ACE_Thread_Mutex start_lock_;
   bool started_;
 
   // A session must be for a publisher

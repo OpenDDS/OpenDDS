@@ -476,7 +476,20 @@ public:
     return sequence_number_;
   }
 
+  const ValueDispatcher* get_value_dispatcher() const
+  {
+    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+  }
+
 protected:
+
+  void check_and_set_repo_id(const RepoId& id)
+  {
+    ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
+    if (GUID_UNKNOWN == publication_id_) {
+      publication_id_ = id;
+    }
+  }
 
   SequenceNumber get_next_sn()
   {
@@ -503,8 +516,6 @@ protected:
 
   // type specific DataWriter's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
-
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   /**
    * Setup CDR serialization options in type-specific DataWrtier.
@@ -589,7 +600,7 @@ private:
   void lookup_instance_handles(const ReaderIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  DDS::Subscriber_var get_builtin_subscriber() const;
+  RcHandle<BitSubscriber> get_builtin_subscriber_proxy() const;
 
   DDS::DomainId_t domain_id() const {
     return this->domain_id_;
@@ -611,14 +622,14 @@ private:
 
 
   // Data block local pool for this data writer.
-  unique_ptr<DataBlockLockPool>  db_lock_pool_;
+  unique_ptr<DataBlockLockPool>   db_lock_pool_;
 
   /// The name of associated topic.
   CORBA::String_var               topic_name_;
   /// The associated topic repository id.
   RepoId                          topic_id_;
   /// The topic servant.
-  TopicDescriptionPtr<TopicImpl>                 topic_servant_;
+  TopicDescriptionPtr<TopicImpl>  topic_servant_;
 
   /// Mutex to protect listener info
   ACE_Thread_Mutex                listener_mutex_;
@@ -728,6 +739,13 @@ private:
   RcHandle<LivenessTimer> liveness_timer_;
 
   MonotonicTimePoint wait_pending_deadline_;
+
+#if defined(OPENDDS_SECURITY)
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::Security::PermissionsHandle participant_permissions_handle_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataWriterImpl> DataWriterImpl_rch;

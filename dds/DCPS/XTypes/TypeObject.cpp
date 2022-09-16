@@ -1012,6 +1012,9 @@ namespace DCPS {
 
 // Serialization support for TypeObject and its components
 
+using XTypes::TYPE_NAME_MAX_LENGTH;
+using XTypes::MEMBER_NAME_MAX_LENGTH;
+
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifier& uni)
 {
@@ -1361,14 +1364,14 @@ bool operator<<(Serializer& strm, const XTypes::CompleteTypeDetail& stru)
 {
   return (strm << stru.ann_builtin)
     && (strm << stru.ann_custom)
-    && (strm << Serializer::FromBoundedString<char>(stru.type_name, 256));
+    && (strm << Serializer::FromBoundedString<char>(stru.type_name, TYPE_NAME_MAX_LENGTH));
 }
 
 bool operator>>(Serializer& strm, XTypes::CompleteTypeDetail& stru)
 {
   return (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom)
-    && (strm >> Serializer::ToBoundedString<char>(stru.type_name, 256));
+    && (strm >> Serializer::ToBoundedString<char>(stru.type_name, TYPE_NAME_MAX_LENGTH));
 }
 
 
@@ -2356,7 +2359,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationHeader& stru)
     return false;
   }
 
-  return (strm << Serializer::FromBoundedString<char>(stru.annotation_name, 256));
+  return (strm << Serializer::FromBoundedString<char>(stru.annotation_name, TYPE_NAME_MAX_LENGTH));
 }
 
 bool operator>>(Serializer& strm, XTypes::CompleteAnnotationHeader& stru)
@@ -2368,7 +2371,7 @@ bool operator>>(Serializer& strm, XTypes::CompleteAnnotationHeader& stru)
 
   const size_t start_pos = strm.rpos();
 
-  const bool ret = (strm >> Serializer::ToBoundedString<char>(stru.annotation_name, 256));
+  const bool ret = (strm >> Serializer::ToBoundedString<char>(stru.annotation_name, TYPE_NAME_MAX_LENGTH));
 
   if (ret && strm.rpos() - start_pos < total_size) {
     strm.skip(total_size - strm.rpos() + start_pos);
@@ -2396,7 +2399,7 @@ bool operator<<(Serializer& strm, const XTypes::CompleteAnnotationParameter& str
   }
 
   return (strm << stru.common)
-    && (strm << Serializer::FromBoundedString<char>(stru.name, 256))
+    && (strm << Serializer::FromBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm << stru.default_value);
 }
 
@@ -2410,7 +2413,7 @@ bool operator>>(Serializer& strm, XTypes::CompleteAnnotationParameter& stru)
   const size_t start_pos = strm.rpos();
 
   const bool ret = (strm >> stru.common)
-    && (strm >> Serializer::ToBoundedString<char>(stru.name, 256))
+    && (strm >> Serializer::ToBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm >> stru.default_value);
 
   if (ret && strm.rpos() - start_pos < total_size) {
@@ -4087,14 +4090,14 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::CompleteMemberDetail& stru)
 {
-  return (strm << Serializer::FromBoundedString<char>(stru.name, 256))
+  return (strm << Serializer::FromBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm << stru.ann_builtin)
     && (strm << stru.ann_custom);
 }
 
 bool operator>>(Serializer& strm, XTypes::CompleteMemberDetail& stru)
 {
-  return (strm >> Serializer::ToBoundedString<char>(stru.name, 256))
+  return (strm >> Serializer::ToBoundedString<char>(stru.name, MEMBER_NAME_MAX_LENGTH))
     && (strm >> stru.ann_builtin)
     && (strm >> stru.ann_custom);
 }

@@ -88,6 +88,37 @@ namespace {
   }
 
   void
+  gen_field_getValueByMemberId(AST_Field* field)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const Classification cls = classify(field->field_type());
+    const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+    const std::string fieldName = field->local_name()->get_string();
+    if (cls & CL_SCALAR) {
+      std::string prefix, suffix;
+      if (cls & CL_ENUM) {
+        AST_Type* enum_type = resolveActualType(field->field_type());
+        prefix = "gen_" +
+          dds_generator::scoped_helper(enum_type->name(), "_")
+          + "_names[";
+        if (use_cxx11) {
+          prefix += "static_cast<int>(";
+        }
+        suffix = use_cxx11 ? "())]" : "]";
+      } else if (use_cxx11) {
+        suffix += "()";
+      }
+      const std::string string_to_ptr = use_cxx11 ? "" : ".in()";
+      be_global->impl_ <<
+        "    if (" << id << " == memberId) {\n"
+        "      return " + prefix + "typed." + fieldName
+        + (cls & CL_STRING ? string_to_ptr : "") + suffix + ";\n"
+        "    }\n";
+      be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
+    }
+  }
+
+  void
   gen_field_getValue(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
@@ -381,6 +412,16 @@ namespace {
         "    }\n"
         "  }\n\n";
     }
+    be_global->impl_ <<
+      "  Value getValue(const void* stru, DDS::MemberId memberId) const\n"
+      "  {\n"
+      "    ACE_UNUSED_ARG(memberId);\n"
+      "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
+      "    ACE_UNUSED_ARG(typed);\n";
+    std::for_each(fields.begin(), fields.end(), gen_field_getValueByMemberId);
+    be_global->impl_ <<
+      "    " << "throw std::runtime_error(\"Member not found or its type is not supported (in struct" + clazz + ")\");\n"
+      "  }\n\n";
     be_global->impl_ <<
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"

@@ -19,6 +19,9 @@ namespace Security {
 namespace SSL {
 
 class OpenDDS_Security_Export SubjectName {
+ private:
+    typedef std::map<std::string, std::string> AttrMap;
+
 public:
   SubjectName();
   explicit SubjectName(const char*, bool permissive = false);
@@ -36,6 +39,11 @@ public:
 
   bool operator==(const SubjectName&) const;
   bool operator!=(const SubjectName&) const;
+
+  typedef AttrMap::const_iterator const_iterator;
+  const_iterator begin() const { return map_.begin(); }
+  const_iterator end() const { return map_.end(); }
+  const_iterator find(const std::string& key) const { return map_.find(key); }
 
 private:
   /**
@@ -57,7 +65,6 @@ private:
                            const char* a_del, const char* s_trim,
                            const char* a_trim, bool push_back);
 
-  typedef std::map<std::string, std::string> AttrMap;
   AttrMap map_;
 };
 

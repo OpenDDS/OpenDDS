@@ -72,6 +72,9 @@ module Xyz {
 
   typedef sequence<ArrayOfShorts> ArrayOfShortsSeq;
 
+  typedef sequence<TwoDimArrayOfShorts2> TwoDimArrayOfShorts2Seq;
+  typedef sequence<MultiDimArray> MultiDimArraySeq;
+
   // +12
   typedef sequence<short> ShortSeq;
   @topic
