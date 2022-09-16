@@ -14,8 +14,68 @@ DynamicDataWriteImpl::DynamicDataWriteImpl(DDS::DynamicType_ptr type)
   : type_(get_base_type(type))
 {}
 
+DDS::ReturnCode_t DynamicDataWriteImpl::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
+{
+  // TODO
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::set_descriptor(MemberId id, DDS::MemberDescriptor* value)
+{
+  // TODO
+}
+
+CORBA::Boolean DynamicDataWriteImpl::equals(DDS::DynamicData_ptr other)
+{
+  // TODO
+}
+
+MemberId DynamicDataWriteImpl::get_member_id_by_name(const char* name)
+{
+  // TODO
+}
+
+MemberId DynamicDataWriteImpl::get_member_id_at_index(ACE_CDR::ULong index)
+{
+  // TODO
+}
+
+ACE_CDR::ULong DynamicDataWriteImpl::get_item_count()
+{
+  // TODO
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::clear_all_values()
+{
+  // TODO
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::clear_nonkey_values()
+{
+  // TODO
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::clear_value(DDS::MemberId /*id*/)
+{
+  // TODO
+}
+
+DDS::DynamicData_ptr DynamicDataWriteImpl::loan_value(DDS::MemberId /*id*/)
+{
+  // TODO
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::return_loaned_value(DDS::DynamicData_ptr /*value*/)
+{
+  // TODO
+}
+
+DDS::DynamicData_ptr DynamicDataWriteImpl::clone()
+{
+  // TODO
+}
+
 template <typename ValueType>
-DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const ValueType& value, TypeKind tk)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_value_to_struct(DDS::MemberId id, const ValueType& value, TypeKind tk)
 {
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
@@ -39,9 +99,66 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const
   return DDS::RETCODE_OK;
 }
 
+// If a DynamicData represents data of a primitive type or enum/bitmask, the data is stored
+// in the single_map_ in the container_ where id is MEMBER_ID_INVALID as per the XTypes spec.
+// If a DynamicData represents data of a string/wstring, the characters of the string/wstring
+// are also stored in the single_map_ with id of each character translated from its index.
+// Similarly, if a DynamicData represents data of a sequence of a basic type, its elements are
+// also stored in the single_map_ with id tranlated from the element index.
+template <TypeKind ValueTypeKind, typename ValueType>
+DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const ValueType& value,
+                                                         TypeKind enum_or_bitmask, LBound lower, LBound upper)
+{
+  if (!is_type_supported(ValueTypeKind, "set_single_value")) {
+    return DDS::RETCODE_ERROR;
+  }
+
+  DDS::TypeDescriptor_var descriptor;
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+
+  if (tk == enum_or_bitmask) {
+    // Member ID must be MEMBER_ID_INVALID for the write to succeed as per spec.
+    const LBound bit_bound = descriptor->bound()[0];
+    good = id == MEMBER_ID_INVALID && bit_bound >= lower && bit_bound <= upper &&
+      container_.single_map_.insert(make_pair(id, value)).second;
+  } else {
+    switch (tk) {
+    case ValueTypeKind:
+      // TODO: Only allow primitive types in this case?
+      good = is_primitive(tk) && id == MEMBER_ID_INVALID &&
+        container_.single_map_.insert(make_pair(id, value)).second;
+      break;
+    case TK_STRUCTURE:
+      set_value_to_struct(id, value);
+      break;
+    case TK_UNION:
+      set_value_to_union(id, value);
+      break;
+    case TK_SEQUENCE:
+    case TK_ARRAY:
+    case TK_MAP:
+      set_value_to_collection(id, value);
+      break;
+    default:
+      break;
+    }
+  }
+
+  if (!good && DCPS::DCPS_debug_level >= 1) {
+    // TODO: Use correct logging level
+    ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_single_value: "
+               "Failed to write to DynamicData object of type %C\n", typekind_to_string(tk)));
+  }
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+}
+
 DDS::ReturnCode_t DynamicDataWriteImpl::set_int32_value(DDS::MemberId id, CORBA::Long value)
 {
-  // TODO: Allow writing integers and unsigned integers values to an enum or bitmask member.
   return set_single_value(id, value, TK_INT32);
 }
 
@@ -102,7 +219,11 @@ DDS::ReturnCode_t set_char8_value(DDS::MemberId id, CORBA::Char value)
 
 DDS::ReturnCode_t set_char16_value(DDS::MemberId id, CORBA::WChar value)
 {
+#ifdef DDS_HAS_WCHAR
   return set_single_value(id, value, TK_CHAR16);
+#else
+  return DDS::RETCODE_UNSUPPORTED;
+#endif
 }
 
 DDS::ReturnCode_t set_byte_value(DDS::MemberId id, CORBA::Octet value)
@@ -122,7 +243,11 @@ DDS::ReturnCode_t set_string_value(DDS::MemberId id, const char* value)
 
 DDS::ReturnCode_t set_wstring_value(DDS::MemberId id, const CORBA::WChar* value)
 {
+#ifdef DDS_HAS_WCHAR
   return set_single_value(id, value, TK_STRING16);
+#else
+  return DDS::RETCODE_UNSUPPORTED;
+#endif
 }
 
 DDS::ReturnCode_t set_complex_value(DDS::MemberId id, DDS::DynamicData_ptr value)
@@ -179,6 +304,11 @@ DDS::ReturnCode_t set_char8_values(DDS::MemberId id, const DDS::CharSeq& value)
 
 DDS::ReturnCode_t set_char16_values(DDS::MemberId id, const DDS::WcharSeq& value)
 {
+#ifdef DDS_HAS_WCHAR
+  //TODO
+#else
+  return DDS::RETCODE_UNSUPPORTED;
+#endif
 }
 
 DDS::ReturnCode_t set_byte_values(DDS::MemberId id, const DDS::ByteSeq& value)
@@ -195,6 +325,11 @@ DDS::ReturnCode_t set_string_values(DDS::MemberId id, const DDS::StringSeq& valu
 
 DDS::ReturnCode_t set_wstring_values(DDS::MemberId id, const DDS::WstringSeq& value)
 {
+#ifdef DDS_HAS_WCHAR
+  // TODO
+#else
+  return DDS::RETCODE_UNSUPPORTED;
+#endif
 }
 
 DynamicData::SingleValue::SingleValue(CORBA::Long i32)
@@ -245,10 +380,6 @@ DynamicData::SingleValue::SingleValue(CORBA::Char c8)
   : kind_(TK_CHAR8), c8_(c8)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::WChar c16)
-  : kind_(TK_CHAR16), c16_(c16)
-{}
-
 DynamicData::SingleValue::SingleValue(CORBA::Octet byte)
   : kind_(TK_BYTE), byte_(byte)
 {}
@@ -261,10 +392,16 @@ DynamicData::SingleValue::SingleValue(const char* str)
   : kind_(TK_STRING8), str_(ACE_OS::strdup(str))
 {}
 
-// TODO: Make the wide string functionalities conditional on DDS_HAS_WCHAR.
+#ifdef DDS_HAS_WCHAR
+DynamicData::SingleValue::SingleValue(CORBA::WChar c16)
+  : kind_(TK_CHAR16), c16_(c16)
+{}
+
+// TODO: Does ACE_OS::strdup works with wide string?
 DynamicData::SingleValue::SingleValue(const CORBA::WChar* wstr)
   : kind_(TK_STRING16), wstr_(ACE_OS::strdup(wstr))
 {}
+#endif
 
 DynamicData::SingleValue::~SingleValue()
 {

@@ -1090,6 +1090,12 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, MemberId i
   } else {
     switch (tk) {
     case ValueTypeKind:
+      // (sonndinh): Potential bug. When tk is TK_STRING8/16, this would read the whole
+      // string represented by this DynamicData object. And so the current get_string_value
+      // and get_wstring_value functions would allow getting the whole string from a string
+      // DynamicData. This shouldn't be allowed because for string, the contained characters
+      // are members.
+      // Also, when tk is a primitive type, must check that the input id is MEMBER_ID_INVALID.
       good = read_value(value, ValueTypeKind);
       break;
     case TK_STRUCTURE:

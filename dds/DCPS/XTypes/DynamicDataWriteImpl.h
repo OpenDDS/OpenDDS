@@ -337,11 +337,13 @@ private:
     SingleValue(CORBA::Double f64);
     SingleValue(CORBA::LongDouble f128);
     SingleValue(CORBA::Char c8);
-    SingleValue(CORBA::WChar c16);
     SingleValue(CORBA::Octet byte);
     SingleValue(CORBA::Boolean boolean);
     SingleValue(const char* str);
+#ifdef DDS_HAS_WCHAR
+    SingleValue(CORBA::WChar c16);
     SingleValue(CORBA::WChar* wstr);
+#endif
 
     ~SingleValue();
 
@@ -359,11 +361,13 @@ private:
       CORBA::Double f64_;
       CORBA::LongDouble f128_;
       CORBA::Char c8_;
-      CORBA::WChar c16_;
       CORBA::Octet byte_;
       CORBA::Boolean boolean_;
       const char* str_;
+#ifdef DDS_HAS_WCHAR
+      CORBA::WChar c16_;
       const CORBA::WChar* wstr_;
+#endif
     };
   };
 
