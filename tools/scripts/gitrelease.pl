@@ -1945,7 +1945,7 @@ sub remedy_tgz_source {
 
   chdir($tempdir);
   print "Removing git-specific directories ($result)\n";
-  $result = $result || system("find . -name '.git*' -not -path './.gitmodules' | xargs rm -rf");
+  $result = $result || system("rm -rf $basename/.git");
   print "Creating tar file ($result)\n";
   $result = $result || system("tar -cf $settings->{tar_src} $basename");
   print "Gzipping file $settings->{tar_src} ($result)\n";
