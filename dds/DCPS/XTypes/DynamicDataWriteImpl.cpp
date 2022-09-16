@@ -74,29 +74,46 @@ DDS::DynamicData_ptr DynamicDataWriteImpl::clone()
   // TODO
 }
 
-template <typename ValueType>
-DDS::ReturnCode_t DynamicDataWriteImpl::set_value_to_struct(DDS::MemberId id, const ValueType& value, TypeKind tk)
+// Set a member with the given ID in a struct. The member must have type MemberTypeKind or
+// enum/bitmask. In the latter case, its bit bound must be in the range [lower, upper].
+template <TypeKind MemberTypeKind, typename MemberType>
+bool DynamicDataWriteImpl::set_value_to_struct(DDS::MemberId id, const MemberType& value,
+                                               TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
+    return false;
   }
 
   DDS::MemberDescriptor_var md;
   if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
+    return false;
   }
 
-  const TypeKind member_tk = get_base_type(md->type())->get_kind();
-  if (member_tk != tk) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) DynamicDataWriterImpl::set_single_value: setting value for unmatched type (%C)\n",
-               typekind_to_string(member_tk)));
-    return DDS::RETCODE_ERROR;
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  const TypeKind member_tk = member_type->get_kind();
+  if (member_tk == MemberTypeKind) {
+    return container_.single_map_.insert(make_pair(id, value)).second;
   }
 
-  container_.single_map_.insert(make_pair(id, value));
+  if (member_tk == enum_or_bitmask) {
+    DDS::TypeDescriptor_var member_td;
+    if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const LBound bit_bound = member_td->bound()[0];
+    return bit_bound >= lower && bit_bound <= upper &&
+      container_.single_map_.insert(make_pair(id, value)).second;
+  }
 
-  return DDS::RETCODE_OK;
+  return false;
+}
+
+template <TypeKind MemberTypeKind, typename MemberType>
+bool DynamicDataWriteImpl::set_value_to_union(DDS::MemberId id, const MemberType& value,
+                                              TypeKind enum_or_bitmask, LBound lower, LBound upper)
+{
+  
 }
 
 // If a DynamicData represents data of a primitive type or enum/bitmask, the data is stored
@@ -105,6 +122,8 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_value_to_struct(DDS::MemberId id, co
 // are also stored in the single_map_ with id of each character translated from its index.
 // Similarly, if a DynamicData represents data of a sequence of a basic type, its elements are
 // also stored in the single_map_ with id tranlated from the element index.
+// This template is probably common to all set_*_value methods except for char8, char16, boolean,
+// complex.
 template <TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const ValueType& value,
                                                          TypeKind enum_or_bitmask, LBound lower, LBound upper)
@@ -122,7 +141,6 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const
   bool good = true;
 
   if (tk == enum_or_bitmask) {
-    // Member ID must be MEMBER_ID_INVALID for the write to succeed as per spec.
     const LBound bit_bound = descriptor->bound()[0];
     good = id == MEMBER_ID_INVALID && bit_bound >= lower && bit_bound <= upper &&
       container_.single_map_.insert(make_pair(id, value)).second;
@@ -134,17 +152,21 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const
         container_.single_map_.insert(make_pair(id, value)).second;
       break;
     case TK_STRUCTURE:
-      set_value_to_struct(id, value);
+      // Set value for a member of a struct
+      good = set_value_to_struct<ValueTypeKind>(id, value, enum_or_bitmask, lower, upper);
       break;
     case TK_UNION:
-      set_value_to_union(id, value);
+      // Set value for a member of a union
+      good = set_value_to_union<ValueTypeKind>(id, value, enum_or_bitmask, lower, upper);
       break;
     case TK_SEQUENCE:
     case TK_ARRAY:
     case TK_MAP:
-      set_value_to_collection(id, value);
+      // Set value for an element in a collection
+      good = set_value_to_collection<ValueTypeKind>(id, value, tk, enum_or_bitmask, lower, upper);
       break;
     default:
+      good = false;
       break;
     }
   }
@@ -152,7 +174,8 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const
   if (!good && DCPS::DCPS_debug_level >= 1) {
     // TODO: Use correct logging level
     ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_single_value: "
-               "Failed to write to DynamicData object of type %C\n", typekind_to_string(tk)));
+               "Failed to write a value of %C to DynamicData object of type %C\n",
+               typekind_to_string(ValueTypeKind), typekind_to_string(tk)));
   }
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
