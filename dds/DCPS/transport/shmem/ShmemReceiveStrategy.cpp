@@ -29,14 +29,14 @@ ShmemReceiveStrategy::ShmemReceiveStrategy(ShmemDataLink* link)
 {
 }
 
-bool
+void
 ShmemReceiveStrategy::read()
 {
   if (partial_recv_remaining_) {
     VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
           "resuming partial recv\n", link_));
     handle_dds_input(ACE_INVALID_HANDLE);
-    return false;
+    return;
   }
 
   if (bound_name_.empty()) {
@@ -46,11 +46,11 @@ ShmemReceiveStrategy::read()
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem = 0;
   if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)) {
-    VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::read link %@ "
+    VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
               "peer allocator not found, receive_bytes will close link\n",
               link_), 1);
     handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TRecvStrateg.
-    return false;
+    return;
   }
 
   if (!current_data_) {
@@ -62,7 +62,7 @@ ShmemReceiveStrategy::read()
     if (!start) {
       start = current_data_;
     } else if (start == current_data_) {
-      return false; // none found => don't call handle_dds_input()
+      return; // none found => don't call handle_dds_input()
     }
     if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
       current_data_ = reinterpret_cast<ShmemData*>(mem) - 1; // incremented by the for loop
@@ -75,7 +75,7 @@ ShmemReceiveStrategy::read()
   // If we get this far, current_data_ points to the first SHMEM_DATA_IN_USE.
   // handle_dds_input() will call our receive_bytes() to get the data.
   handle_dds_input(ACE_INVALID_HANDLE);
-  return true;
+  return;
 }
 
 ssize_t
@@ -93,7 +93,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   void* mem;
   if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)
       || current_data_->status_ != SHMEM_DATA_IN_USE) {
-    VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
+    VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
              1);
     gracefully_disconnected_ = true; // do not attempt reconnect via relink()
     return 0; // close "connection"

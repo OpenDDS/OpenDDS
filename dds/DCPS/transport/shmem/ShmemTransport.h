@@ -67,7 +67,7 @@ private:
 
   std::pair<std::string, std::string> blob_to_key(const TransportBLOB& blob);
 
-  bool read_from_links(); // callback from ReadTask
+  void read_from_links(); // callback from ReadTask
 
   typedef ACE_Thread_Mutex LockType;
   typedef ACE_Guard<LockType> GuardType;

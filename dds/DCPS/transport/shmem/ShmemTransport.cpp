@@ -186,7 +186,7 @@ ShmemTransport::configure_i(ShmemInst& config)
 
   read_task_.reset(new ReadTask(this, ace_sema));
 
-  VDBG_LVL((LM_INFO, "(%P|%t) ShmemTransport %@ configured with address %C\n",
+  VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemTransport %@ configured with address %C\n",
             this, config.poolname().c_str()), 1);
 
   return true;
@@ -278,8 +278,10 @@ ShmemTransport::ReadTask::svc()
 
   while (!stopped_.value()) {
     ACE_OS::sema_wait(&semaphore_);
-    while (!(stopped_.value() || outer_->read_from_links())) {
+    if (stopped_.value()) {
+      return 0;
     }
+    outer_->read_from_links();
   }
   return 0;
 }
@@ -305,7 +307,7 @@ ShmemTransport::ReadTask::signal_semaphore()
   ACE_OS::sema_post(&semaphore_);
 }
 
-bool
+void
 ShmemTransport::read_from_links()
 {
   std::vector<ShmemDataLink_rch> dl_copies;
@@ -318,13 +320,9 @@ ShmemTransport::read_from_links()
   }
 
   typedef std::vector<ShmemDataLink_rch>::iterator dl_iter_t;
-  bool read_once = false;
   for (dl_iter_t dl_it = dl_copies.begin(); !is_shut_down() && dl_it != dl_copies.end(); ++dl_it) {
-    if (dl_it->in()->read()) {
-      read_once = true;
-    }
+    dl_it->in()->read();
   }
-  return read_once;
 }
 
 void

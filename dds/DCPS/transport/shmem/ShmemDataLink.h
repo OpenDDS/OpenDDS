@@ -12,6 +12,8 @@
 #include "ShmemReceiveStrategy.h"
 #include "ShmemReceiveStrategy_rch.h"
 
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/PeriodicTask.h>
 #include <dds/DCPS/transport/framework/DataLink.h>
 
 #include <ace/Local_Memory_Pool.h>
@@ -85,12 +87,13 @@ public:
 
   bool open(const std::string& peer_address);
 
+  int make_reservation(const GUID_t& remote_sub, const GUID_t& local_pub,
+    const TransportSendListener_wrch& send_listener, bool reliable);
+
   int make_reservation(const GUID_t& remote_pub,
                        const GUID_t& local_sub,
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
-
-  void send_association_msg(const GUID_t& local, const GUID_t& remote);
 
   void request_ack_received(ReceivedDataSample& sample);
 
@@ -103,7 +106,7 @@ public:
   ShmemAllocator* local_allocator();
   ShmemAllocator* peer_allocator();
 
-  bool read() { return recv_strategy_->read(); }
+  void read() { recv_strategy_->read(); }
   void signal_semaphore();
   ShmemTransport& impl() const;
 
@@ -116,9 +119,34 @@ protected:
   virtual void stop_i();
 
 private:
+  void send_association_msg(const GUID_t& local, const GUID_t& remote);
+  void resend_association_msgs(const MonotonicTimePoint& now);
+
   std::string peer_address_;
   ShmemAllocator* peer_alloc_;
   ACE_Thread_Mutex mutex_;
+  ReactorTask_rch reactor_task_;
+
+  struct GuidPair {
+    const GUID_t local;
+    const GUID_t remote;
+
+    GuidPair(const GUID_t& local, const GUID_t& remote)
+    : local(local)
+    , remote(remote)
+    {
+    }
+
+    bool operator<(const GuidPair& other) const
+    {
+      return GUID_tKeyLessThan()(local, other.local) && GUID_tKeyLessThan()(remote, other.remote);
+    }
+  };
+  typedef std::map<GuidPair, unsigned> AssocResends;
+  AssocResends assoc_resends_;
+  ACE_Thread_Mutex assoc_resends_mutex_;
+  typedef PmfPeriodicTask<ShmemDataLink> SmPeriodicTask;
+  DCPS::RcHandle<SmPeriodicTask> assoc_resends_task_;
 };
 
 } // namespace DCPS
