@@ -703,7 +703,7 @@ sub upload_shapes_demo {
     die("No shapes demo run found!");
   }
   if ($run->{status} ne 'completed') {
-    print("It's listed as not finished, run this again when it finishes succesfully.\n");
+    print("It's listed as not finished, run this again when it finishes successfully.\n");
     exit(0);
   }
   if ($run->{conclusion} ne 'success') {
@@ -1291,6 +1291,8 @@ sub name_key ($) {
 }
 
 sub get_authors {
+  return \@global_authors if (@global_authors) ;
+
   my @authors = ();
 
   open(CHANGELOG, "git shortlog -se |") or die "Opening $!";
@@ -1348,17 +1350,25 @@ sub get_authors {
     }
   }
 
-  return sort { name_key($a->{name}) cmp name_key($b->{name}) } @authors;
+  @global_authors = sort { name_key($a->{name}) cmp name_key($b->{name}) } @authors;
+  return \@global_authors;
+}
+
+sub author_lines {
+  my @lines;
+  foreach my $author (@{get_authors()}) {
+    push(@lines, "$author->{name} <$author->{email}>");
+  }
+  return \@lines;
 }
 
 sub verify_authors {
   my $settings = shift();
-  @global_authors = get_authors() if (!@global_authors);
 
   my $tmp_authors_path = "$settings->{workspace}/temp_authors";
   open(my $file, '>', $tmp_authors_path) or die ("Could not open $tmp_authors_path: $!");
-  foreach my $author (@global_authors) {
-    print $file "$author->{name} <$author->{email}>\n";
+  foreach my $line (@{author_lines()}) {
+    print $file "$line\n";
   }
   close($file);
 
@@ -1381,8 +1391,8 @@ sub message_authors {
 
 sub remedy_authors {
   open(my $authors, '>', "AUTHORS") or die "Opening $!";
-  foreach my $author (@global_authors) {
-    print $authors "$author->{name} <$author->{email}>\n";
+  foreach my $line (@{author_lines()}) {
+    print $authors "$line\n";
   }
   close $authors;
   return 1;
@@ -2745,6 +2755,7 @@ my $skip_github = undef;
 my $retcon = 0;
 my $sftp_base_dir = $default_sftp_base_dir;
 my $upload_shapes_demo = 0;
+my $write_authors = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2769,6 +2780,7 @@ GetOptions(
   'sftp-base-dir=s' => \$sftp_base_dir,
   'skip-github=i' => \$skip_github,
   'upload-shapes-demo' => \$upload_shapes_demo,
+  'write-authors' => \$write_authors,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2778,6 +2790,10 @@ if ($print_help) {
 
 if ($print_list_all) {
   $print_list = 1;
+  $ignore_args = 1;
+}
+
+if ($write_authors) {
   $ignore_args = 1;
 }
 
@@ -3364,9 +3380,12 @@ sub run_step {
   $step->{verified} = 1;
 }
 
-my $alt = $upload_shapes_demo;
+my $alt = $upload_shapes_demo || $write_authors;
 if ($upload_shapes_demo) {
   upload_shapes_demo(\%global_settings);
+}
+elsif ($write_authors) {
+  remedy_authors(\%global_settings);
 }
 elsif (!$alt && ($ignore_args || ($workspace && $parsed_version))) {
   my @steps_to_do;
