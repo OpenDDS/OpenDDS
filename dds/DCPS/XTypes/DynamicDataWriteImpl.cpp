@@ -109,11 +109,210 @@ bool DynamicDataWriteImpl::set_value_to_struct(DDS::MemberId id, const MemberTyp
   return false;
 }
 
+bool DynamicDataWriteImpl::is_discriminator_type(TypeKind tk) const
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_ENUM:
+    return true;
+  default:
+    return false;
+  }
+}
+
+// Check if a discriminator value selects the default member. Only works for union.
+bool DynamicDataWriteImpl::select_default_member(CORBA::ULong disc_val, DDS::MemberId default_id) const
+{
+  if (type_->get_kind() != TK_UNION) {
+    return false;
+  }
+
+  DDS::DynamicTypeMembersById_var members_var;
+  if (type_->get_all_members(members_var) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DynamicTypeMembersByIdImpl* members = dynamic_cast<DynamicTypeMembersByIdImpl*>(members_var.in());
+
+  for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin(); it != members->end(); ++it) {
+    if (it->first == default_id) continue;
+
+    DDS::MemberDescriptor_var md;
+    if (it->second->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const DDS::UnionCaseLabelSeq& labels = md->label();
+    for (CORBA::ULong i = 0; i < labels.length(); ++i) {
+      if (disc_val == labels[i]) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 template <TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataWriteImpl::set_value_to_union(DDS::MemberId id, const MemberType& value,
                                               TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  
+  DDS::TypeDescriptor_var descriptor;
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  DDS::DynamicType_var member_type;
+  if (id == DISCRIMINATOR_ID) {
+    // Discriminator can only be of certain types (XTypes spec, 7.2.2.4.4.3)
+    if (!is_discriminator_type(MemberTypeKind)) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DynamicDataWriteImpl::set_value_to_union: Type %C cannot be used for union discriminator\n",
+                 typekind_to_string(MemberTypeKind)));
+      return false;
+    }
+
+    member_type = get_base_type(descriptor->discriminator_type());
+
+    DDS::MemberId selected_id = MEMBER_ID_INVALID;
+    if (container_.single_map_.size() > 0) {
+      OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator it = container_.single_map_.begin();
+      for (; it != container_.single_map_.end(); ++it) {
+        // Discriminator might already be written.
+        if (it->first != DISCRIMINATOR_ID) {
+          selected_id = it->first;
+        }
+      }
+    } else if (container_.sequence_map_.size() > 0) {
+      selected_id = container_.sequence_map_.begin()->first;
+    } else if (container_.complex_map_.size() > 0) {
+      selected_id = container_.complex_map_.begin()->first;
+    }
+
+    if (selected_id != MEMBER_ID_INVALID) {
+      DDS::DynamicTypeMember_var selected_member;
+      if (type_->get_member(selected_member, selected_id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      DDS::MemberDescriptor_var selected_md;
+      if (selected_member->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+        return false;
+      }
+
+      // If the selected member is not default, the discriminator value must equal one of its
+      // labels. If the selected member is default, the discriminator value must not equal
+      // any label of the non-default members.
+      const bool is_default = selected_md->is_default_label();
+      if (!is_default) {
+        const DDS::UnionCaseLabelSeq& labels = selected_md->label();
+        bool found = false;
+        for (CORBA::ULong i = 0; i < labels.length(); ++i) {
+          if (static_cast<CORBA::Long>(value) == labels[i]) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_union:"
+                     " Discriminator value (%d) does not match any label of an existing"
+                     " selected member (ID %d)\n", static_cast<CORBA::Long>(value), selected_id));
+          return false;
+        }
+      } else if (!select_default_member(static_cast<CORBA::Long>(value), selected_id)) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImp::set_value_to_union:"
+                   " Discriminator value (%d) matches a non-default member (ID %d),"
+                   " but the default member (ID %d) was already written\n",
+                   static_cast<CORBA::Long>(value), it->first, selected_id));
+        return false;
+      }
+    }
+  } else { // Writing a selected member
+    DDS::DynamicTypeMember_var member;
+    if (type_->get_member(member, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var md;
+    if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    member_type = get_base_type(md->type());
+
+    DDS::MemberId selected_id = MEMBER_ID_INVALID;
+    bool has_disc = false;
+    CORBA::Long disc_val;
+    if (container_.single_map_.size() > 0) {
+      OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator it = container_.single_map_.begin();
+      for (; it != container_.single_map_.end(); ++it) {
+        if (it->first == DISCRIMINATOR_ID) {
+          has_disc = true;
+          disc_val = static_cast<CORBA::Long>(it->second.get());
+        } else {
+          selected_it = it->first;
+        }
+      }
+    } else if (container_.sequence_map_.size() > 0) {
+      selected_id = container_.sequence_map_.begin()->first;
+    } else if (container_.complex_map_.size() > 0) {
+      selected_id = container_.complex_map_.begin()->first;
+    }
+
+    if (selected_id != MEMBER_ID_INVALID && selected_id != id) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_union:"
+                 " A member (ID %d) was already written\n", selected_id));
+      return false;
+    }
+
+    if (selected_id == MEMBER_ID_INVALID && has_disc) {
+      // If id is a non-default member, disc value must equal to one of its labels.
+      // If id a default member, disc value must not equal to any label of the non-default members.
+      const bool is_default = md->is_default_label();
+      if (!is_default) {
+        const DDS::UnionCaseLabelSeq& labels = md->label();
+        bool found = false;
+        for (CORBA::ULong i = 0; i < labels.length(); ++i) {
+          if (labels[i] == disc_val) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_union:"
+                     " Non-default member (ID %d) does not match the existing discriminator value %d\n",
+                     id, disc_val));
+          return false;
+        }
+      } else if (!select_default_member(disc_val, id)) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_union:"
+                   " Default member (ID %d) does not match the existing discriminator value %d\n",
+                   id, disc_val));
+        return false;
+      }
+    }
+  }
+
+  const TypeKind member_tk = member_type->get_kind();
+  if (member_tk == MemberTypeKind) {
+    return container_.single_map_.insert(make_pair(id, value)).second;
+  }
+
+  if (member_tk == enum_or_bitmask) {
+    DDS::TypeDescriptor_var member_td;
+    if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const LBound bit_bound = member_td->bound()[0];
+    return bit_bound >= lower && bit_bound <= upper &&
+      container_.single_map_.insert(make_pair(id, value)).second;
+  }
+
+  return false;
 }
 
 // If a DynamicData represents data of a primitive type or enum/bitmask, the data is stored
@@ -136,7 +335,7 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return DDS::RETCODE_ERROR;
   }
-  
+
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -152,17 +351,14 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const
         container_.single_map_.insert(make_pair(id, value)).second;
       break;
     case TK_STRUCTURE:
-      // Set value for a member of a struct
       good = set_value_to_struct<ValueTypeKind>(id, value, enum_or_bitmask, lower, upper);
       break;
     case TK_UNION:
-      // Set value for a member of a union
       good = set_value_to_union<ValueTypeKind>(id, value, enum_or_bitmask, lower, upper);
       break;
     case TK_SEQUENCE:
     case TK_ARRAY:
     case TK_MAP:
-      // Set value for an element in a collection
       good = set_value_to_collection<ValueTypeKind>(id, value, tk, enum_or_bitmask, lower, upper);
       break;
     default:
@@ -433,6 +629,9 @@ DynamicData::SingleValue::~SingleValue()
     ACE_OS::free((void*)str_);
   }
 }
+
+template<> CORBA::Long& DynamicDataWriteImpl::SingleValue::get() const { return i32_; }
+
 
 namespace DCPS {
 

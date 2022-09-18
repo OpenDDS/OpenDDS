@@ -347,6 +347,8 @@ private:
 
     ~SingleValue();
 
+    template<typename T> const T& get() const;
+
     TypeKind kind_;
     union {
       CORBA::Long i32_;
