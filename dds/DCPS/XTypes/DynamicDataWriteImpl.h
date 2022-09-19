@@ -320,6 +320,28 @@ public:
                                        const DDS::WstringSeq& value);
 
 private:
+
+  template<TypeKind MemberTypeKind, typename MemberType>
+  bool set_value_to_struct(DDS::MemberId id, const MemberType& value,
+                           TypeKind enum_or_bitmask = TK_NONE,
+                           LBound lower = 0,
+                           LBound upper = 0);
+
+  template<TypeKind MemberTypeKind, typename MemberType>
+  bool set_value_to_union(DDS::MemberId, const MemberType& value,
+                          TypeKind enum_or_bitmask = TK_NONE,
+                          LBound lower = 0,
+                          LBound upper = 0);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool set_single_value(DDS::MemberId id, const ValueType& value,
+                        TypeKind enum_or_bitmask = TK_NONE,
+                        LBound lower = 0,
+                        LBound upper = 0);
+
+  bool is_discriminator_type(TypeKind tk) const;
+  bool select_default_member(CORBA::ULong disc_val, DDS::MemberId default_id) const;
+
   // The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
 

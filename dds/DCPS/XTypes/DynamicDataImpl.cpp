@@ -998,24 +998,10 @@ bool DynamicDataImpl::get_value_from_collection(ElementType& value, MemberId id,
 
   if (elem_tk != ElementTypeKind && elem_tk != enum_or_bitmask) {
     if (DCPS::DCPS_debug_level >= 1) {
-      const char* collection_str;
-      switch (collection_tk) {
-      case TK_SEQUENCE:
-        collection_str = "sequence";
-        break;
-      case TK_ARRAY:
-        collection_str = "array";
-        break;
-      case TK_MAP:
-        collection_str = "map";
-        break;
-      default:
-        return false;
-      }
-
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::get_value_from_collection -")
                  ACE_TEXT(" Could not read a value of type %C from %C with element type %C\n"),
-                 typekind_to_string(ElementTypeKind), collection_str, typekind_to_string(elem_tk)));
+                 typekind_to_string(ElementTypeKind), typekind_to_string(collection_tk),
+                 typekind_to_string(elem_tk)));
     }
     return false;
   }
