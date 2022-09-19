@@ -582,6 +582,73 @@ sub unused_flags {
   return keys(%{$self->{_flags}->{unused}});
 }
 
+sub _process_common {
+  my $self = shift;
+  my $name = shift;
+  my $params = shift;
+  my $debug_logging = 1;
+
+  if ($$params !~ /-DCPSLogLevel / && $self->{dcps_log_level}) {
+    $$params .= " -DCPSLogLevel $self->{dcps_log_level}";
+    $debug_logging = $self->{dcps_log_level} eq "debug";
+  }
+
+  if ($debug_logging) {
+    if (defined $ENV{DCPSDebugLevel}) {
+      $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
+    }
+    if ($$params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
+      my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
+      if ($$params !~ /-ORBVerboseLogging /) {
+        $debug .= " -ORBVerboseLogging 1";
+      }
+      $$params .= $debug;
+    }
+
+    if (defined $ENV{DCPSTransportDebugLevel}) {
+      $self->{dcps_transport_debug_level} = $ENV{DCPSTransportDebugLevel};
+    }
+    if ($$params !~ /-DCPSTransportDebugLevel / &&
+        $self->{dcps_transport_debug_level}) {
+      $$params .= " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
+    }
+
+    if ($$params !~ /-DCPSSecurityDebug(?:Level)? /) {
+      if ($self->{dcps_security_debug}) {
+        $$params .=  " -DCPSSecurityDebug $self->{dcps_security_debug}";
+      }
+      elsif ($self->{dcps_security_debug_level}) {
+        $$params .=  " -DCPSSecurityDebugLevel $self->{dcps_security_debug_level}";
+      }
+    }
+  }
+
+  if ($self->{add_orb_log_file} && $$params !~ /-ORBLogFile ([^ ]+)/) {
+    my $file_name = "$name";
+
+    # account for "blah #2"
+    $file_name =~ s/ /_/g;
+    $file_name =~ s/#//g;
+
+    $$params .= " -ORBLogFile $file_name.log";
+  }
+
+  if ($self->{add_transport_config} &&
+      $self->{transport} ne "" &&
+      $$params !~ /-DCPSConfigFile /) {
+    $self->_info("TestFramework::process appending "
+      . "\"-DCPSConfigFile <transport>.ini\" to process's parameters. Set "
+      . "<TestFramework>->{add_transport_config} = 0 to prevent this.\n");
+    my $ini_file = $self->_ini_file($name);
+    $$params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
+  }
+
+  if ($self->{nobits}) {
+    my $no_bits = " -DCPSBit 0 ";
+    $$params .= $no_bits;
+  }
+}
+
 sub process {
   my $self = shift;
   my $name = shift;
@@ -602,70 +669,30 @@ sub process {
     return;
   }
 
-  my $debug_logging = 1;
-
-  if ($params !~ /-DCPSLogLevel / && $self->{dcps_log_level}) {
-    $params .= " -DCPSLogLevel $self->{dcps_log_level}";
-    $debug_logging = $self->{dcps_log_level} eq "debug";
-  }
-
-  if ($debug_logging) {
-    if (defined $ENV{DCPSDebugLevel}) {
-      $self->{dcps_debug_level} = $ENV{DCPSDebugLevel};
-    }
-    if ($params !~ /-DCPSDebugLevel / && $self->{dcps_debug_level}) {
-      my $debug = " -DCPSDebugLevel $self->{dcps_debug_level}";
-      if ($params !~ /-ORBVerboseLogging /) {
-        $debug .= " -ORBVerboseLogging 1";
-      }
-      $params .= $debug;
-    }
-
-    if (defined $ENV{DCPSTransportDebugLevel}) {
-      $self->{dcps_transport_debug_level} = $ENV{DCPSTransportDebugLevel};
-    }
-    if ($params !~ /-DCPSTransportDebugLevel / &&
-        $self->{dcps_transport_debug_level}) {
-      $params .= " -DCPSTransportDebugLevel $self->{dcps_transport_debug_level}";
-    }
-
-    if ($params !~ /-DCPSSecurityDebug(?:Level)? /) {
-      if ($self->{dcps_security_debug}) {
-        $params .=  " -DCPSSecurityDebug $self->{dcps_security_debug}";
-      }
-      elsif ($self->{dcps_security_debug_level}) {
-        $params .=  " -DCPSSecurityDebugLevel $self->{dcps_security_debug_level}";
-      }
-    }
-  }
-
-  if ($self->{add_orb_log_file} && $params !~ /-ORBLogFile ([^ ]+)/) {
-    my $file_name = "$name";
-
-    # account for "blah #2"
-    $file_name =~ s/ /_/g;
-    $file_name =~ s/#//g;
-
-    $params .= " -ORBLogFile $file_name.log";
-  }
-
-  if ($self->{add_transport_config} &&
-      $self->{transport} ne "" &&
-      $params !~ /-DCPSConfigFile /) {
-    $self->_info("TestFramework::process appending "
-      . "\"-DCPSConfigFile <transport>.ini\" to process's parameters. Set "
-      . "<TestFramework>->{add_transport_config} = 0 to prevent this.\n");
-    my $ini_file = $self->_ini_file($name);
-    $params .= " -DCPSConfigFile $ini_file " if $ini_file ne "";
-  }
-
-  if ($self->{nobits}) {
-    my $no_bits = " -DCPSBit 0 ";
-    $params .= $no_bits;
-  }
+  $self->_process_common($name, \$params);
 
   $self->{processes}->{process}->{$name}->{process} =
     $self->_create_process($executable, $params);
+}
+
+sub java_process {
+  my $self = shift;
+  my $name = shift;
+  my $main_class = shift;
+  my $params = shift;
+  my @jars = shift;
+  my $vmargs = shift;
+
+  if (defined($self->{processes}->{process}->{$name})) {
+    print STDERR "ERROR: already created process named \"$name\"\n";
+    $self->{status} = -1;
+    return;
+  }
+
+  $self->_process_common($name, \$params);
+
+  $self->{processes}->{process}->{$name}->{process} =
+    $self->_create_java_process($main_class, $params, @jars, $vmargs);
 }
 
 sub _getpid {
@@ -1021,6 +1048,30 @@ sub _create_process {
     $params .= $flag if $self->{add_pending_timeout};
   }
   my $proc = PerlDDS::create_process($executable, $params);
+  $self->_track_log_files($params, $proc);
+  return $proc;
+}
+
+sub _create_java_process {
+  my $self = shift;
+  my $main_class = shift;
+  my $params = shift;
+  my @jars = shift;
+  my $vmargs = shift;
+
+  $self->_info("TestFramework::_create_java_process creating executable="
+    . "w/ params=$params jars=@jars vmargs=$vmargs\n");
+  if ($params !~ /-DCPSPendingTimeout /) {
+    my $flag = " -DCPSPendingTimeout 3 ";
+    my $possible_would_be = ($self->{add_pending_timeout} ? "" : "would be ");
+    my $prevent_or_allow = ($self->{add_pending_timeout} ? "prevent" : "allow");
+    $self->_info("TestFramework::_create_process " . $possible_would_be
+      . "adding \"$flag\" to parameters. To " . $prevent_or_allow
+      . " this set " . "<TestFramework>->{add_pending_timeout} = "
+      . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
+    $params .= $flag if $self->{add_pending_timeout};
+  }
+  my $proc = PerlDDS::create_java_process($main_class, $params, @jars, $vmargs);
   $self->_track_log_files($params, $proc);
   return $proc;
 }

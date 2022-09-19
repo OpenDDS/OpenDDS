@@ -70,6 +70,15 @@ sub create_process {
     return $created;
 }
 
+sub create_java_process {
+    my $main_class = shift;
+    my $arguments = shift;
+    my @jars = shift;
+    my $vmargs = shift;
+
+    return new PerlDDS::Process_Java($main_class, $arguments, @jars, $vmargs);
+}
+
 sub identify_process {
     my $executable = shift;
 
