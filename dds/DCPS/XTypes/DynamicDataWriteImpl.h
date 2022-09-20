@@ -22,6 +22,8 @@ class OpenDDS_Dcps_Export DynamicDataWriteImpl
 public:
   DynamicDataWriteImpl(DDS::DynamicType_ptr type);
 
+  DDS::DynamicType_ptr type();
+
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
 
@@ -333,12 +335,18 @@ private:
                           LBound lower = 0,
                           LBound upper = 0);
 
+  template<TypeKind ElementTypeKind, typename ElementType>
+  bool set_value_to_collection(DDS::MemberId id, const ElementType& value,
+                               TypeKind coll_tk, TypeKind enum_or_bitmaks,
+                               LBound lower, LBound upper);
+
   template<TypeKind ValueTypeKind, typename ValueType>
   bool set_single_value(DDS::MemberId id, const ValueType& value,
                         TypeKind enum_or_bitmask = TK_NONE,
                         LBound lower = 0,
                         LBound upper = 0);
 
+  bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
   bool is_discriminator_type(TypeKind tk) const;
   bool select_default_member(CORBA::ULong disc_val, DDS::MemberId default_id) const;
 
@@ -403,7 +411,7 @@ private:
   struct DataContainer {
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
     OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
-    OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_ptr) complex_map;
+    OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
   };
 
   DataContainer container_;

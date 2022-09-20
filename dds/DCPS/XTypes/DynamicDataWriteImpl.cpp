@@ -14,6 +14,11 @@ DynamicDataWriteImpl::DynamicDataWriteImpl(DDS::DynamicType_ptr type)
   : type_(get_base_type(type))
 {}
 
+DDS::DynamicType_ptr DynamicDataWriteImpl::type()
+{
+  return type_.in();
+}
+
 DDS::ReturnCode_t DynamicDataWriteImpl::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
 {
   // TODO
@@ -101,7 +106,7 @@ bool DynamicDataWriteImpl::set_value_to_struct(DDS::MemberId id, const MemberTyp
     if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
       return false;
     }
-    const LBound bit_bound = member_td->bound()[0];
+    const CORBA::ULong bit_bound = member_td->bound()[0];
     return bit_bound >= lower && bit_bound <= upper &&
       container_.single_map_.insert(make_pair(id, value)).second;
   }
@@ -307,9 +312,34 @@ bool DynamicDataWriteImpl::set_value_to_union(DDS::MemberId id, const MemberType
     if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
       return false;
     }
-    const LBound bit_bound = member_td->bound()[0];
+    const CORBA::ULong bit_bound = member_td->bound()[0];
     return bit_bound >= lower && bit_bound <= upper &&
       container_.single_map_.insert(make_pair(id, value)).second;
+  }
+
+  return false;
+}
+
+// Check if a given member ID is valid for a given type with maximum number of elements.
+bool DynamicDataWriteImpl::check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const
+{
+  // The given ID is implicitly treated as index.
+  switch (tk) {
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_SEQUENCE:
+  case TK_MAP:
+    // Bound of 0 means unbounded.
+    if (bound == 0 || id < bound) {
+      return true;
+    }
+    break;
+  case TK_BITMASK:
+  case TK_ARRAY:
+    if (id < bound) {
+      return true;
+    }
+    break;
   }
 
   return false;
@@ -343,7 +373,7 @@ bool DynamicDataWriteImpl::set_value_to_collection(DDS::MemberId id, const Eleme
     if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
       return false;
     }
-    const LBound bit_bound = elem_td->bound()[0];
+    const CORBA::ULong bit_bound = elem_td->bound()[0];
     if (bit_bound < lower || bit_bound > upper) {
       return false;
     }
@@ -351,9 +381,34 @@ bool DynamicDataWriteImpl::set_value_to_collection(DDS::MemberId id, const Eleme
 
   switch (collection_tk) {
   case TK_SEQUENCE:
+    {
+      const CORBA::ULong bound = descriptor->bound()[0];
+      if (!check_index_from_id(id, bound)) {
+        if (DCPS::DCPS_debug_level >= 1) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_collection:"
+                     " Failed to write a member (ID %d) to %C with bound %d\n",
+                     id, typekind_to_string(collection_tk), bound));
+        }
+        return false;
+      }
+      break;
+    }
   case TK_ARRAY:
-    container_.single_map_.insert(make_pair(id, value));
-    break;
+    {
+      CORBA::ULong bound = 1;
+      for (CORBA::ULong i = 0; i < descriptor->bound().length(); ++i) {
+        bound *= descriptor->bound()[i];
+      }
+      if (!check_index_from_id(id, bound)) {
+        if (DCPS::DCPS_debug_leve >= 1) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_collection:"
+                     " Failed to write a member (ID %d) to %C with bound %d\n",
+                     id, typekind_to_string(collection_tk), bound));
+        }
+        return false;
+      }
+      break;
+    }
   case TK_MAP:
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_collection:"
@@ -364,6 +419,7 @@ bool DynamicDataWriteImpl::set_value_to_collection(DDS::MemberId id, const Eleme
     return false;
   }
 
+  container_.single_map_.insert(make_pair(id, value));
   return true;
 }
 
@@ -392,7 +448,7 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_single_value(DDS::MemberId id, const
   bool good = true;
 
   if (tk == enum_or_bitmask) {
-    const LBound bit_bound = descriptor->bound()[0];
+    const CORBA::ULong bit_bound = descriptor->bound()[0];
     good = id == MEMBER_ID_INVALID && bit_bound >= lower && bit_bound <= upper &&
       container_.single_map_.insert(make_pair(id, value)).second;
   } else {
@@ -433,89 +489,177 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_int32_value(DDS::MemberId id, CORBA:
   return set_single_value<TK_INT32>(id, value, TK_ENUM, 17, 32);
 }
 
-DDS::ReturnCode_t set_uint32_value(DDS::MemberId id, CORBA::ULong value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint32_value(DDS::MemberId id, CORBA::ULong value)
 {
   return set_single_value<TK_UINT32>(id, value, TK_BITMASK, 17, 32);
 }
 
-DDS::ReturnCode_t set_int8_value(DDS::MemberId id, CORBA::Int8 value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int8_value(DDS::MemberId id, CORBA::Int8 value)
 {
   return set_single_value<TK_INT8>(id, value, TK_ENUM, 1, 8);
 }
 
-DDS::ReturnCode_t set_uint8_value(DDS::MemberId id, CORBA::UInt8 value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint8_value(DDS::MemberId id, CORBA::UInt8 value)
 {
   return set_single_value<TK_UINT8>(id, value, TK_BITMASK, 1, 8);
 }
 
-DDS::ReturnCode_t set_int16_value(DDS::MemberId id, CORBA::Short value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int16_value(DDS::MemberId id, CORBA::Short value)
 {
   return set_single_value<TK_INT16>(id, value, TK_ENUM, 9, 16);
 }
 
-DDS::ReturnCode_t set_uint16_value(DDS::MemberId id, CORBA::UShort value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint16_value(DDS::MemberId id, CORBA::UShort value)
 {
   return set_single_value<TK_UINT16>(id, value, TK_BITMASK, 9, 16);
 }
 
-DDS::ReturnCode_t set_int64_value(DDS::MemberId id, CORBA::LongLong value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int64_value(DDS::MemberId id, CORBA::LongLong value)
 {
   return set_single_value<TK_INT64>(id, value);
 }
 
-DDS::ReturnCode_t set_uint64_value(DDS::MemberId id, CORBA::ULongLong value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint64_value(DDS::MemberId id, CORBA::ULongLong value)
 {
   return set_single_value<TK_UINT64>(id, value, TK_BITMASK, 33, 64);
 }
 
-DDS::ReturnCode_t set_float32_value(DDS::MemberId id, CORBA::Float value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_float32_value(DDS::MemberId id, CORBA::Float value)
 {
   return set_single_value<TK_FLOAT32>(id, value);
 }
 
-DDS::ReturnCode_t set_float64_value(DDS::MemberId id, CORBA::Double value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_float64_value(DDS::MemberId id, CORBA::Double value)
 {
   return set_single_value<TK_FLOAT64>(id, value);
 }
 
-DDS::ReturnCode_t set_float128_value(DDS::MemberId id, CORBA::LongDouble value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_float128_value(DDS::MemberId id, CORBA::LongDouble value)
 {
   return set_single_value<TK_FLOAT128>(id, value);
 }
 
-DDS::ReturnCode_t set_char8_value(DDS::MemberId id, CORBA::Char value)
+template<TypeKind CharKind, TypeKind StringKind, typename CharT>
+DDS::ReturnCode_t DynamicDataWriteImpl::set_char_common(DDS::MemberId id, CharT& value)
 {
-  // TODO
-  return DDS::RETCODE_OK;
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+
+  switch (tk) {
+  case CharKind:
+    good = id == MEMBER_ID_INVALID &&
+      container_.single_map_.insert(make_pair(id, value)).second;
+    break;
+  case StringKind:
+    {
+      DDS::TypeDescriptor_var descriptor;
+      if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+        good = false;
+        break;
+      }
+      const CORBA::ULong bound = descriptor->bound()[0];
+      if (!check_index_from_id(id, bound)) {
+        good = false;
+      } else {
+        good = container_.single_map_.insert(make_pair(id, value)).second;
+      }
+      break;
+    }
+  case TK_STRUCTURE:
+    good = set_value_to_struct<CharKind>(id, value);
+    break;
+  case TK_UNION:
+    good = set_value_to_union<CharKind>(id, value);
+    break;
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+    good = set_value_to_collection<CharKind>(id, value, tk);
+    break;
+  default:
+    good = false;
+    break;
+  }
+
+  if (!good && DCPS::DCPS_debug_level >= 1) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_char_common:"
+               " Failed to write DynamicData object of type %C\n", typekind_to_string(tk)));
+  }
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
-DDS::ReturnCode_t set_char16_value(DDS::MemberId id, CORBA::WChar value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_char8_value(DDS::MemberId id, CORBA::Char value)
+{
+  return set_char_common<TK_CHAR8, TK_STRING8>(id, value);
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::set_char16_value(DDS::MemberId id, CORBA::WChar value)
 {
 #ifdef DDS_HAS_WCHAR
-  // TODO
-  return DDS::RETCODE_OK;
+  return set_char_common<TK_CHAR16, TK_STRING16>(id, value);
 #else
   return DDS::RETCODE_UNSUPPORTED;
 #endif
 }
 
-DDS::ReturnCode_t set_byte_value(DDS::MemberId id, CORBA::Octet value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_byte_value(DDS::MemberId id, CORBA::Octet value)
 {
   return set_single_value<TK_BYTE>(id, value);
 }
 
-DDS::ReturnCode_t set_boolean_value(DDS::MemberId id, CORBA::Boolean value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_boolean_value(DDS::MemberId id, CORBA::Boolean value)
 {
-  // TODO
-  return DDS::RETCODE_OK;
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+
+  switch (tk) {
+  case TK_BOOLEAN:
+    good = id == MEMBER_ID_INVALID && container_.single_map_.insert(make_pair(id, value)).second;
+    break;
+  case TK_BITMASK:
+    {
+      DDS::TypeDescriptor_var descriptor;
+      if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+        good = false;
+        break;
+      }
+      const CORBA::ULong bit_bound = descriptor->bound()[0];
+      if (!check_index_from_id(id, bit_bound)) {
+        good = false;
+      } else {
+        good = container_.single_map_.insert(make_pair(id, value)).second;
+      }
+      break;
+    }
+  case TK_STRUCTURE:
+    good = set_value_to_struct<TK_BOOLEAN>(id, value);
+    break;
+  case TK_UNION:
+    good = set_value_to_union<TK_BOOLEAN>(id, value);
+    break;
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+    good = set_value_to_collection<TK_BOOLEAN>(id, value, tk);
+    break;
+  default:
+    good = false;
+    break;
+  }
+
+  if (!good && DCPS::DCPS_debug_level >= 1) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_boolean_value:"
+               " Failed to write boolean to DynamicData object of type %C\n", typekind_to_string(tk)));
+  }
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
-DDS::ReturnCode_t set_string_value(DDS::MemberId id, const char* value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_string_value(DDS::MemberId id, const char* value)
 {
   return set_single_value<TK_STRING8>(id, value);
 }
 
-DDS::ReturnCode_t set_wstring_value(DDS::MemberId id, const CORBA::WChar* value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_wstring_value(DDS::MemberId id, const CORBA::WChar* value)
 {
 #ifdef DDS_HAS_WCHAR
   return set_single_value<TK_STRING16>(id, value);
@@ -524,85 +668,136 @@ DDS::ReturnCode_t set_wstring_value(DDS::MemberId id, const CORBA::WChar* value)
 #endif
 }
 
-DDS::ReturnCode_t set_complex_value(DDS::MemberId id, DDS::DynamicData_ptr value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_complex_value(DDS::MemberId id, DDS::DynamicData_ptr value)
+{
+  DDS::TypeDescriptor_var descriptor;
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+
+  const TypeKind tk = type_->get_kind();
+  bool good = false;
+
+  switch (tk) {
+  case TK_STRUCTURE:
+    {
+      DDS::DynamicTypeMember_var member;
+      if (type_->get_member(member, id) != DDS::RETCODE_OK) {
+        good = false;
+        break;
+      }
+      DDS::MemberDescriptor_var md;
+      if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+        good = false;
+        break;
+      }
+      DDS::DynamicType_var member_type = get_base_type(md->type());
+      if (!member_type || !value_type || !member_type->equals(value->type())) {
+        good = false;
+      } else {
+        good = container_.complex_map_.insert(make_pair(id, value)).second;
+      }
+      break;
+    }
+  case TK_UNION:
+    {
+      if (id == DISCRIMINATOR_ID) {
+        DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+        if (!disc_type->equals(value->type())) {
+          good = false;
+          break;
+        }
+        // TODO: If a selected member is already written, check that the input disc value matches.
+      } else {
+        // TODO: If discriminator is already written, check that it matches the member being written.
+      }
+    }
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+  default:
+    good = false;
+    break;
+  }
+
+  if (!good && DCPS::DCPS_debug_level >= 1) {
+  }
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int32_values(DDS::MemberId id, const DDS::Int32Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_int32_values(DDS::MemberId id, const DDS::Int32Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint32_values(DDS::MemberId id, const DDS::UInt32Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_uint32_values(DDS::MemberId id, const DDS::UInt32Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int8_values(DDS::MemberId id, const DDS::Int8Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_int8_values(DDS::MemberId id, const DDS::Int8Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint8_values(DDS::MemberId id, const DDS::UInt8Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_uint8_values(DDS::MemberId id, const DDS::UInt8Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int16_values(DDS::MemberId id, const DDS::Int16Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_int16_values(DDS::MemberId id, const DDS::Int16Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint16_values(DDS::MemberId id, const DDS::UInt16Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_uint16_values(DDS::MemberId id, const DDS::UInt16Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int64_values(DDS::MemberId id, const DDS::Int64Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_int64_values(DDS::MemberId id, const DDS::Int64Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_uint64_values(DDS::MemberId id, const DDS::UInt64Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_uint64_values(DDS::MemberId id, const DDS::UInt64Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_float32_values(DDS::MemberId id, const DDS::Float32Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_float32_values(DDS::MemberId id, const DDS::Float32Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_float64_values(DDS::MemberId id, const DDS::Float64Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_float64_values(DDS::MemberId id, const DDS::Float64Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_float128_values(DDS::MemberId id, const DDS::Float128Seq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_float128_values(DDS::MemberId id, const DDS::Float128Seq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_char8_values(DDS::MemberId id, const DDS::CharSeq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_char8_values(DDS::MemberId id, const DDS::CharSeq& value)
-{
-  // TODO
-  return DDS::RETCODE_OK;
-}
-
-DDS::ReturnCode_t set_char16_values(DDS::MemberId id, const DDS::WcharSeq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_char16_values(DDS::MemberId id, const DDS::WcharSeq& value)
 {
 #ifdef DDS_HAS_WCHAR
   //TODO
@@ -612,25 +807,25 @@ DDS::ReturnCode_t set_char16_values(DDS::MemberId id, const DDS::WcharSeq& value
 #endif
 }
 
-DDS::ReturnCode_t set_byte_values(DDS::MemberId id, const DDS::ByteSeq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_byte_values(DDS::MemberId id, const DDS::ByteSeq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_boolean_values(DDS::MemberId id, const DDS::BooleanSeq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_boolean_values(DDS::MemberId id, const DDS::BooleanSeq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_string_values(DDS::MemberId id, const DDS::StringSeq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_string_values(DDS::MemberId id, const DDS::StringSeq& value)
 {
   // TODO
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t set_wstring_values(DDS::MemberId id, const DDS::WstringSeq& value)
+DDS::ReturnCode_t DynamicDataWriteImpl::set_wstring_values(DDS::MemberId id, const DDS::WstringSeq& value)
 {
 #ifdef DDS_HAS_WCHAR
   // TODO
@@ -640,78 +835,78 @@ DDS::ReturnCode_t set_wstring_values(DDS::MemberId id, const DDS::WstringSeq& va
 #endif
 }
 
-DynamicData::SingleValue::SingleValue(CORBA::Long i32)
+DynamicDataWriteImmp::SingleValue::SingleValue(CORBA::Long i32)
   : kind_(TK_INT32), i32_(i32)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::ULong ui32)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::ULong ui32)
   : kind_(TK_UINT32), ui32_(ui32)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::Int8 i8)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::Int8 i8)
   : kind_(TK_INT8), i8_(i8)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::UInt8 ui8)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::UInt8 ui8)
   : kind_(TK_UINT8), ui8_(ui8)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::Short i16)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::Short i16)
   : kind_(TK_INT16), i16_(i16)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::UShort ui16)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::UShort ui16)
   : kind_(TK_UINT16), ui16_(ui16)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::LongLong i64)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::LongLong i64)
   : kind_(TK_INT64), i64_(i64)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::ULongLong ui64)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::ULongLong ui64)
   : kind_(TK_UINT64), ui64_(ui64)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::Float f32)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::Float f32)
   : kind_(TK_FLOAT32), f32_(f32)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::Double f64)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::Double f64)
   : kind_(TK_FLOAT64), f64_(f64)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::LongDouble f128)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::LongDouble f128)
   : kind_(TK_FLOAT128), f128_(f128)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::Char c8)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::Char c8)
   : kind_(TK_CHAR8), c8_(c8)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::Octet byte)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::Octet byte)
   : kind_(TK_BYTE), byte_(byte)
 {}
 
-DynamicData::SingleValue::SingleValue(CORBA::Boolean boolean)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::Boolean boolean)
   : kind_(TK_BOOLEAN), boolean_(boolean)
 {}
 
-DynamicData::SingleValue::SingleValue(const char* str)
+DynamicDataWriteImpl::SingleValue::SingleValue(const char* str)
   : kind_(TK_STRING8), str_(ACE_OS::strdup(str))
 {}
 
 #ifdef DDS_HAS_WCHAR
-DynamicData::SingleValue::SingleValue(CORBA::WChar c16)
+DynamicDataWriteImpl::SingleValue::SingleValue(CORBA::WChar c16)
   : kind_(TK_CHAR16), c16_(c16)
 {}
 
 // TODO: Does ACE_OS::strdup works with wide string?
-DynamicData::SingleValue::SingleValue(const CORBA::WChar* wstr)
+DynamicDataWriteImpl::SingleValue::SingleValue(const CORBA::WChar* wstr)
   : kind_(TK_STRING16), wstr_(ACE_OS::strdup(wstr))
 {}
 #endif
 
-DynamicData::SingleValue::~SingleValue()
+DynamicDataWriteImpl::SingleValue::~SingleValue()
 {
   if (kind_ == TK_STRING8 || kind_ == TK_STRING16) {
     // TODO: Does this work for wstring?

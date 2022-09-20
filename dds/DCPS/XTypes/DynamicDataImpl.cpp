@@ -1234,7 +1234,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, MemberId id)
   }
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_char_common -")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::get_char_common -")
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
   }
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
@@ -1278,7 +1278,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(ACE_CDR::Boolean& value, Me
 
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   const TypeKind tk = type_->get_kind();
@@ -1346,7 +1346,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(ACE_CDR::Boolean& value, Me
   }
 
   if (!good && DCPS::DCPS_debug_level >= 1) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) Dynamic::get_boolean_value -")
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::get_boolean_value -")
                ACE_TEXT(" Failed to read DynamicData object of type %C\n"), typekind_to_string(tk)));
   }
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
@@ -1372,7 +1372,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
 
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return false;
+    return DDS::RETCODE_ERROR;
   }
 
   const TypeKind tk = type_->get_kind();
@@ -1382,8 +1382,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
   case TK_STRUCTURE:
     {
       DDS::DynamicTypeMember_var member;
-      const DDS::ReturnCode_t retcode = type_->get_member(member, id);
-      if (retcode != DDS::RETCODE_OK) {
+      if (type_->get_member(member, id) != DDS::RETCODE_OK) {
         if (DCPS::DCPS_debug_level >= 1) {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::get_complex_value -")
                      ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
@@ -1907,7 +1906,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_wstring_values(DDS::WstringSeq& value, Me
 
 DDS::DynamicType_ptr DynamicDataImpl::type()
 {
-  return DDS::DynamicType::_duplicate(type_);
+  return type_.in();
 }
 
 bool DynamicDataImpl::check_xcdr1_mutable(DDS::DynamicType_ptr dt)
