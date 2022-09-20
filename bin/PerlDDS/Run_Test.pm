@@ -680,7 +680,7 @@ sub java_process {
   my $name = shift;
   my $main_class = shift;
   my $params = shift;
-  my @jars = shift;
+  my $jars = shift;
   my $vmargs = shift;
 
   if (defined($self->{processes}->{process}->{$name})) {
@@ -692,7 +692,7 @@ sub java_process {
   $self->_process_common($name, \$params);
 
   $self->{processes}->{process}->{$name}->{process} =
-    $self->_create_java_process($main_class, $params, @jars, $vmargs);
+    $self->_create_java_process($main_class, $params, $jars, $vmargs);
 }
 
 sub _getpid {
@@ -1056,11 +1056,11 @@ sub _create_java_process {
   my $self = shift;
   my $main_class = shift;
   my $params = shift;
-  my @jars = shift;
+  my $jars = shift;
   my $vmargs = shift;
 
   $self->_info("TestFramework::_create_java_process creating executable="
-    . "w/ params=$params jars=@jars vmargs=$vmargs\n");
+    . "w/ params=$params jars=" . join(':', @{$jars}) . " vmargs=$vmargs\n");
   if ($params !~ /-DCPSPendingTimeout /) {
     my $flag = " -DCPSPendingTimeout 3 ";
     my $possible_would_be = ($self->{add_pending_timeout} ? "" : "would be ");
@@ -1071,7 +1071,7 @@ sub _create_java_process {
       . ($self->{add_pending_timeout} ? "0" : "1") . "\n");
     $params .= $flag if $self->{add_pending_timeout};
   }
-  my $proc = PerlDDS::create_java_process($main_class, $params, @jars, $vmargs);
+  my $proc = PerlDDS::create_java_process($main_class, $params, $jars, $vmargs);
   $self->_track_log_files($params, $proc);
   return $proc;
 }
