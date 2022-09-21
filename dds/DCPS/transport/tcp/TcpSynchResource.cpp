@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
 #include "TcpSynchResource.h"
 #include "TcpConnection.h"
 #include "TcpSendStrategy.h"
