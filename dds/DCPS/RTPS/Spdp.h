@@ -362,9 +362,7 @@ public:
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
-  void remove_discovered_participant(const DiscoveredParticipantIter& iter);
-
-  void remove_discovered_participant_i(const DiscoveredParticipantIter& iter);
+  void purge_discovered_participant(const DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
   void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
@@ -670,8 +668,6 @@ private:
   size_t n_participants_in_authentication_;
   void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
-
-  void erase_participant(DiscoveredParticipantIter iter);
 
   friend class ::DDS_TEST;
 };
