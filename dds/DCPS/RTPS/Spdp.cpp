@@ -380,10 +380,7 @@ Spdp::shutdown()
     }
 #endif
 
-    for (DiscoveredParticipantIter part = participants_.begin();
-         part != participants_.end();
-         /* Update in loop*/)
-    {
+    for (DiscoveredParticipantIter part = participants_.begin(); part != participants_.end(); ++part) {
 #ifdef OPENDDS_SECURITY
       DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
       if (sedp_endpoint) {
@@ -396,7 +393,7 @@ Spdp::shutdown()
       }
       purge_handshake_deadlines(part);
 #endif
-      remove_discovered_participant(part++);
+      purge_discovered_participant(part);
     }
   }
 
@@ -872,7 +869,9 @@ Spdp::handle_participant_data(DCPS::MessageId id,
               DCPS::LogGuid(guid).c_str()));
           }
           // FUTURE: This is probably not a good idea since it will just get rediscovered.
-          erase_participant(iter);
+          purge_discovered_participant(iter);
+          participants_.erase(iter);
+          iter = participants_.end();
         } else { // allow_unauthenticated_participants == true
           set_auth_state(iter->second, AUTH_STATE_UNAUTHENTICATED);
           match_unauthenticated(iter);
@@ -896,14 +895,18 @@ Spdp::handle_participant_data(DCPS::MessageId id,
                 ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
                 DCPS::LogGuid(guid).c_str()));
             }
-            erase_participant(iter);
+            purge_discovered_participant(iter);
+            participants_.erase(iter);
+            iter = participants_.end();
           } else { // allow_unauthenticated_participants == true
             set_auth_state(iter->second, AUTH_STATE_UNAUTHENTICATED);
             match_unauthenticated(iter);
           }
         } else if (iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED) {
           if (match_authenticated(guid, iter) == false) {
-            erase_participant(iter);
+            purge_discovered_participant(iter);
+            participants_.erase(iter);
+            iter = participants_.end();
           }
         }
         // otherwise just return, since we're waiting for input to finish authentication
@@ -958,7 +961,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       process_location_updates_i(iter, "dispose/unregister");
 #endif
       if (iter != participants_.end()) {
-        remove_discovered_participant(iter);
+        purge_discovered_participant(iter);
+        participants_.erase(iter);
       }
       return;
     }
@@ -1010,7 +1014,8 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       process_location_updates_i(iter, "reset");
 #endif
       if (iter != participants_.end()) {
-        remove_discovered_participant(iter);
+        purge_discovered_participant(iter);
+        participants_.erase(iter);
       }
       return;
     }
@@ -1777,7 +1782,8 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
           ice_agent_->stop_ice(spdp_endpoint, guid_, pit->first);
         }
         handshake_deadlines_.erase(pos);
-        remove_discovered_participant(pit);
+        purge_discovered_participant(pit);
+        participants_.erase(pit);
       } else {
         purge_handshake_resends(pit);
         set_auth_state(pit->second, AUTH_STATE_UNAUTHENTICATED);
@@ -2141,83 +2147,6 @@ void Spdp::remove_agent_info(const DCPS::RepoId&)
   }
 }
 #endif
-
-void
-Spdp::remove_discovered_participant_i(const DiscoveredParticipantIter& iter)
-{
-
-  remove_lease_expiration_i(iter);
-
-#ifdef OPENDDS_SECURITY
-  if (security_config_) {
-    DDS::Security::SecurityException se = {"", 0, 0};
-    DDS::Security::Authentication_var auth = security_config_->get_authentication();
-    DDS::Security::AccessControl_var access = security_config_->get_access_control();
-
-    DDS::Security::ParticipantCryptoHandle pch =
-      sedp_->get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
-    if (!security_config_->get_crypto_key_factory()->unregister_participant(pch, se)) {
-      if (DCPS::security_debug.auth_warn) {
-        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                   ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
-                   ACE_TEXT("Unable to return crypto handle. ")
-                   ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-                   se.code, se.minor_code, se.message.in()));
-      }
-    }
-    sedp_->get_handle_registry()->erase_remote_participant_crypto_handle(iter->first);
-    sedp_->get_handle_registry()->erase_remote_participant_permissions_handle(iter->first);
-
-    if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
-      if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
-        if (DCPS::security_debug.auth_warn) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
-                     ACE_TEXT("Unable to return identity handle. ")
-                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-                     se.code, se.minor_code, se.message.in()));
-        }
-      }
-    }
-
-    if (iter->second.handshake_handle_ != DDS::HANDLE_NIL) {
-      if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
-        if (DCPS::security_debug.auth_warn) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
-                     ACE_TEXT("Unable to return handshake handle. ")
-                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-                     se.code, se.minor_code, se.message.in()));
-        }
-      }
-    }
-
-    if (iter->second.shared_secret_handle_ != 0) {
-      if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
-        if (DCPS::security_debug.auth_warn) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
-                     ACE_TEXT("Unable to return sharedsecret handle. ")
-                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-                     se.code, se.minor_code, se.message.in()));
-        }
-      }
-    }
-
-    if (iter->second.permissions_handle_ != DDS::HANDLE_NIL) {
-      if (!access->return_permissions_handle(iter->second.permissions_handle_, se)) {
-        if (DCPS::security_debug.auth_warn) {
-          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
-                     ACE_TEXT("Spdp::remove_discovered_participant_i() - ")
-                     ACE_TEXT("Unable to return permissions handle. ")
-                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
-                     se.code, se.minor_code, se.message.in()));
-        }
-      }
-    }
-  }
-#endif
-}
 
 void
 Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
@@ -2845,8 +2774,8 @@ Spdp::update_rtps_relay_application_participant_i(DiscoveredParticipantIter iter
                    ACE_TEXT("(%P|%t) Spdp::update_rtps_relay_application_participant - removing previous RtpsRelay application participant %C\n"),
                    DCPS::LogGuid(pos->first).c_str()));
       }
-      DiscoveredParticipantIter to_erase = pos++;
-      remove_discovered_participant(to_erase);
+      purge_discovered_participant(pos);
+      participants_.erase(pos++);
     } else {
       ++pos;
     }
@@ -3814,7 +3743,7 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
   for (TimeQueue::iterator pos = lease_expirations_.begin(), limit = lease_expirations_.end();
        pos != limit && pos->first <= now;) {
     DiscoveredParticipantIter part = participants_.find(pos->second);
-    // Pre-emptively erase so remove_discovered_participant will not modify lease_expirations_.
+    // Pre-emptively erase so purge_discovered_participant will not modify lease_expirations_.
     lease_expirations_.erase(pos++);
 
     if (part == participants_.end()) {
@@ -3840,7 +3769,8 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
     }
     purge_handshake_deadlines(part);
 #endif
-    remove_discovered_participant(part);
+    purge_discovered_participant(part);
+    participants_.erase(part);
   }
 
   if (!lease_expirations_.empty()) {
@@ -4712,7 +4642,8 @@ void Spdp::ignore_domain_participant(const GUID_t& ignoreId)
 
   DiscoveredParticipantIter iter = participants_.find(ignoreId);
   if (iter != participants_.end()) {
-    remove_discovered_participant(iter);
+    purge_discovered_participant(iter);
+    participants_.erase(iter);
   }
 }
 
@@ -4722,7 +4653,8 @@ void Spdp::remove_domain_participant(const GUID_t& removeId)
 
   DiscoveredParticipantIter iter = participants_.find(removeId);
   if (iter != participants_.end()) {
-    remove_discovered_participant(iter);
+    purge_discovered_participant(iter);
+    participants_.erase(iter);
   }
 }
 
@@ -4754,24 +4686,94 @@ DCPS::TopicStatus Spdp::assert_topic(GUID_t& topicId, const char* topicName,
   return endpoint_manager().assert_topic(topicId, topicName, dataTypeName, qos, hasDcpsKey, topic_callbacks);
 }
 
-void Spdp::remove_discovered_participant(const DiscoveredParticipantIter& iter)
+void Spdp::purge_discovered_participant(const DiscoveredParticipantIter& iter)
 {
   if (iter == participants_.end()) {
     return;
   }
-  bool removed = endpoint_manager().disassociate(iter->second);
-  if (removed) {
-    bit_subscriber_->remove_participant(iter->second.bit_ih_, iter->second.location_ih_);
-    if (DCPS_debug_level > 3) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalParticipant::remove_discovered_participant: "
-        "erasing %C (%B)\n",
-        DCPS::LogGuid(iter->first).c_str(), participants_.size()));
+  endpoint_manager().disassociate(iter->second);
+  bit_subscriber_->remove_participant(iter->second.bit_ih_, iter->second.location_ih_);
+  if (DCPS_debug_level > 3) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) LocalParticipant::purge_discovered_participant: "
+               "erasing %C (%B)\n",
+               DCPS::LogGuid(iter->first).c_str(), participants_.size()));
+  }
+
+  remove_lease_expiration_i(iter);
+
+#ifdef OPENDDS_SECURITY
+  if (security_config_) {
+    DDS::Security::SecurityException se = {"", 0, 0};
+    DDS::Security::Authentication_var auth = security_config_->get_authentication();
+    DDS::Security::AccessControl_var access = security_config_->get_access_control();
+
+    DDS::Security::ParticipantCryptoHandle pch =
+      sedp_->get_handle_registry()->get_remote_participant_crypto_handle(iter->first);
+    if (!security_config_->get_crypto_key_factory()->unregister_participant(pch, se)) {
+      if (DCPS::security_debug.auth_warn) {
+        ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                   ACE_TEXT("Spdp::purge_discovered_participant() - ")
+                   ACE_TEXT("Unable to return crypto handle. ")
+                   ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                   se.code, se.minor_code, se.message.in()));
+      }
+    }
+    sedp_->get_handle_registry()->erase_remote_participant_crypto_handle(iter->first);
+    sedp_->get_handle_registry()->erase_remote_participant_permissions_handle(iter->first);
+
+    if (iter->second.identity_handle_ != DDS::HANDLE_NIL) {
+      if (!auth->return_identity_handle(iter->second.identity_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::purge_discovered_participant() - ")
+                     ACE_TEXT("Unable to return identity handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
     }
 
-    remove_discovered_participant_i(iter);
+    if (iter->second.handshake_handle_ != DDS::HANDLE_NIL) {
+      if (!auth->return_handshake_handle(iter->second.handshake_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::purge_discovered_participant() - ")
+                     ACE_TEXT("Unable to return handshake handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
+    }
 
-    erase_participant(iter);
+    if (iter->second.shared_secret_handle_ != 0) {
+      if (!auth->return_sharedsecret_handle(iter->second.shared_secret_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::purge_discovered_participant() - ")
+                     ACE_TEXT("Unable to return sharedsecret handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
+    }
+
+    if (iter->second.permissions_handle_ != DDS::HANDLE_NIL) {
+      if (!access->return_permissions_handle(iter->second.permissions_handle_, se)) {
+        if (DCPS::security_debug.auth_warn) {
+          ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
+                     ACE_TEXT("Spdp::purge_discovered_participant() - ")
+                     ACE_TEXT("Unable to return permissions handle. ")
+                     ACE_TEXT("Security Exception[%d.%d]: %C\n"),
+                     se.code, se.minor_code, se.message.in()));
+        }
+      }
+    }
   }
+
+  if (iter->second.auth_state_ == AUTH_STATE_HANDSHAKE) {
+    --n_participants_in_authentication_;
+  }
+#endif
 }
 
 #ifdef OPENDDS_SECURITY
@@ -4784,16 +4786,6 @@ void Spdp::set_auth_state(DiscoveredParticipant& dp, AuthState new_state)
   dp.auth_state_ = new_state;
 }
 #endif
-
-void Spdp::erase_participant(DiscoveredParticipantIter iter)
-{
-#ifdef OPENDDS_SECURITY
-  if (iter->second.auth_state_ == AUTH_STATE_HANDSHAKE) {
-    --n_participants_in_authentication_;
-  }
-#endif
-  participants_.erase(iter);
-}
 
 } // namespace RTPS
 } // namespace OpenDDS
