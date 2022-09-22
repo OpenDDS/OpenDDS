@@ -464,23 +464,43 @@ namespace {
 void
 Spdp::enqueue_location_update_i(DiscoveredParticipantIter iter,
                                 DCPS::ParticipantLocation mask,
-                                const ACE_INET_Addr& from)
+                                const ACE_INET_Addr& from,
+                                const char* reason)
 {
   // We have the global lock.
   iter->second.location_updates_.push_back(DiscoveredParticipant::LocationUpdate(mask, from, DCPS::SystemTimePoint::now()));
+
+  if (DCPS::log_bits) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::enqueue_location_update_i: %@ for %C size=%B reason=%C\n", this, LogGuid(iter->first).c_str(), iter->second.location_updates_.size(), reason));
+  }
+
 }
 
-void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, bool force_publish)
+void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, const char* reason, bool force_publish)
 {
   // We have the global lock.
 
-  if (iter == participants_.end() || iter->second.bit_ih_ == DDS::HANDLE_NIL) {
+  if (iter == participants_.end()) {
+    if (DCPS::log_bits) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ iterator invalid, returning\n", this));
+    }
+    return;
+  }
+
+  if (iter->second.bit_ih_ == DDS::HANDLE_NIL) {
     // Do not process updates until the participant exists in the built-in topics.
+    if (DCPS::log_bits) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C does not exist in participant bit, returning\n", this, LogGuid(iter->first).c_str()));
+    }
     return;
   }
 
   DiscoveredParticipant::LocationUpdateList location_updates;
   std::swap(iter->second.location_updates_, location_updates);
+
+  if (DCPS::log_bits) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ %C has %B location update(s) force_publish=%d reason=%C\n", this, LogGuid(iter->first).c_str(), location_updates.size(), force_publish, reason));
+  }
 
   bool published = false;
   for (DiscoveredParticipant::LocationUpdateList::const_iterator pos = location_updates.begin(),
@@ -560,13 +580,26 @@ void Spdp::process_location_updates_i(const DiscoveredParticipantIter& iter, boo
     }
 
     if (old_mask != location_data.location || address_change) {
+      if (DCPS::log_bits) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ publishing %C update\n", this, LogGuid(iter->first).c_str()));
+      }
       publish_location_update_i(iter);
       published = true;
     }
   }
 
   if (force_publish && !published) {
+    if (DCPS::log_bits) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ publishing %C forced\n", this, LogGuid(iter->first).c_str()));
+    }
     publish_location_update_i(iter);
+    published = true;
+  }
+
+  if (!published && DCPS::log_bits) {
+    if (DCPS::log_bits) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::process_location_updates_i: %@ not published\n", this, LogGuid(iter->first).c_str()));
+    }
   }
 }
 
@@ -574,6 +607,9 @@ void
 Spdp::publish_location_update_i(const DiscoveredParticipantIter& iter)
 {
   iter->second.location_ih_ = bit_subscriber_->add_participant_location(iter->second.location_data_, DDS::NEW_VIEW_STATE);
+  if (DCPS::log_bits) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: Spdp::publish_location_update_i: %@ participant %C has participant location handle %d\n", this, LogGuid(iter->first).c_str(), iter->second.location_ih_));
+  }
 }
 #endif
 
@@ -806,7 +842,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #ifndef DDS_HAS_MINIMUM_BIT
     if (!from_sedp) {
-      enqueue_location_update_i(iter, location_mask, from);
+      enqueue_location_update_i(iter, location_mask, from, "new participant");
     }
 #endif
 
@@ -887,7 +923,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #ifndef DDS_HAS_MINIMUM_BIT
     if (!from_sedp) {
-      enqueue_location_update_i(iter, location_mask, from);
+      enqueue_location_update_i(iter, location_mask, from, "existing participant");
     }
 #endif
 #ifdef OPENDDS_SECURITY
@@ -899,7 +935,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         iter->second.last_recv_address_ = from;
       }
 #ifndef DDS_HAS_MINIMUM_BIT
-      process_location_updates_i(iter);
+      process_location_updates_i(iter, "non-secure liveliness");
 #endif
       return;
     }
@@ -919,7 +955,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       purge_handshake_deadlines(iter);
 #endif
 #ifndef DDS_HAS_MINIMUM_BIT
-      process_location_updates_i(iter);
+      process_location_updates_i(iter, "dispose/unregister");
 #endif
       if (iter != participants_.end()) {
         remove_discovered_participant(iter);
@@ -963,7 +999,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
        * the first data on the participant. Readers might have been ignoring
        * location samples on the participant until now.
        */
-      process_location_updates_i(iter, secure_part_user_data());
+      process_location_updates_i(iter, "valid SPDP", secure_part_user_data());
 #endif
     // Else a reset has occurred and check if we should remove the participant
     } else if (iter->second.seq_reset_count_ >= config_->max_spdp_sequence_msg_reset_check()) {
@@ -971,7 +1007,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
       purge_handshake_deadlines(iter);
 #endif
 #ifndef DDS_HAS_MINIMUM_BIT
-      process_location_updates_i(iter);
+      process_location_updates_i(iter, "reset");
 #endif
       if (iter != participants_.end()) {
         remove_discovered_participant(iter);
@@ -982,7 +1018,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #ifndef DDS_HAS_MINIMUM_BIT
   if (iter != participants_.end()) {
-    process_location_updates_i(iter);
+    process_location_updates_i(iter, "catch all");
   }
 #endif
 }
@@ -1089,7 +1125,7 @@ Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
     dp_iter->second.bit_ih_ = bit_subscriber_->add_participant(partBitData(dp_iter->second.pdata_), DDS::NEW_VIEW_STATE);
   }
 
-  process_location_updates_i(dp_iter);
+  process_location_updates_i(dp_iter, "match_unauthenticated");
 #else
   ACE_UNUSED_ARG(dp_iter);
 #endif /* DDS_HAS_MINIMUM_BIT */
@@ -2086,7 +2122,7 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   sedp_->process_association_records_i(iter->second);
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  process_location_updates_i(iter);
+  process_location_updates_i(iter, "match_authenticated");
 #endif
   return true;
 }
@@ -3420,8 +3456,8 @@ Spdp::IceConnect::execute()
   for (ICE::GuidSetType::const_iterator pos = guids_.begin(), limit = guids_.end(); pos != limit; ++pos) {
     DiscoveredParticipantIter iter = spdp_->participants_.find(pos->remote);
     if (iter != spdp_->participants_.end()) {
-      spdp_->enqueue_location_update_i(iter, compute_ice_location_mask(addr_), connect_ ? addr_ : ACE_INET_Addr());
-      spdp_->process_location_updates_i(iter);
+      spdp_->enqueue_location_update_i(iter, compute_ice_location_mask(addr_), connect_ ? addr_ : ACE_INET_Addr(), "ICE connect");
+      spdp_->process_location_updates_i(iter, "ICE connect");
     }
   }
 }
@@ -4464,8 +4500,8 @@ void Spdp::process_participant_ice(const ParameterList& plist,
       ACE_GUARD(ACE_Thread_Mutex, g, lock_);
       DiscoveredParticipantIter iter = participants_.find(guid);
       if (iter != participants_.end()) {
-        enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr());
-        process_location_updates_i(iter);
+        enqueue_location_update_i(iter, DCPS::LOCATION_ICE, ACE_INET_Addr(), "stop ice");
+        process_location_updates_i(iter, "stop ice");
       }
 #endif
     }
@@ -4524,8 +4560,8 @@ Spdp::rtps_relay_only_now(bool flag)
     for (DiscoveredParticipantIter iter = participants_.begin();
          iter != participants_.end();
          ++iter) {
-      enqueue_location_update_i(iter, mask, ACE_INET_Addr());
-      process_location_updates_i(iter);
+      enqueue_location_update_i(iter, mask, ACE_INET_Addr(), "rtps_relay_only_now");
+      process_location_updates_i(iter, "rtps_relay_only_now");
     }
 #endif
   } else {
@@ -4576,8 +4612,8 @@ Spdp::use_rtps_relay_now(bool f)
     for (DiscoveredParticipantIter iter = participants_.begin();
          iter != participants_.end();
          ++iter) {
-      enqueue_location_update_i(iter, mask, ACE_INET_Addr());
-      process_location_updates_i(iter);
+      enqueue_location_update_i(iter, mask, ACE_INET_Addr(), "use_rtps_relay_now");
+      process_location_updates_i(iter, "use_rtps_relay_now");
     }
 #endif
 
@@ -4632,8 +4668,8 @@ Spdp::use_ice_now(bool flag)
     for (DiscoveredParticipantIter part = participants_.begin();
          part != participants_.end();
          ++part) {
-      enqueue_location_update_i(part, mask, ACE_INET_Addr());
-      process_location_updates_i(part);
+      enqueue_location_update_i(part, mask, ACE_INET_Addr(), "use_ice_now");
+      process_location_updates_i(part, "use_ice_now");
     }
 #endif
   }

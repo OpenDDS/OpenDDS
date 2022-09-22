@@ -11,6 +11,7 @@
 
 #include "BuiltInTopicDataReaderImpls.h"
 #include "BitPubListenerImpl.h"
+#include "Logging.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -294,22 +295,37 @@ DDS::InstanceHandle_t BitSubscriber::add_i(const char* topic_name,
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, DDS::HANDLE_NIL);
 
   if (!bit_subscriber_) {
+    if (log_bits) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: BitSubscriber::add_i: %@ bit_subscriber_ is null for topic %C, returning nil\n", this, topic_name));
+    }
     return DDS::HANDLE_NIL;
   }
 
   DDS::DataReader_var d = bit_subscriber_->lookup_datareader(topic_name);
   if (!d) {
+    if (log_bits) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: BitSubscriber::add_i: %@ DataReader is null for topic %C, returning nil\n", this, topic_name));
+    }
     return DDS::HANDLE_NIL;
   }
 
   DataReaderImpl* bit = dynamic_cast<DataReaderImpl*>(d.in());
   if (!bit) {
+    if (log_bits) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: BitSubscriber::add_i: %@ dynamic_cast failed for topic %C, returning nil\n", this, topic_name));
+    }
     return DDS::HANDLE_NIL;
   }
 
-  return bit->store_synthetic_data(sample, view_state);
+  const DDS::InstanceHandle_t ih = bit->store_synthetic_data(sample, view_state);
+  if (log_bits) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: BitSubscriber::add_i: %@ returning instance handle %d for topic %C\n", this, ih, topic_name));
+  }
+  return ih;
 #else
-  ACE_UNUSED_ARG(topic_name);
+  if (log_bits) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) DEBUG: BitSubscriber::add_i: %@ DDS_HAS_MINIMUM_BIT is not defined, returning nil\n", this, topic_name));
+  }
   ACE_UNUSED_ARG(sample);
   ACE_UNUSED_ARG(view_state);
   return DDS::HANDLE_NIL;
