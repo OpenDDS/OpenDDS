@@ -58,6 +58,11 @@ public:
   DDS::Security::ParticipantCryptoHandle get_remote_participant_crypto_handle(const DCPS::RepoId& id) const;
   void erase_remote_participant_crypto_handle(const DCPS::RepoId& id);
 
+  void insert_remote_participant_permissions_handle(const DCPS::RepoId& id,
+                                                    DDS::Security::PermissionsHandle handle);
+  DDS::Security::PermissionsHandle get_remote_participant_permissions_handle(const DCPS::RepoId& id) const;
+  void erase_remote_participant_permissions_handle(const DCPS::RepoId& id);
+
   void insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
                                               DDS::Security::DatareaderCryptoHandle handle,
                                               const DDS::Security::EndpointSecurityAttributes& attributes);
@@ -77,6 +82,8 @@ public:
 private:
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::ParticipantCryptoHandle, DCPS::GUID_tKeyLessThan)
     ParticipantCryptoHandleMap;
+  typedef OPENDDS_MAP_CMP(DCPS::RepoId, DDS::Security::PermissionsHandle, DCPS::GUID_tKeyLessThan)
+    PermissionsHandleMap;
   typedef std::pair<DDS::Security::DatareaderCryptoHandle, DDS::Security::EndpointSecurityAttributes> P1;
   typedef OPENDDS_MAP_CMP(DCPS::RepoId, P1, DCPS::GUID_tKeyLessThan)
     DatareaderCryptoHandleMap;
@@ -88,6 +95,7 @@ private:
 
   mutable ACE_Thread_Mutex mutex_;
   ParticipantCryptoHandleMap remote_participant_crypto_handles_;
+  PermissionsHandleMap remote_participant_permissions_handles_;
 
   DatareaderCryptoHandleMap local_datareader_crypto_handles_;
   DatawriterCryptoHandleMap local_datawriter_crypto_handles_;

@@ -263,6 +263,23 @@ TEST(dds_DCPS_ServiceEventDispatcher, RecursiveDispatchDelta_IS)
   EXPECT_GE(test_event->call_count(), 100000u);
 }
 
+TEST(dds_DCPS_ServiceEventDispatcher, TestShutdown)
+{
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
+
+  dispatcher->dispatch(test_event);
+
+  test_event->wait(1u);
+  dispatcher->shutdown();
+
+  EXPECT_FALSE(dispatcher->dispatch(test_event));
+  EXPECT_EQ(-1, dispatcher->schedule(test_event, OpenDDS::DCPS::MonotonicTimePoint::now()));
+  EXPECT_EQ(0u, dispatcher->cancel(1));
+
+  EXPECT_EQ(test_event->call_count(), 1u);
+}
+
 TEST(dds_DCPS_ServiceEventDispatcher, TimedDispatch)
 {
   OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();

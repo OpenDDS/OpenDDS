@@ -429,7 +429,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       if (total_worker_reports != allocated_scenario.expected_worker_reports) {
         std::string log_msg = "ERROR: Only received " + std::to_string(total_worker_reports) +
-          " out of " + std::to_string(allocated_scenario.expected_worker_reports) + " valid reports!\n";
+          " out of " + std::to_string(allocated_scenario.expected_worker_reports) + " expected worker reports!\n";
         result_file << log_msg;
         std::cerr << log_msg;
         result = EXIT_FAILURE;

@@ -393,6 +393,7 @@ public:
 #endif
 
   virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
+                                                DDS::InstanceHandle_t publication_handle,
                                                 SubscriptionInstance_rch& instance,
                                                 bool& is_new_instance,
                                                 bool& filtered,
@@ -400,6 +401,7 @@ public:
                                                 bool full_copy) = 0;
 
   virtual void dispose_unregister(const ReceivedDataSample& sample,
+                                  DDS::InstanceHandle_t publication_handle,
                                   SubscriptionInstance_rch& instance);
 
   void process_latency(const ReceivedDataSample& sample);
@@ -565,8 +567,17 @@ public:
                           const SystemTimePoint& timestamp = SystemTimePoint::now(),
                           const GUID_t& guid = GUID_UNKNOWN)
   {
+    DDS::InstanceHandle_t publication_handle = DDS::HANDLE_NIL;
+    {
+      ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, publication_handle_lock_);
+      RepoIdToHandleMap::const_iterator pos = publication_id_to_handle_map_.find(guid);
+      if (pos != publication_id_to_handle_map_.end()) {
+        publication_handle = pos->second;
+      }
+    }
+
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
-    set_instance_state_i(instance, state, timestamp, guid);
+    set_instance_state_i(instance, publication_handle, state, timestamp, guid);
   }
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
@@ -625,6 +636,11 @@ public:
   }
 
   void return_handle(DDS::InstanceHandle_t handle);
+
+  const ValueDispatcher* get_value_dispatcher() const
+  {
+    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+  }
 
 protected:
 
@@ -694,8 +710,6 @@ protected:
 
   // type specific DataReader's part of enable.
   virtual DDS::ReturnCode_t enable_specific() = 0;
-
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
 
   void sample_info(DDS::SampleInfo & sample_info,
                    const ReceivedDataElement *ptr);
@@ -771,6 +785,7 @@ protected:
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
+  RepoId topic_id_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
@@ -800,6 +815,7 @@ protected:
 private:
 
   virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
+                                    DDS::InstanceHandle_t publication_handle,
                                     DDS::InstanceStateKind state,
                                     const SystemTimePoint& timestamp,
                                     const GUID_t& guid) = 0;
@@ -810,7 +826,8 @@ private:
   void lookup_instance_handles(const WriterIdSeq& ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  void instances_liveliness_update(const PublicationId& writer);
+  void instances_liveliness_update(const PublicationId& writer,
+                                   DDS::InstanceHandle_t publication_handle);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool verify_coherent_changes_completion(WriterInfo* writer);
@@ -869,10 +886,9 @@ private:
 
   //Used to protect access to id_to_handle_map_
   ACE_Recursive_Thread_Mutex   publication_handle_lock_;
-  Reverse_Lock_t reverse_pub_handle_lock_;
 
   typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
-  RepoIdToHandleMap            id_to_handle_map_;
+  RepoIdToHandleMap            publication_id_to_handle_map_;
 
   // Status conditions.
   DDS::LivelinessChangedStatus         liveliness_changed_status_;
@@ -1082,6 +1098,12 @@ public:
     const bool set_reader_status_;
     const bool set_subscriber_status_;
   };
+
+#if defined(OPENDDS_SECURITY)
+protected:
+  Security::SecurityConfig_rch security_config_;
+  DDS::DynamicType_var dynamic_type_;
+#endif
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

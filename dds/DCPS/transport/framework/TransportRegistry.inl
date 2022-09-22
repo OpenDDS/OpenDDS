@@ -69,15 +69,20 @@ ACE_INLINE
 void
 TransportRegistry::remove_inst(const OPENDDS_STRING& inst_name)
 {
-  GuardType guard(this->lock_);
-  InstMap::iterator iter = inst_map_.find(inst_name);
-  if (iter == inst_map_.end()) {
-    return;
+  TransportInst_rch inst;
+  {
+    GuardType guard(this->lock_);
+    InstMap::iterator iter = inst_map_.find(inst_name);
+    if (iter == inst_map_.end()) {
+      return;
+    }
+    inst = iter->second;
+    inst_map_.erase(iter);
   }
-  if (iter->second) {
-    iter->second->shutdown();
+
+  if (inst) {
+    inst->shutdown();
   }
-  inst_map_.erase(iter);
 }
 
 ACE_INLINE

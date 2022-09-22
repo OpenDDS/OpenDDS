@@ -18,8 +18,8 @@ namespace DCPS {
 
 DWMonitorImpl::DWMonitorImpl(DataWriterImpl* dw,
               OpenDDS::DCPS::DataWriterReportDataWriter_ptr dw_writer)
-  : dw_(dw),
-    dw_writer_(DataWriterReportDataWriter::_duplicate(dw_writer))
+  : dw_(dw)
+  , dw_writer_(DataWriterReportDataWriter::_duplicate(dw_writer))
 {
 }
 
@@ -29,13 +29,13 @@ DWMonitorImpl::~DWMonitorImpl()
 
 void
 DWMonitorImpl::report() {
-  if (!CORBA::is_nil(this->dw_writer_.in())) {
+  if (!CORBA::is_nil(dw_writer_.in())) {
     DataWriterReport report;
-    report.dp_id = this->dw_->get_dp_id();
-    DDS::Publisher_var pub = this->dw_->get_publisher();
+    report.dp_id = dw_->get_dp_id();
+    DDS::Publisher_var pub = dw_->get_publisher();
     report.pub_handle = pub->get_instance_handle();
-    report.dw_id   = this->dw_->get_repo_id();
-    DDS::Topic_var topic = this->dw_->get_topic();
+    report.dw_id = dw_->get_repo_id();
+    DDS::Topic_var topic = dw_->get_topic();
     OpenDDS::DCPS::TopicImpl* ti = dynamic_cast<TopicImpl*>(topic.in());
     if (!ti) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DWMonitorImpl::report():")
@@ -44,7 +44,7 @@ DWMonitorImpl::report() {
     }
     report.topic_id = ti->get_id();
     DataWriterImpl::InstanceHandleVec instances;
-    this->dw_->get_instance_handles(instances);
+    dw_->get_instance_handles(instances);
     CORBA::ULong length = 0;
     report.instances.length(static_cast<CORBA::ULong>(instances.size()));
     for (DataWriterImpl::InstanceHandleVec::iterator iter = instances.begin();
@@ -53,7 +53,7 @@ DWMonitorImpl::report() {
       report.instances[length++] = *iter;
     }
     DCPS::RepoIdSet readers;
-    this->dw_->get_readers(readers);
+    dw_->get_readers(readers);
     length = 0;
     report.associations.length(static_cast<CORBA::ULong>(readers.size()));
     for (DCPS::RepoIdSet::iterator iter = readers.begin();
@@ -62,10 +62,9 @@ DWMonitorImpl::report() {
       report.associations[length].dr_id = *iter;
       length++;
     }
-    this->dw_writer_->write(report, DDS::HANDLE_NIL);
+    dw_writer_->write(report, DDS::HANDLE_NIL);
   }
 }
-
 
 } // namespace DCPS
 } // namespace OpenDDS

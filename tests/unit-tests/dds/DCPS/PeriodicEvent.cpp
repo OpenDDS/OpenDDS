@@ -12,11 +12,9 @@
 
 #include <gtest/gtest.h>
 
-namespace
-{
+namespace {
 
-class TestEventBase : public OpenDDS::DCPS::EventBase
-{
+class TestEventBase : public OpenDDS::DCPS::EventBase {
 public:
   TestEventBase() : cv_(mutex_), call_count_(0) {}
 
@@ -49,8 +47,7 @@ private:
   size_t call_count_;
 };
 
-struct SimpleTestEvent : public TestEventBase
-{
+struct SimpleTestEvent : public TestEventBase {
   SimpleTestEvent() {}
   void handle_event() { increment_call_count(); }
 };

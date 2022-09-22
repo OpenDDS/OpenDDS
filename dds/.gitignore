@@ -197,6 +197,17 @@
 /DdsDcpsTypeSupportExtS.h
 /DdsDcpsTypeSupportExtS.inl
 /DdsDcps_lem_stub_export.h
+/DdsDynamicDataC.cpp
+/DdsDynamicDataC.h
+/DdsDynamicDataC.inl
+/DdsDynamicDataS.h
+/DdsDynamicDataSeqC.cpp
+/DdsDynamicDataSeqC.h
+/DdsDynamicDataSeqC.inl
+/DdsDynamicDataSeqS.h
+/DdsDynamicDataSeqTypeSupport.idl
+/DdsDynamicDataSeqTypeSupportImpl.cpp
+/DdsDynamicDataSeqTypeSupportImpl.h
 /DdsSecurityCoreC.cpp
 /DdsSecurityCoreC.h
 /DdsSecurityCoreC.inl

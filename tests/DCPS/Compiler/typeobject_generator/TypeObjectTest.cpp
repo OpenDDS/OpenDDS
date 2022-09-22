@@ -32,7 +32,7 @@ void verify_union_disc(const TypeIdentifier& ti, const TypeObject& to)
     }
 
   } else {
-    EXPECT_EQ(to.complete.enumerated_type.header.detail.type_name, String("::UnionDisc"));
+    EXPECT_EQ(to.complete.enumerated_type.header.detail.type_name, String("UnionDisc"));
     const CompleteEnumeratedLiteralSeq& literal_seq = to.complete.enumerated_type.literal_seq;
     for (unsigned i = 0; i < literal_seq.length(); ++i) {
       verify_common_enum_literal(literal_seq[i].common, i);
@@ -118,7 +118,7 @@ void verify_some_union(const TypeIdentifier& ti, const TypeObject& to, const Typ
       verify_some_union_member(member_seq[i].common, &member_seq[i].detail, 0, alias_member, struct_member, double_member);
     }
   } else {
-    EXPECT_EQ(to.complete.union_type.header.detail.type_name, "::SomeUnion");
+    EXPECT_EQ(to.complete.union_type.header.detail.type_name, "SomeUnion");
     EXPECT_GT(to.complete.union_type.discriminator.common.member_flags | IS_KEY, 0);
     EXPECT_TRUE(to.complete.union_type.discriminator.common.type_id == disc_member);
 
@@ -176,7 +176,7 @@ void verify_nested_struct(const TypeIdentifier& ti, const TypeObject& to)
     }
   } else {
     EXPECT_EQ(to.complete.struct_type.header.base_type.kind(), TK_NONE);
-    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "::NestedStruct");
+    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "NestedStruct");
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
     EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(3));
 
@@ -208,7 +208,7 @@ void verify_long10seq(const TypeIdentifier& ti, const TypeObject& to)
   EXPECT_EQ(base_type.seq_sdefn().element_identifier->kind(), TK_INT32);
 
   if (ti.kind() == EK_COMPLETE) {
-    EXPECT_EQ(to.complete.alias_type.header.detail.type_name, "::Long10Seq");
+    EXPECT_EQ(to.complete.alias_type.header.detail.type_name, "Long10Seq");
   }
 
   EXPECT_EQ(makeTypeIdentifier(to), ti);
@@ -298,32 +298,32 @@ IndexMap compute_scc15_index_map(const TypeMap& com_scc15)
     const ACE_CDR::Long index = it->first.sc_component_id().scc_index;
     if (tk == TK_ALIAS) {
       const String type_name = it->second.complete.alias_type.header.detail.type_name;
-      EXPECT_TRUE(type_name == "::ASequence" || type_name == "::BSeq" ||
-                  type_name == "::CSeq" || type_name == "::DSeq" || type_name == "::ESeq");
+      EXPECT_TRUE(type_name == "ASequence" || type_name == "BSeq" ||
+                  type_name == "CSeq" || type_name == "DSeq" || type_name == "ESeq");
 
-      if (type_name == "::ASequence") {
+      if (type_name == "ASequence") {
         result[index] = A_SEQ_ALIAS;
-      } else if (type_name == "::BSeq") {
+      } else if (type_name == "BSeq") {
         result[index] = B_SEQ_ALIAS;
-      } else if (type_name == "::CSeq") {
+      } else if (type_name == "CSeq") {
         result[index] = C_SEQ_ALIAS;
-      } else if (type_name == "::DSeq") {
+      } else if (type_name == "DSeq") {
         result[index] = D_SEQ_ALIAS;
       } else {
         result[index] = E_SEQ_ALIAS;
       }
     } else if (tk == TK_STRUCTURE) {
       const String type_name = it->second.complete.struct_type.header.detail.type_name;
-      EXPECT_TRUE(type_name == "::A" || type_name == "::B" || type_name == "::C" ||
-                  type_name == "::D" || type_name == "::E");
+      EXPECT_TRUE(type_name == "A" || type_name == "B" || type_name == "C" ||
+                  type_name == "D" || type_name == "E");
 
-      if (type_name == "::A") {
+      if (type_name == "A") {
         result[index] = A;
-      } else if (type_name == "::B") {
+      } else if (type_name == "B") {
         result[index] = B;
-      } else if (type_name == "::C") {
+      } else if (type_name == "C") {
         result[index] = C;
-      } else if (type_name == "::D") {
+      } else if (type_name == "D") {
         result[index] = D;
       } else {
         result[index] = E;
@@ -341,13 +341,13 @@ IndexMap compute_scc15_index_map(const TypeMap& com_scc15)
       EXPECT_EQ(elem_pos->second.complete.kind, TK_STRUCTURE);
       const String elem_type_name = elem_pos->second.complete.struct_type.header.detail.type_name;
 
-      if (elem_type_name == "::A") {
+      if (elem_type_name == "A") {
         result[index] = A_SEQ;
-      } else if (elem_type_name == "::B") {
+      } else if (elem_type_name == "B") {
         result[index] = B_SEQ;
-      } else if (elem_type_name == "::C") {
+      } else if (elem_type_name == "C") {
         result[index] = C_SEQ;
-      } else if (elem_type_name == "::D") {
+      } else if (elem_type_name == "D") {
         result[index] = D_SEQ;
       } else {
         result[index] = E_SEQ;
@@ -367,28 +367,28 @@ IndexMap compute_scc12_index_map(const TypeMap& com_scc12)
     const ACE_CDR::Long index = it->first.sc_component_id().scc_index;
     if (tk == TK_ALIAS) {
       const String type_name = it->second.complete.alias_type.header.detail.type_name;
-      EXPECT_TRUE(type_name == "::FSeq" || type_name == "::GSeq" ||
-                  type_name == "::HSeq" || type_name == "::ISeq");
+      EXPECT_TRUE(type_name == "FSeq" || type_name == "GSeq" ||
+                  type_name == "HSeq" || type_name == "ISeq");
 
-      if (type_name == "::FSeq") {
+      if (type_name == "FSeq") {
         result[index] = F_SEQ_ALIAS;
-      } else if (type_name == "::GSeq") {
+      } else if (type_name == "GSeq") {
         result[index] = G_SEQ_ALIAS;
-      } else if (type_name == "::HSeq") {
+      } else if (type_name == "HSeq") {
         result[index] = H_SEQ_ALIAS;
       } else {
         result[index] = I_SEQ_ALIAS;
       }
     } else if (tk == TK_STRUCTURE) {
       const String type_name = it->second.complete.struct_type.header.detail.type_name;
-      EXPECT_TRUE(type_name == "::F" || type_name == "::G" ||
-                  type_name == "::H" || type_name == "::I");
+      EXPECT_TRUE(type_name == "F" || type_name == "G" ||
+                  type_name == "H" || type_name == "I");
 
-      if (type_name == "::F") {
+      if (type_name == "F") {
         result[index] = F;
-      } else if (type_name == "::G") {
+      } else if (type_name == "G") {
         result[index] = G;
-      } else if (type_name == "::H") {
+      } else if (type_name == "H") {
         result[index] = H;
       } else {
         result[index] = I;
@@ -406,11 +406,11 @@ IndexMap compute_scc12_index_map(const TypeMap& com_scc12)
       EXPECT_EQ(elem_pos->second.complete.kind, TK_STRUCTURE);
       const String elem_type_name = elem_pos->second.complete.struct_type.header.detail.type_name;
 
-      if (elem_type_name == "::F") {
+      if (elem_type_name == "F") {
         result[index] = F_SEQ;
-      } else if (elem_type_name == "::G") {
+      } else if (elem_type_name == "G") {
         result[index] = G_SEQ;
-      } else if (elem_type_name == "::H") {
+      } else if (elem_type_name == "H") {
         result[index] = H_SEQ;
       } else {
         result[index] = I_SEQ;
@@ -469,7 +469,7 @@ void check_struct_a(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
     }
   } else {
     EXPECT_EQ(to.complete.struct_type.header.base_type, TypeIdentifier(TK_NONE));
-    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "::A");
+    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "A");
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
     EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(2));
 
@@ -546,7 +546,7 @@ void check_struct_b(const TypeMap& scc15, const TypeMap& other,
     }
   } else {
     EXPECT_EQ(to.complete.struct_type.header.base_type, TypeIdentifier(TK_NONE));
-    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "::B");
+    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "B");
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
     EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(3));
 
@@ -615,7 +615,7 @@ void check_struct_c(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
     }
   } else {
     EXPECT_EQ(to.complete.struct_type.header.base_type, TypeIdentifier(TK_NONE));
-    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "::C");
+    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "C");
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
     EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(2));
 
@@ -683,7 +683,7 @@ void check_struct_d(const TypeMap& scc15, const TypeObject& to, const IndexMap& 
     }
   } else {
     EXPECT_EQ(to.complete.struct_type.header.base_type, TypeIdentifier(TK_NONE));
-    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "::D");
+    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "D");
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
     EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(2));
 
@@ -749,7 +749,7 @@ void check_struct_e(const TypeMap& scc15, const TypeMap& scc12,
     }
   } else {
     EXPECT_EQ(to.complete.struct_type.header.base_type, TypeIdentifier(TK_NONE));
-    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "::E");
+    EXPECT_EQ(to.complete.struct_type.header.detail.type_name, "E");
     const CompleteStructMemberSeq& member_seq = to.complete.struct_type.member_seq;
     EXPECT_EQ(member_seq.length(), static_cast<ACE_CDR::ULong>(2));
 
@@ -838,15 +838,15 @@ void check_scc15_map(const TypeMap& scc15, const TypeMap& scc12, const TypeMap& 
     } else if (index == to_index[E_SEQ]) {
       check_sequence(scc15, it->second, scc15_index_map, E, ek);
     } else if (index == to_index[A_SEQ_ALIAS]) {
-      check_alias(scc15, it->second, scc15_index_map, "::ASequence", A_SEQ, ek);
+      check_alias(scc15, it->second, scc15_index_map, "ASequence", A_SEQ, ek);
     } else if (index == to_index[B_SEQ_ALIAS]) {
-      check_alias(scc15, it->second, scc15_index_map, "::BSeq", B_SEQ, ek);
+      check_alias(scc15, it->second, scc15_index_map, "BSeq", B_SEQ, ek);
     } else if (index == to_index[C_SEQ_ALIAS]) {
-      check_alias(scc15, it->second, scc15_index_map, "::CSeq", C_SEQ, ek);
+      check_alias(scc15, it->second, scc15_index_map, "CSeq", C_SEQ, ek);
     } else if (index == to_index[D_SEQ_ALIAS]) {
-      check_alias(scc15, it->second, scc15_index_map, "::DSeq", D_SEQ, ek);
+      check_alias(scc15, it->second, scc15_index_map, "DSeq", D_SEQ, ek);
     } else if (index == to_index[E_SEQ_ALIAS]) {
-      check_alias(scc15, it->second, scc15_index_map, "::ESeq", E_SEQ, ek);
+      check_alias(scc15, it->second, scc15_index_map, "ESeq", E_SEQ, ek);
     }
   }
 }

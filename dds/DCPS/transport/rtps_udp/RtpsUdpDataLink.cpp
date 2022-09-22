@@ -84,6 +84,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , db_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
+  , db_lock_pool_(new DataBlockLockPool(static_cast<unsigned long>(TheServiceParticipant->n_chunks())))
   , multi_buff_(this, config.nak_depth_)
   , flush_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::flush_send_queue)))
   , best_effort_heartbeat_count_(0)
@@ -1031,7 +1032,7 @@ RtpsUdpDataLink::alloc_msgblock(size_t size, ACE_Allocator* data_allocator) {
                       0, // cont
                       0, // data
                       data_allocator,
-                      0, // locking_strategy
+                      db_lock_pool_->get_lock(), // locking_strategy
                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                       ACE_Time_Value::zero,
                       ACE_Time_Value::max_time,
@@ -1517,7 +1518,7 @@ RtpsUdpDataLink::RtpsWriter::add_gap_submsg_i(RTPS::SubmessageSeq& msg,
   msg[idx].gap_sm(gap);
 }
 
-void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddress& addr)
+void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddress& addr, const MonotonicTimePoint& now)
 {
   if (addr == config().rtps_relay_address()) {
     return;
@@ -1528,7 +1529,6 @@ void RtpsUdpDataLink::update_last_recv_addr(const RepoId& src, const NetworkAddr
     ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
     const RemoteInfoMap::iterator pos = locators_.find(src);
     if (pos != locators_.end()) {
-      const MonotonicTimePoint now = MonotonicTimePoint::now();
       const bool expired = config().receive_address_duration_ < (MonotonicTimePoint::now() - pos->second.last_recv_time_);
       const bool allow_update = expired ||
                                 pos->second.last_recv_addr_ == addr ||
@@ -1843,7 +1843,7 @@ RtpsUdpDataLink::received(const RTPS::HeartBeatSubmessage& heartbeat,
   const RepoId src = make_id(src_prefix, heartbeat.writerId);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
 
-  update_last_recv_addr(src, remote_addr);
+  update_last_recv_addr(src, remote_addr, now);
 
   MetaSubmessageVec meta_submessages;
   OPENDDS_VECTOR(InterestingRemote) callbacks;
@@ -2996,12 +2996,11 @@ RtpsUdpDataLink::received(const RTPS::AckNackSubmessage& acknack,
 {
   // local side is DW
   const RepoId local = make_id(local_prefix_, acknack.writerId); // can't be ENTITYID_UNKNOWN
-
   const RepoId remote = make_id(src_prefix, acknack.readerId);
-
-  update_last_recv_addr(remote, remote_addr);
-
   const MonotonicTimePoint now = MonotonicTimePoint::now();
+
+  update_last_recv_addr(remote, remote_addr, now);
+
   OPENDDS_VECTOR(DiscoveryListener*) callbacks;
 
   {

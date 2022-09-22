@@ -198,14 +198,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, DDS::HANDLE_NIL);
+
   ACIdentityMap::iterator iter = local_identity_map_.find(local_identity_handle);
 
   if (iter == local_identity_map_.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: No matching local identity handle present");
     return DDS::HANDLE_NIL;
   }
-
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, DDS::HANDLE_NIL);
 
   ACPermsMap::iterator piter = local_ac_perms_.find(iter->second);
 
@@ -586,7 +586,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_register_instance(
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataWriter_ptr writer,
-  ::DDS::Security::DynamicData_ptr key,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
@@ -605,7 +605,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_dispose_instance(
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataWriter_ptr writer,
-  ::DDS::Security::DynamicData_ptr key,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
@@ -993,13 +993,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataReader_ptr reader,
   ::DDS::InstanceHandle_t publication_handle,
-  ::DDS::Security::DynamicData_ptr key,
-  ::DDS::InstanceHandle_t instance_handle,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle ||
-      DDS::HANDLE_NIL == publication_handle ||
-      DDS::HANDLE_NIL == instance_handle) {
+      DDS::HANDLE_NIL == publication_handle) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid handle");
   }
   if (0 == reader) {
@@ -1016,7 +1014,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataReader_ptr reader,
   ::DDS::InstanceHandle_t publication_handle,
-  ::DDS::Security::DynamicData_ptr key,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle ||
@@ -1721,6 +1719,19 @@ AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTi
     const TimeDuration duration = std::min(TimeDuration(expiration_to_handle_.begin()->first - cur_utc_time), MAX_DURATION);
     schedule(duration);
   }
+}
+
+SSL::SubjectName
+AccessControlBuiltInImpl::get_subject_name(DDS::Security::PermissionsHandle permissions_handle) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, SSL::SubjectName());
+
+  ACPermsMap::const_iterator pos = local_ac_perms_.find(permissions_handle);
+  if (pos != local_ac_perms_.end()) {
+    return pos->second.subject;
+  }
+
+  return SSL::SubjectName();
 }
 
 } // namespace Security

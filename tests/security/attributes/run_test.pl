@@ -171,9 +171,9 @@ if ($scenario) {
     @pub_perm_files = ("permissions/permissions_test_participant_01_join_signed.p7s");
     # doesn't have permission to read
     @sub_perm_files = ("permissions/permissions_test_participant_02_join_signed.p7s");
-    @topic_names = ("OD_OL_OA_OM_OD");
-    $pub_expect = "~16";
-    $sub_expect = "~27";
+    @topic_names = ("OD_OL_RWA_OM_OD");
+    $pub_expect = "~13";
+    $sub_expect = "~23";
   } elsif ($scenario eq "SC1_sec_on_success") {
     #SC1 (join controlled domain) : valid participants join and send
     @gov_keys = ("PU_PA_ED_EL_NR");

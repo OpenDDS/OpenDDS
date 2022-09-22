@@ -54,7 +54,7 @@ TEST(dds_DCPS_JsonValueWriter, begin_struct_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("aField", false));
   EXPECT_STREQ(buffer.GetString(), "{\"aField\"");
 }
 
@@ -64,7 +64,7 @@ TEST(dds_DCPS_JsonValueWriter, end_struct_member)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("aField", false));
   jvw.write_int16(5);
   jvw.end_struct_member();
   EXPECT_STREQ(buffer.GetString(), "{\"aField\":5");
@@ -140,10 +140,10 @@ TEST(dds_DCPS_JsonValueWriter, complete_struct)
   Writer writer(buffer);
   JsonValueWriter<Writer> jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("aField", false));
+  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("aField", false));
   jvw.write_int16(5);
   jvw.end_struct_member();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("bField", false));
+  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("bField", false));
   jvw.write_int16(6);
   jvw.end_struct_member();
   jvw.end_struct();
@@ -275,7 +275,7 @@ TEST(dds_DCPS_JsonValueWriter, complete_struct_with_complete_array)
   Writer writer(buffer);
   TestWriter jvw(writer);
   jvw.begin_struct();
-  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptor("a", false));
+  jvw.begin_struct_member(OpenDDS::XTypes::MemberDescriptorImpl("a", false));
   jvw.begin_array();
   jvw.begin_element(0);
   jvw.write_int16(5);

@@ -154,6 +154,7 @@ public:
 
   void handle_participant_data(DCPS::MessageId id,
                                const ParticipantData_t& pdata,
+                               const DCPS::MonotonicTimePoint& now,
                                const DCPS::SequenceNumber& seq,
                                const ACE_INET_Addr& from,
                                bool from_sedp);
@@ -361,13 +362,11 @@ public:
 protected:
   Sedp& endpoint_manager() { return *sedp_; }
 
-  void remove_discovered_participant(const DiscoveredParticipantIter& iter);
-
-  void remove_discovered_participant_i(const DiscoveredParticipantIter& iter);
+  void purge_discovered_participant(const DiscoveredParticipantIter& iter);
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from);
-  void process_location_updates_i(const DiscoveredParticipantIter& iter, bool force_publish = false);
+  void enqueue_location_update_i(DiscoveredParticipantIter iter, DCPS::ParticipantLocation mask, const ACE_INET_Addr& from, const char* reason);
+  void process_location_updates_i(const DiscoveredParticipantIter& iter, const char* reason, bool force_publish = false);
   void publish_location_update_i(const DiscoveredParticipantIter& iter);
 #endif
 
@@ -669,8 +668,6 @@ private:
   size_t n_participants_in_authentication_;
   void set_auth_state(DiscoveredParticipant& dp, AuthState state);
 #endif
-
-  void erase_participant(DiscoveredParticipantIter iter);
 
   friend class ::DDS_TEST;
 };

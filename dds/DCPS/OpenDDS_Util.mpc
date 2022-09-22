@@ -2,7 +2,7 @@
 // by opendds_idl to have objects of common classes (like TypeObject)
 // instantiated within the IDL compiler.
 
-project: acelib, dds_macros, install {
+project: acelib, dds_macros, install, crosscompile {
   requires += no_opendds_safety_profile
   sharedname = OpenDDS_Util
   dynamicflags = OPENDDS_DCPS_BUILD_DLL
@@ -47,6 +47,8 @@ project: acelib, dds_macros, install {
 
   // If the 'idl_stubs' make target is built, this library is needed.
   verbatim(gnuace, local) {
-    idl_stubs: all
+    ifeq ($(CROSS-COMPILE),)
+      idl_stubs: all
+    endif
   }
 }

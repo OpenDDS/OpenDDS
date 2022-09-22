@@ -1689,16 +1689,12 @@ namespace {
   {
     // Value can be a comma-separated list
     const char* start = value.c_str();
-    char buffer[128];
-    std::memset(buffer, 0, sizeof(buffer));
     while (const char* next_comma = std::strchr(start, ',')) {
-      // Copy into temp buffer, won't have null
-      std::strncpy(buffer, start, next_comma - start);
-      // Append null
-      buffer[next_comma - start] = '\0';
+      const size_t size = next_comma - start;
+      const OPENDDS_STRING temp(start, size);
       // Add to QOS
       x.name.length(x.name.length() + 1);
-      x.name[x.name.length() - 1] = static_cast<const char*>(buffer);
+      x.name[x.name.length() - 1] = temp.c_str();
       // Advance pointer
       start = next_comma + 1;
     }

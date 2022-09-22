@@ -1,6 +1,6 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
-  "start_time": { "sec": -30, "nsec": 0 },
+  "start_time": { "sec": -60, "nsec": 0 },
   "stop_time": { "sec": -1, "nsec": 0 },
   "destruction_time": { "sec": -1, "nsec": 0 },
 
@@ -21,24 +21,51 @@
             "value": "3"
           }
         ]
-      }
-    ],
-    "discoveries": [
-      { "name": "bench_test_rtps",
-        "type": "rtps",
-        "domain": 7
-      }
-    ],
-    "instances": [
-      { "name": "rtps_instance_01",
-        "type": "rtps_udp",
-        "domain": 7
+      },
+      { "name": "domain/7",
+        "properties": [
+          { "name": "DiscoveryConfig",
+            "value": "my_rtps_discovery"
+          },
+          { "name": "DefaultTransportConfig",
+            "value": "rtps_config"
+          }
+        ]
+      },
+      { "name": "rtps_discovery/my_rtps_discovery",
+        "properties": [
+          { "name": "ResendPeriod",
+            "value": "2"
+          },
+          { "name": "SedpPassiveConnectDuration",
+            "value": "90000"
+          }
+        ]
+      },
+      { "name": "config/rtps_config",
+        "properties": [
+          { "name": "transports",
+            "value": "rtps_transport"
+          },
+          { "name": "passive_connect_duration",
+            "value": "90000"
+          }
+        ]
+      },
+      { "name": "transport/rtps_transport",
+        "properties": [
+          { "name": "transport_type",
+            "value": "rtps_udp"
+          },
+          { "name": "use_multicast",
+            "value": "0"
+          }
+        ]
       }
     ],
     "participants": [
       { "name": "participant_01",
         "domain": 7,
-        "transport_config_name": "rtps_instance_01",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },

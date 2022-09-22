@@ -15,6 +15,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+bool log_bits = false;
+
 void OpenDDS_Dcps_Export log_progress(const char* activity,
                                       const GUID_t& local,
                                       const GUID_t& remote,

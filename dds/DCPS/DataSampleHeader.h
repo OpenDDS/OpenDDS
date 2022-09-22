@@ -16,6 +16,9 @@
 #include "RepoIdTypes.h"
 #include "SequenceNumber.h"
 
+#include <ace/Guard_T.h>
+#include <ace/Lock.h>
+
 #include <iosfwd>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -265,6 +268,27 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
 private:
   /// Keep track of the amount of data read from a buffer.
   size_t serialized_size_;
+
+  // If the constructor argument is null this object does nothing.
+  // Otherwise it is an ACE_Guard for the lock constructor argument.
+  struct MaybeGuard {
+    explicit MaybeGuard(ACE_Lock* a) : guard_(a ? *a : non_lock) {}
+
+    ACE_Guard<ACE_Lock> guard_;
+
+    struct NoOpLock : ACE_Lock {
+      int remove() { return 0; }
+      int acquire() { return 0; }
+      int tryacquire() { return 0; }
+      int release() { return 0; }
+      int acquire_read() { return 0; }
+      int acquire_write() { return 0; }
+      int tryacquire_read() { return 0; }
+      int tryacquire_write() { return 0; }
+      int tryacquire_write_upgrade() { return 0; }
+    };
+    static NoOpLock non_lock;
+  };
 };
 
 typedef Cached_Allocator_With_Overflow<DataSampleHeader, ACE_Null_Mutex> DataSampleHeaderAllocator;

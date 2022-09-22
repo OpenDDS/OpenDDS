@@ -8,6 +8,7 @@
 
 #include <ace/Message_Block.h>
 #include <ace/OS_NS_string.h>
+#include <ace/Log_Msg.h>
 
 #include <algorithm>
 
@@ -899,16 +900,25 @@ Serializer::align_cont_w()
 }
 
 ACE_INLINE
+bool Serializer::skip_delimiter()
+{
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
+    return skip(uint32_cdr_size);
+  }
+  return true;
+}
+
+ACE_INLINE
 bool Serializer::read_delimiter(size_t& size)
 {
   if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
     ACE_CDR::ULong dheader;
-    if (!(*this >> dheader)) {
-      return false;
+    if (*this >> dheader) {
+      size = dheader;
+      return true;
     }
-    size = dheader;
   }
-  return true;
+  return false;
 }
 
 ACE_INLINE

@@ -1,9 +1,7 @@
 project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transports_for_test, dcpsexe, googlemock, googletest, optional_opendds_face, opendds_optional_security, optional_rapidjson, optional_rtps_relay_lib, msvc_bigobj {
-  exename = *
-  recurse = 1
 
   dcps_ts_flags += -Gxtypes-complete
-  idlflags += -I dds/DCPS/XTypes
+  idlflags += -SS -I dds/DCPS/XTypes
 
   Idl_Files {
     dds/DCPS/XTypes/CompleteToDynamicType.idl
@@ -19,5 +17,22 @@ project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transport
   TypeSupport_Files {
     dcps_ts_flags += -SI -Sv
     dds/DCPS/XTypes/DynamicData.idl
+  }
+
+  Source_Files {
+    *.cpp
+    dds/DCPS
+    dds/DCPS/RTPS
+    dds/DCPS/security
+    dds/DCPS/security/SSL
+    dds/DCPS/transport/framework
+    dds/DCPS/transport/rtps_udp
+    dds/DCPS/XTypes
+    dds/FACE/config
+    FACE
+    tools/dds/rtpsrelaylib
+
+    // override default of Template_Files for *_T.cpp
+    dds/DCPS/RcHandle_T.cpp
   }
 }

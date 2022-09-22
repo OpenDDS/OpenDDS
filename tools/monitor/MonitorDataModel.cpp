@@ -179,7 +179,7 @@ Qt::ItemFlags
 MonitorDataModel::flags( const QModelIndex& index) const
 {
   if( false == index.isValid()) {
-    return 0;
+    return Qt::ItemFlags();
   }
 
   return this->QAbstractItemModel::flags( index)
