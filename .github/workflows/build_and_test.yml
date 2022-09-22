@@ -12424,7 +12424,7 @@ jobs:
         tar cvf ${{ github.job }}.tar openssl_install
         xz -3 ${{ github.job }}.tar
     - name: upload openssl artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
