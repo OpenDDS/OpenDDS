@@ -44,9 +44,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::assign_fields(void* incoming,
   const MetaStruct& resulting_meta = getResultingMeta();
   typedef vector<SubjectFieldSpec>::const_iterator iter_t;
   for (iter_t iter = proj.begin(); iter != proj.end(); ++iter) {
-    const SubjectFieldSpec& sfs = *iter;
-    resulting_meta.assign(&resulting, sfs.resulting_name_.c_str(),
-                          incoming, sfs.incoming_name_.c_str(), meta);
+    resulting_meta.assign(&resulting, iter->resulting_name_.c_str(),
+                          incoming, iter->incoming_name_.c_str(), meta);
   }
 
   const vector<OPENDDS_STRING>& proj_out = qp.keys_projected_out_;
@@ -104,11 +103,15 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       SampleInfo info;
       const ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
-      if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
+      if (ret == DDS::RETCODE_NO_DATA || !info.valid_data) {
+        return DDS::RETCODE_NO_DATA;
+      }
+
+      if (ret != RETCODE_OK) {
         throw std::runtime_error(
          OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
          " read_instance_generic: " + retcode_to_string(ret));
-      } else if (ret == DDS::RETCODE_OK) {
+      } else {
         resulting.push_back(prototype);
         resulting.back().combine(SampleWithInfo(other_topic.in(), info));
         assign_fields(other_data.ptr_, resulting.back().sample_,
@@ -132,7 +135,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
           << " read_next_instance_generic: " << retcode_to_string(ret);
         throw std::runtime_error(ss.str());
       } else if (ret == RETCODE_NO_DATA) {
-        break;
+        return ret;
       }
       ih = info.instance_handle;
 
@@ -228,8 +231,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
       }
 
       typename std::map<TopicSet, SampleVec>::iterator found =
-        find_if(partialResults.begin(), partialResults.end(),
-          Contains(other_topic));
+        find_if(partialResults.begin(), partialResults.end(), Contains(other_topic));
 
       if (found == partialResults.end()) { // haven't seen this topic yet
 

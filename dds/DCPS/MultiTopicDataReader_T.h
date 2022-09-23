@@ -105,14 +105,18 @@ private:
 
   struct SampleWithInfo {
     SampleWithInfo(const OPENDDS_STRING& topic, const DDS::SampleInfo& sampinfo)
-      : sample_(),
-        view_(sampinfo.view_state) {
+      : sample_()
+      , view_(sampinfo.view_state)
+    {
       info_[topic] = sampinfo.instance_handle;
     }
-    void combine(const SampleWithInfo& other) {
+
+    void combine(const SampleWithInfo& other)
+    {
       info_.insert(other.info_.begin(), other.info_.end());
       if (other.view_ == DDS::NEW_VIEW_STATE) view_ = DDS::NEW_VIEW_STATE;
     }
+
     Sample sample_;
     DDS::ViewStateKind view_;
     OPENDDS_MAP(OPENDDS_STRING/*topicName*/, DDS::InstanceHandle_t) info_;
@@ -164,19 +168,21 @@ private:
 
   struct GenericData {
     explicit GenericData(const MetaStruct& meta, bool doAlloc = true)
-      : meta_(meta), ptr_(doAlloc ? meta.allocate() : NULL) {}
+      : meta_(meta), ptr_(doAlloc ? meta.allocate() : 0) {}
     ~GenericData() { meta_.deallocate(ptr_); }
+
     const MetaStruct& meta_;
     void* ptr_;
   };
 
   struct Contains { // predicate for std::find_if()
-    const OPENDDS_STRING& look_for_;
-    explicit Contains(const OPENDDS_STRING& s) : look_for_(s) {}
-    bool operator()(const std::pair<const std::set<OPENDDS_STRING>, SampleVec>& e)
-      const {
-      return e.first.count(look_for_);
+    explicit Contains(const OPENDDS_STRING& s) : look_for_topic_(s) {}
+    bool operator()(const std::pair<const std::set<OPENDDS_STRING>, SampleVec>& e) const
+    {
+      return e.first.count(look_for_topic_);
     }
+
+    const OPENDDS_STRING& look_for_topic_;
   };
 
   typename TypedDataReader::Interface::_var_type typed_reader_;
