@@ -109,10 +109,9 @@ public:
   void read() { recv_strategy_->read(); }
   void signal_semaphore();
   ShmemTransport& impl() const;
+  ShmemInst& config() const;
 
 protected:
-  ShmemInst* config_;
-
   ShmemSendStrategy_rch send_strategy_;
   ShmemReceiveStrategy_rch recv_strategy_;
 
