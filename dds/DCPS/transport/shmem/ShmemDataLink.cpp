@@ -121,7 +121,7 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
   send_association_msg(local_sub, remote_pub);
   // Resend until we get a response.
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, accoc_resends_guard, assoc_resends_mutex_, result);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, result);
     assoc_resends_.insert(std::pair<GuidPair, unsigned>(GuidPair(remote_pub, local_sub), 5));
   }
   return result;
@@ -165,14 +165,14 @@ ShmemDataLink::send_association_msg(const GUID_t& local, const GUID_t& remote)
 void ShmemDataLink::resend_association_msgs(const MonotonicTimePoint&)
 {
   ACE_DEBUG((LM_DEBUG, "(%P|%t) ShmemDataLink::resend_association_msgs\n"));
-  ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   for (AssocResends::iterator i = assoc_resends_.begin(); i != assoc_resends_.end();) {
     send_association_msg(i->first.local, i->first.remote);
     i->second--;
     if (i->second) {
       ++i;
     } else {
-      i = assoc_resends_.erase(i);
+      assoc_resends_.erase(i++);
     }
   }
 }
@@ -196,7 +196,7 @@ ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
         invoke_on_start_callbacks(local, remote, true);
       } else {
         // Writer has responded to association ack, stop sending.
-        ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
+        ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
         assoc_resends_.erase(GuidPair(remote, local));
       }
     }
@@ -215,10 +215,7 @@ ShmemDataLink::stop_i()
 {
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
-  {
-    ACE_GUARD(ACE_Thread_Mutex, accoc_resends_guard, assoc_resends_mutex_);
-    assoc_resends_.clear();
-  }
+  assoc_resends_.clear();
   assoc_resends_task_->disable();
 
   if (peer_alloc_) {
