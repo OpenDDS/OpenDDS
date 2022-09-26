@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -26,8 +24,8 @@ ShmemInst::ShmemInst(const std::string& name)
   , pool_size_(16 * 1024 * 1024)
   , datalink_control_size_(4 * 1024)
   , hostname_(get_fully_qualified_hostname())
-  , association_resend_period_(0, 250)
-  , association_resend_max_count_(30)
+  , association_resend_period_(0, 250000)
+  , association_resend_max_count_(10)
 {
   std::ostringstream pool;
   pool << "OpenDDS-" << ACE_OS::getpid() << '-' << this->name();

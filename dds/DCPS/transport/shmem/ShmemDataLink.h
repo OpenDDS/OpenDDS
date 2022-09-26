@@ -123,7 +123,7 @@ private:
 
   std::string peer_address_;
   ShmemAllocator* peer_alloc_;
-  ACE_Thread_Mutex mutex_;
+  ACE_Recursive_Thread_Mutex mutex_;
   ReactorTask_rch reactor_task_;
 
   struct GuidPair {
