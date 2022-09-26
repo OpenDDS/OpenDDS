@@ -194,11 +194,14 @@ function(tao_idl_command target)
 
     _tao_append_runtime_lib_dir_to_path(_tao_extra_lib_dirs)
 
+    ## CMake wants forward slashes for commands
+    string(REPLACE "\\" "/" _tao_extra_lib_dirs ${_tao_extra_lib_dirs})
+
     add_custom_command(
       OUTPUT ${_OUTPUT_FILES}
       DEPENDS tao_idl ${tao_idl_shared_libs} ace_gperf
       MAIN_DEPENDENCY ${idl_file_path}
-      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}"  "TAO_ROOT=${TAO_INCLUDE_DIR}"
+      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}"  "TAO_ROOT=${TAO_INCLUDE_DIR}" "TAO_IDL_PREPROCESSOR_ARGS=-E"
         "${_tao_extra_lib_dirs}"
         $<TARGET_FILE:tao_idl> -g ${GPERF_LOCATION} ${TAO_CORBA_IDL_FLAGS} -Sg
         -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h
