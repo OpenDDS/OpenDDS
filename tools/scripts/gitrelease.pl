@@ -2044,13 +2044,17 @@ sub release_archive_worktree_verify {
     }
     close GIT_DESCRIBE;
 
-    if (-f $cl) {
-      open(my $fd, $cl) or die("Couldn't open $cl: $!");
-      my $found_crlf = ((<$fd> =~ /\r\n/) ? 1 : 0);
+    $correct = 0 if (!-f $cl);
+
+    my $check_file = "$worktree/VERSION.txt";
+    if (-f $check_file) {
+      open(my $fd, $check_file) or die("Couldn't open $check_file: $!");
+      my $line = <$fd>;
+      my $found_crlf = (($line =~ /\r\n/) ? 1 : 0);
       close($fd);
       if ($found_crlf != $crlf) {
         print STDERR ('ERROR: unexpected ', $found_crlf ? 'DOS' : 'UNIX',
-          " line endings in $worktree\n");
+          " line endings in $check_file\n");
         $correct = 0;
       }
     }
@@ -2098,10 +2102,11 @@ sub release_archive_worktree_remedy {
   if ($crlf) {
     $crlf_insert = "-c core.autocrlf=true ";
   }
-
   run_command("git ${crlf_insert}worktree add $worktree $settings->{git_tag}", autodie => 1);
   if ($crlf) {
-    run_command("git config --local core.autocrlf true", autodie => 1);
+    my $chdir = ChangeDir->new($worktree);
+    run_command("git config --local extensions.worktreeConfig true", autodie => 1);
+    run_command("git config --worktree core.autocrlf true", autodie => 1);
   }
   copy("$worktree/$settings->{changelog}", $cl) or die("copy $cl failed: $!");
 
@@ -2337,7 +2342,7 @@ sub message_zip_doxygen {
 
   my ($dox_dir, $dox_zip) = dox_values($settings);
   my $message = "$settings->{zip_dox} ";
-  if (-f ) {
+  if (-f $dox_zip) {
     $message .= "is either invalid or doesn't match source directory and needs to be recreated";
   }
   else {
@@ -3101,8 +3106,8 @@ my %global_settings = (
     parsed_next_version => $parsed_next_version,
     base_name => $base_name,
     git_tag => "${git_name_prefix}$parsed_version->{tag_string}",
-    tgz_worktree => "$workspace/${base_name}-tgz",
-    zip_worktree => "$workspace/${base_name}-zip",
+    tgz_worktree => "$workspace/tgz/${base_name}",
+    zip_worktree => "$workspace/zip/${base_name}",
     doxygen_dir => $doxygen_dir,
     doxygen_inner_dir => $doxygen_inner_dir,
     tar_src => "${base_name}.tar",
@@ -3602,7 +3607,7 @@ sub run_step {
 
   my $prereq_insert = '';
   if ($prereq_of) {
-    $prereq_insert = "Prereq. of \"$prereq_of\" is";
+    $prereq_insert = "Prereq. of \"$prereq_of\", ";
   }
   print " $prereq_insert Step $step_number \"$title\" is OK!\n";
 

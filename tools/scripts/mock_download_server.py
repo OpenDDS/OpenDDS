@@ -39,7 +39,6 @@ def fake_filenames(paths, path_base, version, extra, source=True):
         ]
     if extra:
         suffixes += [
-            '-doxygen.tar.gz',
             '-doxygen.zip',
             '.pdf',
         ]
