@@ -15,6 +15,7 @@
 #include "dds/DCPS/transport/framework/TransportImpl.h"
 
 #include "dds/DCPS/PoolAllocator.h"
+#include <dds/DCPS/AtomicBool.h>
 
 #include <string>
 
@@ -94,7 +95,7 @@ private:
   private:
     ShmemTransport* outer_;
     ACE_sema_t semaphore_;
-    ACE_Atomic_Op<ACE_Thread_Mutex, bool> stopped_;
+    AtomicBool stopped_;
   };
   unique_ptr<ReadTask> read_task_;
 };

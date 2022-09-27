@@ -192,7 +192,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
       return DDS::RETCODE_OK;
 
     // for the not changeable qos, it can be changed before enable
-    if (!Qos_Helper::changeable(publisher_qos_, publisher_qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(publisher_qos_, publisher_qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -212,7 +212,7 @@ DDS::ReturnCode_t ReplayerImpl::set_qos (const DDS::PublisherQos &  publisher_qo
     if (qos_ == qos)
       return DDS::RETCODE_OK;
 
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(qos_, qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -307,7 +307,7 @@ ReplayerImpl::enable()
     return DDS::RETCODE_OK;
   }
 
-  // if (this->publisher_servant_->is_enabled() == false) {
+  // if (this->publisher_servant_->is_enabled()) {
   //   return DDS::RETCODE_PRECONDITION_NOT_MET;
   // }
   //
@@ -413,7 +413,7 @@ ReplayerImpl::add_association(const RepoId&            yourId,
                LogGuid(reader.readerId).c_str()));
   }
 
-  // if (entity_deleted_ == true) {
+  // if (entity_deleted_) {
   //   if (DCPS_debug_level >= 1)
   //     ACE_DEBUG((LM_DEBUG,
   //                ACE_TEXT("(%P|%t) ReplayerImpl::add_association")

@@ -12,11 +12,13 @@
  * If you do NOT want the boolean test function to be virtual, implement it as:
  *   bool boolean_test() const;
  * and derive the class from SafeBool_T with the class as the template argument:
- *   class YourClass : public SafeBool<YourClass>.
+ *   class YourClass : public SafeBool_T<YourClass>.
  */
 
 #ifndef OPENDDS_DCPS_SAFE_BOOL_T_H
 #define OPENDDS_DCPS_SAFE_BOOL_T_H
+
+#include <dds/Versioned_Namespace.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

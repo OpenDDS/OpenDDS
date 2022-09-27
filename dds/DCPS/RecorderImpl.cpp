@@ -258,7 +258,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
   // This block prevents adding associations to deleted readers.
   // Presumably this is a "good thing(tm)".
   //
-  // if (entity_deleted_ == true) {
+  // if (entity_deleted_) {
   //   if (DCPS_debug_level >= 1)
   //     ACE_DEBUG((LM_DEBUG,
   //                ACE_TEXT("(%P|%t) RecorderImpl::add_association")
@@ -760,7 +760,7 @@ DDS::ReturnCode_t RecorderImpl::set_qos(
   if (Qos_Helper::valid(subscriber_qos) && Qos_Helper::consistent(subscriber_qos)) {
     if (subqos_ != subscriber_qos) {
       // for the not changeable qos, it can be changed before enable
-      if (!Qos_Helper::changeable(subqos_, subscriber_qos) && enabled_ == true) {
+      if (!Qos_Helper::changeable(subqos_, subscriber_qos) && enabled_) {
         return DDS::RETCODE_IMMUTABLE_POLICY;
 
       } else {
