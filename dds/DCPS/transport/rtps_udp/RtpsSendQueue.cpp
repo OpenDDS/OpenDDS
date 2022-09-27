@@ -10,6 +10,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+namespace {
+
+bool check_counts(bool redundant, CORBA::Long v1, CORBA::Long v2)
+{
+  return redundant ? v1 <= v2 : v1 < v2;
+}
+
+}
+
 RtpsSendQueue::RtpsSendQueue()
 : enabled_(true)
 , heartbeats_need_merge_(false)
@@ -28,7 +37,7 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
         heartbeat_map_.insert(std::make_pair(key, ms));
         result = true;
         heartbeats_need_merge_ = true;
-      } else if (pos->second.redundant_ || pos->second.sm_.heartbeat_sm().count.value < ms.sm_.heartbeat_sm().count.value) {
+      } else if (check_counts(pos->second.redundant_, pos->second.sm_.heartbeat_sm().count.value, ms.sm_.heartbeat_sm().count.value)) {
         pos->second = ms;
         result = true;
         heartbeats_need_merge_ = true;
@@ -42,7 +51,7 @@ bool RtpsSendQueue::push_back(const MetaSubmessage& ms)
         acknack_map_.insert(std::make_pair(key, ms));
         result = true;
         acknacks_need_merge_ = true;
-      } else if (pos->second.redundant_ || pos->second.sm_.acknack_sm().count.value < ms.sm_.acknack_sm().count.value) {
+      } else if (check_counts(pos->second.redundant_, pos->second.sm_.acknack_sm().count.value, ms.sm_.acknack_sm().count.value)) {
         pos->second = ms;
         result = true;
         acknacks_need_merge_ = true;
@@ -73,7 +82,7 @@ bool RtpsSendQueue::merge(RtpsSendQueue& from)
           heartbeat_map_.insert(std::make_pair(it->first, it->second));
           result = true;
           heartbeats_need_merge_ = true;
-        } else if (pos->second.redundant_ || pos->second.sm_.heartbeat_sm().count.value < it->second.sm_.heartbeat_sm().count.value) {
+        } else if (check_counts(pos->second.redundant_, pos->second.sm_.heartbeat_sm().count.value, it->second.sm_.heartbeat_sm().count.value)) {
           pos->second = it->second;
           result = true;
           heartbeats_need_merge_ = true;
@@ -92,7 +101,7 @@ bool RtpsSendQueue::merge(RtpsSendQueue& from)
           acknack_map_.insert(std::make_pair(it->first, it->second));
           result = true;
           acknacks_need_merge_ = true;
-        } else if (pos->second.redundant_ || pos->second.sm_.acknack_sm().count.value < it->second.sm_.acknack_sm().count.value) {
+        } else if (check_counts(pos->second.redundant_, pos->second.sm_.acknack_sm().count.value, it->second.sm_.acknack_sm().count.value)) {
           pos->second = it->second;
           result = true;
           acknacks_need_merge_ = true;
