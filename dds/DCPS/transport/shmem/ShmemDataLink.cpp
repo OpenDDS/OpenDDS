@@ -46,6 +46,8 @@ ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
 bool
 ShmemDataLink::open(const std::string& peer_address)
 {
+  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, mutex_, false);
+
   peer_address_ = peer_address;
   const ACE_TString name = ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str());
   ShmemAllocator::MEMORY_POOL_OPTIONS* alloc_opts_ptr = 0;
