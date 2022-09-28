@@ -204,7 +204,7 @@ sub help {
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
     "                         GitHub.\n" .
-    # TODO: Also remove fixed skip on RTD step
+    # When this is ready also remove fixed skip on RTD step
     # "  READ_THE_DOCS_TOKEN    Access token for Read the Docs Admin\n" .
     "  SFTP_USERNAME          SFTP Username\n" .
     "  SFTP_HOST              SFTP Server Address\n" .
@@ -2428,7 +2428,7 @@ sub get_github_release_files {
   push(@files, $settings->{md5_src}, $settings->{sha256_src});
   if (!$settings->{skip_devguide}) {
     push(@files, $settings->{devguide_ver});
-  };
+  }
 
   return @files;
 }
@@ -2851,12 +2851,12 @@ sub verify_trigger_shapes_demo_build {
     return 0;
   }
   return 1;
-};
+}
 
 sub message_trigger_shapes_demo_build {
   my $settings = shift();
   return "Shapes demo GitHub Action workflow has to be trigged";
-};
+}
 
 sub remedy_trigger_shapes_demo_build {
   my $settings = shift();
@@ -2867,7 +2867,7 @@ sub remedy_trigger_shapes_demo_build {
   sleep(5);
 
   return 1;
-};
+}
 
 ############################################################################
 
@@ -3454,7 +3454,7 @@ my @release_steps = (
     remedy => sub{remedy_rtd_activate(@_)},
     post_release => 1,
     can_force => 1,
-    skip => 1, # TODO: Also uncomment READ_THE_DOCS_TOKEN comment in help
+    skip => 1, # When this is ready, also uncomment READ_THE_DOCS_TOKEN in help
   },
   {
     name => 'Trigger Shapes Demo Build',
