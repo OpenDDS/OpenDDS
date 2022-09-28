@@ -55,7 +55,7 @@ jobs:
         cd OpenDDS
         make -j4 ishapes
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/ishapes
@@ -113,7 +113,7 @@ jobs:
         call setenv.cmd
         msbuild -p:Configuration=Release,Platform=x64 -m -t:ishapes DDS_TAOv2_all.sln
     - name: upload ishapes artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ github.job }}_artifact
         path: OpenDDS/examples/DCPS/ishapes/Static_Release/ishapes.exe

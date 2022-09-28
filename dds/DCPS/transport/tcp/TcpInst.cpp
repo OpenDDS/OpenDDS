@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
 #include "TcpInst.h"
 
 #include <dds/DCPS/NetworkResource.h>

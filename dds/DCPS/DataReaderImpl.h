@@ -637,7 +637,10 @@ public:
 
   void return_handle(DDS::InstanceHandle_t handle);
 
-  virtual const ValueWriterDispatcher* get_value_writer_dispatcher() const { return 0; }
+  const ValueDispatcher* get_value_dispatcher() const
+  {
+    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+  }
 
 protected:
 
@@ -782,6 +785,7 @@ protected:
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
+  RepoId topic_id_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;

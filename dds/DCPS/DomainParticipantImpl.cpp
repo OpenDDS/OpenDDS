@@ -2203,7 +2203,7 @@ DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("DomainParticipantImpl::create_recorder, ")
                  ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;
@@ -2248,7 +2248,7 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("DomainParticipantImpl::create_replayer, ")
                  ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;

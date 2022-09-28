@@ -7,6 +7,7 @@
 
 #include "Service_Participant.h"
 
+#include "Logging.h"
 #include "WaitSet.h"
 #include "transport/framework/TransportRegistry.h"
 #include "debug.h"
@@ -1852,6 +1853,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
     }
+
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSLogBits"), log_bits, bool);
 
 #if defined(OPENDDS_SECURITY)
     if (got_security_flag) {

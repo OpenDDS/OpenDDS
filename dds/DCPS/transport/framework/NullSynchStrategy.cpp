@@ -25,7 +25,7 @@ OpenDDS::DCPS::ThreadSynch*
 OpenDDS::DCPS::NullSynchStrategy::create_synch_object(
   ThreadSynchResource* synch_resource,
   long                 /* priority */,
-  int                  /* scheduler */)
+  long                 /* scheduler */)
 {
   DBG_ENTRY_LVL("NullSynchStrategy","create_synch_object",6);
 

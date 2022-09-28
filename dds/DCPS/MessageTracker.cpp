@@ -28,7 +28,14 @@ MessageTracker::MessageTracker(const OPENDDS_STRING& msg_src)
 }
 
 bool
-MessageTracker::pending_messages()
+MessageTracker::pending_messages() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
+  return pending_messages_i();
+}
+
+bool
+MessageTracker::pending_messages_i() const
 {
   return sent_count_ > delivered_count_ + dropped_count_;
 }
@@ -46,7 +53,7 @@ MessageTracker::message_delivered()
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   ++delivered_count_;
 
-  if (!pending_messages()) {
+  if (!pending_messages_i()) {
     done_condition_.notify_all();
   }
 }
@@ -57,7 +64,7 @@ MessageTracker::message_dropped()
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   ++dropped_count_;
 
-  if (!pending_messages()) {
+  if (!pending_messages_i()) {
     done_condition_.notify_all();
   }
 }
@@ -73,7 +80,7 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
 {
   const bool use_deadline = deadline.is_zero();
   ACE_GUARD(ACE_Thread_Mutex, guard, this->lock_);
-  const bool report = DCPS_debug_level > 0 && pending_messages();
+  const bool report = DCPS_debug_level > 0 && pending_messages_i();
   if (report) {
     if (use_deadline) {
       ACE_DEBUG((LM_DEBUG,
@@ -89,14 +96,13 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
   }
   bool loop = true;
   ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
-  while (loop && pending_messages()) {
+  while (loop && pending_messages_i()) {
     switch (done_condition_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_Timeout:
       if (DCPS_debug_level && pending_messages()) {
-        ACE_DEBUG((LM_INFO,
-                   ACE_TEXT("(%P|%t) MessageTracker::wait_messages_pending %T ")
-                   ACE_TEXT("(Redmine Issue# 1446) (caller: %C)\n"),
-                   ACE_TEXT("Timed out waiting for messages to be transported"),
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) MessageTracker::wait_messages_pending: "
+                   "Timed out waiting for messages to be transported (caller: %C)\n",
                    caller));
       }
       loop = false;
@@ -120,8 +126,9 @@ void MessageTracker::wait_messages_pending(const char* caller, const MonotonicTi
 }
 
 int
-MessageTracker::dropped_count()
+MessageTracker::dropped_count() const
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
   return dropped_count_;
 }
 

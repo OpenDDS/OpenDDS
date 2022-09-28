@@ -114,25 +114,25 @@ first -- the `configure` script will download it for you.
 
 There are three distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI ACE/TAO 2.2a patch 23 or later
+* OCI ACE/TAO 2.2a patch 24 or later
   * This will be automatically downloaded by default when using the configure
     script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE 6.5.16 / TAO 2.5.16 or later in the ACE 6.x / TAO 2.x series
+* DOC Group ACE 6.5.18 / TAO 2.5.18 or later in the ACE 6.x / TAO 2.x series
   * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
     * `--ace-github-latest` to use the `ace6tao2` branch of ACE/TAO as is. This
       also downloads the `master` branch of MPC as is.
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_16
-* DOC Group ACE 7.0.5 / TAO 3.0.5 or later in the ACE 7.x / TAO 3.x series.
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_18
+* DOC Group ACE 7.0.8 / TAO 3.0.8 or later in the ACE 7.x / TAO 3.x series.
   This distribution requires a C++11 capable compiler
   * When using the configure script, DOC Group ACE/TAO can be downloaded using:
     * `--doc-group3` for the latest release
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_5
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_8
 
 The TAO Developer's Guide book can be requested for free from
 https://objectcomputing.com/products/tao/tao-developers-guide and the CORBA Programmers
@@ -169,9 +169,9 @@ This release of OpenDDS has been tested under the following platforms:
 
 Linux family:
 * Red Hat EL and CentOS 6.6, 6.8, 6.9 (x86\_64)
-* Red Hat EL and CentOS 7.2, 7.3, 7.4, 7.5 (x86\_64)
+* Red Hat EL and CentOS 7.2, 7.3, 7.4 (x86\_64)
 * Red Hat EL 8.0 (x86\_64)
-* Fedora 24 and 33 (x86\_64)
+* Fedora 24 and 31 (x86\_64)
 * Debian 9.4 (i686)
 * Ubuntu 18.04 LTS (x86\_64)
 * openSUSE 42.1 (x86\_64)
@@ -180,9 +180,6 @@ Windows family:
 * Windows 7 (32-bit, 64-bit)
 * Windows Server 2012 R2 (64-bit)
 * Windows 10 (64-bit)
-
-Others:
-* macOS 10.15.2 (Catalina)
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
@@ -201,18 +198,20 @@ Marketplace](https://marketplace.windriver.com/index.php?partners&on=details&id=
 
 This release of OpenDDS has been tested using the following compilers:
 
-* Microsoft Visual C++ 9 with SP1 (Visual Studio 2008)
 * Microsoft Visual C++ 10 with SP1 (Visual Studio 2010)
 * Microsoft Visual C++ 11 (Visual Studio 2012) - Update 4
 * Microsoft Visual C++ 12 (Visual Studio 2013) - Update 5
 * Microsoft Visual C++ 14 (Visual Studio 2015) - Update 3
-* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27045
-* Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.29.30133
+* Microsoft Visual C++ 14.1 (Visual Studio 2017) cl 19.16.27048
+* Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.29.30146
 * gcc 4.4.7, 4.8.5
-* gcc 6.3
-* gcc 7.2
-* gcc 11.2
-* Clang 13.0.1 (llvm.org) and 11.0.3 (Apple)
+* gcc 6.2.1, 6.3.0
+* gcc 7.2.0, 7.5.0
+* gcc 8.2.0, 8.2.1
+* gcc 9.3.1
+* gcc 12.2.0
+* Ubuntu clang 14.0.6
+* Ubuntu clang 15.0.0
 
 ## Building and Installing
 
