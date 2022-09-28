@@ -133,9 +133,12 @@ if(OPENDDS_XERCES3)
 endif()
 
 set(_ace_libs
-  ACE_XML_Utils
   ACE
 )
+
+if(OPENDDS_XERCES3)
+  list(APPEND _ace_libs ACE_XML_Utils)
+endif()
 
 set(_tao_libs
   TAO_IORManip
@@ -162,14 +165,16 @@ set(_opendds_libs
   OpenDDS_Model
   OpenDDS_monitor
   OpenDDS_Multicast
-  OpenDDS_QOS_XML_XSC_Handler
   OpenDDS_Rtps
   OpenDDS_Rtps_Udp
-  OpenDDS_Security
   OpenDDS_Shmem
   OpenDDS_Tcp
   OpenDDS_Udp
 )
+
+if(OPENDDS_SECURITY)
+  list(APPEND _opendds_libs OpenDDS_QOS_XML_XSC_Handler OpenDDS_Security)
+endif()
 
 list(APPEND _all_libs ${_opendds_libs} ${_ace_libs} ${_tao_libs})
 
