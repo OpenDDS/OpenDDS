@@ -128,11 +128,11 @@ private:
   // Given a QueryPlan that describes how to treat 'incoming' data from a
   // certain topic (with MetaStruct 'meta'), assign its relevant fields to
   // the corresponding fields of 'resulting'.
-  void assign_fields(void* incoming, Sample& resulting, const QueryPlan& qp,
+  void assign_fields(Sample& resulting, void* incoming, const QueryPlan& qp,
                      const MetaStruct& meta);
 
   // Process all joins (recursively) in the QueryPlan 'qp'.
-  DDS::ReturnCode_t process_joins(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
+  DDS::ReturnCode_t process_joins(OPENDDS_MAP(TopicSet, SampleVec)& partial_results,
                                   SampleVec starting, const TopicSet& seen,
                                   const QueryPlan& qp);
 
@@ -148,7 +148,7 @@ private:
   // When no common keys are found, natural join devolves to a cross-join where
   // each instance in the joined-to-topic (qp) is combined with the results so
   // far (partialResults).
-  DDS::ReturnCode_t cross_join(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
+  DDS::ReturnCode_t cross_join(OPENDDS_MAP(TopicSet, SampleVec)& partial_results,
                                const TopicSet& seen, const QueryPlan& qp);
 
   // Combine two vectors of data, 'resulting' and 'other', with the results of
@@ -161,7 +161,7 @@ private:
 
   // Helper for combine(), similar to assign_fields but instead of coming from
   // a differently-typed struct in a void*, the data comes from an existing
-  // Sample, 'source'.  Each field projeted from any of the topics in
+  // Sample, 'source'.  Each field projected from any of the topics in
   // 'other_topics' is copied from 'source' to 'target'.
   void assign_resulting_fields(Sample& target, const Sample& source,
                                const TopicSet& other_topics);
