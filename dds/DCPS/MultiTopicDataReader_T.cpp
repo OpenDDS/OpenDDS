@@ -119,6 +119,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       return DDS::RETCODE_NO_DATA;
     }
   } else { // incomplete key or cross-join (0 key fields)
+    ReturnCode_t ret = RETCODE_OK;
     for (InstanceHandle_t ih = HANDLE_NIL; ret != RETCODE_NO_DATA;) {
       GenericData other_data(other_meta, false);
       SampleInfo info;
@@ -193,6 +194,34 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::combine(
   resulting.insert(resulting.end(), new_data.begin(), new_data.end());
 }
 
+// Two constituent topics are joinable directly if they have some common join keys,
+// or indirectly via a third topic which has common join keys with each of them.
+// The constituent topics form one or more groups of connected topics. In each groups,
+// topics are connected. But any two groups are not connected (otherwise, they would
+// have been a single group). And so groups are cross-joined with each other.
+// Within a group, topics are joined using process_joins(). Starting from an incoming
+// sample of a given topic, it computes partial resulting samples from the samples of
+// the constituent topics in the same group that are already received, in a DFS manner.
+// @partial_results contains entries for sets of topics, each corresponding to a path
+// of topics which have been visited, starting from the incoming topic.
+// For example, if the graph of visited topics looks like this
+//                              A (incoming topic)
+//                            /   \
+//                           B     C
+//                          /    / | \
+//                         D    E  F  G
+//                        /     .  .  .
+//                       H      .  .  .
+//                       .      .  .  .
+// then @a partial_results contains entries for topic sets: {A,B,D,H}, {A,C,E},
+// {A,C,F}, {A,C,G}.
+// When traverse a path, if the next adjacent topic appears on a different path, i.e.,
+// there is an entry corresponding to that path in @a partial_results that has it in
+// its topic set, then the two entries are combined into a new entry which contains
+// topics from both of them. For example, if we are traversing path (A,C,G) and
+// the next adjacent topic to G is B, which appears in path (A,B,D,H), then entries
+// keyed by (A,C,G) and (A,B,D,H) are combined into a single entry with key
+// (A,B,C,D,G,H). Entries (A,C,G) and (A,B,D,H) are removed from @a partial_results.
 template<typename Sample, typename TypedDataReader>
 DDS::ReturnCode_t
 MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
@@ -283,8 +312,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
   try {
     const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
     vector<OPENDDS_STRING> no_keys;
-    for (typename std::map<TopicSet, SampleVec>::iterator it_pr =
-      partial_results.begin(); it_pr != partial_results.end(); ++it_pr) {
+    for (typename std::map<TopicSet, SampleVec>::iterator it_pr = partial_results.begin();
+         it_pr != partial_results.end(); ++it_pr) {
       SampleVec resulting;
       for (typename SampleVec::iterator i = it_pr->second.begin(); i != it_pr->second.end(); ++i) {
         const DDS::ReturnCode_t ret = join(resulting, *i, no_keys, 0, qp.data_reader_, other_meta);
@@ -299,7 +328,8 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
     with_join.insert(topicNameFor(qp.data_reader_));
     partial_results[with_join].swap(partial_results[seen]);
     partial_results.erase(seen);
-    const DDS::ReturnCode_t ret = process_joins(partial_results, partial_results[with_join], with_join, qp);
+    const DDS::ReturnCode_t ret = process_joins(partial_results, partial_results[with_join],
+                                                with_join, qp);
     if (ret != DDS::RETCODE_OK) {
       partial_results.erase(with_join);
       return ret;
