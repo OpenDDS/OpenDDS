@@ -196,34 +196,36 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::combine(
   resulting.insert(resulting.end(), new_data.begin(), new_data.end());
 }
 
-// Two constituent topics are joinable directly if they have some common join keys,
-// or indirectly via a third topic which has common join keys with each of them.
-// The constituent topics form one or more groups of connected topics. In each groups,
-// topics are connected. But any two groups are not connected (otherwise, they would
-// have been a single group). And so groups are cross-joined with each other.
-// Within a group, topics are joined using process_joins(). Starting from an incoming
-// sample of a given topic, it computes partial resulting samples from the samples of
-// the constituent topics in the same group that are already received, in a DFS manner.
-// @partial_results contains entries for sets of topics, each corresponding to a path
-// of topics which have been visited, starting from the incoming topic.
-// For example, if the graph of visited topics looks like this
-//                              A (incoming topic)
-//                            /   \
-//                           B     C
-//                          /    / | \
-//                         D    E  F  G
-//                        /     .  .  .
-//                       H      .  .  .
-//                       .      .  .  .
-// then @a partial_results contains entries for topic sets: {A,B,D,H}, {A,C,E},
-// {A,C,F}, {A,C,G}.
-// When traverse a path, if the next adjacent topic appears on a different path, i.e.,
-// there is an entry corresponding to that path in @a partial_results that has it in
-// its topic set, then the two entries are combined into a new entry which contains
-// topics from both of them. For example, if we are traversing path (A,C,G) and
-// the next adjacent topic to G is B, which appears in path (A,B,D,H), then entries
-// keyed by (A,C,G) and (A,B,D,H) are combined into a single entry with key
-// (A,B,C,D,G,H). Entries (A,C,G) and (A,B,D,H) are removed from @a partial_results.
+/**
+ * Two constituent topics are joinable directly if they have some common join keys,
+ * or indirectly via a third topic which has common join keys with each of them.
+ * The constituent topics form one or more groups of connected topics. In each groups,
+ * topics are connected. But any two groups are not connected (otherwise, they would
+ * have been a single group). And so groups are cross-joined with each other.
+ * Within a group, topics are joined using process_joins(). Starting from an incoming
+ * sample of a given topic, it computes partial resulting samples from the samples of
+ * the constituent topics in the same group that are already received, in a DFS manner.
+ * @partial_results contains entries for sets of topics, each corresponding to a path
+ * of topics which have been visited, starting from the incoming topic.
+ * For example, if the graph of visited topics looks like this
+ *                              A (incoming topic)
+ *                            /   \
+ *                           B     C
+ *                          /    / | \
+ *                         D    E  F  G
+ *                        /     .  .  .
+ *                       H      .  .  .
+ *                       .      .  .  .
+ * then @a partial_results contains entries for topic sets: {A,B,D,H}, {A,C,E},
+ * {A,C,F}, {A,C,G}.
+ * When traverse a path, if the next adjacent topic appears on a different path, i.e.,
+ * there is an entry corresponding to that path in @a partial_results that has it in
+ * its topic set, then the two entries are combined into a new entry which contains
+ * topics from both of them. For example, if we are traversing path (A,C,G) and
+ * the next adjacent topic to G is B, which appears in path (A,B,D,H), then entries
+ * keyed by (A,C,G) and (A,B,D,H) are combined into a single entry with key
+ * (A,B,C,D,G,H). Entries (A,C,G) and (A,B,D,H) are removed from @a partial_results.
+ */
 template<typename Sample, typename TypedDataReader>
 DDS::ReturnCode_t
 MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
