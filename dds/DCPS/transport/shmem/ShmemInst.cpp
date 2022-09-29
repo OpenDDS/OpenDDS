@@ -72,8 +72,7 @@ ShmemInst::dump_to_str() const
      << formatNameForDump("pool_name") << this->poolname_ << "\n"
      << formatNameForDump("host_name") << this->hostname_ << "\n"
      << formatNameForDump("association_resend_period") << association_resend_period_.str() << "\n"
-     << formatNameForDump("association_resend_max_count") << association_resend_max_count_ << "\n"
-     << std::endl;
+     << formatNameForDump("association_resend_max_count") << association_resend_max_count_ << "\n";
   return OPENDDS_STRING(os.str());
 }
 

@@ -46,15 +46,11 @@ ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
 bool
 ShmemDataLink::open(const std::string& peer_address)
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, mutex_, false);
-
   peer_address_ = peer_address;
   const ACE_TString name = ACE_TEXT_CHAR_TO_TCHAR(peer_address.c_str());
-  ShmemAllocator::MEMORY_POOL_OPTIONS* alloc_opts_ptr = 0;
 
 #ifdef OPENDDS_SHMEM_WINDOWS
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
-  alloc_opts_ptr = &alloc_opts;
   const ACE_TString name_under = name + ACE_TEXT('_');
   // Find max size of peer's pool so enough local address space is reserved.
   HANDLE fm = ACE_TEXT_CreateFileMapping(INVALID_HANDLE_VALUE, 0, PAGE_READONLY,
@@ -75,7 +71,11 @@ ShmemDataLink::open(const std::string& peer_address)
   CloseHandle(fm);
 #endif
 
-  peer_alloc_ = new ShmemAllocator(name.c_str(), 0 /*lock_name*/, alloc_opts_ptr);
+  peer_alloc_ = new ShmemAllocator(name.c_str(), 0 /*lock_name*/
+#ifdef OPENDDS_SHMEM_WINDOWS
+    , &alloc_opts
+#endif
+    );
 
   if (-1 == peer_alloc_->find("Semaphore")) {
     stop_i();
@@ -122,7 +122,7 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
   send_association_msg(local_sub, remote_pub);
   // Resend until we get a response.
   {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, mutex_, result);
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
     assoc_resends_.insert(std::pair<GuidPair, unsigned>(GuidPair(remote_pub, local_sub),
       config().association_resend_max_count()));
   }
@@ -168,11 +168,10 @@ void ShmemDataLink::resend_association_msgs(const MonotonicTimePoint&)
 {
   VDBG((LM_DEBUG, "(%P|%t) ShmemDataLink::resend_association_msgs\n"));
 
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, g, mutex_);
+  ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
   for (AssocResends::iterator i = assoc_resends_.begin(); i != assoc_resends_.end();) {
     send_association_msg(i->first.local, i->first.remote);
-    i->second--;
-    if (i->second) {
+    if (--i->second) {
       ++i;
     } else {
       assoc_resends_.erase(i++);
@@ -199,7 +198,7 @@ ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
         invoke_on_start_callbacks(local, remote, true);
       } else {
         // Writer has responded to association ack, stop sending.
-        ACE_GUARD(ACE_Recursive_Thread_Mutex, g, mutex_);
+        ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
         assoc_resends_.erase(GuidPair(remote, local));
       }
     }
@@ -216,13 +215,19 @@ ShmemDataLink::control_received(ReceivedDataSample& /*sample*/)
 void
 ShmemDataLink::stop_i()
 {
-  ACE_GUARD(ACE_Recursive_Thread_Mutex, g, mutex_);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
+    assoc_resends_.clear();
+    assoc_resends_task_->disable();
+  }
 
-  assoc_resends_.clear();
-  assoc_resends_task_->disable();
-
-  if (peer_alloc_) {
-    peer_alloc_->release(0 /*don't close*/);
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, peer_alloc_mutex_);
+    if (peer_alloc_) {
+      peer_alloc_->release(0 /*don't close*/);
+    }
+    delete peer_alloc_;
+    peer_alloc_ = 0;
   }
   delete peer_alloc_;
   peer_alloc_ = 0;
@@ -237,7 +242,7 @@ ShmemDataLink::impl() const
 ShmemAllocator*
 ShmemDataLink::peer_allocator()
 {
-  ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, g, mutex_, 0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, peer_alloc_mutex_, 0);
   return peer_alloc_;
 }
 

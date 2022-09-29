@@ -75,7 +75,6 @@ ShmemReceiveStrategy::read()
   // If we get this far, current_data_ points to the first SHMEM_DATA_IN_USE.
   // handle_dds_input() will call our receive_bytes() to get the data.
   handle_dds_input(ACE_INVALID_HANDLE);
-  return;
 }
 
 ssize_t

@@ -123,7 +123,7 @@ private:
 
   std::string peer_address_;
   ShmemAllocator* peer_alloc_;
-  ACE_Recursive_Thread_Mutex mutex_;
+  ACE_Thread_Mutex peer_alloc_mutex_;
   ReactorTask_rch reactor_task_;
 
   struct GuidPair {
@@ -141,6 +141,7 @@ private:
       return GUID_tKeyLessThan()(local, other.local) && GUID_tKeyLessThan()(remote, other.remote);
     }
   };
+  ACE_Thread_Mutex assoc_resends_mutex_;
   typedef std::map<GuidPair, unsigned> AssocResends;
   AssocResends assoc_resends_;
   typedef PmfPeriodicTask<ShmemDataLink> SmPeriodicTask;
