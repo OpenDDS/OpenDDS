@@ -72,3 +72,4 @@ massif.out.*
 *.tlog
 *.log
 *.ior
+/ChangeLog
