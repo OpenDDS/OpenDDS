@@ -138,6 +138,13 @@ void RtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
   queue_.swap(vec);
 }
 
+void RtpsSendQueue::purge(const RepoId& local, const RepoId& remote)
+{
+  const KeyType key(local, remote);
+  heartbeat_map_.erase(key);
+  acknack_map_.erase(key);
+}
+
 void RtpsSendQueue::purge_remote(const RepoId& id)
 {
   for (MapType::iterator it = heartbeat_map_.begin(), limit = heartbeat_map_.end(); it != limit;) {
