@@ -140,10 +140,10 @@ private:
   // data from 'other_dr' (with MetaStruct 'other_meta') such that all key
   // fields named in 'key_names' match the values in 'key_data'.  The struct
   // pointed-to by 'key_data' is of the type used by the 'other_dr'.
-  DDS::ReturnCode_t join(SampleVec& resulting, const SampleWithInfo& prototype,
-                         const std::vector<OPENDDS_STRING>& key_names,
-                         const void* key_data, DDS::DataReader_ptr other_dr,
-                         const MetaStruct& other_meta);
+  bool join(SampleVec& resulting, const SampleWithInfo& prototype,
+            const std::vector<OPENDDS_STRING>& key_names,
+            const void* key_data, DDS::DataReader_ptr other_dr,
+            const MetaStruct& other_meta);
 
   // When no common keys are found, natural join devolves to a cross-join where
   // each instance in the joined-to-topic (qp) is combined with the results so

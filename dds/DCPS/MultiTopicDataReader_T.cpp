@@ -76,7 +76,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::assign_resulting_fields(
 }
 
 template<typename Sample, typename TypedDataReader>
-DDS::ReturnCode_t
+bool
 MultiTopicDataReader_T<Sample, TypedDataReader>::join(
   SampleVec& resulting, const SampleWithInfo& prototype,
   const std::vector<OPENDDS_STRING>& key_names, const void* key_data,
@@ -87,7 +87,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
   if (!other_dri) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::join: ")
       ACE_TEXT("Failed to get DataReaderImpl.\n")));
-    return DDS::RETCODE_ERROR;
+    return false;
   }
 
   TopicDescription_var other_td = other_dri->get_topicdescription();
@@ -103,19 +103,19 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       const ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
-        throw std::runtime_error(
-          OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
-          " read_instance_generic: " + retcode_to_string(ret));
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MultiTopicDataReader_T::join: read_instance_generic"
+                     " for topic %C returns %C\n", other_topic.in(), retcode_to_string(ret)));
+        }
+        return false;
       }
       if (ret == DDS::RETCODE_NO_DATA || !info.valid_data) {
-        return DDS::RETCODE_NO_DATA;
+        return false;
       }
 
       resulting.push_back(prototype);
       resulting.back().combine(SampleWithInfo(other_topic.in(), info));
       assign_fields(resulting.back().sample_, other_data.ptr_, other_qp, other_meta);
-    } else {
-      return DDS::RETCODE_NO_DATA;
     }
   } else { // incomplete key or cross-join (0 key fields)
     ReturnCode_t ret = RETCODE_OK;
@@ -125,9 +125,12 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       const ReturnCode_t ret = other_dri->read_next_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
-        throw std::runtime_error(
-          OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
-          " read_next_instance_generic: " + retcode_to_string(ret));
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MultiTopicDataReader_T::join:"
+                     " read_next_instance_generic for topic %C returns %C\n",
+                     other_topic.in(), retcode_to_string(ret)));
+        }
+        return false;
       }
       if (ret == RETCODE_NO_DATA || !info.valid_data) {
         break;
@@ -148,7 +151,7 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       }
     }
   }
-  return DDS::RETCODE_OK;
+  return true;
 }
 
 template<typename Sample, typename TypedDataReader>
@@ -241,61 +244,54 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::process_joins(
     iter_t range_end = qp.adjacent_joins_.upper_bound(other_topic);
     const QueryPlan& other_qp = query_plans_[other_topic];
     DDS::DataReader_ptr other_dr = other_qp.data_reader_;
-    try {
-      const MetaStruct& other_meta = metaStructFor(other_dr);
+    const MetaStruct& other_meta = metaStructFor(other_dr);
 
-      vector<OPENDDS_STRING> keys;
-      for (; iter != range_end; ++iter) { // for each key in common w/ this topic
-        keys.push_back(iter->second);
+    vector<OPENDDS_STRING> keys;
+    for (; iter != range_end; ++iter) { // for each key in common w/ this topic
+      keys.push_back(iter->second);
+    }
+
+    typename std::map<TopicSet, SampleVec>::iterator found =
+      find_if(partial_results.begin(), partial_results.end(), Contains(other_topic));
+
+    if (found == partial_results.end()) { // haven't seen this topic yet
+      partial_results.erase(seen);
+      TopicSet with_join(seen);
+      with_join.insert(other_topic);
+      SampleVec& join_result = partial_results[with_join];
+      for (size_t i = 0; i < starting.size(); ++i) {
+        GenericData other_keys(other_meta);
+        for (size_t j = 0; j < keys.size(); ++j) {
+          other_meta.assign(other_keys.ptr_, keys[j].c_str(),
+                            &starting[i], keys[j].c_str(), resulting_meta);
+        }
+        if (!join(join_result, starting[i], keys, other_keys.ptr_, other_dr, other_meta)) {
+          return DDS::RETCODE_ERROR;
+        }
       }
 
-      typename std::map<TopicSet, SampleVec>::iterator found =
-        find_if(partial_results.begin(), partial_results.end(), Contains(other_topic));
-
-      if (found == partial_results.end()) { // haven't seen this topic yet
-        partial_results.erase(seen);
-        TopicSet with_join(seen);
-        with_join.insert(other_topic);
-        SampleVec& join_result = partial_results[with_join];
-        for (size_t i = 0; i < starting.size(); ++i) {
-          GenericData other_keys(other_meta);
-          for (size_t j = 0; j < keys.size(); ++j) {
-            other_meta.assign(other_keys.ptr_, keys[j].c_str(),
-                              &starting[i], keys[j].c_str(), resulting_meta);
-          }
-          const DDS::ReturnCode_t ret = join(join_result, starting[i], keys,
-                                             other_keys.ptr_, other_dr, other_meta);
-          if (ret != DDS::RETCODE_OK) {
-            return ret;
-          }
+      if (!join_result.empty() && !seen.count(other_topic)) {
+        // Recursively join with topics that are adjacent to other_topic.
+        const DDS::ReturnCode_t ret = process_joins(partial_results, join_result,
+                                                    with_join, other_qp);
+        if (ret != DDS::RETCODE_OK) {
+          return ret;
         }
-
-        if (!join_result.empty() && !seen.count(other_topic)) {
-          // Recursively join with topics that are adjacent to other_topic.
-          const DDS::ReturnCode_t ret = process_joins(partial_results, join_result,
-                                                      with_join, other_qp);
-          if (ret != DDS::RETCODE_OK) {
-            return ret;
-          }
-        }
-      } else if (!found->first.count(this_topic) /*avoid looping back*/) {
-        // We have partialResults for this topic, use them instead of recursing.
-        // Combine the partial samples for the TopicSet seen and found->first.
-        // Store the result into a new entry keyed with all topics in seen and found->first.
-        // The existing two entries are removed since they are not needed anymore.
-        combine(starting, found->second, keys, found->first);
-        TopicSet new_topics(seen);
-        for (set<OPENDDS_STRING>::const_iterator it = found->first.begin(); it != found->first.end(); ++it) {
-          new_topics.insert(*it);
-        }
-
-        partial_results.erase(found);
-        partial_results.erase(seen);
-        partial_results[new_topics] = starting;
+      }
+    } else if (!found->first.count(this_topic) /*avoid looping back*/) {
+      // We have partialResults for this topic, use them instead of recursing.
+      // Combine the partial samples for the TopicSet seen and found->first.
+      // Store the result into a new entry keyed with all topics in seen and found->first.
+      // The existing two entries are removed since they are not needed anymore.
+      combine(starting, found->second, keys, found->first);
+      TopicSet new_topics(seen);
+      for (set<OPENDDS_STRING>::const_iterator it = found->first.begin(); it != found->first.end(); ++it) {
+        new_topics.insert(*it);
       }
 
-    } catch (const std::runtime_error& e) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::process_joins: %C\n"), e.what()));
+      partial_results.erase(found);
+      partial_results.erase(seen);
+      partial_results[new_topics] = starting;
     }
   }
   return DDS::RETCODE_OK;
@@ -308,34 +304,30 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::cross_join(
   const QueryPlan& qp)
 {
   using namespace std;
-  try {
-    const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
-    vector<OPENDDS_STRING> no_keys;
-    for (typename std::map<TopicSet, SampleVec>::iterator it_pr = partial_results.begin();
-         it_pr != partial_results.end(); ++it_pr) {
-      SampleVec resulting;
-      for (typename SampleVec::iterator i = it_pr->second.begin(); i != it_pr->second.end(); ++i) {
-        const DDS::ReturnCode_t ret = join(resulting, *i, no_keys, 0, qp.data_reader_, other_meta);
-        if (ret != DDS::RETCODE_OK) {
-          return ret;
-        }
+  const MetaStruct& other_meta = metaStructFor(qp.data_reader_);
+  vector<OPENDDS_STRING> no_keys;
+  for (typename std::map<TopicSet, SampleVec>::iterator it_pr = partial_results.begin();
+       it_pr != partial_results.end(); ++it_pr) {
+    SampleVec resulting;
+    for (typename SampleVec::iterator i = it_pr->second.begin(); i != it_pr->second.end(); ++i) {
+      if (!join(resulting, *i, no_keys, 0, qp.data_reader_, other_meta)) {
+        return DDS::RETCODE_ERROR;
       }
-      resulting.swap(it_pr->second);
     }
-
-    TopicSet with_join(seen);
-    with_join.insert(topicNameFor(qp.data_reader_));
-    partial_results[with_join].swap(partial_results[seen]);
-    partial_results.erase(seen);
-    const DDS::ReturnCode_t ret = process_joins(partial_results, partial_results[with_join],
-                                                with_join, qp);
-    if (ret != DDS::RETCODE_OK) {
-      partial_results.erase(with_join);
-      return ret;
-    }
-  } catch (const std::runtime_error& e) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReader_T::cross_join: %C\n"), e.what()));
+    resulting.swap(it_pr->second);
   }
+
+  TopicSet with_join(seen);
+  with_join.insert(topicNameFor(qp.data_reader_));
+  partial_results[with_join].swap(partial_results[seen]);
+  partial_results.erase(seen);
+  const DDS::ReturnCode_t ret = process_joins(partial_results, partial_results[with_join],
+                                              with_join, qp);
+  if (ret != DDS::RETCODE_OK) {
+    partial_results.erase(with_join);
+    return ret;
+  }
+
   return DDS::RETCODE_OK;
 }
 
