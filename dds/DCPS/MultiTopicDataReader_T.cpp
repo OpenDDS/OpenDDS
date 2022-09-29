@@ -102,19 +102,18 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
       SampleInfo info;
       const ReturnCode_t ret = other_dri->read_instance_generic(other_data.ptr_,
         info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+      if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_NO_DATA) {
+        throw std::runtime_error(
+          OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
+          " read_instance_generic: " + retcode_to_string(ret));
+      }
       if (ret == DDS::RETCODE_NO_DATA || !info.valid_data) {
         return DDS::RETCODE_NO_DATA;
       }
 
-      if (ret != RETCODE_OK) {
-        throw std::runtime_error(
-          OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
-          " read_instance_generic: " + retcode_to_string(ret));
-      } else {
-        resulting.push_back(prototype);
-        resulting.back().combine(SampleWithInfo(other_topic.in(), info));
-        assign_fields(resulting.back().sample_, other_data.ptr_, other_qp, other_meta);
-      }
+      resulting.push_back(prototype);
+      resulting.back().combine(SampleWithInfo(other_topic.in(), info));
+      assign_fields(resulting.back().sample_, other_data.ptr_, other_qp, other_meta);
     } else {
       return DDS::RETCODE_NO_DATA;
     }
@@ -123,21 +122,21 @@ MultiTopicDataReader_T<Sample, TypedDataReader>::join(
     for (InstanceHandle_t ih = HANDLE_NIL; ret != RETCODE_NO_DATA;) {
       GenericData other_data(other_meta, false);
       SampleInfo info;
-      const ReturnCode_t ret = other_dri->read_next_instance_generic(other_data.ptr_, info, ih,
-        READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+      const ReturnCode_t ret = other_dri->read_next_instance_generic(other_data.ptr_,
+        info, ih, READ_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
       if (ret != RETCODE_OK && ret != RETCODE_NO_DATA) {
         throw std::runtime_error(
           OPENDDS_STRING("In join(), incoming DataReader for ") + OPENDDS_STRING(other_topic) +
           " read_next_instance_generic: " + retcode_to_string(ret));
-      } else if (ret == RETCODE_NO_DATA) {
+      }
+      if (ret == RETCODE_NO_DATA || !info.valid_data) {
         break;
       }
       ih = info.instance_handle;
 
       bool match = true;
       for (size_t i = 0; match && i < key_names.size(); ++i) {
-        if (!other_meta.compare(key_data, other_data.ptr_,
-                                key_names[i].c_str())) {
+        if (!other_meta.compare(key_data, other_data.ptr_, key_names[i].c_str())) {
           match = false;
         }
       }
