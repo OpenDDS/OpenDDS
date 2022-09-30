@@ -88,7 +88,7 @@ void NetworkConfigModifier::update_interfaces()
         ACE_INET_Addr address;
         address.set(reinterpret_cast<struct sockaddr_in *> (addr), sizeof(sockaddr_in6));
 
-        nia_list.push_back(NetworkInterfaceAddress(ACE_OS::if_nametoindex(p_if->ifa_name), p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK), address));
+        nia_list.push_back(NetworkInterfaceAddress(p_if->ifa_name, p_if->ifa_flags & (IFF_MULTICAST | IFF_LOOPBACK), NetworkAddress(address)));
       }
     }
 # endif /* ACE_HAS_IPV6 */
