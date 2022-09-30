@@ -189,6 +189,9 @@ Subscriber::Subscriber( const Options& options)
   // StatusCondition(s) that we want to wait on in the main thread.
   this->reader_->set_listener( this->listener_, DDS::DATA_AVAILABLE_STATUS);
 
+  // Call on_data_available in case there are samples which are waiting
+  this->listener_->on_data_available(this->reader_);
+
   // Grab, enable and attach the status condition for test synchronization.
   this->status_ = this->reader_->get_statuscondition();
   this->status_->set_enabled_statuses( DDS::SUBSCRIPTION_MATCHED_STATUS);

@@ -362,6 +362,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 
       DataReaderListener_var failover = new FailoverListener(key());
       pbit_dr->set_listener(failover, DEFAULT_STATUS_MASK);
+      // No need to invoke the listener.
     }
 
     DDS::DataReaderQos dr_qos;
