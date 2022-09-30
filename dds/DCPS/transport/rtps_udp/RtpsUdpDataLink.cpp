@@ -561,6 +561,8 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             const NetworkAddress& last_addr_hint,
                             bool requires_inline_qos)
 {
+  sq_.purge(local_id, remote_id);
+
   update_locators(remote_id, unicast_addresses, multicast_addresses, requires_inline_qos, true);
   if (last_addr_hint != NetworkAddress()) {
     update_last_recv_addr(remote_id, last_addr_hint);

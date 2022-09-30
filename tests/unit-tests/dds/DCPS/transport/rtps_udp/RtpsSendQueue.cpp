@@ -267,6 +267,20 @@ TEST(dds_DCPS_RtpsSendQueue, Purging)
   sq.push_back(create_heartbeat(w2, r1, first, last, count++));
   sq.push_back(create_heartbeat(w2, r2, first, last, count++));
 
+  sq.purge(w1, r2);
+
+  sq.condense_and_swap(vec);
+  EXPECT_EQ(vec.size(), 5u);
+  vec.clear();
+
+  sq.push_back(create_heartbeat(w1, GUID_UNKNOWN, first, last, count++));
+  sq.push_back(create_heartbeat(w1, r1, first, last, count++));
+  sq.push_back(create_heartbeat(w1, r2, first, last, count++));
+
+  sq.push_back(create_heartbeat(w2, GUID_UNKNOWN, first, last, count++));
+  sq.push_back(create_heartbeat(w2, r1, first, last, count++));
+  sq.push_back(create_heartbeat(w2, r2, first, last, count++));
+
   sq.purge_remote(r2);
 
   sq.condense_and_swap(vec);
