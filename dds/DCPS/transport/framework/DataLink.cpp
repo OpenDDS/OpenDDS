@@ -384,7 +384,7 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
     LogGuid local_log(local_publication_id), remote_log(remote_subscription_id);
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
-        ACE_TEXT("creating association local publication  %C ")
+        ACE_TEXT("creating association local publication %C ")
         ACE_TEXT("<--> with remote subscription %C.\n"),
         local_log .c_str(),
         remote_log.c_str()));
@@ -422,12 +422,12 @@ DataLink::make_reservation(const RepoId& remote_publication_id,
   DBG_ENTRY_LVL("DataLink", "make_reservation", 6);
 
   if (DCPS_debug_level > 9) {
-    GuidConverter local(local_subscription_id), remote(remote_publication_id);
+    LogGuid local(local_subscription_id), remote(remote_publication_id);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::make_reservation() - ")
                ACE_TEXT("creating association local subscription %C ")
-               ACE_TEXT("<--> with remote publication  %C.\n"),
-               OPENDDS_STRING(local).c_str(), OPENDDS_STRING(remote).c_str()));
+               ACE_TEXT("<--> with remote publication %C.\n"),
+               local.c_str(), remote.c_str()));
   }
 
   TransportSendStrategy_rch strategy = get_send_strategy();

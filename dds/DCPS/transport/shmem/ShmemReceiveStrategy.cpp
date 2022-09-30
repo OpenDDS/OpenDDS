@@ -46,7 +46,7 @@ ShmemReceiveStrategy::read()
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem = 0;
   if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)) {
-    VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::read link %@ "
+    VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
               "peer allocator not found, receive_bytes will close link\n",
               link_), 1);
     handle_dds_input(ACE_INVALID_HANDLE); // will return 0 to the TRecvStrateg.
@@ -92,7 +92,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   void* mem;
   if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)
       || current_data_->status_ != SHMEM_DATA_IN_USE) {
-    VDBG_LVL((LM_INFO, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
+    VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
              1);
     gracefully_disconnected_ = true; // do not attempt reconnect via relink()
     return 0; // close "connection"
@@ -182,6 +182,10 @@ ShmemReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
                                      const ACE_INET_Addr& /*remote_address*/)
 {
   switch (sample.header_.message_id_) {
+
+  case REQUEST_ACK:
+    link_->request_ack_received(sample);
+    break;
 
   case TRANSPORT_CONTROL:
     link_->control_received(sample);
