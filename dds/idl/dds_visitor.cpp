@@ -35,7 +35,9 @@
 #include <ast_predefined_type.h>
 #include <ast_root.h>
 #include <ast_sequence.h>
+#if OPENDDS_HAS_MAP
 #include <ast_map.h>
+#endif
 #include <ast_structure.h>
 #include <ast_union.h>
 #include <ast_valuetype.h>

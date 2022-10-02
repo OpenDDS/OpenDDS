@@ -66,9 +66,13 @@ std::string FieldInfo::scoped_type(AST_Type& field_type, const std::string& fiel
   n = n.substr(0, n.rfind(scope_op) + 2) + at_pfx() + field_name;
   if (field_type.node_type() == AST_Decl::NT_sequence) {
     return n + "_seq";
-  } else if (field_type.node_type() == AST_Decl::NT_map) {
+  }
+
+#if OPENDDS_HAS_MAP
+  if (field_type.node_type() == AST_Decl::NT_map) {
     return n + "_map";
   }
+#endif
 
   return n;
 }
@@ -101,7 +105,9 @@ FieldInfo::FieldInfo(AST_Field& field)
   , cls_(classify(act_))
   , arr_(dynamic_cast<AST_Array*>(type_))
   , seq_(dynamic_cast<AST_Sequence*>(type_))
+#if OPENDDS_HAS_MAP
   , map_(dynamic_cast<AST_Map*>(type_))
+#endif
   , as_base_(container_base_type(type_))
   , as_act_(as_base_ ? resolveActualType(as_base_) : 0)
   , as_cls_(as_act_ ? classify(as_act_) : CL_UNKNOWN)

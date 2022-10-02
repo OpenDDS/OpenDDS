@@ -4,6 +4,8 @@
 
 #include <gtest/gtest.h>
 
+#if OPENDDS_HAS_MAP
+
 const OpenDDS::DCPS::Encoding encoding(OpenDDS::DCPS::Encoding::KIND_UNALIGNED_CDR);
 
 template<typename T>
@@ -236,3 +238,5 @@ int main(int argc, char* argv[])
   ::testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+#endif

@@ -103,6 +103,7 @@ namespace {
     }
   }
 
+#if OPENDDS_HAS_MAP
   void map_helper(const std::string& expression, AST_Map* map,
                        const std::string& idx, int level)
   {
@@ -150,6 +151,7 @@ namespace {
       indent << "}\n" <<
       indent << "if (!value_reader.end_map()) return false;\n";
   }
+#endif
 
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
@@ -190,11 +192,14 @@ namespace {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression + accessor, array, 0, idx, level);
       return;
-    } else if (c & CL_MAP) {
+    } 
+#if OPENDDS_HAS_MAP
+    if (c & CL_MAP) {
       AST_Map* const map = dynamic_cast<AST_Map*>(actual);
       map_helper(expression + accessor, map, idx, level);
       return;
     }
+#endif
 
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');

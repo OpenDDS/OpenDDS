@@ -1471,10 +1471,12 @@ struct Cxx11Generator : GeneratorBase
     be_global->lang_header_ << ind << "using " << type << " = std::map<" << key << "," << val << ">;\n";
   }
 
+#if OPENDDS_HAS_MAP
   void gen_map(UTL_ScopedName* tdname, AST_Map* map)
   {
     gen_map(tdname->last_component()->get_string(), map_type(map->key_type()), map_type(map->value_type()));
   }
+#endif
 
   static void gen_common_strunion_pre(const char* nm)
   {
@@ -1504,11 +1506,13 @@ struct Cxx11Generator : GeneratorBase
       }
     }
 
+#if OPENDDS_HAS_MAP
     if (af.map_) {
       const std::string key_type = generator_->map_type(af.map_->key_type());
       const std::string value_type = generator_->map_type(af.map_->value_type());
       gen_map(af.type_name_, key_type, value_type, "  ");
     }
+#endif
 
     const std::string lang_field_type = generator_->map_type(field);
     const std::string assign_pre = "{ _" + af.name_ + " = ",
@@ -1933,9 +1937,11 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
     case AST_Decl::NT_sequence:
       generator_->gen_sequence(name, dynamic_cast<AST_Sequence*>(base));
       break;
+#if OPENDDS_HAS_MAPS
     case AST_Decl::NT_map:
       generator_->gen_map(name, dynamic_cast<AST_Map*>(base));
       break;
+#endif
     case AST_Decl::NT_array:
       generator_->gen_array(name, arr = dynamic_cast<AST_Array*>(base));
       break;

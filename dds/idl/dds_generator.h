@@ -409,8 +409,10 @@ namespace AstTypeClassification {
         ((dynamic_cast<AST_String*>(type)->max_size()->ev()->u.ulval == 0)
         ? 0 : CL_BOUNDED) |
         ((type->node_type() == AST_Decl::NT_wstring) ? CL_WIDE : 0);
+#if OPENDDS_HAS_MAP
     case AST_Decl::NT_map:
       return CL_MAP;
+#endif 
     case AST_Decl::NT_sequence:
       return CL_SEQUENCE |
         ((dynamic_cast<AST_Sequence*>(type)->unbounded()) ? 0 : CL_BOUNDED);

@@ -1229,6 +1229,7 @@ namespace {
     }
   }
 
+#if OPENDDS_HAS_MAP
   void gen_map_i(
     UTL_ScopedName* tdname, AST_Map* map, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
@@ -1586,6 +1587,7 @@ namespace {
       gen_map_i(0, 0, true, &sf);
     }
   }
+#endif
 
   void gen_array_i(
     UTL_ScopedName* name, AST_Array* arr, bool nested_key_only, const FieldInfo* anonymous = 0)
@@ -2258,9 +2260,11 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
   case AST_Decl::NT_array:
     gen_array(name, dynamic_cast<AST_Array*>(base));
     break;
+#if OPENDDS_HAS_MAP
   case AST_Decl::NT_map:
     gen_map(name, dynamic_cast<AST_Map*>(base));
     break;
+#endif
   default:
     return true;
   }
@@ -3577,10 +3581,13 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         gen_anonymous_array(af);
       } else if (af.seq_ && af.is_new(anonymous_seq_generated)) {
         gen_anonymous_sequence(af);
-      } else if (af.map_) {
+      } 
+#if OPENDDS_HAS_MAP
+      if (af.map_) {
         // TODO
         gen_anonymous_map(af);
       }
+#endif
     }
   }
 

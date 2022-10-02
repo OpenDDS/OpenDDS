@@ -824,7 +824,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       consider(v, n->base_type(), v.name);
       break;
     }
-
+#if OPENDDS_HAS_MAP
   case AST_ConcreteType::NT_map:
     {
       AST_Map* const n = dynamic_cast<AST_Map*>(type);
@@ -833,7 +833,7 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       consider(v, n->value_type(), v.name);
       break;
     }
-
+#endif
   case AST_ConcreteType::NT_sequence:
     {
       AST_Sequence* const n = dynamic_cast<AST_Sequence*>(type);
@@ -1361,6 +1361,7 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
 void
 typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_type_object)
 {
+#if OPENDDS_HAS_MAP
   AST_Map* const n = dynamic_cast<AST_Map*>(type);
   // TODO (tyler) This needs to be completed
 
@@ -1401,6 +1402,7 @@ typeobject_generator::generate_map_type_identifier(AST_Type* type, bool force_ty
 
     update_maps(type, minimal_to, complete_to);
   }
+#endif
 }
 
 void
@@ -1625,11 +1627,13 @@ typeobject_generator::generate_type_identifier(AST_Type* type, bool force_type_o
       break;
     }
 
+#if OPENDDS_HAS_MAP
   case AST_ConcreteType::NT_map:
     {
       generate_map_type_identifier(type, force_type_object);
       break;
     }
+#endif
 
   case AST_ConcreteType::NT_sequence:
     {
