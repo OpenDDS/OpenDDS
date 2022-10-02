@@ -412,7 +412,7 @@ namespace AstTypeClassification {
 #if OPENDDS_HAS_MAP
     case AST_Decl::NT_map:
       return CL_MAP;
-#endif 
+#endif
     case AST_Decl::NT_sequence:
       return CL_SEQUENCE |
         ((dynamic_cast<AST_Sequence*>(type)->unbounded()) ? 0 : CL_BOUNDED);

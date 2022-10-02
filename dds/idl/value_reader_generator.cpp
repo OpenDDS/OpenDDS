@@ -192,7 +192,7 @@ namespace {
       AST_Array* const array = dynamic_cast<AST_Array*>(actual);
       array_helper(expression + accessor, array, 0, idx, level);
       return;
-    } 
+    }
 #if OPENDDS_HAS_MAP
     if (c & CL_MAP) {
       AST_Map* const map = dynamic_cast<AST_Map*>(actual);

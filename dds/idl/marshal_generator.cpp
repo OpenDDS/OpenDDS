@@ -3581,7 +3581,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         gen_anonymous_array(af);
       } else if (af.seq_ && af.is_new(anonymous_seq_generated)) {
         gen_anonymous_sequence(af);
-      } 
+      }
 #if OPENDDS_HAS_MAP
       if (af.map_) {
         // TODO
