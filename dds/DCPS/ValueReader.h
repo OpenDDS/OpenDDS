@@ -196,9 +196,6 @@ public:
   ///@}
 };
 
-template <typename T>
-bool vread(ValueReader& value_reader, T& value);
-
 } // namespace DCPS
 } // namespace OpenDDS
 

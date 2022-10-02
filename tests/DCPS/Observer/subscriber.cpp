@@ -86,9 +86,9 @@ int Subscriber::Reader::waitForPublisherDone()
 {
   // Block until Publisher completes
   DDS::StatusCondition_var status = reader_->get_statuscondition();
-  DDS::WaitSet waitSet;
+  DDS::WaitSet_var waitSet(new DDS::WaitSet);
   if (status->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS) != DDS::RETCODE_OK
-    || waitSet.attach_condition(status) != DDS::RETCODE_OK) {
+    || waitSet->attach_condition(status) != DDS::RETCODE_OK) {
     return 1;
   }
   int ret = 0;
@@ -97,7 +97,7 @@ int Subscriber::Reader::waitForPublisherDone()
     DDS::Duration_t timeout = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};
     DDS::SubscriptionMatchedStatus match = {0, 0, 0, 0, 0};
     while (match.current_count != 0 || match.total_count <= 0) {
-      if (waitSet.wait(conditions, timeout) != DDS::RETCODE_OK) {
+      if (waitSet->wait(conditions, timeout) != DDS::RETCODE_OK) {
         throw ACE_TEXT("ERROR: wait() failed!\n");
       }
       if (reader_->get_subscription_matched_status(match) != DDS::RETCODE_OK) {
@@ -105,7 +105,7 @@ int Subscriber::Reader::waitForPublisherDone()
       }
     }
   } catch (...) { ret = 1; }
-  return (waitSet.detach_condition(status) == DDS::RETCODE_OK ? 0 : 1) + ret;
+  return (waitSet->detach_condition(status) == DDS::RETCODE_OK ? 0 : 1) + ret;
 }
 
 void Subscriber::Reader::change_qos()

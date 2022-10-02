@@ -1535,7 +1535,7 @@ Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& remoteId)
 }
 #endif
 
-bool
+void
 Sedp::disassociate(DiscoveredParticipant& participant)
 {
   const RepoId part = make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
@@ -1545,12 +1545,8 @@ Sedp::disassociate(DiscoveredParticipant& participant)
   OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
   OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
 
-  bool result = false;
-  if (spdp_.has_discovered_participant(part)) {
-    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
-    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
-    result = true;
-  }
+  remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
+  remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
 
   for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
     remove_from_bit_i(*it);
@@ -1627,8 +1623,6 @@ Sedp::disassociate(DiscoveredParticipant& participant)
     }
   }
 #endif
-
-  return result;
 }
 
 void
@@ -3171,6 +3165,11 @@ bool Sedp::Endpoint::associated_with_counterpart_if_not_pending(
   return associated_with(counterpart) || !pending_association_with(counterpart);
 }
 
+RcHandle<DCPS::BitSubscriber> Sedp::Endpoint::get_builtin_subscriber_proxy() const
+{
+  return sedp_.spdp_.bit_subscriber_;
+}
+
 //---------------------------------------------------------------
 Sedp::Writer::Writer(const RepoId& pub_id, Sedp& sedp, ACE_INT64 seq_init)
   : Endpoint(pub_id, sedp), seq_(seq_init)
@@ -3588,7 +3587,7 @@ Sedp::Writer::set_header_fields(DCPS::DataSampleHeader& dsh,
 
   const SystemTimePoint now = SystemTimePoint::now();
   dsh.source_timestamp_sec_ = static_cast<ACE_INT32>(now.value().sec());
-  dsh.source_timestamp_nanosec_ = now.value().usec() * 1000;
+  dsh.source_timestamp_nanosec_ = static_cast<ACE_UINT32>(now.value().usec() * 1000);
 }
 
 Sedp::SecurityWriter::~SecurityWriter()
@@ -4435,7 +4434,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
     const GUID_t guid = make_part_guid(sample.header_.publication_id_);
     sedp_.spdp_.process_participant_ice(data, pdata, guid);
-    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
+    sedp_.spdp_.handle_participant_data(id, pdata, DCPS::MonotonicTimePoint::now(), DCPS::SequenceNumber::ZERO(), ACE_INET_Addr(), true);
 
 #endif
   }
@@ -7302,7 +7301,8 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
       // Associate immediately.
       event_dispatcher_->dispatch(DCPS::make_rch<ReaderAddAssociation>(rar));
       event_dispatcher_->dispatch(DCPS::make_rch<WriterAddAssociation>(war));
-    } else if (call_reader) {
+
+#ifndef OPENDDS_SAFETY_PROFILE
       if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
         // Reader is a local recorder using complete types
         DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();
@@ -7314,6 +7314,22 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
           }
         }
       }
+#endif
+
+    } else if (call_reader) {
+#ifndef OPENDDS_SAFETY_PROFILE
+      if (use_xtypes_complete_ && reader_type_info->complete.typeid_with_size.type_id.kind() == XTypes::TK_NONE) {
+        // Reader is a local recorder using complete types
+        DCPS::DataReaderCallbacks_rch lock = rar->callbacks_.lock();
+        OpenDDS::DCPS::RecorderImpl* ri = dynamic_cast<OpenDDS::DCPS::RecorderImpl*>(lock.in());
+        if (ri) {
+          XTypes::TypeInformation type_info;
+          if (XTypes::deserialize_type_info(type_info, rar->writer_association_.serializedTypeInfo)) {
+            ri->add_to_dynamic_type_map(rar->writer_id(), type_info.complete.typeid_with_size.type_id);
+          }
+        }
+      }
+#endif
       Spdp::DiscoveredParticipantIter iter = spdp_.participants_.find(make_id(writer, ENTITYID_PARTICIPANT));
       if (iter != spdp_.participants_.end()) {
         iter->second.reader_pending_records_.push_back(rar);

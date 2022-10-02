@@ -6,10 +6,12 @@ tests/security/attributes/run_test.pl SC0_sec_on
 tests/security/attributes/run_test.pl SC0_sec_on_ec_pub
 tests/security/attributes/run_test.pl SC0_sec_on_ec_sub
 tests/security/attributes/run_test.pl SC0_sec_on_ec_both
-#tests/security/attributes/run_test.pl SC1_sec_off_failure
+tests/security/attributes/run_test.pl SC1_sec_off_success
+tests/security/attributes/run_test.pl SC1_sec_sub_failure
+tests/security/attributes/run_test.pl SC1_sec_pub_failure
 tests/security/attributes/run_test.pl SC1_sec_on_bad_cert_failure
 tests/security/attributes/run_test.pl SC1_sec_on_bad_perm_1_failure
-#tests/security/attributes/run_test.pl SC1_sec_on_bad_perm_2_failure
+tests/security/attributes/run_test.pl SC1_sec_on_bad_perm_2_failure
 tests/security/attributes/run_test.pl SC1_sec_on_success
 tests/security/attributes/run_test.pl SC2
 tests/security/attributes/run_test.pl SC3
@@ -30,7 +32,7 @@ tests/security/attributes/run_test.pl FullMsgSign_SubMsgSign_PayloadEncrypt
 tests/security/attributes/run_test.pl FullMsgSign_SubMsgEncrypt_PayloadEncrypt
 tests/security/attributes/run_test.pl FullMsgEncrypt_SubMsgSign_PayloadEncrypt
 tests/security/attributes/run_test.pl FullMsgEncrypt_SubMsgEncrypt_PayloadEncrypt
-#tests/security/attributes/run_test.pl FullMsgSign_PayloadEncrypt_Frag
+tests/security/attributes/run_test.pl FullMsgSign_PayloadEncrypt_Frag
 tests/security/attributes/run_test.pl Partitions_DefaultQoS
 tests/security/attributes/run_test.pl Partitions_Denied
 tests/security/attributes/run_test.pl Partitions_Match
@@ -69,3 +71,4 @@ tests/DCPS/XTypes/run_test.pl --secure
 
 tests/security/ConcurrentAuthLimit/run_test.pl
 tests/security/ConcurrentAuthLimit/run_test.pl no_limit
+tests/security/CheckInstance/run_test.pl: !DDS_NO_CONTENT_SUBSCRIPTION

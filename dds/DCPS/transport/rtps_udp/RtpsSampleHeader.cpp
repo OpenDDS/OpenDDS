@@ -146,6 +146,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   if (valid_) {
 
     frag_ = (kind == DATA_FRAG);
+    data_ = (kind == DATA);
 
     // serialized_size_ is # of bytes of submessage we have read from "mb"
     serialized_size_ = starting_length - mb.total_length();

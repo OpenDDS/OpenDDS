@@ -95,7 +95,9 @@ public:
 
   void remove_all_associations();
 
+#ifndef OPENDDS_SAFETY_PROFILE
   void add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti);
+#endif
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   // implement Recoder
@@ -151,7 +153,9 @@ private:
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
-  XTypes::DynamicData get_dynamic_data(const RawDataSample& sample);
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicData_ptr get_dynamic_data(const RawDataSample& sample);
+#endif
   void check_encap(bool b) { check_encap_ = b; }
   bool check_encap() const { return check_encap_; }
 
@@ -199,8 +203,10 @@ private:
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
 
-  typedef OPENDDS_MAP(PublicationId, XTypes::DynamicType_rch) DynamicTypeByPubId;
+#ifndef OPENDDS_SAFETY_PROFILE
+  typedef OPENDDS_MAP(PublicationId, DDS::DynamicType_var) DynamicTypeByPubId;
   DynamicTypeByPubId dt_map_;
+#endif
   bool check_encap_;
 };
 

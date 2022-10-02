@@ -904,7 +904,7 @@ void SpdpHandler::cache_message(GuidAddrSet::Proxy& proxy,
 bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::GUID_t& src_guid,
-                                       const GuidSet& to,
+                                       GuidSet& to,
                                        bool admitted,
                                        bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
@@ -914,8 +914,11 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
-      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing application participant imposter detected at %C\n"),
-        OpenDDS::DCPS::LogAddr(remote).c_str()));
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SpdpHandler::do_normal_processing application participant imposter detected AP %C %C Remote %C %C\n"),
+                     guid_to_string(config_.application_participant_guid()).c_str(),
+                     OpenDDS::DCPS::LogAddr(application_participant_addr_).c_str(),
+                     guid_to_string(src_guid).c_str(),
+                     OpenDDS::DCPS::LogAddr(remote).c_str()));
       return false;
     }
 
@@ -944,6 +947,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
     // Don't double send when admitted.
     send_to_application_participant = !admitted;
+    to.erase(config_.application_participant_guid());
   }
 
   return true;
@@ -1051,7 +1055,7 @@ SedpHandler::SedpHandler(const Config& config,
 bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                                        const ACE_INET_Addr& remote,
                                        const OpenDDS::DCPS::GUID_t& src_guid,
-                                       const GuidSet& to,
+                                       GuidSet& to,
                                        bool /*admitted*/,
                                        bool& send_to_application_participant,
                                        const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
@@ -1061,8 +1065,11 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   if (src_guid == config_.application_participant_guid()) {
     if (remote != application_participant_addr_) {
       // Something is impersonating our application participant.
-      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing application participant imposter detected at %C\n"),
-        OpenDDS::DCPS::LogAddr(remote).c_str()));
+      HANDLER_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: SedpHandler::do_normal_processing application participant imposter detected AP %C %C Remote %C %C\n"),
+                     guid_to_string(config_.application_participant_guid()).c_str(),
+                     OpenDDS::DCPS::LogAddr(application_participant_addr_).c_str(),
+                     guid_to_string(src_guid).c_str(),
+                     OpenDDS::DCPS::LogAddr(remote).c_str()));
       return false;
     }
 
@@ -1090,6 +1097,7 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
   // SEDP message is from a client.
   if (to.empty() || to.count(config_.application_participant_guid()) != 0) {
     send_to_application_participant = true;
+    to.erase(config_.application_participant_guid());
   }
 
   return true;

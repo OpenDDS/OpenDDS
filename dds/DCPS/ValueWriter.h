@@ -7,7 +7,7 @@
 #define OPENDDS_DCPS_VALUE_WRITER_H
 
 #include "Definitions.h"
-#include "XTypes/MemberDescriptor.h"
+#include "XTypes/MemberDescriptorImpl.h"
 
 #include <dds/Versioned_Namespace.h>
 #include <FACE/Fixed.h>
@@ -42,7 +42,7 @@ public:
 
   virtual void begin_struct() {}
   virtual void end_struct() {}
-  virtual void begin_struct_member(const XTypes::MemberDescriptor& /*descriptor*/) {}
+  virtual void begin_struct_member(const DDS::MemberDescriptor& /*descriptor*/) {}
   virtual void end_struct_member() {}
 
   virtual void begin_union() {}
@@ -138,17 +138,6 @@ public:
   virtual void write_char8_array(const ACE_CDR::Char* x, size_t length);
   virtual void write_char16_array(const ACE_CDR::WChar* x, size_t length);
   ///@}
-};
-
-template <typename T>
-void vwrite(ValueWriter& value_writer, const T& value);
-
-// Implementations of this interface will call vwrite(value_writer, v)
-// where v is the resulting of casting data to the appropriate type.
-struct ValueWriterDispatcher {
-  virtual ~ValueWriterDispatcher() {}
-
-  virtual void write(ValueWriter& value_writer, const void* data) const = 0;
 };
 
 } // namespace DCPS

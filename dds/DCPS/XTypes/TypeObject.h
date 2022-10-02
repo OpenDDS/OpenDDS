@@ -1896,7 +1896,7 @@ namespace XTypes {
 
   // Enumerated type
   struct CompleteEnumeratedType  {
-    EnumTypeFlag enum_flags; // unused
+    EnumTypeFlag enum_flags;
     CompleteEnumeratedHeader header;
     CompleteEnumeratedLiteralSeq literal_seq;
 
@@ -1915,7 +1915,7 @@ namespace XTypes {
 
   // Enumerated type
   struct MinimalEnumeratedType  {
-    EnumTypeFlag enum_flags; // unused
+    EnumTypeFlag enum_flags;
     MinimalEnumeratedHeader header;
     MinimalEnumeratedLiteralSeq literal_seq;
 
@@ -1971,6 +1971,10 @@ namespace XTypes {
     BitmaskTypeFlag bitmask_flags; // unused
     MinimalBitmaskHeader header;
     MinimalBitflagSeq flag_seq;
+
+    MinimalBitmaskType()
+      : bitmask_flags(0)
+    {}
   };
 
   // --- Bitset: ----------------------------------------------------------
@@ -2013,6 +2017,10 @@ namespace XTypes {
     BitsetTypeFlag bitset_flags; // unused
     MinimalBitsetHeader header;
     MinimalBitfieldSeq field_seq;
+
+    MinimalBitsetType()
+      : bitset_flags(0)
+    {}
   };
 
   // --- Type Object: ---------------------------------------------------

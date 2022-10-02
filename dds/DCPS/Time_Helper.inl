@@ -178,7 +178,7 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 {
   DDS::Time_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
 
@@ -187,7 +187,7 @@ MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
 {
   MonotonicTime_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
 
@@ -230,7 +230,7 @@ DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)
 {
   DDS::Duration_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
 

@@ -35,6 +35,8 @@ void RelayParticipantStatusReporter::add_participant(GuidAddrSet::Proxy& proxy,
                    guid_to_string(repoid).c_str(), OpenDDS::DCPS::to_json(data).c_str(),
                    proxy.get_session_time(repoid, now).sec_str().c_str()));
       }
+    } else {
+      p.first->second = status;
     }
 
     stats_reporter_.local_participants(guids_.size(), now);

@@ -110,6 +110,13 @@ DataWriterImpl::DataWriterImpl()
 DataWriterImpl::~DataWriterImpl()
 {
   DBG_ENTRY_LVL("DataWriterImpl","~DataWriterImpl",6);
+#ifndef OPENDDS_SAFETY_PROFILE
+  RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
+  if (participant) {
+    XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
+    type_lookup_service->remove_guid_from_dynamic_map(publication_id_);
+  }
+#endif
 }
 
 // this method is called when delete_datawriter is called.
@@ -219,9 +226,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     return;
   }
 
-  if (GUID_UNKNOWN == publication_id_) {
-    publication_id_ = yourId;
-  }
+  check_and_set_repo_id(yourId);
 
   {
     ACE_GUARD(ACE_Thread_Mutex, reader_info_guard, this->reader_info_lock_);
@@ -1514,6 +1519,12 @@ DataWriterImpl::enable()
     return DDS::RETCODE_ERROR;
   }
 
+#if defined(OPENDDS_SECURITY)
+  security_config_ = participant->get_security_config();
+  participant_permissions_handle_ = participant->permissions_handle();
+  dynamic_type_ = type_lookup_service->type_identifier_to_dynamic(typesupport->getCompleteTypeIdentifier(), publication_id);
+#endif
+
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DataWriterImpl::enable: "
       "got GUID %C, publishing to topic name \"%C\" type \"%C\"\n",
@@ -1802,21 +1813,10 @@ DataWriterImpl::dispose_and_unregister(DDS::InstanceHandle_t handle,
 void
 DataWriterImpl::unregister_instances(const DDS::Time_t& source_timestamp)
 {
-  {
-    ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, guard, sync_unreg_rem_assocs_lock_);
 
-    PublicationInstanceMapType::iterator it =
-      this->data_container_->instances_.begin();
-
-    while (it != this->data_container_->instances_.end()) {
-      if (!it->second->unregistered_) {
-        const DDS::InstanceHandle_t handle = it->first;
-        ++it; // avoid mangling the iterator
-        this->unregister_instance_i(handle, source_timestamp);
-      } else {
-        ++it;
-      }
-    }
+  while (!this->data_container_->instances_.empty()) {
+    this->unregister_instance_i(this->data_container_->instances_.begin()->first, source_timestamp);
   }
 }
 
@@ -1917,10 +1917,10 @@ DataWriterImpl::write(Message_Block_Ptr data,
     this->send(list, transaction_id);
   }
 
-  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+  const ValueDispatcher* vd = get_value_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_SENT);
-  if (observer && real_data && vwd) {
-    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vwd);
+  if (observer && real_data && vd) {
+    Observer::Sample s(handle, element->get_header().instance_state(), source_timestamp, element->get_header().sequence_, real_data, *vd);
     observer->on_sample_sent(this, s);
   }
 

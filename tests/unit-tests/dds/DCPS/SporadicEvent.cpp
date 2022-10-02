@@ -12,11 +12,9 @@
 
 #include <gtest/gtest.h>
 
-namespace
-{
+namespace {
 
-class TestEventBase : public OpenDDS::DCPS::EventBase
-{
+class TestEventBase : public OpenDDS::DCPS::EventBase {
 public:
   TestEventBase() : cv_(mutex_), call_count_(0) {}
 
@@ -49,8 +47,7 @@ private:
   size_t call_count_;
 };
 
-struct SimpleTestEvent : public TestEventBase
-{
+struct SimpleTestEvent : public TestEventBase {
   SimpleTestEvent() {}
   void handle_event() { increment_call_count(); }
 };
@@ -74,6 +71,25 @@ TEST(dds_DCPS_SporadicEvent, Nominal)
 
   test_event->wait(1);
   EXPECT_EQ(test_event->call_count(), 1u);
+}
+
+TEST(dds_DCPS_SporadicEvent, MoveUp)
+{
+  OpenDDS::DCPS::RcHandle<SimpleTestEvent> test_event = OpenDDS::DCPS::make_rch<SimpleTestEvent>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::ServiceEventDispatcher>();
+  OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::SporadicEvent> sporadic = OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SporadicEvent>(dispatcher, test_event);
+
+  sporadic->schedule(OpenDDS::DCPS::TimeDuration(1, 0));
+  sporadic->schedule(OpenDDS::DCPS::TimeDuration(0, 1000));
+
+  test_event->wait(1);
+  EXPECT_EQ(test_event->call_count(), 1u);
+
+  sporadic->schedule(OpenDDS::DCPS::TimeDuration(1, 0));
+  sporadic->schedule(OpenDDS::DCPS::TimeDuration(0, 1000));
+
+  test_event->wait(2);
+  EXPECT_EQ(test_event->call_count(), 2u);
 }
 
 TEST(dds_DCPS_SporadicEvent, NoDoubleExec)

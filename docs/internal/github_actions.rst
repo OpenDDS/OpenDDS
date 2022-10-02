@@ -16,22 +16,23 @@ Legend for GitHub Actions Build Names
 Operating System
 ================
 
-* u18/u20 - Ubuntu 18.04/Ubuntu 20.04
-* w19/w22 - Windows Server 2019 (Visual Studio 2019)/Windows Server 2022 (Visual Studio 2022)
-* m10 - MacOS 10.15
-* m11 - MacOS 11.0
+* u20/u22 - Ubuntu 20.04/22.04
+* w19/w22 - Windows Server 2019/Windows Server 2022
+* m11/m12 - macOS 11/12
 
 .. seealso::
 
-  `GitHub Virtual Environments <https://github.com/actions/virtual-environments>`_
+  `GitHub Runner Images <https://github.com/actions/runner-images>`
 
 Build Configuration
 ===================
 
 * x86 - Windows 32 bit. If not specified, x64 is implied.
 * re - Release build.  If not specified, Debug is implied.
-* clang5/clang10/gcc6/gcc8/gcc10 - compiler used to build OpenDDS.
+* clangX/gccY - compiler used to build OpenDDS.
   If not specified, the default system compiler is used.
+  Windows Server 2019 uses Visual Studio 2019
+  Windows Server 2022 uses Visual Studio 2022
 
 Build Type
 ==========
@@ -39,7 +40,7 @@ Build Type
 * stat - Static build
 * bsafe/esafe - Base Safety/Extended Safety build
 * sec - Security build
-* asan - Address Sanitizer build
+* asan/tsan - Address/Thread Sanitizer build
 
 Build Options
 =============
@@ -51,12 +52,13 @@ Build Options
 * w1 - enables wide characters
 * v1 - enables versioned namespace
 * cpp03 - ``--std=c++03``
-* j/j8/j12 - Default System Java/Java8/Java12
+* j/j<N> - Java version default/N
 * ace7 - uses ace7tao3 rather than ace6tao2
 * xer0 - disables xerces
 * qt - enables ``--qt``
 * ws - enables ``--wireshark``
 * js0 - enables ``--no-rapidjson``
+* a1 - enables TAO's Anys using ``--features=dds_suppress_anys=0``
 
 Feature Mask
 ============

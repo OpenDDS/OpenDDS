@@ -251,7 +251,9 @@ TEST(dds_DCPS_JsonValueReader, struct_max)
   EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
   EXPECT_EQ(member_id, FLOAT128_MEMBER_ID);
   EXPECT_TRUE(jvr.read_float128(float128_value));
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244)
   EXPECT_EQ(float128_value, 1.25);
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
   EXPECT_TRUE(jvr.end_struct_member());
 
   EXPECT_TRUE(jvr.begin_struct_member(member_id, member_helper));
@@ -396,7 +398,9 @@ TEST(dds_DCPS_JsonValueReader, array_min)
 
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_float128(float128_value));
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244)
   EXPECT_EQ(float128_value, -1.25);
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.begin_element());
@@ -530,7 +534,9 @@ TEST(dds_DCPS_JsonValueReader, sequence_zero)
   EXPECT_TRUE(jvr.elements_remaining());
   EXPECT_TRUE(jvr.begin_element());
   EXPECT_TRUE(jvr.read_float128(float128_value));
+  GTEST_DISABLE_MSC_WARNINGS_PUSH_(4244)
   EXPECT_EQ(float128_value, 0.0);
+  GTEST_DISABLE_MSC_WARNINGS_POP_()
   EXPECT_TRUE(jvr.end_element());
 
   EXPECT_TRUE(jvr.elements_remaining());

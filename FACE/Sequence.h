@@ -86,6 +86,7 @@ namespace FaceTypes {
     static void move_n(T* in, seq_size_type n, T* out) { copy_n(in, n, out); }
     static void reset_n(T*, seq_size_type) {}
     static T* destroy(T* buffer, seq_size_type) { return buffer; }
+    static bool equal(const T& lhs, const T& rhs) { return lhs == rhs; }
   };
 
   /// Element Policy for sequence elements that are IDL "variable-length" types
@@ -103,6 +104,7 @@ namespace FaceTypes {
     static void move_n(T* in, seq_size_type n, T* out);
     static void reset_n(T* buffer, seq_size_type n);
     static T* destroy(T* buffer, seq_size_type n);
+    static bool equal(const T& lhs, const T& rhs) { return lhs == rhs; }
   };
 
   /// Element Policy for sequences of strings.
@@ -192,7 +194,58 @@ namespace FaceTypes {
     static void move_n(CharT** in, seq_size_type n, CharT** out);
     static void reset_n(CharT**, seq_size_type);
     static CharT** destroy(CharT** buffer, seq_size_type n);
+
+    static bool equal(ConstElement lhs, ConstElement rhs)
+    {
+      return 0 == StringTraits<CharT>::cmp(lhs, rhs);
+    }
   };
+
+  /// Helpers for arrays: extent<> is based on C++11 <type_traits>
+  // Doesn't support arrays of unknown bound -- all bounds are known for IDL arrays
+  // The value of extent<T, N> for array type T and constant N is the number of elements
+  // in dimension N (N defaults to 0 and goes from 0 to the array's rank - 1)
+  namespace ArrayTraits {
+
+    template <typename T, unsigned N = 0>
+    struct extent {
+      static const std::size_t value = 0;
+    };
+
+    template <typename E, std::size_t I>
+    struct extent<E[I], 0> {
+      static const std::size_t value = I;
+    };
+
+    template <typename E, std::size_t I, unsigned N>
+    struct extent<E[I], N> : extent<E, N - 1> {};
+
+
+    // For arbitrary type T, generate a static member function callabale as
+    // "bool value(T, T)" that compares two objects which may be arrays.
+    template <typename T, std::size_t = extent<T>::value>
+    struct equal {
+      // The primary template is used when T is not an array.
+      // Partial specializations (below) take precendence when T is an array.
+      static bool value(const T& lhs, const T& rhs) { return lhs == rhs; }
+    };
+
+    template <typename E, std::size_t I, std::size_t N>
+    struct equal<E[N], I> {
+      typedef E T[N];
+      static bool value(const T& lhs, const T& rhs)
+      {
+        return equal<T, I - 1>::value(lhs, rhs) && equal<E>::value(lhs[I - 1], rhs[I - 1]);
+      }
+    };
+
+    template <typename E, std::size_t N>
+    struct equal<E[N], 0> {
+      typedef E T[N];
+      static bool value(const T&, const T&) { return true; }
+    };
+
+  }
 
   /// Element Policy for sequences of arrays.
   /// Currently arrays of fixed-length and variable-length elements are both
@@ -212,6 +265,10 @@ namespace FaceTypes {
     static void move_n(T* in, seq_size_type n, T* out) { copy_n(in, n, out); }
     static void reset_n(T* buffer, seq_size_type n);
     static T* destroy(T* buffer, seq_size_type n);
+    static bool equal(ConstElement lhs, ConstElement rhs)
+    {
+      return ArrayTraits::equal<T>::value(lhs, rhs);
+    }
   };
 
   /// Generic base class for all IDL-defined sequences accepted by opendds_idl.
@@ -296,10 +353,9 @@ namespace FaceTypes {
     // max_size() inherited from AllocPolicy
     bool empty() const { return !length_; }
 
-#ifndef __SUNPRO_CC
   private:
     friend struct AllocPolicy<T, Sequence, Bounds>;
-#endif
+
     void replace_i(size_type maximum, size_type length,
                    T* data, seq_flag_type release);
 
@@ -653,7 +709,7 @@ namespace FaceTypes {
       return false;
     }
     for (size_type i = 0; i < sz; ++i) {
-      if (!((*this)[i] == rhs[i])) {
+      if (!Elts::equal((*this)[i], rhs[i])) {
         return false;
       }
     }

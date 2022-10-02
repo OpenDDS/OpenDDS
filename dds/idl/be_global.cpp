@@ -50,7 +50,6 @@ BE_GlobalData::BE_GlobalData()
   , suppress_xtypes_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
-  , generate_v8_(false)
   , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
   , face_ts_(false)
@@ -60,6 +59,7 @@ BE_GlobalData::BE_GlobalData()
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
+  , default_enum_extensibility_zero_(false)
   , root_default_autoid_(autoidkind_sequential)
   , default_try_construct_(tryconstructfailaction_discard)
   , old_typeobject_encoding_(false)
@@ -233,16 +233,6 @@ bool BE_GlobalData::itl() const
   return this->generate_itl_;
 }
 
-void BE_GlobalData::v8(bool b)
-{
-  this->generate_v8_ = b;
-}
-
-bool BE_GlobalData::v8() const
-{
-  return this->generate_v8_;
-}
-
 void BE_GlobalData::value_reader_writer(bool b)
 {
   this->generate_value_reader_writer_ = b;
@@ -382,8 +372,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       itl(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS")) {
       face_ts(true);
-    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gv8")) {
-      v8(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
     } else {
@@ -459,6 +447,8 @@ BE_GlobalData::parse_args(long& i, char** av)
           ACE_TEXT("Invalid argument to --default-extensibility: %C\n"), av[i]));
         idl_global->parse_args_exit(1);
       }
+    } else if (!strcmp(av[i], "--default-enum-extensibility-zero")) {
+      default_enum_extensibility_zero_ = true;
     } else if (!strcmp(av[i], "--default-autoid")) {
       if (av[++i] == 0) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("No argument for --default-autoid\n")));
@@ -835,7 +825,34 @@ bool BE_GlobalData::warn_about_dcps_data_type()
   return idl_global->print_warnings();
 }
 
-ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node, ExtensibilityKind default_extensibility, bool& has_annotation) const
+{
+  has_annotation = true;
+
+  if (builtin_annotations_["::@final"]->find_on(node)) {
+    return extensibilitykind_final;
+  }
+
+  if (builtin_annotations_["::@appendable"]->find_on(node)) {
+    return extensibilitykind_appendable;
+  }
+
+  if (builtin_annotations_["::@mutable"]->find_on(node)) {
+    return extensibilitykind_mutable;
+  }
+
+  ExtensibilityAnnotation* extensibility_annotation =
+    dynamic_cast<ExtensibilityAnnotation*>(
+      builtin_annotations_["::@extensibility"]);
+  ExtensibilityKind value;
+  if (!extensibility_annotation->node_value_exists(node, value)) {
+    value = default_extensibility;
+    has_annotation = false;
+  }
+  return value;
+}
+
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node, ExtensibilityKind default_extensibility) const
 {
   if (builtin_annotations_["::@final"]->find_on(node)) {
     return extensibilitykind_final;
@@ -854,9 +871,14 @@ ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
       builtin_annotations_["::@extensibility"]);
   ExtensibilityKind value;
   if (!extensibility_annotation->node_value_exists(node, value)) {
-    value = default_extensibility_;
+    value = default_extensibility;
   }
   return value;
+}
+
+ExtensibilityKind BE_GlobalData::extensibility(AST_Decl* node) const
+{
+  return extensibility(node, default_extensibility_);
 }
 
 AutoidKind BE_GlobalData::autoid(AST_Decl* node) const

@@ -703,6 +703,13 @@ public:
   bool write_list_end_parameter_id();
 
   /**
+   * Skip a delimiter used for XCDR2 delimited data.
+   *
+   * Returns true if successful
+   */
+  bool skip_delimiter();
+
+  /**
    * Read a delimiter used for XCDR2 delimited data.
    *
    * Returns true if successful and size will be set to the size of the CDR

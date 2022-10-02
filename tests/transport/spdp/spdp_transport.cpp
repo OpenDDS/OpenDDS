@@ -61,7 +61,8 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, spdp_->lock_);
     Spdp::DiscoveredParticipantIter iter = spdp_->participants_.find(guid_);
     if (iter != spdp_->participants_.end()) {
-      spdp_->remove_discovered_participant(iter);
+      spdp_->purge_discovered_participant(iter);
+      spdp_->participants_.erase(iter);
     }
   }
 

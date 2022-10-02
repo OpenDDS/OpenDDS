@@ -363,6 +363,16 @@ For a ``Doodad.cpp`` file in :ghfile:`dds/DCPS`, the includes could look like:
   #include <unistd.h>
   #include <stdlib.h>
 
+**************
+Initialization
+**************
+
+Note that OpenDDS applications require ACE to be initialized to work correctly. For many OpenDDS applications, ``ACE::init()`` and ``ACE::fini()`` will be called
+automatically, either by interaction with the ACE or TAO libraries, or due to ACE's redefinition of executable entry points (e.g. ``main``) which wrap normal execution
+with calls to those functions. However, be advised that on some platforms, the helper macros to catch entry points may change names to suit compiler options. For example,
+for Visual C++ builds on Windows with wide-character support enabled, the helper macro changes from ``main`` to ``wmain``. Applications either need to handle these differences
+in order to correctly ensure initialization or they need to use an entrypoint helper macro such as ``ACE_TMAIN`` which isn't vulnerable to this issue.
+
 ****
 Time
 ****

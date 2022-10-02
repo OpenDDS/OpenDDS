@@ -76,11 +76,6 @@ public:
   SecurityConfig_rch builtin_config() const;
   void builtin_config(const SecurityConfig_rch& cfg);
 
-  void bind_config(const OPENDDS_STRING& name,
-                   DDS::DomainParticipant_ptr domain_participant);
-  void bind_config(const SecurityConfig_rch& config,
-                   DDS::DomainParticipant_ptr domain_participant);
-
   /// For internal use by OpenDDS DCPS layer:
   /// Transfer the configuration in ACE_Configuration_Heap object to
   /// the SecurityRegistry.  This is called by the Service_Participant

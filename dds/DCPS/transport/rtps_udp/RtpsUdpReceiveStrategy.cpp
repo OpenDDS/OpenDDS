@@ -34,7 +34,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
-  : BaseReceiveStrategy(link->config())
+  : BaseReceiveStrategy(link->config(), BUFFER_COUNT)
   , link_(link)
   , last_received_()
   , recvd_sample_(0)
@@ -47,6 +47,28 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , encoded_submsg_(false)
 #endif
 {
+  // Since BUFFER_COUNT is 1, the index will always be 0
+  const size_t INDEX = 0;
+
+  if (receive_buffers_[INDEX] == 0) {
+    ACE_NEW_MALLOC(
+      receive_buffers_[INDEX],
+      (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
+      ACE_Message_Block(
+        RECEIVE_DATA_BUFFER_SIZE,           // Buffer size
+        ACE_Message_Block::MB_DATA,         // Default
+        0,                                  // Start with no continuation
+        0,                                  // Let the constructor allocate
+        &data_allocator_,                   // Our buffer cache
+        &receive_lock_,                     // Our locking strategy
+        ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // Default
+        ACE_Time_Value::zero,               // Default
+        ACE_Time_Value::max_time,           // Default
+        &db_allocator_,                     // Our data block cache
+        &mb_allocator_                      // Our message block cache
+      ));
+  }
+
 #ifdef OPENDDS_SECURITY
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
 #endif
@@ -57,7 +79,171 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
-  return handle_simple_dds_input(fd);
+  // Since BUFFER_COUNT is 1, the index will always be 0
+  const size_t INDEX = 0;
+
+  ACE_Message_Block* const cur_rb = receive_buffers_[INDEX];
+  cur_rb->reset();
+
+  iovec iov;
+#ifdef _MSC_VER
+#pragma warning(push)
+// iov_len is 32-bit on 64-bit VC++, but we don't want a cast here
+// since on other platforms iov_len is 64-bit
+#pragma warning(disable : 4267)
+#endif
+  iov.iov_len = cur_rb->space();
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
+  iov.iov_base = cur_rb->wr_ptr();
+
+  ACE_INET_Addr remote_address;
+  bool stop = false;
+  ssize_t bytes_remaining = receive_bytes(&iov,
+                                          1,
+                                          remote_address,
+                                          fd,
+                                          stop);
+
+  if (stop) {
+    return 0;
+  }
+
+  if (bytes_remaining < 0) {
+    relink();
+    return -1;
+  }
+
+  cur_rb->wr_ptr(bytes_remaining);
+
+  if (bytes_remaining == 0) {
+    if (gracefully_disconnected_) {
+      return -1;
+    } else {
+      relink();
+      return -1;
+    }
+  }
+
+  if (!pdu_remaining_) {
+    receive_transport_header_.length_ = static_cast<ACE_UINT32>(bytes_remaining);
+  }
+
+  receive_transport_header_ = *cur_rb;
+  if (!receive_transport_header_.valid()) {
+    cur_rb->reset();
+    if (DCPS_debug_level > 0) {
+      ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: RtpsUdpReceiveStrategy::handle_input: TransportHeader invalid.\n")));
+    }
+    return 0;
+  }
+
+  bytes_remaining = receive_transport_header_.length_;
+  if (!check_header(receive_transport_header_)) {
+    return 0;
+  }
+
+  {
+    const ScopedHeaderProcessing shp(*this);
+    while (bytes_remaining > 0) {
+      data_sample_header_.pdu_remaining(bytes_remaining);
+      data_sample_header_ = *cur_rb;
+      bytes_remaining -= data_sample_header_.get_serialized_size();
+      if (!check_header(data_sample_header_)) {
+        return 0;
+      }
+      const size_t dsh_ml = data_sample_header_.message_length();
+      const bool alloc_new_data_buffer = data_sample_header_.expect_hold();
+      const size_t cur_rb_rd_pos = cur_rb->rd_ptr() - cur_rb->base();
+      const size_t cur_rb_wr_pos = cur_rb->wr_ptr() - cur_rb->base();
+      ACE_Message_Block* current_sample_block = 0;
+      if (alloc_new_data_buffer) {
+        ACE_NEW_MALLOC_RETURN(
+          current_sample_block,
+          (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
+          ACE_Message_Block(
+            cur_rb->data_block()->clone_nocopy(0, dsh_ml),
+            0,
+            &mb_allocator_),
+          -1);
+        current_sample_block->reset();
+        std::memcpy(current_sample_block->wr_ptr(), cur_rb->rd_ptr(), dsh_ml);
+        current_sample_block->wr_ptr(dsh_ml);
+      } else {
+        current_sample_block = cur_rb;
+        current_sample_block->rd_ptr(cur_rb->rd_ptr());
+        current_sample_block->wr_ptr(current_sample_block->rd_ptr() + dsh_ml);
+        OPENDDS_ASSERT(current_sample_block->data_block()->reference_count() == 1);
+      }
+      {
+        ReceivedDataSample rds(current_sample_block, alloc_new_data_buffer);
+        if (data_sample_header_.into_received_data_sample(rds)) {
+
+          if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
+
+            if (reassemble(rds)) {
+              VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
+              deliver_sample(rds, remote_address);
+            }
+            // If reassemble() returned false, it takes ownership of the data
+            // just like deliver_sample() does.
+
+          } else {
+            deliver_sample(rds, remote_address);
+          }
+        }
+      }
+      if (!alloc_new_data_buffer) {
+        OPENDDS_ASSERT(current_sample_block->data_block()->reference_count() == 1);
+        cur_rb->reset();
+        cur_rb->rd_ptr(cur_rb_rd_pos);
+        cur_rb->wr_ptr(cur_rb_wr_pos);
+      }
+      cur_rb->rd_ptr(dsh_ml);
+      bytes_remaining -= dsh_ml;
+
+      // For the reassembly algorithm, the 'last_fragment_' header bit only
+      // applies to the first DataSampleHeader in the TransportHeader
+      receive_transport_header_.last_fragment(false);
+    }
+  }
+
+  finish_message();
+
+  // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
+  if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
+
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"));
+    }
+
+    ACE_DES_FREE(
+      receive_buffers_[INDEX],
+      mb_allocator_.free,
+      ACE_Message_Block);
+
+    ACE_NEW_MALLOC_RETURN(
+      receive_buffers_[INDEX],
+      (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
+      ACE_Message_Block(
+        RECEIVE_DATA_BUFFER_SIZE,           // Buffer size
+        ACE_Message_Block::MB_DATA,         // Default
+        0,                                  // Start with no continuation
+        0,                                  // Let the constructor allocate
+        &data_allocator_,                   // Our buffer cache
+        &receive_lock_,                     // Our locking strategy
+        ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, // Default
+        ACE_Time_Value::zero,               // Default
+        ACE_Time_Value::max_time,           // Default
+        &db_allocator_,                     // Our data block cache
+        &mb_allocator_                      // Our message block cache
+      ),
+      -1);
+  }
+
+  return 0;
 }
 
 ssize_t

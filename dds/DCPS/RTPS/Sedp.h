@@ -531,7 +531,7 @@ public:
   void resend_user_crypto_tokens(const DCPS::RepoId& remote_participant);
 #endif
 
-  bool disassociate(DiscoveredParticipant& participant);
+  void disassociate(DiscoveredParticipant& participant);
 
   void update_locators(const ParticipantData_t& pdata);
 
@@ -854,6 +854,8 @@ private:
     bool associated_with_counterpart(const DCPS::GUID_t& remote_part) const;
     bool pending_association_with_counterpart(const DCPS::GUID_t& remote_part) const;
     bool associated_with_counterpart_if_not_pending(const DCPS::GUID_t& remote_part) const;
+
+    RcHandle<DCPS::BitSubscriber> get_builtin_subscriber_proxy() const;
 
   protected:
     DCPS::RepoId repo_id_;
