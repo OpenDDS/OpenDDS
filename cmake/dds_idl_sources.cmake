@@ -238,9 +238,6 @@ function(opendds_target_idl_sources target)
 
     _tao_append_runtime_lib_dir_to_path(_tao_extra_lib_dirs)
 
-    ## CMake wants forward slashes for commands
-    string(REPLACE "\\" "/" _tao_extra_lib_dirs ${_tao_extra_lib_dirs})
-
     add_custom_command(
       OUTPUT ${_cur_idl_outputs} ${_cur_type_support_idl} ${_cur_java_list}
       DEPENDS opendds_idl ${DDS_ROOT}/dds/idl/IDLTemplate.txt
