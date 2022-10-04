@@ -2527,31 +2527,6 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
     }
   }
 
-  // delete topics
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->topics_protector_,
-                     DDS::RETCODE_ERROR);
-
-    TopicMap::iterator topicIter = topics_.begin();
-    DDS::Topic_ptr topicPtr;
-    size_t topicsize = topics_.size();
-
-    while (topicsize > 0) {
-      topicPtr = topicIter->second.pair_.obj_.in();
-      ++topicIter;
-
-      // Delete the topic the reference count.
-      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
-
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
-      }
-      --topicsize;
-    }
-  }
-
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      tao_mon,
@@ -2584,6 +2559,31 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
     }
 
     replayers_.clear();
+  }
+
+  // delete topics
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->topics_protector_,
+                     DDS::RETCODE_ERROR);
+
+    TopicMap::iterator topicIter = topics_.begin();
+    DDS::Topic_ptr topicPtr;
+    size_t topicsize = topics_.size();
+
+    while (topicsize > 0) {
+      topicPtr = topicIter->second.pair_.obj_.in();
+      ++topicIter;
+
+      // Delete the topic the reference count.
+      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+
+      if (result != DDS::RETCODE_OK) {
+        ret = result;
+      }
+      --topicsize;
+    }
   }
 
   shutdown_mutex_.acquire();
