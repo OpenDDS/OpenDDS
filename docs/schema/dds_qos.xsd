@@ -319,6 +319,7 @@
             <xs:element name="transport_priority" type="dds:transportPriorityQosPolicy" minOccurs="0"></xs:element>
             <xs:element name="lifespan" type="dds:lifespanQosPolicy" minOccurs="0"></xs:element>
             <xs:element name="ownership" type="dds:ownershipQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="representation" type="dds:dataRepresentationQosPolicy" minOccurs="0"></xs:element>
         </xs:all>
         <xs:attribute name="name" type="dds:elementName"></xs:attribute>
         <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>

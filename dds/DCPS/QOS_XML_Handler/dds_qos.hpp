@@ -1675,6 +1675,16 @@ namespace dds
     typedef XML_XSC_SMART_PTR( ::dds::ownershipQosPolicy) ownership_auto_ptr_type;
     ownership_auto_ptr_type ownership_;
 
+    // representation
+    public:
+    bool representation_p () const;
+    ::dds::dataRepresentationQosPolicy const& representation () const;
+    void representation (::dds::dataRepresentationQosPolicy const& );
+
+    protected:
+    typedef XML_XSC_SMART_PTR( ::dds::dataRepresentationQosPolicy) representation_auto_ptr_type;
+    representation_auto_ptr_type representation_;
+
     // name
     public:
     bool name_p () const;

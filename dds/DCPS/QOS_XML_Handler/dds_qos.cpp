@@ -3237,6 +3237,7 @@ namespace dds
   , transport_priority_ (s.transport_priority_.get () ? new ::dds::transportPriorityQosPolicy (*s.transport_priority_) : 0)
   , lifespan_ (s.lifespan_.get () ? new ::dds::lifespanQosPolicy (*s.lifespan_) : 0)
   , ownership_ (s.ownership_.get () ? new ::dds::ownershipQosPolicy (*s.ownership_) : 0)
+  , representation_ (s.representation_.get () ? new ::dds::dataRepresentationQosPolicy (*s.representation_) : 0)
   , name_ (s.name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.name_) : 0)
   , base_name_ (s.base_name_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.base_name_) : 0)
   , topic_filter_ (s.topic_filter_.get () ? new ::XMLSchema::string<ACE_TCHAR> (*s.topic_filter_) : 0)
@@ -3254,6 +3255,7 @@ namespace dds
     if (transport_priority_.get ()) transport_priority_->container (this);
     if (lifespan_.get ()) lifespan_->container (this);
     if (ownership_.get ()) ownership_->container (this);
+    if (representation_.get ()) representation_->container (this);
     if (name_.get ()) name_->container (this);
     if (base_name_.get ()) base_name_->container (this);
     if (topic_filter_.get ()) topic_filter_->container (this);
@@ -3328,6 +3330,11 @@ namespace dds
         ownership (*(s.ownership_));
       else
         ownership_.reset (0);
+
+      if (s.representation_.get ())
+        representation (*(s.representation_));
+      else
+        representation_.reset (0);
 
       if (s.name_.get ()) name (*(s.name_));
       else name_.reset (0);
@@ -3704,6 +3711,34 @@ namespace dds
     {
       ownership_ = topicQos::ownership_auto_ptr_type (new ::dds::ownershipQosPolicy (e));
       ownership_->container (this);
+    }
+  }
+
+  // topicQos
+  bool topicQos::
+  representation_p () const
+  {
+    return representation_.get () != 0;
+  }
+
+  ::dds::dataRepresentationQosPolicy const& topicQos::
+  representation () const
+  {
+    return *representation_;
+  }
+
+  void topicQos::
+  representation (::dds::dataRepresentationQosPolicy const& e)
+  {
+    if (representation_.get ())
+    {
+      *representation_ = e;
+    }
+
+    else
+    {
+      representation_ = topicQos::representation_auto_ptr_type (new ::dds::dataRepresentationQosPolicy (e));
+      representation_->container (this);
     }
   }
 
@@ -6933,6 +6968,12 @@ namespace dds
       {
         ::dds::ownershipQosPolicy t (e);
         ownership (t);
+      }
+
+      else if (n == ACE_TEXT("representation"))
+      {
+        ::dds::dataRepresentationQosPolicy t (e);
+        representation (t);
       }
 
       else
