@@ -65,6 +65,19 @@
             <xs:enumeration value="EXCLUSIVE_OWNERSHIP_QOS"></xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
+    <xs:simpleType name="dataRepresentationIdKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="XCDR_DATA_REPRESENTATION"></xs:enumeration>
+            <xs:enumeration value="XML_DATA_REPRESENTATION"></xs:enumeration>
+            <xs:enumeration value="XCDR2_DATA_REPRESENTATION"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="typeConsistencyEnforcementQosPolicyKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="DISALLOW_TYPE_COERCION"></xs:enumeration>
+            <xs:enumeration value="ALLOW_TYPE_COERCION"></xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
     <xs:simpleType name="nonNegativeInteger_UNLIMITED">
         <xs:restriction base="xs:string">
             <xs:pattern value="(LENGTH_UNLIMITED|([0-9])*)?"></xs:pattern>
@@ -102,6 +115,11 @@
     <xs:complexType name="stringSeq">
         <xs:sequence>
             <xs:element name="element" type="xs:string" minOccurs="0" maxOccurs="unbounded"></xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="dataRepresentationIdSeq">
+        <xs:sequence>
+            <xs:element name="element" type="dds::dataRepresentationIdKind" minOccurs="0" maxOccurs="unbounded"></xs:element>
         </xs:sequence>
     </xs:complexType>
     <xs:complexType name="deadlineQosPolicy">
@@ -239,6 +257,16 @@
             <xs:element name="autodispose_unregistered_instances" type="xs:boolean" default="true" minOccurs="0"></xs:element>
         </xs:all>
     </xs:complexType>
+    <xs:complexType name="typeConsistencyEnforcementQosPolicy">
+        <xs:all>
+            <xs:element name="kind" type="dds:typeConsistencyEnforcementQosPolicyKind_t" minOccurs="0"></xs:element>
+            <xs:element name="ignore_sequence_bounds" type="xs:boolean" default="false" minOccurs="0"></xs:element>
+            <xs:element name="ignore_string_bounds" type="xs:boolean" default="false" minOccurs="0"></xs:element>
+            <xs:element name="ignore_member_names" type="xs:boolean" default="false" minOccurs="0"></xs:element>
+            <xs:element name="prevent_type_widening" type="xs:boolean" default="false" minOccurs="0"></xs:element>
+            <xs:element name="force_type_validation" type="xs:boolean" default="false" minOccurs="0"></xs:element>
+        </xs:all>
+    </xs:complexType>
 
     <xs:complexType name="domainparticipantQos">
         <xs:all>
@@ -305,6 +333,8 @@
             <xs:element name="ownership" type="dds:ownershipQosPolicy" minOccurs="0"></xs:element>
             <xs:element name="time_based_filter" type="dds:timeBasedFilterQosPolicy" minOccurs="0"></xs:element>
             <xs:element name="reader_data_lifecycle" type="dds:readerDataLifecycleQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="representation" type="dds:dataRepresentationQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="type_consistency" type="dds:typeConsistencyEnforcementQosPolicy" minOccurs="0"></xs:element>
         </xs:all>
         <xs:attribute name="name" type="dds:elementName"></xs:attribute>
         <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
@@ -327,6 +357,7 @@
             <xs:element name="ownership" type="dds:ownershipQosPolicy" minOccurs="0"></xs:element>
             <xs:element name="ownership_strength" type="dds:ownershipStrengthQosPolicy" minOccurs="0"></xs:element>
             <xs:element name="writer_data_lifecycle" type="dds:writerDataLifecycleQosPolicy" minOccurs="0"></xs:element>
+            <xs:element name="representation" type="dds:dataRepresentationQosPolicy" minOccurs="0"></xs:element>
         </xs:all>
         <xs:attribute name="name" type="dds:elementName"></xs:attribute>
         <xs:attribute name="base_name" type="dds:elementName"></xs:attribute>
