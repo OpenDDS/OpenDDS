@@ -162,13 +162,13 @@ MulticastInst::dump_to_str() const
   os << formatNameForDump("port_offset")         << this->port_offset_ << std::endl;
   os << formatNameForDump("reliable")            << (this->reliable_ ? "true" : "false") << std::endl;
   os << formatNameForDump("syn_backoff")         << this->syn_backoff_ << std::endl;
-  os << formatNameForDump("syn_interval")        << this->syn_interval_.value().msec() << std::endl;
-  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.value().msec() << std::endl;
+  os << formatNameForDump("syn_interval")        << this->syn_interval_.str() << std::endl;
+  os << formatNameForDump("syn_timeout")         << this->syn_timeout_.str() << std::endl;
   os << formatNameForDump("nak_depth")           << this->nak_depth_ << std::endl;
-  os << formatNameForDump("nak_interval")        << this->nak_interval_.value().msec() << std::endl;
+  os << formatNameForDump("nak_interval")        << this->nak_interval_.str() << std::endl;
   os << formatNameForDump("nak_delay_intervals") << this->nak_delay_intervals_ << std::endl;
   os << formatNameForDump("nak_max")             << this->nak_max_ << std::endl;
-  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.value().msec() << std::endl;
+  os << formatNameForDump("nak_timeout")         << this->nak_timeout_.str() << std::endl;
   os << formatNameForDump("ttl")                 << int(this->ttl_) << std::endl;
   os << formatNameForDump("rcv_buffer_size");
 
