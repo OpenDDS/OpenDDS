@@ -1,13 +1,12 @@
 
 #include "dds/DCPS/QOS_XML_Handler/QOS_XML_Loader.h"
 #include "dds/DdsDcpsC.h"
-#include "dds/DCPS/debug.h"
+
 int ACE_TMAIN (int, ACE_TCHAR *[])
 {
   int retval = 0;
   try
     {
-      OpenDDS::DCPS::DCPS_debug_level = 10;
       OpenDDS::DCPS::QOS_XML_Loader xml_loader;
       DDS::ReturnCode_t const retcode = xml_loader.init (ACE_TEXT ("qos#TestProfile"));
       if (retcode == DDS::RETCODE_OK)
