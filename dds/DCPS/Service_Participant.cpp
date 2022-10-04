@@ -518,9 +518,9 @@ Service_Participant::get_domain_participant_factory(int &argc,
             uname.nodename, uname.machine, uname.sysname, uname.release, uname.version));
         }
 
-      ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
-        "compiler: %C version %d.%d.%d\n",
-        ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version (), ACE::compiler_beta_version ()));
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "compiler: %C version %d.%d.%d\n",
+          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version (), ACE::compiler_beta_version ()));
       }
 
       // Establish the default scheduling mechanism and
