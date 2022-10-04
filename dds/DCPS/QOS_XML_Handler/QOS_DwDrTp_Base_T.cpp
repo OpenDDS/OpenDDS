@@ -255,7 +255,7 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, c
               if (OpenDDS::DCPS::DCPS_debug_level > 9)
                 {
                   ACE_DEBUG((LM_TRACE,
-                    ACE_TEXT("QOS_DwTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                    ACE_TEXT("QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
                     ACE_TEXT("Data representation <%d> inserted in representation at position <%u>\n"),
                     dds_qos.representation.value[pos], pos));
                 }
