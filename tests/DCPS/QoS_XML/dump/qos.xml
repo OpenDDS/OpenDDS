@@ -4,6 +4,20 @@
      xsi:schemaLocation="http://www.omg.org/dds dds_qos.xsd">
   <qos_profile name="TestProfile">
     <datareader_qos>
+        <representation>
+          <value>
+            <element>XCDR_DATA_REPRESENTATION</element>
+            <element>XCDR2_DATA_REPRESENTATION</element>
+          </value>
+        </representation>
+        <type_consistency>
+          <kind>ALLOW_TYPE_COERCION</kind>
+          <ignore_sequence_bounds>true</ignore_sequence_bounds>
+          <ignore_string_bounds>true</ignore_string_bounds>
+          <ignore_member_names>true</ignore_member_names>
+          <prevent_type_widening>true</prevent_type_widening>
+          <force_type_validation>true</force_type_validation>
+        </type_consistency>
           <durability>
                  <kind>VOLATILE_DURABILITY_QOS</kind>
           </durability>
