@@ -511,7 +511,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
           "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
 
         ACE_utsname uname;
-        int const result = ACE_OS::uname (&uname);
+        int const result = ACE_OS::uname(&uname);
         if (result != -1)
         {
           ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
