@@ -731,7 +731,7 @@ public:
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq&,
+  DDS::ReturnCode_t get_char16_values(DDS::WCharSeq&,
                                       DDS::MemberId)
   {
     // FUTURE
@@ -739,7 +739,7 @@ public:
   }
 
   DDS::ReturnCode_t set_char16_values(DDS::MemberId,
-                                      const DDS::WcharSeq&)
+                                      const DDS::WCharSeq&)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
@@ -783,7 +783,7 @@ public:
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq&,
+  DDS::ReturnCode_t get_wstring_values(DDS::WStringSeq&,
                                        DDS::MemberId)
   {
     // FUTURE
@@ -791,7 +791,7 @@ public:
   }
 
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId,
-                                       const DDS::WstringSeq&)
+                                       const DDS::WStringSeq&)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }

@@ -281,13 +281,13 @@ public:
   DDS::ReturnCode_t set_char8_values(DDS::MemberId id,
                                      const DDS::CharSeq& value);
 
-  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq&,
+  DDS::ReturnCode_t get_char16_values(DDS::WCharSeq&,
                                       DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
   DDS::ReturnCode_t set_char16_values(DDS::MemberId id,
-                                      const DDS::WcharSeq& value);
+                                      const DDS::WCharSeq& value);
 
   DDS::ReturnCode_t get_byte_values(DDS::ByteSeq&,
                                     DDS::MemberId) const
@@ -313,13 +313,13 @@ public:
   DDS::ReturnCode_t set_string_values(DDS::MemberId id,
                                       const DDS::StringSeq& value);
 
-  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq&,
+  DDS::ReturnCode_t get_wstring_values(DDS::WStringSeq&,
                                        DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
-                                       const DDS::WstringSeq& value);
+                                       const DDS::WStringSeq& value);
 
 private:
 
@@ -420,8 +420,51 @@ private:
     };
   };
 
-  // TODO: Contain data for an instance of a sequence of a basic type.
   struct SequenceValue {
+    SequenceValue(const DDS::Int32Seq& int32_seq);
+    SequenceValue(const DDS::UInt32Seq& uint32_seq);
+    SequenceValue(const DDS::Int8Seq& int8_seq);
+    SequenceValue(const DDS::UInt8Seq& uint8_seq);
+    SequenceValue(const DDS::Int16Seq& int16_seq);
+    SequenceValue(const DDS::UInt16Seq& uint16_seq);
+    SequenceValue(const DDS::Int64Seq& int64_seq);
+    SequenceValue(const DDS::UInt64Seq& uint64_seq);
+    SequenceValue(const DDS::Float32Seq& float32_seq);
+    SequenceValue(const DDS::DoubleSeq& float64_seq);
+    SequenceValue(const DDS::LongDoubleSeq& float128_seq);
+    SequenceValue(const DDS::CharSeq& char8_seq);
+    SequenceValue(const DDS::OctetSeq& byte_seq);
+    SequenceValue(const DDS::BooleanSeq& boolean_seq);
+    SequenceValue(const DDS::StringSeq& str_seq);
+#ifdef DDS_HAS_WCHAR
+    SequenceValue(const DDS::WCharSeq& char16_seq);
+    SequenceValue(const DDS::WStringSeq& wstr_seq);
+#endif
+
+    ~SequenceValue();
+
+    TypeKind elem_kind_;
+    union {
+      DDS::Int32Seq int32_seq_;
+      DDS::UInt32Seq uint32_seq_;
+      DDS::Int8Seq int8_seq_;
+      DDS::UInt8Seq uint8_seq_;
+      DDS::Int16Seq int16_seq_;
+      DDS::UInt16Seq uint16_seq_;
+      DDS::Int64Seq int64_seq_;
+      DDS::UInt64Seq uint64_seq_;
+      DDS::Float32Seq float32_seq_;
+      DDS::DoubleSeq float64_seq_;
+      DDS::LongDoubleSeq float128_seq_;
+      DDS::CharSeq char8_seq_;
+      DDS::OctetSeq byte_seq_;
+      DDS::BooleanSeq boolean_seq_;
+      DDS::StringSeq string_seq_;
+#ifdef DDS_HAS_WCHAR
+      DDS::WCharSeq char16_seq_;
+      DDS::WStringSeq wstring_seq_;
+#endif
+    };
   };
 
   // Container for all data written to this DynamicData object.

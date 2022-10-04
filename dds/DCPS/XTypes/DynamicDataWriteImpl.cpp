@@ -1084,6 +1084,84 @@ template<> CORBA::WChar& DynamicDataWriteImpl::SingleValue::get() const { return
 template<> const CORBA::WChar*& DynamicDataWriteImpl::SingleValue::get() const { return wstr_; }
 #endif
 
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::Int32Seq& int32_seq)
+  : elem_kind_(TK_INT32), int32_seq_(int32_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::UInt32Seq& uint32_seq)
+  : elem_kind_(TK_UINT32), uint32_seq_(uint32_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::Int8Seq& int8_seq)
+  : elem_kind_(TK_INT8), int8_seq_(int8_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::UInt8Seq& uint8_seq)
+  : elem_kind_(TK_UINT8), uint8_seq_(uint8_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::Int16Seq& int16_seq)
+  : elem_kind_(TK_INT16), int16_seq_(int16_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::UInt16Seq& uint16_seq)
+  : elem_kind_(TK_UINT16), uint16_seq_(uint16_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::Int64Seq& int64_seq)
+  : elem_kind_(TK_INT64), int64_seq_(int64_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::UInt64Seq& uint64_seq)
+  : elem_kind_(TK_UINT64), uint64_seq_(uint64_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::Float32Seq& float32_seq)
+  : elem_kind_(TK_FLOAT32), float32_seq_(float32_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::DoubleSeq& float64_seq)
+  : elem_kind_(TK_FLOAT64), float64_seq_(float64_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::LongDoubleSeq& float128_seq)
+  : elem_kind_(TK_FLOAT128), float128_seq_(float128_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::CharSeq& char8_seq)
+  : elem_kind_(TK_CHAR8), char8_seq_(char8_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::OctetSeq& byte_seq)
+  : elem_kind_(TK_BYTE), byte_seq_(byte_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::BooleanSeq& boolean_seq)
+  : elem_kind_(TK_BOOLEAN), boolean_seq_(boolean_seq)
+{}
+
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::StringSeq& str_seq)
+  : elem_kind_(TK_STRING8), string_seq_(str_seq)
+{}
+
+#ifdef DDS_HAS_WCHAR
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::WCharSeq& char16_seq)
+  : elem_kind_(TK_CHAR16), char16_seq_(char16_seq)
+{}
+
+// TODO: strdup each wide string?
+DynamicDataWriteImpl::SequenceValue::SequenceValue(const DDS::WStringSeq& wstr_seq)
+  : elem_kind_(TK_STRING16), wstring_seq_(wstr_seq)
+{}
+#endif
+
+DynamicDataWriteImpl::SequenceValue::~SequenceValue()
+{
+  // TODO
+}
+
+} // namespace XTypes
+
 namespace DCPS {
 
 bool operator<<(Serializer& ser, const DynamicDataWriteImpl& dd)
@@ -1092,9 +1170,8 @@ bool operator<<(Serializer& ser, const DynamicDataWriteImpl& dd)
   return true;
 }
 
-}
+} // namespace DCPS
 
-} // namespace XTypes
 } // namespace OpenDDS
 
 
