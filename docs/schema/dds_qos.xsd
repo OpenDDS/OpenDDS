@@ -72,7 +72,7 @@
             <xs:enumeration value="XCDR2_DATA_REPRESENTATION"></xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
-    <xs:simpleType name="typeConsistencyEnforcementQosPolicyKind">
+    <xs:simpleType name="typeConsistencyKind">
         <xs:restriction base="xs:string">
             <xs:enumeration value="DISALLOW_TYPE_COERCION"></xs:enumeration>
             <xs:enumeration value="ALLOW_TYPE_COERCION"></xs:enumeration>
@@ -264,7 +264,7 @@
     </xs:complexType>
     <xs:complexType name="typeConsistencyEnforcementQosPolicy">
         <xs:all>
-            <xs:element name="kind" type="dds:typeConsistencyEnforcementQosPolicyKind" minOccurs="0"></xs:element>
+            <xs:element name="kind" type="dds:typeConsistencyKind" minOccurs="0"></xs:element>
             <xs:element name="ignore_sequence_bounds" type="xs:boolean" default="false" minOccurs="0"></xs:element>
             <xs:element name="ignore_string_bounds" type="xs:boolean" default="false" minOccurs="0"></xs:element>
             <xs:element name="ignore_member_names" type="xs:boolean" default="false" minOccurs="0"></xs:element>

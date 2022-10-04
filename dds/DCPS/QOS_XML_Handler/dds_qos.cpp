@@ -225,28 +225,28 @@ namespace dds
   {
   }
 
-  // typeConsistencyEnforcementQosPolicyKind
+  // typeConsistencyKind
 
-  typeConsistencyEnforcementQosPolicyKind::Value typeConsistencyEnforcementQosPolicyKind::
+  typeConsistencyKind::Value typeConsistencyKind::
   integral () const
   {
     return v_;
   }
 
   bool
-  operator== (::dds::typeConsistencyEnforcementQosPolicyKind const& a, ::dds::typeConsistencyEnforcementQosPolicyKind const& b)
+  operator== (::dds::typeConsistencyKind const& a, ::dds::typeConsistencyKind const& b)
   {
     return a.v_ == b.v_;
   }
 
   bool
-  operator!= (::dds::typeConsistencyEnforcementQosPolicyKind const& a, ::dds::typeConsistencyEnforcementQosPolicyKind const& b)
+  operator!= (::dds::typeConsistencyKind const& a, ::dds::typeConsistencyKind const& b)
   {
     return a.v_ != b.v_;
   }
 
-  typeConsistencyEnforcementQosPolicyKind::
-  typeConsistencyEnforcementQosPolicyKind (typeConsistencyEnforcementQosPolicyKind::Value v)
+  typeConsistencyKind::
+  typeConsistencyKind (typeConsistencyKind::Value v)
   : v_ (v)
   {
   }
@@ -2338,7 +2338,7 @@ namespace dds
 
   typeConsistencyEnforcementQosPolicy::typeConsistencyEnforcementQosPolicy (typeConsistencyEnforcementQosPolicy const& s) :
   ::XSCRT::Type (s)
-  , kind_ (s.kind_.get () ? new ::dds::typeConsistencyEnforcementQosPolicyKind (*s.kind_) : 0)
+  , kind_ (s.kind_.get () ? new ::dds::typeConsistencyKind (*s.kind_) : 0)
   , ignore_sequence_bounds_ (s.ignore_sequence_bounds_.get () ? new ::XMLSchema::boolean (*s.ignore_sequence_bounds_) : 0)
   , ignore_string_bounds_ (s.ignore_string_bounds_.get () ? new ::XMLSchema::boolean (*s.ignore_string_bounds_) : 0)
   , ignore_member_names_ (s.ignore_member_names_.get () ? new ::XMLSchema::boolean (*s.ignore_member_names_) : 0)
@@ -2400,14 +2400,14 @@ namespace dds
     return kind_.get () != 0;
   }
 
-  ::dds::typeConsistencyEnforcementQosPolicyKind const& typeConsistencyEnforcementQosPolicy::
+  ::dds::typeConsistencyKind const& typeConsistencyEnforcementQosPolicy::
   kind () const
   {
     return *kind_;
   }
 
   void typeConsistencyEnforcementQosPolicy::
-  kind (::dds::typeConsistencyEnforcementQosPolicyKind const& e)
+  kind (::dds::typeConsistencyKind const& e)
   {
     if (kind_.get ())
     {
@@ -2416,7 +2416,7 @@ namespace dds
 
     else
     {
-      kind_ = typeConsistencyEnforcementQosPolicy::kind_auto_ptr_type (new ::dds::typeConsistencyEnforcementQosPolicyKind (e));
+      kind_ = typeConsistencyEnforcementQosPolicy::kind_auto_ptr_type (new ::dds::typeConsistencyKind (e));
       kind_->container (this);
     }
   }
@@ -5523,6 +5523,12 @@ namespace dds
     qos_profile_.push_back (e);
   }
 
+  void qosProfile_seq::
+  del_qos_profile(qosProfile_seq::qos_profile_value_type const& e)
+  {
+    qos_profile_.remove (e);
+  }
+
   size_t qosProfile_seq::
   count_qos_profile() const
   {
@@ -5795,10 +5801,10 @@ namespace dds
   dataRepresentationIdKind const dataRepresentationIdKind::XML_DATA_REPRESENTATION (dataRepresentationIdKind::XML_DATA_REPRESENTATION_l);
   dataRepresentationIdKind const dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION (dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION_l);
 
-  // typeConsistencyEnforcementQosPolicyKind
+  // typeConsistencyKind
 
-  typeConsistencyEnforcementQosPolicyKind::
-  typeConsistencyEnforcementQosPolicyKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
+  typeConsistencyKind::
+  typeConsistencyKind (::XSCRT::XML::Element<ACE_TCHAR> const& e)
   : ::XSCRT::Type (e)
   {
     std::basic_string<ACE_TCHAR> v (e.value ());
@@ -5810,8 +5816,8 @@ namespace dds
     }
   }
 
-  typeConsistencyEnforcementQosPolicyKind::
-  typeConsistencyEnforcementQosPolicyKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
+  typeConsistencyKind::
+  typeConsistencyKind (::XSCRT::XML::Attribute<ACE_TCHAR> const& a)
   : ::XSCRT::Type (a)
   {
     std::basic_string<ACE_TCHAR> v (a.value ());
@@ -5823,8 +5829,8 @@ namespace dds
     }
   }
 
-  typeConsistencyEnforcementQosPolicyKind const typeConsistencyEnforcementQosPolicyKind::DISALLOW_TYPE_COERCION (typeConsistencyEnforcementQosPolicyKind::DISALLOW_TYPE_COERCION_l);
-  typeConsistencyEnforcementQosPolicyKind const typeConsistencyEnforcementQosPolicyKind::ALLOW_TYPE_COERCION (typeConsistencyEnforcementQosPolicyKind::ALLOW_TYPE_COERCION_l);
+  typeConsistencyKind const typeConsistencyKind::DISALLOW_TYPE_COERCION (typeConsistencyKind::DISALLOW_TYPE_COERCION_l);
+  typeConsistencyKind const typeConsistencyKind::ALLOW_TYPE_COERCION (typeConsistencyKind::ALLOW_TYPE_COERCION_l);
 
   // duration
 
@@ -6614,7 +6620,7 @@ namespace dds
 
       if (n == ACE_TEXT("kind"))
       {
-        ::dds::typeConsistencyEnforcementQosPolicyKind t (e);
+        ::dds::typeConsistencyKind t (e);
         kind (t);
       }
 

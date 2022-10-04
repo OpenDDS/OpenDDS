@@ -177,4 +177,51 @@ QosCommon::get_ownership_kind(const ::dds::ownershipKind kind,
     }
 }
 
+void
+QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind kind,
+                              ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind)
+{
+  switch (kind.integral())
+    {
+    case ::dds::typeConsistencyKind::DISALLOW_TYPE_COERCION_l:
+      dds_kind = ::DDS::DISALLOW_TYPE_COERCION;
+      break;
+    case ::dds::typeConsistencyKind::ALLOW_TYPE_COERCION_l:
+      dds_kind = ::DDS::ALLOW_TYPE_COERCION;
+      break;
+    default:
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_type_consistency_kind - ")
+        ACE_TEXT("Unknown type consistency kind found <%d>; returning DISALLOW_TYPE_COERCION\n"),
+        kind.integral()));
+      dds_kind = ::DDS::DISALLOW_TYPE_COERCION;
+      break;
+    }
+}
+
+void
+QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind kind,
+                                         ::DDS::DataRepresentationId_t& dds_kind)
+{
+  switch (kind.integral())
+    {
+    case ::dds::dataRepresentationIdKind::XCDR_DATA_REPRESENTATION_l:
+      dds_kind = ::DDS::XCDR_DATA_REPRESENTATION;
+      break;
+    case ::dds::dataRepresentationIdKind::XML_DATA_REPRESENTATION_l:
+      dds_kind = ::DDS::XML_DATA_REPRESENTATION;
+      break;
+    case ::dds::dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION_l:
+      dds_kind = ::DDS::XCDR2_DATA_REPRESENTATION;
+      break;
+    default:
+      ACE_ERROR((LM_ERROR,
+        ACE_TEXT("(%P|%t) ERROR: QosCommon::get_data_presentation_id_kind - ")
+        ACE_TEXT("Unknown data presentation kind found <%d>; returning XCDR_DATA_REPRESENTATION\n"),
+        kind.integral()));
+      dds_kind = ::DDS::XCDR_DATA_REPRESENTATION;
+      break;
+    }
+}
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

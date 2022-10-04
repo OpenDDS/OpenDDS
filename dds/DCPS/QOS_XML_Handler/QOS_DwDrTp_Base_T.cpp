@@ -32,7 +32,6 @@ QOS_DwDrTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, c
                 ACE_TEXT("set durability to <%d>\n"),
                 dds_qos.durability.kind));
             }
-
         }
     }
   if (xml_qos->deadline_p())

@@ -8,8 +8,8 @@
  * please report this to the XSC project at
  * https://github.com/DOCGroup/XSC
  */
-#ifndef OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
-#define OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
+#ifndef DDS_QOS_HPP
+#define DDS_QOS_HPP
 
 #include "OpenDDS_XML_QOS_Handler_Export.h"
 // Forward declarations.
@@ -23,7 +23,7 @@ namespace dds
   class reliabilityKind;
   class ownershipKind;
   class dataRepresentationIdKind;
-  class typeConsistencyEnforcementQosPolicyKind;
+  class typeConsistencyKind;
   class duration;
   class stringSeq;
   class dataRepresentationIdSeq;
@@ -365,14 +365,14 @@ namespace dds
   bool OpenDDS_XML_QOS_Handler_Export operator!= (dataRepresentationIdKind const &a, dataRepresentationIdKind const &b);
 
 
-  class OpenDDS_XML_QOS_Handler_Export typeConsistencyEnforcementQosPolicyKind : public ::XSCRT::Type
+  class OpenDDS_XML_QOS_Handler_Export typeConsistencyKind : public ::XSCRT::Type
   {
     public:
-    explicit typeConsistencyEnforcementQosPolicyKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
-    explicit typeConsistencyEnforcementQosPolicyKind (::XSCRT::XML::Attribute<ACE_TCHAR> const&);
+    explicit typeConsistencyKind (::XSCRT::XML::Element<ACE_TCHAR> const&);
+    explicit typeConsistencyKind (::XSCRT::XML::Attribute<ACE_TCHAR> const&);
 
-    static typeConsistencyEnforcementQosPolicyKind const DISALLOW_TYPE_COERCION;
-    static typeConsistencyEnforcementQosPolicyKind const ALLOW_TYPE_COERCION;
+    static typeConsistencyKind const DISALLOW_TYPE_COERCION;
+    static typeConsistencyKind const ALLOW_TYPE_COERCION;
 
     enum Value
     {
@@ -384,20 +384,20 @@ namespace dds
     integral () const;
 
     friend bool OpenDDS_XML_QOS_Handler_Export
-    operator== (typeConsistencyEnforcementQosPolicyKind const& a, typeConsistencyEnforcementQosPolicyKind const& b);
+    operator== (typeConsistencyKind const& a, typeConsistencyKind const& b);
 
     friend bool OpenDDS_XML_QOS_Handler_Export
-    operator!= (typeConsistencyEnforcementQosPolicyKind const& a, typeConsistencyEnforcementQosPolicyKind const& b);
+    operator!= (typeConsistencyKind const& a, typeConsistencyKind const& b);
 
     private:
-    typeConsistencyEnforcementQosPolicyKind (Value v);
+    typeConsistencyKind (Value v);
 
     Value v_;
   };
 
-  bool OpenDDS_XML_QOS_Handler_Export operator== (typeConsistencyEnforcementQosPolicyKind const &a, typeConsistencyEnforcementQosPolicyKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator== (typeConsistencyKind const &a, typeConsistencyKind const &b);
 
-  bool OpenDDS_XML_QOS_Handler_Export operator!= (typeConsistencyEnforcementQosPolicyKind const &a, typeConsistencyEnforcementQosPolicyKind const &b);
+  bool OpenDDS_XML_QOS_Handler_Export operator!= (typeConsistencyKind const &a, typeConsistencyKind const &b);
 
 
   class OpenDDS_XML_QOS_Handler_Export duration : public ::XSCRT::Type
@@ -1258,11 +1258,11 @@ namespace dds
     // kind
     public:
     bool kind_p () const;
-    ::dds::typeConsistencyEnforcementQosPolicyKind const& kind () const;
-    void kind (::dds::typeConsistencyEnforcementQosPolicyKind const& );
+    ::dds::typeConsistencyKind const& kind () const;
+    void kind (::dds::typeConsistencyKind const& );
 
     protected:
-    typedef XML_XSC_SMART_PTR( ::dds::typeConsistencyEnforcementQosPolicyKind) kind_auto_ptr_type;
+    typedef XML_XSC_SMART_PTR( ::dds::typeConsistencyKind) kind_auto_ptr_type;
     kind_auto_ptr_type kind_;
 
     // ignore_sequence_bounds
@@ -2266,6 +2266,7 @@ namespace dds
     qos_profile_const_iterator begin_qos_profile () const;
     qos_profile_const_iterator end_qos_profile () const;
     void add_qos_profile (qos_profile_value_type const&);
+    void del_qos_profile (qos_profile_value_type const&);
     size_t count_qos_profile () const;
 
     protected:
@@ -2290,4 +2291,4 @@ namespace dds
   }
 }
 
-#endif // OPENDDS_DCPS_QOS_XML_HANDLER_DDS_QOS_HPP
+#endif // DDS_QOS_HPP
