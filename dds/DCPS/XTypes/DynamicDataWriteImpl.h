@@ -348,7 +348,24 @@ private:
 
   bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
   bool is_discriminator_type(TypeKind tk) const;
-  bool select_default_member(CORBA::ULong disc_val, DDS::MemberId default_id) const;
+  bool is_default_member_selected(CORBA::ULong disc_val, DDS::MemberId default_id) const;
+  bool read_discriminator(CORBA::ULong& disc_val) const;
+  DDS::MemberId find_selected_member() const;
+  bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
+  bool find_selected_member_and_discriminator(DDS::MemberId& selected_id,
+                                              bool& has_disc,
+                                              CORBA::Long& disc_val) const;
+  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_ptr value);
+  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_ptr value);
+  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_ptr value, TypeKind tk);
+  bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
+                                     DDS::MemberId id, TypeKind collection_tk) const;
+
+
+  template<typename SingleType>
+  bool insert_single(DDS::MemberId id, const SingleType& value);
+
+  bool insert_complex(DDS::MemberId id, const DDS::DynamicData_var& value);
 
   // The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
@@ -408,7 +425,13 @@ private:
   };
 
   // Container for all data written to this DynamicData object.
+  // At anytime, there can be at most 1 entry for any given MemberId in all maps.
+  // That is, each member is stored in at most 1 map.
   struct DataContainer {
+    typedef OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
+    typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
+    typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
+
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
     OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
     OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
