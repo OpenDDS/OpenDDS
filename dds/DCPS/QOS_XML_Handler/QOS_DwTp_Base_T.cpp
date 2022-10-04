@@ -144,6 +144,28 @@ QOS_DwTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, con
             }
         }
     }
+  if (xml_qos->representation_p())
+    {
+      if (xml_qos->representation().value_p())
+        {
+          dds_qos.representation.value.length(static_cast<CORBA::ULong>(xml_qos->representation().value().count_element()));
+          CORBA::ULong pos = 0;
+          for (::dds::stringSeq::element_const_iterator it = xml_qos->representation().value().begin_element();
+               it != xml_qos->representation().value().end_element();
+               ++it, ++pos)
+            {
+              dds_qos.representation.value[pos] = ::CORBA::string_dup(ACE_TEXT_ALWAYS_CHAR(it->get()->c_str()));
+
+              if (OpenDDS::DCPS::DCPS_debug_level > 9)
+                {
+                  ACE_DEBUG((LM_TRACE,
+                    ACE_TEXT("QOS_DwTp_Base_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
+                    ACE_TEXT("New name <%s> inserted in representation at position <%u>\n"),
+                    dds_qos.representation.value[pos].in(), pos));
+                }
+            }
+        }
+    }
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
