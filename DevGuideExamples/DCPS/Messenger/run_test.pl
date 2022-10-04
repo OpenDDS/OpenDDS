@@ -40,7 +40,7 @@ if ($help) {
 unlink "subscriber.log";
 unlink "publisher.log";
 
-my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 ";
+my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 -DCPSPendingTimeout 3 ";
 
 if ($rtps) {
   $common_opts .= " -DCPSConfigFile rtps.ini";
