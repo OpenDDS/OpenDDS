@@ -116,14 +116,15 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::StatusCondition_var condition = writer->get_statuscondition();
     condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
+    DDS::WaitSet_var ws(new DDS::WaitSet);
     ws->attach_condition(condition);
 
-    ACE_DEBUG((LM_DEBUG,
-               ACE_TEXT("Block until subscriber is available\n")));
+    ACE_DEBUG((LM_DEBUG, ACE_TEXT("Block until subscriber is available\n")));
+
+    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
+    DDS::ConditionSeq conditions;
 
     while (true) {
-      DDS::PublicationMatchedStatus matches;
       if (writer->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
@@ -135,7 +136,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         break;
       }
 
-      DDS::ConditionSeq conditions;
       DDS::Duration_t timeout = { 60, 0 };
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -172,7 +172,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
 
     // Wait for samples to be acknowledged
-    DDS::Duration_t timeout = { 30, 0 };
+    const DDS::Duration_t timeout = { 30, 0 };
     if (message_writer->wait_for_acknowledgments(timeout) != DDS::RETCODE_OK) {
       ACE_ERROR_RETURN((LM_ERROR,
                         ACE_TEXT("ERROR: %N:%l: main() -")

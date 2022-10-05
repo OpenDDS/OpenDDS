@@ -123,11 +123,13 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     DDS::StatusCondition_var condition = reader->get_statuscondition();
     condition->set_enabled_statuses(DDS::SUBSCRIPTION_MATCHED_STATUS);
 
-    DDS::WaitSet_var ws = new DDS::WaitSet;
+    DDS::WaitSet_var ws(new DDS::WaitSet);
     ws->attach_condition(condition);
 
+    DDS::SubscriptionMatchedStatus matches = { 0, 0, 0, 0, 0 };
+    DDS::ConditionSeq conditions;
+
     while (true) {
-      DDS::SubscriptionMatchedStatus matches;
       if (reader->get_subscription_matched_status(matches) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
@@ -139,8 +141,7 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         break;
       }
 
-      DDS::ConditionSeq conditions;
-      DDS::Duration_t timeout = { 60, 0 };
+      const DDS::Duration_t timeout = { 60, 0 };
       if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("ERROR: %N:%l: main() -")
