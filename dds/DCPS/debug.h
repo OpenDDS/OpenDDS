@@ -194,8 +194,8 @@ private:
 };
 #endif // OPENDDS_UTIL_BUILD
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
