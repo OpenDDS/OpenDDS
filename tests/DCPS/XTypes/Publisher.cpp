@@ -96,10 +96,10 @@ void write_base_appendable_struct(const DataWriter_var& dw)
 {
   BaseAppendableStructDataWriter_var typed_dw = BaseAppendableStructDataWriter::_narrow(dw);
 
-  BaseAppendableStruct apfs;
-  apfs.key_field = key_value;
+  BaseAppendableStruct bas;
+  bas.key_field = key_value;
 
-  const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
+  const ReturnCode_t ret = typed_dw->write(bas, HANDLE_NIL);
   if (ret != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: write_base_appendable_struct returned %C\n",
                OpenDDS::DCPS::retcode_to_string(ret)));
