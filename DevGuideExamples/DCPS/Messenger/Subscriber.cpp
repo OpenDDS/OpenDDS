@@ -23,10 +23,13 @@
 #include "DataReaderListenerImpl.h"
 #include "MessengerTypeSupportImpl.h"
 
+#include <dds/DCPS/transport/framework/TransportDebug.h>
 
 int
 ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
+  OpenDDS::DCPS::transport_debug.log_progress = true;
+
   try {
     // Initialize DomainParticipantFactory
     DDS::DomainParticipantFactory_var dpf =
