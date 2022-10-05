@@ -92,6 +92,23 @@ void write_additional_prefix_field_struct(const DataWriter_var& dw)
   }
 }
 
+void write_base_appendable_struct(const DataWriter_var& dw)
+{
+  BaseAppendableStructDataWriter_var typed_dw = BaseAppendableStructDataWriter::_narrow(dw);
+
+  BaseAppendableStruct apfs;
+  apfs.key_field = key_value;
+
+  const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
+  if (ret != RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: write_base_appendable_struct returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
+  if (verbose) {
+    ACE_DEBUG((LM_DEBUG, "writer: BaseAppendableStruct\n"));
+  }
+}
+
 void write_additional_postfix_field_struct(const DataWriter_var& dw)
 {
   AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
@@ -307,6 +324,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else if (type == "ModifiedFinalStruct") {
     ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type == "BaseAppendableStruct") {
+    BaseAppendableStructTypeSupport_var ts = new BaseAppendableStructTypeSupportImpl;
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructNoXTypes") {
     AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
@@ -484,6 +504,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       write_final_struct(dw);
     } else if (type == "ModifiedFinalStruct") {
       write_modified_final_struct(dw);
+    } else if (type == "BaseAppendableStruct") {
+      write_base_appendable_struct(dw);
     } else if (type == "AppendableStructNoXTypes") {
       write_appendable_struct_no_xtypes(dw);
     } else if (type == "AdditionalPrefixFieldStruct") {

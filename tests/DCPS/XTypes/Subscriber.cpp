@@ -65,6 +65,31 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
 }
 
 template<typename T1, typename T2>
+ReturnCode_t read_extended_struct(const DataReader_var& dr, const T1& pdr, T2& data)
+{
+  ReturnCode_t ret = RETCODE_OK;
+  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
+    if (data.length() != 1) {
+      ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
+      ret = RETCODE_ERROR;
+    } else if (data[0].key_field != key_value) {
+      ACE_ERROR((LM_ERROR, "reader: expected key value: %d, received: %d\n", key_value, data[0].key_field));
+      ret = RETCODE_ERROR;
+    } else if (data[0].additional_field != 0) {
+      ACE_ERROR((LM_ERROR, "reader: expected additional_field: %d, received: %d\n", 0, data[0].additional_field));
+      ret = RETCODE_ERROR;
+    } else if (verbose) {
+      ACE_DEBUG((LM_DEBUG, "reader: %d additional_field: %d\n", data[0].key_field, data[0].additional_field));
+    }
+  } else {
+    ACE_ERROR((LM_ERROR, "ERROR: Reader: read_i returned %C\n",
+               OpenDDS::DCPS::retcode_to_string(ret)));
+  }
+
+  return ret;
+}
+
+template<typename T1, typename T2>
 ReturnCode_t read_union(const DataReader_var& dr, const T1& pdr, T2& data)
 {
   ReturnCode_t ret = RETCODE_OK;
@@ -126,6 +151,13 @@ ReturnCode_t read_appendable_struct(const DataReader_var& dr)
   AppendableStructDataReader_var pdr = AppendableStructDataReader::_narrow(dr);
   ::AppendableStructSeq data;
   return read_struct(dr, pdr, data);
+}
+
+ReturnCode_t read_extended_appendable_struct(const DataReader_var& dr)
+{
+  ExtendedAppendableStructDataReader_var pdr = ExtendedAppendableStructDataReader::_narrow(dr);
+  ::ExtendedAppendableStructSeq data;
+  return read_extended_struct(dr, pdr, data);
 }
 
 ReturnCode_t read_appendable_struct_no_xtypes(const DataReader_var& dr)
@@ -249,6 +281,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStruct") {
     AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
+    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+  } else if (type == "ExtendedAppendableStruct") {
+    ExtendedAppendableStructTypeSupport_var ts = new ExtendedAppendableStructTypeSupportImpl;
     failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
   } else if (type == "AppendableStructNoXTypes") {
     AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl;
@@ -402,6 +437,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStruct") {
       failed = (read_appendable_struct(dr) != RETCODE_OK);
+    } else if (type == "ExtendedAppendableStruct") {
+      failed = (read_extended_appendable_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStructNoXTypes") {
       failed = (read_appendable_struct_no_xtypes(dr) != RETCODE_OK);
     } else if (type == "FinalStructSub") {
