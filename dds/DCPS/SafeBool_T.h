@@ -3,6 +3,13 @@
  * Implements the "Safe Bool" idiom, which is a safer alternative to operator
  * bool. Based on:
  *   https://www.artima.com/articles/the-safe-bool-idiom
+ * TLDR: We may want to be able to use `operator bool()` to check an object's
+ * abstract truthfulness using `if (object) {...}`, but that opens up implicit
+ * casting and comparisons that come with the bool type that are almost
+ * certainly not desired, like `int count = object`. This is achieved via the
+ * BoolType function pointer which isn't actually called, but is the only
+ * boolean-ish thing the type can be implicitly converted to using the BoolType
+ * operator.
  *
  * If you want the boolean test function to be virtual, implement it as:
  *   virtual bool boolean_test() const;

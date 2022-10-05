@@ -34,5 +34,6 @@ project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transport
 
     // override default of Template_Files for *_T.cpp
     dds/DCPS/RcHandle_T.cpp
+    dds/DCPS/SafeBool_T.cpp
   }
 }
