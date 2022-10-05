@@ -87,7 +87,7 @@ void DcpsUpcalls::writer_done()
   wait(); // ACE_Task_Base::wait does not accept a timeout
 }
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

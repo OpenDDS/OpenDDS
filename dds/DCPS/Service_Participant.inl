@@ -395,7 +395,7 @@ void Service_Participant::type_object_encoding(TypeObjectEncoding encoding)
   type_object_encoding_ = encoding;
 }
 
-} // namespace DDS
+} // namespace DCPS
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

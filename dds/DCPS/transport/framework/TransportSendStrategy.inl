@@ -155,7 +155,7 @@ TransportQueueElement* TransportSendStrategy::current_packet_first_element() con
   return this->elems_.peek();
 }
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
