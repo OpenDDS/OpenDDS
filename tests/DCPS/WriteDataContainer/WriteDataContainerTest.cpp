@@ -75,6 +75,7 @@ public:
 
   DDS::ReturnCode_t setup_serialization(Test::SimpleDataWriterImpl* dw)
   {
+    dw->type_support_ = &ts_;
     return dw->setup_serialization();
   }
 
@@ -290,6 +291,7 @@ public:
 
   WriteDataContainer* delayed_deliver_container_;
   DataSampleElement* element_to_deliver_;
+  Test::SimpleTypeSupportImpl ts_;
 };
 
 // Writer thread.
@@ -369,8 +371,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
         dw_qos.resource_limits.max_samples = MAX_SAMPLES;
 
-        OpenDDS::DCPS::NativeTopicType<Test::Simple> topic_type;
-        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl(&topic_type));
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
@@ -489,8 +490,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 #endif
         dw_qos.resource_limits.max_samples = 2;
 
-        OpenDDS::DCPS::NativeTopicType<Test::Simple> topic_type;
-        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl(&topic_type));
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
@@ -623,8 +623,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         dw_qos.reliability.max_blocking_time.sec = 2;
         dw_qos.reliability.max_blocking_time.nanosec = MAX_BLOCKING_TIME_NANO;
 
-        OpenDDS::DCPS::NativeTopicType<Test::Simple> topic_type;
-        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl(&topic_type));
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
@@ -761,8 +760,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         dw_qos.resource_limits.max_samples = MAX_SAMPLES;
         dw_qos.resource_limits.max_samples_per_instance = MAX_SAMPLES_PER_INSTANCE;
 
-        OpenDDS::DCPS::NativeTopicType<Test::Simple> topic_type;
-        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl(&topic_type));
+        OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
         test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);

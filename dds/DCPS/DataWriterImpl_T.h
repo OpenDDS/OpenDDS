@@ -43,8 +43,7 @@ DataWriterImpl_T
 public:
   typedef NativeSample<MessageType> Sample;
 
-  DataWriterImpl_T(const AbstractTopicType* topic_type)
-    : DataWriterImpl(topic_type)
+  DataWriterImpl_T()
   {
   }
 
@@ -66,7 +65,7 @@ public:
     if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: %CDataWriterImpl::register_instance_w_timestamp: ")
                  ACE_TEXT("register failed: %C\n"),
-                 topic_type_->name().c_str(),
+                 get_type_support()->name(),
                  retcode_to_string(ret)));
     }
 
@@ -114,7 +113,7 @@ public:
       if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
         ACE_ERROR_RETURN((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: %CDataWriterImpl::write_w_timestamp: ")
                           ACE_TEXT("register failed: %C.\n"),
-                          topic_type_->name().c_str(),
+                          get_type_support()->name(),
                           retcode_to_string(ret)),
                          ret);
       }
@@ -257,11 +256,13 @@ private:
 #endif
 
       // don't use fast allocator for registration.
+      const TypeSupportImpl* const ts = get_type_support();
       Message_Block_Ptr serialized(serialize_sample(instance_data, /* key_only = */ true));
       if (!serialized) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: %CDataWriterImpl::get_or_create_instance_handle: "
-          "failed to serialize sample\n",
-          topic_type_->name().c_str()));
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %CDataWriterImpl::get_or_create_instance_handle: "
+            "failed to serialize sample\n", ts->name()));
+        }
         return DDS::RETCODE_ERROR;
       }
 
@@ -276,10 +277,11 @@ private:
 
       if (needs_creation && !insert_instance(handle, sample)) {
         handle = DDS::HANDLE_NIL;
-        ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: %CDataWriterImpl::get_or_create_instance_handle: ")
-                          ACE_TEXT("insert instance failed\n"),
-                          topic_type_->name().c_str()),
-                         DDS::RETCODE_ERROR);
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %CDataWriterImpl::get_or_create_instance_handle: "
+             "insert instance failed\n", ts->name()));
+        }
+        return DDS::RETCODE_ERROR;
       }
 
       send_all_to_flush_control(guard);

@@ -55,18 +55,18 @@ namespace DCPS {
 //      currently this is not needed because auto_enable_created_entities
 //      cannot be false.
 
-DataWriterImpl::DataWriterImpl(const AbstractTopicType* topic_type)
+DataWriterImpl::DataWriterImpl()
   : data_dropped_count_(0)
   , data_delivered_count_(0)
   , controlTracker("DataWriterImpl")
   , n_chunks_(TheServiceParticipant->n_chunks())
   , association_chunk_multiplier_(TheServiceParticipant->association_chunk_multiplier())
   , qos_(TheServiceParticipant->initial_DataWriterQos())
-  , topic_type_(topic_type)
   , skip_serialize_(false)
   , db_lock_pool_(new DataBlockLockPool((unsigned long)TheServiceParticipant->n_chunks()))
   , topic_id_(GUID_UNKNOWN)
   , topic_servant_(0)
+  , type_support_(0)
   , listener_mask_(DEFAULT_STATUS_MASK)
   , domain_id_(0)
   , publication_id_(GUID_UNKNOWN)
@@ -128,22 +128,24 @@ DataWriterImpl::cleanup()
   // deleted
   set_listener(0, NO_STATUS_MASK);
   topic_servant_ = 0;
+  type_support_ = 0;
 }
 
 void
 DataWriterImpl::init(
-  TopicImpl *                          topic_servant,
-  const DDS::DataWriterQos &           qos,
-  DDS::DataWriterListener_ptr          a_listener,
-  const DDS::StatusMask &              mask,
-  OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::DomainParticipantImpl> participant_servant,
-  OpenDDS::DCPS::PublisherImpl *         publisher_servant)
+  TopicImpl* topic_servant,
+  const DDS::DataWriterQos& qos,
+  DDS::DataWriterListener_ptr a_listener,
+  const DDS::StatusMask& mask,
+  WeakRcHandle<DomainParticipantImpl> participant_servant,
+  PublisherImpl* publisher_servant)
 {
-  DBG_ENTRY_LVL("DataWriterImpl","init",6);
+  DBG_ENTRY_LVL("DataWriterImpl", "init", 6);
   topic_servant_ = topic_servant;
-  topic_name_    = topic_servant_->get_name();
-  topic_id_      = topic_servant_->get_id();
-  type_name_     = topic_servant_->get_type_name();
+  type_support_ = dynamic_cast<TypeSupportImpl*>(topic_servant->get_type_support());
+  topic_name_ = topic_servant_->get_name();
+  topic_id_ = topic_servant_->get_id();
+  type_name_ = topic_servant_->get_type_name();
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   is_bit_ = topicIsBIT(topic_name_.in(), type_name_.in());
@@ -385,7 +387,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
                  LogGuid(remote_id).c_str()));
     }
 
-    if (OpenDDS::DCPS::insert(readers_, remote_id) == -1) {
+    if (insert(readers_, remote_id) == -1) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::association_complete_i: ")
                  ACE_TEXT("insert %C from pending failed.\n"),
@@ -425,7 +427,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       // protect publication_match_status_ and status changed flags.
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-      if (OpenDDS::DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
+      if (bind(id_to_handle_map_, remote_id, handle) != 0) {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),
@@ -595,7 +597,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
       //in there, the association_complete() is not called yet and remove it
       //from pending list.
 
-      if (OpenDDS::DCPS::remove(readers_, readers[i]) == 0) {
+      if (remove(readers_, readers[i]) == 0) {
         ++ fully_associated_len;
         fully_associated_readers.length(fully_associated_len);
         fully_associated_readers [fully_associated_len - 1] = readers[i];
@@ -782,7 +784,7 @@ void DataWriterImpl::remove_all_associations()
   // stop pending associations
   this->stop_associating();
 
-  OpenDDS::DCPS::ReaderIdSeq readers;
+  ReaderIdSeq readers;
   CORBA::ULong size;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
@@ -1486,14 +1488,12 @@ DataWriterImpl::enable()
   DDS::PublisherQos pub_qos;
   publisher->get_qos(pub_qos);
 
-  TypeSupportImpl* const typesupport =
-    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
   XTypes::TypeInformation type_info;
-  typesupport->to_type_info(type_info);
+  type_support_->to_type_info(type_info);
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-  typesupport->add_types(type_lookup_service);
-  typesupport->populate_dependencies(type_lookup_service);
+  type_support_->add_types(type_lookup_service);
+  type_support_->populate_dependencies(type_lookup_service);
 
   const RepoId publication_id =
     disco->add_publication(this->domain_id_,
@@ -2272,17 +2272,16 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
                            const FilterEvaluator& evaluator,
                            const DDS::StringSeq& expression_params) const
 {
-  TypeSupportImpl* const typesupport =
-    dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
-
-  if (!typesupport) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR DataWriterImpl::filter_out - Could not cast type support, not filtering\n"));
+  if (!type_support_) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::filter_out: Could not cast type support, not filtering\n"));
+    }
     return false;
   }
 
   if (filterClassName == "DDSSQL" ||
       filterClassName == "OPENDDSSQL") {
-    const MetaStruct& meta = typesupport->getMetaStructForType();
+    const MetaStruct& meta = type_support_->getMetaStructForType();
     if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
       return true;
     }
@@ -2290,14 +2289,13 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
       return !evaluator.eval(elt.get_sample()->cont(),
                              elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
                              elt.get_header().cdr_encapsulation_, meta,
-                             expression_params, typesupport->getExtensibility());
+                             expression_params, type_support_->base_extensibility());
     } catch (const std::runtime_error&) {
-      //if the eval fails, the throws will do the logging
-      //return false here so that the sample is not filtered
+      // if the eval fails, the throws will do the logging
+      // return false here so that the sample is not filtered
       return false;
     }
-  }
-  else {
+  } else {
     return false;
   }
 }
@@ -2837,14 +2835,14 @@ DDS::ReturnCode_t DataWriterImpl::setup_serialization()
     // There should only be one data representation in a DataWriter, so
     // simply use qos_.representation.value[0].
     if (repr_to_encoding_kind(qos_.representation.value[0], encoding_kind)) {
-      encoding_mode_ = EncodingMode(topic_type_, encoding_kind, swap_bytes());
+      encoding_mode_ = EncodingMode(type_support_, encoding_kind, swap_bytes());
       if (encoding_kind == Encoding::KIND_XCDR1 &&
-          topic_type_->max_extensibility() == MUTABLE) {
+          type_support_->max_extensibility() == MUTABLE) {
         if (log_level >= LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::setup_serialization: "
             "Encountered unsupported combination of XCDR1 encoding and mutable extensibility "
             "for writer of type %C\n",
-            topic_type_->name().c_str()));
+            type_support_->name()));
         }
         return DDS::RETCODE_ERROR;
       } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR) {
@@ -2859,11 +2857,11 @@ DDS::ReturnCode_t DataWriterImpl::setup_serialization()
                  "Encountered unsupported or unknown data representation: %C ",
                  "for writer of type %C\n",
                  repr_to_string(qos_.representation.value[0]).c_str(),
-                 topic_type_->name().c_str()));
+                 type_support_->name()));
     }
   } else {
     // Pick unaligned CDR as it is the implicit representation for non-encapsulated
-    encoding_mode_ = EncodingMode(topic_type_, Encoding::KIND_UNALIGNED_CDR, swap_bytes());
+    encoding_mode_ = EncodingMode(type_support_, Encoding::KIND_UNALIGNED_CDR, swap_bytes());
   }
   if (!encoding_mode_.valid()) {
     if (log_level >= LogLevel::Notice) {
@@ -2995,7 +2993,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
     Serializer serializer(mb.get(), encoding);
     if (encapsulated) {
       EncapsulationHeader encap;
-      if (!encap.from_encoding(encoding, topic_type_->base_extensibility())) {
+      if (!encap.from_encoding(encoding, type_support_->base_extensibility())) {
         // from_encoding logged the error
         return 0;
       }

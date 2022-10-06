@@ -116,14 +116,9 @@ public:
     }
   };
 
-  DataWriterImpl(const AbstractTopicType* topic_type);
+  DataWriterImpl();
 
   virtual ~DataWriterImpl();
-
-  const AbstractTopicType* topic_type() const
-  {
-    return topic_type_;
-  }
 
   void set_marshal_skip_serialize(bool value)
   {
@@ -500,7 +495,7 @@ public:
 
   const ValueDispatcher* get_value_dispatcher() const
   {
-    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+    return dynamic_cast<const ValueDispatcher*>(type_support_);
   }
 
   DDS::ReturnCode_t get_key_value(AbstractSample_rch& sample, DDS::InstanceHandle_t handle);
@@ -606,7 +601,6 @@ protected:
   virtual SendControlStatus send_control(const DataSampleHeader& header,
                                          Message_Block_Ptr msg);
 
-  const AbstractTopicType* const topic_type_;
   bool skip_serialize_;
 
   /**
@@ -621,12 +615,12 @@ protected:
     {
     }
 
-    EncodingMode(const AbstractTopicType* topic_type, Encoding::Kind kind, bool swap_the_bytes)
+    EncodingMode(const TypeSupportImpl* ts, Encoding::Kind kind, bool swap_the_bytes)
     : valid_(true)
     , encoding_(kind, swap_the_bytes)
     , header_size_(encoding_.is_encapsulated() ? EncapsulationHeader::serialized_size : 0)
-    , bound_(topic_type->serialized_size_bound(encoding_))
-    , key_only_bound_(topic_type->key_only_serialized_size_bound(encoding_))
+    , bound_(ts->serialized_size_bound(encoding_))
+    , key_only_bound_(ts->key_only_serialized_size_bound(encoding_))
     {
     }
 
@@ -663,6 +657,11 @@ protected:
     SerializedSizeBound bound_;
     SerializedSizeBound key_only_bound_;
   } encoding_mode_;
+
+  TypeSupportImpl* get_type_support() const
+  {
+    return type_support_;
+  }
 
 private:
 
@@ -730,6 +729,7 @@ private:
   GUID_t topic_id_;
   /// The topic servant.
   TopicDescriptionPtr<TopicImpl> topic_servant_;
+  TypeSupportImpl* type_support_;
 
   /// Mutex to protect listener info
   ACE_Thread_Mutex listener_mutex_;
