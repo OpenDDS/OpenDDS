@@ -200,7 +200,7 @@ function(tao_idl_command target)
       OUTPUT ${_OUTPUT_FILES}
       DEPENDS tao_idl ${tao_idl_shared_libs} ace_gperf
       MAIN_DEPENDENCY ${idl_file_path}
-      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}"  "TAO_ROOT=${TAO_INCLUDE_DIR}" "TAO_IDL_PREPROCESSOR_ARGS=\"-E -I${TAO_ROOT} -I${TAO_INCLUDE_DIR}\""
+      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}"  "TAO_ROOT=${TAO_INCLUDE_DIR}"
         "${_tao_extra_lib_dirs}"
         $<TARGET_FILE:tao_idl> -g ${GPERF_LOCATION} ${TAO_CORBA_IDL_FLAGS} -Sg
         -Wb,pre_include=ace/pre.h -Wb,post_include=ace/post.h

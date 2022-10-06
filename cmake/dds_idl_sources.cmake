@@ -242,7 +242,7 @@ function(opendds_target_idl_sources target)
       OUTPUT ${_cur_idl_outputs} ${_cur_type_support_idl} ${_cur_java_list}
       DEPENDS opendds_idl ${DDS_ROOT}/dds/idl/IDLTemplate.txt
       MAIN_DEPENDENCY ${abs_filename}
-      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}" "TAO_IDL_PREPROCESSOR_ARGS=\"-E -I${TAO_ROOT} -I${TAO_INCLUDE_DIR}\""
+      COMMAND ${CMAKE_COMMAND} -E env "DDS_ROOT=${DDS_ROOT}" "TAO_ROOT=${TAO_INCLUDE_DIR}"
               "${_tao_extra_lib_dirs}"
               $<TARGET_FILE:opendds_idl> -I${idl_file_dir}
               ${_ddsidl_flags} ${file_dds_idl_flags} ${abs_filename}
