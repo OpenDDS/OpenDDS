@@ -179,7 +179,7 @@ QosCommon::get_ownership_kind(const ::dds::ownershipKind kind,
 
 void
 QosCommon::get_type_consistency_kind(const ::dds::typeConsistencyKind kind,
-                              ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind)
+                                    ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind)
 {
   switch (kind.integral())
     {
