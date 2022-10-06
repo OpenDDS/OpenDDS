@@ -32,4 +32,4 @@ module CORBA
   typedef sequence<short> ShortSeq;
 };
 
-#endif /* OPENDDS_CORBA_SHORT_SEQ_IDL */
+#endif /* OPENDDS_CORBASEQ_SHORTSEQ_IDL */

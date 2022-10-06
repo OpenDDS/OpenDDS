@@ -31,4 +31,4 @@ module CORBA
   typedef sequence<wstring> WStringSeq;
 };
 
-#endif /* OPENDDS_CORBA_WSTRING_SEQ_IDL */
+#endif /* OPENDDS_CORBASEQ_WSTRINGSEQ_IDL */

@@ -33,4 +33,4 @@ module CORBA
   typedef sequence<char> CharSeq;
 };
 
-#endif /* OPENDDS_CORBA_CHAR_SEQ_IDL */
+#endif /* OPENDDS_CORBASEQ_CHARSEQ_IDL */

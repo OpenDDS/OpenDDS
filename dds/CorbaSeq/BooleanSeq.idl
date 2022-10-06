@@ -19,4 +19,4 @@ module CORBA
   typedef sequence<boolean> BooleanSeq;
 };
 
-#endif /* OPENDDS_CORBA_BOOLEAN_SEQ_IDL */
+#endif /* OPENDDS_CORBASEQ_BOOLEANSEQ_IDL */
