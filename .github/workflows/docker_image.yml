@@ -5,6 +5,8 @@ on:
   push:
     branches:
       - latest-release
+    tags:
+      - DDS-*
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
