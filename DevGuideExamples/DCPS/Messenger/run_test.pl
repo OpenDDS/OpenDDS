@@ -2,117 +2,62 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
     & eval 'exec perl -S $0 $argv:q'
     if 0;
 
-# -*- perl -*-
+my @original_ARGV = @ARGV;
 
 use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
-
 use Getopt::Long;
 use PerlDDS::Run_Test;
-
 use strict;
 
 my $status = 0;
-
 my $rtps = 0;
 my $help = 0;
-
+my $common_opts = 0;
 my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
 my $invalid_args = not GetOptions(
   "rtps" => \$rtps,
   "help|h" => \$help,
 );
+
 if (scalar(grep {length($_)} @ARGV)) {
   print STDERR ("ERROR: Invalid positional argument(s) passed: ", join(' ', @ARGV), "\n");
   $invalid_args = 1;
 }
+
 if ($invalid_args) {
   print STDERR ("ERROR: Invalid Command Line Argument(s)\n$help_message");
   exit 1;
 }
+
 if ($help) {
   print $help_message;
   exit 0;
 }
 
-unlink "subscriber.log";
-unlink "publisher.log";
-
-my $common_opts = "-ORBDebugLevel 10 -DCPSDebugLevel 10 -ORBVerboseLogging 1 -DCPSTransportDebugLevel 6 -DCPSPendingTimeout 3 ";
-
 if ($rtps) {
   $common_opts .= " -DCPSConfigFile rtps.ini";
 }
 
-my $pub_opts = "$common_opts -ORBLogFile publisher.log";
-my $sub_opts = "$common_opts -ORBLogFile subscriber.log";
+my $test = new PerlDDS::TestFramework();
 
-my $DCPSREPO;
-my $dcpsrepo_ior = "repo.ior";
+$test->{dcps_debug_level} = 4;
+$test->{dcps_transport_debug_level} = 2;
+$test->{add_transport_config} = 0;
+my $dbg_lvl = '-ORBDebugLevel 1';
+my $pub_opts = "$dbg_lvl" . "$common_opts";
+my $sub_opts = "$dbg_lvl" . "$common_opts";
+my $repo_bit_opt = "";
 
-my $subdir = $PerlACE::Process::ExeSubDir;
-my $filename = "subscriber";
-my $filename_exe = "subscriber.exe";
-if (!(-e $subdir.$filename) && !(-e $subdir.$filename_exe)) {
-    print STDERR "ERROR: subscriber does not exist. Subdir: $subdir\n";
-    exit 1;
-}
-$filename = 'publisher';
-$filename_exe = "publisher.exe";
-if (!(-e $subdir.$filename) && !(-e $subdir.$filename_exe)) {
-    print STDERR "ERROR: publisher does not exist. Subdir: $subdir\n";
-    exit 1;
-}
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
+                       "$repo_bit_opt") unless $rtps;
 
-my $Subscriber = PerlDDS::create_process("subscriber", " $sub_opts");
-my $Publisher = PerlDDS::create_process("publisher", " $pub_opts");
+$test->process("publisher", "publisher", $pub_opts);
+$test->process("subscriber", "subscriber", $sub_opts);
 
-if (not $rtps) {
-  unlink $dcpsrepo_ior;
+$test->start_process("subscriber");
+$test->start_process("publisher");
 
-  $DCPSREPO = PerlDDS::create_process(
-    "$ENV{DDS_ROOT}/bin/DCPSInfoRepo",
-    "-ORBDebugLevel 10 " .
-    "-ORBLogFile DCPSInfoRepo.log " .
-    "-o $dcpsrepo_ior");
-
-  print $DCPSREPO->CommandLine() . "\n";
-  $DCPSREPO->Spawn();
-  if (PerlACE::waitforfile_timed($dcpsrepo_ior, 30) == -1) {
-    print STDERR "ERROR: waiting for Info Repo IOR file\n";
-    $DCPSREPO->Kill();
-    exit 1;
-  }
-}
-
-print $Publisher->CommandLine() . "\n";
-$Publisher->Spawn();
-
-print $Subscriber->CommandLine() . "\n";
-$Subscriber->Spawn();
-
-my $PublisherResult = $Publisher->WaitKill(300);
-if ($PublisherResult != 0) {
-  print STDERR "ERROR: publisher returned $PublisherResult\n";
-  $status = 1;
-}
-
-my $SubscriberResult = $Subscriber->WaitKill(15);
-if ($SubscriberResult != 0) {
-  print STDERR "ERROR: subscriber returned $SubscriberResult\n";
-  $status = 1;
-}
-
-if (not $rtps) {
-  my $ir = $DCPSREPO->TerminateWaitKill(5);
-  if ($ir != 0) {
-    print STDERR "ERROR: DCPSInfoRepo returned $ir\n";
-    $status = 1;
-  }
-
-  unlink $dcpsrepo_ior;
-}
-
-exit $status;
+exit $test->finish(120);
