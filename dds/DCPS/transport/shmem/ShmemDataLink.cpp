@@ -123,7 +123,7 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
   // Resend until we get a response.
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
-    assoc_resends_.insert(std::pair<GuidPair, unsigned>(GuidPair(remote_pub, local_sub),
+    assoc_resends_.insert(std::pair<GuidPair, unsigned>(GuidPair(local_sub, remote_pub),
       config().association_resend_max_count()));
   }
   return result;
@@ -199,7 +199,7 @@ ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
       } else {
         // Writer has responded to association ack, stop sending.
         ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
-        assoc_resends_.erase(GuidPair(remote, local));
+        assoc_resends_.erase(GuidPair(local, remote));
       }
     }
     return;
@@ -229,8 +229,6 @@ ShmemDataLink::stop_i()
     delete peer_alloc_;
     peer_alloc_ = 0;
   }
-  delete peer_alloc_;
-  peer_alloc_ = 0;
 }
 
 ShmemTransport&
