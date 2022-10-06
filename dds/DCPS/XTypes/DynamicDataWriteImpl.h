@@ -325,15 +325,11 @@ private:
 
   template<TypeKind MemberTypeKind, typename MemberType>
   bool set_value_to_struct(DDS::MemberId id, const MemberType& value,
-                           TypeKind enum_or_bitmask = TK_NONE,
-                           LBound lower = 0,
-                           LBound upper = 0);
+                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<TypeKind MemberTypeKind, typename MemberType>
   bool set_value_to_union(DDS::MemberId, const MemberType& value,
-                          TypeKind enum_or_bitmask = TK_NONE,
-                          LBound lower = 0,
-                          LBound upper = 0);
+                          TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<TypeKind ElementTypeKind, typename ElementType>
   bool set_value_to_collection(DDS::MemberId id, const ElementType& value,
@@ -366,6 +362,33 @@ private:
   bool insert_single(DDS::MemberId id, const SingleType& value);
 
   bool insert_complex(DDS::MemberId id, const DDS::DynamicData_var& value);
+
+  template<typename SequenceType>
+  bool insert_sequence(DDS::MemberId id, const SequenceType& value);
+
+  bool validate_sequence_type(DDS::MemberId id, TypeKind enum_or_bitmask,
+                              LBound lower, LBound upper) const;
+
+  template<TypeKind ElementTypeKind, typename SequenceType>
+  bool set_values_to_struct(DDS::MemberId id, const SequenceType& value,
+                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
+
+  template<TypeKind ElementTypeKind, typename SequenceType>
+  bool set_values_to_union(DDS::MemberId id, const SequenceType& value,
+                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
+
+  template<TypeKind ElementTypeKind, typename SequenceType>
+  bool set_values_to_sequence(DDS::MemberId id, const SequenceType& value,
+                              TypeKind enum_or_bitmask, LBound lower, LBound upper);
+
+  template<TypeKind ElementTypeKind, typename SequenceType>
+  bool set_values_to_array(DDS::MemberId id, const SequenceType& value,
+                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
+
+  template<TypeKind ElementTypeKind, typename SequenceType>
+  DDS::ReturnCode_t set_sequence_values(DDS::MemberId id, const SequenceType& value,
+                                        TypeKind enum_or_bitmask = TK_NONE,
+                                        LBound lower = 0, LBound upper = 0);
 
   // The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;

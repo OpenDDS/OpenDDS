@@ -400,8 +400,10 @@ bool DynamicDataWriteImpl::set_value_to_union(DDS::MemberId id, const MemberType
     // Prohibit writing another member if a member was already written.
     // Overwrite the same member is allowed.
     if (selected_id != MEMBER_ID_INVALID && selected_id != id) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataWriteImpl::set_value_to_union:"
-                 " A member (ID %d) was already written\n", selected_id));
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataWriteImpl::set_value_to_union:"
+                   " Already had an active member (%d)\n", selected_id));
+      }
       return false;
     }
 
@@ -875,10 +877,216 @@ DDS::ReturnCode_t DynamicDataWriteImpl::set_complex_value(DDS::MemberId id, DDS:
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
-DDS::ReturnCode_t DynamicDataWriteImpl::set_int32_values(DDS::MemberId id, const DDS::Int32Seq& value)
+template<typename SequenceType>
+bool DynamicDataWriteImpl::insert_sequence(DDS::MemberId id, const SequenceType& value)
+{
+  if (container_.complex_map_.count(id) > 0) {
+    container_.complex_map_.erase(id);
+  }
+  return container_.sequence_map_.insert(make_pair(id, value)).second;
+}
+
+template<TypeKind ElementTypeKind>
+bool DynamicDataWriteImpl::validate_sequence_type(DDS::MemberId id, TypeKind enum_or_bitmask,
+                                                  LBound lower, LBound upper) const
+{
+  DDS::DynamicTypeMember_var member;
+  if (type_->get_member(member, id)) {
+    return false;
+  }
+  DDS::MemberDescriptor_var md;
+  if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  const DDS::DynamicType_var member_type = get_base_type(md->type());
+  const TypeKind member_tk = member_type->get_kind();
+  if (member_tk != TK_SEQUENCE) {
+    return false;
+  }
+
+  DDS::TypeDescriptor_var member_td;
+  if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  const DDS::DynamicType_var elem_type = get_base_type(member_td->element_type());
+  const TypeKind elem_tk = elem_type->get_kind();
+  if (elem_tk != ElementTypeKind && elem_tk != enum_or_bitmask) {
+    return false;
+  }
+
+  if (elem_tk == enum_or_bitmask) {
+    DDS::TypeDescriptor_var elem_td;
+    if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const CORBA::ULong bit_bound = elem_td->bound()[0];
+    if (bit_bound < lower || bit_bound > upper) {
+      return false;
+    }
+  }
+  return true;
+}
+
+template<TypeKind ElementTypeKind, typename SequenceType>
+bool DynamicDataWriteImpl::set_values_to_struct(DDS::MemberId id, const SequenceType& value,
+                                                TypeKind enum_or_bitmask,
+                                                LBound lower, LBound upper)
+{
+  return validate_sequence_type<ElementTypeKind>(id, enum_or_bitmask, lower, upper) &&
+    insert_sequence(id, value);
+}
+
+template<TypeKind ElementTypeKind, typename SequenceType>
+bool DynamicDataWriteImpl::set_values_to_union(DDS::MemberId id, const SequenceType& value,
+                                               TypeKind enum_or_bitmask,
+                                               LBound lower, LBound upper)
+{
+  if (id == DISCRIMINATOR_ID) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataWriteImpl::set_values_to_union:"
+                 " Union discriminator cannot be a sequence\n"));
+    }
+    return false;
+  }
+
+  // Check the member type against the input type parameters.
+  if (!validate_sequence_type<ElementTypeKind>(id, enum_or_bitmask, lower, upper)) {
+    return false;
+  }
+
+  // If discriminator was already written, make sure the target member is selected by it.
+  DDS::MemberId selected_id = MEMBER_ID_INVALID;
+  bool has_disc = false;
+  CORBA::Long disc_val;
+  if (!find_selected_member_and_discriminator(selected_id, has_disc, disc_val)) {
+    return false;
+  }
+
+  if (selected_id != MEMBER_ID_INVALID && selected_id != id) {
+    return false;
+  }
+
+  DDS::DynamicTypeMember_var member;
+  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var md;
+  if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  if (selected_id == MEMBER_ID_INVALID && has_disc && !validate_discriminator(disc_val, md)) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataWriteImpl::set_values_to_union:"
+                 " Already had an active member (%d)\n", selected_id));
+    }
+    return false;
+  }
+  return insert_sequence(id, value);
+}
+
+template<TypeKind ElementTypeKind, typename SequenceType>
+bool DynamicDataWriteImpl::set_values_to_sequence(DDS::MemberId id, const SequenceType& value,
+                                                  TypeKind enum_or_bitmask,
+                                                  LBound lower, LBound upper)
+{
+  DDS::TypeDescriptor_var descriptor;
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const TypeKind elem_tk = elem_type->get_kind();
+
+  if (elem_tk != TK_SEQUENCE) {
+    return false;
+  }
+
+  DDS::TypeDescriptor_var elem_td;
+  if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  const DDS::DynamicType_var nested_elem_type = get_base_type(elem_td->element_type());
+  const TypeKind nested_elem_tk = nested_elem_type->get_kind();
+  if (nested_elem_tk != ElementTypeKind && nested_elem_tk != enum_or_bitmask) {
+    return false;
+  }
+
+  if (nested_elem_tk == enum_or_bitmask) {
+    DDS::TypeDescriptor_var nested_elem_td;
+    if (nested_elem_type->get_descriptor(nested_elem_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const CORBA::ULong bit_bound = nested_elem_td->bound()[0];
+    if (bit_bound < lower || bit_bound > upper) {
+      return false;
+    }
+  }
+  return insert_sequence(id, value);
+}
+
+template<TypeKind ElementTypeKind, typename SequenceType>
+bool DynamicDataWriteImpl::set_values_to_array(DDS::MemberId id, const SequenceType& value,
+                                               TypeKind enum_or_bitmask,
+                                               LBound lower, LBound upper)
 {
   // TODO
-  return DDS::RETCODE_OK;
+  return true;
+}
+
+template<TypeKind ElementTypeKind, typename SequenceType>
+DDS::ReturnCode_t DynamicDataWriteImpl::set_sequence_values(DDS::MemberId id, const SequenceType& value,
+                                                            TypeKind enum_or_bitmask,
+                                                            LBound lower, LBound upper)
+{
+  if (!is_type_supported(ElementTypeKind, "set_sequence_values")) {
+    return DDS::RETCODE_ERROR;
+  }
+
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+
+  switch (tk) {
+  case TK_STRUCTURE:
+    good = set_values_to_struct<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
+    break;
+  case TK_UNION:
+    good = set_values_to_union<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
+    break;
+  case TK_SEQUENCE:
+    good = set_values_to_sequence<ElementTypeKind>(id, value, enum_or_bitmaks, lower, upper);
+    break;
+  case TK_ARRAY:
+    good = set_values_to_array<ElementTypeKind>(id, value, enum_or_bitmask, lower, upper);
+    break;
+  case TK_MAP:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataWriteImpl::set_sequence_values:"
+                 " Map is currently not supported\n"));
+    }
+    return DDS::RETCODE_ERROR;
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataWriteImpl::set_sequence_values:"
+                 " Write to unsupported type (%C)\n", typekind_to_string(tk)));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+
+  if (!good && log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataWriteImpl::set_sequence_values:"
+               " Failed to write sequence of %C to member with ID %d\n",
+               typekind_to_string(ElementTypeKind), id));
+  }
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+}
+
+DDS::ReturnCode_t DynamicDataWriteImpl::set_int32_values(DDS::MemberId id, const DDS::Int32Seq& value)
+{
+  return set_sequence_values<TK_INT32>(id, value, TK_ENUM, 17, 32);
 }
 
 DDS::ReturnCode_t DynamicDataWriteImpl::set_uint32_values(DDS::MemberId id, const DDS::UInt32Seq& value)

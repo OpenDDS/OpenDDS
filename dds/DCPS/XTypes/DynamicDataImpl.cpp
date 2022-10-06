@@ -1553,7 +1553,7 @@ bool DynamicDataImpl::get_values_from_struct(SequenceType& value, MemberId id,
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::get_values_from_union(SequenceType& value, MemberId id,
-                                        TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md = get_from_union_common_checks(id, "get_values_from_union");
   if (!md) {
@@ -1645,7 +1645,6 @@ bool DynamicDataImpl::get_values_from_sequence(SequenceType& value, MemberId id,
     const LBound bit_bound = td->bound()[0];
     return bit_bound >= lower && bit_bound <= upper && read_values(value, enum_or_bitmask);
   } else if (elem_tk == TK_SEQUENCE) {
-    // Read from a sequence of enums or bitmasks.
     DDS::TypeDescriptor_var td;
     if (elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
       return false;
@@ -1653,10 +1652,10 @@ bool DynamicDataImpl::get_values_from_sequence(SequenceType& value, MemberId id,
     const DDS::DynamicType_var nested_elem_type = get_base_type(td->element_type());
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
     if (nested_elem_tk == ElementTypeKind) {
-      // Read from a sequence of sequence of ElementTypeKind.
+      // Read from a sequence of sequences of ElementTypeKind.
       return skip_to_sequence_element(id) && read_values(value, ElementTypeKind);
     } else if (nested_elem_tk == enum_or_bitmask) {
-      // Read from a sequence of sequence of enums or bitmasks.
+      // Read from a sequence of sequences of enums or bitmasks.
       DDS::TypeDescriptor_var td;
       if (nested_elem_type->get_descriptor(td) != DDS::RETCODE_OK) {
         return false;
@@ -2037,8 +2036,7 @@ bool DynamicDataImpl::skip_to_struct_member(DDS::MemberDescriptor* member_desc, 
 bool DynamicDataImpl::get_from_struct_common_checks(DDS::MemberDescriptor_var& md, MemberId id, TypeKind kind, bool is_sequence)
 {
   DDS::DynamicTypeMember_var member;
-  const DDS::ReturnCode_t retcode = type_->get_member(member, id);
-  if (retcode != DDS::RETCODE_OK) {
+  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
     if (DCPS::DCPS_debug_level >= 1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataImpl::get_from_struct_common_checks -")
                  ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
