@@ -53,7 +53,7 @@ int ACE_TMAIN (int, ACE_TCHAR *[])
           if (dr_qos.type_consistency.ignore_sequence_bounds != true)
           {
             ACE_ERROR ((LM_ERROR, "PARSEXML - "
-                  "get_datareader_qos return an invalid type type_consistency ignore_sequence_bounds.\n"));
+                  "get_datareader_qos returned an invalid type type_consistency ignore_sequence_bounds.\n"));
             ++retval;
           }
           if (dr_qos.type_consistency.ignore_string_bounds != true)
