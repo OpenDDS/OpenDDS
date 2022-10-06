@@ -23,4 +23,4 @@ module CORBA
   typedef sequence<unsigned long> ULongSeq;
 };
 
-#endif  /* OPENDDS_CORBASEQ_ULONGSEQ_IDL */
+#endif

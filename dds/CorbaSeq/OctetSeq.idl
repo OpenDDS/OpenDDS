@@ -33,4 +33,4 @@ module CORBA
   typedef sequence<octet> OctetSeq;
 };
 
-#endif /* OPENDDS_CORBASEQ_OCTETSEQ_IDL */
+#endif

@@ -34,4 +34,4 @@ module CORBA
   typedef sequence<float> FloatSeq;
 };
 
-#endif /* OPENDDS_CORBASEQ_FLOATSEQ_IDL */
+#endif

@@ -31,4 +31,4 @@ module CORBA
   typedef sequence<long double> LongDoubleSeq;
 };
 
-#endif /* OPENDDS_CORBASEQ_LONGDOUBLESEQ_IDL */
+#endif

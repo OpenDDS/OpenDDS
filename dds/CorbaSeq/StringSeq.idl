@@ -30,4 +30,4 @@ module CORBA
   typedef sequence<string> StringSeq;
 };
 
-#endif /* OPENDDS_CORBASEQ_STRINGSEQ_IDL */
+#endif

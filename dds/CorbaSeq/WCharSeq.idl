@@ -31,4 +31,4 @@ module CORBA
   typedef sequence<wchar> WCharSeq;
 };
 
-#endif /* OPENDDS_CORBASEQ_WCHARSEQ_IDL */
+#endif

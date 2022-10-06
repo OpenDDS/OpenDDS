@@ -33,4 +33,4 @@ module CORBA
   typedef sequence<double> DoubleSeq;
 };
 
-#endif /* OPENDDS_CORBASEQ_DOUBLESEQ_IDL */
+#endif
