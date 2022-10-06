@@ -110,7 +110,7 @@ QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos(DDS_QOS_TYPE& dds_qos, co
             {
               ACE_DEBUG((LM_TRACE,
                 ACE_TEXT("QOS_DataReader_T<XML_QOS_TYPE, DDS_QOS_TYPE>::read_qos - ")
-                ACE_TEXT("set type_consistency to <%d>\n"),
+                ACE_TEXT("set type_consistency kind to <%d>\n"),
                 dds_qos.type_consistency.kind));
             }
         }
