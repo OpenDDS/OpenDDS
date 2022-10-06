@@ -3049,6 +3049,8 @@ DDS::ReturnCode_t DataWriterImpl::instance_must_exist(
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
 
+  OPENDDS_ASSERT(sample->key_only());
+
   InstanceValuesToHandles::iterator pos = instance_values_to_handles_.find(sample);
   if (pos == instance_values_to_handles_.end()) {
     if (log_level >= LogLevel::Notice) {

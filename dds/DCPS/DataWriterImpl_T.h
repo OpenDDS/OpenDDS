@@ -83,7 +83,7 @@ public:
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& timestamp)
   {
-    AbstractSample_rch sample = make_sample(instance_data);
+    AbstractSample_rch sample = make_sample(instance_data, /* key_only = */ true);
     return DataWriterImpl::unregister_instance_w_timestamp(sample, instance_handle, timestamp);
   }
 
@@ -177,7 +177,7 @@ public:
     }
 #endif
 
-    AbstractSample_rch sample = make_sample(instance_data);
+    AbstractSample_rch sample = make_sample(instance_data, /* key_only = */ true);
     return DataWriterImpl::dispose_w_timestamp(sample, instance_handle, source_timestamp);
   }
 
@@ -195,7 +195,7 @@ public:
 
   DDS::InstanceHandle_t lookup_instance(const MessageType& instance_data)
   {
-    AbstractSample_rch sample = make_sample(instance_data);
+    AbstractSample_rch sample = make_sample(instance_data, /* key_only = */ true);
     return DataWriterImpl::lookup_instance(sample);
   }
 
@@ -239,7 +239,7 @@ private:
     handle = DataWriterImpl::lookup_instance(sample);
     const bool needs_creation = handle == DDS::HANDLE_NIL;
 
-    if (needs_creation || get_handle_instance(handle)) {
+    if (needs_creation || !get_handle_instance(handle)) {
 #if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
       XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), instance_data);
       DDS::Security::SecurityException ex;

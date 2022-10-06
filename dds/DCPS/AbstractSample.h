@@ -63,15 +63,10 @@ protected:
   const bool key_only_;
 };
 
-inline bool operator<(const AbstractSample& lhs, const AbstractSample& rhs)
-{
-  return lhs.compare(rhs);
-}
-
 struct OpenDDS_Dcps_Export AbstractSampleRchCmp {
   bool operator()(const AbstractSample_rch& lhs, const AbstractSample_rch& rhs) const
   {
-    return *lhs < *rhs;
+    return lhs->compare(*rhs);
   }
 };
 

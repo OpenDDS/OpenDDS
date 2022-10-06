@@ -140,9 +140,8 @@ Reader::read (const SampleInfoMap& si_map,
         for (CORBA::ULong i = 0 ; i < si.length() ; i++)
         {
           // skip the dispose notification sample.
-          if (si[i].valid_data == 0)
-          {
-            ACE_OS::printf ("got SampleInfo[%d] dispose sample\n", i);
+          if (si[i].valid_data == 0) {
+            ACE_OS::printf("got SampleInfo[%d] dispose sample key = %d\n", i, foo[i].key);
             continue;
           }
 
