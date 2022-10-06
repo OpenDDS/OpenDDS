@@ -52,9 +52,11 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
           joined_interfaces_.insert(nia.name);
           if (log_level >= LogLevel::Info) {
             ACE_DEBUG((LM_INFO,
-                       "(%P|%t) INFO: MulticastManager::process: joined group %C on %C (joined count %B)\n",
+                       "(%P|%t) INFO: MulticastManager::process: joined group %C on %C/%C (%@ joined count %B)\n",
                        LogAddr(multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
           any_joined = true;
@@ -73,9 +75,11 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
         } else {
           if (log_level >= LogLevel::Error) {
             ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: failed to join group %C on %C (joined count %B): %m\n",
+                       "(%P|%t) ERROR: MulticastManager::process: failed to join group %C on %C/%C (%@ joined count %B): %m\n",
                        LogAddr(multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
         }
@@ -91,9 +95,11 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
           ipv6_joined_interfaces_.insert(nia.name);
           if (log_level >= LogLevel::Info) {
             ACE_DEBUG((LM_INFO,
-                       "(%P|%t) INFO: MulticastManager::process: joined group %C on %C (joined count %B)\n",
+                       "(%P|%t) INFO: MulticastManager::process: joined group %C on %C/%C (%@ joined count %B)\n",
                        LogAddr(ipv6_multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
           any_joined = true;
@@ -112,9 +118,11 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
         } else {
           if (log_level >= LogLevel::Error) {
             ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: failed to join group %C on %C (joined count %B): %m\n",
+                       "(%P|%t) ERROR: MulticastManager::process: failed to join group %C on %C/%C (%@ joined count %B): %m\n",
                        LogAddr(ipv6_multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
         }
@@ -129,17 +137,21 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
           joined_interfaces_.erase(nia.name);
           if (log_level >= LogLevel::Info) {
             ACE_DEBUG((LM_INFO,
-                       "(%P|%t) INFO: MulticastManager::process: left group %C on %C (joined count %B)\n",
+                       "(%P|%t) INFO: MulticastManager::process: left group %C on %C/%C (%@ joined count %B)\n",
                        LogAddr(multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
         } else {
           if (log_level >= LogLevel::Error) {
             ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: failed to leave group %C on %C (joined count %B): %m\n",
+                       "(%P|%t) ERROR: MulticastManager::process: failed to leave group %C on %C/%C (%@ joined count %B): %m\n",
                        LogAddr(multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
         }
@@ -151,17 +163,21 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
           ipv6_joined_interfaces_.erase(nia.name);
           if (log_level >= LogLevel::Info) {
             ACE_DEBUG((LM_INFO,
-                       "(%P|%t) INFO: MulticastManager::process: left group %C on %C (joined count %B)\n",
+                       "(%P|%t) INFO: MulticastManager::process: left group %C on %C/%C (%@ joined count %B)\n",
                        LogAddr(ipv6_multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
         } else {
           if (log_level >= LogLevel::Error) {
             ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: failed to leave group %C on %C (joined count %B): %m\n",
+                       "(%P|%t) ERROR: MulticastManager::process: failed to leave group %C on %C/%C (%@ joined count %B): %m\n",
                        LogAddr(ipv6_multicast_group_address).c_str(),
                        nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
                        joined_interface_count()));
           }
         }

@@ -536,7 +536,7 @@ Examples
   }
 
   if (log_level >= LogLevel::Info) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) example_function: Hello, World!\n"));
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: example_function: Hello, World!\n"));
   }
 
   if (DCPS_debug_level >= 1) {
