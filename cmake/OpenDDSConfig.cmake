@@ -76,8 +76,13 @@ endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/init.cmake)
 
+## Adding ${TAO_BIN_DIR} to the ace bin hints allows users of
+## VxWorks layer builds to set TAO_BIN_DIR to the location of
+## the partner host tools directory, but keep ACE_BIN_DIR the
+## value of $ACE_ROOT so that other ACE related scripts can
+## be located.
 set(_dds_bin_hints ${OPENDDS_BIN_DIR})
-set(_ace_bin_hints ${ACE_BIN_DIR})
+set(_ace_bin_hints ${ACE_BIN_DIR} ${TAO_BIN_DIR})
 set(_tao_bin_hints ${TAO_BIN_DIR})
 
 find_program(PERL perl)
