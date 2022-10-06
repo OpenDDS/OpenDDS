@@ -751,8 +751,8 @@ namespace OpenDDS {
 
     MessageSequenceType data;
     DDS::SampleInfoSeq infos;
-    DDS::ReturnCode_t rc = take_i(data, infos, DDS::LENGTH_UNLIMITED,
-                                  sample_states, view_states, instance_states, 0);
+    const DDS::ReturnCode_t rc = take_i(data, infos, DDS::LENGTH_UNLIMITED,
+                                        sample_states, view_states, instance_states, 0);
 
     samples.reserve(data.length());
 
