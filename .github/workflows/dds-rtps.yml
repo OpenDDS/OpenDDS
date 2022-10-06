@@ -63,7 +63,7 @@ jobs:
         mwc.pl -type gnuace
         make -sj4
     - name: upload shape_main artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ github.job }}_artifact
         path: dds-rtps/srcCxx/shape_main

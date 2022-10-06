@@ -2203,7 +2203,7 @@ DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("DomainParticipantImpl::create_recorder, ")
                  ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;
@@ -2248,7 +2248,7 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("DomainParticipantImpl::create_replayer, ")
                  ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;
@@ -2527,31 +2527,6 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
     }
   }
 
-  // delete topics
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->topics_protector_,
-                     DDS::RETCODE_ERROR);
-
-    TopicMap::iterator topicIter = topics_.begin();
-    DDS::Topic_ptr topicPtr;
-    size_t topicsize = topics_.size();
-
-    while (topicsize > 0) {
-      topicPtr = topicIter->second.pair_.obj_.in();
-      ++topicIter;
-
-      // Delete the topic the reference count.
-      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
-
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
-      }
-      --topicsize;
-    }
-  }
-
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      tao_mon,
@@ -2584,6 +2559,31 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
     }
 
     replayers_.clear();
+  }
+
+  // delete topics
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->topics_protector_,
+                     DDS::RETCODE_ERROR);
+
+    TopicMap::iterator topicIter = topics_.begin();
+    DDS::Topic_ptr topicPtr;
+    size_t topicsize = topics_.size();
+
+    while (topicsize > 0) {
+      topicPtr = topicIter->second.pair_.obj_.in();
+      ++topicIter;
+
+      // Delete the topic the reference count.
+      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+
+      if (result != DDS::RETCODE_OK) {
+        ret = result;
+      }
+      --topicsize;
+    }
   }
 
   shutdown_mutex_.acquire();

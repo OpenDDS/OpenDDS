@@ -1535,7 +1535,7 @@ Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& remoteId)
 }
 #endif
 
-bool
+void
 Sedp::disassociate(DiscoveredParticipant& participant)
 {
   const RepoId part = make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
@@ -1545,12 +1545,8 @@ Sedp::disassociate(DiscoveredParticipant& participant)
   OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
   OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
 
-  bool result = false;
-  if (spdp_.has_discovered_participant(part)) {
-    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
-    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
-    result = true;
-  }
+  remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
+  remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
 
   for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
     remove_from_bit_i(*it);
@@ -1627,8 +1623,6 @@ Sedp::disassociate(DiscoveredParticipant& participant)
     }
   }
 #endif
-
-  return result;
 }
 
 void

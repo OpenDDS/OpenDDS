@@ -268,11 +268,11 @@ public:
 
   void init(
     TopicDescriptionImpl* a_topic_desc,
-    const DDS::DataReaderQos &  qos,
+    const DDS::DataReaderQos& qos,
     DDS::DataReaderListener_ptr a_listener,
-    const DDS::StatusMask &     mask,
-    DomainParticipantImpl*        participant,
-    SubscriberImpl*               subscriber);
+    const DDS::StatusMask& mask,
+    DomainParticipantImpl* participant,
+    SubscriberImpl* subscriber);
 
   virtual DDS::ReadCondition_ptr create_readcondition(
     DDS::SampleStateMask sample_states,

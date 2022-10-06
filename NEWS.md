@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
-## Version 3.22.0 of OpenDDS
-OpenDDS 3.22.0 is currently in development, so this list might change.
+## Version 3.23.0 of OpenDDS
+OpenDDS 3.23.0 is currently in development, so this list might change.
 
 ### Additions:
 - TODO: Add your features here
@@ -11,6 +11,39 @@ OpenDDS 3.22.0 is currently in development, so this list might change.
 
 ### Notes:
 - TODO: Add your notes here
+
+## Version 3.22.0 of OpenDDS
+OpenDDS 3.22.0 was released on Sep 16 2022.
+
+### Additions:
+- Sequences in FACE mapping: support == for any type (#3604)
+- Implement instance security methods from DDS Security Spec (#3557)
+- Added meta-discovery server to RtpsRelay (#3655)
+- Support building for VxWorks 21.03 (#3723)
+- alive and active flags now have timestamps in RtpsRelay (#3579)
+
+### Fixes:
+- Fixed bug where partitions for RtpsRelay client were not updated (#3583)
+- Fixed data race on status flag which causes missing listener invocation for BIT readers (#3584)
+- Fixed bug where SEDP removes crypto handles before dissassociating (#3597)
+- Fixed null BIT subscriber in ConnectionRecord (#3610)
+- Fixed bug where user data reverts to original for RtpsRelay clients (#3613)
+- Removed warning about unexpected register in MulticastManager (#3608)
+- Fixed reference counting issue that blocks SPDP shutdown (#3619)
+- Fixed dds_suppress_anys=0 (#3656)
+- Ignore interfaces with no FQDN in AddressLookup (#3660)
+- Fixed memory leak where DataWriter doesn't remove unregistered instances (#3684)
+- Update TransportClient's use of PendingAssoc's lock (#3652)
+- Clone Google Test and RapidJSON if not found (#3691)
+- Set extensibility on enums (#3686)
+- Do not use fixed-size buffer for partition parsing (#3704)
+- Prevent Use Of IPv4-mapped IPv6 'Any' Addresses In RTPS Locators (#3713)
+
+### Notes:
+- Removed wait param in TransportRegistry::create_inst (#3644)
+- Changed Multicast Group Join Errors to Warnings (#3558)
+- Remove Leading `::` from `TypeObject` Names (#3679)
+- Updates to the ValueReader/ValueWriter/ValueDispatcher framework (#3719)
 
 ## Version 3.21.0 of OpenDDS
 OpenDDS 3.21.0 was released on Jun 24 2022.

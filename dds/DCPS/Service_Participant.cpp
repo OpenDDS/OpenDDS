@@ -7,6 +7,7 @@
 
 #include "Service_Participant.h"
 
+#include "Logging.h"
 #include "WaitSet.h"
 #include "transport/framework/TransportRegistry.h"
 #include "debug.h"
@@ -39,6 +40,7 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/Version.h>
 #include <ace/Configuration.h>
+#include <ace/OS_NS_sys_utsname.h>
 
 #include <cstring>
 #ifdef OPENDDS_SAFETY_PROFILE
@@ -507,6 +509,18 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
         ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
           "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
+
+        ACE_utsname uname;
+        int const result = ACE_OS::uname(&uname);
+        if (result != -1) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+            "machine: %C, %C platform: %C, %C, %C\n",
+            uname.nodename, uname.machine, uname.sysname, uname.release, uname.version));
+        }
+
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "compiler: %C version %d.%d.%d\n",
+          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version (), ACE::compiler_beta_version ()));
       }
 
       // Establish the default scheduling mechanism and
@@ -1852,6 +1866,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
     }
+
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSLogBits"), log_bits, bool);
 
 #if defined(OPENDDS_SECURITY)
     if (got_security_flag) {

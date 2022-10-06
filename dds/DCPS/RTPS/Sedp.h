@@ -531,7 +531,7 @@ public:
   void resend_user_crypto_tokens(const DCPS::RepoId& remote_participant);
 #endif
 
-  bool disassociate(DiscoveredParticipant& participant);
+  void disassociate(DiscoveredParticipant& participant);
 
   void update_locators(const ParticipantData_t& pdata);
 
