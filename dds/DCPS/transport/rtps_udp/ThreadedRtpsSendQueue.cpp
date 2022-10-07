@@ -81,6 +81,15 @@ void ThreadedRtpsSendQueue::condense_and_swap(MetaSubmessageVec& vec)
   has_data_to_send_ = false;
 }
 
+void ThreadedRtpsSendQueue::purge(const RepoId& local, const RepoId& remote)
+{
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+  for (ThreadQueueMap::iterator it = thread_queue_map_.begin(), limit = thread_queue_map_.end(); it != limit; ++it) {
+    it->second.purge(local, remote);
+  }
+  primary_queue_.purge(local, remote);
+}
+
 void ThreadedRtpsSendQueue::purge_remote(const RepoId& id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

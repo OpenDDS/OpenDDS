@@ -127,6 +127,43 @@ TEST(dds_DCPS_ThreadedRtpsSendQueue, EnableDisable)
   vec.clear();
 }
 
+TEST(dds_DCPS_ThreadedRtpsSendQueue, Purge)
+{
+  ThreadedRtpsSendQueue sq;
+
+  sq.enable_thread_queue();
+  EXPECT_FALSE(sq.disable_thread_queue());
+  sq.enable_thread_queue();
+
+  const ACE_INT64 first = 3;
+  const ACE_INT64 last = 5;
+  ACE_INT32 hb_count = 0;
+
+  const ACE_INT64 base = 3;
+  ACE_INT32 an_count = 0;
+
+  MetaSubmessageVec vec;
+  vec.push_back(create_heartbeat(w1, r2, first, last, hb_count++));
+  vec.push_back(create_heartbeat(w1, r1, first, last, hb_count++));
+  vec.push_back(create_acknack(r1, w2, base, an_count++));
+  vec.push_back(create_acknack(r2, w2, base, an_count++));
+  sq.enqueue(vec);
+
+  vec.clear();
+  sq.condense_and_swap(vec);
+
+  EXPECT_EQ(vec.size(), 0u);
+  vec.clear();
+
+  sq.purge(w1, r1);
+
+  EXPECT_TRUE(sq.disable_thread_queue());
+  sq.condense_and_swap(vec);
+
+  EXPECT_EQ(vec.size(), 3u);
+  vec.clear();
+}
+
 TEST(dds_DCPS_ThreadedRtpsSendQueue, PurgeLocal)
 {
   ThreadedRtpsSendQueue sq;

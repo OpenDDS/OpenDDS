@@ -39,7 +39,6 @@ def fake_filenames(paths, path_base, version, extra, source=True):
         ]
     if extra:
         suffixes += [
-            '-doxygen.tar.gz',
             '-doxygen.zip',
             '.pdf',
         ]
@@ -82,13 +81,14 @@ def main(serve_root, fake_latest_version):
     if fake_latest_version:
         generate_fake_files(serve_root, fake_latest_version)
 
+    abs_serve_root = serve_root.resolve()
     chdir(serve_root)
     port = 8000
     socketserver.TCPServer.allow_reuse_address = True
     with socketserver.TCPServer(('', port), http.server.SimpleHTTPRequestHandler) as httpd:
         print('URL is http://localhost:{}\n'
           'Pass "--sftp-base-dir={}" to the release script'.format(
-          port, str(serve_root.resolve())))
+          port, str(abs_serve_root)))
         httpd.serve_forever()
 
 

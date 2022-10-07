@@ -29,14 +29,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
   const ACE_INET_Addr& remote_address,
-  OpenDDS::DCPS::TcpTransport&  transport_impl,
+  OpenDDS::DCPS::TcpTransport& transport_impl,
   Priority priority,
-  bool        is_loopback,
-  bool        is_active)
-  : DataLink(transport_impl, priority, is_loopback, is_active),
-    remote_address_(remote_address),
-    graceful_disconnect_sent_(false),
-    release_is_pending_(false)
+  bool is_loopback,
+  bool is_active)
+  : DataLink(transport_impl, priority, is_loopback, is_active)
+  , remote_address_(remote_address)
+  , graceful_disconnect_sent_(false)
+  , release_is_pending_(false)
 {
   DBG_ENTRY_LVL("TcpDataLink","TcpDataLink",6);
 }
@@ -450,9 +450,9 @@ OpenDDS::DCPS::TcpDataLink::ack_received(const ReceivedDataSample& sample)
 void
 OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sample)
 {
-  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == sizeof(RepoId)) {
-    RepoId local;
-    DCPS::Serializer ser(&(*sample.sample_), encoding_unaligned_native);
+  if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
+    GUID_t local;
+    Serializer ser(sample.sample_.get(), encoding_unaligned_native);
     if (ser >> local) {
       invoke_on_start_callbacks(local, sample.header_.publication_id_, true);
     }
@@ -466,7 +466,7 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
   // Other data in the DataSampleHeader are not necessary set. The bogus values
   // can be used.
 
-  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
+  header_data.byte_order_ = ACE_CDR_BYTE_ORDER;
   header_data.message_length_ = 0;
   header_data.sequence_ = sample.header_.sequence_;
   header_data.publication_id_ = sample.header_.publication_id_;
@@ -532,8 +532,8 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
 {
   DataSampleHeader header_data;
   header_data.message_id_ = REQUEST_ACK;
-  header_data.byte_order_  = ACE_CDR_BYTE_ORDER;
-  header_data.message_length_ = sizeof(remote);
+  header_data.byte_order_ = ACE_CDR_BYTE_ORDER;
+  header_data.message_length_ = guid_cdr_size;
   header_data.sequence_ = -1;
   header_data.publication_id_ = local;
   header_data.publisher_id_ = remote;
@@ -552,7 +552,7 @@ OpenDDS::DCPS::TcpDataLink::send_association_msg(const RepoId& local, const Repo
                           0));
 
   *message << header_data;
-  DCPS::Serializer ser(message.get(), encoding_unaligned_native);
+  Serializer ser(message.get(), encoding_unaligned_native);
   ser << remote;
 
   TransportControlElement* send_element = new TransportControlElement(move(message));
@@ -584,6 +584,7 @@ OpenDDS::DCPS::TcpDataLink::receive_strategy()
   GuardType guard(strategy_lock_);
   return static_rchandle_cast<OpenDDS::DCPS::TcpReceiveStrategy>(receive_strategy_);
 }
+
 int
 OpenDDS::DCPS::TcpDataLink::make_reservation(const RepoId& remote_subscription_id,
                                              const RepoId& local_publication_id,

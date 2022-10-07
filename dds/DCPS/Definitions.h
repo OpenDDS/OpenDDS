@@ -138,8 +138,8 @@ const size_t AceTimestampSize = 27;
 /// Size of TCHAR buffer for use with addr_to_string.
 const size_t AddrToStringSize = 256;
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

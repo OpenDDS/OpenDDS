@@ -49,6 +49,9 @@ public:
   /// Note: calls clear() on the input vector before swapping
   void condense_and_swap(MetaSubmessageVec& vec);
 
+  /// Remove all queued submessage with the given source and destination
+  void purge(const RepoId& local, const RepoId& remote);
+
   /// Remove all queued submessage with the given destination (dst_guid_)
   void purge_remote(const RepoId& id);
 
