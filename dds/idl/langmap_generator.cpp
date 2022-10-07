@@ -124,10 +124,17 @@ struct GeneratorBase
   std::string map_type(AST_Field* field)
   {
     FieldInfo af(*field);
-    if ((af.type_->anonymous() && af.as_base_) || af.map_)
+    if ((af.type_->anonymous() && af.as_base_))
     {
       return af.type_name_;
     }
+
+#if OPENDDS_HAS_MAP
+    if (af.map_)
+    {
+      return af.type_name_;
+    }
+#endif
 
     return map_type(af.type_);
   }

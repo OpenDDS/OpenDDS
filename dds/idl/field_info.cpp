@@ -125,9 +125,12 @@ FieldInfo::FieldInfo(AST_Field& field)
   } else if (seq_) {
     length_ = "length";
     arg_ = "seq";
-  } else if (map_) {
+  } 
+#if OPENDDS_HAS_MAP
+  else if (map_) {
     arg_ = "map";
   }
+#endif
 
   if (cxx11()) {
     unwrap_ = scoped_type_ + "& " + arg_ + " = wrap;\n  ACE_UNUSED_ARG(" + arg_ + ");\n";

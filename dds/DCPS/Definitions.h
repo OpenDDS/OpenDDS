@@ -74,7 +74,8 @@
 #  define OPENDDS_HAS_EXPLICIT_INTS 0
 #endif
 
-#if defined TAO_IDL_HAS_MAP && TAO_HAS_IDL_FEATURES
+#if defined TAO_HAS_IDL_FEATURES && TAO_HAS_IDL_FEATURES
+#  include <tao/idl_features.h>
 #define OPENDDS_HAS_MAP TAO_IDL_HAS_MAP
 #endif
 
