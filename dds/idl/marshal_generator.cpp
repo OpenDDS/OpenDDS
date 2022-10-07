@@ -3107,8 +3107,8 @@ namespace {
             "    if (!" << generate_field_stream(
               mutable_indent, field, "<< stru" + value_access, wrap_nested_key_only, intro)
             << ") {\n"
-            "    return false;\n"
-            "  }\n";
+            "      return false;\n"
+            "    }\n";
         }
         mutable_fields << "\n"
           "    if (!strm.write_list_end_parameter_id()) {\n"
