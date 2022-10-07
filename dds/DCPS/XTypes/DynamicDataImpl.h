@@ -3,46 +3,31 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
-#define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
+#ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITE_IMPL_H
+#define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITE_IMPL_H
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
-#include "TypeObject.h"
 #include "DynamicTypeImpl.h"
 
-#include <dds/DCPS/LocalObject.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/Serializer.h>
+#include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
-class OpenDDS_Dcps_Export DynamicDataImpl : public virtual DCPS::LocalObject<DDS::DynamicData> {
+class OpenDDS_Dcps_Export DynamicDataImpl
+  : public virtual DCPS::LocalObject<DDS::DynamicData> {
 public:
-  DynamicDataImpl();
+  DynamicDataImpl(DDS::DynamicType_ptr type);
 
-  /// This creates a duplicated ACE_Message_Block chain from the provided chain.
-  /// The duplicated chain is released when the object is destroyed. Caller is
-  /// responsible for the release of the input message block chain.
-  DynamicDataImpl(ACE_Message_Block* chain,
-                  const DCPS::Encoding& encoding,
-                  DDS::DynamicType_ptr type);
-
-  /// Use this when you want to pass the alignment state of a given Serializer object over.
-  /// A typical use case would be when a part of the data has already been consumed from
-  /// @a ser and you want to give the remaining to DynamicData.
-  DynamicDataImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type);
-
-  DynamicDataImpl(const DynamicDataImpl& other);
-  DynamicDataImpl& operator=(const DynamicDataImpl& other);
-
-  ~DynamicDataImpl();
+  DDS::DynamicType_ptr type();
 
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
+
+  CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
   MemberId get_member_id_by_name(const char* name);
   MemberId get_member_id_at_index(ACE_CDR::ULong index);
@@ -56,527 +41,486 @@ public:
 
   DDS::DynamicData_ptr clone();
 
-  DDS::ReturnCode_t get_int32_value(CORBA::Long& value,
-                                    DDS::MemberId id);
-  DDS::ReturnCode_t set_int32_value(DDS::MemberId,
-                                    CORBA::Long)
+  DDS::ReturnCode_t get_int32_value(CORBA::Long&,
+                                    DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int32_value(DDS::MemberId id,
+                                    CORBA::Long value);
 
-  DDS::ReturnCode_t get_uint32_value(CORBA::ULong& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_uint32_value(DDS::MemberId,
-                                     CORBA::ULong)
+  DDS::ReturnCode_t get_uint32_value(CORBA::ULong&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint32_value(DDS::MemberId id,
+                                     CORBA::ULong value);
 
-  DDS::ReturnCode_t get_int8_value(CORBA::Int8& value,
-                                   DDS::MemberId id);
-  DDS::ReturnCode_t set_int8_value(DDS::MemberId,
-                                   CORBA::Int8)
+  DDS::ReturnCode_t get_int8_value(CORBA::Int8&,
+                                   DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int8_value(DDS::MemberId id,
+                                   CORBA::Int8 value);
 
-  DDS::ReturnCode_t get_uint8_value(CORBA::UInt8& value,
-                                    DDS::MemberId id);
-  DDS::ReturnCode_t set_uint8_value(DDS::MemberId,
-                                    CORBA::UInt8)
+  DDS::ReturnCode_t get_uint8_value(CORBA::UInt8&,
+                                    DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint8_value(DDS::MemberId id,
+                                    CORBA::UInt8 value);
 
-  DDS::ReturnCode_t get_int16_value(CORBA::Short& value,
-                                    DDS::MemberId id);
-  DDS::ReturnCode_t set_int16_value(DDS::MemberId,
-                                    CORBA::Short)
+  DDS::ReturnCode_t get_int16_value(CORBA::Short&,
+                                    DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int16_value(DDS::MemberId id,
+                                    CORBA::Short value);
 
-  DDS::ReturnCode_t get_uint16_value(CORBA::UShort& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_uint16_value(DDS::MemberId,
-                                     CORBA::UShort)
+  DDS::ReturnCode_t get_uint16_value(CORBA::UShort&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint16_value(DDS::MemberId id,
+                                     CORBA::UShort value);
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
-                                    DDS::MemberId id);
-  DDS::ReturnCode_t set_int64_value(DDS::MemberId,
-                                    CORBA::LongLong)
+  DDS::ReturnCode_t get_int64_value(CORBA::LongLong&,
+                                    DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int64_value(DDS::MemberId id,
+                                    CORBA::LongLong value);
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_uint64_value(DDS::MemberId,
-                                     CORBA::ULongLong)
+  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint64_value(DDS::MemberId id,
+                                     CORBA::ULongLong value);
 
-  DDS::ReturnCode_t get_float32_value(CORBA::Float& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_float32_value(DDS::MemberId,
-                                      CORBA::Float)
+  DDS::ReturnCode_t get_float32_value(CORBA::Float&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_float32_value(DDS::MemberId id,
+                                      CORBA::Float value);
 
-  DDS::ReturnCode_t get_float64_value(CORBA::Double& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_float64_value(DDS::MemberId,
-                                      CORBA::Double)
+  DDS::ReturnCode_t get_float64_value(CORBA::Double&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_float64_value(DDS::MemberId id,
+                                      CORBA::Double value);
 
-  DDS::ReturnCode_t get_float128_value(CORBA::LongDouble& value,
-                                       DDS::MemberId id);
-  DDS::ReturnCode_t set_float128_value(DDS::MemberId,
-                                       CORBA::LongDouble)
+  DDS::ReturnCode_t get_float128_value(CORBA::LongDouble&,
+                                       DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_float128_value(DDS::MemberId id,
+                                       CORBA::LongDouble value);
 
-  DDS::ReturnCode_t get_char8_value(CORBA::Char& value,
-                                    DDS::MemberId id);
-  DDS::ReturnCode_t set_char8_value(DDS::MemberId,
-                                    CORBA::Char)
+  DDS::ReturnCode_t get_char8_value(CORBA::Char&,
+                                    DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_char8_value(DDS::MemberId id,
+                                    CORBA::Char value);
 
-  DDS::ReturnCode_t get_char16_value(CORBA::WChar& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_char16_value(DDS::MemberId,
-                                     CORBA::WChar)
+  DDS::ReturnCode_t get_char16_value(CORBA::WChar&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_char16_value(DDS::MemberId id,
+                                     CORBA::WChar value);
 
-  DDS::ReturnCode_t get_byte_value(CORBA::Octet& value,
-                                   DDS::MemberId id);
-  DDS::ReturnCode_t set_byte_value(DDS::MemberId,
-                                   CORBA::Octet)
+  DDS::ReturnCode_t get_byte_value(CORBA::Octet&,
+                                   DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_byte_value(DDS::MemberId id,
+                                   CORBA::Octet value);
 
-  DDS::ReturnCode_t get_boolean_value(CORBA::Boolean& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_boolean_value(DDS::MemberId,
-                                      CORBA::Boolean)
+  DDS::ReturnCode_t get_boolean_value(CORBA::Boolean&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_boolean_value(DDS::MemberId id,
+                                      CORBA::Boolean value);
 
-  DDS::ReturnCode_t get_string_value(char*& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_string_value(DDS::MemberId,
-                                     const char*)
+  DDS::ReturnCode_t get_string_value(char*&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_string_value(DDS::MemberId id,
+                                     const char* value);
 
-  DDS::ReturnCode_t get_wstring_value(CORBA::WChar*& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_wstring_value(DDS::MemberId,
-                                      const CORBA::WChar*)
+  DDS::ReturnCode_t get_wstring_value(CORBA::WChar*&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_wstring_value(DDS::MemberId id,
+                                      const CORBA::WChar* value);
 
-  DDS::ReturnCode_t get_complex_value(DDS::DynamicData_ptr& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_complex_value(DDS::MemberId,
-                                      DDS::DynamicData_ptr)
+  DDS::ReturnCode_t get_complex_value(DDS::DynamicData_ptr&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_complex_value(DDS::MemberId id,
+                                      DDS::DynamicData_ptr value);
 
-  DDS::ReturnCode_t get_int32_values(DDS::Int32Seq& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_int32_values(DDS::MemberId,
-                                     const DDS::Int32Seq&)
+  DDS::ReturnCode_t get_int32_values(DDS::Int32Seq&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int32_values(DDS::MemberId id,
+                                     const DDS::Int32Seq& value);
 
-  DDS::ReturnCode_t get_uint32_values(DDS::UInt32Seq& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_uint32_values(DDS::MemberId,
-                                      const DDS::UInt32Seq&)
+  DDS::ReturnCode_t get_uint32_values(DDS::UInt32Seq&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint32_values(DDS::MemberId id,
+                                      const DDS::UInt32Seq& value);
 
-  DDS::ReturnCode_t get_int8_values(DDS::Int8Seq& value,
-                                    DDS::MemberId id);
-  DDS::ReturnCode_t set_int8_values(DDS::MemberId,
-                                    const DDS::Int8Seq&)
+  DDS::ReturnCode_t get_int8_values(DDS::Int8Seq&,
+                                    DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int8_values(DDS::MemberId id,
+                                    const DDS::Int8Seq& value);
 
-  DDS::ReturnCode_t get_uint8_values(DDS::UInt8Seq& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_uint8_values(DDS::MemberId,
-                                     const DDS::UInt8Seq&)
+  DDS::ReturnCode_t get_uint8_values(DDS::UInt8Seq&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint8_values(DDS::MemberId id,
+                                     const DDS::UInt8Seq& value);
 
-  DDS::ReturnCode_t get_int16_values(DDS::Int16Seq& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_int16_values(DDS::MemberId,
-                                     const DDS::Int16Seq&)
+  DDS::ReturnCode_t get_int16_values(DDS::Int16Seq&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int16_values(DDS::MemberId id,
+                                     const DDS::Int16Seq& value);
 
-  DDS::ReturnCode_t get_uint16_values(DDS::UInt16Seq& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_uint16_values(DDS::MemberId,
-                                      const DDS::UInt16Seq&)
+  DDS::ReturnCode_t get_uint16_values(DDS::UInt16Seq&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint16_values(DDS::MemberId id,
+                                      const DDS::UInt16Seq& value);
 
-  DDS::ReturnCode_t get_int64_values(DDS::Int64Seq& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_int64_values(DDS::MemberId,
-                                     const DDS::Int64Seq&)
+  DDS::ReturnCode_t get_int64_values(DDS::Int64Seq&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_int64_values(DDS::MemberId id,
+                                     const DDS::Int64Seq& value);
 
-  DDS::ReturnCode_t get_uint64_values(DDS::UInt64Seq& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_uint64_values(DDS::MemberId,
-                                      const DDS::UInt64Seq&)
+  DDS::ReturnCode_t get_uint64_values(DDS::UInt64Seq&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_uint64_values(DDS::MemberId id,
+                                      const DDS::UInt64Seq& value);
 
-  DDS::ReturnCode_t get_float32_values(DDS::Float32Seq& value,
-                                       DDS::MemberId id);
-  DDS::ReturnCode_t set_float32_values(DDS::MemberId,
-                                       const DDS::Float32Seq&)
+  DDS::ReturnCode_t get_float32_values(DDS::Float32Seq&,
+                                       DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_float32_values(DDS::MemberId id,
+                                       const DDS::Float32Seq& value);
 
-  DDS::ReturnCode_t get_float64_values(DDS::Float64Seq& value,
-                                       DDS::MemberId id);
-  DDS::ReturnCode_t set_float64_values(DDS::MemberId,
-                                       const DDS::Float64Seq&)
+  DDS::ReturnCode_t get_float64_values(DDS::Float64Seq&,
+                                       DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_float64_values(DDS::MemberId id,
+                                       const DDS::Float64Seq& value);
 
-  DDS::ReturnCode_t get_float128_values(DDS::Float128Seq& value,
-                                        DDS::MemberId id);
-  DDS::ReturnCode_t set_float128_values(DDS::MemberId,
-                                        const DDS::Float128Seq&)
+  DDS::ReturnCode_t get_float128_values(DDS::Float128Seq&,
+                                        DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_float128_values(DDS::MemberId id,
+                                        const DDS::Float128Seq& value);
 
-  DDS::ReturnCode_t get_char8_values(DDS::CharSeq& value,
-                                     DDS::MemberId id);
-  DDS::ReturnCode_t set_char8_values(DDS::MemberId,
-                                     const DDS::CharSeq&)
+  DDS::ReturnCode_t get_char8_values(DDS::CharSeq&,
+                                     DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_char8_values(DDS::MemberId id,
+                                     const DDS::CharSeq& value);
 
-  DDS::ReturnCode_t get_char16_values(DDS::WCharSeq& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_char16_values(DDS::MemberId,
-                                      const DDS::WCharSeq&)
+  DDS::ReturnCode_t get_char16_values(DDS::WCharSeq&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_char16_values(DDS::MemberId id,
+                                      const DDS::WCharSeq& value);
 
-  DDS::ReturnCode_t get_byte_values(DDS::ByteSeq& value,
-                                    DDS::MemberId id);
-  DDS::ReturnCode_t set_byte_values(DDS::MemberId,
-                                    const DDS::ByteSeq&)
+  DDS::ReturnCode_t get_byte_values(DDS::ByteSeq&,
+                                    DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_byte_values(DDS::MemberId id,
+                                    const DDS::ByteSeq& value);
 
-  DDS::ReturnCode_t get_boolean_values(DDS::BooleanSeq& value,
-                                       DDS::MemberId id);
-  DDS::ReturnCode_t set_boolean_values(DDS::MemberId,
-                                       const DDS::BooleanSeq&)
+  DDS::ReturnCode_t get_boolean_values(DDS::BooleanSeq&,
+                                       DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_boolean_values(DDS::MemberId id,
+                                       const DDS::BooleanSeq& value);
 
-  DDS::ReturnCode_t get_string_values(DDS::StringSeq& value,
-                                      DDS::MemberId id);
-  DDS::ReturnCode_t set_string_values(DDS::MemberId,
-                                      const DDS::StringSeq&)
+  DDS::ReturnCode_t get_string_values(DDS::StringSeq&,
+                                      DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
+  DDS::ReturnCode_t set_string_values(DDS::MemberId id,
+                                      const DDS::StringSeq& value);
 
-  DDS::ReturnCode_t get_wstring_values(DDS::WStringSeq& value,
-                                       DDS::MemberId id);
-  DDS::ReturnCode_t set_wstring_values(DDS::MemberId,
-                                       const DDS::WStringSeq&)
+  DDS::ReturnCode_t get_wstring_values(DDS::WStringSeq&,
+                                       DDS::MemberId) const
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
-
-  DDS::DynamicType_ptr type();
-
-  bool check_xcdr1_mutable(DDS::DynamicType_ptr dt);
-
-  CORBA::Boolean equals(DDS::DynamicData_ptr other);
+  DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
+                                       const DDS::WStringSeq& value);
 
 private:
 
-  class ScopedChainManager {
-  public:
-    explicit ScopedChainManager(DynamicDataImpl& dd)
-      : dd_(dd)
-      , dup_(dd_.chain_->duplicate())
-    {
-      dd_.setup_stream(dup_.get());
-    }
-
-    ~ScopedChainManager()
-    {
-      dd_.release_chains();
-    }
-
-  private:
-    DynamicDataImpl& dd_;
-    DCPS::Message_Block_Ptr dup_;
-  };
-
-  void copy(const DynamicDataImpl& other);
-
-  /// Skip the whole data corresponding to this type if it is a struct or union.
-  /// This is called by a containing type when it wants to skip a member which
-  /// is an object of this type.
-  bool skip_all();
-
-  /// Verify that a given type is primitive or string or wstring.
-  ///
-  bool is_type_supported(TypeKind tk, const char* func_name);
-
-  /// Setup the strm_ object so that it has the correct alignment state.
-  ///
-  void setup_stream(ACE_Message_Block* chain);
-
-  /// Reading a single value as a given type. For instance, an enum with bit bound
-  /// of 32 is read as an 32-bit integer and thus TK_INT32 should be passed to @a tk.
-  template<typename ValueType>
-  bool read_value(ValueType& value, TypeKind tk);
-
-  ///@{
-  /** Reading a value of type primitive, string, or wstring as a member of a struct, union,
-   *  or a collection (sequence, array, map). TK_ENUM should be passed to @a enum_or_bitmask
-   *  if @value is a 8-bit, 16-bit, or 32-bit signed integer type. In that case, @lower and
-   *  @upper should be set to form the bit_bound range of the enum type that matches
-   *  the number of bits of @a value. For instance, if we are reading a 8-bit integer, then
-   *  @enum_or_bitmask is TK_ENUM, @a lower is 1 and @a upper is 8. This allows reading
-   *  an enum with a particular bit bound as an integer with the matching size.
-   *  Similarly, if we are reading an unsigned integer, set @a enum_or_bitmask to TK_BITMASK,
-   *  and @a lower and @a upper to form a corresponding range for the bitmask's bit bound.
-   */
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool get_value_from_struct(MemberType& value, MemberId id,
-                             TypeKind enum_or_bitmask = TK_NONE,
-                             LBound lower = 0,
-                             LBound upper = 0);
+  bool set_value_to_struct(DDS::MemberId id, const MemberType& value,
+                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool get_value_from_union(MemberType& value, MemberId id,
-                            TypeKind enum_or_bitmask = TK_NONE,
-                            LBound lower = 0,
-                            LBound upper = 0);
+  bool set_value_to_union(DDS::MemberId, const MemberType& value,
+                          TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<TypeKind ElementTypeKind, typename ElementType>
-  bool get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
-                                 TypeKind enum_or_bitmask = TK_NONE,
-                                 LBound lower = 0,
-                                 LBound upper = 0);
-  ///@}
+  bool set_value_to_collection(DDS::MemberId id, const ElementType& value,
+                               TypeKind coll_tk, TypeKind enum_or_bitmaks,
+                               LBound lower, LBound upper);
 
-  /// Read a single value of type primitive (except char8, char16, and boolean), string,
-  /// or wstring.
   template<TypeKind ValueTypeKind, typename ValueType>
-  DDS::ReturnCode_t get_single_value(ValueType& value, MemberId id,
-                                     TypeKind enum_or_bitmask = TK_NONE,
-                                     LBound lower = 0,
-                                     LBound upper = 0);
+  bool set_single_value(DDS::MemberId id, const ValueType& value,
+                        TypeKind enum_or_bitmask = TK_NONE,
+                        LBound lower = 0,
+                        LBound upper = 0);
 
-  /// Common method to read a single char8 or char16 value.
-  template<TypeKind CharKind, TypeKind StringKind, typename ToCharT, typename CharT>
-  DDS::ReturnCode_t get_char_common(CharT& value, MemberId id);
+  bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
+  bool is_discriminator_type(TypeKind tk) const;
+  bool is_default_member_selected(CORBA::ULong disc_val, DDS::MemberId default_id) const;
+  bool read_discriminator(CORBA::ULong& disc_val) const;
+  DDS::MemberId find_selected_member() const;
+  bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
+  bool find_selected_member_and_discriminator(DDS::MemberId& selected_id,
+                                              bool& has_disc,
+                                              CORBA::Long& disc_val) const;
+  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_ptr value);
+  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_ptr value);
+  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_ptr value, TypeKind tk);
+  bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
+                                     DDS::MemberId id, TypeKind collection_tk) const;
 
-  template<typename UIntType, TypeKind UIntTypeKind>
-  bool get_boolean_from_bitmask(ACE_CDR::ULong index, ACE_CDR::Boolean& value);
 
-  /// Skip to a member with a given ID in a struct.
-  ///
-  bool skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id);
+  template<typename SingleType>
+  bool insert_single(DDS::MemberId id, const SingleType& value);
 
-  bool get_from_struct_common_checks(DDS::MemberDescriptor_var& md, MemberId id,
-                                     TypeKind kind, bool is_sequence = false);
+  bool insert_complex(DDS::MemberId id, const DDS::DynamicData_var& value);
 
-  /// Return the member descriptor for the selected member from a union data or null.
-  DDS::MemberDescriptor* get_union_selected_member();
-
-  DDS::MemberDescriptor* get_from_union_common_checks(MemberId id, const char* func_name);
-
-  ///@{
-  /** Skip to an element with a given ID in a sequence or array, or skip the entire collection. */
-  bool skip_to_sequence_element(MemberId id, DDS::DynamicType_ptr coll_type = 0);
-  bool skip_to_array_element(MemberId id, DDS::DynamicType_ptr coll_type = 0);
-  ///@}
-
-  /// Skip to an element with a given ID in a map. The key associated with that
-  /// element is also skipped.
-  bool skip_to_map_element(MemberId id);
-
-  /// Read a sequence with element type @a elem_tk and store the result in @a value,
-  /// which is a sequence of primitives or strings or wstrings. Sequence of enums or
-  /// bitmasks are read as a sequence of signed and unsigned integers, respectively.
-  /// In that case, @a elem_tk is set to TK_ENUM or TK_BITMASK.
   template<typename SequenceType>
-  bool read_values(SequenceType& value, TypeKind elem_tk);
+  bool insert_sequence(DDS::MemberId id, const SequenceType& value);
 
-  ///@{
-  /** Templates for reading a sequence of primitives, strings or wstrings
-   *  as a member (or an element) of a given containing type. See get_value_from_struct
-   *  and the similar methods for the use of @a enum_or_bitmask, @a lower, @a upper.
-   */
+  bool check_seqmem_in_struct_union(DDS::MemberId id, TypeKind enum_or_bitmask,
+                                    LBound lower, LBound upper) const;
+  bool check_seqmem_in_sequence_array(DDS::MemberId id, TypeKind enum_or_bitmask,
+                                      LBound lower, LBound upper) const;
+
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool get_values_from_struct(SequenceType& value, MemberId id,
+  bool set_values_to_struct(DDS::MemberId id, const SequenceType& value,
+                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
+
+  template<TypeKind ElementTypeKind, typename SequenceType>
+  bool set_values_to_union(DDS::MemberId id, const SequenceType& value,
+                           TypeKind enum_or_bitmask, LBound lower, LBound upper);
+
+  template<TypeKind ElementTypeKind, typename SequenceType>
+  bool set_values_to_sequence(DDS::MemberId id, const SequenceType& value,
                               TypeKind enum_or_bitmask, LBound lower, LBound upper);
 
   template<TypeKind ElementTypeKind, typename SequenceType>
-  bool get_values_from_union(SequenceType& value, MemberId id,
-                             TypeKind enum_or_bitmask, LBound lower, LBound upper);
-
-  template<TypeKind ElementTypeKind, typename SequenceType>
-  bool get_values_from_sequence(SequenceType& value, MemberId id,
-                                TypeKind enum_or_bitmask, LBound lower, LBound upper);
-
-  template<TypeKind ElementTypeKind, typename SequenceType>
-  bool get_values_from_array(SequenceType& value, MemberId id,
-                             TypeKind enum_or_bitmask, LBound lower, LBound upper);
-
-  template<TypeKind ElementTypeKind, typename SequenceType>
-  bool get_values_from_map(SequenceType& value, MemberId id,
+  bool set_values_to_array(DDS::MemberId id, const SequenceType& value,
                            TypeKind enum_or_bitmask, LBound lower, LBound upper);
-  ///@}
 
-  /// Common method to read a value sequence of any type (primitive, string, wstring).
   template<TypeKind ElementTypeKind, typename SequenceType>
-  DDS::ReturnCode_t get_sequence_values(SequenceType& value, MemberId id,
+  DDS::ReturnCode_t set_sequence_values(DDS::MemberId id, const SequenceType& value,
                                         TypeKind enum_or_bitmask = TK_NONE,
-                                        LBound lower = 0,
-                                        LBound upper = 0);
+                                        LBound lower = 0, LBound upper = 0);
 
-  bool skip(const char* func_name, const char* description, size_t n, int size = 1);
-
-  bool read_discriminator(const DDS::DynamicType_ptr disc_type, DDS::ExtensibilityKind union_ek, ACE_CDR::Long& label);
-
-  /// Skip a member of a final or appendable struct at the given index.
-  ///
-  bool skip_struct_member_at_index(ACE_CDR::ULong index, ACE_CDR::ULong& num_skipped);
-
-  /// Skip a member with the given type. The member can be a part of any containing type,
-  /// such as a member in a struct or union, an element in a sequence or array, etc.
-  /// Note that this assumes any header preceding this type, e.g. EMHEADER if this is
-  /// a member of a mutable struct, is already consumed, and the read pointer is pointing
-  /// to the actual data of the member.
-  bool skip_member(DDS::DynamicType_ptr member_type);
-
-  ///@{
-  /** Skip a member which is a sequence, array, or map. */
-  bool skip_sequence_member(DDS::DynamicType_ptr type);
-  bool skip_array_member(DDS::DynamicType_ptr type);
-  bool skip_map_member(DDS::DynamicType_ptr type);
-  ///@}
-
-  /// Skip a non-primitive collection member. That is, a sequence or an array of non-primitive
-  /// elements, or a map with at least either key type or value type is non-primitive.
-  bool skip_collection_member(DDS::DynamicType_ptr coll_type);
-
-  /// Skip a member which is a structure or a union.
-  bool skip_aggregated_member(DDS::DynamicType_ptr type);
-
-  void release_chains();
-
-  bool is_primitive(TypeKind tk) const;
-  bool get_primitive_size(DDS::DynamicType_ptr dt, ACE_CDR::ULong& size) const;
-
-  bool has_optional_member(bool& has_optional) const;
-
-  bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
-
-  /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
-  typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;
-  bool check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, DynamicTypeNameSet& dtns);
-
-  typedef OPENDDS_VECTOR(ACE_Message_Block*) IntermediateChains;
-  const IntermediateChains& get_intermediate_chains() const { return chains_to_release; }
-
-  /// A duplicate of the original message block chain passed from the constructor.
-  /// This is released in the destructor.
-  ACE_Message_Block* chain_;
-
-  DCPS::Encoding encoding_;
-
-  /// Indicate whether the alignment state of a Serializer object associated
-  /// with this DynamicData needs to be reset.
-  bool reset_align_state_;
-
-  /// The alignment state that a Serializer object associated with this DynamicData
-  /// object will be set to.
-  DCPS::Serializer::RdState align_state_;
-
-  /// Each public interface creates a new Serializer object with a message block
-  /// chain that is a duplicate from chain_.
-  DCPS::Serializer strm_;
-
-  /// Message block chains created during each get_*_value or get_*_values method's
-  /// execution that need to be released when the method ends. Those chains are created
-  /// when the method skips a nested aggregated type (i.e., struct and union) by
-  /// calling skip_aggregated_member().
-  IntermediateChains chains_to_release;
-
-  /// The actual (i.e., non-alias) DynamicType of the associated type.
+  // The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
 
-  static const ACE_CDR::ULong ITEM_COUNT_INVALID = ACE_UINT32_MAX;
+  // Contain data for an instance of a basic type.
+  struct SingleValue {
+    SingleValue(CORBA::Long i32);
+    SingleValue(CORBA::ULong ui32);
+    SingleValue(CORBA::Int8 i8);
+    SingleValue(CORBA::UInt8 ui8);
+    SingleValue(CORBA::Short i16);
+    SingleValue(CORBA::UShort ui16);
+    SingleValue(CORBA::LongLong i64);
+    SingleValue(CORBA::ULongLong ui64);
+    SingleValue(CORBA::Float f32);
+    SingleValue(CORBA::Double f64);
+    SingleValue(CORBA::LongDouble f128);
+    SingleValue(CORBA::Char c8);
+    SingleValue(CORBA::Octet byte);
+    SingleValue(CORBA::Boolean boolean);
+    SingleValue(const char* str);
+#ifdef DDS_HAS_WCHAR
+    SingleValue(CORBA::WChar c16);
+    SingleValue(CORBA::WChar* wstr);
+#endif
 
-  /// Cache the number of items (i.e., members or elements) in the data it holds.
-  ACE_CDR::ULong item_count_;
+    ~SingleValue();
+
+    template<typename T> const T& get() const;
+
+    TypeKind kind_;
+    union {
+      CORBA::Long i32_;
+      CORBA::ULong ui32_;
+      CORBA::Int8 i8_;
+      CORBA::UInt8 ui8_;
+      CORBA::Short i16_;
+      CORBA::UShort ui16_;
+      CORBA::LongLong i64_;
+      CORBA::ULongLong ui64_;
+      CORBA::Float f32_;
+      CORBA::Double f64_;
+      CORBA::LongDouble f128_;
+      CORBA::Char c8_;
+      CORBA::Octet byte_;
+      CORBA::Boolean boolean_;
+      const char* str_;
+#ifdef DDS_HAS_WCHAR
+      CORBA::WChar c16_;
+      const CORBA::WChar* wstr_;
+#endif
+    };
+  };
+
+  struct SequenceValue {
+    SequenceValue(const DDS::Int32Seq& int32_seq);
+    SequenceValue(const DDS::UInt32Seq& uint32_seq);
+    SequenceValue(const DDS::Int8Seq& int8_seq);
+    SequenceValue(const DDS::UInt8Seq& uint8_seq);
+    SequenceValue(const DDS::Int16Seq& int16_seq);
+    SequenceValue(const DDS::UInt16Seq& uint16_seq);
+    SequenceValue(const DDS::Int64Seq& int64_seq);
+    SequenceValue(const DDS::UInt64Seq& uint64_seq);
+    SequenceValue(const DDS::Float32Seq& float32_seq);
+    SequenceValue(const DDS::DoubleSeq& float64_seq);
+    SequenceValue(const DDS::LongDoubleSeq& float128_seq);
+    SequenceValue(const DDS::CharSeq& char8_seq);
+    SequenceValue(const DDS::OctetSeq& byte_seq);
+    SequenceValue(const DDS::BooleanSeq& boolean_seq);
+    SequenceValue(const DDS::StringSeq& str_seq);
+#ifdef DDS_HAS_WCHAR
+    SequenceValue(const DDS::WCharSeq& char16_seq);
+    SequenceValue(const DDS::WStringSeq& wstr_seq);
+#endif
+
+    ~SequenceValue();
+
+    TypeKind elem_kind_;
+    union {
+      DDS::Int32Seq int32_seq_;
+      DDS::UInt32Seq uint32_seq_;
+      DDS::Int8Seq int8_seq_;
+      DDS::UInt8Seq uint8_seq_;
+      DDS::Int16Seq int16_seq_;
+      DDS::UInt16Seq uint16_seq_;
+      DDS::Int64Seq int64_seq_;
+      DDS::UInt64Seq uint64_seq_;
+      DDS::Float32Seq float32_seq_;
+      DDS::DoubleSeq float64_seq_;
+      DDS::LongDoubleSeq float128_seq_;
+      DDS::CharSeq char8_seq_;
+      DDS::OctetSeq byte_seq_;
+      DDS::BooleanSeq boolean_seq_;
+      DDS::StringSeq string_seq_;
+#ifdef DDS_HAS_WCHAR
+      DDS::WCharSeq char16_seq_;
+      DDS::WStringSeq wstring_seq_;
+#endif
+    };
+  };
+
+  // Container for all data written to this DynamicData object.
+  // At anytime, there can be at most 1 entry for any given MemberId in all maps.
+  // That is, each member is stored in at most 1 map.
+  struct DataContainer {
+    typedef OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
+    typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
+    typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
+
+    OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
+    OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
+    OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
+  };
+
+  DataContainer container_;
 };
 
-OpenDDS_Dcps_Export bool print_dynamic_data(DDS::DynamicData_ptr dd,
-                                            DCPS::String& type_string,
-                                            DCPS::String& indent);
-
 } // namespace XTypes
+
+namespace DCPS {
+
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const DynamicDataImpl& dd);
+
+} // namespace DCPS
+
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_SAFETY_PROFILE
 
-#endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
+#endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITE_IMPL_H
