@@ -7,8 +7,8 @@ order: 13
 ---
 <p>
   This guide will take you through the process of compiling and runnning an OpenDDS application with Docker.
-  Docker images containing a pre-built OpenDDS are available on DockerHub.
-  An image corresponding to a particular release has a tag of the form <code>release-DDS-X.xx</code>, e.g., <code>release-DDS-3.12</code>.
+  Docker images containing a pre-built OpenDDS are available on <a href="https://github.com/objectcomputing/OpenDDS/pkgs/container/opendds">GitHub Container Registry</a>.
+  An image corresponding to a particular release has a tag of the form <code>DDS-X.xx</code>, e.g., <code>DDS-3.23</code>.
 </p>
 
 <div class="bodytext" align="justify">
@@ -25,7 +25,7 @@ docker-compose --version
   <ol>
     <li>
       <p>Enter a container</p>
-      <pre>docker run --rm -ti -v "$PWD:/opt/workspace" objectcomputing/opendds</pre>
+      <pre>docker run --rm -ti -v "$PWD:/opt/workspace" ghcr.io/objectcomputing/opendds:latest-release</pre>
     </li>
     <li>
       <p>Copy the <i>Messenger</i> directory which contains an example from the <a href="{{ site.data.opendds.latest_devguide_url }}">Developer's Guide</a></p>
@@ -34,7 +34,8 @@ cd Messenger</pre>
     </li>
     <li>
       <p>Configure and build the Messenger example</p>
-      <pre>mwc.pl -type gnuace
+      <pre>source /opt/OpenDDS/setenv.sh
+mwc.pl -type gnuace
 make</pre>
     </li>
     <li>
