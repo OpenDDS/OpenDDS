@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,26 +6,28 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/OpenddsDcpsExtC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsPublicationC.h"
-#include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
 #include "TransportInst.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/ReactorTask_rch.h"
 #include "DataLinkCleanupTask.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/DiscoveryListener.h"
-#include "dds/DCPS/EventDispatcher.h"
 
-#if defined(OPENDDS_SECURITY)
-#include "dds/DdsSecurityCoreC.h"
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/DiscoveryListener.h>
+#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/AtomicBool.h>
+
+#include <dds/OpenddsDcpsExtC.h>
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DdsDcpsPublicationC.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#include "ace/Synch_Traits.h"
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -320,7 +320,7 @@ public:
 protected:
   /// Id of the last link established.
   ACE_Atomic_Op<ACE_Thread_Mutex, size_t> last_link_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> is_shut_down_;
+  AtomicBool is_shut_down_;
 };
 
 } // namespace DCPS

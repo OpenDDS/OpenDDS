@@ -308,28 +308,28 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   DDS::Security::SecurityException se = {"", 0, 0};
 
-  if (auth->get_identity_token(identity_token_, identity_handle_, se) == false) {
+  if (!auth->get_identity_token(identity_token_, identity_handle_, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("unable to get identity token. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     throw std::runtime_error("unable to get identity token");
   }
-  if (auth->get_identity_status_token(identity_status_token_, identity_handle_, se) == false) {
+  if (!auth->get_identity_status_token(identity_status_token_, identity_handle_, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("unable to get identity status token. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     throw std::runtime_error("unable to get identity status token");
   }
-  if (access->get_permissions_token(permissions_token_, permissions_handle_, se) == false) {
+  if (!access->get_permissions_token(permissions_token_, permissions_handle_, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("unable to get permissions handle. Security Exception[%d.%d]: %C\n"),
         se.code, se.minor_code, se.message.in()));
     throw std::runtime_error("unable to get permissions token");
   }
-  if (access->get_permissions_credential_token(permissions_credential_token_, permissions_handle_, se) == false) {
+  if (!access->get_permissions_credential_token(permissions_credential_token_, permissions_handle_, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("unable to get permissions credential handle. Security Exception[%d.%d]: %C\n"),
@@ -337,7 +337,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
     throw std::runtime_error("unable to get permissions credential token");
   }
 
-  if (auth->set_permissions_credential_and_token(identity_handle_, permissions_credential_token_, permissions_token_, se) == false) {
+  if (!auth->set_permissions_credential_and_token(identity_handle_, permissions_credential_token_, permissions_token_, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("unable to set permissions credential and token. Security Exception[%d.%d]: %C\n"),
@@ -347,7 +347,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
   init_participant_sec_attributes(participant_sec_attr_);
 
-  if (access->get_participant_sec_attributes(permissions_handle_, participant_sec_attr_, se) == false) {
+  if (!access->get_participant_sec_attributes(permissions_handle_, participant_sec_attr_, se)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
       ACE_TEXT("Spdp::Spdp() - ")
       ACE_TEXT("failed to retrieve participant security attributes. Security Exception[%d.%d]: %C\n"),
@@ -429,7 +429,7 @@ Spdp::~Spdp()
 void
 Spdp::write_secure_updates()
 {
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -723,7 +723,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -862,7 +862,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
       if (!has_security_data(iter->second.pdata_.dataKind)) {
-        if (participant_sec_attr_.allow_unauthenticated_participants == false) {
+        if (!participant_sec_attr_.allow_unauthenticated_participants) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
               ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
@@ -889,7 +889,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
         attempt_authentication(iter, true);
 
         if (iter->second.auth_state_ == AUTH_STATE_UNAUTHENTICATED) {
-          if (participant_sec_attr_.allow_unauthenticated_participants == false) {
+          if (!participant_sec_attr_.allow_unauthenticated_participants) {
             if (DCPS::security_debug.auth_debug) {
               ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
                 ACE_TEXT("Incompatible security attributes in discovered participant: %C\n"),
@@ -903,7 +903,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
             match_unauthenticated(iter);
           }
         } else if (iter->second.auth_state_ == AUTH_STATE_AUTHENTICATED) {
-          if (match_authenticated(guid, iter) == false) {
+          if (!match_authenticated(guid, iter)) {
             purge_discovered_participant(iter);
             participants_.erase(iter);
             iter = participants_.end();
@@ -1052,7 +1052,7 @@ Spdp::data_received(const DataSubmessage& data,
                     const ACE_INET_Addr& from)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1170,7 +1170,7 @@ Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1482,7 +1482,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_ ) {
     return;
   }
 
@@ -1756,7 +1756,7 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -1771,7 +1771,7 @@ Spdp::process_handshake_deadlines(const DCPS::MonotonicTimePoint& now)
                    DCPS::LogGuid(pos->second).c_str()));
       }
       const DCPS::MonotonicTimePoint ptime = pos->first;
-      if (participant_sec_attr_.allow_unauthenticated_participants == false) {
+      if (!participant_sec_attr_.allow_unauthenticated_participants) {
         DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
         if (sedp_endpoint) {
           stop_ice(sedp_endpoint, pit->first, pit->second.pdata_.participantProxy.availableBuiltinEndpoints,
@@ -1808,7 +1808,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 {
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
 
-  if (initialized_flag_ == false || shutdown_flag_ == true) {
+  if (!initialized_flag_ || shutdown_flag_) {
     return;
   }
 
@@ -2065,8 +2065,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   if (participant_sec_attr_.is_access_protected) {
-    if (access->check_remote_participant(iter->second.permissions_handle_, domain_,
-        iter->second.pdata_.ddsParticipantDataSecure, se) == false) {
+    if (!access->check_remote_participant(iter->second.permissions_handle_, domain_,
+        iter->second.pdata_.ddsParticipantDataSecure, se)) {
       if (DCPS::security_debug.auth_warn) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} ")
           ACE_TEXT("Spdp::match_authenticated() - ")
@@ -2108,8 +2108,8 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   }
 
   if (crypto_handle_ != DDS::HANDLE_NIL) {
-    if (key_exchange->create_local_participant_crypto_tokens(
-        iter->second.crypto_tokens_, crypto_handle_, dp_crypto_handle, se) == false) {
+    if (!key_exchange->create_local_participant_crypto_tokens(
+        iter->second.crypto_tokens_, crypto_handle_, dp_crypto_handle, se)) {
       if (DCPS::security_debug.auth_warn) {
         ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_debug} ")
           ACE_TEXT("Spdp::match_authenticated() - ")
@@ -2515,7 +2515,7 @@ void Spdp::SpdpTransport::register_handlers(const DCPS::ReactorTask_rch& reactor
   }
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
-  if (outer->shutdown_flag_ == true) {
+  if (outer->shutdown_flag_) {
     return;
   }
 
@@ -3605,7 +3605,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
     return;
   }
 
-  if (outer->shutdown_flag_ == true) {
+  if (outer->shutdown_flag_) {
     return;
   }
 
@@ -4384,7 +4384,7 @@ void Spdp::process_participant_ice(const ParameterList& plist,
   DCPS::WeakRcHandle<ICE::Endpoint> spdp_endpoint;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    if (initialized_flag_ == false || shutdown_flag_ == true) {
+    if (!initialized_flag_ || shutdown_flag_) {
       return;
     }
     if (sedp_) {

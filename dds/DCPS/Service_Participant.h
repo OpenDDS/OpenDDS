@@ -20,6 +20,7 @@
 #include "Recorder.h"
 #include "Replayer.h"
 #include "TimeSource.h"
+#include "AtomicBool.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
@@ -759,7 +760,7 @@ private:
   bool monitor_enabled_;
 
   /// Used to track state of service participant
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> shut_down_;
+  AtomicBool shut_down_;
 
   RcHandle<ShutdownListener> shutdown_listener_;
 
