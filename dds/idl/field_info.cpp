@@ -125,7 +125,7 @@ FieldInfo::FieldInfo(AST_Field& field)
   } else if (seq_) {
     length_ = "length";
     arg_ = "seq";
-  } 
+  }
 #if OPENDDS_HAS_MAP
   else if (map_) {
     arg_ = "map";
