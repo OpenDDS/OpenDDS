@@ -2970,7 +2970,9 @@ namespace {
         if (is_appendable) {
           expr += ") {\n"
             "      return false;\n"
-            "    }\n"
+            "    }\n";
+          if (cond.empty())
+          expr +=
             "  }\n";
         } else if (!cond.empty()) {
           expr += ")";
