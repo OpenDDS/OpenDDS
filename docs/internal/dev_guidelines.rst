@@ -497,9 +497,9 @@ Message Content
 - Log messages should take the form:
   ::
 
-    (%P|%t) [ERROR:|WARNING:|NOTICE:] FUNCTION_NAME: MESSAGE\n
+    (%P|%t) [ERROR:|WARNING:|NOTICE:|INFO:] FUNCTION_NAME: MESSAGE\n
 
-  - Use ``ERROR:``, ``WARNING:``, and ``NOTICE:`` if using the corresponding log priorities.
+  - Use ``ERROR:``, ``WARNING:``, ``NOTICE:``, and ``INFO:`` if using the corresponding log priorities.
   - ``CLASS_NAME::METHOD_NAME`` should be used instead of just the function name if it's part of a class.
     It's at the developer's discretion to come up with a meaningful name for members of overload sets, templates, and other more complex cases.
   - ``security_debug`` and ``transport_debug`` log messages should indicate the category name, for example:
