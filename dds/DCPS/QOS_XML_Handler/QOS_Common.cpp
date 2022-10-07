@@ -217,7 +217,7 @@ QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind k
     default:
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: QosCommon::get_data_presentation_id_kind - ")
-        ACE_TEXT("Unknown data presentation kind found <%d>; returning XCDR_DATA_REPRESENTATION\n"),
+        ACE_TEXT("Unknown data presentation kind found <%d>; returning XCDR2_DATA_REPRESENTATION\n"),
         kind.integral()));
       dds_kind = ::DDS::XCDR2_DATA_REPRESENTATION;
       break;
