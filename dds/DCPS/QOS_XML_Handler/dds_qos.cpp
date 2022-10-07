@@ -5813,6 +5813,7 @@ namespace dds
     if (v == ACE_TEXT ("XCDR_DATA_REPRESENTATION")) v_ = XCDR_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
     else
     {
     }
@@ -5827,6 +5828,7 @@ namespace dds
     if (v == ACE_TEXT ("XCDR_DATA_REPRESENTATION")) v_ = XCDR_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XML_DATA_REPRESENTATION")) v_ = XML_DATA_REPRESENTATION_l;
     else if (v == ACE_TEXT ("XCDR2_DATA_REPRESENTATION")) v_ = XCDR2_DATA_REPRESENTATION_l;
+    else if (v == ACE_TEXT ("UNALIGNED_CDR_DATA_REPRESENTATION")) v_ = UNALIGNED_CDR_DATA_REPRESENTATION_l;
     else
     {
     }
@@ -5835,6 +5837,7 @@ namespace dds
   dataRepresentationIdKind const dataRepresentationIdKind::XCDR_DATA_REPRESENTATION (dataRepresentationIdKind::XCDR_DATA_REPRESENTATION_l);
   dataRepresentationIdKind const dataRepresentationIdKind::XML_DATA_REPRESENTATION (dataRepresentationIdKind::XML_DATA_REPRESENTATION_l);
   dataRepresentationIdKind const dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION (dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION_l);
+  dataRepresentationIdKind const dataRepresentationIdKind::UNALIGNED_CDR_DATA_REPRESENTATION (dataRepresentationIdKind::UNALIGNED_CDR_DATA_REPRESENTATION_l);
 
   // typeConsistencyKind
 

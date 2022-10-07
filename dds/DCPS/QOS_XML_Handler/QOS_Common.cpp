@@ -214,6 +214,9 @@ QosCommon::get_data_presentation_id_kind(const ::dds::dataRepresentationIdKind k
     case ::dds::dataRepresentationIdKind::XCDR2_DATA_REPRESENTATION_l:
       dds_kind = ::DDS::XCDR2_DATA_REPRESENTATION;
       break;
+    case ::dds::dataRepresentationIdKind::UNALIGNED_CDR_DATA_REPRESENTATION_l:
+      dds_kind = ::OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
+      break;
     default:
       ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: QosCommon::get_data_presentation_id_kind - ")

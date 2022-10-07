@@ -338,10 +338,11 @@ namespace dds
     static dataRepresentationIdKind const XCDR_DATA_REPRESENTATION;
     static dataRepresentationIdKind const XML_DATA_REPRESENTATION;
     static dataRepresentationIdKind const XCDR2_DATA_REPRESENTATION;
+    static dataRepresentationIdKind const UNALIGNED_CDR_DATA_REPRESENTATION;
 
     enum Value
     {
-      XCDR_DATA_REPRESENTATION_l, XML_DATA_REPRESENTATION_l, XCDR2_DATA_REPRESENTATION_l
+      XCDR_DATA_REPRESENTATION_l, XML_DATA_REPRESENTATION_l, XCDR2_DATA_REPRESENTATION_l, UNALIGNED_CDR_DATA_REPRESENTATION_l
     };
 
 

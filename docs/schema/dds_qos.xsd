@@ -70,6 +70,7 @@
             <xs:enumeration value="XCDR_DATA_REPRESENTATION"></xs:enumeration>
             <xs:enumeration value="XML_DATA_REPRESENTATION"></xs:enumeration>
             <xs:enumeration value="XCDR2_DATA_REPRESENTATION"></xs:enumeration>
+            <xs:enumeration value="UNALIGNED_CDR_DATA_REPRESENTATION"></xs:enumeration>
         </xs:restriction>
     </xs:simpleType>
     <xs:simpleType name="typeConsistencyKind">
