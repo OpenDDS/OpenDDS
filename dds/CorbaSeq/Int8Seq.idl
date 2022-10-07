@@ -20,4 +20,4 @@ module CORBA
 
 #endif
 
-#endif /* OPENDDS_CORBASEQ_INT8SEQ_IDL */
+#endif
