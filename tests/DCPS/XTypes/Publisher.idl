@@ -70,6 +70,12 @@ struct ModifiedNameMutableStruct {
   @id(2) long additional_field_modified;
 };
 
+@topic
+@mutable
+struct NestedMutableStruct {
+  @id(1) ModifiedNameMutableStruct nested_struct;
+};
+
 // Unions
 @topic
 @mutable
