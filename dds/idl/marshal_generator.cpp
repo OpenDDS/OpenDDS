@@ -2741,15 +2741,15 @@ namespace {
     std::string const_cpp_name;
     switch (field_type) {
     case FieldFilter_All:
-      const_cpp_name = "const " + actual_cpp_name + "&";
+      const_cpp_name = "const" + actual_cpp_name + "&";
       break;
     case FieldFilter_NestedKeyOnly:
       cpp_name = "const NestedKeyOnly<" + actual_cpp_name + ">";
-      const_cpp_name = "const NestedKeyOnly<const " + actual_cpp_name + ">&";
+      const_cpp_name = "const NestedKeyOnly<const" + actual_cpp_name + ">&";
       break;
     case FieldFilter_KeyOnly:
       cpp_name = "const KeyOnly<" + actual_cpp_name + ">";
-      const_cpp_name = "const KeyOnly<const " + actual_cpp_name + ">&";
+      const_cpp_name = "const KeyOnly<const" + actual_cpp_name + ">&";
       break;
     }
     const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
@@ -2993,15 +2993,15 @@ namespace {
     std::string const_cpp_name;
     switch (field_type) {
     case FieldFilter_All:
-      const_cpp_name = "const " + actual_cpp_name + "&";
+      const_cpp_name = "const" + actual_cpp_name + "&";
       break;
     case FieldFilter_NestedKeyOnly:
       cpp_name = "const NestedKeyOnly<" + actual_cpp_name + ">";
-      const_cpp_name = "const NestedKeyOnly<const " + actual_cpp_name + ">&";
+      const_cpp_name = "const NestedKeyOnly<const" + actual_cpp_name + ">&";
       break;
     case FieldFilter_KeyOnly:
       cpp_name = "const KeyOnly<" + actual_cpp_name + ">";
-      const_cpp_name = "const KeyOnly<const " + actual_cpp_name + ">&";
+      const_cpp_name = "const KeyOnly<const" + actual_cpp_name + ">&";
       break;
     }
     const std::string value_access = field_type == FieldFilter_All ? "" : ".value";
