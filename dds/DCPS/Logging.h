@@ -31,8 +31,8 @@ extern void OpenDDS_Dcps_Export log_progress(const char* activity,
                                              const MonotonicTime_t& start_time,
                                              const GUID_t& reference = GUID_UNKNOWN);
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
