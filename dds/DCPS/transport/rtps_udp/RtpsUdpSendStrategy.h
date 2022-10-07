@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -10,16 +8,16 @@
 
 #include "Rtps_Udp_Export.h"
 
-#if defined(OPENDDS_SECURITY)
-#include "dds/DdsSecurityCoreC.h"
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/transport/framework/TransportSendStrategy.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#include "dds/DCPS/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
-
-#include "dds/DCPS/RTPS/MessageTypes.h"
-
-#include "ace/SOCK_Dgram.h"
+#include <ace/SOCK_Dgram.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -146,7 +144,7 @@ private:
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
   ACE_Thread_Mutex rtps_header_mb_lock_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> network_is_unreachable_;
+  AtomicBool network_is_unreachable_;
 };
 
 } // namespace DCPS

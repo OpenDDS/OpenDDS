@@ -162,7 +162,7 @@ SubscriberImpl::create_datareader(
       MultiTopicDataReaderBase* mtdr =
         dynamic_cast<MultiTopicDataReaderBase*>(dr.in());
       mtdr->init(dr_qos, a_listener, mask, this, mt);
-      if (enabled_ == true && qos_.entity_factory.autoenable_created_entities) {
+      if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
         if (dr->enable() != DDS::RETCODE_OK) {
           if (DCPS_debug_level > 0) {
             ACE_ERROR((LM_ERROR,
@@ -238,7 +238,7 @@ SubscriberImpl::create_datareader(
                    participant.in(),
                    this);
 
-  if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
+  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
     const DDS::ReturnCode_t ret = dr_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
@@ -636,7 +636,7 @@ SubscriberImpl::set_qos(
       return DDS::RETCODE_OK;
 
     // for the not changeable qos, it can be changed before enable
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(qos_, qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -735,14 +735,20 @@ SubscriberImpl::get_listener()
 DDS::ReturnCode_t
 SubscriberImpl::begin_access()
 {
-  if (enabled_ == false) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
-                ACE_TEXT(" Subscriber is not enabled!\n")));
+  DataReaderSet to_call;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     si_guard,
+                     si_lock_,
+                     DDS::RETCODE_ERROR);
+    if (!enabled_) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::begin_access:")
+                   ACE_TEXT(" Subscriber is not enabled!\n")));
+      }
+      return DDS::RETCODE_NOT_ENABLED;
     }
-    return DDS::RETCODE_NOT_ENABLED;
-  }
 
   if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
     return DDS::RETCODE_OK;
@@ -772,14 +778,20 @@ SubscriberImpl::begin_access()
 DDS::ReturnCode_t
 SubscriberImpl::end_access()
 {
-  if (enabled_ == false) {
-    if (DCPS_debug_level > 0) {
-      ACE_ERROR((LM_ERROR,
-                ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
-                ACE_TEXT(" Publisher is not enabled!\n")));
+  DataReaderSet to_call;
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     si_guard,
+                     si_lock_,
+                     DDS::RETCODE_ERROR);
+    if (!enabled_) {
+      if (DCPS_debug_level > 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) ERROR: SubscriberImpl::end_access:")
+                   ACE_TEXT(" Publisher is not enabled!\n")));
+      }
+      return DDS::RETCODE_NOT_ENABLED;
     }
-    return DDS::RETCODE_NOT_ENABLED;
-  }
 
   if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
     return DDS::RETCODE_OK;

@@ -157,7 +157,7 @@ PublisherImpl::create_datawriter(
       participant_,
       this);
 
-  if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
+  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
     const DDS::ReturnCode_t ret = dw_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
@@ -433,7 +433,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
       return DDS::RETCODE_OK;
 
     // for the not changeable qos, it can be changed before enable
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(qos_, qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -531,7 +531,7 @@ PublisherImpl::get_listener()
 DDS::ReturnCode_t
 PublisherImpl::suspend_publications()
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")
@@ -562,7 +562,7 @@ PublisherImpl::is_suspended() const
 DDS::ReturnCode_t
 PublisherImpl::resume_publications()
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: ")
@@ -608,7 +608,7 @@ PublisherImpl::resume_publications()
 DDS::ReturnCode_t
 PublisherImpl::begin_coherent_changes()
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: PublisherImpl::begin_coherent_changes:")
@@ -654,7 +654,7 @@ PublisherImpl::begin_coherent_changes()
 DDS::ReturnCode_t
 PublisherImpl::end_coherent_changes()
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: PublisherImpl::end_coherent_changes:")
@@ -740,7 +740,7 @@ DDS::ReturnCode_t
 PublisherImpl::wait_for_acknowledgments(
     const DDS::Duration_t& max_wait)
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: PublisherImpl::wait_for_acknowledgments, ")

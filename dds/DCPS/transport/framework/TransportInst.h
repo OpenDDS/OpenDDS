@@ -13,20 +13,22 @@
 #pragma once
 #endif
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/ReactorTask_rch.h"
-#include "dds/DCPS/EventDispatcher.h"
-#include "dds/DCPS/NetworkAddress.h"
-#include "dds/DCPS/TimeDuration.h"
-
-#include <dds/DdsDcpsInfoUtilsC.h>
-
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
-#include "ace/Synch_Traits.h"
+
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/TimeDuration.h>
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/OpenddsDcpsExtC.h>
+
+#include <ace/Synch_Traits.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;

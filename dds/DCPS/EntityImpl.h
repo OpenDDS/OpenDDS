@@ -9,17 +9,10 @@
 #include "Observer.h"
 #include "LocalObject.h"
 #include "Definitions.h"
+#include "AtomicBool.h"
 #include "transport/framework/TransportConfig_rch.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
-
-#ifndef ACE_HAS_CPP11
-#  include <ace/Atomic_Op_T.h>
-#endif
-
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#endif
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
@@ -84,14 +77,6 @@ protected:
   bool get_deleted() const;
 
   DDS::InstanceHandle_t get_entity_instance_handle(const GUID_t& id, DomainParticipantImpl* participant);
-
-  typedef
-#ifdef ACE_HAS_CPP11
-    std::atomic<bool>
-#else
-    ACE_Atomic_Op<TAO_SYNCH_MUTEX, bool>
-#endif
-    AtomicBool;
 
   /// The flag indicates the entity is enabled.
   AtomicBool enabled_;
