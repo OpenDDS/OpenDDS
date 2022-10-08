@@ -2958,11 +2958,9 @@ namespace {
           AST_Type* const type = field->field_type();
           const string stru_field_name = "stru" + value_access + "." + field_name;
           expr +=
-            "  if (end_of_stream) {\n";
-          expr += type_to_default("    ", type, stru_field_name, type->anonymous());
-          expr +=
-            "  } else {\n";
-          expr +=
+            "  if (end_of_stream) {\n" +
+            type_to_default("    ", type, stru_field_name, type->anonymous()) +
+            "  } else {\n"
             "    if (!";
         }
         expr += generate_field_stream(
