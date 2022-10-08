@@ -11991,10 +11991,8 @@ jobs:
         EOF
         echo "--- ifconfig ---"
         ifconfig
-        echo "--- netstat -r ---"
-        netstat -r
-        echo "--- netstat -r6 ---"
-        netstat -r6
+        echo "--- netstat -nr ---"
+        netstat -nr
         echo "---"
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
