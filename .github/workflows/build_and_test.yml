@@ -11989,12 +11989,12 @@ jobs:
         <command name="process_logs" options="prettify"/>
         </autobuild>
         EOF
-        echo "--- ip addr ---"
-        ip addr
-        echo "--- ip -4 -d route ---"
-        ip -4 -d route
-        echo "--- ip -6 -d route ---"
-        ip -6 -d route
+        echo "--- ifconfig ---"
+        ifconfig
+        echo "--- netstat -r ---"
+        netstat -r
+        echo "--- netstat -r6 ---"
+        netstat -r6
         echo "---"
         $GITHUB_WORKSPACE/autobuild/autobuild.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/config.xml"
     - name: upload autobuild output
