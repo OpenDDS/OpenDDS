@@ -245,6 +245,7 @@ my $query = $show_configs || $list_configs || $list_tests;
 # Determine what test list files to use
 my @file_list = ();
 if ($auto_config) {
+    print "about to check files: auto_config == $auto_config\n";
     foreach my $list (@builtin_test_lists) {
         push(@file_list, "$DDS_ROOT/$list->{file}") if ($query_all || $list->{enabled});
     }
@@ -252,11 +253,14 @@ if ($auto_config) {
 push(@file_list, @ARGV);
 
 if ($auto_config) {
+    print "about add os_configs: auto_config == $auto_config\n";
     die("auto_run_tests.pl: Error: unknown perl OS: $^O") if (!exists($os_configs{$^O}));
     push(@PerlACE::ConfigList::Configs, $os_configs{$^O});
 
+    print "about add RTPS: auto_config == $auto_config\n";
     push(@PerlACE::ConfigList::Configs, "RTPS");
     if ($gh_actions) {
+        print "about add GH_ACTIONS: auto_config == $auto_config\n";
         push(@PerlACE::ConfigList::Configs, 'GH_ACTIONS');
     }
 }
@@ -285,11 +289,11 @@ if ($list_configs) {
     exit(0);
 }
 
-if (!$list_tests) {
+#if (!$list_tests) {
     print "Test Lists: ", join(', ', @file_list), "\n";
     print "Configs: ", join(', ', @PerlACE::ConfigList::Configs), "\n";
     print "Excludes: ", join(', ', @PerlACE::ConfigList::Excludes), "\n";
-}
+#}
 
 foreach my $test_lst (@file_list) {
 
