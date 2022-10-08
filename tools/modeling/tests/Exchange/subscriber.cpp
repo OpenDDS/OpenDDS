@@ -15,10 +15,10 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
   public:
     ReaderListener(bool& disposed) : _disposed(disposed)
     { }
-  virtual void on_data_available(
-    DDS::DataReader_ptr reader);
+  virtual void on_data_available(DDS::DataReader_ptr reader);
   private:
     bool& _disposed;
+    ACE_Thread_Mutex mutex_;
 };
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
@@ -26,6 +26,8 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
 void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
   TMQDataReader_var reader_i =
     TMQDataReader::_narrow(reader);
 
@@ -93,6 +95,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR** argv)
 
     DDS::DataReaderListener_var listener(new ReaderListener(disposed));
     reader->set_listener( listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+
+    // Call on_data_available in case there are samples which are waiting
+    listener->on_data_available(reader);
 
     // START OF EXISTING MESSENGER EXAMPLE CODE
 

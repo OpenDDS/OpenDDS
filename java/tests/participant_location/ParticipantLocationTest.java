@@ -153,6 +153,7 @@ public class ParticipantLocationTest {
 
     int ret = pubDr.set_listener(pubLocationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
     assert (ret == DDS.RETCODE_OK.value);
+    // Don't need to invoke the listener because the subscriber doesn't exist.
 
     Publisher pub = pubParticipant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
     if (pub == null) {

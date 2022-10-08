@@ -64,6 +64,7 @@ public:
   LocationMapType location_map;
 
 private:
+  ACE_Thread_Mutex mutex_;
   const std::string id_;
   bool no_ice_;
   bool ipv6_;

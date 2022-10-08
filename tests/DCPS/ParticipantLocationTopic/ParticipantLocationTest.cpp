@@ -253,6 +253,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
       ACE_OS::exit(EXIT_FAILURE);
     }
+    // No need to call on_data_available since subscriber doesn't exist.
 
     // Create Subscriber DomainParticipant
     std::cout << "Starting subscriber" << std::endl;
@@ -355,6 +356,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
       ACE_OS::exit(EXIT_FAILURE);
     }
+
+    // Call on_data_available in case there are samples which are waiting
+    sub_listener->on_data_available(sub_loc_dr);
 
     while (participants_done != 2) {
       participants_done_cond.wait();
