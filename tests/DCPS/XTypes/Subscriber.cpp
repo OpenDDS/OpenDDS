@@ -67,8 +67,8 @@ ReturnCode_t read_struct(const DataReader_var& dr, const T1& pdr, T2& data)
 template<typename T1, typename T2>
 ReturnCode_t read_extended_struct(const DataReader_var& dr, const T1& pdr, T2& data)
 {
-  ReturnCode_t ret = RETCODE_OK;
-  if ((ret = read_i(dr, pdr, data)) == RETCODE_OK) {
+  ReturnCode_t ret = read_i(dr, pdr, data);
+  if (ret =  == RETCODE_OK) {
     if (data.length() != 1) {
       ACE_ERROR((LM_ERROR, "reader: unexpected data length: %d\n", data.length()));
       ret = RETCODE_ERROR;
