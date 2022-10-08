@@ -2954,7 +2954,10 @@ namespace {
           }
         } else if (is_appendable) {
           AST_Type* const type = field->field_type();
-          const string stru_field_name = "stru" + value_access + "." + field_name;
+          string stru_field_name = "stru" + value_access + "." + field_name;
+          if (use_cxx11) {
+            stru_field_name += "()";
+          }
           expr +=
             "  if (reached_end_of_struct) {\n" +
             type_to_default("    ", type, stru_field_name, type->anonymous()) +
