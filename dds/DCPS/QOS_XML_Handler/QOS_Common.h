@@ -35,9 +35,12 @@ public:
                                      ::DDS::ReliabilityQosPolicyKind& dds_kind);
   static void get_destination_order_kind (const ::dds::destinationOrderKind kind,
                                           ::DDS::DestinationOrderQosPolicyKind& dds_kind);
-
   static void get_ownership_kind (::dds::ownershipKind kind,
                                   ::DDS::OwnershipQosPolicyKind& dds_kind);
+  static void get_type_consistency_kind (::dds::typeConsistencyKind kind,
+                                         ::DDS::TypeConsistencyEnforcementQosPolicyKind_t& dds_kind);
+  static void get_data_presentation_id_kind (::dds::dataRepresentationIdKind kind,
+                                             ::DDS::DataRepresentationId_t& dds_kind);
   //@}
 
   /**

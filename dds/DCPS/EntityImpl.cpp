@@ -47,11 +47,7 @@ EntityImpl::set_enabled()
 bool
 EntityImpl::is_enabled() const
 {
-#ifdef ACE_HAS_CPP11
-  return this->enabled_;
-#else
-  return this->enabled_.value();
-#endif
+  return enabled_;
 }
 
 DDS::StatusCondition_ptr
@@ -91,11 +87,7 @@ EntityImpl::set_deleted(bool state)
 bool
 EntityImpl::get_deleted() const
 {
-#ifdef ACE_HAS_CPP11
-  return this->entity_deleted_;
-#else
-  return this->entity_deleted_.value();
-#endif
+  return entity_deleted_;
 }
 
 Observer_rch EntityImpl::get_observer(Observer::Event e)

@@ -3116,8 +3116,8 @@ namespace {
             "    if (!" << generate_field_stream(
               mutable_indent, field, "<< stru" + value_access, wrap_nested_key_only, intro)
             << ") {\n"
-            "    return false;\n"
-            "  }\n";
+            "      return false;\n"
+            "    }\n";
         }
         mutable_fields << "\n"
           "    if (!strm.write_list_end_parameter_id()) {\n"
@@ -3359,7 +3359,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "    }\n", not_final);
   be_global->impl_ <<
     "    std::string base_field = field;\n"
-    "    size_t index = base_field.find('.');\n"
+    "    const size_t index = base_field.find('.');\n"
     "    std::string subfield;\n"
     "    if (index != std::string::npos) {\n"
     "      subfield = base_field.substr(index + 1);\n"

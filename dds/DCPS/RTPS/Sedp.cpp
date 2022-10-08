@@ -3196,7 +3196,7 @@ void Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote)
     return;
   }
 
-  if (shutting_down_ == true) {
+  if (shutting_down_) {
     return;
   }
 
@@ -4085,7 +4085,7 @@ static bool decode_parameter_list(
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
-  if (shutting_down_ == true) {
+  if (shutting_down_) {
     return;
   }
 
@@ -5331,7 +5331,7 @@ Sedp::create_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandl
   DDS::Security::SecurityException se = {"", 0, 0};
   DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  if (key_exchange->create_local_datawriter_crypto_tokens(dwcts, dwch, drch, se) == false) {
+  if (!key_exchange->create_local_datawriter_crypto_tokens(dwcts, dwch, drch, se)) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
       ACE_TEXT("Sedp::create_datawriter_crypto_tokens() - ")
       ACE_TEXT("Unable to create local datawriter crypto tokens with crypto key exchange plugin. ")
@@ -6113,7 +6113,7 @@ GUID_t Sedp::add_publication(
       return GUID_t();
     }
 
-    if (topic_sec_attr.is_write_protected == true) {
+    if (topic_sec_attr.is_write_protected) {
       if (!get_access_control()->check_create_datawriter(
             permh, get_domain_id(), topic_name.data(), qos,
             publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
@@ -6259,7 +6259,7 @@ GUID_t Sedp::add_subscription(
       return GUID_t();
     }
 
-    if (topic_sec_attr.is_read_protected == true) {
+    if (topic_sec_attr.is_read_protected) {
       if (!get_access_control()->check_create_datareader(
         get_permissions_handle(), get_domain_id(), topic_name.data(), qos,
         subscriberQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {

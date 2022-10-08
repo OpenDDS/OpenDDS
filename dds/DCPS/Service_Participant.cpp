@@ -312,7 +312,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
   }
 
-  if (shut_down_.value()) {
+  if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
   }
 

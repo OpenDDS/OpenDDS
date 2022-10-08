@@ -12,6 +12,7 @@
 
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/debug.h>
+#include <dds/DCPS/AtomicBool.h>
 
 #include <ace/Configuration.h>
 
@@ -28,6 +29,7 @@ namespace RTPS {
 
 using DCPS::log_level;
 using DCPS::LogLevel;
+using DCPS::AtomicBool;
 
 typedef RcHandle<Spdp> ParticipantHandle;
 typedef OPENDDS_MAP_CMP(GUID_t, ParticipantHandle, GUID_tKeyLessThan) ParticipantMap;
@@ -285,7 +287,7 @@ public:
 
   bool sedp_multicast() const
   {
-    return sedp_multicast_.value();
+    return sedp_multicast_;
   }
   void sedp_multicast(bool sm)
   {
@@ -498,7 +500,7 @@ public:
 
   bool use_rtps_relay() const
   {
-    return use_rtps_relay_.value();
+    return use_rtps_relay_;
   }
   void use_rtps_relay(bool f)
   {
@@ -507,7 +509,7 @@ public:
 
   bool rtps_relay_only() const
   {
-    return rtps_relay_only_.value();
+    return rtps_relay_only_;
   }
   void rtps_relay_only(bool f)
   {
@@ -538,7 +540,7 @@ public:
 
   bool use_ice() const
   {
-    return use_ice_.value();
+    return use_ice_;
   }
   void use_ice(bool ui)
   {
@@ -558,7 +560,7 @@ public:
 
   bool undirected_spdp() const
   {
-    return undirected_spdp_.value();
+    return undirected_spdp_;
   }
   void undirected_spdp(bool value)
   {
@@ -567,7 +569,7 @@ public:
 
   bool periodic_directed_spdp() const
   {
-    return periodic_directed_spdp_.value();
+    return periodic_directed_spdp_;
   }
   void periodic_directed_spdp(bool value)
   {
@@ -576,7 +578,7 @@ public:
 
   bool secure_participant_user_data() const
   {
-    return secure_participant_user_data_.value();
+    return secure_participant_user_data_;
   }
   void secure_participant_user_data(bool value)
   {
@@ -703,7 +705,7 @@ public:
 
   bool sedp_responsive_mode() const
   {
-    return sedp_responsive_mode_.value();
+    return sedp_responsive_mode_;
   }
   void sedp_responsive_mode(bool sedp_responsive_mode)
   {
@@ -757,7 +759,7 @@ private:
   unsigned char ttl_;
   ACE_INT32 send_buffer_size_;
   ACE_INT32 recv_buffer_size_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> sedp_multicast_;
+  AtomicBool sedp_multicast_;
   OPENDDS_STRING multicast_interface_;
   ACE_INET_Addr sedp_local_address_, sedp_advertised_address_, spdp_local_address_;
   ACE_INET_Addr default_multicast_group_;  /// FUTURE: handle > 1 group.
@@ -773,16 +775,16 @@ private:
   ACE_INET_Addr spdp_rtps_relay_address_;
   DCPS::TimeDuration spdp_rtps_relay_send_period_;
   ACE_INET_Addr sedp_rtps_relay_address_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_rtps_relay_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> rtps_relay_only_;
+  AtomicBool use_rtps_relay_;
+  AtomicBool rtps_relay_only_;
   ACE_INET_Addr spdp_stun_server_address_;
   ACE_INET_Addr sedp_stun_server_address_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> use_ice_;
+  AtomicBool use_ice_;
   size_t sedp_max_message_size_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> undirected_spdp_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> periodic_directed_spdp_;
+  AtomicBool undirected_spdp_;
+  AtomicBool periodic_directed_spdp_;
   /// Should participant user data QoS only be sent when the message is secure?
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> secure_participant_user_data_;
+  AtomicBool secure_participant_user_data_;
   DCPS::TimeDuration max_type_lookup_service_reply_period_;
   UseXTypes use_xtypes_;
   DCPS::TimeDuration sedp_heartbeat_period_;
@@ -791,7 +793,7 @@ private:
   DCPS::TimeDuration sedp_passive_connect_duration_;
   DCPS::TimeDuration sedp_fragment_reassembly_timeout_;
   CORBA::ULong participant_flags_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> sedp_responsive_mode_;
+  AtomicBool sedp_responsive_mode_;
   size_t sedp_receive_preallocated_message_blocks_, sedp_receive_preallocated_data_blocks_;
   bool check_source_ip_;
 };

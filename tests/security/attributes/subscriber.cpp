@@ -150,6 +150,7 @@ int run_test(int argc, ACE_TCHAR *argv[], Args& my_args)
     DDS::DataReaderListener_var listener(listener_servant);
 #ifndef DDS_HAS_MINIMUM_BIT
     part_reader->set_listener(listener.in(), OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    listener->on_data_available(part_reader);
 #endif
 
     // Create DataReader
