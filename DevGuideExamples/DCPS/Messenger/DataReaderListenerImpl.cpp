@@ -71,6 +71,8 @@ DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
                 << "         count      = " << message.count        << std::endl
                 << "         text       = " << message.text.in()    << std::endl;
 
+    } else {
+      std::cout << "Message Key: subject_id = " << message.subject_id << std::endl;
     }
 
   } else {
