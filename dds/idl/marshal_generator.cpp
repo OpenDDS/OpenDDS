@@ -2780,6 +2780,7 @@ namespace {
       if (is_appendable) {
         be_global->impl_ <<
           "  bool reached_end_of_struct = false;\n";
+          "  ACE_UNUSED_ARG(reached_end_of_struct);\n";
       }
       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
