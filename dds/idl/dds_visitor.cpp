@@ -307,6 +307,10 @@ dds_visitor::visit_structure(AST_Structure* node)
   const Fields fields(node);
   const Fields::Iterator fields_end = fields.end();
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+    ACE_DEBUG((LM_DEBUG, "%C", (*i)->name()));
+    for (auto a: (*i)->annotations()) {
+      ACE_DEBUG((LM_DEBUG, "Annotation: %s\n", a->original_name()));
+    }
     field_vec.push_back(*i);
   }
 

@@ -1,6 +1,8 @@
 @topic
 struct Data {
-    string hello;
-    // @optional
-    // boolean opt_data;
+    @optional
+    boolean opt_data;
+
+    @appendable
+    boolean append;
 };
