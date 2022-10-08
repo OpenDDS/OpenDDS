@@ -147,7 +147,7 @@ public class MessageConsumerImpl implements MessageConsumer {
         } else {
             ConsumerDataReaderListener listener = new ConsumerDataReaderListener(this, sessionImpl);
             messagePayloadDataReader.set_listener(listener, DATA_AVAILABLE_STATUS.value);
-            listener->on_data_available(messagePayloadDataReader);
+            listener.on_data_available(messagePayloadDataReader);
         }
         this.messageListener = messageListener;
     }
