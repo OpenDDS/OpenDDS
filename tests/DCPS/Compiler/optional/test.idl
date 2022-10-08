@@ -2,7 +2,4 @@
 struct Data {
     @optional
     boolean opt_data;
-
-    @appendable
-    boolean append;
 };
