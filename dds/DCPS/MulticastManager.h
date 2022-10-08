@@ -37,6 +37,8 @@ public:
                #endif
                );
 private:
+  size_t joined_interface_count() const;
+
   OPENDDS_SET(OPENDDS_STRING) joined_interfaces_;
 #ifdef ACE_HAS_IPV6
   OPENDDS_SET(OPENDDS_STRING) ipv6_joined_interfaces_;
