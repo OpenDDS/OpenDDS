@@ -2936,7 +2936,7 @@ namespace {
         // ends before some fields on the reader side get their values.
         if (is_appendable) {
           expr +=
-            "  end_of_stream |= (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() >= end_of_struct);\n";
+            "  reached_end_of_struct |= (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() >= end_of_struct);\n";
         }
         const string field_name = field->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
@@ -2958,7 +2958,7 @@ namespace {
           AST_Type* const type = field->field_type();
           const string stru_field_name = "stru" + value_access + "." + field_name;
           expr +=
-            "  if (end_of_stream) {\n" +
+            "  if (reached_end_of_struct) {\n" +
             type_to_default("    ", type, stru_field_name, type->anonymous()) +
             "  } else {\n"
             "    if (!";
@@ -2969,9 +2969,10 @@ namespace {
           expr += ") {\n"
             "      return false;\n"
             "    }\n";
-          if (cond.empty())
-          expr +=
+          if (cond.empty()) {
+            expr +=
             "  }\n";
+          }
         } else if (!cond.empty()) {
           expr += ")";
         }
