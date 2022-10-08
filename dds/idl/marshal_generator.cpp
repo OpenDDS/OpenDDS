@@ -2932,8 +2932,6 @@ namespace {
         if (expr.size() && exten != extensibilitykind_appendable) {
           expr += "\n    && ";
         }
-        // TODO (sonndinh): Integrate with try-construct for when the stream
-        // ends before some fields on the reader side get their values.
         if (is_appendable) {
           expr +=
             "  reached_end_of_struct |= (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() >= end_of_struct);\n";
