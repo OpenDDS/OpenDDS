@@ -2779,7 +2779,7 @@ namespace {
         "  ACE_UNUSED_ARG(encoding);\n";
       if (is_appendable) {
         be_global->impl_ <<
-          "  bool end_of_stream = false;\n";
+          "  bool reached_end_of_struct = false;\n";
       }
       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
