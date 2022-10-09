@@ -2779,7 +2779,7 @@ namespace {
         "  ACE_UNUSED_ARG(encoding);\n";
       if (is_appendable) {
         be_global->impl_ <<
-          "  bool reached_end_of_struct = false;\n";
+          "  bool reached_end_of_struct = false;\n"
           "  ACE_UNUSED_ARG(reached_end_of_struct);\n";
       }
       marshal_generator::generate_dheader_code(
