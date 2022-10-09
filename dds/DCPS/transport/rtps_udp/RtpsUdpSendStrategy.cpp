@@ -285,11 +285,10 @@ RtpsUdpSendStrategy::choose_send_socket(const NetworkAddress& addr) const
 {
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
-    return link_->ipv6_unicast_socket();
+    return addr.is_multicast() ? link_->ipv6_multicast_socket() : link_->ipv6_unicast_socket();
   }
 #endif
-  ACE_UNUSED_ARG(addr);
-  return link_->unicast_socket();
+  return addr.is_multicast() ? link_->multicast_socket() : link_->unicast_socket();
 }
 
 ssize_t
