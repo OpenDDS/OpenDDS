@@ -17,6 +17,12 @@ struct ModifiedFinalStruct {
 // Appendable structures
 @topic
 @appendable
+struct BaseAppendableStruct {
+  @key long key_field;
+};
+
+@topic
+@appendable
 struct AdditionalPostfixFieldStruct {
   @key long key_field;
   long additional_field;
