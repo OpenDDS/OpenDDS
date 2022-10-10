@@ -2200,7 +2200,7 @@ RtpsUdpDataLink::RtpsReader::should_nack_fragments(const RcHandle<RtpsUdpDataLin
 void
 RtpsUdpDataLink::RtpsReader::do_Nothing(const MonotonicTimePoint& /*now*/)
 {
-	return;
+  return;
 }
 
 void
