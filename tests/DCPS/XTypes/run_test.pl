@@ -120,6 +120,11 @@ if ($secure) {
       expect_inconsistent_topic => 0, topic => "AppendableStructT", key_val => 4,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
     },
+    "ExtendedAppendableMatch" => {
+      reader_type => "ExtendedAppendableStruct", writer_type => "BaseAppendableStruct",
+      expect_inconsistent_topic => 0, topic => "AppendableStructT", key_val => 4,
+      r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
+    },
     "AppendableNoMatch" => {
       reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct",
       expect_inconsistent_topic => 1, topic => "AppendableStructT_NoMatch", key_val => 5,
