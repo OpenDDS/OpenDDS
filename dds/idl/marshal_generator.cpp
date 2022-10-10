@@ -2777,6 +2777,11 @@ namespace {
       be_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
+      if (is_appendable) {
+        be_global->impl_ <<
+          "  bool reached_end_of_struct = false;\n"
+          "  ACE_UNUSED_ARG(reached_end_of_struct);\n";
+      }
       marshal_generator::generate_dheader_code(
         "    if (!strm.read_delimiter(total_size)) {\n"
         "      return false;\n"
@@ -2805,16 +2810,14 @@ namespace {
         * to read a non-existent member id.
         */
         be_global->impl_ <<
-          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-          "            strm.rpos() >= end_of_struct) {\n"
+          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() >= end_of_struct) {\n"
           "        return true;\n"
           "      }\n"
           "      bool must_understand = false;\n"
           "      if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
           "        return false;\n"
           "      }\n"
-          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 &&\n"
-          "            member_id == Serializer::pid_list_end) {\n"
+          "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1 && member_id == Serializer::pid_list_end) {\n"
           "        return true;\n"
           "      }\n"
           "      const size_t end_of_field = strm.rpos() + field_size;\n"
@@ -2930,14 +2933,9 @@ namespace {
         if (expr.size() && exten != extensibilitykind_appendable) {
           expr += "\n    && ";
         }
-        // TODO (sonndinh): Integrate with try-construct for when the stream
-        // ends before some fields on the reader side get their values.
         if (is_appendable) {
           expr +=
-            "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-            "      strm.rpos() >= end_of_struct) {\n"
-            "    return true;\n"
-            "  }\n";
+            "  reached_end_of_struct |= (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() >= end_of_struct);\n";
         }
         const string field_name = field->local_name()->get_string();
         const string cond = rtpsCustom.getConditional(field_name);
@@ -2956,14 +2954,27 @@ namespace {
             expr += prefix + "(!(" + cond + ") || ";
           }
         } else if (is_appendable) {
-          expr += "  if (!";
+          AST_Type* const type = field->field_type();
+          string stru_field_name = "stru" + value_access + "." + field_name;
+          if (use_cxx11) {
+            stru_field_name += "()";
+          }
+          expr +=
+            "  if (reached_end_of_struct) {\n" +
+            type_to_default("    ", type, stru_field_name, type->anonymous()) +
+            "  } else {\n"
+            "    if (!";
         }
         expr += generate_field_stream(
           indent, field, ">> stru" + value_access, wrap_nested_key_only, intro);
         if (is_appendable) {
           expr += ") {\n"
-            "    return false;\n"
+            "      return false;\n"
+            "    }\n";
+          if (cond.empty()) {
+            expr +=
             "  }\n";
+          }
         } else if (!cond.empty()) {
           expr += ")";
         }
@@ -2971,8 +2982,7 @@ namespace {
       intro.join(be_global->impl_, indent);
       if (is_appendable) {
         expr +=
-          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 &&\n"
-          "      strm.rpos() < end_of_struct) {\n"
+          "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() < end_of_struct) {\n"
           "    strm.skip(end_of_struct - strm.rpos());\n"
           "  }\n"
           "  return true;\n";
