@@ -1963,7 +1963,6 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !is_final, meta_submessages, cumulative_bits_added);
     } else if (link->config().responsive_mode_) {
-      gather_preassociation_acknack_i(meta_submessages, writer);
       ++cumulative_bits_added;
     }
     if (cumulative_bits_added && link->config().count_messages()) {
@@ -2143,7 +2142,6 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
 
     preassociation_task_->schedule(link->config().heartbeat_period_);
     MetaSubmessageVec meta_submessages;
-    gather_preassociation_acknack_i(meta_submessages, writer);
     g.release();
     link->queue_submessages(meta_submessages);
 
@@ -2200,62 +2198,9 @@ RtpsUdpDataLink::RtpsReader::should_nack_fragments(const RcHandle<RtpsUdpDataLin
 }
 
 void
-RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoint& /*now*/)
+RtpsUdpDataLink::RtpsReader::do_Nothing(const MonotonicTimePoint& /*now*/)
 {
-  RtpsUdpDataLink_rch link = link_.lock();
-  if (!link) {
-    return;
-  }
-
-  MetaSubmessageVec meta_submessages;
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    if (stopping_ || preassociation_writers_.empty()) {
-      return;
-    }
-
-    // We want a heartbeat from these writers.
-    meta_submessages.reserve(preassociation_writers_.size());
-    for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
-         pos != limit; ++pos) {
-      gather_preassociation_acknack_i(meta_submessages, *pos);
-    }
-  }
-
-  link->queue_submessages(meta_submessages);
-
-  preassociation_task_->schedule(link->config().heartbeat_period_);
-}
-
-void
-RtpsUdpDataLink::RtpsReader::gather_preassociation_acknack_i(MetaSubmessageVec& meta_submessages,
-                                                             const WriterInfo_rch& writer)
-{
-  using namespace OpenDDS::RTPS;
-
-  OPENDDS_ASSERT(writer->recvd_.empty());
-  const CORBA::ULong num_bits = 0;
-  const LongSeq8 bitmap;
-  const EntityId_t reader_id = id_.entityId;
-  const EntityId_t writer_id = writer->id_.entityId;
-
-  MetaSubmessage meta_submessage(id_, writer->id_);
-
-  AckNackSubmessage acknack = {
-    {ACKNACK,
-     CORBA::Octet(FLAG_E),
-     0 /*length*/},
-    reader_id,
-    writer_id,
-    { // SequenceNumberSet: acking bitmapBase - 1
-      {0, 1},
-      num_bits, bitmap
-    },
-    {writer->heartbeat_recvd_count_}
-  };
-  meta_submessage.sm_.acknack_sm(acknack);
-  meta_submessages.push_back(meta_submessage);
+	return;
 }
 
 void
