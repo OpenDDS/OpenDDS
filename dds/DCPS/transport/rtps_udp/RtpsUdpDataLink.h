@@ -624,7 +624,6 @@ private:
       , id_(id)
       , stopping_(false)
       , nackfrag_count_(0)
-      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::do_Nothing)))
     {}
 
     ~RtpsReader();
@@ -659,8 +658,6 @@ private:
     void log_remote_counts(const char* funcname);
 
   private:
-    void do_Nothing(const MonotonicTimePoint& now);
-
 
     void gather_ack_nacks_i(const WriterInfo_rch& writer,
                             const RtpsUdpDataLink_rch& link,
@@ -680,7 +677,6 @@ private:
     WriterInfoSet preassociation_writers_;
     bool stopping_;
     CORBA::Long nackfrag_count_;
-    RcHandle<SporadicEvent> preassociation_task_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 

@@ -1629,8 +1629,6 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
 
   guard.release();
   g.release();
-
-  preassociation_task_->cancel();
 }
 
 RtpsUdpDataLink::RtpsReader::~RtpsReader()
@@ -2140,7 +2138,6 @@ RtpsUdpDataLink::RtpsReader::add_writer(const WriterInfo_rch& writer)
       return false;
     }
 
-    preassociation_task_->schedule(link->config().heartbeat_period_);
     MetaSubmessageVec meta_submessages;
     g.release();
     link->queue_submessages(meta_submessages);
@@ -2195,12 +2192,6 @@ RtpsUdpDataLink::RtpsReader::should_nack_fragments(const RcHandle<RtpsUdpDataLin
   }
 
   return false;
-}
-
-void
-RtpsUdpDataLink::RtpsReader::do_Nothing(const MonotonicTimePoint& /*now*/)
-{
-  return;
 }
 
 void
