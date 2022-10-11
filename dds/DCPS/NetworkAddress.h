@@ -65,6 +65,7 @@ public:
 
   bool is_any() const;
   bool is_loopback() const;
+  bool is_multicast() const;
 
   bool is_private() const; // IPv4 only
 

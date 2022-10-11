@@ -311,6 +311,40 @@ TEST(dds_DCPS_NetworkAddress, IsLoopbackIpSix)
 
 #endif
 
+TEST(dds_DCPS_NetworkAddress, IsMulticastIpFour)
+{
+  NetworkAddress sa1(1234, "224.0.1.4");
+  NetworkAddress sa2(1234, "239.255.0.9");
+  NetworkAddress sa3(1234, "127.0.0.1");
+  NetworkAddress sa4(1234, "192.168.10.7");
+  NetworkAddress sa5(1234, "7.5.3.1");
+
+  EXPECT_TRUE(sa1.is_multicast());
+  EXPECT_TRUE(sa2.is_multicast());
+
+  EXPECT_FALSE(sa3.is_multicast());
+  EXPECT_FALSE(sa4.is_multicast());
+  EXPECT_FALSE(sa5.is_multicast());
+}
+
+#if defined (ACE_HAS_IPV6)
+
+TEST(dds_DCPS_NetworkAddress, IsMulticastIpSix)
+{
+  NetworkAddress sa1(1234, "ff20::3");
+  NetworkAddress sa2(1234, "::2");
+  NetworkAddress sa3(1234, "0101:0101:0101:0101:0101:0101:0101:0101");
+  NetworkAddress sa4(1234, "0202:0202:0202:0202:0202:0202:0202:0202");
+
+  EXPECT_TRUE(sa1.is_multicast());
+
+  EXPECT_FALSE(sa2.is_multicast());
+  EXPECT_FALSE(sa3.is_multicast());
+  EXPECT_FALSE(sa4.is_multicast());
+}
+
+#endif
+
 TEST(dds_DCPS_NetworkAddress, IsPrivateIpFour)
 {
   NetworkAddress sa1(1234, "7.8.9.10");
