@@ -11226,7 +11226,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11520,7 +11520,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11642,7 +11642,7 @@ jobs:
 
   # macOS 12.5
 
-  ACE_TAO_m12_p1o1d0_sec:
+  ACE_TAO_m12_o1d0_sec:
 
     runs-on: macos-12
 
@@ -11715,11 +11715,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_m12_p1o1d0_sec:
+  build_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: ACE_TAO_m12_p1o1d0_sec
+    needs: ACE_TAO_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11744,13 +11744,13 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: configure OpenDDS
       run: |
         cd OpenDDS
@@ -11792,11 +11792,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m12_p1o1d0_sec:
+  test_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: build_m12_p1o1d0_sec
+    needs: build_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11826,23 +11826,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_m12_p1o1d0_sec_artifact
+        name: build_m12_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -11879,7 +11879,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config IPV6 -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M12"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11897,11 +11897,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  cmake_m12_p1o1d0_sec:
+  cmake_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: build_m12_p1o1d0_sec
+    needs: build_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11931,23 +11931,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_m12_p1o1d0_sec_artifact
+        name: build_m12_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12255,7 +12255,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
