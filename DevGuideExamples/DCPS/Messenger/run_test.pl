@@ -15,7 +15,10 @@ use strict;
 my $status = 0;
 my $rtps = 0;
 my $help = 0;
-my $common_opts = 0;
+
+my $dbg_opts = " -ORBDebugLevel 1";
+my $common_opts = "$dbg_opts";
+
 my $help_message = "usage: run_test.pl [-h|--help] [--rtps]\n";
 my $invalid_args = not GetOptions(
   "rtps" => \$rtps,
@@ -46,13 +49,11 @@ my $test = new PerlDDS::TestFramework();
 $test->{dcps_debug_level} = 4;
 $test->{dcps_transport_debug_level} = 2;
 $test->{add_transport_config} = 0;
-my $dbg_lvl = '-ORBDebugLevel 1';
-my $pub_opts = "$dbg_lvl" . "$common_opts";
-my $sub_opts = "$dbg_lvl" . "$common_opts";
-my $repo_bit_opt = "";
 
-$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log " .
-                       "$repo_bit_opt") unless $rtps;
+my $pub_opts = "$common_opts";
+my $sub_opts = "$common_opts";
+
+$test->setup_discovery("-ORBDebugLevel 1 -ORBLogFile DCPSInfoRepo.log") unless $rtps;
 
 $test->process("publisher", "publisher", $pub_opts);
 $test->process("subscriber", "subscriber", $sub_opts);
