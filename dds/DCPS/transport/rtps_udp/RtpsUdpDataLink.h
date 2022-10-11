@@ -624,7 +624,7 @@ private:
       , id_(id)
       , stopping_(false)
       , nackfrag_count_(0)
-      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks)))
+      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks))) 
     {}
 
     ~RtpsReader();
