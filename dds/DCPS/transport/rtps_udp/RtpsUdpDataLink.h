@@ -624,7 +624,7 @@ private:
       , id_(id)
       , stopping_(false)
       , nackfrag_count_(0)
-      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks)))
+      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks))) 
     {}
 
     ~RtpsReader();
@@ -661,7 +661,7 @@ private:
   private:
     void send_preassociation_acknacks(const MonotonicTimePoint& now);
     void gather_preassociation_acknack_i(MetaSubmessageVec& meta_submessages,
-      const WriterInfo_rch& writer);
+                                         const WriterInfo_rch& writer);
 
     void gather_ack_nacks_i(const WriterInfo_rch& writer,
                             const RtpsUdpDataLink_rch& link,
