@@ -2199,22 +2199,22 @@ void
 RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoint& /*now*/)
 {
   RtpsUdpDataLink_rch link = link_.lock();
-  if(!link)
-  {
+  if (!link) {
     return;
   }
+
   MetaSubmessageVec meta_submessages;
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-    if(stopping_ || preassociation_writers_.empty())
-    {
+
+    if (stopping_ || preassociation_writers_.empty()) {
       return;
     }
 
     // We want a heartbeat from these writers.
     meta_submessages.reserve(preassociation_writers_.size());
-    for(WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
-      pos != limit; ++pos) {
+    for (WriterInfoSet::const_iterator pos = preassociation_writers_.begin(), limit = preassociation_writers_.end();
+         pos != limit; ++pos) {
       gather_preassociation_acknack_i(meta_submessages, *pos);
     }
   }
@@ -2226,15 +2226,18 @@ RtpsUdpDataLink::RtpsReader::send_preassociation_acknacks(const MonotonicTimePoi
 
 void
 RtpsUdpDataLink::RtpsReader::gather_preassociation_acknack_i(MetaSubmessageVec& meta_submessages,
-  const WriterInfo_rch& writer)
+                                                             const WriterInfo_rch& writer)
 {
   using namespace OpenDDS::RTPS;
+
   OPENDDS_ASSERT(writer->recvd_.empty());
   const CORBA::ULong num_bits = 0;
   const LongSeq8 bitmap;
   const EntityId_t reader_id = id_.entityId;
   const EntityId_t writer_id = writer->id_.entityId;
+
   MetaSubmessage meta_submessage(id_, writer->id_);
+
   AckNackSubmessage acknack = {
     {ACKNACK,
      CORBA::Octet(FLAG_E),
