@@ -15,7 +15,7 @@
 #include "RtpsCustomizedElement.h"
 #include "LocatorCacheKey.h"
 #include "BundlingCacheKey.h"
-#include "ThreadedRtpsSendQueue.h"
+#include "TransactionalRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
@@ -736,7 +736,7 @@ private:
   void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long current);
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
-  ThreadedRtpsSendQueue sq_;
+  TransactionalRtpsSendQueue sq_;
   ACE_Thread_Mutex fsq_mutex_;
   MetaSubmessageVec fsq_vec_;
 

@@ -86,6 +86,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , db_lock_pool_(new DataBlockLockPool(static_cast<unsigned long>(TheServiceParticipant->n_chunks())))
   , multi_buff_(this, config.nak_depth_)
+  , sq_(TheServiceParticipant->get_thread_status_manager())
   , flush_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::flush_send_queue)))
   , best_effort_heartbeat_count_(0)
   , heartbeat_(make_rch<PeriodicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::send_heartbeats)))
@@ -106,7 +107,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 #endif
 
   send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
-  receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
+  receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix, ref(TheServiceParticipant->get_thread_status_manager()));
   assign(local_prefix_, local_prefix);
 
   this->job_queue(job_queue_);
@@ -2394,6 +2395,10 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
 
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVec::iterator it = meta_submessages.begin(), limit = meta_submessages.end(); it != limit; ++it) {
+    if (it->ignore_) {
+      continue;
+    }
+
     const BundlingCacheKey key(it->src_guid_, it->dst_guid_);
     BundlingCache::ScopedAccess entry(bundling_cache_, key, false, now);
     if (entry.is_new_) {
@@ -2630,7 +2635,8 @@ void
 RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
 {
   ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
-  sq_.condense_and_swap(fsq_vec_);
+  sq_.swap(fsq_vec_);
+  dedup(fsq_vec_);
   bundle_and_send_submessages(fsq_vec_);
   fsq_vec_.clear();
 }
@@ -2638,13 +2644,13 @@ RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
 void
 RtpsUdpDataLink::enable_response_queue()
 {
-  sq_.enable_thread_queue();
+  sq_.begin_transaction();
 }
 
 void
 RtpsUdpDataLink::disable_response_queue()
 {
-  if (sq_.disable_thread_queue()) {
+  if (sq_.end_transaction()) {
     flush_send_queue_sporadic_->schedule(config().send_delay_);
   }
 }
