@@ -9,6 +9,10 @@
 #include "Serializer.h"
 #include "TypeSupportImpl.h"
 #include "RcHandle_T.h"
+#include "FilterEvaluator.h"
+#include "XTypes/DynamicDataAdapter.h"
+
+#include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -55,7 +59,14 @@ public:
   virtual bool compare(const AbstractSample& other) const = 0;
   virtual bool to_message_block(ACE_Message_Block& mb) = 0;
   virtual bool from_message_block(const ACE_Message_Block& mb) = 0;
-  virtual AbstractSample_rch copy(bool read_only) const = 0;
+  virtual AbstractSample_rch copy(bool read_only, bool key_only) const = 0;
+  AbstractSample_rch copy(bool read_only) const
+  {
+    return copy(read_only, key_only_);
+  }
+  virtual DDS::DynamicData* get_dynamic_data(DDS::DynamicType_ptr type) = 0;
+  virtual const void* native_data() = 0;
+  virtual bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const = 0;
 
 protected:
   const bool owns_data_;
@@ -78,28 +89,37 @@ public:
   typedef RcHandle<NativeSample<NativeType> > Rch;
   typedef KeyOnly<const NativeType> KeyOnlyType;
   typedef KeyOnly<NativeType> MutableKeyOnlyType;
+  typedef XTypes::DynamicDataAdapter<NativeType> DynamicDataImpl;
 
   NativeSample(const NativeType& data, bool key_only = false)
   : AbstractSample(/* owns_data = */ false, /* read_only = */ true, key_only)
   , data_(&data)
+  , dynamic_data_(0, getMetaStruct<NativeType>(), data)
+  , dynamic_data_initialized_(false)
   {
   }
 
   NativeSample(const NativeType* data, bool key_only = false)
-  : AbstractSample(/* owns_data = */ false, /* read_only = */ true, key_only)
+  : AbstractSample(/* owns_data = */ true, /* read_only = */ true, key_only)
   , data_(data)
+  , dynamic_data_(0, getMetaStruct<NativeType>(), *data)
+  , dynamic_data_initialized_(false)
   {
   }
 
   NativeSample(NativeType& data, bool key_only = false)
   : AbstractSample(/* owns_data = */ false, /* read_only = */ false, key_only)
-  , data_(const_cast<const NativeType*>(&data))
+  , data_(&data)
+  , dynamic_data_(0, getMetaStruct<NativeType>(), data)
+  , dynamic_data_initialized_(false)
   {
   }
 
   NativeSample(NativeType* data, bool key_only = false)
   : AbstractSample(/* owns_data = */ true, /* read_only = */ false, key_only)
-  , data_(const_cast<const NativeType*>(data))
+  , data_(data)
+  , dynamic_data_(0, getMetaStruct<NativeType>(), *data)
+  , dynamic_data_initialized_(false)
   {
   }
 
@@ -176,16 +196,37 @@ public:
     return MarshalTraitsType::from_message_block(mutable_data(), mb);
   }
 
-  AbstractSample_rch copy(bool read_only) const
+  AbstractSample_rch copy(bool read_only, bool key_only) const
   {
     NativeType* new_data = new NativeType;
     *new_data = *data_;
     return dynamic_rchandle_cast<AbstractSample>(make_rch<NativeSample<NativeType> >(
-      read_only ? const_cast<const NativeType*>(new_data) : new_data, key_only_));
+      read_only ? const_cast<const NativeType*>(new_data) : new_data, key_only));
+  }
+
+  DDS::DynamicData* get_dynamic_data(DDS::DynamicType_ptr type)
+  {
+    if (type && !dynamic_data_initialized_) {
+      dynamic_data_ = DynamicDataImpl(type, getMetaStruct<NativeType>(), *data_);
+      dynamic_data_initialized_ = true;
+    }
+    return &dynamic_data_;
+  }
+
+  const void* native_data()
+  {
+    return data_;
+  }
+
+  bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const
+  {
+    return evaluator.eval(*data_, params);
   }
 
 private:
   const NativeType* data_;
+  DynamicDataImpl dynamic_data_;
+  bool dynamic_data_initialized_;
 };
 
 } // namespace DCPS

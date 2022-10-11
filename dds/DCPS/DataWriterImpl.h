@@ -275,6 +275,12 @@ public:
                           GUIDSeq* filter_out,
                           const void* real_data);
 
+  DDS::ReturnCode_t write_sample(
+    AbstractSample_rch sample,
+    DDS::InstanceHandle_t handle,
+    const DDS::Time_t& source_timestamp,
+    GUIDSeq* filter_out);
+
   /**
    * Delegate to the WriteDataContainer to dispose all data
    * samples for a given instance and tell the transport to
@@ -663,6 +669,22 @@ protected:
     return type_support_;
   }
 
+  DDS::ReturnCode_t instance_must_exist(
+    const char* const method_name,
+    AbstractSample_rch& sample,
+    DDS::InstanceHandle_t& instance_handle,
+    bool remove = false);
+
+  DDS::ReturnCode_t get_or_create_instance_handle(
+    DDS::InstanceHandle_t& handle,
+    AbstractSample_rch sample,
+    const DDS::Time_t& source_timestamp);
+
+  DDS::ReturnCode_t write_w_timestamp(
+    AbstractSample_rch sample,
+    DDS::InstanceHandle_t handle,
+    const DDS::Time_t& source_timestamp);
+
 private:
 
   void track_sequence_number(GUIDSeq* filter_out);
@@ -710,12 +732,6 @@ private:
   void association_complete_i(const RepoId& remote_id);
 
   void return_handle(DDS::InstanceHandle_t handle);
-
-  DDS::ReturnCode_t instance_must_exist(
-    const char* const method_name,
-    AbstractSample_rch& sample,
-    DDS::InstanceHandle_t& instance_handle,
-    bool remove = false);
 
   friend class ::DDS_TEST; // allows tests to get at privates
 

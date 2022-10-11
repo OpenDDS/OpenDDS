@@ -10,6 +10,7 @@
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 #include <dds/DdsDynamicDataC.h>
+#include <dds/DCPS/XTypes/DynamicTypeImpl.h>
 #include <dds/DCPS/FilterEvaluator.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -20,13 +21,27 @@ namespace XTypes {
 template <typename T>
 class DynamicDataAdapter : public DDS::DynamicData {
 public:
-  DynamicDataAdapter(DDS::DynamicType_ptr type,
-                    const DCPS::MetaStruct& meta_struct,
-                    const T& value)
-    : type_(DDS::DynamicType::_duplicate(type))
-    , meta_struct_(meta_struct)
-    , value_(value)
+  DynamicDataAdapter()
+    : type_(0)
+    , meta_struct_(0)
+    , value_(0)
   {}
+
+  DynamicDataAdapter(DDS::DynamicType_ptr type,
+                     const DCPS::MetaStruct& meta_struct,
+                     const T& value)
+    : type_(DDS::DynamicType::_duplicate(type))
+    , meta_struct_(&meta_struct)
+    , value_(&value)
+  {}
+
+  DynamicDataAdapter& operator=(const DynamicDataAdapter& other)
+  {
+    type_ = other.type_;
+    meta_struct_ = other.meta_struct_;
+    value_ = other.value_;
+    return *this;
+  }
 
   DDS::DynamicType_ptr type()
   {
@@ -133,7 +148,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.i_;
     return DDS::RETCODE_OK;
   }
@@ -162,7 +177,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.u_;
     return DDS::RETCODE_OK;
   }
@@ -191,7 +206,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.i_;
     return DDS::RETCODE_OK;
   }
@@ -220,7 +235,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.u_;
     return DDS::RETCODE_OK;
   }
@@ -249,7 +264,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.i_;
     return DDS::RETCODE_OK;
   }
@@ -278,7 +293,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.u_;
     return DDS::RETCODE_OK;
   }
@@ -307,7 +322,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.l_;
     return DDS::RETCODE_OK;
   }
@@ -336,7 +351,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.m_;
     return DDS::RETCODE_OK;
   }
@@ -365,7 +380,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     // FUTURE: Remove cast once float type is available.
     value = static_cast<float>(v.f_);
     return DDS::RETCODE_OK;
@@ -395,7 +410,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.f_;
     return DDS::RETCODE_OK;
   }
@@ -424,7 +439,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.ld_;
     return DDS::RETCODE_OK;
   }
@@ -453,7 +468,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.c_;
     return DDS::RETCODE_OK;
   }
@@ -508,7 +523,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = v.b_;
     return DDS::RETCODE_OK;
   }
@@ -537,7 +552,7 @@ public:
       return DDS::RETCODE_ERROR;
     }
 
-    const DCPS::Value v = meta_struct_.getValue(&value_, id);
+    const DCPS::Value v = meta_struct_->getValue(value_, id);
     value = CORBA::string_dup(v.s_);
     return DDS::RETCODE_OK;
   }
@@ -797,8 +812,8 @@ public:
 
 private:
   DDS::DynamicType_var type_;
-  const DCPS::MetaStruct& meta_struct_;
-  const T& value_;
+  const DCPS::MetaStruct* meta_struct_;
+  const T* value_;
 };
 
 } // namespace XTypes
