@@ -71,7 +71,7 @@ TypeIdentifier::TypeIdentifier(ACE_CDR::Octet kind)
 void TypeIdentifier::activate(const TypeIdentifier* other)
 {
 #define OPENDDS_BRANCH_ACTIVATE(T, N) \
-  active_ = new(N ## _) T;            \
+  active_ = new(N ## _) T();          \
   if (other) N() = other->N();        \
   break
 
@@ -300,7 +300,7 @@ AnnotationParameterValue& AnnotationParameterValue::operator=(const AnnotationPa
 void AnnotationParameterValue::activate(const AnnotationParameterValue* other)
 {
 #define OPENDDS_BRANCH_ACTIVATE(T, N) \
-  active_ = new(N ## _) T;            \
+  active_ = new(N ## _) T();          \
   if (other) N() = other->N();        \
   break
 
