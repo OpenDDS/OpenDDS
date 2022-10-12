@@ -89,11 +89,14 @@ private:
     OPENDDS_STRING name;
     bool can_multicast;
 
-    NetworkInterface() {}
+    NetworkInterface()
+      : can_multicast(false)
+    {}
+
     NetworkInterface(const OPENDDS_STRING& a_name,
                      bool a_can_multicast)
-    : name(a_name)
-    , can_multicast(a_can_multicast)
+      : name(a_name)
+      , can_multicast(a_can_multicast)
     {}
   };
 

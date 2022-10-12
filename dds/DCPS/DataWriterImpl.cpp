@@ -1490,6 +1490,10 @@ DataWriterImpl::enable()
 
   TypeSupportImpl* const typesupport =
     dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+  if (!typesupport) {
+    return DDS::RETCODE_ERROR;
+  }
+
   XTypes::TypeInformation type_info;
   typesupport->to_type_info(type_info);
 

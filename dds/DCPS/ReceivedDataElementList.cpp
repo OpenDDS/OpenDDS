@@ -308,7 +308,7 @@ bool OpenDDS::DCPS::ReceivedDataElementList::sanity_check()
 {
   OPENDDS_ASSERT(head_ == 0 || head_->previous_data_sample_ == 0);
   for (ReceivedDataElement* item = head_; item != 0; item = item->next_data_sample_) {
-    sanity_check(item);
+    OPENDDS_ASSERT(sanity_check(item));
   }
   OPENDDS_ASSERT(tail_ == 0 || tail_->next_data_sample_ == 0);
   return true;

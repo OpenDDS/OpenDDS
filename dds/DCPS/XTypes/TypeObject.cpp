@@ -272,6 +272,119 @@ TypeIdentifier makeTypeIdentifier(const TypeObject& type_object, const DCPS::Enc
   return ti;
 }
 
+AnnotationParameterValue::AnnotationParameterValue(ACE_CDR::Octet kind)
+  : kind_(kind)
+  , active_(0)
+{
+  activate();
+}
+
+AnnotationParameterValue::AnnotationParameterValue(const AnnotationParameterValue& other)
+  : kind_(other.kind_)
+  , active_(0)
+{
+  activate(&other);
+}
+
+AnnotationParameterValue& AnnotationParameterValue::operator=(const AnnotationParameterValue& other)
+{
+  if (&other == this) {
+    return *this;
+  }
+  reset();
+  kind_ = other.kind_;
+  activate(&other);
+  return *this;
+}
+
+void AnnotationParameterValue::activate(const AnnotationParameterValue* other)
+{
+#define OPENDDS_BRANCH_ACTIVATE(T, N) \
+  active_ = new(N ## _) T;            \
+  if (other) N() = other->N();        \
+  break
+
+  switch (kind_) {
+  case TK_NONE:
+    break; // no-op, no member selected
+  case TK_BOOLEAN:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Boolean, boolean_value);
+  case TK_BYTE:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Octet, byte_value);
+  case TK_INT16:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Short, int16_value);
+  case TK_INT32:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Long, int32_value);
+  case TK_INT64:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::LongLong, int64_value);
+  case TK_UINT16:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::UShort, uint16_value);
+  case TK_UINT32:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::ULong, uint32_value);
+  case TK_UINT64:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::ULongLong, uint64_value);
+  case TK_FLOAT32:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Float, float32_value);
+  case TK_FLOAT64:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Double, float64_value);
+  case TK_FLOAT128:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::LongDouble, float128_value);
+  case TK_INT8:
+  case TK_UINT8:
+    break; // no-op, no member selected
+  case TK_CHAR8:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Char, char_value);
+  case TK_CHAR16:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::WChar, wchar_value);
+  case TK_ENUM:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Long, enumerated_value);
+  case TK_STRING8:
+    OPENDDS_BRANCH_ACTIVATE(OPENDDS_STRING, string8_value);
+  case TK_STRING16:
+    OPENDDS_BRANCH_ACTIVATE(OPENDDS_WSTRING, string16_value);
+  default:
+    OPENDDS_BRANCH_ACTIVATE(ExtendedAnnotationParameterValue, extended_value);
+  }
+}
+
+void AnnotationParameterValue::reset()
+{
+  using DCPS::String;
+  using DCPS::WString;
+
+  if (!active_) {
+    return;
+  }
+  #define OPENDDS_BRANCH_RESET(T) static_cast<T*>(active_)->~T(); break
+  switch (kind_) {
+  case TK_NONE:
+    break; // no-op, no member selected
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+  case TK_CHAR16:
+  case TK_ENUM:
+    break; // no-op, no member selected
+  case TK_STRING8:
+    OPENDDS_BRANCH_RESET(String);
+  case TK_STRING16:
+    OPENDDS_BRANCH_RESET(WString);
+  default:
+    OPENDDS_BRANCH_RESET(ExtendedAnnotationParameterValue);
+  }
+}
+
 ACE_CDR::ULong hash_member_name_to_id(const OPENDDS_STRING& name)
 {
   ACE_CDR::ULong name_hash;
@@ -3363,78 +3476,78 @@ bool operator>>(Serializer& strm, XTypes::MinimalUnionMember& stru)
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::AnnotationParameterValue& uni)
 {
-  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind));
-  switch (uni.kind) {
+  primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.kind()));
+  switch (uni.kind()) {
   case XTypes::TK_BOOLEAN: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(uni.boolean_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_boolean(uni.boolean_value()));
     break;
   }
   case XTypes::TK_BYTE: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.byte_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_octet(uni.byte_value()));
     break;
   }
   case XTypes::TK_INT16: {
-    primitive_serialized_size(encoding, size, uni.int16_value);
+    primitive_serialized_size(encoding, size, uni.int16_value());
     break;
   }
   case XTypes::TK_UINT16: {
-    primitive_serialized_size(encoding, size, uni.uint16_value);
+    primitive_serialized_size(encoding, size, uni.uint16_value());
     break;
   }
   case XTypes::TK_INT32: {
-    primitive_serialized_size(encoding, size, uni.int32_value);
+    primitive_serialized_size(encoding, size, uni.int32_value());
     break;
   }
   case XTypes::TK_UINT32: {
-    primitive_serialized_size(encoding, size, uni.uint32_value);
+    primitive_serialized_size(encoding, size, uni.uint32_value());
     break;
   }
   case XTypes::TK_INT64: {
-    primitive_serialized_size(encoding, size, uni.int64_value);
+    primitive_serialized_size(encoding, size, uni.int64_value());
     break;
   }
   case XTypes::TK_UINT64: {
-    primitive_serialized_size(encoding, size, uni.uint64_value);
+    primitive_serialized_size(encoding, size, uni.uint64_value());
     break;
   }
   case XTypes::TK_FLOAT32: {
-    primitive_serialized_size(encoding, size, uni.float32_value);
+    primitive_serialized_size(encoding, size, uni.float32_value());
     break;
   }
   case XTypes::TK_FLOAT64: {
-    primitive_serialized_size(encoding, size, uni.float64_value);
+    primitive_serialized_size(encoding, size, uni.float64_value());
     break;
   }
   case XTypes::TK_FLOAT128: {
-    primitive_serialized_size(encoding, size, ACE_CDR::LongDouble());
+    primitive_serialized_size(encoding, size, uni.float128_value());
     break;
   }
   case XTypes::TK_CHAR8: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_char(uni.char_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_char(uni.char_value()));
     break;
   }
   case XTypes::TK_CHAR16: {
-    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_wchar(uni.wchar_value));
+    primitive_serialized_size(encoding, size, ACE_OutputCDR::from_wchar(uni.wchar_value()));
     break;
   }
   case XTypes::TK_ENUM: {
-    primitive_serialized_size(encoding, size, uni.enumerated_value);
+    primitive_serialized_size(encoding, size, uni.enumerated_value());
     break;
   }
   case XTypes::TK_STRING8: {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(uni.string8_value.c_str()) + 1;
+    size += ACE_OS::strlen(uni.string8_value().c_str()) + 1;
     break;
   }
   case XTypes::TK_STRING16: {
 #ifdef DDS_HAS_WCHAR
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(uni.string16_value.c_str()) * DCPS::char16_cdr_size;
+    size += ACE_OS::strlen(uni.string16_value().c_str()) * DCPS::char16_cdr_size;
 #endif
     break;
   }
   default: {
-    serialized_size(encoding, size, uni.extended_value);
+    serialized_size(encoding, size, uni.extended_value());
     break;
   }
   }
@@ -3442,64 +3555,64 @@ void serialized_size(const Encoding& encoding, size_t& size,
 
 bool operator<<(Serializer& strm, const XTypes::AnnotationParameterValue& uni)
 {
-  if (!(strm << ACE_OutputCDR::from_octet(uni.kind))) {
+  if (!(strm << ACE_OutputCDR::from_octet(uni.kind()))) {
     return false;
   }
-  switch (uni.kind) {
+  switch (uni.kind()) {
   case XTypes::TK_BOOLEAN: {
-    return (strm << ACE_OutputCDR::from_boolean(uni.boolean_value));
+    return (strm << ACE_OutputCDR::from_boolean(uni.boolean_value()));
   }
   case XTypes::TK_BYTE: {
-    return (strm << ACE_OutputCDR::from_octet(uni.byte_value));
+    return (strm << ACE_OutputCDR::from_octet(uni.byte_value()));
   }
   case XTypes::TK_INT16: {
-    return (strm << uni.int16_value);
+    return (strm << uni.int16_value());
   }
   case XTypes::TK_UINT16: {
-    return (strm << uni.uint16_value);
+    return (strm << uni.uint16_value());
   }
   case XTypes::TK_INT32: {
-    return (strm << uni.int32_value);
+    return (strm << uni.int32_value());
   }
   case XTypes::TK_UINT32: {
-    return (strm << uni.uint32_value);
+    return (strm << uni.uint32_value());
   }
   case XTypes::TK_INT64: {
-    return (strm << uni.int64_value);
+    return (strm << uni.int64_value());
   }
   case XTypes::TK_UINT64: {
-    return (strm << uni.uint64_value);
+    return (strm << uni.uint64_value());
   }
   case XTypes::TK_FLOAT32: {
-    return (strm << uni.float32_value);
+    return (strm << uni.float32_value());
   }
   case XTypes::TK_FLOAT64: {
-    return (strm << uni.float64_value);
+    return (strm << uni.float64_value());
   }
   case XTypes::TK_FLOAT128: {
-    return (strm << uni.float128_value);
+    return (strm << uni.float128_value());
   }
   case XTypes::TK_CHAR8: {
-    return (strm << ACE_OutputCDR::from_char(uni.char_value));
+    return (strm << ACE_OutputCDR::from_char(uni.char_value()));
   }
   case XTypes::TK_CHAR16: {
-    return (strm << ACE_OutputCDR::from_wchar(uni.wchar_value));
+    return (strm << ACE_OutputCDR::from_wchar(uni.wchar_value()));
   }
   case XTypes::TK_ENUM: {
-    return (strm << uni.enumerated_value);
+    return (strm << uni.enumerated_value());
   }
   case XTypes::TK_STRING8: {
-    return (strm << Serializer::FromBoundedString<char>(uni.string8_value, 128));
+    return (strm << Serializer::FromBoundedString<char>(uni.string8_value(), 128));
   }
   case XTypes::TK_STRING16: {
 #ifdef DDS_HAS_WCHAR
-    return (strm << Serializer::FromBoundedString<wchar_t>(uni.string16_value, 128));
+    return (strm << Serializer::FromBoundedString<wchar_t>(uni.string16_value(), 128));
 #else
     return false;
 #endif
   }
   default: {
-    return (strm << uni.extended_value);
+    return (strm << uni.extended_value());
   }
   }
 }
@@ -3510,162 +3623,46 @@ bool operator>>(Serializer& strm, XTypes::AnnotationParameterValue& uni)
   if (!(strm >> ACE_InputCDR::to_octet(kind))) {
     return false;
   }
+  uni = XTypes::AnnotationParameterValue(kind);
+
   switch (kind) {
-  case XTypes::TK_BOOLEAN: {
-    ACE_CDR::Boolean tmp;
-    if (strm >> ACE_InputCDR::to_boolean(tmp)) {
-      uni.boolean_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_BYTE: {
-    ACE_CDR::Octet tmp;
-    if (strm >> ACE_InputCDR::to_octet(tmp)) {
-      uni.byte_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_INT16: {
-    ACE_CDR::Short tmp;
-    if (strm >> tmp) {
-      uni.int16_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_UINT16: {
-    ACE_CDR::UShort tmp;
-    if (strm >> tmp) {
-      uni.uint16_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_INT32: {
-    ACE_CDR::Long tmp;
-    if (strm >> tmp) {
-      uni.int32_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_UINT32: {
-    ACE_CDR::ULong tmp;
-    if (strm >> tmp) {
-      uni.uint32_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_INT64: {
-    ACE_CDR::LongLong tmp;
-    if (strm >> tmp) {
-      uni.int64_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_UINT64: {
-    ACE_CDR::ULongLong tmp;
-    if (strm >> tmp) {
-      uni.uint64_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_FLOAT32: {
-    ACE_CDR::Float tmp;
-    if (strm >> tmp) {
-      uni.float32_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_FLOAT64: {
-    ACE_CDR::Double tmp;
-    if (strm >> tmp) {
-      uni.float64_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_FLOAT128: {
-    ACE_CDR::LongDouble tmp;
-    if (strm >> tmp) {
-      uni.float128_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_CHAR8: {
-    ACE_CDR::Char tmp;
-    if (strm >> ACE_InputCDR::to_char(tmp)) {
-      uni.char_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_CHAR16: {
-    ACE_CDR::WChar tmp;
-    if (strm >> ACE_InputCDR::to_wchar(tmp)) {
-      uni.wchar_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_ENUM: {
-    ACE_CDR::Long tmp;
-    if (strm >> tmp) {
-      uni.enumerated_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_STRING8: {
-    OPENDDS_STRING tmp;
-    if (strm >> Serializer::ToBoundedString<char>(tmp, 128)) {
-      uni.string8_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
-  case XTypes::TK_STRING16: {
+  case XTypes::TK_BOOLEAN:
+    return (strm >> ACE_InputCDR::to_boolean(uni.boolean_value()));
+  case XTypes::TK_BYTE:
+    return (strm >> ACE_InputCDR::to_octet(uni.byte_value()));
+  case XTypes::TK_INT16:
+    return (strm >> uni.int16_value());
+  case XTypes::TK_UINT16:
+    return (strm >> uni.uint16_value());
+  case XTypes::TK_INT32:
+    return (strm >> uni.int32_value());
+  case XTypes::TK_UINT32:
+    return (strm >> uni.uint32_value());
+  case XTypes::TK_INT64:
+    return (strm >> uni.int64_value());
+  case XTypes::TK_UINT64:
+    return (strm >> uni.uint64_value());
+  case XTypes::TK_FLOAT32:
+    return (strm >> uni.float32_value());
+  case XTypes::TK_FLOAT64:
+    return (strm >> uni.float64_value());
+  case XTypes::TK_FLOAT128:
+    return (strm >> uni.float128_value());
+  case XTypes::TK_CHAR8:
+    return (strm >> ACE_InputCDR::to_char(uni.char_value()));
+  case XTypes::TK_CHAR16:
+    return (strm >> ACE_InputCDR::to_wchar(uni.wchar_value()));
+  case XTypes::TK_ENUM:
+    return (strm >> uni.enumerated_value());
+  case XTypes::TK_STRING8:
+    return (strm >> Serializer::ToBoundedString<char>(uni.string8_value(), 128));
+  case XTypes::TK_STRING16:
 #ifdef DDS_HAS_WCHAR
-    OPENDDS_WSTRING tmp;
-    if (strm >> Serializer::ToBoundedString<wchar_t>(tmp, 128)) {
-      uni.string16_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
+    return (strm >> Serializer::ToBoundedString<wchar_t>(uni.string16_value(), 128));
 #endif
     return false;
-  }
-  default: {
-    XTypes::ExtendedAnnotationParameterValue tmp;
-    if (strm >> tmp) {
-      uni.extended_value = tmp;
-      uni.kind = kind;
-      return true;
-    }
-    return false;
-  }
+  default:
+    return (strm >> uni.extended_value());
   }
 }
 

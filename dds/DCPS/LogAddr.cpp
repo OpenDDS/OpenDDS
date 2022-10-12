@@ -3,6 +3,7 @@
 #include "LogAddr.h"
 #include "Definitions.h"
 #include "SafetyProfileStreams.h"
+#include "debug.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -25,7 +26,10 @@ const String LogAddr::port(const ACE_INET_Addr& addr)
 const String LogAddr::host(const ACE_INET_Addr& addr)
 {
   char s[BufSize] = {'\0'};
-  addr.get_host_name(s, BufSize);
+  if (addr.get_host_name(s, BufSize) < 0 && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LogAddr::host: "
+               "could not get hostname: %m\n"));
+  }
   return String(s);
 }
 
