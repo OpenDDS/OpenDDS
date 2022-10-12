@@ -12404,7 +12404,7 @@ jobs:
         echo "OPENSSL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.OPENSSL_COMMIT }}
