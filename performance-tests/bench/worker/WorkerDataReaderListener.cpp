@@ -424,7 +424,9 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 
     // if we didn't meet the expected sample count, add difference to missing sample count
     if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
-      missing_data_count += expected_sample_count_ - sample_count_;
+      if (!expected_per_writer_sample_count_) {
+        missing_data_count += expected_sample_count_ - sample_count_;
+      }
       missing_data_details << " ERROR Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
     }
 
