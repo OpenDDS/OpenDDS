@@ -778,6 +778,10 @@ bool operator==(const AnnotationParameterValue& lhs, const AnnotationParameterVa
     return lhs.boolean_value() == rhs.boolean_value();
   case TK_BYTE:
     return lhs.byte_value() == rhs.byte_value();
+  case TK_INT8:
+    return lhs.int8_value() == rhs.int8_value();
+  case TK_UINT8:
+    return lhs.uint8_value() == rhs.uint8_value();
   case TK_INT16:
     return lhs.int16_value() == rhs.int16_value();
   case TK_UINT16:

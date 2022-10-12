@@ -311,16 +311,20 @@ void AnnotationParameterValue::activate(const AnnotationParameterValue* other)
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Boolean, boolean_value);
   case TK_BYTE:
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Octet, byte_value);
+  case TK_INT8:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Char, int8_value);
+  case TK_UINT8:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Octet, uint8_value);
   case TK_INT16:
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Short, int16_value);
-  case TK_INT32:
-    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Long, int32_value);
-  case TK_INT64:
-    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::LongLong, int64_value);
   case TK_UINT16:
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::UShort, uint16_value);
+  case TK_INT32:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Long, int32_value);
   case TK_UINT32:
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::ULong, uint32_value);
+  case TK_INT64:
+    OPENDDS_BRANCH_ACTIVATE(ACE_CDR::LongLong, int64_value);
   case TK_UINT64:
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::ULongLong, uint64_value);
   case TK_FLOAT32:
@@ -329,9 +333,6 @@ void AnnotationParameterValue::activate(const AnnotationParameterValue* other)
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Double, float64_value);
   case TK_FLOAT128:
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::LongDouble, float128_value);
-  case TK_INT8:
-  case TK_UINT8:
-    break; // no-op, no member selected
   case TK_CHAR8:
     OPENDDS_BRANCH_ACTIVATE(ACE_CDR::Char, char_value);
   case TK_CHAR16:
@@ -361,21 +362,21 @@ void AnnotationParameterValue::reset()
     break; // no-op, no member selected
   case TK_BOOLEAN:
   case TK_BYTE:
+  case TK_INT8:
+  case TK_UINT8:
   case TK_INT16:
-  case TK_INT32:
-  case TK_INT64:
   case TK_UINT16:
+  case TK_INT32:
   case TK_UINT32:
+  case TK_INT64:
   case TK_UINT64:
   case TK_FLOAT32:
   case TK_FLOAT64:
   case TK_FLOAT128:
-  case TK_INT8:
-  case TK_UINT8:
   case TK_CHAR8:
   case TK_CHAR16:
   case TK_ENUM:
-    break; // no-op, no member selected
+    break; // primitive type, no destructor.
   case TK_STRING8:
     OPENDDS_BRANCH_RESET(String);
   case TK_STRING16:
