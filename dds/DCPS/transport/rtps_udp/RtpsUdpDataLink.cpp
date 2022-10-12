@@ -1962,9 +1962,6 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !is_final, meta_submessages, cumulative_bits_added);
-    } else if (link->config().responsive_mode_) {
-      gather_preassociation_acknack_i(meta_submessages, writer);
-      ++cumulative_bits_added;
     }
     if (cumulative_bits_added && link->config().count_messages()) {
       ACE_Guard<ACE_Thread_Mutex> tsg(link->transport_statistics_mutex_);
