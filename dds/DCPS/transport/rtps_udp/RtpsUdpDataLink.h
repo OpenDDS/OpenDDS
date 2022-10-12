@@ -732,7 +732,7 @@ private:
     BundleVec& bundles,
     CountKeeper& counts);
 
-  void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
+  void queue_submessages(MetaSubmessageVec& meta_submessages);
   void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long current);
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 

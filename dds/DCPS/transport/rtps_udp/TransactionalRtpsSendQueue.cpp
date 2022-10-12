@@ -10,10 +10,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransactionalRtpsSendQueue::TransactionalRtpsSendQueue(ThreadStatusManager& thread_status_manager)
-  : condition_variable_(mutex_)
+TransactionalRtpsSendQueue::TransactionalRtpsSendQueue()
+  : ready_to_send_(false)
   , active_transaction_count_(0)
-  , thread_status_manager_(thread_status_manager)
 {
 }
 
@@ -39,36 +38,28 @@ void TransactionalRtpsSendQueue::begin_transaction()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ++active_transaction_count_;
-  condition_variable_.notify_one();
 }
 
-bool TransactionalRtpsSendQueue::end_transaction()
+void TransactionalRtpsSendQueue::ready_to_send()
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  --active_transaction_count_;
-  condition_variable_.notify_one();
-  return !queue_.empty();
+  ready_to_send_ = true;
 }
 
-size_t TransactionalRtpsSendQueue::active_transaction_count() const
-{
-  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  return active_transaction_count_;
-}
 
-void TransactionalRtpsSendQueue::swap(MetaSubmessageVec& vec)
+void TransactionalRtpsSendQueue::end_transaction(MetaSubmessageVec& vec)
 {
   vec.clear();
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  while (active_transaction_count_ != 0) {
-    condition_variable_.wait(thread_status_manager_);
+  --active_transaction_count_;
+  if (active_transaction_count_ == 0 && ready_to_send_) {
+    queue_.swap(vec);
+    ready_to_send_ = false;
   }
-
-  queue_.swap(vec);
 }
 
-void TransactionalRtpsSendQueue::purge(const RepoId& local, const RepoId& remote)
+void TransactionalRtpsSendQueue::ignore(const RepoId& local, const RepoId& remote)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (MetaSubmessageVec::iterator pos = queue_.begin(), limit = queue_.end(); pos != limit; ++pos) {
@@ -78,7 +69,7 @@ void TransactionalRtpsSendQueue::purge(const RepoId& local, const RepoId& remote
   }
 }
 
-void TransactionalRtpsSendQueue::purge_remote(const RepoId& id)
+void TransactionalRtpsSendQueue::ignore_remote(const RepoId& id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (MetaSubmessageVec::iterator pos = queue_.begin(), limit = queue_.end(); pos != limit; ++pos) {
@@ -88,7 +79,7 @@ void TransactionalRtpsSendQueue::purge_remote(const RepoId& id)
   }
 }
 
-void TransactionalRtpsSendQueue::purge_local(const RepoId& id)
+void TransactionalRtpsSendQueue::ignore_local(const RepoId& id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   for (MetaSubmessageVec::iterator pos = queue_.begin(), limit = queue_.end(); pos != limit; ++pos) {

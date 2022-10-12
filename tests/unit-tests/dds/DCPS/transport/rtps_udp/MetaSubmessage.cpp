@@ -9,107 +9,10 @@
 
 #include <dds/DCPS/transport/rtps_udp/MetaSubmessage.h>
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
-#include <dds/DCPS/RTPS/MessageTypes.h>
+#include "util.h"
 
 using namespace OpenDDS::DCPS;
-using namespace OpenDDS::RTPS;
-
-namespace
-{
-
-MetaSubmessage create_heartbeat(const RepoId& from, const RepoId& dst, ACE_INT64 first, ACE_INT64 last, ACE_INT32 count, bool ignore)
-{
-  MetaSubmessage meta_submessage;
-
-  const HeartBeatSubmessage heartbeat =
-  {
-    {
-      HEARTBEAT,
-      FLAG_E,
-      HEARTBEAT_SZ
-    },
-    dst.entityId,
-    from.entityId,
-    to_rtps_seqnum(SequenceNumber(first)),
-    to_rtps_seqnum(SequenceNumber(last)),
-    { count }
-  };
-
-  meta_submessage.src_guid_ = from;
-  meta_submessage.dst_guid_ = dst;
-  meta_submessage.sm_.heartbeat_sm(heartbeat);
-  meta_submessage.ignore_ = ignore;
-  return meta_submessage;
-}
-
-MetaSubmessage create_acknack(const RepoId& from, const RepoId& dst, ACE_INT64 base, ACE_INT32 count, bool ignore)
-{
-  MetaSubmessage meta_submessage;
-
-  LongSeq8 bitmap;
-
-  const AckNackSubmessage acknack =
-  {
-    {
-      ACKNACK,
-      FLAG_E,
-      0 /*length*/
-    },
-    from.entityId,
-    dst.entityId,
-    {
-      to_rtps_seqnum(base),
-      0 /* num_bits */,
-      bitmap
-    },
-    {
-      count
-    }
-  };
-
-  meta_submessage.src_guid_ = from;
-  meta_submessage.dst_guid_ = dst;
-  meta_submessage.sm_.acknack_sm(acknack);
-  meta_submessage.ignore_ = ignore;
-  return meta_submessage;
-}
-
-MetaSubmessage create_gap(const RepoId& from, const RepoId& dst, ACE_INT64 start, ACE_INT64 base)
-{
-  MetaSubmessage meta_submessage;
-
-  LongSeq8 bitmap;
-
-  const GapSubmessage gap =
-  {
-    {
-      GAP,
-      FLAG_E,
-      0 /*length*/
-    },
-    from.entityId,
-    dst.entityId,
-    to_rtps_seqnum(start),
-    {
-      to_rtps_seqnum(base),
-      0 /* num_bits */,
-      bitmap
-    }
-  };
-
-  meta_submessage.src_guid_ = from;
-  meta_submessage.dst_guid_ = dst;
-  meta_submessage.sm_.gap_sm(gap);
-  return meta_submessage;
-}
-
-const RepoId w1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, 0x02 } };
-const RepoId w2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, 0x02 } };
-const RepoId r1 = { { 0x01 }, { { 0x00, 0x00, 0x00 }, 0x07 } };
-const RepoId r2 = { { 0x01 }, { { 0x01, 0x00, 0x00 }, 0x07 } };
-
-}
+using namespace test;
 
 TEST(dds_DCPS_transport_rtps_udp_MetaSubmessage, DefaultConstructor)
 {
@@ -196,5 +99,5 @@ TEST(dds_DCPS_transport_rtps_udp_MetaSubmessage, Merging)
 
   const size_t marked = dedup(actual);
   EXPECT_EQ(marked, 10u);
-  EXPECT_EQ(actual, expected);
+  EXPECT_TRUE(meta_submessage_vec_equal(actual, expected));
 }

@@ -86,7 +86,6 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , db_lock_pool_(new DataBlockLockPool(static_cast<unsigned long>(TheServiceParticipant->n_chunks())))
   , multi_buff_(this, config.nak_depth_)
-  , sq_(TheServiceParticipant->get_thread_status_manager())
   , flush_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::flush_send_queue)))
   , best_effort_heartbeat_count_(0)
   , heartbeat_(make_rch<PeriodicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::send_heartbeats)))
@@ -562,7 +561,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             const NetworkAddress& last_addr_hint,
                             bool requires_inline_qos)
 {
-  sq_.purge(local_id, remote_id);
+  sq_.ignore(local_id, remote_id);
 
   update_locators(remote_id, unicast_addresses, multicast_addresses, requires_inline_qos, true);
   if (last_addr_hint != NetworkAddress()) {
@@ -652,7 +651,7 @@ RtpsUdpDataLink::disassociated(const RepoId& local_id,
 {
   release_reservations_i(remote_id, local_id);
   remove_locator_and_bundling_cache(remote_id);
-  sq_.purge_remote(remote_id);
+  sq_.ignore_remote(remote_id);
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
@@ -809,7 +808,7 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
       }
     }
   }
-  sq_.purge_local(localId);
+  sq_.ignore_local(localId);
 }
 
 void
@@ -2634,11 +2633,10 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
 void
 RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
 {
-  ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
-  sq_.swap(fsq_vec_);
-  dedup(fsq_vec_);
-  bundle_and_send_submessages(fsq_vec_);
-  fsq_vec_.clear();
+  sq_.ready_to_send();
+  sq_.begin_transaction();
+
+  disable_response_queue();
 }
 
 void
@@ -2650,20 +2648,22 @@ RtpsUdpDataLink::enable_response_queue()
 void
 RtpsUdpDataLink::disable_response_queue()
 {
-  if (sq_.end_transaction()) {
-    flush_send_queue_sporadic_->schedule(config().send_delay_);
-  }
+  ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
+  sq_.end_transaction(fsq_vec_);
+  dedup(fsq_vec_);
+  bundle_and_send_submessages(fsq_vec_);
+  fsq_vec_.clear();
 }
 
 void
-RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in, double scale)
+RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in)
 {
   if (in.empty()) {
     return;
   }
 
   if (sq_.enqueue(in)) {
-    flush_send_queue_sporadic_->schedule(config().send_delay_ * scale);
+    flush_send_queue_sporadic_->schedule(config().send_delay_);
   }
 }
 

@@ -26,8 +26,6 @@ struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
     dst_guid_ = GUID_UNKNOWN;
   }
 
-  bool operator==(const MetaSubmessage& other) const;
-
   RepoId src_guid_;
   RepoId dst_guid_;
   RTPS::Submessage sm_;
