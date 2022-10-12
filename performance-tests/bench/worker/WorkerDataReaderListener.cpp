@@ -25,6 +25,13 @@ WorkerDataReaderListener::WorkerDataReaderListener(const Builder::PropertySeq& p
     expected_sample_count = static_cast<size_t>(expected_sample_count_prop->value.ull_prop());
   }
   expected_sample_count_ = expected_sample_count;
+
+  size_t expected_per_writer_sample_count = 0;
+  auto expected_per_writer_sample_count_prop = get_property(properties, "expected_per_writer_sample_count", Builder::PVK_ULL);
+  if (expected_per_writer_sample_count_prop) {
+    expected_per_writer_sample_count = static_cast<size_t>(expected_per_writer_sample_count_prop->value.ull_prop());
+  }
+  expected_per_writer_sample_count_ = expected_per_writer_sample_count;
 }
 
 WorkerDataReaderListener::~WorkerDataReaderListener()
@@ -134,7 +141,7 @@ WorkerDataReaderListener::on_valid_data(const Data& data, const DDS::SampleInfo&
     if (durable_ && (history_keep_all_ || history_depth_ > data.msg_count)) {
       ws.data_received_.insert(0);
     }
-    if (reliable_ && expected_sample_count_) {
+    if (reliable_ && (expected_sample_count_ || expected_per_writer_sample_count_)) {
       ws.data_received_.insert(0);
     }
     ws.first_data_time_ = data.sent_time;
@@ -386,6 +393,11 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     // missing data count / details
     for (auto it = writer_state_map_.begin(); it != writer_state_map_.end(); ++it) {
       new_writer = true;
+      bool inserted_expected = false;
+      if (expected_per_writer_sample_count_ && static_cast<size_t>(it->second.data_received_.high().getValue()) < expected_per_writer_sample_count_) {
+        it->second.data_received_.insert(expected_per_writer_sample_count_ + 1);
+        inserted_expected = true;
+      }
       if (it->second.data_received_.disjoint()) {
         if (missing_data_details.str().empty()) {
           missing_data_details << "ERROR :: Topic Name: " << datareader_->get_topic_name() << ", Reliable: " << (reliable_ ? "true" : "false") << ", Durable: " << (durable_ ? "true" : "false") << std::flush;
@@ -395,7 +407,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
           missing_data_count += static_cast<ptrdiff_t>(it2->second.getValue() - (it2->first.getValue() - 1)); // update count
           if (new_writer) {
             uint64_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
-            missing_data_details << " [PH: " << it->first << " (" << low << "-" << it->second.data_received_.high().getValue() << ")] " << std::flush;
+            uint64_t high = inserted_expected ? it->second.data_received_.high().getValue() - 1 : it->second.data_received_.high().getValue();
+            missing_data_details << " [PH: " << it->first << " (" << low << "-" << high << ")] " << std::flush;
             new_writer = false;
           } else {
             missing_data_details << ", " << std::flush;
@@ -410,7 +423,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
     }
 
     // if we didn't meet the expected sample count, add difference to missing sample count
-    if (!reliable_ && expected_sample_count_ && sample_count_ < expected_sample_count_) {
+    if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
       missing_data_count += expected_sample_count_ - sample_count_;
       missing_data_details << " ERROR Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
     }
