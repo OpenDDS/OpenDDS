@@ -2934,7 +2934,7 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& source_timestamp)
 {
-#if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
+#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   DDS::DynamicData* const dynamic_data = sample->get_dynamic_data(dynamic_type_);
   DDS::Security::SecurityException ex;
 
@@ -3065,7 +3065,7 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
   handle = lookup_instance(sample);
   if (handle == DDS::HANDLE_NIL || !get_handle_instance(handle)) {
     AbstractSample_rch copy = sample->copy(/* read_only = */ true, /* key_only = */ true);
-#if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
+#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     DDS::DynamicData* const dynamic_data = copy->get_dynamic_data(dynamic_type_);
     DDS::Security::SecurityException ex;
 

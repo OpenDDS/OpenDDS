@@ -66,7 +66,9 @@ public:
   }
   virtual DDS::DynamicData* get_dynamic_data(DDS::DynamicType_ptr type) = 0;
   virtual const void* native_data() = 0;
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const = 0;
+#endif
 
 protected:
   const bool owns_data_;
@@ -89,37 +91,47 @@ public:
   typedef RcHandle<NativeSample<NativeType> > Rch;
   typedef KeyOnly<const NativeType> KeyOnlyType;
   typedef KeyOnly<NativeType> MutableKeyOnlyType;
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   typedef XTypes::DynamicDataAdapter<NativeType> DynamicDataImpl;
+#endif
 
   NativeSample(const NativeType& data, bool key_only = false)
   : AbstractSample(/* owns_data = */ false, /* read_only = */ true, key_only)
   , data_(&data)
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   , dynamic_data_(0, getMetaStruct<NativeType>(), data)
   , dynamic_data_initialized_(false)
+#endif
   {
   }
 
   NativeSample(const NativeType* data, bool key_only = false)
   : AbstractSample(/* owns_data = */ true, /* read_only = */ true, key_only)
   , data_(data)
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   , dynamic_data_(0, getMetaStruct<NativeType>(), *data)
   , dynamic_data_initialized_(false)
+#endif
   {
   }
 
   NativeSample(NativeType& data, bool key_only = false)
   : AbstractSample(/* owns_data = */ false, /* read_only = */ false, key_only)
   , data_(&data)
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   , dynamic_data_(0, getMetaStruct<NativeType>(), data)
   , dynamic_data_initialized_(false)
+#endif
   {
   }
 
   NativeSample(NativeType* data, bool key_only = false)
   : AbstractSample(/* owns_data = */ true, /* read_only = */ false, key_only)
   , data_(data)
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   , dynamic_data_(0, getMetaStruct<NativeType>(), *data)
   , dynamic_data_initialized_(false)
+#endif
   {
   }
 
@@ -206,11 +218,15 @@ public:
 
   DDS::DynamicData* get_dynamic_data(DDS::DynamicType_ptr type)
   {
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     if (type && !dynamic_data_initialized_) {
       dynamic_data_ = DynamicDataImpl(type, getMetaStruct<NativeType>(), *data_);
       dynamic_data_initialized_ = true;
     }
     return &dynamic_data_;
+#else
+    return 0;
+#endif
   }
 
   const void* native_data()
@@ -218,15 +234,19 @@ public:
     return data_;
   }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const
   {
     return evaluator.eval(*data_, params);
   }
+#endif
 
 private:
   const NativeType* data_;
+#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
   DynamicDataImpl dynamic_data_;
   bool dynamic_data_initialized_;
+#endif
 };
 
 } // namespace DCPS

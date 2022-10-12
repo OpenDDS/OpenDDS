@@ -83,7 +83,8 @@ public:
                                       const Test::Simple& instance_data,
                                       bool key_only = false)
   {
-    return dw->serialize_sample(instance_data, key_only);
+    AbstractSample_rch sample = dw->make_sample(instance_data, key_only);
+    return dw->serialize_sample(sample);
   }
 
   void prep_delayed_deliver(WriteDataContainer* wdc, DataSampleElement* element)
