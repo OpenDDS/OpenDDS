@@ -728,7 +728,7 @@ namespace XTypes {
     void* active_;
     union {
       ACE_CDR::ULongLong max_alignment;
-#define OPENDDS_UNION_MEMBER(T, N) char N ## _[sizeof(T)]
+#define OPENDDS_UNION_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
       OPENDDS_UNION_MEMBER(StringSTypeDefn, string_sdefn);
       OPENDDS_UNION_MEMBER(StringLTypeDefn, string_ldefn);
       OPENDDS_UNION_MEMBER(PlainSequenceSElemDefn, seq_sdefn);
@@ -920,7 +920,7 @@ namespace XTypes {
     ACE_CDR::Octet kind_;
     void* active_;
     union {
-#define OPENDDS_UNION_MEMBER(T, N) char N ## _[sizeof(T)]
+#define OPENDDS_UNION_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
       OPENDDS_UNION_MEMBER(ACE_CDR::Boolean, boolean_value);
       OPENDDS_UNION_MEMBER(ACE_CDR::Octet, byte_value);
       OPENDDS_UNION_MEMBER(ACE_CDR::Char, int8_value);
