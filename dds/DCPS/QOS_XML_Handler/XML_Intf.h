@@ -101,7 +101,7 @@ namespace DCPS {
       if (profile) {
         return *profile;
       } else {
-        return ::dds::qosProfile("");
+        return ::dds::qosProfile(ACE_TEXT(""));
       }
     }
 
