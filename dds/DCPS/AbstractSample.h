@@ -23,7 +23,7 @@ class AbstractSample;
 typedef RcHandle<AbstractSample> AbstractSample_rch;
 
 /**
- * Represents a sample that can either be an instance of a C++ generated Type
+ * Represents a sample that can either be an instance of a C++ generated type
  * from opendds_idl or a DynamicData. This is meant to be used by
  * DataReaderImpl and DataWriterImpl.
  */
@@ -64,7 +64,9 @@ public:
   {
     return copy(read_only, key_only_);
   }
+#ifndef OPENDDS_SAFETY_PROFILE
   virtual DDS::DynamicData* get_dynamic_data(DDS::DynamicType_ptr type) = 0;
+#endif
   virtual const void* native_data() = 0;
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const = 0;
@@ -216,18 +218,20 @@ public:
       read_only ? const_cast<const NativeType*>(new_data) : new_data, key_only));
   }
 
+#ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicData* get_dynamic_data(DDS::DynamicType_ptr type)
   {
-#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     if (type && !dynamic_data_initialized_) {
       dynamic_data_ = DynamicDataImpl(type, getMetaStruct<NativeType>(), *data_);
       dynamic_data_initialized_ = true;
     }
     return &dynamic_data_;
-#else
+#  else
     return 0;
-#endif
+#  endif
   }
+#endif
 
   const void* native_data()
   {
