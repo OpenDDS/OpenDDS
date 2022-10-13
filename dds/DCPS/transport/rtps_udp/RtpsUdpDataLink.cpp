@@ -2655,7 +2655,7 @@ RtpsUdpDataLink::flush_send_queue_i()
   for (size_t idx = 0; idx != fsq_vec_size_; ++idx) {
     dedup(fsq_vec_[idx]);
     bundle_and_send_submessages(fsq_vec_[idx]);
-    fsq_vec_.clear();
+    fsq_vec_[idx].clear();
   }
   fsq_vec_size_ = 0;
 }
