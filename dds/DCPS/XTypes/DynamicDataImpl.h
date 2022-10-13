@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITE_IMPL_H
-#define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITE_IMPL_H
+#ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
+#define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
@@ -397,23 +397,23 @@ private:
 
   // Contain data for an instance of a basic type.
   struct SingleValue {
-    SingleValue(CORBA::Long i32);
-    SingleValue(CORBA::ULong ui32);
-    SingleValue(CORBA::Int8 i8);
-    SingleValue(CORBA::UInt8 ui8);
-    SingleValue(CORBA::Short i16);
-    SingleValue(CORBA::UShort ui16);
-    SingleValue(CORBA::LongLong i64);
-    SingleValue(CORBA::ULongLong ui64);
-    SingleValue(CORBA::Float f32);
-    SingleValue(CORBA::Double f64);
-    SingleValue(CORBA::LongDouble f128);
-    SingleValue(CORBA::Char c8);
+    SingleValue(CORBA::Long int32);
+    SingleValue(CORBA::ULong uint32);
+    SingleValue(CORBA::Int8 int8);
+    SingleValue(CORBA::UInt8 uint8);
+    SingleValue(CORBA::Short int16);
+    SingleValue(CORBA::UShort uint16);
+    SingleValue(CORBA::LongLong int64);
+    SingleValue(CORBA::ULongLong uint64);
+    SingleValue(CORBA::Float float32);
+    SingleValue(CORBA::Double float64);
+    SingleValue(CORBA::LongDouble float128);
+    SingleValue(CORBA::Char char8);
     SingleValue(CORBA::Octet byte);
     SingleValue(CORBA::Boolean boolean);
     SingleValue(const char* str);
 #ifdef DDS_HAS_WCHAR
-    SingleValue(CORBA::WChar c16);
+    SingleValue(CORBA::WChar char16);
     SingleValue(CORBA::WChar* wstr);
 #endif
 
@@ -423,23 +423,23 @@ private:
 
     TypeKind kind_;
     union {
-      CORBA::Long i32_;
-      CORBA::ULong ui32_;
-      CORBA::Int8 i8_;
-      CORBA::UInt8 ui8_;
-      CORBA::Short i16_;
-      CORBA::UShort ui16_;
-      CORBA::LongLong i64_;
-      CORBA::ULongLong ui64_;
-      CORBA::Float f32_;
-      CORBA::Double f64_;
-      CORBA::LongDouble f128_;
-      CORBA::Char c8_;
+      CORBA::Long int32_;
+      CORBA::ULong uint32_;
+      CORBA::Int8 int8_;
+      CORBA::UInt8 uint8_;
+      CORBA::Short int16_;
+      CORBA::UShort uint16_;
+      CORBA::LongLong int64_;
+      CORBA::ULongLong uint64_;
+      CORBA::Float float32_;
+      CORBA::Double float64_;
+      CORBA::LongDouble float128_;
+      CORBA::Char char8_;
       CORBA::Octet byte_;
       CORBA::Boolean boolean_;
       const char* str_;
 #ifdef DDS_HAS_WCHAR
-      CORBA::WChar c16_;
+      CORBA::WChar char16_;
       const CORBA::WChar* wstr_;
 #endif
     };
@@ -479,8 +479,8 @@ private:
       DDS::Int64Seq int64_seq_;
       DDS::UInt64Seq uint64_seq_;
       DDS::Float32Seq float32_seq_;
-      DDS::DoubleSeq float64_seq_;
-      DDS::LongDoubleSeq float128_seq_;
+      DDS::Float64Seq float64_seq_;
+      DDS::Float128Seq float128_seq_;
       DDS::CharSeq char8_seq_;
       DDS::OctetSeq byte_seq_;
       DDS::BooleanSeq boolean_seq_;
@@ -500,20 +500,79 @@ private:
     typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
     typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
 
+    DataContainer(const DynamicType_var& type) : type_(type) {}
+
+    // Get the largest index from each map.
+    // Call only for collection-like types (sequence, string, etc).
+    // Caller must check for an empty map.
+    bool get_largest_single_index(CORBA::ULong& index) const;
+    bool get_largest_sequence_index(CORBA::ULong& index) const;
+
+    // Get the largest index in a collection of a basic type (sequence, string, array).
+    // This assumes there is at least 1 value of a basic type stored.
+    bool get_largest_index_basic(CORBA::ULong& index) const;
+
+    // Get the largest index in a collection of sequences of basic type
+    // (each element of the collection is a sequence of a basic type).
+    // Assuming at least 1 sequence is stored.
+    bool get_largest_index_basic_sequence(CORBA::ULong& index) const;
+
+    // Get the largest index in a collection of a complex type (type for which
+    // the data must be represented using its own DynamicData object). Those types
+    // are neither basic nor sequence of basic type.
+    // Assuming at least 1 complex is stored.
+    bool get_largest_index_complex(CORBA::ULong& index) const;
+
+    template<typename ValueType>
+    bool set_default_value(ValueType& value, TypeKind kind) const;
+
+    template<typename SequenceType>
+    bool set_default_values(SequenceType& seq, TypeKind elem_tk) const;
+
+    template<typename SequenceType>
+    bool reconstruct_basic_sequence(SequenceType& seq, TypeKind elem_tk,
+                                    CORBA::ULong size, CORBA::ULong bound) const;
+
+    // Serialize a sequence of basic type.
+    bool serialize_basic_sequence(DCPS::Serializer& ser, TypeKind elem_tk,
+                                  CORBA::ULong size, CORBA::ULong bound) const;
+
+    template<typename SequenceType>
+    bool reconstruct_enum_sequence(SequenceType& seq, CORBA::ULong size, CORBA::ULong bound) const;
+
+    bool serialize_enum_sequence_as_int8s(DCPS::Serializer& ser,
+                                          CORBA::ULong size, CORBA::ULong bound) const;
+    bool serialize_enum_sequence_as_int16s(DCPS::Serializer& ser,
+                                           CORBA::ULong size, CORBA::ULong bound) const;
+    bool serialize_enum_sequence_as_int32s(DCPS::Serializer& ser,
+                                           CORBA::ULong size, CORBA::ULong bound) const;
+    bool serialize_enum_sequence(DCPS::Serializer& ser, CORBA::ULong size,
+                                 CORBA::ULong bitbound, CORBA::ULong seqbound) const;
+
+    bool serialize_bitmask_sequence(DCPS::Serializer& ser,
+                                    CORBA::ULong size, CORBA::ULong bitbound) const;
+
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
     OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
     OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
+
+    const DDS::DynamicType_var& type_;
   };
 
   DataContainer container_;
+
+  friend bool operator<<(Serializer& ser, const SingleValue& value);
+  friend bool operator<<(Serializer& ser, const DynamicDataImpl& data);
 };
 
 } // namespace XTypes
 
 namespace DCPS {
 
+bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl::SingleValue& value);
+
 OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const DynamicDataImpl& dd);
+bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
 
 } // namespace DCPS
 
@@ -523,4 +582,4 @@ OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_SAFETY_PROFILE
 
-#endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_WRITE_IMPL_H
+#endif // OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
