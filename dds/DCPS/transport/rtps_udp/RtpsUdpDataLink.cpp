@@ -3647,11 +3647,21 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
         const AddrSet& uni = consolidated_recipients_unicast[seq];
         const AddrSet& multi = consolidated_recipients_multicast[seq];
         const RepoIdSet& readers = consolidated_request_readers[seq];
-        const RtpsUdpSendStrategy::OverrideToken ot =
-          link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
-        proxy.resend_i(SequenceRange(seq, seq));
-        ++cumulative_send_count;
+        if (proxy.has_frags(seq)) {
+          if (consolidated_fragment_requests.find(seq) == consolidated_fragment_requests.end()) {
+            consolidated_fragment_requests[seq].insert(1);
+          }
+          consolidated_fragment_recipients_unicast[seq].insert(uni.begin(), uni.end());
+          consolidated_fragment_recipients_multicast[seq].insert(multi.begin(), multi.end());
+          consolidated_fragment_request_readers[seq].insert(readers.begin(), readers.end());
+        } else {
+          const RtpsUdpSendStrategy::OverrideToken ot =
+            link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
+
+          proxy.resend_i(SequenceRange(seq, seq));
+          ++cumulative_send_count;
+        }
       }
     }
 

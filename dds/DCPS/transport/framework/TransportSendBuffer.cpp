@@ -372,6 +372,12 @@ SingleSendBuffer::check_capacity_i(BufferVec& removed)
 }
 
 bool
+SingleSendBuffer::has_frags(const SequenceNumber& seq) const
+{
+  return fragments_.find(seq) != fragments_.end();
+}
+
+bool
 SingleSendBuffer::resend(const SequenceRange& range, DisjointSequence* gaps)
 {
   ACE_GUARD_RETURN(LockType, guard, strategy_lock(), false);

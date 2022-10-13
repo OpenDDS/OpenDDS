@@ -268,8 +268,9 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
 {
   ssize_t result = -1;
   typedef AddrSet::const_iterator iter_t;
+  const NetworkAddress empty = NetworkAddress();
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
-    if (*iter == NetworkAddress()) {
+    if (*iter == empty) {
       continue;
     }
     const ssize_t result_per_dest = send_single_i(iov, n, *iter);
