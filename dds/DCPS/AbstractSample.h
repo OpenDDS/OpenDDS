@@ -228,6 +228,7 @@ public:
     }
     return &dynamic_data_;
 #  else
+    ACE_UNUSED_ARG(type);
     return 0;
 #  endif
   }
