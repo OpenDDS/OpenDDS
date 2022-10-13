@@ -1065,7 +1065,9 @@ public:
 InfoRepoDiscovery::StaticInitializer::StaticInitializer()
 {
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(make_rch<InfoRepoType>());
+  if (!registry->register_type(make_rch<InfoRepoType>())) {
+    return;
+  }
   TheServiceParticipant->register_discovery_type("repository", new Config);
 }
 
