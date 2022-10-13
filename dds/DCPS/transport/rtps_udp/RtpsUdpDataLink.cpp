@@ -2636,8 +2636,8 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
 void
 RtpsUdpDataLink::harvest_send_queue(const MonotonicTimePoint& /*now*/)
 {
-  sq_.ready_to_send();
   sq_.begin_transaction();
+  sq_.ready_to_send();
 
   disable_response_queue(true);
 }
