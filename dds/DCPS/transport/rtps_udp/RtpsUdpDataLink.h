@@ -243,7 +243,7 @@ public:
   RtpsUdpTransport& transport();
 
   void enable_response_queue();
-  void disable_response_queue();
+  void disable_response_queue(bool send_immediately);
 
   bool requires_inline_qos(const GUIDSeq_var& peers);
 
@@ -738,10 +738,13 @@ private:
 
   TransactionalRtpsSendQueue sq_;
   ACE_Thread_Mutex fsq_mutex_;
-  MetaSubmessageVec fsq_vec_;
+  OPENDDS_VECTOR(MetaSubmessageVec) fsq_vec_;
+  size_t fsq_vec_size_;
 
+  void harvest_send_queue(const MonotonicTimePoint& now);
+  RcHandle<SporadicEvent> harvest_send_queue_sporadic_;
   void flush_send_queue(const MonotonicTimePoint& now);
-
+  void flush_send_queue_i();
   RcHandle<SporadicEvent> flush_send_queue_sporadic_;
 
   RepoIdSet pending_reliable_readers_;

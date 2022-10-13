@@ -86,6 +86,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , db_lock_pool_(new DataBlockLockPool(static_cast<unsigned long>(TheServiceParticipant->n_chunks())))
   , multi_buff_(this, config.nak_depth_)
+  , fsq_vec_size_(0)
+  , harvest_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::harvest_send_queue)))
   , flush_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::flush_send_queue)))
   , best_effort_heartbeat_count_(0)
   , heartbeat_(make_rch<PeriodicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::send_heartbeats)))
@@ -114,6 +116,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 
 RtpsUdpDataLink::~RtpsUdpDataLink()
 {
+  harvest_send_queue_sporadic_->cancel();
   flush_send_queue_sporadic_->cancel();
 }
 
@@ -2631,12 +2634,30 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
 }
 
 void
-RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
+RtpsUdpDataLink::harvest_send_queue(const MonotonicTimePoint& /*now*/)
 {
   sq_.ready_to_send();
   sq_.begin_transaction();
 
-  disable_response_queue();
+  disable_response_queue(true);
+}
+
+void
+RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
+{
+  ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
+  flush_send_queue_i();
+}
+
+void
+RtpsUdpDataLink::flush_send_queue_i()
+{
+  for (size_t idx = 0; idx != fsq_vec_size_; ++idx) {
+    dedup(fsq_vec_[idx]);
+    bundle_and_send_submessages(fsq_vec_[idx]);
+    fsq_vec_.clear();
+  }
+  fsq_vec_size_ = 0;
 }
 
 void
@@ -2646,13 +2667,26 @@ RtpsUdpDataLink::enable_response_queue()
 }
 
 void
-RtpsUdpDataLink::disable_response_queue()
+RtpsUdpDataLink::disable_response_queue(bool send_immediately)
 {
+  MetaSubmessageVec vec;
   ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
-  sq_.end_transaction(fsq_vec_);
-  dedup(fsq_vec_);
-  bundle_and_send_submessages(fsq_vec_);
-  fsq_vec_.clear();
+  sq_.end_transaction(vec);
+  if (!vec.empty()) {
+    if (fsq_vec_.size() == fsq_vec_size_) {
+      fsq_vec_.resize(fsq_vec_.size() + 1);
+    }
+    fsq_vec_[fsq_vec_size_++].swap(vec);
+  }
+
+  if (fsq_vec_size_) {
+    if (send_immediately) {
+      flush_send_queue_i();
+    } else {
+      flush_send_queue_sporadic_->schedule(TimeDuration::zero_value);
+    }
+  }
+
 }
 
 void
@@ -2663,7 +2697,7 @@ RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in)
   }
 
   if (sq_.enqueue(in)) {
-    flush_send_queue_sporadic_->schedule(config().send_delay_);
+    harvest_send_queue_sporadic_->schedule(config().send_delay_);
   }
 }
 

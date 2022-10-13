@@ -1127,7 +1127,7 @@ RtpsUdpReceiveStrategy::begin_transport_header_processing()
 void
 RtpsUdpReceiveStrategy::end_transport_header_processing()
 {
-  link_->disable_response_queue();
+  link_->disable_response_queue(false);
 }
 
 const ReceivedDataSample*
