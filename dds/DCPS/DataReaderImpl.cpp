@@ -829,7 +829,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
     if (qos_ == new_qos)
       return DDS::RETCODE_OK;
 
-    if (enabled_ == true) {
+    if (enabled_) {
       if (!Qos_Helper::changeable(qos_, new_qos)) {
         return DDS::RETCODE_IMMUTABLE_POLICY;
 
@@ -1046,7 +1046,7 @@ DDS::ReturnCode_t
 DataReaderImpl::get_matched_publications(
     DDS::InstanceHandleSeq & publication_handles)
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::get_matched_publications: ")
         ACE_TEXT(" Entity is not enabled.\n")),
@@ -1078,7 +1078,7 @@ DataReaderImpl::get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
     DDS::InstanceHandle_t publication_handle)
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::")
         ACE_TEXT("get_matched_publication_data: ")
@@ -1238,6 +1238,10 @@ DataReaderImpl::enable()
 
     TypeSupportImpl* const typesupport =
       dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+    if (!typesupport) {
+      return DDS::RETCODE_ERROR;
+    }
+
     XTypes::TypeInformation type_info;
     typesupport->to_type_info(type_info);
 
@@ -2382,7 +2386,7 @@ DataReaderImpl::reset_latency_stats()
 CORBA::Boolean
 DataReaderImpl::statistics_enabled()
 {
-  return statistics_enabled_.value();
+  return statistics_enabled_;
 }
 
 void

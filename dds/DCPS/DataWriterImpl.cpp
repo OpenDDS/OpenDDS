@@ -925,7 +925,7 @@ DDS::ReturnCode_t DataWriterImpl::set_qos(const DDS::DataWriterQos& qos)
     if (qos_ == new_qos)
       return DDS::RETCODE_OK;
 
-    if (enabled_ == true) {
+    if (enabled_) {
       if (!Qos_Helper::changeable(qos_, new_qos)) {
         return DDS::RETCODE_IMMUTABLE_POLICY;
       }
@@ -1246,7 +1246,7 @@ DDS::ReturnCode_t
 DataWriterImpl::get_matched_subscriptions(
   DDS::InstanceHandleSeq & subscription_handles)
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::get_matched_subscriptions: ")
@@ -1280,7 +1280,7 @@ DataWriterImpl::get_matched_subscription_data(
   DDS::SubscriptionBuiltinTopicData & subscription_data,
   DDS::InstanceHandle_t subscription_handle)
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::")
                       ACE_TEXT("get_matched_subscription_data: ")
@@ -1596,7 +1596,7 @@ DataWriterImpl::register_instance_i(DDS::InstanceHandle_t& handle,
 {
   DBG_ENTRY_LVL("DataWriterImpl","register_instance_i",6);
 
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("DataWriterImpl::register_instance_i: ")
@@ -1686,7 +1686,7 @@ DataWriterImpl::unregister_instance_i(DDS::InstanceHandle_t handle,
 {
   DBG_ENTRY_LVL("DataWriterImpl","unregister_instance_i",6);
 
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::unregister_instance_i: ")
                       ACE_TEXT("Entity is not enabled.\n")),
@@ -1832,7 +1832,7 @@ DataWriterImpl::write(Message_Block_Ptr data,
   // take ownership of sequence allocated in FooDWImpl::write_w_timestamp()
   GUIDSeq_var filter_out_var(filter_out);
 
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::write: ")
                       ACE_TEXT("Entity is not enabled.\n")),
@@ -1984,7 +1984,7 @@ DataWriterImpl::dispose(DDS::InstanceHandle_t handle,
 {
   DBG_ENTRY_LVL("DataWriterImpl","dispose",6);
 
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: DataWriterImpl::dispose: ")
                       ACE_TEXT("Entity is not enabled.\n")),

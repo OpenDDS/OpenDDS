@@ -8,8 +8,6 @@
 
 #include "Rtps_Udp_Export.h"
 
-#include "ConstSharedRepoIdSet.h"
-
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -19,9 +17,9 @@ namespace DCPS {
 
 struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
   MetaSubmessage()
-    : src_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), redundant_(false) {}
+    : src_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), ignore_(false) {}
   MetaSubmessage(const RepoId& src, const RepoId& dst)
-    : src_guid_(src), dst_guid_(dst), redundant_(false) {}
+    : src_guid_(src), dst_guid_(dst), ignore_(false) {}
 
   void reset_destination()
   {
@@ -31,10 +29,15 @@ struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
   RepoId src_guid_;
   RepoId dst_guid_;
   RTPS::Submessage sm_;
-  bool redundant_;
+  bool ignore_;
 };
 
 typedef OPENDDS_VECTOR(MetaSubmessage) MetaSubmessageVec;
+
+/// Mark submessages that are superseded as ignored.
+/// Returns the number of messages that are marked as ignored.
+OpenDDS_Rtps_Udp_Export
+size_t dedup(MetaSubmessageVec& vec);
 
 } // namespace DCPS
 } // namespace OpenDDS

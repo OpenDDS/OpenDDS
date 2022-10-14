@@ -276,9 +276,9 @@ ShmemTransport::ReadTask::svc()
 {
   ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "ShmemTransport");
 
-  while (!stopped_.value()) {
+  while (!stopped_) {
     ACE_OS::sema_wait(&semaphore_);
-    if (stopped_.value()) {
+    if (stopped_) {
       return 0;
     }
     outer_->read_from_links();
@@ -289,7 +289,7 @@ ShmemTransport::ReadTask::svc()
 void
 ShmemTransport::ReadTask::stop()
 {
-  if (stopped_.value()) {
+  if (stopped_) {
     return;
   }
   stopped_ = true;
@@ -301,7 +301,7 @@ ShmemTransport::ReadTask::stop()
 void
 ShmemTransport::ReadTask::signal_semaphore()
 {
-  if (stopped_.value()) {
+  if (stopped_) {
     return;
   }
   ACE_OS::sema_post(&semaphore_);

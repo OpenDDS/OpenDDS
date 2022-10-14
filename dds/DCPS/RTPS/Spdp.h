@@ -31,27 +31,19 @@
 #include <dds/DCPS/PoolAllocationBase.h>
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
+#include <dds/DCPS/AtomicBool.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
-#ifndef ACE_HAS_CPP11
-#  include <ace/Atomic_Op.h>
-#endif
 #include <ace/SOCK_Dgram.h>
 #include <ace/SOCK_Dgram_Mcast.h>
 #include <ace/Thread_Mutex.h>
 
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#endif
-
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
 #endif
-
-/* ParticipantData_t */
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -117,11 +109,7 @@ public:
   // Is Spdp fully initialized?
   bool initialized()
   {
-#ifdef ACE_HAS_CPP11
     return initialized_flag_;
-#else
-    return initialized_flag_.value();
-#endif
   }
 
   void shutdown();
@@ -129,11 +117,7 @@ public:
   // Is Spdp shutting down?
   bool shutting_down()
   {
-#ifdef ACE_HAS_CPP11
     return shutdown_flag_;
-#else
-    return shutdown_flag_.value();
-#endif
   }
 
   bool associated() const;
@@ -608,19 +592,13 @@ private:
 #endif /* DDS_HAS_MINIMUM_BIT */
 #endif
 
-#ifdef ACE_HAS_CPP11
-  std::atomic<bool> initialized_flag_; // Spdp initialized
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> initialized_flag_; // Spdp initialized
-#endif
+  /// Spdp initialized
+  AtomicBool initialized_flag_;
 
   bool eh_shutdown_;
   DCPS::ConditionVariable<ACE_Thread_Mutex> shutdown_cond_;
-#ifdef ACE_HAS_CPP11
-  std::atomic<bool> shutdown_flag_; // Spdp shutting down
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutdown_flag_; // Spdp shutting down
-#endif
+  /// Spdp shutting down
+  AtomicBool shutdown_flag_;
 
   BuiltinEndpointSet_t available_builtin_endpoints_;
   DCPS::RcHandle<Sedp> sedp_;

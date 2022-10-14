@@ -39,6 +39,7 @@
 #include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/TopicDetails.h>
+#include <dds/DCPS/AtomicBool.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
@@ -51,15 +52,8 @@
 #  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#ifndef ACE_HAS_CPP11
-#  include <ace/Atomic_Op_T.h>
-#endif
 #include <ace/Task_Ex_T.h>
 #include <ace/Thread_Mutex.h>
-
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#endif
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
 #  pragma once
@@ -69,6 +63,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+
+using DCPS::RepoIdSet;
+using DCPS::AtomicBool;
 
 #ifdef OPENDDS_SECURITY
 enum AuthState {
@@ -107,8 +104,6 @@ inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
   return kind == Security::DPDK_ENHANCED || kind == Security::DPDK_SECURE;
 }
 #endif
-
-using DCPS::RepoIdSet;
 
 const int AC_EMPTY = 0;
 const int AC_REMOTE_RELIABLE = 1 << 0;
@@ -860,11 +855,7 @@ private:
   protected:
     DCPS::RepoId repo_id_;
     Sedp& sedp_;
-#ifdef ACE_HAS_CPP11
-    std::atomic<bool> shutting_down_;
-#else
-    ACE_Atomic_Op<ACE_Thread_Mutex, bool> shutting_down_;
-#endif
+    AtomicBool shutting_down_;
 #ifdef OPENDDS_SECURITY
     DDS::Security::ParticipantCryptoHandle participant_crypto_handle_;
     DDS::Security::NativeCryptoHandle endpoint_crypto_handle_;

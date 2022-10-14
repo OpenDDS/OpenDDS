@@ -177,7 +177,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -347,7 +347,7 @@ jobs:
           --no-debug \
           --features=versioned_namespace=1 \
           --tests
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: make OpenDDS
       run: |
         cd OpenDDS
@@ -643,7 +643,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_esafe_js0.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -953,7 +953,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u22_bsafe_js0_FM-1f.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -1228,7 +1228,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1508,7 +1508,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -1787,7 +1787,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2066,7 +2066,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2331,7 +2331,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2591,7 +2591,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -2893,7 +2893,7 @@ jobs:
       run: |
         cd OpenDDS
         tar xvfJ ACE_TAO_u20_gcc10_bsafe_js0_FM-2c.tar.xz
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS_Util lib and opendds_idl in host
       shell: bash
       run: |
@@ -3058,7 +3058,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3359,7 +3359,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3638,7 +3638,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -3915,7 +3915,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4200,7 +4200,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4513,7 +4513,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4789,7 +4789,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -4978,7 +4978,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -5270,7 +5270,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -6108,7 +6108,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -6412,7 +6412,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -6492,7 +6492,7 @@ jobs:
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.9.0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -6642,7 +6642,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -6802,7 +6802,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -6951,7 +6951,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7093,7 +7093,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features no_rapidjson=1 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -7297,7 +7297,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -7377,7 +7377,7 @@ jobs:
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.9.0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -7527,7 +7527,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -7687,7 +7687,7 @@ jobs:
         rm -rf xcdr
         rm -rf XTypesExtensibility
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7835,7 +7835,7 @@ jobs:
         rm -rf isolated_types
         rm -rf is_topic_type
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -7976,7 +7976,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -static -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -features ownership_profile=0 -features content_subscription=0 -features object_model_profile=0 -features persistence_profile=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -8205,7 +8205,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -8455,7 +8455,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -8610,7 +8610,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -8760,7 +8760,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features ipv6=1 -features no_cxx11=0 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features no_opendds_security=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -9049,7 +9049,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9272,7 +9272,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -9427,7 +9427,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -9575,7 +9575,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2019 -features no_cxx11=0 -features java=1 -features xerces3=1 -features no_rapidjson=0 -features ssl=1 -features openssl11=1 -features built_in_topics=0 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -9782,7 +9782,7 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -9866,7 +9866,7 @@ jobs:
         mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1.9.0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -10106,7 +10106,7 @@ jobs:
       run: |
         mv OpenDDS/ACE_TAO /c/
         mv MPC /c/
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
       with:
@@ -10418,7 +10418,7 @@ jobs:
         cd OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: cmd
       run: |
@@ -10498,7 +10498,7 @@ jobs:
         rm -f build_w22_p1.tar.xz
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
       run: |
@@ -10637,7 +10637,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Messenger
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features no_rapidjson=0 -features ipv6=1 -features ssl=1 -features no_cxx11=0
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make messenger tests
       shell: cmd
       run: |
@@ -10792,7 +10792,7 @@ jobs:
         call setenv.cmd
         cd tests\DCPS\Compiler
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make compiler tests
       shell: cmd
       run: |
@@ -10933,7 +10933,7 @@ jobs:
         call setenv.cmd
         cd tests\unit-tests
         perl %ACE_ROOT%\bin\mwc.pl -type vs2022 -features ipv6=1 -features no_cxx11=0 -features no_rapidjson=0 -features ssl=1 -value_project macros+=GTEST_LINKED_AS_SHARED_LIBRARY
-    - uses: ammaraskar/msvc-problem-matcher@0.1
+    - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: make unit tests
       shell: cmd
       run: |
@@ -11113,7 +11113,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -11226,7 +11226,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11392,7 +11392,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -11520,7 +11520,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11642,7 +11642,7 @@ jobs:
 
   # macOS 12.5
 
-  ACE_TAO_m12_p1o1d0_sec:
+  ACE_TAO_m12_o1d0_sec:
 
     runs-on: macos-12
 
@@ -11674,7 +11674,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c03_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11689,7 +11689,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --ipv6 --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11715,11 +11715,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  build_m12_p1o1d0_sec:
+  build_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: ACE_TAO_m12_p1o1d0_sec
+    needs: ACE_TAO_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11744,25 +11744,25 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: configure OpenDDS
       run: |
         cd OpenDDS
         clang++ --version
-        ./configure --ipv6 --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -11792,11 +11792,11 @@ jobs:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
 
-  test_m12_p1o1d0_sec:
+  test_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: build_m12_p1o1d0_sec
+    needs: build_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11826,23 +11826,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_m12_p1o1d0_sec_artifact
+        name: build_m12_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -11879,7 +11879,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config IPV6 -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M12"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config XERCES3 -Config OPENDDS_SECURITY -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11897,11 +11897,11 @@ jobs:
         cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
-  cmake_m12_p1o1d0_sec:
+  cmake_m12_o1d0_sec:
 
     runs-on: macos-12
 
-    needs: build_m12_p1o1d0_sec
+    needs: build_m12_o1d0_sec
 
     steps:
     - name: checkout OpenDDS
@@ -11931,23 +11931,23 @@ jobs:
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
-        name: ACE_TAO_m12_p1o1d0_sec_artifact
+        name: ACE_TAO_m12_o1d0_sec_artifact
         path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
         cd OpenDDS/ACE_TAO
-        gtar xvfJ ACE_TAO_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ ACE_TAO_m12_o1d0_sec.tar.xz
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
-        name: build_m12_p1o1d0_sec_artifact
+        name: build_m12_o1d0_sec_artifact
         path: OpenDDS
     - name: extract OpenDDS artifact
       shell: bash
       run: |
         cd OpenDDS
-        gtar xvfJ build_m12_p1o1d0_sec.tar.xz
+        gtar xvfJ build_m12_o1d0_sec.tar.xz
     - name: check build configuration
       shell: bash
       run: |
@@ -12123,7 +12123,7 @@ jobs:
         cd OpenDDS
         . setenv.sh
         tools/scripts/show_build_config.pl
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: build OpenDDS
       shell: bash
       run: |
@@ -12255,7 +12255,7 @@ jobs:
         <command name="check_compiler" options="gcc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=$ACE_ROOT/bin dir=$GITHUB_WORKSPACE/OpenDDS -l tests/core_ci_tests.lst -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$GITHUB_WORKSPACE/OpenDDS -Config STATIC_MESSENGER -Config STATIC_COMPILER -Config STATIC_COMPILER2 -Config STATIC_UNIT_TESTS -Config CXX11 -Config RAPIDJSON -Config NO_SHMEM -Config DDS_NO_ORBSVCS -Config NO_BUILT_IN_TOPICS -Config NO_UNIT_TESTS -Config GH_ACTIONS_M12 --no-dcps tests/core_ci_tests.lst"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -12388,7 +12388,7 @@ jobs:
       with:
         path: OpenDDS
         submodules: true
-    - uses: ammaraskar/gcc-problem-matcher@0.1
+    - uses: ammaraskar/gcc-problem-matcher@0.2.0
     - name: Build
       run: cd OpenDDS && docker build -f .github/workflows/build_u14_gcc4.Dockerfile .
 
@@ -12404,7 +12404,7 @@ jobs:
         echo "OPENSSL_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
         key: c02_${{ github.job }}_${{ env.OPENSSL_COMMIT }}

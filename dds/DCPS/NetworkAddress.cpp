@@ -229,6 +229,18 @@ bool NetworkAddress::is_loopback() const
   return false;
 }
 
+bool NetworkAddress::is_multicast() const
+{
+  if (inet_addr_.in4_.sin_family == AF_INET) {
+    return (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xF0000000) == 0xE0000000;
+#if defined (ACE_HAS_IPV6)
+  } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
+    return this->inet_addr_.in6_.sin6_addr.s6_addr[0] == 0xFF;
+#endif
+  }
+  return false;
+}
+
 bool NetworkAddress::is_private() const
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
