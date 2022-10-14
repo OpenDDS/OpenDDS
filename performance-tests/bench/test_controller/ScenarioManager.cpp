@@ -348,6 +348,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
           ++process_report_count;
           const CORBA::ULong spi_idx = OpenDDS::DCPS::grow(node_report.spawned_process_ids) - 1;
           const CORBA::ULong lpi_idx = OpenDDS::DCPS::grow(node_report.local_process_ids) - 1;
+          ACE_UNUSED_ARG(lpi_idx);
           OPENDDS_ASSERT(spi_idx == lpi_idx);
           node_report.spawned_process_ids[spi_idx] = spawned_process_reports[wr].spawned_process_id;
           node_report.local_process_ids[spi_idx] = spawned_process_reports[wr].pid;
