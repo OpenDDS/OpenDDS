@@ -166,12 +166,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   config.enable_time = ZERO;
   config.start_time = ZERO;
   config.stop_time = ZERO;
+  config.destruction_time = ZERO;
   config.wait_for_discovery = false;
   config.wait_for_discovery_seconds = 0;
 
   if (!json_2_idl(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
+  }
+
+  if (config.create_time == ZERO) {
+    config.create_time = Builder::get_sys_time();
+  }
+
+  if (ZERO < config.create_time && config.enable_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.enable_time.sec, config.enable_time.nsec };
+    config.enable_time = config.create_time + temp;
+  }
+
+  if (ZERO < config.enable_time && config.start_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.start_time.sec, config.start_time.nsec };
+    config.start_time = config.enable_time + temp;
+  }
+
+  if (ZERO < config.start_time && config.stop_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.stop_time.sec, config.stop_time.nsec };
+    config.stop_time = config.start_time + temp;
+  }
+
+  if (ZERO < config.stop_time && config.destruction_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.destruction_time.sec, config.destruction_time.nsec };
+    config.destruction_time = config.stop_time + temp;
   }
 
   // Bad-actor test & debugging options for node & test controllers
