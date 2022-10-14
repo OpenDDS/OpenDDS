@@ -103,6 +103,7 @@ public:
   SpawnedProcess(const std::string& node_name, const NodeId& node_id, const SpawnedProcessConfig& config)
   : node_name_(node_name), node_id_(node_id)
   , spawned_process_id_(config.spawned_process_id)
+  , original_config_name_(config.config_name.in())
   {
     std::stringstream ss;
     ss << 'n' << node_id_ << 'w' << spawned_process_id_;
@@ -143,6 +144,7 @@ public:
     report.failed = (pid_ == ACE_INVALID_PID || exit_status_ != 0);
     report.details = "";
     report.log = "";
+    report.pid = static_cast<CORBA::Long>(pid_);
 
     if (!report.failed) {
       std::ifstream report_file(report_filename_);
@@ -187,16 +189,25 @@ public:
       }
       ss << command << std::flush;
     }
-    const std::string command = ss.str();
-    std::cerr << command + "\n" << std::flush;
-    proc_opts->command_line("%s", command.c_str());
+    command_line_ = ss.str();
+    proc_opts->command_line("%s", command_line_.c_str());
     return proc_opts;
   }
 
   void set_pid(pid_t pid) noexcept
   {
+    start_time_ = Builder::get_sys_time();
     pid_ = pid;
     running_ = true;
+  }
+
+  void log_process_creation()
+  {
+    std::stringstream ss;
+    ss << Bench::iso8601() << ": Node " << node_id_ << " (" << node_name_ << ") starting process " << pid_ << ":\n";
+    ss << " - original config: " << original_config_name_ << "\n";
+    ss << " - command line: " << command_line_ << "\n\n" << std::flush;
+    std::cerr << ss.str() << std::flush;
   }
 
   pid_t get_pid() noexcept
@@ -236,6 +247,9 @@ private:
   std::string log_filename_;
   std::string executable_name_;
   std::string spawned_process_command_;
+  std::string original_config_name_;
+  mutable std::string command_line_;
+  Builder::TimeStamp start_time_;
   bool ignore_errors_;
 };
 
@@ -355,6 +369,7 @@ public:
           spawned_process->set_pid(pid);
           pid_to_spawned_process_id_[pid] = spawned_process->id();
           spawned_process_process_stat_collectors_[pid] = std::make_shared<ProcessStatsCollector>(pid);
+          spawned_process->log_process_creation();
         } else {
           std::cerr << "Failed to run spawned process " << spawned_process->id() << std::endl;
           spawned_process_is_finished(spawned_process);
@@ -413,13 +428,13 @@ public:
           const auto i = pid_to_spawned_process_id_.find(ep.pid);
           if (i != pid_to_spawned_process_id_.end()) {
             auto& spawned_process = all_spawned_processes_[i->second];
-            ss_out << "SpawnedProcessManager::handle_exit() - Handling exit of process " << ep.pid << " at " << Bench::iso8601() << " with exit code " << ep.exit_code << std::endl;
+            ss_out << Bench::iso8601() << ": SpawnedProcessManager::handle_exit() - Handling exit of process " << ep.pid << " with exit code " << ep.exit_code << std::endl;
             spawned_process->set_exit_status(ep.return_value, ep.exit_code);
             remaining_spawned_process_count_--;
             finished_spawned_processes_.push_back(spawned_process);
             cv_.notify_all();
           } else {
-            ss_err << "SpawnedProcessManager::handle_exit() received an unknown PID: " << ep.pid << std::endl;
+            ss_err << Bench::iso8601() << ": SpawnedProcessManager::handle_exit() received an unknown PID: " << ep.pid << std::endl;
           }
         }
 
@@ -446,13 +461,13 @@ public:
       bool kill_spawned_processes = false;
       if (!spawned_processes_killed && scenario_timedout_.load()) {
         std::stringstream ss;
-        ss << "Scenario timed out at " << Bench::iso8601() << ", Killing Spawned Processes..." << std::endl;
+        ss << Bench::iso8601() << ": Scenario timed out, Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
         kill_spawned_processes = true;
       }
       if (!spawned_processes_killed && sigint_.load()) {
         std::stringstream ss;
-        ss << "Interrupted, Killing Spawned Processes..." << std::endl;
+        ss << Bench::iso8601() << ": Interrupted, Killing Spawned Processes..." << std::endl;
         std::cerr << ss.str() << std::flush;
         kill_spawned_processes = true;
       }
@@ -475,7 +490,7 @@ public:
       mem_block->finalize();
       virtual_mem_block->finalize();
     } catch (const std::exception& e) {
-      std::cerr << "Exception caught trying to finalize statistic blocks: " << e.what() << std::endl;
+      std::cerr << Bench::iso8601() << ": Exception caught trying to finalize statistic blocks: " << e.what() << std::endl;
       return false;
     }
 

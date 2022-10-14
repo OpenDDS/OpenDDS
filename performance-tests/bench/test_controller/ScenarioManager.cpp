@@ -264,7 +264,7 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
   temp.configs.length(0);
   temp.launch_time = Builder::get_sys_time() + Builder::from_seconds(3);
   std::cout << "Setting scenario launch_time to be 3 seconds from now: "
-            << iso8601(system_clock::now() + seconds(3)) << std::endl;
+            << iso8601(system_clock::now() + seconds(3)) << std::endl << std::endl;
 
   // Write Configs
   if (dds_entities_.scenario_writer_impl_->write(temp, DDS::HANDLE_NIL) != DDS::RETCODE_OK) {
@@ -347,7 +347,10 @@ void ScenarioManager::execute(const Bench::TestController::AllocatedScenario& al
         for (CORBA::ULong wr = 0; wr < spawned_process_reports.length(); wr++) {
           ++process_report_count;
           const CORBA::ULong spi_idx = OpenDDS::DCPS::grow(node_report.spawned_process_ids) - 1;
+          const CORBA::ULong lpi_idx = OpenDDS::DCPS::grow(node_report.local_process_ids) - 1;
+          OPENDDS_ASSERT(spi_idx == lpi_idx);
           node_report.spawned_process_ids[spi_idx] = spawned_process_reports[wr].spawned_process_id;
+          node_report.local_process_ids[spi_idx] = spawned_process_reports[wr].pid;
           if (spawned_process_reports[wr].failed) {
             ++worker_failures;
             std::stringstream ss;
