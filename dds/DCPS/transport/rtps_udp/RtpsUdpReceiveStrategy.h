@@ -44,7 +44,9 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
 public:
   static const size_t BUFFER_COUNT = 1u;
 
-  explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
+  RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
+                         const GuidPrefix_t& local_prefix,
+                         ThreadStatusManager& thread_status_manager);
 
   virtual int handle_input(ACE_HANDLE fd);
 
@@ -169,6 +171,7 @@ private:
   };
 
   MessageReceiver receiver_;
+  ThreadStatusManager& thread_status_manager_;
   ACE_INET_Addr remote_address_;
   RTPS::Message message_;
 
