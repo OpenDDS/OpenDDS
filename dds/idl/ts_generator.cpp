@@ -199,7 +199,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     be_global->header_ <<
       "class " << be_global->export_macro() << " " << ts_short_name << "TypeSupportImpl\n"
       "  : public virtual OpenDDS::DCPS::LocalObject<" << ts_short_name << "TypeSupport>\n"
-      "  , public virtual OpenDDS::DCPS::NativeTypeSupportImpl<" << short_name << ">\n"
+      "  , public virtual OpenDDS::DCPS::TypeSupportImpl_T<" << short_name << ">\n"
       "  , public virtual OpenDDS::DCPS::ValueDispatcher_T<" << short_name << ">\n"
       "{\n"
       "public:\n"

@@ -134,7 +134,7 @@ private:
 };
 
 template <typename NativeType>
-class NativeTypeSupportImpl : public TypeSupportImpl {
+class TypeSupportImpl_T : public TypeSupportImpl {
 public:
   typedef DDSTraits<NativeType> TraitsType;
   typedef MarshalTraits<NativeType> MarshalTraitsType;

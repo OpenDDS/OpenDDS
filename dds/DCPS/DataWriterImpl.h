@@ -130,7 +130,6 @@ public:
     return skip_serialize_;
   }
 
-  ACE_INLINE
   DataAllocator* data_allocator() const
   {
     return data_allocator_.get();
@@ -379,10 +378,8 @@ public:
   /**
    * Accessor of the WriterDataContainer's lock.
    */
-  // ciju: Seems this is no longer being used.
-  // Was wrong. Still required.
-  ACE_INLINE
-  ACE_Recursive_Thread_Mutex& get_lock() const {
+  ACE_Recursive_Thread_Mutex& get_lock() const
+  {
     return data_container_->lock_;
   }
 
@@ -670,7 +667,7 @@ protected:
   }
 
   DDS::ReturnCode_t instance_must_exist(
-    const char* const method_name,
+    const char* method_name,
     AbstractSample_rch& sample,
     DDS::InstanceHandle_t& instance_handle,
     bool remove = false);

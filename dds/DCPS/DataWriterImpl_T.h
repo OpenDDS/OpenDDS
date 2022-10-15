@@ -40,8 +40,6 @@ DataWriterImpl_T
 , public virtual DataWriterImpl
 {
 public:
-  typedef NativeSample<MessageType> Sample;
-
   DataWriterImpl_T()
   {
   }
@@ -60,7 +58,7 @@ public:
   {
     DDS::InstanceHandle_t registered_handle = DDS::HANDLE_NIL;
 
-    AbstractSample_rch sample = make_sample(instance, /* key_only = */ true);
+    AbstractSample_rch sample = make_sample(instance, SampleKeyOnly);
     const DDS::ReturnCode_t ret = get_or_create_instance_handle(registered_handle, sample, timestamp);
     if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: %CDataWriterImpl::register_instance_w_timestamp: ")
@@ -82,7 +80,7 @@ public:
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& timestamp)
   {
-    AbstractSample_rch sample = make_sample(instance_data, /* key_only = */ true);
+    AbstractSample_rch sample = make_sample(instance_data, SampleKeyOnly);
     return DataWriterImpl::unregister_instance_w_timestamp(sample, instance_handle, timestamp);
   }
 
@@ -117,7 +115,7 @@ public:
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& source_timestamp)
   {
-    AbstractSample_rch sample = make_sample(instance_data, /* key_only = */ true);
+    AbstractSample_rch sample = make_sample(instance_data, SampleKeyOnly);
     return DataWriterImpl::dispose_w_timestamp(sample, instance_handle, source_timestamp);
   }
 
@@ -135,19 +133,21 @@ public:
 
   DDS::InstanceHandle_t lookup_instance(const MessageType& instance_data)
   {
-    AbstractSample_rch sample = make_sample(instance_data, /* key_only = */ true);
+    AbstractSample_rch sample = make_sample(instance_data, SampleKeyOnly);
     return DataWriterImpl::lookup_instance(sample);
   }
 
 private:
-  AbstractSample_rch make_sample(const MessageType& data, bool key_only = false)
+  typedef Sample<MessageType> SampleType;
+
+  AbstractSample_rch make_sample(const MessageType& data, SampleExtent extent = SampleFull)
   {
-    return dynamic_rchandle_cast<AbstractSample>(make_rch<Sample>(data, key_only));
+    return dynamic_rchandle_cast<AbstractSample>(make_rch<SampleType>(data, extent));
   }
 
   const MessageType& get_data(AbstractSample_rch& sample)
   {
-    return dynamic_rchandle_cast<Sample>(sample)->data();
+    return dynamic_rchandle_cast<SampleType>(sample)->data();
   }
 
   // A class, normally provided by an unit test, that needs access to
