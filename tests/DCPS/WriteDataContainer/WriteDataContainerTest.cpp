@@ -81,9 +81,9 @@ public:
 
   ACE_Message_Block* serialize_sample(Test::SimpleDataWriterImpl* dw,
                                       const Test::Simple& instance_data,
-                                      bool key_only = false)
+                                      SampleExtent extent = SampleFull)
   {
-    AbstractSample_rch sample = dw->make_sample(instance_data, key_only);
+    AbstractSample_rch sample = dw->make_sample(instance_data, extent);
     return dw->serialize_sample(sample);
   }
 
@@ -389,7 +389,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb(test->serialize_sample(fast_dw.get(), foo1, true));
+        Message_Block_Ptr mb(test->serialize_sample(fast_dw.get(), foo1, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
@@ -433,7 +433,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test_data_container->get_unsent_data(temp);
         test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, true));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, SampleKeyOnly));
 
         DataSampleElement* element_1 = 0;
         ret = test_data_container->obtain_buffer(element_1, handle1);
@@ -507,7 +507,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, true));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
@@ -555,7 +555,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo2.key = 2;
         foo2.count = 1;
 
-        Message_Block_Ptr mb2(test->serialize_sample(fast_dw.get(), foo2, true));
+        Message_Block_Ptr mb2(test->serialize_sample(fast_dw.get(), foo2, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle2, mb2);
@@ -590,7 +590,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo3.key = 3;
         foo3.count = 1;
 
-        Message_Block_Ptr mb3(test->serialize_sample(fast_dw.get(), foo3, true));
+        Message_Block_Ptr mb3(test->serialize_sample(fast_dw.get(), foo3, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle3, mb3);
@@ -640,7 +640,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, true));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
@@ -688,7 +688,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo2.key = 2;
         foo2.count = 1;
 
-        Message_Block_Ptr mb2(test->serialize_sample(fast_dw.get(), foo2, true));
+        Message_Block_Ptr mb2(test->serialize_sample(fast_dw.get(), foo2, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle2, mb2);
@@ -723,7 +723,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo3.key = 3;
         foo3.count = 1;
 
-        Message_Block_Ptr mb3(test->serialize_sample(fast_dw.get(), foo3, true));
+        Message_Block_Ptr mb3(test->serialize_sample(fast_dw.get(), foo3, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle3, mb3);
@@ -777,7 +777,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb(test->serialize_sample(fast_dw.get(), foo1, true));
+        Message_Block_Ptr mb(test->serialize_sample(fast_dw.get(), foo1, SampleKeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
@@ -828,7 +828,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         if (ret != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
         }
-        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, true));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, SampleKeyOnly));
 
         element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
