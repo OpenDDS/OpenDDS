@@ -2,4 +2,9 @@ project {
   specific (prop:microsoft) {
     compile_flags += /bigobj
   }
+  verbatim(cmake, macros) {
+    if(MSVC)
+      add_compile_options(/bigobj)
+    endif()
+  }
 }
