@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_WRITERDATASAMPLELIST_H
 
 #include "dcps_export.h"
+#include "ace/Basic_Types.h"
 
 #include <cstring>
 
