@@ -13,6 +13,7 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
     always_generate_lib_export_header)
 
   set(_single_value_options
+    SKIP_TAO_IDL
     SUPPRESS_ANYS
     ALWAYS_GENERATE_LIB_EXPORT_HEADER
   )
@@ -49,6 +50,10 @@ macro(OPENDDS_GET_SOURCES_AND_OPTIONS
 
   set(${tao_options} ${_arg_TAO_IDL_OPTIONS})
   set(${opendds_options} ${_arg_OPENDDS_IDL_OPTIONS})
+
+  if (DEFINED _arg_SKIP_TAO_IDL)
+    list(APPEND ${tao_options} SKIP_TAO_IDL)
+  endif()
 
   if(DEFINED _arg_SUPPRESS_ANYS)
     set(${suppress_anys} ${_arg_SUPPRESS_ANYS})
@@ -189,13 +194,21 @@ macro(OPENDDS_TARGET_SOURCES target)
   get_target_property(_target_type ${target} TYPE)
   if(_target_type STREQUAL "SHARED_LIBRARY"
       OR (_always_generate_lib_export_header AND _target_type MATCHES "LIBRARY"))
-    opendds_get_target_export_header(${target} _export_header)
+    if((NOT "${_tao_options}" MATCHES "SKIP_TAO_IDL" AND
+        NOT "${_tao_options}" MATCHES "-Wb,export_include" AND
+        NOT "${_tao_options}" MATCHES "-Wb,stub_export_include") OR
+       NOT "${_opendds_options}" MATCHES "-Wb,export_include")
+      opendds_get_target_export_header(${target} _export_header)
+    endif()
 
-    if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
+    if(NOT "${_tao_options}" MATCHES "SKIP_TAO_IDL" AND
+       NOT "${_tao_options}" MATCHES "-Wb,export_include" AND
+       NOT "${_tao_options}" MATCHES "-Wb,stub_export_include")
       list(APPEND _tao_options "-Wb,stub_export_include=${_export_header}")
     endif()
 
-    if(NOT "${_tao_options}" MATCHES "-Wb,stub_export_macro")
+    if(NOT "${_tao_options}" MATCHES "-Wb,export_macro" AND
+       NOT "${_tao_options}" MATCHES "-Wb,stub_export_macro")
       list(APPEND _tao_options "-Wb,stub_export_macro=${target}_Export")
     endif()
 
@@ -203,7 +216,8 @@ macro(OPENDDS_TARGET_SOURCES target)
       list(APPEND _opendds_options "-Wb,export_macro=${target}_Export")
     endif()
 
-    if(NOT "${_opendds_options}" MATCHES "-Wb,export_include")
+    if(NOT "${_tao_options}" MATCHES "SKIP_TAO_IDL" AND
+       NOT "${_tao_options}" MATCHES "-Wb,export_include")
       list(APPEND _opendds_options "-Wb,export_include=${_export_header}")
     endif()
   endif()
@@ -234,11 +248,19 @@ macro(OPENDDS_TARGET_SOURCES target)
 
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if(_idl_sources_${scope})
-      opendds_target_idl_sources(${target}
-        TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS} ${_extra_idl_paths}
-        DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${_extra_idl_paths} ${_extra_idl_flags}
-        IDL_FILES ${_idl_sources_${scope}}
-        SCOPE ${scope})
+      if("${_tao_options}" MATCHES "SKIP_TAO_IDL")
+        opendds_target_idl_sources(${target}
+          SKIP_TAO_IDL ON
+          DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${_extra_idl_paths} ${_extra_idl_flags}
+          IDL_FILES ${_idl_sources_${scope}}
+          SCOPE ${scope})
+      else()
+        opendds_target_idl_sources(${target}
+          TAO_IDL_FLAGS ${_tao_options} ${OPENDDS_TAO_BASE_IDL_FLAGS} ${_extra_idl_paths}
+          DDS_IDL_FLAGS ${_opendds_options} ${OPENDDS_DDS_BASE_IDL_FLAGS} ${_extra_idl_paths} ${_extra_idl_flags}
+          IDL_FILES ${_idl_sources_${scope}}
+          SCOPE ${scope})
+      endif()
     endif()
 
     # The above should add IDL-Generated sources; here, the
