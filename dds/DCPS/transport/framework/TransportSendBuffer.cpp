@@ -41,7 +41,6 @@ TransportSendBuffer::retain_all(const RepoId&)
 void
 TransportSendBuffer::resend_one(const BufferType& buffer)
 {
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t) SSB::resend_one - &buffer = %@\n", &buffer));
   int bp = 0;
   strategy_->do_send_packet(buffer.second, bp);
 }
@@ -428,12 +427,9 @@ SingleSendBuffer::resend_i(const SequenceRange& range, DisjointSequence* gaps,
       } else {
         const FragmentMap::iterator fm_it = fragments_.find(it->first);
         if (fm_it != fragments_.end()) {
-          //ACE_DEBUG((LM_DEBUG, "(%P|%t) SSB::resend_i for seq %Q - resending all fragments\n", it->first.getValue()));
-          size_t count = 0;
           for (BufferMap::iterator bm_it = fm_it->second.begin();
-                count < 5 && bm_it != fm_it->second.end(); ++bm_it) {
+                bm_it != fm_it->second.end(); ++bm_it) {
             resend_one(bm_it->second);
-            ++count;
           }
         }
       }
@@ -448,7 +444,6 @@ SingleSendBuffer::resend_fragments_i(SequenceNumber seq,
                                      const DisjointSequence& requested_frags,
                                      size_t& cumulative_send_count)
 {
-  //ACE_DEBUG((LM_DEBUG, "(%P|%t) SSB::resend_requested_frags_i for seq %Q range %Q - %Q (%C) csc = %Q\n", seq.getValue(), requested_frags.low().getValue(), requested_frags.high().getValue(), requested_frags.disjoint() ? "disjoint" : "continuous", cumulative_send_count));
   if (fragments_.empty() || requested_frags.empty()) {
     return;
   }
