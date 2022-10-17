@@ -468,6 +468,8 @@ private:
 
     ~SequenceValue();
 
+    template<typename T> const T& get() const;
+
     TypeKind elem_kind_;
     union {
       DDS::Int32Seq int32_seq_;
@@ -496,9 +498,9 @@ private:
   // At anytime, there can be at most 1 entry for any given MemberId in all maps.
   // That is, each member is stored in at most 1 map.
   struct DataContainer {
-    typedef OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
-    typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
-    typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
+    typedef DCPS::OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
+    typedef DCPS::OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
+    typedef DCPS::OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
 
     DataContainer(const DynamicType_var& type) : type_(type) {}
 
@@ -524,10 +526,10 @@ private:
     bool get_largest_index_complex(CORBA::ULong& index) const;
 
     template<typename ValueType>
-    bool set_default_value(ValueType& value, TypeKind kind) const;
+    bool set_default_basic_value(ValueType& value, TypeKind kind) const;
 
     template<typename SequenceType>
-    bool set_default_values(SequenceType& seq, TypeKind elem_tk) const;
+    bool set_default_basic_values(SequenceType& seq, TypeKind elem_tk) const;
 
     template<typename SequenceType>
     bool reconstruct_basic_sequence(SequenceType& seq, TypeKind elem_tk,
@@ -552,24 +554,25 @@ private:
     bool serialize_bitmask_sequence(DCPS::Serializer& ser,
                                     CORBA::ULong size, CORBA::ULong bitbound) const;
 
-    OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
-    OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
-    OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
+    DCPS::OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
+    DCPS::OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
+    DCPS::OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
 
     const DDS::DynamicType_var& type_;
   };
 
   DataContainer container_;
 
-  friend bool operator<<(Serializer& ser, const SingleValue& value);
-  friend bool operator<<(Serializer& ser, const DynamicDataImpl& data);
+  friend void serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
+  friend bool operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
 };
 
 } // namespace XTypes
 
 namespace DCPS {
 
-bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl::SingleValue& value);
+OpenDDS_Dcps_Export
+void serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
 
 OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
