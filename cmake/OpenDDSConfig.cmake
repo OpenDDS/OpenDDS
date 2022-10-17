@@ -74,6 +74,7 @@ if(OpenDDS_FOUND)
   return()
 endif()
 
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}")
 include(${CMAKE_CURRENT_LIST_DIR}/init.cmake)
 
 ## Adding ${TAO_BIN_DIR} to the ace bin hints allows users of
@@ -385,9 +386,14 @@ foreach(_lib ${_all_libs})
   select_library_configurations(${_LIB_VAR})
 endforeach()
 
+if(NOT BUILDING_OPENDDS_CORE)
+  list(APPEND _opendds_required_deps
+    OPENDDS_DCPS_LIBRARY
+    OPENDDS_IDL
+  )
+endif()
+
 list(APPEND _opendds_required_deps
-  OPENDDS_DCPS_LIBRARY
-  OPENDDS_IDL
   ACE_LIBRARY
   ACE_GPERF
   TAO_LIBRARY
