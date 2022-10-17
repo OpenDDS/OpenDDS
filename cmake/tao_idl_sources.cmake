@@ -23,6 +23,9 @@ set(TAO_VERSIONING_IDL_FLAGS
   -Wb,versioning_begin=TAO_BEGIN_VERSIONED_NAMESPACE_DECL
   -Wb,versioning_end=TAO_END_VERSIONED_NAMESPACE_DECL
 )
+if(NOT OPENDDS_DEFAULT_GENERATED_OUTPUT_DIR)
+  set(OPENDDS_DEFAULT_GENERATED_OUTPUT_DIR "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated")
+endif()
 
 if (CORBA_E_MICRO)
   list(APPEND TAO_CORBA_IDL_FLAGS -DCORBA_E_MICRO -Gce)
@@ -50,15 +53,17 @@ endif()
 
 function(opendds_get_generated_output_dir target output_dir_var)
   # TODO base output_dir_var on target
-  set(${output_dir_var} "${CMAKE_CURRENT_BINARY_DIR}/opendds_generated" PARENT_SCOPE)
+  set(${output_dir_var} ${OPENDDS_DEFAULT_GENERATED_OUTPUT_DIR} PARENT_SCOPE)
 endfunction()
 
 function(opendds_ensure_generated_output_dir target file o_arg output_dir_var)
   if(o_arg)
-    set(output_dir ${o_arg})
+    get_filename_component(abs_file "${o_arg}" ABSOLUTE)
+    ## CMake has a bug where if ${o_arg} is ".", it will add /TRUE to the
+    ## end of the absolute path.  We'll just chop it off.
+    string(REGEX REPLACE "/TRUE$" "" abs_file ${abs_file})
+    set(output_dir ${abs_file})
   else()
-    get_filename_component(abs_file "${file}" ABSOLUTE)
-    get_filename_component(abs_dir "${abs_file}" DIRECTORY)
     opendds_get_generated_output_dir("${target}" output_dir)
   endif()
   file(MAKE_DIRECTORY "${output_dir}")
