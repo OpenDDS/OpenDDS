@@ -21,10 +21,10 @@
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DCPS/Service_Participant.h>
-
+#include <dds/DCPS/ArgParsing.h>
 #ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
 #include <string>
@@ -116,118 +116,95 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     overrides.bench_partition_suffix = ss.str();
   }
 
-  const char* usage = "usage: test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]";
-  try {
-    for (int i = 1; i < argc; i++) {
-      const ACE_TCHAR* argument = argv[i];
-      if (!ACE_OS::strcmp(argument, ACE_TEXT("--domain"))) {
-        domain = get_option_argument_int(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--wait-for-nodes"))) {
-        wait_for_nodes = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--timeout"))) {
-        timeout = get_option_argument_uint(i, argc, argv);
-        timeout_passed = true;
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--help")) || !ACE_OS::strcmp(argument, ACE_TEXT("-h"))) {
-        std::cout << usage << std::endl
-          << std::endl
-//            ################################################################################
-          << "TEST_CONTEXT is the path to the directory of the test configurations and" << std::endl
-          << "artifacts." << std::endl
-          << "SCENARIO_ID is the name of the scenario file in the test context to use without" << std::endl
-          << "the `.json` extension." << std::endl
-          << std::endl
-          << "OPTIONS:" << std::endl
-          << "--domain N                   The DDS Domain to use. The default is 89." << std::endl
-          << "--wait-for-nodes N           The number of seconds to wait for nodes before" << std::endl
-          << "                             broadcasting the scenario to them. The default is" << std::endl
-          << "                             10 seconds." << std::endl
-          << "--timeout N                  The number of seconds to wait for a scenario to" << std::endl
-          << "                             complete. Overrides the value defined in the" << std::endl
-          << "                             scenario. If N is 0, there is no timeout." << std::endl
-          << "--prealloc-scenario-out PATH Instead of running the scenario, write the" << std::endl
-          << "                             directives (in JSON) that would have been sent to" << std::endl
-          << "                             the node controllers to the file at this path." << std::endl
-          << "--pretty                     Write the JSON output of `--prealloc-scenario-out`" << std::endl
-          << "                             with indentation." << std::endl
-          << "--debug-alloc                Print out a debug version of what is saved with" << std::endl
-          << "                             --prealloc-scenario-out and exit." << std::endl
-          << "--prealloc-scenario-in PATH  Take result of --prealloc-scneario-out and use that" << std::endl
-          << "                             to run the scenario instead of discovering nodes." << std::endl
-          << "                             This might fail if the nodes go offline after the" << std::endl
-          << "                             preallocated scenario is saved." << std::endl
-          << "--result-id ID               Name to store the results under. By default" << std::endl
-          << "                             incrementing numbers are assigned, but ID doesn't" << std::endl
-          << "                             have to be a valid number, just a valid file name." << std::endl
-          << "--overwrite-result           Write the result when using --result-id, even if" << std::endl
-          << "                             it would overwrite another result." << std::endl
-          << "--override-bench-partition-suffix SUFFIX     Override the system-wide partition suffix." << std::endl
-          << "--override-create-time N                     Override the system-wide creation time." << std::endl
-          << "--override-enable-time N                     Override the system-wide enabling time." << std::endl
-          << "--override-start-time N                      Override the system-wide starting time." << std::endl
-          << "--override-stop-time N                       Override the system-wide stopping time." << std::endl
-          << "--override-destruction-time N                Override the system-wide destruction time." << std::endl
-          << "--tag TAG                    Specify a tag for which the user wants to collect" << std::endl
-          << "                             the statistics information. User can specify multiple" << std::endl
-          << "                             --tag options, each with a single tag." << std::endl
-          << "--json                       Output full JSON report as '<resuld-id>.json' in the test conext." << std::endl
-          << "                             By default, this not enabled. This report will contain" << std::endl
-          << "                             the full raw Bench::TestController report, including all" << std::endl
-          << "                             node controller and worker reports (and DDS entity reports)" << std::endl;
-//            ################################################################################
-        return 0;
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-out"))) {
-        preallocated_scenario_output_path = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-in"))) {
-        preallocated_scenario_input_path = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--pretty"))) {
-        pretty = true;
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--debug-alloc"))) {
-        debug_alloc = true;
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--result-id"))) {
-        result_id = get_option_argument(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--overwrite-result"))) {
-        overwrite_result = true;
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-bench-partition-suffix"))) {
-        std::string suffix = get_option_argument(i, argc, argv);
-        overrides.bench_partition_suffix = suffix == "none" ? "" : suffix;
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-create-time"))) {
-        overrides.create_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-enable-time"))) {
-        overrides.enable_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-start-time"))) {
-        overrides.start_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-stop-time"))) {
-        overrides.stop_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--override-destruction-time"))) {
-        overrides.destruction_time_delta = get_option_argument_uint(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--tag"))) {
-        tags.insert(get_option_argument(i, argc, argv));
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--json"))) {
-        json_result = true;
-      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--show-worker-logs"))) {
-        show_worker_logs = true;
-      } else if (test_context_path.empty() && argument[0] != '-') {
-        test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
-      } else if (scenario_id.empty() && argument[0] != '-') {
-        scenario_id = ACE_TEXT_ALWAYS_CHAR(argument);
-      } else {
-        std::cerr << "Invalid option: " << argument << std::endl;
-        throw 1;
-      }
-    }
+  {
+    using namespace OpenDDS::DCPS::ArgParsing;
 
-    if (test_context_path.empty()) {
-      std::cerr << "The path to the text context is required!" << std::endl;
-      throw 1;
-    }
-    if (scenario_id.empty()) {
-      std::cerr << "The id of the scenario to run is required!" << std::endl;
-      throw 1;
-    }
-  } catch(int value) {
-    std::cerr << usage << std::endl
-      << "Use -h or --help to see the full help message" << std::endl;
-    return value;
+    ArgParser arg_parser("The test_controller executes test scenarios.");
+
+    Positional test_context_arg(arg_parser, "TEST_CONTEXT",
+      "The path to the directory of the test configurations and artifacts.",
+      test_context_path);
+    Positional scenario_id_arg(arg_parser, "SCENARIO_ID",
+      "The name of the scenario file in the test context to use without the `.json` extension.",
+      scenario_id);
+
+    OptionAs<IntValue<int> > domain_opt(arg_parser, "domain",
+      "The DDS Domain to use. The default is 89.",
+      domain, "DOMAIN_INT");
+    OptionAs<IntValue<unsigned> > wait_for_nodes_opt(arg_parser, "wait-for-nodes",
+      "The number of seconds to wait for nodes before broadcasting the scenario to them. "
+      "The default is 10 seconds.",
+      wait_for_nodes, "SECONDS");
+    OptionAs<IntValue<unsigned> > timeout_opt(arg_parser, "timeout",
+      "The number of seconds to wait for a scenario to complete. Overrides the value defined in "
+      "the scenario. If SECONDS is 0, there is no timeout.", timeout, "SECONDS");
+
+    OptionAs<StringValue> prealloc_scenario_out_opt(arg_parser, "prealloc-scenario-out",
+      "Instead of running the scenario, write the directives (in JSON) that would have been sent "
+      "to the node controllers to the file at this path.",
+      preallocated_scenario_output_path, "PATH");
+    Option pretty_opt(arg_parser, "pretty",
+      "Write the JSON output of --prealloc-scenario-out with indentation.",
+      pretty);
+    Option debug_alloc_opt(arg_parser, "debug-alloc",
+      "Print out a debug version of what is saved with --prealloc-scenario-out and exit.",
+      debug_alloc);
+    OptionAs<StringValue> prealloc_scenario_in_opt(arg_parser, "prealloc-scenario-in",
+      "Take result of --prealloc-scneario-out and use that to run the scenario instead of "
+      "discovering nodes. This might fail if the nodes go offline after the preallocated scenario "
+      "is saved.",
+      preallocated_scenario_input_path, "PATH");
+
+    OptionAs<StringValue> result_id_opt(arg_parser, "result-id",
+      "Name to store the results under. By default incrementing numbers are assigned, but ID "
+      "doesn't have to be a valid number, just a valid file name.",
+      result_id, "ID");
+    Option overwrite_result_opt(arg_parser, "overwrite-result",
+      "Write the result when using --result-id, even if it would overwrite another result.",
+      overwrite_result);
+
+    OptionPass<StringValue> override_bench_partition_suffix_opt(arg_parser, "override-bench-partition-suffix",
+      "Override the system-wide partition suffix.",
+      [&overrides](const OpenDDS::DCPS::String& suffix) {
+        overrides.bench_partition_suffix = suffix == "none" ? "" : suffix;
+      }, "SUFFIX");
+
+    OptionAs<IntValue<unsigned> > override_create_time_opt(arg_parser, "override-create-time",
+      "Override the system-wide creation time.",
+      overrides.create_time_delta, "N");
+    OptionAs<IntValue<unsigned> > override_enable_time_opt(arg_parser, "override-enable-time",
+      "Override the system-wide enabling time.",
+      overrides.enable_time_delta, "N");
+    OptionAs<IntValue<unsigned> > override_start_time_opt(arg_parser, "override-start-time",
+      "Override the system-wide starting time.",
+      overrides.start_time_delta, "N");
+    OptionAs<IntValue<unsigned> > override_stop_time_opt(arg_parser, "override-stop-time",
+      "Override the system-wide stopping time.",
+      overrides.stop_time_delta, "N");
+    OptionAs<IntValue<unsigned> > override_destruction_time_opt(arg_parser, "override-destruction-time",
+      "Override the system-wide destruction time.",
+      overrides.destruction_time_delta, "N");
+
+    OptionPass<StringValue> tag_opt(arg_parser, "tag",
+      "Specify a tag for which the user wants to collect the statistics information. User can "
+      "specify multiple --tag options, each with a single tag.",
+      [&tags](const OpenDDS::DCPS::String& tag) {
+        tags.insert(tag);
+      }, "TAG");
+    tag_opt.allow_multiple_ = true;
+
+    Option json_opt(arg_parser, "json",
+      "Output full JSON report as '<resuld-id>.json' in the test context.\n"
+      "By default, this not enabled. This report will contain the full raw Bench::TestController "
+      "report, including all node controller and worker reports (and DDS entity reports)",
+      json_result);
+
+    Option show_worker_logs_opt(arg_parser, "show-worker-logs",
+      "Show logs from workers at end of scenario",
+      show_worker_logs);
+
+    arg_parser.parse(argc, argv);
+    timeout_passed = timeout_opt.present();
   }
 
   // Try To Load Scenario

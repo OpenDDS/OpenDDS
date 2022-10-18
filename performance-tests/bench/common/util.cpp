@@ -16,40 +16,6 @@
 
 namespace Bench {
 
-std::string get_option_argument(int& i, int argc, ACE_TCHAR* argv[])
-{
-  if (i == argc - 1) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i])<< " requires an argument" << std::endl;
-    throw int{1};
-  }
-  return ACE_TEXT_ALWAYS_CHAR(argv[++i]);
-}
-
-int get_option_argument_int(int& i, int argc, ACE_TCHAR* argv[])
-{
-  int value;
-  try {
-    value = static_cast<int>(std::stoll(get_option_argument(i, argc, argv)));
-  } catch (const std::exception&) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << " requires an argument that's a valid number" << std::endl;
-    throw 1;
-  }
-  return value;
-}
-
-unsigned get_option_argument_uint(int& i, int argc, ACE_TCHAR* argv[])
-{
-  unsigned value;
-  try {
-    value = static_cast<unsigned>(std::stoull(get_option_argument(i, argc, argv)));
-  } catch (const std::exception&) {
-    std::cerr << "Option " << ACE_TEXT_ALWAYS_CHAR(argv[i])
-      << " requires an argument that's a valid positive number" << std::endl;
-    throw 1;
-  }
-  return value;
-}
-
 std::string& string_replace(std::string& input, const std::string& oldstr, const std::string& newstr)
 {
   size_t pos = input.find(oldstr);

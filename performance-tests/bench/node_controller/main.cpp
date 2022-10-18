@@ -2,6 +2,34 @@
  * The Node Controller takes directives from a Test Controller, spawns Spawned Processes,
  * and report the results back.
  */
+
+#include "ProcessStatsCollector.h"
+#include "PropertyStatBlock.h"
+
+#include <util.h>
+#include <BenchTypeSupportImpl.h>
+#include <tests/Utils/StatusMatching.h>
+#include <Common.h>
+
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsPublicationC.h>
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/Marked_Default_Qos.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/ArgParsing.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
+
+#include <ace/Process_Manager.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_fcntl.h>
+#ifdef ACE_WIN32
+#  include <ace/WFMO_Reactor.h>
+#endif
+
 #include <map>
 #include <string>
 #include <iostream>
@@ -14,35 +42,7 @@
 #include <atomic>
 #include <condition_variable>
 
-#include <ace/Process_Manager.h>
-#include <ace/OS_NS_stdlib.h>
-#include <ace/OS_NS_fcntl.h>
-#ifdef ACE_WIN32
-#include <ace/WFMO_Reactor.h>
-#endif
-
-#include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DdsDcpsPublicationC.h>
-#include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/DomainParticipantImpl.h>
-#include <dds/DCPS/Marked_Default_Qos.h>
-#include <dds/DCPS/WaitSet.h>
-
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
-
-#include <util.h>
-#include <BenchTypeSupportImpl.h>
-#include <tests/Utils/StatusMatching.h>
-#include <Common.h>
-#include "ProcessStatsCollector.h"
-#include "PropertyStatBlock.h"
-
 using namespace Bench::NodeController;
-using Bench::get_option_argument_int;
-using Bench::get_option_argument;
 using Bench::join_path;
 using Bench::string_replace;
 using Bench::create_temp_dir;
@@ -589,37 +589,27 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   int domain = default_control_domain;
   std::string name;
 
-  try {
-    if (argc == 1) {
-      std::cerr << "A valid run type is required" << std::endl;
-      throw 1;
-    }
+  {
+    using namespace OpenDDS::DCPS::ArgParsing;
 
-    const ACE_TCHAR* run_mode_arg = argv[1];
-    if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("one-shot"))) {
-      run_mode = RunMode::one_shot;
-    } else if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("daemon"))) {
-      run_mode = RunMode::daemon;
-    } else if (!ACE_OS::strcmp(run_mode_arg, ACE_TEXT("daemon-exit-on-error"))) {
-      run_mode = RunMode::daemon_exit_on_error;
-    } else {
-      std::cerr << "Invalid run mode: " << ACE_TEXT_ALWAYS_CHAR(run_mode_arg) << std::endl;
-      throw 1;
-    }
+    ArgParser arg_parser("Communicates with test_controller to start and report results of workers "
+      "for a scenario. See bench documentation for details.");
 
-    for (int i = 2; i < argc; i++) {
-      if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--domain"))) {
-        domain = get_option_argument_int(i, argc, argv);
-      } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--name"))) {
-        name = get_option_argument(i, argc, argv);
-      } else {
-        std::cerr << "Invalid option: " << ACE_TEXT_ALWAYS_CHAR(argv[i]) << std::endl;
-        return 1;
-      }
-    }
-  } catch(const int value) {
-    std::cerr << "See DDS_ROOT/performance-tests/bench/README.md for usage" << std::endl;
-    return value;
+    PositionalAs<ChoiceValue<RunMode> > run_mode_arg(arg_parser, "RUN_MODE",
+      "Controls how the program loops.", run_mode);
+    run_mode_arg.handler.add_choice("one-shot", RunMode::one_shot, "Run one scenario and exit.");
+    run_mode_arg.handler.add_choice("daemon", RunMode::daemon, "Run scenarios until killed.");
+    run_mode_arg.handler.add_choice("daemon-exit-on-error", RunMode::daemon_exit_on_error,
+      "Run scenarios until killed or an error occurs.");
+
+    OptionAs<IntValue<int> > domain_opt(arg_parser, "domain",
+      "The DDS Domain to use. The default is 89.",
+      domain, "DOMAIN_INT");
+
+    OptionAs<StringValue> name_opt(arg_parser, "name", "Human friendly name for the node.",
+      name, "NAME_STR");
+
+    arg_parser.parse(argc, argv);
   }
 
   // Try to get a temp_dir
