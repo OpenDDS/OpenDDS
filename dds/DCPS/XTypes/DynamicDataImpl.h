@@ -494,6 +494,8 @@ private:
     };
   };
 
+  typedef DCPS::OPENDDS_VECTOR(CORBA::ULong) IndexToIdMap;
+
   // Container for all data written to this DynamicData object.
   // At anytime, there can be at most 1 entry for any given MemberId in all maps.
   // That is, each member is stored in at most 1 map.
