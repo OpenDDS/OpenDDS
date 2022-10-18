@@ -15,7 +15,7 @@
 
 #include "tao/Exception.h"
 
-#include "dds/InfoRepo/DCPSInfoRepoServ.h"
+#include "dds/InfoRepo/Serv/DCPSInfoRepoServ.h"
 #include "dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h"
 
 #include "org_opendds_jms_DCPSInfoRepo.h"

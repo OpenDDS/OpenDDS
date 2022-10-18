@@ -20,7 +20,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
 namespace Federator {
-  // reproducing type created by dds/InfoRepo/Federator.idl
+  // reproducing type created by dds/InfoRepo/Federator/Federator.idl
   typedef ::CORBA::Long RepoKey;
 }
 

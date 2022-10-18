@@ -7,7 +7,7 @@
 
 #include "dds/DCPS/debug.h"
 
-#include "dds/InfoRepo/FederatorC.h"
+#include "dds/InfoRepo/Federator/FederatorC.h"
 
 #include "ace/Arg_Shifter.h"
 #include "ace/OS_main.h"

@@ -1,0 +1,8 @@
+project: dcpslib, dcps_inforepodiscovery, iortable, bidir_giop, dcps_inforepo_bits, imr_client, svc_utils, install_lib {
+  sharedname   = OpenDDS_InfoRepoServ
+  dynamicflags = OPENDDS_DCPSINFOREPOSERV_BUILD_DLL
+  includes    += $(DDS_ROOT) .. ../Lib ../Federator
+  libs        += OpenDDS_InfoRepoLib OpenDDS_Federator
+  after       += DCPSInfoRepoLib DCPSInfoRepoFederator
+  requires    += no_opendds_safety_profile
+}

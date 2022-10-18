@@ -1,0 +1,9 @@
+project: dcpsexe, iortable, bidir_giop, dcps_inforepo_bits, imr_client, svc_utils, install {
+  exename   = DCPSInfoRepo
+  exeout    = $(DDS_ROOT)/bin
+  requires += no_opendds_safety_profile
+  includes += .. ../Lib ../Federator ../Serv
+  libpaths += $(DDS_ROOT)/lib
+  libs     += OpenDDS_InfoRepoServ OpenDDS_InfoRepoLib OpenDDS_Federator
+  after    += DCPSInfoRepoLib DCPSInfoRepoFederator DCPSInfoRepoServ
+}
