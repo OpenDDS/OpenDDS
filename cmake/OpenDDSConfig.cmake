@@ -88,12 +88,14 @@ set(_tao_bin_hints ${TAO_BIN_DIR})
 
 find_program(PERL perl)
 
+if(NOT BUILDING_OPENDDS_CORE)
 find_program(OPENDDS_IDL
   NAMES
     opendds_idl
   HINTS
     ${_dds_bin_hints}
 )
+endif()
 
 find_program(TAO_IDL
   NAMES
