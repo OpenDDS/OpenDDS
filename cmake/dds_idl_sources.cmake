@@ -109,7 +109,7 @@ function(opendds_export_target_property target property_name)
 endfunction()
 
 function(opendds_target_idl_sources target)
-  set(oneValueArgs SCOPE SKIP_TAO_IDL)
+  set(oneValueArgs SCOPE SKIP_TAO_IDL SKIP_TYPESUPPORT_IDL)
   set(multiValueArgs TAO_IDL_FLAGS DDS_IDL_FLAGS IDL_FILES)
   cmake_parse_arguments(_arg "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -279,13 +279,17 @@ function(opendds_target_idl_sources target)
       OPENDDS_LANGUAGE_MAPPINGS ${file_language_mappings})
 
     if (NOT _arg_SKIP_TAO_IDL)
+      set(_tao_idl_files ${_cur_idl_file})
+      if (NOT _arg_SKIP_TYPESUPPORT_IDL)
+        list(APPEND _tao_idl_files ${_cur_type_support_idl})
+      endif()
       tao_idl_command(${target}
         IDL_FLAGS
           -I${DDS_ROOT}
           -I${idl_file_dir} # The type-support IDL will include the primary IDL file
           ${_arg_TAO_IDL_FLAGS}
           -o "${output_dir}"
-        IDL_FILES ${_cur_idl_file})
+        IDL_FILES ${_tao_idl_files})
     endif()
 
     set_property(SOURCE ${abs_filename} PROPERTY

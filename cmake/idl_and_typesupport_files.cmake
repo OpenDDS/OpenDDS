@@ -34,6 +34,7 @@ macro(IDL_AND_TYPESUPPORT_FILES_TARGET_SOURCES target)
     if (_idl_sources_${scope})
       OPENDDS_TARGET_SOURCES(${target}
                       ${scope} ${_idl_sources_${scope}}
+                      SKIP_TYPESUPPORT_IDL ON
                       TAO_IDL_OPTIONS ${_arg_IDL_FILES_OPTIONS}
                       OPENDDS_IDL_OPTIONS ${_arg_TYPESUPPORT_FILES_OPTIONS})
    endif()
