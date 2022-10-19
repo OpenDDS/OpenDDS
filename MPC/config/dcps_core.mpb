@@ -1,0 +1,11 @@
+project {
+  specific(cmake) {
+    pre_find_package = "set(BUILDING_OPENDDS_CORE YES)<%crlf%>set(OPENDDS_DEFAULT_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR})"
+  }
+  verbatim(cmake, local) {
+    if(MSVC)
+      target_link_libraries(${PROJECT_TARGET} iphlpapi)
+    endif()
+  }
+}
+

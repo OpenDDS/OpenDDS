@@ -1,4 +1,4 @@
-project: dcpslib, iortable, dcps_inforepodiscovery, dcps_inforepo_bits, imr_client, svc_utils, install_lib {
+project: dcps_core, dcpslib, iortable, dcps_inforepodiscovery, dcps_inforepo_bits, imr_client, svc_utils, install_lib {
   sharedname   = OpenDDS_InfoRepoLib
   dynamicflags = OPENDDS_INFOREPOLIB_BUILD_DLL
   includes    += $(DDS_ROOT) ..

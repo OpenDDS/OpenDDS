@@ -1,4 +1,4 @@
-project(OpenDDS_monitor) : dcpslib, install, dds_versioning_idl_defaults, msvc_bigobj {
+project(OpenDDS_monitor) : dcps_core, dcpslib, install, dds_versioning_idl_defaults, msvc_bigobj {
   requires += no_opendds_safety_profile
   sharedname   = OpenDDS_monitor
   dynamicflags = MONITOR_BUILD_DLL

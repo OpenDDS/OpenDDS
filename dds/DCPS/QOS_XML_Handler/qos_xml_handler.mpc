@@ -1,5 +1,5 @@
 
-project (OpenDDS_XML_QOS_XSC_Generation) : install, xscdefaults {
+project (OpenDDS_XML_QOS_XSC_Generation) : dcps_core, install, xscdefaults {
   requires += xsc
 
   xscflags += --cxx-banner-file $(DDS_ROOT)/docs/schema/xsc-banner.cpp

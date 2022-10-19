@@ -1,4 +1,4 @@
-project(OpenDDS_Dcps): core, coverage_optional, \
+project(OpenDDS_Dcps): dcps_core, core, coverage_optional, \
         dcps_optional_features, opendds_testing_features, dcps_optional_safety, dds_macros, \
         dds_suppress_any_support, dds_taolib, gen_ostream, install, valgrind, \
         dds_vc_warnings, dds_versioning_idl_defaults, msvc_bigobj, dcps_optional_rapidjson {

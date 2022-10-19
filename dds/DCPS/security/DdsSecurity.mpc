@@ -1,4 +1,4 @@
-project(OpenDDS_Security): dcpslib, dcps_rtps, dds_openssl, ace_xml_utils, install, dds_versioning_idl_defaults {
+project(OpenDDS_Security): dcps_core, dcpslib, dcps_rtps, dds_openssl, ace_xml_utils, install, dds_versioning_idl_defaults {
   idlflags += -Wb,export_macro=OpenDDS_Security_Export -Wb,export_include=OpenDDS_Security_Export.h -SS
   dcps_ts_flags += -Wb,export_macro=OpenDDS_Security_Export -Wb,export_include=OpenDDS_Security_Export.h
   requires += no_opendds_safety_profile

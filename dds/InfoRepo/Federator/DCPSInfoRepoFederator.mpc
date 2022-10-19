@@ -1,4 +1,4 @@
-project: dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, install, dds_versioning_idl_defaults, msvc_bigobj {
+project: dcps_core, dcpslib, dcps_inforepodiscovery, dcps_tcp, iortable, install, dds_versioning_idl_defaults, msvc_bigobj {
   sharedname     = OpenDDS_Federator
   dynamicflags   = OPENDDS_FEDERATOR_BUILD_DLL
   includes      += $(DDS_ROOT) .. ../Lib

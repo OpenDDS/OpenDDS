@@ -1,7 +1,7 @@
 //
 //
 
-project: dcpslib, dcps_rtps, opendds_testing_features, install, msvc_bigobj {
+project: dcps_core, dcpslib, dcps_rtps, opendds_testing_features, install, msvc_bigobj {
   sharedname    = OpenDDS_Rtps_Udp
   dynamicflags  = OPENDDS_RTPS_UDP_BUILD_DLL
 

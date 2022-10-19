@@ -1,4 +1,4 @@
-project(OpenDDS*): dcpslib, dcps_tcp, dds_versioning_idl_defaults, install {
+project(OpenDDS*): dcps_core, dcpslib, dcps_tcp, dds_versioning_idl_defaults, install {
   requires += no_opendds_safety_profile
   dynamicflags = OPENDDS_INFOREPODISCOVERY_BUILD_DLL
 

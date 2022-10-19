@@ -1,7 +1,7 @@
 //
 //
 
-project : dcpslib, install {
+project : dcps_core, dcpslib, install {
   sharedname    = OpenDDS_Multicast
   dynamicflags  = OPENDDS_MULTICAST_BUILD_DLL
   requires += no_opendds_safety_profile
