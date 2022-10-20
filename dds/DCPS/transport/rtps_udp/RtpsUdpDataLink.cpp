@@ -567,7 +567,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   sq_.ignore(local_id, remote_id);
 
   update_locators(remote_id, unicast_addresses, multicast_addresses, requires_inline_qos, true);
-  if (last_addr_hint != NetworkAddress()) {
+  if (last_addr_hint) {
     update_last_recv_addr(remote_id, last_addr_hint);
   }
 
@@ -4623,7 +4623,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const
 
 bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
 {
-  if (last_recv_addr_ == NetworkAddress()) {
+  if (!last_recv_addr_) {
     return false;
   }
   const ACE_INT16 last_addr_type = last_recv_addr_.get_type();

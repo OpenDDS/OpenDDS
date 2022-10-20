@@ -16,6 +16,8 @@ TEST(dds_DCPS_NetworkAddress, DefaultConstructor)
   const NetworkAddress sa;
   EXPECT_EQ(sa.get_port_number(), 0);
   EXPECT_EQ(sa, NetworkAddress());
+  EXPECT_FALSE(sa);
+  EXPECT_TRUE(!sa);
 }
 
 TEST(dds_DCPS_NetworkAddress, AddrConstructorDefault)
@@ -25,6 +27,8 @@ TEST(dds_DCPS_NetworkAddress, AddrConstructorDefault)
   EXPECT_EQ(sa, NetworkAddress());
   EXPECT_EQ(sa.to_addr(), ia);
   EXPECT_EQ(sa.to_addr(), ACE_INET_Addr());
+  EXPECT_FALSE(sa);
+  EXPECT_TRUE(!sa);
 }
 
 TEST(dds_DCPS_NetworkAddress, AddrConstructorPortStrIpFour)
@@ -39,6 +43,8 @@ TEST(dds_DCPS_NetworkAddress, AddrConstructorPortStrIpFour)
   ACE_INET_Addr ia2;
   ia2.set_addr(ia.get_addr(), ia.get_addr_size());
   EXPECT_EQ(sa.to_addr(), ia2);
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
 }
 
 TEST(dds_DCPS_NetworkAddress, AddrConstructorStrIpFour)
@@ -53,6 +59,8 @@ TEST(dds_DCPS_NetworkAddress, AddrConstructorStrIpFour)
   ACE_INET_Addr ia2;
   ia2.set_addr(ia.get_addr(), ia.get_addr_size());
   EXPECT_EQ(sa.to_addr(), ia2);
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
 }
 
 #if defined (ACE_HAS_IPV6)
@@ -64,6 +72,8 @@ TEST(dds_DCPS_NetworkAddress, AddrConstructorPortStrIpSix)
   EXPECT_EQ(sa.get_type(), AF_INET6);
   EXPECT_EQ(sa.get_port_number(), 1234);
   EXPECT_EQ(sa.to_addr(), ia);
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
 }
 
 TEST(dds_DCPS_NetworkAddress, AddrConstructortStrIpSix)
@@ -73,6 +83,8 @@ TEST(dds_DCPS_NetworkAddress, AddrConstructortStrIpSix)
   EXPECT_EQ(sa.get_type(), AF_INET6);
   EXPECT_EQ(sa.get_port_number(), 4321);
   EXPECT_EQ(sa.to_addr(), ia);
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
 }
 
 #endif
@@ -89,6 +101,8 @@ TEST(dds_DCPS_NetworkAddress, PortStrConstructorIpFour)
   ACE_INET_Addr ia2;
   ia2.set_addr(ia.get_addr(), ia.get_addr_size());
   EXPECT_EQ(sa.to_addr(), ia2);
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
 
   EXPECT_EQ(sa, NetworkAddress(1234, "127.0.10.13"));
 }
@@ -105,6 +119,8 @@ TEST(dds_DCPS_NetworkAddress, StrConstructorIpFour)
   ACE_INET_Addr ia2;
   ia2.set_addr(ia.get_addr(), ia.get_addr_size());
   EXPECT_EQ(sa.to_addr(), ia2);
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
 
   EXPECT_EQ(sa, NetworkAddress(4321, "127.0.10.13"));
 }
@@ -117,6 +133,8 @@ TEST(dds_DCPS_NetworkAddress, PortStrConstructorIpSix)
   EXPECT_EQ(sa.get_type(), AF_INET6);
   EXPECT_EQ(sa.get_port_number(), 1234);
   EXPECT_EQ(sa.to_addr(), ACE_INET_Addr(1234, "::FD01"));
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
   EXPECT_EQ(sa, NetworkAddress(1234, "::FD01"));
 }
 
@@ -126,6 +144,8 @@ TEST(dds_DCPS_NetworkAddress, StrConstructorIpSix)
   EXPECT_EQ(sa.get_type(), AF_INET6);
   EXPECT_EQ(sa.get_port_number(), 4321);
   EXPECT_EQ(sa.to_addr(), ACE_INET_Addr(4321, "::FE03"));
+  EXPECT_TRUE(sa);
+  EXPECT_FALSE(!sa);
   EXPECT_EQ(sa, NetworkAddress(4321, "::FE03"));
 }
 

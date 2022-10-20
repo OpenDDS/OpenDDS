@@ -121,6 +121,18 @@ NetworkAddress& NetworkAddress::operator=(const ACE_INET_Addr& rhs)
   return *this = NetworkAddress(rhs);
 }
 
+NetworkAddress::operator bool() const
+{
+  static const NetworkAddress empty = NetworkAddress();
+  return *this != empty;
+}
+
+bool NetworkAddress::operator!() const
+{
+  static const NetworkAddress empty = NetworkAddress();
+  return *this == empty;
+}
+
 bool NetworkAddress::operator==(const NetworkAddress& rhs) const
 {
   return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) == 0;
@@ -286,7 +298,7 @@ bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming
 {
   // The question to answer here: "Is the incoming address 'more local' than the current address?"
 
-  if (current == NetworkAddress()) {
+  if (!current) {
     return true;
   }
 
