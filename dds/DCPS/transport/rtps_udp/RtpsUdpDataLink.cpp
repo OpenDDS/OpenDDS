@@ -3215,11 +3215,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   // Process the ack.
   bool inform_send_listener = false;
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    // Clean up requested fragments.
-    for (RequestedFragSeqMap::iterator pos = reader->requested_frags_.begin(),
-           limit = reader->requested_frags_.end(); pos != limit && pos->first < ack;) {
-      reader->requested_frags_.erase(pos++);
-    }
 
     if (ack >= reader->cur_cumulative_ack_) {
       reader->cur_cumulative_ack_ = ack;
