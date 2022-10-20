@@ -649,7 +649,10 @@ CL is _MSC_VER ARCH
 EOF
     print $tmp_fd $cl_check;
     close($tmp_fd);
-    my $cl_command = "\"$opts{'compiler'}\" /EP $tmp_filename 2>&1";
+    ## CL understands - as an option indicator and when using mingw perl
+    ## anything that starts with / is converted to a Windows path before
+    ## it is passed to an executable.
+    my $cl_command = "\"$opts{'compiler'}\" -EP $tmp_filename 2>&1";
     print "Running $cl_command\n" if $opts{'verbose'};
     open(my $cl_out_fd, "-|", $cl_command)
       or die "ERROR: Could not detect Visual C++ version, try running this ".
@@ -660,7 +663,7 @@ EOF
       chomp ($line);
       print "CL says: $line\n" if $opts{'verbose'} && $line !~ /^\s*$/;
       # Convert _MSC_VER to the form \d+\.\d
-      if ($line =~ /^CL is (\d+)\d (\w+)$/) {
+      if ($line =~ /^CL is (\d+)\d (\w+)\s*$/) {
         $ver = int($1) / 10;
         $arch = $2;
         last;
@@ -2722,6 +2725,12 @@ sub write_cmake_file {
     );
     for my $opt (sort(keys(%opts_to_use))) {
       print_cmake_config($fh, $opt, exists($opts{$opt}) ? $opts{$opt} : $opts_to_use{$opt});
+    }
+
+    ## Add security related options if the user enabled security
+    if ($opts{'security'}) {
+      print_cmake_config($fh, 'SECURITY_MACRO',    'OPENDDS_SECURITY');
+      print_cmake_config($fh, 'SECURITY_OPTION', '-DOPENDDS_SECURITY');
     }
 
     print $fh "\n# Sanitizers\n";
