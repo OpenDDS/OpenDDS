@@ -18,7 +18,7 @@ namespace OpenDDS {
     using OpenDDS::DCPS::EntityId_t;
 
     /**
-     * The below entities 
+     * The below entities
      are from the security spec. V1.1
      * section 7.3.7.1 "Mapping of the EntityIds for the Builtin DataWriters and DataReaders"
      */
@@ -44,7 +44,7 @@ namespace OpenDDS {
     #ifdef OPENDDS_SECURITY
     const DDS::Security::ParticipantSecurityInfo PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
     const DDS::Security::EndpointSecurityInfo ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
-    #endif 
+    #endif
     // end of EntityId section
 
     // For messages we create, the "octetsToInlineQoS" value will be constant.
