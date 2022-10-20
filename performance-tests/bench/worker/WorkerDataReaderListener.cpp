@@ -332,7 +332,8 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 
     size_t out_of_order_data_count = 0;
     size_t duplicate_data_count = 0;
-    size_t missing_data_count = 0;
+    size_t missing_data_from_writers_count = 0;
+    size_t missing_data_from_totals_count = 0;
     std::stringstream missing_data_details;
     std::stringstream out_of_order_data_details;
     std::stringstream duplicate_data_details;
@@ -404,7 +405,7 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
         }
         auto msr = it->second.data_received_.missing_sequence_ranges();
         for (auto it2 = msr.begin(); it2 != msr.end(); ++it2) {
-          missing_data_count += static_cast<ptrdiff_t>(it2->second.getValue() - (it2->first.getValue() - 1)); // update count
+          missing_data_from_writers_count += static_cast<ptrdiff_t>(it2->second.getValue() - (it2->first.getValue() - 1)); // update count
           if (new_writer) {
             uint64_t low = it->second.data_received_.low().getValue() == 0 ? 1 : it->second.data_received_.low().getValue();
             uint64_t high = inserted_expected ? it->second.data_received_.high().getValue() - 1 : it->second.data_received_.high().getValue();
@@ -424,17 +425,15 @@ WorkerDataReaderListener::unset_datareader(Builder::DataReader& datareader)
 
     // if we didn't meet the expected sample count, add difference to missing sample count
     if (expected_sample_count_ && sample_count_ < expected_sample_count_) {
-      if (!expected_per_writer_sample_count_) {
-        missing_data_count += expected_sample_count_ - sample_count_;
-      }
-      missing_data_details << " ERROR Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
+      missing_data_from_totals_count += expected_sample_count_ - sample_count_;
+      missing_data_details << " ERROR Total Expected Sample Deficit: " << expected_sample_count_ - sample_count_ << std::flush;
     }
 
     out_of_order_data_count_->value.ull_prop(out_of_order_data_count);
     out_of_order_data_details_->value.string_prop(out_of_order_data_details.str().c_str());
     duplicate_data_count_->value.ull_prop(duplicate_data_count);
     duplicate_data_details_->value.string_prop(duplicate_data_details.str().c_str());
-    missing_data_count_->value.ull_prop(missing_data_count);
+    missing_data_count_->value.ull_prop(std::max(missing_data_from_writers_count, missing_data_from_totals_count));
     missing_data_details_->value.string_prop(missing_data_details.str().c_str());
 
     discovery_delta_stat_block_->finalize();
