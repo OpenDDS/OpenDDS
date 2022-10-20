@@ -10,6 +10,11 @@ project(OpenDDS_monitor) : dcps_core, dcpslib, install, dds_versioning_idl_defau
                    -Wb,versioning_begin=OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL \
                    -Wb,versioning_end=OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+  IDL_Files {
+    monitor.idl
+    monitorTypeSupport.idl
+  }
+
   TypeSupport_Files {
     monitor.idl
   }
