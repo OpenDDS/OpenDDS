@@ -8,9 +8,6 @@
 #include "ParameterListConverter.h"
 
 #include "BaseMessageUtils.h"
-#ifdef OPENDDS_SECURITY
-#  include "SecurityHelpers.h"
-#endif
 
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/GuidUtils.h>
