@@ -25,7 +25,7 @@ project (OpenDDS_XML_QOS_XSC_Generation) : dcps_core, install, xscdefaults {
 }
 
 
-project(OpenDDS_QOS_XML_XSC_Handler): install, ace_xml_utils, dcpslib {
+project(OpenDDS_QOS_XML_XSC_Handler): dcps_core, install, ace_xml_utils, dcpslib {
   sharedname = OpenDDS_QOS_XML_XSC_Handler
   after += OpenDDS_XML_QOS_XSC_Generation
   dynamicflags += OPENDDS_XML_QOS_HANDLER_BUILD_DLL
