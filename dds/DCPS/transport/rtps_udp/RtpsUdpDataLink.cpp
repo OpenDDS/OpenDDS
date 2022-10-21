@@ -24,7 +24,6 @@
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/Logging.h>
 #ifdef OPENDDS_SECURITY
-#  include <dds/DCPS/RTPS/SecurityHelpers.h>
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
 

@@ -10,7 +10,7 @@
 #include "BaseMessageTypes.h"
 #include "BaseMessageUtils.h"
 #ifdef OPENDDS_SECURITY
-#  include "SecurityHelpers.h"
+#  include "ParameterListConverter.h"
 #endif
 #include "ICE/Ice.h"
 #include "RtpsRpcTypeSupportImpl.h"
@@ -1256,7 +1256,7 @@ private:
 
 #ifdef OPENDDS_SECURITY
   void data_received(DCPS::MessageId message_id,
-                     const DiscoveredPublication_SecurityWrapper& wrapper);
+                     const ParameterListConverter::DiscoveredPublication_SecurityWrapper& wrapper);
 #endif
 
   void process_discovered_reader_data(DCPS::MessageId message_id,
@@ -1276,7 +1276,7 @@ private:
 
 #ifdef OPENDDS_SECURITY
   void data_received(DCPS::MessageId message_id,
-                     const DiscoveredSubscription_SecurityWrapper& wrapper);
+                     const ParameterListConverter::DiscoveredSubscription_SecurityWrapper& wrapper);
 #endif
 
   /// This is a function to unify the notification of liveliness within RTPS

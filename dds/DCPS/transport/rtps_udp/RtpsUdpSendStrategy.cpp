@@ -25,11 +25,6 @@
 
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
-#ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
-#include <vector>
-#endif
-
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
