@@ -2733,6 +2733,12 @@ sub write_cmake_file {
       print_cmake_config($fh, 'SECURITY_OPTION', '-DOPENDDS_SECURITY');
     }
 
+    ## Add built-in-topics related options if the user disabled them
+    if (exists $opts{'built-in-topics'} && !$opts{'built-in-topics'}) {
+      print_cmake_config($fh, 'BUILT_IN_TOPICS_MACRO',   'DDS_HAS_MINIMUM_BIT');
+      print_cmake_config($fh, 'BUILT_IN_TOPICS_OPTION','-DDDS_HAS_MINIMUM_BIT');
+    }
+
     print $fh "\n# Sanitizers\n";
     for my $name (sort(keys(%all_sanitizers))) {
       print_cmake_config($fh, $name, exists($enabled_sanitizers{$name}) ? 1 : 0);

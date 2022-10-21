@@ -1,7 +1,18 @@
+project : taoidldefaults, dcps_ts_defaults {
+  // Since CMake is configurable outside of MPC, we will provide these
+  // settings whether the built_in_topics feature is enabled or disabled.
+  specific(cmake) {
+    macros        += ${OPENDDS_BUILT_IN_TOPICS_MACRO}
+    idlflags      += ${OPENDDS_BUILT_IN_TOPICS_OPTION}
+    dcps_ts_flags += ${OPENDDS_BUILT_IN_TOPICS_OPTION}
+  }
+}
 feature (!built_in_topics) : taoidldefaults, dcps_ts_defaults {
-  macros   += DDS_HAS_MINIMUM_BIT
-  idlflags += -DDDS_HAS_MINIMUM_BIT
-  dcps_ts_flags += -DDDS_HAS_MINIMUM_BIT
+  specific(!cmake) {
+    macros   += DDS_HAS_MINIMUM_BIT
+    idlflags += -DDDS_HAS_MINIMUM_BIT
+    dcps_ts_flags += -DDDS_HAS_MINIMUM_BIT
+  }
 }
 feature (!content_subscription) : taoidldefaults, dcps_ts_defaults {
   macros   += OPENDDS_NO_QUERY_CONDITION OPENDDS_NO_CONTENT_FILTERED_TOPIC OPENDDS_NO_MULTI_TOPIC
