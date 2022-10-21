@@ -2917,7 +2917,6 @@ Service_Participant::create_replayer(DDS::DomainParticipant_ptr participant,
                                      const DDS::DataWriterQos& datawriter_qos,
                                      const ReplayerListener_rch& a_listener)
 {
-  ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);
