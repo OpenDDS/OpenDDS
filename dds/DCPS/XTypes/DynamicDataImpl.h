@@ -484,7 +484,7 @@ private:
       DDS::Float64Seq float64_seq_;
       DDS::Float128Seq float128_seq_;
       DDS::CharSeq char8_seq_;
-      DDS::OctetSeq byte_seq_;
+      DDS::ByteSeq byte_seq_;
       DDS::BooleanSeq boolean_seq_;
       DDS::StringSeq string_seq_;
 #ifdef DDS_HAS_WCHAR

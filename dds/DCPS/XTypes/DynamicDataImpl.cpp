@@ -1469,50 +1469,6 @@ bool DynamicDataImpl::DataContainer::get_largest_index_basic_sequence(CORBA::ULo
   return true;
 }
 
-template<typename ValueType>
-bool DynamicDataImpl::DataContainer::set_default_basic_value(ValueType& value, TypeKind kind) const
-{
-  // Set default value for a basic type according to Table 9.
-  // When MemberDescriptor::default_value is fully supported, it would
-  // have precedence over these default values.
-  switch (kind) {
-  case TK_INT32:
-  case TK_UINT32:
-  case TK_INT8:
-  case TK_UINT8:
-  case TK_INT16:
-  case TK_UINT16:
-  case TK_INT64:
-  case TK_UINT64:
-  case TK_FLOAT32:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-    value = 0
-    return true;
-  case TK_CHAR8:
-    value = '\0';
-    return true;
-  case TK_BYTE:
-    value = 0x00;
-    return true;
-  case TK_STRING8:
-    value = "";
-    return true;
-  case TK_BOOLEAN:
-    value = false;
-    return true;
-#ifdef DDS_HAS_WCHAR
-  case TK_CHAR16:
-    value = '\0';
-    return true;
-  case TK_STRING16:
-    value = "";
-    return true;
-#endif
-  }
-  return false;
-}
-
 template<typename PrimitiveType>
 bool DynamicDataImpl::DataContainer::serialize_primitive_value(DCPS::Serializer& ser,
   PrimitiveType default_value, TypeKind primitive_kind) const
@@ -1646,24 +1602,70 @@ bool DynamicDataImpl::DataContainer::serialize_wstring_value(DCPS::Serializer& s
   }
 }
 
-template<typename SequenceType>
-void DynamicDataImpl::DataContainer::set_default_basic_values(SequenceType& seq, TypeKind elem_tk) const
+template<typename ValueType>
+bool DynamicDataImpl::DataContainer::set_default_basic_value(ValueType& value, TypeKind kind) const
 {
-  for (CORBA::ULong i = 0; i < seq.length(); ++i) {
-    set_default_basic_value(seq[i], elem_tk);
+  // Set default value for a basic type according to Table 9.
+  // When MemberDescriptor::default_value is fully supported, it would
+  // have precedence over these default values.
+  switch (kind) {
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+    value = 0
+    return true;
+  case TK_CHAR8:
+    value = '\0';
+    return true;
+  case TK_BYTE:
+    value = 0x00;
+    return true;
+  case TK_STRING8:
+    value = "";
+    return true;
+  case TK_BOOLEAN:
+    value = false;
+    return true;
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    value = '\0';
+    return true;
+  case TK_STRING16:
+    value = "";
+    return true;
+#endif
+  }
+  return false;
+}
+
+template<typename CollectionType>
+void DynamicDataImpl::DataContainer::set_default_basic_values(CollectionType& collection,
+                                                              TypeKind elem_tk) const
+{
+  for (CORBA::ULong i = 0; i < collection.length(); ++i) {
+    set_default_basic_value(collection[i], elem_tk);
   }
 }
 
 // Set elements for a sequence of basic type.
-template<typename SequenceType>
-bool DynamicDataImpl::DataContainer::set_basic_values(SequenceType& seq, CORBA::ULong bound) const
+template<typename CollectionType>
+bool DynamicDataImpl::DataContainer::set_basic_values(CollectionType& collection,
+                                                      CORBA::ULong bound) const
 {
   for (const_single_iterator it = single_map_.begin(); it != single_map_.end(); ++it) {
     CORBA::ULong index;
     if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
-    seq[index] = it->second.get();
+    collection[index] = it->second.get();
   }
 
   for (const_complex_iterator it = complex_map_.begin(); it != complex_map_.end(); ++it) {
@@ -1671,18 +1673,20 @@ bool DynamicDataImpl::DataContainer::set_basic_values(SequenceType& seq, CORBA::
     if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
-    seq[index] = it->second.container_.single_map_.at(MEMBER_ID_INVALID);
+    collection[index] = it->second.container_.single_map_.at(MEMBER_ID_INVALID);
   }
   return true;
 }
 
-template<typename SequenceType>
-bool DynamicDataImpl::DataContainer::reconstruct_basic_sequence(SequenceType& seq,
+// Helper function to reconstruct a sequence or array of basic type.
+// For array, @a size is equal to @a bound.
+template<typename CollectionType>
+bool DynamicDataImpl::DataContainer::reconstruct_basic_collection(CollectionType& collection,
   TypeKind elem_tk, CORBA::ULong size, CORBA::ULong bound) const
 {
-  seq.length(size);
-  set_default_basic_values(seq, elem_tk);
-  return set_basic_values(seq, bound);
+  collection.length(size);
+  set_default_basic_values(collection, elem_tk);
+  return set_basic_values(collection, bound);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_basic_sequence(DCPS::Serializer& ser,
@@ -1691,80 +1695,80 @@ bool DynamicDataImpl::DataContainer::serialize_basic_sequence(DCPS::Serializer& 
   switch (elem_tk) {
   case TK_INT32: {
     DDS::Int32Seq int32seq;
-    return reconstruct_basic_sequence(int32seq, elem_tk, size, bound) && (ser << int32seq);
+    return reconstruct_basic_collection(int32seq, elem_tk, size, bound) && (ser << int32seq);
   }
   case TK_UINT32: {
     DDS::UInt32Seq uint32seq;
-    return reconstruct_basic_sequence(uint32seq, elem_tk, size, bound) && (ser << uint32seq);
+    return reconstruct_basic_collection(uint32seq, elem_tk, size, bound) && (ser << uint32seq);
   }
   case TK_INT8: {
     DDS::Int8Seq int8seq;
-    return reconstruct_basic_sequence(int8seq, elem_tk, size, bound) && (ser << int8seq);
+    return reconstruct_basic_collection(int8seq, elem_tk, size, bound) && (ser << int8seq);
   }
   case TK_UINT8: {
     DDS::UInt8Seq uint8seq;
-    return reconstruct_basic_sequence(uint8seq, elem_tk, size, bound) && (ser << uint8seq);
+    return reconstruct_basic_collection(uint8seq, elem_tk, size, bound) && (ser << uint8seq);
   }
   case TK_INT16: {
     DDS::Int16Seq int16seq;
-    return reconstruct_basic_sequence(int16seq, elem_tk, size, bound) && (ser << int16seq);
+    return reconstruct_basic_collection(int16seq, elem_tk, size, bound) && (ser << int16seq);
   }
   case TK_UINT16: {
     DDS::UInt16Seq uint16seq;
-    return reconstruct_basic_sequence(uint16seq, elem_tk, size, bound) && (ser << uint16seq);
+    return reconstruct_basic_collection(uint16seq, elem_tk, size, bound) && (ser << uint16seq);
   }
   case TK_INT64: {
     DDS::Int64Seq int64seq;
-    return reconstruct_basic_sequence(int64seq, elem_tk, size, bound) && (ser << int64seq);
+    return reconstruct_basic_collection(int64seq, elem_tk, size, bound) && (ser << int64seq);
   }
   case TK_UINT64: {
     DDS::UInt64Seq uint64seq;
-    return reconstruct_basic_sequence(uint64seq, elem_tk, size, bound) && (ser << uint64seq);
+    return reconstruct_basic_collection(uint64seq, elem_tk, size, bound) && (ser << uint64seq);
   }
   case TK_FLOAT32: {
     DDS::Float32Seq float32seq;
-    return reconstruct_basic_sequence(float32seq, elem_tk, size, bound) && (ser << float32seq);
+    return reconstruct_basic_collection(float32seq, elem_tk, size, bound) && (ser << float32seq);
   }
   case TK_FLOAT64: {
     DDS::Float64Seq float64seq;
-    return reconstruct_basic_sequence(float64seq, elem_tk, size, bound) && (ser << float64seq);
+    return reconstruct_basic_collection(float64seq, elem_tk, size, bound) && (ser << float64seq);
   }
   case TK_FLOAT128: {
     DDS::Float128Seq float128seq;
-    return reconstruct_basic_sequence(float128seq, elem_tk, size, bound) && (ser << float128seq);
+    return reconstruct_basic_collection(float128seq, elem_tk, size, bound) && (ser << float128seq);
   }
   case TK_CHAR8: {
     DDS::CharSeq charseq;
-    return reconstruct_basic_sequence(charseq, elem_tk, size, bound) && (ser << charseq);
+    return reconstruct_basic_collection(charseq, elem_tk, size, bound) && (ser << charseq);
   }
   case TK_STRING8: {
     DDS::StringSeq strseq;
-    return reconstruct_basic_sequence(strseq, elem_tk, size, bound) && (ser << strseq);
+    return reconstruct_basic_collection(strseq, elem_tk, size, bound) && (ser << strseq);
   }
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
     DDS::WCharSeq wcharseq;
-    return reconstruct_basic_sequence(wcharseq, elem_tk, size, bound) && (ser << wcharseq);
+    return reconstruct_basic_collection(wcharseq, elem_tk, size, bound) && (ser << wcharseq);
   }
   case TK_STRING16: {
     DDS::WStringSeq wstrseq;
-    return reconstruct_basic_sequence(wstrseq, elem_tk, size, bound) && (ser << wstrseq);
+    return reconstruct_basic_collection(wstrseq, elem_tk, size, bound) && (ser << wstrseq);
   }
 #endif
   case TK_BYTE: {
-    DDS::OctetSeq byteseq;
-    return reconstruct_basic_sequence(byteseq, elem_tk, size, bound) && (ser << byteseq);
+    DDS::ByteSeq byteseq;
+    return reconstruct_basic_collection(byteseq, elem_tk, size, bound) && (ser << byteseq);
   }
   case TK_BOOLEAN: {
     DDS::BooleanSeq boolseq;
-    return reconstruct_basic_sequence(boolseq, elem_tk, size, bound) && (ser << boolseq);
+    return reconstruct_basic_collection(boolseq, elem_tk, size, bound) && (ser << boolseq);
   }
   }
   return false;
 }
 
-template<typename ElementType, typename SequenceType>
-bool DynamicDataImpl::DataContainer::set_default_enum_values(SequenceType& seq,
+template<typename ElementType, typename CollectionType>
+bool DynamicDataImpl::DataContainer::set_default_enum_values(CollectionType& collection,
   const DDS::DynamicType_var& enum_type) const
 {
   // From Table 9, default enum value is the first enumerator.
@@ -1777,28 +1781,28 @@ bool DynamicDataImpl::DataContainer::set_default_enum_values(SequenceType& seq,
     return false;
   }
 
-  for (CORBA::ULong i = 0; i < seq.length(); ++i) {
-    seq[i] = static_cast<ElemenType>(first_md->id());
+  for (CORBA::ULong i = 0; i < collection.length(); ++i) {
+    collection[i] = static_cast<ElemenType>(first_md->id());
   }
   return true;
 }
 
-template<typename ElementType, typename SequenceType>
-bool DynamicDataImpl::DataContainer::reconstruct_enum_sequence(SequenceType& seq,
+template<typename ElementType, typename CollectionType>
+bool DynamicDataImpl::DataContainer::reconstruct_enum_collection(CollectionType& collection,
   CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
 {
-  seq.length(size);
-  if (!set_default_enum_values<ElementType>(seq, enum_type)) {
+  collection.length(size);
+  if (!set_default_enum_values<ElementType>(collection, enum_type)) {
     return false;
   }
-  return set_basic_values(seq, bound);
+  return set_basic_values(collection, bound);
 }
 
-// Serialized size of a enum sequence represented as a sequence of integers.
+// Serialize enum sequence represented as int8 sequence
 void DynamicDataImpl::DataContainer::serialized_size_enum_sequence(const DCPS::Encoding& encoding,
   size_t& size, const DDS::Int8Seq& seq) const
 {
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_delimiter(encoding, size);
   }
   primitive_serialized_size_ulong(encoding, size);
@@ -1808,38 +1812,12 @@ void DynamicDataImpl::DataContainer::serialized_size_enum_sequence(const DCPS::E
   primitive_serialized_size_int8(encoding, size, seq.length());
 }
 
-void DynamicDataImpl::DataContainer::serialized_size_enum_sequence(const DCPS::Encoding& encoding,
-  size_t& size, const DDS::Int16Seq& seq) const
-{
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (seq.length() == 0) {
-    return;
-  }
-  primitive_serialized_size(encoding, size, CORBA::Short(), seq.length());
-}
-
-void DynamicDataImpl::DataContainer::serialized_size_enum_sequence(const DCPS::Encoding& encoding,
-  size_t& size, const DDS::Int32Seq& seq) const
-{
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (seq.length() == 0) {
-    return;
-  }
-  primitive_serialized_size(encoding, size, CORBA::Long(), seq.length());
-}
-
 bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_ints_i(DCPS::Serializer& ser,
   const DDS::Int8Seq& enumseq) const
 {
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_enum_sequence(encoding, total_size, enumseq);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -1859,10 +1837,22 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_int8s(DCPS::Seri
   CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int8Seq enumseq;
-  if (!reconstruct_enum_sequence<CORBA::Int8>(enumseq, size, bound, enum_type)) {
-    return false;
+  return reconstruct_enum_collection<CORBA::Int8>(enumseq, size, bound, enum_type) &&
+    serialize_enum_sequence_as_ints_i(ser, enumseq);
+}
+
+// Serialize enum sequence represented as int16 sequence
+void DynamicDataImpl::DataContainer::serialized_size_enum_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::Int16Seq& seq) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
   }
-  return serialize_enum_sequence_as_ints_i(ser, enumseq);
+  primitive_serialized_size_ulong(encoding, size);
+  if (seq.length() == 0) {
+    return;
+  }
+  primitive_serialized_size(encoding, size, CORBA::Short(), seq.length());
 }
 
 bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_ints_i(DCPS::Serializer& ser,
@@ -1870,7 +1860,7 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_ints_i(DCPS::Ser
 {
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_enum_sequence(encoding, total_size, enumseq);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -1890,10 +1880,22 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_int16s(DCPS::Ser
   CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int16Seq enumseq;
-  if (!reconstruct_enum_sequence<CORBA::Short>(enumseq, size, bound, enum_type)) {
-    return false;
+  return reconstruct_enum_collection<CORBA::Short>(enumseq, size, bound, enum_type) &&
+    serialize_enum_sequence_as_ints_i(ser, enumseq);
+}
+
+// Serialize enum sequence represented as int32 sequence
+void DynamicDataImpl::DataContainer::serialized_size_enum_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::Int32Seq& seq) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
   }
-  return serialize_enum_sequence_as_ints_i(ser, enumseq);
+  primitive_serialized_size_ulong(encoding, size);
+  if (seq.length() == 0) {
+    return;
+  }
+  primitive_serialized_size(encoding, size, CORBA::Long(), seq.length());
 }
 
 bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_ints_i(DCPS::Serializer& ser,
@@ -1901,7 +1903,7 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_ints_i(DCPS::Ser
 {
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_enum_sequence(encoding, total_size, enumseq);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -1921,10 +1923,8 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_int32s(DCPS::Ser
   CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int32Seq enumseq;
-  if (!reconstruct_enum_sequence<CORBA::Long>(enumseq, size, bound, enum_type)) {
-    return false;
-  }
-  return serialize_enum_sequence_as_ints_i(ser, enumseq);
+  return reconstruct_enum_collection<CORBA::Long>(enumseq, size, bound, enum_type) &&
+    serialize_enum_sequence_as_ints_i(ser, enumseq);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_enum_sequence(DCPS::Serializer& ser,
@@ -1941,29 +1941,29 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence(DCPS::Serializer& s
   return false;
 }
 
-template<typename SequenceType>
-void DynamicDataImpl::DataContainer::set_default_bitmask_values(SequenceType& seq) const
+template<typename CollectionType>
+void DynamicDataImpl::DataContainer::set_default_bitmask_values(CollectionType& col) const
 {
   // Table 9 doesn't mention default value for bitmask. Use 0 as default here.
-  for (CORBA::ULong i = 0; i < seq.length(); ++i) {
-    seq[i] = 0;
+  for (CORBA::ULong i = 0; i < col.length(); ++i) {
+    col[i] = 0;
   }
 }
 
-template<typename SequenceType>
-bool DynamicDataImpl::DataContainer::reconstruct_bitmask_sequence(SequenceType& seq,
+template<typename CollectionType>
+bool DynamicDataImpl::DataContainer::reconstruct_bitmask_collection(CollectionType& collection,
   CORBA::ULong size, CORBA::ULong bound) const
 {
-  seq.length(size);
-  set_default_bitmask_values(seq);
-  return set_basic_values(seq, bound);
+  collection.length(size);
+  set_default_bitmask_values(collection);
+  return set_basic_values(collection, bound);
 }
 
-// Serialized size of a bitmask sequence represented as a sequence of unsigned integers.
+// Bitmask sequence represented as uint8 sequence.
 void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS::Encoding& encoding,
   size_t& size, const DDS::UInt8Seq& seq) const
 {
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_delimiter(encoding, size);
   }
   primitive_serialized_size_ulong(encoding, size);
@@ -1973,51 +1973,12 @@ void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS
   primitive_serialized_size_uint8(encoding, size, seq.length());
 }
 
-void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS::Encoding& encoding,
-  size_t& size, const DDS::UInt16Seq& seq) const
-{
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (seq.length() == 0) {
-    return;
-  }
-  primitive_serialized_size(encoding, size, CORBA::UShort(), seq.length());
-}
-
-void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS::Encoding& encoding,
-  size_t& size, const DDS::UInt32Seq& seq) const
-{
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (seq.length() == 0) {
-    return;
-  }
-  primitive_serialized_size(encoding, size, CORBA::ULong(), seq.length());
-}
-
-void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS::Encoding& encoding,
-  size_t& size, const DDS::UInt64Seq& seq) const
-{
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (seq.length() == 0) {
-    return;
-  }
-  primitive_serialized_size(encoding, size, CORBA::ULongLong(), seq.length());
-}
-
 bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
   const DDS::UInt8Seq& bitmask_seq) const
 {
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_bitmask_sequence(encoding, total_size, bitmask_seq);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -2037,10 +1998,22 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint8s(DCPS::
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt8Seq bitmask_seq;
-  if (!reconstruct_bitmask_sequence<CORBA::UInt8>(bitmask_seq, size, bound)) {
-    return false;
+  return reconstruct_bitmask_collection<CORBA::UInt8>(bitmask_seq, size, bound) &&
+    serialize_bitmask_sequence_as_uints_i(ser, size, bitmask_seq);
+}
+
+// Bitmask sequence represented as uint16 sequence
+void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::UInt16Seq& seq) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
   }
-  return serialize_bitmask_sequence_as_uints_i(ser, size, bitmask_seq);
+  primitive_serialized_size_ulong(encoding, size);
+  if (seq.length() == 0) {
+    return;
+  }
+  primitive_serialized_size(encoding, size, CORBA::UShort(), seq.length());
 }
 
 bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
@@ -2048,7 +2021,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uints_i(DCPS:
 {
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_bitmask_sequence(encoding, total_size, bitmask_seq);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -2068,10 +2041,22 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint16s(DCPS:
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt16Seq bitmask_seq;
-  if (!reconstruct_bitmask_sequence<CORBA::UInt16>(bitmask_seq, size, bound)) {
-    return false;
+  return reconstruct_bitmask_collection<CORBA::UShort>(bitmask_seq, size, bound) &&
+    serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
+}
+
+// Bitmask sequence represented as uint32 sequence
+void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::UInt32Seq& seq) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
   }
-  return serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
+  primitive_serialized_size_ulong(encoding, size);
+  if (seq.length() == 0) {
+    return;
+  }
+  primitive_serialized_size(encoding, size, CORBA::ULong(), seq.length());
 }
 
 bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
@@ -2079,7 +2064,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uints_i(DCPS:
 {
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_bitmask_sequence(encoding, total_size, bitmask_seq);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -2099,10 +2084,22 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint32s(DCPS:
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt32Seq bitmask_seq;
-  if (!reconstruct_bitmask_sequence<CORBA::UInt32>(bitmask_seq, size, bound)) {
-    return false;
+  return reconstruct_bitmask_collection<CORBA::ULong>(bitmask_seq, size, bound) &&
+    serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
+}
+
+// Bitmask sequence represented as uint64 sequence
+void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::UInt64Seq& seq) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
   }
-  return serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
+  primitive_serialized_size_ulong(encoding, size);
+  if (seq.length() == 0) {
+    return;
+  }
+  primitive_serialized_size(encoding, size, CORBA::ULongLong(), seq.length());
 }
 
 bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uints_i(DCPS::Serializer& ser,
@@ -2110,7 +2107,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uints_i(DCPS:
 {
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_bitmask_sequence(encoding, total_size, bitmask_seq);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -2130,10 +2127,8 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint64s(DCPS:
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt64Seq bitmask_seq;
-  if (!reconstruct_bitmask_sequence<CORBA::UInt64>(bitmask_seq, size, bound)) {
-    return false;
-  }
-  return serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
+  return reconstruct_bitmask_collection<CORBA::ULongLong>(bitmask_seq, size, bound) &&
+    serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence(DCPS::Serializer& ser,
@@ -2151,7 +2146,8 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence(DCPS::Serializer
   return false;
 }
 
-// Helper function for serializing nesting sequence (of basic or enumerated types).
+// Helper function for serializing sequence or array where element type is sequence
+// of basic or enumerated type.
 bool DynamicDataImpl::DataContainer::get_index_to_id_map(IndexToIdMap& index_to_id,
                                                          CORBA::ULong bound) const
 {
@@ -2180,16 +2176,10 @@ void DynamicDataImpl::DataContainer::serialized_size_complex_member_i(const DCPS
   serialized_size(encoding, size, nested_data);
 }
 
-void DynamicDataImpl::DataContainer::serialized_size_nesting_basic_sequence(const DCPS::Encoding& encoding,
-  size_t& size, const IndexToIdMap& index_to_id) const
+template<typename SequenceType>
+void DynamicDataImpl::DataContainer::serialized_size_nested_basic_sequences(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id, SequenceType protoseq) const
 {
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (index_to_id.empty()) {
-    return;
-  }
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     const CORBA::ULong id = index_to_id[i];
     if (id != MEMBER_ID_INVALID) {
@@ -2199,11 +2189,25 @@ void DynamicDataImpl::DataContainer::serialized_size_nesting_basic_sequence(cons
       } else { // Must be from the complex map
         serialized_size_complex_member_i(encoding, size, id);
       }
-    } else {
-      // Empty sequence. Only length is written.
-      primitive_serialized_size_ulong(encoding, size);
+    } else { // Empty sequence
+      protoseq.length(0);
+      serialized_size(encoding, size, protoseq);
     }
   }
+}
+
+template<typename SequenceType>
+void DynamicDataImpl::DataContainer::serialized_size_nesting_basic_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id, SequenceType protoseq) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size_ulong(encoding, size);
+  if (index_to_id.empty()) {
+    return;
+  }
+  serialized_size_nested_basic_sequences(encoding, size, index_to_id, protoseq);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_member_i(DCPS::Serializer& ser,
@@ -2215,35 +2219,11 @@ bool DynamicDataImpl::DataContainer::serialize_complex_member_i(DCPS::Serializer
 }
 
 template<typename SequenceType>
-bool DynamicDataImpl::DataContainer::serialize_nesting_basic_sequence_i(DCPS::Serializer& ser,
-  CORBA::ULong size, CORBA::ULong bound, SequenceType protoseq) const
+bool DynamicDataImpl::DataContainer::serialize_nested_basic_sequences(DCPS::Serializer& ser,
+  const IndexToIdMap& index_to_id, SequenceType protoseq) const
 {
-  // Map from index to ID. Use MEMBER_ID_INVALID to indicate there is
-  // no data for an element at a given index.
-  IndexToIdMap index_to_id(size, MEMBER_ID_INVALID);
-  if (!get_index_to_id_map(index_to_id, bound)) {
-    return false;
-  }
-
-  const DCPS::Encoding& encoding = ser.encoding();
-  size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_nesting_basic_sequence(encoding, total_size, index_to_id);
-    if (!ser.write_delimiter(total_size)) {
-      return false;
-    }
-  }
-
-  // Serialize the top-level sequence's length
-  if (!(ser << size)) {
-    return false;
-  }
-  if (size == 0) {
-    return true;
-  }
-
   // Serialize the nested basic sequences
-  for (CORBA::ULong i = 0; i < size; ++i) {
+  for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     const CORBA::ULong id = index_to_id[i];
     if (id != MEMBER_ID_INVALID) {
       const_sequence_iterator it = sequence_map_.find(id);
@@ -2263,6 +2243,36 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_basic_sequence_i(DCPS::Se
     }
   }
   return true;
+}
+
+template<typename SequenceType>
+bool DynamicDataImpl::DataContainer::serialize_nesting_basic_sequence_i(DCPS::Serializer& ser,
+  CORBA::ULong size, CORBA::ULong bound, SequenceType protoseq) const
+{
+  // Map from index to ID. Use MEMBER_ID_INVALID to indicate there is
+  // no data for an element at a given index.
+  IndexToIdMap index_to_id(size, MEMBER_ID_INVALID);
+  if (!get_index_to_id_map(index_to_id, bound)) {
+    return false;
+  }
+
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_nesting_basic_sequence(encoding, total_size, index_to_id, protoseq);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+
+  // Serialize the top-level sequence's length
+  if (!(ser << size)) {
+    return false;
+  }
+  if (size == 0) {
+    return true;
+  }
+  return serialize_nested_basic_sequences(ser, index_to_id, protoseq);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_nesting_basic_sequence(DCPS::Serializer& ser,
@@ -2302,23 +2312,16 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_basic_sequence(DCPS::Seri
     return serialize_nesting_basic_sequence_i(ser, size, bound, DDS::WStringSeq());
 #endif
   case TK_BYTE:
-    return serialize_nesting_basic_sequence_i(ser, size, bound, DDS::OctetSeq());
+    return serialize_nesting_basic_sequence_i(ser, size, bound, DDS::ByteSeq());
   case TK_BOOLEAN:
     return serialize_nesting_basic_sequence_i(ser, size, bound, DDS::BooleanSeq());
   }
   return false;
 }
 
-void DynamicDataImpl::DataContainer::serialized_size_nesting_enum_sequence(const DCPS::Encoding& encoding,
+void DynamicDataImpl::DataContainer::serialized_size_nested_enum_sequences(const DCPS::Encoding& encoding,
   size_t& size, const IndexToIdMap& index_to_id) const
 {
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (index_to_id.empty()) {
-    return;
-  }
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     const CORBA::ULong id = index_to_id[i];
     if (id != MEMBER_ID_INVALID) {
@@ -2329,7 +2332,7 @@ void DynamicDataImpl::DataContainer::serialized_size_nesting_enum_sequence(const
         serialized_size_complex_member_i(encoding, size, id);
       }
     } else {
-      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+      if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
         serialized_size_delimiter(encoding, size);
       }
       primitive_serialized_size_ulong(encoding, size);
@@ -2337,8 +2340,49 @@ void DynamicDataImpl::DataContainer::serialized_size_nesting_enum_sequence(const
   }
 }
 
+void DynamicDataImpl::DataContainer::serialized_size_nesting_enum_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size_ulong(encoding, size);
+  if (index_to_id.empty()) {
+    return;
+  }
+  serialized_size_nested_enum_sequences(encoding, size, index_to_id);
+}
+
 // TODO: Revisit the use of get_index_from_id - it must be able to handle bound == 0
 // (unbounded sequence, string, map, etc).
+
+bool DynamicDataImpl::DataContainer::serialize_nested_enum_sequences(DCPS::Serializer& ser,
+                                                                     const IndexToIdMap& index_to_id) const
+{
+  for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
+    const CORBA::ULong id = index_to_id[i];
+    if (id != MEMBER_ID_INVALID) {
+      const_sequence_iterator it = sequence_map_.find(id);
+      if (it != sequence_map_.end()) {
+        if (!serialize_enum_sequence_as_ints_i(ser, it->second.get())) {
+          return false;
+        }
+      } else if (!serialize_complex_member_i(ser, id)) {
+        return false;
+      }
+    } else { // Empty sequence of enums
+      if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+        if (!ser.write_delimiter(2 * DCPS::uint32_cdr_size)) {
+          return false;
+        }
+      }
+      if (!(ser << static_cast<CORBA::ULong>(0))) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
 
 bool DynamicDataImpl::DataContainer::serialize_nesting_enum_sequence(DCPS::Serializer& ser,
   CORBA::ULong size, CORBA::ULong bound) const
@@ -2350,7 +2394,7 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_enum_sequence(DCPS::Seria
 
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_nesting_enum_sequence(encoding, total_size, index_to_id);
     if (!ser.write_delimiter(total_size)) {
       return false;
@@ -2363,43 +2407,12 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_enum_sequence(DCPS::Seria
   if (size == 0) {
     return true;
   }
-
-  for (CORBA::ULong i = 0; i < size; ++i) {
-    const CORBA::ULong id = index_to_id[i];
-    if (id != MEMBER_ID_INVALID) {
-      const_sequence_iterator it = sequence_map_.find(id);
-      if (it != sequence_map_.end()) {
-        if (!serialize_enum_sequence_as_ints_i(ser, it->second.get())) {
-          return false;
-        }
-      } else if (!serialize_complex_member_i(ser, id)) {
-        return false;
-      }
-    } else {
-      // Empty sequence of enums
-      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-        if (!ser.write_delimiter(2 * DCPS::uint32_cdr_size)) {
-          return false;
-        }
-      }
-      if (!(ser << static_cast<CORBA::ULong>(0))) {
-        return false;
-      }
-    }
-  }
-  return true;
+  return serialize_nested_enum_sequences(ser, index_to_id);
 }
 
-void DynamicDataImpl::DataContainer::serialized_size_nesting_bitmask_sequence(const DCPS::Encoding& encoding,
+void DynamicDataImpl::DataContainer::serialized_size_nested_bitmask_sequences(const DCPS::Encoding& encoding,
   size_t& size, const IndexToIdMap& index_to_id) const
 {
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_delimiter(encoding, size);
-  }
-  primitive_serialized_size_ulong(encoding, size);
-  if (index_to_id.empty()) {
-    return;
-  }
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     const CORBA::ULong id = index_to_id[i];
     if (id != MEMBER_ID_INVALID) {
@@ -2410,7 +2423,7 @@ void DynamicDataImpl::DataContainer::serialized_size_nesting_bitmask_sequence(co
         serialized_size_complex_member_i(encoding, size, id);
       }
     } else {
-      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+      if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
         serialized_size_delimiter(encoding, size);
       }
       primitive_serialized_size_ulong(encoding, size);
@@ -2418,31 +2431,23 @@ void DynamicDataImpl::DataContainer::serialized_size_nesting_bitmask_sequence(co
   }
 }
 
-bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_sequence(DCPS::Serializer& ser,
-  CORBA::ULong size, CORBA::ULong bound) const
+void DynamicDataImpl::DataContainer::serialized_size_nesting_bitmask_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id) const
 {
-  IndexToIdMap index_to_id(size, MEMBER_ID_INVALID);
-  if (!get_index_to_id_map(index_to_id, bound)) {
-    return false;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
   }
+  primitive_serialized_size_ulong(encoding, size);
+  if (index_to_id.empty()) {
+    return;
+  }
+  serialized_size_nested_bitmask_sequences(encoding, size, index_to_id);
+}
 
-  const DCPS::Encoding& encoding = ser.encoding();
-  size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_nesting_bitmask_sequence(encoding, total_size, index_to_id);
-    if (!ser.write_delimiter(total_size)) {
-      return false;
-    }
-  }
-
-  if (!(ser << size)) {
-    return false;
-  }
-  if (size == 0) {
-    return true;
-  }
-
-  for (CORBA::ULong i = 0; i < size; ++i) {
+bool DynamicDataImpl::DataContainer::serialize_nested_bitmask_sequences(DCPS::Serializer& ser,
+  const IndexToIdMap& index_to_id) const
+{
+  for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     const CORBA::ULong id = index_to_id[i];
     if (id != MEMBER_ID_INVALID) {
       const_sequence_iterator it = sequence_map_.find(id);
@@ -2455,7 +2460,7 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_sequence(DCPS::Se
       }
     } else {
       // Empty sequence of bitmasks
-      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+      if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
         if (!ser.write_delimiter(2 * DCPS::uint32_cdr_size)) {
           return false;
         }
@@ -2466,6 +2471,32 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_sequence(DCPS::Se
     }
   }
   return true;
+}
+
+bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_sequence(DCPS::Serializer& ser,
+  CORBA::ULong size, CORBA::ULong bound) const
+{
+  IndexToIdMap index_to_id(size, MEMBER_ID_INVALID);
+  if (!get_index_to_id_map(index_to_id, bound)) {
+    return false;
+  }
+
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_nesting_bitmask_sequence(encoding, total_size, index_to_id);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+
+  if (!(ser << size)) {
+    return false;
+  }
+  if (size == 0) {
+    return true;
+  }
+  return serialize_nested_bitmask_sequences(ser, index_to_id);
 }
 
 void DynamicDataImpl::DataContainer::serialized_size_complex_member(const DCPS::Encoding& encoding,
@@ -2482,7 +2513,7 @@ void DynamicDataImpl::DataContainer::serialized_size_complex_member(const DCPS::
 void DynamicDataImpl::DataContainer::serialized_size_complex_sequence(const DCPS::Encoding& encoding,
   size_t& size, const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const
 {
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     serialized_size_delimiter(encoding, size);
   }
   primitive_serialized_size_ulong(encoding, size);
@@ -2492,6 +2523,25 @@ void DynamicDataImpl::DataContainer::serialized_size_complex_sequence(const DCPS
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     serialized_size_complex_member(encoding, size, index_to_id[i], elem_type);
   }
+}
+
+bool DynamicDataImpl::DataContainer::serialize_complex_sequence_i(DCPS::Serializer& ser,
+  const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const
+{
+  for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
+    const CORBA::ULong id = index_to_id[i];
+    if (id != MEMBER_ID_INVALID) {
+      if (!serialize_complex_member_i(ser, id)) {
+        return false;
+      }
+    } else {
+      // TODO: Use default value. Make sure this is what we want.
+      if (!(ser << DynamicDataImpl(elem_type))) {
+        return false;
+      }
+    }
+  }
+  return true;
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_sequence(DCPS::Serializer& ser,
@@ -2508,8 +2558,8 @@ bool DynamicDataImpl::DataContainer::serialize_complex_sequence(DCPS::Serializer
 
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
-  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {
-    serialized_size_complex_sequence(encoding, total_size, index_to_id);
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_complex_sequence(encoding, total_size, index_to_id, elem_type);
     if (!ser.write_delimiter(total_size)) {
       return false;
     }
@@ -2521,21 +2571,7 @@ bool DynamicDataImpl::DataContainer::serialize_complex_sequence(DCPS::Serializer
   if (size == 0) {
     return true;
   }
-
-  for (CORBA::ULong i = 0; i < size; ++i) {
-    const CORBA::ULong id = index_to_id[i];
-    if (id != MEMBER_ID_INVALID) {
-      if (!serialize_complex_member_i(ser, id)) {
-        return false;
-      }
-    } else {
-      // TODO: Use default value. Make sure this is what we want.
-      if (!(ser << DynamicDataImpl(elem_type))) {
-        return false;
-      }
-    }
-  }
-  return true;
+  return serialize_complex_sequence_i(ser, index_to_id, elem_type);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser) const
@@ -2582,16 +2618,8 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser) c
       }
     }
   } else if (elem_tk == TK_SEQUENCE) {
-    DDS::TypeDescriptor_var elem_td;
-    if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
-      return false;
-    }
     const DDS::DynamicType_var nested_elem_type = get_base_type(elem_td->element_type());
     const TypeKind nested_elem_tk = nested_elem_type->get_kind();
-    DDS::TypeDescriptor_var nested_elem_td;
-    if (nested_elem_type->get_descriptor(nested_elem_td) != DDS::RETCODE_OK) {
-      return false;
-    }
 
     if (is_basic_type(nested_elem_tk) || nested_elem_tk == TK_ENUM || nested_elem_tk == TK_BITMASK) {
       const bool is_empty = sequence_map_.empty() && complex_map_.empty();
@@ -2613,7 +2641,6 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser) c
         } else if (nested_elem_tk == TK_ENUM) {
           return serialize_nesting_enum_sequence(ser, 0, bound);
         } else {
-          const CORBA::ULong bit_bound = nested_elem_td->bound()[0];
           return serialize_nesting_bitmask_sequence(ser, 0, bound);
         }
       }
@@ -2632,6 +2659,630 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser) c
   return serialize_complex_sequence(ser, 0, bound, elem_type);
 }
 
+void DynamicDataImpl::DataContainer::serialized_size_string_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::StringSeq& strarr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  for (CORBA::ULong i = 0; i < strarr.length(); ++i) {
+    primitive_serialized_size_ulong(encoding, size);
+    if (strarr[i]) {
+      size += ACE_OS::strlen(strarr[i]) + 1;
+    }
+  }
+}
+
+bool DynamicDataImpl::DataContainer::serialize_string_array(DCPS::Serializer& ser,
+                                                            const DDS::StringSeq& strarr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_string_array(encoding, total_size, strarr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  for (CORBA::ULong i = 0; i < strarr.length(); ++i) {
+    if (!(ser << strarr[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void DynamicDataImpl::DataContainer::serialized_size_wstring_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::WStringSeq& wstrarr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  for (CORBA::ULong i = 0; i < wstrarr.length(); ++i) {
+    primitive_serialized_size_ulong(encoding, size);
+    if (wstrarr[i]) {
+      size += ACE_OS::strlen(wstrarr[i]) * char16_cdr_size;
+    }
+  }
+}
+
+bool DynamicDataImpl::DataContainer::serialize_wstring_array(DCPS::Serializer& ser,
+                                                             const DDS::WStringSeq& wstrarr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_wstring_array(encoding, total_size, wstrarr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  for (CORBA::ULong i = 0; i < wstrarr.length(); ++i) {
+    if (!(ser << wstrarr[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool DynamicDataImpl::DataContainer::serialize_basic_array(DCPS::Serializer& ser,
+  TypeKind elem_tk, CORBA::ULong length) const
+{
+  switch (elem_tk) {
+  case TK_INT32: {
+    DDS::Int32Seq int32arr;
+    return reconstruct_basic_collection(int32arr, elem_tk, length, length) &&
+      ser.write_long_array(int32arr.get_buffer(), length);
+  }
+  case TK_UINT32: {
+    DDS::UInt32Seq uint32arr;
+    return reconstruct_basic_collection(uint32arr, elem_tk, length, length) &&
+      ser.write_ulong_array(uint32arr.get_buffer(), length);
+  }
+  case TK_INT8: {
+    DDS::Int8Seq int8arr;
+    return reconstruct_basic_collection(int8arr, elem_tk, length, length) &&
+      ser.write_int8_array(int8arr.get_buffer(), length);
+  }
+  case TK_UINT8: {
+    DDS::UInt8Seq uint8arr;
+    return reconstruct_basic_collection(uint8arr, elem_tk, length, length) &&
+      ser.write_uint8_array(uint8arr.get_buffer(), length);
+  }
+  case TK_INT16: {
+    DDS::Int16Seq int16arr;
+    return reconstruct_basic_collection(int16arr, elem_tk, length, length) &&
+      ser.write_short_array(int16arr.get_buffer(), length);
+  }
+  case TK_UINT16: {
+    DDS::UInt16Seq uint16arr;
+    return reconstruct_basic_collection(uint16arr, elem_tk, length, length) &&
+      ser.write_ushort_array(uint16arr.get_buffer(), length);
+  }
+  case TK_INT64: {
+    DDS::Int64Seq int64arr;
+    return reconstruct_basic_collection(int64arr, elem_tk, length, length) &&
+      ser.write_longlong_array(int64arr.get_buffer(), length);
+  }
+  case TK_UINT64: {
+    DDS::UInt64Seq uint64arr;
+    return reconstruct_basic_collection(uint64arr, elem_tk, length, length) &&
+      ser.write_ulonglong_array(uint64arr.get_buffer(), length);
+  }
+  case TK_FLOAT32: {
+    DDS::Float32Seq float32arr;
+    return reconstruct_basic_collection(float32arr, elem_tk, length, length) &&
+      ser.write_float_array(float32arr.get_buffer(), length);
+  }
+  case TK_FLOAT64: {
+    DDS::Float64Seq float64arr;
+    return reconstruct_basic_collection(float64arr, elem_tk, length, length) &&
+      ser.write_double_array(float64arr.get_buffer(), length);
+  }
+  case TK_FLOAT128: {
+    DDS::Float128Seq float128arr;
+    return reconstruct_basic_collection(float128arr, elem_tk, length, length) &&
+      ser.write_longdouble_array(float128arr.get_buffer(), length);
+  }
+  case TK_CHAR8: {
+    DDS::CharSeq chararr;
+    return reconstruct_basic_collection(chararr, elem_tk, length, length) &&
+      ser.write_char_array(chararr.get_buffer(), length);
+  }
+  case TK_STRING8: {
+    DDS::StringSeq strarr;
+    return reconstruct_basic_collection(strarr, elem_tk, length, length) &&
+      serialize_string_array(ser, strarr);
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    DDS::WCharSeq wchararr;
+    return reconstruct_basic_collection(wchararr, elem_tk, length, length) &&
+      ser.write_wchar_array(wchararr.get_buffer(), length);
+  }
+  case TK_STRING16: {
+    DDS::WStringSeq wstrarr;
+    return reconstruct_basic_collection(wstrarr, elem_tk, length, length) &&
+      serialize_wstring_array(ser, wstrarr);
+  }
+#endif
+  case TK_BYTE: {
+    DDS::ByteSeq bytearr;
+    return reconstruct_basic_collection(bytearr, elem_tk, length, length) &&
+      ser.write_octet_array(bytearr.get_buffer(), length);
+  }
+  case TK_BOOLEAN: {
+    DDS::BooleanSeq boolarr;
+    return reconstruct_basic_collection(boolarr, elem_tk, length, length) &&
+      ser.write_boolean_array(boolarr.get_buffer(), length);
+  }
+  }
+  return false;
+}
+
+// Serialize enum array represented as int8 array
+void DynamicDataImpl::DataContainer::serialized_size_enum_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::Int8Seq& enumarr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size_int8(encoding, size, enumarr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_enum_array_as_ints_i(DCPS::Serializer& ser,
+  const DDS::Int8Seq& enumarr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_enum_array(encoding, total_size, enumarr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return ser.write_int8_array(enumarr.get_buffer(), enumarr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_enum_array_as_int8s(DCPS::Serializer& ser,
+  CORBA::ULong length, const DDS::DynamicType_var& enum_type) const
+{
+  DDS::Int8Seq enumarr;
+  return reconstruct_enum_collection<CORBA::Int8>(enumarr, length, length, enum_type) &&
+    serialize_enum_array_as_ints_i(ser, enumarr);
+}
+
+// Serialize enum array represented as int16 array
+void DynamicDataImpl::DataContainer::serialized_size_enum_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::Int16Seq& enumarr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size(encoding, size, CORBA::Short(), enumarr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_enum_array_as_ints_i(DCPS::Serializer& ser,
+  const DDS::Int16Seq& enumarr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_enum_array(encoding, total_size, enumarr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return ser.write_short_array(enumarr.get_buffer(), enumarr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_enum_array_as_int16s(DCPS::Serializer& ser,
+  CORBA::ULong length, const DDS::DynamicType_var& enum_type) const
+{
+  DDS::Int16Seq enumarr;
+  return reconstruct_enum_collection<CORBA::Short>(enumarr, length, length, enum_type) &&
+    serialize_enum_array_as_ints_i(ser, enumarr);
+}
+
+// Serialize enum array represented as int32 array
+void DynamicDataImpl::DataContainer::serialized_size_enum_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::Int32Seq& enumarr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size(encoding, size, CORBA::Long(), enumarr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_enum_array_as_ints_i(DCPS::Serializer& ser,
+  const DDS::Int32Seq& enumarr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_enum_array(encoding, total_size, enumarr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return ser.write_long_array(enumarr.get_buffer(), enumarr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_enum_array_as_int32s(DCPS::Serializer& ser,
+  CORBA::ULong length, const DDS::DynamicType_var& enum_type) const
+{
+  DDS::Int32Seq enumarr;
+  return reconstruct_enum_collection<CORBA::Long>(enumarr, length, length, enum_type) &&
+    serialize_enum_array_as_ints_i(ser, enumarr);
+}
+
+bool DyamicDataImpl::DataContainer::serialize_enum_array(DCPS::Serializer& ser,
+  CORBA::ULong bitbound, CORBA::ULong length, const DDS::DynamicType_var& enum_type) const
+{
+  if (bitbound >= 1 && bitbound <= 8) {
+    return serialize_enum_array_as_int8s(ser, length, enum_type);
+  } else if (bitbound >= 9 && bitbound <= 16) {
+    return serialize_enum_array_as_int16s(ser, length, enum_type);
+  } else if (bitbound >= 17 && bitbound <= 32) {
+    return serialize_enum_array_as_int32s(ser, length, enum_type);
+  }
+  return false;
+}
+
+// Bitmask array represented as uint8 array.
+void DynamicDataImpl::DataContainer::serialized_size_bitmask_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::UInt8Seq& arr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size_uint8(encoding, size, seq.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
+  const DDS::UInt8Seq& bitmask_arr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_bitmask_array(encoding, total_size, bitmask_arr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return ser.write_uint8_array(bitmask_arr.get_buffer(), bitmask_arr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint8s(DCPS::Serializer& ser,
+                                                                       CORBA::ULong length) const
+{
+  DDS::UInt8Seq bitmask_arr;
+  return reconstruct_bitmask_collection<CORBA::UInt8>(bitmask_arr, length) &&
+    serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
+}
+
+// Bitmask array represented as uint16 array.
+void DynamicDataImpl::DataContainer::serialized_size_bitmask_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::UInt16Seq& arr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size(encoding, size, CORBA::UShort(), arr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
+  const DDS::UInt16Seq& bitmask_arr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_bitmask_array(encoding, total_size, bitmask_arr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return ser.write_ushort_array(bitmask_arr.get_buffer(), bitmask_arr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint16s(DCPS::Serializer& ser,
+                                                                        CORBA::ULong length) const
+{
+  DDS::UInt16Seq bitmask_arr;
+  return reconstruct_bitmask_collection<CORBA::UShort>(bitmask_arr, length) &&
+    serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
+}
+
+// Bitmask array represented as uint32 array.
+void DynamicDataImpl::DataContainer::serialized_size_bitmask_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::UInt32Seq& arr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size(encoding, size, CORBA::ULong(), arr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
+  const DDS::UInt32Seq& bitmask_arr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_bitmask_array(encoding, total_size, bitmask_arr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return ser.write_ulong_array(bitmask_arr.get_buffer(), bitmask_arr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint32s(DCPS::Serializer& ser,
+                                                                        CORBA::ULong length) const
+{
+  DDS::UInt32Seq bitmask_arr;
+  return reconstruct_bitmask_collection<CORBA::ULong>(bitmask_arr, length) &&
+    serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
+}
+
+// Bitmask array represented as uint64 array.
+void DynamicDataImpl::DataContainer::serialized_size_bitmask_array(const DCPS::Encoding& encoding,
+  size_t& size, const DDS::UInt64Seq& arr) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size(encoding, size, CORBA::ULongLong(), arr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uints_i(DCPS::Serializer& ser,
+  const DDS::UInt64Seq& bitmask_arr) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_bitmask_array(encoding, total_size, bitmask_arr);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return ser.write_ulonglong_array(bitmask_arr.get_buffer(), bitmask_arr.length());
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint64s(DCPS::Serializer& ser,
+                                                                        CORBA::ULong length) const
+{
+  DDS::UInt64Seq bitmask_arr;
+  return reconstruct_bitmask_collection<CORBA::ULongLong>(bitmask_arr, length) &&
+    serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_array(DCPS::Serializer& ser,
+  CORBA::ULong bitbound, CORBA::ULong length) const
+{
+  if (bitbound >= 1 && bitbound <= 8) {
+    return serialize_bitmask_array_as_uint8s(ser, length);
+  } else if (bitbound >= 9 && bitbound <= 16) {
+    return serialize_bitmask_array_as_uint16s(ser, length);
+  } else if (bitbound >= 17 && bitbound <= 32) {
+    return serialize_bitmask_array_as_uint32s(ser, length);
+  } else if (bitbound >= 33 && bitbound <= 64) {
+    return serialize_bitmask_array_as_uint64s(ser, length);
+  }
+  return false;
+}
+
+template<typename SequenceType>
+bool DynamicDataImpl::DataContainer::serialized_size_nesting_basic_array(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id, SequenceType protoseq) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  serialized_size_nested_basic_sequences(encoding, size, index_to_id, protoseq);
+}
+
+template<typename SequenceType>
+bool DynamicDataImpl::DataContainer::serialize_nesting_basic_array_i(DCPS::Serializer& ser,
+  CORBA::ULong length, SequenceType protoseq) const
+{
+  IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
+  if (!get_index_to_id_map(index_to_id, length)) {
+    return false;
+  }
+
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_nesting_basic_array(encoding, total_size, index_to_id);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return serialize_nested_basic_sequences(ser, index_to_id, protoseq);
+}
+
+bool DynamicDataImpl::DataContainer::serialize_nesting_basic_array(DCPS::Serializer& ser,
+  TypeKind nested_elem_tk, CORBA::ULong length) const
+{
+  switch (nested_elem_tk) {
+  case TK_INT32:
+    return serialize_nesting_basic_array_i(ser, length, DDS::Int32Seq());
+  case TK_UINT32:
+    return serialize_nesting_basic_array_i(ser, length, DDS::UInt32Seq());
+  case TK_INT8:
+    return serialize_nesting_basic_array_i(ser, length, DDS::Int8Seq());
+  case TK_UINT8:
+    return serialize_nesting_basic_array_i(ser, length, DDS::UInt8Seq());
+  case TK_INT16:
+    return serialize_nesting_basic_array_i(ser, length, DDS::Int16Seq());
+  case TK_UINT16:
+    return serialize_nesting_basic_array_i(ser, length, DDS::UInt16Seq());
+  case TK_INT64:
+    return serialize_nesting_basic_array_i(ser, length, DDS::Int64Seq());
+  case TK_UINT64:
+    return serialize_nesting_basic_array_i(ser, length, DDS::UInt64Seq());
+  case TK_FLOAT32:
+    return serialize_nesting_basic_array_i(ser, length, DDS::Float32Seq());
+  case TK_FLOAT64:
+    return serialize_nesting_basic_array_i(ser, length, DDS::Float64Seq());
+  case TK_FLOAT128:
+    return serialize_nesting_basic_array_i(ser, length, DDS::Float128Seq());
+  case TK_CHAR8:
+    return serialize_nesting_basic_array_i(ser, length, DDS::CharSeq());
+  case TK_STRING8:
+    return serialize_nesting_basic_array_i(ser, length, DDS::StringSeq());
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    return serialize_nesting_basic_array_i(ser, length, DDS::WCharSeq());
+  case TK_STRING16:
+    return serialize_nesting_basic_array_i(ser, length, DDS::WStringSeq());
+#endif
+  case TK_BYTE:
+    return serialize_nesting_basic_array_i(ser, length, DDS::ByteSeq());
+  case TK_BOOLEAN:
+    return serialize_nesting_basic_array_i(ser, length, DDS::BooleanSeq());
+  }
+  return false;
+}
+
+void DynamicDataImpl::DataContainer::serialized_size_nesting_enum_array(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  serialized_size_nested_enum_sequences(encoding, size, index_to_id);
+}
+
+bool DynamicDataImpl::DataContainer::serialize_nesting_enum_array(DCPS::Serializer& ser,
+                                                                  CORBA::ULong length) const
+{
+  IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
+  if (!get_index_to_id_map(index_to_id, length)) {
+    return false;
+  }
+
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_nesting_enum_array(encoding, total_size, index_to_id);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return serialize_nested_enum_sequences(ser, index_to_id);
+}
+
+void DynamicDataImpl::DataContainer::serialized_size_nesting_bitmask_array(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  serialized_size_nested_bitmask_sequences(encoding, size, index_to_id);
+}
+
+bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_array(DCPS::Serializer& ser,
+                                                                     CORBA::ULong length) const
+{
+  IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
+  if (!get_index_to_id_map(index_to_id, bound)) {
+    return false;
+  }
+
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_nesting_bitmask_array(encoding, total_size, index_to_id);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return serialize_nested_bitmask_sequences(ser, index_to_id);
+}
+
+void DynamicDataImpl::DataContainer::serialized_size_complex_array(const DCPS::Encoding& encoding,
+  size_t& size, const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_delimiter(encoding, size);
+  }
+  for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
+    serialized_size_complex_member(encoding, size, index_to_id[i], elem_type);
+  }
+}
+
+bool DynamicDataImpl::DataContainer::serialize_complex_array(DCPS::Serializer& ser,
+                                                             CORBA::ULong length, const DDS::DynamicType_var& elem_type) const
+{
+  IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
+  for (const_complex_iterator it = complex_map_.begin(); it != complex_map_.end(); ++it) {
+    CORBA::ULong index;
+    if (!get_index_from_id(it->first, index, bound)) {
+      return false;
+    }
+    index_to_id[index] = it->first;
+  }
+
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    serialized_size_complex_array(encoding, total_size, index_to_id, elem_type);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+  return serialize_complex_sequence_i(ser, index_to_id, elem_type);
+}
+
+bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser) const
+{
+  DDS::TypeDescriptor_var descriptor;
+  if (type_->descriptor(descriptor) != DDS::RETCODE_OK) {
+    return false;
+  }
+  CORBA::ULong length = 1;
+  const DDS::BoundSeq& bound = descriptor->bound();
+  for (CORBA::ULong i = 0; i < bound.length(); ++i) {
+    length *= bound[i];
+  }
+
+  const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
+  const TypeKind elem_tk = elem_type->get_kind();
+  DDS::TypeDescriptor_var elem_td;
+  if (elem_type->get_descriptor(elem_td) != DDS::RETCODE_OK) {
+    return false;
+  }
+
+  if (is_basic_type(elem_tk)) {
+    return serialize_basic_array(ser, elem_tk, length);
+  } else if (elem_tk == TK_ENUM) {
+    const CORBA::ULong bit_bound = elem_td->bound()[0];
+    return serialize_enum_array(ser, bit_bound, length, elem_type);
+  } else if (elem_tk == TK_BITMASK) {
+    const CORBA::ULong bit_bound = elem_td->bound()[0];
+    return serialize_bitmask_array(ser, bit_bound, length);
+  } else if (elem_tk == TK_SEQUENCE) {
+    const DDS::DynamicType_var nested_elem_type = get_base_type(elem_td->element_type());
+    const TypeKind nested_elem_tk = nested_elem_type->get_kind();
+
+    if (is_basic_type(nested_elem_tk)) {
+      return serialize_nesting_basic_array(ser, nested_elem_tk, length);
+    } else if (nested_elem_tk == TK_ENUM) {
+      return serialize_nesting_enum_array(ser, length);
+    } else if (nested_elem_tk == TK_BITMASK) {
+      return serialize_nesting_bitmask_array(ser, length);
+    }
+  }
+  return serialize_complex_array(ser, length, elem_type);
+}
+
+bool DynamicDataImpl::DataContainer::serialize_structure() const
+{
+  // TODO
+}
+
 } // namespace XTypes
 
 namespace DCPS {
@@ -2639,6 +3290,37 @@ namespace DCPS {
 void serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data)
 {
   // TODO:
+  const TypeKind tk = data.type_->get_kind();
+  switch (tk) {
+  case TK_INT32:
+  case TK_UINT32:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_INT16:
+  case TK_UINT16:
+  case TK_INT64:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_CHAR8:
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+#endif
+  case TK_BYTE:
+  case TK_BOOLEAN:
+  case TK_ENUM:
+  case TK_BITMASK:
+  case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16:
+#endif
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+  }
 }
 
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data)
@@ -2660,9 +3342,6 @@ bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data)
   // sequence_map_ and complex_map_. If it's a more complex type, it is stored in complex_map_.
   // Traverve the correponding maps depending on each case.
   // 6. If dd is an array, it's probably the same.
-  //
-  // Question: how does it handle an member which is not set yet? Should it return an error or
-  // should it use a default value for the member's type?
   const TypeKind tk = data.type_->get_kind();
   switch (tk) {
   case TK_INT32:
@@ -2708,13 +3387,13 @@ bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data)
     return serialize_wstring_value(ser);
 #endif
   case TK_STRUCTURE:
-    // TODO:
+    return serialize_structure(ser);
   case TK_UNION:
     // TODO:
   case TK_SEQUENCE:
     return serialize_sequence(ser);
   case TK_ARRAY:
-    // TODO:
+    return serialize_array(ser);
   case TK_MAP:
   }
   return false;
