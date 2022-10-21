@@ -193,6 +193,7 @@ private:
   void relay_stun_task(const MonotonicTimePoint& now);
   RcHandle<Sporadic> relay_stun_task_;
   DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  ThreadLockType relay_stun_task_falloff_mutex_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
 
   mutable ACE_Thread_Mutex relay_stun_mutex_;
