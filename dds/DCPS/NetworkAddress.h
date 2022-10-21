@@ -43,6 +43,9 @@ public:
   NetworkAddress& operator=(const NetworkAddress& rhs);
   NetworkAddress& operator=(const ACE_INET_Addr& rhs);
 
+  operator bool() const;
+  bool operator!() const;
+
   bool operator==(const NetworkAddress& rhs) const;
   bool operator!=(const NetworkAddress& rhs) const;
 

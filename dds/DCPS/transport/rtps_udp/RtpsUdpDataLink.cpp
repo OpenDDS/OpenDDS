@@ -567,7 +567,7 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
   sq_.ignore(local_id, remote_id);
 
   update_locators(remote_id, unicast_addresses, multicast_addresses, requires_inline_qos, true);
-  if (last_addr_hint != NetworkAddress()) {
+  if (last_addr_hint) {
     update_last_recv_addr(remote_id, last_addr_hint);
   }
 
@@ -3215,11 +3215,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   // Process the ack.
   bool inform_send_listener = false;
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    // Clean up requested fragments.
-    for (RequestedFragSeqMap::iterator pos = reader->requested_frags_.begin(),
-           limit = reader->requested_frags_.end(); pos != limit && pos->first < ack;) {
-      reader->requested_frags_.erase(pos++);
-    }
 
     if (ack >= reader->cur_cumulative_ack_) {
       reader->cur_cumulative_ack_ = ack;
@@ -3647,11 +3642,21 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
         const AddrSet& uni = consolidated_recipients_unicast[seq];
         const AddrSet& multi = consolidated_recipients_multicast[seq];
         const RepoIdSet& readers = consolidated_request_readers[seq];
-        const RtpsUdpSendStrategy::OverrideToken ot =
-          link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
-        proxy.resend_i(SequenceRange(seq, seq));
-        ++cumulative_send_count;
+        if (proxy.has_frags(seq)) {
+          if (consolidated_fragment_requests.find(seq) == consolidated_fragment_requests.end()) {
+            consolidated_fragment_requests[seq].insert(1);
+          }
+          consolidated_fragment_recipients_unicast[seq].insert(uni.begin(), uni.end());
+          consolidated_fragment_recipients_multicast[seq].insert(multi.begin(), multi.end());
+          consolidated_fragment_request_readers[seq].insert(readers.begin(), readers.end());
+        } else {
+          const RtpsUdpSendStrategy::OverrideToken ot =
+            link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
+
+          proxy.resend_i(SequenceRange(seq, seq));
+          ++cumulative_send_count;
+        }
       }
     }
 
@@ -4618,7 +4623,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const
 
 bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
 {
-  if (last_recv_addr_ == NetworkAddress()) {
+  if (!last_recv_addr_) {
     return false;
   }
   const ACE_INT16 last_addr_type = last_recv_addr_.get_type();

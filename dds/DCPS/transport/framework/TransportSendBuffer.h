@@ -185,6 +185,12 @@ public:
       ssb_.resend_fragments_i(sequence, fragments, cumulative_send_count);
     }
 
+    bool has_frags(const SequenceNumber& seq) const
+    {
+      return ssb_.has_frags(seq);
+    }
+
+
   private:
     SingleSendBuffer& ssb_;
     OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(Proxy)
@@ -194,6 +200,8 @@ public:
   {
     pre_seq_.clear();
   }
+
+  bool has_frags(const SequenceNumber& seq) const;
 
 private:
   void check_capacity_i(BufferVec& removed);

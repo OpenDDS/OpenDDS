@@ -1,7 +1,7 @@
 {
   "enable_time": { "sec": -1, "nsec": 0 },
-  "start_time": { "sec": -10, "nsec": 0 },
-  "stop_time": { "sec": -15, "nsec": 0 },
+  "start_time": { "sec": -15, "nsec": 0 },
+  "stop_time": { "sec": -30, "nsec": 0 },
   "destruction_time": { "sec": -1, "nsec": 0 },
 
   "wait_for_discovery": false,
@@ -66,6 +66,9 @@
                     "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
                   },
                   { "name": "expected_sample_count",
+                    "value": { "$discriminator": "PVK_ULL", "ull_prop": 10 }
+                  },
+                  { "name": "expected_per_writer_sample_count",
                     "value": { "$discriminator": "PVK_ULL", "ull_prop": 10 }
                   }
                 ],
