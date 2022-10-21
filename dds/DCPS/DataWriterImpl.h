@@ -6,7 +6,7 @@
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
-#include "AbstractSample.h"
+#include "Sample.h"
 #include "DataWriterCallbacks.h"
 #include "transport/framework/TransportSendListener.h"
 #include "transport/framework/TransportClient.h"
@@ -275,7 +275,7 @@ public:
                           const void* real_data);
 
   DDS::ReturnCode_t write_sample(
-    AbstractSample_rch sample,
+    const Sample& sample,
     DDS::InstanceHandle_t handle,
     const DDS::Time_t& source_timestamp,
     GUIDSeq* filter_out);
@@ -501,14 +501,16 @@ public:
     return dynamic_cast<const ValueDispatcher*>(type_support_);
   }
 
-  DDS::ReturnCode_t get_key_value(AbstractSample_rch& sample, DDS::InstanceHandle_t handle);
-  DDS::InstanceHandle_t lookup_instance(AbstractSample_rch& sample);
+  DDS::ReturnCode_t get_key_value(Sample_rch& sample, DDS::InstanceHandle_t handle);
+  DDS::InstanceHandle_t lookup_instance(const Sample& sample);
+  DDS::InstanceHandle_t register_instance_w_timestamp(
+    const Sample& sample, const DDS::Time_t& timestamp);
   DDS::ReturnCode_t unregister_instance_w_timestamp(
-    AbstractSample_rch& sample,
+    const Sample& sample,
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& timestamp);
   DDS::ReturnCode_t dispose_w_timestamp(
-    AbstractSample_rch& sample,
+    const Sample& sample,
     DDS::InstanceHandle_t instance_handle,
     const DDS::Time_t& source_timestamp);
 
@@ -550,9 +552,7 @@ protected:
    */
   DDS::ReturnCode_t setup_serialization();
 
-  ACE_Message_Block* serialize_sample(AbstractSample_rch& sample);
-
-  bool insert_instance(DDS::InstanceHandle_t handle, AbstractSample_rch& sample);
+  ACE_Message_Block* serialize_sample(const Sample& sample);
 
   /// The number of chunks for the cached allocator.
   size_t n_chunks_;
@@ -647,10 +647,10 @@ protected:
       return bound_ ? SerializedSizeBound(header_size_ + bound_.get()) : SerializedSizeBound();
     }
 
-    size_t buffer_size(AbstractSample_rch& sample) const
+    size_t buffer_size(const Sample& sample) const
     {
-      const SerializedSizeBound bound = sample->key_only() ? key_only_bound_ : bound_;
-      return header_size_ + (bound ? bound.get() : sample->serialized_size(encoding_));
+      const SerializedSizeBound bound = sample.key_only() ? key_only_bound_ : bound_;
+      return header_size_ + (bound ? bound.get() : sample.serialized_size(encoding_));
     }
 
   private:
@@ -668,17 +668,17 @@ protected:
 
   DDS::ReturnCode_t instance_must_exist(
     const char* method_name,
-    AbstractSample_rch& sample,
+    const Sample& sample,
     DDS::InstanceHandle_t& instance_handle,
     bool remove = false);
 
   DDS::ReturnCode_t get_or_create_instance_handle(
     DDS::InstanceHandle_t& handle,
-    AbstractSample_rch sample,
+    const Sample& sample,
     const DDS::Time_t& source_timestamp);
 
   DDS::ReturnCode_t write_w_timestamp(
-    AbstractSample_rch sample,
+    const Sample& sample,
     DDS::InstanceHandle_t handle,
     const DDS::Time_t& source_timestamp);
 
@@ -853,11 +853,14 @@ private:
 
   MonotonicTimePoint wait_pending_deadline_;
 
-  typedef OPENDDS_MAP_T(DDS::InstanceHandle_t, AbstractSample_rch) InstanceHandlesToValues;
+  typedef OPENDDS_MAP_T(DDS::InstanceHandle_t, Sample_rch) InstanceHandlesToValues;
   InstanceHandlesToValues instance_handles_to_values_;
   typedef OPENDDS_MAP_CMP_T(
-    AbstractSample_rch, DDS::InstanceHandle_t, AbstractSampleRchCmp) InstanceValuesToHandles;
+    Sample_rch, DDS::InstanceHandle_t, SampleRchCmp) InstanceValuesToHandles;
   InstanceValuesToHandles instance_values_to_handles_;
+
+  bool insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample);
+  InstanceValuesToHandles::const_iterator find_instance(const Sample& sample) const;
 
 #ifdef OPENDDS_SECURITY
 protected:

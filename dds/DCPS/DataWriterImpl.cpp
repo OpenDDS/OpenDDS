@@ -2897,8 +2897,7 @@ DDS::ReturnCode_t DataWriterImpl::setup_serialization()
   return DDS::RETCODE_OK;
 }
 
-DDS::ReturnCode_t DataWriterImpl::get_key_value(
-  AbstractSample_rch& sample, DDS::InstanceHandle_t handle)
+DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::InstanceHandle_t handle)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
   const InstanceHandlesToValues::const_iterator it = instance_handles_to_values_.find(handle);
@@ -2909,15 +2908,28 @@ DDS::ReturnCode_t DataWriterImpl::get_key_value(
   return DDS::RETCODE_OK;
 }
 
-DDS::InstanceHandle_t DataWriterImpl::lookup_instance(AbstractSample_rch& sample)
+DDS::InstanceHandle_t DataWriterImpl::lookup_instance(const Sample& sample)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
-  const InstanceValuesToHandles::const_iterator it = instance_values_to_handles_.find(sample);
+  const InstanceValuesToHandles::const_iterator it = find_instance(sample);
   return it == instance_values_to_handles_.end() ? DDS::HANDLE_NIL : it->second;
 }
 
+DDS::InstanceHandle_t DataWriterImpl::register_instance_w_timestamp(
+  const Sample& sample, const DDS::Time_t& timestamp)
+{
+  DDS::InstanceHandle_t registered_handle = DDS::HANDLE_NIL;
+  const DDS::ReturnCode_t ret = get_or_create_instance_handle(registered_handle, sample, timestamp);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, ACE_TEXT("(%P|%t) NOTICE: DataWriterImpl::register_instance_w_timestamp: ")
+               ACE_TEXT("register failed: %C\n"),
+               retcode_to_string(ret)));
+  }
+  return registered_handle;
+}
+
 DDS::ReturnCode_t DataWriterImpl::unregister_instance_w_timestamp(
-  AbstractSample_rch& sample,
+  const Sample& sample,
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& timestamp)
 {
@@ -2930,15 +2942,14 @@ DDS::ReturnCode_t DataWriterImpl::unregister_instance_w_timestamp(
 }
 
 DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
-  AbstractSample_rch& sample,
+  const Sample& sample,
   DDS::InstanceHandle_t instance_handle,
   const DDS::Time_t& source_timestamp)
 {
 #if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  DDS::DynamicData_var dynamic_data = sample->get_dynamic_data(dynamic_type_);
+  DDS::DynamicData_var dynamic_data = sample.get_dynamic_data(dynamic_type_);
   DDS::Security::SecurityException ex;
-
-  if (security_config_ &&
+  if (dynamic_data && security_config_ &&
       participant_permissions_handle_ != DDS::HANDLE_NIL &&
       !security_config_->get_access_control()->check_local_datawriter_dispose_instance(participant_permissions_handle_, this, dynamic_data, ex)) {
     if (log_level >= LogLevel::Notice) {
@@ -2958,7 +2969,7 @@ DDS::ReturnCode_t DataWriterImpl::dispose_w_timestamp(
   return dispose(instance_handle, source_timestamp);
 }
 
-ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
+ACE_Message_Block* DataWriterImpl::serialize_sample(const Sample& sample)
 {
   const bool encapsulated = cdr_encapsulation();
   const Encoding& encoding = encoding_mode_.encoding();
@@ -2967,7 +2978,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
 
   // Don't use the cached allocator for the registered sample message
   // block.
-  if (sample->key_only() && !skip_serialize_) {
+  if (sample.key_only() && !skip_serialize_) {
     ACE_NEW_RETURN(tmp_mb,
       ACE_Message_Block(
         encoding_mode_.buffer_size(sample),
@@ -2998,7 +3009,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
   mb.reset(tmp_mb);
 
   if (skip_serialize_) {
-    if (!sample->to_message_block(*mb)) {
+    if (!sample.to_message_block(*mb)) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
                    "to_message_block failed\n"));
@@ -3021,7 +3032,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
         return 0;
       }
     }
-    if (!sample->serialize(serializer)) {
+    if (!sample.serialize(serializer)) {
       if (log_level >= LogLevel::Error) {
         ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DataWriterImpl::serialize_sample: "
           "failed to serialize sample data\n"));
@@ -3040,7 +3051,7 @@ ACE_Message_Block* DataWriterImpl::serialize_sample(AbstractSample_rch& sample)
   return mb.release();
 }
 
-bool DataWriterImpl::insert_instance(DDS::InstanceHandle_t handle, AbstractSample_rch& sample)
+bool DataWriterImpl::insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample)
 {
   OPENDDS_ASSERT(sample->key_only());
   if (!instance_handles_to_values_.insert(
@@ -3055,21 +3066,29 @@ bool DataWriterImpl::insert_instance(DDS::InstanceHandle_t handle, AbstractSampl
   return true;
 }
 
+DataWriterImpl::InstanceValuesToHandles::const_iterator
+DataWriterImpl::find_instance(const Sample& sample) const
+{
+  Sample_rch dummy_rch(const_cast<Sample*>(&sample), keep_count());
+  InstanceValuesToHandles::const_iterator pos = instance_values_to_handles_.find(dummy_rch);
+  dummy_rch._retn();
+  return pos;
+}
+
 DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
   DDS::InstanceHandle_t& handle,
-  AbstractSample_rch sample,
+  const Sample& sample,
   const DDS::Time_t& source_timestamp)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
 
   handle = lookup_instance(sample);
   if (handle == DDS::HANDLE_NIL || !get_handle_instance(handle)) {
-    AbstractSample_rch copy = sample->copy(SampleReadOnly, SampleKeyOnly);
+    Sample_rch copy = sample.copy(Sample::ReadOnly, Sample::KeyOnly);
 #if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     DDS::DynamicData_var dynamic_data = copy->get_dynamic_data(dynamic_type_);
     DDS::Security::SecurityException ex;
-
-    if (security_config_ &&
+    if (dynamic_data && security_config_ &&
         participant_permissions_handle_ != DDS::HANDLE_NIL &&
         !security_config_->get_access_control()->check_local_datawriter_register_instance(participant_permissions_handle_, this, dynamic_data, ex)) {
       if (log_level >= LogLevel::Notice) {
@@ -3083,7 +3102,7 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
 
     // don't use fast allocator for registration.
     const TypeSupportImpl* const ts = get_type_support();
-    Message_Block_Ptr serialized(serialize_sample(copy));
+    Message_Block_Ptr serialized(serialize_sample(*copy));
     if (!serialized) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %CDataWriterImpl::get_or_create_instance_handle: "
@@ -3118,15 +3137,15 @@ DDS::ReturnCode_t DataWriterImpl::get_or_create_instance_handle(
 
 DDS::ReturnCode_t DataWriterImpl::instance_must_exist(
   const char* const method_name,
-  AbstractSample_rch& sample,
+  const Sample& sample,
   DDS::InstanceHandle_t& instance_handle,
   bool remove)
 {
+  OPENDDS_ASSERT(sample.key_only());
+
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
 
-  OPENDDS_ASSERT(sample->key_only());
-
-  InstanceValuesToHandles::iterator pos = instance_values_to_handles_.find(sample);
+  const InstanceValuesToHandles::const_iterator pos = find_instance(sample);
   if (pos == instance_values_to_handles_.end()) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::%C: "
@@ -3151,7 +3170,7 @@ DDS::ReturnCode_t DataWriterImpl::instance_must_exist(
 }
 
 DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
-  AbstractSample_rch sample,
+  const Sample& sample,
   DDS::InstanceHandle_t handle,
   const DDS::Time_t& source_timestamp)
 {
@@ -3187,7 +3206,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
         if (!filter_out.ptr()) {
           filter_out = new OpenDDS::DCPS::GUIDSeq;
         }
-        if (!sample->eval(*ri.eval_, ri.expression_params_)) {
+        if (!sample.eval(*ri.eval_, ri.expression_params_)) {
           push_back(filter_out.inout(), iter->first);
         }
       }
@@ -3199,7 +3218,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
 }
 
 DDS::ReturnCode_t DataWriterImpl::write_sample(
-  AbstractSample_rch sample,
+  const Sample& sample,
   DDS::InstanceHandle_t handle,
   const DDS::Time_t& source_timestamp,
   GUIDSeq* filter_out)
@@ -3213,7 +3232,7 @@ DDS::ReturnCode_t DataWriterImpl::write_sample(
     return DDS::RETCODE_ERROR;
   }
 
-  return write(move(serialized), handle, source_timestamp, filter_out, sample->native_data());
+  return write(move(serialized), handle, source_timestamp, filter_out, sample.native_data());
 }
 
 } // namespace DCPS
