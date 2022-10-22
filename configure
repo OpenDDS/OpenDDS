@@ -21,6 +21,7 @@ use File::Temp ();
 use FileHandle;
 use Cwd;
 use POSIX qw(strftime);
+use B qw/perlstring/;
 
 use FindBin;
 use lib "$FindBin::RealBin/tools/scripts/modules";
@@ -2056,6 +2057,25 @@ sub get_features {
   return %features;
 }
 
+sub write_opendds_mwc {
+  my $root = shift;
+  my $command_list = shift;
+
+  my $command = join(', ', map {perlstring($_)} @{$command_list});
+
+  my $path = "$root/bin/mwc.pl";
+  my $fd = backup_and_open($path);
+  print $fd <<"EOF";
+#!/usr/bin/env perl
+exec($command, \@ARGV) or die("Failed to exec mwc: \$!");
+EOF
+  $fd->close();
+  print "Wrote $path\n" if $opts{'verbose'};
+  dump_and_unlink($fd) if $opts{'dry-run'};
+
+  chmod(0775, $path);
+}
+
 my $buildtao;
 sub generate_workspace {
   my $buildEnv = shift;
@@ -2272,13 +2292,6 @@ EOT
   my $static = (($opts{'static'} && $is_windows) ||
     ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'));
 
-  my @mpcopts = ();
-  if (defined $opts{'mpcopts'}) {
-    for my $i (@{$opts{'mpcopts'}}) {
-      push(@mpcopts, split(/ /, $i));
-    }
-  }
-
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
   # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
   # to be on the include path for .mpb files.
@@ -2294,17 +2307,23 @@ EOT
   if ($static) {
     push(@mwccmd, '-static');
   }
-
-  my @mwcargs = ("$buildEnv->{'DDS_ROOT'}$slash$ws", @mpcopts);
-  if (!$buildtao && @features) {
-    for my $feature (@features) {
-      push(@mwcargs, '-features', ($feature =~ /=/ ? $feature : "$feature=1"));
+  if (defined $opts{'mpcopts'}) {
+    for my $i (@{$opts{'mpcopts'}}) {
+      push(@mwccmd, split(/ /, $i));
     }
   }
 
+  my @feature_opts = ();
+  if (!$buildtao && @features) {
+    push(@feature_opts, '-features', join(',', map {/=/ ? $_: "$_=1"} @features));
+  }
+
+  # Generate our own mwc wrapper script
+  write_opendds_mwc($buildEnv->{'DDS_ROOT'}, [@mwccmd, @feature_opts]);
+
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  if (run_command([@mwccmd, @mwcargs])) {
+  if (run_command([@mwccmd, @feature_opts, "$buildEnv->{'DDS_ROOT'}$slash$ws"])) {
     die "ERROR: Error from MPC, stopped";
   }
   $buildEnv->{'mpctype'} = $mpctype;
@@ -2312,7 +2331,7 @@ EOT
   # If this is a target safety profile build
   if (defined $opts{'no-opendds-safety-profile'}) {
     # Generate ACE workspace separately, to exclude TAO
-    if (run_command([@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace", @mpcopts])) {
+    if (run_command([@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace"])) {
       die "ERROR: Error from MPC, stopped";
     }
   }
@@ -2511,8 +2530,8 @@ if ($cloned_build) {
     }
   }
 
-  push_path(\%targetEnv, $hostEnv{'ACE_ROOT'} . $slash . 'bin');
   push_path(\%targetEnv, $hostEnv{'DDS_ROOT'} . $slash . 'bin');
+  push_path(\%targetEnv, $hostEnv{'ACE_ROOT'} . $slash . 'bin');
 
   print "Cross-compile configuring host\n";
 
@@ -2548,8 +2567,8 @@ else { # does not require cloned builds
     setEnv('HOST_DDS', $opts{'host-tools'});
   }
 
-  push_path(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'bin');
   push_path(\%targetEnv, $targetEnv{'DDS_ROOT'} . $slash . 'bin');
+  push_path(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'bin');
 
   unless ($opts{'static'}) {
     push_libpath(\%targetEnv, $targetEnv{'ACE_ROOT'} . $slash . 'lib');
