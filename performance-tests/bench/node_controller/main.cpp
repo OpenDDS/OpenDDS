@@ -104,6 +104,7 @@ public:
   : node_name_(node_name), node_id_(node_id)
   , spawned_process_id_(config.spawned_process_id)
   , original_config_name_(config.config_name.in())
+  , start_time_({0, 0})
   {
     std::stringstream ss;
     ss << 'n' << node_id_ << 'w' << spawned_process_id_;
