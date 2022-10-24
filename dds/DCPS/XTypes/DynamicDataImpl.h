@@ -504,7 +504,7 @@ private:
     typedef DCPS::OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
     typedef DCPS::OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
 
-    DataContainer(const DynamicType_var& type) : type_(type) {}
+    DataContainer(const DynamicType_var& type, const DynamicData_var& data) : type_(type), data_(data) {}
 
     // Get the largest index from each map.
     // Call only for collection-like types (sequence, string, etc).
@@ -561,6 +561,7 @@ private:
     DCPS::OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
 
     const DDS::DynamicType_var& type_;
+    const DDS::DynamicData_var& data_;
   };
 
   DataContainer container_;
