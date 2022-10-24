@@ -1,5 +1,6 @@
 feature(!no_opendds_safety_profile) {
   includes += $(DDS_ROOT)/dds/CORBA
+  libpaths += $(DDS_ROOT)/lib
   libs += OpenDDS_Corba
   after += OpenDDS_Corba
 }

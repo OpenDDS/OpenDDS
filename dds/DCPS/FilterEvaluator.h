@@ -17,7 +17,13 @@
 #include "Comparator_T.h"
 #include "RcObject.h"
 
-#include <dds/DdsDynamicDataC.h>
+#ifdef OPENDDS_SAFETY_PROFILE
+namespace DDS {
+  typedef CORBA::ULong MemberId;
+}
+#else
+#  include <dds/DdsDynamicDataC.h>
+#endif
 
 #include <string>
 

@@ -467,6 +467,7 @@ DDS::ReturnCode_t MultiTopicDataReaderBase::get_matched_publication_data(
 }
 #endif
 
+#ifndef OPENDDS_SAFETY_PROFILE
 void MultiTopicDataReaderBase::get_latency_stats(LatencyStatisticsSeq& stats)
 {
   resulting_reader_->get_latency_stats(stats);
@@ -487,6 +488,7 @@ void MultiTopicDataReaderBase::statistics_enabled(
 {
   resulting_reader_->statistics_enabled(statistics_enabled);
 }
+#endif
 
 }
 }

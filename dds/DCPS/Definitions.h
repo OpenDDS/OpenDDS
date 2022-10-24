@@ -60,11 +60,13 @@
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
-#  define OPENDDS_ASSERT(C) ((void) 0)
+// DCPS/yart/yard_tree.hpp uses assert() directly
+#  undef assert
+#  define assert(C) ((void) 0)
 #else
 #  include <cassert>
-#  define OPENDDS_ASSERT(C) assert(C)
 #endif
+#define OPENDDS_ASSERT(C) assert(C)
 
 #include <tao/orbconf.h>
 #if defined TAO_HAS_IDL_FEATURES && TAO_HAS_IDL_FEATURES

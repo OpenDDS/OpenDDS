@@ -114,6 +114,7 @@ public:
 
   // OpenDDS::DCPS::DataReaderEx interface
 
+#ifndef OPENDDS_SAFETY_PROFILE
   void get_latency_stats(LatencyStatisticsSeq& stats);
 
   void reset_latency_stats();
@@ -121,6 +122,7 @@ public:
   CORBA::Boolean statistics_enabled();
 
   void statistics_enabled(CORBA::Boolean statistics_enabled);
+#endif
 
 private:
   virtual void init_typed(DataReaderEx* dr) = 0;

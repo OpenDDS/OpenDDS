@@ -88,7 +88,7 @@ private:
   MemoryPool* main_pool_;
   ACE_Thread_Mutex lock_;
   static SafetyProfilePool* instance_;
-  friend class InstanceMaker;
+  friend struct InstanceMaker;
 };
 
 }}

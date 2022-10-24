@@ -43,7 +43,7 @@
 #include <ace/OS_NS_sys_utsname.h>
 
 #include <cstring>
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined(OPENDDS_SAFETY_PROFILE) && defined (ACE_LACKS_IOSTREAM_TOTALLY)
 #  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
 #  include <fstream>
@@ -57,7 +57,7 @@ namespace {
 
 void set_log_file_name(const char* fname)
 {
-#ifdef OPENDDS_SAFETY_PROFILE
+#if defined(OPENDDS_SAFETY_PROFILE) && defined (ACE_LACKS_IOSTREAM_TOTALLY)
   ACE_LOG_MSG->msg_ostream(fopen(fname, "a"), true);
 #else
   std::ofstream* output_stream = new std::ofstream(fname, ios::app);
