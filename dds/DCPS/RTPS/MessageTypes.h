@@ -17,6 +17,7 @@ namespace OpenDDS {
 
     using OpenDDS::DCPS::EntityId_t;
 
+    #ifdef OPENDDS_SECURITY
     /**
      * The below entities
      are from the security spec. V1.1
@@ -41,7 +42,7 @@ namespace OpenDDS {
     const EntityId_t ENTITYID_TL_SVC_REPLY_WRITER_SECURE = {{0xff, 0x03, 0x01}, 0xc3 };
     const EntityId_t ENTITYID_TL_SVC_REPLY_READER_SECURE = {{0xff, 0x03, 0x01}, 0xc4 };
     ///@}
-    #ifdef OPENDDS_SECURITY
+
     const DDS::Security::ParticipantSecurityInfo PARTICIPANT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
     const DDS::Security::EndpointSecurityInfo ENDPOINT_SECURITY_ATTRIBUTES_INFO_DEFAULT = {0, 0};
     #endif
