@@ -2900,7 +2900,7 @@ DDS::ReturnCode_t DataWriterImpl::setup_serialization()
 DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::InstanceHandle_t handle)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
-  const InstanceHandlesToValues::const_iterator it = instance_handles_to_values_.find(handle);
+  const InstanceHandlesToValues::iterator it = instance_handles_to_values_.find(handle);
   if (it == instance_handles_to_values_.end()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
@@ -2911,7 +2911,7 @@ DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::Instanc
 DDS::InstanceHandle_t DataWriterImpl::lookup_instance(const Sample& sample)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
-  const InstanceValuesToHandles::const_iterator it = find_instance(sample);
+  const InstanceValuesToHandles::iterator it = find_instance(sample);
   return it == instance_values_to_handles_.end() ? DDS::HANDLE_NIL : it->second;
 }
 
@@ -3066,11 +3066,11 @@ bool DataWriterImpl::insert_instance(DDS::InstanceHandle_t handle, Sample_rch& s
   return true;
 }
 
-DataWriterImpl::InstanceValuesToHandles::const_iterator
-DataWriterImpl::find_instance(const Sample& sample) const
+DataWriterImpl::InstanceValuesToHandles::iterator
+DataWriterImpl::find_instance(const Sample& sample)
 {
   Sample_rch dummy_rch(const_cast<Sample*>(&sample), keep_count());
-  InstanceValuesToHandles::const_iterator pos = instance_values_to_handles_.find(dummy_rch);
+  InstanceValuesToHandles::iterator pos = instance_values_to_handles_.find(dummy_rch);
   dummy_rch._retn();
   return pos;
 }
@@ -3145,7 +3145,7 @@ DDS::ReturnCode_t DataWriterImpl::instance_must_exist(
 
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, get_lock(), DDS::RETCODE_ERROR);
 
-  const InstanceValuesToHandles::const_iterator pos = find_instance(sample);
+  const InstanceValuesToHandles::iterator pos = find_instance(sample);
   if (pos == instance_values_to_handles_.end()) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DataWriterImpl::%C: "

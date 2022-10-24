@@ -860,7 +860,7 @@ private:
   InstanceValuesToHandles instance_values_to_handles_;
 
   bool insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample);
-  InstanceValuesToHandles::const_iterator find_instance(const Sample& sample) const;
+  InstanceValuesToHandles::iterator find_instance(const Sample& sample);
 
 #ifdef OPENDDS_SECURITY
 protected:
