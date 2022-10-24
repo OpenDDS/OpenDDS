@@ -21,7 +21,7 @@ module DDS {
   typedef sequence<string> IncludePathSeq;
   typedef string<256> ObjectName;
 
-  // FUTURE: Define TypeOjbect.
+  // FUTURE: Define TypeObject.
   local interface TypeObject;
   // FUTURE: Use correct definition of BoundSeq once defined by spec.
   typedef sequence<unsigned long> BoundSeq;

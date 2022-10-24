@@ -29,7 +29,7 @@ TypeSupportImpl::register_type(DDS::DomainParticipant_ptr participant,
                                const char* type_name)
 {
   const char* const type =
-    (!type_name || !type_name[0]) ? default_type_name() : type_name;
+    (!type_name || !type_name[0]) ? name() : type_name;
   return Registered_Data_Types->register_type(participant, type, this);
 }
 
@@ -47,7 +47,7 @@ TypeSupportImpl::unregister_type(DDS::DomainParticipant_ptr participant,
 char*
 TypeSupportImpl::get_type_name()
 {
-  CORBA::String_var type = default_type_name();
+  CORBA::String_var type = name();
   return type._retn();
 }
 

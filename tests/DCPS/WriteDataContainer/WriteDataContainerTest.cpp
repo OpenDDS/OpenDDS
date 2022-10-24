@@ -23,7 +23,7 @@
 using namespace DDS;
 using namespace OpenDDS::DCPS;
 
-const long  MY_DOMAIN = 111;
+const long MY_DOMAIN = 111;
 const char* MY_TOPIC = "topic_foo";
 const char* MY_TYPE = "type_foo";
 
@@ -73,11 +73,18 @@ public:
     dw->participant_servant_ = *tp;
   }
 
-  ACE_Message_Block* dds_marshal(Test::SimpleDataWriterImpl* dw,
-                                 const Test::Simple& instance_data,
-                                 OpenDDS::DCPS::MarshalingType marshaling_type)
+  DDS::ReturnCode_t setup_serialization(Test::SimpleDataWriterImpl* dw)
   {
-    return dw->dds_marshal(instance_data, marshaling_type);
+    dw->type_support_ = &ts_;
+    return dw->setup_serialization();
+  }
+
+  ACE_Message_Block* serialize_sample(Test::SimpleDataWriterImpl* dw,
+                                      const Test::Simple& instance_data,
+                                      Sample::Extent extent = Sample::Full)
+  {
+    const Test::SimpleDataWriterImpl::SampleType sample(instance_data, extent);
+    return dw->serialize_sample(sample);
   }
 
   void prep_delayed_deliver(WriteDataContainer* wdc, DataSampleElement* element)
@@ -285,6 +292,7 @@ public:
 
   WriteDataContainer* delayed_deliver_container_;
   DataSampleElement* element_to_deliver_;
+  Test::SimpleTypeSupportImpl ts_;
 };
 
 // Writer thread.
@@ -366,7 +374,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
-        fast_dw->setup_serialization();
+        test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
 
         WriteDataContainer* test_data_container =
@@ -381,7 +389,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb(test->serialize_sample(fast_dw.get(), foo1, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
@@ -425,7 +433,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test_data_container->get_unsent_data(temp);
         test->log_send_state_lists("After get_unsent_data", test_data_container);
 
-        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, Sample::KeyOnly));
 
         DataSampleElement* element_1 = 0;
         ret = test_data_container->obtain_buffer(element_1, handle1);
@@ -485,9 +493,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
-        fast_dw->setup_serialization();
+        test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
-        WriteDataContainer* test_data_container  =
+        WriteDataContainer* test_data_container =
           test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock,
                                         deadline_status, deadline_last_total_count);
 
@@ -496,10 +504,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test->log_send_state_lists("Initial Setup:", test_data_container);
 
         Test::Simple foo1;
-        foo1.key  = 1;
+        foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
@@ -544,10 +552,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test->log_send_state_lists("After get_unsent_data", test_data_container);
 
         Test::Simple foo2;
-        foo2.key  = 2;
+        foo2.key = 2;
         foo2.count = 1;
 
-        Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb2(test->serialize_sample(fast_dw.get(), foo2, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle2, mb2);
@@ -579,10 +587,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test->log_send_state_lists("After get_unsent_data", test_data_container);
 
         Test::Simple foo3;
-        foo3.key  = 3;
+        foo3.key = 3;
         foo3.count = 1;
 
-        Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb3(test->serialize_sample(fast_dw.get(), foo3, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle3, mb3);
@@ -618,9 +626,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
-        fast_dw->setup_serialization();
+        test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
-        WriteDataContainer* test_data_container  =
+        WriteDataContainer* test_data_container =
           test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock,
                                         deadline_status, deadline_last_total_count);
 
@@ -629,10 +637,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test->log_send_state_lists("Initial Setup:", test_data_container);
 
         Test::Simple foo1;
-        foo1.key  = 1;
+        foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb1);
@@ -677,10 +685,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test->log_send_state_lists("After get_unsent_data", test_data_container);
 
         Test::Simple foo2;
-        foo2.key  = 2;
+        foo2.key = 2;
         foo2.count = 1;
 
-        Message_Block_Ptr mb2(test->dds_marshal(fast_dw.get(), foo2, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb2(test->serialize_sample(fast_dw.get(), foo2, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle2 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle2, mb2);
@@ -712,10 +720,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test->log_send_state_lists("After get_unsent_data", test_data_container);
 
         Test::Simple foo3;
-        foo3.key  = 3;
+        foo3.key = 3;
         foo3.count = 1;
 
-        Message_Block_Ptr mb3(test->dds_marshal(fast_dw.get(), foo3, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb3(test->serialize_sample(fast_dw.get(), foo3, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle3 = DDS::HANDLE_NIL;
         retval = test_data_container->register_instance(handle3, mb3);
@@ -755,9 +763,9 @@ int run_test(int argc, ACE_TCHAR *argv[])
 
         OpenDDS::DCPS::unique_ptr<Test::SimpleDataWriterImpl> fast_dw(new Test::SimpleDataWriterImpl());
         fast_dw->set_qos(dw_qos);
-        fast_dw->setup_serialization();
+        test->setup_serialization(fast_dw.get());
         test->substitute_dw_particpant(fast_dw.get(), tpi);
-        WriteDataContainer* test_data_container  =
+        WriteDataContainer* test_data_container =
           test->get_test_data_container(dw_qos, fast_dw.get(), deadline_status_lock,
                                         deadline_status, deadline_last_total_count);
 
@@ -766,10 +774,10 @@ int run_test(int argc, ACE_TCHAR *argv[])
         test->log_send_state_lists("Initial Setup:", test_data_container);
 
         Test::Simple foo1;
-        foo1.key  = 1;
+        foo1.key = 1;
         foo1.count = 1;
 
-        Message_Block_Ptr mb(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb(test->serialize_sample(fast_dw.get(), foo1, Sample::KeyOnly));
 
         DDS::InstanceHandle_t handle1 = DDS::HANDLE_NIL;
         DDS::ReturnCode_t retval = test_data_container->register_instance(handle1, mb);
@@ -820,7 +828,7 @@ int run_test(int argc, ACE_TCHAR *argv[])
         if (ret != DDS::RETCODE_OK) {
           ACE_ERROR((LM_ERROR, "obtain buffer failed for element 1\n"));
         }
-        Message_Block_Ptr mb1(test->dds_marshal(fast_dw.get(), foo1, OpenDDS::DCPS::KEY_ONLY_MARSHALING));
+        Message_Block_Ptr mb1(test->serialize_sample(fast_dw.get(), foo1, Sample::KeyOnly));
 
         element_1->set_sample(OpenDDS::DCPS::move(mb1));
 
