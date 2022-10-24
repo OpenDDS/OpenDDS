@@ -59,10 +59,21 @@ feature (!persistence_profile) : taoidldefaults, dcps_ts_defaults {
 
 // Safety profile defined by OpenDDS (not the OMG DDS spec)
 feature (!no_opendds_safety_profile) : taoidldefaults, dcps_ts_defaults {
+  specific(!cmake) {
     macros   += OPENDDS_SAFETY_PROFILE OPENDDS_NO_PERSISTENCE_PROFILE TAOLIB_ERROR=ACELIB_ERROR TAOLIB_DEBUG=ACELIB_DEBUG
     idlflags += -DOPENDDS_SAFETY_PROFILE
     dcps_ts_flags += -DOPENDDS_SAFETY_PROFILE
   }
+}
+
+project : taoidldefaults, dcps_ts_defaults {
+  specific(cmake) {
+    macros        += ${OPENDDS_SAFETY_PROFILE_MACRO}
+    idlflags      += ${OPENDDS_SAFETY_PROFILE_OPTION} \
+                     ${SAFETY_PROFILE_TAOIDL_OPTION}
+    dcps_ts_flags += ${OPENDDS_SAFETY_PROFILE_OPTION}
+  }
+}
 
 feature (!no_opendds_security) : taoidldefaults, dcps_ts_defaults {
   specific(cmake) {

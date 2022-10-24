@@ -3,4 +3,8 @@ feature(!no_opendds_safety_profile) : acelib, dds_corba {
 }
 
 feature(no_opendds_safety_profile) : taolib, portableserver, valuetype {
+  specific(cmake) {
+    includes -= $(TAO_ROOT)
+    includes += ${OPENDDS_SAFETY_PROFILE_INCLUDES} $(TAO_ROOT)
+  }
 }
