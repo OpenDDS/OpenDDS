@@ -51,6 +51,25 @@ TypeSupportImpl::get_type_name()
   return type._retn();
 }
 
+namespace {
+  void log_ti_not_found(const char* method_name, const char* name, const XTypes::TypeIdentifier& ti)
+  {
+    if (log_level >= LogLevel::Error) {
+      const XTypes::EquivalenceKind ek = ti.kind();
+      String str;
+      if (ek == XTypes::EK_COMPLETE || ek == XTypes::EK_MINIMAL) {
+        str = ek == XTypes::EK_MINIMAL ? "minimal " : "complete ";
+        str += XTypes::equivalence_hash_to_string(ti.equivalence_hash());
+      } else {
+        str = "not an equivalence hash";
+      }
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TypeSupportImpl::%C: "
+                 "TypeIdentifier \"%C\" of topic type \"%C\" not found in local type map.\n",
+                 method_name, str.c_str(), name));
+    }
+  }
+}
+
 void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,
                                      const XTypes::TypeIdentifier& ti,
                                      const XTypes::TypeMap& type_map) const
@@ -58,9 +77,7 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
   const XTypes::TypeMap::const_iterator pos = type_map.find(ti);
 
   if (pos == type_map.end()) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TypeSupportImpl::to_type_info_i, ")
-               ACE_TEXT("%C TypeIdentifier (%C) of topic type not found in local type map.\n"),
-               kind_to_string(ti.kind()), XTypes::equivalence_hash_to_string(ti.equivalence_hash()).c_str()));
+    log_ti_not_found("to_type_info_i", name(), ti);
     ti_with_deps.typeid_with_size.type_id = XTypes::TypeIdentifier();
     ti_with_deps.typeid_with_size.typeobject_serialized_size = 0;
   } else if (TheServiceParticipant->type_object_encoding() == Service_Participant::Encoding_WriteOldFormat) {
@@ -149,9 +166,7 @@ void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupS
       XTypes::TypeIdentifierWithSize ti_with_size(*it, static_cast<ACE_CDR::ULong>(tobj_size));
       deps_with_size.append(ti_with_size);
     } else if (XTypes::has_type_object(*it)) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: TypeSupportImpl::populate_dependencies, ")
-                 ACE_TEXT("local %C TypeIdentifier (%C) not found in local type map.\n"),
-                 kind_to_string(ek), XTypes::equivalence_hash_to_string(it->equivalence_hash()).c_str()));
+      log_ti_not_found("populate_dependencies_i", name(), *it);
     }
   }
   tls->add_type_dependencies(type_id, deps_with_size);
@@ -161,11 +176,6 @@ void TypeSupportImpl::populate_dependencies(const RcHandle<XTypes::TypeLookupSer
 {
   populate_dependencies_i(tls, XTypes::EK_MINIMAL);
   populate_dependencies_i(tls, XTypes::EK_COMPLETE);
-}
-
-const char* kind_to_string(const XTypes::EquivalenceKind ek)
-{
-  return ek == XTypes::EK_MINIMAL ? "minimal" : "complete";
 }
 
 }

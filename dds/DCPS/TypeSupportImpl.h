@@ -175,8 +175,6 @@ public:
   }
 };
 
-const char* kind_to_string(const XTypes::EquivalenceKind ek);
-
 } // namespace DCPS
 } // namespace OpenDDS
 

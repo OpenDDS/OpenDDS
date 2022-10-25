@@ -208,6 +208,10 @@
 /DdsDynamicDataSeqTypeSupport.idl
 /DdsDynamicDataSeqTypeSupportImpl.cpp
 /DdsDynamicDataSeqTypeSupportImpl.h
+/DdsDynamicTypeSupportC.cpp
+/DdsDynamicTypeSupportC.h
+/DdsDynamicTypeSupportC.inl
+/DdsDynamicTypeSupportS.h
 /DdsSecurityCoreC.cpp
 /DdsSecurityCoreC.h
 /DdsSecurityCoreC.inl

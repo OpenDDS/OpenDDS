@@ -30,6 +30,7 @@
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDynamicTypeSupportC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
@@ -417,6 +418,17 @@ public:
 
   bool prepare_to_delete_datawriters();
   bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
+
+  DDS::DynamicType* get_dynamic_type(const XTypes::TypeIdentifier& ti)
+  {
+    if (type_lookup_service_) {
+      return type_lookup_service_->type_identifier_to_dynamic(ti, dp_id_);
+    }
+    return 0;
+  }
+
+  DDS::DynamicTypeSupport_ptr create_dynamic_type_support(
+    DDS::TypeSupport_ptr ts, const char* register_as = "");
 
 private:
 
