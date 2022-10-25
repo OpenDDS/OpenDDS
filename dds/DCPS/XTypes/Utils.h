@@ -6,9 +6,10 @@
 #ifndef OPENDDS_DCPS_XTYPES_UTILS_H
 #define OPENDDS_DCPS_XTYPES_UTILS_H
 
-#include <dds/DCPS/Serializer.h>
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <dds/DCPS/Serializer.h>
 
-#include <dds/DdsDynamicDataC.h>
+#  include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -24,4 +25,5 @@ OpenDDS_Dcps_Export DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKin
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+#endif // OPENDDS_SAFETY_PROFILE
 #endif

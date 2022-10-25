@@ -5,11 +5,12 @@
 
 #include <DCPS/DdsDcps_pch.h>
 
-#include "Utils.h"
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include "Utils.h"
 
-#include "DynamicDataImpl.h"
+#  include "DynamicDataImpl.h"
 
-#include <algorithm>
+#  include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -97,11 +98,13 @@ OpenDDS_Dcps_Export DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKin
     return DCPS::APPENDABLE;
   case DDS::MUTABLE:
     return DCPS::MUTABLE;
-  default:
-    OPENDDS_ASSERT(false);
   }
+  OPENDDS_ASSERT(false);
+  return DCPS::FINAL;
 }
 
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#endif // OPENDDS_SAFETY_PROFILE

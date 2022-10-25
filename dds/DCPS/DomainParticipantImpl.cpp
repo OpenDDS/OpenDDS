@@ -5,7 +5,6 @@
 
 #include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
-#include "DdsDynamicDataC.h"
 #include "DomainParticipantImpl.h"
 
 #include "FeatureDisabledQosCheck.h"
@@ -2614,6 +2613,7 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   return result;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 DDS::DynamicTypeSupport_ptr DomainParticipantImpl::create_dynamic_type_support(
   DDS::TypeSupport_ptr ts, const char* register_as)
 {
@@ -2635,6 +2635,7 @@ DDS::DynamicTypeSupport_ptr DomainParticipantImpl::create_dynamic_type_support(
   }
   return dts._retn();
 }
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -427,8 +427,10 @@ public:
     return 0;
   }
 
+#ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicTypeSupport_ptr create_dynamic_type_support(
     DDS::TypeSupport_ptr ts, const char* register_as = "");
+#endif
 
 private:
 

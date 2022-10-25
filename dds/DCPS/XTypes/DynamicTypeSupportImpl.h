@@ -6,12 +6,13 @@
 #ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
 
-#include <dds/DCPS/Sample.h>
-#include <dds/DCPS/DataWriterImpl.h>
-#include <dds/DCPS/RcHandle_T.h>
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <dds/DCPS/Sample.h>
+#  include <dds/DCPS/DataWriterImpl.h>
+#  include <dds/DCPS/RcHandle_T.h>
 
-#include <dds/DdsDynamicTypeSupportC.h>
-#include <dds/DdsDcpsTypeSupportExtC.h>
+#  include <dds/DdsDynamicTypeSupportC.h>
+#  include <dds/DdsDcpsTypeSupportExtC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -167,7 +168,8 @@ public:
   const DCPS::MetaStruct& getMetaStructForType()
   {
     OPENDDS_ASSERT(false);
-    return *reinterpret_cast<DCPS::MetaStruct*>(0);
+    const DCPS::MetaStruct* const ms = 0;
+    return *ms;
   }
 
   CORBA::Boolean _is_a(const char* type_id)
@@ -286,4 +288,5 @@ public:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
+#endif // OPENDDS_SAFETY_PROFILE
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
