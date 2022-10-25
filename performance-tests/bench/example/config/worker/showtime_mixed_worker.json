@@ -1,4 +1,5 @@
 {
+  "create_time": { "sec": -2, "nsec": 0 },
   "enable_time": { "sec": -2, "nsec": 0 },
   "start_time": { "sec": -2, "nsec": 0 },
   "stop_time": { "sec": -90, "nsec": 0 },
@@ -15,10 +16,10 @@
       { "name": "common",
         "properties": [
           { "name": "DCPSGlobalTransportConfig",
-            "value": "mfs_config"
+            "value": "config_02"
           },
           { "name": "DCPSDefaultDiscovery",
-            "value": "mfs_rtps_discovery"
+            "value": "rtps_discovery"
           },
           { "name": "DCPSTransportDebugLevel",
             "value": "0"
@@ -31,7 +32,7 @@
           }
         ]
       },
-      { "name": "rtps_discovery/mfs_rtps_discovery",
+      { "name": "rtps_discovery/rtps_discovery",
         "properties": [
           { "name": "SedpMulticast",
             "value": "1"
@@ -44,52 +45,31 @@
           }
         ]
       },
-      { "name": "config/mfs_config",
+      { "name": "config/config_02",
         "properties": [
           { "name": "transports",
-            "value": "mfs_rtps_transport"
+            "value": "rtps_transport_02"
           },
           { "name": "passive_connect_duration",
-            "value": "20000"
+            "value": "90000"
           }
         ]
       },
-      { "name": "transport/mfs_rtps_transport",
+      { "name": "transport/rtps_transport_02",
         "properties": [
           { "name": "transport_type",
             "value": "rtps_udp"
           },
-          { "name": "thread_per_connection",
-            "value": "1"
-          },
-          { "name": "ttl",
-            "value": "3"
-          },
-          { "name": "use_multicast",
-            "value": "0"
-          },
-          { "name": "handshake_timeout",
-            "value": "5000"
+          { "name": "multicast_group_address",
+            "value": "239.255.17.2:7401"
           }
         ]
-      }
-    ],
-    "discoveries": [
-      { "name": "bench_test_rtps_02",
-        "type": "rtps",
-        "domain": 17
-      }
-    ],
-    "instances": [
-      { "name": "rtps_instance_02",
-        "type": "rtps_udp",
-        "domain": 17
       }
     ],
     "participants": [
       { "name": "participant_C1",
         "domain": 17,
-        "transport_config_name": "rtps_instance_02",
+        "transport_config_name": "config_02",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },

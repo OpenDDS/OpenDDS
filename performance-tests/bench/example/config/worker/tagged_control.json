@@ -9,19 +9,30 @@
 
   "process": {
     "config_sections": [
-      {
-        "name": "common",
+      { "name": "common",
         "properties": [
-          { "name": "DCPSSecurity",
-            "value": 0
+          { "name": "DCPSDefaultDiscovery",
+            "value":"rtps_disc"
+          },
+          { "name": "DCPSGlobalTransportConfig",
+            "value":"$file"
           },
           { "name": "DCPSDebugLevel",
-            "value": 0
+            "value": "0"
+          },
+          { "name": "DCPSPendingTimeout",
+            "value": "3"
           }
         ]
       },
-      {
-        "name": "transport/rtps_transport",
+      { "name": "rtps_discovery/rtps_disc",
+        "properties": [
+          { "name": "ResendPeriod",
+            "value": "2"
+          }
+        ]
+      },
+      { "name": "transport/rtps_transport",
         "properties": [
           { "name": "transport_type",
             "value": "rtps_udp"
@@ -29,25 +40,10 @@
         ]
       }
     ],
-    "discoveries": [
-      {
-        "name": "tagged_test_rtps",
-        "type": "rtps",
-        "domain": 7
-      }
-    ],
-    "instances": [
-      {
-        "name": "rtps_instance_01",
-        "type": "rtps_udp",
-        "domain": 7
-      }
-    ],
     "participants": [
       {
         "name": "participant_01",
         "domain": 7,
-        "transport_config_name": "rtps_instance_01",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },

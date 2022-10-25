@@ -76,10 +76,6 @@ elsif ($test->flag('fan_ws')) {
   $tc_opts .= " ci_fan_ws";
   $is_rtps_disc = 1;
 }
-elsif ($test->flag('fan_mini')) {
-  $tc_opts .= " ci_fan_mini";
-  $is_rtps_disc = 1;
-}
 elsif ($test->flag('fan_frag')) {
   $tc_opts .= " ci_fan_frag";
   $is_rtps_disc = 1;
@@ -88,24 +84,12 @@ elsif ($test->flag('fan_frag_ws')) {
   $tc_opts .= " ci_fan_frag_ws";
   $is_rtps_disc = 1;
 }
-elsif ($test->flag('fan_frag_mini')) {
-  $tc_opts .= " ci_fan_frag_mini";
-  $is_rtps_disc = 1;
-}
 elsif ($test->flag('echo')) {
   $tc_opts .= " ci_echo";
   $is_rtps_disc = 1;
 }
-elsif ($test->flag('echo_mini')) {
-  $tc_opts .= " ci_echo_mini";
-  $is_rtps_disc = 1;
-}
 elsif ($test->flag('echo_frag')) {
   $tc_opts .= " ci_echo_frag";
-  $is_rtps_disc = 1;
-}
-elsif ($test->flag('echo_frag_mini')) {
-  $tc_opts .= " ci_echo_frag_mini";
   $is_rtps_disc = 1;
 }
 elsif ($test->flag('force_worker_segfault')) {
