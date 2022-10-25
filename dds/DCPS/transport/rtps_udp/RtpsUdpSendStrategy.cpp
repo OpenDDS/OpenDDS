@@ -25,11 +25,6 @@
 
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
-#ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
-#include <vector>
-#endif
-
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -269,7 +264,7 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   ssize_t result = -1;
   typedef AddrSet::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
-    if (*iter == NetworkAddress()) {
+    if (!*iter) {
       continue;
     }
     const ssize_t result_per_dest = send_single_i(iov, n, *iter);
@@ -296,7 +291,7 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const NetworkAddress& addr)
 {
-  OPENDDS_ASSERT(addr != NetworkAddress());
+  OPENDDS_ASSERT(addr);
 
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 

@@ -108,6 +108,8 @@ module Bench {
       string executable;
       // Command to invoke worker
       string command;
+      // Name of the originating configuration file
+      string config_name;
       // JSON Serialized Bench::WorkerConfig
       string config;
       // Number of workers to spawn using this config (Must be >=1)
@@ -135,6 +137,7 @@ module Bench {
 
     struct SpawnedProcessReport {
       SpawnedProcessId spawned_process_id;
+      long pid;
       boolean failed;
       // JSON Serialized Bench::WorkerReport
       string details;
@@ -212,12 +215,14 @@ module Bench {
     };
 
     typedef sequence<NodeController::SpawnedProcessId> SpawnedProcessIdSeq;
+    typedef sequence<long> LocalProcessIdSeq;
     struct NodeReport {
       string node_name;
       NodeController::NodeId node_id;
       WorkerReportSeq worker_reports;
       Builder::StringSeq spawned_process_logs;
       SpawnedProcessIdSeq spawned_process_ids;
+      LocalProcessIdSeq local_process_ids;
       Builder::PropertySeq properties;
     };
 

@@ -737,7 +737,7 @@ private:
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
   TransactionalRtpsSendQueue sq_;
-  ACE_Thread_Mutex fsq_mutex_;
+  mutable ACE_Thread_Mutex fsq_mutex_;
   OPENDDS_VECTOR(MetaSubmessageVec) fsq_vec_;
   size_t fsq_vec_size_;
 
@@ -772,7 +772,6 @@ private:
   mutable ACE_Thread_Mutex readers_lock_;
   mutable ACE_Thread_Mutex writers_lock_;
   mutable ACE_Thread_Mutex locators_lock_;
-  mutable ACE_Thread_Mutex send_queues_lock_;
 
   /// Extend the FragmentNumberSet to cover the fragments that are
   /// missing from our last known fragment to the extent

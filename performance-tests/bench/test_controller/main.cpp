@@ -412,15 +412,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
       size_t total_worker_reports = 0;
       for (CORBA::ULong i = 0; i < report.node_reports.length(); ++i) {
-        total_worker_reports += report.node_reports[i].worker_reports.length();
+        auto& nr = report.node_reports[i];
+        total_worker_reports += nr.worker_reports.length();
         if (show_worker_logs) {
-          for (CORBA::ULong j = 0; j < report.node_reports[i].spawned_process_logs.length(); ++j) {
+          for (CORBA::ULong j = 0; j < nr.spawned_process_logs.length(); ++j) {
             std::stringstream header;
-            header << "=== Showing Log for Node " << report.node_reports[i].node_id << " Spawned Process #" << report.node_reports[i].spawned_process_ids[j] << " ===" << std::endl;
+            header << "=== Showing Log for Node " << nr.node_id << " === Spawned Process #" << nr.spawned_process_ids[j] << " (PID " << nr.local_process_ids[j] << ") ===" << std::endl;
             result_file << header.str();
-            result_file << report.node_reports[i].spawned_process_logs[j] << std::endl << std::endl;
+            result_file << nr.spawned_process_logs[j] << std::endl << std::endl;
             std::cout << header.str();
-            std::cout << report.node_reports[i].spawned_process_logs[j] << std::endl << std::endl;
+            std::cout << nr.spawned_process_logs[j] << std::endl << std::endl;
           }
           result_file << "=== End of Node Logs ===" << std::endl << std::endl;
           std::cout << "=== End of Node Logs ===" << std::endl << std::endl;

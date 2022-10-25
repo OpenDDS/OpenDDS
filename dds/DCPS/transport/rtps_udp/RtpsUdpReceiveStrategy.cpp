@@ -24,9 +24,6 @@
 #include <algorithm>
 #include <cstring>
 
-#ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

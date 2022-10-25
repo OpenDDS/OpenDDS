@@ -11,9 +11,7 @@
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
 #include "Logging.h"
-#ifdef OPENDDS_SECURITY
-#  include "SecurityHelpers.h"
-#endif
+
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/GuidConverter.h>
