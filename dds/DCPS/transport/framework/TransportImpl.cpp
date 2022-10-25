@@ -51,7 +51,7 @@ TransportImpl::~TransportImpl()
 bool
 TransportImpl::is_shut_down() const
 {
-  return is_shut_down_.value();
+  return is_shut_down_;
 }
 
 void
@@ -100,7 +100,7 @@ TransportImpl::add_pending_connection(const TransportClient_rch& client, DataLin
 void
 TransportImpl::create_reactor_task(bool useAsyncSend, const OPENDDS_STRING& name)
 {
-  if (is_shut_down_.value() || this->reactor_task_.in()) {
+  if (is_shut_down_ || this->reactor_task_.in()) {
     return;
   }
 

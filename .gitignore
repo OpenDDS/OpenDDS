@@ -51,6 +51,7 @@ compile_commands.json
 
 # Binaries
 *.exe
+*.vxe
 *.dll
 *.lib
 lib*.a
@@ -71,3 +72,4 @@ massif.out.*
 *.tlog
 *.log
 *.ior
+/ChangeLog

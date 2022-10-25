@@ -242,6 +242,8 @@ is `PRIVATE` by default.
 Command-line options can be supplied to the TAO/OpenDDS IDL compilers using
 `TAO_IDL_OPTIONS` and/or `OPENDDS_IDL_OPTIONS` (if the default behavior is not
 suitable). Add `OPENDDS_IDL_OPTIONS -Lc++11` to use the C++11 IDL Mapping.
+To get a complete list of options and environment variables, see the [TAO IDL](https://htmlpreview.github.io/?https://github.com/DOCGroup/ACE_TAO/blob/master/TAO/docs/compiler.html) and
+[OpenDDS IDL](https://download.objectcomputing.com/OpenDDS/OpenDDS-latest.pdf) documentation.
 
 An option is available to force creation of typecodes by using `SUPPRESS_ANYS
 OFF`. This value will overrule the one received from config.cmake

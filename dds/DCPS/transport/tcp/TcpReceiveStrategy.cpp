@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
 #include "TcpReceiveStrategy.h"
 #include "TcpSendStrategy.h"
 #include "TcpTransport.h"

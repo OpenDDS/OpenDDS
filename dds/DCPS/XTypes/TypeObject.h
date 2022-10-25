@@ -728,7 +728,7 @@ namespace XTypes {
     void* active_;
     union {
       ACE_CDR::ULongLong max_alignment;
-#define OPENDDS_UNION_MEMBER(T, N) char N ## _[sizeof(T)]
+#define OPENDDS_UNION_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
       OPENDDS_UNION_MEMBER(StringSTypeDefn, string_sdefn);
       OPENDDS_UNION_MEMBER(StringLTypeDefn, string_ldefn);
       OPENDDS_UNION_MEMBER(PlainSequenceSElemDefn, seq_sdefn);
@@ -846,6 +846,10 @@ namespace XTypes {
   //   boolean             boolean_value;
   // case TK_BYTE:
   //   octet               byte_value;
+  // case TK_INT8:
+  //   int8                int8_value;
+  // case TK_UINT8:
+  //   uint8               uint8_value;
   // case TK_INT16:
   //   short               int16_value;
   // case TK_UINT16:
@@ -878,125 +882,68 @@ namespace XTypes {
   //   ExtendedAnnotationParameterValue      extended_value;
   // };
 
-  struct AnnotationParameterValue {
-    ACE_CDR::Octet kind;
-    ACE_CDR::Boolean boolean_value;
-    ACE_CDR::Octet byte_value;
-    ACE_CDR::Short int16_value;
-    ACE_CDR::UShort uint16_value; // OMG Issue DDSXTY14-46.
-    ACE_CDR::Long int32_value;
-    ACE_CDR::ULong uint32_value;
-    ACE_CDR::LongLong int64_value;
-    ACE_CDR::ULongLong uint64_value;
-    ACE_CDR::Float float32_value;
-    ACE_CDR::Double float64_value;
-    ACE_CDR::LongDouble float128_value;
-    ACE_CDR::Char char_value;
-    ACE_CDR::WChar wchar_value;
-    ACE_CDR::Long enumerated_value;
-    OPENDDS_STRING string8_value;
-    OPENDDS_WSTRING string16_value;
-    ExtendedAnnotationParameterValue extended_value;
+  class OpenDDS_Dcps_Export AnnotationParameterValue {
+  public:
 
-    struct WCharValue {
-      ACE_CDR::WChar value;
+    explicit AnnotationParameterValue(ACE_CDR::Octet kind = TK_NONE);
+    AnnotationParameterValue(const AnnotationParameterValue& other);
+    AnnotationParameterValue& operator=(const AnnotationParameterValue& other);
+    ~AnnotationParameterValue() { reset(); }
 
-      WCharValue() : value() {}
+    ACE_CDR::Octet kind() const { return kind_; }
 
-      WCharValue(ACE_CDR::WChar a_value)
-        : value(a_value) {}
+#define OPENDDS_UNION_ACCESSORS(T, N)                         \
+    const T& N() const { return *static_cast<T*>(active_); }  \
+    T& N() { return *static_cast<T*>(active_); }
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Boolean, boolean_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Octet, byte_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Char, int8_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Octet, uint8_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Short, int16_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::UShort, uint16_value); // OMG Issue DDSXTY14-46.
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Long, int32_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::ULong, uint32_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::LongLong, int64_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::ULongLong, uint64_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Float, float32_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Double, float64_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::LongDouble, float128_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Char, char_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::WChar, wchar_value);
+    OPENDDS_UNION_ACCESSORS(ACE_CDR::Long, enumerated_value);
+    OPENDDS_UNION_ACCESSORS(OPENDDS_STRING, string8_value);
+    OPENDDS_UNION_ACCESSORS(OPENDDS_WSTRING, string16_value);
+    OPENDDS_UNION_ACCESSORS(ExtendedAnnotationParameterValue, extended_value);
+#undef OPENDDS_UNION_ACCESSORS
+
+  private:
+    ACE_CDR::Octet kind_;
+    void* active_;
+    union {
+#define OPENDDS_UNION_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
+      OPENDDS_UNION_MEMBER(ACE_CDR::Boolean, boolean_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Octet, byte_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Char, int8_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Octet, uint8_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Short, int16_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::UShort, uint16_value); // OMG Issue DDSXTY14-46.
+      OPENDDS_UNION_MEMBER(ACE_CDR::Long, int32_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::ULong, uint32_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::LongLong, int64_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::ULongLong, uint64_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Float, float32_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Double, float64_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::LongDouble, float128_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Char, char_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::WChar, wchar_value);
+      OPENDDS_UNION_MEMBER(ACE_CDR::Long, enumerated_value);
+      OPENDDS_UNION_MEMBER(DCPS::String, string8_value);
+      OPENDDS_UNION_MEMBER(DCPS::WString, string16_value);
+      OPENDDS_UNION_MEMBER(ExtendedAnnotationParameterValue, extended_value);
+#undef OPENDDS_UNION_MEMBER
     };
-
-    struct EnumValue {
-      ACE_CDR::Long value;
-
-      EnumValue() : value() {}
-
-      EnumValue(ACE_CDR::Long a_value)
-        : value(a_value) {}
-    };
-
-    AnnotationParameterValue() : kind(TK_NONE) {}
-
-    explicit AnnotationParameterValue(ACE_CDR::Boolean value)
-      : kind(TK_BOOLEAN)
-      , boolean_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::Octet value)
-      : kind(TK_BYTE)
-      , byte_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::Short value)
-      : kind(TK_INT16)
-      , int16_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::UShort value)
-      : kind(TK_UINT16)
-      , uint16_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::Long value)
-      : kind(TK_INT32)
-      , int32_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::ULong value)
-      : kind(TK_UINT32)
-      , uint32_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::LongLong value)
-      : kind(TK_INT64)
-      , int64_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::ULongLong value)
-      : kind(TK_UINT64)
-      , uint64_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::Float value)
-      : kind(TK_FLOAT32)
-      , float32_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::Double value)
-      : kind(TK_FLOAT64)
-      , float64_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::LongDouble value)
-      : kind(TK_FLOAT128)
-      , float128_value(value)
-    {}
-
-    explicit AnnotationParameterValue(ACE_CDR::Char value)
-      : kind(TK_CHAR8)
-      , char_value(value)
-    {}
-
-    explicit AnnotationParameterValue(WCharValue value)
-      : kind(TK_CHAR16)
-      , wchar_value(value.value)
-    {}
-
-    explicit AnnotationParameterValue(EnumValue value)
-      : kind(TK_ENUM)
-      , enumerated_value(value.value)
-    {}
-
-    explicit AnnotationParameterValue(const OPENDDS_STRING& value)
-      : kind(TK_STRING8)
-      , string8_value(value)
-    {}
-
-    explicit AnnotationParameterValue(const OPENDDS_WSTRING& value)
-      : kind(TK_STRING16)
-      , string16_value(value)
-    {}
+    void activate(const AnnotationParameterValue* other = 0);
+    void reset();
   };
 
   // The application of an annotation to some type or type member
@@ -1971,6 +1918,10 @@ namespace XTypes {
     BitmaskTypeFlag bitmask_flags; // unused
     MinimalBitmaskHeader header;
     MinimalBitflagSeq flag_seq;
+
+    MinimalBitmaskType()
+      : bitmask_flags(0)
+    {}
   };
 
   // --- Bitset: ----------------------------------------------------------
@@ -2013,6 +1964,10 @@ namespace XTypes {
     BitsetTypeFlag bitset_flags; // unused
     MinimalBitsetHeader header;
     MinimalBitfieldSeq field_seq;
+
+    MinimalBitsetType()
+      : bitset_flags(0)
+    {}
   };
 
   // --- Type Object: ---------------------------------------------------

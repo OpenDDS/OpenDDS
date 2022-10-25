@@ -769,43 +769,47 @@ bool operator==(const CommonAnnotationParameter& lhs, const CommonAnnotationPara
 
 bool operator==(const AnnotationParameterValue& lhs, const AnnotationParameterValue& rhs)
 {
-  if (lhs.kind != rhs.kind) {
+  if (lhs.kind() != rhs.kind()) {
     return false;
   }
 
-  switch (rhs.kind) {
+  switch (rhs.kind()) {
   case TK_BOOLEAN:
-    return lhs.boolean_value == rhs.boolean_value;
+    return lhs.boolean_value() == rhs.boolean_value();
   case TK_BYTE:
-    return lhs.byte_value == rhs.byte_value;
+    return lhs.byte_value() == rhs.byte_value();
+  case TK_INT8:
+    return lhs.int8_value() == rhs.int8_value();
+  case TK_UINT8:
+    return lhs.uint8_value() == rhs.uint8_value();
   case TK_INT16:
-    return lhs.int16_value == rhs.int16_value;
+    return lhs.int16_value() == rhs.int16_value();
   case TK_UINT16:
-    return lhs.uint16_value == rhs.uint16_value;
+    return lhs.uint16_value() == rhs.uint16_value();
   case TK_INT32:
-    return lhs.int32_value == rhs.int32_value;
+    return lhs.int32_value() == rhs.int32_value();
   case TK_UINT32:
-    return lhs.uint32_value == rhs.uint32_value;
+    return lhs.uint32_value() == rhs.uint32_value();
   case TK_INT64:
-    return lhs.int64_value == rhs.int64_value;
+    return lhs.int64_value() == rhs.int64_value();
   case TK_UINT64:
-    return lhs.uint64_value == rhs.uint64_value;
+    return lhs.uint64_value() == rhs.uint64_value();
   case TK_FLOAT32:
-    return lhs.float32_value == rhs.float32_value;
+    return lhs.float32_value() == rhs.float32_value();
   case TK_FLOAT64:
-    return lhs.float64_value == rhs.float64_value;
+    return lhs.float64_value() == rhs.float64_value();
   case TK_FLOAT128:
-    return lhs.float128_value == rhs.float128_value;
+    return lhs.float128_value() == rhs.float128_value();
   case TK_CHAR8:
-    return lhs.char_value == rhs.char_value;
+    return lhs.char_value() == rhs.char_value();
   case TK_CHAR16:
-    return lhs.wchar_value == rhs.wchar_value;
+    return lhs.wchar_value() == rhs.wchar_value();
   case TK_ENUM:
-    return lhs.enumerated_value == rhs.enumerated_value;
+    return lhs.enumerated_value() == rhs.enumerated_value();
   case TK_STRING8:
-    return lhs.string8_value == rhs.string8_value;
+    return lhs.string8_value() == rhs.string8_value();
   case TK_STRING16:
-    return lhs.string16_value == rhs.string16_value;
+    return lhs.string16_value() == rhs.string16_value();
   default:
     return true;
   }

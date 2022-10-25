@@ -79,7 +79,10 @@ RtpsUdpTransport::rtps_relay_only_now(bool flag)
 
 #ifdef OPENDDS_SECURITY
   if (flag) {
-    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    {
+      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+      relay_stun_task_falloff_.set(config().heartbeat_period_);
+    }
     relay_stun_task_->schedule(TimeDuration::zero_value);
   } else {
     if (!config().use_rtps_relay()) {
@@ -96,7 +99,10 @@ RtpsUdpTransport::use_rtps_relay_now(bool flag)
 
 #ifdef OPENDDS_SECURITY
   if (flag) {
-    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    {
+      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+      relay_stun_task_falloff_.set(config().heartbeat_period_);
+    }
     relay_stun_task_->schedule(TimeDuration::zero_value);
   } else {
     if (!config().rtps_relay_only()) {
@@ -131,7 +137,10 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
   if (equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     assign(local_prefix_, local_prefix);
 #ifdef OPENDDS_SECURITY
-    relay_stun_task_falloff_.set(config().heartbeat_period_);
+    {
+      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+      relay_stun_task_falloff_.set(config().heartbeat_period_);
+    }
     relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
   }
@@ -503,7 +512,10 @@ RtpsUdpTransport::rtps_relay_address_change()
 {
 #ifdef OPENDDS_SECURITY
   relay_stun_task_->cancel();
-  relay_stun_task_falloff_.set(config().heartbeat_period_);
+  {
+    ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+    relay_stun_task_falloff_.set(config().heartbeat_period_);
+  }
   relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
 }
@@ -605,7 +617,11 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
                      false);
   }
 
-  config.ipv6_local_address(NetworkAddress(address));
+  NetworkAddress temp(address);
+  if (address.is_ipv4_mapped_ipv6() && temp.is_any()) {
+    temp = NetworkAddress(address.get_port_number(), "::");
+  }
+  config.ipv6_local_address(temp);
 
 #ifdef ACE_RECVPKTINFO6
   if (ipv6_unicast_socket_.set_option(IPPROTO_IPV6, ACE_RECVPKTINFO6, &sockopt, sizeof sockopt) == -1) {
@@ -633,7 +649,10 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
   }
 
 #ifdef OPENDDS_SECURITY
-  relay_stun_task_falloff_.set(config.heartbeat_period_);
+  {
+    ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+    relay_stun_task_falloff_.set(config.heartbeat_period_);
+  }
   relay_stun_task_->schedule(TimeDuration::zero_value);
 #endif
 
@@ -941,8 +960,11 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
       !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
     ice_endpoint_->send(relay_address, relay_srsm_.message());
-    relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
-    relay_stun_task_->schedule(relay_stun_task_falloff_.get());
+    {
+      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+      relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+      relay_stun_task_->schedule(relay_stun_task_falloff_.get());
+    }
   }
 }
 
@@ -967,7 +989,10 @@ RtpsUdpTransport::process_relay_sra(ICE::ServerReflexiveStateMachine::StateChang
   case ICE::ServerReflexiveStateMachine::SRSM_Set:
   case ICE::ServerReflexiveStateMachine::SRSM_Change:
     // Lengthen to normal period.
-    relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
+    {
+      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+      relay_stun_task_falloff_.set(ICE::Configuration::instance()->server_reflexive_address_period());
+    }
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();
     connection_record.latency = relay_srsm_.latency().to_dds_duration();
     relay_srsm_.latency_available(false);
@@ -1004,6 +1029,7 @@ RtpsUdpTransport::disable_relay_stun_task()
   DCPS::ConnectionRecord connection_record;
   std::memset(connection_record.guid, 0, sizeof(connection_record.guid));
   connection_record.protocol = RTPS_RELAY_STUN_PROTOCOL;
+  connection_record.latency = TimeDuration::zero_value.to_dds_duration();
 
   if (relay_srsm_.stun_server_address() != ACE_INET_Addr()) {
     connection_record.address = DCPS::LogAddr(relay_srsm_.stun_server_address()).c_str();

@@ -174,7 +174,7 @@ DomainParticipantImpl::create_publisher(
                                this),
                  DDS::Publisher::_nil());
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
+  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
     pub->enable();
   }
 
@@ -288,7 +288,7 @@ DomainParticipantImpl::create_subscriber(
                                 this),
                  DDS::Subscriber::_nil());
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
+  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
     sub->enable();
   }
 
@@ -575,7 +575,7 @@ DomainParticipantImpl::create_topic_i(
       return DDS::Topic::_nil();
     }
 
-    if ((this->enabled_ == true) && qos_.entity_factory.autoenable_created_entities) {
+    if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
       if (new_topic->enable() != DDS::RETCODE_OK) {
         if (DCPS_debug_level > 0) {
           ACE_ERROR((LM_WARNING,
@@ -1165,7 +1165,7 @@ DomainParticipantImpl::set_qos(
       return DDS::RETCODE_OK;
 
     // for the not changeable qos, it can be changed before enable
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(qos_, qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -1225,9 +1225,8 @@ DDS::ReturnCode_t
 DomainParticipantImpl::ignore_participant(
   DDS::InstanceHandle_t handle)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  if (enabled_ == false) {
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_participant, ")
@@ -1285,9 +1284,8 @@ DDS::ReturnCode_t
 DomainParticipantImpl::ignore_topic(
   DDS::InstanceHandle_t handle)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  if (enabled_ == false) {
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_topic, ")
@@ -1336,9 +1334,8 @@ DDS::ReturnCode_t
 DomainParticipantImpl::ignore_publication(
   DDS::InstanceHandle_t handle)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  if (enabled_ == false) {
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_publication, ")
@@ -1379,9 +1376,8 @@ DDS::ReturnCode_t
 DomainParticipantImpl::ignore_subscription(
   DDS::InstanceHandle_t handle)
 {
-#if !defined (DDS_HAS_MINIMUM_BIT)
-
-  if (enabled_ == false) {
+#ifndef DDS_HAS_MINIMUM_BIT
+  if (!enabled_) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: DomainParticipantImpl::ignore_subscription, ")
@@ -1999,8 +1995,7 @@ DomainParticipantImpl::create_new_topic(
                            this),
                  DDS::Topic::_nil());
 
-  if ((enabled_ == true)
-      && (qos_.entity_factory.autoenable_created_entities)) {
+  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
     const DDS::ReturnCode_t ret = topic_servant->enable();
 
     if (ret != DDS::RETCODE_OK) {
@@ -2203,7 +2198,7 @@ DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("DomainParticipantImpl::create_recorder, ")
                  ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;
@@ -2227,7 +2222,7 @@ DomainParticipantImpl::create_recorder(DDS::Topic_ptr a_topic,
     dr_qos, a_listener,
     mask, this, sub_qos);
 
-  if ((enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
+  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
     recorder->enable();
   }
 
@@ -2248,7 +2243,7 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: ")
-                 ACE_TEXT("SubscriberImpl::create_datareader, ")
+                 ACE_TEXT("DomainParticipantImpl::create_replayer, ")
                  ACE_TEXT("topic desc is nil.\n")));
     }
     return 0;
@@ -2272,7 +2267,7 @@ DomainParticipantImpl::create_replayer(DDS::Topic_ptr a_topic,
 
   replayer->init(a_topic, topic_servant, dw_qos, a_listener, mask, this, pub_qos);
 
-  if ((this->enabled_ == true) && (qos_.entity_factory.autoenable_created_entities)) {
+  if (enabled_ && qos_.entity_factory.autoenable_created_entities) {
     const DDS::ReturnCode_t ret = replayer->enable();
 
     if (ret != DDS::RETCODE_OK) {
@@ -2527,31 +2522,6 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
     }
   }
 
-  // delete topics
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     tao_mon,
-                     this->topics_protector_,
-                     DDS::RETCODE_ERROR);
-
-    TopicMap::iterator topicIter = topics_.begin();
-    DDS::Topic_ptr topicPtr;
-    size_t topicsize = topics_.size();
-
-    while (topicsize > 0) {
-      topicPtr = topicIter->second.pair_.obj_.in();
-      ++topicIter;
-
-      // Delete the topic the reference count.
-      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
-
-      if (result != DDS::RETCODE_OK) {
-        ret = result;
-      }
-      --topicsize;
-    }
-  }
-
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
                      tao_mon,
@@ -2584,6 +2554,31 @@ DomainParticipantImpl::handle_exception(ACE_HANDLE /*fd*/)
     }
 
     replayers_.clear();
+  }
+
+  // delete topics
+  {
+    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                     tao_mon,
+                     this->topics_protector_,
+                     DDS::RETCODE_ERROR);
+
+    TopicMap::iterator topicIter = topics_.begin();
+    DDS::Topic_ptr topicPtr;
+    size_t topicsize = topics_.size();
+
+    while (topicsize > 0) {
+      topicPtr = topicIter->second.pair_.obj_.in();
+      ++topicIter;
+
+      // Delete the topic the reference count.
+      const DDS::ReturnCode_t result = this->delete_topic_i(topicPtr, true);
+
+      if (result != DDS::RETCODE_OK) {
+        ret = result;
+      }
+      --topicsize;
+    }
   }
 
   shutdown_mutex_.acquire();

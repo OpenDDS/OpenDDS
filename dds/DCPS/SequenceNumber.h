@@ -203,8 +203,8 @@ void serialized_size(const Encoding& encoding, size_t& size,
 typedef std::pair<SequenceNumber, SequenceNumber> SequenceRange;
 extern OpenDDS_Dcps_Export const SequenceRange unknown_sequence_range;
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

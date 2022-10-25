@@ -17,7 +17,7 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
     virtual void on_data_available(DDS::DataReader_ptr reader);
   private:
     OpenDDS::Model::ReaderCondSync& rcs_;
-
+    ACE_Thread_Mutex mutex_;
 };
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
@@ -25,6 +25,8 @@ class ReaderListener : public OpenDDS::Model::NullReaderListener {
 void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
   MTMdata2::MTM_MessageDataReader_var reader_i =
     MTMdata2::MTM_MessageDataReader::_narrow(reader);
 

@@ -42,6 +42,12 @@ public:
   explicit JsonValueReader(InputStream& input_stream)
     : token_type_(kUnknown)
     , input_stream_(input_stream)
+    , bool_value_(false)
+    , int_value_(0)
+    , uint_value_(0)
+    , int64_value_(0)
+    , uint64_value_(0)
+    , double_value_(0)
   {
     reader_.IterativeParseInit();
   }

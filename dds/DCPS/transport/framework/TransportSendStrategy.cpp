@@ -841,6 +841,8 @@ TransportSendStrategy::start()
 
   header_db_allocator_.reset( new TransportDataBlockAllocator(header_chunks));
   header_mb_allocator_.reset( new TransportMessageBlockAllocator(header_chunks));
+  header_db_lock_pool_.reset(new DataBlockLockPool(static_cast<unsigned long>(TheServiceParticipant->n_chunks())));
+  header_data_allocator_.reset(new DataAllocator(TheServiceParticipant->association_chunk_multiplier(), max_header_size_));
 
   // Since we (the TransportSendStrategy object) are a reference-counted
   // object, but the synch_ object doesn't necessarily know this, we need
@@ -1656,10 +1658,10 @@ TransportSendStrategy::prepare_packet()
     static_cast<ACE_Message_Block*>(header_mb_allocator_->malloc()),
     ACE_Message_Block(max_header_size_,
                       ACE_Message_Block::MB_DATA,
-                      0,
-                      0,
-                      0,
-                      0,
+                      0, // cont
+                      0, // data
+                      header_data_allocator_.get(),
+                      header_db_lock_pool_->get_lock(),
                       ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY,
                       ACE_Time_Value::zero,
                       ACE_Time_Value::max_time,

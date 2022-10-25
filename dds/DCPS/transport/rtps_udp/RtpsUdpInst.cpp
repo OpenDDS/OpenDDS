@@ -179,8 +179,8 @@ RtpsUdpInst::dump_to_str() const
   ret += formatNameForDump("nak_depth") + to_dds_string(unsigned(nak_depth_)) + '\n';
   ret += formatNameForDump("anticipated_fragments") + to_dds_string(unsigned(anticipated_fragments_)) + '\n';
   ret += formatNameForDump("max_message_size") + to_dds_string(unsigned(max_message_size_)) + '\n';
-  ret += formatNameForDump("nak_response_delay") + to_dds_string(nak_response_delay_.value().msec()) + '\n';
-  ret += formatNameForDump("heartbeat_period") + to_dds_string(heartbeat_period_.value().msec()) + '\n';
+  ret += formatNameForDump("nak_response_delay") + nak_response_delay_.str() + '\n';
+  ret += formatNameForDump("heartbeat_period") + heartbeat_period_.str() + '\n';
   ret += formatNameForDump("send_buffer_size") + to_dds_string(send_buffer_size_) + '\n';
   ret += formatNameForDump("rcv_buffer_size") + to_dds_string(rcv_buffer_size_) + '\n';
   ret += formatNameForDump("ttl") + to_dds_string(ttl_) + '\n';

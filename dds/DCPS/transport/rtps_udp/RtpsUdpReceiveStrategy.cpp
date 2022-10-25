@@ -24,16 +24,15 @@
 #include <algorithm>
 #include <cstring>
 
-#ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix)
+RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
+                                               const GuidPrefix_t& local_prefix,
+                                               ThreadStatusManager& thread_status_manager)
   : BaseReceiveStrategy(link->config(), BUFFER_COUNT)
   , link_(link)
   , last_received_()
@@ -41,6 +40,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
   , total_frags_(0)
   , reassembly_(link->config().fragment_reassembly_timeout_)
   , receiver_(local_prefix)
+  , thread_status_manager_(thread_status_manager)
 #ifdef OPENDDS_SECURITY
   , secure_sample_(0)
   , encoded_rtps_(false)
@@ -77,7 +77,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const Guid
 int
 RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
-  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+  ThreadStatusManager::Event ev(thread_status_manager_);
 
   // Since BUFFER_COUNT is 1, the index will always be 0
   const size_t INDEX = 0;
@@ -1124,7 +1124,7 @@ RtpsUdpReceiveStrategy::begin_transport_header_processing()
 void
 RtpsUdpReceiveStrategy::end_transport_header_processing()
 {
-  link_->disable_response_queue();
+  link_->disable_response_queue(false);
 }
 
 const ReceivedDataSample*

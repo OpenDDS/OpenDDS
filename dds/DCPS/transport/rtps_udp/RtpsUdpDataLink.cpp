@@ -24,7 +24,6 @@
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/Logging.h>
 #ifdef OPENDDS_SECURITY
-#  include <dds/DCPS/RTPS/SecurityHelpers.h>
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
 
@@ -86,6 +85,8 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
   , bundle_allocator_(TheServiceParticipant->association_chunk_multiplier(), config.max_message_size_)
   , db_lock_pool_(new DataBlockLockPool(static_cast<unsigned long>(TheServiceParticipant->n_chunks())))
   , multi_buff_(this, config.nak_depth_)
+  , fsq_vec_size_(0)
+  , harvest_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::harvest_send_queue)))
   , flush_send_queue_sporadic_(make_rch<SporadicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::flush_send_queue)))
   , best_effort_heartbeat_count_(0)
   , heartbeat_(make_rch<PeriodicEvent>(event_dispatcher_, make_rch<PmfNowEvent<RtpsUdpDataLink> >(rchandle_from(this), &RtpsUdpDataLink::send_heartbeats)))
@@ -106,7 +107,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 #endif
 
   send_strategy_ = make_rch<RtpsUdpSendStrategy>(this, local_prefix);
-  receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix);
+  receive_strategy_ = make_rch<RtpsUdpReceiveStrategy>(this, local_prefix, ref(TheServiceParticipant->get_thread_status_manager()));
   assign(local_prefix_, local_prefix);
 
   this->job_queue(job_queue_);
@@ -114,6 +115,7 @@ RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
 
 RtpsUdpDataLink::~RtpsUdpDataLink()
 {
+  harvest_send_queue_sporadic_->cancel();
   flush_send_queue_sporadic_->cancel();
 }
 
@@ -561,8 +563,10 @@ RtpsUdpDataLink::associated(const RepoId& local_id, const RepoId& remote_id,
                             const NetworkAddress& last_addr_hint,
                             bool requires_inline_qos)
 {
+  sq_.ignore(local_id, remote_id);
+
   update_locators(remote_id, unicast_addresses, multicast_addresses, requires_inline_qos, true);
-  if (last_addr_hint != NetworkAddress()) {
+  if (last_addr_hint) {
     update_last_recv_addr(remote_id, last_addr_hint);
   }
 
@@ -649,7 +653,7 @@ RtpsUdpDataLink::disassociated(const RepoId& local_id,
 {
   release_reservations_i(remote_id, local_id);
   remove_locator_and_bundling_cache(remote_id);
-  sq_.purge_remote(remote_id);
+  sq_.ignore_remote(remote_id);
 
   ACE_GUARD(ACE_Thread_Mutex, g, locators_lock_);
 
@@ -806,7 +810,7 @@ void RtpsUdpDataLink::client_stop(const RepoId& localId)
       }
     }
   }
-  sq_.purge_local(localId);
+  sq_.ignore_local(localId);
 }
 
 void
@@ -1960,9 +1964,6 @@ RtpsUdpDataLink::RtpsReader::process_heartbeat_i(const RTPS::HeartBeatSubmessage
     if (!writer->recvd_.empty()) {
       writer->hb_last_ = std::max(writer->hb_last_, hb_last);
       gather_ack_nacks_i(writer, link, !is_final, meta_submessages, cumulative_bits_added);
-    } else if (link->config().responsive_mode_) {
-      gather_preassociation_acknack_i(meta_submessages, writer);
-      ++cumulative_bits_added;
     }
     if (cumulative_bits_added && link->config().count_messages()) {
       ACE_Guard<ACE_Thread_Mutex> tsg(link->transport_statistics_mutex_);
@@ -2392,6 +2393,10 @@ RtpsUdpDataLink::build_meta_submessage_map(MetaSubmessageVec& meta_submessages, 
 
   // Sort meta_submessages by address set and destination
   for (MetaSubmessageVec::iterator it = meta_submessages.begin(), limit = meta_submessages.end(); it != limit; ++it) {
+    if (it->ignore_) {
+      continue;
+    }
+
     const BundlingCacheKey key(it->src_guid_, it->dst_guid_);
     BundlingCache::ScopedAccess entry(bundling_cache_, key, false, now);
     if (entry.is_new_) {
@@ -2625,37 +2630,70 @@ RtpsUdpDataLink::bundle_mapped_meta_submessages(const Encoding& encoding,
 }
 
 void
+RtpsUdpDataLink::harvest_send_queue(const MonotonicTimePoint& /*now*/)
+{
+  sq_.begin_transaction();
+  sq_.ready_to_send();
+
+  disable_response_queue(true);
+}
+
+void
 RtpsUdpDataLink::flush_send_queue(const MonotonicTimePoint& /*now*/)
 {
   ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
-  sq_.condense_and_swap(fsq_vec_);
-  bundle_and_send_submessages(fsq_vec_);
-  fsq_vec_.clear();
+  flush_send_queue_i();
+}
+
+void
+RtpsUdpDataLink::flush_send_queue_i()
+{
+  for (size_t idx = 0; idx != fsq_vec_size_; ++idx) {
+    dedup(fsq_vec_[idx]);
+    bundle_and_send_submessages(fsq_vec_[idx]);
+    fsq_vec_[idx].clear();
+  }
+  fsq_vec_size_ = 0;
 }
 
 void
 RtpsUdpDataLink::enable_response_queue()
 {
-  sq_.enable_thread_queue();
+  sq_.begin_transaction();
 }
 
 void
-RtpsUdpDataLink::disable_response_queue()
+RtpsUdpDataLink::disable_response_queue(bool send_immediately)
 {
-  if (sq_.disable_thread_queue()) {
-    flush_send_queue_sporadic_->schedule(config().send_delay_);
+  MetaSubmessageVec vec;
+  ACE_Guard<ACE_Thread_Mutex> fsq_guard(fsq_mutex_);
+  sq_.end_transaction(vec);
+  if (!vec.empty()) {
+    if (fsq_vec_.size() == fsq_vec_size_) {
+      fsq_vec_.resize(fsq_vec_.size() + 1);
+    }
+    fsq_vec_[fsq_vec_size_++].swap(vec);
   }
+
+  if (fsq_vec_size_) {
+    if (send_immediately) {
+      flush_send_queue_i();
+    } else {
+      flush_send_queue_sporadic_->schedule(TimeDuration::zero_value);
+    }
+  }
+
 }
 
 void
-RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in, double scale)
+RtpsUdpDataLink::queue_submessages(MetaSubmessageVec& in)
 {
   if (in.empty()) {
     return;
   }
 
   if (sq_.enqueue(in)) {
-    flush_send_queue_sporadic_->schedule(config().send_delay_ * scale);
+    harvest_send_queue_sporadic_->schedule(config().send_delay_);
   }
 }
 
@@ -3176,11 +3214,6 @@ RtpsUdpDataLink::RtpsWriter::process_acknack(const RTPS::AckNackSubmessage& ackn
   // Process the ack.
   bool inform_send_listener = false;
   if (ack != SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
-    // Clean up requested fragments.
-    for (RequestedFragSeqMap::iterator pos = reader->requested_frags_.begin(),
-           limit = reader->requested_frags_.end(); pos != limit && pos->first < ack;) {
-      reader->requested_frags_.erase(pos++);
-    }
 
     if (ack >= reader->cur_cumulative_ack_) {
       reader->cur_cumulative_ack_ = ack;
@@ -3608,11 +3641,21 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
         const AddrSet& uni = consolidated_recipients_unicast[seq];
         const AddrSet& multi = consolidated_recipients_multicast[seq];
         const RepoIdSet& readers = consolidated_request_readers[seq];
-        const RtpsUdpSendStrategy::OverrideToken ot =
-          link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
 
-        proxy.resend_i(SequenceRange(seq, seq));
-        ++cumulative_send_count;
+        if (proxy.has_frags(seq)) {
+          if (consolidated_fragment_requests.find(seq) == consolidated_fragment_requests.end()) {
+            consolidated_fragment_requests[seq].insert(1);
+          }
+          consolidated_fragment_recipients_unicast[seq].insert(uni.begin(), uni.end());
+          consolidated_fragment_recipients_multicast[seq].insert(multi.begin(), multi.end());
+          consolidated_fragment_request_readers[seq].insert(readers.begin(), readers.end());
+        } else {
+          const RtpsUdpSendStrategy::OverrideToken ot =
+            link->send_strategy()->override_destinations(readers.size() * 2 > remote_readers_.size() ? multi : uni);
+
+          proxy.resend_i(SequenceRange(seq, seq));
+          ++cumulative_send_count;
+        }
       }
     }
 
@@ -4579,7 +4622,7 @@ RtpsUdpDataLink::get_addresses_i(const RepoId& local) const
 
 bool RtpsUdpDataLink::RemoteInfo::insert_recv_addr(AddrSet& aset) const
 {
-  if (last_recv_addr_ == NetworkAddress()) {
+  if (!last_recv_addr_) {
     return false;
   }
   const ACE_INT16 last_addr_type = last_recv_addr_.get_type();

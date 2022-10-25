@@ -30,6 +30,8 @@ ParticipantLocationListenerImpl::~ParticipantLocationListenerImpl()
 
 void ParticipantLocationListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
   // 1.  Narrow the DataReader to an ParticipantLocationBuiltinTopicDataDataReader
   // 2.  Read the samples from the data reader
   // 3.  Print out the contents of the samples

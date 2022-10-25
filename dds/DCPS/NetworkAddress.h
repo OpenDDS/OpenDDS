@@ -43,6 +43,9 @@ public:
   NetworkAddress& operator=(const NetworkAddress& rhs);
   NetworkAddress& operator=(const ACE_INET_Addr& rhs);
 
+  operator bool() const;
+  bool operator!() const;
+
   bool operator==(const NetworkAddress& rhs) const;
   bool operator!=(const NetworkAddress& rhs) const;
 
@@ -65,6 +68,7 @@ public:
 
   bool is_any() const;
   bool is_loopback() const;
+  bool is_multicast() const;
 
   bool is_private() const; // IPv4 only
 

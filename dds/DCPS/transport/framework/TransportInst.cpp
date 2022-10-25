@@ -111,7 +111,7 @@ OpenDDS::DCPS::TransportInst::dump_to_str() const
   ret += formatNameForDump("thread_per_connection")   + (thread_per_connection_ ? "true" : "false") + '\n';
   ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay_) + '\n';
   ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks_)) + '\n';
-  ret += formatNameForDump("fragment_reassembly_timeout") + to_dds_string(fragment_reassembly_timeout_.value().msec()) + '\n';
+  ret += formatNameForDump("fragment_reassembly_timeout") + fragment_reassembly_timeout_.str() + '\n';
   ret += formatNameForDump("receive_preallocated_message_blocks") + to_dds_string(unsigned(receive_preallocated_message_blocks_)) + '\n';
   ret += formatNameForDump("receive_preallocated_data_blocks") + to_dds_string(unsigned(receive_preallocated_data_blocks_)) + '\n';
   return ret;

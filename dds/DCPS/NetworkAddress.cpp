@@ -121,6 +121,18 @@ NetworkAddress& NetworkAddress::operator=(const ACE_INET_Addr& rhs)
   return *this = NetworkAddress(rhs);
 }
 
+NetworkAddress::operator bool() const
+{
+  static const NetworkAddress empty = NetworkAddress();
+  return *this != empty;
+}
+
+bool NetworkAddress::operator!() const
+{
+  static const NetworkAddress empty = NetworkAddress();
+  return *this == empty;
+}
+
 bool NetworkAddress::operator==(const NetworkAddress& rhs) const
 {
   return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) == 0;
@@ -206,7 +218,11 @@ bool NetworkAddress::is_any() const
     return inet_addr_.in4_.sin_addr.s_addr == INADDR_ANY;
 #if defined (ACE_HAS_IPV6)
   } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
-    return IN6_IS_ADDR_UNSPECIFIED(&inet_addr_.in6_.sin6_addr);
+    if (IN6_IS_ADDR_UNSPECIFIED(&inet_addr_.in6_.sin6_addr)) {
+      return true;
+    }
+    static const unsigned char buff[16] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xFF, 0xFF, 0, 0, 0, 0 };
+    return memcmp(buff, &inet_addr_.in6_.sin6_addr, sizeof (buff)) == 0;
 #endif
   }
   return false;
@@ -220,6 +236,18 @@ bool NetworkAddress::is_loopback() const
 #if defined (ACE_HAS_IPV6)
   } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
     return IN6_IS_ADDR_LOOPBACK(&inet_addr_.in6_.sin6_addr);
+#endif
+  }
+  return false;
+}
+
+bool NetworkAddress::is_multicast() const
+{
+  if (inet_addr_.in4_.sin_family == AF_INET) {
+    return (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xF0000000) == 0xE0000000;
+#if defined (ACE_HAS_IPV6)
+  } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
+    return this->inet_addr_.in6_.sin6_addr.s6_addr[0] == 0xFF;
 #endif
   }
   return false;
@@ -270,7 +298,7 @@ bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming
 {
   // The question to answer here: "Is the incoming address 'more local' than the current address?"
 
-  if (current == NetworkAddress()) {
+  if (!current) {
     return true;
   }
 

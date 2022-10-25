@@ -363,6 +363,16 @@ For a ``Doodad.cpp`` file in :ghfile:`dds/DCPS`, the includes could look like:
   #include <unistd.h>
   #include <stdlib.h>
 
+**************
+Initialization
+**************
+
+Note that OpenDDS applications require ACE to be initialized to work correctly. For many OpenDDS applications, ``ACE::init()`` and ``ACE::fini()`` will be called
+automatically, either by interaction with the ACE or TAO libraries, or due to ACE's redefinition of executable entry points (e.g. ``main``) which wrap normal execution
+with calls to those functions. However, be advised that on some platforms, the helper macros to catch entry points may change names to suit compiler options. For example,
+for Visual C++ builds on Windows with wide-character support enabled, the helper macro changes from ``main`` to ``wmain``. Applications either need to handle these differences
+in order to correctly ensure initialization or they need to use an entrypoint helper macro such as ``ACE_TMAIN`` which isn't vulnerable to this issue.
+
 ****
 Time
 ****
@@ -487,9 +497,9 @@ Message Content
 - Log messages should take the form:
   ::
 
-    (%P|%t) [ERROR:|WARNING:|NOTICE:] FUNCTION_NAME: MESSAGE\n
+    (%P|%t) [ERROR:|WARNING:|NOTICE:|INFO:] FUNCTION_NAME: MESSAGE\n
 
-  - Use ``ERROR:``, ``WARNING:``, and ``NOTICE:`` if using the corresponding log priorities.
+  - Use ``ERROR:``, ``WARNING:``, ``NOTICE:``, and ``INFO:`` if using the corresponding log priorities.
   - ``CLASS_NAME::METHOD_NAME`` should be used instead of just the function name if it's part of a class.
     It's at the developer's discretion to come up with a meaningful name for members of overload sets, templates, and other more complex cases.
   - ``security_debug`` and ``transport_debug`` log messages should indicate the category name, for example:
@@ -526,7 +536,7 @@ Examples
   }
 
   if (log_level >= LogLevel::Info) {
-    ACE_DEBUG((LM_INFO, "(%P|%t) example_function: Hello, World!\n"));
+    ACE_DEBUG((LM_INFO, "(%P|%t) INFO: example_function: Hello, World!\n"));
   }
 
   if (DCPS_debug_level >= 1) {

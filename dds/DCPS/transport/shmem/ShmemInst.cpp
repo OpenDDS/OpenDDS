@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -26,11 +24,12 @@ ShmemInst::ShmemInst(const std::string& name)
   , pool_size_(16 * 1024 * 1024)
   , datalink_control_size_(4 * 1024)
   , hostname_(get_fully_qualified_hostname())
+  , association_resend_period_(0, 250000)
+  , association_resend_max_count_(10)
 {
   std::ostringstream pool;
   pool << "OpenDDS-" << ACE_OS::getpid() << '-' << this->name();
   poolname_ = pool.str();
-
 }
 
 TransportImpl_rch
@@ -55,6 +54,11 @@ ShmemInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("pool_size"), pool_size_, size_t)
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_size"),
                    datalink_control_size_, size_t)
+  GET_CONFIG_TIME_VALUE(cf, sect,
+    ACE_TEXT("association_resend_period"), association_resend_period_);
+  GET_CONFIG_VALUE(cf, sect,
+    ACE_TEXT("association_resend_max_count"), association_resend_max_count_, size_t);
+
   return 0;
 }
 
@@ -66,8 +70,9 @@ ShmemInst::dump_to_str() const
   os << formatNameForDump("pool_size") << pool_size_ << "\n"
      << formatNameForDump("datalink_control_size") << datalink_control_size_ << "\n"
      << formatNameForDump("pool_name") << this->poolname_ << "\n"
-     << formatNameForDump("host_name") << this->hostname_
-     << std::endl;
+     << formatNameForDump("host_name") << this->hostname_ << "\n"
+     << formatNameForDump("association_resend_period") << association_resend_period_.str() << "\n"
+     << formatNameForDump("association_resend_max_count") << association_resend_max_count_ << "\n";
   return OPENDDS_STRING(os.str());
 }
 

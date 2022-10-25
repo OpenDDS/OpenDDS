@@ -31,7 +31,7 @@ use ChangeDir;
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
 my $doc_tao2_version = '6.5.18';
-my $doc_tao3_version = '7.0.8';
+my $doc_tao3_version = '7.0.9';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -398,15 +398,24 @@ my %specific =
     'refpost' => '}', 'comment' => '#')
   );
 
+sub might_be_executable {
+  my $path = shift;
+  return -x $path && -f $path; # On Windows -x can return true for directories
+}
+
 sub which {
   my $file = shift;
   for my $p (File::Spec->path()) {
     next if $p eq '.';
-    if (-x "$p/$file") {
-      return "$p/$file";
+    my $path = "$p/$file";
+    if (might_be_executable($path)) {
+      return $path;
     }
-    elsif ($exeext ne '' && -x "$p/$file$exeext") {
-      return "$p/$file$exeext";
+    elsif ($exeext ne '') {
+      $path .= $exeext;
+      if (might_be_executable($path)) {
+        return $path;
+      }
     }
   }
   return undef;
@@ -470,7 +479,7 @@ sub git_submodule_prop {
     or die("git_submodule_prop open failed: $!\nStopped");
   my $prop_value = <$fd>;
   close($fd);
-  chomp($prop_value);
+  chomp($prop_value) if (defined($prop_value));
   if (!$prop_value) {
     die("Couldn't get $full_prop_name from .gitmodules\nStopped");
   }

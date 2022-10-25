@@ -10,7 +10,7 @@ concurrency:
 jobs:
 
   Linux:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -63,7 +63,7 @@ jobs:
         mwc.pl -type gnuace
         make -sj4
     - name: upload shape_main artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: ${{ github.job }}_artifact
         path: dds-rtps/srcCxx/shape_main

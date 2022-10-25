@@ -7,6 +7,7 @@
 
 #include "Service_Participant.h"
 
+#include "Logging.h"
 #include "WaitSet.h"
 #include "transport/framework/TransportRegistry.h"
 #include "debug.h"
@@ -39,6 +40,7 @@
 #include <ace/OS_NS_unistd.h>
 #include <ace/Version.h>
 #include <ace/Configuration.h>
+#include <ace/OS_NS_sys_utsname.h>
 
 #include <cstring>
 #ifdef OPENDDS_SAFETY_PROFILE
@@ -310,7 +312,7 @@ DDS::ReturnCode_t Service_Participant::shutdown()
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
   }
 
-  if (shut_down_.value()) {
+  if (shut_down_) {
     return DDS::RETCODE_ALREADY_DELETED;
   }
 
@@ -507,6 +509,17 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
         ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
           "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
+
+        ACE_utsname uname;
+        if (ACE_OS::uname(&uname) != -1) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+            "machine: %C, %C platform: %C, %C, %C\n",
+            uname.nodename, uname.machine, uname.sysname, uname.release, uname.version));
+        }
+
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "compiler: %C version %d.%d.%d\n",
+          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version(), ACE::compiler_beta_version()));
       }
 
       // Establish the default scheduling mechanism and
@@ -1853,6 +1866,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
     }
 
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSLogBits"), log_bits, bool);
+
 #if defined(OPENDDS_SECURITY)
     if (got_security_flag) {
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurity")));
@@ -2901,7 +2916,6 @@ Service_Participant::create_replayer(DDS::DomainParticipant_ptr participant,
                                      const DDS::DataWriterQos& datawriter_qos,
                                      const ReplayerListener_rch& a_listener)
 {
-  ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);

@@ -50,7 +50,6 @@ BE_GlobalData::BE_GlobalData()
   , suppress_xtypes_(false)
   , no_default_gen_(false)
   , generate_itl_(false)
-  , generate_v8_(false)
   , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
   , face_ts_(false)
@@ -234,16 +233,6 @@ bool BE_GlobalData::itl() const
   return this->generate_itl_;
 }
 
-void BE_GlobalData::v8(bool b)
-{
-  this->generate_v8_ = b;
-}
-
-bool BE_GlobalData::v8() const
-{
-  return this->generate_v8_;
-}
-
 void BE_GlobalData::value_reader_writer(bool b)
 {
   this->generate_value_reader_writer_ = b;
@@ -383,8 +372,6 @@ BE_GlobalData::parse_args(long& i, char** av)
       itl(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS")) {
       face_ts(true);
-    } else if (0 == ACE_OS::strcasecmp(av[i], "-Gv8")) {
-      v8(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
     } else {

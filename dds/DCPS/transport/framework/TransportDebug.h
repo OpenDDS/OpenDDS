@@ -70,8 +70,8 @@ public:
 };
 extern OpenDDS_Dcps_Export TransportDebug transport_debug;
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

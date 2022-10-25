@@ -88,18 +88,31 @@ public:
   virtual DDS::ReturnCode_t unregister_type(DDS::DomainParticipant_ptr participant,
                                             const char* type_name);
 
+  virtual const char* name() const = 0;
+
+  /// NOTE: This one implements the IDL TypeSupport method so it returns a CORBA String
+  /// that the caller must take ownership of.
   virtual char* get_type_name();
 
-  /// Get allowed representations defined by IDL annotations
-  virtual void representations_allowed_by_type(
-    DDS::DataRepresentationIdSeq& seq) = 0;
+  virtual size_t key_count() const = 0;
+  bool has_dcps_key()
+  {
+    return key_count();
+  }
+
+  virtual SerializedSizeBound serialized_size_bound(const Encoding& encoding) const = 0;
+  virtual SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const = 0;
+
+  /// Returns the extensibility of just the topic type.
+  virtual Extensibility base_extensibility() const = 0;
+  /// Between the topic type and its nested types, return the extensibility
+  /// that is furthest right in (final, appenable, mutable).
+  virtual Extensibility max_extensibility() const = 0;
 
   virtual const XTypes::TypeIdentifier& getMinimalTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getMinimalTypeMap() const = 0;
   virtual const XTypes::TypeIdentifier& getCompleteTypeIdentifier() const = 0;
   virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
-
-  virtual Extensibility getExtensibility() const = 0;
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 
@@ -108,8 +121,6 @@ public:
 
 private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
-
-  virtual const char* default_type_name() const = 0;
 
   void to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_with_deps,
                       const XTypes::TypeIdentifier& ti,
@@ -120,6 +131,48 @@ private:
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 
+};
+
+template <typename NativeType>
+class TypeSupportImpl_T : public TypeSupportImpl {
+public:
+  typedef DDSTraits<NativeType> TraitsType;
+  typedef MarshalTraits<NativeType> MarshalTraitsType;
+
+  const char* name() const
+  {
+    return TraitsType::type_name();
+  }
+
+  size_t key_count() const
+  {
+    return TraitsType::key_count();
+  }
+
+  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)
+  {
+    MarshalTraitsType::representations_allowed_by_type(seq);
+  }
+
+  Extensibility base_extensibility() const
+  {
+    return MarshalTraitsType::extensibility();
+  }
+
+  Extensibility max_extensibility() const
+  {
+    return MarshalTraitsType::max_extensibility_level();
+  }
+
+  SerializedSizeBound serialized_size_bound(const Encoding& encoding) const
+  {
+    return MarshalTraitsType::serialized_size_bound(encoding);
+  }
+
+  SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding) const
+  {
+    return MarshalTraitsType::key_only_serialized_size_bound(encoding);
+  }
 };
 
 const char* kind_to_string(const XTypes::EquivalenceKind ek);

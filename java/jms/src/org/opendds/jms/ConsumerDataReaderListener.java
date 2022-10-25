@@ -60,7 +60,7 @@ public class ConsumerDataReaderListener extends _DataReaderListenerLocalBase {
         // No-op
     }
 
-    public void on_data_available(DataReader dataReader) {
+    public synchronized void on_data_available(DataReader dataReader) {
         MessagePayloadDataReader reader = MessagePayloadDataReaderHelper.narrow(dataReader);
         MessagePayloadSeqHolder payloads = new MessagePayloadSeqHolder(new MessagePayload[0]);
         SampleInfoSeqHolder infos = new SampleInfoSeqHolder(new SampleInfo[0]);

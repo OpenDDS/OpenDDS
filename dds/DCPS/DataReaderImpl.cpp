@@ -64,6 +64,7 @@ DataReaderImpl::DataReaderImpl()
   , qos_(TheServiceParticipant->initial_DataReaderQos())
   , reverse_sample_lock_(sample_lock_)
   , topic_servant_(0)
+  , topic_id_(GUID_UNKNOWN)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   , is_exclusive_ownership_(false)
 #endif
@@ -187,6 +188,7 @@ void DataReaderImpl::init(
   topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
   if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
     topic_servant_ = a_topic;
+    topic_id_ = a_topic->get_id();
   }
 
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -827,7 +829,7 @@ DDS::ReturnCode_t DataReaderImpl::set_qos(const DDS::DataReaderQos& qos)
     if (qos_ == new_qos)
       return DDS::RETCODE_OK;
 
-    if (enabled_ == true) {
+    if (enabled_) {
       if (!Qos_Helper::changeable(qos_, new_qos)) {
         return DDS::RETCODE_IMMUTABLE_POLICY;
 
@@ -1044,7 +1046,7 @@ DDS::ReturnCode_t
 DataReaderImpl::get_matched_publications(
     DDS::InstanceHandleSeq & publication_handles)
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::get_matched_publications: ")
         ACE_TEXT(" Entity is not enabled.\n")),
@@ -1076,7 +1078,7 @@ DataReaderImpl::get_matched_publication_data(
     DDS::PublicationBuiltinTopicData & publication_data,
     DDS::InstanceHandle_t publication_handle)
 {
-  if (enabled_ == false) {
+  if (!enabled_) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderImpl::")
         ACE_TEXT("get_matched_publication_data: ")
@@ -1236,6 +1238,10 @@ DataReaderImpl::enable()
 
     TypeSupportImpl* const typesupport =
       dynamic_cast<TypeSupportImpl*>(topic_servant_->get_type_support());
+    if (!typesupport) {
+      return DDS::RETCODE_ERROR;
+    }
+
     XTypes::TypeInformation type_info;
     typesupport->to_type_info(type_info);
 
@@ -1383,7 +1389,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
         to_string(sample.header_).c_str()));
   }
 
-  const ValueWriterDispatcher* vwd = get_value_writer_dispatcher();
+  const ValueDispatcher* vd = get_value_dispatcher();
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_RECEIVED);
 
   RcHandle<MessageHolder> real_data;
@@ -1418,7 +1424,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     if (sample.header_.key_fields_only_) {
       dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, KEY_ONLY_MARSHALING, false);
     } else {
-      real_data = dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vwd);
+      real_data = dds_demarshal(sample, publication_handle, instance, is_new_instance, filtered, FULL_MARSHALING, observer && vd);
     }
 
     // Per sample logging
@@ -1649,12 +1655,12 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     break;
   }
 
-  if (observer && real_data && vwd) {
+  if (observer && real_data && vd) {
     const DDS::Time_t timestamp = {
       sample.header_.source_timestamp_sec_,
       sample.header_.source_timestamp_nanosec_
     };
-    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get(), *vwd);
+    Observer::Sample s(instance ? instance->instance_handle_ : DDS::HANDLE_NIL, sample.header_.instance_state(), timestamp, sample.header_.sequence_, real_data->get(), *vd);
     observer->on_sample_received(this, s);
   }
 }
@@ -2380,7 +2386,7 @@ DataReaderImpl::reset_latency_stats()
 CORBA::Boolean
 DataReaderImpl::statistics_enabled()
 {
-  return statistics_enabled_.value();
+  return statistics_enabled_;
 }
 
 void
@@ -2792,7 +2798,7 @@ DataReaderImpl::get_reactor()
 OpenDDS::DCPS::RepoId
 DataReaderImpl::get_topic_id()
 {
-  return this->topic_servant_->get_id();
+  return topic_id_;
 }
 
 OpenDDS::DCPS::RepoId

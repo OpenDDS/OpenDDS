@@ -40,6 +40,9 @@ NetworkConfigMonitor::NetworkConfigMonitor()
   : writer_(make_rch<InternalDataWriter<NetworkInterfaceAddress> >(true))
 {}
 
+NetworkConfigMonitor::~NetworkConfigMonitor()
+{}
+
 void NetworkConfigMonitor::connect(RcHandle<InternalTopic<NetworkInterfaceAddress> > topic)
 {
   topic->connect(writer_);
