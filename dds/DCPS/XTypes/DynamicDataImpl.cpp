@@ -2524,8 +2524,7 @@ bool DynamicDataImpl::DataContainer::serialize_nested_bitmask_sequences(DCPS::Se
       } else if (!serialize_complex_member_i(ser, id)) {
         return false;
       }
-    } else {
-      // Empty sequence of bitmasks
+    } else { // Empty sequence of bitmasks
       if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
         if (!ser.write_delimiter(2 * DCPS::uint32_cdr_size)) {
           return false;
@@ -3520,6 +3519,8 @@ bool DynamicDataImpl::DataContainer::serialize_basic_member_default_value(DCPS::
   return false;
 }
 
+// Serialize a struct member which is stored in the complex map,
+// i.e., the member value is represented by a DynamicData object.
 bool DynamicDataImpl::DataContainer::serialize_complex_struct_member(DCPS::Serializer& ser,
   const_complex_iterator it, CORBA::Boolean optional, CORBA::Boolean must_understand,
   DDS::ExtensibilityKind extensibility) const
@@ -3542,11 +3543,12 @@ bool DynamicDataImpl::DataContainer::serialize_complex_struct_member(DCPS::Seria
   return ser << *data_impl;
 }
 
-// Serialize a member of a struct. The member has a basic type.
+// Serialize struct member whose type is basic or enum or bitmask
 bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::Serializer& ser,
-  DDS::MemberId id, TypeKind member_tk, bool optional,
+  DDS::MemberId id, DDS::DynamicType_var& member_type, bool optional,
   bool must_understand, DDS::ExtensibilityKind extensibility) const
 {
+  const TypeKind member_tk = member_type->get_kind();
   const DCPS::Encoding& encoding = ser.encoding();
   const_single_iterator single_it = single_map_.find(id);
   const_complex_iterator complex_it = complex_map_.find(id);
@@ -3559,31 +3561,56 @@ bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::S
     }
     if (extensibility == DDS::MUTABLE) {
       size_t member_size = 0;
-      serialized_size_basic_member_default_value(encoding, member_size, member_tk);
+      if (is_basic_type(member_tk)) {
+        serialized_size_basic_member_default_value(encoding, member_size, member_tk);
+      } else if (member_tk == TK_ENUM) {
+        serialized_size_enum(encoding, member_size, member_type);
+      } else if (member_tk == TK_BITMASK) {
+        serialized_size_bitmask(encoding, member_size, member_type);
+      } else {
+        return false;
+      }
       if (!ser.write_parameter_id(id, member_size, must_understand)) {
         return false;
       }
     }
-    return serialize_basic_member_default_value(ser, member_tk);
-  } else if (single_it != single_map_.end()) {
+    if (is_basic_type(member_tk)) {
+      return serialize_basic_member_default_value(ser, member_tk);
+    } else if (member_tk == TK_ENUM) {
+      return serialize_enum_default_value(ser, member_type);
+    } else if (member_tk == TK_BITMASK) {
+      return serialize_bitmask_default_value(ser, member_type);
+    }
+    return false;
+  }
+
+  if (single_it != single_map_.end()) {
     if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
       if (!(ser << ACE_OutputCDR::from_boolean(true))) {
         return false;
       }
     } else if (extensibility == DDS::MUTABLE) {
       size_t member_size = 0;
-      serialized_size_basic_member(encoding, member_size, member_tk, single_it);
+      if (is_basic_type(member_tk)) {
+        serialized_size_basic_member(encoding, member_size, member_tk, single_it);
+      } else if (member_tk == TK_ENUM) {
+        serialized_size_enum(encoding, member_size, member_type);
+      } else if (member_tk == TK_BITMASK) {
+        serialized_size_bitmask(encoding, member_size, member_type);
+      } else {
+        return false;
+      }
       if (!ser.write_parameter_id(id, member_size, must_understand)) {
         return false;
       }
     }
     return ser << single_it->second.get();
   }
-
   return serialize_complex_struct_member(ser, complex_it, optional,
                                          must_understand, extensibility);
 }
 
+/*
 bool DynamicDataImpl::DataContainer::serialize_enum_struct_member_xcdr2(DCPS::Serializer& ser,
   DDS::MemberId id, DDS::DynamicType_var& member_type, bool optional,
   bool must_understand, DDS::ExtensibilityKind extensibility) const
@@ -3620,7 +3647,6 @@ bool DynamicDataImpl::DataContainer::serialize_enum_struct_member_xcdr2(DCPS::Se
     }
     return ser << single_it->second.get();
   }
-
   return serialize_complex_struct_member(ser, complex_it, optional,
                                          must_understand, extensibility);
 }
@@ -3661,24 +3687,33 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_struct_member_xcdr2(DCPS:
     }
     return ser << single_it->second.get();
   }
-
   return serialize_complex_struct_member(ser, complex_it, optional,
                                          must_understand, extensibility);
 }
+*/
 
-void DynamicDataImpl::DataContainer::serialized_size_basicseq_member_default_value(
+void DynamicDataImpl::DataContainer::serialized_size_sequence_member_default_value(
   const DCPS::Encoding& encoding, size_t& size, TypeKind elem_tk) const
 {
-  // TODO
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !is_primitive(elem_tk)) {
+    serialized_size_delimiter(encoding, size);
+  }
+  primitive_serialized_size_ulong(encoding, size);
 }
 
-bool DynamicDataImpl::DataContainer::serialize_basicseq_member_default_value(DCPS::Serializer& ser,
+bool DynamicDataImpl::DataContainer::serialize_sequence_member_default_value(DCPS::Serializer& ser,
                                                                              TypeKind elem_tk) const
 {
-  // TODO
+  const DCPS::Encoding& encoding = ser.encoding();
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !is_primitive(elem_tk)) {
+    if (!ser.write_delimiter(2 * uint32_cdr_size)) {
+      return false;
+    }
+  }
+  return ser << static_cast<CORBA::ULong>(0);
 }
 
-bool DynamicDataImpl::DataContainer::serialize_basicseq_struct_member_xcdr2(DCPS::Serializer& ser,
+bool DynamicDataImpl::DataContainer::serialize_sequence_struct_member_xcdr2(DCPS::Serializer& ser,
   DDS::MemberId id, TypeKind elem_tk, bool optional,
   bool must_understand, DDS::ExtensibilityKind extensibility) const
 {
@@ -3686,7 +3721,6 @@ bool DynamicDataImpl::DataContainer::serialize_basicseq_struct_member_xcdr2(DCPS
   const_sequence_iterator seq_it = sequence_map_.find(id);
   const_complex_iterator complex_it = complex_map_.find(id);
   if (seq_it == sequence_map_.end() && complex_it == complex_map_.end()) {
-    // TODO
     if (optional) {
       if (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE) {
         return ser << ACE_OutputCDR::from_boolean(false);
@@ -3695,16 +3729,45 @@ bool DynamicDataImpl::DataContainer::serialize_basicseq_struct_member_xcdr2(DCPS
     }
     if (extensibility == DDS::MUTABLE) {
       size_t member_size = 0;
-      serialized_size_basicseq_member_default_value(encoding, member_size, elem_tk);
+      serialized_size_sequence_member_default_value(encoding, member_size, elem_tk);
       if (!ser.write_parameter_id(id, member_size, must_understand)) {
         return false;
       }
     }
-    return serialize_basicseq_member_default_value(ser, elem_tk);
-  } else if (seq_it != sequence_map_.end()) {
-    // TODO
+    return serialize_sequence_member_default_value(ser, elem_tk);
   }
-  // TODO: from complex map
+
+  if (seq_it != sequence_map_.end()) {
+    if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+      if (!(ser << ACE_OutputCDR::from_boolean(true))) {
+        return false;
+      }
+    } else if (extensibility == DDS::MUTABLE) {
+      size_t member_size = 0;
+      if (is_basic_type(elem_tk)) {
+        serialized_size(encoding, member_size, seq_it->second.get());
+      } else if (elem_tk == TK_ENUM) {
+        serialized_size_enum_sequence(encoding, member_size, seq_it->second.get());
+      } else if (elem_tk == TK_BITMASK) {
+        serialized_size_bitmask_sequence(encoding, member_size, seq_it->second.get());
+      } else {
+        return false;
+      }
+      if (!ser.write_parameter_id(id, member_size, must_understand)) {
+        return false;
+      }
+    }
+    if (is_basic_type(elem_tk)) {
+      return ser << seq_it->second.get();
+    } else if (elem_tk == TK_ENUM) {
+      return serialize_enum_sequence_as_ints_i(ser, seq_it->second.get());
+    } else if (elem_tk == TK_BITMASK) {
+      return serialize_bitmask_sequence_as_uints_i(ser, seq_it->second.get());
+    }
+    return false;
+  }
+  return serialize_complex_struct_member(ser, complex_it, optional,
+                                         must_understand, extensibility);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer& ser) const
@@ -3742,21 +3805,12 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
     const DDS::DynamicType_var member_type = get_base_type(md->type());
     const TypeKind member_tk = member_type->get_kind();
 
-    if (is_basic_type(member_tk)) {
-      if (!serialize_basic_struct_member_xcdr2(ser, id, member_tk, optional,
+    if (is_basic_type(member_tk) || member_tk == TK_ENUM || member_tk == TK_BITMASK) {
+      if (!serialize_basic_struct_member_xcdr2(ser, id, member_type, optional,
                                                must_understand, extensibility)) {
         return false;
       }
-    } else if (member_tk == TK_ENUM) {
-      if (!serialize_enum_struct_member_xcdr2(ser, id, member_type, optional,
-                                              must_understand, extensibility)) {
-        return false;
-      }
-    } else if (member_tk == TK_BITMASK) {
-      if (!serialize_bitmask_struct_member_xcdr2(ser, id, member_type, optional,
-                                                 must_understand, extensibility)) {
-        return false;
-      }
+      continue;
     } else if (member_tk == TK_SEQUENCE) {
       DDS::TypeDescriptor_var member_td;
       if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
@@ -3764,13 +3818,12 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
       }
       const DDS::DynamicType_var elem_type = get_base_type(member_td->element_type());
       const TypeKind elem_tk = elem_type->get_kind();
-      if (is_basic_type(elem_tk)) { // Member is a sequence of basic type
-        if (!serialize_basicseq_struct_member_xcdr2(ser, id, elem_tk, optional,
+      if (is_basic_type(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
+        if (!serialize_sequence_struct_member_xcdr2(ser, id, elem_tk, optional,
                                                     must_understand, extensibility)) {
           return false;
         }
-      } else if (elem_tk == TK_ENUM) { // Member is a sequence of enum
-      } else if (elem_tk == TK_BITMASK) { // Member is a sequence of bitmask
+        continue;
       }
     }
 
