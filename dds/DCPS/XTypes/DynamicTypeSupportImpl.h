@@ -3,8 +3,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
-#define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
+#ifndef OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_IMPL_H
+#define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_IMPL_H
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include <dds/DCPS/Sample.h>
@@ -59,26 +59,24 @@ public:
       data_->clone(), mutability, extent));
   }
 
-#ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr) const
   {
     return data_;
   }
-#endif
 
   const void* native_data() const
   {
     return 0;
   }
 
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#  ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   bool eval(DCPS::FilterEvaluator& evaluator, const DDS::StringSeq& params) const
   {
     ACE_UNUSED_ARG(evaluator);
     ACE_UNUSED_ARG(params);
     return false;
   }
-#endif
+#  endif
 
 protected:
   DDS::DynamicData_var data_;
@@ -289,4 +287,4 @@ public:
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_SAFETY_PROFILE
-#endif // OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
+#endif // OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_IMPL_H

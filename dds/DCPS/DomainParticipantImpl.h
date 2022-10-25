@@ -419,6 +419,7 @@ public:
   bool prepare_to_delete_datawriters();
   bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
+#ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicType* get_dynamic_type(const XTypes::TypeIdentifier& ti)
   {
     if (type_lookup_service_) {
@@ -427,7 +428,6 @@ public:
     return 0;
   }
 
-#ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicTypeSupport_ptr create_dynamic_type_support(
     DDS::TypeSupport_ptr ts, const char* register_as = "");
 #endif
