@@ -142,7 +142,7 @@ private:
     }
   };
   ACE_Thread_Mutex assoc_resends_mutex_;
-  typedef std::map<GuidPair, unsigned> AssocResends;
+  typedef std::map<GuidPair, size_t> AssocResends;
   AssocResends assoc_resends_;
   typedef PmfPeriodicTask<ShmemDataLink> SmPeriodicTask;
   DCPS::RcHandle<SmPeriodicTask> assoc_resends_task_;
