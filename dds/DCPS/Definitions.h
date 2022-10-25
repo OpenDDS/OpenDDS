@@ -60,7 +60,7 @@
 #endif
 
 #ifdef OPENDDS_SAFETY_PROFILE
-// DCPS/yart/yard_tree.hpp uses assert() directly
+// DCPS/yard/yard_tree.hpp uses assert() directly
 #  undef assert
 #  define assert(C) ((void) 0)
 #else
