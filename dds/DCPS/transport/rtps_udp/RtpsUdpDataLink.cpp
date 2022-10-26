@@ -22,7 +22,6 @@
 #include <dds/DCPS/RTPS/BaseMessageUtils.h>
 #include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
-#include <dds/DCPS/RTPS/Logging.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
 #endif
@@ -2843,9 +2842,6 @@ RtpsUdpDataLink::bundle_and_send_submessages(MetaSubmessageVec& meta_submessages
     RtpsUdpSendStrategy_rch ss = send_strategy();
     if (ss) {
       ss->send_rtps_control(rtps_message, *(mb_bundle.get()), bundles[i].proxy_.addrs());
-      if (transport_debug.log_messages) {
-        RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message.hdr.guidPrefix, true, rtps_message);
-      }
     }
   }
 }
@@ -4016,10 +4012,6 @@ void RtpsUdpDataLink::durability_resend(TransportQueueElement* element,
       RTPS::Message message;
       send_strategy()->send_rtps_control(message, *const_cast<ACE_Message_Block*>((*i)->msg()), addrs);
       ++cumulative_send_count;
-      if (transport_debug.log_messages) {
-        parse_submessages(message, *const_cast<ACE_Message_Block*>((*i)->msg()));
-        RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", message.hdr.guidPrefix, true, message);
-      }
     }
 
     (*i)->data_delivered();
