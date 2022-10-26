@@ -1,0 +1,16 @@
+project {
+  specific(cmake) {
+    packages += OpenDDS
+    pre_find_package += "<%crlf%>set(OPENDDS_DEFAULT_GENERATED_OUTPUT_DIR ${CMAKE_CURRENT_SOURCE_DIR})"
+  }
+  verbatim(cmake, macros, 1) {
+    if(MSVC)
+      add_compile_definitions(_CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
+    endif()
+  }
+  verbatim(cmake, local) {
+    if(MSVC)
+      target_link_libraries(${PROJECT_TARGET} iphlpapi)
+    endif()
+  }
+}
