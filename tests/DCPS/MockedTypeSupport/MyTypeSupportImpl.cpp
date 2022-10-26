@@ -9,6 +9,8 @@
 
 #include <stdexcept>
 
+using namespace OpenDDS::DCPS;
+
 MyTypeSupportImpl::MyTypeSupportImpl()
 {
 }
@@ -53,7 +55,7 @@ char* MyTypeSupportImpl::get_type_name()
 ::DDS::DataWriter_ptr MyTypeSupportImpl::create_datawriter()
 {
   MyDataWriterImpl* writer_impl;
-  ACE_NEW_RETURN(writer_impl, MyDataWriterImpl(), ::DDS::DataWriter::_nil());
+  ACE_NEW_RETURN(writer_impl, MyDataWriterImpl, ::DDS::DataWriter::_nil());
 
   return writer_impl;
 }

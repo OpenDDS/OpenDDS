@@ -9,9 +9,6 @@
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
 #include "Spdp.h"
-#ifdef OPENDDS_SECURITY
-#  include "SecurityHelpers.h"
-#endif
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Definitions.h>
@@ -1535,7 +1532,7 @@ Sedp::send_builtin_crypto_tokens(const DCPS::RepoId& remoteId)
 }
 #endif
 
-bool
+void
 Sedp::disassociate(DiscoveredParticipant& participant)
 {
   const RepoId part = make_id(participant.pdata_.participantProxy.guidPrefix, ENTITYID_PARTICIPANT);
@@ -1545,12 +1542,8 @@ Sedp::disassociate(DiscoveredParticipant& participant)
   OPENDDS_VECTOR(DiscoveredPublication) pubs_to_remove_from_bit;
   OPENDDS_VECTOR(DiscoveredSubscription) subs_to_remove_from_bit;
 
-  bool result = false;
-  if (spdp_.has_discovered_participant(part)) {
-    remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
-    remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
-    result = true;
-  }
+  remove_entities_belonging_to(discovered_publications_, part, false, pubs_to_remove_from_bit);
+  remove_entities_belonging_to(discovered_subscriptions_, part, true, subs_to_remove_from_bit);
 
   for (OPENDDS_VECTOR(DiscoveredPublication)::iterator it = pubs_to_remove_from_bit.begin(); it != pubs_to_remove_from_bit.end(); ++it) {
     remove_from_bit_i(*it);
@@ -1627,8 +1620,6 @@ Sedp::disassociate(DiscoveredParticipant& participant)
     }
   }
 #endif
-
-  return result;
 }
 
 void
@@ -2312,7 +2303,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 #ifdef OPENDDS_SECURITY
 void Sedp::data_received(DCPS::MessageId message_id,
-                         const DiscoveredPublication_SecurityWrapper& wrapper)
+                         const ParameterListConverter::DiscoveredPublication_SecurityWrapper& wrapper)
 {
   if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
@@ -2647,7 +2638,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 #ifdef OPENDDS_SECURITY
 void Sedp::data_received(DCPS::MessageId message_id,
-                         const DiscoveredSubscription_SecurityWrapper& wrapper)
+                         const ParameterListConverter::DiscoveredSubscription_SecurityWrapper& wrapper)
 {
   if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
@@ -3202,7 +3193,7 @@ void Sedp::Writer::transport_assoc_done(int flags, const RepoId& remote)
     return;
   }
 
-  if (shutting_down_ == true) {
+  if (shutting_down_) {
     return;
   }
 
@@ -4091,7 +4082,7 @@ static bool decode_parameter_list(
 void
 Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 {
-  if (shutting_down_ == true) {
+  if (shutting_down_) {
     return;
   }
 
@@ -4295,7 +4286,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    DiscoveredPublication_SecurityWrapper wdata_secure = DiscoveredPublication_SecurityWrapper();
+    ParameterListConverter::DiscoveredPublication_SecurityWrapper wdata_secure = ParameterListConverter::DiscoveredPublication_SecurityWrapper();
 
     if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
@@ -4383,7 +4374,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    DiscoveredSubscription_SecurityWrapper rdata_secure = DiscoveredSubscription_SecurityWrapper();
+    ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure = ParameterListConverter::DiscoveredSubscription_SecurityWrapper();
     if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
@@ -4878,7 +4869,7 @@ Sedp::write_publication_data_secure(
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
-    DiscoveredPublication_SecurityWrapper dwd;
+    ParameterListConverter::DiscoveredPublication_SecurityWrapper dwd;
     ParameterList plist;
     populate_discovered_writer_msg(dwd.data, rid, lp);
 
@@ -5030,7 +5021,7 @@ Sedp::write_subscription_data_secure(
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
-    DiscoveredSubscription_SecurityWrapper drd;
+    ParameterListConverter::DiscoveredSubscription_SecurityWrapper drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd.data, rid, ls);
 
@@ -5337,7 +5328,7 @@ Sedp::create_datawriter_crypto_tokens(const DDS::Security::DatawriterCryptoHandl
   DDS::Security::SecurityException se = {"", 0, 0};
   DDS::Security::CryptoKeyExchange_var key_exchange = spdp_.get_security_config()->get_crypto_key_exchange();
 
-  if (key_exchange->create_local_datawriter_crypto_tokens(dwcts, dwch, drch, se) == false) {
+  if (!key_exchange->create_local_datawriter_crypto_tokens(dwcts, dwch, drch, se)) {
     ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ")
       ACE_TEXT("Sedp::create_datawriter_crypto_tokens() - ")
       ACE_TEXT("Unable to create local datawriter crypto tokens with crypto key exchange plugin. ")
@@ -6119,7 +6110,7 @@ GUID_t Sedp::add_publication(
       return GUID_t();
     }
 
-    if (topic_sec_attr.is_write_protected == true) {
+    if (topic_sec_attr.is_write_protected) {
       if (!get_access_control()->check_create_datawriter(
             permh, get_domain_id(), topic_name.data(), qos,
             publisherQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {
@@ -6265,7 +6256,7 @@ GUID_t Sedp::add_subscription(
       return GUID_t();
     }
 
-    if (topic_sec_attr.is_read_protected == true) {
+    if (topic_sec_attr.is_read_protected) {
       if (!get_access_control()->check_create_datareader(
         get_permissions_handle(), get_domain_id(), topic_name.data(), qos,
         subscriberQos.partition, DDS::Security::DataTagQosPolicy(), ex)) {

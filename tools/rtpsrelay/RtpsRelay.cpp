@@ -761,6 +761,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on InternalThreadBuiltinTopicDataDataReader\n")));
     return EXIT_FAILURE;
   }
+  // Don't need to invoke listener for existing samples because additional samples are forthcoming.
 
   DDS::DataReaderListener_var relay_partition_listener =
     new RelayPartitionsListener(relay_partition_table, relay_statistics_reporter);
@@ -816,6 +817,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on ParticipantBuiltinTopicDataDataReader\n")));
     return EXIT_FAILURE;
   }
+  // Don't need to invoke listener for existing samples because no remote participants could be discovered yet.
 
   DDS::DataReader_var subscription_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_SUBSCRIPTION_TOPIC);
   SubscriptionListener* subscription_listener =
@@ -826,6 +828,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on SubscriptionBuiltinTopicDataDataReader\n")));
     return EXIT_FAILURE;
   }
+  // Don't need to invoke listener for existing samples because no remote participants could be discovered yet.
 
   DDS::DataReader_var publication_reader = bit_subscriber->lookup_datareader(OpenDDS::DCPS::BUILT_IN_PUBLICATION_TOPIC);
   PublicationListener* publication_listener =
@@ -836,6 +839,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Failed to set listener on PublicationBuiltinTopicDataDataReader\n")));
     return EXIT_FAILURE;
   }
+  // Don't need to invoke listener for existing samples because no remote participants could be discovered yet.
 
   if (spdp_horizontal_handler.open(spdp_horizontal_addr) == -1 ||
       sedp_horizontal_handler.open(sedp_horizontal_addr) == -1 ||

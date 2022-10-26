@@ -15,7 +15,7 @@
 #include "RtpsCustomizedElement.h"
 #include "LocatorCacheKey.h"
 #include "BundlingCacheKey.h"
-#include "ThreadedRtpsSendQueue.h"
+#include "TransactionalRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
@@ -243,7 +243,7 @@ public:
   RtpsUdpTransport& transport();
 
   void enable_response_queue();
-  void disable_response_queue();
+  void disable_response_queue(bool send_immediately);
 
   bool requires_inline_qos(const GUIDSeq_var& peers);
 
@@ -732,16 +732,19 @@ private:
     BundleVec& bundles,
     CountKeeper& counts);
 
-  void queue_submessages(MetaSubmessageVec& meta_submessages, double scale = 1.0);
+  void queue_submessages(MetaSubmessageVec& meta_submessages);
   void update_required_acknack_count(const RepoId& local_id, const RepoId& remote_id, CORBA::Long current);
   void bundle_and_send_submessages(MetaSubmessageVec& meta_submessages);
 
-  ThreadedRtpsSendQueue sq_;
-  ACE_Thread_Mutex fsq_mutex_;
-  MetaSubmessageVec fsq_vec_;
+  TransactionalRtpsSendQueue sq_;
+  mutable ACE_Thread_Mutex fsq_mutex_;
+  OPENDDS_VECTOR(MetaSubmessageVec) fsq_vec_;
+  size_t fsq_vec_size_;
 
+  void harvest_send_queue(const MonotonicTimePoint& now);
+  RcHandle<SporadicEvent> harvest_send_queue_sporadic_;
   void flush_send_queue(const MonotonicTimePoint& now);
-
+  void flush_send_queue_i();
   RcHandle<SporadicEvent> flush_send_queue_sporadic_;
 
   RepoIdSet pending_reliable_readers_;
@@ -769,7 +772,6 @@ private:
   mutable ACE_Thread_Mutex readers_lock_;
   mutable ACE_Thread_Mutex writers_lock_;
   mutable ACE_Thread_Mutex locators_lock_;
-  mutable ACE_Thread_Mutex send_queues_lock_;
 
   /// Extend the FragmentNumberSet to cover the fragments that are
   /// missing from our last known fragment to the extent

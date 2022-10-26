@@ -22,13 +22,39 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
+namespace ParameterListConverter {
 
 #ifdef OPENDDS_SECURITY
-struct DiscoveredPublication_SecurityWrapper;
-struct DiscoveredSubscription_SecurityWrapper;
-#endif
+struct DiscoveredPublication_SecurityWrapper {
+  DCPS::DiscoveredWriterData data;
+  DDS::Security::EndpointSecurityInfo security_info;
+  DDS::Security::DataTags data_tags;
+  bool have_ice_agent_info;
+  ICE::AgentInfo ice_agent_info;
+  XTypes::TypeInformation type_info;
 
-namespace ParameterListConverter {
+  DiscoveredPublication_SecurityWrapper()
+    : have_ice_agent_info(false) {
+    security_info.endpoint_security_attributes = 0;
+    security_info.plugin_endpoint_security_attributes = 0;
+  }
+};
+
+struct DiscoveredSubscription_SecurityWrapper {
+  DCPS::DiscoveredReaderData data;
+  DDS::Security::EndpointSecurityInfo security_info;
+  DDS::Security::DataTags data_tags;
+  bool have_ice_agent_info;
+  ICE::AgentInfo ice_agent_info;
+  XTypes::TypeInformation type_info;
+
+  DiscoveredSubscription_SecurityWrapper()
+    : have_ice_agent_info(false) {
+    security_info.endpoint_security_attributes = 0;
+    security_info.plugin_endpoint_security_attributes = 0;
+  }
+};
+#endif
 
 // DDS::ParticipantBuiltinTopicData
 

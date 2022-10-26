@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
 #include "TcpConnection.h"
 #include "TcpTransport.h"
 #include "TcpInst.h"
@@ -364,7 +363,8 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
 const std::string&
 OpenDDS::DCPS::TcpConnection::config_name() const
 {
-  return impl_->config().name();
+  static const std::string null_name("(couldn't get name)");
+  return impl_ ? impl_->config().name() : null_name;
 }
 
 int

@@ -29,7 +29,6 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
                                )
 {
   bool any_joined = false;
-  bool failed_a_join = false;
 
   for (size_t idx = 0; idx != samples.size(); ++idx) {
     NetworkInterfaceAddress& nia = samples[idx];
@@ -41,9 +40,7 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
 
     switch (info.kind) {
     case ISIK_REGISTER:
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MulticastManager::process: unexpected REGISTER\n"));
-      }
+      // Ignore.
       break;
     case ISIK_SAMPLE: {
       if (nia.exclude_from_multicast(multicast_interface.c_str())) {
@@ -51,15 +48,17 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
       }
 
       if (joined_interfaces_.count(nia.name) == 0 && nia.is_ipv4()) {
-        if (log_level >= LogLevel::Info) {
-          ACE_DEBUG((LM_INFO,
-                     "(%P|%t) MulticastManager::process: joining group %C on %C\n",
-                     LogAddr(multicast_group_address).c_str(),
-                     nia.name.empty() ? "all interfaces" : nia.name.c_str()));
-        }
-
         if (0 == multicast_socket.join(multicast_group_address.to_addr(), 1, nia.name.empty() ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nia.name.c_str()))) {
           joined_interfaces_.insert(nia.name);
+          if (log_level >= LogLevel::Info) {
+            ACE_DEBUG((LM_INFO,
+                       "(%P|%t) INFO: MulticastManager::process: joined group %C on %C/%C (%@ joined count %B)\n",
+                       LogAddr(multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
+          }
           any_joined = true;
 
           if (reactor) {
@@ -74,29 +73,35 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MulticastManager::process: reactor is NULL\n"));
           }
         } else {
-          failed_a_join = true;
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING,
-                       "(%P|%t) WARNING: MulticastManager::process: ACE_SOCK_Dgram_Mcast::join failed: %m\n"));
+                       "(%P|%t) WARNING: MulticastManager::process: failed to join group %C on %C/%C (%@ joined count %B): %m\n",
+                       LogAddr(multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
           }
         }
       }
 
 #ifdef ACE_HAS_IPV6
       if (ipv6_joined_interfaces_.count(nia.name) == 0 && nia.is_ipv6()) {
-        if (log_level >= LogLevel::Info) {
-          ACE_DEBUG((LM_INFO,
-                     "(%P|%t) MulticastManager::process: joining group %C on %C\n",
-                     LogAddr(ipv6_multicast_group_address).c_str(),
-                     nia.name.empty() ? "all interfaces" : nia.name.c_str()));
-        }
-
         // Windows 7 has an issue with different threads concurrently calling join for ipv6
         static ACE_Thread_Mutex ipv6_static_lock;
         ACE_GUARD_RETURN(ACE_Thread_Mutex, g3, ipv6_static_lock, false);
 
         if (0 == ipv6_multicast_socket.join(ipv6_multicast_group_address.to_addr(), 1, nia.name.empty() ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nia.name.c_str()))) {
           ipv6_joined_interfaces_.insert(nia.name);
+          if (log_level >= LogLevel::Info) {
+            ACE_DEBUG((LM_INFO,
+                       "(%P|%t) INFO: MulticastManager::process: joined group %C on %C/%C (%@ joined count %B)\n",
+                       LogAddr(ipv6_multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
+          }
           any_joined = true;
 
           if (reactor) {
@@ -111,10 +116,14 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
             ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MulticastManager::process: ipv6 reactor is NULL\n"));
           }
         } else {
-          failed_a_join = true;
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING,
-                       "(%P|%t) WARNING: MulticastManager::process: ipv6 ACE_SOCK_Dgram_Mcast::join failed: %m\n"));
+                       "(%P|%t) WARNING: MulticastManager::process: failed to join group %C on %C/%C (%@ joined count %B): %m\n",
+                       LogAddr(ipv6_multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
           }
         }
       }
@@ -124,38 +133,52 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
     case ISIK_UNREGISTER:
     case ISIK_DISPOSE: {
       if (joined_interfaces_.count(nia.name) != 0 && !nia.is_ipv4()) {
-        if (log_level >= LogLevel::Info) {
-          ACE_DEBUG((LM_INFO,
-                     "(%P|%t) MulticastManager::process: leaving group %C on %C\n",
-                     LogAddr(multicast_group_address).c_str(),
-                     nia.name.empty() ? "all interfaces" : nia.name.c_str()));
-        }
-
         if (0 == multicast_socket.leave(multicast_group_address.to_addr(), nia.name.empty() ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nia.name.c_str()))) {
           joined_interfaces_.erase(nia.name);
+          if (log_level >= LogLevel::Info) {
+            ACE_DEBUG((LM_INFO,
+                       "(%P|%t) INFO: MulticastManager::process: left group %C on %C/%C (%@ joined count %B)\n",
+                       LogAddr(multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
+          }
         } else {
-          if (log_level >= LogLevel::Error) {
-            ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: ACE_SOCK_Dgram_Mcast::leave failed: %m\n"));
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) WARNING: MulticastManager::process: failed to leave group %C on %C/%C (%@ joined count %B): %m\n",
+                       LogAddr(multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
           }
         }
       }
 
 #ifdef ACE_HAS_IPV6
       if (ipv6_joined_interfaces_.count(nia.name) != 0 && !nia.is_ipv6()) {
-        if (log_level >= LogLevel::Info) {
-          ACE_DEBUG((LM_INFO,
-                     "(%P|%t) MulticastManager::process: leaving group %C on %C\n",
-                     LogAddr(ipv6_multicast_group_address).c_str(),
-                     nia.name.empty() ? "all interfaces" : nia.name.c_str()));
-        }
-
         if (0 == ipv6_multicast_socket.leave(ipv6_multicast_group_address.to_addr(), nia.name.empty() ? 0 : ACE_TEXT_CHAR_TO_TCHAR(nia.name.c_str()))) {
           ipv6_joined_interfaces_.erase(nia.name);
+          if (log_level >= LogLevel::Info) {
+            ACE_DEBUG((LM_INFO,
+                       "(%P|%t) INFO: MulticastManager::process: left group %C on %C/%C (%@ joined count %B)\n",
+                       LogAddr(ipv6_multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
+          }
         } else {
-          if (log_level >= LogLevel::Error) {
-            ACE_ERROR((LM_ERROR,
-                       "(%P|%t) ERROR: MulticastManager::process: ACE_SOCK_Dgram_Mcast::leave failed: %m\n"));
+          if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING,
+                       "(%P|%t) WARNING: MulticastManager::process: failed to leave group %C on %C/%C (%@ joined count %B): %m\n",
+                       LogAddr(ipv6_multicast_group_address).c_str(),
+                       nia.name.empty() ? "all interfaces" : nia.name.c_str(),
+                       LogAddr(nia.address, LogAddr::Ip).c_str(),
+                       this,
+                       joined_interface_count()));
           }
         }
       }
@@ -165,12 +188,16 @@ bool MulticastManager::process(InternalDataReader<NetworkInterfaceAddress>::Samp
     }
   }
 
-  if (failed_a_join && !any_joined && log_level >= LogLevel::Error) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: MulticastManager::process: "
-      "Couldn't join any multicast group\n"));
-  }
-
   return any_joined;
+}
+
+size_t MulticastManager::joined_interface_count() const
+{
+  return joined_interfaces_.size()
+#ifdef ACE_HAS_IPV6
+    + ipv6_joined_interfaces_.size()
+#endif
+    ;
 }
 
 } // namespace DCPS

@@ -35,6 +35,7 @@
 #include "TopicImpl.h"
 #include "WriterInfo.h"
 #include "ZeroCopyInfoSeq_T.h"
+#include "AtomicBool.h"
 #include "transport/framework/ReceivedDataSample.h"
 #include "transport/framework/TransportClient.h"
 #include "transport/framework/TransportReceiveListener.h"
@@ -47,7 +48,6 @@
 
 #include <ace/String_Base.h>
 #include <ace/Reverse_Lock_T.h>
-#include <ace/Atomic_Op.h>
 #include <ace/Reactor.h>
 
 #include <memory>
@@ -268,11 +268,11 @@ public:
 
   void init(
     TopicDescriptionImpl* a_topic_desc,
-    const DDS::DataReaderQos &  qos,
+    const DDS::DataReaderQos& qos,
     DDS::DataReaderListener_ptr a_listener,
-    const DDS::StatusMask &     mask,
-    DomainParticipantImpl*        participant,
-    SubscriberImpl*               subscriber);
+    const DDS::StatusMask& mask,
+    DomainParticipantImpl* participant,
+    SubscriberImpl* subscriber);
 
   virtual DDS::ReadCondition_ptr create_readcondition(
     DDS::SampleStateMask sample_states,
@@ -1013,7 +1013,7 @@ private:
   bool always_get_history_;
 
   /// Flag indicating status of statistics gathering.
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> statistics_enabled_;
+  AtomicBool statistics_enabled_;
 
   /// publications writing to this reader.
   typedef OPENDDS_MAP_CMP(PublicationId, WriterInfo_rch,

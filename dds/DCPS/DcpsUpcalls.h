@@ -44,8 +44,8 @@ private:
   ConditionVariable<ACE_Thread_Mutex> cnd_;
 };
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

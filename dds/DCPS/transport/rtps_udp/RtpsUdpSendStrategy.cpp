@@ -25,11 +25,6 @@
 
 #include "dds/DdsDcpsGuidTypeSupportImpl.h"
 
-#ifdef OPENDDS_SECURITY
-#include "dds/DCPS/RTPS/SecurityHelpers.h"
-#include <vector>
-#endif
-
 #include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -206,7 +201,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_single_i(iov, num_blocks, addr);
-  if (result < 0 && !network_is_unreachable_.value()) {
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
@@ -246,7 +241,7 @@ RtpsUdpSendStrategy::send_rtps_control(RTPS::Message& message,
   iovec iov[MAX_SEND_BLOCKS];
   const int num_blocks = mb_to_iov(use_mb, iov);
   const ssize_t result = send_multi_i(iov, num_blocks, addrs);
-  if (result < 0 && !network_is_unreachable_.value()) {
+  if (result < 0 && !network_is_unreachable_) {
     const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
     ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_rtps_control() - "
       "failed to send RTPS control message\n"));
@@ -269,7 +264,7 @@ RtpsUdpSendStrategy::send_multi_i(const iovec iov[], int n,
   ssize_t result = -1;
   typedef AddrSet::const_iterator iter_t;
   for (iter_t iter = addrs.begin(); iter != addrs.end(); ++iter) {
-    if (*iter == NetworkAddress()) {
+    if (!*iter) {
       continue;
     }
     const ssize_t result_per_dest = send_single_i(iov, n, *iter);
@@ -296,7 +291,7 @@ ssize_t
 RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
                                    const NetworkAddress& addr)
 {
-  OPENDDS_ASSERT(addr != NetworkAddress());
+  OPENDDS_ASSERT(addr);
 
   const ACE_SOCK_Dgram& socket = choose_send_socket(addr);
 
@@ -330,7 +325,7 @@ RtpsUdpSendStrategy::send_single_i(const iovec iov[], int n,
       link_->transport().transport_statistics_.message_count[key].send_fail(result);
     }
     const int err = errno;
-    if (err != ENETUNREACH || !network_is_unreachable_.value()) {
+    if (err != ENETUNREACH || !network_is_unreachable_) {
       errno = err;
       const ACE_Log_Priority prio = shouldWarn(errno) ? LM_WARNING : LM_ERROR;
       ACE_ERROR((prio, "(%P|%t) RtpsUdpSendStrategy::send_single_i() - "

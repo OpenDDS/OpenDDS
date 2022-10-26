@@ -378,6 +378,7 @@ bool run_complex_filtering_test(const DomainParticipant_var& dp,
   MessageDataReader_var mdr2 = MessageDataReader::_narrow(dr2);
   mdr1->set_listener(ml1, DDS::DATA_AVAILABLE_STATUS);
   mdr2->set_listener(ml2, DDS::DATA_AVAILABLE_STATUS);
+  // No need to call on_data_available since samples are written later.
   MessageSeq data;
   SampleInfoSeq infoseq;
   ReturnCode_t ret = mdr1->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc1);

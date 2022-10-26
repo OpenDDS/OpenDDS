@@ -6,7 +6,6 @@
 #include "Args.h"
 #include "DataReaderListener.h"
 #include "MessengerTypeSupportImpl.h"
-#include "../../common/ConnectionRecordLogger.h"
 
 #include <dds/DCPS/JsonValueWriter.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -111,8 +110,6 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       const OpenDDS::DCPS::GUID_t guid = dp_impl->get_id();
       OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::TransportInst> discovery_inst = disc->sedp_transport_inst(42, guid);
       discovery_inst->count_messages(true);
-
-    OpenDDS::Test::install_connection_record_logger(participant);
 
     // Register Type (Messenger::Message)
     Messenger::MessageTypeSupport_var ts =

@@ -48,6 +48,8 @@ bool DataReaderListenerImpl::is_reliable()
 
 void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
   try {
 #ifdef DDS_HAS_MINIMUM_BIT
     ACE_UNUSED_ARG(reader);

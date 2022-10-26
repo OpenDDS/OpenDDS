@@ -576,8 +576,8 @@ private:
   void cancel_deadline(const PublicationInstance_rch& instance);
 };
 
-} /// namespace OpenDDS
 } /// namespace DCPS
+} /// namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

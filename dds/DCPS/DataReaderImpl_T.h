@@ -751,8 +751,8 @@ namespace OpenDDS {
 
     MessageSequenceType data;
     DDS::SampleInfoSeq infos;
-    DDS::ReturnCode_t rc = take_i(data, infos, DDS::LENGTH_UNLIMITED,
-                                  sample_states, view_states, instance_states, 0);
+    const DDS::ReturnCode_t rc = take_i(data, infos, DDS::LENGTH_UNLIMITED,
+                                        sample_states, view_states, instance_states, 0);
 
     samples.reserve(data.length());
 
@@ -1237,7 +1237,7 @@ private:
                                  const OpenDDS::DCPS::DataSampleHeader& header,
                                  OpenDDS::DCPS::SubscriptionInstance_rch& instance_ptr)
   {
-#if defined(OPENDDS_SECURITY) && !defined(OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE)
+#if defined(OPENDDS_SECURITY) && OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     const bool is_dispose_msg =
       header.message_id_ == OpenDDS::DCPS::DISPOSE_INSTANCE ||
       header.message_id_ == OpenDDS::DCPS::DISPOSE_UNREGISTER_INSTANCE;

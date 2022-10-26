@@ -42,8 +42,6 @@ be_util::prep_be_arg(char* arg)
   static const size_t SZ_WB_JAVA = sizeof(WB_JAVA) - 1;
   static const char WB_TAO_INC_PRE[] = "tao_include_prefix=";
   static const size_t SZ_WB_TAO_INC_PRE = sizeof(WB_TAO_INC_PRE) - 1;
-  static const char WB_V8[] = "v8";
-  static const size_t SZ_WB_V8 = sizeof(WB_V8) - 1;
   static const char WB_TS_CPP_INCLUDE[] = "ts_cpp_include=";
   static const size_t SZ_WB_TS_CPP_INCLUDE = sizeof(WB_TS_CPP_INCLUDE) - 1;
   static const char WB_DDS_SEQ_SUFFIX[] = "opendds_sequence_suffix=";
@@ -83,9 +81,6 @@ be_util::prep_be_arg(char* arg)
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
     be_global->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
 
-  } else if (0 == ACE_OS::strncasecmp(arg, WB_V8, SZ_WB_V8)) {
-    be_global->v8(true);
-
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TS_CPP_INCLUDE, SZ_WB_TS_CPP_INCLUDE)) {
     be_global->add_include(arg + SZ_WB_TS_CPP_INCLUDE, BE_GlobalData::STREAM_CPP);
 
@@ -116,9 +111,6 @@ be_util::usage()
     ACE_TEXT(" -Sdefault\t\texclude default TypeSupport generators from output\n")
     ACE_TEXT(" -Gitl\t\t\tgenerate ITL\n")
     ACE_TEXT(" -GfaceTS\t\tgenerate FACE TS API for DCPS data types\n")
-    ACE_TEXT(" -Gv8\t\t\tgenerate TypeSupport for converting data samples ")
-    ACE_TEXT("to v8 JavaScript objects\n")
-    ACE_TEXT("\t\t\t\t-Wb,v8 is an alternative form for this option\n")
     ACE_TEXT(" -Grapidjson\t\tgenerate TypeSupport for converting data samples ")
     ACE_TEXT("to RapidJSON JavaScript objects\n")
     ACE_TEXT(" -Gxtypes-complete\t\t\tgenerate XTypes complete TypeObject and TypeIdentifier\n")

@@ -166,12 +166,37 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   config.enable_time = ZERO;
   config.start_time = ZERO;
   config.stop_time = ZERO;
+  config.destruction_time = ZERO;
   config.wait_for_discovery = false;
   config.wait_for_discovery_seconds = 0;
 
   if (!json_2_idl(config_file, config)) {
     std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
+  }
+
+  if (config.create_time == ZERO) {
+    config.create_time = Builder::get_sys_time();
+  }
+
+  if (ZERO < config.create_time && config.enable_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.enable_time.sec, config.enable_time.nsec };
+    config.enable_time = config.create_time + temp;
+  }
+
+  if (ZERO < config.enable_time && config.start_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.start_time.sec, config.start_time.nsec };
+    config.start_time = config.enable_time + temp;
+  }
+
+  if (ZERO < config.start_time && config.stop_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.stop_time.sec, config.stop_time.nsec };
+    config.stop_time = config.start_time + temp;
+  }
+
+  if (ZERO < config.stop_time && config.destruction_time < ZERO) {
+    const Builder::TimeStamp temp = { -config.destruction_time.sec, config.destruction_time.nsec };
+    config.destruction_time = config.stop_time + temp;
   }
 
   // Bad-actor test & debugging options for node & test controllers
@@ -330,33 +355,35 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
     do_wait(config.create_time, "create", false);
 
-    Log::log() << "Beginning process construction / entity creation." << std::endl;
+    Log::log() << std::endl;
+
+    Log::log() << Bench::iso8601() << ": Beginning process construction / entity creation." << std::endl;
 
     process_construction_begin_time = Builder::get_hr_time();
     Builder::BuilderProcess process(config.process);
     process_construction_end_time = Builder::get_hr_time();
 
-    Log::log() << std::endl << "Process construction / entity creation complete." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Process construction / entity creation complete." << std::endl << std::endl;
 
-    Log::log() << "Beginning action construction / initialization." << std::endl;
+    Log::log() << Bench::iso8601() << ": Beginning action construction / initialization." << std::endl;
 
     Bench::ActionManager am(config.actions, config.action_reports, process.get_reader_map(), process.get_writer_map(), process.get_cft_map());
 
-    Log::log() << "Action construction / initialization complete." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Action construction / initialization complete." << std::endl << std::endl;
 
     do_wait(config.enable_time, "enable");
 
-    Log::log() << "Enabling DDS entities (if not already enabled)." << std::endl;
+    Log::log() << Bench::iso8601() << ": Enabling DDS entities (if not already enabled)." << std::endl;
 
     process_enable_begin_time = Builder::get_hr_time();
     process.enable_dds_entities(true);
     process_enable_end_time = Builder::get_hr_time();
 
-    Log::log() << "DDS entities enabled." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": DDS entities enabled." << std::endl << std::endl;
 
     if (config.wait_for_discovery) {
 
-      Log::log() << "Starting Discovery Check." << std::endl;
+      Log::log() << Bench::iso8601() << ": Starting Discovery Check." << std::endl;
 
       process_start_discovery_time = Builder::get_sys_time();
 
@@ -375,7 +402,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataReaderListener* wdrl = dynamic_cast<Bench::WorkerDataReaderListener*>(dtRdrPtr->get_dds_datareaderlistener().in());
 
             if (!wdrl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
+              Log::log() << Bench::iso8601() << ": Error: " << it->first << " Expected writers not found." << std::endl << std::endl;
             }
           }
         }
@@ -390,7 +417,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
             Bench::WorkerDataWriterListener* wdwl = dynamic_cast<Bench::WorkerDataWriterListener*>(dtWtrPtr->get_dds_datawriterlistener().in());
 
             if (!wdwl->wait_for_expected_match(timeout_time)) {
-              Log::log() << "Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
+              Log::log() << Bench::iso8601() << ": Error: " << it->first << " Expected readers not found." << std::endl << std::endl;
             }
           }
         }
@@ -398,36 +425,36 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
       process_stop_discovery_time = Builder::get_sys_time();
 
-      Log::log() << "Discovery of expected entities took " << process_stop_discovery_time - process_start_discovery_time << " seconds." << std::endl << std::endl;
+      Log::log() << Bench::iso8601() << ": Discovery of expected entities took " << process_stop_discovery_time - process_start_discovery_time << " seconds." << std::endl << std::endl;
     }
 
-    Log::log() << "Initializing process actions." << std::endl;
+    Log::log() << Bench::iso8601() << ": Initializing process actions." << std::endl;
 
     am.action_start();
 
     do_wait(config.start_time, "start");
 
-    Log::log() << "Starting process actions." << std::endl;
+    Log::log() << Bench::iso8601() << ": Starting process actions." << std::endl;
 
     process_start_begin_time = Builder::get_hr_time();
     am.test_start();
     process_start_end_time = Builder::get_hr_time();
 
-    Log::log() << "Process tests started." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Process tests started." << std::endl << std::endl;
 
     do_wait(config.stop_time, "stop");
 
-    Log::log() << "Stopping process tests." << std::endl;
+    Log::log() << Bench::iso8601() << ": Stopping process tests." << std::endl;
 
     process_stop_begin_time = Builder::get_hr_time();
     am.test_stop();
     process_stop_end_time = Builder::get_hr_time();
 
-    Log::log() << "Process tests stopped." << std::endl << std::endl;
+    Log::log() << Bench::iso8601() << ": Process tests stopped." << std::endl << std::endl;
 
     do_wait(config.destruction_time, "destruction");
 
-    Log::log() << "Stopping process actions." << std::endl;
+    Log::log() << Bench::iso8601() << ": Stopping process actions." << std::endl;
 
     am.action_stop();
 
@@ -437,13 +464,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     }
     thread_pool.clear();
 
-    Log::log() << "Detaching Listeners." << std::endl;
+    Log::log() << Bench::iso8601() << ": Detaching Listeners." << std::endl;
 
     process.detach_listeners();
 
     process_report = process.get_report();
 
-    Log::log() << "Beginning process destruction / entity deletion." << std::endl;
+    Log::log() << Bench::iso8601() << ": Beginning process destruction / entity deletion." << std::endl;
 
     process_destruction_begin_time = Builder::get_hr_time();
   } catch (const std::exception& e) {
@@ -467,7 +494,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
   process_destruction_end_time = Builder::get_hr_time();
 
-  Log::log() << "Process destruction / entity deletion complete." << std::endl << std::endl;
+  Log::log() << Bench::iso8601() << ": Process destruction / entity deletion complete." << std::endl << std::endl;
 
   // Some preliminary measurements and reporting (eventually will shift to another process?)
   worker_report.construction_time = process_construction_end_time - process_construction_begin_time;

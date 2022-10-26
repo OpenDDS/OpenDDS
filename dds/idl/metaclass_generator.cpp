@@ -416,7 +416,7 @@ namespace {
       "  Value getValue(const void* stru, DDS::MemberId memberId) const\n"
       "  {\n"
       "    ACE_UNUSED_ARG(memberId);\n"
-      "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
+      "    const" << clazz << "& typed = *static_cast<const" << clazz << "*>(stru);\n"
       "    ACE_UNUSED_ARG(typed);\n";
     std::for_each(fields.begin(), fields.end(), gen_field_getValueByMemberId);
     be_global->impl_ <<
@@ -425,7 +425,7 @@ namespace {
     be_global->impl_ <<
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"
-      "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
+      "    const" << clazz << "& typed = *static_cast<const" << clazz << "*>(stru);\n"
       "    ACE_UNUSED_ARG(typed);\n";
     std::for_each(fields.begin(), fields.end(), gen_field_getValue);
     be_global->impl_ <<

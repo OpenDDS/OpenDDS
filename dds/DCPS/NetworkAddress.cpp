@@ -121,6 +121,18 @@ NetworkAddress& NetworkAddress::operator=(const ACE_INET_Addr& rhs)
   return *this = NetworkAddress(rhs);
 }
 
+NetworkAddress::operator bool() const
+{
+  static const NetworkAddress empty = NetworkAddress();
+  return *this != empty;
+}
+
+bool NetworkAddress::operator!() const
+{
+  static const NetworkAddress empty = NetworkAddress();
+  return *this == empty;
+}
+
 bool NetworkAddress::operator==(const NetworkAddress& rhs) const
 {
   return std::memcmp(&inet_addr_, &rhs.inet_addr_, sizeof (inet_addr_)) == 0;
@@ -229,6 +241,18 @@ bool NetworkAddress::is_loopback() const
   return false;
 }
 
+bool NetworkAddress::is_multicast() const
+{
+  if (inet_addr_.in4_.sin_family == AF_INET) {
+    return (ACE_HTONL(inet_addr_.in4_.sin_addr.s_addr) & 0xF0000000) == 0xE0000000;
+#if defined (ACE_HAS_IPV6)
+  } else if (inet_addr_.in6_.sin6_family == AF_INET6) {
+    return this->inet_addr_.in6_.sin6_addr.s6_addr[0] == 0xFF;
+#endif
+  }
+  return false;
+}
+
 bool NetworkAddress::is_private() const
 {
   if (inet_addr_.in4_.sin_family == AF_INET) {
@@ -274,7 +298,7 @@ bool is_more_local(const NetworkAddress& current, const NetworkAddress& incoming
 {
   // The question to answer here: "Is the incoming address 'more local' than the current address?"
 
-  if (current == NetworkAddress()) {
+  if (!current) {
     return true;
   }
 

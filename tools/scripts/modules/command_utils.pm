@@ -242,6 +242,10 @@ sub die_with_stack_trace {
 #     File handle to print failure messages and capture dump_on_failure output
 #     to. Setting to undef disables these.
 #
+# autodie
+#     Die with stack trace if the command failed to run or returned a non-zero
+#     exit status. Defaults to false.
+#
 sub run_command {
   my $command = shift;
   my @command_list;
@@ -266,6 +270,7 @@ sub run_command {
     error_fh => *STDERR,
     exit_status => undef,
     chdir => undef,
+    autodie => 0,
   );
 
   my %args = (%valid_args, @_);
@@ -380,6 +385,10 @@ sub run_command {
     }
     if (defined($error_fh)) {
       print $error_fh "${script_name}ERROR: \"$name\" $error_message\n";
+    }
+
+    if ($args{autodie}) {
+      die_with_stack_trace('run_command was set to autodie');
     }
   }
 
