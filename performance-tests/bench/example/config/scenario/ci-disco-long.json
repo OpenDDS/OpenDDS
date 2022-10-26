@@ -3,7 +3,7 @@
   "desc": "This is a small slightly-less-quick test for (quiet) discovery capability with many participant processes",
   "any_node": [
     {
-      "config": "ci_disco_long.json",
+      "config": "ci-disco-long.json",
       "count": 20
     }
   ],

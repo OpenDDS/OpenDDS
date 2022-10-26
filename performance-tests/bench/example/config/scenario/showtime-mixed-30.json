@@ -5,11 +5,11 @@
     {
       "workers": [
         {
-          "config": "showtime_mixed_daemon.json",
+          "config": "showtime-mixed_daemon.json",
           "count": 1
         },
         {
-          "config": "showtime_mixed_worker.json",
+          "config": "showtime-mixed_worker.json",
           "count": 1
         }
       ],
@@ -19,7 +19,7 @@
   ],
   "any_node": [
     {
-      "config": "showtime_mixed_master.json",
+      "config": "showtime-mixed_master.json",
       "count": 1
     }
   ],

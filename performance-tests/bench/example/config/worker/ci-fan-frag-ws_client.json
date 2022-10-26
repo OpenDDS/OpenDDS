@@ -12,8 +12,11 @@
     "config_sections": [
       { "name": "common",
         "properties": [
-          { "name": "DCPSSecurity",
-            "value": "0"
+          { "name": "DCPSDefaultDiscovery",
+            "value":"rtps_disc"
+          },
+          { "name": "DCPSGlobalTransportConfig",
+            "value":"$file"
           },
           { "name": "DCPSDebugLevel",
             "value": "0"
@@ -26,16 +29,23 @@
           }
         ]
       },
-      {
-        "name": "config/fan_frag_ws",
+      { "name": "rtps_discovery/rtps_disc",
         "properties": [
-          { "name": "transports",
-            "value": "auto_config_rtps"
+          { "name": "ResendPeriod",
+            "value": "2"
           }
         ]
       },
       {
-        "name": "transport/auto_config_rtps",
+        "name": "config/config_01",
+        "properties": [
+          { "name": "transports",
+            "value": "rtps_01"
+          }
+        ]
+      },
+      {
+        "name": "transport/rtps_01",
         "properties": [
           { "name": "transport_type",
             "value": "rtps_udp"
@@ -56,27 +66,18 @@
             "value": "100"
           },
           { "name": "heartbeat_response_delay",
-            "value": "50"
-          },
-          { "name": "nak_response_delay",
             "value": "20"
           },
-          { "name": "ttl",
-            "value": "1"
+          { "name": "nak_response_delay",
+            "value": "60"
           }
         ]
-      }
-    ],
-    "discoveries": [
-      { "name": "bench_test_rtps",
-        "type": "rtps",
-        "domain": 7
       }
     ],
     "participants": [
       { "name": "participant_01",
         "domain": 7,
-        "transport_config_name": "fan_frag_ws",
+        "transport_config_name": "config_01",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },

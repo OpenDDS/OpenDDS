@@ -3,11 +3,11 @@
   "desc": "This is a small quick test for data fan-out / fan-in capability that uses waitsets and read conditions for reading data",
   "any_node": [
     {
-      "config": "ci_fan_ws_client.json",
+      "config": "ci-fan-ws_client.json",
       "count": 1
     },
     {
-      "config": "ci_fan_ws_server.json",
+      "config": "ci-fan-ws_server.json",
       "count": 10
     }
   ],

@@ -3,11 +3,11 @@
   "desc": "This is like a typical echo client / server combo, except the client doesn't listen for a response. Useful for profiling writer behavior",
   "any_node": [
     {
-      "config": "selfish_echo_client_config.json",
+      "config": "selfish-echo_client.json",
       "count": 1
     },
     {
-      "config": "simple_echo_server_config.json",
+      "config": "simple-echo_server.json",
       "count": 1
     }
   ],

@@ -3,15 +3,15 @@
   "desc": "This is an example of forcing the worker to assert and catching / reporting it correctly",
   "any_node": [
     {
-      "config": "ci_force_worker_noop.json",
+      "config": "ci-force-worker-noop.json",
       "count": 1
     },
     {
-      "config": "ci_force_worker_assert.json",
+      "config": "ci-force-worker-assert.json",
       "count": 1
     },
     {
-      "config": "ci_force_worker_noop.json",
+      "config": "ci-force-worker-noop.json",
       "count": 1
     }
   ],

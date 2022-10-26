@@ -3,11 +3,11 @@
   "desc": "This is an example of forcing the worker to deadlock and catching / reporting it correctly",
   "any_node": [
     {
-      "config": "ci_force_worker_noop.json",
+      "config": "ci-force-worker-noop.json",
       "count": 1
     },
     {
-      "config": "ci_force_worker_deadlock.json",
+      "config": "ci-force-worker-deadlock.json",
       "count": 1
     }
   ],

@@ -5,11 +5,11 @@
     {
       "workers": [
         {
-          "config": "ci_mixed_daemon.json",
+          "config": "ci-mixed_daemon.json",
           "count": 1
         },
         {
-          "config": "ci_mixed_worker.json",
+          "config": "ci-mixed_worker.json",
           "count": 1
         }
       ],
@@ -19,7 +19,7 @@
   ],
   "any_node": [
     {
-      "config": "ci_mixed_master.json",
+      "config": "ci-mixed_master.json",
       "count": 1
     }
   ],
