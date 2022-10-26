@@ -30,6 +30,10 @@ sub text {
     print color 'yellow';
   }
   elsif ( $inside{h3}) {
+    if ($gh_actions && !$needs_groupend) {
+      $needs_groupend = 1;
+      print "::group::";
+    }
     print color 'red';
   }
   else {
