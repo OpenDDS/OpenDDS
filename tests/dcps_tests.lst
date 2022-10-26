@@ -483,7 +483,7 @@ performance-tests/bench/run_test.pl ci-echo-frag --show-worker-logs: !DCPS_MIN !
 performance-tests/bench/run_test.pl ci-fan --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 performance-tests/bench/run_test.pl ci-fan-ws --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 performance-tests/bench/run_test.pl ci-fan-frag --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl ci-fan-frag-ws --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS_ASAN
+performance-tests/bench/run_test.pl ci-fan-frag-ws --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON !GH_ACTIONS_ASAN !OCI_ASAN !OCI_WIN32_DEBUG
 performance-tests/bench/run_test.pl ci-mixed --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 
 tests/DCPS/DataRepresentation/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
