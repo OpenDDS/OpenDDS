@@ -40,7 +40,7 @@ ConfigSectionManager::ConfigSectionManager(const std::string& name, const Config
       }
     }
   }
-  TheServiceParticipant->load_configuration(ach, ACE_TEXT(name.c_str()));
+  TheServiceParticipant->load_configuration(ach, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
 }
 
 }
