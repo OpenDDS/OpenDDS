@@ -396,6 +396,7 @@ module Builder {
 
   @topic
   struct ProcessConfig {
+    string name;
     ConfigSectionSeq config_sections;
     ParticipantConfigSeq participants;
   };
