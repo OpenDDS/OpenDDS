@@ -9,7 +9,6 @@
 
 #include "UpdateManager.h"
 #include "Updater.h"
-#include "ArrDelAdapter.h"
 #include "DCPSInfo_i.h"
 
 #include "tao/CDR.h"

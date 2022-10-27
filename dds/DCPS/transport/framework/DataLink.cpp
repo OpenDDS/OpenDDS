@@ -188,6 +188,7 @@ void
 DataLink::invoke_on_start_callbacks(bool success)
 {
   const DataLink_rch link(success ? this : 0, inc_count());
+  RepoId remote = GUID_UNKNOWN;
 
   while (true) {
     GuardType guard(strategy_lock_);
@@ -196,7 +197,6 @@ DataLink::invoke_on_start_callbacks(bool success)
       break;
     }
 
-    RepoId remote;
     TransportClient_wrch client;
 
     OnStartCallbackMap::iterator it = on_start_callbacks_.begin();
