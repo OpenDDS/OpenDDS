@@ -20,7 +20,6 @@
 #include <dds/DCPS/transport/framework/TransportSendControlElement.h>
 #include <dds/DCPS/transport/framework/RemoveAllVisitor.h>
 #include <dds/DCPS/RTPS/BaseMessageUtils.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/Logging.h>
 #ifdef OPENDDS_SECURITY

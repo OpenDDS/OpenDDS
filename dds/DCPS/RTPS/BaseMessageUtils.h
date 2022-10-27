@@ -10,7 +10,6 @@
 
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"
-#include "BaseMessageTypes.h"
 
 #include <dds/DCPS/Hash.h>
 #include <dds/DCPS/Util.h>
@@ -276,4 +275,4 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* RTPS_BASEMESSAGETYPES_H */
+#endif /* OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H */
