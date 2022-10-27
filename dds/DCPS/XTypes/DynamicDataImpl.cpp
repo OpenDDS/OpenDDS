@@ -50,16 +50,17 @@ MemberId DynamicDataImpl::get_member_id_by_name(const char* name)
 
 MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 {
-  // TODO: Not sure if this should be supported for the writing direction.
-  // The index is counted from a complete data sample which we may not have
-  // yet when this is called.
-  return 0;
+  // Not sure if this should be supported for the writing direction.
+  // The index is counted from the serialized data but when this is
+  // called the user may not finish setting all the fields they want yet.
+  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::get_member_id_at_index: Not implemented\n"));
+  return MEMBER_ID_INVALID;
 }
 
 ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
-  // TODO: Return the number of items from the internal data container.
-  return 0;
+  return container_.single_map_.size() + container_.sequence_map_.size() +
+    container_.complex_map_.size();
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
@@ -277,8 +278,8 @@ bool DynamicDataImpl::validate_discriminator(CORBA::Long disc_val,
 }
 
 bool DynamicDataImpl::find_selected_member_and_discriminator(DDS::MemberId& selected_id,
-                                                                  bool& has_disc,
-                                                                  CORBA::Long& disc_val) const
+                                                             bool& has_disc,
+                                                             CORBA::Long& disc_val) const
 {
   for (DataContainer::const_single_iterator single_it = container_.single_map_.begin();
        single_it != container_.single_map_.end(); ++single_it) {
@@ -313,7 +314,7 @@ bool DynamicDataImpl::find_selected_member_and_discriminator(DDS::MemberId& sele
 
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& value,
-                                              TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                         TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -920,8 +921,8 @@ bool DynamicDataImpl::check_seqmem_in_struct_union(DDS::MemberId id, TypeKind en
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::set_values_to_struct(DDS::MemberId id, const SequenceType& value,
-                                                TypeKind enum_or_bitmask,
-                                                LBound lower, LBound upper)
+                                           TypeKind enum_or_bitmask,
+                                           LBound lower, LBound upper)
 {
   return check_seqmem_in_struct_union<ElementTypeKind>(id, enum_or_bitmask, lower, upper) &&
     insert_sequence(id, value);
@@ -929,8 +930,8 @@ bool DynamicDataImpl::set_values_to_struct(DDS::MemberId id, const SequenceType&
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& value,
-                                               TypeKind enum_or_bitmask,
-                                               LBound lower, LBound upper)
+                                          TypeKind enum_or_bitmask,
+                                          LBound lower, LBound upper)
 {
   if (id == DISCRIMINATOR_ID) {
     if (log_level >= LogLevel::Notice) {
@@ -977,7 +978,7 @@ bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& 
 }
 
 bool DynamicDataImpl::check_seqmem_in_sequence_array(DDS::MemberId id, TypeKind enum_or_bitmask,
-                                                          LBound lower, LBound upper) const
+                                                     LBound lower, LBound upper) const
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1017,8 +1018,8 @@ bool DynamicDataImpl::check_seqmem_in_sequence_array(DDS::MemberId id, TypeKind 
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::set_values_to_sequence(DDS::MemberId id, const SequenceType& value,
-                                                  TypeKind enum_or_bitmask,
-                                                  LBound lower, LBound upper)
+                                             TypeKind enum_or_bitmask,
+                                             LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1032,8 +1033,8 @@ bool DynamicDataImpl::set_values_to_sequence(DDS::MemberId id, const SequenceTyp
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataImpl::set_values_to_array(DDS::MemberId id, const SequenceType& value,
-                                               TypeKind enum_or_bitmask,
-                                               LBound lower, LBound upper)
+                                          TypeKind enum_or_bitmask,
+                                          LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1385,18 +1386,17 @@ template<> const DDS::WCharSeq& DynamicDataImpl::SequenceValue::get() const { re
 template<> const DDS::WStringSeq& DynamicDataImpl::SequenceValue::get() const { return wstring_seq_; }
 #endif
 
+// Get largest index among elements of a sequence-like type written to the single map.
 bool DynamicDataImpl::DataContainer::get_largest_single_index(CORBA::ULong& largest_index) const
 {
-  // TODO: Make sure all applicable types are here. In case array, compute correct bound.
   const TypeKind tk = type_->get_kind();
-  if (tk != TK_STRING8 && tk != TK_STRING16 && tk != TK_SEQUENCE && tk != TK_ARRAY) {
+  if (tk != TK_STRING8 && tk != TK_STRING16 && tk != TK_SEQUENCE) {
     return false;
   }
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
-
   const CORBA::ULong bound = descriptor->bound()[0];
 
   // Since ID is used as index in this implementation, the last element has largest index.
@@ -1405,34 +1405,31 @@ bool DynamicDataImpl::DataContainer::get_largest_single_index(CORBA::ULong& larg
   return get_index_from_id(single_map_.rbegin()->first, largest_index, bound);
 }
 
+// Get largest index among elements of a nesting sequence type written to the sequence map.
 bool DynamicDataImpl::DataContainer::get_largest_sequence_index(CORBA::ULong& largest_index) const
 {
-  // TODO: Make sure all applicable types are here. Compute correct bound for array.
-  const TypeKind tk = type_->get_kind();
-  if (tk != TK_SEQUENCE && tk != TK_ARRAY) {
+  if (type_->get_kind() != TK_SEQUENCE) {
     return false;
   }
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
-
   const CORBA::ULong bound = descriptor->bound()[0];
   return get_index_from_id(sequence_map_.rbegin()->first, largest_index, bound);
 }
 
+// Get largest index among elements of a sequence-like type written to the complex map.
 bool DynamicDataImpl::DataContainer::get_largest_complex_index(CORBA::ULong& largest_index) const
 {
-  // TODO: Make sure all applicable types are here. Compute correct bound for array.
   const TypeKind tk = type_->get_kind();
-  if (tk != TK_STRING8 && tk != TK_STRING16 && tk != TK_SEQUENCE && tk != TK_ARRAY) {
+  if (tk != TK_STRING8 && tk != TK_STRING16 && tk != TK_SEQUENCE) {
     return false;
   }
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
-
   const CORBA::ULong bound = descriptor->bound()[0];
   return get_index_from_id(complex_map_.rbegin()->first, largest_index, bound);
 }
@@ -1625,7 +1622,10 @@ bool DynamicDataImpl::DataContainer::serialize_string_value(DCPS::Serializer& se
     }
     return ser << str;
   } else {
-    return ser << (CORBA::Char*)0;
+    // This DynamicData object contains no data for the string.
+    // Use default value which is an empty string.
+    const CORBA::Char* empty_str = "";
+    return ser << empty_str;
   }
 }
 
@@ -1658,7 +1658,8 @@ bool DynamicDataImpl::DataContainer::serialize_wstring_value(DCPS::Serializer& s
     }
     return ser << wstr;
   } else {
-    return ser << (CORBA::Char*)0;
+    const CORBA::WChar* empty_wstr = "";
+    return ser << empty_wstr;
   }
 }
 
@@ -2239,8 +2240,8 @@ void DynamicDataImpl::DataContainer::serialized_size_complex_member_i(const DCPS
   size_t& size, MemberId id) const
 {
   const DDS::DynamicData_var& dd_var = complex_map_.at(id);
-  const DynamicDataImpl* nested_data = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
-  serialized_size(encoding, size, nested_data);
+  const DynamicDataImpl* data_impl = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
+  serialized_size(encoding, size, data_impl);
 }
 
 template<typename SequenceType>
@@ -2281,8 +2282,8 @@ bool DynamicDataImpl::DataContainer::serialize_complex_member_i(DCPS::Serializer
                                                                 MemberId id) const
 {
   const DDS::DynamicData_var& dd_var = complex_map_.at(id);
-  const DynamicDataImpl* elem_data = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
-  return ser << *elem_data;
+  const DynamicDataImpl* data_impl = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
+  return ser << *data_impl;
 }
 
 template<typename SequenceType>
@@ -3426,6 +3427,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
   return false;
 }
 
+// Serialized size of a basic member of an aggregated type. Member header size is not included.
 bool DynamicDataImpl::DataContainer::serialized_size_basic_member(const DCPS::Encoding& encoding,
   size_t& size, TypeKind member_tk, const_single_iterator it) const
 {
@@ -3519,13 +3521,64 @@ bool DynamicDataImpl::DataContainer::serialize_basic_member_default_value(DCPS::
   return false;
 }
 
-// Serialize a struct member which is stored in the complex map,
-// i.e., the member value is represented by a DynamicData object.
-bool DynamicDataImpl::DataContainer::serialize_complex_struct_member(DCPS::Serializer& ser,
-  const_complex_iterator it, CORBA::Boolean optional, CORBA::Boolean must_understand,
-  DDS::ExtensibilityKind extensibility) const
+// Serialize an aggregated member stored in the single map.
+// The member type is basic or enum or bitmask.
+bool DynamicDataImpl::DataContainer::serialize_single_aggregated_member_xcdr2(DCPS::Serializer& ser,
+  const_single_iterator it, const DDS::DynamicType_var& member_type, bool optional,
+  bool must_understand, DDS::ExtensibilityKind extensibility) const
 {
-  const DDS::MemberId id = it->first;
+  if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+    if (!(ser << ACE_OutputCDR::from_boolean(true))) {
+      return false;
+    }
+  } else if (extensibility == DDS::MUTABLE) {
+    const DCPS::Encoding& encoding = ser.encoding();
+    const TypeKind member_tk = member_type->get_kind();
+    size_t member_size = 0;
+    if (is_basic_type(member_tk)) {
+      serialized_size_basic_member(encoding, member_size, member_tk, it);
+    } else if (member_tk == TK_ENUM) {
+      serialized_size_enum(encoding, member_size, member_type);
+    } else if (member_tk == TK_BITMASK) {
+      serialized_size_bitmask(encoding, member_size, member_type);
+    } else {
+      return false;
+    }
+    if (!ser.write_parameter_id(it->first, member_size, must_understand)) {
+      return false;
+    }
+  }
+  return ser << it->second.get();
+}
+
+// Serialize a member of an aggregated type which is not present in the complex map.
+bool DynamicDataImpl::DataContainer::serialize_complex_aggregated_member_xcdr2_default(
+  DCPS::Serializer& ser, DDS::MemberId id, const DDS::DynamicType_var& member_type,
+  bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const
+{
+  if (optional) {
+    if (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE) {
+      return ser << ACE_OutputCDR::from_boolean(false);
+    }
+    return true;
+  }
+  // Use default value if the member is not optional.
+  if (extensibility == DDS::MUTABLE) {
+    size_t member_size = 0;
+    serialized_size(ser.encoding(), member_size, DynamicDataImpl(member_type));
+    if (!ser.write_parameter_id(id, member_size, must_understand)) {
+      return false;
+    }
+  }
+  return ser << DynamicDataImpl(member_type);
+}
+
+// Serialize a member of an aggregated type stored in the complex map,
+// i.e., the member value is represented by a DynamicData object.
+bool DynamicDataImpl::DataContainer::serialize_complex_aggregated_member_xcdr2(
+  DCPS::Serializer& ser, const_complex_iterator it, bool optional,
+  bool must_understand, DDS::ExtensibilityKind extensibility) const
+{
   const DDS::DynamicData_var& data_var = it->second;
   const DynamicDataImpl* data_impl = dynamic_cast<DynamicDataImpl*>(data_var.in());
 
@@ -3536,16 +3589,17 @@ bool DynamicDataImpl::DataContainer::serialize_complex_struct_member(DCPS::Seria
   } else if (extensibility == DDS::MUTABLE) {
     size_t member_size = 0;
     serialized_size(ser.encoding(), member_size, *data_impl);
-    if (!ser.write_parameter_id(id, member_size, must_understand)) {
+    if (!ser.write_parameter_id(it->first, member_size, must_understand)) {
       return false;
     }
   }
   return ser << *data_impl;
 }
 
-// Serialize struct member whose type is basic or enum or bitmask
+// Serialize struct member whose type is basic or compatible with a basic type,
+// that are enum and bitmask types.
 bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::Serializer& ser,
-  DDS::MemberId id, DDS::DynamicType_var& member_type, bool optional,
+  DDS::MemberId id, const DDS::DynamicType_var& member_type, bool optional,
   bool must_understand, DDS::ExtensibilityKind extensibility) const
 {
   const TypeKind member_tk = member_type->get_kind();
@@ -3585,116 +3639,17 @@ bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::S
   }
 
   if (single_it != single_map_.end()) {
-    if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
-      if (!(ser << ACE_OutputCDR::from_boolean(true))) {
-        return false;
-      }
-    } else if (extensibility == DDS::MUTABLE) {
-      size_t member_size = 0;
-      if (is_basic_type(member_tk)) {
-        serialized_size_basic_member(encoding, member_size, member_tk, single_it);
-      } else if (member_tk == TK_ENUM) {
-        serialized_size_enum(encoding, member_size, member_type);
-      } else if (member_tk == TK_BITMASK) {
-        serialized_size_bitmask(encoding, member_size, member_type);
-      } else {
-        return false;
-      }
-      if (!ser.write_parameter_id(id, member_size, must_understand)) {
-        return false;
-      }
-    }
-    return ser << single_it->second.get();
+    return serialize_single_aggregated_member_xcdr2(ser, single_it, member_type, optional,
+                                                    must_understand, extensibility);
   }
-  return serialize_complex_struct_member(ser, complex_it, optional,
-                                         must_understand, extensibility);
+  return serialize_complex_aggregated_member_xcdr2(ser, complex_it, optional,
+                                                   must_understand, extensibility);
 }
-
-/*
-bool DynamicDataImpl::DataContainer::serialize_enum_struct_member_xcdr2(DCPS::Serializer& ser,
-  DDS::MemberId id, DDS::DynamicType_var& member_type, bool optional,
-  bool must_understand, DDS::ExtensibilityKind extensibility) const
-{
-  const DCPS::Encoding& encoding = ser.encoding();
-  const_single_iterator single_it = single_map_.find(id);
-  const_complex_iterator complex_it = complex_map_.find(id);
-  if (single_it == single_map_.end() && complex_it == complex_map_.end()) {
-    if (optional) {
-      if (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE) {
-        return ser << ACE_OutputCDR::from_boolean(false);
-      }
-      return true;
-    }
-    if (extensibility == DDS::MUTABLE) {
-      size_t member_size = 0;
-      serialized_size_enum(encoding, member_size, member_type);
-      if (!ser.write_parameter_id(id, member_size, must_understand)) {
-        return false;
-      }
-    }
-    return serialize_enum_default_value(ser, member_type);
-  } else if (single_it != single_map_.end()) {
-    if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
-      if (!(ser << ACE_OutputCDR::from_boolean(true))) {
-        return false;
-      }
-    } else if (extensibility == DDS::MUTABLE) {
-      size_t member_size = 0;
-      serialized_size_enum(encoding, member_size, member_type);
-      if (!ser.write_parameter_id(id, member_size, must_understand)) {
-        return false;
-      }
-    }
-    return ser << single_it->second.get();
-  }
-  return serialize_complex_struct_member(ser, complex_it, optional,
-                                         must_understand, extensibility);
-}
-
-bool DynamicDataImpl::DataContainer::serialize_bitmask_struct_member_xcdr2(DCPS::Serializer& ser,
-  DDS::MemberId id, DDS::DynamicType_var& member_type, bool optional,
-  bool must_understand, DDS::ExtensibilityKind extensibility) const
-{
-  const DCPS::Encoding& encoding = ser.encoding();
-  const_single_iterator single_it = single_map_.find(id);
-  const_complex_iterator complex_it = complex_map_.find(id);
-  if (single_it == single_map_.end() && complex_it == complex_map_.end()) {
-    if (optional) {
-      if (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE) {
-        return ser << ACE_OutputCDR::from_boolean(false);
-      }
-      return true;
-    }
-    if (extensibility == DDS::MUTABLE) {
-      size_t member_size = 0;
-      serialized_size_bitmask(encoding, member_size, member_type);
-      if (!ser.write_parameter_id(id, member_size, must_understand)) {
-        return false;
-      }
-    }
-    return serialize_bitmask_default_value(ser, member_type);
-  } else if (single_it != single_map_.end()) {
-    if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
-      if (!(ser << ACE_OutputCDR::from_boolean(true))) {
-        return false;
-      }
-    } else if (extensibility == DDS::MUTABLE) {
-      size_t member_size = 0;
-      serialized_size_bitmask(encoding, member_size, member_type);
-      if (!ser.write_parameter_id(id, member_size, must_understand)) {
-        return false;
-      }
-    }
-    return ser << single_it->second.get();
-  }
-  return serialize_complex_struct_member(ser, complex_it, optional,
-                                         must_understand, extensibility);
-}
-*/
 
 void DynamicDataImpl::DataContainer::serialized_size_sequence_member_default_value(
   const DCPS::Encoding& encoding, size_t& size, TypeKind elem_tk) const
 {
+  // Zero-length sequence
   if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !is_primitive(elem_tk)) {
     serialized_size_delimiter(encoding, size);
   }
@@ -3704,6 +3659,7 @@ void DynamicDataImpl::DataContainer::serialized_size_sequence_member_default_val
 bool DynamicDataImpl::DataContainer::serialize_sequence_member_default_value(DCPS::Serializer& ser,
                                                                              TypeKind elem_tk) const
 {
+  // Zero-length sequence
   const DCPS::Encoding& encoding = ser.encoding();
   if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !is_primitive(elem_tk)) {
     if (!ser.write_delimiter(2 * uint32_cdr_size)) {
@@ -3713,6 +3669,43 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_member_default_value(DCP
   return ser << static_cast<CORBA::ULong>(0);
 }
 
+// Serialize an aggregated member stored in the sequence map.
+// The member type is sequence of basic or enum or bitmask type.
+bool DynamicDataImpl::DataContainer::serialize_sequence_aggregated_member_xcdr2(DCPS::Serializer& ser,
+  const_sequence_iterator it, TypeKind elem_tk, bool optional,
+  bool must_understand, DDS::ExtensibilityKind extensibility) const
+{
+  if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
+    if (!(ser << ACE_OutputCDR::from_boolean(true))) {
+      return false;
+    }
+  } else if (extensibility == DDS::MUTABLE) {
+    const DCPS::Encoding& encoding = ser.encoding();
+    size_t member_size = 0;
+    if (is_basic_type(elem_tk)) {
+      serialized_size(encoding, member_size, it->second.get());
+    } else if (elem_tk == TK_ENUM) {
+      serialized_size_enum_sequence(encoding, member_size, it->second.get());
+    } else if (elem_tk == TK_BITMASK) {
+      serialized_size_bitmask_sequence(encoding, member_size, it->second.get());
+    } else {
+      return false;
+    }
+    if (!ser.write_parameter_id(it->first, member_size, must_understand)) {
+      return false;
+    }
+  }
+  if (is_basic_type(elem_tk)) {
+    return ser << it->second.get();
+  } else if (elem_tk == TK_ENUM) {
+    return serialize_enum_sequence_as_ints_i(ser, it->second.get());
+  } else if (elem_tk == TK_BITMASK) {
+    return serialize_bitmask_sequence_as_uints_i(ser, it->second.get());
+  }
+  return false;
+}
+
+// Serialize a struct member whose type is sequence of basic type or enum or bitmask.
 bool DynamicDataImpl::DataContainer::serialize_sequence_struct_member_xcdr2(DCPS::Serializer& ser,
   DDS::MemberId id, TypeKind elem_tk, bool optional,
   bool must_understand, DDS::ExtensibilityKind extensibility) const
@@ -3738,36 +3731,11 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_struct_member_xcdr2(DCPS
   }
 
   if (seq_it != sequence_map_.end()) {
-    if (optional && (extensibility == DDS::FINAL || extensibility == DDS::APPENDABLE)) {
-      if (!(ser << ACE_OutputCDR::from_boolean(true))) {
-        return false;
-      }
-    } else if (extensibility == DDS::MUTABLE) {
-      size_t member_size = 0;
-      if (is_basic_type(elem_tk)) {
-        serialized_size(encoding, member_size, seq_it->second.get());
-      } else if (elem_tk == TK_ENUM) {
-        serialized_size_enum_sequence(encoding, member_size, seq_it->second.get());
-      } else if (elem_tk == TK_BITMASK) {
-        serialized_size_bitmask_sequence(encoding, member_size, seq_it->second.get());
-      } else {
-        return false;
-      }
-      if (!ser.write_parameter_id(id, member_size, must_understand)) {
-        return false;
-      }
-    }
-    if (is_basic_type(elem_tk)) {
-      return ser << seq_it->second.get();
-    } else if (elem_tk == TK_ENUM) {
-      return serialize_enum_sequence_as_ints_i(ser, seq_it->second.get());
-    } else if (elem_tk == TK_BITMASK) {
-      return serialize_bitmask_sequence_as_uints_i(ser, seq_it->second.get());
-    }
-    return false;
+    return serialize_sequence_aggregated_member_xcdr2(ser, seq_it, elem_tk, optional,
+                                                      must_understand, extensibility);
   }
-  return serialize_complex_struct_member(ser, complex_it, optional,
-                                         must_understand, extensibility);
+  return serialize_complex_aggregated_member_xcdr2(ser, complex_it, optional,
+                                                   must_understand, extensibility);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer& ser) const
@@ -3827,7 +3795,13 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
       }
     }
 
-    // TODO: For the remaining cases, the member must have its own DynamicData object.
+    const_complex_it it = complex_map_.find(id);
+    if (it != complex_map_.end()) {
+      return serialize_complex_aggregated_member_xcdr2(ser, it, optional,
+                                                       must_understand, extensibility);
+    }
+    return serialize_complex_aggregated_member_xcdr2_default(ser, id, member_type, optional,
+                                                             must_understand, extensiblity);
   }
   return true;
 }
@@ -3835,17 +3809,11 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
 bool DynamicDataImpl::DataContainer::serialize_structure_xcdr1(DCPS::Serializer& ser) const
 {
   // TODO: Support only Final extensibility?
+  return false;
 }
 
 bool DynamicDataImpl::DataContainer::serialize_structure(DCPS::Serializer& ser) const
 {
-  // TODO: If a member is optional and wasn't set by user, ignore it.
-  // If a member is not optional and wasn't set, use default value for it.
-  // If a member is of basic type or enum or bitmask, the member is stored in single_map_
-  // or complex_map_.
-  // If a member is a sequence of basic type or enum or bitmask, the member is stored in
-  // sequence_map_ or complex_map_.
-  // For all other cases, the member is stored in complex_map_.
   const DCPS::Encoding& encoding = ser.encoding();
   if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
     return serialize_structure_xcdr2(ser, extensibility);
@@ -3857,7 +3825,114 @@ bool DynamicDataImpl::DataContainer::serialize_structure(DCPS::Serializer& ser) 
 
 bool DynamicDataImpl::DataContainer::serialize_union(DCPS::Serializer& ser) const
 {
-  // TODO
+  DDS::TypeDescriptor_var descriptor;
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    return false;
+  }
+  const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+
+  // Delimiter
+  const DCPS::Encoding& encoding = ser.encoding();
+  size_t total_size = 0;
+  if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
+    const DynamicDataImpl* data_impl = dynamic_cast<const DynamicDataImpl*>(data_.in());
+    serialized_size(encoding, total_size, *data_impl);
+    if (!ser.write_delimiter(total_size)) {
+      return false;
+    }
+  }
+
+  const_single_iterator single_it = single_map_.find(DISCRIMINATOR_ID);
+  const_complex_iterator complex_it = complex_map_.find(DISCRIMINATOR_ID);
+  const bool has_disc = single_it != single_map_.end() || complex_it != complex_map_.end();
+  const DDS::MemberId selected_id = data_->find_selected_member();
+
+  if (selected_id != MEMBER_ID_INVALID && !has_disc) {
+    // TODO: Is this an error?
+    return false;
+  }
+
+  if (selected_id == MEMBER_ID_INVALID && has_disc) {
+    // TODO: 2 cases
+    // If the discriminator doesn't select any member then the union only has discriminator
+    // If the discriminator selects a member, use default value of that member type? or
+    // also just serialize only the discriminator?
+    return false;
+  }
+
+  DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+  const TypeKind disc_tk = disc_type->get_kind();
+  if (selected_id == MEMBER_ID_INVALID && !has_disc) {
+    // TODO: User default value for the union (Table 9)
+    return false;
+  }
+
+  // Discriminator
+  if (single_it != single_map_.end()) {
+    if (extensibility == DDS::MUTABLE) {
+      size_t disc_size = 0;
+      if (is_primitive(disc_tk)) {
+        serialized_size_primitive_member(encoding, disc_size, disc_tk);
+      } else { // Enum is the only other type can be used for discriminator
+        serialized_size_enum(encoding, disc_size, disc_type);
+      }
+      // Discriminator always has Id 0?
+      if (!ser.write_parameter_id(0, disc_size, false)) {
+        return false;
+      }
+    }
+    if (!(ser << single_it->second.get())) {
+      return false;
+    }
+  } else {
+    if (extensibility == DDS::MUTABLE) {
+      size_t disc_size = 0;
+      serialized_size_complex_member_i(encoding, disc_size, complex_it->first);
+      if (!ser.write_parameter_id(0, disc_size, false)) {
+        return false;
+      }
+    }
+    if (!serialize_complex_member_i(ser, complex_it->first)) {
+      return false;
+    }
+  }
+
+  // Selected member
+  DDS::DynamicTypeMember_var selected_dtm;
+  if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var selected_md;
+  if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
+  const bool optional = selected_md->is_optional();
+  const bool must_understand = selected_md->is_must_understand();
+
+  single_it = single_map_.find(selected_id);
+  if (single_it != single_map_.end()) {
+    return serialize_basic_aggregated_member_xcdr2(ser, single_it, selected_type, optional,
+                                                   must_understand, extensibility);
+  }
+
+  const_sequence_iterator seq_it = sequence_map_.find(selected_id);
+  if (seq_it ! = sequence_map_.end()) {
+    DDS::TypeDescriptor_var selected_td;
+    if (selected_type->get_descriptor(selected_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const TypeKind elem_tk = get_base_type(selected_td->element_type())->get_kind();
+    return serialize_sequence_aggregated_member_xcdr2(ser, seq_it, elem_tk, optional,
+                                                      must_understand, extensibility);
+  }
+
+  complex_it = complex_map_.find(selected_id);
+  if (complex_it != complex_map_.end()) {
+    return serialize_complex_aggregated_member_xcdr2(ser, complex_it, selected_id, optional,
+                                                     must_understand, extensibility);
+  }
+  return false;
 }
 
 } // namespace XTypes
@@ -3870,6 +3945,8 @@ void serialized_size(const Encoding& encoding, size_t& size, const XTypes::Dynam
   const TypeKind tk = data.type_->get_kind();
   switch (tk) {
   case TK_INT32:
+    primitive_serialized_size(encoding, size, CORBA::Long());
+    return;
   case TK_UINT32:
   case TK_INT8:
   case TK_UINT8:
