@@ -511,8 +511,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
           "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
 
         ACE_utsname uname;
-        int const result = ACE_OS::uname(&uname);
-        if (result != -1) {
+        if (ACE_OS::uname(&uname) != -1) {
           ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
             "machine: %C, %C platform: %C, %C, %C\n",
             uname.nodename, uname.machine, uname.sysname, uname.release, uname.version));
@@ -520,7 +519,7 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
         ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
           "compiler: %C version %d.%d.%d\n",
-          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version (), ACE::compiler_beta_version ()));
+          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version(), ACE::compiler_beta_version()));
       }
 
       // Establish the default scheduling mechanism and
@@ -2917,7 +2916,6 @@ Service_Participant::create_replayer(DDS::DomainParticipant_ptr participant,
                                      const DDS::DataWriterQos& datawriter_qos,
                                      const ReplayerListener_rch& a_listener)
 {
-  ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);

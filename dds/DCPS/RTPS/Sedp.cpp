@@ -9,9 +9,6 @@
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
 #include "Spdp.h"
-#ifdef OPENDDS_SECURITY
-#  include "SecurityHelpers.h"
-#endif
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Definitions.h>
@@ -2306,7 +2303,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 #ifdef OPENDDS_SECURITY
 void Sedp::data_received(DCPS::MessageId message_id,
-                         const DiscoveredPublication_SecurityWrapper& wrapper)
+                         const ParameterListConverter::DiscoveredPublication_SecurityWrapper& wrapper)
 {
   if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
@@ -2641,7 +2638,7 @@ Sedp::data_received(DCPS::MessageId message_id,
 
 #ifdef OPENDDS_SECURITY
 void Sedp::data_received(DCPS::MessageId message_id,
-                         const DiscoveredSubscription_SecurityWrapper& wrapper)
+                         const ParameterListConverter::DiscoveredSubscription_SecurityWrapper& wrapper)
 {
   if (!spdp_.initialized() || spdp_.shutting_down()) { return; }
 
@@ -4289,7 +4286,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    DiscoveredPublication_SecurityWrapper wdata_secure = DiscoveredPublication_SecurityWrapper();
+    ParameterListConverter::DiscoveredPublication_SecurityWrapper wdata_secure = ParameterListConverter::DiscoveredPublication_SecurityWrapper();
 
     if (!ParameterListConverter::from_param_list(data, wdata_secure, sedp_.use_xtypes_, wdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
@@ -4377,7 +4374,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    DiscoveredSubscription_SecurityWrapper rdata_secure = DiscoveredSubscription_SecurityWrapper();
+    ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure = ParameterListConverter::DiscoveredSubscription_SecurityWrapper();
     if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")
@@ -4872,7 +4869,7 @@ Sedp::write_publication_data_secure(
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
-    DiscoveredPublication_SecurityWrapper dwd;
+    ParameterListConverter::DiscoveredPublication_SecurityWrapper dwd;
     ParameterList plist;
     populate_discovered_writer_msg(dwd.data, rid, lp);
 
@@ -5024,7 +5021,7 @@ Sedp::write_subscription_data_secure(
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
 
-    DiscoveredSubscription_SecurityWrapper drd;
+    ParameterListConverter::DiscoveredSubscription_SecurityWrapper drd;
     ParameterList plist;
     populate_discovered_reader_msg(drd.data, rid, ls);
 

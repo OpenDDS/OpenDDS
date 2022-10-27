@@ -4,12 +4,12 @@
   "any_node": [
     {
       "command": "valgrind -v %bench_root%%ds%worker%ds%worker %config% --report %report%",
-      "config": "ci_echo_client.json",
+      "config": "ci-echo_client.json",
       "count": 1
     },
     {
       "command": "valgrind -v %bench_root%%ds%worker%ds%worker %config% --report %report%",
-      "config": "ci_echo_server.json",
+      "config": "ci-echo_server.json",
       "count": 1
     }
   ],

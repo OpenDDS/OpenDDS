@@ -446,38 +446,33 @@ The example here sets the value of both the ``DCPSSecurity`` and ``DCPSDebugLeve
 
         { "name": "common",
           "properties": [
-            { "name": "DCPSSecurity",
-              "value": "0"
+            { "name": "DCPSDefaultDiscovery",
+              "value":"rtps_disc"
+            },
+            { "name": "DCPSGlobalTransportConfig",
+              "value":"$file"
             },
             { "name": "DCPSDebugLevel",
               "value": "0"
+            },
+            { "name": "DCPSPendingTimeout",
+              "value": "3"
             }
           ]
-        }
-      ],
-      "discoveries": [
-
-Even if there is no configuration section for it (see above), this allows us to create unique discovery instances per domain.
-If both are specified, this will find and use / modify the one specified in the configuration section above.
-Valid types are ``"rtps"`` and ``"repo"`` (requires additional ``"ior"`` element with valid URL)
-
-::
-
-        { "name": "bench_test_rtps",
-          "type": "rtps",
-          "domain": 7
-        }
-      ],
-      "instances": [
-
-Even if there is no configuration section for it (see above), this allows us to create unique transport instances.
-If both are specified, this will find and use / modify the one specified in the configuration section above. Valid types are ``rtps_udp``, ``tcp``, ``udp``, ``ip_multicast``, ``shmem``.
-
-::
-
-        { "name": "rtps_instance_01",
-          "type": "rtps_udp",
-          "domain": 7
+        },
+        { "name": "rtps_discovery/rtps_disc",
+          "properties": [
+            { "name": "ResendPeriod",
+              "value": "5"
+            }
+          ]
+        },
+        { "name": "transport/rtps_transport",
+          "properties": [
+            { "name": "transport_type",
+              "value": "rtps_udp"
+            }
+          ]
         }
       ],
       "participants": [
