@@ -11041,7 +11041,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d)
+        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d | sort -r | head -n 1)
         ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -11107,7 +11107,7 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d)
+        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d | sort -r | head -n 1)
         ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
@@ -11691,7 +11691,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d)
+        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d | sort -r | head -n 1)
         ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
@@ -11758,7 +11758,7 @@ jobs:
       run: |
         cd OpenDDS
         clang++ --version
-        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d)
+        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d | sort -r | head -n 1)
         ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
@@ -12053,7 +12053,7 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d)
+        XERCESC_ROOT=$(find /usr/local/Cellar -iname "3\.*\.*" -type d | sort -r | head -n 1)
         ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
