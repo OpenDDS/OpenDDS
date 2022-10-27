@@ -1631,7 +1631,6 @@ RtpsUdpDataLink::RtpsReader::pre_stop_helper()
 
   guard.release();
   g.release();
-
   preassociation_task_->cancel();
 }
 
