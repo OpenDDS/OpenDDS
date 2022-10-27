@@ -13,7 +13,6 @@
 #include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/Logging.h"
 #include "dds/DCPS/GuidUtils.h"
 #include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Util.h"
@@ -209,8 +208,6 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
       receive_transport_header_.last_fragment(false);
     }
   }
-
-  finish_message();
 
   // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
   if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
@@ -576,14 +573,6 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 #endif
 
   deliver_sample_i(sample, rsh.submessage_, NetworkAddress(remote_address));
-}
-
-void
-RtpsUdpReceiveStrategy::finish_message()
-{
-  if (transport_debug.log_messages) {
-    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", receiver_.local_, false, message_);
-  }
 }
 
 void
