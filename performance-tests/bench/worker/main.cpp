@@ -117,7 +117,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
         report_file_fullname = get_option_argument(i, argc, argv);
       } else if (config_file_fullname.empty()) {
         config_file_fullname = ACE_TEXT_ALWAYS_CHAR(argument);
-        config_file_basename = ACE::basename(argument);
+        config_file_basename = ACE_TEXT_ALWAYS_CHAR(ACE::basename(argument));
       } else {
         std::cerr << "Invalid option: " << argument << std::endl;
         return 1;
