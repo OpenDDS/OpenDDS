@@ -161,19 +161,19 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   const std::vector<AST_EnumVal*>& vals, const char*)
 {
   NamespaceGuard ng;
-  be_global->add_include("dds/DCPS/Serializer.h");
+  be_builtin_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
   {
     Function insertion("operator<<", "bool");
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("enumval", "const " + cxx + "&");
     insertion.endArgs();
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    if (CORBA::ULong(enumval) >= " << vals.size() << ") {\n"
       "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid enumerated value for " << cxx << " (%u)\\n\"), enumval));\n"
       "      return false;\n"
       "    }\n";
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  return strm << static_cast<CORBA::ULong>(enumval);\n";
   }
   {
@@ -181,15 +181,15 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     extraction.addArg("strm", "Serializer&");
     extraction.addArg("enumval", cxx + "&");
     extraction.endArgs();
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
       "  if (strm >> temp) {\n";
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    if (temp >= " << vals.size() << ") {\n"
       "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
       "      return false;\n"
       "    }\n";
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    enumval = static_cast<" << cxx << ">(temp);\n"
       "    return true;\n"
       "  }\n"
@@ -241,7 +241,7 @@ namespace {
           }
         }
       } else if (type_class & CL_UNION) {
-        result = be_global->union_discriminator_is_key(dynamic_cast<AST_Union*>(type));
+        result = be_builtin_global->union_discriminator_is_key(dynamic_cast<AST_Union*>(type));
       }
     }
     type_stack.pop_back();
@@ -251,14 +251,14 @@ namespace {
   bool needs_forany(AST_Type* type)
   {
     const Classification type_class = classify(resolveActualType(type));
-    return be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11 &&
+    return be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_CXX11 &&
       type_class & CL_ARRAY;
   }
 
   bool needs_distinct_type(AST_Type* type)
   {
     const Classification type_class = classify(resolveActualType(type));
-    return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 &&
+    return be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11 &&
       type_class & (CL_SEQUENCE | CL_ARRAY);
   }
 
@@ -341,8 +341,8 @@ namespace {
 
     void generate_tag()
     {
-      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-        be_global->header_ << "struct " << get_tag_name() << " {};\n\n";
+      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
+        be_builtin_global->header_ << "struct " << get_tag_name() << " {};\n\n";
       }
     }
 
@@ -453,20 +453,20 @@ namespace {
 
     std::string seq_check_empty() const
     {
-      const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+      const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
       return value_access() + (use_cxx11 ? ".empty()" : ".length() == 0");
     }
 
     std::string seq_get_length() const
     {
-      const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+      const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
       const std::string value = value_access();
       return use_cxx11 ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
     }
 
     std::string seq_get_buffer() const
     {
-      const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+      const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
       return value_access() + (use_cxx11 ? ".data()" : ".get_buffer()");
     }
 
@@ -612,7 +612,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("seq", "const " + cxx + "&");
       serialized_size.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    if (seq[i]._d() == OpenDDS::RTPS::PID_SENTINEL) continue;\n"
         "    serialized_size(encoding, size, seq[i]);\n"
@@ -625,7 +625,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("seq", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    if (seq[i]._d() == OpenDDS::RTPS::PID_SENTINEL) continue;\n"
         "    if (!(strm << seq[i])) {\n"
@@ -640,7 +640,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("seq", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  while (true) {\n"
         "    const CORBA::ULong idx = OpenDDS::DCPS::grow(seq) - 1;\n"
         "    if (!(strm >> seq[idx])) {\n"
@@ -669,7 +669,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("seq", "const " + cxx + "&");
       serialized_size.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  primitive_serialized_size_ulong(encoding, size);\n"
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    serialized_size(encoding, size, seq[i]);\n"
@@ -680,7 +680,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("seq", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  CORBA::ULong serlen = 0;\n"
         "  for (CORBA::ULong i = 0; i < seq.length(); ++i) {\n"
         "    if (seq[i].propagate) {\n"
@@ -702,7 +702,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("seq", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  CORBA::ULong length;\n"
         "  if (!(strm >> length)) {\n"
         "    return false;\n"
@@ -736,7 +736,7 @@ namespace {
     }
 
     std::string tempvar = "tempvar";
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
       indent << "  strm.skip(end_of_seq - strm.rpos());\n" <<
       indent << "} else {\n";
@@ -744,7 +744,7 @@ namespace {
     const bool classic_array_copy = !use_cxx11 && (cls & CL_ARRAY);
 
     if (!classic_array_copy) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "  " << elem_type_name << " " << tempvar << ";\n";
     }
 
@@ -762,10 +762,10 @@ namespace {
       wrapper.classic_array_copy_ = classic_array_copy;
       wrapper.done(&intro);
       stream_to = wrapper.ref();
-      intro.join(be_global->impl_, indent + "    ");
+      intro.join(be_builtin_global->impl_, indent + "    ");
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       indent << "  for (CORBA::ULong j = " << start << " + 1; j < " << end << "; ++j) {\n" <<
       indent << "    strm >> " << stream_to << ";\n" <<
       indent << "  }\n" <<
@@ -774,7 +774,7 @@ namespace {
 
   void skip_to_end_array(const std::string& indent)
   {
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       indent << "if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n" <<
       indent << "  strm.set_construction_status(Serializer::ElementConstructionFailure);\n" <<
       indent << "  strm.skip(end_of_arr - strm.rpos());\n" <<
@@ -788,8 +788,8 @@ namespace {
   void gen_sequence_i(
     UTL_ScopedName* tdname, AST_Sequence* seq, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
-    be_global->add_include("dds/DCPS/Util.h");
-    be_global->add_include("dds/DCPS/Serializer.h");
+    be_builtin_global->add_include("dds/DCPS/Util.h");
+    be_builtin_global->add_include("dds/DCPS/Serializer.h");
     if (anonymous) {
       seq = dynamic_cast<AST_Sequence*>(anonymous->type_);
     }
@@ -809,26 +809,26 @@ namespace {
     }
 
     AST_Type* elem = resolveActualType(seq->base_type());
-    TryConstructFailAction try_construct = be_global->sequence_element_try_construct(seq);
+    TryConstructFailAction try_construct = be_builtin_global->sequence_element_try_construct(seq);
 
     Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
-        if (be_global->language_mapping() != BE_GlobalData::LANGMAP_FACE_CXX &&
-            be_global->language_mapping() != BE_GlobalData::LANGMAP_SP_CXX) {
+        if (be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_FACE_CXX &&
+            be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_SP_CXX) {
           const std::string hdr = "dds/CorbaSeq/" + nameOfSeqHeader(elem) + "SeqTypeSupportImpl.h";
-          be_global->conditional_include(hdr.c_str(), BE_GlobalData::STREAM_CPP,
+          be_builtin_global->conditional_include(hdr.c_str(), BE_BuiltinGlobalData::STREAM_CPP,
                                          "#ifndef OPENDDS_SAFETY_PROFILE");
         }
       } else {
-        be_global->add_referenced(elem->file_name().c_str());
+        be_builtin_global->add_referenced(elem->file_name().c_str());
       }
     }
 
     const std::string cxx_elem =
       anonymous ? anonymous->scoped_elem_ : scoped(seq->base_type()->name());
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
 
     base_wrapper.generate_tag();
 
@@ -848,9 +848,9 @@ namespace {
       if ((elem_cls & CL_INTERFACE) == 0) {
         marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
-        intro.join(be_global->impl_, "  ");
+        intro.join(be_builtin_global->impl_, "  ");
 
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  primitive_serialized_size_ulong(encoding, size);\n"
           "  if (" << check_empty << ") {\n"
           "    return;\n"
@@ -858,30 +858,30 @@ namespace {
       }
 
       if (elem_cls & CL_ENUM) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  primitive_serialized_size_ulong(encoding, size, " + get_length + ");\n";
       } else if (elem_cls & CL_PRIMITIVE) {
-        be_global->impl_ << checkAlignment(elem) <<
+        be_builtin_global->impl_ << checkAlignment(elem) <<
           "  " + getSizeExprPrimitive(elem, get_length) << ";\n";
       } else if (elem_cls & CL_INTERFACE) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  // sequence of objrefs is not marshaled\n";
       } else if (elem_cls == CL_UNKNOWN) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  // sequence of unknown/unsupported type\n";
       } else { // String, Struct, Array, Sequence, Union
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < " << get_length << "; ++i) {\n";
         if (elem_cls & CL_STRING) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "    primitive_serialized_size_ulong(encoding, size);\n";
           const string strlen_suffix = (elem_cls & CL_WIDE)
             ? " * char16_cdr_size;\n" : " + 1;\n";
           if (use_cxx11) {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "    size += " + value_access + "[i].size()" << strlen_suffix;
           } else {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "    if (" + value_access + "[i]) {\n"
               "      size += ACE_OS::strlen(" + value_access + "[i])" << strlen_suffix <<
               "    }\n";
@@ -892,11 +892,11 @@ namespace {
           Intro intro;
           elem_wrapper.done(&intro);
           const std::string indent = "    ";
-          intro.join(be_global->impl_, indent);
-          be_global->impl_ <<
+          intro.join(be_builtin_global->impl_, indent);
+          be_builtin_global->impl_ <<
             indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
         }
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  }\n";
       }
     }
@@ -915,7 +915,7 @@ namespace {
       insertion.endArgs();
 
       if ((elem_cls & CL_INTERFACE) == 0) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
         marshal_generator::generate_dheader_code(
@@ -924,17 +924,17 @@ namespace {
           "      return false;\n"
           "    }\n", !primitive);
 
-        intro.join(be_global->impl_, "  ");
+        intro.join(be_builtin_global->impl_, "  ");
 
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  const CORBA::ULong length = " << get_length << ";\n";
         if (!seq->unbounded()) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  if (length > " << bounded_arg(seq) << ") {\n"
             "    return false;\n"
             "  }\n";
         }
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           streamAndCheck("<< length") <<
           "  if (length == 0) {\n"
           "    return true;\n"
@@ -944,38 +944,38 @@ namespace {
       if (elem_cls & CL_PRIMITIVE) {
         AST_PredefinedType* predef = dynamic_cast<AST_PredefinedType*>(elem);
         if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < length; ++i) {\n" <<
             streamAndCheck("<< ACE_OutputCDR::from_boolean(" + value_access + "[i])", 4) <<
             "  }\n"
             "  return true;\n";
         } else {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  return strm.write_" << getSerializerName(elem)
             << "_array(" << get_buffer << ", length);\n";
         }
       } else if (elem_cls & CL_INTERFACE) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
       } else if (elem_cls == CL_UNKNOWN) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < length; ++i) {\n";
         if ((elem_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED)) {
           const string args = value_access + "[i], " + bounded_arg(elem);
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             streamAndCheck("<< " + getWrapper(args, elem, WD_OUTPUT), 4);
         } else {
           Wrapper elem_wrapper(elem, cxx_elem, value_access + "[i]");
           elem_wrapper.nested_key_only_ = nested_key_only;
           Intro intro;
           elem_wrapper.done(&intro);
-          intro.join(be_global->impl_, "    ");
-          be_global->impl_ << streamAndCheck("<< " + elem_wrapper.ref(), 4);
+          intro.join(be_builtin_global->impl_, "    ");
+          be_builtin_global->impl_ << streamAndCheck("<< " + elem_wrapper.ref(), 4);
         }
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  }\n"
           "  return true;\n";
       }
@@ -996,7 +996,7 @@ namespace {
       extraction.endArgs();
 
       if ((elem_cls & CL_INTERFACE) == 0) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
         marshal_generator::generate_dheader_code(
@@ -1005,13 +1005,13 @@ namespace {
           "    }\n", !primitive);
 
         if (!primitive) {
-          be_global->impl_ << "  const size_t end_of_seq = strm.rpos() + total_size;\n";
+          be_builtin_global->impl_ << "  const size_t end_of_seq = strm.rpos() + total_size;\n";
         }
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  CORBA::ULong length;\n"
           << streamAndCheck(">> length");
         // The check here is to prevent very large sequences from being allocated.
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  if (length > strm.length()) {\n"
           "    if (DCPS_debug_level >= 8) {\n"
           "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid sequence length (%u)\\n\"), length));\n"
@@ -1030,31 +1030,31 @@ namespace {
       //for a bounded sequence this is our maximum
       //we save the old length so we know how far we need to read until
       if ((elem_cls & CL_INTERFACE) == 0) {
-        be_global->impl_ << "  CORBA::ULong new_length = length;\n";
+        be_builtin_global->impl_ << "  CORBA::ULong new_length = length;\n";
       }
 
       if (elem_cls & CL_PRIMITIVE) {
         // if we are a bounded primitive, we read to our max then return false
         if (!seq->unbounded()) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  if (length > " << bound << ") {\n"
             "    new_length = " << bound << ";\n"
             "  }\n";
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             (use_cxx11 ? "  " + value_access + ".resize(" : "  " + value_access +
             ".length(") << "new_length);\n";
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n"
             "    bool b;\n" <<
             streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
             "    " + value_access + "[i] = b;\n"
             "  }\n";
           } else {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "  strm.read_" << getSerializerName(elem) << "_array(" << get_buffer << ", new_length);\n";
           }
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  if (new_length != length) {\n"
             "    size_t skip_length = 0;\n"
             "    " << getSizeExprPrimitive(elem, "(length - new_length)", "skip_length", "encoding") << ";\n"
@@ -1063,11 +1063,11 @@ namespace {
             "    return false;\n"
             "  }\n";
         } else {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             (use_cxx11 ? "  " + value_access + ".resize(new_length);\n" : "  " + value_access +
             ".length(new_length);\n");
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
               "    bool b;\n" <<
               streamAndCheck(">> ACE_InputCDR::to_boolean(b)", 4) <<
@@ -1075,7 +1075,7 @@ namespace {
               "  }\n"
               "  return true;\n";
           } else {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "  if (length == 0) {\n"
               "    return true;\n"
               "  }\n"
@@ -1084,26 +1084,26 @@ namespace {
           }
         }
       } else if (elem_cls & CL_INTERFACE) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return false; // sequence of objrefs is not marshaled\n";
         return;
       } else if (elem_cls == CL_UNKNOWN) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return false; // sequence of unknown/unsupported type\n";
         return;
       } else { // Enum, String, Struct, Array, Sequence, Union
         const std::string elem_access = value_access + "[i]";
         if (!seq->unbounded()) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  if (length > " << (use_cxx11 ? bounded_arg(seq) : value_access + ".maximum()") << ") {\n"
             "    new_length = " << bound << ";\n"
             "  }\n";
         }
         //change the size of seq length to prepare
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           (use_cxx11 ? "  " + value_access + ".resize(new_length);\n" : "  " + value_access + ".length(new_length);\n");
         //read the entire length of the writer's sequence
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n";
 
         Intro intro;
@@ -1122,7 +1122,7 @@ namespace {
             stream_to = getWrapper(args, elem, WD_INPUT);
           } else {
             const string getbuffer =
-              (be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE)
+              (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_NONE)
               ? ".get_buffer()" : "";
             stream_to = value_access + getbuffer + "[i]";
           }
@@ -1133,14 +1133,14 @@ namespace {
           stream_to = elem_wrapper.ref();
         }
         const std::string indent = "    ";
-        intro.join(be_global->impl_, indent);
-        be_global->impl_ <<
+        intro.join(be_builtin_global->impl_, indent);
+        be_builtin_global->impl_ <<
           indent << " if (!(strm >> " << stream_to << ")) {\n";
 
         const std::string seq_resize_func = use_cxx11 ? "resize" : "length";
 
         if (try_construct == tryconstructfailaction_use_default) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             type_to_default("        ", elem, elem_access) <<
             "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
         } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
@@ -1151,7 +1151,7 @@ namespace {
             const std::string get_length =
               use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
             const string inout = use_cxx11 ? "" : ".inout()";
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "        if (" + construct_bound_fail + " && " << check_not_empty << " && (" <<
               bounded_arg(elem) << " < " << get_length << ")) {\n"
               "          "  << elem_access << inout <<
@@ -1160,44 +1160,44 @@ namespace {
               "        } else {\n"
               "          strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
             skip_to_end_sequence("          ", "i", "length", named_as, use_cxx11, elem_cls, seq);
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "        return false;\n"
               "      }\n";
           } else if (elem_cls & CL_SEQUENCE) {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "      if (" + construct_elem_fail + ") {\n";
             skip_to_end_sequence("          ", "i", "length", named_as, use_cxx11, elem_cls, seq);
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "        return false;\n"
               "      }\n"
               "      strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           }
         } else {
           //discard/default
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n";
           skip_to_end_sequence("      ", "i", "length", named_as, use_cxx11, elem_cls, seq);
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "      return false;\n";
         }
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "    }\n";
         if (classic_array_copy.size()) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "    " << classic_array_copy << "\n";
         }
-        be_global->impl_ << "  }\n";
+        be_builtin_global->impl_ << "  }\n";
       }
       if (!primitive) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  if (new_length != length) {\n";
         skip_to_end_sequence("    ", "new_length", "length", named_as, use_cxx11, elem_cls, seq);
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "    strm.set_construction_status(Serializer::BoundConstructionFailure);\n"
           "    return false;\n"
           "  }\n";
       }
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return true;\n";
     }
   }
@@ -1221,7 +1221,7 @@ namespace {
   void gen_array_i(
     UTL_ScopedName* name, AST_Array* arr, bool nested_key_only, const FieldInfo* anonymous = 0)
   {
-    be_global->add_include("dds/DCPS/Serializer.h");
+    be_builtin_global->add_include("dds/DCPS/Serializer.h");
     if (anonymous) {
       arr = dynamic_cast<AST_Array*>(anonymous->type_);
     }
@@ -1230,15 +1230,15 @@ namespace {
     base_wrapper.nested_key_only_ = nested_key_only;
     NamespaceGuard ng(!anonymous);
 
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
 
     AST_Type* elem = resolveActualType(arr->base_type());
-    TryConstructFailAction try_construct = be_global->array_element_try_construct(arr);
+    TryConstructFailAction try_construct = be_builtin_global->array_element_try_construct(arr);
     Classification elem_cls = classify(elem);
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()
         && elem->node_type() != AST_Decl::NT_pre_defined) {
-      be_global->add_referenced(elem->file_name().c_str());
+      be_builtin_global->add_referenced(elem->file_name().c_str());
     }
     const std::string cxx_elem =
       anonymous ? anonymous->scoped_elem_ : scoped(arr->base_type()->name());
@@ -1255,7 +1255,7 @@ namespace {
       set_default.endArgs();
       string indent = "  ";
       NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
-      be_global->impl_ << type_to_default(indent, elem, wrapper.value_access() + nfl.index_);
+      be_builtin_global->impl_ << type_to_default(indent, elem, wrapper.value_access() + nfl.index_);
     }
 
     {
@@ -1270,34 +1270,34 @@ namespace {
       marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", !primitive, false);
 
       if (elem_cls & CL_ENUM) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  primitive_serialized_size_ulong(encoding, size, " << n_elems << ");\n";
       } else if (elem_cls & CL_PRIMITIVE) {
         std::ostringstream n_elems_ss;
         n_elems_ss << n_elems;
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  " << getSizeExprPrimitive(elem, n_elems_ss.str()) << ";\n";
       } else { // String, Struct, Array, Sequence, Union
         string indent = "  ";
         NestedForLoops nfl("CORBA::ULong", "i", arr, indent);
         if (elem_cls & CL_STRING) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             indent << "primitive_serialized_size_ulong(encoding, size);\n" <<
             indent;
           if (use_cxx11) {
-            be_global->impl_ << "size += " << wrapper.value_access() << nfl.index_ << ".size()";
+            be_builtin_global->impl_ << "size += " << wrapper.value_access() << nfl.index_ << ".size()";
           } else {
-            be_global->impl_ << "size += ACE_OS::strlen(" << wrapper.value_access()
+            be_builtin_global->impl_ << "size += ACE_OS::strlen(" << wrapper.value_access()
               << nfl.index_ << ".in())";
           }
-          be_global->impl_ << ((elem_cls & CL_WIDE) ? " * char16_cdr_size;\n" : " + 1;\n");
+          be_builtin_global->impl_ << ((elem_cls & CL_WIDE) ? " * char16_cdr_size;\n" : " + 1;\n");
         } else {
           Wrapper elem_wrapper(elem, cxx_elem, wrapper.value_access() + nfl.index_);
           elem_wrapper.nested_key_only_ = nested_key_only;
           Intro intro;
           elem_wrapper.done(&intro);
-          intro.join(be_global->impl_, indent);
-          be_global->impl_ <<
+          intro.join(be_builtin_global->impl_, indent);
+          be_builtin_global->impl_ <<
             indent << "serialized_size(encoding, size, " << elem_wrapper.ref() << ");\n";
         }
       }
@@ -1311,7 +1311,7 @@ namespace {
       insertion.addArg("arr", wrapper.wrapped_type_name());
       insertion.endArgs();
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
 
@@ -1325,7 +1325,7 @@ namespace {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += use_cxx11 ? "->data()" : "[0]";
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return strm.write_" << getSerializerName(elem)
           << "_array(" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
@@ -1336,10 +1336,10 @@ namespace {
           elem_wrapper.nested_key_only_ = nested_key_only;
           Intro intro;
           elem_wrapper.done(&intro);
-          intro.join(be_global->impl_, indent);
-          be_global->impl_ << streamAndCheck("<< " + elem_wrapper.ref(), indent.size());
+          intro.join(be_builtin_global->impl_, indent);
+          be_builtin_global->impl_ << streamAndCheck("<< " + elem_wrapper.ref(), indent.size());
         }
-        be_global->impl_ << "  return true;\n";
+        be_builtin_global->impl_ << "  return true;\n";
       }
     }
 
@@ -1353,9 +1353,9 @@ namespace {
       extraction.endArgs();
 
       if (!primitive) {
-        be_global->impl_ << "  bool discard_flag = false;\n";
+        be_builtin_global->impl_ << "  bool discard_flag = false;\n";
       }
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       marshal_generator::generate_dheader_code(
@@ -1364,7 +1364,7 @@ namespace {
         "    }\n", !primitive);
 
       if (!primitive && (try_construct != tryconstructfailaction_use_default)) {
-        be_global->impl_ << "  const size_t end_of_arr = strm.rpos() + total_size;\n";
+        be_builtin_global->impl_ << "  const size_t end_of_arr = strm.rpos() + total_size;\n";
       }
 
       const std::string accessor = wrapper.value_access() + (use_cxx11 ? ".data()" : ".out()");
@@ -1372,7 +1372,7 @@ namespace {
         string suffix;
         for (unsigned int i = 1; i < arr->n_dims(); ++i)
           suffix += use_cxx11 ? "->data()" : "[0]";
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return strm.read_" << getSerializerName(elem)
           << "_array(" << accessor << suffix << ", " << n_elems << ");\n";
       } else { // Enum, String, Struct, Array, Sequence, Union
@@ -1395,13 +1395,13 @@ namespace {
             stream = streamCommon(
               indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
           }
-          intro.join(be_global->impl_, indent);
-          be_global->impl_ <<
+          intro.join(be_builtin_global->impl_, indent);
+          be_builtin_global->impl_ <<
             indent << "if (!" << stream << ") {\n";
 
           indent += "  ";
           if (try_construct == tryconstructfailaction_use_default) {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               type_to_default(indent, elem, elem_access) <<
               indent << "strm.set_construction_status(Serializer::ConstructionSuccessful);\n";
           } else if ((try_construct == tryconstructfailaction_trim) && (elem_cls & CL_BOUNDED) &&
@@ -1412,7 +1412,7 @@ namespace {
               const std::string get_length =
                 use_cxx11 ? elem_access + ".length()" : "ACE_OS::strlen(" + elem_access + ".in())";
               const string inout = use_cxx11 ? "" : ".inout()";
-              be_global->impl_ <<
+              be_builtin_global->impl_ <<
                 indent << "if (" << construct_bound_fail << " && " <<
                   check_not_empty << " && (" << bounded_arg(elem) << " < " << get_length << ")) {\n" <<
                 indent << "  " << wrapper.value_access() + nfl.index_ << inout <<
@@ -1420,13 +1420,13 @@ namespace {
                 indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
                 indent << "} else {\n";
               skip_to_end_array(indent);
-              be_global->impl_ <<
+              be_builtin_global->impl_ <<
                 indent << "}\n";
             } else if (elem_cls & CL_SEQUENCE) {
-              be_global->impl_ <<
+              be_builtin_global->impl_ <<
                 indent << "if (" + construct_elem_fail + ") {\n";
               skip_to_end_array(indent);
-              be_global->impl_ <<
+              be_builtin_global->impl_ <<
                 indent << "} else {\n" <<
                 indent << "  strm.set_construction_status(Serializer::ConstructionSuccessful);\n" <<
                 indent << "}\n";
@@ -1436,15 +1436,15 @@ namespace {
             skip_to_end_array(indent);
           }
           if (classic_array_copy.size()) {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               indent << "} else {\n" <<
               indent << "  " << classic_array_copy << "\n";
           }
           indent.erase(0, 2);
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             indent << "}\n";
         }
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  if (discard_flag) {\n"
           "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "    return false;\n"
@@ -1578,7 +1578,7 @@ namespace {
     if ((fld_cls & CL_STRING) && !(fld_cls & CL_BOUNDED)) {
       bounded = false;
     } else if (fld_cls & CL_STRUCTURE) {
-      const ExtensibilityKind exten = be_global->extensibility(type);
+      const ExtensibilityKind exten = be_builtin_global->extensibility(type);
       if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
         /*
          * TODO(iguessthislldo): This is a workaround for not properly
@@ -1606,7 +1606,7 @@ namespace {
       AST_Array* array_node = dynamic_cast<AST_Array*>(type);
       if (!is_bounded_type(array_node->base_type(), encoding)) bounded = false;
     } else if (fld_cls & CL_UNION) {
-      const ExtensibilityKind exten = be_global->extensibility(type);
+      const ExtensibilityKind exten = be_builtin_global->extensibility(type);
       if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
         /*
          * TODO(iguessthislldo): This is a workaround for not properly
@@ -1642,7 +1642,7 @@ namespace {
 
     const Classification fld_cls = classify(type);
     if (fld_cls & CL_STRUCTURE || fld_cls & CL_UNION) {
-      exten = be_global->extensibility(type);
+      exten = be_builtin_global->extensibility(type);
       if (exten == extensibilitykind_mutable) {
         type_stack.pop_back();
         return extensibilitykind_mutable;
@@ -1763,7 +1763,7 @@ namespace {
   void idl_max_serialized_size(Encoding encoding, size_t& size, AST_Type* type)
   {
     type = resolveActualType(type);
-    const ExtensibilityKind exten = be_global->extensibility(type);
+    const ExtensibilityKind exten = be_builtin_global->extensibility(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
@@ -1901,7 +1901,7 @@ namespace {
                         const string& prefix, bool wrap_nested_key_only, Intro& intro,
                         const string& = "") // same sig as streamCommon
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix == "uni";
 
     AST_Type* const actual_type = resolveActualType(type);
@@ -1969,7 +1969,7 @@ namespace {
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru)
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
 
     AST_Type* const actual_type = resolveActualType(type);
@@ -2049,7 +2049,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("stru", "const " + cxx + "&");
       serialized_size.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (stru.propagate) {\n"
         "    primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
@@ -2061,7 +2061,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("stru", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (stru.propagate) {\n"
         "    return (strm << stru.name.in()) && (strm << stru.value);\n"
         "  }\n"
@@ -2072,7 +2072,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("stru", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  stru.propagate = true;\n"
         "  return (strm >> stru.name.out()) && (strm >> stru.value);\n";
     }
@@ -2092,7 +2092,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("stru", "const " + cxx + "&");
       serialized_size.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (stru.propagate) {\n"
         "    primitive_serialized_size_ulong(encoding, size);\n"
         "    size += ACE_OS::strlen(stru.name.in()) + 1;\n"
@@ -2105,7 +2105,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("stru", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (stru.propagate) {\n"
         "    return (strm << stru.name.in()) && (strm << stru.value.in());\n"
         "  }\n"
@@ -2116,7 +2116,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("stru", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  stru.propagate = true;\n"
         "  return (strm >> stru.name.out()) && (strm >> stru.value.out());\n";
     }
@@ -2136,7 +2136,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("stru", "const " + cxx + "&");
       serialized_size.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  serialized_size(encoding, size, stru.value);\n"
         "  serialized_size(encoding, size, stru.binary_value);\n";
     }
@@ -2145,7 +2145,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("stru", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return (strm << stru.value)\n"
         "    && (strm << stru.binary_value);\n";
     }
@@ -2154,7 +2154,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("stru", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (!(strm >> stru.value)) {\n"
         "    return false;\n"
         "  }\n"
@@ -2179,7 +2179,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("stru", "const " + cxx + "&");
       serialized_size.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  serialized_size(encoding, size, stru.smHeader);\n"
         "  primitive_serialized_size_octet(encoding, size, stru.content.length());\n";
     }
@@ -2188,7 +2188,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("stru", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return (strm << stru.smHeader)\n"
         "    && strm.write_octet_array(stru.content.get_buffer(), "
         "stru.content.length());\n";
@@ -2198,7 +2198,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("stru", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (strm >> stru.smHeader) {\n"
         "    stru.content.length(stru.smHeader.submessageLength);\n"
         "    if (strm.read_octet_array(stru.content.get_buffer(),\n"
@@ -2225,7 +2225,7 @@ namespace {
       serialized_size.addArg("size", "size_t&");
       serialized_size.addArg("stru", "const " + cxx + "&");
       serialized_size.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  size += "
         << ((cxx == RtpsNamespace + "SequenceNumberSet") ? "12" : "8")
         << " + 4 * ((stru.numBits + 31) / 32); // RTPS Custom\n";
@@ -2235,7 +2235,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("stru", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if ((strm << stru.bitmapBase) && (strm << stru.numBits)) {\n"
         "    const CORBA::ULong M = (stru.numBits + 31) / 32;\n"
         "    if (stru.bitmap.length() < M) {\n"
@@ -2255,7 +2255,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("stru", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if ((strm >> stru.bitmapBase) && (strm >> stru.numBits)) {\n"
         "    const CORBA::ULong M = (stru.numBits + 31) / 32;\n"
         "    if (M > 8) {\n"
@@ -2427,7 +2427,7 @@ namespace {
      * TODO(iguessthislldo): This is a workaround for not properly implementing
      * serialized_size_bound for XCDR. See XTYPE-83.
      */
-    const ExtensibilityKind exten = be_global->extensibility(type);
+    const ExtensibilityKind exten = be_builtin_global->extensibility(type);
     if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
       return false;
     }
@@ -2468,16 +2468,16 @@ namespace {
     const Fields fields(node);
     const Fields::Iterator fields_end = fields.end();
     const std::string name = scoped(node->name());
-    const ExtensibilityKind exten = be_global->extensibility(node);
+    const ExtensibilityKind exten = be_builtin_global->extensibility(node);
 
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "  static SerializedSizeBound " << function_prefix <<
         "serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      be_global->header_ <<
+      be_builtin_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
       if (is_bounded_topic_struct(type_node, encoding, key_only, keys, info)) {
@@ -2493,11 +2493,11 @@ namespace {
             idl_max_serialized_size(encoding, size, (*i)->field_type());
           }
         }
-        be_global->header_ << size;
+        be_builtin_global->header_ << size;
       }
-      be_global->header_ << ");\n";
+      be_builtin_global->header_ << ");\n";
     }
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "    default:\n"
       "      OPENDDS_ASSERT(false);\n"
       "      return SerializedSizeBound();\n"
@@ -2518,23 +2518,23 @@ namespace {
 
   bool generate_marshal_traits_union(AST_Union* node, bool has_key, ExtensibilityKind exten)
   {
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      be_global->header_ <<
+      be_builtin_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
       if (is_bounded_type(node, encoding)) {
         size_t size = 0;
         idl_max_serialized_size(encoding, size, node);
-        be_global->header_ << size;
+        be_builtin_global->header_ << size;
       }
-      be_global->header_ << ");\n";
+      be_builtin_global->header_ << ");\n";
     }
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "    default:\n"
       "      OPENDDS_ASSERT(false);\n"
       "      return SerializedSizeBound();\n"
@@ -2542,13 +2542,13 @@ namespace {
       "  }\n"
       "\n";
 
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "  static SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
     for (unsigned e = 0; e < encoding_count; ++e) {
       const Encoding encoding = static_cast<Encoding>(e);
-      be_global->header_ <<
+      be_builtin_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
       /*
@@ -2560,11 +2560,11 @@ namespace {
         if (has_key) {
           idl_max_serialized_size(encoding, size, node->disc_type());
         }
-        be_global->header_ << size;
+        be_builtin_global->header_ << size;
       }
-      be_global->header_ << ");\n";
+      be_builtin_global->header_ << ");\n";
     }
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "    default:\n"
       "      OPENDDS_ASSERT(false);\n"
       "      return SerializedSizeBound();\n"
@@ -2607,20 +2607,20 @@ namespace {
 
     std::string export_string;
     if (octetSeqOnly.size()) {
-      const ACE_CString exporter = be_global->export_macro();
+      const ACE_CString exporter = be_builtin_global->export_macro();
       if (exporter != "") {
         export_string = string(" ") + exporter.c_str();
       }
     }
 
-    be_global->add_include("dds/DCPS/TypeSupportImpl.h");
+    be_builtin_global->add_include("dds/DCPS/TypeSupportImpl.h");
 
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "template <>\n"
       "struct" << export_string << " MarshalTraits<" << cxx << "> {\n"
       "  static void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)\n"
       "  {\n"
-        << fill_datareprseq(be_global->data_representations(node), "seq", "    ") <<
+        << fill_datareprseq(be_builtin_global->data_representations(node), "seq", "    ") <<
       "  }\n"
       "\n";
 
@@ -2640,7 +2640,7 @@ namespace {
       const char* set_len;
       const char* get_buffer;
       const char* buffer_pre = "";
-      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
         get_len = "size";
         set_len = "resize";
         get_buffer = "[0]";
@@ -2651,7 +2651,7 @@ namespace {
         get_buffer = ".get_buffer()";
       }
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "bool MarshalTraits<" << cxx << ">::to_message_block(ACE_Message_Block& mb, "
         "const " << cxx << "& stru)\n"
         "{\n"
@@ -2676,7 +2676,7 @@ namespace {
 
       msg_block_fn_decl_end = ";";
     }
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "  static bool to_message_block(ACE_Message_Block&, const " << cxx << "&)"
         << msg_block_fn_decl_end << "\n"
       "  static bool from_message_block(" << cxx << "&, const ACE_Message_Block&)"
@@ -2687,47 +2687,47 @@ namespace {
      * This is just for the base type, nested types can have different
      * extensibilities.
      */
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "  static Extensibility extensibility() { return ";
     switch (exten) {
     case extensibilitykind_final:
-      be_global->header_ << "FINAL";
+      be_builtin_global->header_ << "FINAL";
       break;
     case extensibilitykind_appendable:
-      be_global->header_ << "APPENDABLE";
+      be_builtin_global->header_ << "APPENDABLE";
       break;
     case extensibilitykind_mutable:
-      be_global->header_ << "MUTABLE";
+      be_builtin_global->header_ << "MUTABLE";
       break;
     default:
       idl_global->err()->misc_error(
         "Unexpected extensibility while generating MarshalTraits", node);
       return false;
     }
-    be_global->header_ << "; }\n";
+    be_builtin_global->header_ << "; }\n";
 
     /*
      * This is used for topic type extensibility level.
      */
     const ExtensibilityKind ek = max_extensibility_kind(dynamic_cast<AST_Type*>(node));
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "  static Extensibility max_extensibility_level() { return ";
     switch (ek) {
     case extensibilitykind_final:
-      be_global->header_ << "FINAL";
+      be_builtin_global->header_ << "FINAL";
       break;
     case extensibilitykind_appendable:
-      be_global->header_ << "APPENDABLE";
+      be_builtin_global->header_ << "APPENDABLE";
       break;
     case extensibilitykind_mutable:
-      be_global->header_ << "MUTABLE";
+      be_builtin_global->header_ << "MUTABLE";
       break;
     default:
       idl_global->err()->misc_error(
         "Unexpected extensibility level while generating MarshalTraits", node);
       return false;
     }
-    be_global->header_ << "; }\n"
+    be_builtin_global->header_ << "; }\n"
       "};\n";
 
     return true;
@@ -2758,9 +2758,9 @@ namespace {
     const Fields::Iterator fields_end = fields.end();
     RtpsFieldCustomizer rtpsCustom(cpp_name);
 
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
 
-    const ExtensibilityKind exten = be_global->extensibility(node);
+    const ExtensibilityKind exten = be_builtin_global->extensibility(node);
     const bool not_final = exten != extensibilitykind_final;
     const bool is_mutable = exten == extensibilitykind_mutable;
     const bool is_appendable = exten == extensibilitykind_appendable;
@@ -2774,11 +2774,11 @@ namespace {
       string expr;
       const std::string indent = "  ";
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       if (is_appendable) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  bool reached_end_of_struct = false;\n"
           "  ACE_UNUSED_ARG(reached_end_of_struct);\n";
       }
@@ -2788,13 +2788,13 @@ namespace {
         "    }\n", not_final);
 
       if (not_final) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  const size_t end_of_struct = strm.rpos() + total_size;\n"
           "\n";
       }
 
       if (is_mutable) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
           "    set_default(stru" << (wrap_nested_key_only ? ".value" : "") << ");\n"
           "\n"
@@ -2809,7 +2809,7 @@ namespace {
         * after we hit the offset marked by the delimiter, but before trying
         * to read a non-existent member id.
         */
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "      if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() >= end_of_struct) {\n"
           "        return true;\n"
           "      }\n"
@@ -2827,7 +2827,7 @@ namespace {
         std::ostringstream cases;
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
-          const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+          const OpenDDS::XTypes::MemberId id = be_builtin_global->get_id(field);
           string field_name =
             string("stru") + value_access + "." + field->local_name()->get_string();
           cases <<
@@ -2840,7 +2840,7 @@ namespace {
           if (use_cxx11) {
             field_name += "()";
           }
-          const TryConstructFailAction try_construct = be_global->try_construct(field);
+          const TryConstructFailAction try_construct = be_builtin_global->try_construct(field);
           if (try_construct == tryconstructfailaction_use_default) {
             cases <<
               type_to_default("          ", field_type, field_name, field->field_type()->anonymous()) <<
@@ -2892,19 +2892,19 @@ namespace {
             "        break;\n"
             "      }\n";
         }
-        intro.join(be_global->impl_, indent);
+        intro.join(be_builtin_global->impl_, indent);
         const string switch_cases = cases.str();
         string sw_indent = "        ";
         if (switch_cases.empty()) {
           sw_indent = "      ";
         } else {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "      switch (member_id) {\n"
             << switch_cases <<
             "      default:\n";
         }
 
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           sw_indent << "if (must_understand) {\n" <<
           sw_indent << "  if (DCPS_debug_level >= 8) {\n" <<
           sw_indent << "    ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
@@ -2915,12 +2915,12 @@ namespace {
           sw_indent << "strm.skip(field_size);\n";
 
         if (!switch_cases.empty()) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "        break;\n"
             "      }\n";
         }
 
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "    }\n"
           "    return false;\n"
           "  }\n"
@@ -2979,18 +2979,18 @@ namespace {
           expr += ")";
         }
       }
-      intro.join(be_global->impl_, indent);
+      intro.join(be_builtin_global->impl_, indent);
       if (is_appendable) {
         expr +=
           "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2 && strm.rpos() < end_of_struct) {\n"
           "    strm.skip(end_of_struct - strm.rpos());\n"
           "  }\n"
           "  return true;\n";
-        be_global->impl_ << expr;
+        be_builtin_global->impl_ << expr;
       } else if (expr.empty()) {
-        be_global->impl_ << "  return true;\n";
+        be_builtin_global->impl_ << "  return true;\n";
       } else {
-        be_global->impl_ << "  return " << expr << ";\n";
+        be_builtin_global->impl_ << "  return " << expr << ";\n";
       }
     }
     return true;
@@ -3020,7 +3020,7 @@ namespace {
     const Fields::Iterator fields_end = fields.end();
     RtpsFieldCustomizer rtpsCustom(cpp_name);
 
-    const ExtensibilityKind exten = be_global->extensibility(node);
+    const ExtensibilityKind exten = be_builtin_global->extensibility(node);
     const bool not_final = exten != extensibilitykind_final;
     const bool is_mutable = exten == extensibilitykind_mutable;
 
@@ -3036,7 +3036,7 @@ namespace {
          * For parameter lists this is used to hold the total size while
          * size is hijacked for field sizes because of alignment resets.
          */
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  size_t mutable_running_total = 0;\n";
       }
 
@@ -3049,7 +3049,7 @@ namespace {
         AST_Field* const field = *i;
         AST_Type* field_type = resolveActualType(field->field_type());
         if (!field_type->in_main_file() && field_type->node_type() != AST_Decl::NT_pre_defined) {
-          be_global->add_referenced(field_type->file_name().c_str());
+          be_builtin_global->add_referenced(field_type->file_name().c_str());
         }
         const string field_name = field->local_name()->get_string(),
           cond = rtpsCustom.getConditional(field_name);
@@ -3066,11 +3066,11 @@ namespace {
           expr += "  }\n";
         }
       }
-      intro.join(be_global->impl_, indent);
-      be_global->impl_ << expr;
+      intro.join(be_builtin_global->impl_, indent);
+      be_builtin_global->impl_ << expr;
 
       if (is_mutable) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
       }
     }
@@ -3080,7 +3080,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("stru", const_cpp_name);
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  const Encoding& encoding = strm.encoding();\n"
         "  ACE_UNUSED_ARG(encoding);\n";
       marshal_generator::generate_dheader_code(
@@ -3101,9 +3101,9 @@ namespace {
           "    ACE_UNUSED_ARG(size);\n";
         for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
           AST_Field* const field = *i;
-          const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+          const OpenDDS::XTypes::MemberId id = be_builtin_global->get_id(field);
           const string field_name = field->local_name()->get_string();
-          const bool is_key = be_global->is_key(field);
+          const bool is_key = be_builtin_global->is_key(field);
 
           mutable_fields
             << generate_field_serialized_size(
@@ -3145,11 +3145,11 @@ namespace {
         }
       }
 
-      intro.join(be_global->impl_, indent);
+      intro.join(be_builtin_global->impl_, indent);
       if (expr.empty()) {
         expr = "true";
       }
-      be_global->impl_ << mutable_fields.str() << "  return " << expr << ";\n";
+      be_builtin_global->impl_ << mutable_fields.str() << "  return " << expr << ";\n";
     }
 
     return generate_struct_deserialization(node, field_type);
@@ -3164,9 +3164,9 @@ void marshal_generator::generate_dheader_code(const std::string& code, bool dhea
   //DHeader also appears on ALL sequences and arrays of non-primitives
   if (dheader_required) {
     if (is_ser_func) {
-      be_global->impl_ << "  size_t total_size = 0;\n";
+      be_builtin_global->impl_ << "  size_t total_size = 0;\n";
     }
-    be_global->impl_ << "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
+    be_builtin_global->impl_ << "  if (encoding.xcdr_version() == Encoding::XCDR_VERSION_2) {\n"
       << code <<
       "  }\n";
   }
@@ -3179,9 +3179,9 @@ bool marshal_generator::gen_struct(AST_Structure* node,
                                    const char* /* repoid */)
 {
   NamespaceGuard ng;
-  be_global->add_include("dds/DCPS/Serializer.h");
+  be_builtin_global->add_include("dds/DCPS/Serializer.h");
   const string cxx = scoped(name); // name as a C++ class
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
 
   {
     Function set_default("set_default", "void", "");
@@ -3198,8 +3198,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       }
       contents << type_to_default("  ", type, field_name, type->anonymous());
     }
-    intro.join(be_global->impl_, "  ");
-    be_global->impl_ << contents.str();
+    intro.join(be_builtin_global->impl_, "  ");
+    be_builtin_global->impl_ << contents.str();
   }
 
   const special_struct* special_struct_ptr = get_special_struct(cxx);
@@ -3225,7 +3225,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   }
 
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-  const bool is_topic_type = be_global->is_topic_type(node);
+  const bool is_topic_type = be_builtin_global->is_topic_type(node);
   TopicKeys keys;
   if (is_topic_type) {
     keys = TopicKeys(node);
@@ -3237,7 +3237,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   }
 
   if ((info || is_topic_type) &&
-      !generate_marshal_traits(node, cxx, be_global->extensibility(node), keys, info)) {
+      !generate_marshal_traits(node, cxx, be_builtin_global->extensibility(node), keys, info)) {
     return false;
   }
 
@@ -3249,7 +3249,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       serialized_size.addArg("stru", "const KeyOnly<const " + cxx + ">");
       serialized_size.endArgs();
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  switch (encoding.xcdr_version()) {\n";
       const char* indent = "    ";
       for (unsigned e = 0; e < encoding_count; ++e) {
@@ -3260,16 +3260,16 @@ bool marshal_generator::gen_struct(AST_Structure* node,
               serialized_size_iteration, 0, &expr, &intro)) {
           return false;
         }
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  case " << encoding_to_xcdr_version(encoding) << ":\n"
           "    {\n";
-        intro.join(be_global->impl_, indent);
-        be_global->impl_
+        intro.join(be_builtin_global->impl_, indent);
+        be_builtin_global->impl_
           << expr <<
           "    break;\n"
           "    }\n";
       }
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  }\n";
     }
 
@@ -3296,8 +3296,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         expr += streamCommon(indent, key_name, field_type, "<< stru.value", false, intro);
       }
 
-      intro.join(be_global->impl_, indent);
-      be_global->impl_ << "  return " << (first ? "true" : expr) << ";\n";
+      intro.join(be_builtin_global->impl_, indent);
+      be_builtin_global->impl_ << "  return " << (first ? "true" : expr) << ";\n";
     }
 
     {
@@ -3323,8 +3323,8 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         expr += streamCommon(indent, key_name, field_type, ">> stru.value", false, intro);
       }
 
-      intro.join(be_global->impl_, indent);
-      be_global->impl_ << "  return " << (first ? "true" : expr) << ";\n";
+      intro.join(be_builtin_global->impl_, indent);
+      be_builtin_global->impl_ << "  return " << (first ? "true" : expr) << ";\n";
     }
   }
 
@@ -3338,9 +3338,9 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   //check the id for a match to our id
   //if we are not a match, skip to the next field
   //if we are a match, deserialize the field
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
   std::string expr;
-  const ExtensibilityKind exten = be_global->extensibility(node);
+  const ExtensibilityKind exten = be_builtin_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;
   const bool is_mutable = exten == extensibilitykind_mutable;
   const std::string actual_cpp_name = scoped(node->name());
@@ -3349,7 +3349,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   const Fields::Iterator fields_end = fields.end();
   RtpsFieldCustomizer rtpsCustom(cpp_name);
 
-  be_global->impl_ <<
+  be_builtin_global->impl_ <<
     "  Value getValue(Serializer& strm, const char* field) const\n"
     "  {\n"
     "    const Encoding& encoding = strm.encoding();\n"
@@ -3358,7 +3358,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "    if (!strm.read_delimiter(total_size)) {\n"
     "      throw std::runtime_error(\"Unable to reader delimiter in getValue\");\n"
     "    }\n", not_final);
-  be_global->impl_ <<
+  be_builtin_global->impl_ <<
     "    std::string base_field = field;\n"
     "    const size_t index = base_field.find('.');\n"
     "    std::string subfield;\n"
@@ -3368,7 +3368,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     "    }\n";
 
   if (is_mutable) {
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    if (encoding.xcdr_version() != Encoding::XCDR_VERSION_NONE) {\n"
       "      unsigned field_id = map_name_to_id(base_field.c_str());\n"
       "      ACE_UNUSED_ARG(field_id);\n"
@@ -3398,7 +3398,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
       AST_Field* const field = *i;
       size_t size = 0;
-      const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
+      const OpenDDS::XTypes::MemberId id = be_builtin_global->get_id(field);
       std::string field_name = field->local_name()->get_string();
       AST_Type* const field_type = resolveActualType(field->field_type());
       Classification fld_cls = classify(field_type);
@@ -3441,12 +3441,12 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
     if (switch_cases.empty()) {
       sw_indent = "        ";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "        switch (member_id) {\n"
         << switch_cases <<
         "        default:\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       sw_indent << "if (must_understand) {\n" <<
       sw_indent << "  if (DCPS_debug_level >= 8) {\n" <<
       sw_indent << "    ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) unknown must_understand field(%u) in "
@@ -3456,11 +3456,11 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       sw_indent << "}\n" <<
       sw_indent << "strm.skip(field_size);\n";
     if (!switch_cases.empty()) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "          break;\n"
         "        }\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "      }\n"
       "      if (!field[0]) {\n"   // if 'field' is the empty string...
       "        return 0;\n"        //    the return value is ignored
@@ -3535,7 +3535,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         "    }\n";
     }
   }
-  be_global->impl_ <<
+  be_builtin_global->impl_ <<
     expr <<
     "    if (!field[0]) {\n"   // if 'field' is the empty string...
     "      return 0;\n"        //    the return value is ignored
@@ -3564,7 +3564,7 @@ namespace {
       serialized_size.endArgs();
       generateSwitchForUnion(u, "uni._d()", findSizeCommon, branches,
                              discriminator, "", "", cxx.c_str());
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (uni._d() == RTPS::PID_XTYPES_TYPE_INFORMATION) {\n"
         "    // Parameter union uses OctetSeq but this is not actually a sequence\n"
         "    size -= 4;\n"
@@ -3576,7 +3576,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", "const " + cxx + "&");
       insertion.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (!(strm << uni._d())) {\n"
         "    return false;\n"
         "  }\n"
@@ -3614,7 +3614,7 @@ namespace {
       extraction.addArg("strm", "Serializer&");
       extraction.addArg("uni", cxx + "&");
       extraction.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  ACE_CDR::UShort disc, size;\n"
         "  if (!(strm >> disc) || !(strm >> size)) {\n"
         "    return false;\n"
@@ -3656,7 +3656,7 @@ namespace {
         "  switch (disc) {\n";
       generateSwitchBody(u, streamCommon, branches, discriminator,
                          "", ">> ", cxx.c_str(), true);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  default:\n"
         "    {\n"
         "      uni.unknown_data(DDS::OctetSeq(size));\n"
@@ -3698,7 +3698,7 @@ namespace {
       insertion.addArg("strm", "Serializer&");
       insertion.addArg("uni", cxx + "&");
       insertion.endArgs();
-      be_global->impl_ << "  // unused\n  return false;\n";
+      be_builtin_global->impl_ << "  // unused\n  return false;\n";
     }
     return true;
   }
@@ -3720,9 +3720,9 @@ namespace {
     const string cxx = scoped(node->name()); // name as a C++ class
     AST_Type* const discriminator = node->disc_type();
     const Classification disc_cls = classify(discriminator);
-    const bool has_key = be_global->union_discriminator_is_key(node);
+    const bool has_key = be_builtin_global->union_discriminator_is_key(node);
     const string key_only_wrap_out = getWrapper("uni.value._d()", discriminator, WD_OUTPUT);
-    const ExtensibilityKind exten = be_global->extensibility(node);
+    const ExtensibilityKind exten = be_builtin_global->extensibility(node);
     const bool not_final = exten != extensibilitykind_final;
     const string wrapper = kind == FieldFilter_KeyOnly ? "KeyOnly"
       : kind == FieldFilter_NestedKeyOnly ? "NestedKeyOnly"
@@ -3739,21 +3739,21 @@ namespace {
         marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
         if (exten == extensibilitykind_mutable) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  size_t mutable_running_total = 0;\n"
             "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
         }
 
         if (disc_cls & CL_ENUM) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  primitive_serialized_size_ulong(encoding, size);\n";
         } else {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
         }
 
         if (exten == extensibilitykind_mutable) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
         }
       }
@@ -3766,7 +3766,7 @@ namespace {
       insertion.endArgs();
 
       if (has_key) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
         marshal_generator::generate_dheader_code(
@@ -3777,28 +3777,28 @@ namespace {
 
         // EMHEADER for discriminator
         if (exten == extensibilitykind_mutable) {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  size_t size = 0;\n";
 
           if (disc_cls & CL_ENUM) {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "  primitive_serialized_size_ulong(encoding, size);\n";
           } else {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "  primitive_serialized_size(encoding, size, " << key_only_wrap_out << ");\n";
           }
 
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  if (!strm.write_parameter_id(0, size)) {\n"
             "    return false;\n"
             "  }\n"
             "  size = 0;\n";
         }
 
-        be_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
+        be_builtin_global->impl_ << streamAndCheck("<< " + key_only_wrap_out);
       }
 
-      be_global->impl_
+      be_builtin_global->impl_
         << "  return true;\n";
     }
 
@@ -3810,7 +3810,7 @@ namespace {
 
       if (has_key) {
         // DHEADER
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  const Encoding& encoding = strm.encoding();\n"
           "  ACE_UNUSED_ARG(encoding);\n";
         marshal_generator::generate_dheader_code(
@@ -3820,7 +3820,7 @@ namespace {
 
         if (exten == extensibilitykind_mutable) {
           // EMHEADER for discriminator
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  unsigned member_id;\n"
             "  size_t field_size;\n"
             "  bool must_understand = false;\n"
@@ -3829,13 +3829,13 @@ namespace {
             "  }\n";
         }
 
-        be_global->impl_
+        be_builtin_global->impl_
           << "  " << scoped(discriminator->name()) << " disc;\n"
           << streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT))
           << "  uni.value._d(disc);\n";
       }
 
-      be_global->impl_
+      be_builtin_global->impl_
         << "  return true;\n";
     }
   }
@@ -3846,24 +3846,24 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
    const char*)
 {
   NamespaceGuard ng;
-  be_global->add_include("dds/DCPS/Serializer.h");
+  be_builtin_global->add_include("dds/DCPS/Serializer.h");
   string cxx = scoped(name); // name as a C++ class
   Classification disc_cls = classify(discriminator);
 
-  const ExtensibilityKind exten = be_global->extensibility(node);
+  const ExtensibilityKind exten = be_builtin_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;
 
   {
     Function set_default("set_default", "void", "");
     set_default.addArg("uni", cxx + "&");
     set_default.endArgs();
-    be_global->impl_ << "  " << scoped(discriminator->name()) << " temp;\n";
-    be_global->impl_ << type_to_default("  ", discriminator, "  temp");
-    be_global->impl_ << "  uni._d(temp);\n";
+    be_builtin_global->impl_ << "  " << scoped(discriminator->name()) << " temp;\n";
+    be_builtin_global->impl_ << type_to_default("  ", discriminator, "  temp");
+    be_builtin_global->impl_ << "  uni._d(temp);\n";
     AST_Type* disc_type = resolveActualType(discriminator);
     Classification disc_cls = classify(disc_type);
     if (!disc_type->in_main_file() && disc_type->node_type() != AST_Decl::NT_pre_defined) {
-      be_global->add_referenced(disc_type->file_name().c_str());
+      be_builtin_global->add_referenced(disc_type->file_name().c_str());
     }
     ACE_CDR::ULong default_enum_val = 0;
     if (disc_cls & CL_ENUM) {
@@ -3901,9 +3901,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
             AST_Type* br = resolveActualType(branch->field_type());
             Classification br_cls = classify(br);
             if (br_cls & (CL_SEQUENCE | CL_ARRAY)) {
-              be_global->impl_ << scoped(branch->field_type()->name()) << " " << getWrapper("tmp", branch->field_type(), WD_INPUT) << ";\n";
+              be_builtin_global->impl_ << scoped(branch->field_type()->name()) << " " << getWrapper("tmp", branch->field_type(), WD_INPUT) << ";\n";
             }
-            be_global->impl_ << type_to_default("  ", branch->field_type(), string("uni.")
+            be_builtin_global->impl_ << type_to_default("  ", branch->field_type(), string("uni.")
               + branch->local_name()->get_string(), false, true);
             found = true;
             break;
@@ -3930,16 +3930,16 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     marshal_generator::generate_dheader_code("    serialized_size_delimiter(encoding, size);\n", not_final, false);
 
     if (exten == extensibilitykind_mutable) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  size_t mutable_running_total = 0;\n"
         "  serialized_size_parameter_id(encoding, size, mutable_running_total);\n";
     }
 
     if (disc_cls & CL_ENUM) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  primitive_serialized_size_ulong(encoding, size);\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
     }
 
@@ -3950,7 +3950,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (exten == extensibilitykind_mutable) {
       // TODO: XTypes B will need to edit this code to add the pid for the end of mutable unions.
       // Until this change is made, XCDR1 will NOT be functional
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);\n";
     }
   }
@@ -3960,7 +3960,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     insertion.addArg("uni", "const " + cxx + "&");
     insertion.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
     marshal_generator::generate_dheader_code(
@@ -3971,31 +3971,31 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     // EMHEADER for discriminator
     if (exten == extensibilitykind_mutable) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  size_t size = 0;\n";
 
       if (disc_cls & CL_ENUM) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  primitive_serialized_size_ulong(encoding, size);\n";
       } else {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  primitive_serialized_size(encoding, size, " << wrap_out << ");\n";
       }
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (!strm.write_parameter_id(0, size)) {\n"
         "    return false;\n"
         "  }\n"
         "  size = 0;\n";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       streamAndCheck("<< " + wrap_out);
     if (generateSwitchForUnion(node, "uni._d()", streamCommon, branches,
                                discriminator, "return", "<< ", cxx.c_str(),
                                false, true, true,
                                exten == extensibilitykind_mutable ? findSizeCommon : 0)) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return true;\n";
     }
   }
@@ -4005,7 +4005,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     extraction.addArg("uni", cxx + "&");
     extraction.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  const Encoding& encoding = strm.encoding();\n"
       "  ACE_UNUSED_ARG(encoding);\n";
     marshal_generator::generate_dheader_code(
@@ -4015,19 +4015,19 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
     if (exten == extensibilitykind_mutable) {
       // EMHEADER for discriminator
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  unsigned member_id;\n"
         "  size_t field_size;\n"
         "  bool must_understand = false;\n"
         "  if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
         "    return false;\n"
         "  }\n";
-      TryConstructFailAction try_construct = be_global->union_discriminator_try_construct(node);
-      be_global->impl_ <<
+      TryConstructFailAction try_construct = be_builtin_global->union_discriminator_try_construct(node);
+      be_builtin_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n"
         "  if (!(strm >> disc)) {\n";
       if (try_construct == tryconstructfailaction_use_default) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "    set_default(uni);\n"
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
           "      return false;\n"
@@ -4036,7 +4036,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "    strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
           "    return true;\n";
       } else {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "    if (!strm.read_parameter_id(member_id, field_size, must_understand)) {\n"
           "      return false;\n"
           "    }\n"
@@ -4044,9 +4044,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
           "    strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
           "    return false;\n";
       }
-      be_global->impl_ << "  }\n";
+      be_builtin_global->impl_ << "  }\n";
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  member_id = 0;\n"
         "  field_size = 0;\n"
         "  must_understand = false;\n";
@@ -4057,16 +4057,16 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
         "    }\n";
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
                                  discriminator, prefix, ">> ", cxx.c_str())) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return true;\n";
       }
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
           discriminator, "", ">> ", cxx.c_str())) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return true;\n";
       }
     }

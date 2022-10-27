@@ -536,9 +536,9 @@ void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
 
   for (const char* ptr = buffer.rd_ptr(); ptr != buffer.wr_ptr(); ++ptr) {
     if (ptr != buffer.rd_ptr()) {
-      be_global->impl_ << ", ";
+      be_builtin_global->impl_ << ", ";
     }
-    be_global->impl_ << int(*reinterpret_cast<const unsigned char*>(ptr));
+    be_builtin_global->impl_ << int(*reinterpret_cast<const unsigned char*>(ptr));
   }
 }
 
@@ -558,12 +558,12 @@ typeobject_generator::declare_get_type_map()
   }
   get_type_map_declared_ = true;
 
-  be_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_GlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/XTypes/TypeObject.h", BE_BuiltinGlobalData::STREAM_H);
 
-  be_global->impl_ << "static const XTypes::TypeMap& get_minimal_type_map();\n";
+  be_builtin_global->impl_ << "static const XTypes::TypeMap& get_minimal_type_map();\n";
 
   if (produce_xtypes_complete_) {
-    be_global->impl_ << "static const XTypes::TypeMap& get_complete_type_map();\n";
+    be_builtin_global->impl_ << "static const XTypes::TypeMap& get_complete_type_map();\n";
   }
 }
 
@@ -578,7 +578,7 @@ typeobject_generator::use_old_typeobject_encoding()
 void
 typeobject_generator::gen_epilogue()
 {
-  be_global->add_include("dds/DCPS/Service_Participant.h");
+  be_builtin_global->add_include("dds/DCPS/Service_Participant.h");
 
   if (!produce_output_ || !get_type_map_declared_) {
     return;
@@ -586,19 +586,19 @@ typeobject_generator::gen_epilogue()
 
   NamespaceGuard ng;
 
-  be_global->impl_ <<
+  be_builtin_global->impl_ <<
     "namespace {\n";
 
   size_t idx = 0;
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
        pos != minimal_type_map_.end(); ++pos, ++idx) {
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "XTypes::TypeObject minimal_to" << idx << "()\n"
       "{\n"
       "  const unsigned char to_bytes[] = { ";
     dump_bytes(pos->second);
-    be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
-    be_global->impl_ <<
+    be_builtin_global->add_include("<stdexcept>", BE_BuiltinGlobalData::STREAM_CPP);
+    be_builtin_global->impl_ <<
       "  };\n"
       "  XTypes::TypeObject to;\n"
       "  if (!to_type_object(to_bytes, sizeof(to_bytes), to)) {\n"
@@ -608,7 +608,7 @@ typeobject_generator::gen_epilogue()
       "}\n\n";
   }
 
-  be_global->impl_ <<
+  be_builtin_global->impl_ <<
     "XTypes::TypeMap get_minimal_type_map_private()\n"
     "{\n"
     "  XTypes::TypeMap tm;\n";
@@ -616,10 +616,10 @@ typeobject_generator::gen_epilogue()
   idx = 0;
   for (OpenDDS::XTypes::TypeMap::const_iterator pos = minimal_type_map_.begin();
        pos != minimal_type_map_.end(); ++pos, ++idx) {
-    be_global->impl_ << "  tm[" << pos->first << "] = minimal_to" << idx << "();\n";
+    be_builtin_global->impl_ << "  tm[" << pos->first << "] = minimal_to" << idx << "();\n";
   }
 
-  be_global->impl_ <<
+  be_builtin_global->impl_ <<
     "  return tm;\n"
     "}\n\n";
 
@@ -627,13 +627,13 @@ typeobject_generator::gen_epilogue()
     idx = 0;
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "XTypes::TypeObject complete_to" << idx << "()\n"
         "{\n"
         "  const unsigned char to_bytes[] = {\n";
       dump_bytes(pos->second);
-      be_global->add_include("<stdexcept>", BE_GlobalData::STREAM_CPP);
-      be_global->impl_ <<
+      be_builtin_global->add_include("<stdexcept>", BE_BuiltinGlobalData::STREAM_CPP);
+      be_builtin_global->impl_ <<
         "  };\n"
         "  XTypes::TypeObject to;\n"
         "  if (!to_type_object(to_bytes, sizeof(to_bytes), to)) {\n"
@@ -643,7 +643,7 @@ typeobject_generator::gen_epilogue()
         "}\n\n";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "XTypes::TypeMap get_complete_type_map_private()\n"
       "{\n"
       "  XTypes::TypeMap tm;\n";
@@ -651,21 +651,21 @@ typeobject_generator::gen_epilogue()
     idx = 0;
     for (OpenDDS::XTypes::TypeMap::const_iterator pos = complete_type_map_.begin();
          pos != complete_type_map_.end(); ++pos, ++idx) {
-      be_global->impl_ << "  tm[" << pos->first << "] = complete_to" << idx << "();\n";
+      be_builtin_global->impl_ << "  tm[" << pos->first << "] = complete_to" << idx << "();\n";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  return tm;\n"
       "}\n";
   }
-  be_global->impl_ << "}\n\n";
+  be_builtin_global->impl_ << "}\n\n";
 
   const std::string common = "{\n"
     "  static XTypes::TypeMap tm;\n"
     "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), tm);\n"
     "  if (tm.empty()) {\n";
 
-  be_global->impl_ <<
+  be_builtin_global->impl_ <<
     "const XTypes::TypeMap& get_minimal_type_map()\n" << common <<
     "    tm = get_minimal_type_map_private();\n"
     "  }\n"
@@ -673,7 +673,7 @@ typeobject_generator::gen_epilogue()
     "}\n\n";
 
   if (produce_xtypes_complete_) {
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "const XTypes::TypeMap& get_complete_type_map()\n" << common <<
       "    tm = get_complete_type_map_private();\n"
       "  }\n"
@@ -785,12 +785,12 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
       consider(v, discriminator, v.name + ".d");
 
-      const AutoidKind auto_id = be_global->autoid(n);
+      const AutoidKind auto_id = be_builtin_global->autoid(n);
       OpenDDS::XTypes::MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
-        const OpenDDS::XTypes::MemberId id = be_global->compute_id(ub, auto_id, member_id);
+        const OpenDDS::XTypes::MemberId id = be_builtin_global->compute_id(ub, auto_id, member_id);
         consider(v, ub->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -805,12 +805,12 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       // TODO: Struct inheritance.
 
       const Fields fields(n);
-      const AutoidKind auto_id = be_global->autoid(n);
+      const AutoidKind auto_id = be_builtin_global->autoid(n);
       OpenDDS::XTypes::MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* field = *i;
-        const OpenDDS::XTypes::MemberId id = be_global->compute_id(field, auto_id, member_id);
+        const OpenDDS::XTypes::MemberId id = be_builtin_global->compute_id(field, auto_id, member_id);
         consider(v, field->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -1020,7 +1020,7 @@ void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
   OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>& annotations)
 {
   // Support only @hashid annotation for member at this time.
-  const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
+  const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_builtin_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
   if (hashid_ann->node_value_exists(member, hash_name)) {
     annotations.present = true;
@@ -1035,8 +1035,8 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
   AST_Structure* const n = dynamic_cast<AST_Structure*>(type);
   const Fields fields(n);
 
-  const ExtensibilityKind exten = be_global->extensibility(n);
-  const AutoidKind auto_id = be_global->autoid(n);
+  const ExtensibilityKind exten = be_builtin_global->extensibility(n);
+  const AutoidKind auto_id = be_builtin_global->autoid(n);
 
   OpenDDS::XTypes::TypeObject minimal_to, complete_to;
   minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
@@ -1044,7 +1044,7 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 
   minimal_to.minimal.struct_type.struct_flags = extensibility_to_type_flag(exten);
 
-  if (be_global->is_nested(n)) {
+  if (be_builtin_global->is_nested(n)) {
     minimal_to.minimal.struct_type.struct_flags |= OpenDDS::XTypes::IS_NESTED;
   }
 
@@ -1065,25 +1065,25 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
     AST_Field* field = *i;
-    const TryConstructFailAction trycon = be_global->try_construct(field);
+    const TryConstructFailAction trycon = be_builtin_global->try_construct(field);
 
     OpenDDS::XTypes::MinimalStructMember minimal_member;
-    minimal_member.common.member_id = be_global->get_id(field);
+    minimal_member.common.member_id = be_builtin_global->get_id(field);
     minimal_member.common.member_flags = try_construct_to_member_flag(trycon);
 
-    if (be_global->is_optional(field)) {
+    if (be_builtin_global->is_optional(field)) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_OPTIONAL;
     }
 
-    if (be_global->is_must_understand(field)) {
+    if (be_builtin_global->is_must_understand(field)) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_MUST_UNDERSTAND;
     }
 
-    if (be_global->is_key(field)) {
+    if (be_builtin_global->is_key(field)) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_KEY;
     }
 
-    if (be_global->is_external(field)) {
+    if (be_builtin_global->is_external(field)) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
     }
 
@@ -1115,15 +1115,15 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
   AST_Type* discriminator = n->disc_type();
   const Fields fields(n);
 
-  const ExtensibilityKind exten = be_global->extensibility(n);
-  const AutoidKind auto_id = be_global->autoid(n);
+  const ExtensibilityKind exten = be_builtin_global->extensibility(n);
+  const AutoidKind auto_id = be_builtin_global->autoid(n);
 
   OpenDDS::XTypes::TypeObject minimal_to, complete_to;
   minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
   minimal_to.minimal.kind = OpenDDS::XTypes::TK_UNION;
   minimal_to.minimal.union_type.union_flags = extensibility_to_type_flag(exten);
 
-  if (be_global->is_nested(n)) {
+  if (be_builtin_global->is_nested(n)) {
     minimal_to.minimal.union_type.union_flags |= OpenDDS::XTypes::IS_NESTED;
   }
 
@@ -1131,9 +1131,9 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     minimal_to.minimal.union_type.union_flags |= OpenDDS::XTypes::IS_AUTOID_HASH;
   }
 
-  const TryConstructFailAction trycon = be_global->union_discriminator_try_construct(n);
+  const TryConstructFailAction trycon = be_builtin_global->union_discriminator_try_construct(n);
   minimal_to.minimal.union_type.discriminator.common.member_flags = try_construct_to_member_flag(trycon);
-  if (be_global->union_discriminator_is_key(n)) {
+  if (be_builtin_global->union_discriminator_is_key(n)) {
     minimal_to.minimal.union_type.discriminator.common.member_flags |= OpenDDS::XTypes::IS_KEY;
   }
   minimal_to.minimal.union_type.discriminator.common.type_id = get_minimal_type_identifier(discriminator);
@@ -1150,7 +1150,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
 
   for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
     AST_UnionBranch* branch = dynamic_cast<AST_UnionBranch*>(*i);
-    const TryConstructFailAction trycon = be_global->try_construct(branch);
+    const TryConstructFailAction trycon = be_builtin_global->try_construct(branch);
 
     bool is_default = false;
     for (unsigned long j = 0; j < branch->label_list_length(); ++j) {
@@ -1162,14 +1162,14 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     }
 
     OpenDDS::XTypes::MinimalUnionMember minimal_member;
-    minimal_member.common.member_id = be_global->get_id(branch);
+    minimal_member.common.member_id = be_builtin_global->get_id(branch);
     minimal_member.common.member_flags = try_construct_to_member_flag(trycon);
 
     if (is_default) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_DEFAULT;
     }
 
-    if (be_global->is_external(branch)) {
+    if (be_builtin_global->is_external(branch)) {
       minimal_member.common.member_flags |= OpenDDS::XTypes::IS_EXTERNAL;
     }
 
@@ -1210,7 +1210,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   std::vector<AST_EnumVal*> contents;
   scope2vector(contents, n, AST_Decl::NT_enum_val);
   bool has_extensibility_annotation = false;
-  const ExtensibilityKind ek = be_global->extensibility(type, extensibilitykind_appendable, has_extensibility_annotation);
+  const ExtensibilityKind ek = be_builtin_global->extensibility(type, extensibilitykind_appendable, has_extensibility_annotation);
 
   if (ek == extensibilitykind_mutable) {
     be_util::misc_error_and_abort("MUTABLE extensibility for enum is not allowed", type);
@@ -1227,7 +1227,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
   OpenDDS::XTypes::TypeObject minimal_to, complete_to;
   minimal_to.kind = OpenDDS::XTypes::EK_MINIMAL;
   minimal_to.minimal.kind = OpenDDS::XTypes::TK_ENUM;
-  if (has_extensibility_annotation || !be_global->default_enum_extensibility_zero()) {
+  if (has_extensibility_annotation || !be_builtin_global->default_enum_extensibility_zero()) {
     minimal_to.minimal.enumerated_type.enum_flags = extensibility_to_type_flag(ek);
   }
   // TODO: Add support for @bit_bound.
@@ -1235,7 +1235,7 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
 
   complete_to.kind = OpenDDS::XTypes::EK_COMPLETE;
   complete_to.complete.kind = OpenDDS::XTypes::TK_ENUM;
-  if (has_extensibility_annotation || !be_global->default_enum_extensibility_zero()) {
+  if (has_extensibility_annotation || !be_builtin_global->default_enum_extensibility_zero()) {
     complete_to.complete.enumerated_type.enum_flags = extensibility_to_type_flag(ek);
   }
   complete_to.complete.enumerated_type.header.common.bit_bound = 32;
@@ -1265,15 +1265,15 @@ typeobject_generator::generate_array_type_identifier(AST_Type* type, bool force_
 {
   AST_Array* const n = dynamic_cast<AST_Array*>(type);
 
-  const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
+  const TryConstructFailAction trycon = be_builtin_global->try_construct(n->base_type());
   OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
-  if (be_global->is_external(n->base_type())) {
+  if (be_builtin_global->is_external(n->base_type())) {
     cef |= OpenDDS::XTypes::IS_EXTERNAL;
   }
   const OpenDDS::XTypes::TypeIdentifier minimal_elem_ti = get_minimal_type_identifier(n->base_type());
   const OpenDDS::XTypes::TypeIdentifier complete_elem_ti = get_complete_type_identifier(n->base_type());
 
-  if (be_global->is_plain(type) && !force_type_object) {
+  if (be_builtin_global->is_plain(type) && !force_type_object) {
     const OpenDDS::XTypes::EquivalenceKind minimal_ek =
       OpenDDS::XTypes::is_fully_descriptive(minimal_elem_ti) ? OpenDDS::XTypes::EK_BOTH : OpenDDS::XTypes::EK_MINIMAL;
     const OpenDDS::XTypes::EquivalenceKind complete_ek =
@@ -1359,15 +1359,15 @@ typeobject_generator::generate_sequence_type_identifier(AST_Type* type, bool for
     bound = n->max_size()->ev()->u.ulval;
   }
 
-  const TryConstructFailAction trycon = be_global->try_construct(n->base_type());
+  const TryConstructFailAction trycon = be_builtin_global->try_construct(n->base_type());
   OpenDDS::XTypes::CollectionElementFlag cef = try_construct_to_member_flag(trycon);
-  if (be_global->is_external(n->base_type())) {
+  if (be_builtin_global->is_external(n->base_type())) {
     cef |= OpenDDS::XTypes::IS_EXTERNAL;
   }
   const OpenDDS::XTypes::TypeIdentifier minimal_elem_ti = get_minimal_type_identifier(n->base_type());
   const OpenDDS::XTypes::TypeIdentifier complete_elem_ti = get_complete_type_identifier(n->base_type());
 
-  if (be_global->is_plain(type) && !force_type_object) {
+  if (be_builtin_global->is_plain(type) && !force_type_object) {
     const OpenDDS::XTypes::EquivalenceKind minimal_ek =
       OpenDDS::XTypes::is_fully_descriptive(minimal_elem_ti) ? OpenDDS::XTypes::EK_BOTH : OpenDDS::XTypes::EK_MINIMAL;
     const OpenDDS::XTypes::EquivalenceKind complete_ek =
@@ -1706,7 +1706,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
   NamespaceGuard ng;
   const string clazz = tag_type(name);
 
-  be_global->header_ << "struct " << clazz << " {};\n";
+  be_builtin_global->header_ << "struct " << clazz << " {};\n";
 
   const std::string common = "  static XTypes::TypeIdentifier ti;\n"
     "  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, TheServiceParticipant->get_static_xtypes_lock(), ti);\n"
@@ -1717,7 +1717,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     Function gti(decl.c_str(), "const XTypes::TypeIdentifier&", "");
     gti.endArgs();
     const OpenDDS::XTypes::TypeIdentifier ti = get_minimal_type_identifier(node);
-    be_global->impl_ << common <<
+    be_builtin_global->impl_ << common <<
       "    ti = " << ti << ";\n"
       "  }\n"
       "  return ti;\n";
@@ -1728,7 +1728,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
     const string decl = "getMinimalTypeMap<" + clazz + ">";
     Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
     gti.endArgs();
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  return get_minimal_type_map();\n";
   }
 
@@ -1740,12 +1740,12 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
 
       if (produce_xtypes_complete_) {
         const OpenDDS::XTypes::TypeIdentifier ti = get_complete_type_identifier(node);
-        be_global->impl_ << common <<
+        be_builtin_global->impl_ << common <<
           "    ti = " << ti << ";\n"
           "  }\n"
           "  return ti;\n";
       } else {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  static XTypes::TypeIdentifier ti;\n"
           "  return ti;\n";
       }
@@ -1755,7 +1755,7 @@ typeobject_generator::generate(AST_Type* node, UTL_ScopedName* name)
       const string decl = "getCompleteTypeMap<" + clazz + ">";
       Function gti(decl.c_str(), "const XTypes::TypeMap&", "");
       gti.endArgs();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return get_complete_type_map();\n";
     }
   }

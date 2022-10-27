@@ -65,7 +65,7 @@ namespace {
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
     const Classification c = classify(array->base_type());
     const bool primitive = c & CL_PRIMITIVE;
@@ -74,13 +74,13 @@ namespace {
     // in a loop in the generated code
     if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "if (!value_reader.begin_array()) return false;\n" <<
         indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
           << idx << " != " << dim << "; ++" << idx << ") {\n" <<
         indent << "  if (!value_reader.begin_element()) return false;\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "  if (!value_reader.end_element()) return false;\n" <<
         indent << "}\n" <<
         indent << "if (!value_reader.end_array()) return false;\n";
@@ -90,11 +90,11 @@ namespace {
         AST_Type* const actual = resolveActualType(array->base_type());
         const AST_PredefinedType::PredefinedType pt =
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << "if (!value_reader.begin_array()) return false;\n";
-        be_global->impl_ << indent <<
+        be_builtin_global->impl_ << indent <<
           "if (!value_reader.read_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ")) return false;\n";
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << "if (!value_reader.end_array()) return false;\n";
 
       } else {
@@ -107,21 +107,21 @@ namespace {
                        const std::string& idx, int level)
   {
     // TODO: Take advantage of the size.
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       indent << "if (!value_reader.begin_sequence()) return false;\n" <<
       indent << "for (" << (use_cxx11 ? "size_t " : "unsigned int ") << idx << " = 0; "
         "value_reader.elements_remaining(); ++" << idx << ") {\n";
     if (use_cxx11) {
-      be_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
+      be_builtin_global->impl_ << indent << "  " << expression << ".resize(" << expression << ".size() + 1);\n";
     } else {
-      be_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
+      be_builtin_global->impl_ << indent << "  OpenDDS::DCPS::grow(" << expression << ");\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       indent << "  if (!value_reader.begin_element()) return false;\n";
     generate_read(expression + "[" + idx + "]", "", sequence->base_type(), idx + "i", level + 1);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       indent << "  if (!value_reader.end_element()) return false;\n" <<
       indent << "}\n" <<
       indent << "if (!value_reader.end_sequence()) return false;\n";
@@ -144,14 +144,14 @@ namespace {
       return;
     }
 
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
     if (c & CL_FIXED) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "if (!value_reader.read_fixed(" << expression << ")) return false;\n";
 
     } else if (c & CL_STRING) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "{\n" <<
         indent << "  " << ((c & CL_WIDE) ? "WString" : "String") << " x;\n" <<
         indent << "  if (!value_reader.read_" << ((c & CL_WIDE) ? "w" : "")
@@ -164,7 +164,7 @@ namespace {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
       if (pt == AST_PredefinedType::PT_boolean) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << "{\n" <<
           indent << "  " << scoped(type->name()) << " bx;\n" <<
           indent << "  if (!value_reader.read_" << primitive_type(pt)
@@ -172,11 +172,11 @@ namespace {
           indent << "  " << expression << accessor << " = bx;\n" <<
           indent << "}\n";
       } else {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << "if (!value_reader.read_" << primitive_type(pt) << '(' << expression << accessor << ")) return false;\n";
       }
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "if (!vread(value_reader, " << expression << accessor <<
           ")) return false;\n";
     }
@@ -198,11 +198,11 @@ namespace {
       decl = (c & CL_WIDE) ? "std::wstring" : "std::string";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    if (!value_reader.begin_union_member()) return false;\n"
       "    " << decl << " bv;\n";
     generate_read("bv", "", type, "i", 2);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    value." << field_name << "(bv" << ((c & CL_STRING) ? ".c_str()" : "") << ");\n" <<
       "    if (!value_reader.end_union_member()) return false;\n";
     return "";
@@ -214,8 +214,8 @@ bool value_reader_generator::gen_enum(AST_Enum*,
                                       const std::vector<AST_EnumVal*>& contents,
                                       const char*)
 {
-  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
-  be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/Util.h", BE_BuiltinGlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/ValueReader.h", BE_BuiltinGlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
 
@@ -227,18 +227,18 @@ bool value_reader_generator::gen_enum(AST_Enum*,
     read.addArg("value", type_name + "&");
     read.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  static const ListEnumHelper::Pair pairs[] = {";
 
     for (size_t i = 0; i != contents.size(); ++i) {
       if (i) {
-        be_global->impl_ << ',';
+        be_builtin_global->impl_ << ',';
       }
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         '{' << '"' << contents[i]->local_name()->get_string() << '"' << ',' << contents[i]->constant_value()->ev()->u.eval << '}';
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       ",{0,0}};\n"
       "  ListEnumHelper helper(pairs);\n"
       "  return value_reader.read_enum(value, helper);\n";
@@ -261,11 +261,11 @@ bool value_reader_generator::gen_struct(AST_Structure*,
                                         AST_Type::SIZE_TYPE,
                                         const char*)
 {
-  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
-  be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/Util.h", BE_BuiltinGlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/ValueReader.h", BE_BuiltinGlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
   const std::string accessor = use_cxx11 ? "()" : "";
 
   {
@@ -276,22 +276,22 @@ bool value_reader_generator::gen_struct(AST_Structure*,
     read.addArg("value", type_name + "&");
     read.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  static const ListMemberHelper::Pair pairs[] = {";
 
     for (size_t i = 0; i != fields.size(); ++i) {
       if (i) {
-        be_global->impl_ << ',';
+        be_builtin_global->impl_ << ',';
       }
-      be_global->impl_ <<
-        '{' << '"' << fields[i]->local_name()->get_string() << '"' << ',' << be_global->get_id(fields[i]) << '}';
+      be_builtin_global->impl_ <<
+        '{' << '"' << fields[i]->local_name()->get_string() << '"' << ',' << be_builtin_global->get_id(fields[i]) << '}';
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       ",{0,0}};\n"
       "  ListMemberHelper helper(pairs);\n";
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  if (!value_reader.begin_struct()) return false;\n"
       "  XTypes::MemberId member_id;\n"
       "  while (value_reader.begin_struct_member(member_id, helper)) {\n"
@@ -301,15 +301,15 @@ bool value_reader_generator::gen_struct(AST_Structure*,
          pos != limit; ++pos) {
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
-      be_global->impl_ <<
-        "    case " << be_global->get_id(field) << ": {\n";
+      be_builtin_global->impl_ <<
+        "    case " << be_builtin_global->get_id(field) << ": {\n";
       generate_read("value." + field_name, accessor, field->field_type(), "i", 3);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "      break;\n"
         "    }\n";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    }\n"
       "    if (!value_reader.end_struct_member()) return false;\n"
       "  }\n"
@@ -327,8 +327,8 @@ bool value_reader_generator::gen_union(AST_Union* u,
                                        AST_Type* discriminator,
                                        const char*)
 {
-  be_global->add_include("dds/DCPS/Util.h", BE_GlobalData::STREAM_H);
-  be_global->add_include("dds/DCPS/ValueReader.h", BE_GlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/Util.h", BE_BuiltinGlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/ValueReader.h", BE_BuiltinGlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
 
@@ -340,13 +340,13 @@ bool value_reader_generator::gen_union(AST_Union* u,
     read.addArg("value", type_name + "&");
     read.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  if (!value_reader.begin_union()) return false;\n"
       "  if (!value_reader.begin_discriminator()) return false;\n"
       "  {\n"
       "    " << scoped(discriminator->name()) << " d;\n";
     generate_read("d", "", discriminator, "i", 2);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    value._d(d);\n"
       "  }\n"
       "  if (!value_reader.end_discriminator()) return false;\n";
@@ -354,7 +354,7 @@ bool value_reader_generator::gen_union(AST_Union* u,
     generateSwitchForUnion(u, "value._d()", branch_helper, branches,
                            discriminator, "", "", type_name.c_str(),
                            false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  if (!value_reader.end_union()) return false;\n"
       "  return true;\n";
   }

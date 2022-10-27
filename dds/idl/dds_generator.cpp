@@ -281,7 +281,7 @@ NestedForLoops::NestedForLoops(const char* type, const char* prefix,
   size_t i = 0, j = 0;
   while (true) {
     for (; i < n_; ++i) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "for (" << type << ' ' << prefix << i << " = 0; " <<
         prefix << i << " < " << arr->dims()[i - j]->ev()->u.ulval << "; ++" <<
         prefix << i << ") {\n";
@@ -308,7 +308,7 @@ NestedForLoops::~NestedForLoops()
 {
   for (size_t i = 0; i < n_; ++i) {
     indent_.resize(indent_.size() - 2);
-    be_global->impl_ << indent_ << "}\n";
+    be_builtin_global->impl_ << indent_ << "}\n";
   }
 }
 
@@ -353,7 +353,7 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
 {
   AST_Type* actual_type = resolveActualType(type);
   Classification fld_cls = classify(actual_type);
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
   string def_val;
   std::string pre = " = ";
   std::string post;

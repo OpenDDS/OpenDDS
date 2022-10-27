@@ -70,16 +70,16 @@ namespace {
 dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   : scope_(scope), error_(false), java_ts_only_(java_ts_only)
 {
-  if (!be_global->no_default_gen()) {
+  if (!be_builtin_global->no_default_gen()) {
     gen_target_.add_generator(&to_gen_);
-    const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
+    const bool generate_xtypes = !be_builtin_global->suppress_xtypes() && !java_ts_only;
     to_gen_.produce_output(generate_xtypes);
-    to_gen_.produce_xtypes_complete(generate_xtypes && be_global->xtypes_complete());
-    if (generate_xtypes && be_global->old_typeobject_encoding()) {
+    to_gen_.produce_xtypes_complete(generate_xtypes && be_builtin_global->xtypes_complete());
+    if (generate_xtypes && be_builtin_global->old_typeobject_encoding()) {
       to_gen_.use_old_typeobject_encoding();
     }
 
-    if (be_global->value_reader_writer()) {
+    if (be_builtin_global->value_reader_writer()) {
       gen_target_.add_generator(&value_reader_generator_);
       gen_target_.add_generator(&value_writer_generator_);
     }
@@ -89,10 +89,10 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
     gen_target_.add_generator(&ts_gen_);
     gen_target_.add_generator(&mc_gen_);
   }
-  if (be_global->itl()) {
+  if (be_builtin_global->itl()) {
     gen_target_.add_generator(&itl_gen_);
   }
-  if (be_global->language_mapping() != BE_GlobalData::LANGMAP_NONE) {
+  if (be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_NONE) {
     gen_target_.add_generator(&lm_gen_);
     lm_gen_.init();
   }
@@ -232,7 +232,7 @@ dds_visitor::visit_structure(AST_Structure* node)
 
   IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(node->name());
   if (info) {
-    if (be_global->warn_about_dcps_data_type()) {
+    if (be_builtin_global->warn_about_dcps_data_type()) {
       idl_global->err()->misc_warning("\n"
         "  DCPS_DATA_TYPE and DCPS_DATA_KEY pragma statements are deprecated; please use\n"
         "  topic type annotations instead.\n"
@@ -244,7 +244,7 @@ dds_visitor::visit_structure(AST_Structure* node)
      * If the struct is declared a topic type using both the older and newer
      * styles, warn if the keys are inconsistent.
      */
-    if (be_global->is_topic_type(node)) {
+    if (be_builtin_global->is_topic_type(node)) {
       set<string> topic_type_keys, dcps_data_type_keys;
 
       TopicKeys::Iterator finished = topic_keys.end();
@@ -310,7 +310,7 @@ dds_visitor::visit_structure(AST_Structure* node)
                                       node->size_type(), node->repoID());
   }
 
-  if (!node->imported() && be_global->java()) {
+  if (!node->imported() && be_builtin_global->java()) {
     java_ts_generator::generate(node);
   }
 

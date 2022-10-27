@@ -66,7 +66,7 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 #include "global_extern.h"
 
-#include "be_extern.h"
+#include "be_builtin.h"
 #include "dds_visitor.h"
 
 #include "ast_root.h"
@@ -87,25 +87,6 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #include <cassert>
 
 using namespace std;
-
-// Clean up before exit, whether successful or not.
-// Need not be exported since it is called only from this file.
-void
-BE_cleanup()
-{
-  if (idl_global) {
-    idl_global->destroy();
-  }
-}
-
-// Abort this run of the BE.
-void
-BE_abort()
-{
-  ACE_ERROR((LM_ERROR, ACE_TEXT("Fatal Error - Aborting\n")));
-  BE_cleanup();
-  ACE_OS::exit(1);
-}
 
 namespace {
 
@@ -158,12 +139,12 @@ string to_header(const char* cpp_name)
 }
 
 void postprocess(const char* fn, ostringstream& content,
-                 BE_GlobalData::stream_enum_t which)
+                 BE_BuiltinGlobalData::stream_enum_t which)
 {
   ostringstream out;
 
-  if (which == BE_GlobalData::STREAM_H ||
-      which == BE_GlobalData::STREAM_LANG_H) {
+  if (which == BE_BuiltinGlobalData::STREAM_H ||
+      which == BE_BuiltinGlobalData::STREAM_LANG_H) {
     out << "/* -*- C++ -*- */\n";
   }
 
@@ -177,12 +158,12 @@ void postprocess(const char* fn, ostringstream& content,
   string macrofied;
 
   switch (which) {
-  case BE_GlobalData::STREAM_H:
-  case BE_GlobalData::STREAM_FACETS_H:
-  case BE_GlobalData::STREAM_LANG_H: {
+  case BE_BuiltinGlobalData::STREAM_H:
+  case BE_BuiltinGlobalData::STREAM_FACETS_H:
+  case BE_BuiltinGlobalData::STREAM_LANG_H: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-    if (which == BE_GlobalData::STREAM_H) {
+    if (which == BE_BuiltinGlobalData::STREAM_H) {
       out <<
         "\n"
         "#include <dds/Version.h>\n"
@@ -196,54 +177,54 @@ void postprocess(const char* fn, ostringstream& content,
         "#include <dds/DdsDcpsC.h>\n"
         "\n";
     }
-    if (which == BE_GlobalData::STREAM_LANG_H) {
-      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX ||
-          be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX) {
+    if (which == BE_BuiltinGlobalData::STREAM_LANG_H) {
+      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_FACE_CXX ||
+          be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_SP_CXX) {
         out << "#include <tao/orbconf.h>\n"
                "#include <tao/Basic_Types.h>\n";
       }
     } else {
-      string taoheader = be_global->header_name_.c_str();
+      string taoheader = be_builtin_global->header_name_.c_str();
       taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
-      const bool explicit_ints = be_global->tao_inc_pre_.length()
+      const bool explicit_ints = be_builtin_global->tao_inc_pre_.length()
         && (taoheader == "Int8SeqC.h" || taoheader == "UInt8SeqC.h");
       std::string indent;
       if (explicit_ints) {
         out << "#if OPENDDS_HAS_EXPLICIT_INTS\n";
         indent = "  ";
       }
-      out << "#" << indent << "include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
+      out << "#" << indent << "include \"" << be_builtin_global->tao_inc_pre_ << taoheader << "\"\n";
       if (explicit_ints) {
         out << "#endif\n";
       }
     }
   }
   break;
-  case BE_GlobalData::STREAM_CPP: {
-    ACE_CString pch = be_global->pch_include();
+  case BE_BuiltinGlobalData::STREAM_CPP: {
+    ACE_CString pch = be_builtin_global->pch_include();
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
     }
-    if (be_global->java_arg().length() == 0) {
+    if (be_builtin_global->java_arg().length() == 0) {
       string header = to_header(fn);
       out << "#include \"" << header << "\"\n\n";
     } else {
-      out << "#include \"" << be_global->header_name_.c_str() << "\"\n\n";
+      out << "#include \"" << be_builtin_global->header_name_.c_str() << "\"\n\n";
     }
   }
   break;
-  case BE_GlobalData::STREAM_FACETS_CPP: {
-    ACE_CString pch = be_global->pch_include();
+  case BE_BuiltinGlobalData::STREAM_FACETS_CPP: {
+    ACE_CString pch = be_builtin_global->pch_include();
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
     }
-    out << "#include \"" << be_global->facets_header_name_.c_str() << "\"\n"
-      "#include \"" << be_global->header_name_.c_str() << "\"\n"
+    out << "#include \"" << be_builtin_global->facets_header_name_.c_str() << "\"\n"
+      "#include \"" << be_builtin_global->header_name_.c_str() << "\"\n"
       "#include \"dds/FACE/FaceTSS.h\"\n\n"
       "namespace FACE { namespace TS {\n\n";
   }
   break;
-  case BE_GlobalData::STREAM_IDL: {
+  case BE_BuiltinGlobalData::STREAM_IDL: {
     macrofied = to_macro(fn);
     out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
 
@@ -251,7 +232,7 @@ void postprocess(const char* fn, ostringstream& content,
     out << "#define __OPENDDS_IDL_HAS_FIXED\n";
 #endif
 
-    string filebase(be_global->filename());
+    string filebase(be_builtin_global->filename());
     const size_t idx = filebase.find_last_of("/\\"); // allow either slash
     if (idx != string::npos) {
       filebase = filebase.substr(idx + 1);
@@ -263,25 +244,25 @@ void postprocess(const char* fn, ostringstream& content,
     ;
   }
 
-  out << be_global->get_include_block(which);
+  out << be_builtin_global->get_include_block(which);
 
   out << content.str();
 
   switch (which) {
-  case BE_GlobalData::STREAM_H:
-  case BE_GlobalData::STREAM_IDL:
-  case BE_GlobalData::STREAM_FACETS_H:
-  case BE_GlobalData::STREAM_LANG_H:
+  case BE_BuiltinGlobalData::STREAM_H:
+  case BE_BuiltinGlobalData::STREAM_IDL:
+  case BE_BuiltinGlobalData::STREAM_FACETS_H:
+  case BE_BuiltinGlobalData::STREAM_LANG_H:
     out << "#endif /* " << macrofied << " */\n";
     break;
-  case BE_GlobalData::STREAM_FACETS_CPP:
+  case BE_BuiltinGlobalData::STREAM_FACETS_CPP:
     out << "}}\n";
     break;
   default:
     ;
   }
 
-  if (!BE_GlobalData::writeFile(fn, out.str())) {
+  if (!BE_BuiltinGlobalData::writeFile(fn, out.str())) {
     BE_abort();  //error message already printed
   }
 }
@@ -290,14 +271,14 @@ void postprocess(const char* fn, ostringstream& content,
 
 // Do the work of this BE. This is the starting point for code generation.
 void
-BE_produce()
+BE_BuiltinInterface::produce()
 {
   const char* idl_fn = idl_global->main_filename()->get_string();
-  be_global->filename(idl_fn);
+  be_builtin_global->filename(idl_fn);
 
-  const BE_GlobalData::stream_enum_t out_stream =
-    be_global->language_mapping() == BE_GlobalData::LANGMAP_NONE
-    ? BE_GlobalData::STREAM_H : BE_GlobalData::STREAM_LANG_H;
+  const BE_BuiltinGlobalData::stream_enum_t out_stream =
+    be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_NONE
+    ? BE_BuiltinGlobalData::STREAM_H : BE_BuiltinGlobalData::STREAM_LANG_H;
 
   ifstream idl(idl_fn);
   const size_t buffer_sz = 512;
@@ -329,7 +310,7 @@ BE_produce()
         continue;
       }
 
-      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX &&
+      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_SP_CXX &&
           base_name.substr(0, 4) == "tao/" &&
           base_name.substr(base_name.size() - 3) == "Seq") {
         continue; // with Safety Profile C++, skip include of tao/*SeqC.h
@@ -337,11 +318,11 @@ BE_produce()
 
       string stb_inc = base_name + "C.h";
       if (stb_inc != "tao/orbC.h") {
-        be_global->add_include(stb_inc.c_str(), out_stream);
+        be_builtin_global->add_include(stb_inc.c_str(), out_stream);
         if (stb_inc == "orbC.h" ||
             (stb_inc.size() >= 7
             && stb_inc.substr(stb_inc.size() - 7) == "/orbC.h") ) {
-          be_global->warning(
+          be_builtin_global->warning(
             "Potential inclusion of TAO orbC.h\n"
             "  Include TAO orb.idl with path of tao/orb.idl"
             "  to prevent compilation errors",
@@ -354,7 +335,7 @@ BE_produce()
 
   idl.close();
 
-  be_global->open_streams(idl_fn);
+  be_builtin_global->open_streams(idl_fn);
 
   AST_Decl* d = idl_global->root();
   AST_Root* root = dynamic_cast<AST_Root*>(d);
@@ -367,9 +348,9 @@ BE_produce()
     BE_abort();
   }
 
-  be_global->set_inc_paths(idl_global->idl_flags());
+  be_builtin_global->set_inc_paths(idl_global->idl_flags());
 
-  const bool java_ts_only = be_global->java_arg().length() > 0;
+  const bool java_ts_only = be_builtin_global->java_arg().length() > 0;
 
   dds_visitor visitor(d, java_ts_only);
 
@@ -381,34 +362,32 @@ BE_produce()
   }
 
   if (!java_ts_only) {
-    postprocess(be_global->header_name_.c_str(),
-                be_global->header_, BE_GlobalData::STREAM_H);
-    if (!be_global->suppress_idl()) {
-      postprocess(be_global->idl_name_.c_str(),
-                  be_global->idl_, BE_GlobalData::STREAM_IDL);
+    postprocess(be_builtin_global->header_name_.c_str(),
+                be_builtin_global->header_, BE_BuiltinGlobalData::STREAM_H);
+    if (!be_builtin_global->suppress_idl()) {
+      postprocess(be_builtin_global->idl_name_.c_str(),
+                  be_builtin_global->idl_, BE_BuiltinGlobalData::STREAM_IDL);
     }
   }
 
-  postprocess(be_global->impl_name_.c_str(),
-              be_global->impl_, BE_GlobalData::STREAM_CPP);
+  postprocess(be_builtin_global->impl_name_.c_str(),
+              be_builtin_global->impl_, BE_BuiltinGlobalData::STREAM_CPP);
 
-  if (be_global->itl()) {
-    if (!BE_GlobalData::writeFile(be_global->itl_name_.c_str(), be_global->itl_.str())) {
+  if (be_builtin_global->itl()) {
+    if (!BE_BuiltinGlobalData::writeFile(be_builtin_global->itl_name_.c_str(), be_builtin_global->itl_.str())) {
       BE_abort();  //error message already printed
     }
   }
 
-  if (be_global->face_ts()) {
-    postprocess(be_global->facets_header_name_.c_str(), be_global->facets_header_,
-                BE_GlobalData::STREAM_FACETS_H);
-    postprocess(be_global->facets_impl_name_.c_str(), be_global->facets_impl_,
-                BE_GlobalData::STREAM_FACETS_CPP);
+  if (be_builtin_global->face_ts()) {
+    postprocess(be_builtin_global->facets_header_name_.c_str(), be_builtin_global->facets_header_,
+                BE_BuiltinGlobalData::STREAM_FACETS_H);
+    postprocess(be_builtin_global->facets_impl_name_.c_str(), be_builtin_global->facets_impl_,
+                BE_BuiltinGlobalData::STREAM_FACETS_CPP);
   }
 
-  if (be_global->language_mapping() != BE_GlobalData::LANGMAP_NONE) {
-    postprocess(be_global->lang_header_name_.c_str(), be_global->lang_header_,
-                BE_GlobalData::STREAM_LANG_H);
+  if (be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_NONE) {
+    postprocess(be_builtin_global->lang_header_name_.c_str(), be_builtin_global->lang_header_,
+                BE_BuiltinGlobalData::STREAM_LANG_H);
   }
-
-  BE_cleanup();
 }

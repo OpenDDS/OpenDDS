@@ -43,8 +43,8 @@ namespace {
 
   std::string exporter()
   {
-    return be_global->export_macro().empty() ? ""
-      : be_global->export_macro().c_str() + std::string(" ");
+    return be_builtin_global->export_macro().empty() ? ""
+      : be_builtin_global->export_macro().c_str() + std::string(" ");
   }
 
   std::string array_zero_indices(AST_Array* arr)
@@ -70,15 +70,15 @@ namespace {
 
   void gen_typecode(UTL_ScopedName* name)
   {
-    if (be_global->suppress_typecode() || be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+    if (be_builtin_global->suppress_typecode() || be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
       return;
     }
     const char* const nm = name->last_component()->get_string();
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "extern " << exporter() << "const ::CORBA::TypeCode_ptr _tc_" << nm
       << ";\n";
-    const ScopedNamespaceGuard cppNs(name, be_global->impl_);
-    be_global->impl_ <<
+    const ScopedNamespaceGuard cppNs(name, be_builtin_global->impl_);
+    be_builtin_global->impl_ <<
       "const ::CORBA::TypeCode_ptr _tc_" << nm << " = 0;\n";
   }
 
@@ -156,7 +156,7 @@ struct GeneratorBase
     case AST_Expression::EV_wstring: pt = AST_PredefinedType::PT_wchar; break;
 #ifdef ACE_HAS_CDR_FIXED
     case AST_Expression::EV_fixed:
-      be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
+      be_builtin_global->add_include("FACE/Fixed.h", BE_BuiltinGlobalData::STREAM_LANG_H);
       return helpers_[HLP_FIXED_CONSTANT];
 #endif
     default:
@@ -171,7 +171,7 @@ struct GeneratorBase
 
   virtual void gen_simple_out(const char* nm)
   {
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "typedef " << nm << "& " << nm << "_out;\n";
   }
 
@@ -180,21 +180,21 @@ struct GeneratorBase
 
   virtual void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE size, const char* struct_or_class = "struct")
   {
-    be_global->add_include("<tao/VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<tao/VarOut_T.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
     const char* const nm = name->last_component()->get_string();
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       struct_or_class << ' ' << nm << ";\n";
     switch (size) {
     case AST_Type::SIZE_UNKNOWN:
-      be_global->lang_header_ << "/* Unknown size */\n";
+      be_builtin_global->lang_header_ << "/* Unknown size */\n";
       break;
     case AST_Type::FIXED:
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "typedef " << helpers_[HLP_FIX_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
         "typedef " << nm << "& " << nm << "_out;\n";
       break;
     case AST_Type::VARIABLE:
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "typedef " << helpers_[HLP_VAR_VAR] << '<' << nm << "> " << nm << "_var;\n" <<
         "typedef " << helpers_[HLP_OUT] << '<' << nm << "> " << nm << "_out;\n";
       break;
@@ -243,10 +243,10 @@ struct GeneratorBase
       case AST_Expression::EV_enum:
         {
           AST_Enum* e = dynamic_cast<AST_Enum*>(the_union->disc_type());
-          if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ||
-              be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+          if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11 ||
+              be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_FACE_CXX) {
             std::string prefix = scoped(e->name());
-            if (be_global->language_mapping() == BE_GlobalData::LANGMAP_FACE_CXX) {
+            if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_FACE_CXX) {
               size_t pos = prefix.rfind("::");
               if (pos == std::string::npos) {
                 prefix = "";
@@ -315,7 +315,7 @@ struct GeneratorBase
       AST_Type* actual_field_type = resolveActualType(field_type);
       const Classification cls = classify(actual_field_type);
       if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-        be_global->lang_header_ <<
+        be_builtin_global->lang_header_ <<
           "  void " << field_name << " (" << field_type_string << " x) {\n"
           "    _reset();\n"
           "    this->_u." << field_name << " = x;\n"
@@ -327,7 +327,7 @@ struct GeneratorBase
       } else if (cls & CL_STRING) {
         const std::string& primtype = (cls & CL_WIDE) ? primtype_[AST_PredefinedType::PT_wchar] : primtype_[AST_PredefinedType::PT_char];
         const std::string& helper = (cls & CL_WIDE) ? helpers_[HLP_WSTR_VAR] : helpers_[HLP_STR_VAR];
-        be_global->lang_header_ <<
+        be_builtin_global->lang_header_ <<
           "  void " << field_name << " (" << primtype << "* x) {\n"
           "    _reset();\n" <<
           "    this->_u." << field_name << " = x;\n"
@@ -347,7 +347,7 @@ struct GeneratorBase
           "    return this->_u." << field_name << ";\n"
           "  }\n";
       } else if (cls & CL_ARRAY) {
-        be_global->lang_header_ <<
+        be_builtin_global->lang_header_ <<
           "  void " << field_name << " (" << field_type_string << " x) {\n"
           "    _reset();\n" <<
           "    this->_u." << field_name << " = " << field_type_string << "_dup(x);\n"
@@ -357,7 +357,7 @@ struct GeneratorBase
           "    return this->_u." << field_name << ";\n"
           "  }\n";
       } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
-        be_global->lang_header_ <<
+        be_builtin_global->lang_header_ <<
           "  void " << field_name << " (const " << field_type_string << "& x) {\n"
           "    _reset();\n"
           "    this->_u." << field_name << " = new " << field_type_string << "(x);\n"
@@ -416,18 +416,18 @@ struct GeneratorBase
     const Classification cls = classify(actual_field_type);
     const std::string lang_field_type = generator_->map_type(field_type);
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "    " << lang_field_type << ' ' << branch->local_name()->get_string() << ";\n";
     } else if (cls & CL_STRING) {
       const AST_PredefinedType::PredefinedType chartype = (cls & CL_WIDE)
         ? AST_PredefinedType::PT_wchar : AST_PredefinedType::PT_char;
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "    " << primtype_[chartype] << "* " << branch->local_name()->get_string() << ";\n";
     } else if (cls & CL_ARRAY) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "    " << lang_field_type << "_slice* " << branch->local_name()->get_string() << ";\n";
     } else if (cls & (CL_STRUCTURE | CL_UNION | CL_SEQUENCE | CL_FIXED)) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "    " << lang_field_type << "* " << branch->local_name()->get_string() << ";\n";
     } else {
       std::cerr << "Unsupported type for union element\n";
@@ -548,10 +548,10 @@ struct GeneratorBase
   virtual bool gen_union(AST_Union* u, UTL_ScopedName* name,
                          const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
   {
-    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
     struct_decls(name, u->size_type(), "class");
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "\n"
       "class " << exporter() << nm << "\n"
       "{\n"
@@ -568,55 +568,55 @@ struct GeneratorBase
     std::for_each (branches.begin(), branches.end(), GenerateUnionAccessors(u, discriminator));
 
     if (needsDefault(branches, discriminator)) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  void _default() {\n"
         "    _reset();\n"
         "    _discriminator = " << generateDefaultValue(u) << ";\n"
         "  }\n";
     }
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  bool operator==(const " << nm << "& rhs) const;\n"
       "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n"
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n";
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       " private:\n"
       "  " << scoped(discriminator->name()) << " _discriminator;\n"
       "  union {\n";
 
     std::for_each (branches.begin(), branches.end(), generate_union_field);
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  } _u;\n";
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  void _reset();\n"
       "};\n\n";
 
-    be_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<ace/CDR_Stream.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR& os, const " << nm << "& x);\n\n";
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       exporter() << "ACE_CDR::Boolean operator>> (ACE_InputCDR& os, " << nm << "& x);\n\n";
 
     {
-      const ScopedNamespaceGuard guard(name, be_global->impl_);
+      const ScopedNamespaceGuard guard(name, be_builtin_global->impl_);
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         nm << "::" << nm << "() { std::memset (this, 0, sizeof (" << nm << ")); }\n\n";
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         nm << "::" << nm << "(const " << nm << "& other)\n"
         "{\n"
         "  this->_discriminator = other._discriminator;\n";
       generateSwitchForUnion(u, "this->_discriminator", generateCopyCtor, branches, discriminator, "", "", "", false, false);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "}\n\n";
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         nm << "& " << nm << "::operator=(const " << nm << "& other)\n"
         "{\n" <<
         "  if (this == &other) {\n"
@@ -625,31 +625,31 @@ struct GeneratorBase
         "  _reset();\n"
         "  this->_discriminator = other._discriminator;\n";
       generateSwitchForUnion(u, "this->_discriminator", generateAssign, branches, discriminator, "", "", "", false, false);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return *this;\n"
         "}\n\n";
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n"
         "  if (this->_discriminator != rhs._discriminator) return false;\n";
       if (generateSwitchForUnion(u, "this->_discriminator", generateEqual, branches, discriminator, "", "", "", false, false)) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "  return false;\n";
       }
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "}\n\n";
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "void " << nm << "::_reset()\n"
         "{\n";
       generateSwitchForUnion(u, "this->_discriminator", generateReset, branches, discriminator, "", "", "", false, false);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "}\n\n";
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "ACE_CDR::Boolean operator<<(ACE_OutputCDR&, const " << nm << "&) { return true; }\n\n";
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "ACE_CDR::Boolean operator>>(ACE_InputCDR&, " << nm << "&) { return true; }\n\n";
     }
 
@@ -659,8 +659,8 @@ struct GeneratorBase
 
   virtual void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
   {
-    be_global->add_include("<tao/Array_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("dds/DCPS/SafetyProfilePool.h", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<tao/Array_VarOut_T.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("dds/DCPS/SafetyProfilePool.h", BE_BuiltinGlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = arr->base_type();
     const Classification elem_cls = classify(elem);
@@ -692,7 +692,7 @@ struct GeneratorBase
         "_slice, " + nm + "_tag>";
     }
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "typedef " << elem_type << ' ' << nm << bound.str() << ";\n"
       "typedef " << elem_type << ' ' << nm << "_slice" << nofirst.str() << ";\n"
       "struct " << nm << "_tag {};\n"
@@ -709,8 +709,8 @@ struct GeneratorBase
       << "_slice* slice);\n" <<
       exporter() << "void " << nm << "_copy(" << nm << "_slice* dst, const "
       << nm << "_slice* src);\n\n";
-    const ScopedNamespaceGuard namespaces(tdname, be_global->impl_);
-    be_global->impl_ <<
+    const ScopedNamespaceGuard namespaces(tdname, be_builtin_global->impl_);
+    be_builtin_global->impl_ <<
       nm << "_slice* " << nm << "_alloc()\n"
       "{\n"
       "  void* const raw = ACE_Allocator::instance()->malloc"
@@ -724,29 +724,29 @@ struct GeneratorBase
       "{\n";
 
     if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
-      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
+      be_builtin_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
     } else if (elem_cls & CL_ARRAY) {
       std::string indent = "  ";
       const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << elem_type << "_init_i(begin" << nfl.index_ << ");\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  std::uninitialized_fill_n(begin, " << total.str() << ", "
         << elem_type << "());\n";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n"
       "void " << nm << "_fini_i(" << elem_type << "* begin)\n"
       "{\n";
 
     if (elem_cls & (CL_PRIMITIVE | CL_ENUM)) {
-      be_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
+      be_builtin_global->impl_ << "  ACE_UNUSED_ARG(begin);\n";
     } else if (elem_cls & CL_ARRAY) {
       std::string indent = "  ";
       const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << elem_type << "_fini_i(begin" << nfl.index_ << ");\n";
     } else {
       const std::string::size_type idx_last = elem_type.rfind("::");
@@ -754,7 +754,7 @@ struct GeneratorBase
         (elem_cls & CL_STRING) ? "StringManager" :
         ((idx_last == std::string::npos) ? elem_type
          : elem_type.substr(idx_last + 2));
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
         "    begin[i]."
 #ifdef __SUNPRO_CC
@@ -764,7 +764,7 @@ struct GeneratorBase
         "  }\n";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n"
       "void " << nm << "_free(" << nm << "_slice* slice)\n"
       "{\n"
@@ -787,19 +787,19 @@ struct GeneratorBase
       std::string indent = "  ";
       const NestedForLoops nfl("ACE_CDR::ULong", "i", arr, indent);
       if (elem_cls & CL_ARRAY) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << elem_type << "_copy(dst" << nfl.index_ << ", src"
           << nfl.index_ << ");\n";
       } else {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << "dst" << nfl.index_ << " = src" << nfl.index_ << ";\n";
       }
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n";
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "inline ACE_CDR::Boolean operator<<(ACE_OutputCDR &, const " << nm << "_forany&) { return true; }\n\n"
       "inline ACE_CDR::Boolean operator>>(ACE_InputCDR &, " << nm << "_forany&) { return true; }\n\n";
   }
@@ -810,7 +810,7 @@ struct GeneratorBase
   {
     const std::string nm = scoped(tdname);
     const std::string zeros = array_zero_indices(arr);
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "TAO_BEGIN_VERSIONED_NAMESPACE_DECL\nnamespace TAO {\n"
       "template <>\n"
       "struct " << exporter() << "Array_Traits<" << nm << "_forany>\n"
@@ -850,7 +850,7 @@ struct GeneratorBase
 
   virtual void gen_array_typedef(const char* nm, AST_Type* base)
   {
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "typedef " << map_type(base) << "_var " << nm << "_var;\n" <<
       "typedef " << map_type(base) << "_slice " << nm << "_slice;\n" <<
       "typedef " << map_type(base) << "_forany " << nm << "_forany;\n\n" <<
@@ -866,11 +866,11 @@ struct GeneratorBase
     if (cls & CL_STRING) {
       const Helper var = (cls & CL_WIDE) ? HLP_WSTR_VAR : HLP_STR_VAR,
         out = (cls & CL_WIDE) ? HLP_WSTR_OUT : HLP_STR_OUT;
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "typedef " << helpers_[var] << ' ' << nm << "_var;\n"
         "typedef " << helpers_[out] << ' ' << nm << "_out;\n";
     } else {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "typedef " << generator_->map_type(base) << "_out " << nm << "_out;\n";
     }
   }
@@ -880,8 +880,8 @@ struct FaceGenerator : GeneratorBase
 {
   virtual void init()
   {
-    be_global->add_include("FACE/types.hpp", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("FACE/StringManager.h", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("FACE/types.hpp", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("FACE/StringManager.h", BE_BuiltinGlobalData::STREAM_LANG_H);
     primtype_[AST_PredefinedType::PT_long] = "::FACE::Long";
     primtype_[AST_PredefinedType::PT_ulong] = "::FACE::UnsignedLong";
     primtype_[AST_PredefinedType::PT_longlong] = "::FACE::LongLong";
@@ -919,10 +919,10 @@ struct FaceGenerator : GeneratorBase
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
-    be_global->add_include("<tao/Seq_Out_T.h>", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("FACE/Sequence.h", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("FACE/SequenceVar.h", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<tao/Seq_Out_T.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("FACE/Sequence.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("FACE/SequenceVar.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<ace/CDR_Stream.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = seq->base_type();
     const Classification elem_cls = classify(elem);
@@ -958,7 +958,7 @@ struct FaceGenerator : GeneratorBase
       len_type = primtype_[AST_PredefinedType::PT_ulong],
       flag_type = primtype_[AST_PredefinedType::PT_boolean];
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "class " << nm << ";\n"
       "typedef " << helpers_[var] << '<' << nm << "> " << nm << "_var;\n"
       "typedef " << helpers_[out] << '<' << nm << "> " << nm << "_out;\n\n"
@@ -977,25 +977,25 @@ struct FaceGenerator : GeneratorBase
       "  }\n";
 
     if (bounded) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  " << nm << "(" << len_type << " length, " << elem_type << "* data, "
         << flag_type << " release = false)\n"
         "    : " << base << "(0u, length, data, release) {}\n";
     } else {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  " << nm << "(" << len_type << " maximum)\n"
         "    : " << base << "(maximum, 0u, 0, true) {}\n"
         "  " << nm << "(" << len_type << " maximum, " << len_type << " length, "
         << elem_type << "* data, " << flag_type << " release = false)\n"
         "    : " << base << "(maximum, length, data, release) {}\n";
     }
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "};\n\n";
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "inline ACE_CDR::Boolean operator<< (ACE_OutputCDR&, const " << nm << "&) { return true; }\n\n";
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "inline ACE_CDR::Boolean operator>> (ACE_InputCDR&, " << nm << "&) { return true; }\n\n";
   }
 
@@ -1004,10 +1004,10 @@ struct FaceGenerator : GeneratorBase
                   AST_Type::SIZE_TYPE size,
                   const char*)
   {
-    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
     struct_decls(name, size);
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "\n"
       "struct " << exporter() << nm << "\n"
       "{\n"
@@ -1023,32 +1023,32 @@ struct FaceGenerator : GeneratorBase
       if (cls & CL_STRING) {
         type_name = helpers_[(cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
       }
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  " << type_name << ' ' << field_name << ";\n";
     }
 
-    be_global->lang_header_ << "\n"
+    be_builtin_global->lang_header_ << "\n"
       "  bool operator==(const " << nm << "& rhs) const;\n"
       "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n"
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
-    be_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<ace/CDR_Stream.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
 
     if (size == AST_Type::VARIABLE) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
     }
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR& os, const " << nm << "& x);\n\n";
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       exporter() << "ACE_CDR::Boolean operator>> (ACE_InputCDR& os, " << nm << "& x);\n\n";
 
     {
-      const ScopedNamespaceGuard guard(name, be_global->impl_);
-      be_global->impl_ <<
+      const ScopedNamespaceGuard guard(name, be_builtin_global->impl_);
+      be_builtin_global->impl_ <<
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n";
       for (size_t i = 0; i < fields.size(); ++i) {
@@ -1059,22 +1059,22 @@ struct FaceGenerator : GeneratorBase
           std::string indent("  ");
           NestedForLoops nfl("int", "i",
             dynamic_cast<AST_Array*>(field_type), indent, true);
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             indent << "if (" << field_name << nfl.index_ << " != rhs."
             << field_name << nfl.index_ << ") {\n" <<
             indent << "  return false;\n" <<
             indent << "}\n";
         } else {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  if (" << field_name << " != rhs." << field_name << ") {\n"
             "    return false;\n"
             "  }\n";
         }
       }
-      be_global->impl_ << "  return true;\n}\n\n";
+      be_builtin_global->impl_ << "  return true;\n}\n\n";
 
       if (size == AST_Type::VARIABLE) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
           "{\n"
           "  using std::swap;\n";
@@ -1085,21 +1085,21 @@ struct FaceGenerator : GeneratorBase
           if (cls & CL_ARRAY) {
             ACE_CDR::ULong elems = 1;
             const std::string flat_fn = fn + array_dims(field_type, elems);
-            be_global->add_include("<algorithm>", BE_GlobalData::STREAM_CPP);
-            be_global->impl_ <<
+            be_builtin_global->add_include("<algorithm>", BE_BuiltinGlobalData::STREAM_CPP);
+            be_builtin_global->impl_ <<
               "  std::swap_ranges(lhs." << flat_fn << ", lhs." << flat_fn
                                         << " + " << elems << ", rhs." << flat_fn << ");\n";
           } else {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "  swap(lhs." << fn << ", rhs." << fn << ");\n";
           }
         }
-        be_global->impl_ << "}\n\n";
+        be_builtin_global->impl_ << "}\n\n";
       }
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "ACE_CDR::Boolean operator<< (ACE_OutputCDR &, const " << nm << "&) { return true; }\n\n";
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "ACE_CDR::Boolean operator>> (ACE_InputCDR &, " << nm << "&) { return true; }\n\n";
     }
 
@@ -1115,8 +1115,8 @@ struct SafetyProfileGenerator : GeneratorBase
 {
   virtual void init()
   {
-    be_global->add_include("tao/String_Manager_T.h", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("tao/CORBA_String.h", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("tao/String_Manager_T.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("tao/CORBA_String.h", BE_BuiltinGlobalData::STREAM_LANG_H);
     primtype_[AST_PredefinedType::PT_long] = "CORBA::Long";
     primtype_[AST_PredefinedType::PT_ulong] = "CORBA::ULong";
     primtype_[AST_PredefinedType::PT_longlong] = "CORBA::LongLong";
@@ -1156,9 +1156,9 @@ struct SafetyProfileGenerator : GeneratorBase
 
   virtual void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
   {
-    be_global->add_include("<tao/Seq_Out_T.h>", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("dds/DCPS/SafetyProfileSequence.h", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("dds/DCPS/SafetyProfileSequenceVar.h", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<tao/Seq_Out_T.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("dds/DCPS/SafetyProfileSequence.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("dds/DCPS/SafetyProfileSequenceVar.h", BE_BuiltinGlobalData::STREAM_LANG_H);
     const char* const nm = tdname->last_component()->get_string();
     AST_Type* elem = seq->base_type();
     const Classification elem_cls = classify(elem);
@@ -1194,7 +1194,7 @@ struct SafetyProfileGenerator : GeneratorBase
       len_type = primtype_[AST_PredefinedType::PT_ulong],
       flag_type = primtype_[AST_PredefinedType::PT_boolean];
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "class " << nm << ";\n"
       "typedef " << helpers_[var] << '<' << nm << "> " << nm << "_var;\n"
       "typedef " << helpers_[out] << '<' << nm << "> " << nm << "_out;\n\n"
@@ -1213,25 +1213,25 @@ struct SafetyProfileGenerator : GeneratorBase
       "  }\n";
 
     if (bounded) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  " << nm << "(" << len_type << " length, " << elem_type << "* data, "
         << flag_type << " release = false)\n"
         "    : " << base << "(0u, length, data, release) {}\n";
     } else {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  " << nm << "(" << len_type << " maximum)\n"
         "    : " << base << "(maximum, 0u, 0, true) {}\n"
         "  " << nm << "(" << len_type << " maximum, " << len_type << " length, "
         << elem_type << "* data, " << flag_type << " release = false)\n"
         "    : " << base << "(maximum, length, data, release) {}\n";
     }
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "};\n\n";
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "inline ACE_CDR::Boolean operator<< (ACE_OutputCDR&, const " << nm << "&) { return true; }\n\n";
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "inline ACE_CDR::Boolean operator>> (ACE_InputCDR&, " << nm << "&) { return true; }\n\n";
   }
 
@@ -1240,10 +1240,10 @@ struct SafetyProfileGenerator : GeneratorBase
                   AST_Type::SIZE_TYPE size,
                   const char*)
   {
-    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
     struct_decls(name, size);
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "\n"
       "struct " << exporter() << nm << "\n"
       "{\n"
@@ -1258,32 +1258,32 @@ struct SafetyProfileGenerator : GeneratorBase
       if (cls & CL_STRING) {
         type_name = helpers_[(cls & CL_WIDE) ? HLP_WSTR_MGR : HLP_STR_MGR];
       }
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  " << type_name << ' ' << field_name << ";\n";
     }
 
-    be_global->lang_header_ << "\n"
+    be_builtin_global->lang_header_ << "\n"
       "  bool operator==(const " << nm << "& rhs) const;\n"
       "  bool operator!=(const " << nm << "& rhs) const { return !(*this == rhs); }\n"
       "  OPENDDS_POOL_ALLOCATION_HOOKS\n"
       "};\n\n";
 
-    be_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("<ace/CDR_Stream.h>", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("dds/DCPS/PoolAllocationBase.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<ace/CDR_Stream.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
 
     if (size == AST_Type::VARIABLE) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
     }
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       exporter() << "ACE_CDR::Boolean operator<< (ACE_OutputCDR& os, const " << nm << "& x);\n\n";
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       exporter() << "ACE_CDR::Boolean operator>> (ACE_InputCDR& os, " << nm << "& x);\n\n";
 
     {
-      const ScopedNamespaceGuard guard(name, be_global->impl_);
-      be_global->impl_ <<
+      const ScopedNamespaceGuard guard(name, be_builtin_global->impl_);
+      be_builtin_global->impl_ <<
         "bool " << nm << "::operator==(const " << nm << "& rhs) const\n"
         "{\n";
       for (size_t i = 0; i < fields.size(); ++i) {
@@ -1294,22 +1294,22 @@ struct SafetyProfileGenerator : GeneratorBase
           std::string indent("  ");
           NestedForLoops nfl("int", "i",
             dynamic_cast<AST_Array*>(field_type), indent, true);
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             indent << "if (" << field_name << nfl.index_ << " != rhs."
             << field_name << nfl.index_ << ") {\n" <<
             indent << "  return false;\n" <<
             indent << "}\n";
         } else {
-          be_global->impl_ <<
+          be_builtin_global->impl_ <<
             "  if (" << field_name << " != rhs." << field_name << ") {\n"
             "    return false;\n"
             "  }\n";
         }
       }
-      be_global->impl_ << "  return true;\n}\n\n";
+      be_builtin_global->impl_ << "  return true;\n}\n\n";
 
       if (size == AST_Type::VARIABLE) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
           "{\n"
           "  using std::swap;\n";
@@ -1320,21 +1320,21 @@ struct SafetyProfileGenerator : GeneratorBase
           if (cls & CL_ARRAY) {
             ACE_CDR::ULong elems = 1;
             const std::string flat_fn = fn + array_dims(field_type, elems);
-            be_global->add_include("<algorithm>", BE_GlobalData::STREAM_CPP);
-            be_global->impl_ <<
+            be_builtin_global->add_include("<algorithm>", BE_BuiltinGlobalData::STREAM_CPP);
+            be_builtin_global->impl_ <<
               "  std::swap_ranges(lhs." << flat_fn << ", lhs." << flat_fn
                                         << " + " << elems << ", rhs." << flat_fn << ");\n";
           } else {
-            be_global->impl_ <<
+            be_builtin_global->impl_ <<
               "  swap(lhs." << fn << ", rhs." << fn << ");\n";
           }
         }
-        be_global->impl_ << "}\n\n";
+        be_builtin_global->impl_ << "}\n\n";
       }
 
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "ACE_CDR::Boolean operator<< (ACE_OutputCDR &, const " << nm << "&) { return true; }\n\n";
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "ACE_CDR::Boolean operator>> (ACE_InputCDR &, " << nm << "&) { return true; }\n\n";
     }
 
@@ -1350,8 +1350,8 @@ struct Cxx11Generator : GeneratorBase
 {
   void init()
   {
-    be_global->add_include("<cstdint>", BE_GlobalData::STREAM_LANG_H);
-    be_global->add_include("<string>", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<cstdint>", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("<string>", BE_BuiltinGlobalData::STREAM_LANG_H);
     primtype_[AST_PredefinedType::PT_long] = "int32_t";
     primtype_[AST_PredefinedType::PT_ulong] = "uint32_t";
     primtype_[AST_PredefinedType::PT_longlong] = "int64_t";
@@ -1393,10 +1393,10 @@ struct Cxx11Generator : GeneratorBase
 
   static void gen_typecode_ptrs(const std::string& type)
   {
-    if (!be_global->suppress_typecode()) {
-      be_global->add_include("tao/Basic_Types.h", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ << "extern const ::CORBA::TypeCode_ptr _tc_" << type << ";\n";
-      be_global->impl_ << "const ::CORBA::TypeCode_ptr _tc_" << type << " = nullptr;\n";
+    if (!be_builtin_global->suppress_typecode()) {
+      be_builtin_global->add_include("tao/Basic_Types.h", BE_BuiltinGlobalData::STREAM_LANG_H);
+      be_builtin_global->lang_header_ << "extern const ::CORBA::TypeCode_ptr _tc_" << type << ";\n";
+      be_builtin_global->impl_ << "const ::CORBA::TypeCode_ptr _tc_" << type << " = nullptr;\n";
     }
   }
 
@@ -1423,7 +1423,7 @@ struct Cxx11Generator : GeneratorBase
 
   void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE, const char*)
   {
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "class " << name->last_component()->get_string() << ";\n";
   }
 
@@ -1435,8 +1435,8 @@ struct Cxx11Generator : GeneratorBase
       array += "std::array<";
       bounds << ", " << arr->dims()[dim - 1]->ev()->u.ulval << '>';
     }
-    be_global->add_include("<array>", BE_GlobalData::STREAM_LANG_H);
-    be_global->lang_header_ << ind << "using " << type << " = " << array << elem << bounds.str() << ";\n";
+    be_builtin_global->add_include("<array>", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->lang_header_ << ind << "using " << type << " = " << array << elem << bounds.str() << ";\n";
   }
 
   void gen_array(UTL_ScopedName* tdname, AST_Array* arr)
@@ -1450,8 +1450,8 @@ struct Cxx11Generator : GeneratorBase
 
   static void gen_sequence(const std::string& type, const std::string& elem,  const std::string& ind = "")
   {
-    be_global->add_include("<vector>", BE_GlobalData::STREAM_LANG_H);
-    be_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
+    be_builtin_global->add_include("<vector>", BE_BuiltinGlobalData::STREAM_LANG_H);
+    be_builtin_global->lang_header_ << ind << "using " << type << " = std::vector<" << elem << ">;\n";
   }
 
   void gen_sequence(UTL_ScopedName* tdname, AST_Sequence* seq)
@@ -1461,7 +1461,7 @@ struct Cxx11Generator : GeneratorBase
 
   static void gen_common_strunion_pre(const char* nm)
   {
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "\n"
       "class " << exporter() << nm << "\n"
       "{\n"
@@ -1470,7 +1470,7 @@ struct Cxx11Generator : GeneratorBase
 
   static void gen_common_strunion_post(const char* nm)
   {
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "};\n\n"
       << exporter() << "void swap(" << nm << "& lhs, " << nm << "& rhs);\n\n";
   }
@@ -1494,7 +1494,7 @@ struct Cxx11Generator : GeneratorBase
       ret = "{ return _" + af.name_ + "; }\n";
     std::string initializer;
     if (af.cls_ & (CL_PRIMITIVE | CL_ENUM)) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  void " << af.name_ << '(' << lang_field_type << " val) " << assign <<
         "  " << lang_field_type << ' ' << af.name_ << "() const " << ret <<
         "  " << lang_field_type << "& " << af.name_ << "() " << ret;
@@ -1514,14 +1514,14 @@ struct Cxx11Generator : GeneratorBase
       if (af.cls_ & CL_ARRAY) {
         initializer = "{}";
       }
-      be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ <<
+      be_builtin_global->add_include("<utility>", BE_BuiltinGlobalData::STREAM_LANG_H);
+      be_builtin_global->lang_header_ <<
         "  void " << af.name_ << "(const " << lang_field_type << "& val) " << assign <<
         "  void " << af.name_ << '(' << lang_field_type << "&& val) " << move <<
         "  const " << lang_field_type << "& " << af.name_ << "() const " << ret <<
         "  " << lang_field_type << "& " << af.name_ << "() " << ret;
     }
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  " << lang_field_type << " _" << af.name_ << initializer << ";\n\n";
   }
 
@@ -1529,17 +1529,17 @@ struct Cxx11Generator : GeneratorBase
                   const std::vector<AST_Field*>& fields,
                   AST_Type::SIZE_TYPE, const char*)
   {
-    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
-    const ScopedNamespaceGuard namespaces2(name, be_global->impl_);
+    const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
+    const ScopedNamespaceGuard namespaces2(name, be_builtin_global->impl_);
     const char* const nm = name->last_component()->get_string();
     gen_common_strunion_pre(nm);
 
     std::for_each(fields.begin(), fields.end(), gen_struct_members);
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  " << nm << "() = default;\n"
       "  " << (fields.size() == 1 ? "explicit " : "") << nm << '(';
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       nm << "::" << nm << '(';
 
     std::string init_list, swaps;
@@ -1550,17 +1550,17 @@ struct Cxx11Generator : GeneratorBase
       const bool by_ref = (cls & (CL_PRIMITIVE | CL_ENUM)) == 0;
       const std::string param = (by_ref ? "const " : "") + ft + (by_ref ? "&" : "")
         + ' ' + fn + (i < fields.size() - 1 ? ",\n    " : ")");
-      be_global->lang_header_ << param;
-      be_global->impl_ << param;
+      be_builtin_global->lang_header_ << param;
+      be_builtin_global->impl_ << param;
       init_list += '_' + fn + '(' + fn + ')';
       if (i < fields.size() - 1) init_list += "\n  , ";
       swaps += "  swap(lhs._" + fn + ", rhs._" + fn + ");\n";
     }
-    be_global->lang_header_ << ";\n\n";
-    be_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
+    be_builtin_global->lang_header_ << ";\n\n";
+    be_builtin_global->impl_ << "\n  : " << init_list << "\n{}\n\n";
 
     gen_common_strunion_post(nm);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
       "{\n"
       "  using std::swap;\n"
@@ -1573,7 +1573,7 @@ struct Cxx11Generator : GeneratorBase
   {
     AST_Type* field_type = branch->field_type();
     const std::string lang_field_type = generator_->map_type(field_type);
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "    " << lang_field_type << " _" << branch->local_name()->get_string()
       << ";\n";
   }
@@ -1615,14 +1615,14 @@ struct Cxx11Generator : GeneratorBase
       move = assign_pre + "std::move(val); }\n",
       ret = "{ return _" + std::string(nm) + "; }\n";
     if (cls & (CL_PRIMITIVE | CL_ENUM)) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  void " << nm << '(' << lang_field_type << " val" << disc_param
         << ") " << assign <<
         "  " << lang_field_type << ' ' << nm << "() const " << ret <<
         "  " << lang_field_type << "& " << nm << "() " << ret << "\n";
     } else {
-      be_global->add_include("<utility>", BE_GlobalData::STREAM_LANG_H);
-      be_global->lang_header_ <<
+      be_builtin_global->add_include("<utility>", BE_BuiltinGlobalData::STREAM_LANG_H);
+      be_builtin_global->lang_header_ <<
         "  void " << nm << "(const " << lang_field_type << "& val" << disc_param
         << ") " << assign <<
         "  void " << nm << '(' << lang_field_type << "&& val" << disc_param
@@ -1694,14 +1694,14 @@ struct Cxx11Generator : GeneratorBase
   bool gen_union(AST_Union* u, UTL_ScopedName* name,
                  const std::vector<AST_UnionBranch*>& branches, AST_Type* discriminator)
   {
-    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
     const std::string d_type = generator_->map_type(discriminator);
     const std::string defVal = generateDefaultValue(u);
 
     gen_common_strunion_pre(nm);
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  " << nm << "() { _activate(" << defVal << "); }\n"
       "  " << nm << "(const " << nm << "& rhs);\n"
       "  " << nm << "(" << nm << "&& rhs);\n"
@@ -1713,11 +1713,11 @@ struct Cxx11Generator : GeneratorBase
 
     std::for_each(branches.begin(), branches.end(), union_accessors);
     if (needsDefault(branches, discriminator)) {
-      be_global->lang_header_ <<
+      be_builtin_global->lang_header_ <<
         "  void _default() { _reset(); _activate(" << defVal << "); }\n\n";
     }
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "private:\n"
       "  bool _set = false;\n"
       "  " << d_type << " _disc;\n\n"
@@ -1725,26 +1725,26 @@ struct Cxx11Generator : GeneratorBase
 
     std::for_each(branches.begin(), branches.end(), union_field);
 
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  };\n\n"
       "  void _activate(" << d_type << " d);\n"
       "  void _reset();\n";
 
     gen_common_strunion_post(nm);
 
-    const ScopedNamespaceGuard namespacesCpp(name, be_global->impl_);
-    be_global->impl_ <<
+    const ScopedNamespaceGuard namespacesCpp(name, be_builtin_global->impl_);
+    be_builtin_global->impl_ <<
       nm << "::" << nm << "(const " << nm << "& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
     generateSwitchForUnion(u, "_disc", union_copy, branches, discriminator, "", "", "", false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n" <<
       nm << "::" << nm << '(' << nm << "&& rhs)\n"
       "{\n"
       "  _activate(rhs._disc);\n";
     generateSwitchForUnion(u, "_disc", union_move, branches, discriminator, "", "", "", false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n" <<
       nm << "& " << nm << "::operator=(const " << nm << "& rhs)\n"
       "{\n"
@@ -1752,7 +1752,7 @@ struct Cxx11Generator : GeneratorBase
       "    return *this;\n"
       "  }\n";
     generateSwitchForUnion(u, "rhs._disc", union_assign, branches, discriminator, "", "", "", false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
       "}\n\n" <<
@@ -1762,7 +1762,7 @@ struct Cxx11Generator : GeneratorBase
       "    return *this;\n"
       "  }\n";
     generateSwitchForUnion(u, "rhs._disc", union_move_assign, branches, discriminator, "", "", "", false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  _disc = rhs._disc;\n"
       "  return *this;\n"
       "}\n\n" <<
@@ -1772,7 +1772,7 @@ struct Cxx11Generator : GeneratorBase
       "    _reset();\n"
       "  }\n";
     generateSwitchForUnion(u, "d", union_activate, branches, discriminator, "", "", "", false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  _set = true;\n"
       "  _disc = d;\n"
       "}\n\n"
@@ -1780,7 +1780,7 @@ struct Cxx11Generator : GeneratorBase
       "{\n"
       "  if (!_set) return;\n";
     generateSwitchForUnion(u, "_disc", union_reset, branches, discriminator, "", "", "", false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  _set = false;\n"
       "}\n\n"
       "void swap(" << nm << "& lhs, " << nm << "& rhs)\n"
@@ -1798,18 +1798,18 @@ Cxx11Generator Cxx11Generator::instance;
 
 void langmap_generator::init()
 {
-  switch (be_global->language_mapping()) {
-  case BE_GlobalData::LANGMAP_FACE_CXX:
+  switch (be_builtin_global->language_mapping()) {
+  case BE_BuiltinGlobalData::LANGMAP_FACE_CXX:
     string_ns = "::FACE";
     generator_ = &FaceGenerator::instance;
     generator_->init();
     break;
-  case BE_GlobalData::LANGMAP_SP_CXX:
+  case BE_BuiltinGlobalData::LANGMAP_SP_CXX:
     string_ns = "::CORBA";
     generator_ = &SafetyProfileGenerator::instance;
     generator_->init();
     break;
-  case BE_GlobalData::LANGMAP_CXX11:
+  case BE_BuiltinGlobalData::LANGMAP_CXX11:
     string_ns = "::CORBA";
     generator_ = &Cxx11Generator::instance;
     generator_->init();
@@ -1821,26 +1821,26 @@ void langmap_generator::init()
 bool langmap_generator::gen_const(UTL_ScopedName* name, bool,
                                   AST_Constant* constant)
 {
-  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+  const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
   const char* const nm = name->last_component()->get_string();
 
   const AST_Expression::ExprType type = constant->et();
   const bool is_enum = (type == AST_Expression::EV_enum);
   const std::string type_name = is_enum
     ? scoped(constant->enum_full_name()) : generator_->map_type(type);
-  be_global->lang_header_ <<
+  be_builtin_global->lang_header_ <<
     generator_->const_keyword(type) << ' ' << type_name << ' ' << nm << " = ";
 
   if (is_enum) {
     UTL_ScopedName* const enumerator = constant->constant_value()->n();
     if (generator_->scoped_enum()) {
-      be_global->lang_header_ << type_name << "::"
+      be_builtin_global->lang_header_ << type_name << "::"
         << to_string(enumerator->last_component()) << ";\n";
     } else {
-      be_global->lang_header_ << dds_generator::scoped_helper(enumerator, "::") << ";\n";
+      be_builtin_global->lang_header_ << dds_generator::scoped_helper(enumerator, "::") << ";\n";
     }
   } else {
-    be_global->lang_header_ << *constant->constant_value()->ev() << ";\n";
+    be_builtin_global->lang_header_ << *constant->constant_value()->ev() << ";\n";
   }
   return true;
 }
@@ -1849,18 +1849,18 @@ bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
                                  const std::vector<AST_EnumVal*>& contents,
                                  const char*)
 {
-  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+  const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
   const char* const nm = name->last_component()->get_string();
   const char* scoped_enum = generator_->scoped_enum() ? "class " : "";
   const std::string enum_base = generator_->enum_base();
-  be_global->lang_header_ <<
+  be_builtin_global->lang_header_ <<
     "enum " << scoped_enum << nm << enum_base << " {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "  " << contents[i]->local_name()->get_string()
       << ((i < contents.size() - 1) ? ",\n" : "\n");
   }
-  be_global->lang_header_ <<
+  be_builtin_global->lang_header_ <<
     "};\n\n";
   generator_->gen_simple_out(nm);
   gen_typecode(name);
@@ -1870,7 +1870,7 @@ bool langmap_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
 bool langmap_generator::gen_struct_fwd(UTL_ScopedName* name,
                                        AST_Type::SIZE_TYPE size)
 {
-  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+  const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
   generator_->struct_decls(name, size);
   return true;
 }
@@ -1888,9 +1888,9 @@ namespace {
 #ifdef ACE_HAS_CDR_FIXED
   void gen_fixed(UTL_ScopedName* name, AST_Fixed* fixed)
   {
-    be_global->add_include("FACE/Fixed.h", BE_GlobalData::STREAM_LANG_H);
+    be_builtin_global->add_include("FACE/Fixed.h", BE_BuiltinGlobalData::STREAM_LANG_H);
     const char* const nm = name->last_component()->get_string();
-    be_global->lang_header_ <<
+    be_builtin_global->lang_header_ <<
       "typedef " << helpers_[HLP_FIXED] << '<' << *fixed->digits()->ev()
       << ", " << *fixed->scale()->ev() << "> " << nm << ";\n"
       "typedef " << nm << "& " << nm << "_out;\n";
@@ -1903,7 +1903,7 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 {
   AST_Array* arr = 0;
   {
-    const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+    const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
     const char* const nm = name->last_component()->get_string();
 
     switch (base->node_type()) {
@@ -1923,11 +1923,11 @@ bool langmap_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
       return false;
 # endif
     default:
-      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-        be_global->lang_header_ <<
+      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
+        be_builtin_global->lang_header_ <<
           "using "  << nm << " = " << generator_->map_type(base) << ";\n";
       } else {
-        be_global->lang_header_ <<
+        be_builtin_global->lang_header_ <<
           "typedef " << generator_->map_type(base) << ' ' << nm << ";\n";
       }
 
@@ -1951,7 +1951,7 @@ bool langmap_generator::gen_union_fwd(AST_UnionFwd* node,
                                       UTL_ScopedName* name,
                                       AST_Type::SIZE_TYPE)
 {
-  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+  const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
   generator_->struct_decls(name, node->full_definition()->size_type(), "class");
   return true;
 }
@@ -1966,15 +1966,15 @@ bool langmap_generator::gen_union(AST_Union* u, UTL_ScopedName* name,
 
 bool langmap_generator::gen_interf_fwd(UTL_ScopedName* name)
 {
-  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+  if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
     return true;
   }
 
-  const ScopedNamespaceGuard namespaces(name, be_global->lang_header_);
+  const ScopedNamespaceGuard namespaces(name, be_builtin_global->lang_header_);
 
-  be_global->add_include("<tao/Objref_VarOut_T.h>", BE_GlobalData::STREAM_LANG_H);
+  be_builtin_global->add_include("<tao/Objref_VarOut_T.h>", BE_BuiltinGlobalData::STREAM_LANG_H);
   const char* const nm = name->last_component()->get_string();
-  be_global->lang_header_ <<
+  be_builtin_global->lang_header_ <<
     "class " << nm << ";\n"
     "typedef " << nm << '*' << nm << "_ptr;\n"
     "typedef TAO_Objref_Var_T<" << nm << "> " << nm << "_var;\n"

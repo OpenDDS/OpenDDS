@@ -6,61 +6,113 @@
  */
 
 #include "be_extern.h"
-#include "be_util.h"
-#include "../Version.h"
+#include "be_builtin.h"
 
-#include <global_extern.h>
-#include <drv_extern.h>
+namespace {
+  typedef std::vector<BE_Interface*> InterfaceList;
+  InterfaceList interfaces;
 
-#include <ace/OS_NS_stdlib.h>
+  void register_builtin() {
+    static bool registered = false;
+    if (!registered) {
+      // Register the builtin backend
+      BE_Interface* builtin = 0;
+      ACE_NEW(builtin, BE_BuiltinInterface);
+      if (builtin != 0) {
+        BE_register(builtin);
+        registered = true;
+      }
+    }
 
-#include <iostream>
-#include <iomanip>
+    // Allocate the fake be_global data which is expected to exist by tao_idl.
+    // It doesn't actually do anything except call back into functions within this file.
+    if (be_global == 0) {
+      ACE_NEW(be_global, BE_GlobalData);
+    }
+  }
+}
+
+void
+BE_register(BE_Interface* interface)
+{
+  interfaces.push_back(interface);
+}
 
 void
 BE_version()
 {
-  ACE_DEBUG((LM_DEBUG, ACE_TEXT("OpenDDS version ") ACE_TEXT(OPENDDS_VERSION)
-             ACE_TEXT("\n")));
+  InterfaceList::const_iterator end = interfaces.end();
+  for (InterfaceList::const_iterator itr = interfaces.begin(); itr != end; ++itr) {
+    (*itr)->version();
+  }
 }
 
 int
-BE_init(int&, ACE_TCHAR*[])
+BE_init(int& argc, ACE_TCHAR* argv[])
 {
-  ACE_NEW_RETURN(be_global, BE_GlobalData, -1);
-  idl_global->default_idl_version_ = IDL_VERSION_4;
-  idl_global->anon_type_diagnostic(IDL_GlobalData::ANON_TYPE_SILENT);
-  return 0;
+  register_builtin();
+
+  int status = 0;
+  InterfaceList::iterator end = interfaces.end();
+  for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
+    status |= (*itr)->init(argc, argv);
+  }
+  return status;
 }
 
 void
-BE_post_init(char*[], long)
+BE_post_init(char* files[], long nfiles)
 {
-  std::ostringstream version;
-  version << "-D__OPENDDS_IDL=0x"
-          << std::setw(2) << std::setfill('0') << OPENDDS_MAJOR_VERSION
-          << std::setw(2) << std::setfill('0') << OPENDDS_MINOR_VERSION
-          << std::setw(2) << std::setfill('0') << OPENDDS_MICRO_VERSION;
-  DRV_cpp_putarg(version.str().c_str());
-
-#ifdef ACE_HAS_CDR_FIXED
-  DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_FIXED");
-#endif
-
-  std::string include_dds = be_util::dds_root();
-  if (include_dds.find(' ') != std::string::npos && include_dds[0] != '"') {
-    include_dds.insert(include_dds.begin(), '"');
-    include_dds.insert(include_dds.end(), '"');
+  InterfaceList::iterator end = interfaces.end();
+  for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
+    (*itr)->post_init(files, nfiles);
   }
-  be_global->add_inc_path(include_dds.c_str());
-  ACE_CString included;
-  DRV_add_include_path(included, include_dds.c_str(), 0, true);
+}
 
-  if (idl_global->idl_version_ < IDL_VERSION_4) {
-    idl_global->ignore_files_ = true; // Exit without parsing files
-    be_global->error("OpenDDS requires IDL version to be 4 or greater");
-  } else {
-    DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
-    be_global->builtin_annotations_.register_all();
+void
+BE_produce()
+{
+  InterfaceList::iterator end = interfaces.end();
+  for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
+    (*itr)->produce();
+  }
+}
+
+// Clean up before exit, whether successful or not.
+// Need not be exported since it is called only from this file.
+void
+BE_cleanup()
+{
+  InterfaceList::iterator end = interfaces.end();
+  for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
+    (*itr)->cleanup();
+  }
+}
+
+// Abort this run of the BE.
+void
+BE_abort()
+{
+  ACE_ERROR((LM_ERROR, ACE_TEXT("Fatal Error - Aborting\n")));
+  InterfaceList::iterator end = interfaces.end();
+  for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
+    (*itr)->cleanup();
+  }
+  ACE_OS::exit(1);
+}
+
+void BE_destroy()
+{
+  InterfaceList::iterator end = interfaces.end();
+  for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
+    (*itr)->destroy();
+  }
+}
+
+void BE_parse_args(long& i, char** av)
+{
+  InterfaceList::iterator end = interfaces.end();
+  for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
+    (*itr)->parse_args(i, av);
   }
 }

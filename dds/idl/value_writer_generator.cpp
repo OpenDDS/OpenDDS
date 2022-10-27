@@ -5,7 +5,7 @@
 
 #include "value_writer_generator.h"
 
-#include "be_extern.h"
+#include "be_builtin.h"
 #include "global_extern.h"
 
 #include <dds/DCPS/Definitions.h>
@@ -63,7 +63,7 @@ namespace {
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
     const std::string indent(level * 2, ' ');
     const Classification c = classify(array->base_type());
     const bool primitive = c & CL_PRIMITIVE;
@@ -72,14 +72,14 @@ namespace {
     // in a loop in the generated code
     if ((primitive && (dim_idx < array->n_dims() - 1)) || (!primitive && (dim_idx < array->n_dims()))) {
       const size_t dim = array->dims()[dim_idx]->ev()->u.ulval;
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "value_writer.begin_array();\n";
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << dim << "; ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_element(" << idx << ");\n";
       array_helper(expression + "[" + idx + "]", array, dim_idx + 1, idx + "i", level + 1);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "  value_writer.end_element();\n" <<
         indent << "}\n" <<
         indent << "value_writer.end_array();\n";
@@ -89,11 +89,11 @@ namespace {
         AST_Type* const actual = resolveActualType(array->base_type());
         const AST_PredefinedType::PredefinedType pt =
           dynamic_cast<AST_PredefinedType*>(actual)->pt();
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << "value_writer.begin_array();\n";
-        be_global->impl_ << indent <<
+        be_builtin_global->impl_ << indent <<
           "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : "") << ", " << dim << ");\n";
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           indent << "value_writer.end_array();\n";
 
       } else {
@@ -105,10 +105,10 @@ namespace {
   void sequence_helper(const std::string& expression, AST_Sequence* sequence,
                        const std::string& idx, int level)
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
     const char* const length_func = use_cxx11 ? "size" : "length";
     const std::string indent(level * 2, ' ');
-    be_global->impl_ << indent << "value_writer.begin_sequence();\n";
+    be_builtin_global->impl_ << indent << "value_writer.begin_sequence();\n";
 
     const Classification c = classify(sequence->base_type());
     AST_Type* const actual = resolveActualType(sequence->base_type());
@@ -125,20 +125,20 @@ namespace {
     if (use_optimized_write_) {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
-      be_global->impl_ << indent <<
+      be_builtin_global->impl_ << indent <<
         "value_writer.write_" << primitive_type(pt) << "_array (" << expression << (use_cxx11 ? ".data()" : ".get_buffer()") << ", " << expression << "." << length_func << "());\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "for (" << (use_cxx11 ? "size_t " : "::CORBA::ULong ") << idx << " = 0; "
         << idx << " != " << expression << "." << length_func << "(); ++" << idx << ") {\n" <<
         indent << "  value_writer.begin_element(" << idx << ");\n";
       generate_write(expression + "[" + idx + "]", sequence->base_type(), idx + "i", level + 1);
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         indent << "  value_writer.end_element();\n" <<
         indent << "}\n";
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       indent << "value_writer.end_sequence();\n";
   }
 
@@ -158,24 +158,24 @@ namespace {
       return;
     }
 
-    be_global->impl_ << std::string(level * 2, ' ');
+    be_builtin_global->impl_ << std::string(level * 2, ' ');
 
     if (c & CL_FIXED) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "value_writer.write_fixed(" << expression << ");\n";
 
     } else if (c & CL_STRING) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "value_writer.write_" << ((c & CL_WIDE) ? "w" : "") << "string(" << expression << ");\n";
 
     } else if (c & CL_PRIMITIVE) {
       const AST_PredefinedType::PredefinedType pt =
         dynamic_cast<AST_PredefinedType*>(actual)->pt();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "value_writer.write_" << primitive_type(pt) << '(' << expression << ");\n";
 
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "vwrite(value_writer, " << expression << ");\n";
     }
   }
@@ -188,10 +188,10 @@ namespace {
                             Intro&,
                             const std::string&)
   {
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    value_writer.begin_union_member(\"" << field_name << "\");\n";
     generate_write("value." + field_name + "()", type, "i", 2);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    value_writer.end_union_member();\n";
     return "";
   }
@@ -202,10 +202,10 @@ bool value_writer_generator::gen_enum(AST_Enum*,
                                       const std::vector<AST_EnumVal*>& contents,
                                       const char*)
 {
-  be_global->add_include("dds/DCPS/ValueWriter.h", BE_GlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/ValueWriter.h", BE_BuiltinGlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
 
   {
     NamespaceGuard guard;
@@ -215,19 +215,19 @@ bool value_writer_generator::gen_enum(AST_Enum*,
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  switch (value) {\n";
     for (std::vector<AST_EnumVal*>::const_iterator pos = contents.begin(), limit = contents.end();
          pos != limit; ++pos) {
       AST_EnumVal* const val = *pos;
       const std::string value_name = (use_cxx11 ? (type_name + "::") : module_scope(name))
         + val->local_name()->get_string();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  case " << value_name << ":\n"
         "    value_writer.write_enum(\"" << val->local_name()->get_string() << "\", " << value_name << ");\n"
         "    break;\n";
     }
-    be_global->impl_ << "  }\n";
+    be_builtin_global->impl_ << "  }\n";
   }
 
   return true;
@@ -247,10 +247,10 @@ bool value_writer_generator::gen_struct(AST_Structure*,
                                         AST_Type::SIZE_TYPE,
                                         const char*)
 {
-  be_global->add_include("dds/DCPS/ValueWriter.h", BE_GlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/ValueWriter.h", BE_BuiltinGlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
   const std::string accessor_suffix = use_cxx11 ? "()" : "";
 
   {
@@ -261,20 +261,20 @@ bool value_writer_generator::gen_struct(AST_Structure*,
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  value_writer.begin_struct();\n";
     for (std::vector<AST_Field*>::const_iterator pos = fields.begin(), limit = fields.end();
          pos != limit; ++pos) {
       AST_Field* const field = *pos;
       const std::string field_name = field->local_name()->get_string();
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  value_writer.begin_struct_member(XTypes::MemberDescriptorImpl(\"" << field_name << "\", "
-                                                                             << (be_global->is_key(field) ? "true" : "false") <<  "));\n";
+                                                                             << (be_builtin_global->is_key(field) ? "true" : "false") <<  "));\n";
       generate_write("value." + field_name + accessor_suffix, field->field_type(), "i");
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  value_writer.end_struct_member();\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  value_writer.end_struct();\n";
   }
 
@@ -288,7 +288,7 @@ bool value_writer_generator::gen_union(AST_Union* u,
                                        AST_Type* discriminator,
                                        const char*)
 {
-  be_global->add_include("dds/DCPS/ValueWriter.h", BE_GlobalData::STREAM_H);
+  be_builtin_global->add_include("dds/DCPS/ValueWriter.h", BE_BuiltinGlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
 
@@ -300,17 +300,17 @@ bool value_writer_generator::gen_union(AST_Union* u,
     write.addArg("value", "const " + type_name + "&");
     write.endArgs();
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  value_writer.begin_union();\n"
       "  value_writer.begin_discriminator();\n";
     generate_write("value._d()" , discriminator, "i");
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  value_writer.end_discriminator();\n";
 
     generateSwitchForUnion(u, "value._d()", branch_helper, branches,
                            discriminator, "", "", type_name.c_str(),
                            false, false);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  value_writer.end_union();\n";
   }
 

@@ -6,7 +6,7 @@
 #ifndef dds_generator_H
 #define dds_generator_H
 
-#include "be_extern.h"
+#include "be_builtin.h"
 #include "be_util.h"
 
 #include <dds/DCPS/ValueHelper.h>
@@ -179,15 +179,15 @@ struct NamespaceGuard {
   : enabled_(enabled)
   {
     if (enabled_) {
-      be_global->header_ << namespace_guard_start;
-      be_global->impl_ << namespace_guard_start;
+      be_builtin_global->header_ << namespace_guard_start;
+      be_builtin_global->impl_ << namespace_guard_start;
     }
   }
   ~NamespaceGuard()
   {
     if (enabled_) {
-      be_global->header_ << namespace_guard_end;
-      be_global->impl_ << namespace_guard_end;
+      be_builtin_global->header_ << namespace_guard_end;
+      be_builtin_global->impl_ << namespace_guard_end;
     }
   }
 };
@@ -235,23 +235,23 @@ struct Function {
     using std::string;
     if (template_args) {
       const string tmpl = string("template<") + template_args + "> ";
-      be_global->header_ << tmpl;
-      be_global->impl_ << tmpl;
+      be_builtin_global->header_ << tmpl;
+      be_builtin_global->impl_ << tmpl;
     }
-    ACE_CString ace_exporter = be_global->export_macro();
+    ACE_CString ace_exporter = be_builtin_global->export_macro();
     bool use_exp = ace_exporter != "";
     string exporter = use_exp ? (string(" ") + ace_exporter.c_str()) : "";
-    be_global->header_ << ace_exporter << (use_exp ? "\n" : "")
+    be_builtin_global->header_ << ace_exporter << (use_exp ? "\n" : "")
       << returntype << " " << name << "(";
-    be_global->impl_ << returntype << " " << name << "(";
+    be_builtin_global->impl_ << returntype << " " << name << "(";
   }
 
   void addArg(const char* name, const std::string& type)
   {
     std::string sig = (has_arg_ ? ", " : "") + type + (name[0] ? " " : "")
       + (name[0] ? name : "");
-    be_global->header_ << sig;
-    be_global->impl_ << sig;
+    be_builtin_global->header_ << sig;
+    be_builtin_global->impl_ << sig;
     if (name[0]) {
       preamble_ += "  ACE_UNUSED_ARG(" + std::string(name) + ");\n";
     }
@@ -260,15 +260,15 @@ struct Function {
 
   void endArgs()
   {
-    be_global->header_ << ");\n\n";
-    be_global->impl_ << ")\n{\n" << preamble_;
+    be_builtin_global->header_ << ");\n\n";
+    be_builtin_global->impl_ << ")\n{\n" << preamble_;
   }
 
   ~Function()
   {
-    be_global->impl_ << "}\n";
+    be_builtin_global->impl_ << "}\n";
     if (extra_newline_) {
-      be_global->impl_ << "\n";
+      be_builtin_global->impl_ << "\n";
     }
   }
 };
@@ -299,10 +299,10 @@ public:
   void output(const std::string& str) const
   {
     if (impl_) {
-      be_global->impl_ << str;
+      be_builtin_global->impl_ << str;
     }
     if (header_) {
-      be_global->header_ << str;
+      be_builtin_global->header_ << str;
     }
   }
 
@@ -484,7 +484,7 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
 
 inline std::string string_type(AstTypeClassification::Classification cls)
 {
-  return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 ?
+  return be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11 ?
     ((cls & AstTypeClassification::CL_WIDE) ? "std::wstring" : "std::string") :
     (cls & AstTypeClassification::CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
 }
@@ -567,7 +567,7 @@ inline
 std::string getWrapper(const std::string& name, AST_Type* type, WrapDirection wd)
 {
   using namespace AstTypeClassification;
-  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+  if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
     const Classification cls = classify(type);
     if ((cls & (CL_BOUNDED | CL_STRING)) == (CL_BOUNDED | CL_STRING)) {
       return (wd == WD_OUTPUT ? "Serializer::FromBoundedString" : "Serializer::ToBoundedString")
@@ -583,7 +583,7 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
 {
   std::string e = scoped(disc->name()),
     label = label_val->n()->last_component()->get_string();
-  if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+  if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
     return e + "::" + label;
   }
   const size_t colon = e.rfind("::");
@@ -681,15 +681,15 @@ void generateBranchLabels(AST_UnionBranch* branch, AST_Type* discriminator,
     ++n_labels;
     AST_UnionLabel* label = branch->label(j);
     if (label->label_kind() == AST_UnionLabel::UL_default) {
-      be_global->impl_ << "  default:";
+      be_builtin_global->impl_ << "  default:";
       has_default = true;
     } else if (discriminator->node_type() == AST_Decl::NT_enum) {
-      be_global->impl_ << "  case "
+      be_builtin_global->impl_ << "  case "
         << getEnumLabel(label->label_val(), discriminator) << ':';
     } else {
-      be_global->impl_ << "  case " << *label->label_val()->ev() << ':';
+      be_builtin_global->impl_ << "  case " << *label->label_val()->ev() << ':';
     }
-    be_global->impl_<< ((j == branch->label_list_length() - 1) ? " {\n" : "\n");
+    be_builtin_global->impl_<< ((j == branch->label_list_length() - 1) ? " {\n" : "\n");
   }
 }
 
@@ -763,8 +763,8 @@ void generateCaseBody(
   const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens)
 {
   using namespace AstTypeClassification;
-  const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
-  const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
+  const BE_BuiltinGlobalData::LanguageMapping lmap = be_builtin_global->language_mapping();
+  const bool use_cxx11 = lmap == BE_BuiltinGlobalData::LANGMAP_CXX11;
   const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
     std::string brType = scoped(branch->field_type()->name()), forany;
@@ -772,11 +772,11 @@ void generateCaseBody(
     Classification br_cls = classify(br);
     if (!br->in_main_file()
         && br->node_type() != AST_Decl::NT_pre_defined) {
-      be_global->add_referenced(br->file_name().c_str());
+      be_builtin_global->add_referenced(br->file_name().c_str());
     }
 
     std::string rhs;
-    const bool is_face = lmap == BE_GlobalData::LANGMAP_FACE_CXX;
+    const bool is_face = lmap == BE_BuiltinGlobalData::LANGMAP_FACE_CXX;
     const bool is_wide = br_cls & CL_WIDE;
     const bool is_bound_string = (br_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED);
     const std::string bound_string_suffix = (is_bound_string && !is_face) ? ".c_str()" : "";
@@ -805,9 +805,9 @@ void generateCaseBody(
     }
 
     if (*statementPrefix) {
-      be_global->impl_ << statementPrefix;
+      be_builtin_global->impl_ << statementPrefix;
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "    " << brType << " tmp;\n" << forany <<
       "    if (strm >> " << rhs << ") {\n"
       "      uni." << name << (use_cxx11 ? "(std::move(tmp));\n" : "(tmp" + bound_string_suffix + ");\n") <<
@@ -815,19 +815,19 @@ void generateCaseBody(
       "      return true;\n"
       "    }\n";
 
-    if (be_global->try_construct(branch) == tryconstructfailaction_use_default) {
-      be_global->impl_ <<
+    if (be_builtin_global->try_construct(branch) == tryconstructfailaction_use_default) {
+      be_builtin_global->impl_ <<
         type_to_default("        ", br, "uni." + name, branch->anonymous(), true) <<
         "        strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
         "        return true;\n";
-    } else if ((be_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
+    } else if ((be_builtin_global->try_construct(branch) == tryconstructfailaction_trim) && (br_cls & CL_BOUNDED) &&
                 (br_cls & (CL_STRING | CL_SEQUENCE))) {
       if (is_bound_string) {
         const std::string check_not_empty = "!tmp.empty()";
         const std::string get_length = use_cxx11 ? "tmp.length()" : "ACE_OS::strlen(tmp.c_str())";
         const std::string inout = use_cxx11 ? "" : ".inout()";
         const std::string strtype = br_cls & CL_WIDE ? "std::wstring" : "std::string";
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
                     << bounded_arg(br) << " < " << get_length << ")) {\n"
           "          " << strtype << " s = tmp;\n"
@@ -840,7 +840,7 @@ void generateCaseBody(
           "          return false;\n"
           "        }\n";
       } else if (br_cls & CL_SEQUENCE) {
-        be_global->impl_ <<
+        be_builtin_global->impl_ <<
           "        if(strm.get_construction_status() == Serializer::ElementConstructionFailure) {\n"
           "          return false;\n"
           "        }\n"
@@ -851,7 +851,7 @@ void generateCaseBody(
       }
     } else {
       //discard/default
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "        strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
         "        return false;\n  ";
     }
@@ -861,7 +861,7 @@ void generateCaseBody(
     Intro intro;
     std::ostringstream contents;
     if (commonFn2) {
-      const OpenDDS::XTypes::MemberId id = be_global->get_id(branch);
+      const OpenDDS::XTypes::MemberId id = be_builtin_global->get_id(branch);
       contents
         << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
@@ -878,8 +878,8 @@ void generateCaseBody(
     } else {
       contents << expr << breakString;
     }
-    intro.join(be_global->impl_, indent);
-    be_global->impl_ << contents.str();
+    intro.join(be_builtin_global->impl_, indent);
+    be_builtin_global->impl_ << contents.str();
   }
 }
 
@@ -910,11 +910,11 @@ bool generateSwitchBody(AST_Union*, CommonFn commonFn,
     generateBranchLabels(branch, discriminator, n_labels, has_default);
     generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix,
                      uni, breaks, parens);
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  }\n";
   }
   if (!has_default && needSyntheticDefault(discriminator, n_labels)) {
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  default:\n" <<
       ((namePrefix == std::string(">> ")) ? "    uni._d(disc);\n" : "") <<
       "    break;\n";
@@ -955,10 +955,10 @@ bool generateSwitchForUnion(AST_Union* u, const char* switchExpr, CommonFn commo
     }
 
     if (true_branch || false_branch) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  if (" << switchExpr << ") {\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  {\n";
     }
 
@@ -968,25 +968,25 @@ bool generateSwitchForUnion(AST_Union* u, const char* switchExpr, CommonFn commo
     }
 
     if (false_branch || (default_branch && true_branch)) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  } else {\n";
       generateCaseBody(commonFn, commonFn2, false_branch ? false_branch : default_branch,
                        statementPrefix, namePrefix, uni, false, parens);
     }
 
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  }\n";
 
     return !default_branch && bool(true_branch) != bool(false_branch);
 
   } else {
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  switch (" << switchExpr << ") {\n";
     bool b(generateSwitchBody(u, commonFn, branches, discriminator,
                               statementPrefix, namePrefix, uni,
                               forceDisableDefault, parens, breaks,
                               commonFn2));
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "  }\n";
     return b;
   }
@@ -996,7 +996,7 @@ inline
 std::string insert_cxx11_accessor_parens(
   const std::string& full_var_name_, bool is_union_member = false)
 {
-  const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
   if (!use_cxx11 || is_union_member || full_var_name_.empty()) {
     return full_var_name_;
   }
@@ -1041,7 +1041,7 @@ inline
 bool struct_has_explicit_keys(AST_Structure* node)
 {
   for (unsigned i = 0; i < node->nfields(); ++i) {
-    if (be_global->is_key(get_struct_field(node, i))) {
+    if (be_builtin_global->is_key(get_struct_field(node, i))) {
       return true;
     }
   }
@@ -1086,7 +1086,7 @@ public:
 
     void validate_pos()
     {
-      for (; check() && explicit_keys_only_ && !be_global->is_key(**this); ++pos_) {
+      for (; check() && explicit_keys_only_ && !be_builtin_global->is_key(**this); ++pos_) {
       }
     }
 

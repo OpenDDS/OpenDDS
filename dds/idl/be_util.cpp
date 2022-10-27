@@ -14,6 +14,7 @@
 
 #include "be_util.h"
 
+#include "be_builtin.h"
 #include "be_extern.h"
 
 #include <ast_generator.h>
@@ -48,44 +49,44 @@ be_util::prep_be_arg(char* arg)
   static const size_t SZ_WB_DDS_SEQ_SUFFIX = sizeof(WB_DDS_SEQ_SUFFIX) - 1;
 
   if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_MACRO, SZ_WB_EXPORT_MACRO)) {
-    be_global->export_macro(arg + SZ_WB_EXPORT_MACRO);
+    be_builtin_global->export_macro(arg + SZ_WB_EXPORT_MACRO);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_EXPORT_INCLUDE,
                                       SZ_WB_EXPORT_INCLUDE)) {
-    be_global->export_include(arg + SZ_WB_EXPORT_INCLUDE);
+    be_builtin_global->export_include(arg + SZ_WB_EXPORT_INCLUDE);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_VERSIONING_NAME,
                                       SZ_WB_VERSIONING_NAME)) {
-    be_global->versioning_name(arg + SZ_WB_VERSIONING_NAME);
+    be_builtin_global->versioning_name(arg + SZ_WB_VERSIONING_NAME);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_VERSIONING_BEGIN,
                                       SZ_WB_VERSIONING_BEGIN)) {
-    be_global->versioning_begin(arg + SZ_WB_VERSIONING_BEGIN);
+    be_builtin_global->versioning_begin(arg + SZ_WB_VERSIONING_BEGIN);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_VERSIONING_END,
                                       SZ_WB_VERSIONING_END)) {
-    be_global->versioning_end(arg + SZ_WB_VERSIONING_END);
+    be_builtin_global->versioning_end(arg + SZ_WB_VERSIONING_END);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_PCH_INCLUDE, SZ_WB_PCH_INCLUDE)) {
-    be_global->pch_include(arg + SZ_WB_PCH_INCLUDE);
+    be_builtin_global->pch_include(arg + SZ_WB_PCH_INCLUDE);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_CPP_INCLUDE, SZ_WB_CPP_INCLUDE)) {
-    be_global->add_cpp_include(arg + SZ_WB_CPP_INCLUDE);
+    be_builtin_global->add_cpp_include(arg + SZ_WB_CPP_INCLUDE);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_JAVA, SZ_WB_JAVA)) {
-    be_global->java(true);
+    be_builtin_global->java(true);
     if (ACE_OS::strlen(arg + SZ_WB_JAVA)) {
-      be_global->java_arg(arg + SZ_WB_JAVA + 1 /* = */);
+      be_builtin_global->java_arg(arg + SZ_WB_JAVA + 1 /* = */);
     }
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TAO_INC_PRE, SZ_WB_TAO_INC_PRE)) {
-    be_global->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
+    be_builtin_global->tao_inc_pre_ = arg + SZ_WB_TAO_INC_PRE;
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_TS_CPP_INCLUDE, SZ_WB_TS_CPP_INCLUDE)) {
-    be_global->add_include(arg + SZ_WB_TS_CPP_INCLUDE, BE_GlobalData::STREAM_CPP);
+    be_builtin_global->add_include(arg + SZ_WB_TS_CPP_INCLUDE, BE_BuiltinGlobalData::STREAM_CPP);
 
   } else if (0 == ACE_OS::strncasecmp(arg, WB_DDS_SEQ_SUFFIX, SZ_WB_DDS_SEQ_SUFFIX)) {
-    be_global->sequence_suffix(arg + SZ_WB_DDS_SEQ_SUFFIX);
+    be_builtin_global->sequence_suffix(arg + SZ_WB_DDS_SEQ_SUFFIX);
   }
 }
 

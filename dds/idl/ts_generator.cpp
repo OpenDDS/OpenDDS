@@ -53,9 +53,9 @@ namespace {
 
   template<size_t N>
   void add_includes(const char* (&includes)[N],
-                    BE_GlobalData::stream_enum_t whichStream) {
+                    BE_BuiltinGlobalData::stream_enum_t whichStream) {
     for (size_t i = 0; i < N; ++i) {
-      be_global->add_include(includes[i], whichStream);
+      be_builtin_global->add_include(includes[i], whichStream);
     }
   }
 }
@@ -94,15 +94,15 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   size_t key_count = 0;
   if (struct_node) {
     IDL_GlobalData::DCPS_Data_Type_Info* info = idl_global->is_dcps_type(name);
-    if (be_global->is_topic_type(struct_node)) {
+    if (be_builtin_global->is_topic_type(struct_node)) {
       key_count = TopicKeys(struct_node).count();
     } else if (info) {
       key_count = info->key_list_.size();
     } else {
       return true;
     }
-  } else if (be_global->is_topic_type(union_node)) {
-    key_count = be_global->union_discriminator_is_key(union_node) ? 1 : 0;
+  } else if (be_builtin_global->is_topic_type(union_node)) {
+    key_count = be_builtin_global->union_discriminator_is_key(union_node) ? 1 : 0;
   } else {
     return true;
   }
@@ -121,16 +121,16 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "dds/DdsDcpsPublication.idl", "dds/DdsDcpsSubscriptionExt.idl",
     "dds/DdsDcpsTypeSupportExt.idl"
   };
-  add_includes(idl_includes, BE_GlobalData::STREAM_IDL);
+  add_includes(idl_includes, BE_BuiltinGlobalData::STREAM_IDL);
 
-  std::string dc = be_global->header_name_.c_str();
+  std::string dc = be_builtin_global->header_name_.c_str();
   dc.replace(dc.end() - 6, dc.end() - 2, "C"); // s/Impl.h$/C.h/
-  be_global->add_include(dc.c_str());
+  be_builtin_global->add_include(dc.c_str());
 
   static const char* h_includes[] = {
     "dds/DCPS/TypeSupportImpl.h", "dds/DCPS/ValueDispatcher.h"
   };
-  add_includes(h_includes, BE_GlobalData::STREAM_H);
+  add_includes(h_includes, BE_BuiltinGlobalData::STREAM_H);
 
   static const char* cpp_includes[] = {
     "dds/DCPS/debug.h", "dds/DCPS/Registered_Data_Types.h",
@@ -143,7 +143,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "dds/DCPS/MultiTopicDataReader_T.h", "dds/DCPS/DataWriterImpl_T.h",
     "dds/DCPS/DataReaderImpl_T.h", "dds/DCPS/XTypes/TypeObject.h"
   };
-  add_includes(cpp_includes, BE_GlobalData::STREAM_CPP);
+  add_includes(cpp_includes, BE_BuiltinGlobalData::STREAM_CPP);
 
   std::map<std::string, std::string> replacements;
   replacements["SCOPED"] = scoped(name, EscapeContext_ForGenIdl);
@@ -152,31 +152,31 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   replacements["SCOPED_NOT_GLOBAL"] =
     dds_generator::scoped_helper(name, "::", EscapeContext_FromGenIdl);
   replacements["TYPE"] = to_string(name->last_component(), EscapeContext_ForGenIdl);
-  replacements["EXPORT"] = be_global->export_macro().c_str();
-  replacements["SEQ"] = be_global->sequence_suffix().c_str();
+  replacements["EXPORT"] = be_builtin_global->export_macro().c_str();
+  replacements["SEQ"] = be_builtin_global->sequence_suffix().c_str();
 
-  ScopedNamespaceGuard idlGuard(name, be_global->idl_, "module");
+  ScopedNamespaceGuard idlGuard(name, be_builtin_global->idl_, "module");
   std::string idl = idl_template_;
   replaceAll(idl, replacements);
-  be_global->idl_ << idl;
+  be_builtin_global->idl_ << idl;
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
+  be_builtin_global->header_ << be_builtin_global->versioning_begin() << "\n";
   {
-    ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard hGuard(name, be_builtin_global->header_);
 
-    be_global->header_ <<
+    be_builtin_global->header_ <<
       "class " << ts_short_name << "TypeSupportImpl;\n";
   }
-  be_global->header_ << be_global->versioning_end() << "\n";
+  be_builtin_global->header_ << be_builtin_global->versioning_end() << "\n";
 
-  be_global->header_ <<
+  be_builtin_global->header_ <<
     "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
     "namespace OpenDDS {\n"
     "namespace DCPS {\n"
     "template <>\n"
     "struct DDSTraits<" << cxx_name << "> {\n"
     "  typedef " << cxx_name << " MessageType;\n"
-    "  typedef " << ts_name << be_global->sequence_suffix() << " MessageSequenceType;\n"
+    "  typedef " << ts_name << be_builtin_global->sequence_suffix() << " MessageSequenceType;\n"
     "  typedef " << ts_name << "TypeSupport TypeSupportType;\n"
     "  typedef " << ts_name << "TypeSupportImpl TypeSupportImplType;\n"
     "  typedef " << ts_name << "DataWriter DataWriterType;\n"
@@ -192,12 +192,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "} // namespace OpenDDS\n"
     "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
 
-  be_global->header_ << be_global->versioning_begin() << "\n";
+  be_builtin_global->header_ << be_builtin_global->versioning_begin() << "\n";
   {
-    ScopedNamespaceGuard hGuard(name, be_global->header_);
+    ScopedNamespaceGuard hGuard(name, be_builtin_global->header_);
 
-    be_global->header_ <<
-      "class " << be_global->export_macro() << " " << ts_short_name << "TypeSupportImpl\n"
+    be_builtin_global->header_ <<
+      "class " << be_builtin_global->export_macro() << " " << ts_short_name << "TypeSupportImpl\n"
       "  : public virtual OpenDDS::DCPS::LocalObject<" << ts_short_name << "TypeSupport>\n"
       "  , public virtual OpenDDS::DCPS::TypeSupportImpl_T<" << short_name << ">\n"
       "  , public virtual OpenDDS::DCPS::ValueDispatcher_T<" << short_name << ">\n"
@@ -210,10 +210,10 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  " << ts_short_name << "TypeSupportImpl() {}\n"
       "  virtual ~" << ts_short_name << "TypeSupportImpl() {}\n"
       "\n"
-      "  virtual " << be_global->versioning_name() << "::DDS::DataWriter_ptr create_datawriter();\n"
-      "  virtual " << be_global->versioning_name() << "::DDS::DataReader_ptr create_datareader();\n"
+      "  virtual " << be_builtin_global->versioning_name() << "::DDS::DataWriter_ptr create_datawriter();\n"
+      "  virtual " << be_builtin_global->versioning_name() << "::DDS::DataReader_ptr create_datareader();\n"
       "#ifndef OPENDDS_NO_MULTI_TOPIC\n"
-      "  virtual " << be_global->versioning_name() << "::DDS::DataReader_ptr create_multitopic_datareader();\n"
+      "  virtual " << be_builtin_global->versioning_name() << "::DDS::DataReader_ptr create_multitopic_datareader();\n"
       "#endif /* !OPENDDS_NO_MULTI_TOPIC */\n"
       "#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE\n"
       "  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();\n"
@@ -238,12 +238,12 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "} init_" << name_underscores << ";\n"
       "}\n\n";
   }
-  be_global->header_ << be_global->versioning_end() << "\n";
+  be_builtin_global->header_ << be_builtin_global->versioning_end() << "\n";
 
-  be_global->impl_ << be_global->versioning_begin() << "\n";
+  be_builtin_global->impl_ << be_builtin_global->versioning_begin() << "\n";
   {
-    ScopedNamespaceGuard cppGuard(name, be_global->impl_);
-    be_global->impl_ <<
+    ScopedNamespaceGuard cppGuard(name, be_builtin_global->impl_);
+    be_builtin_global->impl_ <<
       "::DDS::DataWriter_ptr " << ts_short_name << "TypeSupportImpl::create_datawriter()\n"
       "{\n"
       "  typedef OpenDDS::DCPS::DataWriterImpl_T<" << short_name << "> DataWriterImplType;\n"
@@ -281,66 +281,66 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "const OpenDDS::XTypes::TypeIdentifier& " << ts_short_name << "TypeSupportImpl::getMinimalTypeIdentifier() const\n"
       "{\n";
 
-    const bool java_ts_only = be_global->java_arg().length() > 0;
-    const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
+    const bool java_ts_only = be_builtin_global->java_arg().length() > 0;
+    const bool generate_xtypes = !be_builtin_global->suppress_xtypes() && !java_ts_only;
     if (generate_xtypes) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return OpenDDS::DCPS::getMinimalTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
         "  return ti;\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n"
       "const OpenDDS::XTypes::TypeMap& " << ts_short_name << "TypeSupportImpl::getMinimalTypeMap() const\n"
       "{\n";
 
     if (generate_xtypes) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return OpenDDS::DCPS::getMinimalTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  static OpenDDS::XTypes::TypeMap tm;\n"
         "  return tm;\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n"
       "const OpenDDS::XTypes::TypeIdentifier& " << ts_short_name << "TypeSupportImpl::getCompleteTypeIdentifier() const\n"
       "{\n";
 
-    const bool generate_xtypes_complete = generate_xtypes && be_global->xtypes_complete();
+    const bool generate_xtypes_complete = generate_xtypes && be_builtin_global->xtypes_complete();
     if (generate_xtypes_complete) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return OpenDDS::DCPS::getCompleteTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
         "  return ti;\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n"
       "const OpenDDS::XTypes::TypeMap& " << ts_short_name << "TypeSupportImpl::getCompleteTypeMap() const\n"
       "{\n";
 
     if (generate_xtypes_complete) {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  return OpenDDS::DCPS::getCompleteTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
     } else {
-      be_global->impl_ <<
+      be_builtin_global->impl_ <<
         "  static OpenDDS::XTypes::TypeMap tm;\n"
         "  return tm;\n";
     }
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "}\n\n"
       << ts_short_name << "TypeSupport::_ptr_type " << ts_short_name << "TypeSupportImpl::_narrow(CORBA::Object_ptr obj)\n"
       "{\n"
       "  return TypeSupportType::_narrow(obj);\n"
       "}\n";
   }
-  be_global->impl_ << be_global->versioning_end() << "\n";
+  be_builtin_global->impl_ << be_builtin_global->versioning_end() << "\n";
 
-  if (be_global->face_ts()) {
+  if (be_builtin_global->face_ts()) {
     if (node->node_type() == AST_Decl::NT_struct) {
       face_ts_generator::generate(name);
     } else {
@@ -371,15 +371,15 @@ namespace java_ts_generator {
   void generate(AST_Structure* node) {
     UTL_ScopedName* name = node->name();
 
-    if (!(idl_global->is_dcps_type(name) || be_global->is_topic_type(node))) {
+    if (!(idl_global->is_dcps_type(name) || be_builtin_global->is_topic_type(node))) {
       return;
     }
 
-    ACE_CString output_file = be_global->java_arg();
+    ACE_CString output_file = be_builtin_global->java_arg();
     if (output_file.length()) {
-      be_global->impl_name_ = output_file;
+      be_builtin_global->impl_name_ = output_file;
     }
-    be_global->add_include("idl2jni_jni.h", BE_GlobalData::STREAM_CPP);
+    be_builtin_global->add_include("idl2jni_jni.h", BE_BuiltinGlobalData::STREAM_CPP);
 
     std::string type = scoped(name);
 
@@ -424,7 +424,7 @@ namespace java_ts_generator {
       "    }\n"
       "    private static native long _jni_init();\n"
       "}\n";
-    be_global->impl_ <<
+    be_builtin_global->impl_ <<
       "extern \"C\" JNIEXPORT jlong JNICALL\n"
       "Java_" << jniclass << "TypeSupportImpl__1jni_1init(JNIEnv*, jclass) {\n"
       "  return reinterpret_cast<jlong>(static_cast<CORBA::Object_ptr>(new "
@@ -439,10 +439,10 @@ namespace face_ts_generator {
   void generate(UTL_ScopedName* name) {
     const std::string cxx_name = scoped(name),
       name_underscores = dds_generator::scoped_helper(name, "_"),
-      exportMacro = be_global->export_macro().c_str(),
+      exportMacro = be_builtin_global->export_macro().c_str(),
       exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
-    be_global->add_include("FACE/TS.hpp", BE_GlobalData::STREAM_FACETS_H);
-    be_global->facets_header_ <<
+    be_builtin_global->add_include("FACE/TS.hpp", BE_BuiltinGlobalData::STREAM_FACETS_H);
+    be_builtin_global->facets_header_ <<
       "namespace FACE\n"
       "{\n"
       "  namespace Read_Callback\n"
@@ -480,7 +480,7 @@ namespace face_ts_generator {
       "      /* out */ RETURN_CODE_TYPE& return_code);\n\n"
       "  }\n"
       "}\n\n";
-    be_global->facets_impl_ <<
+    be_builtin_global->facets_impl_ <<
       "void Receive_Message(CONNECTION_ID_TYPE connection_id,\n"
       "                     TIMEOUT_TYPE timeout,\n"
       "                     TRANSACTION_ID_TYPE& transaction_id,\n"

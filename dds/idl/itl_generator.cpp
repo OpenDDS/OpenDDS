@@ -54,7 +54,7 @@ operator<<(std::ostream& out,
 {
   AST_Typedef* td = dynamic_cast<AST_Typedef*>(it.type);
   if (td) {
-    be_global->itl_ << '"' << it.type->repoID() << '"';
+    be_builtin_global->itl_ << '"' << it.type->repoID() << '"';
     return out;
   }
 
@@ -62,60 +62,60 @@ operator<<(std::ostream& out,
   if (c & CL_STRING) {
     // TODO:  Support bounded strings.
     if (c & CL_WIDE) {
-      be_global->itl_ << "{ \"kind\" : \"string\", \"note\" : { \"idl\" : { \"type\" : \"wstring\" } } }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"string\", \"note\" : { \"idl\" : { \"type\" : \"wstring\" } } }";
     }
     else {
-      be_global->itl_ << "{ \"kind\" : \"string\" }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"string\" }";
     }
   }
   else if (c & CL_PRIMITIVE) {
     switch (dynamic_cast<AST_PredefinedType*>(it.type)->pt()) {
     case AST_PredefinedType::PT_long:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 32 }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 32 }";
       break;
     case AST_PredefinedType::PT_ulong:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 32, \"unsigned\" : true}";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 32, \"unsigned\" : true}";
       break;
     case AST_PredefinedType::PT_longlong:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 64 }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 64 }";
       break;
     case AST_PredefinedType::PT_ulonglong:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 64, \"unsigned\" : true}";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 64, \"unsigned\" : true}";
       break;
     case AST_PredefinedType::PT_short:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 16 }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 16 }";
       break;
     case AST_PredefinedType::PT_ushort:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 16, \"unsigned\" : true}";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 16, \"unsigned\" : true}";
       break;
     case AST_PredefinedType::PT_float:
-      be_global->itl_ << "{ \"kind\" : \"float\", \"model\" : \"binary32\" }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"float\", \"model\" : \"binary32\" }";
       break;
     case AST_PredefinedType::PT_double:
-      be_global->itl_ << "{ \"kind\" : \"float\", \"model\" : \"binary64\" }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"float\", \"model\" : \"binary64\" }";
       break;
     case AST_PredefinedType::PT_longdouble:
-      be_global->itl_ << "{ \"kind\" : \"float\", \"model\" : \"binary128\" }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"float\", \"model\" : \"binary128\" }";
       break;
     case AST_PredefinedType::PT_char:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"note\" : { \"presentation\" : { \"type\" : \"char\" } } }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"note\" : { \"presentation\" : { \"type\" : \"char\" } } }";
       break;
     case AST_PredefinedType::PT_wchar:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"note\" : { \"presentation\" : { \"type\" : \"char\" }, \"idl\" : { \"type\" : \"wchar\" } } }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"note\" : { \"presentation\" : { \"type\" : \"char\" }, \"idl\" : { \"type\" : \"wchar\" } } }";
       break;
     case AST_PredefinedType::PT_boolean:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 1, \"note\" : { \"presentation\" : { \"type\" : \"bool\" } } }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 1, \"note\" : { \"presentation\" : { \"type\" : \"bool\" } } }";
       break;
     case AST_PredefinedType::PT_octet:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true, "
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true, "
         "\"note\" : { \"presentation\" : { \"type\" : \"byte\" } }  }";
       break;
 #if OPENDDS_HAS_EXPLICIT_INTS
     case AST_PredefinedType::PT_uint8:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8, \"unsigned\" : true }";
       break;
     case AST_PredefinedType::PT_int8:
-      be_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8 }";
+      be_builtin_global->itl_ << "{ \"kind\" : \"int\", \"bits\" : 8 }";
       break;
 #endif
     case AST_PredefinedType::PT_any:
@@ -129,7 +129,7 @@ operator<<(std::ostream& out,
     }
   }
   else {
-    be_global->itl_ << '"' << it.type->repoID() << '"';
+    be_builtin_global->itl_ << '"' << it.type->repoID() << '"';
   }
 
   return out;
@@ -137,7 +137,7 @@ operator<<(std::ostream& out,
 
 void itl_generator::gen_prologue()
 {
-  be_global->itl_ << Indent(this) << "{\n"
+  be_builtin_global->itl_ << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"types\" :\n"
                   << Open(this)
@@ -146,7 +146,7 @@ void itl_generator::gen_prologue()
 
 void itl_generator::gen_epilogue()
 {
-  be_global->itl_ << Indent(this) << "]\n"
+  be_builtin_global->itl_ << Indent(this) << "]\n"
                   << Close(this)
                   << Close(this)
                   << Indent(this) << "}\n";
@@ -155,7 +155,7 @@ void itl_generator::gen_epilogue()
 void itl_generator::new_type()
 {
   if (count_ > 0)
-    be_global->itl_ << Indent(this) << ",\n";
+    be_builtin_global->itl_ << Indent(this) << ",\n";
   ++count_;
 }
 
@@ -164,7 +164,7 @@ bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* /*name*/,
 {
   new_type();
 
-  be_global->itl_ << Open(this)
+  be_builtin_global->itl_ << Open(this)
                   << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
@@ -181,18 +181,18 @@ bool itl_generator::gen_enum(AST_Enum*, UTL_ScopedName* /*name*/,
 
   for (size_t i = 0; i < contents.size(); ++i) {
     if (i > 0)
-      be_global->itl_ << ", ";
-    be_global->itl_ << '"' << contents[i]->local_name()->get_string() << '"'
+      be_builtin_global->itl_ << ", ";
+    be_builtin_global->itl_ << '"' << contents[i]->local_name()->get_string() << '"'
                     << " : "
                     << '"' << i << '"';
   }
 
-  be_global->itl_ << "}\n";
-  be_global->itl_ << Close(this)
+  be_builtin_global->itl_ << "}\n";
+  be_builtin_global->itl_ << Close(this)
                   << Indent(this) << "}\n"
                   << Close(this);
 
-  be_global->itl_ << Close(this)
+  be_builtin_global->itl_ << Close(this)
                   << Indent(this) << "}\n"
                   << Close(this);
 
@@ -209,7 +209,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
   case AST_Decl::NT_sequence:
     {
       AST_Sequence *seq = dynamic_cast<AST_Sequence*>(base);
-      be_global->itl_ << Open(this)
+      be_builtin_global->itl_ << Open(this)
                       << Indent(this) << "{\n"
                       << Open(this)
                       << Indent(this) << "\"kind\" : \"alias\",\n"
@@ -220,9 +220,9 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
                       << Open(this)
                       << Indent(this) << "\"kind\" : \"sequence\",\n";
       if (!seq->unbounded()) {
-        be_global->itl_ << Indent(this) << "\"capacity\" : " << seq->max_size()->ev()->u.ulval << ",\n";
+        be_builtin_global->itl_ << Indent(this) << "\"capacity\" : " << seq->max_size()->ev()->u.ulval << ",\n";
       }
-      be_global->itl_ << Indent(this) << "\"type\" : " << InlineType(seq->base_type()) << "\n"
+      be_builtin_global->itl_ << Indent(this) << "\"type\" : " << InlineType(seq->base_type()) << "\n"
                       << Close(this)
                       << Indent(this) << "}\n"
                       << Close(this)
@@ -234,7 +234,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
   case AST_Decl::NT_array:
     {
       AST_Array* arr = dynamic_cast<AST_Array*>(base);
-      be_global->itl_ << Open(this)
+      be_builtin_global->itl_ << Open(this)
                       << Indent(this) << "{\n"
                       << Open(this)
                       << Indent(this) << "\"kind\" : \"alias\",\n"
@@ -249,10 +249,10 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
       ACE_CDR::ULong dims = arr->n_dims();
       for (size_t i = 0; i < dims; ++i) {
         if (i > 0)
-          be_global->itl_ << ", ";
-        be_global->itl_ << arr->dims()[i]->ev()->u.ulval;
+          be_builtin_global->itl_ << ", ";
+        be_builtin_global->itl_ << arr->dims()[i]->ev()->u.ulval;
       }
-      be_global->itl_ << "]\n"
+      be_builtin_global->itl_ << "]\n"
                       << Close(this)
                       << Indent(this) << "}\n"
                       << Close(this)
@@ -266,7 +266,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
       AST_Fixed* fixed = dynamic_cast<AST_Fixed*>(base);
       unsigned digits = fixed->digits()->ev()->u.ulval;
       unsigned scale = fixed->scale()->ev()->u.ulval;
-      be_global->itl_
+      be_builtin_global->itl_
         << Open(this) << Indent(this) << "{\n" << Open(this)
         << Indent(this) << "\"kind\" : \"alias\",\n"
         << Indent(this) << "\"name\" : \"" << repoid << "\",\n"
@@ -280,7 +280,7 @@ bool itl_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* /*name*/,
     }
   default:
     {
-      be_global->itl_ << Open(this)
+      be_builtin_global->itl_ << Open(this)
                       << Indent(this) << "{\n"
                       << Open(this)
                       << Indent(this) << "\"kind\" : \"alias\",\n"
@@ -300,15 +300,15 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
                                const std::vector<AST_Field*>& fields,
                                AST_Type::SIZE_TYPE, const char* repoid)
 {
-  if (!be_global->itl())
+  if (!be_builtin_global->itl())
     return true;
 
   const bool is_topic_type =
-    idl_global->is_dcps_type(node->name()) || be_global->is_topic_type(node);
+    idl_global->is_dcps_type(node->name()) || be_builtin_global->is_topic_type(node);
 
   new_type();
 
-  be_global->itl_ << Open(this)
+  be_builtin_global->itl_ << Open(this)
                   << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
@@ -334,9 +334,9 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
        ++pos) {
     AST_Field* field = *pos;
     if (comma_flag) {
-      be_global->itl_ << Indent(this) << ",\n";
+      be_builtin_global->itl_ << Indent(this) << ",\n";
     }
-    be_global->itl_ << Open(this)
+    be_builtin_global->itl_ << Open(this)
                     << Indent(this) << "{\n"
                     << Open(this)
                     << Indent(this) << "\"name\" : \"" << field->local_name()->get_string() << "\",\n"
@@ -347,7 +347,7 @@ bool itl_generator::gen_struct(AST_Structure* node, UTL_ScopedName*,
     comma_flag = true;
   }
 
-  be_global->itl_ << Indent(this) << "]\n"
+  be_builtin_global->itl_ << Indent(this) << "]\n"
                   << Close(this)
                   << Close(this)
                   << Indent(this) << "}\n"
@@ -368,7 +368,7 @@ bool itl_generator::gen_union(AST_Union* node, UTL_ScopedName* /*name*/,
 {
   new_type();
 
-  be_global->itl_ << Open(this)
+  be_builtin_global->itl_ << Open(this)
                   << Indent(this) << "{\n"
                   << Open(this)
                   << Indent(this) << "\"kind\" : \"alias\",\n"
@@ -380,7 +380,7 @@ bool itl_generator::gen_union(AST_Union* node, UTL_ScopedName* /*name*/,
                   << Indent(this) << "\"kind\" : \"union\",\n"
                   << Indent(this) << "\"discriminator\" : " << InlineType(_d) << ",\n"
                   << Indent(this) << "\"note\" : { \"is_dcps_data_type\" : "
-                  << (be_global->is_topic_type(node) ? "true" : "false")
+                  << (be_builtin_global->is_topic_type(node) ? "true" : "false")
                   << " },\n"
                   << Indent(this) << "\"fields\" :\n"
                   << Open(this)
@@ -390,11 +390,11 @@ bool itl_generator::gen_union(AST_Union* node, UTL_ScopedName* /*name*/,
        pos != limit;
        ++pos) {
     if (pos != cases.begin())
-      be_global->itl_ << Indent(this) << ",\n";
+      be_builtin_global->itl_ << Indent(this) << ",\n";
 
     AST_UnionBranch *branch = *pos;
 
-    be_global->itl_ << Open(this)
+    be_builtin_global->itl_ << Open(this)
                     << Indent(this) << "{\n"
                     << Open(this)
                     << Indent(this) << "\"name\" : \"" << branch->local_name()->get_string() << "\",\n"
@@ -407,22 +407,22 @@ bool itl_generator::gen_union(AST_Union* node, UTL_ScopedName* /*name*/,
     for (unsigned long i = 0; i < count; i++)
       {
         if (i > 0)
-          be_global->itl_ << ", ";
+          be_builtin_global->itl_ << ", ";
         AST_UnionLabel *label = branch->label(i);
         if (label->label_kind() == AST_UnionLabel::UL_default)
           {
             continue;
           }
-        be_global->itl_ << "\"" << label->label_val()->n()->last_component()->get_string() << "\"";
+        be_builtin_global->itl_ << "\"" << label->label_val()->n()->last_component()->get_string() << "\"";
       }
 
-    be_global->itl_ << "]\n"
+    be_builtin_global->itl_ << "]\n"
                     << Close(this)
                     << Indent(this) << "}\n"
                     << Close(this);
   }
 
-  be_global->itl_ << Indent(this) << "]\n"
+  be_builtin_global->itl_ << Indent(this) << "]\n"
                   << Close(this)
                   << Close(this)
                   << Indent(this) << "}\n"

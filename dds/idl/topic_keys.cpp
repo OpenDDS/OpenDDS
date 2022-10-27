@@ -204,7 +204,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
           implied_keys_ = true;
           for (Fields::Iterator i = fields.begin(); i != fields_end && implied_keys_; ++i) {
             bool key_annotation_value;
-            const bool has_key_annotation = be_global->check_key(*i, key_annotation_value);
+            const bool has_key_annotation = be_builtin_global->check_key(*i, key_annotation_value);
             if (has_key_annotation && key_annotation_value) {
               implied_keys_ = false;
             }
@@ -216,7 +216,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
 
       for (Fields::Iterator i = fields[pos_]; i != fields_end; ++i) {
         bool key_annotation_value;
-        const bool has_key_annotation = be_global->check_key(*i, key_annotation_value);
+        const bool has_key_annotation = be_builtin_global->check_key(*i, key_annotation_value);
         const bool implied_key = implied_keys_ && !(has_key_annotation && !key_annotation_value);
         if (key_annotation_value || implied_key) {
           child_ = new Iterator(*i, this);
@@ -274,7 +274,7 @@ TopicKeys::Iterator& TopicKeys::Iterator::operator++()
     if (pos_ == 0) { // Only Allow One Iteration
       pos_ = 1;
       AST_Union* union_node = dynamic_cast<AST_Union*>(root_);
-      if (be_global->union_discriminator_is_key(union_node)) {
+      if (be_builtin_global->union_discriminator_is_key(union_node)) {
         current_value_ = root_;
         return *this;
       } else if (level_ > 0) {
