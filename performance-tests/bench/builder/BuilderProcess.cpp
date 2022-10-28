@@ -5,7 +5,7 @@
 namespace Builder {
 
 BuilderProcess::BuilderProcess(const ProcessConfig& config)
-  : config_sections_(std::make_shared<ConfigSectionManager>(config.config_sections))
+  : config_sections_(std::make_shared<ConfigSectionManager>(config.name.in(), config.config_sections))
   , participants_(std::make_shared<ParticipantManager>(config.participants, report_.participants, reader_map_, writer_map_, cft_map_))
 {
 }

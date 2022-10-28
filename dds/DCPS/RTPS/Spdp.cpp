@@ -9,7 +9,6 @@
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
-#include "Logging.h"
 
 
 #include <dds/DCPS/Service_Participant.h>
@@ -2579,13 +2578,6 @@ Spdp::SpdpTransport::dispose_unregister()
     return;
   }
 
-  if (DCPS::transport_debug.log_messages) {
-    RTPS::Message message;
-    message.hdr = hdr_;
-    append_submessage(message, data_);
-    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
-  }
-
   send(SEND_MULTICAST | SEND_RELAY);
 }
 
@@ -2733,13 +2725,6 @@ Spdp::SpdpTransport::write_i(WriteFlags flags)
     return;
   }
 
-  if (DCPS::transport_debug.log_messages) {
-    RTPS::Message message;
-    message.hdr = hdr_;
-    append_submessage(message, data_);
-    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
-  }
-
   send(flags);
 }
 
@@ -2871,14 +2856,6 @@ Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& loca
         ACE_TEXT("failed to serialize headers for SPDP\n")));
     }
     return;
-  }
-
-  if (DCPS::transport_debug.log_messages) {
-    RTPS::Message message;
-    message.hdr = hdr_;
-    append_submessage(message, info_dst);
-    append_submessage(message, data_);
-    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, true, message);
   }
 
   send(flags, local_address);
@@ -3190,10 +3167,6 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
       } else if (!submessageLength) {
         break; // submessageLength of 0 indicates the last submessage
       }
-    }
-
-    if (DCPS::transport_debug.log_messages && !DCPS::equal_guid_prefixes(hdr_.guidPrefix, header.guidPrefix)) {
-      RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", hdr_.guidPrefix, false, message);
     }
 
   } else if ((buff_.size() >= 4) && (ACE_OS::memcmp(buff_.rd_ptr(), "RTPX", 4) == 0)) {
