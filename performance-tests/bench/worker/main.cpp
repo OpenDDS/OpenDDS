@@ -46,6 +46,7 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/transport/udp/Udp.h>
