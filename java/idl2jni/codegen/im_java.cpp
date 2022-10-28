@@ -6,7 +6,7 @@
  */
 
 #include "idl_mapping.h"
-#include "be_extern.h"
+#include "be_jni.h"
 
 #include "utl_identifier.h"
 #include "utl_string.h"
@@ -56,7 +56,7 @@ struct JavaName {
   : pkg_(base.pkg_)
   , clazz_(base.clazz_) {
     clazz_ += suffix;
-    size_t zero = 0; //explicit type to avoid SunCC thinking this is a char*
+    const size_t zero = 0; //explicit type to avoid SunCC thinking this is a char*
 
     if (escape) clazz_.insert(zero, 1, '_');
   }
@@ -115,7 +115,7 @@ bool java_class_gen(const JavaName &jn, JavaFileType jft, const char *body,
     break;
   }
 
-  string nlib = be_global->native_lib_name().c_str();
+  string nlib = be_jni_global->native_lib_name().c_str();
   string nativeLoader;
 
   if (nlib != "" && ACE_OS::strstr(body, " native ")) {
@@ -150,7 +150,7 @@ bool java_class_gen(const JavaName &jn, JavaFileType jft, const char *body,
 
   oss << " {\n" << body << nativeLoader << "}\n";
 
-  return BE_GlobalData::writeFile(file.c_str(), oss.str());
+  return BE_JNIGlobalData::writeFile(file.c_str(), oss.str());
 }
 
 bool gen_helper(const JavaName &jn, const char *repoid, bool narrow = false)
@@ -477,7 +477,7 @@ ostream& operator<<(ostream& o, const AST_Expression::AST_ExprValue& expr)
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
-    BE_abort();
+    BE_JNIInterface::BE_abort();
   }
   }
 
@@ -554,7 +554,7 @@ bool idl_mapping_java::gen_const(UTL_ScopedName *name, bool nestedInInteface,
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported\n";
-    BE_abort();
+    BE_JNIInterface::BE_abort();
   }
   }
 
@@ -873,7 +873,7 @@ void writeUnionDefaultValue(ostream &os, AST_Expression::ExprType udisc_type,
     break;
   default:
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Bad discriminant type '" << udisc_type << "' (shouldn't happen here)\n";
-    BE_abort();
+    BE_JNIInterface::BE_abort();
   }
 }
 }
@@ -893,7 +893,7 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
 
   for (size_t i = 0; i < branches.size(); ++i) {
     string disc_check, first_label_value;
-    unsigned long n_labels = branches[i]->label_list_length();
+    const unsigned long n_labels = branches[i]->label_list_length();
 
     for (unsigned long j = 0; j < n_labels; ++j) {
       AST_UnionLabel *ul = branches[i]->label(j);
@@ -977,7 +977,7 @@ bool idl_mapping_java::gen_union(UTL_ScopedName *name,
       "  }\n\n";
   }
 
-  JavaName jn(name);
+  const JavaName jn(name);
   return java_class_gen(jn, JFINAL_CLASS,
                         body.c_str(), "", "java.io.Serializable")
          && gen_helper(jn, repoid) && gen_holder(jn);

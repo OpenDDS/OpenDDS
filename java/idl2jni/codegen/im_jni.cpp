@@ -7,7 +7,7 @@
 
 #include "idl_mapping.h"
 
-#include "be_extern.h"
+#include "be_jni.h"
 #include "utl_identifier.h"
 #include "utl_string.h"
 #include "fe_private.h"
@@ -405,13 +405,13 @@ struct commonSetup {
   explicit commonSetup(UTL_ScopedName *name, const char *java = "jobject",
                        bool useVar = false, bool useForAny = false,
                        bool skipDefault = false, bool useCxxRef = true)
-  : hfile(be_global->stub_header_)
-  , cppfile(be_global->stub_impl_)
+  : hfile(be_jni_global->stub_header_)
+  , cppfile(be_jni_global->stub_impl_)
   , cxx(idl_mapping_jni::scoped(name) + (useVar ? "_var" : (useForAny ? "_forany" : ""))) {
-    be_global->add_include("idl2jni_jni.h");
-    be_global->add_include("idl2jni_runtime.h");
-    ACE_CString ace_exporter = be_global->stub_export_macro();
-    bool use_exp = ace_exporter != "";
+    be_jni_global->add_include("idl2jni_jni.h");
+    be_jni_global->add_include("idl2jni_runtime.h");
+    ACE_CString ace_exporter = be_jni_global->stub_export_macro();
+    const bool use_exp = ace_exporter != "";
     exporter = use_exp ? (string(" ") + ace_exporter.c_str()) : "";
     sigToCxx =
       "void copyToCxx (JNIEnv *jni, " + cxx + (useCxxRef ? " &" : " ")
@@ -897,7 +897,7 @@ void write_native_unarrow(const char *cxx, const char *javaInterf)
 {
   string helper = string(javaInterf) + "Helper",
                   fnName = jni_function_name(helper.c_str(), "native_unarrow");
-  be_global->stub_impl_ <<
+  be_jni_global->stub_impl_ <<
   "extern \"C\" JNIEXPORT jobject JNICALL\n" <<
   fnName << " (JNIEnv *jni, jclass, jobject obj)\n"
   "{\n"
@@ -1012,7 +1012,7 @@ string arg_conversion(const char *name, AST_Type *type,
     if (always_var) suffix = ".inout ()";
 
   } else if (direction == AST_Argument::dir_OUT) {
-    bool var = type->size_type() != AST_Type::FIXED;
+    const bool var = type->size_type() != AST_Type::FIXED;
     argconv_in +=
       "      " + (var ? tao_var : tao) + " _c_" + name + ";\n";
     argconv_out +=
@@ -1088,8 +1088,8 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
   string jniFn = idl_mapping_jni::jniFnName(attr->field_type());
   string ret_jsig = idl_mapping_jni::jvmSignature(attr->field_type());
   string suffix, extra_type, extra_init, extra_retn;
-  bool is_array = isArray(attr->field_type()),
-                  is_objref = isObjref(attr->field_type());
+  const bool is_array = isArray(attr->field_type()),
+                        is_objref = isObjref(attr->field_type());
 
   if (is_array || attr->field_type()->size_type() != AST_Type::FIXED) {
     if (!is_array && !is_objref) suffix = ".in ()";
@@ -1137,9 +1137,9 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
     string attrname_cxx = isCxxKeyword(attrname) ? (string("_cxx_")
                                                     + attrname) : attrname;
     //FUTURE: support user exceptions
-    be_global->stub_header_ <<
+    be_jni_global->stub_header_ <<
       "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ");\n\n";
-    be_global->stub_impl_ <<
+    be_jni_global->stub_impl_ <<
     tao_ret << ' ' << idl_mapping_jni::scoped_helper(name, "_")
             << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
     "{\n"
@@ -1160,7 +1160,7 @@ void write_native_attribute_r(UTL_ScopedName *name, const char *javaStub,
     "}\n\n";
   }
 
-  be_global->stub_impl_ <<
+  be_jni_global->stub_impl_ <<
   "extern \"C\" JNIEXPORT " << ret << " JNICALL\n" <<
   fnName << " (JNIEnv *_jni, jobject _jthis" << args << ")\n"
   "{\n"
@@ -1231,9 +1231,9 @@ void write_native_attribute_w(UTL_ScopedName *name, const char *javaStub,
     string attrname_cxx = isCxxKeyword(attrname) ? (string("_cxx_")
                                                     + attrname) : attrname;
     //FUTURE: support user exceptions
-    be_global->stub_header_ <<
+    be_jni_global->stub_header_ <<
       "  " << tao_ret << ' ' << attrname_cxx << " (" << tao_args << ");\n\n";
-    be_global->stub_impl_ <<
+    be_jni_global->stub_impl_ <<
     tao_ret << ' ' << idl_mapping_jni::scoped_helper(name, "_")
             << "JavaPeer::" << attrname_cxx << " (" << tao_args << ")\n"
     "{\n"
@@ -1254,7 +1254,7 @@ void write_native_attribute_w(UTL_ScopedName *name, const char *javaStub,
     "}\n\n";
   }
 
-  be_global->stub_impl_ <<
+  be_jni_global->stub_impl_ <<
   "extern \"C\" JNIEXPORT " << ret << " JNICALL\n" <<
   fnName << " (JNIEnv *_jni, jobject _jthis" << args << ")\n"
   "{\n"
@@ -1299,8 +1299,8 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     jniFn = idl_mapping_jni::jniFnName(op->return_type());
     ret_jsig = idl_mapping_jni::jvmSignature(op->return_type());
     string suffix, extra_type, extra_init, extra_retn;
-    bool is_array = isArray(op->return_type()),
-                    is_objref = isObjref(op->return_type());
+    const bool is_array = isArray(op->return_type()),
+                          is_objref = isObjref(op->return_type());
 
     if (is_array || op->return_type()->size_type() != AST_Type::FIXED) {
       if (!is_array && !is_objref) suffix = ".in ()";
@@ -1386,9 +1386,9 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     string opname_cxx = isCxxKeyword(opname) ? (string("_cxx_") + opname)
                         : opname;
     //FUTURE: support user exceptions
-    be_global->stub_header_ <<
+    be_jni_global->stub_header_ <<
       "  " << tao_ret << ' ' << opname_cxx << " (" << tao_args << ");\n\n";
-    be_global->stub_impl_ <<
+    be_jni_global->stub_impl_ <<
     tao_ret << ' ' << idl_mapping_jni::scoped_helper(name, "_")
             << "JavaPeer::" << opname_cxx << " (" << tao_args << ")\n"
     "{\n"
@@ -1409,7 +1409,7 @@ void write_native_operation(UTL_ScopedName *name, const char *javaStub,
     "}\n\n";
   }
 
-  be_global->stub_impl_ <<
+  be_jni_global->stub_impl_ <<
   "extern \"C\" JNIEXPORT " << ret << " JNICALL\n" <<
   fnName << " (JNIEnv *_jni, jobject _jthis" << args << ")\n"
   "{\n"
@@ -1509,7 +1509,7 @@ bool idl_mapping_jni::gen_interf(UTL_ScopedName *name, bool local,
   write_native_unarrow(cxx.c_str(), javaInterf.c_str());
 
   if (local) {
-    be_global->add_include("idl2jni_BaseJavaPeer.h");
+    be_jni_global->add_include("idl2jni_BaseJavaPeer.h");
     c.hfile << "\n"
     "class" << c.exporter << ' ' << name_underscores << "JavaPeer\n";
 
@@ -1683,7 +1683,7 @@ ostream& operator<<(ostream& o, const AST_Expression::AST_ExprValue& expr)
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported as a union case label\n";
-    BE_abort();
+    BE_JNIInterface::BE_abort();
   }
   }
 
@@ -1705,7 +1705,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
   bool someBranchUsesExplicitDisc(false), hasDefault(false);
 
   for (size_t i = 0; i < branches.size(); ++i) {
-    unsigned long n_labels = branches[i]->label_list_length();
+    const unsigned long n_labels = branches[i]->label_list_length();
     bool useExplicitDisc(n_labels > 1);
 
     for (unsigned long j = 0; j < n_labels; ++j) {
@@ -1840,7 +1840,7 @@ bool idl_mapping_jni::gen_union(UTL_ScopedName *name,
 
   commonSetup c(name);
   string unionJVMsig = scoped_helper(name, "/");
-  bool disc_is_enum(disc_meth == "Object");
+  const bool disc_is_enum(disc_meth == "Object");
   bool disc_is_bool = false;
   AST_PredefinedType *pd = dynamic_cast<AST_PredefinedType*>(discriminator);
   if (pd) {

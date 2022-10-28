@@ -9,7 +9,6 @@
 #define idl2jni_visitor_H
 
 #include "ast_visitor.h"
-#include "be_extern.h"
 
 #include "tao/Basic_Types.h"
 #include "tao/Version.h"

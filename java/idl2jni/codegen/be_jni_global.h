@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef IDL2JNI_BE_GLOBAL_H
-#define IDL2JNI_BE_GLOBAL_H
+#ifndef IDL2JNI_BE_JNI_GLOBAL_H
+#define IDL2JNI_BE_JNI_GLOBAL_H
 
 #include "ace/SString.h"
 
@@ -21,21 +21,19 @@ class AST_Generator;
 
 // Defines a class containing all back end global data.
 
-class BE_GlobalData {
+class BE_JNIGlobalData {
 public:
   // = TITLE
-  //    BE_GlobalData
+  //    BE_JNIGlobalData
   //
   // = DESCRIPTION
   //    Storage of global data specific to the compiler back end
   //
-  BE_GlobalData();
+  BE_JNIGlobalData();
 
-  virtual ~BE_GlobalData();
+  virtual ~BE_JNIGlobalData();
 
   // Data accessors.
-
-  const char *holding_scope_name() const;
 
   void destroy();
   // Cleanup function.
@@ -122,4 +120,4 @@ private:
   const char *type_, *name_;
 };
 
-#endif /* IDL2JNI_BE_GLOBAL_H */
+#endif /* IDL2JNI_BE_JNI_GLOBAL_H */

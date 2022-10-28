@@ -34,6 +34,7 @@
 
 #include "idl2jni_visitor.h"
 #include "idl_mapping.h"
+#include "be_jni.h"
 
 #include <iostream>
 #include <vector>
@@ -138,7 +139,7 @@ idl2jni_visitor::visit_scope(UTL_Scope *node)
 int
 idl2jni_visitor::visit_module(AST_Module *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -160,7 +161,7 @@ idl2jni_visitor::visit_module(AST_Module *node)
 int
 idl2jni_visitor::visit_interface(AST_Interface *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -208,7 +209,7 @@ idl2jni_visitor::visit_interface(AST_Interface *node)
 int
 idl2jni_visitor::visit_structure(AST_Structure *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -239,7 +240,7 @@ idl2jni_visitor::visit_structure(AST_Structure *node)
 int
 idl2jni_visitor::visit_exception(AST_Exception *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -259,7 +260,7 @@ idl2jni_visitor::visit_exception(AST_Exception *node)
 int
 idl2jni_visitor::visit_typedef(AST_Typedef *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -280,7 +281,7 @@ idl2jni_visitor::visit_typedef(AST_Typedef *node)
 int
 idl2jni_visitor::visit_enum(AST_Enum *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -315,7 +316,7 @@ idl2jni_visitor::visit_interface_fwd(AST_InterfaceFwd *node)
 int
 idl2jni_visitor::visit_constant(AST_Constant *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -340,7 +341,7 @@ idl2jni_visitor::visit_constant(AST_Constant *node)
 int
 idl2jni_visitor::visit_native(AST_Native *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -358,7 +359,7 @@ idl2jni_visitor::visit_native(AST_Native *node)
 int
 idl2jni_visitor::visit_union(AST_Union *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -440,7 +441,7 @@ idl2jni_visitor::visit_array(AST_Array *)
 int
 idl2jni_visitor::visit_valuetype(AST_ValueType *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -452,7 +453,7 @@ idl2jni_visitor::visit_valuetype(AST_ValueType *node)
 int
 idl2jni_visitor::visit_valuetype_fwd(AST_ValueTypeFwd *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -464,7 +465,7 @@ idl2jni_visitor::visit_valuetype_fwd(AST_ValueTypeFwd *node)
 int
 idl2jni_visitor::visit_component(AST_Component *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -476,7 +477,7 @@ idl2jni_visitor::visit_component(AST_Component *node)
 int
 idl2jni_visitor::visit_component_fwd(AST_ComponentFwd *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -488,7 +489,7 @@ idl2jni_visitor::visit_component_fwd(AST_ComponentFwd *node)
 int
 idl2jni_visitor::visit_eventtype(AST_EventType *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -500,7 +501,7 @@ idl2jni_visitor::visit_eventtype(AST_EventType *node)
 int
 idl2jni_visitor::visit_eventtype_fwd(AST_EventTypeFwd *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 
@@ -512,7 +513,7 @@ idl2jni_visitor::visit_eventtype_fwd(AST_EventTypeFwd *node)
 int
 idl2jni_visitor::visit_home(AST_Home *node)
 {
-  if (node->imported() && !be_global->do_included_files()) {
+  if (node->imported() && !be_jni_global->do_included_files()) {
     return 0;
   }
 

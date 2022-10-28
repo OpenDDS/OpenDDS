@@ -1,20 +1,21 @@
-#ifndef OPENDDS_IDL_BE_BUILTIN_H
-#define OPENDDS_IDL_BE_BUILTIN_H
+#ifndef OPENDDS_IDL_BE_JNI_H
+#define OPENDDS_IDL_BE_JNI_H
 
-#include "be_interface.h"
-#include "be_builtin_global.h"
+#include "dds/idl/be_interface.h"
+#include "be_jni_global.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-extern BE_BuiltinGlobalData* be_builtin_global;
+extern BE_JNIGlobalData* be_jni_global;
 
-class BE_BuiltinInterface: public BE_Interface {
+class BE_JNIInterface: public BE_Interface {
 public:
-  virtual ~BE_BuiltinInterface();
+  virtual ~BE_JNIInterface();
 
   // Extern BE_* functions
+
   virtual int init(int&, ACE_TCHAR*[]);
   virtual void post_init(char*[], long);
   virtual void version() const;
@@ -29,6 +30,10 @@ public:
   virtual void prep_be_arg(char* arg);
   virtual void arg_post_proc();
   virtual void usage();
+
+  // Give our library a way to call BE_abort() without requiring us to resolve
+  // that symbol at link time.
+  static void BE_abort();
 };
 
-#endif /* OPENDDS_IDL_BE_BUILTIN_H */
+#endif /* OPENDDS_IDL_BE_JNI_H */

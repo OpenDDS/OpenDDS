@@ -5,10 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "be_global.h"
+#include "be_jni_global.h"
 
-#include "be_util.h"
-#include "be_extern.h"
+#include "be_jni.h"
 
 #include <ast_generator.h>
 #include <global_extern.h>
@@ -27,9 +26,9 @@
 
 using namespace std;
 
-BE_GlobalData *be_global = 0;
+BE_JNIGlobalData *be_jni_global = 0;
 
-BE_GlobalData::BE_GlobalData()
+BE_JNIGlobalData::BE_JNIGlobalData()
   : filename_(0),
     do_server_side_(true)
 {
@@ -38,110 +37,110 @@ BE_GlobalData::BE_GlobalData()
   idl_global->preserve_cpp_keywords(true);
 }
 
-BE_GlobalData::~BE_GlobalData()
+BE_JNIGlobalData::~BE_JNIGlobalData()
 {
 }
 
 void
-BE_GlobalData::destroy()
+BE_JNIGlobalData::destroy()
 {
 }
 
 const char *
-BE_GlobalData::filename() const
+BE_JNIGlobalData::filename() const
 {
   return this->filename_;
 }
 
-ACE_CString BE_GlobalData::stub_export_macro() const
+ACE_CString BE_JNIGlobalData::stub_export_macro() const
 {
   return this->stub_export_macro_;
 }
 
-void BE_GlobalData::stub_export_macro(const ACE_CString &str)
+void BE_JNIGlobalData::stub_export_macro(const ACE_CString &str)
 {
   this->stub_export_macro_ = str;
 }
 
-ACE_CString BE_GlobalData::stub_export_include() const
+ACE_CString BE_JNIGlobalData::stub_export_include() const
 {
   return this->stub_export_include_;
 }
 
-void BE_GlobalData::stub_export_include(const ACE_CString &str)
+void BE_JNIGlobalData::stub_export_include(const ACE_CString &str)
 {
   this->stub_export_include_ = str;
 }
 
-ACE_CString BE_GlobalData::skel_export_macro() const
+ACE_CString BE_JNIGlobalData::skel_export_macro() const
 {
   return this->skel_export_macro_;
 }
 
-void BE_GlobalData::skel_export_macro(const ACE_CString &str)
+void BE_JNIGlobalData::skel_export_macro(const ACE_CString &str)
 {
   this->skel_export_macro_ = str;
 }
 
-ACE_CString BE_GlobalData::skel_export_include() const
+ACE_CString BE_JNIGlobalData::skel_export_include() const
 {
   return this->skel_export_include_;
 }
 
-void BE_GlobalData::skel_export_include(const ACE_CString &str)
+void BE_JNIGlobalData::skel_export_include(const ACE_CString &str)
 {
   this->skel_export_include_ = str;
 }
 
-ACE_CString BE_GlobalData::native_lib_name() const
+ACE_CString BE_JNIGlobalData::native_lib_name() const
 {
   return this->native_lib_name_;
 }
 
-void BE_GlobalData::native_lib_name(const ACE_CString &str)
+void BE_JNIGlobalData::native_lib_name(const ACE_CString &str)
 {
   this->native_lib_name_ = str;
 }
 
 void
-BE_GlobalData::filename(const char *fname)
+BE_JNIGlobalData::filename(const char *fname)
 {
   this->filename_ = fname;
 }
 
 bool
-BE_GlobalData::do_included_files() const
+BE_JNIGlobalData::do_included_files() const
 {
   return false; //we never process included files
 }
 
 bool
-BE_GlobalData::do_server_side() const
+BE_JNIGlobalData::do_server_side() const
 {
   return this->do_server_side_;
 }
 
 void
-BE_GlobalData::do_server_side(bool val)
+BE_JNIGlobalData::do_server_side(bool val)
 {
   this->do_server_side_ = val;
 }
 
 void
-BE_GlobalData::open_streams(const char *filename)
+BE_JNIGlobalData::open_streams(const char *filename)
 {
   this->filename(filename);
 
-  size_t len = strlen(filename);
+  const size_t len = strlen(filename);
   if ((len < 5 || 0 != ACE_OS::strcasecmp(filename + len - 4, ".idl"))
       && (len < 6 || 0 != ACE_OS::strcasecmp(filename + len - 5, ".pidl"))) {
     ACE_ERROR((LM_ERROR, "Error - Input filename must end in \".idl\" or \".pidl\".\n"));
-    BE_abort();
+    BE_JNIInterface::BE_abort();
   }
 
   string filebase(filename);
   filebase.erase(filebase.rfind('.'));
-  size_t idx = filebase.find_last_of("/\\"); // allow either slash
+  const size_t idx = filebase.find_last_of("/\\"); // allow either slash
   if (idx != string::npos) {
     filebase = filebase.substr(idx + 1);
   }
@@ -156,12 +155,12 @@ BE_GlobalData::open_streams(const char *filename)
 }
 
 void
-BE_GlobalData::close_streams()
+BE_JNIGlobalData::close_streams()
 {
 }
 
 void
-BE_GlobalData::multicast(const char *str)
+BE_JNIGlobalData::multicast(const char *str)
 {
   stub_header_ << str;
   stub_impl_ << str;
@@ -178,24 +177,24 @@ BE_Comment_Guard::BE_Comment_Guard(const char *type, const char *name)
   if (idl_global->compile_flags() & IDL_CF_INFORMATIVE)
     std::cout << type << ": " << name << std::endl;
 
-  be_global->multicast("\n\n/* Begin ");
-  be_global->multicast(type);
-  be_global->multicast(": ");
-  be_global->multicast(name);
-  be_global->multicast(" */\n\n");
+  be_jni_global->multicast("\n\n/* Begin ");
+  be_jni_global->multicast(type);
+  be_jni_global->multicast(": ");
+  be_jni_global->multicast(name);
+  be_jni_global->multicast(" */\n\n");
 }
 
 BE_Comment_Guard::~BE_Comment_Guard()
 {
-  be_global->multicast("\n/* End ");
-  be_global->multicast(type_);
-  be_global->multicast(": ");
-  be_global->multicast(name_);
-  be_global->multicast(" */\n");
+  be_jni_global->multicast("\n/* End ");
+  be_jni_global->multicast(type_);
+  be_jni_global->multicast(": ");
+  be_jni_global->multicast(name_);
+  be_jni_global->multicast(" */\n");
 }
 
 ACE_CString
-BE_GlobalData::spawn_options()
+BE_JNIGlobalData::spawn_options()
 {
   return /*this->orb_args_ +*/ idl_global->idl_flags();
 }
@@ -213,7 +212,7 @@ void invalid_option(char * option)
 }
 
 void
-BE_GlobalData::parse_args(long &i, char **av)
+BE_JNIGlobalData::parse_args(long &i, char **av)
 {
   switch (av[i][1]) {
   case 'S':
@@ -241,7 +240,7 @@ BE_GlobalData::parse_args(long &i, char **av)
 
 
 bool
-BE_GlobalData::writeFile(const char *fileName, const string &content)
+BE_JNIGlobalData::writeFile(const char *fileName, const string &content)
 {
   ofstream ofs(fileName);
 
@@ -262,7 +261,7 @@ Includes_t ch_, cc_, sh_, sc_;
 }
 
 void
-BE_GlobalData::reset_includes()
+BE_JNIGlobalData::reset_includes()
 {
   ch_.clear();
   cc_.clear();
@@ -271,8 +270,8 @@ BE_GlobalData::reset_includes()
 }
 
 void
-BE_GlobalData::add_include(const char *file,
-                           BE_GlobalData::stream_enum_t which)
+BE_JNIGlobalData::add_include(const char *file,
+                           BE_JNIGlobalData::stream_enum_t which)
 {
   Includes_t *inc = 0;
 
@@ -297,7 +296,7 @@ BE_GlobalData::add_include(const char *file,
 }
 
 ACE_CString
-BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
+BE_JNIGlobalData::get_include_block(BE_JNIGlobalData::stream_enum_t which)
 {
   Includes_t *inc = 0;
 
@@ -341,7 +340,7 @@ BE_GlobalData::get_include_block(BE_GlobalData::stream_enum_t which)
   return ret;
 }
 
-void BE_GlobalData::warning(const char* msg, const char* filename, unsigned lineno)
+void BE_JNIGlobalData::warning(const char* msg, const char* filename, unsigned lineno)
 {
   if (idl_global->print_warnings()) {
     if (filename) {
@@ -355,7 +354,7 @@ void BE_GlobalData::warning(const char* msg, const char* filename, unsigned line
   idl_global->err()->last_warning = UTL_Error::EIDL_MISC;
 }
 
-void BE_GlobalData::error(const char* msg, const char* filename, unsigned lineno)
+void BE_JNIGlobalData::error(const char* msg, const char* filename, unsigned lineno)
 {
   if (filename) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("Error - %C: \"%C\", line %u: %C\n"),

@@ -66,7 +66,6 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #define OPENDDS_IDL_BE_EXTERN_H
 
 #include "be_global.h"
-#include "be_builtin.h"
 
 #include <ace/SString.h>
 
@@ -82,12 +81,5 @@ extern void BE_version();
 extern void BE_produce();
 extern void BE_abort();
 extern void BE_cleanup();
-
-// Used to register your backend with the idl compiler.
-// TODO: Export this.
-void BE_register(BE_Interface* interface);
-
-void BE_destroy();
-void BE_parse_args(long& i, char** av);
 
 #endif /* OPENDDS_IDL_BE_EXTERN_H */

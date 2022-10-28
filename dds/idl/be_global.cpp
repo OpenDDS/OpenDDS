@@ -6,7 +6,7 @@
  */
 
 #include "be_global.h"
-#include "be_extern.h"
+#include "be_init.h"
 
 // Referenced through extern via be_extern.h
 BE_GlobalData* be_global = 0;
