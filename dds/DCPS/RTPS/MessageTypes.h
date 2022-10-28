@@ -9,7 +9,8 @@
 #define OPENDDS_DCPS_RTPS_MESSAGETYPES_H
 
 #include "RtpsCoreC.h"
-#include "dds/DCPS/GuidUtils.h"
+
+#include <dds/DCPS/GuidUtils.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
