@@ -36,6 +36,14 @@ GuidAddrSet::record_activity(const Proxy& proxy,
       if (pos != guid_addr_set_map_.end()) {
         remove(proxy, result.first->second, pos, now, &relay_participant_status_reporter_);
       }
+      if (config_.admission_control_queue_size()) {
+        for (auto it = admission_control_queue_.begin(); it != admission_control_queue_.end(); ++it) {
+          if (it->prefix_ == result.first->second.guidPrefix) {
+            admission_control_queue_.erase(it);
+            break;
+          }
+        }
+      }
       result.first->second = src_guid;
     }
   }
@@ -193,9 +201,23 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
     return true;
   }
 
+  // Clean old entries from admission queue
+  if (config_.admission_control_queue_size()) {
+    const OpenDDS::DCPS::MonotonicTimePoint earliest = now - config_.admission_control_queue_duration();
+    auto limit = admission_control_queue_.begin();
+    while (limit != admission_control_queue_.end() && limit->admitted_ < earliest) {
+      ++limit;
+    }
+    admission_control_queue_.erase(admission_control_queue_.begin(), limit);
+  }
+
   if (!admitting()) {
     // Too many new clients to admit another.
     return true;
+  }
+
+  if (config_.admission_control_queue_size()) {
+    admission_control_queue_.emplace_back(guid.guidPrefix, now);
   }
 
   pos->second.allow_rtps = true;
