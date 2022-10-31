@@ -69,7 +69,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
     if (res.second) {
       if (config_.log_activity()) {
         ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::record_activity "
-                   "%C %C is at %C %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B\n",
+                   "%C %C is at %C %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                    handler.name().c_str(),
                    guid_to_string(src_guid).c_str(),
                    OpenDDS::DCPS::LogAddr(remote_address.addr).c_str(),
@@ -78,7 +78,8 @@ GuidAddrSet::record_activity(const Proxy& proxy,
                    guid_addr_set_map_.size(),
                    remote_map_.size(),
                    deactivation_guid_queue_.size(),
-                   expiration_guid_addr_queue_.size()));
+                   expiration_guid_addr_queue_.size(),
+                   admission_control_queue_.size()));
       }
       relay_stats_reporter_.new_address(now);
 
@@ -149,7 +150,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
     if (config_.log_activity()) {
       const auto ago = now - expiration;
       ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::process_expirations "
-                 "%C %C expired %C ago %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B\n",
+                 "%C %C expired %C ago %C into session addrs=%B total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                  guid_to_string(ga.guid).c_str(),
                  OpenDDS::DCPS::LogAddr(ga.address.addr).c_str(),
                  ago.str().c_str(),
@@ -158,7 +159,8 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
                  guid_addr_set_map_.size(),
                  remote_map_.size(),
                  deactivation_guid_queue_.size(),
-                 expiration_guid_addr_queue_.size()));
+                 expiration_guid_addr_queue_.size(),
+                 admission_control_queue_.size()));
     }
     relay_stats_reporter_.expired_address(now);
 
@@ -213,6 +215,7 @@ bool GuidAddrSet::ignore_rtps(bool from_application_participant,
 
   if (!admitting()) {
     // Too many new clients to admit another.
+    relay_stats_reporter_.admission_deferral_count(now);
     return true;
   }
 
@@ -253,13 +256,14 @@ void GuidAddrSet::remove(const Proxy& proxy,
 
   if (config_.log_activity()) {
     ACE_DEBUG((LM_INFO, "(%P|%t) INFO: GuidAddrSet::remove_i "
-               "%C removed %C into session total=%B remote=%B deactivation=%B expire=%B\n",
+               "%C removed %C into session total=%B remote=%B deactivation=%B expire=%B admit=%B\n",
                guid_to_string(guid).c_str(),
                session_time.sec_str().c_str(),
                guid_addr_set_map_.size(),
                remote_map_.size(),
                deactivation_guid_queue_.size(),
-               expiration_guid_addr_queue_.size()));
+               expiration_guid_addr_queue_.size(),
+               admission_control_queue_.size()));
   }
 
   if (reporter) {

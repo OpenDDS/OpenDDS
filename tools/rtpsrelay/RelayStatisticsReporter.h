@@ -151,6 +151,13 @@ public:
     report(now);
   }
 
+  void admission_deferral_count(const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ++log_relay_statistics_.admission_deferral_count();
+    ++publish_relay_statistics_.admission_deferral_count();
+    report(now);
+  }
+
   void report()
   {
     report(OpenDDS::DCPS::MonotonicTimePoint::now(), true);
