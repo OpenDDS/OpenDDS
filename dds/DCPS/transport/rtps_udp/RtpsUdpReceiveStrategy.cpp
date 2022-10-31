@@ -795,7 +795,14 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
   const ParticipantCryptoHandle peer_pch = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
-  sec_submsg_to_octets(encoded_submsg, submessage);
+  if (!sec_submsg_to_octets(encoded_submsg, submessage)) {
+    if (security_debug.encdec_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("preprocess_secure_submsg failed to encode submessage %C RPCH %d\n"),
+                 LogGuid(peer).c_str(), peer_pch));
+    }
+    return;
+  }
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
   secure_sample_ = ReceivedDataSample(0);
 
@@ -889,7 +896,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
   }
 }
 
-void
+bool
 RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
                                              const RTPS::Submessage& postfix)
 {
@@ -908,25 +915,40 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
 
   ACE_Message_Block mb(size);
   Serializer ser(&mb, encoding);
-  ser << secure_prefix_;
-  ser.align_r(RTPS::SMHDR_SZ);
+  if (!(ser << secure_prefix_)) {
+    return false;
+  }
+
+  if (!ser.align_r(RTPS::SMHDR_SZ)) {
+    return false;
+  }
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
-    ser << secure_submessages_[i];
+    if (!(ser << secure_submessages_[i])) {
+      return false;
+    }
     const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
       const CORBA::Octet* sample_bytes =
         reinterpret_cast<const CORBA::Octet*>(secure_sample_.sample_->rd_ptr());
-      ser.write_octet_array(sample_bytes,
-                            static_cast<unsigned int>(secure_sample_.sample_->length()));
+      if (!ser.write_octet_array(sample_bytes,
+                                 static_cast<unsigned int>(secure_sample_.sample_->length()))) {
+        return false;
+      }
     }
-    ser.align_r(RTPS::SMHDR_SZ);
+    if (!ser.align_r(RTPS::SMHDR_SZ)) {
+      return false;
+    }
   }
-  ser << postfix;
+  if (!(ser << postfix)) {
+    return false;
+  }
 
   encoded.length(static_cast<unsigned int>(mb.length()));
   std::memcpy(encoded.get_buffer(), mb.rd_ptr(), mb.length());
   secure_submessages_.resize(0);
+
+  return true;
 }
 
 bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,

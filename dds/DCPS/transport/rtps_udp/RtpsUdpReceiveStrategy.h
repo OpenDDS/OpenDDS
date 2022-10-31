@@ -117,7 +117,7 @@ private:
   virtual bool reassemble_i(ReceivedDataSample& data, RtpsSampleHeader& rsh);
 
 #ifdef OPENDDS_SECURITY
-  void sec_submsg_to_octets(DDS::OctetSeq& encoded,
+  bool sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
   void deliver_from_secure(const RTPS::Submessage& submessage,

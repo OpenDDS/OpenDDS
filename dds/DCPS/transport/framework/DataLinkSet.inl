@@ -36,46 +36,44 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
     map_copy = map_;
   }
 
-  TransportSendElement* send_element = 0;
   if (map_copy.size()) {
-    send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
-  } else if (sample->get_send_listener()) {
-    sample->get_send_listener()->data_dropped(sample, true);
-  }
-
-  for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
+    TransportSendElement* send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
+    for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-    if (customHeader) {
-      typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
-      FilterIter fi = sample->get_filter_per_link().find(itr->first);
-      GUIDSeq* guids = 0;
-      if (fi != sample->get_filter_per_link().end()) {
-        guids = fi->second.ptr();
-      }
+      if (customHeader) {
+        typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
+        FilterIter fi = sample->get_filter_per_link().find(itr->first);
+        GUIDSeq* guids = 0;
+        if (fi != sample->get_filter_per_link().end()) {
+          guids = fi->second.ptr();
+        }
 
-      VDBG_LVL((LM_DEBUG,
-        "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
-        itr->second.in(), guids ? guids->length() : 0), 5);
+        VDBG_LVL((LM_DEBUG,
+                  "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
+                  itr->second.in(), guids ? guids->length() : 0), 5);
 
-      Message_Block_Ptr mb (send_element->msg()->duplicate());
+        Message_Block_Ptr mb (send_element->msg()->duplicate());
 
-      DataSampleHeader::add_cfentries(guids, mb.get());
+        DataSampleHeader::add_cfentries(guids, mb.get());
 
-      TransportCustomizedElement* tce = new TransportCustomizedElement(send_element);
-      tce->set_msg(move(mb)); // tce now owns ACE_Message_Block chain
+        TransportCustomizedElement* tce = new TransportCustomizedElement(send_element);
+        tce->set_msg(move(mb)); // tce now owns ACE_Message_Block chain
 
-      itr->second->send(tce);
+        itr->second->send(tce);
 
-    } else {
+      } else {
 #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
-      // Tell the DataLink to send it.
-      itr->second->send(send_element);
+        // Tell the DataLink to send it.
+        itr->second->send(send_element);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-    }
+      }
 #endif
+    }
+  } else if (sample->get_send_listener()) {
+    sample->get_send_listener()->data_dropped(sample, true);
   }
 }
 
