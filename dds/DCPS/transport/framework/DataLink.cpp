@@ -196,9 +196,8 @@ DataLink::invoke_on_start_callbacks(bool success)
       break;
     }
 
-    RepoId remote;
+    RepoId remote = GUID_UNKNOWN;
     TransportClient_wrch client;
-
     OnStartCallbackMap::iterator it = on_start_callbacks_.begin();
     if (it != on_start_callbacks_.end()) {
       remote = it->first;

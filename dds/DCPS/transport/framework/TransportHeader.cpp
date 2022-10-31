@@ -25,8 +25,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-const TransportHeader::no_init_t TransportHeader::no_init = {};
-
 bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 {
   Serializer writer(&buffer, Encoding::KIND_UNALIGNED_CDR);
@@ -50,10 +48,10 @@ bool operator<<(ACE_Message_Block& buffer, const TransportHeader& value)
 ACE_UINT32
 TransportHeader::get_length(const char* marshaled_header)
 {
-  static const TransportHeader hdr(no_init);
-  static const unsigned int OFFSET = sizeof(hdr.protocol_) +
+  const TransportHeader* hdr = 0;
+  static const unsigned int OFFSET = sizeof(hdr->protocol_) +
                                      1 /*flags*/ +
-                                     sizeof(hdr.reserved_);
+                                     sizeof(hdr->reserved_);
   return *reinterpret_cast<const ACE_UINT32*>(marshaled_header + OFFSET);
 }
 
