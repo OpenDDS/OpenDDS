@@ -9,6 +9,11 @@
 #include "be_util.h"
 #include "../Version.h"
 
+#include "face_language_mapping.h"
+
+#include "cxx11_language_mapping.h"
+#include "sp_language_mapping.h"
+
 #include <global_extern.h>
 #include <drv_extern.h>
 
@@ -30,9 +35,10 @@ BE_BuiltinInterface::version() const
 }
 
 int
-BE_BuiltinInterface::init(int&, ACE_TCHAR*[])
+BE_BuiltinInterface::init(int& argc, ACE_TCHAR* argv[])
 {
   ACE_NEW_RETURN(be_builtin_global, BE_BuiltinGlobalData, -1);
+  allocate_language_mapping(argc, argv);
   idl_global->default_idl_version_ = IDL_VERSION_4;
   idl_global->anon_type_diagnostic(IDL_GlobalData::ANON_TYPE_SILENT);
   return 0;
@@ -226,4 +232,42 @@ void BE_BuiltinInterface::usage()
     ACE_TEXT(" -Wb,opendds_sequence_suffix=<suffix>\tset the implied DDS sequence suffix ")
     ACE_TEXT("(default is 'Seq')\n")
     ));
+}
+
+void BE_BuiltinInterface::rm_arg(int& i, int& argc, ACE_TCHAR* argv[])
+{
+  // Shift everything down one (including the NULL)
+  const int down = 1;
+  for (int j = i + 1; j <= argc; j++) {
+    argv[j - down] = argv[j];
+  }
+  argc -= down;
+
+  // Set i back to where it was when it was on the current option
+  // after the next increment in the for loop.
+  i -= down;
+}
+
+void BE_BuiltinInterface::allocate_language_mapping(int& argc, ACE_TCHAR* argv[])
+{
+  for (int i = 1; i < argc; i++) {
+    if (ACE_OS::strcasecmp(argv[i], ACE_TEXT("-Lface")) == 0) {
+      FaceLanguageMapping* language_mapping = 0;
+      ACE_NEW(language_mapping, FaceLanguageMapping);
+      be_builtin_global->language_mapping(language_mapping);
+      rm_arg(i, argc, argv);
+    }
+    else if (ACE_OS::strcasecmp(argv[i], ACE_TEXT("-Lspcpp")) == 0) {
+      SPLanguageMapping* language_mapping = 0;
+      ACE_NEW(language_mapping, SPLanguageMapping);
+      be_builtin_global->language_mapping(language_mapping);
+      rm_arg(i, argc, argv);
+    }
+    else if (ACE_OS::strcasecmp(argv[i], ACE_TEXT("-Lc++11")) == 0) {
+      Cxx11LanguageMapping* language_mapping = 0;
+      ACE_NEW(language_mapping, Cxx11LanguageMapping);
+      be_builtin_global->language_mapping(language_mapping);
+      rm_arg(i, argc, argv);
+    }
+  }
 }

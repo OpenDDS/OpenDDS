@@ -98,7 +98,7 @@ bool keys_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
     KeyLessThanWrapper wrapper(name);
 
     if (key_count) {
-      const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+      const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
 
       wrapper.has_keys_signature();
       if (!use_cxx11) {

@@ -56,7 +56,7 @@ BE_BuiltinGlobalData::BE_BuiltinGlobalData()
   , face_ts_(false)
   , filename_only_includes_(false)
   , sequence_suffix_("Seq")
-  , language_mapping_(LANGMAP_NONE)
+  , language_mapping_(0)
   , root_default_nested_(true)
   , warn_about_dcps_data_type_(true)
   , default_extensibility_(extensibilitykind_appendable)
@@ -70,6 +70,8 @@ BE_BuiltinGlobalData::BE_BuiltinGlobalData()
   platforms_.insert("*");
   platforms_.insert("DDS");
   platforms_.insert("OpenDDS");
+
+  ACE_NEW(language_mapping_, LanguageMapping);
 }
 
 BE_BuiltinGlobalData::~BE_BuiltinGlobalData()
@@ -173,12 +175,13 @@ ACE_CString BE_BuiltinGlobalData::java_arg() const
   return this->java_arg_;
 }
 
-void BE_BuiltinGlobalData::language_mapping(LanguageMapping lm)
+void BE_BuiltinGlobalData::language_mapping(LanguageMapping* lm)
 {
+  delete this->language_mapping_;
   this->language_mapping_ = lm;
 }
 
-BE_BuiltinGlobalData::LanguageMapping BE_BuiltinGlobalData::language_mapping() const
+LanguageMapping* BE_BuiltinGlobalData::language_mapping() const
 {
   return this->language_mapping_;
 }
@@ -295,7 +298,7 @@ BE_BuiltinGlobalData::multicast(const char* str)
   header_ << str;
   impl_ << str;
   idl_ << str;
-  if (language_mapping_ != LANGMAP_NONE) lang_header_ << str;
+  if (!language_mapping_->none()) lang_header_ << str;
 }
 
 BE_Comment_Guard::BE_Comment_Guard(const char* type, const char* name)
@@ -375,18 +378,6 @@ BE_BuiltinGlobalData::parse_args(long& i, char** av)
       face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
-    } else {
-      invalid_option(av[i]);
-    }
-    break;
-
-  case 'L':
-    if (0 == ACE_OS::strcasecmp(av[i], "-Lface"))
-      language_mapping(LANGMAP_FACE_CXX);
-    else if (0 == ACE_OS::strcasecmp(av[i], "-Lspcpp"))
-      language_mapping(LANGMAP_SP_CXX);
-    else if (0 == ACE_OS::strcasecmp(av[i], "-Lc++11")) {
-      language_mapping(LANGMAP_CXX11);
     } else {
       invalid_option(av[i]);
     }

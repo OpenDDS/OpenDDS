@@ -484,7 +484,7 @@ std::string wrapPrefix(AST_Type* type, WrapDirection wd)
 
 inline std::string string_type(AstTypeClassification::Classification cls)
 {
-  return be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11 ?
+  return be_builtin_global->language_mapping()->cxx11() ?
     ((cls & AstTypeClassification::CL_WIDE) ? "std::wstring" : "std::string") :
     (cls & AstTypeClassification::CL_WIDE) ? "TAO::WString_Manager" : "TAO::String_Manager";
 }
@@ -567,7 +567,7 @@ inline
 std::string getWrapper(const std::string& name, AST_Type* type, WrapDirection wd)
 {
   using namespace AstTypeClassification;
-  if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
+  if (be_builtin_global->language_mapping()->cxx11()) {
     const Classification cls = classify(type);
     if ((cls & (CL_BOUNDED | CL_STRING)) == (CL_BOUNDED | CL_STRING)) {
       return (wd == WD_OUTPUT ? "Serializer::FromBoundedString" : "Serializer::ToBoundedString")
@@ -583,7 +583,7 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
 {
   std::string e = scoped(disc->name()),
     label = label_val->n()->last_component()->get_string();
-  if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
+  if (be_builtin_global->language_mapping()->cxx11()) {
     return e + "::" + label;
   }
   const size_t colon = e.rfind("::");
@@ -763,8 +763,8 @@ void generateCaseBody(
   const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens)
 {
   using namespace AstTypeClassification;
-  const BE_BuiltinGlobalData::LanguageMapping lmap = be_builtin_global->language_mapping();
-  const bool use_cxx11 = lmap == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  LanguageMapping* lmap = be_builtin_global->language_mapping();
+  const bool use_cxx11 = lmap->cxx11();
   const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
     std::string brType = scoped(branch->field_type()->name()), forany;
@@ -776,20 +776,17 @@ void generateCaseBody(
     }
 
     std::string rhs;
-    const bool is_face = lmap == BE_BuiltinGlobalData::LANGMAP_FACE_CXX;
     const bool is_wide = br_cls & CL_WIDE;
     const bool is_bound_string = (br_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED);
-    const std::string bound_string_suffix = (is_bound_string && !is_face) ? ".c_str()" : "";
+    const std::string bound_string_suffix = is_bound_string ? lmap->getBoundStringSuffix() : "";
 
     if (is_bound_string) {
-      const std::string to_type = is_face ? is_wide ? "ACE_InputCDR::to_wstring" : "ACE_InputCDR::to_string"
-        : is_wide ? "Serializer::ToBoundedString<wchar_t>" : "Serializer::ToBoundedString<char>";
-      const std::string face_suffix = is_face ? ".out()" : "";
-      brType = is_face ? is_wide ? "FACE::WString_var" : "FACE::String_var"
-        : is_wide ? "OPENDDS_WSTRING" : "OPENDDS_STRING";
+      const std::string to_type = lmap->getInputCDRToString(is_wide);
+      const std::string face_suffix = lmap->getBranchStringSuffix();
+      brType = lmap->getBranchStringType(is_wide);
       rhs = to_type + "(tmp" + face_suffix + ", " + bounded_arg(br) + ")";
     } else if (br_cls & CL_STRING) {
-      const std::string nmspace = is_face ? "FACE::" : "CORBA::";
+      const std::string nmspace = lmap->getBranchStringPrefix();
       brType = use_cxx11 ? std::string("std::") + (is_wide ? "w" : "") + "string"
         : nmspace + (is_wide ? "W" : "") + "String_var";
       rhs = use_cxx11 ? "tmp" : "tmp.out()";
@@ -996,7 +993,7 @@ inline
 std::string insert_cxx11_accessor_parens(
   const std::string& full_var_name_, bool is_union_member = false)
 {
-  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
   if (!use_cxx11 || is_union_member || full_var_name_.empty()) {
     return full_var_name_;
   }

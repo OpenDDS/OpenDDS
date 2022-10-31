@@ -3,6 +3,8 @@
 
 #include <ace/SString.h>
 
+#include "language_mapping.h"
+
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
@@ -15,8 +17,12 @@ public:
   }
   virtual ~BE_Interface() {}
 
-  // Extern BE_* functions
+  // Provide a language mapping
+  LanguageMapping* language_mapping() {
+    return 0;
+  }
 
+  // Extern BE_* functions
   virtual int init(int&, ACE_TCHAR*[]) = 0;
   virtual void post_init(char*[], long) = 0;
   virtual void version() const = 0;

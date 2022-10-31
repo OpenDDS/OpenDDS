@@ -65,7 +65,7 @@ namespace {
   void array_helper(const std::string& expression, AST_Array* array,
                     size_t dim_idx, const std::string& idx, int level)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const std::string indent(level * 2, ' ');
     const Classification c = classify(array->base_type());
     const bool primitive = c & CL_PRIMITIVE;
@@ -107,7 +107,7 @@ namespace {
                        const std::string& idx, int level)
   {
     // TODO: Take advantage of the size.
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const std::string indent(level * 2, ' ');
     be_builtin_global->impl_ <<
       indent << "if (!value_reader.begin_sequence()) return false;\n" <<
@@ -144,7 +144,7 @@ namespace {
       return;
     }
 
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const std::string indent(level * 2, ' ');
     if (c & CL_FIXED) {
       be_builtin_global->impl_ <<
@@ -265,7 +265,7 @@ bool value_reader_generator::gen_struct(AST_Structure*,
   be_builtin_global->add_include("dds/DCPS/ValueReader.h", BE_BuiltinGlobalData::STREAM_H);
 
   const std::string type_name = scoped(name);
-  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
   const std::string accessor = use_cxx11 ? "()" : "";
 
   {

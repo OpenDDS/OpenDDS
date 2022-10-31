@@ -49,7 +49,7 @@ const std::string FieldInfo::scope_op = "::";
 
 bool FieldInfo::cxx11()
 {
-  return be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  return be_builtin_global->language_mapping()->cxx11();
 }
 
 std::string FieldInfo::at_pfx()

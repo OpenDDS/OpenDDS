@@ -52,7 +52,6 @@ namespace {
     if (!plugin) {
       BE_register(0, 0);
     }
-    
 
     // Allocate the fake be_global data which is expected to exist by tao_idl.
     // It doesn't actually do anything except call back into functions within

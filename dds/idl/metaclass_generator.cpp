@@ -90,7 +90,7 @@ namespace {
   void
   gen_field_getValueByMemberId(AST_Field* field)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const Classification cls = classify(field->field_type());
     const OpenDDS::XTypes::MemberId id = be_builtin_global->get_id(field);
     const std::string fieldName = field->local_name()->get_string();
@@ -121,7 +121,7 @@ namespace {
   void
   gen_field_getValue(AST_Field* field)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
     if (cls & CL_SCALAR) {
@@ -155,7 +155,7 @@ namespace {
   void
   gen_field_createQC(AST_Field* field)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
     if (cls & CL_SCALAR) {
@@ -188,7 +188,7 @@ namespace {
   void
   get_raw_field(AST_Field* field)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const char* fieldName = field->local_name()->get_string();
     be_builtin_global->impl_ <<
       "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
@@ -201,7 +201,7 @@ namespace {
   void
   assign_field(AST_Field* field)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     Classification cls = classify(field->field_type());
     if (!cls) return; // skip CL_UNKNOWN types
     std::string fieldType = (cls & CL_STRING) ?
@@ -260,7 +260,7 @@ namespace {
   void
   compare_field(AST_Field* field)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     Classification cls = classify(field->field_type());
     if (!(cls & CL_SCALAR)) return;
     const char* fieldName = field->local_name()->get_string();
@@ -588,7 +588,7 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
               "    if (!ser.skip(strlength)) return false;\n";
           } else if (elem_cls & (CL_ARRAY | CL_SEQUENCE | CL_STRUCTURE)) {
             std::string pre, post;
-            const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+            const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
             if (!use_cxx11 && (elem_cls & CL_ARRAY)) {
               post = "_forany";
             } else if (use_cxx11 && (elem_cls & (CL_ARRAY | CL_SEQUENCE))) {
@@ -630,7 +630,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   if (!arr && !(seq = dynamic_cast<AST_Sequence*>(type))) {
     return true;
   }
-  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
 
   const std::string clazz = scoped(name);
   ContentSubscriptionGuard csg;
@@ -717,7 +717,7 @@ static std::string
 func(const std::string&, const std::string&, AST_Type* br_type, const std::string&,
   bool, Intro&, const std::string&)
 {
-  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
   std::stringstream ss;
   const Classification br_cls = classify(br_type);
   ss <<

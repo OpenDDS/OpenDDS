@@ -353,7 +353,7 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
 {
   AST_Type* actual_type = resolveActualType(type);
   Classification fld_cls = classify(actual_type);
-  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
   string def_val;
   std::string pre = " = ";
   std::string post;

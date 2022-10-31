@@ -251,14 +251,14 @@ namespace {
   bool needs_forany(AST_Type* type)
   {
     const Classification type_class = classify(resolveActualType(type));
-    return be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_CXX11 &&
+    return !be_builtin_global->language_mapping()->cxx11() &&
       type_class & CL_ARRAY;
   }
 
   bool needs_distinct_type(AST_Type* type)
   {
     const Classification type_class = classify(resolveActualType(type));
-    return be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11 &&
+    return be_builtin_global->language_mapping()->cxx11() &&
       type_class & (CL_SEQUENCE | CL_ARRAY);
   }
 
@@ -341,7 +341,7 @@ namespace {
 
     void generate_tag()
     {
-      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
+      if (be_builtin_global->language_mapping()->cxx11()) {
         be_builtin_global->header_ << "struct " << get_tag_name() << " {};\n\n";
       }
     }
@@ -453,20 +453,20 @@ namespace {
 
     std::string seq_check_empty() const
     {
-      const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+      const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
       return value_access() + (use_cxx11 ? ".empty()" : ".length() == 0");
     }
 
     std::string seq_get_length() const
     {
-      const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+      const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
       const std::string value = value_access();
       return use_cxx11 ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
     }
 
     std::string seq_get_buffer() const
     {
-      const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+      const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
       return value_access() + (use_cxx11 ? ".data()" : ".get_buffer()");
     }
 
@@ -815,8 +815,7 @@ namespace {
     const bool primitive = elem_cls & CL_PRIMITIVE;
     if (!elem->in_main_file()) {
       if (elem->node_type() == AST_Decl::NT_pre_defined) {
-        if (be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_FACE_CXX &&
-            be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_SP_CXX) {
+        if (be_builtin_global->language_mapping()->needSequenceTypeSupportImplHeader()) {
           const std::string hdr = "dds/CorbaSeq/" + nameOfSeqHeader(elem) + "SeqTypeSupportImpl.h";
           be_builtin_global->conditional_include(hdr.c_str(), BE_BuiltinGlobalData::STREAM_CPP,
                                          "#ifndef OPENDDS_SAFETY_PROFILE");
@@ -828,7 +827,7 @@ namespace {
 
     const std::string cxx_elem =
       anonymous ? anonymous->scoped_elem_ : scoped(seq->base_type()->name());
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
 
     base_wrapper.generate_tag();
 
@@ -1122,7 +1121,7 @@ namespace {
             stream_to = getWrapper(args, elem, WD_INPUT);
           } else {
             const string getbuffer =
-              (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_NONE)
+              (be_builtin_global->language_mapping()->none())
               ? ".get_buffer()" : "";
             stream_to = value_access + getbuffer + "[i]";
           }
@@ -1230,7 +1229,7 @@ namespace {
     base_wrapper.nested_key_only_ = nested_key_only;
     NamespaceGuard ng(!anonymous);
 
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
 
     AST_Type* elem = resolveActualType(arr->base_type());
     TryConstructFailAction try_construct = be_builtin_global->array_element_try_construct(arr);
@@ -1901,7 +1900,7 @@ namespace {
                         const string& prefix, bool wrap_nested_key_only, Intro& intro,
                         const string& = "") // same sig as streamCommon
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const bool is_union_member = prefix == "uni";
 
     AST_Type* const actual_type = resolveActualType(type);
@@ -1969,7 +1968,7 @@ namespace {
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru)
   {
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
     const bool is_union_member = prefix.substr(3) == "uni";
 
     AST_Type* const actual_type = resolveActualType(type);
@@ -2640,7 +2639,7 @@ namespace {
       const char* set_len;
       const char* get_buffer;
       const char* buffer_pre = "";
-      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11) {
+      if (be_builtin_global->language_mapping()->cxx11()) {
         get_len = "size";
         set_len = "resize";
         get_buffer = "[0]";
@@ -2758,7 +2757,7 @@ namespace {
     const Fields::Iterator fields_end = fields.end();
     RtpsFieldCustomizer rtpsCustom(cpp_name);
 
-    const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+    const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
 
     const ExtensibilityKind exten = be_builtin_global->extensibility(node);
     const bool not_final = exten != extensibilitykind_final;
@@ -3181,7 +3180,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
   NamespaceGuard ng;
   be_builtin_global->add_include("dds/DCPS/Serializer.h");
   const string cxx = scoped(name); // name as a C++ class
-  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
 
   {
     Function set_default("set_default", "void", "");
@@ -3338,7 +3337,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   //check the id for a match to our id
   //if we are not a match, skip to the next field
   //if we are a match, deserialize the field
-  const bool use_cxx11 = be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_CXX11;
+  const bool use_cxx11 = be_builtin_global->language_mapping()->cxx11();
   std::string expr;
   const ExtensibilityKind exten = be_builtin_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;

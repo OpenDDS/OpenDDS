@@ -178,11 +178,7 @@ void postprocess(const char* fn, ostringstream& content,
         "\n";
     }
     if (which == BE_BuiltinGlobalData::STREAM_LANG_H) {
-      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_FACE_CXX ||
-          be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_SP_CXX) {
-        out << "#include <tao/orbconf.h>\n"
-               "#include <tao/Basic_Types.h>\n";
-      }
+      out << be_builtin_global->language_mapping()->getMinimalHeaders();
     } else {
       string taoheader = be_builtin_global->header_name_.c_str();
       taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
@@ -277,7 +273,7 @@ BE_BuiltinInterface::produce()
   be_builtin_global->filename(idl_fn);
 
   const BE_BuiltinGlobalData::stream_enum_t out_stream =
-    be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_NONE
+    be_builtin_global->language_mapping()->none()
     ? BE_BuiltinGlobalData::STREAM_H : BE_BuiltinGlobalData::STREAM_LANG_H;
 
   ifstream idl(idl_fn);
@@ -310,7 +306,7 @@ BE_BuiltinInterface::produce()
         continue;
       }
 
-      if (be_builtin_global->language_mapping() == BE_BuiltinGlobalData::LANGMAP_SP_CXX &&
+      if (be_builtin_global->language_mapping()->skipTAOSequences() &&
           base_name.substr(0, 4) == "tao/" &&
           base_name.substr(base_name.size() - 3) == "Seq") {
         continue; // with Safety Profile C++, skip include of tao/*SeqC.h
@@ -386,7 +382,7 @@ BE_BuiltinInterface::produce()
                 BE_BuiltinGlobalData::STREAM_FACETS_CPP);
   }
 
-  if (be_builtin_global->language_mapping() != BE_BuiltinGlobalData::LANGMAP_NONE) {
+  if (!be_builtin_global->language_mapping()->none()) {
     postprocess(be_builtin_global->lang_header_name_.c_str(), be_builtin_global->lang_header_,
                 BE_BuiltinGlobalData::STREAM_LANG_H);
   }
