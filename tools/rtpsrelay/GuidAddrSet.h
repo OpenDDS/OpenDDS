@@ -270,7 +270,9 @@ private:
 
   bool admitting() const
   {
-    return relay_thread_monitor_.threads_okay();
+    const size_t limit = config_.admission_control_queue_size();
+    const bool limit_okay = !limit || admission_control_queue_.size() < limit;
+    return limit_okay && relay_thread_monitor_.threads_okay();
   }
 
   bool ignore_rtps(bool from_application_participant,
@@ -292,6 +294,18 @@ private:
       it->second.get_session_time(now);
   }
 
+  struct AdmissionControlInfo
+  {
+    AdmissionControlInfo(const OpenDDS::DCPS::GuidPrefix_t& prefix, const OpenDDS::DCPS::MonotonicTimePoint& admitted)
+     : admitted_(admitted)
+    {
+      std::memcpy(prefix_, prefix, sizeof (OpenDDS::DCPS::GuidPrefix_t));
+    }
+    OpenDDS::DCPS::GuidPrefix_t prefix_;
+    OpenDDS::DCPS::MonotonicTimePoint admitted_;
+  };
+  typedef std::deque<AdmissionControlInfo> AdmissionControlQueue;
+
   const Config& config_;
   OpenDDS::RTPS::RtpsDiscovery_rch rtps_discovery_;
   RelayParticipantStatusReporter& relay_participant_status_reporter_;
@@ -307,6 +321,7 @@ private:
   DeactivationGuidQueue deactivation_guid_queue_;
   typedef std::list<std::pair<OpenDDS::DCPS::MonotonicTimePoint, GuidAddr> > ExpirationGuidAddrQueue;
   ExpirationGuidAddrQueue expiration_guid_addr_queue_;
+  AdmissionControlQueue admission_control_queue_;
   mutable ACE_Thread_Mutex mutex_;
 };
 
