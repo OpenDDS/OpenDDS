@@ -132,6 +132,7 @@ void GuidAddrSet::process_expirations(const Proxy& proxy,
 
     if (p->second <= now) {
       addr_set.erase(p);
+      remote_map_.erase(Remote(ga.address.addr, ga.guid));
     } else {
       expiration_guid_addr_queue_.push_back(std::make_pair(p->second, ga));
       continue;
