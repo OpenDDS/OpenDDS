@@ -822,8 +822,9 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Now dispatch the sample to the DataLink\n"));
 
-        ReceivedDataSample rds(this->payload_);
-        this->payload_ = 0;  // rds takes ownership of payload_
+        ReceivedDataSample rds(*payload_);
+        payload_->release();
+        payload_ = 0;
         if (this->data_sample_header_.into_received_data_sample(rds)) {
 
           if (this->data_sample_header_.more_fragments()

@@ -102,7 +102,7 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
     }
     if (sample.header_.sequence_ == 6) { // reassembled from DATA_FRAG
       if (sample.header_.message_length_ != 3 * 1024
-          || sample.sample_->total_length() != 3 * 1024) {
+          || sample.data_length() != 3 * 1024) {
         ACE_ERROR((LM_ERROR, "ERROR: unexpected reassembled sample length\n"));
       }
       if (have_frag_) {

@@ -188,10 +188,11 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    Message_Block_Ptr payload(sample.data()); // TODO: allocator?
     Encoding::Kind kind = Encoding::KIND_UNALIGNED_CDR;
     if (sample.header_.cdr_encapsulation_ && check_encap_) {
       Encoding enc;
-      Serializer ser(sample.sample_.get(), enc);
+      Serializer ser(payload.get(), enc);
       EncapsulationHeader encap;
       if (ser >> encap && encap.to_any_encoding(enc)) {
         kind = enc.kind();
@@ -203,7 +204,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                             sample.header_.source_timestamp_nanosec_,
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
-                            sample.sample_.get(),
+                            payload.get(),
                             kind);
     listener_->on_sample_data_received(this, rawSample);
   }

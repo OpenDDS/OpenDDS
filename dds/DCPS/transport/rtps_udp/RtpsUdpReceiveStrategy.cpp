@@ -40,7 +40,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
   , receiver_(local_prefix)
   , thread_status_manager_(thread_status_manager)
 #ifdef OPENDDS_SECURITY
-  , secure_sample_(0)
+  , secure_sample_()
   , encoded_rtps_(false)
   , encoded_submsg_(false)
 #endif
@@ -151,56 +151,24 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
       if (!check_header(data_sample_header_)) {
         return 0;
       }
-      const size_t dsh_ml = data_sample_header_.message_length();
-      const bool alloc_new_data_buffer = data_sample_header_.expect_hold();
-      const size_t cur_rb_rd_pos = cur_rb->rd_ptr() - cur_rb->base();
-      const size_t cur_rb_wr_pos = cur_rb->wr_ptr() - cur_rb->base();
-      ACE_Message_Block* current_sample_block = 0;
-      if (alloc_new_data_buffer) {
-        ACE_NEW_MALLOC_RETURN(
-          current_sample_block,
-          (ACE_Message_Block*) mb_allocator_.malloc(sizeof(ACE_Message_Block)),
-          ACE_Message_Block(
-            cur_rb->data_block()->clone_nocopy(0, dsh_ml),
-            0,
-            &mb_allocator_),
-          -1);
-        current_sample_block->reset();
-        std::memcpy(current_sample_block->wr_ptr(), cur_rb->rd_ptr(), dsh_ml);
-        current_sample_block->wr_ptr(dsh_ml);
-      } else {
-        current_sample_block = cur_rb;
-        current_sample_block->rd_ptr(cur_rb->rd_ptr());
-        current_sample_block->wr_ptr(current_sample_block->rd_ptr() + dsh_ml);
-        OPENDDS_ASSERT(current_sample_block->data_block()->reference_count() == 1);
-      }
-      {
-        ReceivedDataSample rds(current_sample_block, alloc_new_data_buffer);
-        if (data_sample_header_.into_received_data_sample(rds)) {
+      ReceivedDataSample rds(*cur_rb);
+      if (data_sample_header_.into_received_data_sample(rds)) {
 
-          if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
-            VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
+        if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
+          VDBG((LM_DEBUG,"(%P|%t) DBG:   Attempt reassembly of fragments\n"));
 
-            if (reassemble(rds)) {
-              VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
-              deliver_sample(rds, remote_address);
-            }
-            // If reassemble() returned false, it takes ownership of the data
-            // just like deliver_sample() does.
-
-          } else {
+          if (reassemble(rds)) {
+            VDBG((LM_DEBUG,"(%P|%t) DBG:   Reassembled complete message\n"));
             deliver_sample(rds, remote_address);
           }
+          // If reassemble() returned false, it takes ownership of the data
+          // just like deliver_sample() does.
+
+        } else {
+          deliver_sample(rds, remote_address);
         }
       }
-      if (!alloc_new_data_buffer) {
-        OPENDDS_ASSERT(current_sample_block->data_block()->reference_count() == 1);
-        cur_rb->reset();
-        cur_rb->rd_ptr(cur_rb_rd_pos);
-        cur_rb->wr_ptr(cur_rb_wr_pos);
-      }
-      cur_rb->rd_ptr(dsh_ml);
-      bytes_remaining -= dsh_ml;
+      bytes_remaining -= data_sample_header_.message_length();
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
       // applies to the first DataSampleHeader in the TransportHeader
@@ -803,7 +771,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
     return;
   }
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
-  secure_sample_ = ReceivedDataSample(0);
+  secure_sample_ = ReceivedDataSample();
 
   DatawriterCryptoHandle dwch = DDS::HANDLE_NIL;
   DatareaderCryptoHandle drch = DDS::HANDLE_NIL;
@@ -868,7 +836,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
 
   RtpsSampleHeader rsh(mb);
   if (check_header(rsh)) {
-    ReceivedDataSample plain_sample(mb.duplicate());
+    ReceivedDataSample plain_sample(mb);
     if (rsh.into_received_data_sample(plain_sample)) {
       if (rsh.more_fragments()) {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   Attempt reassembly of decoded fragments\n"));
@@ -906,7 +874,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
     serialized_size(encoding, size, secure_submessages_[i]);
     const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
-      size += secure_sample_.sample_->size();
+      size += secure_sample_.data_length();
     }
     align(size, RTPS::SMHDR_SZ);
   }
@@ -928,10 +896,7 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
     }
     const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
-      const CORBA::Octet* sample_bytes =
-        reinterpret_cast<const CORBA::Octet*>(secure_sample_.sample_->rd_ptr());
-      if (!ser.write_octet_array(sample_bytes,
-                                 static_cast<unsigned int>(secure_sample_.sample_->length()))) {
+      if (!secure_sample_.write_data(ser)) {
         return false;
       }
     }
@@ -968,14 +933,7 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
     return true;
   }
 
-  DDS::OctetSeq encoded, plain, iQos;
-  encoded.length(static_cast<unsigned int>(sample.sample_->total_length()));
-  unsigned char* const buffer = encoded.get_buffer();
-  ACE_Message_Block* mb(sample.sample_.get());
-  for (unsigned int i = 0; mb; mb = mb->cont()) {
-    std::memcpy(buffer + i, mb->rd_ptr(), mb->length());
-    i += static_cast<unsigned int>(mb->length());
-  }
+  DDS::OctetSeq encoded = sample.copy_data(), plain, iQos;
 
   const Encoding encoding(Encoding::KIND_XCDR1,
     static_cast<Endianness>(submsg.smHeader.flags & 1));
@@ -995,15 +953,13 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                                     DDS::HANDLE_NIL,
                                                     writer_crypto_handle, ex);
   if (ok) {
-    const unsigned int n = plain.length();
-
     // The sample.sample_ message block uses the transport's data block so it
     // can't be modified in-place, instead replace it with a new block.
-    sample.sample_.reset(new ACE_Message_Block(n));
-    const char* buffer_raw = reinterpret_cast<const char*>(plain.get_buffer());
-    sample.sample_->copy(buffer_raw, n);
+    sample.clear();
+    const char* const buffer_raw = reinterpret_cast<const char*>(plain.get_buffer());
+    sample.append(buffer_raw, plain.length());
 
-    if (n > 1) {
+    if (plain.length() > 1) {
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
     }
 
@@ -1180,7 +1136,7 @@ bool RtpsUdpReceiveStrategy::reassemble_i(ReceivedDataSample& data, RtpsSampleHe
     // In particular we will need the SequenceNumber, but ignore the iQoS.
 
     // Peek at the byte order from the encapsulation containing the payload.
-    data.header_.byte_order_ = data.sample_->rd_ptr()[1] & FLAG_E;
+    data.header_.byte_order_ = data.peek(1) & FLAG_E;
 
     const DataFragSubmessage& dfsm = rsh.submessage_.data_frag_sm();
 

@@ -183,7 +183,8 @@ ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
     VDBG((LM_DEBUG, "(%P|%t) ShmemDataLink::request_ack_received: association msg\n"));
     GUID_t local;
-    Serializer ser(sample.sample_.get(), encoding_unaligned_native);
+    Message_Block_Ptr payload(sample.data());
+    Serializer ser(payload.get(), encoding_unaligned_native);
     if (ser >> local) {
       const GUID_t& remote = sample.header_.publication_id_;
       GuidConverter gc(local);

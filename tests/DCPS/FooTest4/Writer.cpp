@@ -63,7 +63,12 @@ Writer::start()
 
       ACE_OS::printf("\"writing\" foo.x = %f foo.y = %f, foo.key = %d\n",
                      foo.x, foo.y, foo.key);
-      OpenDDS::DCPS::ReceivedDataSample sample(0);
+
+      OpenDDS::DCPS::Message_Block_Ptr mb(new ACE_Message_Block(foo_size));
+      OpenDDS::DCPS::Serializer ser(mb.get(), encoding);
+      ser << foo;
+
+      OpenDDS::DCPS::ReceivedDataSample sample(*mb);
 
       sample.header_.message_length_ = static_cast<unsigned>(foo_size);
       sample.header_.message_id_ = OpenDDS::DCPS::SAMPLE_DATA;
@@ -79,11 +84,6 @@ Writer::start()
 
       sample.header_.source_timestamp_sec_ = static_cast<ACE_INT32>(now.sec());
       sample.header_.source_timestamp_nanosec_ = now.usec() * 1000;
-
-      sample.sample_.reset(new ACE_Message_Block(foo_size));
-
-      ::OpenDDS::DCPS::Serializer ser(sample.sample_.get(), encoding);
-      ser << foo;
 
       dr_servant->data_received(sample);
     }

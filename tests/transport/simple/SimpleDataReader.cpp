@@ -56,8 +56,9 @@ SimpleDataReader::data_received(const OpenDDS::DCPS::ReceivedDataSample& sample)
 
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
 
-  if (sample.sample_->length() < 25) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", sample.sample_->rd_ptr()));
+  if (sample.data_length() < 25) {
+    OpenDDS::DCPS::Message_Block_Ptr payload(sample.data());
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Message: [%C]\n", payload->rd_ptr()));
   }
 
   if (0 == num_messages_received_) {
