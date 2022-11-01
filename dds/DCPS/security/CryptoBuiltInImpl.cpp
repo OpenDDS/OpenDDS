@@ -19,7 +19,6 @@
 #include "dds/DCPS/Serializer.h"
 #include "dds/DCPS/Util.h"
 
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"

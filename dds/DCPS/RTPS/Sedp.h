@@ -7,7 +7,7 @@
 #define OPENDDS_DCPS_RTPS_SEDP_H
 
 #include "TypeLookup.h"
-#include "BaseMessageTypes.h"
+#include "MessageTypes.h"
 #include "BaseMessageUtils.h"
 #ifdef OPENDDS_SECURITY
 #  include "ParameterListConverter.h"

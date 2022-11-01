@@ -5,7 +5,6 @@
 
 #include "Spdp.h"
 
-#include "BaseMessageTypes.h"
 #include "BaseMessageUtils.h"
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
