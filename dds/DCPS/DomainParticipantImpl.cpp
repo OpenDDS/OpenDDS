@@ -34,7 +34,6 @@
 #  include "security/framework/SecurityConfig.h"
 #  include "security/framework/Properties.h"
 #endif
-#include "XTypes/DynamicTypeSupportImpl.h"
 
 #include <dds/DdsDcpsGuidC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -2612,30 +2611,6 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   }
   return result;
 }
-
-#ifndef OPENDDS_SAFETY_PROFILE
-DDS::DynamicTypeSupport_ptr DomainParticipantImpl::create_dynamic_type_support(
-  DDS::TypeSupport_ptr ts, const char* register_as)
-{
-  TypeSupportImpl* const tsi = dynamic_cast<TypeSupportImpl*>(ts);
-  XTypes::DynamicTypeSupportImpl* const dtsi = new XTypes::DynamicTypeSupportImpl(
-    get_dynamic_type(tsi->getMinimalTypeIdentifier()));
-  dtsi->setMinimalTypeIdentifier(tsi->getMinimalTypeIdentifier());
-  dtsi->setMinimalTypeMap(tsi->getMinimalTypeMap());
-  dtsi->setCompleteTypeIdentifier(tsi->getCompleteTypeIdentifier());
-  dtsi->setCompleteTypeMap(tsi->getCompleteTypeMap());
-  DDS::DynamicTypeSupport_var dts(dtsi);
-  const DDS::ReturnCode_t ret = dts->register_type(this, register_as);
-  if (ret != DDS::RETCODE_OK) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::create_dynamic_type_support: "
-        "Could not register type \"%C\": %C\n", register_as, retcode_to_string(ret)));
-    }
-    return 0;
-  }
-  return dts._retn();
-}
-#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

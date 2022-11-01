@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -14,20 +12,17 @@
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
 #include "XTypes/TypeObject.h"
+#include "XTypes/TypeLookupService.h"
 
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace XTypes {
-class TypeLookupService;
-}
-
 namespace DCPS {
 
 class MetaStruct;
@@ -116,8 +111,12 @@ public:
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 
-  void add_types(const RcHandle<XTypes::TypeLookupService>& tls) const;
-  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
+  void add_types(const XTypes::TypeLookupService_rch& tls) const;
+  void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  virtual DDS::DynamicType_var get_dynamic_type() = 0;
+#endif
 
 private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
@@ -126,7 +125,7 @@ private:
                       const XTypes::TypeIdentifier& ti,
                       const XTypes::TypeMap& type_map) const;
 
-  void populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
+  void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                XTypes::EquivalenceKind ek) const;
 
   OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
@@ -173,6 +172,31 @@ public:
   {
     return MarshalTraitsType::key_only_serialized_size_bound(encoding);
   }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicType_var get_dynamic_type()
+  {
+    if (!type_lookup_service_) {
+      type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
+      add_types(type_lookup_service_);
+      populate_dependencies(type_lookup_service_);
+    }
+    const XTypes::TypeIdentifier& cti = getCompleteTypeIdentifier();
+    const XTypes::TypeMap& ctm = getCompleteTypeMap();
+    const XTypes::TypeIdentifier& mti = getMinimalTypeIdentifier();
+    const XTypes::TypeMap& mtm = getMinimalTypeMap();
+    XTypes::DynamicTypeImpl* dt = dynamic_cast<XTypes::DynamicTypeImpl*>(
+      type_lookup_service_->type_identifier_to_dynamic(getCompleteTypeIdentifier(), GUID_UNKNOWN));
+    dt->set_complete_type_identifier(cti);
+    dt->set_complete_type_map(ctm);
+    dt->set_minimal_type_identifier(mti);
+    dt->set_minimal_type_map(mtm);
+    return dt;
+  }
+#endif
+
+protected:
+  XTypes::TypeLookupService_rch type_lookup_service_;
 };
 
 } // namespace DCPS

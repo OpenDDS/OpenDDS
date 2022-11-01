@@ -428,8 +428,11 @@ public:
     return 0;
   }
 
-  DDS::DynamicTypeSupport_ptr create_dynamic_type_support(
-    DDS::TypeSupport_ptr ts, const char* register_as = "");
+  template <typename TopicType>
+  DDS::DynamicType* get_dynamic_type()
+  {
+    return get_dynamic_type(getCompleteTypeIdentifier<DDSTraits<TopicType>::Xtag>());
+  }
 #endif
 
 private:

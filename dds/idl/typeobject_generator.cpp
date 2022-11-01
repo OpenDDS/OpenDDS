@@ -685,7 +685,7 @@ typeobject_generator::gen_epilogue()
 string
 typeobject_generator::tag_type(UTL_ScopedName* name)
 {
-  return dds_generator::scoped_helper(name, "_") + "_xtag";
+  return dds_generator::get_xtag_name(name);
 }
 
 bool

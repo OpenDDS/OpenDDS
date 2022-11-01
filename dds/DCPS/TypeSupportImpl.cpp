@@ -1,17 +1,14 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
 
 #include "TypeSupportImpl.h"
 
 #include "Registered_Data_Types.h"
 #include "Service_Participant.h"
-
 #include "XTypes/TypeLookupService.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -110,7 +107,7 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
   }
 }
 
-void TypeSupportImpl::add_types(const RcHandle<XTypes::TypeLookupService>& tls) const
+void TypeSupportImpl::add_types(const XTypes::TypeLookupService_rch& tls) const
 {
   using namespace XTypes;
   const TypeMap& minTypeMap = getMinimalTypeMap();
@@ -142,7 +139,7 @@ void TypeSupportImpl::add_types(const RcHandle<XTypes::TypeLookupService>& tls) 
   }
 }
 
-void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
+void TypeSupportImpl::populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                               XTypes::EquivalenceKind ek) const
 {
   if (ek != XTypes::EK_MINIMAL && ek != XTypes::EK_COMPLETE) {
@@ -172,7 +169,7 @@ void TypeSupportImpl::populate_dependencies_i(const RcHandle<XTypes::TypeLookupS
   tls->add_type_dependencies(type_id, deps_with_size);
 }
 
-void TypeSupportImpl::populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const
+void TypeSupportImpl::populate_dependencies(const XTypes::TypeLookupService_rch& tls) const
 {
   populate_dependencies_i(tls, XTypes::EK_MINIMAL);
   populate_dependencies_i(tls, XTypes::EK_COMPLETE);

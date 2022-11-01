@@ -11,11 +11,15 @@ using namespace OpenDDS::XTypes;
 using namespace max_extensibility;
 
 class dds_DCPS_XTypes_Utils : public testing::Test {
-  template<typename TopicType, typename Xtag>
+
+  TypeLookupService_rch tls_;
+
+  template<typename TopicType>
   void add_type()
   {
     TypeIdentifierPairSeq tid_pairs;
     TypeIdentifierPair tid_pair;
+    typedef typename DDSTraits<TopicType>::Xtag Xtag;
     tid_pair.type_identifier1 = getCompleteTypeIdentifier<Xtag>();
     tid_pair.type_identifier2 = getMinimalTypeIdentifier<Xtag>();
     tid_pairs.append(tid_pair);
@@ -28,21 +32,21 @@ class dds_DCPS_XTypes_Utils : public testing::Test {
   void SetUp()
   {
     tls_ = make_rch<TypeLookupService>();
-    add_type<FinalStruct, max_extensibility_FinalStruct_xtag>();
-    add_type<AppendableUnion, max_extensibility_AppendableUnion_xtag>();
-    add_type<MutableStruct, max_extensibility_MutableStruct_xtag>();
-    add_type<FinalMaxFinalStruct, max_extensibility_FinalMaxFinalStruct_xtag>();
-    add_type<FinalMaxAppendableStruct, max_extensibility_FinalMaxAppendableStruct_xtag>();
-    add_type<FinalMaxMutableStruct, max_extensibility_FinalMaxMutableStruct_xtag>();
-    add_type<AppendableMaxAppendableStruct, max_extensibility_AppendableMaxAppendableStruct_xtag>();
-    add_type<AppendableMaxMutableUnion, max_extensibility_AppendableMaxMutableUnion_xtag>();
-    add_type<MutableMaxMutableStruct, max_extensibility_MutableMaxMutableStruct_xtag>();
+    add_type<FinalStruct>();
+    add_type<AppendableUnion>();
+    add_type<MutableStruct>();
+    add_type<FinalMaxFinalStruct>();
+    add_type<FinalMaxAppendableStruct>();
+    add_type<FinalMaxMutableStruct>();
+    add_type<AppendableMaxAppendableStruct>();
+    add_type<AppendableMaxMutableUnion>();
+    add_type<MutableMaxMutableStruct>();
   }
 
-  TypeLookupService_rch tls_;
-  template<typename Xtag>
+  template<typename TopicType>
   DDS::DynamicType_var get_dynamic_type()
   {
+    typedef typename DDSTraits<TopicType>::Xtag Xtag;
     const TypeIdentifier& com_ti = getCompleteTypeIdentifier<Xtag>();
     const TypeMap& com_map = getCompleteTypeMap<Xtag>();
     TypeMap::const_iterator pos = com_map.find(com_ti);
@@ -52,19 +56,19 @@ class dds_DCPS_XTypes_Utils : public testing::Test {
   }
 
 public:
-  template<typename Xtag>
+  template<typename TopicType>
   void expect_ext(Extensibility expected)
   {
-    DDS::DynamicType_var dy = get_dynamic_type<Xtag>();
+    DDS::DynamicType_var dy = get_dynamic_type<TopicType>();
     Extensibility actual;
     EXPECT_EQ(DDS::RETCODE_OK, extensibility(dy.in(), actual));
     EXPECT_EQ(expected, actual);
   }
 
-  template<typename Xtag>
+  template<typename TopicType>
   void expect_maxext(Extensibility expected)
   {
-    DDS::DynamicType_var dy = get_dynamic_type<Xtag>();
+    DDS::DynamicType_var dy = get_dynamic_type<TopicType>();
     CORBA::String_var name = dy->get_name();
     Extensibility actual;
     EXPECT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::max_extensibility(dy.in(), actual)) << name.in();
@@ -74,27 +78,27 @@ public:
 
 TEST_F(dds_DCPS_XTypes_Utils, extensibility)
 {
-  expect_ext<max_extensibility_FinalStruct_xtag>(FINAL);
-  expect_ext<max_extensibility_AppendableUnion_xtag>(APPENDABLE);
-  expect_ext<max_extensibility_MutableStruct_xtag>(MUTABLE);
-  expect_ext<max_extensibility_FinalMaxFinalStruct_xtag>(FINAL);
-  expect_ext<max_extensibility_FinalMaxAppendableStruct_xtag>(FINAL);
-  expect_ext<max_extensibility_FinalMaxMutableStruct_xtag>(FINAL);
-  expect_ext<max_extensibility_AppendableMaxAppendableStruct_xtag>(APPENDABLE);
-  expect_ext<max_extensibility_AppendableMaxMutableUnion_xtag>(APPENDABLE);
-  expect_ext<max_extensibility_MutableMaxMutableStruct_xtag>(MUTABLE);
+  expect_ext<FinalStruct>(FINAL);
+  expect_ext<AppendableUnion>(APPENDABLE);
+  expect_ext<MutableStruct>(MUTABLE);
+  expect_ext<FinalMaxFinalStruct>(FINAL);
+  expect_ext<FinalMaxAppendableStruct>(FINAL);
+  expect_ext<FinalMaxMutableStruct>(FINAL);
+  expect_ext<AppendableMaxAppendableStruct>(APPENDABLE);
+  expect_ext<AppendableMaxMutableUnion>(APPENDABLE);
+  expect_ext<MutableMaxMutableStruct>(MUTABLE);
 }
 
 TEST_F(dds_DCPS_XTypes_Utils, max_extensibility)
 {
-  expect_maxext<max_extensibility_FinalStruct_xtag>(FINAL);
-  expect_maxext<max_extensibility_AppendableUnion_xtag>(APPENDABLE);
-  expect_maxext<max_extensibility_MutableStruct_xtag>(MUTABLE);
-  expect_maxext<max_extensibility_FinalMaxFinalStruct_xtag>(FINAL);
-  expect_maxext<max_extensibility_FinalMaxAppendableStruct_xtag>(APPENDABLE);
-  expect_maxext<max_extensibility_FinalMaxMutableStruct_xtag>(MUTABLE);
-  expect_maxext<max_extensibility_AppendableMaxAppendableStruct_xtag>(APPENDABLE);
-  expect_maxext<max_extensibility_AppendableMaxMutableUnion_xtag>(MUTABLE);
-  expect_maxext<max_extensibility_MutableMaxMutableStruct_xtag>(MUTABLE);
+  expect_maxext<FinalStruct>(FINAL);
+  expect_maxext<AppendableUnion>(APPENDABLE);
+  expect_maxext<MutableStruct>(MUTABLE);
+  expect_maxext<FinalMaxFinalStruct>(FINAL);
+  expect_maxext<FinalMaxAppendableStruct>(APPENDABLE);
+  expect_maxext<FinalMaxMutableStruct>(MUTABLE);
+  expect_maxext<AppendableMaxAppendableStruct>(APPENDABLE);
+  expect_maxext<AppendableMaxMutableUnion>(MUTABLE);
+  expect_maxext<MutableMaxMutableStruct>(MUTABLE);
 }
 #endif // OPENDDS_SAFETY_PROFILE

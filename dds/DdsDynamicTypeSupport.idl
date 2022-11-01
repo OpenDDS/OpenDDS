@@ -14,13 +14,23 @@
 
 module DDS {
 
-local interface DynamicTypeSupport : TypeSupport {
-  /*
+// All the methods the XTypes spec describes in DynamicTypeSupport are not
+// valid IDL. It's not possible to declare a static method in IDL, at
+// least in a standardized way. register_type and get_type_name are not valid
+// because interfaces can't redefine methods defined in parent interfaces.
+// https://issues.omg.org/browse/INBOX-1527
+local interface DynamicTypeSupportInterf : TypeSupport {
+#if 0
+  /*static*/ DynamicTypeSupport create_type_support(
+    in DynamicType type);
+  /*static*/ DDS::ReturnCode_t delete_type_support(
+    in DynamicTypeSupport type_support);
+
   ReturnCode_t register_type(
     in DomainParticipant participant,
     in ObjectName type_name);
   ObjectName get_type_name();
-  */
+#endif
 };
 
 local interface DynamicDataWriter : Entity {

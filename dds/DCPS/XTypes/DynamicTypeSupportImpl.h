@@ -82,118 +82,6 @@ protected:
   DDS::DynamicData_var data_;
 };
 
-class OpenDDS_Dcps_Export DynamicTypeSupportImpl
-: public virtual DCPS::TypeSupportImpl
-, public virtual DDS::DynamicTypeSupport
-{
-public:
-  DynamicTypeSupportImpl(DDS::DynamicType_var type)
-  : type_(type)
-  , name_(type->get_name())
-  {
-  }
-
-  const char* name() const
-  {
-    return name_.in();
-  }
-
-  size_t key_count() const
-  {
-    OPENDDS_ASSERT(false);
-    return 0;
-  }
-
-  void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
-
-  DCPS::Extensibility base_extensibility() const;
-  DCPS::Extensibility max_extensibility() const;
-
-  DCPS::SerializedSizeBound serialized_size_bound(const DCPS::Encoding&) const
-  {
-    return DCPS::SerializedSizeBound();
-  }
-
-  DCPS::SerializedSizeBound key_only_serialized_size_bound(const DCPS::Encoding&) const
-  {
-    return DCPS::SerializedSizeBound();
-  }
-
-  DDS::DataWriter_ptr create_datawriter();
-  DDS::DataReader_ptr create_datareader();
-  DDS::DataReader_ptr create_multitopic_datareader();
-
-  void setMinimalTypeIdentifier(const TypeIdentifier& ti)
-  {
-    minimal_ti_ = ti;
-  }
-
-  const TypeIdentifier& getMinimalTypeIdentifier() const
-  {
-    return minimal_ti_;
-  }
-
-  void setMinimalTypeMap(const TypeMap& tm)
-  {
-    minimal_tm_ = tm;
-  }
-
-  const TypeMap& getMinimalTypeMap() const
-  {
-    return minimal_tm_;
-  }
-
-  void setCompleteTypeIdentifier(const TypeIdentifier& ti)
-  {
-    complete_ti_ = ti;
-  }
-
-  const TypeIdentifier& getCompleteTypeIdentifier() const
-  {
-    return complete_ti_;
-  }
-
-  void setCompleteTypeMap(const TypeMap& tm)
-  {
-    complete_tm_ = tm;
-  }
-
-  const TypeMap& getCompleteTypeMap() const
-  {
-    return complete_tm_;
-  }
-
-  const DCPS::MetaStruct& getMetaStructForType()
-  {
-    OPENDDS_ASSERT(false);
-    const DCPS::MetaStruct* const ms = 0;
-    return *ms;
-  }
-
-  CORBA::Boolean _is_a(const char* type_id)
-  {
-    return DDS::DynamicTypeSupport::_is_a(type_id);
-  }
-
-  const char* _interface_repository_id() const
-  {
-    return DDS::DynamicTypeSupport::_interface_repository_id();
-  }
-
-  CORBA::Boolean marshal(TAO_OutputCDR&)
-  {
-    return false;
-  }
-
-protected:
-  DDS::DynamicType_var type_;
-  CORBA::String_var name_;
-  TypeIdentifier minimal_ti_;
-  TypeMap minimal_tm_;
-  TypeIdentifier complete_ti_;
-  TypeMap complete_tm_;
-};
-
 class OpenDDS_Dcps_Export DynamicDataWriterImpl
 : public virtual DCPS::LocalObject<DDS::DynamicDataWriter>
 , public virtual DCPS::DataWriterImpl
@@ -284,7 +172,117 @@ public:
 } // namespace XTypes
 } // namespace OpenDDS
 
+namespace DDS {
+
+class DynamicTypeSupport;
+typedef DynamicTypeSupport* DynamicTypeSupport_ptr;
+
+typedef TAO_Objref_Var_T<DynamicTypeSupport> DynamicTypeSupport_var;
+
+class OpenDDS_Dcps_Export DynamicTypeSupport
+: public virtual OpenDDS::DCPS::TypeSupportImpl
+, public virtual DynamicTypeSupportInterf
+{
+public:
+  typedef DynamicTypeSupport_ptr _ptr_type;
+  typedef DynamicTypeSupport_var _var_type;
+
+  DynamicTypeSupport(DynamicType_var type)
+  : type_(type)
+  , name_(type->get_name())
+  {
+  }
+
+  virtual ~DynamicTypeSupport() {}
+
+  const char* name() const
+  {
+    return name_.in();
+  }
+
+  size_t key_count() const
+  {
+    OPENDDS_ASSERT(false);
+    return 0;
+  }
+
+  void representations_allowed_by_type(DataRepresentationIdSeq& seq);
+
+  OpenDDS::DCPS::Extensibility base_extensibility() const;
+  OpenDDS::DCPS::Extensibility max_extensibility() const;
+
+  OpenDDS::DCPS::SerializedSizeBound serialized_size_bound(const OpenDDS::DCPS::Encoding&) const
+  {
+    return OpenDDS::DCPS::SerializedSizeBound();
+  }
+
+  OpenDDS::DCPS::SerializedSizeBound key_only_serialized_size_bound(
+    const OpenDDS::DCPS::Encoding&) const
+  {
+    return OpenDDS::DCPS::SerializedSizeBound();
+  }
+
+  DataWriter_ptr create_datawriter();
+  DataReader_ptr create_datareader();
+  DataReader_ptr create_multitopic_datareader();
+
+  const OpenDDS::XTypes::TypeIdentifier& getMinimalTypeIdentifier() const;
+  const OpenDDS::XTypes::TypeMap& getMinimalTypeMap() const;
+  const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;
+  const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;
+
+  DDS::DynamicType_var get_dynamic_type()
+  {
+    return type_;
+  }
+
+  const OpenDDS::DCPS::MetaStruct& getMetaStructForType()
+  {
+    OPENDDS_ASSERT(false);
+    const OpenDDS::DCPS::MetaStruct* const ms = 0;
+    return *ms;
+  }
+
+  CORBA::Boolean _is_a(const char* type_id)
+  {
+    return DynamicTypeSupportInterf::_is_a(type_id);
+  }
+
+  const char* _interface_repository_id() const
+  {
+    return DynamicTypeSupportInterf::_interface_repository_id();
+  }
+
+  CORBA::Boolean marshal(TAO_OutputCDR&)
+  {
+    return false;
+  }
+
+  static DynamicTypeSupport_ptr _duplicate(DynamicTypeSupport_ptr obj);
+
+protected:
+  DynamicType_var type_;
+  CORBA::String_var name_;
+};
+
+} // namespace DDS
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+#  ifndef DDS_DYNAMICTYPESUPPORT__TRAITS_
+#    define DDS_DYNAMICTYPESUPPORT__TRAITS_
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+namespace TAO {
+template<>
+struct OpenDDS_Dcps_Export Objref_Traits<DDS::DynamicTypeSupport> {
+  static DDS::DynamicTypeSupport_ptr duplicate(DDS::DynamicTypeSupport_ptr p);
+  static void release(DDS::DynamicTypeSupport_ptr p);
+  static DDS::DynamicTypeSupport_ptr nil();
+  static CORBA::Boolean marshal(const DDS::DynamicTypeSupport_ptr p, TAO_OutputCDR & cdr);
+};
+} // namespace TAO
+TAO_END_VERSIONED_NAMESPACE_DECL
+#  endif
 
 #endif // OPENDDS_SAFETY_PROFILE
 #endif // OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_IMPL_H

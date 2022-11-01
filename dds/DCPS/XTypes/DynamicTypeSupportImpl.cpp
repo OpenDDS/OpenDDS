@@ -9,6 +9,7 @@
 
 #  include "DynamicTypeSupportImpl.h"
 
+#  include "DynamicTypeImpl.h"
 #  include "Utils.h"
 
 #  include <dds/DCPS/debug.h>
@@ -46,58 +47,123 @@ bool DynamicSample::compare(const DCPS::Sample& other) const
   return false;
 }
 
-void DynamicTypeSupportImpl::representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)
+} // namespace XTypes
+} // namespace OpenDDS
+
+namespace DDS {
+
+using namespace OpenDDS::DCPS;
+using namespace OpenDDS::XTypes;
+
+void DynamicTypeSupport::representations_allowed_by_type(DataRepresentationIdSeq& seq)
 {
-  seq.length(4);
-  seq[0] = DDS::XCDR_DATA_REPRESENTATION;
-  seq[1] = DDS::XCDR2_DATA_REPRESENTATION;
-  seq[2] = DDS::XML_DATA_REPRESENTATION;
-  seq[3] = OpenDDS::DCPS::UNALIGNED_CDR_DATA_REPRESENTATION;
+  // TODO: Need to be able to read annotations?
+  seq.length(1);
+  seq[0] = XCDR2_DATA_REPRESENTATION;
 }
 
-DCPS::Extensibility DynamicTypeSupportImpl::base_extensibility() const
+Extensibility DynamicTypeSupport::base_extensibility() const
 {
-  DCPS::Extensibility ext = DCPS::FINAL;
-  const DDS::ReturnCode_t rc = extensibility(type_, ext);
-  if (rc != DDS::RETCODE_OK && DCPS::log_level >= DCPS::LogLevel::Error) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicTypeSupportImpl::base_extensibility: "
+  Extensibility ext = OpenDDS::DCPS::FINAL;
+  const ReturnCode_t rc = extensibility(type_, ext);
+  if (rc != RETCODE_OK && log_level >= LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicTypeSupport::base_extensibility: "
       "could not get correct extensibility for DynamicType %C: %C\n",
-      name(), DCPS::retcode_to_string(rc)));
+      name(), retcode_to_string(rc)));
   }
   return ext;
 }
 
-DCPS::Extensibility DynamicTypeSupportImpl::max_extensibility() const
+Extensibility DynamicTypeSupport::max_extensibility() const
 {
-  DCPS::Extensibility ext = DCPS::FINAL;
-  const DDS::ReturnCode_t rc = XTypes::max_extensibility(type_, ext);
-  if (rc != DDS::RETCODE_OK && DCPS::log_level >= DCPS::LogLevel::Error) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicTypeSupportImpl::max_extensibility: "
+  Extensibility ext = OpenDDS::DCPS::FINAL;
+  const ReturnCode_t rc = OpenDDS::XTypes::max_extensibility(type_, ext);
+  if (rc != RETCODE_OK && log_level >= LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicTypeSupport::max_extensibility: "
       "could not get correct max extensibility for DynamicType %C: %C\n",
-      name(), DCPS::retcode_to_string(rc)));
+      name(), retcode_to_string(rc)));
   }
   return ext;
 }
 
-DDS::DataWriter_ptr DynamicTypeSupportImpl::create_datawriter()
+DataWriter_ptr DynamicTypeSupport::create_datawriter()
 {
   return new DynamicDataWriterImpl();
 }
 
-DDS::DataReader_ptr DynamicTypeSupportImpl::create_datareader()
+DataReader_ptr DynamicTypeSupport::create_datareader()
 {
   // TODO
   return 0;
 }
 
-DDS::DataReader_ptr DynamicTypeSupportImpl::create_multitopic_datareader()
+DataReader_ptr DynamicTypeSupport::create_multitopic_datareader()
 {
   // TODO
   return 0;
 }
 
-} // namespace XTypes
-} // namespace OpenDDS
+const TypeIdentifier& DynamicTypeSupport::getMinimalTypeIdentifier() const
+{
+  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  return dti->get_minimal_type_identifier();
+}
+
+const TypeMap& DynamicTypeSupport::getMinimalTypeMap() const
+{
+  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  return dti->get_minimal_type_map();
+}
+
+const TypeIdentifier& DynamicTypeSupport::getCompleteTypeIdentifier() const
+{
+  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  return dti->get_complete_type_identifier();
+}
+
+const TypeMap& DynamicTypeSupport::getCompleteTypeMap() const
+{
+  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  return dti->get_complete_type_map();
+}
+
+DynamicTypeSupport_ptr DynamicTypeSupport::_duplicate(DynamicTypeSupport_ptr obj)
+{
+  if (!obj) {
+    obj->_add_ref();
+  }
+  return obj;
+}
+
+} // namespace DDS
+
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
+
+TAO_BEGIN_VERSIONED_NAMESPACE_DECL
+namespace TAO {
+
+DDS::DynamicTypeSupport_ptr Objref_Traits<DDS::DynamicTypeSupport>::duplicate(DDS::DynamicTypeSupport_ptr p)
+{
+  return DDS::DynamicTypeSupport::_duplicate(p);
+}
+
+void Objref_Traits<DDS::DynamicTypeSupport>::release(DDS::DynamicTypeSupport_ptr p)
+{
+  CORBA::release(p);
+}
+
+DDS::DynamicTypeSupport_ptr Objref_Traits<DDS::DynamicTypeSupport>::nil()
+{
+  return static_cast<DDS::DynamicTypeSupport_ptr>(0);
+}
+
+CORBA::Boolean Objref_Traits<DDS::DynamicTypeSupport>::marshal(
+  const DDS::DynamicTypeSupport_ptr p, TAO_OutputCDR& cdr)
+{
+  return CORBA::Object::marshal(p, cdr);
+}
+
+} // namespace TAO
+TAO_END_VERSIONED_NAMESPACE_DECL
 
 #endif // OPENDDS_SAFETY_PROFILE
