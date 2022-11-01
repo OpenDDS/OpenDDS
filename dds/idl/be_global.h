@@ -8,7 +8,9 @@
 #ifndef OPENDDS_IDL_BE_GLOBAL_H
 #define OPENDDS_IDL_BE_GLOBAL_H
 
-class BE_GlobalData {
+#include "opendds_idl_plugin_export.h"
+
+class opendds_idl_plugin_Export BE_GlobalData {
 public:
   // = TITLE
   //    BE_GlobalData

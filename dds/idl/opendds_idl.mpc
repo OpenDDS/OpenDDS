@@ -1,10 +1,8 @@
 project: aceexe, dds_macros, crosscompile, install, opendds_util {
-
   exename   = *
   exeout    = $(DDS_ROOT)/bin
-
-  after    += TAO_IDL_FE
-  libs     += TAO_IDL_FE
+  after    += TAO_IDL_FE opendds_idl_plugin
+  libs     += TAO_IDL_FE opendds_idl_plugin
   includes += . $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)/TAO_IDL/fe $(TAO_ROOT)
   requires += no_opendds_safety_profile
 
@@ -38,4 +36,61 @@ project: aceexe, dds_macros, crosscompile, install, opendds_util {
 "	ln -sf ../../../bin/opendds_idl $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
   }
 
+  Source_Files {
+    drv_args.cpp
+    drv_preporoc.cpp
+    opendds_idl.cpp
+  }
 }
+
+project(opendds_idl_plugin): acelib, dds_macros, crosscompile, opendds_util {
+  sharedname   = opendds_idl_plugin
+  libout       = $(DDS_ROOT)/lib
+  dynamicflags = OPENDDS_IDL_PLUGIN_BUILD_DLL
+  after       += TAO_IDL_FE
+  libs        += TAO_IDL_FE
+  includes    += . $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)
+  requires    += no_opendds_safety_profile
+
+  Source_Files {
+    annotations.cpp
+    be_builtin.cpp
+    be_builtin_global.cpp
+    be_global.cpp
+    be_init.cpp
+    be_produce.cpp
+    be_util.cpp
+    cxx11_language_mapping.cpp
+    dds_generator.cpp
+    dds_visitor.cpp
+    field_info.cpp
+    itl_generator.cpp
+    keys_generator.cpp
+    langmap_generator.cpp
+    language_mapping.cpp
+    marshal_generator.cpp
+    metaclass_generator.cpp
+    sp_language_mapping.cpp
+    topic_keys.cpp
+    ts_generator.cpp
+    typeobject_generator.cpp
+    value_reader_generator.cpp
+    value_writer_generator.cpp
+    windows_linking.cpp
+  }
+}
+
+project(opendds_idl_face): acelib, dds_macros, crosscompile, opendds_util {
+  sharedname   = opendds_idl_face
+  libout       = $(DDS_ROOT)/lib
+  dynamicflags = OPENDDS_IDL_FACE_BUILD_DLL
+  after       += TAO_IDL_FE opendds_idl_plugin
+  libs        += TAO_IDL_FE opendds_idl_plugin
+  includes    += . $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)
+  requires    += no_opendds_safety_profile
+
+  Source_Files {
+    face_language_mapping.cpp
+  }
+}
+

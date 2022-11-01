@@ -8,6 +8,7 @@
 #ifndef OPENDDS_IDL_BE_BUILTIN_GLOBAL_H
 #define OPENDDS_IDL_BE_BUILTIN_GLOBAL_H
 
+#include "opendds_idl_plugin_export.h"
 #include "annotations.h"
 
 #include <dds/DCPS/XTypes/TypeObject.h>
@@ -40,7 +41,7 @@ class AST_Annotation_Decl;
 
 // Defines a class containing all back end global data.
 
-class BE_BuiltinGlobalData {
+class opendds_idl_plugin_Export BE_BuiltinGlobalData {
 public:
   // = TITLE
   //    BE_BuiltinGlobalData

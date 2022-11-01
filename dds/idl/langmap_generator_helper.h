@@ -6,15 +6,9 @@
 #ifndef LANGMAP_GENERATOR_HELPER_H
 #define LANGMAP_GENERATOR_HELPER_H
 
-#include <utl_scoped_name.h>
-#include <utl_identifier.h>
-#include <utl_string.h>
+#include "opendds_idl_plugin_export.h"
 #include <ast.h>
-#include <ast_component_fwd.h>
-#include <ast_eventtype_fwd.h>
-#include <ast_structure_fwd.h>
 #include <ast_union_fwd.h>
-#include <ast_valuetype_fwd.h>
 
 #include <string>
 #include <vector>
@@ -22,7 +16,7 @@
 
 struct Intro;
 
-class GeneratorBase
+class opendds_idl_plugin_Export GeneratorBase
 {
 public:
   virtual ~GeneratorBase();

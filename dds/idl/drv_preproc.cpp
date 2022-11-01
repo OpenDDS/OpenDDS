@@ -17,3 +17,6 @@
 // NOTE: this was copied from the $TAO_ROOT/orbsvcs/IFR_Service
 
 #include "TAO_IDL/driver/drv_preproc.cpp"
+
+#include "windows_linking.h"
+INITIALIZE_DRV_PTRS_FUNC

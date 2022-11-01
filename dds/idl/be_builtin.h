@@ -1,6 +1,7 @@
 #ifndef OPENDDS_IDL_BE_BUILTIN_H
 #define OPENDDS_IDL_BE_BUILTIN_H
 
+#include "opendds_idl_plugin_export.h"
 #include "be_interface.h"
 #include "be_builtin_global.h"
 
@@ -8,7 +9,7 @@
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-extern BE_BuiltinGlobalData* be_builtin_global;
+extern opendds_idl_plugin_Export BE_BuiltinGlobalData* be_builtin_global;
 
 class BE_BuiltinInterface: public BE_Interface {
 public:
@@ -33,8 +34,12 @@ public:
   virtual void arg_post_proc();
   virtual void usage();
 
-protected:
+private:
   static void rm_arg(int& i, int& argc, ACE_TCHAR* argv[]);
+
+  typedef LanguageMapping* (*language_mapping_allocator)();
+  static language_mapping_allocator load_language_mapping(const ACE_TCHAR* mapping_name);
+
   void allocate_language_mapping(int&, ACE_TCHAR* []);
 };
 

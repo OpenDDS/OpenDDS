@@ -1,8 +1,20 @@
 #include "face_language_mapping.h"
-#include "dds_generator.h"
-#include "field_info.h"
+#include "opendds_idl_face_export.h"
+
+#include <langmap_generator_helper.h>
+#include <dds_generator.h>
+#include <field_info.h>
 
 using namespace AstTypeClassification;
+
+extern "C" {
+  opendds_idl_face_Export LanguageMapping* opendds_idl_face_allocator()
+  {
+    FaceLanguageMapping* ptr = 0;
+    ACE_NEW_RETURN(ptr, FaceLanguageMapping, 0);
+    return ptr;
+  }
+}
 
 class FaceGenerator : public GeneratorBase
 {

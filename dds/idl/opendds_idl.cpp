@@ -14,4 +14,5 @@
 
 // NOTE: this was copied from the $TAO_ROOT/orbsvcs/IFR_Service
 
+#include "windows_linking.h"
 #include "TAO_IDL/tao_idl.cpp"

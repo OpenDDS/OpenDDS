@@ -17,4 +17,4 @@ public:
   virtual GeneratorBase* getGeneratorHelper() const;
 };
 
-#endif /* OPENDDS_IDL_FACE_LANGUAGE_MAPPING_H */
+#endif /* OPENDDS_IDL_SP_LANGUAGE_MAPPING_H */

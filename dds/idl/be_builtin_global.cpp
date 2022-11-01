@@ -41,7 +41,7 @@
 
 using namespace std;
 
-BE_BuiltinGlobalData* be_builtin_global = 0;
+opendds_idl_plugin_Export BE_BuiltinGlobalData* be_builtin_global = 0;
 
 BE_BuiltinGlobalData::BE_BuiltinGlobalData()
   : filename_(0)

@@ -9,7 +9,7 @@
 #include "be_init.h"
 
 // Referenced through extern via be_extern.h
-BE_GlobalData* be_global = 0;
+opendds_idl_plugin_Export BE_GlobalData* be_global = 0;
 
 BE_GlobalData::BE_GlobalData()
 {

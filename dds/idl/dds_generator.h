@@ -6,6 +6,7 @@
 #ifndef dds_generator_H
 #define dds_generator_H
 
+#include "opendds_idl_plugin_export.h"
 #include "be_builtin.h"
 #include "be_util.h"
 
@@ -45,7 +46,7 @@ enum EscapeContext {
   EscapeContext_Normal,
 };
 
-class dds_generator {
+class opendds_idl_plugin_Export dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
@@ -428,7 +429,7 @@ namespace AstTypeClassification {
   }
 }
 
-struct NestedForLoops {
+struct opendds_idl_plugin_Export NestedForLoops {
   NestedForLoops(const char* type, const char* prefix, AST_Array* arr,
                  std::string& indent, bool followTypedefs = false);
   ~NestedForLoops();
@@ -782,9 +783,9 @@ void generateCaseBody(
 
     if (is_bound_string) {
       const std::string to_type = lmap->getInputCDRToString(is_wide);
-      const std::string face_suffix = lmap->getBranchStringSuffix();
+      const std::string str_suffix = lmap->getBranchStringSuffix();
       brType = lmap->getBranchStringType(is_wide);
-      rhs = to_type + "(tmp" + face_suffix + ", " + bounded_arg(br) + ")";
+      rhs = to_type + "(tmp" + str_suffix + ", " + bounded_arg(br) + ")";
     } else if (br_cls & CL_STRING) {
       const std::string nmspace = lmap->getBranchStringPrefix();
       brType = use_cxx11 ? std::string("std::") + (is_wide ? "w" : "") + "string"

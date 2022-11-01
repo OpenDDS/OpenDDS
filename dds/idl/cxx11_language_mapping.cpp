@@ -1,4 +1,5 @@
 #include "cxx11_language_mapping.h"
+#include "langmap_generator_helper.h"
 #include "dds_generator.h"
 #include "field_info.h"
 

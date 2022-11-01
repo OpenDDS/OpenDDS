@@ -1,11 +1,13 @@
 #ifndef OPENDDS_IDL_LANGUAGE_MAPPING_H
 #define OPENDDS_IDL_LANGUAGE_MAPPING_H
 
-#include "langmap_generator_helper.h"
+#include "opendds_idl_plugin_export.h"
 
 #include <string>
 
-class LanguageMapping {
+class GeneratorBase;
+
+class opendds_idl_plugin_Export LanguageMapping {
 public:
   virtual ~LanguageMapping();
 

@@ -9,14 +9,13 @@
 #include "be_util.h"
 #include "../Version.h"
 
-#include "face_language_mapping.h"
-
 #include "cxx11_language_mapping.h"
 #include "sp_language_mapping.h"
 
 #include <global_extern.h>
 #include <drv_extern.h>
 
+#include <ace/DLL_Manager.h>
 #include <ace/OS_NS_stdlib.h>
 #include <ace/OS_NS_strings.h>
 
@@ -248,16 +247,37 @@ void BE_BuiltinInterface::rm_arg(int& i, int& argc, ACE_TCHAR* argv[])
   i -= down;
 }
 
+BE_BuiltinInterface::language_mapping_allocator
+BE_BuiltinInterface::load_language_mapping(const ACE_TCHAR* mapping_name)
+{
+  language_mapping_allocator symbol = 0;
+  if (mapping_name != 0) {
+    ACE_TString dllname("opendds_idl_");
+    dllname += mapping_name;
+    ACE_TString symbolname(dllname);
+    symbolname += ACE_TEXT("_allocator");
+    ACE_DLL_Manager* manager = ACE_DLL_Manager::instance();
+    if (manager != 0) {
+      ACE_DLL_Handle* handle = manager->open_dll(dllname.c_str(), RTLD_NOW,
+                                                 ACE_SHLIB_INVALID_HANDLE);
+      if (handle != 0) {
+        symbol = static_cast<language_mapping_allocator>(handle->symbol(symbolname.c_str()));
+        if (symbol == 0) {
+          manager->close_dll(dllname.c_str());
+        }
+      }
+    }
+  }
+  return symbol;
+}
+
 void BE_BuiltinInterface::allocate_language_mapping(int& argc, ACE_TCHAR* argv[])
 {
+  const ACE_TCHAR* generic_mapping_opt = ACE_TEXT("-L");
+  const size_t gmo_len = ACE_OS::strlen(generic_mapping_opt);
+
   for (int i = 1; i < argc; i++) {
-    if (ACE_OS::strcasecmp(argv[i], ACE_TEXT("-Lface")) == 0) {
-      FaceLanguageMapping* language_mapping = 0;
-      ACE_NEW(language_mapping, FaceLanguageMapping);
-      be_builtin_global->language_mapping(language_mapping);
-      rm_arg(i, argc, argv);
-    }
-    else if (ACE_OS::strcasecmp(argv[i], ACE_TEXT("-Lspcpp")) == 0) {
+    if (ACE_OS::strcasecmp(argv[i], ACE_TEXT("-Lspcpp")) == 0) {
       SPLanguageMapping* language_mapping = 0;
       ACE_NEW(language_mapping, SPLanguageMapping);
       be_builtin_global->language_mapping(language_mapping);
@@ -268,6 +288,16 @@ void BE_BuiltinInterface::allocate_language_mapping(int& argc, ACE_TCHAR* argv[]
       ACE_NEW(language_mapping, Cxx11LanguageMapping);
       be_builtin_global->language_mapping(language_mapping);
       rm_arg(i, argc, argv);
+    }
+    else if (ACE_OS::strncasecmp(argv[i], generic_mapping_opt, gmo_len) == 0) {
+      language_mapping_allocator mapping = load_language_mapping(argv[i] + gmo_len);
+      if (mapping != 0) {
+        LanguageMapping* language_mapping = mapping();
+        if (language_mapping != 0) {
+          be_builtin_global->language_mapping(language_mapping);
+          rm_arg(i, argc, argv);
+        }
+      }
     }
   }
 }

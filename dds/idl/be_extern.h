@@ -73,13 +73,13 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 # pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
-extern BE_GlobalData* be_global;
+extern opendds_idl_plugin_Export BE_GlobalData* be_global;
 
-extern int BE_init(int&, ACE_TCHAR*[]);
-extern void BE_post_init(char*[], long);
-extern void BE_version();
-extern void BE_produce();
-extern void BE_abort();
-extern void BE_cleanup();
+extern opendds_idl_plugin_Export int BE_init(int&, ACE_TCHAR*[]);
+extern opendds_idl_plugin_Export void BE_post_init(char*[], long);
+extern opendds_idl_plugin_Export void BE_version();
+extern opendds_idl_plugin_Export void BE_produce();
+extern opendds_idl_plugin_Export void BE_abort();
+extern opendds_idl_plugin_Export void BE_cleanup();
 
 #endif /* OPENDDS_IDL_BE_EXTERN_H */

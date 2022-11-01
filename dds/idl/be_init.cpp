@@ -82,8 +82,8 @@ BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* allocator)
       if (handle != 0) {
         typedef BE_Interface* (*interface_alloc_t)();
         const interface_alloc_t interface_alloc =
-          reinterpret_cast<interface_alloc_t>(allocator == 0 ?
-                                              0 : handle->symbol(allocator));
+          static_cast<interface_alloc_t>(allocator == 0 ?
+                                         0 : handle->symbol(allocator));
         if (interface_alloc == 0) {
           manager->close_dll(dllname);
         }
@@ -101,7 +101,7 @@ BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* allocator)
   return false;
 }
 
-void
+opendds_idl_plugin_Export void
 BE_version()
 {
   InterfaceList::const_iterator end = interfaces.end();
@@ -111,7 +111,7 @@ BE_version()
   }
 }
 
-int
+opendds_idl_plugin_Export int
 BE_init(int& argc, ACE_TCHAR* argv[])
 {
   BE_pre_init(argc, argv);
@@ -124,7 +124,7 @@ BE_init(int& argc, ACE_TCHAR* argv[])
   return status;
 }
 
-void
+opendds_idl_plugin_Export void
 BE_post_init(char* files[], long nfiles)
 {
   InterfaceList::iterator end = interfaces.end();
@@ -133,7 +133,7 @@ BE_post_init(char* files[], long nfiles)
   }
 }
 
-void
+opendds_idl_plugin_Export void
 BE_produce()
 {
   InterfaceList::iterator end = interfaces.end();
@@ -144,7 +144,7 @@ BE_produce()
 
 // Clean up before exit, whether successful or not.
 // Need not be exported since it is called only from this file.
-void
+opendds_idl_plugin_Export void
 BE_cleanup()
 {
   InterfaceList::iterator end = interfaces.end();
@@ -154,7 +154,7 @@ BE_cleanup()
 }
 
 // Abort this run of the BE.
-void
+opendds_idl_plugin_Export void
 BE_abort()
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("Fatal Error - Aborting\n")));
