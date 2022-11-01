@@ -1,4 +1,4 @@
-module max_extensibility {
+module XTypesUtils {
 
 @final
 @topic

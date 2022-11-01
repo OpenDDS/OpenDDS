@@ -13,6 +13,9 @@
 module DDS {
     local interface DomainParticipant;
     local interface Topic;
+#ifndef OPENDDS_SAFETY_PROFILE
+    local interface DynamicType;
+#endif
 
     local interface TopicDescription {
         string get_type_name();
@@ -65,6 +68,9 @@ module DDS {
             in DomainParticipant domain,
             in string type_name);
         string get_type_name();
+#ifndef OPENDDS_SAFETY_PROFILE
+        DynamicType get_type();
+#endif
     };
 };
 

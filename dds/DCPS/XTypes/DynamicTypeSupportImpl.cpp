@@ -62,6 +62,12 @@ void DynamicTypeSupport::representations_allowed_by_type(DataRepresentationIdSeq
   seq[0] = XCDR2_DATA_REPRESENTATION;
 }
 
+size_t DynamicTypeSupport::key_count() const
+{
+  OPENDDS_ASSERT(false);
+  return 0;
+}
+
 Extensibility DynamicTypeSupport::base_extensibility() const
 {
   Extensibility ext = OpenDDS::DCPS::FINAL;
@@ -97,11 +103,13 @@ DataReader_ptr DynamicTypeSupport::create_datareader()
   return 0;
 }
 
+#  ifndef OPENDDS_NO_MULTI_TOPIC
 DataReader_ptr DynamicTypeSupport::create_multitopic_datareader()
 {
   // TODO
   return 0;
 }
+#  endif
 
 const TypeIdentifier& DynamicTypeSupport::getMinimalTypeIdentifier() const
 {
@@ -129,7 +137,7 @@ const TypeMap& DynamicTypeSupport::getCompleteTypeMap() const
 
 DynamicTypeSupport_ptr DynamicTypeSupport::_duplicate(DynamicTypeSupport_ptr obj)
 {
-  if (!obj) {
+  if (obj) {
     obj->_add_ref();
   }
   return obj;

@@ -133,7 +133,7 @@ DataReaderImpl::DataReaderImpl()
 // the servant.
 DataReaderImpl::~DataReaderImpl()
 {
-  DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
+  DBG_ENTRY_LVL("DataReaderImpl", "~DataReaderImpl", 6);
 
   deadline_task_->cancel();
 
@@ -141,7 +141,9 @@ DataReaderImpl::~DataReaderImpl()
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    type_lookup_service->remove_guid_from_dynamic_map(subscription_id_);
+    if (type_lookup_service) {
+      type_lookup_service->remove_guid_from_dynamic_map(subscription_id_);
+    }
   }
 #endif
 }

@@ -7,10 +7,9 @@
 #define OPENDDS_DDS_DYNAMIC_TYPE_SUPPORT_IDL
 
 #ifndef OPENDDS_SAFETY_PROFILE
-
-#include <dds/DdsDynamicData.idl>
-#include <dds/DdsDcpsPublication.idl>
-#include <dds/DdsDcpsTopic.idl>
+#  include <dds/DdsDynamicData.idl>
+#  include <dds/DdsDcpsPublication.idl>
+#  include <dds/DdsDcpsTopic.idl>
 
 module DDS {
 

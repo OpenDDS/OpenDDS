@@ -14,6 +14,7 @@
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
 
+#include <dds/DdsDynamicDataC.h>
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
 #ifndef ACE_LACKS_PRAGMA_ONCE
@@ -114,10 +115,6 @@ public:
   void add_types(const XTypes::TypeLookupService_rch& tls) const;
   void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
 
-#ifndef OPENDDS_SAFETY_PROFILE
-  virtual DDS::DynamicType_var get_dynamic_type() = 0;
-#endif
-
 private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 
@@ -174,23 +171,25 @@ public:
   }
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  DDS::DynamicType_var get_dynamic_type()
+  DDS::DynamicType_ptr get_type()
   {
     if (!type_lookup_service_) {
       type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
       add_types(type_lookup_service_);
       populate_dependencies(type_lookup_service_);
     }
+
     const XTypes::TypeIdentifier& cti = getCompleteTypeIdentifier();
     const XTypes::TypeMap& ctm = getCompleteTypeMap();
     const XTypes::TypeIdentifier& mti = getMinimalTypeIdentifier();
     const XTypes::TypeMap& mtm = getMinimalTypeMap();
     XTypes::DynamicTypeImpl* dt = dynamic_cast<XTypes::DynamicTypeImpl*>(
-      type_lookup_service_->type_identifier_to_dynamic(getCompleteTypeIdentifier(), GUID_UNKNOWN));
+      type_lookup_service_->type_identifier_to_dynamic(cti, GUID_UNKNOWN));
     dt->set_complete_type_identifier(cti);
     dt->set_complete_type_map(ctm);
     dt->set_minimal_type_identifier(mti);
     dt->set_minimal_type_map(mtm);
+
     return dt;
   }
 #endif

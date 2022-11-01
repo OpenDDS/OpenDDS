@@ -102,7 +102,8 @@ public:
   DDS::ReturnCode_t unregister_instance(
     DDS::DynamicData_ptr instance, DDS::InstanceHandle_t handle)
   {
-    return unregister_instance_w_timestamp(instance, handle, DCPS::SystemTimePoint::now().to_dds_time());
+    return unregister_instance_w_timestamp(instance, handle,
+      DCPS::SystemTimePoint::now().to_dds_time());
   }
 
   DDS::ReturnCode_t unregister_instance_w_timestamp(
@@ -127,7 +128,8 @@ public:
   DDS::ReturnCode_t dispose(
     DDS::DynamicData_ptr instance_data, DDS::InstanceHandle_t instance_handle)
   {
-    return dispose_w_timestamp(instance_data, instance_handle, DCPS::SystemTimePoint::now().to_dds_time());
+    return dispose_w_timestamp(instance_data, instance_handle,
+      DCPS::SystemTimePoint::now().to_dds_time());
   }
 
   DDS::ReturnCode_t dispose_w_timestamp(DDS::DynamicData_ptr instance_data,
@@ -200,11 +202,7 @@ public:
     return name_.in();
   }
 
-  size_t key_count() const
-  {
-    OPENDDS_ASSERT(false);
-    return 0;
-  }
+  size_t key_count() const;
 
   void representations_allowed_by_type(DataRepresentationIdSeq& seq);
 
@@ -224,24 +222,28 @@ public:
 
   DataWriter_ptr create_datawriter();
   DataReader_ptr create_datareader();
+#  ifndef OPENDDS_NO_MULTI_TOPIC
   DataReader_ptr create_multitopic_datareader();
+#  endif
 
   const OpenDDS::XTypes::TypeIdentifier& getMinimalTypeIdentifier() const;
   const OpenDDS::XTypes::TypeMap& getMinimalTypeMap() const;
   const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;
   const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;
 
-  DDS::DynamicType_var get_dynamic_type()
+  DynamicType_ptr get_type()
   {
-    return type_;
+    return DynamicType::_duplicate(type_);
   }
 
+#  ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const OpenDDS::DCPS::MetaStruct& getMetaStructForType()
   {
     OPENDDS_ASSERT(false);
     const OpenDDS::DCPS::MetaStruct* const ms = 0;
     return *ms;
   }
+#  endif
 
   CORBA::Boolean _is_a(const char* type_id)
   {

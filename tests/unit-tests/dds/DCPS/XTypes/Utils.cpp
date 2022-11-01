@@ -1,5 +1,5 @@
 #ifndef OPENDDS_SAFETY_PROFILE
-#  include "../../../MaxExtensibilityTypeSupportImpl.h"
+#  include <XTypesUtilsTypeSupportImpl.h>
 
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
@@ -8,7 +8,7 @@
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
-using namespace max_extensibility;
+using namespace XTypesUtils;
 
 class dds_DCPS_XTypes_Utils : public testing::Test {
 
@@ -19,7 +19,7 @@ class dds_DCPS_XTypes_Utils : public testing::Test {
   {
     TypeIdentifierPairSeq tid_pairs;
     TypeIdentifierPair tid_pair;
-    typedef typename DDSTraits<TopicType>::Xtag Xtag;
+    typedef typename DDSTraits<TopicType>::XtagType Xtag;
     tid_pair.type_identifier1 = getCompleteTypeIdentifier<Xtag>();
     tid_pair.type_identifier2 = getMinimalTypeIdentifier<Xtag>();
     tid_pairs.append(tid_pair);
@@ -32,6 +32,8 @@ class dds_DCPS_XTypes_Utils : public testing::Test {
   void SetUp()
   {
     tls_ = make_rch<TypeLookupService>();
+
+    // Types for extensibility tests
     add_type<FinalStruct>();
     add_type<AppendableUnion>();
     add_type<MutableStruct>();
@@ -46,7 +48,7 @@ class dds_DCPS_XTypes_Utils : public testing::Test {
   template<typename TopicType>
   DDS::DynamicType_var get_dynamic_type()
   {
-    typedef typename DDSTraits<TopicType>::Xtag Xtag;
+    typedef typename DDSTraits<TopicType>::XtagType Xtag;
     const TypeIdentifier& com_ti = getCompleteTypeIdentifier<Xtag>();
     const TypeMap& com_map = getCompleteTypeMap<Xtag>();
     TypeMap::const_iterator pos = com_map.find(com_ti);
@@ -71,7 +73,7 @@ public:
     DDS::DynamicType_var dy = get_dynamic_type<TopicType>();
     CORBA::String_var name = dy->get_name();
     Extensibility actual;
-    EXPECT_EQ(DDS::RETCODE_OK, OpenDDS::XTypes::max_extensibility(dy.in(), actual)) << name.in();
+    EXPECT_EQ(DDS::RETCODE_OK, max_extensibility(dy.in(), actual)) << name.in();
     EXPECT_EQ(expected, actual) << name.in();
   }
 };

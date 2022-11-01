@@ -109,12 +109,14 @@ DataWriterImpl::DataWriterImpl()
 // the servant.
 DataWriterImpl::~DataWriterImpl()
 {
-  DBG_ENTRY_LVL("DataWriterImpl","~DataWriterImpl",6);
+  DBG_ENTRY_LVL("DataWriterImpl", "~DataWriterImpl", 6);
 #ifndef OPENDDS_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    type_lookup_service->remove_guid_from_dynamic_map(publication_id_);
+    if (type_lookup_service) {
+      type_lookup_service->remove_guid_from_dynamic_map(publication_id_);
+    }
   }
 #endif
 }

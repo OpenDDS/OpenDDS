@@ -89,7 +89,7 @@ DDS::ReturnCode_t max_extensibility(DDS::DynamicType_ptr type, DCPS::Extensibili
   return DDS::RETCODE_OK;
 }
 
-OpenDDS_Dcps_Export DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext)
+DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext)
 {
   switch (ext) {
   case DDS::FINAL:
