@@ -21,32 +21,32 @@ std::string LanguageMapping::getMinimalHeaders() const
 
 std::string LanguageMapping::getInputCDRToString(bool wide) const
 {
-  return "";
+  return wide ? "Serializer::ToBoundedString<wchar_t>" : "Serializer::ToBoundedString<char>";
 }
 
 std::string LanguageMapping::getBranchStringType(bool wide) const
 {
-  return "";
+  return wide ? "OPENDDS_WSTRING" : "OPENDDS_STRING";
 }
 
 std::string LanguageMapping::getBranchStringPrefix() const
 {
-  return "";
+  return "CORBA::";
 }
 
 std::string LanguageMapping::getBranchStringSuffix() const
 {
-  return ".c_str()";
+  return "";
 }
 
 std::string LanguageMapping::getBoundStringSuffix() const
 {
-  return "";
+  return ".c_str()";
 }
 
 bool LanguageMapping::needSequenceTypeSupportImplHeader() const
 {
-  return false;
+  return true;
 }
 
 bool LanguageMapping::skipTAOSequences() const

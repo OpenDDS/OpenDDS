@@ -1,9 +1,9 @@
 #ifndef OPENDDS_IDL_SP_LANGUAGE_MAPPING_H
 #define OPENDDS_IDL_SP_LANGUAGE_MAPPING_H
 
-#include "cxx11_language_mapping.h"
+#include "language_mapping.h"
 
-class SPLanguageMapping: public Cxx11LanguageMapping {
+class SPLanguageMapping: public LanguageMapping {
 public:
   virtual ~SPLanguageMapping();
 

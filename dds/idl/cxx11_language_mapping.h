@@ -10,12 +10,6 @@ public:
   virtual bool cxx11() const;
   virtual bool none() const;
 
-  virtual std::string getMinimalHeaders() const;
-
-  virtual std::string getInputCDRToString(bool wide) const;
-  virtual std::string getBranchStringType(bool wide) const;
-  virtual std::string getBranchStringPrefix() const;
-
   virtual bool needSequenceTypeSupportImplHeader() const;
 
   virtual GeneratorBase* getGeneratorHelper() const;

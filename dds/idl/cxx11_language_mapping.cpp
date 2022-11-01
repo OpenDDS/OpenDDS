@@ -552,26 +552,6 @@ bool Cxx11LanguageMapping::none() const
   return false;
 }
 
-std::string Cxx11LanguageMapping::getMinimalHeaders() const
-{
-  return "";
-}
-
-std::string Cxx11LanguageMapping::getInputCDRToString(bool wide) const
-{
-  return wide ? "Serializer::ToBoundedString<wchar_t>" : "Serializer::ToBoundedString<char>";
-}
-
-std::string Cxx11LanguageMapping::getBranchStringType(bool wide) const
-{
-  return wide ? "OPENDDS_WSTRING" : "OPENDDS_STRING";
-}
-
-std::string Cxx11LanguageMapping::getBranchStringPrefix() const
-{
-  return "CORBA::";
-}
-
 bool Cxx11LanguageMapping::needSequenceTypeSupportImplHeader() const
 {
   return true;

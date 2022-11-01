@@ -304,12 +304,12 @@ std::string FaceLanguageMapping::getBranchStringType(bool wide) const
 
 std::string FaceLanguageMapping::getBranchStringSuffix() const
 {
-  return "";
+  return ".out()";
 }
 
 std::string FaceLanguageMapping::getBoundStringSuffix() const
 {
-  return ".out()";
+  return "";
 }
 
 std::string FaceLanguageMapping::getBranchStringPrefix() const
