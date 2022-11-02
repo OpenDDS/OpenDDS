@@ -268,11 +268,12 @@ void
 UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                  const ReceivedDataSample& data)
 {
+  const size_t blob_len = data.data_length() - sizeof(Priority);
   Message_Block_Ptr payload(data.data());
   Priority priority;
   Serializer serializer(payload.get(), encoding_kind);
   serializer >> priority;
-  TransportBLOB blob(static_cast<CORBA::ULong>(payload->length() - sizeof(Priority)));
+  TransportBLOB blob(static_cast<CORBA::ULong>(blob_len));
   blob.length(blob.maximum());
   serializer.read_octet_array(blob.get_buffer(), blob.length());
 
