@@ -3,12 +3,19 @@
 
 #include "opendds_idl_plugin_export.h"
 
-#if defined(ACE_WIN32)
+#if defined(ACE_Proper_Export_Flag)
+#include <ace/SString.h>
+
+typedef ACE_CString&
+       (*add_include_path)(ACE_CString& include_path, const char* path,
+                           const char* suffix, bool is_system);
+typedef void (*cpp_putarg)(const char* str);
 
 // An interface to set pointers to functions.  Specifically, the
 // DRV_add_include_path and DRV_cpp_putarg functions provided by
 // drv_preproc.cpp, which are included from $(TAO_ROOT)/TAO_IDL/driver.
-opendds_idl_plugin_Export void set_drv_ptrs(void* inc, void* put);
+opendds_idl_plugin_Export void set_drv_ptrs(add_include_path inc_func,
+                                            cpp_putarg put_func);
 
 // Define a macro that will create the function that will initialize our
 // driver pointers.  This is mainly here to contain the ugliness within
