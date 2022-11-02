@@ -179,7 +179,7 @@ void LanguageMapping::produce() const
     }
   }
 
-  be_builtin_global->language_mapping()->produceTS();
+  produceTS();
 
   if (!be_builtin_global->language_mapping()->none()) {
     postprocess(be_builtin_global->lang_header_name_.c_str(), be_builtin_global->lang_header_,
@@ -202,6 +202,10 @@ LanguageMapping::Includes_t* LanguageMapping::additional_includes(int which)
 }
 
 void LanguageMapping::reset_includes()
+{
+}
+
+void LanguageMapping::set_additional_names(const std::string& filebase)
 {
 }
 
@@ -271,7 +275,7 @@ void LanguageMapping::emit_tao_header(std::ostringstream& out) const
   }
 }
 
-void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, int iwhich) const
+void LanguageMapping::postprocess(const char* fn, const std::ostringstream& content, int iwhich) const
 {
   const BE_BuiltinGlobalData::stream_enum_t which =
     static_cast<BE_BuiltinGlobalData::stream_enum_t>(iwhich);

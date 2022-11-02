@@ -16,10 +16,6 @@ namespace java_ts_generator {
   void generate(AST_Structure* node);
 }
 
-namespace face_ts_generator {
-  void generate(UTL_ScopedName* name);
-}
-
 class ts_generator : public dds_generator {
 public:
   ts_generator();

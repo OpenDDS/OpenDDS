@@ -72,11 +72,10 @@ public:
 
   void open_streams(const char* filename);
 
-  std::ostringstream header_, impl_, idl_, itl_, facets_header_, facets_impl_,
+  std::ostringstream header_, impl_, idl_, itl_,
     lang_header_;
   ACE_CString header_name_, impl_name_, idl_name_, itl_name_,
-    facets_header_name_, facets_impl_name_, lang_header_name_,
-    output_dir_, tao_inc_pre_;
+    lang_header_name_, output_dir_, tao_inc_pre_;
 
   ///print message to all open streams
   void multicast(const char* message);

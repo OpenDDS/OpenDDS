@@ -276,8 +276,9 @@ BE_BuiltinGlobalData::open_streams(const char* filename)
   impl_name_ = (filebase + "TypeSupportImpl.cpp").c_str();
   idl_name_ = (filebase + "TypeSupport.idl").c_str();
   itl_name_ = (filebase + ".itl").c_str();
-  facets_header_name_ = (filebase + "_TS.hpp").c_str();
-  facets_impl_name_ = (filebase + "_TS.cpp").c_str();
+  if (language_mapping_ != 0) {
+    language_mapping_->set_additional_names(filebase);
+  }
   lang_header_name_ = (filebase + "C.h").c_str();
 }
 
