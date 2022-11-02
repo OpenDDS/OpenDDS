@@ -263,6 +263,12 @@ void postprocess(const char* fn, ostringstream& content,
   }
 }
 
+// A more generic helper function to be used with the LanguageMapping.
+void postprocess(const char* fn, ostringstream& content, int which)
+{
+  postprocess(fn, content, static_cast<BE_BuiltinGlobalData::stream_enum_t>(which));
+}
+
 } // namespace
 
 // Do the work of this BE. This is the starting point for code generation.
@@ -375,12 +381,7 @@ BE_BuiltinInterface::produce()
     }
   }
 
-  if (be_builtin_global->face_ts()) {
-    postprocess(be_builtin_global->facets_header_name_.c_str(), be_builtin_global->facets_header_,
-                BE_BuiltinGlobalData::STREAM_FACETS_H);
-    postprocess(be_builtin_global->facets_impl_name_.c_str(), be_builtin_global->facets_impl_,
-                BE_BuiltinGlobalData::STREAM_FACETS_CPP);
-  }
+  be_builtin_global->language_mapping()->produceTS(postprocess);
 
   if (!be_builtin_global->language_mapping()->none()) {
     postprocess(be_builtin_global->lang_header_name_.c_str(), be_builtin_global->lang_header_,

@@ -4,6 +4,7 @@
 #include "opendds_idl_plugin_export.h"
 
 #include <string>
+#include <sstream>
 
 class GeneratorBase;
 
@@ -24,6 +25,12 @@ public:
 
   virtual bool skipTAOSequences() const;
   virtual bool needSequenceTypeSupportImplHeader() const;
+
+  typedef void (*postprocess)(const char* fn,
+                              std::ostringstream& content, int which);
+
+  virtual void setTS(bool setting);
+  virtual void produceTS(postprocess func) const;
 
   virtual GeneratorBase* getGeneratorHelper() const;
 };

@@ -868,6 +868,12 @@ void GeneratorBase::gen_fixed(UTL_ScopedName* name, AST_Fixed* fixed)
 #endif
 }
 
+const char* GeneratorBase::generate_ts(AST_Decl* decl, UTL_ScopedName* name)
+{
+  // There is no error, so return nothing.
+  return 0;
+}
+
 void langmap_generator::init()
 {
   generator_ = be_builtin_global->language_mapping()->getGeneratorHelper();

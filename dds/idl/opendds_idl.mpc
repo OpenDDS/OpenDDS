@@ -38,7 +38,7 @@ project: aceexe, dds_macros, crosscompile, install, opendds_util {
 
   Source_Files {
     drv_args.cpp
-    drv_preporoc.cpp
+    drv_preproc.cpp
     opendds_idl.cpp
   }
 }

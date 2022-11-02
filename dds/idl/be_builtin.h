@@ -38,7 +38,7 @@ private:
   static void rm_arg(int& i, int& argc, ACE_TCHAR* argv[]);
 
   typedef LanguageMapping* (*language_mapping_allocator)();
-  static language_mapping_allocator load_language_mapping(const ACE_TCHAR* mapping_name);
+  static language_mapping_allocator load_language_mapping(const ACE_TString& mapping_name);
 
   void allocate_language_mapping(int&, ACE_TCHAR* []);
 };

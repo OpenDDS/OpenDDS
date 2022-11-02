@@ -5,6 +5,7 @@
 
 class FaceLanguageMapping: public LanguageMapping {
 public:
+  FaceLanguageMapping();
   virtual ~FaceLanguageMapping();
 
   virtual bool cxx11() const;
@@ -20,7 +21,13 @@ public:
 
   virtual bool needSequenceTypeSupportImplHeader() const;
 
+  virtual void setTS(bool setting);
+  virtual void produceTS(postprocess func) const;
+
   virtual GeneratorBase* getGeneratorHelper() const;
+
+private:
+  bool emitTS_;
 };
 
 #endif /* OPENDDS_IDL_FACE_LANGUAGE_MAPPING_H */

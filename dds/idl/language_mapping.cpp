@@ -54,6 +54,14 @@ bool LanguageMapping::skipTAOSequences() const
   return false;
 }
 
+void LanguageMapping::setTS(bool setting)
+{
+}
+
+void LanguageMapping::produceTS(postprocess func) const
+{
+}
+
 GeneratorBase* LanguageMapping::getGeneratorHelper() const
 {
   return 0;

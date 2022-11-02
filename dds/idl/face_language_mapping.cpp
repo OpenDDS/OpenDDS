@@ -19,6 +19,16 @@ extern "C" {
 class FaceGenerator : public GeneratorBase
 {
 public:
+  FaceGenerator()
+    : emitTS_(false)
+  {
+  }
+
+  void setTS(bool setting)
+  {
+    emitTS_ = setting;
+  }
+
   virtual std::string string_ns()
   {
     return "::FACE";
@@ -282,7 +292,100 @@ public:
     gen_typecode(name);
     return true;
   }
+
+  virtual const char* generate_ts(AST_Decl* decl, UTL_ScopedName* name) {
+    if (emitTS_) {
+      if (decl->node_type() == AST_Decl::NT_struct) {
+        const std::string cxx_name = scoped(name),
+          name_underscores = dds_generator::scoped_helper(name, "_"),
+          exportMacro = be_builtin_global->export_macro().c_str(),
+          exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
+        be_builtin_global->add_include("FACE/TS.hpp", BE_BuiltinGlobalData::STREAM_FACETS_H);
+        be_builtin_global->facets_header_ <<
+          "namespace FACE\n"
+          "{\n"
+          "  namespace Read_Callback\n"
+          "  {\n"
+          "    typedef void (*send_event_" << name_underscores << "_Ptr) (\n"
+          "      /* in */ TRANSACTION_ID_TYPE transaction_id,\n"
+          "      /* inout */ " << cxx_name << "& message,\n"
+          "      /* in */ MESSAGE_TYPE_GUID message_type_id,\n"
+          "      /* in */ MESSAGE_SIZE_TYPE message_size,\n"
+          "      /* in */ const WAITSET_TYPE waitset,\n"
+          "      /* out */ RETURN_CODE_TYPE& return_code);\n"
+          "  }\n\n"
+          "  namespace TS\n"
+          "  {\n" << exporter <<
+          "    void Receive_Message(\n"
+          "      /* in */ CONNECTION_ID_TYPE connection_id,\n"
+          "      /* in */ TIMEOUT_TYPE timeout,\n"
+          "      /* inout */ TRANSACTION_ID_TYPE& transaction_id,\n"
+          "      /* out */ " << cxx_name << "& message,\n"
+          "      /* in */ MESSAGE_SIZE_TYPE message_size,\n"
+          "      /* out */ RETURN_CODE_TYPE& return_code);\n\n" << exporter <<
+          "    void Send_Message(\n"
+          "      /* in */ CONNECTION_ID_TYPE connection_id,\n"
+          "      /* in */ TIMEOUT_TYPE timeout,\n"
+          "      /* inout */ TRANSACTION_ID_TYPE& transaction_id,\n"
+          "      /* inout */ " << cxx_name << "& message,\n"
+          "      /* inout */ MESSAGE_SIZE_TYPE& message_size,\n"
+          "      /* out */ RETURN_CODE_TYPE& return_code);\n\n" << exporter <<
+          "    void Register_Callback(\n"
+          "      /* in */ CONNECTION_ID_TYPE connection_id,\n"
+          "      /* in */ const WAITSET_TYPE waitset,\n"
+          "      /* in */ Read_Callback::send_event_" << name_underscores
+          << "_Ptr data_callback,\n"
+          "      /* in */ MESSAGE_SIZE_TYPE max_message_size,\n"
+          "      /* out */ RETURN_CODE_TYPE& return_code);\n\n"
+          "  }\n"
+          "}\n\n";
+        be_builtin_global->facets_impl_ <<
+          "void Receive_Message(CONNECTION_ID_TYPE connection_id,\n"
+          "                     TIMEOUT_TYPE timeout,\n"
+          "                     TRANSACTION_ID_TYPE& transaction_id,\n"
+          "                     " << cxx_name << "& message,\n"
+          "                     MESSAGE_SIZE_TYPE message_size,\n"
+          "                     RETURN_CODE_TYPE& return_code) {\n"
+          "  OpenDDS::FaceTSS::receive_message(connection_id, timeout,\n"
+          "                                    transaction_id, message,\n"
+          "                                    message_size, return_code);\n"
+          "}\n\n"
+          "void Send_Message(CONNECTION_ID_TYPE connection_id,\n"
+          "                  TIMEOUT_TYPE timeout,\n"
+          "                  TRANSACTION_ID_TYPE& transaction_id,\n"
+          "                  " << cxx_name << "& message,\n"
+          "                  MESSAGE_SIZE_TYPE& message_size,\n"
+          "                  RETURN_CODE_TYPE& return_code) {\n"
+          "  OpenDDS::FaceTSS::send_message(connection_id, timeout,\n"
+          "                                 transaction_id, message,\n"
+          "                                 message_size, return_code);\n"
+          "}\n\n"
+          "void Register_Callback(CONNECTION_ID_TYPE connection_id,\n"
+          "                       const WAITSET_TYPE waitset,\n"
+          "                       Read_Callback::send_event_" << name_underscores
+          << "_Ptr data_callback,\n"
+          "                       MESSAGE_SIZE_TYPE max_message_size,\n"
+          "                       RETURN_CODE_TYPE& return_code) {\n"
+          "  OpenDDS::FaceTSS::register_callback(connection_id, waitset,\n"
+          "                                      data_callback,\n"
+          "                                      max_message_size, return_code);\n"
+          "}\n\n";
+      }
+      else {
+        return "Generating FACE type support for Union topic types is not supported";
+      }
+    }
+    return 0;
+  }
+
+private:
+  bool emitTS_;
 };
+
+FaceLanguageMapping::FaceLanguageMapping()
+  : emitTS_(false)
+{
+}
 
 FaceLanguageMapping::~FaceLanguageMapping()
 {
@@ -332,6 +435,22 @@ std::string FaceLanguageMapping::getBranchStringPrefix() const
 bool FaceLanguageMapping::needSequenceTypeSupportImplHeader() const
 {
   return false;
+}
+
+void FaceLanguageMapping::setTS(bool setting)
+{
+  emitTS_ = setting;
+  dynamic_cast<FaceLanguageMapping*>(getGeneratorHelper())->setTS(setting);
+}
+
+void FaceLanguageMapping::produceTS(postprocess func) const
+{
+  if (emitTS_) {
+    func(be_builtin_global->facets_header_name_.c_str(), be_builtin_global->facets_header_,
+      BE_BuiltinGlobalData::STREAM_FACETS_H);
+    func(be_builtin_global->facets_impl_name_.c_str(), be_builtin_global->facets_impl_,
+      BE_BuiltinGlobalData::STREAM_FACETS_CPP);
+  }
 }
 
 GeneratorBase* FaceLanguageMapping::getGeneratorHelper() const

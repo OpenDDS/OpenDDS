@@ -53,7 +53,6 @@ BE_BuiltinGlobalData::BE_BuiltinGlobalData()
   , generate_itl_(false)
   , generate_value_reader_writer_(true)
   , generate_xtypes_complete_(false)
-  , face_ts_(false)
   , filename_only_includes_(false)
   , sequence_suffix_("Seq")
   , language_mapping_(0)
@@ -247,16 +246,6 @@ bool BE_BuiltinGlobalData::value_reader_writer() const
   return this->generate_value_reader_writer_;
 }
 
-void BE_BuiltinGlobalData::face_ts(bool b)
-{
-  this->face_ts_ = b;
-}
-
-bool BE_BuiltinGlobalData::face_ts() const
-{
-  return this->face_ts_;
-}
-
 void BE_BuiltinGlobalData::xtypes_complete(bool b)
 {
   this->generate_xtypes_complete_ = b;
@@ -374,8 +363,6 @@ BE_BuiltinGlobalData::parse_args(long& i, char** av)
   case 'G':
     if (0 == ACE_OS::strcmp(av[i], "-Gitl")) {
       itl(true);
-    } else if (0 == ACE_OS::strcasecmp(av[i], "-GfaceTS")) {
-      face_ts(true);
     } else if (0 == ACE_OS::strcasecmp(av[i], "-Gxtypes-complete")) {
       xtypes_complete(true);
     } else {

@@ -104,6 +104,8 @@ public:
 
   void gen_fixed(UTL_ScopedName* name, AST_Fixed* fixed);
 
+  virtual const char* generate_ts(AST_Decl* decl, UTL_ScopedName* name);
+
 protected:
   static std::string exporter();
   static std::string array_zero_indices(AST_Array* arr);

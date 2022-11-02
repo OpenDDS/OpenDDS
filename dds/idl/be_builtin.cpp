@@ -248,23 +248,21 @@ void BE_BuiltinInterface::rm_arg(int& i, int& argc, ACE_TCHAR* argv[])
 }
 
 BE_BuiltinInterface::language_mapping_allocator
-BE_BuiltinInterface::load_language_mapping(const ACE_TCHAR* mapping_name)
+BE_BuiltinInterface::load_language_mapping(const ACE_TString& mapping_name)
 {
   language_mapping_allocator symbol = 0;
-  if (mapping_name != 0) {
-    ACE_TString dllname("opendds_idl_");
-    dllname += mapping_name;
-    ACE_TString symbolname(dllname);
-    symbolname += ACE_TEXT("_allocator");
-    ACE_DLL_Manager* manager = ACE_DLL_Manager::instance();
-    if (manager != 0) {
-      ACE_DLL_Handle* handle = manager->open_dll(dllname.c_str(), RTLD_NOW,
-                                                 ACE_SHLIB_INVALID_HANDLE);
-      if (handle != 0) {
-        symbol = static_cast<language_mapping_allocator>(handle->symbol(symbolname.c_str()));
-        if (symbol == 0) {
-          manager->close_dll(dllname.c_str());
-        }
+  ACE_TString dllname("opendds_idl_");
+  dllname += mapping_name;
+  ACE_TString symbolname(dllname);
+  symbolname += ACE_TEXT("_allocator");
+  ACE_DLL_Manager* manager = ACE_DLL_Manager::instance();
+  if (manager != 0) {
+    ACE_DLL_Handle* handle = manager->open_dll(dllname.c_str(), RTLD_NOW,
+                                                ACE_SHLIB_INVALID_HANDLE);
+    if (handle != 0) {
+      symbol = static_cast<language_mapping_allocator>(handle->symbol(symbolname.c_str()));
+      if (symbol == 0) {
+        manager->close_dll(dllname.c_str());
       }
     }
   }
@@ -273,8 +271,15 @@ BE_BuiltinInterface::load_language_mapping(const ACE_TCHAR* mapping_name)
 
 void BE_BuiltinInterface::allocate_language_mapping(int& argc, ACE_TCHAR* argv[])
 {
-  const ACE_TCHAR* generic_mapping_opt = ACE_TEXT("-L");
-  const size_t gmo_len = ACE_OS::strlen(generic_mapping_opt);
+  // Set up for processing the generic -L and -G options.
+  const ACE_TString generic_mapping_opt(ACE_TEXT("-L"));
+  const ACE_TString generic_ts_opt(ACE_TEXT("-G"));
+
+  // We need to keep track of which dynamically loaded language mappings the
+  // user has requested and the possibility of an associated -G option.
+  typedef std::pair<LanguageMapping*, bool> TSMapValue;
+  typedef std::map<ACE_TString, TSMapValue> TSMap;
+  TSMap ts_mapping;
 
   for (int i = 1; i < argc; i++) {
     if (ACE_OS::strcasecmp(argv[i], ACE_TEXT("-Lspcpp")) == 0) {
@@ -289,15 +294,66 @@ void BE_BuiltinInterface::allocate_language_mapping(int& argc, ACE_TCHAR* argv[]
       be_builtin_global->language_mapping(language_mapping);
       rm_arg(i, argc, argv);
     }
-    else if (ACE_OS::strncasecmp(argv[i], generic_mapping_opt, gmo_len) == 0) {
-      language_mapping_allocator mapping = load_language_mapping(argv[i] + gmo_len);
+    else if (ACE_OS::strncasecmp(argv[i], generic_mapping_opt.c_str(),
+                                 generic_mapping_opt.length()) == 0) {
+      // Attempt to load the language mapping based on the portion of the
+      // option after the -L.
+      const ACE_TString key(argv[i] + generic_mapping_opt.length());
+      language_mapping_allocator mapping = load_language_mapping(key);
       if (mapping != 0) {
         LanguageMapping* language_mapping = mapping();
         if (language_mapping != 0) {
+          // Add or update the map to contain the language mapping pointer.
+          TSMap::iterator found = ts_mapping.find(key);
+          if (found == ts_mapping.end()) {
+            ts_mapping.insert(TSMap::value_type(key, TSMapValue(language_mapping, false)));
+          }
+          else {
+            found->second.first = language_mapping;
+          }
           be_builtin_global->language_mapping(language_mapping);
           rm_arg(i, argc, argv);
         }
       }
+    }
+    else if (ACE_OS::strncasecmp(argv[i], generic_ts_opt.c_str(), generic_ts_opt.length()) == 0) {
+      // See if the portion after the -G option ends in "TS".
+      const ACE_TString suffix(ACE_TEXT("TS"));
+      const size_t arglen = ACE_OS::strlen(argv[i]);
+      if (arglen > suffix.length() &&
+          ACE_OS::strcasecmp(argv[i] + arglen - suffix.length(), suffix.c_str()) == 0) {
+        // If it does, create a key based on the portion in between the -G and
+        // TS.  Due to a limitation of ACE_TString, we have to reassign the key
+        // to itself after chopping off the TS portion.
+        ACE_TString key(argv[i] + generic_ts_opt.length());
+        size_t klen = key.length();
+        if (klen > suffix.length()) {
+          key[klen - suffix.length()] = '\0';
+          key = ACE_TString(key.c_str());
+
+          // Add or update the boolean for the TS option.
+          TSMap::iterator found = ts_mapping.find(key);
+          if (found == ts_mapping.end()) {
+            ts_mapping.insert(TSMap::value_type(key, TSMapValue(0, true)));
+          }
+          else {
+            found->second.second = true;
+          }
+          rm_arg(i, argc, argv);
+        }
+      }
+    }
+  }
+
+  // Iterate over the TS mapping and see if any language mappings require us
+  // to set the TS option.  We used a map because the order of the -L and -G
+  // options is completely up to the user and the -G option could come before
+  // the -L option (which wouldn't be handled if we didn't).
+  TSMap::iterator end = ts_mapping.end();
+  for (TSMap::iterator itr = ts_mapping.begin();
+       itr != end; ++itr) {
+    if (itr->second.first != 0 && itr->second.second) {
+      itr->second.first->setTS(true);
     }
   }
 }
