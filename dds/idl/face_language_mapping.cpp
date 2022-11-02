@@ -440,7 +440,7 @@ bool FaceLanguageMapping::needSequenceTypeSupportImplHeader() const
 void FaceLanguageMapping::setTS(bool setting)
 {
   emitTS_ = setting;
-  dynamic_cast<FaceLanguageMapping*>(getGeneratorHelper())->setTS(setting);
+  dynamic_cast<FaceGenerator*>(getGeneratorHelper())->setTS(setting);
 }
 
 void FaceLanguageMapping::produceTS(postprocess func) const
