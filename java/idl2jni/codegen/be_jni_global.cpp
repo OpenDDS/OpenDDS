@@ -7,8 +7,7 @@
 
 #include "be_jni_global.h"
 
-#include "be_jni.h"
-
+#include <be_extern.h>
 #include <ast_generator.h>
 #include <global_extern.h>
 #include <idl_defines.h>
@@ -135,7 +134,7 @@ BE_JNIGlobalData::open_streams(const char *filename)
   if ((len < 5 || 0 != ACE_OS::strcasecmp(filename + len - 4, ".idl"))
       && (len < 6 || 0 != ACE_OS::strcasecmp(filename + len - 5, ".pidl"))) {
     ACE_ERROR((LM_ERROR, "Error - Input filename must end in \".idl\" or \".pidl\".\n"));
-    BE_JNIInterface::BE_abort();
+    BE_abort();
   }
 
   string filebase(filename);

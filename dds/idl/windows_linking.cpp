@@ -20,14 +20,14 @@ opendds_idl_plugin_Export void set_drv_ptrs(void* inc, void* put)
   cpp_putarg_ptr_ = (cpp_putarg)put;
 }
 
-ACE_CString&
+opendds_idl_plugin_Export ACE_CString&
 DRV_add_include_path(ACE_CString& include_path, const char* path,
                      const char* suffix, bool is_system)
 {
   return add_include_path_ptr_(include_path, path, suffix, is_system);
 }
 
-void DRV_cpp_putarg(const char* str)
+opendds_idl_plugin_Export void DRV_cpp_putarg(const char* str)
 {
   cpp_putarg_ptr_(str);
 }

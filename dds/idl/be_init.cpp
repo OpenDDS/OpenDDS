@@ -69,7 +69,6 @@ BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* allocator)
     BE_BuiltinInterface* builtin = 0;
     ACE_NEW_RETURN(builtin, BE_BuiltinInterface, false);
     if (builtin != 0) {
-      builtin->post_registration(BE_abort, DRV_cpp_putarg);
       interfaces.push_back(builtin);
       return true;
     }
@@ -90,7 +89,6 @@ BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* allocator)
         else {
           BE_Interface* iface = interface_alloc();
           if (iface != 0) {
-            iface->post_registration(BE_abort, DRV_cpp_putarg);
             interfaces.push_back(iface);
             return true;
           }

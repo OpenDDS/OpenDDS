@@ -1,10 +1,6 @@
-project: aceexe, dds_macros, crosscompile, install, opendds_util {
-  exename   = *
-  exeout    = $(DDS_ROOT)/bin
-  after    += TAO_IDL_FE opendds_idl_plugin
-  libs     += TAO_IDL_FE opendds_idl_plugin
-  includes += . $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)/TAO_IDL/fe $(TAO_ROOT)
-  requires += no_opendds_safety_profile
+project: aceexe, opendds_idl_plugin, crosscompile, install {
+  exename = *
+  exeout  = $(DDS_ROOT)/bin
 
   verbatim(gnuace, local) {
     ifeq ($(TAO_IDL_PREPROCESSOR),)
@@ -80,14 +76,10 @@ project(opendds_idl_plugin): acelib, dds_macros, crosscompile, opendds_util {
   }
 }
 
-project(opendds_idl_face): acelib, dds_macros, crosscompile, opendds_util {
+project(opendds_idl_face): opendds_idl_plugin, crosscompile {
   sharedname   = opendds_idl_face
   libout       = $(DDS_ROOT)/lib
   dynamicflags = OPENDDS_IDL_FACE_BUILD_DLL
-  after       += TAO_IDL_FE opendds_idl_plugin
-  libs        += TAO_IDL_FE opendds_idl_plugin
-  includes    += . $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)
-  requires    += no_opendds_safety_profile
 
   Source_Files {
     face_language_mapping.cpp

@@ -30,10 +30,6 @@ public:
   virtual void prep_be_arg(char* arg);
   virtual void arg_post_proc();
   virtual void usage();
-
-  // Give our library a way to call BE_abort() without requiring us to resolve
-  // that symbol at link time.
-  static void BE_abort();
 };
 
 #endif /* OPENDDS_IDL_BE_JNI_H */

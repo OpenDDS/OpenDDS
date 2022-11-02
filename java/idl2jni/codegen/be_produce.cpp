@@ -64,15 +64,16 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 
 // be_produce.cpp - Produce the work of the BE
 
-#include "global_extern.h"
-
 #include "be_jni.h"
-#include "ast_root.h"
-#include "utl_string.h"
-
-#include "ace/OS_NS_strings.h"
-
 #include "idl2jni_visitor.h"
+
+#include <be_extern.h>
+
+#include <ast_root.h>
+#include <utl_string.h>
+
+#include <ace/OS_NS_strings.h>
+
 
 #include <iostream>
 #include <fstream>
@@ -163,7 +164,7 @@ void postprocess(const char *fn, ostringstream &content,
   }
 
   if (!BE_JNIGlobalData::writeFile(fn, out.str())) {
-    BE_JNIInterface::BE_abort();  //error message already printed
+    BE_abort();  //error message already printed
   }
 }
 

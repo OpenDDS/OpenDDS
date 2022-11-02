@@ -1,0 +1,8 @@
+project: opendds_util {
+  after    += TAO_IDL_FE opendds_idl_plugin
+  libs     += TAO_IDL_FE opendds_idl_plugin
+  libpaths += $(DDS_ROOT)/lib
+  includes += $(DDS_ROOT)/dds/idl $(TAO_ROOT)/TAO_IDL/include \
+              $(TAO_ROOT)/TAO_IDL/fe $(TAO_ROOT)
+  requires += no_opendds_safety_profile
+}

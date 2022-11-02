@@ -6,12 +6,13 @@
  */
 
 #include "idl_mapping.h"
-
 #include "be_jni.h"
-#include "utl_identifier.h"
-#include "utl_string.h"
-#include "fe_private.h"
 
+#include <utl_identifier.h>
+#include <utl_string.h>
+#include <fe_private.h>
+
+#include <be_extern.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/ValueHelper.h>
 
@@ -1683,7 +1684,7 @@ ostream& operator<<(ostream& o, const AST_Expression::AST_ExprValue& expr)
   default: {
     cerr << "ERROR - " << __FILE__ << ":" << __LINE__ << " - Constant of type " << ev->et
          << " is not supported as a union case label\n";
-    BE_JNIInterface::BE_abort();
+    BE_abort();
   }
   }
 

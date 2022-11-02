@@ -3,6 +3,7 @@
 #include "../../../dds/Version.h"
 #include "idl2jni_export.h"
 
+#include <drv_extern.h>
 #include <global_extern.h>
 #include <ace/OS_NS_strings.h>
 
@@ -40,7 +41,7 @@ void BE_JNIInterface::post_init(char* [], long)
     be_jni_global->error("OpenDDS requires IDL version to be 4 or greater");
   }
   else {
-    drv_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
+    DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
     idl_global->unknown_annotations_ = IDL_GlobalData::UNKNOWN_ANNOTATIONS_IGNORE;
   }
 }
@@ -148,11 +149,4 @@ void BE_JNIInterface::usage()
     ACE_TEXT(" -Wb,tao_include_prefix=<path>\t\tPrefix for including the TAO-")
     ACE_TEXT("generated header file.\n")
     ));
-}
-
-void BE_JNIInterface::BE_abort()
-{
-  if (instance != 0) {
-    instance->be_abort();
-  }
 }
