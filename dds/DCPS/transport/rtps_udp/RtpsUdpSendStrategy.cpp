@@ -16,7 +16,7 @@
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
 
 #include "dds/DCPS/Serializer.h"

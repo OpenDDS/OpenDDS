@@ -1,7 +1,7 @@
 #ifndef TEST_DDS_DCPS_TRANSPORT_RTPS_UDP_UTIL_H
 #define TEST_DDS_DCPS_TRANSPORT_RTPS_UDP_UTIL_H
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 
 namespace test {

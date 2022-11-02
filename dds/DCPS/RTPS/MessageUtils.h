@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H
-#define OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H
+#ifndef OPENDDS_DCPS_RTPS_MESSAGEUTILS_H
+#define OPENDDS_DCPS_RTPS_MESSAGEUTILS_H
 
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"
@@ -275,4 +275,4 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H */
+#endif /* OPENDDS_DCPS_RTPS_MESSAGEUTILS_H */

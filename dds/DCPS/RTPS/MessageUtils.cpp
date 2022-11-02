@@ -3,7 +3,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "BaseMessageUtils.h"
+#include "MessageUtils.h"
 
 #include "MessageTypes.h"
 

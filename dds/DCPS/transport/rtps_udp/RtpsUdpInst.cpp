@@ -13,7 +13,7 @@
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportDefs.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <ace/Configuration.h>
 
