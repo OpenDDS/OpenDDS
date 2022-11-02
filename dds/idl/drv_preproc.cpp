@@ -18,5 +18,5 @@
 
 #include "TAO_IDL/driver/drv_preproc.cpp"
 
-#include "windows_linking.h"
+#include "visibility_linking.h"
 INITIALIZE_DRV_PTRS_FUNC

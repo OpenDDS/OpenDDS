@@ -1,5 +1,4 @@
-
-#include "windows_linking.h"
+#include "visibility_linking.h"
 
 #if defined(ACE_Proper_Export_Flag)
 

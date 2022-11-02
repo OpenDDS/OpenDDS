@@ -1,5 +1,5 @@
-#ifndef OPENDDS_IDL_WINDOWS_LINKING
-#define OPENDDS_IDL_WINDOWS_LINKING
+#ifndef OPENDDS_IDL_VISIBILITY_LINKING
+#define OPENDDS_IDL_VISIBILITY_LINKING
 
 #include "opendds_idl_plugin_export.h"
 
@@ -39,4 +39,4 @@ void initialize_drv_ptrs();
 #define INITIALIZE_DRV_PTRS_FUNC
 #endif
 
-#endif /* OPENDDS_IDL_WINDOWS_LINKING */
+#endif /* OPENDDS_IDL_VISIBILITY_LINKING */

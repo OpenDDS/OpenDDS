@@ -72,7 +72,7 @@ project(opendds_idl_plugin): acelib, dds_macros, crosscompile, opendds_util {
     typeobject_generator.cpp
     value_reader_generator.cpp
     value_writer_generator.cpp
-    windows_linking.cpp
+    visibility_linking.cpp
   }
 }
 
