@@ -26,13 +26,16 @@ public:
   virtual bool skipTAOSequences() const;
   virtual bool needSequenceTypeSupportImplHeader() const;
 
-  typedef void (*postprocess)(const char* fn,
-                              std::ostringstream& content, int which);
-
   virtual void setTS(bool setting);
-  virtual void produceTS(postprocess func) const;
+  virtual void produce() const;
+  virtual void produceTS() const;
 
   virtual GeneratorBase* getGeneratorHelper() const;
+
+protected:
+  std::string to_macro(const char* fn) const;
+  std::string to_header(const char* cpp_name) const;
+  virtual void postprocess(const char* fn, std::ostringstream& content, int which) const;
 };
 
 #endif /* OPENDDS_IDL_LANGUAGE_MAPPING_H */

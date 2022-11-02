@@ -443,13 +443,15 @@ void FaceLanguageMapping::setTS(bool setting)
   dynamic_cast<FaceGenerator*>(getGeneratorHelper())->setTS(setting);
 }
 
-void FaceLanguageMapping::produceTS(postprocess func) const
+void FaceLanguageMapping::produceTS() const
 {
   if (emitTS_) {
-    func(be_builtin_global->facets_header_name_.c_str(), be_builtin_global->facets_header_,
-      BE_BuiltinGlobalData::STREAM_FACETS_H);
-    func(be_builtin_global->facets_impl_name_.c_str(), be_builtin_global->facets_impl_,
-      BE_BuiltinGlobalData::STREAM_FACETS_CPP);
+    postprocess(be_builtin_global->facets_header_name_.c_str(),
+                be_builtin_global->facets_header_,
+                BE_BuiltinGlobalData::STREAM_FACETS_H);
+    postprocess(be_builtin_global->facets_impl_name_.c_str(),
+                be_builtin_global->facets_impl_,
+                BE_BuiltinGlobalData::STREAM_FACETS_CPP);
   }
 }
 

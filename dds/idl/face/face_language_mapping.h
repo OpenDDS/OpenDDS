@@ -22,7 +22,7 @@ public:
   virtual bool needSequenceTypeSupportImplHeader() const;
 
   virtual void setTS(bool setting);
-  virtual void produceTS(postprocess func) const;
+  virtual void produceTS() const;
 
   virtual GeneratorBase* getGeneratorHelper() const;
 

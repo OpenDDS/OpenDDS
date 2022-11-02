@@ -75,6 +75,13 @@ BE_BuiltinInterface::post_init(char*[], long)
   }
 }
 
+// Do the work of this BE. This is the starting point for code generation.
+void
+BE_BuiltinInterface::produce()
+{
+  be_builtin_global->language_mapping()->produce();
+}
+
 // Clean up before exit, whether successful or not.
 // Need not be exported since it is called only from this file.
 void

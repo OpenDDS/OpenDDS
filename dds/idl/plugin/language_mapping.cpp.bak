@@ -3,13 +3,23 @@
 
 #include "be_builtin.h"
 #include "dds_visitor.h"
+
+#include "ast_root.h"
+#include "utl_string.h"
+
+#include "ace/OS_NS_strings.h"
+#include "ace/OS_NS_sys_time.h"
+#include "ace/OS_NS_unistd.h"
+
 #include "dds/Version.h"
+#include "ace/Version.h"
 
-#include <ace/OS_NS_strings.h>
-#include <ace/OS_NS_sys_time.h>
-#include <ace/OS_NS_unistd.h>
-
+#include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <limits>
+#include <cassert>
 
 LanguageMapping::~LanguageMapping()
 {
@@ -247,8 +257,7 @@ std::string LanguageMapping::to_header(const char* cpp_name) const
 
 void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, int iwhich) const
 {
-  const BE_BuiltinGlobalData::stream_enum_t which =
-    static_cast<BE_BuiltinGlobalData::stream_enum_t>(iwhich);
+  BE_BuiltinGlobalData::stream_enum_t which = static_cast<BE_BuiltinGlobalData::stream_enum_t>(iwhich);
   std::ostringstream out;
 
   if (which == BE_BuiltinGlobalData::STREAM_H ||
