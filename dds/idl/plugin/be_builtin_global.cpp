@@ -488,8 +488,7 @@ BE_BuiltinGlobalData::writeFile(const char* fileName, const string& content)
 //include file management (assumes a singleton BE_BuiltinGlobalData object)
 
 namespace {
-  typedef set<pair<string, string> > Includes_t;
-  Includes_t inc_h_, inc_c_, inc_idl_, inc_facets_h_, inc_lang_h_;
+  LanguageMapping::Includes_t inc_h_, inc_c_, inc_idl_, inc_lang_h_;
   set<string> referenced_idl_, inc_path_;
   vector<string> inc_path_vector_;
 }
@@ -500,9 +499,11 @@ BE_BuiltinGlobalData::reset_includes()
   inc_h_.clear();
   inc_c_.clear();
   inc_idl_.clear();
-  inc_facets_h_.clear();
   inc_lang_h_.clear();
   referenced_idl_.clear();
+  if (language_mapping_ != 0) {
+    language_mapping_->reset_includes();
+  }
 }
 
 void
@@ -528,17 +529,17 @@ BE_BuiltinGlobalData::set_inc_paths(const char* cmdline)
 }
 
 void
-BE_BuiltinGlobalData::add_include(const char* file, stream_enum_t which)
+BE_BuiltinGlobalData::add_include(const char* file, int which)
 {
   conditional_include(file, which, "");
 }
 
 void
 BE_BuiltinGlobalData::conditional_include(const char* file,
-                                   stream_enum_t which,
-                                   const char* condition)
+                                          int which,
+                                          const char* condition)
 {
-  Includes_t* inc = 0;
+  LanguageMapping::Includes_t* inc = 0;
 
   switch (which) {
   case STREAM_H:
@@ -550,17 +551,21 @@ BE_BuiltinGlobalData::conditional_include(const char* file,
   case STREAM_IDL:
     inc = &inc_idl_;
     break;
-  case STREAM_FACETS_H:
-    inc = &inc_facets_h_;
-    break;
   case STREAM_LANG_H:
     inc = &inc_lang_h_;
     break;
+  case STREAM_ITL:
+    break;
   default:
-    return;
+    if (language_mapping_ != 0) {
+      inc = language_mapping_->additional_includes(which);
+    }
+    break;
   }
 
-  inc->insert(make_pair(file, condition));
+  if (inc != 0) {
+    inc->insert(make_pair(file, condition));
+  }
 }
 
 void
@@ -663,7 +668,7 @@ namespace {
 string
 BE_BuiltinGlobalData::get_include_block(BE_BuiltinGlobalData::stream_enum_t which)
 {
-  const Includes_t* inc = 0;
+  const LanguageMapping::Includes_t* inc = 0;
 
   switch (which) {
   case STREAM_H:
@@ -675,36 +680,40 @@ BE_BuiltinGlobalData::get_include_block(BE_BuiltinGlobalData::stream_enum_t whic
   case STREAM_IDL:
     inc = &inc_idl_;
     break;
-  case STREAM_FACETS_H:
-    inc = &inc_facets_h_;
-    break;
   case STREAM_LANG_H:
     inc = &inc_lang_h_;
     break;
+  case STREAM_ITL:
+    break;
   default:
-    return "";
+    if (language_mapping_ != 0) {
+      inc = language_mapping_->additional_includes(which);
+    }
+    break;
   }
 
   ostringstream ret;
 
-  for_each(inc->begin(), inc->end(), InsertIncludes(ret));
+  if (inc != 0) {
+    for_each(inc->begin(), inc->end(), InsertIncludes(ret));
 
-  switch (which) {
-  case STREAM_LANG_H:
-    for_each(referenced_idl_.begin(), referenced_idl_.end(),
-             InsertRefIncludes(ret, "C.h", filename_only_includes_));
-    // fall through
-  case STREAM_H:
-    if (!export_include().empty())
-      ret << "#include \"" << export_include() << "\"\n";
-    break;
-  case STREAM_CPP:
-    for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
-    for_each(referenced_idl_.begin(), referenced_idl_.end(),
-             InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
-    break;
-  default:
-    break;
+    switch (which) {
+    case STREAM_LANG_H:
+      for_each(referenced_idl_.begin(), referenced_idl_.end(),
+        InsertRefIncludes(ret, "C.h", filename_only_includes_));
+      // fall through
+    case STREAM_H:
+      if (!export_include().empty())
+        ret << "#include \"" << export_include() << "\"\n";
+      break;
+    case STREAM_CPP:
+      for_each(cpp_includes().begin(), cpp_includes().end(), InsertIncludes(ret));
+      for_each(referenced_idl_.begin(), referenced_idl_.end(),
+        InsertRefIncludes(ret, "TypeSupportImpl.h", filename_only_includes_));
+      break;
+    default:
+      break;
+    }
   }
 
   return ret.str();

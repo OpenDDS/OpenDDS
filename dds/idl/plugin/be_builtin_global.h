@@ -82,15 +82,18 @@ public:
   void multicast(const char* message);
 
   enum stream_enum_t {
-    STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_ITL,
-    STREAM_FACETS_H, STREAM_FACETS_CPP,
-    STREAM_LANG_H
+    STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_ITL, STREAM_LANG_H,
+
+    // This is not a valid stream value.  It can be used as a starting
+    // point for additional streams provided by dynamically loaded language
+    // mappings.
+    STREAM_LAST_VALUE,
   };
 
   void reset_includes();
 
-  void add_include(const char* file, stream_enum_t which = STREAM_H);
-  void conditional_include(const char* file, stream_enum_t which, const char* condition);
+  void add_include(const char* file, int which = STREAM_H);
+  void conditional_include(const char* file, int which, const char* condition);
 
   /// Called to indicate that OpenDDS marshaling (serialization) code for the
   /// current file will depend on marshaling code generated for the indicated

@@ -3,6 +3,7 @@
 
 #include "opendds_idl_plugin_export.h"
 
+#include <set>
 #include <string>
 #include <sstream>
 
@@ -32,10 +33,18 @@ public:
 
   virtual GeneratorBase* getGeneratorHelper() const;
 
+  typedef std::set<std::pair<std::string, std::string> > Includes_t;
+  virtual Includes_t* additional_includes(int which);
+  virtual void reset_includes();
+
 protected:
   std::string to_macro(const char* fn) const;
   std::string to_header(const char* cpp_name) const;
+  void emit_tao_header(std::ostringstream& out) const;
+
   virtual void postprocess(const char* fn, std::ostringstream& content, int which) const;
+  virtual void postprocess_guard_begin(const std::string& macro, std::ostringstream& content, int which) const;
+  virtual void postprocess_guard_end(const std::string& macro, std::ostringstream& content, int which) const;
 };
 
 #endif /* OPENDDS_IDL_LANGUAGE_MAPPING_H */

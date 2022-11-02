@@ -2,6 +2,7 @@
 #define OPENDDS_IDL_FACE_LANGUAGE_MAPPING_H
 
 #include "language_mapping.h"
+#include "be_builtin_global.h"
 
 class FaceLanguageMapping: public LanguageMapping {
 public:
@@ -26,8 +27,21 @@ public:
 
   virtual GeneratorBase* getGeneratorHelper() const;
 
+  enum FaceStreamType {
+    STREAM_FACETS_H = BE_BuiltinGlobalData::STREAM_LAST_VALUE,
+    STREAM_FACETS_CPP,
+  };
+
+  virtual Includes_t* additional_includes(int which);
+  virtual void reset_includes();
+
 private:
+  Includes_t additional_h_;
+
   bool emitTS_;
+
+  virtual void postprocess_guard_begin(const std::string& macro, std::ostringstream& content, int which) const;
+  virtual void postprocess_guard_end(const std::string& macro, std::ostringstream& content, int which) const;
 };
 
 #endif /* OPENDDS_IDL_FACE_LANGUAGE_MAPPING_H */

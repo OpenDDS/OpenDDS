@@ -196,6 +196,15 @@ GeneratorBase* LanguageMapping::getGeneratorHelper() const
   return 0;
 }
 
+LanguageMapping::Includes_t* LanguageMapping::additional_includes(int which)
+{
+  return 0;
+}
+
+void LanguageMapping::reset_includes()
+{
+}
+
 /// generate a macro name for the #ifndef header-double-include protector
 std::string LanguageMapping::to_macro(const char* fn) const
 {
@@ -245,6 +254,23 @@ std::string LanguageMapping::to_header(const char* cpp_name) const
   return base_name + ".h";
 }
 
+void LanguageMapping::emit_tao_header(std::ostringstream& out) const
+{
+  std::string taoheader = be_builtin_global->header_name_.c_str();
+  taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
+  const bool explicit_ints = be_builtin_global->tao_inc_pre_.length()
+    && (taoheader == "Int8SeqC.h" || taoheader == "UInt8SeqC.h");
+  std::string indent;
+  if (explicit_ints) {
+    out << "#if OPENDDS_HAS_EXPLICIT_INTS\n";
+    indent = "  ";
+  }
+  out << "#" << indent << "include \"" << be_builtin_global->tao_inc_pre_ << taoheader << "\"\n";
+  if (explicit_ints) {
+    out << "#endif\n";
+  }
+}
+
 void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, int iwhich) const
 {
   const BE_BuiltinGlobalData::stream_enum_t which =
@@ -252,7 +278,7 @@ void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, i
   std::ostringstream out;
 
   if (which == BE_BuiltinGlobalData::STREAM_H ||
-    which == BE_BuiltinGlobalData::STREAM_LANG_H) {
+      which == BE_BuiltinGlobalData::STREAM_LANG_H) {
     out << "/* -*- C++ -*- */\n";
   }
 
@@ -263,16 +289,13 @@ void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, i
     << " */\n";
 
   //  if .h add #ifndef...#define
-  std::string macrofied;
+  const std::string macrofied = to_macro(fn);
+  const std::string ifndef = "#ifndef " + macrofied + "\n#define " + macrofied + "\n";
 
   switch (which) {
-  case BE_BuiltinGlobalData::STREAM_H:
-  case BE_BuiltinGlobalData::STREAM_FACETS_H:
-  case BE_BuiltinGlobalData::STREAM_LANG_H: {
-    macrofied = to_macro(fn);
-    out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
-    if (which == BE_BuiltinGlobalData::STREAM_H) {
-      out <<
+  case BE_BuiltinGlobalData::STREAM_H: {
+    out << ifndef
+        <<
         "\n"
         "#include <dds/Version.h>\n"
         "#if !OPENDDS_VERSION_EXACTLY(" << OPENDDS_MAJOR_VERSION
@@ -284,29 +307,16 @@ void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, i
         "\n"
         "#include <dds/DdsDcpsC.h>\n"
         "\n";
-    }
-    if (which == BE_BuiltinGlobalData::STREAM_LANG_H) {
-      out << be_builtin_global->language_mapping()->getMinimalHeaders();
-    }
-    else {
-      std::string taoheader = be_builtin_global->header_name_.c_str();
-      taoheader.replace(taoheader.find("TypeSupportImpl.h"), 17, "C.h");
-      const bool explicit_ints = be_builtin_global->tao_inc_pre_.length()
-        && (taoheader == "Int8SeqC.h" || taoheader == "UInt8SeqC.h");
-      std::string indent;
-      if (explicit_ints) {
-        out << "#if OPENDDS_HAS_EXPLICIT_INTS\n";
-        indent = "  ";
-      }
-      out << "#" << indent << "include \"" << be_builtin_global->tao_inc_pre_ << taoheader << "\"\n";
-      if (explicit_ints) {
-        out << "#endif\n";
-      }
-    }
+    emit_tao_header(out);
+    break;
+  }
+  case BE_BuiltinGlobalData::STREAM_LANG_H: {
+    out << ifndef
+        << getMinimalHeaders();
   }
   break;
   case BE_BuiltinGlobalData::STREAM_CPP: {
-    ACE_CString pch = be_builtin_global->pch_include();
+    const ACE_CString pch = be_builtin_global->pch_include();
     if (pch.length()) {
       out << "#include \"" << pch << "\"\n";
     }
@@ -318,20 +328,8 @@ void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, i
     }
   }
   break;
-  case BE_BuiltinGlobalData::STREAM_FACETS_CPP: {
-    ACE_CString pch = be_builtin_global->pch_include();
-    if (pch.length()) {
-      out << "#include \"" << pch << "\"\n";
-    }
-    out << "#include \"" << be_builtin_global->facets_header_name_.c_str() << "\"\n"
-      "#include \"" << be_builtin_global->header_name_.c_str() << "\"\n"
-      "#include \"dds/FACE/FaceTSS.h\"\n\n"
-      "namespace FACE { namespace TS {\n\n";
-  }
-  break;
   case BE_BuiltinGlobalData::STREAM_IDL: {
-    macrofied = to_macro(fn);
-    out << "#ifndef " << macrofied << "\n#define " << macrofied << '\n';
+    out << ifndef;
 
 #ifdef ACE_HAS_CDR_FIXED
     out << "#define __OPENDDS_IDL_HAS_FIXED\n";
@@ -346,7 +344,8 @@ void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, i
   }
   break;
   default:
-    ;
+    postprocess_guard_begin(macrofied, out, iwhich);
+    break;
   }
 
   out << be_builtin_global->get_include_block(which);
@@ -356,18 +355,23 @@ void LanguageMapping::postprocess(const char* fn, std::ostringstream& content, i
   switch (which) {
   case BE_BuiltinGlobalData::STREAM_H:
   case BE_BuiltinGlobalData::STREAM_IDL:
-  case BE_BuiltinGlobalData::STREAM_FACETS_H:
   case BE_BuiltinGlobalData::STREAM_LANG_H:
     out << "#endif /* " << macrofied << " */\n";
     break;
-  case BE_BuiltinGlobalData::STREAM_FACETS_CPP:
-    out << "}}\n";
-    break;
   default:
-    ;
+    postprocess_guard_end(macrofied, out, iwhich);
+    break;
   }
 
   if (!BE_BuiltinGlobalData::writeFile(fn, out.str())) {
     BE_abort();  //error message already printed
   }
+}
+
+void LanguageMapping::postprocess_guard_begin(const std::string& macro, std::ostringstream& content, int which) const
+{
+}
+
+void LanguageMapping::postprocess_guard_end(const std::string& macro, std::ostringstream& content, int which) const
+{
 }

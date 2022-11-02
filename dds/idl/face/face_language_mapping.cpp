@@ -300,7 +300,7 @@ public:
           name_underscores = dds_generator::scoped_helper(name, "_"),
           exportMacro = be_builtin_global->export_macro().c_str(),
           exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
-        be_builtin_global->add_include("FACE/TS.hpp", BE_BuiltinGlobalData::STREAM_FACETS_H);
+        be_builtin_global->add_include("FACE/TS.hpp", FaceLanguageMapping::STREAM_FACETS_H);
         be_builtin_global->facets_header_ <<
           "namespace FACE\n"
           "{\n"
@@ -447,11 +447,9 @@ void FaceLanguageMapping::produceTS() const
 {
   if (emitTS_) {
     postprocess(be_builtin_global->facets_header_name_.c_str(),
-                be_builtin_global->facets_header_,
-                BE_BuiltinGlobalData::STREAM_FACETS_H);
+                be_builtin_global->facets_header_, STREAM_FACETS_H);
     postprocess(be_builtin_global->facets_impl_name_.c_str(),
-                be_builtin_global->facets_impl_,
-                BE_BuiltinGlobalData::STREAM_FACETS_CPP);
+                be_builtin_global->facets_impl_, STREAM_FACETS_CPP);
   }
 }
 
@@ -459,4 +457,54 @@ GeneratorBase* FaceLanguageMapping::getGeneratorHelper() const
 {
   static FaceGenerator generator;
   return &generator;
+}
+
+LanguageMapping::Includes_t* FaceLanguageMapping::additional_includes(int which)
+{
+  switch (which) {
+    case STREAM_FACETS_H:
+      return &additional_h_;
+    default:
+      return 0;
+  }
+}
+
+void FaceLanguageMapping::reset_includes()
+{
+  additional_h_.clear();
+}
+
+void FaceLanguageMapping::postprocess_guard_begin(const std::string& macrofied, std::ostringstream& out, int which) const
+{
+  switch (which) {
+    case STREAM_FACETS_H: {
+      out << "#ifndef " + macrofied << "\n#define " << macrofied << '\n';
+      emit_tao_header(out);
+      break;
+    }
+    case STREAM_FACETS_CPP: {
+      const ACE_CString pch = be_builtin_global->pch_include();
+      if (pch.length()) {
+        out << "#include \"" << pch << "\"\n";
+      }
+      out << "#include \"" << be_builtin_global->facets_header_name_.c_str() << "\"\n"
+        "#include \"" << be_builtin_global->header_name_.c_str() << "\"\n"
+        "#include \"dds/FACE/FaceTSS.h\"\n\n"
+        "namespace FACE { namespace TS {\n\n";
+      break;
+    }
+  }
+
+}
+
+void FaceLanguageMapping::postprocess_guard_end(const std::string& macrofied, std::ostringstream& out, int which) const
+{
+  switch (which) {
+  case STREAM_FACETS_H:
+    out << "#endif /* " << macrofied << " */\n";
+    break;
+  case STREAM_FACETS_CPP:
+    out << "}}\n";
+    break;
+  }
 }
