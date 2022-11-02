@@ -148,7 +148,9 @@ inline ReceivedDataSample::MessageBlock::MessageBlock(MessageBlock&& rhs)
 inline ReceivedDataSample::MessageBlock&
 ReceivedDataSample::MessageBlock::operator=(MessageBlock&& rhs)
 {
-  std::swap(*this, rhs);
+  std::swap(data_, rhs.data_);
+  std::swap(rd_ptr_, rhs.rd_ptr_);
+  std::swap(wr_ptr_, rhs.wr_ptr_);
   return *this;
 }
 #endif
