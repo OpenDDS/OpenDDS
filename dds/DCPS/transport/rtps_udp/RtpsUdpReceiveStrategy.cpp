@@ -151,7 +151,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
       if (!check_header(data_sample_header_)) {
         return 0;
       }
-      ReceivedDataSample rds(*cur_rb);
+      ReceivedDataSample rds = data_sample_header_.message_length() ? ReceivedDataSample(*cur_rb) : ReceivedDataSample();
       if (data_sample_header_.into_received_data_sample(rds)) {
 
         if (data_sample_header_.more_fragments() || receive_transport_header_.last_fragment()) {
@@ -953,11 +953,10 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
                                                     DDS::HANDLE_NIL,
                                                     writer_crypto_handle, ex);
   if (ok) {
-    // The sample.sample_ message block uses the transport's data block so it
+    // The ReceivedDataSample's message block uses the transport's data block so it
     // can't be modified in-place, instead replace it with a new block.
     sample.clear();
-    const char* const buffer_raw = reinterpret_cast<const char*>(plain.get_buffer());
-    sample.append(buffer_raw, plain.length());
+    sample.append(reinterpret_cast<const char*>(plain.get_buffer()), plain.length());
 
     if (plain.length() > 1) {
       sample.header_.byte_order_ = RtpsSampleHeader::payload_byte_order(sample);
