@@ -1,0 +1,34 @@
+project: aceexe, opendds_idl_plugin, crosscompile, install {
+  exename = *
+  exeout  = $(DDS_ROOT)/bin
+
+  verbatim(gnuace, local) {
+    ifeq ($(TAO_IDL_PREPROCESSOR),)
+      ifeq ($(ACE_CC_PREPROCESSOR),)
+        CPPFLAGS += -DTAO_IDL_PREPROCESSOR=\\\"$(strip $(CXX))\\\"
+      else
+        CPPFLAGS += -DACE_CC_PREPROCESSOR=\\\"$(ACE_CC_PREPROCESSOR)\\\"
+      endif
+    else
+      CPPFLAGS += -DTAO_IDL_PREPROCESSOR=\\\"$(TAO_IDL_PREPROCESSOR)\\\"
+    endif
+    idl_stubs: all
+  }
+
+  Documentation_Files {
+  }
+
+  InstallData_Files {
+    gendir = dds/idl
+    *Template.txt
+  }
+
+  specific {
+    install_dir = dds
+  }
+
+  verbatim(gnuace, postinstall) {
+"	@$(MKDIR) $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
+"	ln -sf ../../../bin/opendds_idl $(DESTDIR)$(INSTALL_PREFIX)/share/dds/bin"
+  }
+}

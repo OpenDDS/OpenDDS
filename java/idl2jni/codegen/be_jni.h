@@ -1,8 +1,8 @@
 #ifndef OPENDDS_IDL_BE_JNI_H
 #define OPENDDS_IDL_BE_JNI_H
 
-#include "dds/idl/be_interface.h"
 #include "be_jni_global.h"
+#include <be_interface.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

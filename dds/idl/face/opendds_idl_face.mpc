@@ -1,0 +1,5 @@
+project(opendds_idl_face): opendds_idl_plugin, crosscompile {
+  sharedname   = opendds_idl_face
+  libout       = $(DDS_ROOT)/lib
+  dynamicflags = OPENDDS_IDL_FACE_BUILD_DLL
+}

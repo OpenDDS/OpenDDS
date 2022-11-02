@@ -1,0 +1,9 @@
+project(opendds_idl_plugin): acelib, dds_macros, crosscompile, opendds_util {
+  sharedname   = opendds_idl_plugin
+  libout       = $(DDS_ROOT)/lib
+  dynamicflags = OPENDDS_IDL_PLUGIN_BUILD_DLL
+  after       += TAO_IDL_FE
+  libs        += TAO_IDL_FE
+  includes    += . $(TAO_ROOT)/TAO_IDL/include $(TAO_ROOT)
+  requires    += no_opendds_safety_profile
+}

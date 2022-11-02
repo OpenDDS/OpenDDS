@@ -76,7 +76,7 @@ trademarks or registered trademarks of Sun Microsystems, Inc.
 #include "ace/OS_NS_sys_time.h"
 #include "ace/OS_NS_unistd.h"
 
-#include "../Version.h"
+#include "dds/Version.h"
 #include "ace/Version.h"
 
 #include <iostream>
