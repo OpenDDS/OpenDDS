@@ -34,14 +34,15 @@ public:
 
   virtual Includes_t* additional_includes(int which);
   virtual void reset_includes();
+  virtual void set_additional_names(const std::string& filebase);
 
 private:
   Includes_t additional_h_;
-
+  ACE_CString facets_header_name_, facets_impl_name_;
   bool emitTS_;
 
-  virtual void postprocess_guard_begin(const std::string& macro, std::ostringstream& content, int which) const;
-  virtual void postprocess_guard_end(const std::string& macro, std::ostringstream& content, int which) const;
+  virtual void postprocess_guard_begin(const std::string& macro, std::ostringstream& out, int which) const;
+  virtual void postprocess_guard_end(const std::string& macro, std::ostringstream& out, int which) const;
 };
 
 #endif /* OPENDDS_IDL_FACE_LANGUAGE_MAPPING_H */

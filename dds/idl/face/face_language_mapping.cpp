@@ -24,11 +24,6 @@ public:
   {
   }
 
-  void setTS(bool setting)
-  {
-    emitTS_ = setting;
-  }
-
   virtual std::string string_ns()
   {
     return "::FACE";
@@ -301,7 +296,7 @@ public:
           exportMacro = be_builtin_global->export_macro().c_str(),
           exporter = exportMacro.empty() ? "" : ("    " + exportMacro + '\n');
         be_builtin_global->add_include("FACE/TS.hpp", FaceLanguageMapping::STREAM_FACETS_H);
-        be_builtin_global->facets_header_ <<
+        facets_header_ <<
           "namespace FACE\n"
           "{\n"
           "  namespace Read_Callback\n"
@@ -339,7 +334,7 @@ public:
           "      /* out */ RETURN_CODE_TYPE& return_code);\n\n"
           "  }\n"
           "}\n\n";
-        be_builtin_global->facets_impl_ <<
+        facets_impl_ <<
           "void Receive_Message(CONNECTION_ID_TYPE connection_id,\n"
           "                     TIMEOUT_TYPE timeout,\n"
           "                     TRANSACTION_ID_TYPE& transaction_id,\n"
@@ -378,7 +373,7 @@ public:
     return 0;
   }
 
-private:
+  std::ostringstream facets_header_, facets_impl_;
   bool emitTS_;
 };
 
@@ -440,16 +435,17 @@ bool FaceLanguageMapping::needSequenceTypeSupportImplHeader() const
 void FaceLanguageMapping::setTS(bool setting)
 {
   emitTS_ = setting;
-  dynamic_cast<FaceGenerator*>(getGeneratorHelper())->setTS(setting);
+  dynamic_cast<FaceGenerator*>(getGeneratorHelper())->emitTS_ = setting;
 }
 
 void FaceLanguageMapping::produceTS() const
 {
   if (emitTS_) {
-    postprocess(be_builtin_global->facets_header_name_.c_str(),
-                be_builtin_global->facets_header_, STREAM_FACETS_H);
-    postprocess(be_builtin_global->facets_impl_name_.c_str(),
-                be_builtin_global->facets_impl_, STREAM_FACETS_CPP);
+    FaceGenerator* generator = dynamic_cast<FaceGenerator*>(getGeneratorHelper());
+    postprocess(facets_header_name_.c_str(),
+                generator->facets_header_, STREAM_FACETS_H);
+    postprocess(facets_impl_name_.c_str(),
+                generator->facets_impl_, STREAM_FACETS_CPP);
   }
 }
 
@@ -461,17 +457,18 @@ GeneratorBase* FaceLanguageMapping::getGeneratorHelper() const
 
 LanguageMapping::Includes_t* FaceLanguageMapping::additional_includes(int which)
 {
-  switch (which) {
-    case STREAM_FACETS_H:
-      return &additional_h_;
-    default:
-      return 0;
-  }
+  return (which == STREAM_FACETS_H ? &additional_h_ : 0);
 }
 
 void FaceLanguageMapping::reset_includes()
 {
   additional_h_.clear();
+}
+
+void FaceLanguageMapping::set_additional_names(const std::string& filebase)
+{
+  facets_header_name_ = (filebase + "_TS.hpp").c_str();
+  facets_impl_name_ = (filebase + "_TS.cpp").c_str();
 }
 
 void FaceLanguageMapping::postprocess_guard_begin(const std::string& macrofied, std::ostringstream& out, int which) const
@@ -484,13 +481,13 @@ void FaceLanguageMapping::postprocess_guard_begin(const std::string& macrofied, 
     }
     case STREAM_FACETS_CPP: {
       const ACE_CString pch = be_builtin_global->pch_include();
-      if (pch.length()) {
+      if (pch.length() != 0) {
         out << "#include \"" << pch << "\"\n";
       }
-      out << "#include \"" << be_builtin_global->facets_header_name_.c_str() << "\"\n"
-        "#include \"" << be_builtin_global->header_name_.c_str() << "\"\n"
-        "#include \"dds/FACE/FaceTSS.h\"\n\n"
-        "namespace FACE { namespace TS {\n\n";
+      out << "#include \"" << facets_header_name_.c_str() << "\"\n"
+             "#include \"" << be_builtin_global->header_name_.c_str() << "\"\n"
+             "#include \"dds/FACE/FaceTSS.h\"\n\n"
+             "namespace FACE { namespace TS {\n\n";
       break;
     }
   }
