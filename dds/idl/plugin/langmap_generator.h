@@ -16,7 +16,7 @@ public:
   void init();
 
 private:
-  bool gen_const(UTL_ScopedName* name, bool nestedInInteface,
+  bool gen_const(UTL_ScopedName* name, bool nestedInInterface,
                  AST_Constant* constant);
 
   bool gen_enum(AST_Enum*, UTL_ScopedName* name,

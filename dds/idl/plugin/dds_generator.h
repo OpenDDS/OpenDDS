@@ -63,7 +63,7 @@ public:
   virtual void gen_epilogue() {}
 
   virtual bool gen_const(UTL_ScopedName* /*name*/,
-                         bool /*nestedInInteface*/,
+                         bool /*nestedInInterface*/,
                          AST_Constant* /*constant*/)
   { return true; }
 
@@ -121,7 +121,7 @@ public:
 
   void gen_epilogue();
 
-  bool gen_const(UTL_ScopedName* name, bool nestedInInteface,
+  bool gen_const(UTL_ScopedName* name, bool nestedInInterface,
                  AST_Constant* constant);
 
   bool gen_enum(AST_Enum* node, UTL_ScopedName* name,
