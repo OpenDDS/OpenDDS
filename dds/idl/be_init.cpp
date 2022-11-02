@@ -81,8 +81,8 @@ BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* allocator)
       if (handle != 0) {
         typedef BE_Interface* (*interface_alloc_t)();
         const interface_alloc_t interface_alloc =
-          static_cast<interface_alloc_t>(allocator == 0 ?
-                                         0 : handle->symbol(allocator));
+          reinterpret_cast<interface_alloc_t>(allocator == 0 ?
+                                              0 : handle->symbol(allocator));
         if (interface_alloc == 0) {
           manager->close_dll(dllname);
         }

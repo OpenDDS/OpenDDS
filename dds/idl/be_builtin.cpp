@@ -260,7 +260,7 @@ BE_BuiltinInterface::load_language_mapping(const ACE_TString& mapping_name)
     ACE_DLL_Handle* handle = manager->open_dll(dllname.c_str(), RTLD_NOW,
                                                 ACE_SHLIB_INVALID_HANDLE);
     if (handle != 0) {
-      symbol = static_cast<language_mapping_allocator>(handle->symbol(symbolname.c_str()));
+      symbol = reinterpret_cast<language_mapping_allocator>(handle->symbol(symbolname.c_str()));
       if (symbol == 0) {
         manager->close_dll(dllname.c_str());
       }
