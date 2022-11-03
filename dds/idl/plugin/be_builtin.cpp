@@ -278,20 +278,11 @@ BE_BuiltinInterface::load_language_mapping(const ACE_TString& mapping_name)
   ACE_DLL_Manager* manager = ACE_DLL_Manager::instance();
   if (manager != 0) {
     ACE_DLL_Handle* handle = manager->open_dll(dllname.c_str(), RTLD_NOW,
-                                                ACE_SHLIB_INVALID_HANDLE);
-    if (handle == 0) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("Unable to load language mapping: %s\n"), dllname.c_str()));
-    }
-    else {
+                                               ACE_SHLIB_INVALID_HANDLE);
+    if (handle != 0) {
       symbol = reinterpret_cast<language_mapping_allocator>(handle->symbol(symbolname.c_str()));
       if (symbol == 0) {
         manager->close_dll(dllname.c_str());
-      }
-      else {
-        ACE_ERROR((LM_ERROR,
-                   ACE_TEXT("Unable to find the language mapping symbol: %s\n"),
-                   symbolname.c_str()));
       }
     }
   }
@@ -329,9 +320,25 @@ void BE_BuiltinInterface::allocate_language_mapping(int& argc, ACE_TCHAR* argv[]
       // option after the -L.
       const ACE_TString key(argv[i] + generic_mapping_opt.length());
       language_mapping_allocator mapping = load_language_mapping(key);
-      if (mapping != 0) {
+#if defined (ACE_AS_STATIC_LIBS)
+      if (mapping == 0) {
+        extern language_mapping_allocator
+               static_language_mapping(const ACE_TString & key);
+        mapping = static_language_mapping(key);
+      }
+#endif
+      if (mapping == 0) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("ERROR: Unable to load language mapping: %s\n"),
+                   key.c_str()));
+      }
+      else {
         LanguageMapping* language_mapping = mapping();
-        if (language_mapping != 0) {
+        if (language_mapping == 0) {
+          ACE_ERROR((LM_ERROR,
+                     ACE_TEXT("ERROR: Unable to allocate the language mapping\n")));
+        }
+        else {
           // Add or update the map to contain the language mapping pointer.
           TSMap::iterator found = ts_mapping.find(key);
           if (found == ts_mapping.end()) {

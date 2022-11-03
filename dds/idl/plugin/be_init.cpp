@@ -12,9 +12,55 @@
 #include <ace/DLL_Manager.h>
 #include <drv_extern.h>
 
+#if defined (ACE_AS_STATIC_LIBS)
+extern interface_instance_t static_be_plugin(const ACE_TString& key);
+#endif
+
 namespace {
   typedef std::vector<BE_Interface*> InterfaceList;
   InterfaceList interfaces;
+
+  bool
+  BE_register(const ACE_TString& dllname)
+  {
+    ACE_TString funcname(dllname);
+    funcname += ACE_TEXT("_instance");
+    if (dllname == "") {
+      interfaces.push_back(BE_BuiltinInterface::instance());
+      return true;
+    }
+    else {
+      ACE_DLL_Manager* manager = ACE_DLL_Manager::instance();
+      if (manager != 0) {
+        ACE_DLL_Handle* handle = manager->open_dll(dllname.c_str(), RTLD_NOW,
+                                                   ACE_SHLIB_INVALID_HANDLE);
+        interface_instance_t interface_instance = 0;
+        if (handle != 0) {
+          interface_instance =
+            reinterpret_cast<interface_instance_t>(
+                                           handle->symbol(funcname.c_str()));
+        }
+
+#if defined (ACE_AS_STATIC_LIBS)
+        if (interface_instance == 0) {
+          interface_instance = static_be_plugin(dllname);
+        }
+#endif
+
+        if (interface_instance == 0) {
+          manager->close_dll(dllname.c_str());
+        }
+        else {
+          BE_Interface* iface = interface_instance();
+          if (iface != 0) {
+            interfaces.push_back(iface);
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 
   int BE_pre_init(int& argc, ACE_TCHAR* argv[]) {
     int status = 0;
@@ -24,9 +70,7 @@ namespace {
         if (++i < argc) {
           // Register the plugin
           const ACE_TString libname(argv[i]);
-          ACE_TString funcname(libname);
-          funcname += ACE_TEXT("_instance");
-          if (BE_register(libname.c_str(), funcname.c_str())) {
+          if (BE_register(libname)) {
             plugin = true;
           }
           else {
@@ -57,7 +101,7 @@ namespace {
 
     // If we didn't load in a plugin, we will register the built-in backend.
     if (!plugin) {
-      BE_register(0, 0);
+      BE_register("");
     }
 
     // Allocate the fake be_global data which is expected to exist by tao_idl.
@@ -69,39 +113,6 @@ namespace {
 
     return status;
   }
-}
-
-bool
-BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* funcname)
-{
-  if (dllname == 0 || ACE_OS::strcmp(dllname, "") == 0) {
-    interfaces.push_back(BE_BuiltinInterface::instance());
-    return true;
-  }
-  else {
-    ACE_DLL_Manager* manager = ACE_DLL_Manager::instance();
-    if (manager != 0) {
-      ACE_DLL_Handle* handle = manager->open_dll(dllname, RTLD_NOW,
-                                                 ACE_SHLIB_INVALID_HANDLE);
-      if (handle != 0) {
-        typedef BE_Interface* (*interface_instance_t)();
-        const interface_instance_t interface_instance =
-          reinterpret_cast<interface_instance_t>(funcname == 0 ?
-                                              0 : handle->symbol(funcname));
-        if (interface_instance == 0) {
-          manager->close_dll(dllname);
-        }
-        else {
-          BE_Interface* iface = interface_instance();
-          if (iface != 0) {
-            interfaces.push_back(iface);
-            return true;
-          }
-        }
-      }
-    }
-  }
-  return false;
 }
 
 opendds_idl_plugin_Export void

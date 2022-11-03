@@ -20,6 +20,9 @@ extern opendds_idl_plugin_Export BE_BuiltinGlobalData* be_builtin_global;
 
 class BE_BuiltinInterface: public BE_Interface {
 public:
+  // This is public to facilitate statically linking plugins into the exe
+  typedef LanguageMapping* (*language_mapping_allocator)();
+
   virtual ~BE_BuiltinInterface();
 
   static BE_BuiltinInterface* instance();
@@ -46,7 +49,6 @@ public:
 private:
   static void rm_arg(int& i, int& argc, ACE_TCHAR* argv[]);
 
-  typedef LanguageMapping* (*language_mapping_allocator)();
   static language_mapping_allocator load_language_mapping(const ACE_TString& mapping_name);
 
   BE_BuiltinInterface();
