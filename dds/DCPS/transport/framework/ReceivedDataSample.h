@@ -9,10 +9,9 @@
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_RECEIVEDDATASAMPLE_H
 
 #include <dds/DCPS/DataSampleHeader.h>
+#include <dds/DCPS/PoolAllocator.h>
 
 #include <ace/Message_Block.h>
-
-#include <vector>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
