@@ -241,7 +241,7 @@ namespace {
           }
         }
       } else if (type_class & CL_UNION) {
-        result = be_global->union_discriminator_is_key(dynamic_cast<AST_Union*>(type));
+        result = true;
       }
     }
     type_stack.pop_back();
@@ -3720,13 +3720,14 @@ namespace {
     const string cxx = scoped(node->name()); // name as a C++ class
     AST_Type* const discriminator = node->disc_type();
     const Classification disc_cls = classify(discriminator);
-    const bool has_key = be_global->union_discriminator_is_key(node);
     const string key_only_wrap_out = getWrapper("uni.value._d()", discriminator, WD_OUTPUT);
     const ExtensibilityKind exten = be_global->extensibility(node);
     const bool not_final = exten != extensibilitykind_final;
+    const bool nested_key_only = kind == FieldFilter_NestedKeyOnly;
     const string wrapper = kind == FieldFilter_KeyOnly ? "KeyOnly"
-      : kind == FieldFilter_NestedKeyOnly ? "NestedKeyOnly"
+      : nested_key_only ? "NestedKeyOnly"
       : "<<error from " __FILE__ ":" OPENDDS_IDL_STR(__LINE__) ">>";
+    const bool has_key = be_global->union_discriminator_is_key(node) || nested_key_only;
 
     {
       Function serialized_size("serialized_size", "void");

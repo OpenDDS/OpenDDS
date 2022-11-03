@@ -100,13 +100,16 @@ module key_annotation {
 
   /*
    * Case of a Keyed Union Nested inside a Struct
-   * 2 Keys
+   * 3 Keys
    *  - value._d()
+   *  - keyed_unkeyed_union._d()
    *  - another_key
    */
   @topic
   struct KeyedUnionStruct {
     @key KeyedUnion value;
+    KeyedUnion unkeyed_unkeyed_union;
+    @key UnkeyedUnion keyed_unkeyed_union;
     @key long another_key;
   };
 
