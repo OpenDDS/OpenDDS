@@ -10,6 +10,8 @@
 
 #  include "DynamicDataImpl.h"
 
+#  include <dds/DCPS/debug.h>
+
 #  include <algorithm>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -18,11 +20,10 @@ namespace XTypes {
 
 DDS::ReturnCode_t extensibility(DDS::DynamicType_ptr type, DCPS::Extensibility& ext)
 {
-  if (!type) {
+  DDS::DynamicType_var base_type = get_base_type(type);
+  if (!base_type) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
-
-  DDS::DynamicType_var base_type = get_base_type(type);
   switch (base_type->get_kind()) {
   case TK_STRUCTURE:
   case TK_UNION:
@@ -101,6 +102,130 @@ DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext)
   }
   OPENDDS_ASSERT(false);
   return DCPS::FINAL;
+}
+
+namespace {
+  DDS::ReturnCode_t get_keys_i(DDS::DynamicType_ptr type, MemberPathVec& paths,
+    const MemberPath& base_path);
+
+  DDS::ReturnCode_t get_keys_i_struct(DynamicTypeMembersByIdImpl* members, MemberPathVec& paths,
+    const MemberPath& base_path, bool implied_all_check = false)
+  {
+    bool implied_all = false;
+    if (!implied_all_check && base_path.level() > 0) {
+      // If there are no explicit keys, then they are implied to all be keys.
+      // TODO: Except when @key(FALSE)
+      MemberPathVec explicit_key;
+      const DDS::ReturnCode_t rc = get_keys_i_struct(members, explicit_key, base_path, true);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      implied_all = explicit_key.empty();
+    }
+
+    for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin();
+        it != members->end(); ++it) {
+      DDS::MemberDescriptor_var md;
+      DDS::ReturnCode_t rc = it->second->get_descriptor(md);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      if (implied_all || md->is_key()) {
+        const DDS::MemberId id = md->id();
+        if (implied_all_check) {
+          paths.push_back(MemberPath(base_path, id));
+          break; // Just need one explict key to know we can't imply all are keys
+        }
+
+        rc = get_keys_i(md->type(), paths, MemberPath(base_path, id));
+        if (rc != DDS::RETCODE_OK) {
+          return rc;
+        }
+      }
+    }
+
+    return DDS::RETCODE_OK;
+  }
+
+  DDS::ReturnCode_t get_keys_i(DDS::DynamicType_ptr type, MemberPathVec& paths,
+    const MemberPath& base_path)
+  {
+    DDS::DynamicType_var base_type = get_base_type(type);
+    if (!base_type) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    switch (base_type->get_kind()) {
+    case TK_STRUCTURE:
+      {
+        DDS::DynamicTypeMembersById_var members;
+        DDS::ReturnCode_t rc = type->get_all_members(members);
+        if (rc != DDS::RETCODE_OK) {
+          return rc;
+        }
+
+        DynamicTypeMembersByIdImpl* const members_impl =
+          dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
+        if (!members_impl) {
+          return DDS::RETCODE_BAD_PARAMETER;
+        }
+
+        return get_keys_i_struct(members_impl, paths, base_path);
+      }
+    case TK_UNION:
+      {
+        DDS::DynamicTypeMember_var disc;
+        const MemberId id = DISCRIMINATOR_ID;
+        const MemberPath this_path(base_path, id);
+        if (base_path.level() == 0) {
+          DDS::ReturnCode_t rc = type->get_member(disc, id);
+          if (rc != DDS::RETCODE_OK) {
+            return rc;
+          }
+          DDS::MemberDescriptor_var md;
+          rc = disc->get_descriptor(md);
+          if (rc != DDS::RETCODE_OK) {
+            return rc;
+          }
+          if (md->is_key()) {
+            paths.push_back(this_path);
+          }
+        } else {
+          // If we're here then the union field has been marked so the
+          // disciminator is an implied key even if it doesn't have @key.
+          // TODO: Except when @key(FALSE)
+          paths.push_back(this_path);
+        }
+      }
+      break;
+    default:
+      if (base_path.level() == 0) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_DEBUG((LM_NOTICE, "(%P|%t) NOTICE: get_keys_i: "
+            "get_keys was passed an invalid topic type: C\n"));
+        }
+        return DDS::RETCODE_BAD_PARAMETER;
+      }
+      paths.push_back(base_path);
+      break;
+    }
+
+    return DDS::RETCODE_OK;
+  }
+}
+
+DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths)
+{
+  return get_keys_i(type, paths, MemberPath());
+}
+
+DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count)
+{
+  MemberPathVec paths;
+  const DDS::ReturnCode_t rc = get_keys(type, paths);
+  if (rc == DDS::RETCODE_OK) {
+    count = paths.size();
+  }
+  return rc;
 }
 
 } // namespace XTypes

@@ -419,22 +419,6 @@ public:
   bool prepare_to_delete_datawriters();
   bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
-#ifndef OPENDDS_SAFETY_PROFILE
-  DDS::DynamicType* get_dynamic_type(const XTypes::TypeIdentifier& ti)
-  {
-    if (type_lookup_service_) {
-      return type_lookup_service_->type_identifier_to_dynamic(ti, dp_id_);
-    }
-    return 0;
-  }
-
-  template <typename TopicType>
-  DDS::DynamicType* get_dynamic_type()
-  {
-    return get_dynamic_type(getCompleteTypeIdentifier<DDSTraits<TopicType>::Xtag>());
-  }
-#endif
-
 private:
 
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);

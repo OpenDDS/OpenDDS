@@ -161,8 +161,11 @@ void DynamicTypeImpl::clear()
 
 DDS::DynamicType_var get_base_type(DDS::DynamicType_ptr type)
 {
-  DDS::DynamicType_var t = DDS::DynamicType::_duplicate(type);
+  if (!type) {
+    return 0;
+  }
 
+  DDS::DynamicType_var t = DDS::DynamicType::_duplicate(type);
   if (t->get_kind() != TK_ALIAS) {
     return t;
   }

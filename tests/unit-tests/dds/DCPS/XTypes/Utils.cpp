@@ -1,5 +1,6 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include <XTypesUtilsTypeSupportImpl.h>
+#  include <key_annotationTypeSupportImpl.h>
 
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
@@ -9,9 +10,10 @@
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
 using namespace XTypesUtils;
+using namespace key_annotation;
 
 class dds_DCPS_XTypes_Utils : public testing::Test {
-
+public:
   TypeLookupService_rch tls_;
 
   template<typename TopicType>
@@ -32,17 +34,6 @@ class dds_DCPS_XTypes_Utils : public testing::Test {
   void SetUp()
   {
     tls_ = make_rch<TypeLookupService>();
-
-    // Types for extensibility tests
-    add_type<FinalStruct>();
-    add_type<AppendableUnion>();
-    add_type<MutableStruct>();
-    add_type<FinalMaxFinalStruct>();
-    add_type<FinalMaxAppendableStruct>();
-    add_type<FinalMaxMutableStruct>();
-    add_type<AppendableMaxAppendableStruct>();
-    add_type<AppendableMaxMutableUnion>();
-    add_type<MutableMaxMutableStruct>();
   }
 
   template<typename TopicType>
@@ -57,24 +48,27 @@ class dds_DCPS_XTypes_Utils : public testing::Test {
     return tls_->complete_to_dynamic(com_to.complete, GUID_UNKNOWN);
   }
 
-public:
   template<typename TopicType>
   void expect_ext(Extensibility expected)
   {
-    DDS::DynamicType_var dy = get_dynamic_type<TopicType>();
+    add_type<TopicType>();
+    DDS::DynamicType_var dt = get_dynamic_type<TopicType>();
+    CORBA::String_var name = dt->get_name();
     Extensibility actual;
-    EXPECT_EQ(DDS::RETCODE_OK, extensibility(dy.in(), actual));
-    EXPECT_EQ(expected, actual);
+    EXPECT_EQ(DDS::RETCODE_OK, extensibility(dt.in(), actual)) << "Happend in type " << name.in();
+    EXPECT_EQ(expected, actual) << "Happend in type " << name.in();
   }
 
   template<typename TopicType>
   void expect_maxext(Extensibility expected)
   {
-    DDS::DynamicType_var dy = get_dynamic_type<TopicType>();
-    CORBA::String_var name = dy->get_name();
+    add_type<TopicType>();
+    DDS::DynamicType_var dt = get_dynamic_type<TopicType>();
+    CORBA::String_var name = dt->get_name();
     Extensibility actual;
-    EXPECT_EQ(DDS::RETCODE_OK, max_extensibility(dy.in(), actual)) << name.in();
-    EXPECT_EQ(expected, actual) << name.in();
+    EXPECT_EQ(DDS::RETCODE_OK, max_extensibility(dt.in(), actual))
+      << "Happend in type " << name.in();
+    EXPECT_EQ(expected, actual) << "Happend in type " << name.in();
   }
 };
 
@@ -103,4 +97,132 @@ TEST_F(dds_DCPS_XTypes_Utils, max_extensibility)
   expect_maxext<AppendableMaxMutableUnion>(MUTABLE);
   expect_maxext<MutableMaxMutableStruct>(MUTABLE);
 }
+
+namespace {
+  struct GetKeysCheck{
+    dds_DCPS_XTypes_Utils& t;
+    MemberPathVec expected;
+
+    GetKeysCheck(dds_DCPS_XTypes_Utils& t)
+    : t(t)
+    {
+    }
+
+    MemberPath& new_key()
+    {
+      expected.push_back(MemberPath());
+      return expected.back();
+    }
+
+    template <typename TopicType>
+    void check()
+    {
+      t.add_type<TopicType>();
+      DDS::DynamicType_var dt = t.get_dynamic_type<TopicType>();
+      CORBA::String_var name = dt->get_name();
+      MemberPathVec actual;
+      EXPECT_EQ(DDS::RETCODE_OK, get_keys(dt, actual))
+        << "Happend in type " << name.in();
+      const size_t count = std::min(expected.size(), actual.size());
+      for (size_t i = 0; i < count; ++i) {
+        EXPECT_EQ(expected[i].ids, actual[i].ids)
+          << "both with i == " << i << " for type "  << name.in();
+      }
+      EXPECT_EQ(expected.size(), actual.size()) << "Happend in type " << name.in();
+    }
+  };
+}
+
+TEST_F(dds_DCPS_XTypes_Utils, get_keys)
+{
+  GetKeysCheck(*this).check<UnkeyedStruct>();
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(10);
+    c.check<SimpleKeyStruct>();
+  }
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(20);
+    c.new_key().id(21).id(10);
+    c.check<NestedKeyStruct>();
+  }
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(30);
+    c.new_key().id(31).id(10);
+    c.check<TypedefStructKeyStruct>();
+  }
+
+  // NOTE: Array counts are different from the ones in the key_annotation test
+  // because we're only counting arrays as 1 key field.
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(40);
+    c.check<LongArrayStruct>();
+  }
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(50);
+    c.check<SimpleKeyArray>();
+  }
+
+  GetKeysCheck(*this).check<UnkeyedUnion>();
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(DISCRIMINATOR_ID);
+    c.check<KeyedUnion>();
+  }
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(60).id(DISCRIMINATOR_ID);
+    c.new_key().id(62).id(DISCRIMINATOR_ID);
+    c.new_key().id(63);
+    c.check<KeyedUnionStruct>();
+  }
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(70);
+    c.new_key().id(71);
+    c.check<MultidimensionalArrayStruct>();
+  }
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(100).id(80);
+    c.new_key().id(100).id(81);
+    c.new_key().id(100).id(82);
+    c.new_key().id(101).id(90);
+    c.new_key().id(102);
+    c.check<ImpliedKeys::StructA>();
+  }
+
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(110).id(100).id(80);
+    c.new_key().id(110).id(100).id(81);
+    c.new_key().id(110).id(100).id(82);
+    c.new_key().id(110).id(101).id(90);
+    c.new_key().id(110).id(102);
+    c.new_key().id(111);
+    c.check<ImpliedKeys::StructB>();
+  }
+
+  /* TODO: Need to support @key(FALSE) to do this
+  {
+    GetKeysCheck c(*this);
+    c.new_key().id(130).id(120);
+    c.new_key().id(130).id(121);
+    c.check<ImpliedKeys::StructC>();
+  }
+  */
+}
+
 #endif // OPENDDS_SAFETY_PROFILE
