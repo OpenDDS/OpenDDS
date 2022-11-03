@@ -197,6 +197,10 @@ void BE_arg_post_proc()
 
 void BE_usage()
 {
+  ACE_DEBUG((LM_DEBUG,
+    ACE_TEXT(" --plugin <libname>\tdynamically load a backend plugin\n")
+    ));
+
   InterfaceList::iterator end = interfaces.end();
   for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
     (*itr)->usage();

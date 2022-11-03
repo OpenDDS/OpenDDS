@@ -38,6 +38,8 @@ public:
   virtual void reset_includes();
   virtual void set_additional_names(const std::string& filebase);
 
+  virtual void usage() const;
+
 protected:
   std::string to_macro(const char* fn) const;
   std::string to_header(const char* cpp_name) const;

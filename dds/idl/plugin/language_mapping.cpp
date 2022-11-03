@@ -209,6 +209,10 @@ void LanguageMapping::set_additional_names(const std::string& filebase)
 {
 }
 
+void LanguageMapping::usage() const
+{
+}
+
 /// generate a macro name for the #ifndef header-double-include protector
 std::string LanguageMapping::to_macro(const char* fn) const
 {
