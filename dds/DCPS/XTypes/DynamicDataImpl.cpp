@@ -212,12 +212,10 @@ bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val) const
   if (!is_discriminator_type(type_->get_kind())) {
     return false;
   }
-
   DataContainer::const_single_iterator found = container_.single_map_.find(MEMBER_ID_INVALID);
   if (found == container_.single_map_.end()) {
     return false;
   }
-
   disc_val = static_cast<CORBA::Long>(found->second.get());
   return true;
 }
@@ -255,7 +253,7 @@ DDS::MemberId DynamicDataImpl::find_selected_member() const
 
 // Check if a discriminator value would select a member with the given descriptor in a union.
 bool DynamicDataImpl::validate_discriminator(CORBA::Long disc_val,
-                                                  const DDS::MemberDescriptor_var& md) const
+                                             const DDS::MemberDescriptor_var& md) const
 {
   // If the selected member is not default, the discriminator value must equal one of its
   // labels. If the selected member is default, the discriminator value must not equal
@@ -1476,7 +1474,7 @@ bool DynamicDataImpl::DataContainer::serialize_primitive_value(DCPS::Serializer&
   }
 
   // No data stored. Use default value.
-  set_default_basic_value(default_value, primitive_kind);
+  set_default_basic_value(default_value);
   return ser << default_value;
 }
 
@@ -1610,11 +1608,11 @@ bool DynamicDataImpl::DataContainer::reconstruct_string_value(CORBA::Char* str) 
     }
     // The DynamicData object for this character may not contain any data.
     // Use default value for character if it is the case.
-    const_single_iterator elem_it = it->second.container_.single_map_.find(MEMBER_ID_INVALID);
-    if (elem_it != it->second.container_.single_map_.end()) {
+    const_single_iterator elem_it = it->second->container_.single_map_.find(MEMBER_ID_INVALID);
+    if (elem_it != it->second->container_.single_map_.end()) {
       str[index] = elem_it->second.get();
     } else {
-      set_default_basic_value(str[index], TK_CHAR8);
+      set_default_basic_value(str[index]);
     }
   }
   return true;
@@ -1676,11 +1674,11 @@ bool DynamicDataImpl::DataContainer::reconstruct_wstring_value(CORBA::WChar* wst
     if (!get_index_from_id(it->first, index, bound)) {
       return false;
     }
-    const_single_iterator elem_it = it->second.container_.single_map_.find(MEMBER_ID_INVALID);
-    if (elem_it != it->second.container_.single_map_.end()) {
+    const_single_iterator elem_it = it->second->container_.single_map_.find(MEMBER_ID_INVALID);
+    if (elem_it != it->second->container_.single_map_.end()) {
       wstr[index] = elem_it->second.get();
     } else {
-      set_default_basic_value(wstr[index], TK_CHAR16);
+      set_default_basic_value(wstr[index]);
     }
   }
   return true;
@@ -1834,56 +1832,102 @@ void DynamicDataImpl::DataContainer::serialized_size_primitive_sequence(const DC
   }
 }
 
-template<typename ValueType>
-bool DynamicDataImpl::DataContainer::set_default_basic_value(ValueType& value, TypeKind kind) const
+// Group of functions to set default value for a basic type (Table 9).
+// When MemberDescriptor::default_value is fully supported, it would
+// have precedence over these default values.
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Long& value) const
 {
-  // Set default value for a basic type according to Table 9.
-  // When MemberDescriptor::default_value is fully supported, it would
-  // have precedence over these default values.
-  switch (kind) {
-  case TK_INT32:
-  case TK_UINT32:
-  case TK_INT8:
-  case TK_UINT8:
-  case TK_INT16:
-  case TK_UINT16:
-  case TK_INT64:
-  case TK_UINT64:
-  case TK_FLOAT32:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-    value = 0
-    return true;
-  case TK_CHAR8:
-    value = '\0';
-    return true;
-  case TK_BYTE:
-    value = 0x00;
-    return true;
-  case TK_STRING8:
-    value = "";
-    return true;
-  case TK_BOOLEAN:
-    value = false;
-    return true;
-#ifdef DDS_HAS_WCHAR
-  case TK_CHAR16:
-    value = '\0';
-    return true;
-  case TK_STRING16:
-    value = "";
-    return true;
-#endif
-  }
-  return false;
+  value = 0;
 }
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::ULong& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Int8& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::UInt8& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Short& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::UShort& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::LongLong& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::ULongLong& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Float& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Double& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::LongDouble& value) const
+{
+  value = 0;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Char& value) const
+{
+  value = '\0';
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Octet& value) const
+{
+  value = 0x00;
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(const char*& value) const
+{
+  value = "";
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Boolean& value) const
+{
+  value = false;
+}
+
+#ifdef DDS_HAS_WCHAR
+void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::WChar& value) const
+{
+  value = '\0';
+}
+
+void DynamicDataImpl::DataContainer::set_default_basic_value(const CORBA::WChar*& value) const
+{
+  value = "";
+}
+#endif
 
 template<typename CollectionType>
 void DynamicDataImpl::DataContainer::set_default_primitive_values(CollectionType& collection,
                                                                   TypeKind elem_tk) const
 {
   for (CORBA::ULong i = 0; i < collection.length(); ++i) {
-    set_default_basic_value(collection[i], elem_tk);
+    set_default_basic_value(collection[i]);
   }
 }
 
@@ -1908,8 +1952,8 @@ bool DynamicDataImpl::DataContainer::set_primitive_values(CollectionType& collec
     // If a primitive value is contained in a DynamicData object, the value is accessed
     // with Id MEMBER_ID_INVALID. If the DynamicData object is empty (i.e., no data),
     // keep default value for that primitive.
-    const_single_iterator elem_it = it->second.container_.single_map_.find(MEMBER_ID_INVALID);
-    if (elem_it != it->second.container_.single_map_.end()) {
+    const_single_iterator elem_it = it->second->container_.single_map_.find(MEMBER_ID_INVALID);
+    if (elem_it != it->second->container_.single_map_.end()) {
       collection[index] = elem_it->second.get();
     }
   }
@@ -2033,7 +2077,7 @@ void DynamicDataImpl::DataContainer::serialized_size_generic_string_collection(
       }
     } else {
       StringType default_value;
-      set_default_basic_value(default_value, str_kind);
+      set_default_basic_value(default_value);
       serialized_size_generic_string(encoding, size, str_kind, default_value);
     }
   }
@@ -2072,7 +2116,7 @@ bool DynamicDataImpl::DataContainer::serialize_generic_string_collection(DCPS::S
       }
     } else { // Not set by the user. Use default value.
       StringType default_value;
-      set_default_basic_value(default_value, str_kind);
+      set_default_basic_value(default_value);
       if (!(ser << default_val)) {
         return false;
       }
@@ -4103,12 +4147,12 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
     return serialized_size_primitive_member(encoding, size, member_tk);
   } else if (member_tk == TK_STRING8) {
     const char* str_default;
-    set_default_basic_value(str_default, TK_STRING8);
+    set_default_basic_value(str_default);
     serialized_size_string_member(encoding, size, str_default);
     return true;
   } else if (member_tk == TK_STRING16) {
     const CORBA::WChar* wstr_default;
-    set_default_basic_value(wstr_default, TK_STRING16);
+    set_default_basic_value(wstr_default);
     serialized_size_wstring_member(encoding, size, wstr_default);
     return true;
   }
@@ -4137,73 +4181,90 @@ bool DynamicDataImpl::DataContainer::serialize_basic_member_default_value(DCPS::
   switch (member_tk) {
   case TK_INT32: {
     CORBA::Long value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_UINT32: {
     CORBA::ULong value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_INT8: {
     CORBA::Int8 value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_UINT8: {
     CORBA::UInt8 value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_INT16: {
     CORBA::Short value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_UINT16: {
     CORBA::UShort value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_INT64: {
     CORBA::LongLong value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_UINT64: {
     CORBA::ULongLong value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_FLOAT32: {
     CORBA::Float value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_FLOAT64: {
     CORBA::Double value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_FLOAT128: {
     CORBA::LongDouble value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_CHAR8: {
     CORBA::Char value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_STRING8: {
     const char* value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16: {
     CORBA::WChar value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_STRING16: {
     const CORBA::WChar* value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
 #endif
   case TK_BYTE: {
     CORBA::Octet value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   case TK_BOOLEAN: {
     CORBA::Boolean value;
-    return set_default_basic_value(value, member_tk) && (ser << value);
+    set_default_basic_value(value);
+    return ser << value;
   }
   }
   return false;
@@ -4733,7 +4794,221 @@ bool DynamicDataImpl::DataContainer::serialize_structure(DCPS::Serializer& ser) 
   return false;
 }
 
-bool DynamicDataImpl::DataContainer::serialize_union(DCPS::Serializer& ser) const
+// Set discriminator to the default value of the corresponding type.
+bool DynamicDataImpl::DataContainer::set_default_discriminator_value(
+  CORBA::Long& value, const DDS::DynamicType_var& disc_type) const
+{
+  const TypeKind disc_tk = disc_type->get_kind();
+  switch (disc_tk) {
+  case TK_BOOLEAN: {
+    CORBA::Boolean val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_BYTE: {
+    CORBA::Octet val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_CHAR8: {
+    CORBA::Char val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_CHAR16: {
+    CORBA::WChar val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_INT8: {
+    CORBA::Int8 val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_UINT8: {
+    CORBA::UInt8 val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_INT16: {
+    CORBA::Short val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_UINT16: {
+    CORBA::UShort val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_INT32: {
+    set_default_basic_value(value);
+    return true;
+  }
+  case TK_UINT32: {
+    CORBA::ULong val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_INT64: {
+    CORBA::LongLong val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_UINT64: {
+    CORBA::ULongLong val;
+    set_default_basic_value(val);
+    value = static_cast<CORBA::Long>(val);
+    return true;
+  }
+  case TK_ENUM: {
+    DDS::DynamicTypeMember_var first_dtm;
+    if (disc_type->get_member_by_index(first_dtm, 0) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var first_md;
+    if (first_dtm->get_descriptor(first_md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    value = static_cast<CORBA::Long>(first_md->id());
+    return true;
+  }
+  }
+  return false;
+}
+
+// Get discriminator value from the data container. The discriminator data must present
+// in either single map or complex map.
+void DynamicDataImpl::DataContainer::get_discriminator_value(
+  CORBA::Long& value, const_single_iterator single_it, const_complex_iterator complex_it,
+  const DDS::DynamicType_var& disc_type) const
+{
+  if (single_it != single_map_.end()) {
+    value = static_cast<CORBA::Long>(single_it->second.get());
+  } else { // Find in complex map
+    const DDS::DynamicData_var& dd_var = complex_it->second;
+    const_single_iterator it = dd_var->container_.single_map_.find(MEMBER_ID_INVALID);
+    if (it != dd_var->container_.single_map_.end()) {
+      value = static_cast<CORBA::Long>(it->second.get());
+    } else {
+      set_default_discriminator_value(value, disc_type);
+    }
+  }
+}
+
+bool DynamicDataImpl::DataContainer::serialize_discriminator_member_xcdr2(
+  DCPS::Serializer& ser, CORBA::Long value, const DDS::DynamicType_var& disc_type,
+  DDS::ExtensibilityKind extensibility) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  const TypeKind disc_tk = disc_type->get_kind();
+  if (extensibility == DDS::MUTABLE) {
+    size_t disc_size = 0;
+
+    if (is_primitive(disc_tk)) {
+      serialized_size_primitive_member(encoding, disc_size, disc_tk);
+    } else {
+      serialized_size_enum(encoding, disc_size, disc_type);
+    }
+    // Use member Id 0 for discriminator?
+    if (!ser.write_parameter_id(0, disc_size, false)) {
+      return false;
+    }
+  }
+
+  switch (disc_tk) {
+  case TK_BOOLEAN:
+    return ser << static_cast<CORBA::Boolean>(value);
+  case TK_BYTE:
+    return ser << static_cast<CORBA::Octet>(value);
+  case TK_CHAR8:
+    return ser << static_cast<CORBA::Char>(value);
+  case TK_CHAR16:
+    return ser << static_cast<CORBA::WChar>(value);
+  case TK_INT8:
+    return ser << static_cast<CORBA::Int8>(value);
+  case TK_UINT8:
+    return ser << static_cast<CORBA::UInt8>(value);
+  case TK_INT16:
+    return ser << static_cast<CORBA::Short>(value);
+  case TK_UINT16:
+    return ser << static_cast<CORBA::UShort>(value);
+  case TK_INT32:
+    return ser << static_cast<CORBA::Long>(value);
+  case TK_UINT32:
+    return ser << static_cast<CORBA::ULong>(value);
+  case TK_INT64:
+    return ser << static_cast<CORBA::LongLong>(value);
+  case TK_UINT64:
+    return ser << static_cast<CORBA::ULongLong>(value);
+  case TK_ENUM: {
+    DDS::TypeDescriptor_var td;
+    if (disc_type->get_descriptor(td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const CORBA::ULong bitbound = td->bound()[0];
+    if (bitbound >= 1 && bitbound <= 8) {
+      return ser << static_cast<CORBA::Int8>(value);
+    } else if (bitbound >= 9 && bitbound <= 16) {
+      return ser << static_cast<CORBA::Short>(value);
+    } else if (bitbound >= 17 && bitbound <= 32) {
+      return ser << value;
+    }
+  }
+  }
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialize_selected_member_xcdr2(DCPS::Serializer& ser,
+  DDS::MemberId selected_id, DDS::ExtensibilityKind extensibility) const
+{
+  DDS::DynamicTypeMember_var selected_dtm;
+  if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var selected_md;
+  if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
+  const bool optional = selected_md->is_optional();
+  const bool must_understand = selected_md->is_must_understand();
+
+  const_single_iterator single_it = single_map_.find(selected_id);
+  if (single_it != single_map_.end()) {
+    return serialize_basic_aggregated_member_xcdr2(ser, single_it, selected_type, optional,
+                                                   must_understand, extensibility);
+  }
+
+  const_sequence_iterator seq_it = sequence_map_.find(selected_id);
+  if (seq_it ! = sequence_map_.end()) {
+    DDS::TypeDescriptor_var selected_td;
+    if (selected_type->get_descriptor(selected_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const TypeKind elem_tk = get_base_type(selected_td->element_type())->get_kind();
+    return serialize_sequence_aggregated_member_xcdr2(ser, seq_it, elem_tk, optional,
+                                                      must_understand, extensibility);
+  }
+
+  const_complex_iterator complex_it = complex_map_.find(selected_id);
+  if (complex_it != complex_map_.end()) {
+    return serialize_complex_aggregated_member_xcdr2(ser, complex_it, optional,
+                                                     must_understand, extensibility);
+  }
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser) const
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -4757,27 +5032,94 @@ bool DynamicDataImpl::DataContainer::serialize_union(DCPS::Serializer& ser) cons
   const bool has_disc = single_it != single_map_.end() || complex_it != complex_map_.end();
   const DDS::MemberId selected_id = data_->find_selected_member();
 
-  if (selected_id != MEMBER_ID_INVALID && !has_disc) {
-    // TODO: Is this an error?
-    return false;
-  }
-
-  if (selected_id == MEMBER_ID_INVALID && has_disc) {
-    // TODO: 2 cases
-    // If the discriminator doesn't select any member then the union only has discriminator
-    // If the discriminator selects a member, use default value of that member type? or
-    // also just serialize only the discriminator?
-    return false;
-  }
-
+  // 1. If discriminator is not present, set it to default value.
+  //    a. If there is no selected member, use the default value of the discriminator
+  //       to select a member and set it to default value. If it selects no member,
+  //       serialize only the discriminator. Else, serialize both as normal.
+  //    b. If there is a selected member and the default value of discriminator
+  //       selects that member, serialize both. Else if it does not select that
+  //       member, return an error.
+  // 2. If discriminator is present but user didn't set a selected member, do the same
+  //    as step 1.a.
   DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
-  const TypeKind disc_tk = disc_type->get_kind();
-  if (selected_id == MEMBER_ID_INVALID && !has_disc) {
-    // TODO: User default value for the union (Table 9)
+  CORBA::Long disc_value;
+  if (has_disc) { // Read the discriminator value set by user
+    get_discriminator_value(disc_value, single_it, complex_it, disc_type);
+  } else if (!set_default_discriminator_value(disc_value, disc_type)) {
     return false;
   }
 
-  // Discriminator
+  // At this point, discriminator value is defined, either by user or set to default.
+  if (selected_id == MEMBER_ID_INVALID) {
+    // Try selecting a member
+    bool found_selected_member = false, has_default = false;
+    DDS::MemberDescriptor_var selected_md, default_md;
+    for (CORBA::ULong i = 0; i < type_->get_member_count(); ++i) {
+      DDS::DynamicTypeMember_var dtm;
+      if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+        return false;
+      }
+      DDS::MemberDescriptor_var md;
+      if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+        return false;
+      }
+      bool found_matched_label = false;
+      const DDS::UnionCaseLabelSeq labels = md->label();
+      for (CORBA::ULong j = 0; !found_matched_label && j < labels.length(); ++j) {
+        if (disc_vale == labels[j]) {
+          found_matched_label = true;
+        }
+      }
+      if (found_matched_label) {
+        selected_md = md;
+        found_selected_member = true;
+        break;
+      }
+      if (md->is_default_label()) {
+        default_md = md;
+        has_default = true;
+      }
+    }
+    if (!found_selected_member && has_default) {
+      selected_md = default_md;
+      found_selected_member = true;
+    }
+
+    // Discriminator
+    if (!serialize_discriminator_member_xcdr2(ser, disc_value, disc_type, extensibility)) {
+      return false;
+    }
+
+    // Selected member
+    if (found_selected_member) {
+      DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
+      const DDS::MemberId id = selected_md->id();
+      const bool optional = selected_md->is_optional();
+      const bool must_understand = selected_md->is_must_understand();
+      return serialize_complex_aggregated_member_xcdr2_default(ser, id, selected_type, optional,
+                                                               must_understand, extensibility);
+    }
+  } else if (!has_disc) {
+    DDS::DynamicTypeMember_var selected_dtm;
+    if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var selected_md;
+    if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (!validate_discriminator(disc_value, selected_md)) {
+      if (log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::DataContainer::serialize_union_xcdr2:"
+                   " Default discriminator value does not select the existing selected member\n"));
+      }
+      return false;
+    }
+    return serialize_discriminator_member_xcdr2(ser, disc_value, disc_type, extensibility) &&
+      serialize_selected_member_xcdr2(ser, selected_id, extensibility);
+  }
+
+  // Both discriminator and a selected member exist in the data container.
   if (single_it != single_map_.end()) {
     if (extensibility == DDS::MUTABLE) {
       size_t disc_size = 0;
@@ -4806,41 +5148,22 @@ bool DynamicDataImpl::DataContainer::serialize_union(DCPS::Serializer& ser) cons
       return false;
     }
   }
+  return serialize_selected_member_xcdr2(ser, selected_id, extensibility);
+}
 
-  // Selected member
-  DDS::DynamicTypeMember_var selected_dtm;
-  if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DDS::MemberDescriptor_var selected_md;
-  if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-    return false;
-  }
-  DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
-  const bool optional = selected_md->is_optional();
-  const bool must_understand = selected_md->is_must_understand();
+bool DynamicDataImpl::DataContainer::serialize_union_xcdr1(DCPS::Serializer& ser) const
+{
+  // TODO:
+  return false;
+}
 
-  single_it = single_map_.find(selected_id);
-  if (single_it != single_map_.end()) {
-    return serialize_basic_aggregated_member_xcdr2(ser, single_it, selected_type, optional,
-                                                   must_understand, extensibility);
-  }
-
-  const_sequence_iterator seq_it = sequence_map_.find(selected_id);
-  if (seq_it ! = sequence_map_.end()) {
-    DDS::TypeDescriptor_var selected_td;
-    if (selected_type->get_descriptor(selected_td) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const TypeKind elem_tk = get_base_type(selected_td->element_type())->get_kind();
-    return serialize_sequence_aggregated_member_xcdr2(ser, seq_it, elem_tk, optional,
-                                                      must_understand, extensibility);
-  }
-
-  complex_it = complex_map_.find(selected_id);
-  if (complex_it != complex_map_.end()) {
-    return serialize_complex_aggregated_member_xcdr2(ser, complex_it, selected_id, optional,
-                                                     must_understand, extensibility);
+bool DynamicDataImpl::DataContainer::serialize_union(DCPS::Serializer& ser) const
+{
+  const DCPS::Encoding& encoding = ser.encoding();
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    return serialize_union_xcdr2(ser);
+  } else if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1) {
+    return serialize_union_xcdr1(ser);
   }
   return false;
 }

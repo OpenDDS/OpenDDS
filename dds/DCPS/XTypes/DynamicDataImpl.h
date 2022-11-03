@@ -414,7 +414,7 @@ private:
     SingleValue(const char* str);
 #ifdef DDS_HAS_WCHAR
     SingleValue(CORBA::WChar char16);
-    SingleValue(CORBA::WChar* wstr);
+    SingleValue(const CORBA::WChar* wstr);
 #endif
 
     ~SingleValue();
