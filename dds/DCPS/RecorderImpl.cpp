@@ -53,10 +53,10 @@ RecorderImpl::RecorderImpl()
   , participant_servant_(0)
   , topic_servant_(0)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  , is_exclusive_ownership_ (false)
+  , is_exclusive_ownership_(false)
 #endif
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  , owner_manager_ (0)
+  , owner_manager_(0)
 #endif
   , subqos_(TheServiceParticipant->initial_SubscriberQos())
   , topic_desc_(0)

@@ -46,7 +46,7 @@ public:
   /// true if at least one Data Block is stored (even if it has 0 useable bytes)
   bool has_data() const { return !blocks_.empty(); }
 
-  /// total length of useable bytes (between rd_ptr and wr_ptr) of all Data Blocks
+  /// total length of usable bytes (between rd_ptr and wr_ptr) of all Data Blocks
   size_t data_length() const;
 
   void clear() { blocks_.clear(); }
