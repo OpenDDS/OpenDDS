@@ -1,3 +1,10 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_IDL_BE_JNI_H
 #define OPENDDS_IDL_BE_JNI_H
 

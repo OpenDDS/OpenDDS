@@ -1,3 +1,10 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
 #ifndef OPENDDS_IDL_LANGUAGE_MAPPING_H
 #define OPENDDS_IDL_LANGUAGE_MAPPING_H
 
