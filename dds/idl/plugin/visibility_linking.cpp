@@ -1,6 +1,7 @@
 #include "visibility_linking.h"
 
-#if defined(ACE_Proper_Export_Flag)
+#if defined(ACE_Proper_Export_Flag) && \
+    defined (OPENDDS_IDL_PLUGIN_HAS_DLL) && (OPENDDS_IDL_PLUGIN_HAS_DLL == 1)
 
 namespace {
   add_include_path add_include_path_ptr_ = 0;

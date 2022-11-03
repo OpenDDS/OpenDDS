@@ -10,7 +10,8 @@
 
 #include "opendds_idl_plugin_export.h"
 
-#if defined(ACE_Proper_Export_Flag)
+#if defined(ACE_Proper_Export_Flag) && \
+    defined (OPENDDS_IDL_PLUGIN_HAS_DLL) && (OPENDDS_IDL_PLUGIN_HAS_DLL == 1)
 #include <ace/SString.h>
 
 typedef ACE_CString&
