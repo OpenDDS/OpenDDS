@@ -939,7 +939,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Meta Discovery listening on %C\n"), OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
-  const bool has_run_time = config.run_time() != OpenDDS::DCPS::TimeDuration::zero_value;
+  const bool has_run_time = !config.run_time().is_zero();
   const OpenDDS::DCPS::MonotonicTimePoint end_time = OpenDDS::DCPS::MonotonicTimePoint::now() + config.run_time();
 
   if (thread_status_manager.update_thread_status()) {
