@@ -972,10 +972,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   application_participant->delete_contained_entities();
-  factory->delete_participant(application_participant.in());
+  factory->delete_participant(application_participant);
 
   relay_participant->delete_contained_entities();
-  factory->delete_participant(relay_participant.in());
+  factory->delete_participant(relay_participant);
 
   TheServiceParticipant->shutdown();
 
