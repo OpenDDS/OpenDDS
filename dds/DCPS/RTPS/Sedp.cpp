@@ -4141,7 +4141,7 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
     // Get Encoding from Encapsulation
     Encoding encoding;
-    DCPS::Message_Block_Ptr payload(sample.data()); //TODO: allocator?
+    DCPS::Message_Block_Ptr payload(sample.data(&mb_alloc_));
     Serializer ser(payload.get(), encoding);
     DCPS::EncapsulationHeader encap;
     if (!(ser >> encap)) {

@@ -901,7 +901,7 @@ namespace OpenDDS {
   {
     //!!! caller should already have the sample_lock_
     const bool encapsulated = sample.header_.cdr_encapsulation_;
-    Message_Block_Ptr payload(sample.data()); // TODO: allocator?
+    Message_Block_Ptr payload(sample.data(&mb_alloc_));
     OpenDDS::DCPS::Serializer ser(
       payload.get(),
       encapsulated ? Encoding::KIND_XCDR1 : Encoding::KIND_UNALIGNED_CDR,
@@ -1058,7 +1058,7 @@ protected:
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
     RcHandle<MessageHolder> message_holder;
 
-    Message_Block_Ptr payload(sample.data()); // TODO: allocator?
+    Message_Block_Ptr payload(sample.data(&mb_alloc_));
     if (marshal_skip_serialize_) {
       if (!MarshalTraitsType::from_message_block(*data, *payload)) {
         if (DCPS_debug_level > 0) {

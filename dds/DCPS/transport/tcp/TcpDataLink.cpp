@@ -448,7 +448,7 @@ OpenDDS::DCPS::TcpDataLink::request_ack_received(const ReceivedDataSample& sampl
 {
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
     GUID_t local;
-    Message_Block_Ptr payload(sample.data());
+    Message_Block_Ptr payload(receive_strategy()->to_msgblock(sample));
     Serializer ser(payload.get(), encoding_unaligned_native);
     if (ser >> local) {
       invoke_on_start_callbacks(local, sample.header_.publication_id_, true);

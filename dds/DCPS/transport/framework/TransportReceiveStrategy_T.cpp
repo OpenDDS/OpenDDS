@@ -963,6 +963,13 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
   return done ? 0 : 1;
 }
 
+template<typename TH, typename DSH>
+ACE_Message_Block*
+TransportReceiveStrategy<TH, DSH>::to_msgblock(const ReceivedDataSample& sample)
+{
+  return sample.data(&mb_allocator_);
+}
+
 }
 }
 
