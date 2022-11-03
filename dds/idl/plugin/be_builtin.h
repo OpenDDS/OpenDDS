@@ -22,6 +22,8 @@ class BE_BuiltinInterface: public BE_Interface {
 public:
   virtual ~BE_BuiltinInterface();
 
+  static BE_BuiltinInterface* instance();
+
   // Provide a language mapping
   LanguageMapping* language_mapping();
 
@@ -47,6 +49,7 @@ private:
   typedef LanguageMapping* (*language_mapping_allocator)();
   static language_mapping_allocator load_language_mapping(const ACE_TString& mapping_name);
 
+  BE_BuiltinInterface();
   void allocate_language_mapping(int&, ACE_TCHAR* []);
 };
 

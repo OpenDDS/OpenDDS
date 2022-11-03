@@ -24,9 +24,9 @@ namespace {
         if (++i < argc) {
           // Register the plugin
           const ACE_TString libname(argv[i]);
-          ACE_TString allocator(libname);
-          allocator += ACE_TEXT("_allocator");
-          if (BE_register(libname.c_str(), allocator.c_str())) {
+          ACE_TString funcname(libname);
+          funcname += ACE_TEXT("_instance");
+          if (BE_register(libname.c_str(), funcname.c_str())) {
             plugin = true;
           }
           else {
@@ -72,15 +72,11 @@ namespace {
 }
 
 bool
-BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* allocator)
+BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* funcname)
 {
   if (dllname == 0 || ACE_OS::strcmp(dllname, "") == 0) {
-    BE_BuiltinInterface* builtin = 0;
-    ACE_NEW_RETURN(builtin, BE_BuiltinInterface, false);
-    if (builtin != 0) {
-      interfaces.push_back(builtin);
-      return true;
-    }
+    interfaces.push_back(BE_BuiltinInterface::instance());
+    return true;
   }
   else {
     ACE_DLL_Manager* manager = ACE_DLL_Manager::instance();
@@ -88,15 +84,15 @@ BE_register(const ACE_TCHAR* dllname, const ACE_TCHAR* allocator)
       ACE_DLL_Handle* handle = manager->open_dll(dllname, RTLD_NOW,
                                                  ACE_SHLIB_INVALID_HANDLE);
       if (handle != 0) {
-        typedef BE_Interface* (*interface_alloc_t)();
-        const interface_alloc_t interface_alloc =
-          reinterpret_cast<interface_alloc_t>(allocator == 0 ?
-                                              0 : handle->symbol(allocator));
-        if (interface_alloc == 0) {
+        typedef BE_Interface* (*interface_instance_t)();
+        const interface_instance_t interface_instance =
+          reinterpret_cast<interface_instance_t>(funcname == 0 ?
+                                              0 : handle->symbol(funcname));
+        if (interface_instance == 0) {
           manager->close_dll(dllname);
         }
         else {
-          BE_Interface* iface = interface_alloc();
+          BE_Interface* iface = interface_instance();
           if (iface != 0) {
             interfaces.push_back(iface);
             return true;

@@ -22,6 +22,16 @@
 #include <iostream>
 #include <iomanip>
 
+BE_BuiltinInterface* BE_BuiltinInterface::instance()
+{
+  static BE_BuiltinInterface instance_;
+  return &instance_;
+}
+
+BE_BuiltinInterface::BE_BuiltinInterface()
+{
+}
+
 BE_BuiltinInterface::~BE_BuiltinInterface()
 {
 }
@@ -269,10 +279,19 @@ BE_BuiltinInterface::load_language_mapping(const ACE_TString& mapping_name)
   if (manager != 0) {
     ACE_DLL_Handle* handle = manager->open_dll(dllname.c_str(), RTLD_NOW,
                                                 ACE_SHLIB_INVALID_HANDLE);
-    if (handle != 0) {
+    if (handle == 0) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("Unable to load language mapping: %s\n"), dllname.c_str()));
+    }
+    else {
       symbol = reinterpret_cast<language_mapping_allocator>(handle->symbol(symbolname.c_str()));
       if (symbol == 0) {
         manager->close_dll(dllname.c_str());
+      }
+      else {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("Unable to find the language mapping symbol: %s\n"),
+                   symbolname.c_str()));
       }
     }
   }

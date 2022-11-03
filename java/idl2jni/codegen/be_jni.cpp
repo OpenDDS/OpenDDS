@@ -7,18 +7,12 @@
 #include <global_extern.h>
 #include <ace/OS_NS_strings.h>
 
-namespace {
-  BE_JNIInterface* instance = 0;
-}
-
 // This function is used to register our interface with the driver
 extern "C" {
-  idl2jni_Export BE_Interface* idl2jni_allocator()
+  idl2jni_Export BE_Interface* idl2jni_instance()
   {
-    if (instance == 0) {
-      ACE_NEW_RETURN(instance, BE_JNIInterface, 0);
-    }
-    return instance;
+    static BE_JNIInterface instance;
+    return &instance;
   }
 }
 
