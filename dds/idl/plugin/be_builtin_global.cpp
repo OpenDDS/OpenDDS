@@ -75,6 +75,7 @@ BE_BuiltinGlobalData::BE_BuiltinGlobalData()
 
 BE_BuiltinGlobalData::~BE_BuiltinGlobalData()
 {
+  delete language_mapping_;
 }
 
 void
