@@ -170,28 +170,6 @@ BE_JNIGlobalData::multicast(const char *str)
   }
 }
 
-BE_Comment_Guard::BE_Comment_Guard(const char *type, const char *name)
-  : type_(type), name_(name)
-{
-  if (idl_global->compile_flags() & IDL_CF_INFORMATIVE)
-    std::cout << type << ": " << name << std::endl;
-
-  be_jni_global->multicast("\n\n/* Begin ");
-  be_jni_global->multicast(type);
-  be_jni_global->multicast(": ");
-  be_jni_global->multicast(name);
-  be_jni_global->multicast(" */\n\n");
-}
-
-BE_Comment_Guard::~BE_Comment_Guard()
-{
-  be_jni_global->multicast("\n/* End ");
-  be_jni_global->multicast(type_);
-  be_jni_global->multicast(": ");
-  be_jni_global->multicast(name_);
-  be_jni_global->multicast(" */\n");
-}
-
 ACE_CString
 BE_JNIGlobalData::spawn_options()
 {

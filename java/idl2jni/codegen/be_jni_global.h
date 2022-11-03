@@ -110,14 +110,4 @@ private:
   skel_export_macro_, skel_export_include_, native_lib_name_;
 };
 
-class BE_Comment_Guard {
-public:
-
-  BE_Comment_Guard(const char *type, const char *name);
-  ~BE_Comment_Guard();
-
-private:
-  const char *type_, *name_;
-};
-
 #endif /* IDL2JNI_BE_JNI_GLOBAL_H */

@@ -320,11 +320,13 @@ BE_BuiltinGlobalData::spawn_options()
   return idl_global->idl_flags();
 }
 
-void invalid_option(char* option)
-{
-  ACE_ERROR((LM_ERROR,
-    ACE_TEXT("opendds_idl: I don't understand the '%C' option\n"), option));
-  idl_global->parse_args_exit(1);
+namespace {
+  void invalid_option(char* option)
+  {
+    ACE_ERROR((LM_ERROR,
+      ACE_TEXT("opendds_idl: I don't understand the '%C' option\n"), option));
+    idl_global->parse_args_exit(1);
+  }
 }
 
 void

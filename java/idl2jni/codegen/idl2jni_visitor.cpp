@@ -5,36 +5,17 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ast_argument.h"
-#include "ast_attribute.h"
-#include "ast_component_fwd.h"
-#include "ast_enum.h"
-#include "ast_enum_val.h"
-#include "ast_eventtype.h"
-#include "ast_eventtype_fwd.h"
-#include "ast_exception.h"
-#include "ast_factory.h"
-#include "ast_home.h"
-#include "ast_interface.h"
-#include "ast_module.h"
-#include "ast_native.h"
-#include "ast_operation.h"
-#include "ast_predefined_type.h"
-#include "ast_root.h"
-#include "ast_sequence.h"
-#include "ast_structure.h"
-#include "ast_union.h"
-#include "ast_valuetype.h"
-#include "ast_valuetype_fwd.h"
-#include "utl_identifier.h"
-#include "utl_string.h"
-#include "utl_exceptlist.h"
-#include "utl_err.h"
-#include "nr_extern.h"
-
 #include "idl2jni_visitor.h"
 #include "idl_mapping.h"
 #include "be_jni.h"
+
+#include <ast_component_fwd.h>
+#include <ast_eventtype.h>
+#include <ast_eventtype_fwd.h>
+#include <ast_home.h>
+#include <ast_valuetype.h>
+#include <ast_valuetype_fwd.h>
+#include <idl_defines.h>
 
 #include <iostream>
 #include <vector>
@@ -63,6 +44,38 @@ void scope2vector(vector<T *> &v, UTL_Scope *s, AST_Decl::NodeType nt)
       v.push_back(dynamic_cast<T*>(item));
     }
   }
+}
+
+class BE_Comment_Guard {
+public:
+
+  BE_Comment_Guard(const char* type, const char* name);
+  ~BE_Comment_Guard();
+
+private:
+  const char* type_, * name_;
+};
+
+BE_Comment_Guard::BE_Comment_Guard(const char* type, const char* name)
+  : type_(type), name_(name)
+{
+  if (idl_global->compile_flags() & IDL_CF_INFORMATIVE)
+    std::cout << type << ": " << name << std::endl;
+
+  be_jni_global->multicast("\n\n/* Begin ");
+  be_jni_global->multicast(type);
+  be_jni_global->multicast(": ");
+  be_jni_global->multicast(name);
+  be_jni_global->multicast(" */\n\n");
+}
+
+BE_Comment_Guard::~BE_Comment_Guard()
+{
+  be_jni_global->multicast("\n/* End ");
+  be_jni_global->multicast(type_);
+  be_jni_global->multicast(": ");
+  be_jni_global->multicast(name_);
+  be_jni_global->multicast(" */\n");
 }
 
 } // namespace
