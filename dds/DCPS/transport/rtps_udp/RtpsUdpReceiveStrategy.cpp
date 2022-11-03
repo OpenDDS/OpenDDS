@@ -168,6 +168,7 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
           deliver_sample(rds, remote_address);
         }
       }
+      cur_rb->rd_ptr(data_sample_header_.message_length());
       bytes_remaining -= data_sample_header_.message_length();
 
       // For the reassembly algorithm, the 'last_fragment_' header bit only
