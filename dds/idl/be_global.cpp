@@ -1027,7 +1027,8 @@ OpenDDS::DataRepresentation BE_GlobalData::data_representations(
   return value;
 }
 
-OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id)
+OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(
+  AST_Structure* stru, AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id)
 {
   const MemberIdMap::const_iterator pos = member_id_map_.find(field);
   if (pos != member_id_map_.end()) {
@@ -1035,9 +1036,10 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind
   }
 
   using OpenDDS::XTypes::hash_member_name_to_id;
+  using OpenDDS::XTypes::MemberId;
   const string field_name = field->local_name()->get_string();
   string hash_id;
-  OpenDDS::XTypes::MemberId mid;
+  MemberId mid;
   if (id(field, member_id)) {
     // @id
     mid = member_id++;
@@ -1051,8 +1053,26 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(AST_Field* field, AutoidKind
     mid = member_id++;
   }
 
+  // Check for collision with ids in the same type
+  GlobalMemberIdCollisionMap::iterator git = member_id_collision_map_.find(stru);
+  if (git == member_id_collision_map_.end()) {
+    git = member_id_collision_map_.insert(
+      std::pair<AST_Structure*, MemberIdCollisionMap>(stru, MemberIdCollisionMap())).first;
+  }
+  MemberIdCollisionMap::iterator lit = git->second.find(mid);
+  if (lit != git->second.end()) {
+    std::ostringstream msg;
+    msg << "Member id " << mid << " is the same as on field "
+      << lit->second->local_name()->get_string();
+    be_util::misc_error_and_abort(msg.str(), field);
+  }
+  git->second.insert(std::pair<MemberId, AST_Field*>(mid, field));
+
   if (mid > OpenDDS::DCPS::Serializer::MEMBER_ID_MAX) {
-    be_util::misc_error_and_abort("Member id exceeds the maximum allowed value", field);
+    std::ostringstream msg;
+    msg << "Member id " << mid << " exceeds the maximum allowed value (" <<
+      OpenDDS::DCPS::Serializer::MEMBER_ID_MAX << ")";
+    be_util::misc_error_and_abort(msg.str(), field);
   }
   member_id_map_[field] = mid;
   return mid;
