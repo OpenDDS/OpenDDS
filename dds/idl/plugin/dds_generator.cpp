@@ -138,13 +138,13 @@ void composite_generator::gen_epilogue()
   }
 }
 
-bool composite_generator::gen_const(UTL_ScopedName* name, bool nestedInInteface,
+bool composite_generator::gen_const(UTL_ScopedName* name, bool nestedInInterface,
   AST_Constant* constant)
 {
   for (vector<dds_generator*>::iterator it(components_.begin());
        it != components_.end(); ++it) {
     if (!constant->imported() || (*it)->do_included_files())
-      if (!(*it)->gen_const(name, nestedInInteface, constant))
+      if (!(*it)->gen_const(name, nestedInInterface, constant))
         return false;
   }
 
