@@ -16,7 +16,8 @@ namespace {
   typedef std::vector<BE_Interface*> InterfaceList;
   InterfaceList interfaces;
 
-  void BE_pre_init(int& argc, ACE_TCHAR* argv[]) {
+  int BE_pre_init(int& argc, ACE_TCHAR* argv[]) {
+    int status = 0;
     bool plugin = false;
     for (int i = 1; i < argc; i++) {
       if (ACE_OS::strcmp(argv[i], ACE_TEXT("--plugin")) == 0) {
@@ -32,6 +33,7 @@ namespace {
             ACE_ERROR((LM_ERROR,
                        ACE_TEXT("ERROR: Unable to load the plugin: %s\n"),
                        libname.c_str()));
+            status++;
           }
 
           // Shift everything down two (including the NULL)
@@ -45,6 +47,11 @@ namespace {
           // after the next increment in the for loop.
           i -= down;
         }
+        else {
+          ACE_ERROR((LM_ERROR,
+            ACE_TEXT("ERROR: --plugin requires a library name parameter.\n")));
+          status++;
+        }
       }
     }
 
@@ -57,8 +64,10 @@ namespace {
     // It doesn't actually do anything except call back into functions within
     // this file.
     if (be_global == 0) {
-      ACE_NEW(be_global, BE_GlobalData);
+      ACE_NEW_RETURN(be_global, BE_GlobalData, 1);
     }
+
+    return status;
   }
 }
 
@@ -112,9 +121,8 @@ BE_version()
 opendds_idl_plugin_Export int
 BE_init(int& argc, ACE_TCHAR* argv[])
 {
-  BE_pre_init(argc, argv);
+  int status = BE_pre_init(argc, argv);
 
-  int status = 0;
   InterfaceList::iterator end = interfaces.end();
   for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
     status |= (*itr)->init(argc, argv);
