@@ -8,8 +8,8 @@ Bitmask
 Bitset
 */
 
-#include "../../../CompleteToDynamicTypeTypeSupportImpl.h"
-#include "../../../CompleteToMinimalTypeObjectTypeSupportImpl.h"
+#include <CompleteToDynamicTypeTypeSupportImpl.h>
+#include <CompleteToMinimalTypeObjectTypeSupportImpl.h>
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/XTypes/TypeLookupService.h>
@@ -356,11 +356,24 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   enum_expected_dt->set_descriptor(enum_td);
   first_expected_dtm->set_descriptor(first_expected_md);
   second_expected_dtm->set_descriptor(second_expected_md);
+
+  XTypes::DynamicTypeMemberImpl* disc_expected_dtm = new XTypes::DynamicTypeMemberImpl();
+  DDS::DynamicTypeMember_var disc_expected_dtm_var = disc_expected_dtm;
+  DDS::MemberDescriptor_var disc_expected_md = new XTypes::MemberDescriptorImpl();
+  disc_expected_md->name("_d");
+  disc_expected_md->id(OpenDDS::XTypes::DISCRIMINATOR_ID);
+  disc_expected_md->index(OpenDDS::XTypes::DISCRIMINATOR_ID);
+  disc_expected_md->try_construct_kind(DDS::DISCARD);
+  disc_expected_md->type(enum_expected_dt);
+  disc_expected_dtm->set_descriptor(disc_expected_md);
+  expected_union_dt->insert_dynamic_member(disc_expected_dtm);
+
   enum_expected_dt->insert_dynamic_member(first_expected_dtm);
   enum_expected_dt->insert_dynamic_member(second_expected_dtm);
   expected_union_dt->insert_dynamic_member(long_expected_dtm);
   expected_union_dt->insert_dynamic_member(char_expected_dtm);
   expected_union_dt->insert_dynamic_member(short_expected_dtm);
+
   test_conversion<DCPS::MyModCompleteToDynamic_MyUnion_xtag>(expected_union_dt);
   // Enum types are circular.  Break apart.
   enum_expected_dt_var->clear();
