@@ -10,6 +10,7 @@
 #include "RelayStatisticsReporter.h"
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/RTPS/MessageParser.h>
 
 #include <ace/Message_Block.h>
 #include <ace/SOCK_Dgram.h>
