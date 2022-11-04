@@ -17,6 +17,8 @@ use strict;
 
 my $opts = join(' ', @ARGV);
 
+PerlDDS::add_lib_path('../GtestUtils');
+
 my $test = new PerlDDS::TestFramework();
 $test->process("UnitTests", "UnitTests", $opts);
 $test->start_process("UnitTests");

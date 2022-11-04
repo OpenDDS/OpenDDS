@@ -1,0 +1,3 @@
+project: dcps, googletest {
+  dynamicflags = OPENDDS_GTEST_UTILS_BUILD_DLL
+}

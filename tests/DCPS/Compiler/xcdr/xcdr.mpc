@@ -1,4 +1,4 @@
-project: dcps_test, googletest, msvc_bigobj {
+project: dcps_test, googletest, msvc_bigobj, gtest_utils {
   dcps_ts_flags += --no-default-nested
   TypeSupport_Files {
     xcdrbasetypes.idl

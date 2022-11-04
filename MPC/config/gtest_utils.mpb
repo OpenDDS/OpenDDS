@@ -1,0 +1,6 @@
+project: dcps_test, test_root, googletest {
+  after += GtestUtils
+  libs += GtestUtils
+  libpaths += $(TEST_ROOT)/tests/GtestUtils
+  includes += $(TEST_ROOT)/tests/GtestUtils
+}
