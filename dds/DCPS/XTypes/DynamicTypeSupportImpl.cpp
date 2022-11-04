@@ -64,8 +64,14 @@ void DynamicTypeSupport::representations_allowed_by_type(DataRepresentationIdSeq
 
 size_t DynamicTypeSupport::key_count() const
 {
-  OPENDDS_ASSERT(false);
-  return 0;
+  size_t count = 0;
+  const ReturnCode_t rc = OpenDDS::XTypes::key_count(type_, count);
+  if (rc != RETCODE_OK && log_level >= LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicTypeSupport::key_count: "
+      "could not get correct key count for DynamicType %C: %C\n",
+      name(), retcode_to_string(rc)));
+  }
+  return count;
 }
 
 Extensibility DynamicTypeSupport::base_extensibility() const

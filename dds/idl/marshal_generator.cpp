@@ -139,6 +139,16 @@ namespace {
     },
   };
 
+  const special_union* get_special_union(const std::string& name)
+  {
+    for (size_t i = 0; i < array_count(special_unions); ++i) {
+      if (special_unions[i].check(name)) {
+        return &special_unions[i];
+      }
+    }
+    return 0;
+  }
+
   // TODO(iguessthislldo): Replace with Encoding::Kind from libOpenDDS_Util. See XTYPE-140
   enum Encoding {
     encoding_unaligned_cdr,
@@ -216,7 +226,8 @@ namespace {
     }
     type_stack.push_back(type);
     bool result = false;
-    if (get_special_struct(scoped(type->name()))) {
+    const std::string name = scoped(type->name());
+    if (get_special_struct(name) || get_special_union(name)) {
       result = false;
     } else {
       const Classification type_class = classify(type);
@@ -241,6 +252,8 @@ namespace {
           }
         }
       } else if (type_class & CL_UNION) {
+        // A union will always different as a key because it's going to be just
+        // the discriminator.
         result = true;
       }
     }
