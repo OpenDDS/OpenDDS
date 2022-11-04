@@ -779,12 +779,12 @@ void generateCaseBody(
     std::string rhs;
     const bool is_wide = br_cls & CL_WIDE;
     const bool is_bound_string = (br_cls & (CL_STRING | CL_BOUNDED)) == (CL_STRING | CL_BOUNDED);
-    const std::string bound_string_suffix = is_bound_string ? lmap->getBoundStringSuffix() : "";
+    const std::string bound_string_suffix = is_bound_string ? lmap->getBoundStringCopySuffix() : "";
 
     if (is_bound_string) {
       const std::string to_type = lmap->getInputCDRToString(is_wide);
-      const std::string str_suffix = lmap->getBranchStringSuffix();
-      brType = lmap->getBranchStringType(is_wide);
+      const std::string str_suffix = lmap->getBoundStringSuffix();
+      brType = lmap->getBoundStringType(is_wide);
       rhs = to_type + "(tmp" + str_suffix + ", " + bounded_arg(br) + ")";
     } else if (br_cls & CL_STRING) {
       const std::string nmspace = lmap->getBranchStringPrefix();

@@ -25,10 +25,8 @@ public:
 
   virtual ~BE_BuiltinInterface();
 
+  // There is only one of these.
   static BE_BuiltinInterface* instance();
-
-  // Provide a language mapping
-  LanguageMapping* language_mapping();
 
   // Extern BE_* functions
   virtual int init(int&, ACE_TCHAR*[]);
@@ -48,7 +46,6 @@ public:
 
 private:
   static void rm_arg(int& i, int& argc, ACE_TCHAR* argv[]);
-
   static language_mapping_allocator load_language_mapping(const ACE_TString& mapping_name);
 
   BE_BuiltinInterface();

@@ -407,17 +407,17 @@ std::string FaceLanguageMapping::getInputCDRToString(bool wide) const
   return wide ? "ACE_InputCDR::to_wstring" : "ACE_InputCDR::to_string";
 }
 
-std::string FaceLanguageMapping::getBranchStringType(bool wide) const
+std::string FaceLanguageMapping::getBoundStringType(bool wide) const
 {
   return wide ? "FACE::WString_var" : "FACE::String_var";
 }
 
-std::string FaceLanguageMapping::getBranchStringSuffix() const
+std::string FaceLanguageMapping::getBoundStringSuffix() const
 {
   return ".out()";
 }
 
-std::string FaceLanguageMapping::getBoundStringSuffix() const
+std::string FaceLanguageMapping::getBoundStringCopySuffix() const
 {
   return "";
 }

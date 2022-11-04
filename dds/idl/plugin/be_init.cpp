@@ -23,8 +23,6 @@ namespace {
   bool
   BE_register(const ACE_TString& dllname)
   {
-    ACE_TString funcname(dllname);
-    funcname += ACE_TEXT("_instance");
     if (dllname == "") {
       interfaces.push_back(BE_BuiltinInterface::instance());
       return true;
@@ -36,6 +34,8 @@ namespace {
                                                    ACE_SHLIB_INVALID_HANDLE);
         interface_instance_t interface_instance = 0;
         if (handle != 0) {
+          ACE_TString funcname(dllname);
+          funcname += ACE_TEXT("_instance");
           interface_instance =
             reinterpret_cast<interface_instance_t>(
                                            handle->symbol(funcname.c_str()));

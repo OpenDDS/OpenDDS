@@ -249,8 +249,6 @@ void BE_BuiltinInterface::usage()
     ACE_TEXT(" -Wb,opendds_sequence_suffix=<suffix>\tset the implied DDS sequence suffix\n")
     ACE_TEXT("\t\t\t\t\t(default is 'Seq')\n")
     ));
-
-  be_builtin_global->language_mapping()->usage();
 }
 
 void BE_BuiltinInterface::rm_arg(int& i, int& argc, ACE_TCHAR* argv[])

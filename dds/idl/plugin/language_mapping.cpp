@@ -35,7 +35,7 @@ std::string LanguageMapping::getInputCDRToString(bool wide) const
   return wide ? "Serializer::ToBoundedString<wchar_t>" : "Serializer::ToBoundedString<char>";
 }
 
-std::string LanguageMapping::getBranchStringType(bool wide) const
+std::string LanguageMapping::getBoundStringType(bool wide) const
 {
   return wide ? "OPENDDS_WSTRING" : "OPENDDS_STRING";
 }
@@ -45,12 +45,12 @@ std::string LanguageMapping::getBranchStringPrefix() const
   return "CORBA::";
 }
 
-std::string LanguageMapping::getBranchStringSuffix() const
+std::string LanguageMapping::getBoundStringSuffix() const
 {
   return "";
 }
 
-std::string LanguageMapping::getBoundStringSuffix() const
+std::string LanguageMapping::getBoundStringCopySuffix() const
 {
   return ".c_str()";
 }
@@ -206,10 +206,6 @@ void LanguageMapping::reset_includes()
 }
 
 void LanguageMapping::set_additional_names(const std::string& filebase)
-{
-}
-
-void LanguageMapping::usage() const
 {
 }
 
@@ -376,10 +372,10 @@ void LanguageMapping::postprocess(const char* fn, const std::ostringstream& cont
   }
 }
 
-void LanguageMapping::postprocess_guard_begin(const std::string& macro, std::ostringstream& content, int which) const
+void LanguageMapping::postprocess_guard_begin(const std::string& macro, std::ostringstream& out, int which) const
 {
 }
 
-void LanguageMapping::postprocess_guard_end(const std::string& macro, std::ostringstream& content, int which) const
+void LanguageMapping::postprocess_guard_end(const std::string& macro, std::ostringstream& out, int which) const
 {
 }

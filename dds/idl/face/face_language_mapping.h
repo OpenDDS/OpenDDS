@@ -22,10 +22,10 @@ public:
   virtual std::string getMinimalHeaders() const;
 
   virtual std::string getInputCDRToString(bool wide) const;
-  virtual std::string getBranchStringType(bool wide) const;
+  virtual std::string getBoundStringType(bool wide) const;
   virtual std::string getBranchStringPrefix() const;
-  virtual std::string getBranchStringSuffix() const;
   virtual std::string getBoundStringSuffix() const;
+  virtual std::string getBoundStringCopySuffix() const;
 
   virtual bool needSequenceTypeSupportImplHeader() const;
 
