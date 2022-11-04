@@ -10,10 +10,18 @@
 
 #pragma ciao lem "dds/DdsDcpsTopicE.idl"
 
+#ifndef OPENDDS_HAS_DYNAMIC_TYPE
+#  ifdef OPENDDS_SAFETY_PROFILE
+#    define OPENDDS_HAS_DYNAMIC_TYPE 0
+#  else
+#    define OPENDDS_HAS_DYNAMIC_TYPE 1
+#  endif
+#endif
+
 module DDS {
     local interface DomainParticipant;
     local interface Topic;
-#ifndef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_HAS_DYNAMIC_TYPE
     local interface DynamicType;
 #endif
 
@@ -68,7 +76,7 @@ module DDS {
             in DomainParticipant domain,
             in string type_name);
         string get_type_name();
-#ifndef OPENDDS_SAFETY_PROFILE
+#if OPENDDS_HAS_DYNAMIC_TYPE
         DynamicType get_type();
 #endif
     };
