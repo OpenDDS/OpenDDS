@@ -10,7 +10,7 @@
 #include "RtpsUdpInst.h"
 #include "RtpsUdpTransport.h"
 
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
 #include "dds/DCPS/GuidUtils.h"
 #include <dds/DCPS/LogAddr.h>

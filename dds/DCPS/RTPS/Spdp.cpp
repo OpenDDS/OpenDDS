@@ -5,7 +5,7 @@
 
 #include "Spdp.h"
 
-#include "BaseMessageUtils.h"
+#include "MessageUtils.h"
 #include "MessageTypes.h"
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"

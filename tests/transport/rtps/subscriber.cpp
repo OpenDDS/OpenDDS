@@ -10,7 +10,7 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <dds/DCPS/RepoIdBuilder.h>
 #include <dds/DCPS/GuidConverter.h>

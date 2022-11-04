@@ -18,7 +18,7 @@
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
 #include <ace/CDR_Base.h>

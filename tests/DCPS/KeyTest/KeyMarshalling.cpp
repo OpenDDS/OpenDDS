@@ -13,7 +13,7 @@
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/Definitions.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <iostream>
 

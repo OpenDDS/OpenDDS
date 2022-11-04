@@ -8,7 +8,7 @@
 
 #include "TypeLookup.h"
 #include "MessageTypes.h"
-#include "BaseMessageUtils.h"
+#include "MessageUtils.h"
 #ifdef OPENDDS_SECURITY
 #  include "ParameterListConverter.h"
 #endif
