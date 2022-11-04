@@ -38,7 +38,7 @@ GuidAddrSet::record_activity(const Proxy& proxy,
       }
       if (config_.admission_control_queue_size()) {
         for (auto it = admission_control_queue_.begin(); it != admission_control_queue_.end(); ++it) {
-          if (it->prefix_ == result.first->second.guidPrefix) {
+          if (OpenDDS::DCPS::equal_guid_prefixes(it->prefix_, result.first->second.guidPrefix)) {
             admission_control_queue_.erase(it);
             break;
           }
