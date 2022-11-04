@@ -743,22 +743,22 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_pt
     }
 
     const DDS::MemberId selected_id = find_selected_member();
-    DDS::DynamicTypeMember_var selected_member;
-    if (type_->get_member(selected_member, selected_id) != DDS::RETCODE_OK) {
-      return false;
-    }
-    DDS::MemberDescriptor_var selected_md;
-    if (member->get_descriptor(selected_md) != DDS::RETCODE_OK) {
-      return false;
-    }
-
-    CORBA::ULong disc_val;
-    if (!value->read_discriminator(disc_val)) {
-      return false;
-    }
-
-    if (selected_id != MEMBER_ID_INVALID && !validate_discriminator(disc_val, selected_md)) {
-      return false;
+    if (selected_id != MEMBER_ID_INVALID) {
+      DDS::DynamicTypeMember_var selected_member;
+      if (type_->get_member(selected_member, selected_id) != DDS::RETCODE_OK) {
+        return false;
+      }
+      DDS::MemberDescriptor_var selected_md;
+      if (selected_member->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+        return false;
+      }
+      CORBA::ULong disc_val;
+      if (!value->read_discriminator(disc_val)) {
+        return false;
+      }
+      if (!validate_discriminator(disc_val, selected_md)) {
+        return false;
+      }
     }
   } else { // Writing a selected member
     DDS::DynamicTypeMember_var member;
@@ -4635,8 +4635,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
   const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
 
   // Delimiter
-  if ((extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) &&
-      encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+  if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
     serialized_size_delimiter(encoding, size);
   }
 
@@ -4905,6 +4904,20 @@ void DynamicDataImpl::DataContainer::get_discriminator_value(
   }
 }
 
+bool DynamicDataImpl::DataContainer::serialized_size_discriminator_member_xcdr2(
+  const DCPS::Encoding& encoding, size_t& size, const DDS::DynamicType_var& disc_type,
+  DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const
+{
+  if (extensibility == DDS::MUTABLE) {
+    serialized_size_parameter_id(encoding, size, mutable_running_total);
+  }
+  const TypeKind disc_tk = disc_type->get_kind();
+  if (is_primitive(disc_tk)) {
+    return serialized_size_primitive_member(encoding, size, disc_tk);
+  }
+  return serialized_size_enum(encoding, size, disc_type);
+}
+
 bool DynamicDataImpl::DataContainer::serialize_discriminator_member_xcdr2(
   DCPS::Serializer& ser, CORBA::Long value, const DDS::DynamicType_var& disc_type,
   DDS::ExtensibilityKind extensibility) const
@@ -4913,7 +4926,6 @@ bool DynamicDataImpl::DataContainer::serialize_discriminator_member_xcdr2(
   const TypeKind disc_tk = disc_type->get_kind();
   if (extensibility == DDS::MUTABLE) {
     size_t disc_size = 0;
-
     if (is_primitive(disc_tk)) {
       serialized_size_primitive_member(encoding, disc_size, disc_tk);
     } else {
@@ -4968,6 +4980,49 @@ bool DynamicDataImpl::DataContainer::serialize_discriminator_member_xcdr2(
   return false;
 }
 
+bool DynamicDataImpl::DataContainer::serialized_size_selected_member_xcdr2(
+  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId selected_id,
+  DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const
+{
+  DDS::DynamicTypeMember_var selected_dtm;
+  if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var selected_md;
+  if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
+  const bool optional = selected_md->is_optional();
+
+  const_single_iterator single_it = single_map_.find(selected_id);
+  if (single_it != single_map_.end()) {
+    serialized_size_single_aggregated_member_xcdr2(encoding, size, single_it, selected_type, optional,
+                                                   extensibility, mutable_running_total);
+    return true;
+  }
+
+  const_sequence_iterator seq_it = sequence_map_.find(selected_id);
+  if (seq_it != sequence_map_.end()) {
+    DDS::TypeDescriptor_var selected_td;
+    if (selected_type->get_descriptor(selected_td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const TypeKind elem_tk = get_base_type(selected_td->element_type())->get_kind();
+    serialized_size_sequence_aggregated_member_xcdr2(encoding, size, seq_it, elem_tk, optional,
+                                                     extensibility, mutable_running_total);
+    return true;
+  }
+
+  const_complex_iterator complex_it = complex_map_.find(selected_id);
+  if (complex_it != complex_map_.end()) {
+    serialized_size_complex_aggregated_member_xcdr2(encoding, size, complex_it, optional,
+                                                    extensibility, mutable_running_total);
+    return true;
+  }
+  return false;
+}
+
 bool DynamicDataImpl::DataContainer::serialize_selected_member_xcdr2(DCPS::Serializer& ser,
   DDS::MemberId selected_id, DDS::ExtensibilityKind extensibility) const
 {
@@ -4985,8 +5040,8 @@ bool DynamicDataImpl::DataContainer::serialize_selected_member_xcdr2(DCPS::Seria
 
   const_single_iterator single_it = single_map_.find(selected_id);
   if (single_it != single_map_.end()) {
-    return serialize_basic_aggregated_member_xcdr2(ser, single_it, selected_type, optional,
-                                                   must_understand, extensibility);
+    return serialize_single_aggregated_member_xcdr2(ser, single_it, selected_type, optional,
+                                                    must_understand, extensibility);
   }
 
   const_sequence_iterator seq_it = sequence_map_.find(selected_id);
@@ -5006,6 +5061,119 @@ bool DynamicDataImpl::DataContainer::serialize_selected_member_xcdr2(DCPS::Seria
                                                      must_understand, extensibility);
   }
   return false;
+}
+
+bool DynamicDataImpl::DataContainer::select_union_member(CORBA::Long disc_value,
+  bool& found_selected_member, DDS::MemberDescriptor_var& selected_md) const
+{
+  found_selected_member = false;
+  bool has_default = false;
+  DDS::MemberDescriptor_var default_md;
+  for (CORBA::ULong i = 0; i < type_->get_member_count(); ++i) {
+    DDS::DynamicTypeMember_var dtm;
+    if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var md;
+    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    bool found_matched_label = false;
+    const DDS::UnionCaseLabelSeq labels = md->label();
+    for (CORBA::ULong j = 0; !found_matched_label && j < labels.length(); ++j) {
+      if (disc_value == labels[j]) {
+        found_matched_label = true;
+      }
+    }
+    if (found_matched_label) {
+      selected_md = md;
+      found_selected_member = true;
+      break;
+    }
+    if (md->is_default_label()) {
+      default_md = md;
+      has_default = true;
+    }
+  }
+  if (!found_selected_member && has_default) {
+    selected_md = default_md;
+    found_selected_member = true;
+  }
+  return true;
+}
+
+bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Encoding& encoding,
+                                                                 size_t& size) const
+{
+  DDS::TypeDescriptor_var descriptor;
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    return false;
+  }
+  const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+  if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
+    serialized_size_delimiter(encoding, size);
+  }
+
+  const_single_iterator single_it = single_map_.find(DISCRIMINATOR_ID);
+  const_complex_iterator complex_it = complex_map_.find(DISCRIMINATOR_ID);
+  const bool has_disc = single_it != single_map_.end() || complex_it != complex_map_.end();
+  const DDS::MemberId selected_id = data_->find_selected_member();
+  DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+
+  CORBA::Long disc_value;
+  if (has_disc) {
+    get_discriminator_value(disc_value, single_it, complex_it, disc_type);
+  } else if (!set_default_discriminator_value(disc_value, disc_type)) {
+    return false;
+  }
+
+  size_t mutable_running_total = 0;
+  if (selected_id == MEMBER_ID_INVALID) {
+    bool found_selected_member = false;
+    DDS::MemberDescriptor_var  selected_md;
+    if (!select_union_member(disc_value, found_selected_member, selected_md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
+                                                    extensibility, mutable_running_total)) {
+      return false;
+    }
+    if (found_selected_member) {
+      DDS::DynamicType_var selected_type = get_base_type(selected_md->tpye());
+      const bool optional = selected_md->is_optional();
+      serialized_size_complex_aggregated_member_xcdr2_default(encoding, size, selected_type, optional,
+                                                              extensibilty, mutable_running_total);
+    }
+    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+    return true;
+  }
+
+  if (!has_disc) {
+    DDS::DynamicTypeMember_var selected_dtm;
+    if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var selected_md;
+    if (selected_dtm->get_descriptor(selected_md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (!validate_discriminator(disc_value, selected_md)) {
+      if (log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::DataContainer::serialized_size_union_xcdr2:"
+                   " Default discriminator value does not select the existing selected member\n"));
+      }
+      return false;
+    }
+  }
+
+  if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
+                                                  extensibility, mutable_running_total) ||
+      !serialized_size_selected_member_xcdr2(encoding, size, selected_id,
+                                             extensibility, mutable_running_total)) {
+    return false;
+  }
+  serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+  return true;
 }
 
 bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser) const
@@ -5031,65 +5199,29 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
   const_complex_iterator complex_it = complex_map_.find(DISCRIMINATOR_ID);
   const bool has_disc = single_it != single_map_.end() || complex_it != complex_map_.end();
   const DDS::MemberId selected_id = data_->find_selected_member();
-
-  // 1. If discriminator is not present, set it to default value.
-  //    a. If there is no selected member, use the default value of the discriminator
-  //       to select a member and set it to default value. If it selects no member,
-  //       serialize only the discriminator. Else, serialize both as normal.
-  //    b. If there is a selected member and the default value of discriminator
-  //       selects that member, serialize both. Else if it does not select that
-  //       member, return an error.
-  // 2. If discriminator is present but user didn't set a selected member, do the same
-  //    as step 1.a.
   DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+
+  // Read the discriminator value if the user already set it. Otherwise,
+  // set it to the default value of the corresponding type.
   CORBA::Long disc_value;
-  if (has_disc) { // Read the discriminator value set by user
+  if (has_disc) {
     get_discriminator_value(disc_value, single_it, complex_it, disc_type);
   } else if (!set_default_discriminator_value(disc_value, disc_type)) {
     return false;
   }
 
-  // At this point, discriminator value is defined, either by user or set to default.
   if (selected_id == MEMBER_ID_INVALID) {
-    // Try selecting a member
-    bool found_selected_member = false, has_default = false;
-    DDS::MemberDescriptor_var selected_md, default_md;
-    for (CORBA::ULong i = 0; i < type_->get_member_count(); ++i) {
-      DDS::DynamicTypeMember_var dtm;
-      if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
-        return false;
-      }
-      DDS::MemberDescriptor_var md;
-      if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
-        return false;
-      }
-      bool found_matched_label = false;
-      const DDS::UnionCaseLabelSeq labels = md->label();
-      for (CORBA::ULong j = 0; !found_matched_label && j < labels.length(); ++j) {
-        if (disc_vale == labels[j]) {
-          found_matched_label = true;
-        }
-      }
-      if (found_matched_label) {
-        selected_md = md;
-        found_selected_member = true;
-        break;
-      }
-      if (md->is_default_label()) {
-        default_md = md;
-        has_default = true;
-      }
+    // If the defined discriminator value selects a member, serialize the member with
+    // its default value. Otherwise, serialize only the discriminator.
+    bool found_selected_member = false;
+    DDS::MemberDescriptor_var selected_md;
+    if (!select_union_member(disc_value, found_selected_member, selected_md)) {
+      return false;
     }
-    if (!found_selected_member && has_default) {
-      selected_md = default_md;
-      found_selected_member = true;
-    }
-
     // Discriminator
     if (!serialize_discriminator_member_xcdr2(ser, disc_value, disc_type, extensibility)) {
       return false;
     }
-
     // Selected member
     if (found_selected_member) {
       DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
@@ -5099,7 +5231,12 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
       return serialize_complex_aggregated_member_xcdr2_default(ser, id, selected_type, optional,
                                                                must_understand, extensibility);
     }
-  } else if (!has_disc) {
+    return true;
+  }
+
+  if (!has_disc) {
+    // If the default value of the discriminator doesn't select the member written
+    // by user, return an error. Otherwise, serialize both as normal.
     DDS::DynamicTypeMember_var selected_dtm;
     if (type_->get_member(selected_dtm, selected_id) != DDS::RETCODE_OK) {
       return false;
@@ -5151,9 +5288,27 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
   return serialize_selected_member_xcdr2(ser, selected_id, extensibility);
 }
 
+bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr1(const DCPS::Encoding& encoding,
+                                                                 size_t& size) const
+{
+  // TODO:
+  return false;
+}
+
 bool DynamicDataImpl::DataContainer::serialize_union_xcdr1(DCPS::Serializer& ser) const
 {
   // TODO:
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialized_size_union(const DCPS::Encoding& encoding,
+                                                           size_t& size) const
+{
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
+    return serialized_size_union_xcdr2(encoding, size);
+  } else if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_1) {
+    return serialized_size_union_xcdr1(encoding, size);
+  }
   return false;
 }
 
@@ -5225,10 +5380,9 @@ bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::Dynam
     return serialized_size_wstring(encoding, size);
 #endif
   case TK_STRUCTURE:
-    // TODO
     return serialized_size_structure(encoding, size);
   case TK_UNION:
-    // TODO
+    return serialized_size_union(encoding, size);
   case TK_SEQUENCE:
     return serialized_size_sequence(encoding, size);
   case TK_ARRAY:
