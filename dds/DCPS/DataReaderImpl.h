@@ -639,7 +639,8 @@ public:
 
   const ValueDispatcher* get_value_dispatcher() const
   {
-    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+    TopicDescriptionPtr<TopicImpl> temp(topic_servant_);
+    return temp ? dynamic_cast<const ValueDispatcher*>(temp->get_type_support()) : 0;
   }
 
 protected:
