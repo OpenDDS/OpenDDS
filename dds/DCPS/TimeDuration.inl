@@ -94,7 +94,7 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator+=(const TimeDuration& other)
 {
-  value(value_ + other.value());
+  value_ += other.value();
   return *this;
 }
 
@@ -102,7 +102,7 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator-=(const TimeDuration& other)
 {
-  value(value_ - other.value());
+  value_ -= other.value();
   return *this;
 }
 
@@ -110,14 +110,14 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator*=(double other)
 {
-  value(value_ * other);
+  value_ *= other;
   return *this;
 }
 
 ACE_INLINE
 TimeDuration& TimeDuration::operator/=(double other)
 {
-  value(value_ * (1.0 / other));
+  value_ *= (1.0 / other);
   return *this;
 }
 
@@ -125,7 +125,7 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator=(const TimeDuration& other)
 {
-  value(other.value());
+  value_ = other.value();
   return *this;
 }
 
