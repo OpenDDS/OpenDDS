@@ -156,7 +156,7 @@ void amalgam_serializer_test_base(
   {
     Serializer serializer(&buffer, encoding);
     ASSERT_TRUE(serializer << value);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    EXPECT_DATA_EQ(expected_cdr, buffer);
   }
 
   // Deserialize
