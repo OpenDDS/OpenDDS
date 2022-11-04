@@ -281,13 +281,13 @@ public:
   DDS::ReturnCode_t set_char8_values(DDS::MemberId id,
                                      const DDS::CharSeq& value);
 
-  DDS::ReturnCode_t get_char16_values(DDS::WCharSeq&,
+  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq&,
                                       DDS::MemberId)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
   DDS::ReturnCode_t set_char16_values(DDS::MemberId id,
-                                      const DDS::WCharSeq& value);
+                                      const DDS::WcharSeq& value);
 
   DDS::ReturnCode_t get_byte_values(DDS::ByteSeq&,
                                     DDS::MemberId)
@@ -313,13 +313,13 @@ public:
   DDS::ReturnCode_t set_string_values(DDS::MemberId id,
                                       const DDS::StringSeq& value);
 
-  DDS::ReturnCode_t get_wstring_values(DDS::WStringSeq&,
+  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq&,
                                        DDS::MemberId)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
-                                       const DDS::WStringSeq& value);
+                                       const DDS::WstringSeq& value);
 
 private:
 
@@ -462,8 +462,8 @@ private:
     SequenceValue(const DDS::BooleanSeq& boolean_seq);
     SequenceValue(const DDS::StringSeq& str_seq);
 #ifdef DDS_HAS_WCHAR
-    SequenceValue(const DDS::WCharSeq& char16_seq);
-    SequenceValue(const DDS::WStringSeq& wstr_seq);
+    SequenceValue(const DDS::WcharSeq& char16_seq);
+    SequenceValue(const DDS::WstringSeq& wstr_seq);
 #endif
 
     ~SequenceValue();
@@ -488,8 +488,8 @@ private:
       DDS::BooleanSeq boolean_seq_;
       DDS::StringSeq string_seq_;
 #ifdef DDS_HAS_WCHAR
-      DDS::WCharSeq char16_seq_;
-      DDS::WStringSeq wstring_seq_;
+      DDS::WcharSeq char16_seq_;
+      DDS::WstringSeq wstring_seq_;
 #endif
     };
   };

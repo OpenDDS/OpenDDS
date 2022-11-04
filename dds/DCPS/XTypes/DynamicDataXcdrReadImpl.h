@@ -296,10 +296,10 @@ public:
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_char16_values(DDS::WCharSeq& value,
+  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq& value,
                                       DDS::MemberId id);
   DDS::ReturnCode_t set_char16_values(DDS::MemberId,
-                                      const DDS::WCharSeq&)
+                                      const DDS::WcharSeq&)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }
@@ -328,10 +328,10 @@ public:
     return DDS::RETCODE_UNSUPPORTED;
   }
 
-  DDS::ReturnCode_t get_wstring_values(DDS::WStringSeq& value,
+  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq& value,
                                        DDS::MemberId id);
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId,
-                                       const DDS::WStringSeq&)
+                                       const DDS::WstringSeq&)
   {
     return DDS::RETCODE_UNSUPPORTED;
   }

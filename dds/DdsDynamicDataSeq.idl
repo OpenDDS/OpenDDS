@@ -42,12 +42,12 @@ module DDS {
   typedef sequence<double> Float64Seq;
   typedef sequence<long double> Float128Seq;
   typedef sequence<char> CharSeq;
-  typedef sequence<wchar> WCharSeq;
+  typedef sequence<wchar> WcharSeq;
   typedef sequence<boolean> BooleanSeq;
   typedef sequence<octet> ByteSeq;
   // Already defined in DdsDcpsCore.idl
   // typedef sequence<string> StringSeq;
-  typedef sequence<wstring> WStringSeq;
+  typedef sequence<wstring> WstringSeq;
 
 };
 
