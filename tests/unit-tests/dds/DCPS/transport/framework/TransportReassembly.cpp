@@ -32,15 +32,14 @@ namespace {
   class Sample {
   public:
     Sample(const RepoId& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true)
-    : mb(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size())),
-      sample(mb)
+      : mb(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()))
+      , sample(*mb)
     {
       sample.header_.publication_id_ = pub_id;
       sample.header_.sequence_ = msg_seq;
       sample.header_.more_fragments_ = more_fragments;
-      sample.sample_.reset(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()));
     }
-    ACE_Message_Block* mb;     // Released (deleted) by sample
+    Message_Block_Ptr mb;
     ReceivedDataSample sample;
   };
 
@@ -340,12 +339,13 @@ void fill(ACE_Message_Block& data, size_t n)
   data.wr_ptr(n);
 }
 
-bool check_reassembled(const ACE_Message_Block& data)
+bool check_reassembled(const ReceivedDataSample& rds)
 {
-  for (size_t i = 0; i < data.length(); ++i) {
-    if (data.base()[i] != char(i)) {
+  Message_Block_Ptr data(rds.data());
+  for (size_t i = 0; i < data->length(); ++i) {
+    if (data->base()[i] != char(i)) {
       ACE_ERROR((LM_ERROR, "(%P|%t) index %d expected %d actual %d\n",
-                 int(i), char(i), data.base()[i]));
+                 int(i), char(i), data->base()[i]));
       return false;
     }
   }
@@ -389,25 +389,25 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
     EXPECT_TRUE(!reassembled.more_fragments_);
     EXPECT_TRUE(reassembled.message_length_ == N);
 
-    ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-      rds2(f.tail_->cont()->duplicate());
+    ReceivedDataSample rds1(*f.head_->cont()),
+      rds2(*f.tail_->cont());
     rds1.header_ = header1;
     rds2.header_ = header2;
     TransportReassembly tr;
     EXPECT_TRUE(!tr.reassemble(4, true, rds1));
     EXPECT_TRUE(tr.reassemble(5, false, rds2));
-    EXPECT_TRUE(rds2.sample_ && rds2.sample_->total_length() == N);
-    EXPECT_TRUE(check_reassembled(*rds2.sample_));
+    EXPECT_EQ(rds2.data_length(), N);
+    EXPECT_TRUE(check_reassembled(rds2));
 
-    ReceivedDataSample rds1b(f.head_->cont()->duplicate()),
-      rds2b(f.tail_->cont()->duplicate());
+    ReceivedDataSample rds1b(*f.head_->cont()),
+      rds2b(*f.tail_->cont());
     rds1b.header_ = header1;
     rds2b.header_ = header2;
     TransportReassembly tr2;
     EXPECT_TRUE(!tr2.reassemble(5, false, rds2b));
     EXPECT_TRUE(tr2.reassemble(4, true, rds1b));
-    EXPECT_TRUE(rds1b.sample_ && rds1b.sample_->total_length() == N);
-    EXPECT_TRUE(check_reassembled(*rds1b.sample_));
+    EXPECT_EQ(rds1b.data_length(), N);
+    EXPECT_TRUE(check_reassembled(rds1b));
   }
   { // data split into 3 messageblocks, fragment in the middle of block #2
     ACE_Message_Block data1(N / 3), data2(N / 3), data3(N / 3);
@@ -510,9 +510,9 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
 
     // Test all permutations of order of reception of the 3 fragments
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -520,13 +520,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(tr.reassemble(3, false, rds3));
-      EXPECT_TRUE(rds3.sample_ && rds3.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds3.sample_));
+      EXPECT_EQ(rds3.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds3));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -534,13 +534,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(tr.reassemble(2, false, rds2));
-      EXPECT_TRUE(rds2.sample_ && rds2.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds2.sample_));
+      EXPECT_EQ(rds2.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds2));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -548,13 +548,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(tr.reassemble(3, false, rds3));
-      EXPECT_TRUE(rds3.sample_ && rds3.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds3.sample_));
+      EXPECT_EQ(rds3.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds3));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -562,13 +562,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(tr.reassemble(1, true, rds1));
-      EXPECT_TRUE(rds1.sample_ && rds1.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds1.sample_));
+      EXPECT_EQ(rds1.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds1));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -576,13 +576,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(tr.reassemble(2, false, rds2));
-      EXPECT_TRUE(rds2.sample_ && rds2.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds2.sample_));
+      EXPECT_EQ(rds2.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds2));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -590,14 +590,14 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(tr.reassemble(1, true, rds1));
-      EXPECT_TRUE(rds1.sample_ && rds1.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds1.sample_));
+      EXPECT_EQ(rds1.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds1));
     }
     // Retest permutations with some duplicates
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -606,13 +606,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(tr.reassemble(3, false, rds3));
-      EXPECT_TRUE(rds3.sample_ && rds3.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds3.sample_));
+      EXPECT_EQ(rds3.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds3));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -622,13 +622,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(tr.reassemble(2, false, rds2));
-      EXPECT_TRUE(rds2.sample_ && rds2.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds2.sample_));
+      EXPECT_EQ(rds2.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds2));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -638,13 +638,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(tr.reassemble(3, false, rds3));
-      EXPECT_TRUE(rds3.sample_ && rds3.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds3.sample_));
+      EXPECT_EQ(rds3.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds3));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -654,13 +654,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(tr.reassemble(1, true, rds1));
-      EXPECT_TRUE(rds1.sample_ && rds1.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds1.sample_));
+      EXPECT_EQ(rds1.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds1));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -670,13 +670,13 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(tr.reassemble(2, false, rds2));
-      EXPECT_TRUE(rds2.sample_ && rds2.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds2.sample_));
+      EXPECT_EQ(rds2.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds2));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -686,14 +686,14 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(tr.reassemble(1, true, rds1));
-      EXPECT_TRUE(rds1.sample_ && rds1.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds1.sample_));
+      EXPECT_EQ(rds1.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds1));
     }
     // Test ignoring of frags from previously completed sequence numbers
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       rds3.header_ = header2b;
@@ -701,12 +701,12 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
       EXPECT_TRUE(tr.reassemble(3, false, rds3));
-      EXPECT_TRUE(rds3.sample_ && rds3.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds3.sample_));
+      EXPECT_EQ(rds3.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds3));
       // Now we're ignoring
-      ReceivedDataSample rds4(f.head_->cont()->duplicate()),
-        rds5(f2.head_->cont()->duplicate()),
-        rds6(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds4(*f.head_->cont()),
+        rds5(*f2.head_->cont()),
+        rds6(*f2.tail_->cont());
       rds4.header_ = header1;
       rds5.header_ = header2a;
       rds6.header_ = header2b;
@@ -715,22 +715,22 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(3, false, rds6));
       // Back to normal
       tr.clear_completed(rds1.header_.publication_id_); // clears completed SN
-      ReceivedDataSample rds7(f.head_->cont()->duplicate()),
-        rds8(f2.head_->cont()->duplicate()),
-        rds9(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds7(*f.head_->cont()),
+        rds8(*f2.head_->cont()),
+        rds9(*f2.tail_->cont());
       rds7.header_ = header1;
       rds8.header_ = header2a;
       rds9.header_ = header2b;
       EXPECT_TRUE(!tr.reassemble(1, true, rds7));
       EXPECT_TRUE(!tr.reassemble(2, false, rds8));
       EXPECT_TRUE(tr.reassemble(3, false, rds9));
-      EXPECT_TRUE(rds9.sample_ && rds9.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds9.sample_));
+      EXPECT_EQ(rds9.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds9));
     }
     // Test data_unavailable() scenarios
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds3.header_ = header2b;
       TransportReassembly tr;
@@ -739,8 +739,8 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds3(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds3(*f2.tail_->cont());
       rds1.header_ = header1;
       rds3.header_ = header2b;
       TransportReassembly tr;
@@ -749,8 +749,8 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
     }
     {
-      ReceivedDataSample rds1(f.head_->cont()->duplicate()),
-        rds2(f2.head_->cont()->duplicate());
+      ReceivedDataSample rds1(*f.head_->cont()),
+        rds2(*f2.head_->cont());
       rds1.header_ = header1;
       rds2.header_ = header2a;
       TransportReassembly tr;
@@ -819,10 +819,10 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
 
     // Test all permutations of order of reception of the 3 fragments
     {
-      ReceivedDataSample rds1(f1.head_->cont()->duplicate()),
-        rds2(f1.tail_->cont()->duplicate()),
-        rds3(f2.head_->cont()->duplicate()),
-        rds4(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f1.head_->cont()),
+        rds2(*f1.tail_->cont()),
+        rds3(*f2.head_->cont()),
+        rds4(*f2.tail_->cont());
       rds1.header_ = header1a;
       rds2.header_ = header1b;
       rds3.header_ = header2a;
@@ -832,14 +832,14 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(SequenceRange(6, 10), rds2));
       EXPECT_TRUE(!tr.reassemble(SequenceRange(11, 15), rds3));
       EXPECT_TRUE(tr.reassemble(SequenceRange(16, 20), rds4));
-      EXPECT_TRUE(rds4.sample_ && rds4.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds4.sample_));
+      EXPECT_EQ(rds4.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds4));
     }
     {
-      ReceivedDataSample rds1(f1.head_->cont()->duplicate()),
-        rds2(f1.tail_->cont()->duplicate()),
-        rds3(f2.head_->cont()->duplicate()),
-        rds4(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f1.head_->cont()),
+        rds2(*f1.tail_->cont()),
+        rds3(*f2.head_->cont()),
+        rds4(*f2.tail_->cont());
       rds1.header_ = header1a;
       rds2.header_ = header1b;
       rds3.header_ = header2a;
@@ -849,14 +849,14 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(SequenceRange(16, 20), rds4));
       EXPECT_TRUE(!tr.reassemble(SequenceRange(6, 10), rds2));
       EXPECT_TRUE(tr.reassemble(SequenceRange(11, 15), rds3));
-      EXPECT_TRUE(rds3.sample_ && rds3.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds3.sample_));
+      EXPECT_EQ(rds3.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds3));
     }
     {
-      ReceivedDataSample rds1(f1.head_->cont()->duplicate()),
-        rds2(f1.tail_->cont()->duplicate()),
-        rds3(f2.head_->cont()->duplicate()),
-        rds4(f2.tail_->cont()->duplicate());
+      ReceivedDataSample rds1(*f1.head_->cont()),
+        rds2(*f1.tail_->cont()),
+        rds3(*f2.head_->cont()),
+        rds4(*f2.tail_->cont());
       rds1.header_ = header1a;
       rds2.header_ = header1b;
       rds3.header_ = header2a;
@@ -866,8 +866,8 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       EXPECT_TRUE(!tr.reassemble(SequenceRange(16, 20), rds4));
       EXPECT_TRUE(!tr.reassemble(SequenceRange(11, 15), rds3));
       EXPECT_TRUE(tr.reassemble(SequenceRange(6, 10), rds2));
-      EXPECT_TRUE(rds2.sample_ && rds2.sample_->total_length() == N);
-      EXPECT_TRUE(check_reassembled(*rds2.sample_));
+      EXPECT_EQ(rds2.data_length(), N);
+      EXPECT_TRUE(check_reassembled(rds2));
     }
   }
   { // content filtering flag with no "entries" (adds another MB to the chain)

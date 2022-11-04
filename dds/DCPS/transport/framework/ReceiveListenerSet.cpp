@@ -111,7 +111,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
     TransportReceiveListener_rch listener = handles[i].lock();
     if (!listener)
       continue;
-    if (i < handles.size() - 1 && sample.sample_) {
+    if (i < handles.size() - 1 && sample.has_data()) {
       // demarshal (in data_received()) updates the rd_ptr() of any of
       // the message blocks in the chain, so give it a duplicated chain.
       ReceivedDataSample rds(sample);

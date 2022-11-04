@@ -50,7 +50,8 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     return;
   }
 
-  Serializer ser(sample.sample_.get(), Encoding::KIND_XCDR1,
+  Message_Block_Ptr payload(sample.data());
+  Serializer ser(payload.get(), Encoding::KIND_XCDR1,
                  sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
   TestMsg data;
   if (!deserializeData(data, ser)) {

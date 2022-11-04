@@ -266,16 +266,16 @@ UdpTransport::blob_to_key(const TransportBLOB& remote,
 
 void
 UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
-                                 const Message_Block_Ptr& data)
+                                 const ReceivedDataSample& data)
 {
-  CORBA::ULong octet_size =
-    static_cast<CORBA::ULong>(data->length() - sizeof(Priority));
+  const size_t blob_len = data.data_length() - sizeof(Priority);
+  Message_Block_Ptr payload(data.data());
   Priority priority;
-  Serializer serializer(data.get(), encoding_kind);
+  Serializer serializer(payload.get(), encoding_kind);
   serializer >> priority;
-  TransportBLOB blob(octet_size);
-  blob.length(octet_size);
-  serializer.read_octet_array(blob.get_buffer(), octet_size);
+  TransportBLOB blob(static_cast<CORBA::ULong>(blob_len));
+  blob.length(blob.maximum());
+  serializer.read_octet_array(blob.get_buffer(), blob.length());
 
   // Send an ack so that the active side can return from
   // connect_datalink_i().  This is just a single byte of

@@ -31,7 +31,7 @@ struct OpenDDS_Dcps_Export TransportReceiveConstants { // non-template base for 
   // a max sized message.  The max message is about 64K and the low water for
   // a buffer is 4096.  Therefore, 16 receive buffers is appropriate.
   //
-  static const size_t RECEIVE_BUFFERS = 16;
+  static const size_t RECEIVE_BUFFERS = DEFAULT_TRANSPORT_RECEIVE_BUFFERS;
   static const size_t BUFFER_LOW_WATER = 4096;
 
   //
@@ -73,6 +73,10 @@ public:
   /// for subclasses.
   const DSH& received_sample_header() const;
   DSH& received_sample_header();
+
+  /// Use the receive strategy's Message Block Allocator to convert
+  /// the ReceivedDataSample's payload to an ACE_Message_Block chain
+  ACE_Message_Block* to_msgblock(const ReceivedDataSample& sample);
 
 protected:
   explicit TransportReceiveStrategy(const TransportInst& config,
@@ -128,8 +132,6 @@ protected:
 
   /// Flag indicates if the GRACEFUL_DISCONNECT message is received.
   bool gracefully_disconnected_;
-
-protected:
 
   /// Manage an index into the receive buffer array.
   size_t successor_index(size_t index) const;

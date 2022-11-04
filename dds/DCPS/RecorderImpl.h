@@ -16,9 +16,11 @@
 #include "EntityImpl.h"
 #include "TopicImpl.h"
 #include "OwnershipManager.h"
-#include "transport/framework/ReceivedDataSample.h"
-#include "transport/framework/TransportReceiveListener.h"
+
 #include "transport/framework/TransportClient.h"
+#include "transport/framework/TransportDefs.h"
+#include "transport/framework/TransportReceiveListener.h"
+#include "transport/framework/ReceivedDataSample.h"
 
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>
@@ -208,6 +210,8 @@ private:
   DynamicTypeByPubId dt_map_;
 #endif
   bool check_encap_;
+
+  TransportMessageBlockAllocator mb_alloc_;
 };
 
 

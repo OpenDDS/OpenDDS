@@ -49,21 +49,22 @@ namespace OpenDDS {
 namespace DCPS {
 
 RecorderImpl::RecorderImpl()
-  : qos_(TheServiceParticipant->initial_DataReaderQos()),
-  participant_servant_(0),
-  topic_servant_(0),
+  : qos_(TheServiceParticipant->initial_DataReaderQos())
+  , participant_servant_(0)
+  , topic_servant_(0)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  is_exclusive_ownership_ (false),
+  , is_exclusive_ownership_(false)
 #endif
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  owner_manager_ (0),
+  , owner_manager_(0)
 #endif
-  subqos_ (TheServiceParticipant->initial_SubscriberQos()),
-  topic_desc_(0),
-  listener_mask_(DEFAULT_STATUS_MASK),
-  domain_id_(0),
-  is_bit_(false),
-  check_encap_(true)
+  , subqos_(TheServiceParticipant->initial_SubscriberQos())
+  , topic_desc_(0)
+  , listener_mask_(DEFAULT_STATUS_MASK)
+  , domain_id_(0)
+  , is_bit_(false)
+  , check_encap_(true)
+  , mb_alloc_(DEFAULT_TRANSPORT_RECEIVE_BUFFERS)
 {
   requested_incompatible_qos_status_.total_count = 0;
   requested_incompatible_qos_status_.total_count_change = 0;
@@ -188,10 +189,11 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
 
   // we only support SAMPLE_DATA messages
   if (sample.header_.message_id_ == SAMPLE_DATA && listener_.in()) {
+    Message_Block_Ptr payload(sample.data(&mb_alloc_));
     Encoding::Kind kind = Encoding::KIND_UNALIGNED_CDR;
     if (sample.header_.cdr_encapsulation_ && check_encap_) {
       Encoding enc;
-      Serializer ser(sample.sample_.get(), enc);
+      Serializer ser(payload.get(), enc);
       EncapsulationHeader encap;
       if (ser >> encap && encap.to_any_encoding(enc)) {
         kind = enc.kind();
@@ -203,7 +205,7 @@ void RecorderImpl::data_received(const ReceivedDataSample& sample)
                             sample.header_.source_timestamp_nanosec_,
                             sample.header_.publication_id_,
                             sample.header_.byte_order_,
-                            sample.sample_.get(),
+                            payload.get(),
                             kind);
     listener_->on_sample_data_received(this, rawSample);
   }

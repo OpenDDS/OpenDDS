@@ -32,7 +32,7 @@ public:
   explicit UdpTransport(UdpInst& inst);
 
   void passive_connection(const ACE_INET_Addr& remote_address,
-                          const Message_Block_Ptr& data);
+                          const ReceivedDataSample& data);
   UdpInst& config() const;
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,

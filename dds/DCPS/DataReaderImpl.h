@@ -1099,11 +1099,13 @@ public:
     const bool set_subscriber_status_;
   };
 
-#if defined(OPENDDS_SECURITY)
 protected:
+#ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
   DDS::DynamicType_var dynamic_type_;
 #endif
+
+  TransportMessageBlockAllocator mb_alloc_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

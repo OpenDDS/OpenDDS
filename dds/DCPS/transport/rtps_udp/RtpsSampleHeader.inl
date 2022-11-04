@@ -74,12 +74,6 @@ RtpsSampleHeader::more_fragments() const
 }
 
 ACE_INLINE bool
-RtpsSampleHeader::expect_hold() const
-{
-  return frag_ || data_;
-}
-
-ACE_INLINE bool
 RtpsSampleHeader::control_message_supported(char message_id)
 {
   switch (message_id) {
