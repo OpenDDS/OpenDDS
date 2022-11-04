@@ -2622,7 +2622,7 @@ bool DynamicDataImpl::DataContainer::get_index_to_id_map(IndexToIdMap& index_to_
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_complex_member_i(
-  const DCPS::Encoding& encoding, size_t& size, MemberId id) const
+  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId id) const
 {
   const DDS::DynamicData_var& dd_var = complex_map_.at(id);
   const DynamicDataImpl* data_impl = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
@@ -2667,7 +2667,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_nesting_basic_sequence(
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_member_i(DCPS::Serializer& ser,
-                                                                MemberId id) const
+                                                                DDS::MemberId id) const
 {
   const DDS::DynamicData_var& dd_var = complex_map_.at(id);
   const DynamicDataImpl* data_impl = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
@@ -2857,8 +2857,8 @@ bool DynamicDataImpl::DataContainer::serialized_size_nesting_enum_sequence(
 // TODO: Revisit the use of get_index_from_id - it must be able to handle bound == 0
 // (unbounded sequence, string, map, etc).
 
-bool DynamicDataImpl::DataContainer::serialize_nested_enum_sequences(DCPS::Serializer& ser,
-                                                                     const IndexToIdMap& index_to_id) const
+bool DynamicDataImpl::DataContainer::serialize_nested_enum_sequences(
+  DCPS::Serializer& ser, const IndexToIdMap& index_to_id) const
 {
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     const CORBA::ULong id = index_to_id[i];
@@ -3001,7 +3001,7 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_sequence(DCPS::Se
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_complex_member(const DCPS::Encoding& encoding,
-  size_t& size, MemberId id, const DDS::DynamicType_var& elem_type) const
+  size_t& size, DDS::MemberId id, const DDS::DynamicType_var& elem_type) const
 {
   if (id != MEMBER_ID_INVALID) {
     return serialized_size_complex_member_i(encoding, size, id);
@@ -3901,8 +3901,8 @@ bool DynamicDataImpl::DataContainer::serialized_size_complex_array(const DCPS::E
   return true;
 }
 
-bool DynamicDataImpl::DataContainer::serialize_complex_array(DCPS::Serializer& ser,
-                                                             CORBA::ULong length, const DDS::DynamicType_var& elem_type) const
+bool DynamicDataImpl::DataContainer::serialize_complex_array(
+  DCPS::Serializer& ser, CORBA::ULong length, const DDS::DynamicType_var& elem_type) const
 {
   IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
   for (const_complex_iterator it = complex_map_.begin(); it != complex_map_.end(); ++it) {
@@ -5259,14 +5259,14 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
   return serialize_selected_member_xcdr2(ser, selected_id, extensibility);
 }
 
-bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr1(const DCPS::Encoding& encoding,
-                                                                 size_t& size) const
+bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr1(const DCPS::Encoding& /*encoding*/,
+                                                                 size_t& /*size*/) const
 {
   // TODO:
   return false;
 }
 
-bool DynamicDataImpl::DataContainer::serialize_union_xcdr1(DCPS::Serializer& ser) const
+bool DynamicDataImpl::DataContainer::serialize_union_xcdr1(DCPS::Serializer& /*ser*/) const
 {
   // TODO:
   return false;
