@@ -46,11 +46,13 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #  include <dds/DCPS/transport/udp/Udp.h>
 #  include <dds/DCPS/transport/tcp/Tcp.h>
 #  include <dds/DCPS/transport/multicast/Multicast.h>
+#  include <dds/DCPS/transport/shmem/Shmem.h>
 #  ifdef OPENDDS_SECURITY
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
@@ -103,26 +105,28 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   Builder::NullStream null_stream_i;
   std::ostream null_stream(&null_stream_i);
 
-  std::string log_file_path;
-  std::string report_file_path;
-  std::string config_file_path;
+  std::string log_file_fullname;
+  std::string report_file_fullname;
+  std::string config_file_fullname;
+  std::string config_file_basename;
 
   try {
     for (int i = 1; i < argc; i++) {
       const ACE_TCHAR* argument = argv[i];
       if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--log"))) {
-        log_file_path = get_option_argument(i, argc, argv);
+        log_file_fullname = get_option_argument(i, argc, argv);
       } else if (!ACE_OS::strcmp(argv[i], ACE_TEXT("--report"))) {
-        report_file_path = get_option_argument(i, argc, argv);
-      } else if (config_file_path.empty()) {
-        config_file_path = ACE_TEXT_ALWAYS_CHAR(argument);
+        report_file_fullname = get_option_argument(i, argc, argv);
+      } else if (config_file_fullname.empty()) {
+        config_file_fullname = ACE_TEXT_ALWAYS_CHAR(argument);
+        config_file_basename = ACE_TEXT_ALWAYS_CHAR(ACE::basename(argument));
       } else {
         std::cerr << "Invalid option: " << argument << std::endl;
         return 1;
       }
     }
 
-    if (config_file_path.empty()) {
+    if (config_file_fullname.empty()) {
       std::cerr << "Must pass a configuration file" << std::endl;
       throw 1;
     }
@@ -131,17 +135,17 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     return value;
   }
 
-  std::ifstream config_file(config_file_path);
+  std::ifstream config_file(config_file_fullname);
   if (!config_file.is_open()) {
-    std::cerr << "Unable to open configuration file: '" << config_file_path << "'" << std::endl;
+    std::cerr << "Unable to open configuration file: '" << config_file_fullname << "'" << std::endl;
     return 2;
   }
 
   std::ofstream log_file;
-  if (!log_file_path.empty()) {
-    log_file.open(log_file_path, ios::app);
+  if (!log_file_fullname.empty()) {
+    log_file.open(log_file_fullname, ios::app);
     if (!log_file.good()) {
-      std::cerr << "Unable to open log file: '" << log_file_path << "'" << std::endl;
+      std::cerr << "Unable to open log file: '" << log_file_fullname << "'" << std::endl;
       return 2;
     }
     Log::stream = &log_file;
@@ -150,10 +154,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
   }
 
   std::ofstream report_file;
-  if (!report_file_path.empty()) {
-    report_file.open(report_file_path);
+  if (!report_file_fullname.empty()) {
+    report_file.open(report_file_fullname);
     if (!report_file.good()) {
-      std::cerr << "Unable to open report file: '" << report_file_path << "'" << std::endl;
+      std::cerr << "Unable to open report file: '" << report_file_fullname << "'" << std::endl;
       return 2;
     }
   }
@@ -174,6 +178,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     std::cerr << "Unable to parse configuration" << std::endl;
     return 3;
   }
+
+  config.process.name = config_file_basename.c_str();
 
   if (config.create_time == ZERO) {
     config.create_time = Builder::get_sys_time();
@@ -302,8 +308,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
     redirect_ace_log = static_cast<size_t>(redirect_ace_log_prop->value.ull_prop());
   }
 
-  if (redirect_ace_log && !log_file_path.empty()) {
-    std::ofstream* output_stream = new std::ofstream(log_file_path.c_str(), ios::app);
+  if (redirect_ace_log && !log_file_fullname.empty()) {
+    std::ofstream* output_stream = new std::ofstream(log_file_fullname.c_str(), ios::app);
     if (output_stream->bad()) {
       delete output_stream;
     } else {
@@ -544,7 +550,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[]) {
 
   // If requested, write out worker report to file
 
-  if (!report_file_path.empty()) {
+  if (!report_file_fullname.empty()) {
     idl_2_json(worker_report, report_file, max_decimal_places);
   }
 

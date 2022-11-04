@@ -1,4 +1,5 @@
 {
+  "create_time": { "sec": -1, "nsec": 0 },
   "enable_time": { "sec": -1, "nsec": 0 },
   "start_time": { "sec": -3, "nsec": 0 },
   "stop_time": { "sec": -3, "nsec": 0 },
@@ -12,22 +13,39 @@
             "value": "0"
           },
           { "name": "DCPSDebugLevel",
+            "value": "3"
+          },
+          { "name": "DCPSPendingTimeout",
+            "value": "3"
+          },
+          { "name": "DCPSInfoRepo",
+            "value": "file://repo.ior"
+          }
+        ]
+      },
+      { "name": "domain/7",
+        "properties": [
+          { "name": "DefaultTransportConfig",
+            "value": "rtps_config"
+          }
+        ]
+      },
+      { "name": "config/rtps_config",
+        "properties": [
+          { "name": "transports",
+            "value": "rtps_transport"
+          }
+        ]
+      },
+      { "name": "transport/rtps_transport",
+        "properties": [
+          { "name": "transport_type",
+            "value": "rtps_udp"
+          },
+          { "name": "use_multicast",
             "value": "0"
           }
         ]
-      }
-    ],
-    "discoveries": [
-      { "name": "bench_test_rtps",
-        "type": "repo",
-        "ior": "file://repo.ior",
-        "domain": 7
-      }
-    ],
-    "instances": [
-      { "name": "rtps_instance_01",
-        "type": "rtps_udp",
-        "domain": 7
       }
     ],
     "participants": [
@@ -35,7 +53,6 @@
         "domain": 7,
         "listener_type_name": "bench_partl",
         "listener_status_mask": 4294967295,
-        "transport_config_name": "rtps_instance_01",
 
         "qos": { "entity_factory": { "autoenable_created_entities": false } },
         "qos_mask": { "entity_factory": { "has_autoenable_created_entities": false } },

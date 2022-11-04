@@ -19,8 +19,9 @@ OpenDDS 3.22.0 was released on Sep 16 2022.
 - Sequences in FACE mapping: support == for any type (#3604)
 - Implement instance security methods from DDS Security Spec (#3557)
 - Added meta-discovery server to RtpsRelay (#3655)
-- Support building for VxWorks 21.03 (#3723)
-- alive and active flags now have timestamps in RtpsRelay (#3579)
+- Support building for VxWorks 21.03 (#3723, #3740)
+- Alive and active flags now have timestamps in RtpsRelay (#3579)
+- Static initializers for registration of TypeSupport objects (#3736)
 
 ### Fixes:
 - Fixed bug where partitions for RtpsRelay client were not updated (#3583)
@@ -38,12 +39,15 @@ OpenDDS 3.22.0 was released on Sep 16 2022.
 - Set extensibility on enums (#3686)
 - Do not use fixed-size buffer for partition parsing (#3704)
 - Prevent Use Of IPv4-mapped IPv6 'Any' Addresses In RTPS Locators (#3713)
+- Fix SEGV in shutdown when using monitor (#3732)
+- Crash from missing BIT reader in shutdown (#3741)
 
 ### Notes:
 - Removed wait param in TransportRegistry::create_inst (#3644)
 - Changed Multicast Group Join Errors to Warnings (#3558)
 - Remove Leading `::` from `TypeObject` Names (#3679)
 - Updates to the ValueReader/ValueWriter/ValueDispatcher framework (#3719)
+- Updates to Dockerfile (#3737)
 
 ## Version 3.21.0 of OpenDDS
 OpenDDS 3.21.0 was released on Jun 24 2022.

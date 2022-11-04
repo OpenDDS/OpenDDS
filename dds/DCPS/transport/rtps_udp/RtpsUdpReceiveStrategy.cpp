@@ -10,10 +10,8 @@
 #include "RtpsUdpInst.h"
 #include "RtpsUdpTransport.h"
 
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/BaseMessageUtils.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/Logging.h"
 #include "dds/DCPS/GuidUtils.h"
 #include <dds/DCPS/LogAddr.h>
 #include "dds/DCPS/Util.h"
@@ -209,8 +207,6 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
       receive_transport_header_.last_fragment(false);
     }
   }
-
-  finish_message();
 
   // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
   if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
@@ -579,14 +575,6 @@ RtpsUdpReceiveStrategy::deliver_sample(ReceivedDataSample& sample,
 }
 
 void
-RtpsUdpReceiveStrategy::finish_message()
-{
-  if (transport_debug.log_messages) {
-    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", receiver_.local_, false, message_);
-  }
-}
-
-void
 RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
                                          const RTPS::Submessage& submessage,
                                          const NetworkAddress& remote_addr)
@@ -806,7 +794,14 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
   const ParticipantCryptoHandle peer_pch = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
-  sec_submsg_to_octets(encoded_submsg, submessage);
+  if (!sec_submsg_to_octets(encoded_submsg, submessage)) {
+    if (security_debug.encdec_warn) {
+      ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy: ")
+                 ACE_TEXT("preprocess_secure_submsg failed to encode submessage %C RPCH %d\n"),
+                 LogGuid(peer).c_str(), peer_pch));
+    }
+    return;
+  }
   secure_prefix_.smHeader.submessageId = SUBMESSAGE_NONE;
   secure_sample_ = ReceivedDataSample(0);
 
@@ -900,7 +895,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
   }
 }
 
-void
+bool
 RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
                                              const RTPS::Submessage& postfix)
 {
@@ -919,25 +914,40 @@ RtpsUdpReceiveStrategy::sec_submsg_to_octets(DDS::OctetSeq& encoded,
 
   ACE_Message_Block mb(size);
   Serializer ser(&mb, encoding);
-  ser << secure_prefix_;
-  ser.align_r(RTPS::SMHDR_SZ);
+  if (!(ser << secure_prefix_)) {
+    return false;
+  }
+
+  if (!ser.align_r(RTPS::SMHDR_SZ)) {
+    return false;
+  }
 
   for (size_t i = 0; i < secure_submessages_.size(); ++i) {
-    ser << secure_submessages_[i];
+    if (!(ser << secure_submessages_[i])) {
+      return false;
+    }
     const RTPS::SubmessageKind kind = secure_submessages_[i]._d();
     if (kind == RTPS::DATA || kind == RTPS::DATA_FRAG) {
       const CORBA::Octet* sample_bytes =
         reinterpret_cast<const CORBA::Octet*>(secure_sample_.sample_->rd_ptr());
-      ser.write_octet_array(sample_bytes,
-                            static_cast<unsigned int>(secure_sample_.sample_->length()));
+      if (!ser.write_octet_array(sample_bytes,
+                                 static_cast<unsigned int>(secure_sample_.sample_->length()))) {
+        return false;
+      }
     }
-    ser.align_r(RTPS::SMHDR_SZ);
+    if (!ser.align_r(RTPS::SMHDR_SZ)) {
+      return false;
+    }
   }
-  ser << postfix;
+  if (!(ser << postfix)) {
+    return false;
+  }
 
   encoded.length(static_cast<unsigned int>(mb.length()));
   std::memcpy(encoded.get_buffer(), mb.rd_ptr(), mb.length());
   secure_submessages_.resize(0);
+
+  return true;
 }
 
 bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,

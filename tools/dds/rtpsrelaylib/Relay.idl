@@ -164,6 +164,7 @@ module RtpsRelay {
     unsigned long relay_partitions_pub_count;
     unsigned long relay_address_pub_count;
     unsigned long spdp_replay_pub_count;
+    unsigned long admission_deferral_count;
   };
 };
 

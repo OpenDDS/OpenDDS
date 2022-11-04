@@ -102,8 +102,6 @@ private:
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);
 
-  virtual void finish_message();
-
   void deliver_sample_i(ReceivedDataSample& sample,
                         const RTPS::Submessage& submessage,
                         const NetworkAddress& remote_addr);
@@ -119,7 +117,7 @@ private:
   virtual bool reassemble_i(ReceivedDataSample& data, RtpsSampleHeader& rsh);
 
 #ifdef OPENDDS_SECURITY
-  void sec_submsg_to_octets(DDS::OctetSeq& encoded,
+  bool sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
   void deliver_from_secure(const RTPS::Submessage& submessage,

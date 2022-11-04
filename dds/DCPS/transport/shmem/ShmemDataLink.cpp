@@ -121,11 +121,9 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
   const int result = DataLink::make_reservation(remote_pub, local_sub, receive_listener, reliable);
   send_association_msg(local_sub, remote_pub);
   // Resend until we get a response.
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
-    assoc_resends_.insert(std::pair<GuidPair, unsigned>(GuidPair(local_sub, remote_pub),
-      config().association_resend_max_count()));
-  }
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
+  assoc_resends_.insert(std::pair<GuidPair, size_t>(GuidPair(local_sub, remote_pub),
+    config().association_resend_max_count()));
   return result;
 }
 

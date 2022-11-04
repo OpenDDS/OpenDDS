@@ -4,7 +4,6 @@
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/TimeTypes.h>

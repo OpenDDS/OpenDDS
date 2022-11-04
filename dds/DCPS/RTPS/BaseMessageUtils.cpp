@@ -5,6 +5,8 @@
 
 #include "BaseMessageUtils.h"
 
+#include "MessageTypes.h"
+
 #include <dds/DCPS/Time_Helper.h>
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 

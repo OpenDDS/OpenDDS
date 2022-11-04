@@ -64,7 +64,7 @@ module OpenDDS {
       long high;
       unsigned long low;
     };
-    // see SEQUENCENUMBER_UNKNOWN constant in BaseMessageTypes.h
+    // see SEQUENCENUMBER_UNKNOWN constant in MessageTypes.h
 
     typedef sequence<long, 8> LongSeq8;
 
@@ -92,7 +92,7 @@ module OpenDDS {
       unsigned long fraction;
     };
 
-    // see TIME_* constants in BaseMessageTypes.h
+    // see TIME_* constants in MessageTypes.h
     typedef Time_t Timestamp_t;
 
     /* Duration_t wasn't defined in the PSM prior to RTPS 2.4. The updated struct
@@ -110,7 +110,7 @@ module OpenDDS {
     const long LOCATOR_KIND_UDPv4 = DCPS::LOCATOR_KIND_UDPv4;
     const long LOCATOR_KIND_UDPv6 = DCPS::LOCATOR_KIND_UDPv6;
     const unsigned long LOCATOR_PORT_INVALID = DCPS::LOCATOR_PORT_INVALID;
-    // see LOCATOR_* constants in BaseMessageTypes.h
+    // see LOCATOR_* constants in MessageTypes.h
 
     /* Specialization of Locator_t used to hold UDP IPv4 locators using a more
        compact representation. */
@@ -118,7 +118,7 @@ module OpenDDS {
       unsigned long address;
       unsigned long _port;
     };
-    // see LOCATORUDPv4_INVALID constant in BaseMessageTypes.h
+    // see LOCATORUDPv4_INVALID constant in MessageTypes.h
 
     /* Enumeration used to distinguish whether a Topic has defined some fields
        within to be used as the 'key' that identifies data-instances within the
@@ -159,14 +159,14 @@ module OpenDDS {
       octet major;
       octet minor;
     };
-    // see PROTOCOLVERSION* constants in BaseMessageTypes.h
+    // see PROTOCOLVERSION* constants in MessageTypes.h
 
     /* Type used to represent the vendor of the service
        implementing the RTPS protocol. */
     struct VendorId_t {
       OctetArray2 vendorId;
     };
-    // see VENDORID_* constants in BaseMessageTypes.h
+    // see VENDORID_* constants in MessageTypes.h
 
     typedef unsigned long IceAgentType_t;
     const IceAgentType_t ICE_FULL = 0x0;
