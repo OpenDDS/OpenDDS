@@ -104,6 +104,74 @@ DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext)
   return DCPS::FINAL;
 }
 
+DDS::ReturnCode_t MemberPath::get_member_from_type(
+  DDS::DynamicType_ptr type, DDS::DynamicTypeMember_var& member)
+{
+  member = 0;
+  if (ids.empty()) {
+    return DDS::RETCODE_ILLEGAL_OPERATION;
+  }
+
+  DDS::DynamicType_var base_type = get_base_type(type);
+  if (!base_type) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  MemberIdVec::iterator it = ids.begin();
+  DDS::DynamicType_var current_type = DDS::DynamicType::_duplicate(type);
+  DDS::DynamicTypeMember_var current_member;
+  while (true) {
+    DDS::ReturnCode_t rc = current_type->get_member(current_member, *it);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+
+    if (++it == ids.end()) {
+      break;
+    }
+
+    DDS::MemberDescriptor_var md;
+    rc = current_member->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    current_type = get_base_type(md->type());
+    if (!base_type) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+  }
+  member = current_member._retn();
+
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t MemberPath::get_member_from_data(
+  DDS::DynamicData_ptr data, DDS::DynamicData_var& container, DDS::MemberId& member_id)
+{
+  container = 0;
+  if (ids.empty()) {
+    return DDS::RETCODE_ILLEGAL_OPERATION;
+  }
+
+  MemberIdVec::iterator it = ids.begin();
+  DDS::DynamicData_var current_data = DDS::DynamicData::_duplicate(data);
+  while (true) {
+    const DDS::MemberId current_id = *it;
+    if (++it == ids.end()) {
+      member_id = current_id;
+      break;
+    }
+
+    DDS::ReturnCode_t rc = current_data->get_complex_value(current_data, current_id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+  }
+  container = current_data._retn();
+
+  return DDS::RETCODE_OK;
+}
+
 namespace {
   DDS::ReturnCode_t get_keys_i(DDS::DynamicType_ptr type, MemberPathVec& paths,
     const MemberPath& base_path);

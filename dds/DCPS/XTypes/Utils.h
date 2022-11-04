@@ -47,6 +47,17 @@ public:
   }
 
   size_t level() const { return ids.size(); }
+
+  DDS::ReturnCode_t get_member_from_type(
+    DDS::DynamicType_ptr type, DDS::DynamicTypeMember_var& member);
+
+  /**
+   * DynamicData itself holds the access methods to its members, so in order to
+   * access them, we have to give both the containing Dynamic Data and the
+   * member ID.
+   */
+  DDS::ReturnCode_t get_member_from_data(
+    DDS::DynamicData_ptr data, DDS::DynamicData_var& container, DDS::MemberId& member_id);
 };
 typedef OPENDDS_VECTOR(MemberPath) MemberPathVec;
 

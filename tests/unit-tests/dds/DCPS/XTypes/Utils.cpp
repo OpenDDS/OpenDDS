@@ -4,8 +4,30 @@
 
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
+#  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
+#  include <dds/DCPS/DCPS_Utils.h>
 
 #  include <gtest/gtest.h>
+
+::testing::AssertionResult retcodes_equal(
+  const char* a_expr, const char* b_expr,
+  DDS::ReturnCode_t a, DDS::ReturnCode_t b)
+{
+  if (a == b) {
+    return ::testing::AssertionSuccess();
+  }
+  return ::testing::AssertionFailure() <<
+    "Expected equality of these values:\n"
+    "  " << a_expr << "\n"
+    "    Which is: " << OpenDDS::DCPS::retcode_to_string(a) << "\n"
+    "  " << b_expr << "\n"
+    "    Which is: " << OpenDDS::DCPS::retcode_to_string(b) << "\n";
+}
+
+#define EXPECT_RC_EQ(A, B) EXPECT_PRED_FORMAT2(retcodes_equal, (A), (B))
+#define ASSERT_RC_EQ(A, B) ASSERT_PRED_FORMAT2(retcodes_equal, (A), (B))
+#define EXPECT_RC_OK(VALUE) EXPECT_RC_EQ(::DDS::RETCODE_OK, (VALUE))
+#define ASSERT_RC_OK(VALUE) ASSERT_RC_EQ(::DDS::RETCODE_OK, (VALUE))
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
@@ -55,7 +77,7 @@ public:
     DDS::DynamicType_var dt = get_dynamic_type<TopicType>();
     CORBA::String_var name = dt->get_name();
     Extensibility actual;
-    EXPECT_EQ(DDS::RETCODE_OK, extensibility(dt.in(), actual)) << "Happend in type " << name.in();
+    EXPECT_RC_OK(extensibility(dt.in(), actual)) << "Happend in type " << name.in();
     EXPECT_EQ(expected, actual) << "Happend in type " << name.in();
   }
 
@@ -66,7 +88,7 @@ public:
     DDS::DynamicType_var dt = get_dynamic_type<TopicType>();
     CORBA::String_var name = dt->get_name();
     Extensibility actual;
-    EXPECT_EQ(DDS::RETCODE_OK, max_extensibility(dt.in(), actual))
+    EXPECT_RC_OK(max_extensibility(dt.in(), actual))
       << "Happend in type " << name.in();
     EXPECT_EQ(expected, actual) << "Happend in type " << name.in();
   }
@@ -121,7 +143,7 @@ namespace {
       DDS::DynamicType_var dt = t.get_dynamic_type<TopicType>();
       CORBA::String_var name = dt->get_name();
       MemberPathVec actual;
-      EXPECT_EQ(DDS::RETCODE_OK, get_keys(dt, actual))
+      EXPECT_RC_OK(get_keys(dt, actual))
         << "Happend in type " << name.in();
       const size_t count = std::min(expected.size(), actual.size());
       for (size_t i = 0; i < count; ++i) {
@@ -228,5 +250,54 @@ TEST_F(dds_DCPS_XTypes_Utils, get_keys)
   }
   */
 }
+
+TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_type)
+{
+  add_type<KeyedUnionStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<KeyedUnionStruct>();
+  MemberPathVec keys;
+  EXPECT_RC_OK(get_keys(dt, keys));
+  std::vector<std::string> expected_names;
+  expected_names.push_back("_d");
+  expected_names.push_back("_d");
+  expected_names.push_back("another_key");
+  std::vector<std::string> actual_names;
+  for (MemberPathVec::iterator it = keys.begin(); it != keys.end(); ++it) {
+    DDS::DynamicTypeMember_var member;
+    EXPECT_RC_OK(it->get_member_from_type(dt, member));
+    CORBA::String_var name = member->get_name();
+    actual_names.push_back(name.in());
+  }
+  EXPECT_EQ(expected_names, actual_names);
+}
+
+#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
+TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
+{
+  // TODO: More complex test when DynamicDataAdapter can handle it
+  add_type<SimpleKeyStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<SimpleKeyStruct>();
+  MemberPathVec keys;
+  ASSERT_RC_OK(get_keys(dt, keys));
+
+  SimpleKeyStruct sample;
+  sample.key = 10;
+  sample.value = 20;
+  DynamicDataAdapter<SimpleKeyStruct> dda(dt, getMetaStruct<SimpleKeyStruct>(), sample);
+
+  std::vector<ACE_CDR::Long> expected_values;
+  expected_values.push_back(10);
+  std::vector<ACE_CDR::Long> actual_values;
+  for (MemberPathVec::iterator it = keys.begin(); it != keys.end(); ++it) {
+    DDS::DynamicData_var container;
+    DDS::MemberId id;
+    ASSERT_RC_OK(it->get_member_from_data(&dda, container, id));
+    ACE_CDR::Long value;
+    ASSERT_RC_OK(container->get_int32_value(value, id));
+    actual_values.push_back(value);
+  }
+  ASSERT_EQ(expected_values, actual_values);
+}
+#  endif
 
 #endif // OPENDDS_SAFETY_PROFILE
