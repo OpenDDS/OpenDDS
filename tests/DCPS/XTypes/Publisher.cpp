@@ -252,6 +252,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string type;
   std::string topic_name = "";
   std::string registered_type_name = "";
+  bool dynamic = false;
 
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
@@ -274,24 +275,26 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--reg_type")) {
+    } else if (arg == ACE_TEXT("--reg-type")) {
       if (i + 1 < argc) {
         registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--key_val")) {
+    } else if (arg == ACE_TEXT("--key-val")) {
       if (i + 1 < argc) {
         key_value = ACE_OS::atoi(argv[++i]);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--expect_inconsistent_topic")) {
+    } else if (arg == ACE_TEXT("--expect-inconsistent-topic")) {
       expect_inconsistent_topic = true;
-    } else if (arg == ACE_TEXT("--expect_incompatible_qos")) {
+    } else if (arg == ACE_TEXT("--expect-incompatible-qos")) {
       expect_incompatible_qos = true;
+    } else if (arg == ACE_TEXT("--dynamic-ts")) {
+      dynamic = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -305,70 +308,51 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  bool failed = false;
-
-  Topic_var topic;
-
   if (topic_name.empty()) {
     topic_name = !registered_type_name.empty() ? registered_type_name : type;
   } else if (registered_type_name.empty()) {
     registered_type_name = topic_name;
   }
 
+  Topic_var topic;
+  TypeSupport_var ts;
+  bool failed = false;
   if (type == "PlainCdrStruct") {
-    PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<PlainCdrStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "FinalStructPub") {
-    FinalStructPubTypeSupport_var ts = new FinalStructPubTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<FinalStructPub>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedFinalStruct") {
-    ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedFinalStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "BaseAppendableStruct") {
-    BaseAppendableStructTypeSupport_var ts = new BaseAppendableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<BaseAppendableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AppendableStructNoXTypes") {
-    AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<AppendableStructNoXTypes>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AdditionalPrefixFieldStruct") {
-    AdditionalPrefixFieldStructTypeSupport_var ts = new AdditionalPrefixFieldStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<AdditionalPrefixFieldStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AdditionalPostfixFieldStruct") {
-    AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<AdditionalPostfixFieldStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedMutableStruct") {
-    ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedMutableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedIdMutableStruct") {
-    ModifiedIdMutableStructTypeSupport_var ts = new ModifiedIdMutableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedIdMutableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedTypeMutableStruct") {
-    ModifiedTypeMutableStructTypeSupport_var ts = new ModifiedTypeMutableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedTypeMutableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedNameMutableStruct") {
-    ModifiedNameMutableStructTypeSupport_var ts = new ModifiedNameMutableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedNameMutableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedMutableUnion") {
-    ModifiedMutableUnionTypeSupport_var ts = new ModifiedMutableUnionTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedMutableUnion>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedDiscMutableUnion") {
-    ModifiedDiscMutableUnionTypeSupport_var ts = new ModifiedDiscMutableUnionTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedDiscMutableUnion>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedTypeMutableUnion") {
-    ModifiedTypeMutableUnionTypeSupport_var ts = new ModifiedTypeMutableUnionTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedTypeMutableUnion>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ModifiedNameMutableUnion") {
-    ModifiedNameMutableUnionTypeSupport_var ts = new ModifiedNameMutableUnionTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ModifiedNameMutableUnion>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "Trim64Struct") {
-    Trim64StructTypeSupport_var ts = new Trim64StructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<Trim64Struct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AppendableStructWithDependency") {
-    AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<AppendableStructWithDependency>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "MutableBaseStruct") {
-    MutableBaseStructTypeSupport_var ts = new MutableBaseStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<MutableBaseStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type.empty()) {
     ACE_ERROR((LM_ERROR, "ERROR: Must specify a type name\n"));
     return 1;
@@ -377,17 +361,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  Topic_var ack_control_topic;
+  Topic_var echo_control_topic;
+  TypeSupport_var ack_control_ts;
+  TypeSupport_var echo_control_ts;
+  failed |= !get_topic<ControlStruct>(
+    ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
+  failed |= !get_topic<ControlStruct>(
+    echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
+
   if (failed) {
     return 1;
   }
 
   ACE_DEBUG((LM_DEBUG, "Writer starting at %T\n"));
-  Topic_var ack_control_topic;
-  Topic_var echo_control_topic;
-  ControlStructTypeSupport_var ack_control_ts = new ControlStructTypeSupportImpl;
-  ControlStructTypeSupport_var echo_control_ts = new ControlStructTypeSupportImpl;
-  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
-  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
   // For subscribing ack control topic.
   Subscriber_var control_sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
@@ -497,7 +484,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
+  if (!expect_inconsistent_topic && !expect_incompatible_qos && !dynamic) {
     if (type == "PlainCdrStruct") {
       write_plain_cdr_struct(dw);
     } else if (type == "FinalStructPub") {
