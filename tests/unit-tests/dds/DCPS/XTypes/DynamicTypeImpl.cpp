@@ -233,7 +233,8 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_StructWithTypedefM
   value_md->id(0);
   value_md->index(0);
   value_md->try_construct_kind(DDS::DISCARD);
-  value_md->type(get_my_alias_struct());
+  DDS::DynamicType_var expected_alias_dt = get_my_alias_struct();
+  value_md->type(expected_alias_dt);
   value_dtm->set_descriptor(value_md);
   swtm_dt->insert_dynamic_member(value_dtm);
 
