@@ -8,9 +8,9 @@ project {
       add_compile_definitions(_CRT_SECURE_NO_WARNINGS _CRT_SECURE_NO_DEPRECATE _CRT_NONSTDC_NO_DEPRECATE)
     endif()
   }
-  verbatim(cmake, local) {
+  verbatim(cmake, top) {
     if(MSVC)
-      target_link_libraries(${PROJECT_TARGET} iphlpapi)
+      link_libraries(iphlpapi)
     endif()
   }
 }
