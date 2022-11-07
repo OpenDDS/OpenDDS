@@ -8,8 +8,9 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
+#include "DynamicDataBase.h"
 #include "TypeObject.h"
-#include "DynamicTypeImpl.h"
+//#include "DynamicTypeImpl.h"
 
 #include <dds/DCPS/LocalObject.h>
 #include <dds/DCPS/PoolAllocator.h>
@@ -20,7 +21,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-class OpenDDS_Dcps_Export DynamicDataXcdrReadImpl : public virtual DCPS::LocalObject<DDS::DynamicData> {
+//class OpenDDS_Dcps_Export DynamicDataXcdrReadImpl : public virtual DCPS::LocalObject<DDS::DynamicData> {
+class OpenDDS_Dcps_Export DynamicDataXcdrReadImpl : public DynamicDataBase {
 public:
   DynamicDataXcdrReadImpl();
 
@@ -41,11 +43,11 @@ public:
 
   ~DynamicDataXcdrReadImpl();
 
-  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
+  //  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
 
-  MemberId get_member_id_by_name(const char* name);
-  MemberId get_member_id_at_index(ACE_CDR::ULong index);
+  //  MemberId get_member_id_by_name(const char* name);
+  DDS:MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
 
   DDS::ReturnCode_t clear_all_values();
@@ -372,7 +374,7 @@ private:
 
   /// Verify that a given type is primitive or string or wstring.
   ///
-  bool is_type_supported(TypeKind tk, const char* func_name);
+  //  bool is_type_supported(TypeKind tk, const char* func_name);
 
   /// Setup the strm_ object so that it has the correct alignment state.
   ///
@@ -521,12 +523,12 @@ private:
 
   void release_chains();
 
-  bool is_primitive(TypeKind tk) const;
+  //  bool is_primitive(TypeKind tk) const;
   bool get_primitive_size(DDS::DynamicType_ptr dt, ACE_CDR::ULong& size) const;
 
   bool has_optional_member(bool& has_optional) const;
 
-  bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
+  //  bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
 
   /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
   typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;

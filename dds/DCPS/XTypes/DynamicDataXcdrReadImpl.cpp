@@ -124,6 +124,7 @@ void DynamicDataXcdrReadImpl::copy(const DynamicDataXcdrReadImpl& other)
   item_count_ = other.item_count_;
 }
 
+/*
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
 {
   DDS::DynamicTypeMember_var dtm;
@@ -133,13 +134,15 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_descriptor(DDS::MemberDescriptor*
 
   return dtm->get_descriptor(value);
 }
+*/
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
 {
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-MemberId DynamicDataXcdrReadImpl::get_member_id_by_name(const char* name)
+/*
+DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_by_name(const char* name)
 {
   const TypeKind tk = type_->get_kind();
   switch (tk) {
@@ -198,6 +201,7 @@ MemberId DynamicDataXcdrReadImpl::get_member_id_by_name(const char* name)
   }
   return MEMBER_ID_INVALID;
 }
+*/
 
 bool DynamicDataXcdrReadImpl::has_optional_member(bool& has_optional) const
 {
@@ -224,7 +228,7 @@ bool DynamicDataXcdrReadImpl::has_optional_member(bool& has_optional) const
   return true;
 }
 
-MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong index)
+DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong index)
 {
   if (item_count_ == ITEM_COUNT_INVALID) {
     get_item_count();
@@ -624,6 +628,7 @@ DDS::DynamicData_ptr DynamicDataXcdrReadImpl::clone()
   return new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_);
 }
 
+/*
 bool DynamicDataXcdrReadImpl::is_type_supported(TypeKind tk, const char* func_name)
 {
   if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
@@ -635,6 +640,7 @@ bool DynamicDataXcdrReadImpl::is_type_supported(TypeKind tk, const char* func_na
   }
   return true;
 }
+*/
 
 template<typename ValueType>
 bool DynamicDataXcdrReadImpl::read_value(ValueType& value, TypeKind tk)
@@ -2603,6 +2609,7 @@ bool DynamicDataXcdrReadImpl::skip(const char* func_name, const char* descriptio
   return true;
 }
 
+/*
 bool DynamicDataXcdrReadImpl::is_primitive(TypeKind tk) const
 {
   switch (tk) {
@@ -2626,6 +2633,7 @@ bool DynamicDataXcdrReadImpl::is_primitive(TypeKind tk) const
     return false;
   }
 }
+*/
 
 bool DynamicDataXcdrReadImpl::get_primitive_size(DDS::DynamicType_ptr dt, ACE_CDR::ULong& size) const
 {
@@ -2663,6 +2671,7 @@ bool DynamicDataXcdrReadImpl::get_primitive_size(DDS::DynamicType_ptr dt, ACE_CD
   return true;
 }
 
+/*
 bool DynamicDataXcdrReadImpl::get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const
 {
   switch (type_->get_kind()) {
@@ -2682,6 +2691,7 @@ bool DynamicDataXcdrReadImpl::get_index_from_id(MemberId id, ACE_CDR::ULong& ind
   }
   return false;
 }
+*/
 
 bool DynamicDataXcdrReadImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, DynamicTypeNameSet& dtns)
 {

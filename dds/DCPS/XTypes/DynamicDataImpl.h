@@ -8,28 +8,30 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 
-#include "DynamicTypeImpl.h"
+#include "DynamicDataBase.h"
 
-#include <dds/DdsDynamicDataC.h>
+//#include "DynamicTypeImpl.h"
+
+//#include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
-class OpenDDS_Dcps_Export DynamicDataImpl
-  : public virtual DCPS::LocalObject<DDS::DynamicData> {
+//class OpenDDS_Dcps_Export DynamicDataImpl : public DDS::DynamicData {
+class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
   DynamicDataImpl(DDS::DynamicType_ptr type);
 
   DDS::DynamicType_ptr type();
 
-  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
+  //  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
 
   CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
-  MemberId get_member_id_by_name(const char* name);
+  //  MemberId get_member_id_by_name(const char* name);
   MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
 
@@ -322,6 +324,7 @@ public:
                                        const DDS::WstringSeq& value);
 
 private:
+  bool is_basic_type(TypeKind tk) const;
 
   template<TypeKind MemberTypeKind, typename MemberType>
   bool set_value_to_struct(DDS::MemberId id, const MemberType& value,
@@ -345,7 +348,7 @@ private:
   bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
   bool is_discriminator_type(TypeKind tk) const;
   bool is_default_member_selected(CORBA::ULong disc_val, DDS::MemberId default_id) const;
-  bool read_discriminator(CORBA::ULong& disc_val) const;
+  bool read_discriminator(CORBA::Long& disc_val) const;
   DDS::MemberId find_selected_member() const;
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
   bool find_selected_member_and_discriminator(DDS::MemberId& selected_id,
@@ -366,10 +369,12 @@ private:
   template<typename SequenceType>
   bool insert_sequence(DDS::MemberId id, const SequenceType& value);
 
+  template<typename ElementTypeKind>
   bool check_seqmem_in_struct_union(DDS::MemberId id, TypeKind enum_or_bitmask,
                                     LBound lower, LBound upper) const;
-  bool check_seqmem_in_sequence_array(DDS::MemberId id, TypeKind enum_or_bitmask,
-                                      LBound lower, LBound upper) const;
+  template<typename ElementTypeKind>
+  bool check_seqmem_in_sequence_and_array(DDS::MemberId id, TypeKind enum_or_bitmask,
+                                          LBound lower, LBound upper) const;
 
   template<TypeKind ElementTypeKind, typename SequenceType>
   bool set_values_to_struct(DDS::MemberId id, const SequenceType& value,
@@ -399,8 +404,8 @@ private:
   struct SingleValue {
     SingleValue(CORBA::Long int32);
     SingleValue(CORBA::ULong uint32);
-    SingleValue(CORBA::Int8 int8);
-    SingleValue(CORBA::UInt8 uint8);
+    SingleValue(ACE_OutputCDR::from_int8 from_int8);
+    SingleValue(ACE_OutputCDR::from_uint8 from_uint8);
     SingleValue(CORBA::Short int16);
     SingleValue(CORBA::UShort uint16);
     SingleValue(CORBA::LongLong int64);
@@ -408,12 +413,12 @@ private:
     SingleValue(CORBA::Float float32);
     SingleValue(CORBA::Double float64);
     SingleValue(CORBA::LongDouble float128);
-    SingleValue(CORBA::Char char8);
-    SingleValue(CORBA::Octet byte);
-    SingleValue(CORBA::Boolean boolean);
+    SingleValue(ACE_OutputCDR::from_char from_char);
+    SingleValue(ACE_OutputCDR::from_octet from_octet);
+    SingleValue(ACE_OutputCDR::from_boolean from_bool);
     SingleValue(const char* str);
 #ifdef DDS_HAS_WCHAR
-    SingleValue(CORBA::WChar char16);
+    SingleValue(ACE_OutputCDR::from_wchar from_wchar);
     SingleValue(const CORBA::WChar* wstr);
 #endif
 
@@ -425,8 +430,8 @@ private:
     union {
       CORBA::Long int32_;
       CORBA::ULong uint32_;
-      CORBA::Int8 int8_;
-      CORBA::UInt8 uint8_;
+      ACE_OutputCDR::from_int8 int8_;
+      ACE_OutputCDR::from_uint8 uint8_;
       CORBA::Short int16_;
       CORBA::UShort uint16_;
       CORBA::LongLong int64_;
@@ -434,12 +439,12 @@ private:
       CORBA::Float float32_;
       CORBA::Double float64_;
       CORBA::LongDouble float128_;
-      CORBA::Char char8_;
-      CORBA::Octet byte_;
-      CORBA::Boolean boolean_;
+      ACE_OutputCDR::from_char char8_;
+      ACE_OutputCDR::from_octet byte_;
+      ACE_OutputCDR::from_boolean boolean_;
       const char* str_;
 #ifdef DDS_HAS_WCHAR
-      CORBA::WChar char16_;
+      ACE_OutputCDR::from_wchar char16_;
       const CORBA::WChar* wstr_;
 #endif
     };
@@ -455,10 +460,10 @@ private:
     SequenceValue(const DDS::Int64Seq& int64_seq);
     SequenceValue(const DDS::UInt64Seq& uint64_seq);
     SequenceValue(const DDS::Float32Seq& float32_seq);
-    SequenceValue(const DDS::DoubleSeq& float64_seq);
-    SequenceValue(const DDS::LongDoubleSeq& float128_seq);
+    SequenceValue(const DDS::Float64Seq& float64_seq);
+    SequenceValue(const DDS::Float128Seq& float128_seq);
     SequenceValue(const DDS::CharSeq& char8_seq);
-    SequenceValue(const DDS::OctetSeq& byte_seq);
+    SequenceValue(const DDS::ByteSeq& byte_seq);
     SequenceValue(const DDS::BooleanSeq& boolean_seq);
     SequenceValue(const DDS::StringSeq& str_seq);
 #ifdef DDS_HAS_WCHAR
@@ -494,17 +499,18 @@ private:
     };
   };
 
-  typedef DCPS::OPENDDS_VECTOR(CORBA::ULong) IndexToIdMap;
+  typedef OPENDDS_VECTOR(CORBA::ULong) IndexToIdMap;
 
   // Container for all data written to this DynamicData object.
   // At anytime, there can be at most 1 entry for any given MemberId in all maps.
   // That is, each member is stored in at most 1 map.
   struct DataContainer {
-    typedef DCPS::OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
-    typedef DCPS::OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
-    typedef DCPS::OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
+    typedef OPENDDS_MAP(DDS::MemberId, SingleValue)::const_iterator const_single_iterator;
+    typedef OPENDDS_MAP(DDS::MemberId, SequenceValue)::const_iterator const_sequence_iterator;
+    typedef OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var)::const_iterator const_complex_iterator;
 
-    DataContainer(const DynamicType_var& type, const DynamicData_var& data) : type_(type), data_(data) {}
+    DataContainer(const DDS::DynamicType_var& type, const DDS::DynamicData_var& data)
+      : type_(type), data_(data) {}
 
     // Get the largest index of all elements in each map.
     // Call only for collection-like types (sequence, string, etc).
@@ -546,8 +552,8 @@ private:
 
     void set_default_basic_value(CORBA::Long& value) const;
     void set_default_basic_value(CORBA::ULong& value) const;
-    void set_default_basic_value(CORBA::Int8& value) const;
-    void set_default_basic_value(CORBA::UInt8& value) const;
+    void set_default_basic_value(ACE_OutputCDR::from_int8& value) const;
+    void set_default_basic_value(ACE_OutputCDR::from_uint8& value) const;
     void set_default_basic_value(CORBA::Short& value) const;
     void set_default_basic_value(CORBA::UShort& value) const;
     void set_default_basic_value(CORBA::LongLong& value) const;
@@ -555,12 +561,12 @@ private:
     void set_default_basic_value(CORBA::Float& value) const;
     void set_default_basic_value(CORBA::Double& value) const;
     void set_default_basic_value(CORBA::LongDouble& value) const;
-    void set_default_basic_value(CORBA::Char& value) const;
-    void set_default_basic_value(CORBA::Octet& value) const;
+    void set_default_basic_value(ACE_OutputCDR::from_char& value) const;
+    void set_default_basic_value(ACE_OutputCDR::from_octet& value) const;
     void set_default_basic_value(const char*& value) const;
-    void set_default_basic_value(CORBA::Boolean& value) const;
+    void set_default_basic_value(ACE_OutputCDR::from_boolean& value) const;
 #ifdef DDS_HAS_WCHAR
-    void set_default_basic_value(CORBA::WChar& value) const;
+    void set_default_basic_value(ACE_OutputCDR::from_wchar& value) const;
     void set_default_basic_value(const CORBA::WChar*& value) const;
 #endif
 
@@ -886,9 +892,9 @@ private:
     bool serialize_union(DCPS::Serializer& ser) const;
 
     // Internal data
-    DCPS::OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
-    DCPS::OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
-    DCPS::OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map;
+    OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
+    OPENDDS_MAP(DDS::MemberId, SequenceValue) sequence_map_;
+    OPENDDS_MAP(DDS::MemberId, DDS::DynamicData_var) complex_map_;
 
     const DDS::DynamicType_var& type_;
     const DDS::DynamicData_var& data_;
@@ -896,8 +902,8 @@ private:
 
   DataContainer container_;
 
-  friend void DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
-  friend bool DCPS::operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
+  friend void serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
+  friend bool operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
 };
 
 } // namespace XTypes

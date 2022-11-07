@@ -16,7 +16,7 @@
 
 #include <dds/DdsDcpsInfrastructureC.h>
 
-#include "XTypes/DynamicDataImpl.h"
+#include "XTypes/DynamicDataXcdrReadImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
