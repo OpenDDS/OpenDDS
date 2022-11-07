@@ -42,7 +42,16 @@ bool get_topic(TypeSupport_var& ts, const DomainParticipant_var dp, const std::s
   Topic_var& topic, const std::string& registered_type_name, bool dynamic = false)
 {
   TypeSupport_var native_ts = new typename OpenDDS::DCPS::DDSTraits<T>::TypeSupportImplType;
-  ts = dynamic ? new DDS::DynamicTypeSupport(native_ts->get_type()) : TypeSupport::_duplicate(native_ts);
+  if (dynamic) {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_ERROR((LM_ERROR, "ERROR: Can't create dynamic type support on safety profile\n"));
+    return false;
+#else
+    ts = new DDS::DynamicTypeSupport(native_ts->get_type());
+#endif
+  } else {
+    ts = TypeSupport::_duplicate(native_ts);
+  }
 
   if (ts->register_type(dp, registered_type_name.c_str()) != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: register_type failed\n"));
