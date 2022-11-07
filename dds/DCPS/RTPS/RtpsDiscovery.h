@@ -35,6 +35,7 @@ using DCPS::AtomicBool;
 typedef RcHandle<Spdp> ParticipantHandle;
 typedef OPENDDS_MAP_CMP(GUID_t, ParticipantHandle, GUID_tKeyLessThan) ParticipantMap;
 typedef OPENDDS_MAP(DDS::DomainId_t, ParticipantMap) DomainParticipantMap;
+typedef OpenDDS::DCPS::RcHandle<RtpsDiscoveryConfig> RtpsDiscoveryConfig_rch;
 
 const char RTPS_DISCOVERY_ENDPOINT_ANNOUNCEMENTS[] = "OpenDDS.RtpsDiscovery.EndpointAnnouncements";
 const char RTPS_DISCOVERY_TYPE_LOOKUP_SERVICE[] = "OpenDDS.RtpsDiscovery.TypeLookupService";
