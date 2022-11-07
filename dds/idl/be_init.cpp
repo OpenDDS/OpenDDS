@@ -36,6 +36,12 @@ BE_init(int&, ACE_TCHAR*[])
 void
 BE_post_init(char*[], long)
 {
+  if (idl_global->idl_version_ < IDL_VERSION_4) {
+    idl_global->ignore_files_ = true; // Exit without parsing files
+    be_global->error("OpenDDS requires IDL version to be 4 or greater");
+    return;
+  }
+
   std::ostringstream version;
   version << "-D__OPENDDS_IDL=0x"
           << std::setw(2) << std::setfill('0') << OPENDDS_MAJOR_VERSION
@@ -56,11 +62,9 @@ BE_post_init(char*[], long)
   ACE_CString included;
   DRV_add_include_path(included, include_dds.c_str(), 0, true);
 
-  if (idl_global->idl_version_ < IDL_VERSION_4) {
-    idl_global->ignore_files_ = true; // Exit without parsing files
-    be_global->error("OpenDDS requires IDL version to be 4 or greater");
-  } else {
-    DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
-    be_global->builtin_annotations_.register_all();
-  }
+  DRV_cpp_putarg("-D__OPENDDS_IDL_HAS_ANNOTATIONS");
+  be_global->builtin_annotations_.register_all();
+  // This annotation isn't used, but must match the one in idl2jni to avoid
+  // warnings or errors.
+  idl_global->eval("module OpenDDS {@annotation hidden_op_in_java {string impl;};};\n");
 }

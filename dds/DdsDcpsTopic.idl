@@ -10,18 +10,12 @@
 
 #pragma ciao lem "dds/DdsDcpsTopicE.idl"
 
-#ifndef OPENDDS_HAS_DYNAMIC_TYPE
-#  ifdef OPENDDS_SAFETY_PROFILE
-#    define OPENDDS_HAS_DYNAMIC_TYPE 0
-#  else
-#    define OPENDDS_HAS_DYNAMIC_TYPE 1
-#  endif
-#endif
-
 module DDS {
     local interface DomainParticipant;
     local interface Topic;
-#if OPENDDS_HAS_DYNAMIC_TYPE
+#if !defined OPENDDS_SAFETY_PROFILE && !defined __OPENDDS_MPC
+    // MPC will make invalid rules in a Java build based on this forward
+    // declaration.
     local interface DynamicType;
 #endif
 
@@ -76,7 +70,11 @@ module DDS {
             in DomainParticipant domain,
             in string type_name);
         string get_type_name();
-#if OPENDDS_HAS_DYNAMIC_TYPE
+#ifndef OPENDDS_SAFETY_PROFILE
+        // valuetype isn't supported in Java. This will exclude this operation
+        // from the generated Java code and return null in get_type method of
+        // the TAOPeer generated C++ class so it isn't a pure virtual function.
+        @OpenDDS::hidden_op_in_java("return 0;")
         DynamicType get_type();
 #endif
     };

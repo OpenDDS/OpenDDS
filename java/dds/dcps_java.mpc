@@ -6,7 +6,6 @@ project: idl2jni, javah, dcpslib, optional_jni_check, dcps_java_optional, dcps_t
   idl2jniflags += -SS -I$(DDS_ROOT) -I$(TAO_ROOT) -I.. \
                   -Wb,stub_export_include=dcps_java_export.h \
                   -Wb,stub_export_macro=dcps_java_Export
-  idl2jniflags += -DOPENDDS_HAS_DYNAMIC_TYPE=0
   dynamicflags += DCPS_JAVA_BUILD_DLL
   includes     += $(DDS_ROOT)/dds $(DDS_ROOT) ..
   macros       += NOMINMAX         //don't #define min and max in Win32 headers
