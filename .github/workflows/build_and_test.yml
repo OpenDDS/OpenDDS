@@ -4067,7 +4067,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4151,7 +4151,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4237,7 +4237,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4361,7 +4361,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -8043,7 +8043,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8138,7 +8138,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8372,7 +8372,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8677,7 +8677,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
