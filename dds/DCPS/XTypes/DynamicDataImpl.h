@@ -532,7 +532,6 @@ private:
   bool has_optional_member(bool& has_optional) const;
 
   bool get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
-  const char* typekind_to_string(TypeKind tk) const;
 
   /// A set of strings used to prevent infinite recursion when checking for XCDR1 Mutable
   typedef OPENDDS_SET(DCPS::String) DynamicTypeNameSet;

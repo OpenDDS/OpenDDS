@@ -252,8 +252,8 @@ namespace {
           }
         }
       } else if (type_class & CL_UNION) {
-        // A union will always different as a key because it's going to be just
-        // the discriminator.
+        // A union will always be different as a key because it's just the
+        // discriminator.
         result = true;
       }
     }

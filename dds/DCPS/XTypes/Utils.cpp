@@ -222,7 +222,8 @@ namespace {
     if (!base_type) {
       return DDS::RETCODE_BAD_PARAMETER;
     }
-    switch (base_type->get_kind()) {
+    const TypeKind kind = base_type->get_kind();
+    switch (kind) {
     case TK_STRUCTURE:
       {
         DDS::DynamicTypeMembersById_var members;
@@ -268,8 +269,9 @@ namespace {
     default:
       if (base_path.level() == 0) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_DEBUG((LM_NOTICE, "(%P|%t) NOTICE: get_keys_i: "
-            "get_keys was passed an invalid topic type: C\n"));
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: get_keys_i: "
+            "get_keys was passed an invalid topic type: %C\n",
+            typekind_to_string(kind)));
         }
         return DDS::RETCODE_BAD_PARAMETER;
       }
@@ -294,6 +296,72 @@ DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count)
     count = paths.size();
   }
   return rc;
+}
+
+const char* typekind_to_string(DDS::TypeKind tk)
+{
+  switch (tk) {
+  case TK_BOOLEAN:
+    return "boolean";
+  case TK_BYTE:
+    return "byte";
+  case TK_INT16:
+    return "int16";
+  case TK_INT32:
+    return "int32";
+  case TK_INT64:
+    return "int64";
+  case TK_UINT16:
+    return "uint16";
+  case TK_UINT32:
+    return "uint32";
+  case TK_UINT64:
+    return "uint64";
+  case TK_FLOAT32:
+    return "float32";
+  case TK_FLOAT64:
+    return "float64";
+  case TK_FLOAT128:
+    return "float128";
+  case TK_INT8:
+    return "int8";
+  case TK_UINT8:
+    return "uint8";
+  case TK_CHAR8:
+    return "char8";
+  case TK_CHAR16:
+    return "char16";
+  case TK_STRING8:
+    return "string";
+  case TK_STRING16:
+    return "wstring";
+  case TK_ALIAS:
+    return "alias";
+  case TK_ENUM:
+    return "enum";
+  case TK_BITMASK:
+    return "bitmask";
+  case TK_ANNOTATION:
+    return "annotation";
+  case TK_STRUCTURE:
+    return "structure";
+  case TK_UNION:
+    return "union";
+  case TK_BITSET:
+    return "bitset";
+  case TK_SEQUENCE:
+    return "sequence";
+  case TK_ARRAY:
+    return "array";
+  case TK_MAP:
+    return "map";
+  default:
+    if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: typekind_to_string: "
+        "passed unknown TypeKind %u\n", tk));
+    }
+    return "unknown";
+  }
 }
 
 } // namespace XTypes
