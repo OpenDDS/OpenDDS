@@ -3553,7 +3553,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
             ++cumulative_send_count;
             continue;
           }
-        } else if (proxy.pre_contains(seq)) {
+        } else if (proxy.pre_contains(seq) || seq > max_sn_) {
           // Can't answer, don't gap.
           continue;
         }
@@ -3602,7 +3602,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
           }
           continue;
         }
-      } else if (proxy.pre_contains(seq)) {
+      } else if (proxy.pre_contains(seq) || seq > max_sn_) {
         // Can't answer, don't gap.
         continue;
       }
