@@ -47,7 +47,7 @@ public:
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
 
   //  MemberId get_member_id_by_name(const char* name);
-  DDS:MemberId get_member_id_at_index(ACE_CDR::ULong index);
+  DDS::MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
 
   DDS::ReturnCode_t clear_all_values();

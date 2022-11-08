@@ -82,14 +82,13 @@ public:
     }
     }
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_member_id_by_name:")
-                " Calling on an unexpected type %C\n", typekind_to_string(tk)));
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_member_id_by_name:"
+                 " Calling on an unexpected type %C\n", typekind_to_string(tk)));
     }
   return MEMBER_ID_INVALID;
   }
 
 protected:
-
   bool is_type_supported(TypeKind tk, const char* func_name)
   {
     if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
@@ -152,7 +151,7 @@ protected:
     return false;
   }
 
-  DDS::DynamicData_var type_
+  DDS::DynamicType_var type_;
 };
 
 } // namespace XTypes
