@@ -180,8 +180,8 @@ RtpsUdpReceiveStrategy::handle_input(ACE_HANDLE fd)
   // If newly selected buffer index still has a reference count, we'll need to allocate a new one for the read
   if (receive_buffers_[INDEX]->data_block()->reference_count() > 1) {
 
-    if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"));
+    if (log_level >= LogLevel::Info) {
+      ACE_DEBUG((LM_INFO, "(%P|%t) RtpsUdpReceiveStrategy::handle_input: reallocating primary receive buffer based on reference count\n"));
     }
 
     ACE_DES_FREE(
