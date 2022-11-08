@@ -140,7 +140,7 @@ DDS::ReturnCode_t MemberPath::get_member_from_type(
       return DDS::RETCODE_BAD_PARAMETER;
     }
   }
-  member = current_member._retn();
+  member = current_member;
 
   return DDS::RETCODE_OK;
 }

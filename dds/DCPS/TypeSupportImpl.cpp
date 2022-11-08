@@ -175,6 +175,30 @@ void TypeSupportImpl::populate_dependencies(const XTypes::TypeLookupService_rch&
   populate_dependencies_i(tls, XTypes::EK_COMPLETE);
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
+DDS::DynamicType_ptr TypeSupportImpl::get_type_from_type_lookup_service()
+{
+  if (!type_lookup_service_) {
+    type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
+    add_types(type_lookup_service_);
+    populate_dependencies(type_lookup_service_);
+  }
+
+  const XTypes::TypeIdentifier& cti = getCompleteTypeIdentifier();
+  const XTypes::TypeMap& ctm = getCompleteTypeMap();
+  const XTypes::TypeIdentifier& mti = getMinimalTypeIdentifier();
+  const XTypes::TypeMap& mtm = getMinimalTypeMap();
+  XTypes::DynamicTypeImpl* dt = dynamic_cast<XTypes::DynamicTypeImpl*>(
+    type_lookup_service_->type_identifier_to_dynamic(cti, GUID_UNKNOWN));
+  dt->set_complete_type_identifier(cti);
+  dt->set_complete_type_map(ctm);
+  dt->set_minimal_type_identifier(mti);
+  dt->set_minimal_type_map(mtm);
+
+  return dt;
+}
+#endif
+
 }
 }
 

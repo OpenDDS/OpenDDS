@@ -32,7 +32,7 @@ local interface DynamicTypeSupportInterf : TypeSupport {
 #endif
 };
 
-local interface DynamicDataWriter : Entity {
+local interface DynamicDataWriter : DataWriter {
   // This should match what DataWriterImpl_T is implementing
   InstanceHandle_t register_instance(
     in DynamicData instance);

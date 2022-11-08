@@ -115,6 +115,11 @@ public:
   void add_types(const XTypes::TypeLookupService_rch& tls) const;
   void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
 
+protected:
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicType_ptr get_type_from_type_lookup_service();
+#endif
+
 private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
 
@@ -125,8 +130,11 @@ private:
   void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                XTypes::EquivalenceKind ek) const;
 
-  OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
+#ifndef OPENDDS_SAFETY_PROFILE
+  XTypes::TypeLookupService_rch type_lookup_service_;
+#endif
 
+  OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };
 
 template <typename NativeType>
@@ -173,24 +181,7 @@ public:
 #ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicType_ptr get_type()
   {
-    if (!type_lookup_service_) {
-      type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
-      add_types(type_lookup_service_);
-      populate_dependencies(type_lookup_service_);
-    }
-
-    const XTypes::TypeIdentifier& cti = getCompleteTypeIdentifier();
-    const XTypes::TypeMap& ctm = getCompleteTypeMap();
-    const XTypes::TypeIdentifier& mti = getMinimalTypeIdentifier();
-    const XTypes::TypeMap& mtm = getMinimalTypeMap();
-    XTypes::DynamicTypeImpl* dt = dynamic_cast<XTypes::DynamicTypeImpl*>(
-      type_lookup_service_->type_identifier_to_dynamic(cti, GUID_UNKNOWN));
-    dt->set_complete_type_identifier(cti);
-    dt->set_complete_type_map(ctm);
-    dt->set_minimal_type_identifier(mti);
-    dt->set_minimal_type_map(mtm);
-
-    return dt;
+    return get_type_from_type_lookup_service();
   }
 #endif
 

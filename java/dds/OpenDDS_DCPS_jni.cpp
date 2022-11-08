@@ -1206,9 +1206,10 @@ jlong JNICALL Java_DDS_GuardCondition__1jni_1init(JNIEnv *, jclass)
 }
 
 #ifndef OPENDDS_SAFETY_PROFILE
-// These are here to satisfy linking requirements on some platforms for the
-// functions that were generated forward declaration of DynamicType in
-// DdsDcpsTopic.idl.
+// Forward declarations of these functions are generated for the forward
+// declaration of DynamicType in DdsDcpsTopic.idl. They shouldn't be used
+// anywhere, but at least on Windows and macOS, declarations need definitions,
+// so these are defined as stubs here.
 void copyToCxx(JNIEnv*, DDS::DynamicType_var&, jobject) {}
-void copyToJava(JNIEnv*, jobject&, const DDS::DynamicType_var&, bool) {};
+void copyToJava(JNIEnv*, jobject&, const DDS::DynamicType_var&, bool) {}
 #endif

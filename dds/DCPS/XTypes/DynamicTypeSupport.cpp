@@ -6,8 +6,7 @@
 #include <DCPS/DdsDcps_pch.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
-
-#  include "DynamicTypeSupportImpl.h"
+#  include "DynamicTypeSupport.h"
 
 #  include "DynamicTypeImpl.h"
 #  include "Utils.h"

@@ -16,7 +16,7 @@
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
-#include <dds/DCPS/XTypes/DynamicTypeSupportImpl.h>
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
