@@ -4067,7 +4067,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4151,7 +4151,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4237,7 +4237,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4361,7 +4361,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -6491,7 +6491,7 @@ jobs:
         tar xvfJ build_w19_p1_stat_js0.tar.xz
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
@@ -7376,7 +7376,7 @@ jobs:
         tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
@@ -8043,7 +8043,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8138,7 +8138,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8294,7 +8294,7 @@ jobs:
         tar xvfJ build_w19_re_o1p1_sec.tar.xz
         rm -f build_w19_re_o1p1_sec.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
       shell: cmd
       run: |
@@ -8372,7 +8372,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8677,7 +8677,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -9131,7 +9131,7 @@ jobs:
         tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
         rm -f build_w19_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
@@ -9865,7 +9865,7 @@ jobs:
       run: |
         mv OpenDDS /c/
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
@@ -10214,7 +10214,7 @@ jobs:
         tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
         rm -f build_w22_x86_i0_j_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
