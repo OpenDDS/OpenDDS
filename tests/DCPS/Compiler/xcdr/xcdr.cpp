@@ -1989,7 +1989,7 @@ template<typename Type>
 void key_only_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter != FieldFilter_KeyOnly || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2050,7 +2050,7 @@ template<typename Type>
 void key_only_union_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter != FieldFilter_KeyOnly || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed = field_filter == FieldFilter_All;
 
   if (include_unkeyed) {
@@ -2103,7 +2103,7 @@ template<typename Type>
 void key_only_complex_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter != FieldFilter_KeyOnly || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2207,7 +2207,7 @@ void key_only_tests_struct_expect_values_equal(
   const TypeA& a, const TypeB& b,
   FieldFilter field_filter, bool keyed)
 {
-  if (field_filter != FieldFilter_KeyOnly || keyed) {
+  if ((field_filter != FieldFilter_KeyOnly) || keyed) {
     EXPECT_EQ(a.long_value, b.long_value);
     expect_arrays_are_equal(a.long_array_value, b.long_array_value);
     /* TODO(iguessthislldo): See IDL Def
@@ -2335,7 +2335,7 @@ template<typename TypeA, typename TypeB>
 void key_only_tests_complex_expect_values_equal(const TypeA& a, const TypeB& b,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter != FieldFilter_KeyOnly || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
   const FieldFilter child =
@@ -2448,7 +2448,7 @@ const unsigned char key_only_non_keys_expected_base[] = {
 void build_expected_basic_struct(
   DataVec& expected, FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter != FieldFilter_KeyOnly || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2488,7 +2488,7 @@ const unsigned char key_only_union_non_keys_expected_base[] = {
 
 void build_expected_union(DataVec& expected, FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter != FieldFilter_KeyOnly || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed = field_filter == FieldFilter_All;
 
   DataView keys;
@@ -2521,7 +2521,7 @@ void build_expected<KeyedUnion>(DataVec& expected, FieldFilter field_filter)
 void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, bool keyed)
 {
   DataVec all_contents;
-  const bool include_possible_keyed = field_filter != FieldFilter_KeyOnly || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
   const FieldFilter nested_field_filter =
