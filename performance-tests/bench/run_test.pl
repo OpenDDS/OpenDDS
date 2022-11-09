@@ -10,6 +10,7 @@ use Env (DDS_ROOT);
 use lib "$DDS_ROOT/bin";
 use Env (ACE_ROOT);
 use lib "$ACE_ROOT/bin";
+use Env (TEST_RUN_PARAMS);
 use PerlDDS::Run_Test;
 use strict;
 
@@ -27,6 +28,10 @@ $test->{add_pending_timeout} = 0;
 my $tc_opts = "--wait-for-nodes 7 example";
 my $nc_opts = "one-shot --name test_nc_" . $$;
 my $is_rtps_disc = 0;
+
+if ($TEST_RUN_PARAMS ne "") {
+  $tc_opts .= " $TEST_RUN_PARAMS";
+}
 
 if ($test->flag('--show-worker-logs')) {
   # This should be set for CI & autobuild runs to catch any error messages in worker DDS logs
