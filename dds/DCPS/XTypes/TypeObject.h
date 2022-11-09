@@ -2343,6 +2343,9 @@ namespace XTypes {
                             const TypeIdentifier& type_identifier,
                             OPENDDS_SET(TypeIdentifier)& dependencies);
 
+  OpenDDS_Dcps_Export
+  const char* typekind_to_string(TypeKind tk);
+
 } // namespace XTypes
 
 namespace DCPS {
