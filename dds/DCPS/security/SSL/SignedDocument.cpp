@@ -9,6 +9,8 @@
 
 #include <dds/DCPS/security/CommonUtilities.h>
 
+#include <dds/DCPS/Definitions.h>
+
 #include <openssl/pem.h>
 
 #include <cstring>
@@ -44,27 +46,8 @@ SignedDocument::SignedDocument(const DDS::OctetSeq& src)
 {
 }
 
-SignedDocument::SignedDocument(const SignedDocument& rhs)
-  : original_(rhs.original_)
-  , content_(rhs.content_)
-  , verified_(rhs.verified_)
-  , filename_(rhs.filename_)
-{
-}
-
 SignedDocument::~SignedDocument()
 {
-}
-
-SignedDocument& SignedDocument::operator=(const SignedDocument& rhs)
-{
-  if (this != &rhs) {
-    original_ = rhs.original_;
-    content_ = rhs.content_;
-    verified_ = rhs.verified_;
-    filename_ = rhs.filename_;
-  }
-  return *this;
 }
 
 bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityException& ex)
@@ -108,59 +91,179 @@ bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityExcepti
   return true;
 }
 
+class X509Store {
+public:
+  X509Store()
+    : store_(X509_STORE_new())
+  {
+    if (!store_) {
+      OPENDDS_SSL_LOG_ERR("X509_STORE_new failed");
+    }
+  }
+
+  ~X509Store()
+  {
+    if (store_) {
+      X509_STORE_free(store_);
+    }
+  }
+
+  X509_STORE* store() const { return store_; }
+  operator bool() const {return store_;}
+
+  bool add_cert(const Certificate& certificate)
+  {
+    if (X509_STORE_add_cert(store_, certificate.x509()) != 1) {
+      OPENDDS_SSL_LOG_ERR("X509_STORE_add_cert failed");
+      return false;
+    }
+
+    return true;
+  }
+
+private:
+  // No copy.
+  X509Store(const X509Store&);
+  X509_STORE* store_;
+};
+
+class Bio {
+public:
+  Bio()
+    : bio_(0)
+  {}
+
+  bool new_mem()
+  {
+    OPENDDS_ASSERT(!bio_);
+    bio_ = BIO_new(BIO_s_mem());
+    if (!bio_) {
+      OPENDDS_SSL_LOG_ERR("BIO_new failed");
+      return false;
+    }
+
+    return true;
+  }
+
+  ~Bio()
+  {
+    if (bio_) {
+      BIO_free(bio_);
+    }
+  }
+
+  BIO* bio() const { return bio_; }
+  BIO*& bio() { return bio_; }
+  operator bool() const {return bio_;}
+
+  bool write(const void* data, int dlen)
+  {
+    if (BIO_write(bio_, data, dlen) != dlen) {
+      OPENDDS_SSL_LOG_ERR("BIO_write failed");
+      return false;
+    }
+
+    return true;
+  }
+
+  long get_mem_data(char **pp)
+  {
+    const long size = BIO_get_mem_data(bio_, pp);
+    if (size < 0) {
+      OPENDDS_SSL_LOG_ERR("BIO_get_mem_data failed");
+    }
+
+    return size;
+  }
+
+private:
+  // No copy.
+  Bio(const Bio&);
+  BIO* bio_;
+};
+
+class PKCS7Doc {
+public:
+  PKCS7Doc(PKCS7* doc)
+    : doc_(doc)
+  {}
+
+  ~PKCS7Doc()
+  {
+    if (doc_) {
+      PKCS7_free(doc_);
+    }
+  }
+
+  operator bool() const { return doc_; }
+
+  bool verify(STACK_OF(X509)* certs,
+              const X509Store& store,
+              const Bio& indata,
+              const Bio& outdata,
+              int flags)
+  {
+    if (PKCS7_verify(doc_, certs, store.store(), indata.bio(), outdata.bio(), flags) != 1) {
+      OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
+      return false;
+    }
+
+    return true;
+  }
+
+private:
+  // No copy.
+  PKCS7Doc(const PKCS7Doc&);
+  PKCS7* doc_;
+};
+
 bool SignedDocument::verify(const Certificate& ca)
 {
   content_.clear();
   verified_ = false;
 
-  X509_STORE* store = X509_STORE_new();
-  if (store) {
-    if (X509_STORE_add_cert(store, ca.x509()) == 1) {
-      BIO* filebuf = BIO_new(BIO_s_mem());
-      if (filebuf) {
-        if (BIO_write(filebuf, original_.get_buffer(), original_.length()) > 0) {
-          BIO* bcont = 0;
-          PKCS7* doc = SMIME_read_PKCS7(filebuf, &bcont);
-          if (doc) {
-            BIO* content = BIO_new(BIO_s_mem());
-            if (content) {
-              if (PKCS7_verify(doc, 0, store, bcont, content, PKCS7_TEXT) == 1) {
-                char* p = 0;
-                long size = BIO_get_mem_data(content, &p);
-                if (size >= 0) {
-                  content_ = std::string(p, size);
-                  verified_ = true;
-                } else {
-                  OPENDDS_SSL_LOG_ERR("BIO_get_mem_data failed");
-                }
-              } else {
-                OPENDDS_SSL_LOG_ERR("PKCS7_verify failed");
-              }
-              BIO_free(content);
-            } else {
-              OPENDDS_SSL_LOG_ERR("BIO_new failed");
-            }
-            if (bcont) {
-              BIO_free(bcont);
-            }
-            PKCS7_free(doc);
-          } else {
-            OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
-          }
-        } else {
-          OPENDDS_SSL_LOG_ERR("BIO_write failed");
-        }
-        BIO_free(filebuf);
-      } else {
-        OPENDDS_SSL_LOG_ERR("BIO_new failed");
-      }
-    } else {
-      OPENDDS_SSL_LOG_ERR("X509_STORE_add_cert failed");
-    }
-    X509_STORE_free(store);
-  } else {
-    OPENDDS_SSL_LOG_ERR("X509_STORE_new failed");
+  X509Store store;
+  if (!store) {
+    return false;
   }
+
+  if (!store.add_cert(ca)) {
+    return false;
+  }
+
+  Bio filebuf;
+  if (!filebuf.new_mem()) {
+    return false;
+  }
+
+  if (!filebuf.write(original_.get_buffer(), original_.length())) {
+    return false;
+  }
+
+  Bio bcont;
+  PKCS7Doc doc(SMIME_read_PKCS7(filebuf.bio(), &bcont.bio()));
+  if (!doc) {
+    OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
+    return false;
+  }
+
+  Bio content;
+  if (!content.new_mem()) {
+    return false;
+  }
+
+  if (!doc.verify(0, store, bcont, content, PKCS7_TEXT)) {
+    return false;
+  }
+
+  char* p = 0;
+  long size = content.get_mem_data(&p);
+  if (size < 0) {
+    return false;
+  }
+
+  content_ = std::string(p, size);
+  verified_ = true;
 
   return verified_;
 }

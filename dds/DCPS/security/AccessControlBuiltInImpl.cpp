@@ -207,12 +207,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   // permissions file
   TokenReader remote_perm_wrapper(remote_credential_token);
   SSL::SignedDocument remote_perm_doc(remote_perm_wrapper.get_bin_property_value("c.perm"));
-  Permissions::shared_ptr remote_permissions = DCPS::make_rch<Permissions>();
-
-  if (remote_permissions->load(remote_perm_doc)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
-    return DDS::HANDLE_NIL;
-  }
 
   const LocalAccessCredentialData::shared_ptr& local_access_credential_data = piter->second.local_access_credential_data;
 
@@ -231,6 +225,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT(
       "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions document verified.\n")));
+  }
+
+  Permissions::shared_ptr remote_permissions = DCPS::make_rch<Permissions>();
+  if (remote_permissions->load(remote_perm_doc)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
+    return DDS::HANDLE_NIL;
   }
 
   //Extract and compare the remote subject name for validation
