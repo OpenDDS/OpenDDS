@@ -3896,8 +3896,18 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        sed -i 's/DevGuideExamples/tests\/unit-tests/' DDS_no_tests.mwc
+        cat > u20_p1_ubsan_sec.mwc <<EOF
+        workspace {
+          DDS_no_tests.mwc
+          exclude {
+            DevGuideExamples
+          }
+          tests/GtestUtils
+          tests/unit-tests
+        }
+        EOF
         ./configure \
+          --workspace u20_p1_ubsan_sec.mwc \
           --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE \
           --mpc=$GITHUB_WORKSPACE/MPC \
           --compiler=clang++-12 \
@@ -5263,7 +5273,21 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --static --qt --wireshark --security --rapidjson --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
+        cat > u22_stat_qt_ws_sec.mwc <<EOF
+        workspace {
+          DDS_no_tests.mwc
+          tests/DCPS/Messenger
+          tests/DCPS/C++11
+          tests/DCPS/Compiler
+          tests/GtestUtils
+          tests/unit-tests
+          tests/security/attributes
+        }
+        EOF
+        ./configure --static --workspace u22_stat_qt_ws_sec.mwc \
+          --security --qt --wireshark --rapidjson \
+          --gtest=$GITHUB_WORKSPACE/OpenDDS/tests/googletest/build/install \
+          --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC
     - name: check build configuration
       shell: bash
       run: |
@@ -5276,84 +5300,14 @@ jobs:
       run: |
         cd OpenDDS
         . setenv.sh
-        make -j4
+        make  -j $(getconf _NPROCESSORS_ONLN)
     - name: Build CMake Tests
       run: |
         source OpenDDS/setenv.sh
         mkdir OpenDDS/tests/cmake/build
         cd OpenDDS/tests/cmake/build
         cmake ..
-        cmake --build . -- -j4
-    - name: configure messenger tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Messenger
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make messenger tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Messenger
-        make
-    - name: configure C++11 messenger test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/C++11
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make C++11 messenger test
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/C++11
-        make
-    - name: configure compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make compiler tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/DCPS/Compiler
-        make
-    - name: configure unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: make unit tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/unit-tests
-        make
-    - name: configure security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        perl $ACE_ROOT/bin/mwc.pl -type gnuace -static
-    - name: build security tests
-      shell: bash
-      run: |
-        cd OpenDDS
-        . setenv.sh
-        cd tests/security/attributes
-        make -j $(getconf _NPROCESSORS_ONLN)
+        cmake --build . -- -j $(getconf _NPROCESSORS_ONLN)
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |

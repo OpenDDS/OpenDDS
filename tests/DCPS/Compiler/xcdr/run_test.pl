@@ -7,6 +7,8 @@ use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 use strict;
 
+PerlDDS::add_lib_path('../GtestUtils');
+
 my $test = new PerlDDS::TestFramework();
 $test->process('test', 'xcdr');
 $test->start_process('test');
