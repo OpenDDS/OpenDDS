@@ -1510,20 +1510,6 @@ DynamicDataImpl::SingleValue::SingleValue(CORBA::LongDouble float128)
   : kind_(TK_FLOAT128), float128_(float128)
 {}
 
-/*
-DynamicDataImpl::SingleValue::SingleValue(CORBA::Char char8)
-  : kind_(TK_CHAR8), char8_(char8)
-{}
-
-DynamicDataImpl::SingleValue::SingleValue(CORBA::Octet byte)
-  : kind_(TK_BYTE), byte_(byte)
-{}
-
-DynamicDataImpl::SingleValue::SingleValue(CORBA::Boolean boolean)
-  : kind_(TK_BOOLEAN), boolean_(boolean)
-{}
-*/
-
 DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_char from_char)
   : kind_(TK_CHAR8), char8_(from_char)
 {}
@@ -1541,10 +1527,6 @@ DynamicDataImpl::SingleValue::SingleValue(const char* str)
 {}
 
 #ifdef DDS_HAS_WCHAR
-//DynamicDataImpl::SingleValue::SingleValue(CORBA::WChar char16)
-//  : kind_(TK_CHAR16), char16_(char16)
-//{}
-
 DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_wchar from_wchar)
   : kind_(TK_CHAR16), char16_(from_wchar)
 {}
@@ -2601,22 +2583,6 @@ bool DynamicDataImpl::DataContainer::serialize_primitive_sequence(DCPS::Serializ
 // Unlike primitive types, string and wstring are not as easy to reconstruct since each
 // element string may need to be reconstructed individually. Instead, we serialize
 // the element strings one by one directly.
-/*
-template<typename StringType>
-void DynamicDataImpl::DataContainer::serialized_size_generic_string(const DCPS::Encoding& encoding,
-  size_t& size, TypeKind str_kind, StringType value) const
-{
-  primitive_serialized_size_ulong(encoding, size);
-  if (value) {
-    if (str_kind == TK_STRING8) {
-      size += ACE_OS::strlen(value) + 1; // Include null termination
-    } else { // TK_STRING16
-      size += ACE_OS::strlen(value) * DCPS::char16_cdr_size; // Not include null termination
-    }
-  }
-}
-*/
-
 void DynamicDataImpl::DataContainer::serialized_size_string_common(const DCPS::Encoding& encoding,
   size_t& size, const char* str) const
 {
@@ -2659,7 +2625,6 @@ bool DynamicDataImpl::DataContainer::serialized_size_generic_string_collection(
     if (id != MEMBER_ID_INVALID) {
       const_single_iterator single_it = single_map_.find(id);
       if (single_it != single_map_.end()) {
-        //serialized_size_generic_string<StringType>(encoding, size, str_kind, single_it->second.get());
         serialized_size_string_common(encoding, size, single_it->second);
       } else if (!serialized_size_complex_member_i(encoding, size, id)) {
         return false;
@@ -2667,7 +2632,6 @@ bool DynamicDataImpl::DataContainer::serialized_size_generic_string_collection(
     } else {
       StringType default_value;
       set_default_basic_value(default_value);
-      //serialized_size_generic_string(encoding, size, str_kind, default_value);
       serialized_size_string_common(encoding, size, default_value);
     }
   }
@@ -2761,15 +2725,16 @@ bool DynamicDataImpl::DataContainer::set_default_enum_values(CollectionType& col
   return true;
 }
 
-template<typename ElementType, typename CollectionType>
+template<typename ElementType, typename WrapElementType, typename CollectionType>
 bool DynamicDataImpl::DataContainer::reconstruct_enum_collection(CollectionType& collection,
-  CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
+  CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type,
+  const WrapElementType& elem_tag) const
 {
   collection.length(size);
   if (!set_default_enum_values<ElementType>(collection, enum_type)) {
     return false;
   }
-  return set_primitive_values(collection, bound);
+  return set_primitive_values(collection, bound, elem_tag);
 }
 
 // Serialize enum sequence represented as int8 sequence
@@ -2817,7 +2782,7 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_int8s(DCPS::Seri
   CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int8Seq enumseq;
-  return reconstruct_enum_collection<CORBA::Int8>(enumseq, size, bound, enum_type) &&
+  return reconstruct_enum_collection<CORBA::Int8>(enumseq, size, bound, enum_type, ACE_OutputCDR::from_int8(0)) &&
     serialize_enum_sequence_as_ints_i(ser, enumseq);
 }
 
@@ -2866,7 +2831,7 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_int16s(DCPS::Ser
   CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int16Seq enumseq;
-  return reconstruct_enum_collection<CORBA::Short>(enumseq, size, bound, enum_type) &&
+  return reconstruct_enum_collection<CORBA::Short>(enumseq, size, bound, enum_type, CORBA::Short()) &&
     serialize_enum_sequence_as_ints_i(ser, enumseq);
 }
 
@@ -2915,51 +2880,8 @@ bool DynamicDataImpl::DataContainer::serialize_enum_sequence_as_int32s(DCPS::Ser
   CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int32Seq enumseq;
-  return reconstruct_enum_collection<CORBA::Long>(enumseq, size, bound, enum_type) &&
+  return reconstruct_enum_collection<CORBA::Long>(enumseq, size, bound, enum_type, CORBA::Long()) &&
     serialize_enum_sequence_as_ints_i(ser, enumseq);
-}
-
-bool DynamicDataImpl::DataContainer::serialized_size_enum_sequence(
-  const DCPS::Encoding& encoding, size_t& size, const_sequence_iterator it) const
-{
-  switch (it->second.elem_kind_) {
-  case TK_INT8: {
-    const DDS::Int8Seq& seq = it->second.get<DDS::Int8Seq>();
-    serialized_size_enum_sequence(encoding, size, seq);
-    return true;
-  }
-  case TK_INT16: {
-    const DDS::Int16Seq& seq = it->second.get<DDS::Int16Seq>();
-    serialized_size_enum_sequence(encoding, size, seq);
-    return true;
-  }
-  case TK_INT32: {
-    const DDS::Int32Seq& seq = it->second.get<DDS::Int32Seq>();
-    serialized_size_enum_sequence(encoding, size, seq);
-    return true;
-  }
-  }
-  return false;
-}
-
-bool DynamicDataImpl::DataContainer::serialize_enum_sequence(
-  DCPS::Serializer& ser, const_sequence_iterator it) const
-{
-  switch (it->second.elem_kind_) {
-  case TK_INT8: {
-    const DDS::Int8Seq& seq = it->second.get<DDS::Int8Seq>();
-    return serialize_enum_sequence_as_ints_i(ser, seq);
-  }
-  case TK_INT16: {
-    const DDS::Int16Seq& seq = it->second.get<DDS::Int16Seq>();
-    return serialize_enum_sequence_as_ints_i(ser, seq);
-  }
-  case TK_INT32: {
-    const DDS::Int32Seq& seq = it->second.get<DDS::Int32Seq>();
-    return serialize_enum_sequence_as_ints_i(ser, seq);
-  }
-  }
-  return false;
 }
 
 void DynamicDataImpl::DataContainer::serialized_size_enum_sequence(const DCPS::Encoding& encoding,
@@ -2997,13 +2919,13 @@ void DynamicDataImpl::DataContainer::set_default_bitmask_values(CollectionType& 
   }
 }
 
-template<typename CollectionType>
+template<typename WrapElementType, typename CollectionType>
 bool DynamicDataImpl::DataContainer::reconstruct_bitmask_collection(CollectionType& collection,
-  CORBA::ULong size, CORBA::ULong bound) const
+  CORBA::ULong size, CORBA::ULong bound, const WrapElementType& elem_tag) const
 {
   collection.length(size);
   set_default_bitmask_values(collection);
-  return set_primitive_values(collection, bound);
+  return set_primitive_values(collection, bound, elem_tag);
 }
 
 // Bitmask sequence represented as uint8 sequence.
@@ -3051,7 +2973,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint8s(DCPS::
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt8Seq bitmask_seq;
-  return reconstruct_bitmask_collection(bitmask_seq, size, bound) &&
+  return reconstruct_bitmask_collection(bitmask_seq, size, bound, ACE_OutputCDR::from_uint8(0)) &&
     serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
 }
 
@@ -3100,7 +3022,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint16s(DCPS:
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt16Seq bitmask_seq;
-  return reconstruct_bitmask_collection(bitmask_seq, size, bound) &&
+  return reconstruct_bitmask_collection(bitmask_seq, size, bound, CORBA::UShort()) &&
     serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
 }
 
@@ -3149,7 +3071,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint32s(DCPS:
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt32Seq bitmask_seq;
-  return reconstruct_bitmask_collection(bitmask_seq, size, bound) &&
+  return reconstruct_bitmask_collection(bitmask_seq, size, bound, CORBA::ULong()) &&
     serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
 }
 
@@ -3198,60 +3120,8 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence_as_uint64s(DCPS:
   CORBA::ULong size, CORBA::ULong bound) const
 {
   DDS::UInt64Seq bitmask_seq;
-  return reconstruct_bitmask_collection(bitmask_seq, size, bound) &&
+  return reconstruct_bitmask_collection(bitmask_seq, size, bound, CORBA::ULongLong()) &&
     serialize_bitmask_sequence_as_uints_i(ser, bitmask_seq);
-}
-
-bool DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(
-  const DCPS::Encoding& encoding, size_t& size, const_sequence_iterator it) const
-{
-  switch (it->second.elem_kind_) {
-  case TK_UINT8: {
-    const DDS::UInt8Seq& seq = it->second.get<DDS::UInt8Seq>();
-    serialized_size_bitmask_sequence(encoding, size, seq);
-    return true;
-  }
-  case TK_UINT16: {
-    const DDS::UInt16Seq& seq = it->second.get<DDS::UInt16Seq>();
-    serialized_size_bitmask_sequence(encoding, size, seq);
-    return true;
-  }
-  case TK_UINT32: {
-    const DDS::UInt32Seq& seq = it->second.get<DDS::UInt32Seq>();
-    serialized_size_bitmask_sequence(encoding, size, seq);
-    return true;
-  }
-  case TK_UINT64: {
-    const DDS::UInt64Seq& seq = it->second.get<DDS::UInt64Seq>();
-    serialized_size_bitmask_sequence(encoding, size, seq);
-    return true;
-  }
-  }
-  return false;
-}
-
-bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence(DCPS::Serializer& ser,
-                                                                const_sequence_iterator it) const
-{
-  switch (it->second.elem_kind_) {
-  case TK_UINT8: {
-    const DDS::UInt8Seq& seq = it->second.get<DDS::UInt8Seq>();
-    return serialize_bitmask_sequence_as_uints_i(ser, seq);
-  }
-  case TK_UINT16: {
-    const DDS::UInt16Seq& seq = it->second.get<DDS::UInt16Seq>();
-    return serialize_bitmask_sequence_as_uints_i(ser, seq);
-  }
-  case TK_UINT32: {
-    const DDS::UInt32Seq& seq = it->second.get<DDS::UInt32Seq>();
-    return serialize_bitmask_sequence_as_uints_i(ser, seq);
-  }
-  case TK_UINT64: {
-    const DDS::UInt64Seq& seq = it->second.get<DDS::UInt64Seq>();
-    return serialize_bitmask_sequence_as_uints_i(ser, seq);
-  }
-  }
-  return false;
 }
 
 void DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(
@@ -3914,7 +3784,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
       length = largest_index + 1;
     }
     if (data_->is_primitive(elem_tk)) {
-      serialized_size_primitive_sequence(encoding, size);
+      serialized_size_primitive_sequence(encoding, size, elem_tk, length);
       return true;
     } else if (elem_tk == TK_STRING8) {
       IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
@@ -4251,7 +4121,7 @@ bool DynamicDataImpl::DataContainer::serialize_enum_array_as_int8s(DCPS::Seriali
   CORBA::ULong length, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int8Seq enumarr;
-  return reconstruct_enum_collection<CORBA::Int8>(enumarr, length, length, enum_type) &&
+  return reconstruct_enum_collection<CORBA::Int8>(enumarr, length, length, enum_type, ACE_OutputCDR::from_int8(0)) &&
     serialize_enum_array_as_ints_i(ser, enumarr);
 }
 
@@ -4283,7 +4153,7 @@ bool DynamicDataImpl::DataContainer::serialize_enum_array_as_int16s(DCPS::Serial
   CORBA::ULong length, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int16Seq enumarr;
-  return reconstruct_enum_collection<CORBA::Short>(enumarr, length, length, enum_type) &&
+  return reconstruct_enum_collection<CORBA::Short>(enumarr, length, length, enum_type, CORBA::Short()) &&
     serialize_enum_array_as_ints_i(ser, enumarr);
 }
 
@@ -4315,7 +4185,7 @@ bool DynamicDataImpl::DataContainer::serialize_enum_array_as_int32s(DCPS::Serial
   CORBA::ULong length, const DDS::DynamicType_var& enum_type) const
 {
   DDS::Int32Seq enumarr;
-  return reconstruct_enum_collection<CORBA::Long>(enumarr, length, length, enum_type) &&
+  return reconstruct_enum_collection<CORBA::Long>(enumarr, length, length, enum_type, CORBA::Long()) &&
     serialize_enum_array_as_ints_i(ser, enumarr);
 }
 
@@ -4372,7 +4242,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint8s(DCPS::Ser
                                                                        CORBA::ULong length) const
 {
   DDS::UInt8Seq bitmask_arr;
-  return reconstruct_bitmask_collection(bitmask_arr, length, length) &&
+  return reconstruct_bitmask_collection(bitmask_arr, length, length, ACE_OutputCDR::from_uint8(0)) &&
     serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
 }
 
@@ -4404,7 +4274,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint16s(DCPS::Se
                                                                         CORBA::ULong length) const
 {
   DDS::UInt16Seq bitmask_arr;
-  return reconstruct_bitmask_collection(bitmask_arr, length, length) &&
+  return reconstruct_bitmask_collection(bitmask_arr, length, length, CORBA::UShort()) &&
     serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
 }
 
@@ -4436,7 +4306,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint32s(DCPS::Se
                                                                         CORBA::ULong length) const
 {
   DDS::UInt32Seq bitmask_arr;
-  return reconstruct_bitmask_collection(bitmask_arr, length, length) &&
+  return reconstruct_bitmask_collection(bitmask_arr, length, length, CORBA::ULong()) &&
     serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
 }
 
@@ -4468,7 +4338,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_array_as_uint64s(DCPS::Se
                                                                         CORBA::ULong length) const
 {
   DDS::UInt64Seq bitmask_arr;
-  return reconstruct_bitmask_collection(bitmask_arr, length, length) &&
+  return reconstruct_bitmask_collection(bitmask_arr, length, length, CORBA::ULongLong()) &&
     serialize_bitmask_array_as_uints_i(ser, bitmask_arr);
 }
 
@@ -4881,22 +4751,6 @@ bool DynamicDataImpl::DataContainer::serialized_size_primitive_member(const DCPS
   return false;
 }
 
-void DynamicDataImpl::DataContainer::serialized_size_string_member(const DCPS::Encoding& encoding,
-  size_t& size, const char* str) const
-{
-  primitive_serialized_size_ulong(encoding, size);
-  size += ACE_OS::strlen(str) + 1;
-}
-
-void DynamicDataImpl::DataContainer::serialized_size_wstring_member(const DCPS::Encoding& encoding,
-  size_t& size, const CORBA::WChar* wstr) const
-{
-#ifdef DDS_HAS_WCHAR
-  primitive_serialized_size_ulong(encoding, size);
-  size += ACE_OS::strlen(wstr) * DCPS::char16_cdr_size;
-#endif
-}
-
 bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
   const DCPS::Encoding& encoding, size_t& size, TypeKind member_tk) const
 {
@@ -4905,14 +4759,17 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
   } else if (member_tk == TK_STRING8) {
     const char* str_default;
     set_default_basic_value(str_default);
-    serialized_size_string_member(encoding, size, str_default);
-    return true;
-  } else if (member_tk == TK_STRING16) {
-    const CORBA::WChar* wstr_default;
-    set_default_basic_value(wstr_default);
-    serialized_size_wstring_member(encoding, size, wstr_default);
+    serialized_size_string_common(encoding, size, str_default);
     return true;
   }
+#ifdef DDS_HAS_WCHAR
+  else if (member_tk == TK_STRING16) {
+    const CORBA::WChar* wstr_default;
+    set_default_basic_value(wstr_default);
+    serialized_size_string_common(encoding, size, wstr_default);
+    return true;
+  }
+#endif
   return false;
 }
 
@@ -4922,11 +4779,8 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_member(const DCPS::En
 {
   if (data_->is_primitive(member_tk)) {
     return serialized_size_primitive_member(encoding, size, member_tk);
-  } else if (member_tk == TK_STRING8) {
-    serialized_size_string_member(encoding, size, it->second.get());
-    return true;
-  } else if (member_tk == TK_STRING16) {
-    serialized_size_wstring_member(encoding, size, it->second.get());
+  } else if (member_tk == TK_STRING8 || member_tk == TK_STRING16) {
+    serialized_size_string_common(encoding, size, it->second);
     return true;
   }
   return false;
@@ -5031,7 +4885,7 @@ bool DynamicDataImpl::DataContainer::serialize_basic_member_default_value(DCPS::
 // Serialize an aggregated member stored in the single map.
 // The member type is basic or enum or bitmask.
 bool DynamicDataImpl::DataContainer::serialized_size_single_aggregated_member_xcdr2(
-  DCPS::Encoding& encoding, size_t& size, const_single_iterator it,
+  const DCPS::Encoding& encoding, size_t& size, const_single_iterator it,
   const DDS::DynamicType_var& member_type, bool optional,
   DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const
 {
@@ -5265,6 +5119,274 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_member_default_value(DCP
   return ser << static_cast<CORBA::ULong>(0);
 }
 
+bool DynamicDataImpl::DataContainer::serialized_size_basic_sequence(const DCPS::Encoding& encoding,
+  size_t& size, const_sequence_iterator it) const
+{
+  switch (it->second.elem_kind_) {
+  case TK_INT32: {
+    const DDS::Int32Seq& seq = it->second.get<DDS::Int32Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_UINT32: {
+    const DDS::UInt32Seq& seq = it->second.get<DDS::UInt32Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_INT8: {
+    const DDS::Int8Seq& seq = it->second.get<DDS::Int8Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_UINT8: {
+    const DDS::UInt8Seq& seq = it->second.get<DDS::UInt8Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_INT16: {
+    const DDS::Int16Seq& seq = it->second.get<DDS::Int16Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_UINT16: {
+    const DDS::UInt16Seq& seq = it->second.get<DDS::UInt16Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_INT64: {
+    const DDS::Int64Seq& seq = it->second.get<DDS::Int64Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_UINT64: {
+    const DDS::UInt64Seq& seq = it->second.get<DDS::UInt64Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_FLOAT32: {
+    const DDS::Float32Seq& seq = it->second.get<DDS::Float32Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_FLOAT64: {
+    const DDS::Float64Seq& seq = it->second.get<DDS::Float64Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_FLOAT128: {
+    const DDS::Float128Seq& seq = it->second.get<DDS::Float128Seq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_CHAR8: {
+    const DDS::CharSeq& seq = it->second.get<DDS::CharSeq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_BYTE: {
+    const DDS::ByteSeq& seq = it->second.get<DDS::ByteSeq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_BOOLEAN: {
+    const DDS::BooleanSeq& seq = it->second.get<DDS::BooleanSeq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_STRING8: {
+    const DDS::StringSeq& seq = it->second.get<DDS::StringSeq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    const DDS::WcharSeq& seq = it->second.get<DDS::WcharSeq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+  case TK_STRING16: {
+    const DDS::WstringSeq& seq = it->second.get<DDS::WstringSeq>();
+    serialized_size(encoding, size, seq);
+    return true;
+  }
+#endif
+  }
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialize_basic_sequence(DCPS::Serializer& ser,
+                                                              const_sequence_iterator it) const
+{
+  switch (it->second.elem_kind_) {
+  case TK_INT32: {
+    const DDS::Int32Seq& seq = it->second.get<DDS::Int32Seq>();
+    return ser << seq;
+  }
+  case TK_UINT32: {
+    const DDS::UInt32Seq& seq = it->second.get<DDS::UInt32Seq>();
+    return ser << seq;
+  }
+  case TK_INT8: {
+    const DDS::Int8Seq& seq = it->second.get<DDS::Int8Seq>();
+    return ser << seq;
+  }
+  case TK_UINT8: {
+    const DDS::UInt8Seq& seq = it->second.get<DDS::UInt8Seq>();
+    return ser << seq;
+  }
+  case TK_INT16: {
+    const DDS::Int16Seq& seq = it->second.get<DDS::Int16Seq>();
+    return ser << seq;
+  }
+  case TK_UINT16: {
+    const DDS::UInt16Seq& seq = it->second.get<DDS::UInt16Seq>();
+    return ser << seq;
+  }
+  case TK_INT64: {
+    const DDS::Int64Seq& seq = it->second.get<DDS::Int64Seq>();
+    return ser << seq;
+  }
+  case TK_UINT64: {
+    const DDS::UInt64Seq& seq = it->second.get<DDS::UInt64Seq>();
+    return ser << seq;
+  }
+  case TK_FLOAT32: {
+    const DDS::Float32Seq& seq = it->second.get<DDS::Float32Seq>();
+    return ser << seq;
+  }
+  case TK_FLOAT64: {
+    const DDS::Float64Seq& seq = it->second.get<DDS::Float64Seq>();
+    return ser << seq;
+  }
+  case TK_FLOAT128: {
+    const DDS::Float128Seq& seq = it->second.get<DDS::Float128Seq>();
+    return ser << seq;
+  }
+  case TK_CHAR8: {
+    const DDS::CharSeq& seq = it->second.get<DDS::CharSeq>();
+    return ser << seq;
+  }
+  case TK_BYTE: {
+    const DDS::ByteSeq& seq = it->second.get<DDS::ByteSeq>();
+    return ser << seq;
+  }
+  case TK_BOOLEAN: {
+    const DDS::BooleanSeq& seq = it->second.get<DDS::BooleanSeq>();
+    return ser << seq;
+  }
+  case TK_STRING8: {
+    const DDS::StringSeq& seq = it->second.get<DDS::StringSeq>();
+    return ser << seq;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    const DDS::WcharSeq& seq = it->second.get<DDS::WcharSeq>();
+    return ser << seq;
+  }
+  case TK_STRING16: {
+    const DDS::WstringSeq& seq = it->second.get<DDS::WstringSeq>();
+    return ser << seq;
+  }
+#endif
+  }
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialized_size_enum_sequence(
+  const DCPS::Encoding& encoding, size_t& size, const_sequence_iterator it) const
+{
+  switch (it->second.elem_kind_) {
+  case TK_INT8: {
+    const DDS::Int8Seq& seq = it->second.get<DDS::Int8Seq>();
+    serialized_size_enum_sequence(encoding, size, seq);
+    return true;
+  }
+  case TK_INT16: {
+    const DDS::Int16Seq& seq = it->second.get<DDS::Int16Seq>();
+    serialized_size_enum_sequence(encoding, size, seq);
+    return true;
+  }
+  case TK_INT32: {
+    const DDS::Int32Seq& seq = it->second.get<DDS::Int32Seq>();
+    serialized_size_enum_sequence(encoding, size, seq);
+    return true;
+  }
+  }
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialize_enum_sequence(
+  DCPS::Serializer& ser, const_sequence_iterator it) const
+{
+  switch (it->second.elem_kind_) {
+  case TK_INT8: {
+    const DDS::Int8Seq& seq = it->second.get<DDS::Int8Seq>();
+    return serialize_enum_sequence_as_ints_i(ser, seq);
+  }
+  case TK_INT16: {
+    const DDS::Int16Seq& seq = it->second.get<DDS::Int16Seq>();
+    return serialize_enum_sequence_as_ints_i(ser, seq);
+  }
+  case TK_INT32: {
+    const DDS::Int32Seq& seq = it->second.get<DDS::Int32Seq>();
+    return serialize_enum_sequence_as_ints_i(ser, seq);
+  }
+  }
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialized_size_bitmask_sequence(
+  const DCPS::Encoding& encoding, size_t& size, const_sequence_iterator it) const
+{
+  switch (it->second.elem_kind_) {
+  case TK_UINT8: {
+    const DDS::UInt8Seq& seq = it->second.get<DDS::UInt8Seq>();
+    serialized_size_bitmask_sequence(encoding, size, seq);
+    return true;
+  }
+  case TK_UINT16: {
+    const DDS::UInt16Seq& seq = it->second.get<DDS::UInt16Seq>();
+    serialized_size_bitmask_sequence(encoding, size, seq);
+    return true;
+  }
+  case TK_UINT32: {
+    const DDS::UInt32Seq& seq = it->second.get<DDS::UInt32Seq>();
+    serialized_size_bitmask_sequence(encoding, size, seq);
+    return true;
+  }
+  case TK_UINT64: {
+    const DDS::UInt64Seq& seq = it->second.get<DDS::UInt64Seq>();
+    serialized_size_bitmask_sequence(encoding, size, seq);
+    return true;
+  }
+  }
+  return false;
+}
+
+bool DynamicDataImpl::DataContainer::serialize_bitmask_sequence(DCPS::Serializer& ser,
+                                                                const_sequence_iterator it) const
+{
+  switch (it->second.elem_kind_) {
+  case TK_UINT8: {
+    const DDS::UInt8Seq& seq = it->second.get<DDS::UInt8Seq>();
+    return serialize_bitmask_sequence_as_uints_i(ser, seq);
+  }
+  case TK_UINT16: {
+    const DDS::UInt16Seq& seq = it->second.get<DDS::UInt16Seq>();
+    return serialize_bitmask_sequence_as_uints_i(ser, seq);
+  }
+  case TK_UINT32: {
+    const DDS::UInt32Seq& seq = it->second.get<DDS::UInt32Seq>();
+    return serialize_bitmask_sequence_as_uints_i(ser, seq);
+  }
+  case TK_UINT64: {
+    const DDS::UInt64Seq& seq = it->second.get<DDS::UInt64Seq>();
+    return serialize_bitmask_sequence_as_uints_i(ser, seq);
+  }
+  }
+  return false;
+}
+
 // Serialize an aggregated member stored in the sequence map.
 // The member type is sequence of basic or enum or bitmask type.
 void DynamicDataImpl::DataContainer::serialized_size_sequence_aggregated_member_xcdr2(
@@ -5277,11 +5399,11 @@ void DynamicDataImpl::DataContainer::serialized_size_sequence_aggregated_member_
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
   if (data_->is_basic_type(elem_tk)) {
-    serialized_size(encoding, size, it->second.get());
+    serialized_size_basic_sequence(encoding, size, it);
   } else if (elem_tk == TK_ENUM) {
-    serialized_size_enum_sequence(encoding, size, it->second.get());
+    serialized_size_enum_sequence(encoding, size, it);
   } else { // Bitmask
-    serialized_size_bitmask_sequence(encoding, size, it->second.get());
+    serialized_size_bitmask_sequence(encoding, size, it);
   }
 }
 
@@ -5297,11 +5419,11 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_aggregated_member_xcdr2(
     const DCPS::Encoding& encoding = ser.encoding();
     size_t member_size = 0;
     if (data_->is_basic_type(elem_tk)) {
-      serialized_size(encoding, member_size, it->second.get());
+      serialized_size_basic_sequence(encoding, member_size, it);
     } else if (elem_tk == TK_ENUM) {
-      serialized_size_enum_sequence(encoding, member_size, it->second.get());
+      serialized_size_enum_sequence(encoding, member_size, it);
     } else if (elem_tk == TK_BITMASK) {
-      serialized_size_bitmask_sequence(encoding, member_size, it->second.get());
+      serialized_size_bitmask_sequence(encoding, member_size, it);
     } else {
       return false;
     }
@@ -5310,11 +5432,11 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_aggregated_member_xcdr2(
     }
   }
   if (data_->is_basic_type(elem_tk)) {
-    return ser << it->second.get();
+    return serialize_basic_sequence(ser, it);
   } else if (elem_tk == TK_ENUM) {
-    return serialize_enum_sequence_as_ints_i(ser, it->second.get());
+    return serialize_enum_sequence(ser, it);
   } else if (elem_tk == TK_BITMASK) {
-    return serialize_bitmask_sequence_as_uints_i(ser, it->second.get());
+    return serialize_bitmask_sequence(ser, it);
   }
   return false;
 }
