@@ -685,7 +685,7 @@ typeobject_generator::gen_epilogue()
 string
 typeobject_generator::tag_type(UTL_ScopedName* name)
 {
-  return dds_generator::scoped_helper(name, "_") + "_xtag";
+  return dds_generator::get_xtag_name(name);
 }
 
 bool
@@ -773,6 +773,8 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
   stack_.push_back(type);
   v.on_stack = true;
 
+  using OpenDDS::XTypes::MemberId;
+  AST_Structure* const stru = dynamic_cast<AST_Structure*>(type);
   switch (type->node_type()) {
 
   case AST_ConcreteType::NT_union:
@@ -786,11 +788,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
       consider(v, discriminator, v.name + ".d");
 
       const AutoidKind auto_id = be_global->autoid(n);
-      OpenDDS::XTypes::MemberId member_id = 0;
+      MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_UnionBranch* ub = dynamic_cast<AST_UnionBranch*>(*i);
-        const OpenDDS::XTypes::MemberId id = be_global->compute_id(ub, auto_id, member_id);
+        const MemberId id = be_global->compute_id(stru, ub, auto_id, member_id);
         consider(v, ub->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 
@@ -806,11 +808,11 @@ typeobject_generator::strong_connect(AST_Type* type, const std::string& anonymou
 
       const Fields fields(n);
       const AutoidKind auto_id = be_global->autoid(n);
-      OpenDDS::XTypes::MemberId member_id = 0;
+      MemberId member_id = 0;
 
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* field = *i;
-        const OpenDDS::XTypes::MemberId id = be_global->compute_id(field, auto_id, member_id);
+        const MemberId id = be_global->compute_id(stru, field, auto_id, member_id);
         consider(v, field->field_type(), v.name + "." + OpenDDS::DCPS::to_dds_string(id));
       }
 

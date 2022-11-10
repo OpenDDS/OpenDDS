@@ -787,10 +787,23 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     td->kind(TK_UNION);
     td->name(cto.union_type.header.detail.type_name.c_str());
     td->bound().length(0);
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.union_type.discriminator.common.type_id, guid);
-    td->discriminator_type(temp);
     td->extensibility_kind(type_flags_to_extensibility(cto.union_type.union_flags));
     td->is_nested(cto.union_type.union_flags & IS_NESTED);
+
+    const DDS::DynamicType_var disc_type =
+      type_identifier_to_dynamic(cto.union_type.discriminator.common.type_id, guid);
+    td->discriminator_type(disc_type);
+    DDS::MemberDescriptor_var disc_md = new MemberDescriptorImpl();
+    disc_md->name("_d");
+    disc_md->is_key(cto.union_type.discriminator.common.member_flags & IS_KEY);
+    disc_md->type(disc_type);
+    disc_md->id(DISCRIMINATOR_ID);
+    disc_md->index(DISCRIMINATOR_ID);
+    DynamicTypeMemberImpl* disc_dtm = new DynamicTypeMemberImpl();
+    DDS::DynamicTypeMember_var disc_dtm_var = disc_dtm;
+    disc_dtm->set_descriptor(disc_md);
+    dt->insert_dynamic_member(disc_dtm);
+
     for (ACE_CDR::ULong i = 0; i < cto.union_type.member_seq.length(); ++i) {
       DDS::MemberDescriptor_var md = complete_union_member_to_member_descriptor(cto.union_type.member_seq[i], guid);
       md->index(i);

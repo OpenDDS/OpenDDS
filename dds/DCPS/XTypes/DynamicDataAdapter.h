@@ -29,8 +29,8 @@ template <typename T>
 class DynamicDataAdapter : public DDS::DynamicData {
 public:
   DynamicDataAdapter(DDS::DynamicType_ptr type,
-                    const DCPS::MetaStruct& meta_struct,
-                    const T& value)
+                     const DCPS::MetaStruct& meta_struct,
+                     const T& value)
     : type_(DDS::DynamicType::_duplicate(type))
     , meta_struct_(meta_struct)
     , value_(value)

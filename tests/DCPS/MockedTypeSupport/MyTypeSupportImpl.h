@@ -48,6 +48,9 @@ public:
 
   const char* name() const { return "MyType"; }
   virtual char* get_type_name();
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicType_ptr get_type() { return 0; }
+#endif
 
   virtual ::DDS::DataWriter_ptr create_datawriter();
 

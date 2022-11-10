@@ -88,11 +88,8 @@ struct ComplexKeyedStruct {
   /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   @key sequence<BasicKeyedStruct> keyed_struct_seq_value;
   */
-  // TODO(iguessthislldo): Mark as Key when supported. See XTYPE-147
-  UnkeyedUnion unkeyed_union_value;
-  // TODO(iguessthislldo): Mark as Key when supported. See XTYPE-147
-  UnkeyedUnion unkeyed_union_array_value[2];
-  // TODO(iguessthislldo): Mark as Key when supported. See XTYPE-147
+  @key UnkeyedUnion unkeyed_union_value;
+  @key UnkeyedUnion unkeyed_union_array_value[2];
   /* TODO(iguessthislldo): Sequences aren't supported. See XTYPE-152
   sequence<UnkeyedUnion> unkeyed_union_seq_value
   */

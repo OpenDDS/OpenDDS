@@ -12,61 +12,65 @@ module key_annotation {
   /*
    * Simple Case of a Sample Struct with One Simple Key
    * 1 Key
-   *  - key
+   *  - key (10)
    */
   @topic
   struct SimpleKeyStruct {
-    @key long key;
+    @key @id(10) long key;
     long value;
   };
 
   /*
    * Case of a Nested Struct Key
    * 2 Keys
-   *  - non_nested_key
-   *  - nested_key.key
+   *  - non_nested_key (20)
+   *  - nested_key.key (21, 10)
    */
   @topic
   struct NestedKeyStruct {
-    @key long non_nested_key;
-    @key SimpleKeyStruct nested_key;
+    @key @id(20) long non_nested_key;
+    @key @id(21) SimpleKeyStruct nested_key;
   };
 
   /*
    * Using a Typedef of a Struct as a Key
    * 2 Keys
-   *  - a_key_value
-   *  - my_struct_typedef_key.key
+   *  - a_key_value (30)
+   *  - my_struct_typedef_key.key (31, 10)
    */
   typedef SimpleKeyStruct MyStructTypedef;
   @topic
   struct TypedefStructKeyStruct {
-    @key long a_key_value;
-    @key MyStructTypedef my_struct_typedef_key;
+    @key @id(30) long a_key_value;
+    @key @id(31) MyStructTypedef my_struct_typedef_key;
   };
 
   /*
    * Case of an Array of Primitives
-   * 2 Keys
+   * 2 Keys in non-XTypes contexts
    *  - values[0]
    *  - values[1]
+   * 1 key in XTypes contexts
+   *  - values (40)
    */
   typedef long LongArray[2];
   @topic
   struct LongArrayStruct {
-    @key LongArray values;
+    @key @id(40) LongArray values;
   };
 
   /*
    * Case of an Array of Structures
-   * 2 Keys
+   * 2 Keys in non-XTypes contexts
    *  - values[0].key
    *  - values[0].key
+   * 1 key in XTypes contexts
+   *  - values (50)
    */
   typedef SimpleKeyStruct SimpleKeyStructArray[2];
   @topic
   struct SimpleKeyArray {
-    @key SimpleKeyStructArray values;
+    @key @id(50) SimpleKeyStructArray values;
   };
 
   /*
@@ -86,7 +90,7 @@ module key_annotation {
   /*
    * Case of a Keyed Union
    * 1 Key
-   *  - _d()
+   *  - _d() (DISCRIMINATOR_ID)
    */
   @topic
   union KeyedUnion switch (@key long) {
@@ -100,19 +104,22 @@ module key_annotation {
 
   /*
    * Case of a Keyed Union Nested inside a Struct
-   * 2 Keys
-   *  - value._d()
-   *  - another_key
+   * 3 Keys
+   *  - value._d() (60, DISCRIMINATOR_ID)
+   *  - keyed_unkeyed_union._d() (62, DISCRIMINATOR_ID)
+   *  - another_key (63)
    */
   @topic
   struct KeyedUnionStruct {
-    @key KeyedUnion value;
-    @key long another_key;
+    @key @id(60) KeyedUnion value;
+    @id(61) KeyedUnion unkeyed_unkeyed_union;
+    @key @id(62) UnkeyedUnion keyed_unkeyed_union;
+    @key @id(63) long another_key;
   };
 
   /*
    * Struct with Multidimensional Array Keys
-   * 2*3 + 2*3*4 (30) Keys
+   * 2*3 + 2*3*4 (30) Keys in non-XTypes contexts
    *  - array1[0][0]
    *  - array1[0][1]
    *   ...
@@ -121,13 +128,16 @@ module key_annotation {
    *  - array2[0][0][1]
    *   ...
    *  - array2[1][2][3]
+   * 2 keys in XTypes contexts
+   *  - array1 (70)
+   *  - array2 (71)
    */
   typedef short A_2D_Array_t[2][3];
   typedef short A_3D_Array_t[2][3][4];
   @topic
   struct MultidimensionalArrayStruct {
-    @key A_2D_Array_t array1;
-    @key A_3D_Array_t array2;
+    @key @id(70) A_2D_Array_t array1;
+    @key @id(71) A_3D_Array_t array2;
   };
 
   /*
@@ -138,13 +148,13 @@ module key_annotation {
   module ImpliedKeys {
 
     struct NoKeysStruct {
-      short a;
-      long b;
-      float c;
+      @id(80) short a;
+      @id(81) long b;
+      @id(82) float c;
     };
 
     struct OneKeyStruct {
-      @key short a;
+      @key @id(90) short a;
       long b;
       float c;
     };
@@ -152,40 +162,40 @@ module key_annotation {
     /*
      * Basic Usage
      * 5 keys
-     *  - nested_no_keys.a
-     *  - nested_no_keys.b
-     *  - nested_no_keys.c
-     *  - nested_one_key.a
-     *  - non_nested
+     *  - nested_no_keys.a (100, 80)
+     *  - nested_no_keys.b (100, 81)
+     *  - nested_no_keys.c (100, 82)
+     *  - nested_one_key.a (101, 90)
+     *  - non_nested (102)
      */
     @topic
     struct StructA {
-      @key NoKeysStruct nested_no_keys;
-      @key OneKeyStruct nested_one_key;
-      @key long non_nested;
+      @key @id(100) NoKeysStruct nested_no_keys;
+      @key @id(101) OneKeyStruct nested_one_key;
+      @key @id(102) long non_nested;
     };
 
     /*
      * Make Sure This Works Recursively
      * 6 keys
-     *  - as_key.nested_no_keys.a
-     *  - as_key.nested_no_keys.b
-     *  - as_key.nested_no_keys.c
-     *  - as_key.nested_one_key.a
-     *  - as_key.non_nested
-     *  - yet_another_key
+     *  - as_key.nested_no_keys.a (110, 100, 80)
+     *  - as_key.nested_no_keys.b (110, 100, 81)
+     *  - as_key.nested_no_keys.c (110, 100, 82)
+     *  - as_key.nested_one_key.a (110, 101, 90)
+     *  - as_key.non_nested (110, 102)
+     *  - yet_another_key (111)
      */
     @topic
     struct StructB {
-      @key StructA as_key;
-      StructA not_as_key;
-      @key long yet_another_key;
+      @key @id(110) StructA as_key;
+      @id(1) StructA not_as_key;
+      @key @id(111) long yet_another_key;
     };
 
     struct StructWithKeyFalse {
-      short a;
-      @key(FALSE) long b;
-      float c;
+      @id(120) short a;
+      @id(1) @key(FALSE) long b;
+      @id(121) float c;
     };
 
     /*
@@ -194,12 +204,12 @@ module key_annotation {
      * with @key or @key(TRUE), then keys can still be implied, but it excludes
      * the fields that are marked with @key(FALSE).
      * 2 keys
-     *  - as_key.a
-     *  - as_key.c
+     *  - as_key.a (130, 120)
+     *  - as_key.c (130, 121)
      */
     @topic
     struct StructC {
-      @key StructWithKeyFalse as_key;
+      @key @id(130) StructWithKeyFalse as_key;
       StructWithKeyFalse not_as_key;
     };
 

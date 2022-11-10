@@ -30,6 +30,7 @@
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDynamicTypeSupportC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif

@@ -120,12 +120,58 @@ public:
   bool equals(DDS::DynamicType_ptr other);
   void insert_dynamic_member(DDS::DynamicTypeMember_ptr dtm);
   void clear();
- private:
+
+  void set_minimal_type_identifier(const TypeIdentifier& ti)
+  {
+    minimal_ti_ = ti;
+  }
+
+  const TypeIdentifier& get_minimal_type_identifier() const
+  {
+    return minimal_ti_;
+  }
+
+  void set_minimal_type_map(const TypeMap& tm)
+  {
+    minimal_tm_ = tm;
+  }
+
+  const TypeMap& get_minimal_type_map() const
+  {
+    return minimal_tm_;
+  }
+
+  void set_complete_type_identifier(const TypeIdentifier& ti)
+  {
+    complete_ti_ = ti;
+  }
+
+  const TypeIdentifier& get_complete_type_identifier() const
+  {
+    return complete_ti_;
+  }
+
+  void set_complete_type_map(const TypeMap& tm)
+  {
+    complete_tm_ = tm;
+  }
+
+  const TypeMap& get_complete_type_map() const
+  {
+    return complete_tm_;
+  }
+
+private:
   DynamicTypeMembersByNameImpl member_by_name_;
   DynamicTypeMembersByIdImpl member_by_id_;
   typedef OPENDDS_VECTOR(DDS::DynamicTypeMember_var) DynamicTypeMembersByIndex;
   DynamicTypeMembersByIndex member_by_index_;
   DDS::TypeDescriptor_var descriptor_;
+
+  TypeIdentifier minimal_ti_;
+  TypeMap minimal_tm_;
+  TypeIdentifier complete_ti_;
+  TypeMap complete_tm_;
 };
 
 OpenDDS_Dcps_Export DDS::DynamicType_var get_base_type(DDS::DynamicType_ptr type);

@@ -51,6 +51,8 @@ public:
 
   static std::string get_tag_name(const std::string& base_name, bool nested_key_only = false);
 
+  static std::string get_xtag_name(UTL_ScopedName* name);
+
   static bool cxx_escaped(const std::string& s);
 
   static std::string valid_var_name(const std::string& str);

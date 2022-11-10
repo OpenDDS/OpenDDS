@@ -10,6 +10,7 @@ project(*Subscriber): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for
   }
 
   TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
     Common.idl
     Subscriber.idl
   }
@@ -32,6 +33,7 @@ project(*Publisher): dcps_test, dcps_rtps_udp, msvc_bigobj, dcps_transports_for_
   }
 
   TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
     Common.idl
     Publisher.idl
   }

@@ -15,12 +15,16 @@ my $secure = 0;
 my $tcp = 0;
 my $verbose = 0;
 my $test_name = "";
+my $dynamic_writers = 0;
+my $dynamic_readers = 0;
 GetOptions(
   "secure" => \$secure,
   "tcp" => \$tcp,
   "verbose" => \$verbose,
   "test|t=s" => \$test_name,
-);
+  "dynamic-writers" => \$dynamic_writers,
+  "dynamic-readers" => \$dynamic_readers,
+) or die("Invalid options");
 
 my @common_args = ('-ORBDebugLevel 1 -DCPSDebugLevel 6');
 if ($verbose) {
@@ -202,85 +206,85 @@ if ($secure) {
       reader_type => "MutableStruct", writer_type => "ModifiedNameMutableStruct",
       expect_inconsistent_topic => 0, topic => "MutableStruct_IMN", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--ignore_member_names",
+      reader_args => "--ignore-member-names",
     },
     "IgnoreMemberNames_MutableUnionMatch" => {
       reader_type => "MutableUnion", writer_type => "ModifiedNameMutableUnion",
       expect_inconsistent_topic => 0, topic => "MutableUnion_IMN", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--ignore_member_names",
+      reader_args => "--ignore-member-names",
     },
     "DisallowTypeCoercion_FinalStructMatch" => {
       reader_type => "FinalStructSub", writer_type => "FinalStructPub",
       expect_inconsistent_topic => 0, topic => "FinalStructMatch_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_FinalStructNoMatch" => {
       reader_type => "FinalStructSub", writer_type => "ModifiedFinalStruct",
       expect_inconsistent_topic => 1, topic => "FinalStructNoMatch_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_AppendableStructNoMatch1" => {
       reader_type => "AppendableStruct", writer_type => "AdditionalPostfixFieldStruct",
       expect_inconsistent_topic => 1, topic => "AppendableStructNoMatch1_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_AppendableStructNoMatch2" => {
       reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct",
       expect_inconsistent_topic => 1, topic => "AppendableStructNoMatch2_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_MutableStructMatch" => {
       reader_type => "MutableStruct", writer_type => "ModifiedMutableStruct",
       expect_inconsistent_topic => 0, topic => "MutableStructMatch_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_MutableStructNoMatchId" => {
       reader_type => "MutableStruct", writer_type => "ModifiedIdMutableStruct",
       expect_inconsistent_topic => 1, topic => "MutableStructNoMatchId_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_MutableStructNoMatchType" => {
       reader_type => "MutableStruct", writer_type => "ModifiedTypeMutableStruct",
       expect_inconsistent_topic => 1, topic => "MutableStructNoMatchType_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_MutableUnionNoMatch" => {
       reader_type => "MutableUnion", writer_type => "ModifiedMutableUnion",
       expect_inconsistent_topic => 1, topic => "MutableUnionNoMatch_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "DisallowTypeCoercion_MutableUnionNoMatchType" => {
       reader_type => "MutableUnion", writer_type => "ModifiedTypeMutableUnion",
       expect_inconsistent_topic => 1, topic => "MutableUnionNoMatchType_DTC", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--disallow_type_coercion",
+      reader_args => "--disallow-type-coercion",
     },
     "ForceTypeValidation_NoXTypesNoMatch_nn" => {
       reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
       expect_inconsistent_topic => 1, topic => "NoXTypes_FTV_nn", key_val => 1,
       r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc_no_xtypes.ini",
-      reader_args => "--force_type_validation",
+      reader_args => "--force-type-validation",
     },
     "ForceTypeValidation_NoXTypesNoMatch_yn" => {
       reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
       expect_inconsistent_topic => 1, topic => "NoXTypes_FTV_yn", key_val => 1,
       r_ini => "rtps_disc_no_xtypes.ini", w_ini => "rtps_disc.ini",
-      reader_args => "--force_type_validation",
+      reader_args => "--force-type-validation",
     },
     "ForceTypeValidation_NoXTypesNoMatch_ny" => {
       reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
       expect_inconsistent_topic => 1, topic => "NoXTypes_FTV_ny", key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc_no_xtypes.ini",
-      reader_args => "--force_type_validation",
+      reader_args => "--force-type-validation",
     },
     "NoXTypesMatchTypeNames" => {
       reader_type => "AppendableStructNoXTypes", writer_type => "AppendableStructNoXTypes",
@@ -311,7 +315,7 @@ sub run_test {
   }
 
   if ($v->{expect_inconsistent_topic} > 0) {
-    push(@test_args, "--expect_inconsistent_topic");
+    push(@test_args, "--expect-inconsistent-topic");
   }
   # This is used to check that a writer with no representation QoS and a reader who specifies XCDR2
   # will not match on a non rtps_udp transport. The writer should default to UnalignedCDR, and this should
@@ -319,11 +323,11 @@ sub run_test {
   # writer with XCDR2 in a non rtps_udp transport is properly associating with a reader who does not specify
   # representation QoS and is notifying the reader that cdr_encapsulation() is enabled.
   if ($v->{expect_incompatible_qos} > 0) {
-    push(@test_args, "--expect_incompatible_qos");
+    push(@test_args, "--expect-incompatible-qos");
   }
 
   if ($v->{key_val} >= 0) {
-    push(@test_args, "--key_val $v->{key_val}");
+    push(@test_args, "--key-val $v->{key_val}");
   }
 
   my @reader_args = ("-DCPSConfigFile $v->{r_ini} -ORBLogFile subscriber_$test_name_param.log --type $v->{reader_type}");
@@ -331,8 +335,10 @@ sub run_test {
     push(@reader_args, "$v->{reader_args}");
   }
   if ($v->{r_reg_type}) {
-    push(@reader_args, "--reg_type $v->{r_reg_type}");
+    push(@reader_args, "--reg-type $v->{r_reg_type}");
   }
+  push(@reader_args, '--dynamic-ts') if ($dynamic_readers);
+  push(@reader_args, '--skip-read') if ($dynamic_writers);
 
   push(@reader_args, @test_args);
   $test->process("reader_$test_name_param", './subscriber', join(' ', @reader_args));
@@ -340,8 +346,9 @@ sub run_test {
 
   my @writer_args = ("-DCPSConfigFile $v->{w_ini} -ORBLogFile publisher_$test_name_param.log --type $v->{writer_type}");
   if ($v->{w_reg_type}) {
-    push(@writer_args, "--reg_type $v->{w_reg_type}");
+    push(@writer_args, "--reg-type $v->{w_reg_type}");
   }
+  push(@writer_args, '--dynamic-ts') if ($dynamic_writers);
 
   push(@writer_args, @test_args);
   $test->process("writer_$test_name_param", './publisher', join(' ', @writer_args));

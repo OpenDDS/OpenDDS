@@ -199,6 +199,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string type;
   std::string topic_name = "";
   std::string registered_type_name = "";
+  bool dynamic = false;
+  bool skip_read = false;
 
   // Default properties of type consistency enforcement Qos currently supported
   bool disallow_type_coercion = false;
@@ -226,30 +228,35 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         ACE_ERROR((LM_ERROR, "ERROR: Invalid topic name argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--reg_type")) {
+    } else if (arg == ACE_TEXT("--reg-type")) {
       if (i + 1 < argc) {
         registered_type_name = ACE_TEXT_ALWAYS_CHAR(argv[++i]);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Invalid registered type argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--key_val")) {
+    } else if (arg == ACE_TEXT("--key-val")) {
       if (i + 1 < argc) {
         key_value = ACE_OS::atoi(argv[++i]);
       } else {
         ACE_ERROR((LM_ERROR, "ERROR: Invalid key value argument\n"));
         return 1;
       }
-    } else if (arg == ACE_TEXT("--expect_inconsistent_topic")) {
+    } else if (arg == ACE_TEXT("--expect-inconsistent-topic")) {
       expect_inconsistent_topic = true;
-    } else if (arg == ACE_TEXT("--expect_incompatible_qos")) {
+    } else if (arg == ACE_TEXT("--expect-incompatible-qos")) {
       expect_incompatible_qos = true;
-    } else if (arg == ACE_TEXT("--disallow_type_coercion")) {
+    } else if (arg == ACE_TEXT("--disallow-type-coercion")) {
       disallow_type_coercion =  true;
-    } else if (arg == ACE_TEXT("--ignore_member_names")) {
+    } else if (arg == ACE_TEXT("--ignore-member-names")) {
       ignore_member_names = true;
-    } else if (arg == ACE_TEXT("--force_type_validation")) {
+    } else if (arg == ACE_TEXT("--force-type-validation")) {
       force_type_validation = true;
+    } else if (arg == ACE_TEXT("--dynamic-ts")) {
+      dynamic = true;
+    // TODO: Remove when dynamic writing is working
+    } else if (arg == ACE_TEXT("--skip-read")) {
+      skip_read = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -263,40 +270,31 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  bool failed = false;
-
-  Topic_var topic;
-
   if (topic_name.empty()) {
     topic_name = !registered_type_name.empty() ? registered_type_name : type;
   } else if (registered_type_name.empty()) {
     registered_type_name = topic_name;
   }
 
+  Topic_var topic;
+  TypeSupport_var ts;
+  bool failed = false;
   if (type == "PlainCdrStruct") {
-    PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<PlainCdrStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "FinalStructSub") {
-    FinalStructSubTypeSupport_var ts = new FinalStructSubTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<FinalStructSub>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AppendableStruct") {
-    AppendableStructTypeSupport_var ts = new AppendableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<AppendableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "ExtendedAppendableStruct") {
-    ExtendedAppendableStructTypeSupport_var ts = new ExtendedAppendableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<ExtendedAppendableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "AppendableStructNoXTypes") {
-    AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<AppendableStructNoXTypes>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "MutableStruct") {
-    MutableStructTypeSupport_var ts = new MutableStructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<MutableStruct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "MutableUnion") {
-    MutableUnionTypeSupport_var ts = new MutableUnionTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<MutableUnion>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type == "Trim20Struct") {
-    Trim20StructTypeSupport_var ts = new Trim20StructTypeSupportImpl;
-    failed = !get_topic(ts, dp, topic_name, topic, registered_type_name);
+    failed = !get_topic<Trim20Struct>(ts, dp, topic_name, topic, registered_type_name, dynamic);
   } else if (type.empty()) {
     ACE_ERROR((LM_ERROR, "ERROR: Must specify a type name\n"));
     return 1;
@@ -305,17 +303,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
+  Topic_var ack_control_topic;
+  Topic_var echo_control_topic;
+  TypeSupport_var ack_control_ts;
+  TypeSupport_var echo_control_ts;
+  failed |= !get_topic<ControlStruct>(
+    ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
+  failed |= !get_topic<ControlStruct>(
+    echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
+
   if (failed) {
     return 1;
   }
 
   ACE_DEBUG((LM_DEBUG, "Reader starting at %T\n"));
-  Topic_var ack_control_topic;
-  Topic_var echo_control_topic;
-  ControlStructTypeSupport_var ack_control_ts = new ControlStructTypeSupportImpl;
-  ControlStructTypeSupport_var echo_control_ts = new ControlStructTypeSupportImpl;
-  get_topic(ack_control_ts, dp, "SET_PD_OL_OA_OM_OD_Ack", ack_control_topic, "ControlStruct");
-  get_topic(echo_control_ts, dp, "SET_PD_OL_OA_OM_OD_Echo", echo_control_topic, "ControlStruct");
 
   // For publishing ack control topic.
   Publisher_var control_pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
@@ -432,7 +433,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
+  if (!expect_inconsistent_topic && !expect_incompatible_qos && !skip_read) {
     if (type == "PlainCdrStruct") {
       failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStruct") {
