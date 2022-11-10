@@ -4141,7 +4141,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
     // Get Encoding from Encapsulation
     Encoding encoding;
-    Serializer ser(sample.sample_.get(), encoding);
+    DCPS::Message_Block_Ptr payload(sample.data(&mb_alloc_));
+    Serializer ser(payload.get(), encoding);
     DCPS::EncapsulationHeader encap;
     if (!(ser >> encap)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")

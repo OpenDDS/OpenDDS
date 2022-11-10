@@ -32,6 +32,7 @@ public:
     , log_participant_statistics_(false)
     , publish_participant_statistics_(false)
     , restart_detection_(false)
+    , admission_control_queue_size_(0)
   {}
 
   void relay_id(const std::string& value)
@@ -264,6 +265,36 @@ public:
     return restart_detection_;
   }
 
+  void admission_control_queue_size(size_t value)
+  {
+    admission_control_queue_size_ = value;
+  }
+
+  size_t admission_control_queue_size() const
+  {
+    return admission_control_queue_size_;
+  }
+
+  void admission_control_queue_duration(OpenDDS::DCPS::TimeDuration value)
+  {
+    admission_control_queue_duration_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration admission_control_queue_duration() const
+  {
+    return admission_control_queue_duration_;
+  }
+
+  void run_time(OpenDDS::DCPS::TimeDuration value)
+  {
+    run_time_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration run_time() const
+  {
+    return run_time_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -288,6 +319,9 @@ private:
   OpenDDS::DCPS::TimeDuration publish_relay_status_;
   OpenDDS::DCPS::TimeDuration publish_relay_status_liveliness_;
   bool restart_detection_;
+  size_t admission_control_queue_size_;
+  OpenDDS::DCPS::TimeDuration admission_control_queue_duration_;
+  OpenDDS::DCPS::TimeDuration run_time_;
 };
 
 }

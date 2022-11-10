@@ -853,10 +853,9 @@ private:
 
   MonotonicTimePoint wait_pending_deadline_;
 
-  typedef OPENDDS_MAP_T(DDS::InstanceHandle_t, Sample_rch) InstanceHandlesToValues;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, Sample_rch) InstanceHandlesToValues;
   InstanceHandlesToValues instance_handles_to_values_;
-  typedef OPENDDS_MAP_CMP_T(
-    Sample_rch, DDS::InstanceHandle_t, SampleRchCmp) InstanceValuesToHandles;
+  typedef OPENDDS_MAP_CMP(Sample_rch, DDS::InstanceHandle_t, SampleRchCmp) InstanceValuesToHandles;
   InstanceValuesToHandles instance_values_to_handles_;
 
   bool insert_instance(DDS::InstanceHandle_t handle, Sample_rch& sample);

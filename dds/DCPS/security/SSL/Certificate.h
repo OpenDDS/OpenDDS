@@ -93,6 +93,8 @@ public:
 
   const char* keypair_algo() const;
 
+  X509* x509() const { return x_; }
+
  private:
 
   bool loaded()

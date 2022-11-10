@@ -544,7 +544,7 @@ DomainParticipantImpl::create_topic_i(
     OpenDDS::DCPS::TypeSupport_var type_support;
 
     if (0 == topic_mask) {
-       // creating a topic with compile time type
+      // creating a topic with compile time type
       type_support = Registered_Data_Types->lookup(this, type_name);
       if (CORBA::is_nil(type_support)) {
         if (DCPS_debug_level >= 1) {

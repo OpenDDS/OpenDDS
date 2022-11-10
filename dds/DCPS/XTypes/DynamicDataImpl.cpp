@@ -6,11 +6,10 @@
 #include <DCPS/DdsDcps_pch.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
+#  include "DynamicDataImpl.h"
+#  include "DynamicTypeMemberImpl.h"
 
-#include "DynamicDataImpl.h"
-
-#include <dds/DCPS/Serializer.h>
-#include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
+#  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 

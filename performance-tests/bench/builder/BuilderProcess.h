@@ -2,8 +2,6 @@
 
 #include "Common.h"
 #include "ConfigSectionManager.h"
-#include "DiscoveryManager.h"
-#include "TransportInstanceManager.h"
 #include "ParticipantManager.h"
 
 namespace Builder {
@@ -35,8 +33,6 @@ protected:
   WriterMap writer_map_;
   ContentFilteredTopicMap cft_map_;
   std::shared_ptr<ConfigSectionManager> config_sections_;
-  std::shared_ptr<DiscoveryManager> discoveries_;
-  std::shared_ptr<TransportInstanceManager> instances_;
   std::shared_ptr<ParticipantManager> participants_;
 };
 

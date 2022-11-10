@@ -639,7 +639,8 @@ public:
 
   const ValueDispatcher* get_value_dispatcher() const
   {
-    return topic_servant_ ? dynamic_cast<const ValueDispatcher*>(topic_servant_->get_type_support()) : 0;
+    TopicDescriptionPtr<TopicImpl> temp(topic_servant_);
+    return temp ? dynamic_cast<const ValueDispatcher*>(temp->get_type_support()) : 0;
   }
 
 protected:
@@ -1099,11 +1100,13 @@ public:
     const bool set_subscriber_status_;
   };
 
-#if defined(OPENDDS_SECURITY)
 protected:
+#ifdef OPENDDS_SECURITY
   Security::SecurityConfig_rch security_config_;
   DDS::DynamicType_var dynamic_type_;
 #endif
+
+  TransportMessageBlockAllocator mb_alloc_;
 };
 
 typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;

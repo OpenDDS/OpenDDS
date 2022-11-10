@@ -1989,7 +1989,7 @@ template<typename Type>
 void key_only_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2050,9 +2050,8 @@ template<typename Type>
 void key_only_union_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
-  const bool include_unkeyed =
-    field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
+  const bool include_unkeyed = field_filter == FieldFilter_All;
 
   if (include_unkeyed) {
     value.default_value(0x74181);
@@ -2104,7 +2103,7 @@ template<typename Type>
 void key_only_complex_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2133,9 +2132,7 @@ void key_only_complex_set_base_values(Type& value,
     key_only_set_base_values(
       value.keyed_struct_seq_value[0], field_filter, true);
     */
-  }
 
-  if (include_unkeyed) { // TODO(iguessthislldo): See IDL Def
     key_only_union_set_base_values(
       value.unkeyed_union_value, field_filter, false);
     key_only_union_set_base_values(
@@ -2147,9 +2144,7 @@ void key_only_complex_set_base_values(Type& value,
     key_only_union_set_base_values(
       value.unkeyed_union_seq_value[0], field_filter, false);
     */
-  }
 
-  if (include_possible_keyed) {
     key_only_union_set_base_values(
       value.keyed_union_value, field_filter, true);
     key_only_union_set_base_values(
@@ -2212,7 +2207,7 @@ void key_only_tests_struct_expect_values_equal(
   const TypeA& a, const TypeB& b,
   FieldFilter field_filter, bool keyed)
 {
-  if (!(field_filter == FieldFilter_KeyOnly && !keyed)) {
+  if ((field_filter != FieldFilter_KeyOnly) || keyed) {
     EXPECT_EQ(a.long_value, b.long_value);
     expect_arrays_are_equal(a.long_array_value, b.long_array_value);
     /* TODO(iguessthislldo): See IDL Def
@@ -2340,7 +2335,7 @@ template<typename TypeA, typename TypeB>
 void key_only_tests_complex_expect_values_equal(const TypeA& a, const TypeB& b,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
   const FieldFilter child =
@@ -2453,7 +2448,7 @@ const unsigned char key_only_non_keys_expected_base[] = {
 void build_expected_basic_struct(
   DataVec& expected, FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2493,7 +2488,7 @@ const unsigned char key_only_union_non_keys_expected_base[] = {
 
 void build_expected_union(DataVec& expected, FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter == FieldFilter_All || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed = field_filter == FieldFilter_All;
 
   DataView keys;
@@ -2526,7 +2521,7 @@ void build_expected<KeyedUnion>(DataVec& expected, FieldFilter field_filter)
 void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, bool keyed)
 {
   DataVec all_contents;
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
   const FieldFilter nested_field_filter =
@@ -2552,23 +2547,17 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
       DataView(array_contents).copy_to(all_contents);
     }
     // TODO(iguessthislldo): keyed_struct_seq_value would go here
-  }
 
-  if (include_unkeyed) {
-    const FieldFilter unkeyed_union_field_filter =
-      keyed ? nested_field_filter : FieldFilter_All;
-    build_expected_union(all_contents, unkeyed_union_field_filter, false);
+    build_expected_union(all_contents, nested_field_filter, false);
     {
       DataVec array_contents;
-      build_expected_union(array_contents, unkeyed_union_field_filter, false);
-      build_expected_union(array_contents, unkeyed_union_field_filter, false);
+      build_expected_union(array_contents, nested_field_filter, false);
+      build_expected_union(array_contents, nested_field_filter, false);
       serialize_u32(all_contents, array_contents.size());
       DataView(array_contents).copy_to(all_contents);
     }
     // TODO(iguessthislldo): unkeyed_union_seq_value would go here
-  }
 
-  if (include_possible_keyed) {
     build_expected_union(all_contents, nested_field_filter, true);
     {
       DataVec array_contents;

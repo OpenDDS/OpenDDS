@@ -18,7 +18,7 @@
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 
 #include <ace/CDR_Base.h>
@@ -408,6 +408,8 @@ RtpsUdpTransport::unregister_for_reader(const RepoId& /*participant*/,
                                         const RepoId& writerid,
                                         const RepoId& readerid)
 {
+  GuardThreadType guard_links(links_lock_);
+
   if (link_) {
     link_->unregister_for_reader(writerid, readerid);
   }
@@ -441,6 +443,8 @@ RtpsUdpTransport::unregister_for_writer(const RepoId& /*participant*/,
                                         const RepoId& readerid,
                                         const RepoId& writerid)
 {
+  GuardThreadType guard_links(links_lock_);
+
   if (link_) {
     link_->unregister_for_writer(readerid, writerid);
   }
@@ -644,6 +648,7 @@ RtpsUdpTransport::configure_i(RtpsUdpInst& config)
 #endif
 
   if (config.opendds_discovery_default_listener_) {
+    GuardThreadType guard_links(links_lock_);
     link_ = make_datalink(config.opendds_discovery_guid_.guidPrefix);
     link_->default_listener(*config.opendds_discovery_default_listener_);
   }

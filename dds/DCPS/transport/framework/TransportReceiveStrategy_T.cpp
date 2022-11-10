@@ -822,8 +822,11 @@ TransportReceiveStrategy<TH, DSH>::handle_dds_input(ACE_HANDLE fd)
         VDBG((LM_DEBUG,"(%P|%t) DBG:   "
               "Now dispatch the sample to the DataLink\n"));
 
-        ReceivedDataSample rds(this->payload_);
-        this->payload_ = 0;  // rds takes ownership of payload_
+        ReceivedDataSample rds = payload_ ? ReceivedDataSample(*payload_) : ReceivedDataSample();
+        if (payload_) {
+          payload_->release();
+          payload_ = 0;
+        }
         if (this->data_sample_header_.into_received_data_sample(rds)) {
 
           if (this->data_sample_header_.more_fragments()
@@ -958,6 +961,13 @@ TransportReceiveStrategy<TH, DSH>::skip_bad_pdus()
   bool done = false;
   update_buffer_index(done);
   return done ? 0 : 1;
+}
+
+template<typename TH, typename DSH>
+ACE_Message_Block*
+TransportReceiveStrategy<TH, DSH>::to_msgblock(const ReceivedDataSample& sample)
+{
+  return sample.data(&mb_allocator_);
 }
 
 }

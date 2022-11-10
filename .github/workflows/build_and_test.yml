@@ -4067,7 +4067,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4151,7 +4151,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4237,7 +4237,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -4361,7 +4361,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_u20_artifact
     - name: extract openssl artifact
@@ -6491,7 +6491,7 @@ jobs:
         tar xvfJ build_w19_p1_stat_js0.tar.xz
         rm -f build_w19_p1_stat_js0.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
@@ -7376,7 +7376,7 @@ jobs:
         tar xvfJ build_w19_re_p1_stat_FM-08.tar.xz
         rm -f build_w19_re_p1_stat_FM-08.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
@@ -8043,7 +8043,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8138,7 +8138,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8294,7 +8294,7 @@ jobs:
         tar xvfJ build_w19_re_o1p1_sec.tar.xz
         rm -f build_w19_re_o1p1_sec.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: setup gtest
       shell: cmd
       run: |
@@ -8372,7 +8372,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -8677,7 +8677,7 @@ jobs:
 
     steps:
     - name: download openssl artifact
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: openssl3_w19_artifact
     - name: extract openssl artifact
@@ -9131,7 +9131,7 @@ jobs:
         tar xvfJ build_w19_re_j_ws_FM-1f.tar.xz
         rm -f build_w19_re_j_ws_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
@@ -9865,7 +9865,7 @@ jobs:
       run: |
         mv OpenDDS /c/
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: Build CMake Tests
       shell: cmd
@@ -10133,15 +10133,14 @@ jobs:
       run: |
         cd OpenDDS
         call setenv.cmd
-        mkdir tests\cmake\build
-        cd tests\cmake\build
-        cmake -A Win32 ..
+        mkdir C:\tests\cmake\build
+        cd /d C:\tests\cmake\build
+        cmake -A Win32 %DDS_ROOT%\tests\cmake
         cmake --build .
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
         cd OpenDDS
-        rm -rf ACE_TAO
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
@@ -10151,6 +10150,17 @@ jobs:
       with:
         name: ${{ github.job }}_artifact
         path: ${{ github.job }}.tar.xz
+    - name: create tests tar.xz artifact
+      shell: bash
+      run: |
+        find /c/tests -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
+        tar cvPf tests_${{ github.job }}.tar /c/tests
+        xz -3 tests_${{ github.job }}.tar
+    - name: upload tests artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: tests_${{ github.job }}_artifact
+        path: tests_${{ github.job }}.tar.xz
 
   cmake_w22_x86_i0_j_FM-1f:
 
@@ -10213,8 +10223,19 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
         rm -f build_w22_x86_i0_j_FM-1f.tar.xz
+    - name: download tests artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: tests_build_w22_x86_i0_j_FM-1f_artifact
+        path: OpenDDS
+    - name: extract tests artifact
+      shell: bash
+      run: |
+        cd OpenDDS
+        tar xvPfJ tests_build_w22_x86_i0_j_FM-1f.tar.xz
+        rm -f tests_build_w22_x86_i0_j_FM-1f.tar.xz
     - name: set up msvc env
-      uses: ilammy/msvc-dev-cmd@v1.9.0
+      uses: ilammy/msvc-dev-cmd@v1
     - name: check build configuration
       shell: cmd
       run: |
@@ -10248,7 +10269,7 @@ jobs:
         <command name="check_compiler" options="msvc"/>
         <command name="print_perl_version"/>
         <command name="print_autobuild_config"/>
-        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake -Config OPENDDS_TESTING_FEATURES"/>
+        <command name="auto_run_tests" options="script_path=tests dir=$FS_GHW/OpenDDS --no-dcps --cmake --cmake-build-dir=c:/tests/cmake/build -Config OPENDDS_TESTING_FEATURES"/>
         <command name="log" options="off"/>
         <command name="process_logs" options="prettify"/>
         </autobuild>
@@ -11041,7 +11062,8 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11106,7 +11128,8 @@ jobs:
     - name: configure OpenDDS
       run: |
         cd OpenDDS
-        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
@@ -11689,7 +11712,8 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --optimize --no-debug --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -11755,7 +11779,8 @@ jobs:
       run: |
         cd OpenDDS
         clang++ --version
-        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure --optimize --no-debug --std=c++11 --tests --rapidjson --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: check build configuration
       shell: bash
       run: |
@@ -12049,7 +12074,8 @@ jobs:
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
         cd OpenDDS
-        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=/usr/local/Cellar/xerces-c/3.2.3 --openssl=/usr/local/opt/openssl@1.1
+        XERCESC_ROOT=$(find /usr/local/Cellar/xerces-c -iname "3\.*\.*" -type d | sort -r | head -n 1)
+        ./configure  --no-inline --std=c++11 --tests --security --ace=$GITHUB_WORKSPACE/OpenDDS/ACE_TAO/ACE --mpc=$GITHUB_WORKSPACE/MPC --xerces3=$XERCESC_ROOT --openssl=/usr/local/opt/openssl@1.1
     - name: build ACE and TAO
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |

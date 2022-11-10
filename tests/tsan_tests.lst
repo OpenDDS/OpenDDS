@@ -119,15 +119,15 @@ tests/DCPS/Thrasher/run_test.pl medium rtps durable: !DCPS_MIN RTPS !LYNXOS
 tests/DCPS/Thrasher/run_test.pl high rtps durable: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE
 #tests/DCPS/Thrasher/run_test.pl aggressive rtps durable: !DCPS_MIN RTPS !LYNXOS !OPENDDS_SAFETY_PROFILE
 
-#performance-tests/bench/run_test.pl disco show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl disco_long show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl disco_repo show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl disco_relay show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl echo show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl echo_frag show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl fan show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl fan_ws show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl fan_frag show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-#performance-tests/bench/run_test.pl fan_frag_ws show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
-performance-tests/bench/run_test.pl mixed show-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+#performance-tests/bench/run_test.pl ci-disco --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-disco-long --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-disco-repo --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-disco-relay --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-echo --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-echo-frag --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-fan --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-fan-ws --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-fan-frag --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+#performance-tests/bench/run_test.pl ci-fan-frag-ws --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
+performance-tests/bench/run_test.pl ci-mixed --show-worker-logs: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE CXX11 RAPIDJSON
 

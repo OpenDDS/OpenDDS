@@ -121,11 +121,9 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
   const int result = DataLink::make_reservation(remote_pub, local_sub, receive_listener, reliable);
   send_association_msg(local_sub, remote_pub);
   // Resend until we get a response.
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
-    assoc_resends_.insert(std::pair<GuidPair, unsigned>(GuidPair(local_sub, remote_pub),
-      config().association_resend_max_count()));
-  }
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
+  assoc_resends_.insert(std::pair<GuidPair, size_t>(GuidPair(local_sub, remote_pub),
+    config().association_resend_max_count()));
   return result;
 }
 
@@ -185,7 +183,8 @@ ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
   if (sample.header_.sequence_ == -1 && sample.header_.message_length_ == guid_cdr_size) {
     VDBG((LM_DEBUG, "(%P|%t) ShmemDataLink::request_ack_received: association msg\n"));
     GUID_t local;
-    Serializer ser(sample.sample_.get(), encoding_unaligned_native);
+    Message_Block_Ptr payload(recv_strategy_->to_msgblock(sample));
+    Serializer ser(payload.get(), encoding_unaligned_native);
     if (ser >> local) {
       const GUID_t& remote = sample.header_.publication_id_;
       GuidConverter gc(local);

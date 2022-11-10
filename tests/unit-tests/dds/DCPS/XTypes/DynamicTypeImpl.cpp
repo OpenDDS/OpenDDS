@@ -8,8 +8,8 @@ Bitmask
 Bitset
 */
 
-#include "../../../CompleteToDynamicTypeTypeSupportImpl.h"
-#include "../../../CompleteToMinimalTypeObjectTypeSupportImpl.h"
+#include <CompleteToDynamicTypeTypeSupportImpl.h>
+#include <CompleteToMinimalTypeObjectTypeSupportImpl.h>
 
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/XTypes/TypeLookupService.h>
@@ -146,10 +146,9 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyOuterStruct)
   test_conversion<DCPS::MyModCompleteToDynamic_MyOuterStruct_xtag>(expected_outer_dt);
 }
 
-TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAliasStruct)
+XTypes::DynamicTypeImpl* get_my_alias_struct()
 {
   XTypes::DynamicTypeImpl* expected_alias_dt = new XTypes::DynamicTypeImpl();
-  DDS::DynamicType_var expected_alias_dt_var = expected_alias_dt;
   DDS::TypeDescriptor_var alias_td = new XTypes::TypeDescriptorImpl();
   alias_td->kind(XTypes::TK_ALIAS);
   alias_td->name("MyModCompleteToDynamic::MyAliasStruct");
@@ -205,7 +204,41 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAliasStruct)
   long_expected_inner_dt->set_descriptor(long_td);
   expected_inner_dt->insert_dynamic_member(expected_inner_dtm);
   expected_outer_dt->insert_dynamic_member(expected_outer_dtm);
+  return expected_alias_dt;
+}
+
+TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyAliasStruct)
+{
+  DDS::DynamicType_var expected_alias_dt = get_my_alias_struct();
   test_conversion<DCPS::MyModCompleteToDynamic_MyAliasStruct_xtag>(expected_alias_dt);
+}
+
+TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_StructWithTypedefMember)
+{
+  XTypes::DynamicTypeImpl* swtm_dt = new XTypes::DynamicTypeImpl();
+  DDS::DynamicType_var swtm_dt_var = swtm_dt;
+  DDS::TypeDescriptor_var swtm_td = new XTypes::TypeDescriptorImpl();
+  swtm_td->kind(XTypes::TK_STRUCTURE);
+  swtm_td->name("MyModCompleteToDynamic::StructWithTypedefMember");
+  swtm_td->bound().length(0);
+  swtm_td->extensibility_kind(DDS::APPENDABLE);
+  swtm_td->is_nested(0);
+  swtm_dt->set_descriptor(swtm_td);
+
+  XTypes::DynamicTypeMemberImpl* value_dtm = new XTypes::DynamicTypeMemberImpl();
+  DDS::DynamicTypeMember_var value_dtm_var = value_dtm;
+  DDS::MemberDescriptor_var value_md = new XTypes::MemberDescriptorImpl();
+  //value_dtm->set_parent(value_dt);
+  value_md->name("value");
+  value_md->id(0);
+  value_md->index(0);
+  value_md->try_construct_kind(DDS::DISCARD);
+  DDS::DynamicType_var expected_alias_dt = get_my_alias_struct();
+  value_md->type(expected_alias_dt);
+  value_dtm->set_descriptor(value_md);
+  swtm_dt->insert_dynamic_member(value_dtm);
+
+  test_conversion<DCPS::MyModCompleteToDynamic_StructWithTypedefMember_xtag>(swtm_dt);
 }
 
 TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_PrimitiveKind)
@@ -356,11 +389,24 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   enum_expected_dt->set_descriptor(enum_td);
   first_expected_dtm->set_descriptor(first_expected_md);
   second_expected_dtm->set_descriptor(second_expected_md);
+
+  XTypes::DynamicTypeMemberImpl* disc_expected_dtm = new XTypes::DynamicTypeMemberImpl();
+  DDS::DynamicTypeMember_var disc_expected_dtm_var = disc_expected_dtm;
+  DDS::MemberDescriptor_var disc_expected_md = new XTypes::MemberDescriptorImpl();
+  disc_expected_md->name("_d");
+  disc_expected_md->id(OpenDDS::XTypes::DISCRIMINATOR_ID);
+  disc_expected_md->index(OpenDDS::XTypes::DISCRIMINATOR_ID);
+  disc_expected_md->try_construct_kind(DDS::DISCARD);
+  disc_expected_md->type(enum_expected_dt);
+  disc_expected_dtm->set_descriptor(disc_expected_md);
+  expected_union_dt->insert_dynamic_member(disc_expected_dtm);
+
   enum_expected_dt->insert_dynamic_member(first_expected_dtm);
   enum_expected_dt->insert_dynamic_member(second_expected_dtm);
   expected_union_dt->insert_dynamic_member(long_expected_dtm);
   expected_union_dt->insert_dynamic_member(char_expected_dtm);
   expected_union_dt->insert_dynamic_member(short_expected_dtm);
+
   test_conversion<DCPS::MyModCompleteToDynamic_MyUnion_xtag>(expected_union_dt);
   // Enum types are circular.  Break apart.
   enum_expected_dt_var->clear();

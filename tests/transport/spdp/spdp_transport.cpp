@@ -5,9 +5,9 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/MessageParser.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>

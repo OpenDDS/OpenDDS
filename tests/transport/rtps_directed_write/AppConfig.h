@@ -4,7 +4,7 @@
 #include "dds/DCPS/Service_Participant.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #ifdef ACE_AS_STATIC_LIBS
 #include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
 #endif

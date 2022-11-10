@@ -175,6 +175,7 @@ Linux family:
 * Debian 9.4 (i686)
 * Ubuntu 18.04 LTS (x86\_64)
 * openSUSE 42.1 (x86\_64)
+* Yocto 2.5.3 (ARMv8)
 
 Windows family:
 * Windows 7 (32-bit, 64-bit)

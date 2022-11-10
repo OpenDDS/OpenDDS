@@ -16,10 +16,9 @@
 #include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
 #include "dds/DCPS/transport/framework/TransportSendElement.h"
 
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
+#include "dds/DCPS/RTPS/MessageParser.h"
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/Logging.h"
 
 #include "dds/DCPS/Serializer.h"
 
@@ -147,12 +146,6 @@ RtpsUdpSendStrategy::OverrideToken::~OverrideToken()
 bool
 RtpsUdpSendStrategy::marshal_transport_header(ACE_Message_Block* mb)
 {
-  if (transport_debug.log_messages) {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, rtps_message_mutex_, false);
-    RTPS::log_message("(%P|%t) {transport_debug.log_messages} %C\n", rtps_message_.hdr.guidPrefix, true, rtps_message_);
-    rtps_message_.submessages.length(0);
-  }
-
   Serializer writer(mb, encoding_unaligned_native); // byte order doesn't matter for the RTPS Header
   return writer.write_octet_array(reinterpret_cast<ACE_CDR::Octet*>(rtps_header_data_),
     RTPS::RTPSHDR_SZ);

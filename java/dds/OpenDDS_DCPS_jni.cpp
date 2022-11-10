@@ -1,10 +1,9 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
+#include "OpenDDS_jni_helpers.h"
 #include "OpenDDS_DCPS_TheParticipantFactory.h"
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
 #include "OpenDDS_DCPS_NetworkConfigModifier.h"
@@ -17,12 +16,19 @@
 #include "OpenDDS_DCPS_transport_TransportInst.h"
 #include "DDS_WaitSet.h"
 #include "DDS_GuardCondition.h"
+#include "DdsDcpsDomainJC.h"
+#include "DdsDcpsPublicationJC.h"
+#include "DdsDcpsSubscriptionJC.h"
 
-#include "idl2jni_runtime.h"
-#include "OpenDDS_jni_helpers.h"
+#include <idl2jni_runtime.h>
 
 #include <dds/DCPS/Service_Participant.h>
-
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/EntityImpl.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -39,20 +45,9 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
 #include <dds/DCPS/transport/framework/TransportInst_rch.h>
 
-#include <dds/DCPS/DomainParticipantImpl.h>
-#include <dds/DCPS/EntityImpl.h>
-#include <dds/DCPS/WaitSet.h>
-#include <dds/DCPS/GuardCondition.h>
-#include <dds/DCPS/NetworkAddress.h>
-#include <dds/DCPS/LogAddr.h>
-
-#include "DdsDcpsDomainJC.h"
-#include "DdsDcpsPublicationJC.h"
-#include "DdsDcpsSubscriptionJC.h"
-
-#include "ace/Init_ACE.h"
-#include "ace/Service_Config.h"
-#include "ace/Service_Repository.h"
+#include <ace/Init_ACE.h>
+#include <ace/Service_Config.h>
+#include <ace/Service_Repository.h>
 
 template <typename CppClass>
 CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
@@ -1209,3 +1204,12 @@ jlong JNICALL Java_DDS_GuardCondition__1jni_1init(JNIEnv *, jclass)
   return reinterpret_cast<jlong>(static_cast<CORBA::Object_ptr>(
                                  new DDS::GuardCondition));
 }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+// Forward declarations of these functions are generated for the forward
+// declaration of DynamicType in DdsDcpsTopic.idl. They shouldn't be used
+// anywhere, but at least on Windows and macOS, declarations need definitions,
+// so these are defined as stubs here.
+void copyToCxx(JNIEnv*, DDS::DynamicType_var&, jobject) {}
+void copyToJava(JNIEnv*, jobject&, const DDS::DynamicType_var&, bool) {}
+#endif

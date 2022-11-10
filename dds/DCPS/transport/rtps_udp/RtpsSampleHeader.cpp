@@ -18,8 +18,7 @@
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
 
@@ -260,16 +259,14 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
       // the MD5 hash of a >16 byte key, so we must limit this to Built-in
       // endpoints which are assumed to use GUIDs as keys.
       if ((rtps.writerId.entityKind & 0xC0) == 0xC0 // Only Built-in endpoints
-          && (rtps.smHeader.flags & FLAG_Q) && !rds.sample_) {
+          && (rtps.smHeader.flags & FLAG_Q) && !rds.has_data()) {
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
           if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
-            rds.sample_.reset(new ACE_Message_Block(20));
             // CDR_BE encapsulation scheme (endianness is not used for key hash)
-            rds.sample_->copy("\x00\x00\x00\x00", 4);
+            rds.replace("\x00\x00\x00\x00", EncapsulationHeader::serialized_size);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
-            rds.sample_->copy(reinterpret_cast<const char*>(data), 16);
-            opendds.message_length_ =
-              static_cast<ACE_UINT32>(rds.sample_->length());
+            rds.append(reinterpret_cast<const char*>(data), sizeof(DDS::OctetArray16));
+            opendds.message_length_ = EncapsulationHeader::serialized_size + sizeof(DDS::OctetArray16);
             opendds.key_fields_only_ = true;
             if (Transport_debug_level) {
               ACE_DEBUG((LM_DEBUG,
@@ -280,8 +277,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
           }
         }
       } else {
-      // FUTURE: Handle the case of D = 0 and K = 0
-      // used for Coherent Sets in PRESENTATION QoS (see 8.7.5)
+        // FUTURE: Handle the case of D = 0 and K = 0
+        // used for Coherent Sets in PRESENTATION QoS (see 8.7.5)
         if (Transport_debug_level) {
           ACE_DEBUG((LM_WARNING,
                      "(%P|%t) RtpsSampleHeader::into_received_data_sample() - "
@@ -328,7 +325,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
 bool RtpsSampleHeader::payload_byte_order(const ReceivedDataSample& rds)
 {
-  return rds.sample_->rd_ptr()[1] & RTPS::FLAG_E;
+  return rds.peek(1) & RTPS::FLAG_E;
 }
 
 namespace {

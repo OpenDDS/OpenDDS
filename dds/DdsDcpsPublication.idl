@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -13,12 +11,12 @@
 #pragma ciao lem "dds/DdsDcpsPublicationE.idl"
 
 module DDS {
-   local interface Topic;
-   local interface DomainParticipant;
-   local interface DataWriter;
-   local interface Publisher;
+  local interface Topic;
+  local interface DomainParticipant;
+  local interface DataWriter;
+  local interface Publisher;
 
-   local interface DataWriterListener : Listener {
+  local interface DataWriterListener : Listener {
     void on_offered_deadline_missed(
       in DataWriter writer,
       in OfferedDeadlineMissedStatus status);
@@ -39,39 +37,38 @@ module DDS {
     local interface PublisherListener : DataWriterListener {
   };
 
-
-   local interface DataWriter : Entity {
+  local interface DataWriter : Entity {
     // InstanceHandle_t register_instance(
-    //          in Data instance);
+    //   in Data instance);
     // InstanceHandle_t register_instance_w_timestamp(
-    //          in Data instance,
-    //          in Time_t timestamp);
+    //   in Data instance,
+    //   in Time_t timestamp);
     // ReturnCode_t unregister_instance(
-    //          in Data instance,
-    //          in InstanceHandle_t handle);
+    //   in Data instance,
+    //   in InstanceHandle_t handle);
     // ReturnCode_t unregister_instance_w_timestamp(
-    //          in Data instance,
-    //          in InstanceHandle_t handle,
-    //          in Time_t timestamp);
+    //   in Data instance,
+    //   in InstanceHandle_t handle,
+    //   in Time_t timestamp);
     // ReturnCode_t write(
-    //          in Data instance_data,
-    //          in InstanceHandle_t handle);
+    //   in Data instance_data,
+    //   in InstanceHandle_t handle);
     // ReturnCode_t write_w_timestamp(
-    //          in Data instance_data,
-    //          in InstanceHandle_t handle,
-    //          in Time_t source_timestamp);
+    //   in Data instance_data,
+    //   in InstanceHandle_t handle,
+    //   in Time_t source_timestamp);
     // ReturnCode_t dispose(
-    //          in Data instance_data,
-    //          in InstanceHandle_t instance_handle);
+    //   in Data instance_data,
+    //   in InstanceHandle_t instance_handle);
     // ReturnCode_t dispose_w_timestamp(
-    //          in Data instance_data,
-    //          in InstanceHandle_t instance_handle,
-    //          in Time_t source_timestamp);
+    //   in Data instance_data,
+    //   in InstanceHandle_t instance_handle,
+    //   in Time_t source_timestamp);
     // ReturnCode_t get_key_value(
-    //          inout Data key_holder,
-    //          in InstanceHandle_t handle);
+    //   inout Data key_holder,
+    //   in InstanceHandle_t handle);
     // InstanceHandle_t lookup_instance(
-    //      in Data instance_data);
+    //   in Data instance_data);
 
     ReturnCode_t set_qos(
       in DataWriterQos qos);
@@ -92,13 +89,13 @@ module DDS {
 
     // Access the status
     ReturnCode_t get_liveliness_lost_status(
-        inout LivelinessLostStatus status);
+      inout LivelinessLostStatus status);
     ReturnCode_t get_offered_deadline_missed_status(
-        inout OfferedDeadlineMissedStatus status);
+      inout OfferedDeadlineMissedStatus status);
     ReturnCode_t get_offered_incompatible_qos_status(
-        inout OfferedIncompatibleQosStatus status);
+      inout OfferedIncompatibleQosStatus status);
     ReturnCode_t get_publication_matched_status(
-        inout PublicationMatchedStatus status);
+      inout PublicationMatchedStatus status);
 
     ReturnCode_t assert_liveliness();
 
@@ -111,10 +108,9 @@ module DDS {
       in InstanceHandle_t subscription_handle);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-    };
+  };
 
-    // ----------------------------------------------------------------------
-    local interface Publisher : Entity {
+  local interface Publisher : Entity {
     DataWriter create_datawriter(
       in Topic a_topic,
       in DataWriterQos qos,
@@ -154,7 +150,7 @@ module DDS {
 #endif
 
     ReturnCode_t wait_for_acknowledgments(
-        in Duration_t max_wait);
+      in Duration_t max_wait);
 
     DomainParticipant get_participant();
 
@@ -167,9 +163,8 @@ module DDS {
     ReturnCode_t copy_from_topic_qos(
       inout DataWriterQos a_datawriter_qos,
       in TopicQos a_topic_qos);
-    };
-
-};
+  };
+}; // module DDS
 
 module OpenDDS {
   module DCPS {

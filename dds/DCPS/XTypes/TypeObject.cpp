@@ -1178,6 +1178,10 @@ const char* typekind_to_string(TypeKind tk)
   case TK_MAP:
     return "map";
   default:
+    if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: typekind_to_string: "
+        "passed unknown TypeKind %u\n", tk));
+    }
     return "unknown";
   }
 }

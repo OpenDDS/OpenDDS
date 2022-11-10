@@ -109,12 +109,14 @@ DataWriterImpl::DataWriterImpl()
 // the servant.
 DataWriterImpl::~DataWriterImpl()
 {
-  DBG_ENTRY_LVL("DataWriterImpl","~DataWriterImpl",6);
+  DBG_ENTRY_LVL("DataWriterImpl", "~DataWriterImpl", 6);
 #ifndef OPENDDS_SAFETY_PROFILE
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    type_lookup_service->remove_guid_from_dynamic_map(publication_id_);
+    if (type_lookup_service) {
+      type_lookup_service->remove_guid_from_dynamic_map(publication_id_);
+    }
   }
 #endif
 }
@@ -427,7 +429,7 @@ DataWriterImpl::association_complete_i(const RepoId& remote_id)
       // protect publication_match_status_ and status changed flags.
       ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->lock_);
 
-      if (bind(id_to_handle_map_, remote_id, handle) != 0) {
+      if (DCPS::bind(id_to_handle_map_, remote_id, handle) != 0) {
         ACE_DEBUG((LM_WARNING,
                    ACE_TEXT("(%P|%t) WARNING: DataWriterImpl::association_complete_i: ")
                    ACE_TEXT("id_to_handle_map_%C = 0x%x failed.\n"),

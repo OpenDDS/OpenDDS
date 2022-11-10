@@ -6,8 +6,8 @@
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsUdpDataLink.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/DataSampleElement.h>

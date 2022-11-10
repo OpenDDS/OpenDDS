@@ -392,34 +392,12 @@ module Builder {
 
   typedef sequence<ParticipantConfig> ParticipantConfigSeq;
 
-  // TransportInstance
-
-  struct TransportInstanceConfig {
-    string name;
-    string type;
-    unsigned short domain;
-  };
-
-  typedef sequence<TransportInstanceConfig> TransportInstanceConfigSeq;
-
-  // Discovery
-
-  struct DiscoveryConfig {
-    string name;
-    string type; // "rtps" or "repo"
-    string ior; // only used for info "repo", format as URI (e.g. "file://repo.ior")
-    unsigned short domain;
-  };
-
-  typedef sequence<DiscoveryConfig> DiscoveryConfigSeq;
-
   // Process
 
   @topic
   struct ProcessConfig {
+    string name;
     ConfigSectionSeq config_sections;
-    DiscoveryConfigSeq discoveries;
-    TransportInstanceConfigSeq instances;
     ParticipantConfigSeq participants;
   };
 

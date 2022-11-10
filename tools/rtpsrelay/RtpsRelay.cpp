@@ -201,6 +201,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     } else if ((arg = args.get_the_parameter("-RestartDetection"))) {
       config.restart_detection(ACE_OS::atoi(arg));
       args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-AdmissionControlQueueSize"))) {
+      config.admission_control_queue_size(ACE_OS::atoi(arg));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-AdmissionControlQueueDuration"))) {
+      config.admission_control_queue_duration(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
+    } else if ((arg = args.get_the_parameter("-RunTime"))) {
+      config.run_time(OpenDDS::DCPS::TimeDuration(ACE_OS::atoi(arg)));
+      args.consume_arg();
 #ifdef OPENDDS_SECURITY
     } else if ((arg = args.get_the_parameter("-IdentityCA"))) {
       identity_ca_file = file + arg;
@@ -930,6 +939,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) INFO: Meta Discovery listening on %C\n"), OpenDDS::DCPS::LogAddr(meta_discovery_addr).c_str()));
 
+  const bool has_run_time = !config.run_time().is_zero();
+  const OpenDDS::DCPS::MonotonicTimePoint end_time = OpenDDS::DCPS::MonotonicTimePoint::now() + config.run_time();
+
   if (thread_status_manager.update_thread_status()) {
     if (relay_thread_monitor->start() == -1) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P:%t) ERROR: failed to activate Thread Load Monitor\n")));
@@ -938,7 +950,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
     OpenDDS::DCPS::ThreadStatusManager::Start s(thread_status_manager, "RtpsRelay Main");
 
-    for (;;) {
+    while (!has_run_time || OpenDDS::DCPS::MonotonicTimePoint::now() < end_time) {
       ACE_Time_Value t = thread_status_manager.thread_status_interval().value();
       OpenDDS::DCPS::ThreadStatusManager::Sleeper s(thread_status_manager);
       if (reactor->run_reactor_event_loop(t, 0) != 0) {
@@ -947,9 +959,25 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     relay_thread_monitor->stop();
+  } else if (has_run_time) {
+    while (OpenDDS::DCPS::MonotonicTimePoint::now() < end_time) {
+      ACE_Time_Value t = (end_time - OpenDDS::DCPS::MonotonicTimePoint::now()).value();
+      if (reactor->run_reactor_event_loop(t, 0) != 0) {
+        break;
+      }
+    }
+
   } else {
     reactor->run_reactor_event_loop();
   }
+
+  application_participant->delete_contained_entities();
+  factory->delete_participant(application_participant);
+
+  relay_participant->delete_contained_entities();
+  factory->delete_participant(relay_participant);
+
+  TheServiceParticipant->shutdown();
 
   spdp_vertical_handler.stop();
   sedp_vertical_handler.stop();

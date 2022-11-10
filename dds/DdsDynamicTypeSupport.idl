@@ -1,0 +1,74 @@
+/*
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+#ifndef OPENDDS_DDS_DYNAMIC_TYPE_SUPPORT_IDL
+#define OPENDDS_DDS_DYNAMIC_TYPE_SUPPORT_IDL
+
+#ifndef OPENDDS_SAFETY_PROFILE
+#  include <dds/DdsDynamicData.idl>
+#  include <dds/DdsDcpsPublication.idl>
+#  include <dds/DdsDcpsTopic.idl>
+
+module DDS {
+
+// All the methods the XTypes spec describes in DynamicTypeSupport are not
+// valid IDL. It's not possible to declare a static method in IDL, at
+// least in a standardized way. register_type and get_type_name are not valid
+// because interfaces can't redefine methods defined in parent interfaces.
+// https://issues.omg.org/browse/INBOX-1527
+local interface DynamicTypeSupportInterf : TypeSupport {
+#if 0
+  /*static*/ DynamicTypeSupport create_type_support(
+    in DynamicType type);
+  /*static*/ DDS::ReturnCode_t delete_type_support(
+    in DynamicTypeSupport type_support);
+
+  ReturnCode_t register_type(
+    in DomainParticipant participant,
+    in ObjectName type_name);
+  ObjectName get_type_name();
+#endif
+};
+
+local interface DynamicDataWriter : DataWriter {
+  // This should match what DataWriterImpl_T is implementing
+  InstanceHandle_t register_instance(
+    in DynamicData instance);
+  InstanceHandle_t register_instance_w_timestamp(
+    in DynamicData instance,
+    in Time_t timestamp);
+  ReturnCode_t unregister_instance(
+    in DynamicData instance,
+    in InstanceHandle_t handle);
+  ReturnCode_t unregister_instance_w_timestamp(
+    in DynamicData instance,
+    in InstanceHandle_t handle,
+    in Time_t timestamp);
+  ReturnCode_t write(
+    in DynamicData instance_data,
+    in InstanceHandle_t handle);
+  ReturnCode_t write_w_timestamp(
+    in DynamicData instance_data,
+    in InstanceHandle_t handle,
+    in Time_t source_timestamp);
+  ReturnCode_t dispose(
+    in DynamicData instance_data,
+    in InstanceHandle_t instance_handle);
+  ReturnCode_t dispose_w_timestamp(
+    in DynamicData instance_data,
+    in InstanceHandle_t instance_handle,
+    in Time_t source_timestamp);
+  ReturnCode_t get_key_value(
+    inout DynamicData key_holder,
+    in InstanceHandle_t handle);
+  InstanceHandle_t lookup_instance(
+    in DynamicData instance_data);
+};
+
+}; // module DDS
+
+#endif // OPENDDS_SAFETY_PROFILE
+
+#endif // OPENDDS_DDS_DYNAMIC_TYPE_SUPPORT_IDL

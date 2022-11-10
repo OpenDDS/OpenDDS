@@ -10,8 +10,8 @@
 #include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RepoIdBuilder.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/AssociationData.h>

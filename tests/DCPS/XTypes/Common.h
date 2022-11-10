@@ -16,6 +16,7 @@
 #    include <dds/DCPS/security/BuiltInPlugins.h>
 #  endif
 #endif
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 
 using namespace DDS;
 using OpenDDS::DCPS::DEFAULT_STATUS_MASK;
@@ -37,10 +38,22 @@ const std::string STRING_26 = "abcdefghijklmnopqrstuvwxyz";
 const std::string STRING_20 = "abcdefghijklmnopqrst";
 
 template<typename T>
-bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_name,
-  Topic_var& topic, const std::string& registered_type_name)
+bool get_topic(TypeSupport_var& ts, const DomainParticipant_var dp, const std::string& topic_name,
+  Topic_var& topic, const std::string& registered_type_name, bool dynamic = false)
 {
-  if (ts->register_type(dp, registered_type_name.empty() ? "" : registered_type_name.c_str()) != RETCODE_OK) {
+  TypeSupport_var native_ts = new typename OpenDDS::DCPS::DDSTraits<T>::TypeSupportImplType;
+  if (dynamic) {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_ERROR((LM_ERROR, "ERROR: Can't create dynamic type support on safety profile\n"));
+    return false;
+#else
+    ts = new DDS::DynamicTypeSupport(native_ts->get_type());
+#endif
+  } else {
+    ts = TypeSupport::_duplicate(native_ts);
+  }
+
+  if (ts->register_type(dp, registered_type_name.c_str()) != RETCODE_OK) {
     ACE_ERROR((LM_ERROR, "ERROR: register_type failed\n"));
     return false;
   }
@@ -62,7 +75,8 @@ bool get_topic(T ts, const DomainParticipant_var dp, const std::string& topic_na
   return true;
 }
 
-bool wait_for_reader(bool tojoin, DataWriter_var &dw) {
+bool wait_for_reader(bool tojoin, DataWriter_var &dw)
+{
   WaitSet_var ws = new DDS::WaitSet;
   StatusCondition_var condition = dw->get_statuscondition();
   condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
@@ -277,7 +291,8 @@ void append(PropertySeq& props, const char* name, const char* value)
   props[len] = prop;
 }
 
-void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp) {
+void create_participant(const DomainParticipantFactory_var& dpf, DomainParticipant_var& dp)
+{
   DomainParticipantQos part_qos;
   dpf->get_default_participant_qos(part_qos);
 

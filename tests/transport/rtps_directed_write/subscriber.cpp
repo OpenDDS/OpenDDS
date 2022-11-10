@@ -7,7 +7,7 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/AssociationData.h>
@@ -108,7 +108,8 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     return;
   }
 
-  Serializer ser(sample.sample_.get(), encoding);
+  Message_Block_Ptr payload(sample.data());
+  Serializer ser(payload.get(), encoding);
   TestMsg data;
   if (!deserializeData(data, ser)) {
     return;

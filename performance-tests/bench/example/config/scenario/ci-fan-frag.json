@@ -1,0 +1,42 @@
+{
+  "name": "Continuous Integration Fan-Out / Fan-In Test",
+  "desc": "This is a small quick test for data fan-out / fan-in capability with large samples (fragmentation)",
+  "scenario_parameters": [
+    {
+      "name": "Base",
+      "desc": "Scenario Base",
+      "value": { "$discriminator": "PK_STRING", "string_param": "fan" }
+    },
+    {
+      "name": "Bytes",
+      "desc": "Payload Bytes",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 256000 }
+    },
+    {
+      "name": "Strategy",
+      "desc": "Message Read Strategy",
+      "value": { "$discriminator": "PK_STRING", "string_param": "Listener" }
+    },
+    {
+      "name": "Max Message Size",
+      "desc": "RTPS Transport Configuration Max Message Size",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 65536 }
+    },
+    {
+      "name": "Servers",
+      "desc": "Total Server Count",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 10 }
+    }
+  ],
+  "any_node": [
+    {
+      "config": "ci-fan-frag_client.json",
+      "count": 1
+    },
+    {
+      "config": "ci-fan-frag_server.json",
+      "count": 10
+    }
+  ],
+  "timeout": 120
+}

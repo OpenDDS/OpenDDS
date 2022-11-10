@@ -7,7 +7,7 @@
 
 #include "ParameterListConverter.h"
 
-#include "BaseMessageUtils.h"
+#include "MessageUtils.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/GuidUtils.h>
@@ -949,11 +949,10 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     } else {
       // Append the blob and a custom PID
       push_back_dcps_locator(param_list, tl);
-      if (!std::strcmp(tl.transport_type, "multicast")) {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) to_param_list(dwd) - ")
-                   ACE_TEXT("Multicast transport with RTPS ")
-                   ACE_TEXT("discovery has known issues")));
+      if (!std::strcmp(tl.transport_type, "multicast")
+          && DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: ParameterListConverter::to_param_list(dwd): "
+                   "Multicast transport with RTPS discovery has known issues\n"));
       }
     }
   }
@@ -1287,11 +1286,10 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     } else {
       // Append the blob and a custom PID
       push_back_dcps_locator(param_list, tl);
-      if (!std::strcmp(tl.transport_type, "multicast")) {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) to_param_list(drd) - ")
-                   ACE_TEXT("Multicast transport with RTPS ")
-                   ACE_TEXT("discovery has known issues")));
+      if (!std::strcmp(tl.transport_type, "multicast")
+          && DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: ParameterListConverter::to_param_list(drd): "
+                   "Multicast transport with RTPS discovery has known issues\n"));
       }
     }
   }

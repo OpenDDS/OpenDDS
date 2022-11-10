@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -14,20 +12,18 @@
 #include "Serializer.h"
 #include "SafetyProfileStreams.h"
 #include "XTypes/TypeObject.h"
+#include "XTypes/TypeLookupService.h"
 
+#include <dds/DdsDynamicDataC.h>
 #include <dds/DdsDcpsTypeSupportExtC.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
-namespace XTypes {
-class TypeLookupService;
-}
-
 namespace DCPS {
 
 class MetaStruct;
@@ -116,8 +112,13 @@ public:
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
 
-  void add_types(const RcHandle<XTypes::TypeLookupService>& tls) const;
-  void populate_dependencies(const RcHandle<XTypes::TypeLookupService>& tls) const;
+  void add_types(const XTypes::TypeLookupService_rch& tls) const;
+  void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
+
+protected:
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicType_ptr get_type_from_type_lookup_service();
+#endif
 
 private:
   static const ACE_CDR::Long TYPE_INFO_DEPENDENT_COUNT_NOT_PROVIDED;
@@ -126,11 +127,14 @@ private:
                       const XTypes::TypeIdentifier& ti,
                       const XTypes::TypeMap& type_map) const;
 
-  void populate_dependencies_i(const RcHandle<XTypes::TypeLookupService>& tls,
+  void populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
                                XTypes::EquivalenceKind ek) const;
 
-  OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
+#ifndef OPENDDS_SAFETY_PROFILE
+  XTypes::TypeLookupService_rch type_lookup_service_;
+#endif
 
+  OPENDDS_DELETED_COPY_MOVE_CTOR_ASSIGN(TypeSupportImpl)
 };
 
 template <typename NativeType>
@@ -173,9 +177,17 @@ public:
   {
     return MarshalTraitsType::key_only_serialized_size_bound(encoding);
   }
-};
 
-const char* kind_to_string(const XTypes::EquivalenceKind ek);
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicType_ptr get_type()
+  {
+    return get_type_from_type_lookup_service();
+  }
+#endif
+
+protected:
+  XTypes::TypeLookupService_rch type_lookup_service_;
+};
 
 } // namespace DCPS
 } // namespace OpenDDS

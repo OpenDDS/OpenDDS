@@ -115,6 +115,8 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
   const std::string unescaped_name =
     dds_generator::scoped_helper(name, "::", EscapeContext_StripEscapes);
   const std::string name_underscores = dds_generator::scoped_helper(name, "_");
+  static const std::string ns("OpenDDS::DCPS::");
+  const std::string xtag = ns + get_xtag_name(name);
 
   static const char* idl_includes[] = {
     "dds/DdsDcpsInfrastructure.idl", "dds/DdsDcpsTopic.idl",
@@ -183,6 +185,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "  typedef " << ts_name << "DataReader DataReaderType;\n"
     "  typedef " << cxx_name << "_OpenDDS_KeyLessThan LessThanType;\n"
     "  typedef OpenDDS::DCPS::KeyOnly<const " << cxx_name << "> KeyOnlyType;\n"
+    "  typedef " << xtag << " XtagType;\n"
     "\n"
     "  static const char* type_name() { return \"" << unescaped_name << "\"; }\n"
     "  static bool gen_has_key() { return " << (key_count ? "true" : "false") << "; }\n"
@@ -285,7 +288,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
     if (generate_xtypes) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getMinimalTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getMinimalTypeIdentifier<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
@@ -298,7 +301,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
     if (generate_xtypes) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getMinimalTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getMinimalTypeMap<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeMap tm;\n"
@@ -312,7 +315,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     const bool generate_xtypes_complete = generate_xtypes && be_global->xtypes_complete();
     if (generate_xtypes_complete) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getCompleteTypeIdentifier<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getCompleteTypeIdentifier<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeIdentifier ti;\n"
@@ -325,7 +328,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
 
     if (generate_xtypes_complete) {
       be_global->impl_ <<
-        "  return OpenDDS::DCPS::getCompleteTypeMap<OpenDDS::DCPS::" << typeobject_generator::tag_type(name) << ">();\n";
+        "  return OpenDDS::DCPS::getCompleteTypeMap<" << xtag << ">();\n";
     } else {
       be_global->impl_ <<
         "  static OpenDDS::XTypes::TypeMap tm;\n"

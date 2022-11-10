@@ -6,18 +6,17 @@
 #include <DCPS/DdsDcps_pch.h>
 
 #ifndef OPENDDS_SAFETY_PROFILE
+#  include "DynamicDataXcdrReadImpl.h"
 
-#include "DynamicDataXcdrReadImpl.h"
+#  include "DynamicTypeMemberImpl.h"
 
-#include "DynamicTypeMemberImpl.h"
+#  include <dds/DCPS/debug.h>
+#  include <dds/DCPS/SafetyProfileStreams.h>
+#  include <dds/DCPS/ValueHelper.h>
 
-#include <dds/DCPS/debug.h>
-#include <dds/DCPS/SafetyProfileStreams.h>
-
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
-#include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
-
-#ifndef OPENDDS_SAFETY_PROFILE
+#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#  include <dds/DdsDcpsInfrastructureC.h>
+#  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
 #  include <dds/CorbaSeq/LongSeqTypeSupportImpl.h>
 #  include <dds/CorbaSeq/ULongSeqTypeSupportImpl.h>
 #  include <dds/CorbaSeq/Int8SeqTypeSupportImpl.h>
@@ -35,13 +34,10 @@
 #  include <dds/CorbaSeq/BooleanSeqTypeSupportImpl.h>
 #  include <dds/CorbaSeq/StringSeqTypeSupportImpl.h>
 #  include <dds/CorbaSeq/WStringSeqTypeSupportImpl.h>
-#  include <dds/DCPS/ValueHelper.h>
-#endif
-#include <dds/DdsDcpsInfrastructureC.h>
 
-#include <ace/OS_NS_string.h>
+#  include <ace/OS_NS_string.h>
 
-#include <stdexcept>
+#  include <stdexcept>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {

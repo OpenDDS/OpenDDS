@@ -1,7 +1,7 @@
 #include "SimpleDataReader.h"
 
 #include <dds/DCPS/AssociationData.h>
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>

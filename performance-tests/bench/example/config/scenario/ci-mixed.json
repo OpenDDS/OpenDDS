@@ -1,0 +1,44 @@
+{
+  "name": "CI Showtime Mixed 5",
+  "desc": "This is a small mixed-qos & configuration scenario. Reliable and durable topics are actively used during discovery.",
+  "scenario_parameters": [
+    {
+      "name": "Base",
+      "desc": "Scenario Base",
+      "value": { "$discriminator": "PK_STRING", "string_param": "mixed" }
+    },
+    {
+      "name": "Nodes",
+      "desc": "Worker Nodes",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 5 }
+    },
+    {
+      "name": "Participants",
+      "desc": "Domain Participants",
+      "value": { "$discriminator": "PK_NUMBER", "number_param": 17 }
+    }
+  ],
+  "nodes": [
+    {
+      "workers": [
+        {
+          "config": "ci-mixed_daemon.json",
+          "count": 1
+        },
+        {
+          "config": "ci-mixed_worker.json",
+          "count": 1
+        }
+      ],
+      "count": 5,
+      "exclusive": false
+    }
+  ],
+  "any_node": [
+    {
+      "config": "ci-mixed_master.json",
+      "count": 1
+    }
+  ],
+  "timeout": 60
+}

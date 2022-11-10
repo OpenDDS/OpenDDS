@@ -86,6 +86,7 @@ DataReaderImpl::DataReaderImpl()
   , raw_latency_buffer_size_(0)
   , raw_latency_buffer_type_(DataCollector<double>::KeepOldest)
   , transport_disabled_(false)
+  , mb_alloc_(DEFAULT_TRANSPORT_RECEIVE_BUFFERS)
 {
   reactor_ = TheServiceParticipant->timer();
 
@@ -133,7 +134,7 @@ DataReaderImpl::DataReaderImpl()
 // the servant.
 DataReaderImpl::~DataReaderImpl()
 {
-  DBG_ENTRY_LVL("DataReaderImpl","~DataReaderImpl",6);
+  DBG_ENTRY_LVL("DataReaderImpl", "~DataReaderImpl", 6);
 
   deadline_task_->cancel();
 
@@ -141,7 +142,9 @@ DataReaderImpl::~DataReaderImpl()
   RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
   if (participant) {
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
-    type_lookup_service->remove_guid_from_dynamic_map(subscription_id_);
+    if (type_lookup_service) {
+      type_lookup_service->remove_guid_from_dynamic_map(subscription_id_);
+    }
   }
 #endif
 }
@@ -1450,8 +1453,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     this->writer_activity(sample.header_);
 
+    Message_Block_Ptr payload(sample.data(&mb_alloc_));
     Serializer serializer(
-        sample.sample_.get(), Encoding::KIND_UNALIGNED_CDR,
+        payload.get(), Encoding::KIND_UNALIGNED_CDR,
         sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
     if (!(serializer >> control)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
@@ -1620,7 +1624,8 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
   case END_HISTORIC_SAMPLES: {
     if (sample.header_.message_length_ >= sizeof(RepoId)) {
-      Serializer ser(sample.sample_.get(), Encoding::KIND_UNALIGNED_CDR);
+      Message_Block_Ptr payload(sample.data(&mb_alloc_));
+      Serializer ser(payload.get(), Encoding::KIND_UNALIGNED_CDR);
       RepoId readerId = GUID_UNKNOWN;
       if (!(ser >> readerId)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")

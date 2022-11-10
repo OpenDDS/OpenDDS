@@ -1,0 +1,63 @@
+module XTypesUtils {
+
+@final
+@topic
+struct FinalStruct {
+  long value;
+};
+
+@appendable
+@topic
+union AppendableUnion switch (long) {
+case 0:
+  long value;
+};
+
+@mutable
+@topic
+struct MutableStruct {
+  long value;
+};
+
+@final
+@topic
+struct FinalMaxFinalStruct {
+  FinalStruct fs;
+};
+
+@final
+@topic
+struct FinalMaxAppendableStruct {
+  FinalStruct fs;
+  AppendableUnion au;
+};
+
+@final
+@topic
+struct FinalMaxMutableStruct {
+  FinalMaxAppendableStruct fmas;
+  MutableStruct ms;
+};
+
+@appendable
+@topic
+struct AppendableMaxAppendableStruct {
+  FinalMaxAppendableStruct fmas;
+};
+
+typedef FinalMaxMutableStruct MaxMutableAlias;
+
+@appendable
+@topic
+union AppendableMaxMutableUnion switch (char) {
+case 'm':
+  MaxMutableAlias fmms;
+};
+
+@mutable
+@topic
+struct MutableMaxMutableStruct {
+  AppendableUnion au;
+};
+
+};
