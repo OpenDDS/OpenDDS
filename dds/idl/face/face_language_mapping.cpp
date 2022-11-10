@@ -391,7 +391,7 @@ bool FaceLanguageMapping::cxx11() const
   return false;
 }
 
-bool FaceLanguageMapping::none() const
+bool FaceLanguageMapping::default_mapping() const
 {
   return false;
 }

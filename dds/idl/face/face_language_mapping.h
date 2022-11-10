@@ -17,7 +17,7 @@ public:
   virtual ~FaceLanguageMapping();
 
   virtual bool cxx11() const;
-  virtual bool none() const;
+  virtual bool default_mapping() const;
 
   virtual std::string getMinimalHeaders() const;
 
