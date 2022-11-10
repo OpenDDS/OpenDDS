@@ -1121,7 +1121,7 @@ namespace {
             stream_to = getWrapper(args, elem, WD_INPUT);
           } else {
             const string getbuffer =
-              (be_builtin_global->language_mapping()->none())
+              (be_builtin_global->language_mapping()->default_mapping())
               ? ".get_buffer()" : "";
             stream_to = value_access + getbuffer + "[i]";
           }

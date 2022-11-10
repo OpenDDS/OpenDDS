@@ -136,11 +136,11 @@ void BE_JNIInterface::usage()
     ACE_TEXT(" -Wb,export_include=<path>\tsets export include ")
     ACE_TEXT("file for all files\n")
     ACE_TEXT(" -Wb,pch_include=<path>\t\tsets include ")
-    ACE_TEXT("file for precompiled header mechanism\n")
+    ACE_TEXT("file for precompiled headers\n")
     ACE_TEXT(" -Wb,java[=<output_file>]\tenables Java support ")
     ACE_TEXT("for TypeSupport files.  Do\n\t\t\t\tnot specify an 'output_file' ")
     ACE_TEXT("except for special\n\t\t\t\tcases.\n")
     ACE_TEXT(" -Wb,tao_include_prefix=<path>\tPrefix for including the TAO-")
-    ACE_TEXT("generated header file.\n")
+    ACE_TEXT("generated header\n\t\t\t\tfile.\n")
     ));
 }

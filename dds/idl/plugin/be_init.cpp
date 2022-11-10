@@ -115,8 +115,7 @@ namespace {
   }
 }
 
-opendds_idl_plugin_Export void
-BE_version()
+opendds_idl_plugin_Export void BE_version()
 {
   InterfaceList::const_iterator end = interfaces.end();
   for (InterfaceList::const_iterator itr = interfaces.begin();
@@ -146,8 +145,7 @@ BE_post_init(char* files[], long nfiles)
   }
 }
 
-opendds_idl_plugin_Export void
-BE_produce()
+opendds_idl_plugin_Export void BE_produce()
 {
   InterfaceList::iterator end = interfaces.end();
   for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
@@ -157,8 +155,7 @@ BE_produce()
 
 // Clean up before exit, whether successful or not.
 // Need not be exported since it is called only from this file.
-opendds_idl_plugin_Export void
-BE_cleanup()
+opendds_idl_plugin_Export void BE_cleanup()
 {
   InterfaceList::iterator end = interfaces.end();
   for (InterfaceList::iterator itr = interfaces.begin(); itr != end; ++itr) {
@@ -167,8 +164,7 @@ BE_cleanup()
 }
 
 // Abort this run of the BE.
-opendds_idl_plugin_Export void
-BE_abort()
+opendds_idl_plugin_Export void BE_abort()
 {
   ACE_ERROR((LM_ERROR, ACE_TEXT("Fatal Error - Aborting\n")));
   InterfaceList::iterator end = interfaces.end();

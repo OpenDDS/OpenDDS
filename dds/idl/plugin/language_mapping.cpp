@@ -20,7 +20,7 @@ bool LanguageMapping::cxx11() const
   return false;
 }
 
-bool LanguageMapping::none() const
+bool LanguageMapping::default_mapping() const
 {
   return true;
 }
@@ -75,7 +75,7 @@ void LanguageMapping::produce() const
   be_builtin_global->filename(idl_fn);
 
   const BE_BuiltinGlobalData::stream_enum_t out_stream =
-    be_builtin_global->language_mapping()->none()
+    be_builtin_global->language_mapping()->default_mapping()
     ? BE_BuiltinGlobalData::STREAM_H : BE_BuiltinGlobalData::STREAM_LANG_H;
 
   ifstream idl(idl_fn);
@@ -181,7 +181,7 @@ void LanguageMapping::produce() const
 
   produceTS();
 
-  if (!be_builtin_global->language_mapping()->none()) {
+  if (!be_builtin_global->language_mapping()->default_mapping()) {
     postprocess(be_builtin_global->lang_header_name_.c_str(), be_builtin_global->lang_header_,
       BE_BuiltinGlobalData::STREAM_LANG_H);
   }

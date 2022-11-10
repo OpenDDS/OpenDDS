@@ -5,6 +5,15 @@
  * See: http://www.opendds.org/license.html
  */
 
+// The purpose of this file is to provide link level visibility for the
+// DRV_add_include_path() and DRV_cpp_putarg() functions that are defined
+// in $TAO_ROOT/TAO_IDL/driver/drv_preproc.cpp.  Those functions are
+// referenced by opendds_idl_plugin framework library, but are not defined
+// within it.  The opendds_idl executable project includes the afore mentioned
+// file into it via a #include.  Because these functions (and others defined
+// in the .cpp) are not exported, we have to either employ this work-around
+// or reproduce the content of drv_preproc.{h,cpp} with exports.
+
 #ifndef OPENDDS_IDL_VISIBILITY_LINKING
 #define OPENDDS_IDL_VISIBILITY_LINKING
 

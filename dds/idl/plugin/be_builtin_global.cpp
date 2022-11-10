@@ -289,7 +289,7 @@ BE_BuiltinGlobalData::multicast(const char* str)
   header_ << str;
   impl_ << str;
   idl_ << str;
-  if (!language_mapping_->none()) lang_header_ << str;
+  if (!language_mapping_->default_mapping()) lang_header_ << str;
 }
 
 BE_Comment_Guard::BE_Comment_Guard(const char* type, const char* name)

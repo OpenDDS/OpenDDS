@@ -92,7 +92,7 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   if (be_builtin_global->itl()) {
     gen_target_.add_generator(&itl_gen_);
   }
-  if (!be_builtin_global->language_mapping()->none()) {
+  if (!be_builtin_global->language_mapping()->default_mapping()) {
     gen_target_.add_generator(&lm_gen_);
     lm_gen_.init();
   }

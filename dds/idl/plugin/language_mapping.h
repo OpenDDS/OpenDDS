@@ -28,7 +28,7 @@ public:
   virtual bool cxx11() const;
 
   /// Is this the default language mapping?
-  virtual bool none() const;
+  virtual bool default_mapping() const;
 
   /// Return code to include minimal headers in the generated
   /// header file.
