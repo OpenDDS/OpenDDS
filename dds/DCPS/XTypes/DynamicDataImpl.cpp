@@ -26,14 +26,6 @@ DDS::DynamicType_ptr DynamicDataImpl::type()
   return type_.in();
 }
 
-/*
-DDS::ReturnCode_t DynamicDataImpl::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
-{
-  // TODO: Can use the same implementation as the reading class.
-  return DDS::RETCODE_OK;
-}
-*/
-
 DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
 {
   return DDS::RETCODE_UNSUPPORTED;
@@ -45,14 +37,6 @@ CORBA::Boolean DynamicDataImpl::equals(DDS::DynamicData_ptr /*other*/)
   ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::equals: Not implemented\n"));
   return false;
 }
-
-/*
-DDS::MemberId DynamicDataImpl::get_member_id_by_name(const char* name)
-{
-  // TODO: Can use the same implementation as the reading class.
-  return 0;
-}
-*/
 
 DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong /*index*/)
 {
@@ -1767,7 +1751,7 @@ bool DynamicDataImpl::DataContainer::serialize_single_value(DCPS::Serializer& se
 
 template<typename PrimitiveType>
 bool DynamicDataImpl::DataContainer::serialize_primitive_value(DCPS::Serializer& ser,
-  PrimitiveType default_value, TypeKind primitive_kind) const
+                                                               PrimitiveType default_value) const
 {
   const_single_iterator it = single_map_.find(MEMBER_ID_INVALID);
   if (it != single_map_.end()) {
@@ -1991,10 +1975,9 @@ bool DynamicDataImpl::DataContainer::reconstruct_wstring_value(CORBA::WChar* wst
   return true;
 }
 
-bool DynamicDataImpl::DataContainer::serialized_size_wstring(DCPS::Serializer& ser,
+bool DynamicDataImpl::DataContainer::serialized_size_wstring(const DCPS::Encoding& encoding,
                                                              size_t& size) const
 {
-  const DCPS::Encoding& encoding = ser.encoding();
   const bool is_empty = single_map_.empty() && complex_map_.empty();
   if (!is_empty) {
     CORBA::ULong largest_index;
@@ -4788,7 +4771,6 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_member(const DCPS::En
 bool DynamicDataImpl::DataContainer::serialize_basic_member_default_value(DCPS::Serializer& ser,
                                                                           TypeKind member_tk) const
 {
-  using namespace DCPS;
   switch (member_tk) {
   case TK_INT32: {
     CORBA::Long value;
@@ -6204,15 +6186,11 @@ bool DynamicDataImpl::DataContainer::serialize_union(DCPS::Serializer& ser) cons
   }
   return false;
 }
-
 } // namespace XTypes
 
 namespace DCPS {
-
 bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data)
 {
-  return true;
-  /*
   using namespace XTypes;
   const TypeKind tk = data.type_->get_kind();
   switch (tk) {
@@ -6255,9 +6233,9 @@ bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::Dynam
     primitive_serialized_size_boolean(encoding, size);
     return true;
   case TK_ENUM:
-    return data.container_.serialized_size_enum(encoding, size, type_);
+    return data.container_.serialized_size_enum(encoding, size, data.type_);
   case TK_BITMASK:
-    return data.container_.serialized_size_bitmask(encoding, size, type_);
+    return data.container_.serialized_size_bitmask(encoding, size, data.type_);
   case TK_STRING8:
     return data.container_.serialized_size_string(encoding, size);
 #ifdef DDS_HAS_WCHAR
@@ -6278,48 +6256,45 @@ bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::Dynam
     }
   }
   return false;
-  */
 }
 
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data)
 {
-  return true;
-  /*
   using namespace XTypes;
   const TypeKind tk = data.type_->get_kind();
   switch (tk) {
   case TK_INT32:
-    return data.container_.serialize_primitive_value(ser, CORBA::Long(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::Long());
   case TK_UINT32:
-    return data.container_.serialize_primitive_value(ser, CORBA::ULong(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::ULong());
   case TK_INT8:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_int8(CORBA::Int8()), tk);
+    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_int8(CORBA::Int8()));
   case TK_UINT8:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_uint8(CORBA::UInt8()), tk);
+    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_uint8(CORBA::UInt8()));
   case TK_INT16:
-    return data.container_.serialize_primitive_value(ser, CORBA::Short(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::Short());
   case TK_UINT16:
-    return data.container_.serialize_primitive_value(ser, CORBA::UShort(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::UShort());
   case TK_INT64:
-    return data.container_.serialize_primitive_value(ser, CORBA::LongLong(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::LongLong());
   case TK_UINT64:
-    return data.container_.serialize_primitive_value(ser, CORBA::ULongLong(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::ULongLong());
   case TK_FLOAT32:
-    return data.container_.serialize_primitive_value(ser, CORBA::Float(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::Float());
   case TK_FLOAT64:
-    return data.container_.serialize_primitive_value(ser, CORBA::Double(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::Double());
   case TK_FLOAT128:
-    return data.container_.serialize_primitive_value(ser, CORBA::LongDouble(), tk);
+    return data.container_.serialize_primitive_value(ser, CORBA::LongDouble());
   case TK_CHAR8:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_char(CORBA::Char()), tk);
+    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_char(CORBA::Char()));
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_wchar(CORBA::WChar()), tk);
+    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_wchar(CORBA::WChar()));
 #endif
   case TK_BYTE:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_octet(CORBA::Octet()), tk);
+    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_octet(CORBA::Octet()));
   case TK_BOOLEAN:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_boolean(CORBA::Boolean()), tk);
+    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_boolean(CORBA::Boolean()));
   case TK_ENUM:
     return data.container_.serialize_enum_value(ser);
   case TK_BITMASK:
@@ -6344,7 +6319,6 @@ bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data)
     }
   }
   return false;
-  */
 }
 
 } // namespace DCPS

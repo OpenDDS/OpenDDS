@@ -7,21 +7,17 @@
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_XCDR_READ_IMPL_H
 
 #ifndef OPENDDS_SAFETY_PROFILE
+#  include "DynamicDataBase.h"
+#  include "TypeObject.h"
 
-#include "DynamicDataBase.h"
-#include "TypeObject.h"
-//#include "DynamicTypeImpl.h"
-
-#include <dds/DCPS/LocalObject.h>
-#include <dds/DCPS/PoolAllocator.h>
-#include <dds/DCPS/Serializer.h>
+#  include <dds/DCPS/PoolAllocator.h>
+#  include <dds/DCPS/Serializer.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
-//class OpenDDS_Dcps_Export DynamicDataXcdrReadImpl : public virtual DCPS::LocalObject<DDS::DynamicData> {
 class OpenDDS_Dcps_Export DynamicDataXcdrReadImpl : public DynamicDataBase {
 public:
   DynamicDataXcdrReadImpl();
@@ -30,8 +26,8 @@ public:
   /// The duplicated chain is released when the object is destroyed. Caller is
   /// responsible for the release of the input message block chain.
   DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
-                  const DCPS::Encoding& encoding,
-                  DDS::DynamicType_ptr type);
+                          const DCPS::Encoding& encoding,
+                          DDS::DynamicType_ptr type);
 
   /// Use this when you want to pass the alignment state of a given Serializer object over.
   /// A typical use case would be when a part of the data has already been consumed from
@@ -43,10 +39,7 @@ public:
 
   ~DynamicDataXcdrReadImpl();
 
-  //  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
-
-  //  MemberId get_member_id_by_name(const char* name);
   DDS::MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
 
@@ -372,10 +365,6 @@ private:
   /// is an object of this type.
   bool skip_all();
 
-  /// Verify that a given type is primitive or string or wstring.
-  ///
-  //  bool is_type_supported(TypeKind tk, const char* func_name);
-
   /// Setup the strm_ object so that it has the correct alignment state.
   ///
   void setup_stream(ACE_Message_Block* chain);
@@ -557,9 +546,6 @@ private:
   /// when the method skips a nested aggregated type (i.e., struct and union) by
   /// calling skip_aggregated_member().
   IntermediateChains chains_to_release;
-
-  /// The actual (i.e., non-alias) DynamicType of the associated type.
-  DDS::DynamicType_var type_;
 
   static const ACE_CDR::ULong ITEM_COUNT_INVALID = ACE_UINT32_MAX;
 

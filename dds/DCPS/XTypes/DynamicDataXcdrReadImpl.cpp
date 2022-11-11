@@ -52,13 +52,13 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
 {}
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
-                                 const DCPS::Encoding& encoding,
-                                 DDS::DynamicType_ptr type)
-  : chain_(chain->duplicate())
+                                                 const DCPS::Encoding& encoding,
+                                                 DDS::DynamicType_ptr type)
+  : DynamicDataBase(type)
+  , chain_(chain->duplicate())
   , encoding_(encoding)
   , reset_align_state_(false)
   , strm_(chain_, encoding_)
-  , type_(get_base_type(type))
   , item_count_(ITEM_COUNT_INVALID)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
@@ -68,12 +68,12 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
 }
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type)
-  : chain_(ser.current()->duplicate())
+  : DynamicDataBase(type)
+  , chain_(ser.current()->duplicate())
   , encoding_(ser.encoding())
   , reset_align_state_(true)
   , align_state_(ser.rdstate())
   , strm_(chain_, encoding_)
-  , type_(get_base_type(type))
   , item_count_(ITEM_COUNT_INVALID)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
@@ -89,6 +89,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(const DynamicDataXcdrReadImpl& 
   , DDS::DynamicData()
   , CORBA::LocalObject()
   , RcObject()
+  , DynamicDataBase()
   , chain_(0)
   , strm_(0, other.encoding_)
 {
@@ -120,84 +121,10 @@ void DynamicDataXcdrReadImpl::copy(const DynamicDataXcdrReadImpl& other)
   item_count_ = other.item_count_;
 }
 
-/*
-DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
-{
-  DDS::DynamicTypeMember_var dtm;
-  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-
-  return dtm->get_descriptor(value);
-}
-*/
-
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
 {
   return DDS::RETCODE_UNSUPPORTED;
 }
-
-/*
-DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_by_name(const char* name)
-{
-  const TypeKind tk = type_->get_kind();
-  switch (tk) {
-  case TK_BOOLEAN:
-  case TK_BYTE:
-  case TK_INT16:
-  case TK_INT32:
-  case TK_INT64:
-  case TK_UINT16:
-  case TK_UINT32:
-  case TK_UINT64:
-  case TK_FLOAT32:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-  case TK_INT8:
-  case TK_UINT8:
-  case TK_CHAR8:
-  case TK_CHAR16:
-  case TK_ENUM:
-    return MEMBER_ID_INVALID;
-  case TK_STRING8:
-  case TK_STRING16:
-  case TK_SEQUENCE:
-  case TK_ARRAY:
-    // Elements of string, sequence, array must be accessed by index.
-    return MEMBER_ID_INVALID;
-  case TK_MAP:
-    // Values in map can be accessed by strings which is converted from map keys.
-    // But need to find out how this conversion works. In the meantime, only allow
-    // accessing map using index.
-    return MEMBER_ID_INVALID;
-  case TK_BITMASK:
-  case TK_STRUCTURE:
-  case TK_UNION:
-    {
-      DDS::DynamicTypeMember_var member;
-      if (type_->get_member_by_name(member, name) != DDS::RETCODE_OK) {
-        return MEMBER_ID_INVALID;
-      }
-      DDS::MemberDescriptor_var descriptor;
-      if (member->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-        return MEMBER_ID_INVALID;
-      }
-      if (tk == TK_BITMASK) {
-        // Bitmask's flags don't have ID, so use index instead.
-        return descriptor->index();
-      } else {
-        return descriptor->id();
-      }
-    }
-  }
-
-  if (DCPS::DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_member_id_by_name -")
-               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
-  }
-  return MEMBER_ID_INVALID;
-}
-*/
 
 bool DynamicDataXcdrReadImpl::has_optional_member(bool& has_optional) const
 {
@@ -623,20 +550,6 @@ DDS::DynamicData_ptr DynamicDataXcdrReadImpl::clone()
 {
   return new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_);
 }
-
-/*
-bool DynamicDataXcdrReadImpl::is_type_supported(TypeKind tk, const char* func_name)
-{
-  if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
-    if (DCPS::DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::%C -")
-                 ACE_TEXT(" Called on an unsupported type (%C)\n"), func_name, typekind_to_string(tk)));
-    }
-    return false;
-  }
-  return true;
-}
-*/
 
 template<typename ValueType>
 bool DynamicDataXcdrReadImpl::read_value(ValueType& value, TypeKind tk)
@@ -2605,32 +2518,6 @@ bool DynamicDataXcdrReadImpl::skip(const char* func_name, const char* descriptio
   return true;
 }
 
-/*
-bool DynamicDataXcdrReadImpl::is_primitive(TypeKind tk) const
-{
-  switch (tk) {
-  case TK_BOOLEAN:
-  case TK_BYTE:
-  case TK_INT8:
-  case TK_UINT8:
-  case TK_CHAR8:
-  case TK_INT16:
-  case TK_UINT16:
-  case TK_CHAR16:
-  case TK_INT32:
-  case TK_UINT32:
-  case TK_FLOAT32:
-  case TK_INT64:
-  case TK_UINT64:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-    return true;
-  default:
-    return false;
-  }
-}
-*/
-
 bool DynamicDataXcdrReadImpl::get_primitive_size(DDS::DynamicType_ptr dt, ACE_CDR::ULong& size) const
 {
   size = 0;
@@ -2666,28 +2553,6 @@ bool DynamicDataXcdrReadImpl::get_primitive_size(DDS::DynamicType_ptr dt, ACE_CD
   }
   return true;
 }
-
-/*
-bool DynamicDataXcdrReadImpl::get_index_from_id(MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const
-{
-  switch (type_->get_kind()) {
-  case TK_STRING8:
-  case TK_STRING16:
-  case TK_BITMASK:
-  case TK_SEQUENCE:
-  case TK_ARRAY:
-  case TK_MAP:
-    // The mapping from id to index must be consistent with get_member_id_at_index
-    // for these types. In particular, index and id are equal given that it doesn't
-    // go out of bound.
-    if (id < bound) {
-      index = id;
-      return true;
-    }
-  }
-  return false;
-}
-*/
 
 bool DynamicDataXcdrReadImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, DynamicTypeNameSet& dtns)
 {

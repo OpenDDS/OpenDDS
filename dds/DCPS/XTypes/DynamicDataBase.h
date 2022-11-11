@@ -10,13 +10,18 @@
 
 #include "DynamicTypeImpl.h"
 
+#include <dds/DCPS/LocalObject.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
 
-class DynamicDataBase : public DDS::DynamicData {
+class DynamicDataBase : public virtual DCPS::LocalObject<DDS::DynamicData> {
 public:
+  DynamicDataBase()
+  {}
+
   DynamicDataBase(DDS::DynamicType_ptr type)
     : type_(get_base_type(type))
   {}
@@ -89,6 +94,9 @@ public:
   }
 
 protected:
+
+  /// Verify that a given type is primitive or string or wstring.
+  ///
   bool is_type_supported(TypeKind tk, const char* func_name)
   {
     if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
@@ -151,6 +159,7 @@ protected:
     return false;
   }
 
+  /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
 };
 

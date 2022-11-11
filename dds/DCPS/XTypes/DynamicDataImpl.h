@@ -7,33 +7,35 @@
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_DATA_IMPL_H
 
 #ifndef OPENDDS_SAFETY_PROFILE
+#  include "DynamicDataBase.h"
 
-#include "DynamicDataBase.h"
-
-#include <dds/DdsDcpsCoreTypeSupportImpl.h>
-
-//#include "DynamicTypeImpl.h"
-
-//#include <dds/DdsDynamicDataC.h>
+#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace XTypes {
+class DynamicDataImpl;
+}
+
+namespace DCPS {
+bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
+bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
+}
+
 namespace XTypes {
 
-//class OpenDDS_Dcps_Export DynamicDataImpl : public DDS::DynamicData {
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
   DynamicDataImpl(DDS::DynamicType_ptr type);
 
   DDS::DynamicType_ptr type();
 
-  //  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
 
   CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
-  //  MemberId get_member_id_by_name(const char* name);
   MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
 
@@ -425,9 +427,6 @@ private:
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0, LBound upper = 0);
 
-  // The actual (i.e., non-alias) DynamicType of the associated type.
-  DDS::DynamicType_var type_;
-
   // Contain data for an instance of a basic type.
   struct SingleValue {
     SingleValue(CORBA::Long int32);
@@ -559,8 +558,7 @@ private:
     bool serialize_single_value(DCPS::Serializer& ser, const SingleValue& sv) const;
 
     template<typename PrimitiveType>
-    bool serialize_primitive_value(DCPS::Serializer& ser, PrimitiveType default_value,
-                                   TypeKind primitive_kind) const;
+    bool serialize_primitive_value(DCPS::Serializer& ser, PrimitiveType default_value) const;
     bool serialized_size_enum(const DCPS::Encoding& encoding,
                               size_t& size, const DDS::DynamicType_var& enum_type) const;
     bool serialize_enum_default_value(DCPS::Serializer& ser,
@@ -575,7 +573,7 @@ private:
     bool serialized_size_string(const DCPS::Encoding& encoding, size_t& size) const;
     bool serialize_string_value(DCPS::Serializer& ser) const;
     bool reconstruct_wstring_value(CORBA::WChar* wstr) const;
-    bool serialized_size_wstring(DCPS::Serializer& ser, size_t& size) const;
+    bool serialized_size_wstring(const DCPS::Encoding& encoding, size_t& size) const;
     bool serialize_wstring_value(DCPS::Serializer& ser) const;
     void serialized_size_primitive_sequence(const DCPS::Encoding& encoding, size_t& size,
                                             TypeKind elem_tk, CORBA::ULong length) const;
@@ -958,22 +956,14 @@ private:
 
   DataContainer container_;
 
-  friend void serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
-  friend bool operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
+  friend OpenDDS_Dcps_Export
+  bool DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
+
+  friend OpenDDS_Dcps_Export
+  bool DCPS::operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
 };
 
 } // namespace XTypes
-
-namespace DCPS {
-
-OpenDDS_Dcps_Export
-void serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
-
-OpenDDS_Dcps_Export
-bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
-
-} // namespace DCPS
-
 } // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
