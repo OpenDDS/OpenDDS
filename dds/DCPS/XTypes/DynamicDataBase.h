@@ -22,7 +22,7 @@ public:
   DynamicDataBase();
   DynamicDataBase(DDS::DynamicType_ptr type);
 
-  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
+  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::MemberId get_member_id_by_name(const char* name);
 
 protected:
