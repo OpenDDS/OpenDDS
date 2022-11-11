@@ -49,8 +49,8 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong /*index*/)
 
 ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
-  return container_.single_map_.size() + container_.sequence_map_.size() +
-    container_.complex_map_.size();
+  return static_cast<ACE_CDR::ULong>(
+    container_.single_map_.size() + container_.sequence_map_.size() + container_.complex_map_.size());
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
@@ -1874,7 +1874,7 @@ bool DynamicDataImpl::DataContainer::serialize_bitmask_value(DCPS::Serializer& s
 bool DynamicDataImpl::DataContainer::reconstruct_string_value(CORBA::Char* str) const
 {
   DDS::TypeDescriptor_var descriptor;
-  if (!type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
   const CORBA::ULong bound = descriptor->bound()[0];
@@ -1932,7 +1932,8 @@ bool DynamicDataImpl::DataContainer::serialize_string_value(DCPS::Serializer& se
     if (!get_largest_index_basic(largest_index)) {
       return false;
     }
-    CORBA::Char str[largest_index + 2] = ""; // Include null termination
+    CORBA::Char str[largest_index + 2]; // Include null termination
+    ACE_OS::memset(str, 0, largest_index + 2);
     return reconstruct_string_value(str) && (ser << str);
   }
 
@@ -2001,7 +2002,8 @@ bool DynamicDataImpl::DataContainer::serialize_wstring_value(DCPS::Serializer& s
     if (!get_largest_index_basic(largest_index)) {
       return false;
     }
-    CORBA::WChar wstr[largest_index + 2] = {0};
+    CORBA::WChar wstr[largest_index + 2];
+    ACE_OS::memset(wstr, 0, (largest_index + 2) * sizeof(CORBA::WChar));
     return reconstruct_wstring_value(wstr) && (ser << wstr);
   }
 
@@ -2179,7 +2181,11 @@ void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::Double& valu
 
 void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::LongDouble& value) const
 {
+#if ACE_SIZEOF_LONG_DOUBLE == 16
   value = 0;
+#else
+  ACE_OS::memset(value.ld, 0, 16);
+#endif
 }
 
 void DynamicDataImpl::DataContainer::set_default_basic_value(ACE_OutputCDR::from_char& value) const
