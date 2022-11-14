@@ -359,9 +359,7 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_string_value(str, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.str.in(), str);
-  CORBA::string_free(str);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 
 #ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar* wstr = 0;
@@ -377,9 +375,7 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_wstring_value(wstr, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.wstr.in(), wstr);
-  CORBA::wstring_free(wstr);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 #endif
 
   // Reading members out-of-order.

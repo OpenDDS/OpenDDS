@@ -336,32 +336,20 @@ DynamicDataImpl::SingleValue::~SingleValue()
   switch (kind_) {
   case TK_INT8:
     SINGLE_VALUE_DESTRUCT(from_int8);
-    //    static_cast<ACE_OutputCDR::from_int8*>(active_)->ACE_OutputCDR::from_int8::~from_int8();
-    //    break;
   case TK_UINT8:
     SINGLE_VALUE_DESTRUCT(from_uint8);
-    //    static_cast<ACE_OutputCDR::from_uint8*>(active_)->ACE_OutputCDR::from_uint8::~from_uint8();
-    //    break;
   case TK_CHAR8:
     SINGLE_VALUE_DESTRUCT(from_char);
-    //    static_cast<ACE_OutputCDR::from_char*>(active_)->ACE_OutputCDR::from_char::~from_char();
-    //    break;
   case TK_BYTE:
     SINGLE_VALUE_DESTRUCT(from_octet);
-    //    static_cast<ACE_OutputCDR::from_octet*>(active_)->ACE_OutputCDR::from_octet::~from_octet();
-    //    break;
   case TK_BOOLEAN:
     SINGLE_VALUE_DESTRUCT(from_boolean);
-    //    static_cast<ACE_OutputCDR::from_boolean*>(active_)->ACE_OutputCDR::from_boolean::~from_boolean();
-    //    break;
   case TK_STRING8:
     ACE_OS::free((void*)str_);
     break;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     SINGLE_VALUE_DESTRUCT(from_wchar);
-    //    static_cast<ACE_OutputCDR::from_wchar*>(active_)->ACE_OutputCDR::from_wchar::~from_wchar();
-    //    break;
   case TK_STRING16:
     ACE_OS::free((void*)wstr_);
     break;
@@ -1709,73 +1697,39 @@ DynamicDataImpl::SequenceValue::~SequenceValue()
   switch (elem_kind_) {
   case TK_INT32:
     SEQUENCE_VALUE_DESTRUCT(Int32Seq);
-    //    static_cast<DDS::Int32Seq*>(active_)->DDS::Int32Seq::~Int32Seq();
-    //    break;
   case TK_UINT32:
     SEQUENCE_VALUE_DESTRUCT(UInt32Seq);
-    //    static_cast<DDS::UInt32Seq*>(active_)->DDS::~UInt32Seq();
-    //    break;
   case TK_INT8:
     SEQUENCE_VALUE_DESTRUCT(Int8Seq);
-    //    static_cast<DDS::Int8Seq*>(active_)->DDS::~Int8Seq();
-    //    break;
   case TK_UINT8:
     SEQUENCE_VALUE_DESTRUCT(UInt8Seq);
-    //    static_cast<DDS::UInt8Seq*>(active_)->DDS::~UInt8Seq();
-    //    break;
   case TK_INT16:
     SEQUENCE_VALUE_DESTRUCT(Int16Seq);
-    //    static_cast<DDS::Int16Seq*>(active_)->DDS::~Int16Seq();
-    //    break;
   case TK_UINT16:
     SEQUENCE_VALUE_DESTRUCT(UInt16Seq);
-    //    static_cast<DDS::UInt16Seq*>(active_)->DDS::~UInt16Seq();
-    //    break;
   case TK_INT64:
     SEQUENCE_VALUE_DESTRUCT(Int64Seq);
-    //    static_cast<DDS::Int64Seq*>(active_)->DDS::~Int64Seq();
-    //    break;
   case TK_UINT64:
     SEQUENCE_VALUE_DESTRUCT(UInt64Seq);
-    //    static_cast<DDS::UInt64Seq*>(active_)->DDS::~UInt64Seq();
-    //    break;
   case TK_FLOAT32:
     SEQUENCE_VALUE_DESTRUCT(Float32Seq);
-    //    static_cast<DDS::Float32Seq*>(active_)->DDS::~Float32Seq();
-    //    break;
   case TK_FLOAT64:
     SEQUENCE_VALUE_DESTRUCT(Float64Seq);
-    //    static_cast<DDS::Float64Seq*>(active_)->DDS::~Float64Seq();
-    //    break;
   case TK_FLOAT128:
     SEQUENCE_VALUE_DESTRUCT(Float128Seq);
-    //    static_cast<DDS::Float128Seq*>(active_)->DDS::~Float128Seq();
-    //    break;
   case TK_CHAR8:
     SEQUENCE_VALUE_DESTRUCT(CharSeq);
-    //    static_cast<DDS::CharSeq*>(active_)->DDS::~CharSeq();
-    //    break;
   case TK_BYTE:
     SEQUENCE_VALUE_DESTRUCT(ByteSeq);
-    //    static_cast<DDS::ByteSeq*>(active_)->DDS::~ByteSeq();
-    //    break;
   case TK_BOOLEAN:
     SEQUENCE_VALUE_DESTRUCT(BooleanSeq);
-    //    static_cast<DDS::BooleanSeq*>(active_)->DDS::~BooleanSeq();
-    //    break;
   case TK_STRING8:
     SEQUENCE_VALUE_DESTRUCT(StringSeq);
-    //    static_cast<DDS::StringSeq*>(active_)->DDS::~StringSeq();
-    //    break;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     SEQUENCE_VALUE_DESTRUCT(WcharSeq);
-    //    static_cast<DDS::WcharSeq*>(active_)->DDS::~WcharSeq();
-    //    break;
   case TK_STRING16:
     SEQUENCE_VALUE_DESTRUCT(WstringSeq);
-    //    static_cast<DDS::WstringSeq*>(active_)->DDS::~WstringSeq();
-    //    break;
 #endif
   }
   #undef SEQUENCE_VALUE_DESTRUCT
@@ -1905,35 +1859,26 @@ bool DynamicDataImpl::DataContainer::serialize_single_value(DCPS::Serializer& se
 {
   switch (sv.kind_) {
   case TK_INT32:
-    //    return ser << sv.int32_;
     return ser << sv.get<CORBA::Long>();
   case TK_UINT32:
-    //    return ser << sv.uint32_;
     return ser << sv.get<CORBA::ULong>();
   case TK_INT8:
     return ser << sv.get<ACE_OutputCDR::from_int8>();
   case TK_UINT8:
     return ser << sv.get<ACE_OutputCDR::from_uint8>();
   case TK_INT16:
-    //    return ser << sv.int16_;
     return ser << sv.get<CORBA::Short>();
   case TK_UINT16:
-    //    return ser << sv.uint16_;
     return ser << sv.get<CORBA::UShort>();
   case TK_INT64:
-    //    return ser << sv.int64_;
     return ser << sv.get<CORBA::LongLong>();
   case TK_UINT64:
-    //    return ser << sv.uint64_;
     return ser << sv.get<CORBA::ULongLong>();
   case TK_FLOAT32:
-    //    return ser << sv.float32_;
     return ser << sv.get<CORBA::Float>();
   case TK_FLOAT64:
-    //    return ser << sv.float64_;
     return ser << sv.get<CORBA::Double>();
   case TK_FLOAT128:
-    //    return ser << sv.float128_;
     return ser << sv.get<CORBA::LongDouble>();
   case TK_CHAR8:
     return ser << sv.get<ACE_OutputCDR::from_char>();
@@ -1942,13 +1887,11 @@ bool DynamicDataImpl::DataContainer::serialize_single_value(DCPS::Serializer& se
   case TK_BOOLEAN:
     return ser << sv.get<ACE_OutputCDR::from_boolean>();
   case TK_STRING8:
-    //    return ser << sv.str_;
     return ser << sv.get<const char*>();
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     return ser << sv.get<ACE_OutputCDR::from_wchar>();
   case TK_STRING16:
-    //    return ser << sv.wstr_;
     return ser << sv.get<const CORBA::WChar*>();
 #endif
   default:
