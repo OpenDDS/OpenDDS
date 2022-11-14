@@ -722,6 +722,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       MemberDescriptorImpl* md = new MemberDescriptorImpl();
       DDS::MemberDescriptor_var md_var = md;
       md->name(cto.enumerated_type.literal_seq[i].detail.name.c_str());
+      // Use Id to convey the value of the enumerator.
       md->id(cto.enumerated_type.literal_seq[i].common.value);
       md->type(dt);
       md->is_default_label(cto.enumerated_type.literal_seq[i].common.flags & IS_DEFAULT);
