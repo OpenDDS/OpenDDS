@@ -38,7 +38,7 @@ public:
 
   DDS::DynamicType_ptr type()
   {
-    return type_;
+    return DDS::DynamicType::_duplicate(type_);
   }
 
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value,
