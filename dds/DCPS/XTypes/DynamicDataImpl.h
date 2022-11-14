@@ -457,8 +457,8 @@ private:
     union {
       CORBA::Long int32_;
       CORBA::ULong uint32_;
-      ACE_OutputCDR::from_int8 int8_;
-      ACE_OutputCDR::from_uint8 uint8_;
+      unsigned char int8_[sizeof(ACE_OutputCDR::from_int8)];
+      unsigned char uint8_[sizeof(ACE_OutputCDR::from_uint8)];
       CORBA::Short int16_;
       CORBA::UShort uint16_;
       CORBA::LongLong int64_;
@@ -466,12 +466,12 @@ private:
       CORBA::Float float32_;
       CORBA::Double float64_;
       CORBA::LongDouble float128_;
-      ACE_OutputCDR::from_char char8_;
-      ACE_OutputCDR::from_octet byte_;
-      ACE_OutputCDR::from_boolean boolean_;
+      unsigned char char8_[sizeof(ACE_OutputCDR::from_char)];
+      unsigned char byte_[sizeof(ACE_OutputCDR::from_octet)];
+      unsigned char boolean_[sizeof(ACE_OutputCDR::from_boolean)];
       const char* str_;
 #ifdef DDS_HAS_WCHAR
-      ACE_OutputCDR::from_wchar char16_;
+      unsigned char char16_[sizeof(ACE_OutputCDR::from_wchar)];
       const CORBA::WChar* wstr_;
 #endif
     };
@@ -504,6 +504,7 @@ private:
 
     TypeKind elem_kind_;
     union {
+      /*
       DDS::Int32Seq int32_seq_;
       DDS::UInt32Seq uint32_seq_;
       DDS::Int8Seq int8_seq_;
@@ -523,6 +524,28 @@ private:
       DDS::WcharSeq char16_seq_;
       DDS::WstringSeq wstring_seq_;
 #endif
+      */
+#define SEQUENCE_VALUE_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
+      SEQUENCE_VALUE_MEMBER(DDS::Int32Seq, int32_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::UInt32Seq, uint32_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::Int8Seq, int8_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::UInt8Seq, uint8_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::Int16Seq, int16_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::UInt16Seq, uint16_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::Int64Seq, int64_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::UInt64Seq, uint64_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::Float32Seq, float32_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::Float64Seq, float64_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::Float128Seq, float128_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::CharSeq, char8_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::ByteSeq, byte_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::BooleanSeq, boolean_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::StringSeq, string_seq);
+#ifdef DDS_HAS_WCHAR
+      SEQUENCE_VALUE_MEMBER(DDS::WcharSeq, char16_seq);
+      SEQUENCE_VALUE_MEMBER(DDS::WstringSeq, wstring_seq);
+#endif
+#undef SEQUENCE_VALUE_MEMBER
     };
   };
 
