@@ -2744,7 +2744,7 @@ sub write_cmake_file {
       print_cmake_config($fh, 'SAFETY_PROFILE_MACRO', 'OPENDDS_SAFETY_PROFILE OPENDDS_NO_PERSISTENCE_PROFILE TAOLIB_ERROR=ACELIB_ERROR TAOLIB_DEBUG=ACELIB_DEBUG');
       print_cmake_config($fh, 'SAFETY_PROFILE_OPTION', '-DOPENDDS_SAFETY_PROFILE -Sa -St');
       print_cmake_config($fh, 'SAFETY_PROFILE_TAOIDL_OPTION', '-SS');
-      print_cmake_config($fh, 'SAFETY_PROFILE_INCLUDES', "${DDS_ROOT}/dds/CORBA");
+      print_cmake_config($fh, 'SAFETY_PROFILE_INCLUDES', "\${DDS_ROOT}/dds/CORBA");
       print_cmake_config($fh, 'SAFETY_PROFILE_CORBA_LIB', "OpenDDS_Corba");
     }
 
