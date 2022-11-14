@@ -454,6 +454,8 @@ private:
     template<typename T> const T& get() const;
 
     TypeKind kind_;
+    // Used for types that need ACE_OutputCDR disambiguators.
+    void* active_;
     union {
       CORBA::Long int32_;
       CORBA::ULong uint32_;
@@ -503,28 +505,8 @@ private:
     template<typename T> const T& get() const;
 
     TypeKind elem_kind_;
+    void* active_;
     union {
-      /*
-      DDS::Int32Seq int32_seq_;
-      DDS::UInt32Seq uint32_seq_;
-      DDS::Int8Seq int8_seq_;
-      DDS::UInt8Seq uint8_seq_;
-      DDS::Int16Seq int16_seq_;
-      DDS::UInt16Seq uint16_seq_;
-      DDS::Int64Seq int64_seq_;
-      DDS::UInt64Seq uint64_seq_;
-      DDS::Float32Seq float32_seq_;
-      DDS::Float64Seq float64_seq_;
-      DDS::Float128Seq float128_seq_;
-      DDS::CharSeq char8_seq_;
-      DDS::ByteSeq byte_seq_;
-      DDS::BooleanSeq boolean_seq_;
-      DDS::StringSeq string_seq_;
-#ifdef DDS_HAS_WCHAR
-      DDS::WcharSeq char16_seq_;
-      DDS::WstringSeq wstring_seq_;
-#endif
-      */
 #define SEQUENCE_VALUE_MEMBER(T, N) unsigned char N ## _[sizeof(T)]
       SEQUENCE_VALUE_MEMBER(DDS::Int32Seq, int32_seq);
       SEQUENCE_VALUE_MEMBER(DDS::UInt32Seq, uint32_seq);
