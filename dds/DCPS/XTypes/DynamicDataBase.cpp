@@ -90,7 +90,7 @@ bool DynamicDataBase::is_type_supported(TypeKind tk, const char* func_name)
 {
   if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::is_type_supported:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::is_type_supported:"
                  " Called function %C on an unsupported type (%C)\n",
                  func_name, typekind_to_string(tk)));
     }

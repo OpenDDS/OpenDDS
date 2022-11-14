@@ -332,7 +332,7 @@ DynamicDataImpl::SingleValue::SingleValue(const CORBA::WChar* wstr)
 
 DynamicDataImpl::SingleValue::~SingleValue()
 {
-#define SINGLE_VALUE_DESTRUCT(T) static_cast<ACE_OutputCDR::T*>(active_)->ACE_OutputCDR::T::~T(); break
+#define SINGLE_VALUE_DESTRUCT(T) static_cast<ACE_OutputCDR::T*>(active_)->~T(); break
   switch (kind_) {
   case TK_INT8:
     SINGLE_VALUE_DESTRUCT(from_int8);
@@ -1705,7 +1705,7 @@ DynamicDataImpl::SequenceValue::SequenceValue(const DDS::WstringSeq& wstr_seq)
 
 DynamicDataImpl::SequenceValue::~SequenceValue()
 {
-#define SEQUENCE_VALUE_DESTRUCT(T) static_cast<DDS::T*>(active_)->DDS::T::~T(); break
+#define SEQUENCE_VALUE_DESTRUCT(T) static_cast<DDS::T*>(active_)->~T(); break
   switch (elem_kind_) {
   case TK_INT32:
     SEQUENCE_VALUE_DESTRUCT(Int32Seq);

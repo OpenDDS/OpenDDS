@@ -28,6 +28,7 @@
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
 #endif
+#include "XTypes/DynamicDataXcdrReadImpl.h"
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 
