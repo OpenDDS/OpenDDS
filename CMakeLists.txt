@@ -19,6 +19,7 @@ option(OPENDDS_SUPPRESS_ANYS "Suppress CORBA::Any's" ON)
 option(OPENDDS_INLINE "Inlining" ON)
 option(OPENDDS_SECURITY "DDS Security Plugin" OFF)
 option(OPENDDS_RAPIDJSON "RapidJSON for Wireshark dissector and JSON Sample Serialization" ON)
+option(OPENDDS_GTEST "Use Google Test Framework" OFF)
 
 ## OPENDDS_SAFETY_PROFILE "basis" or "extended"
 ## OPENDDS_XERCES3 "Set this if XercesC is not installed in a standard location"
@@ -67,12 +68,14 @@ FetchContent_Declare(
   FIND_PACKAGE_ARGS
 )
 
-## If we are building shared libraries, build google test as shared too.
-if(BUILD_SHARED_LIBS)
-  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-endif()
+if(OPENDDS_GTEST)
+  ## If we are building shared libraries, build google test as shared too.
+  if(BUILD_SHARED_LIBS)
+    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+  endif()
 
-FetchContent_MakeAvailable(googletest)
+  FetchContent_MakeAvailable(googletest)
+endif()
 
 if(OPENDDS_RAPIDJSON)
   ## RapidJSON contains a reference to googletest.  We need to turn off
@@ -127,10 +130,13 @@ if(${OPENDDS_RAPIDJSON})
 endif()
 
 add_subdirectory(dds)
-add_subdirectory(tests/DCPS/SequenceIterator)
 add_subdirectory(tests/DCPS/HelloWorld)
 add_subdirectory(tests/stress-tests)
-add_subdirectory(tests/unit-tests)
+
+if(${OPENDDS_GTEST})
+  add_subdirectory(tests/DCPS/SequenceIterator)
+  add_subdirectory(tests/unit-tests)
+endif()
 
 if(${OPENDDS_SECURITY})
   add_subdirectory(tests/security/CheckInstance)
