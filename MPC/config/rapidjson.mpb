@@ -5,6 +5,12 @@ project {
     $RAPIDJSON_ROOT
     $(DDS_ROOT)/tools/rapidjson
   }
-  includes += $(RAPIDJSON_ROOT)/include
-  macros   += OPENDDS_RAPIDJSON
+
+  specific(cmake) {
+    includes += ${OPENDDS_RAPIDJSON_INCLUDE}
+    macros   += ${OPENDDS_RAPIDJSON_MACRO}
+  } else {
+    includes += $(RAPIDJSON_ROOT)/include
+    macros   += OPENDDS_RAPIDJSON
+  }
 }

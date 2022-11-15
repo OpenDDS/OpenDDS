@@ -30,11 +30,19 @@ macro(IDL_AND_TYPESUPPORT_FILES_TARGET_SOURCES target)
     endif()
   endforeach()
 
+  ## When building the core libraries, we do not always need (or want) type
+  ## support idl to be processed by tao_idl.  In other cases, it is assumed.
+  if (BUILDING_OPENDDS_CORE)
+    set(SKIP_TYPESUPPORT_IDL ON)
+  else()
+    set(SKIP_TYPESUPPORT_IDL OFF)
+  endif()
+
   foreach(scope PUBLIC PRIVATE INTERFACE)
     if (_idl_sources_${scope})
       OPENDDS_TARGET_SOURCES(${target}
                       ${scope} ${_idl_sources_${scope}}
-                      SKIP_TYPESUPPORT_IDL ON
+                      SKIP_TYPESUPPORT_IDL ${SKIP_TYPESUPPORT_IDL}
                       TAO_IDL_OPTIONS ${_arg_IDL_FILES_OPTIONS}
                       OPENDDS_IDL_OPTIONS ${_arg_TYPESUPPORT_FILES_OPTIONS})
    endif()

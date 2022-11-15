@@ -3,8 +3,6 @@ project {
     $GTEST_ROOT
     $(DDS_ROOT)/tests/googletest/build/install
   }
-  includes += $(GTEST_ROOT)/include
-  libpaths += $(GTEST_ROOT)/lib
 
   specific(prop:windows) {
     // Avoid adding "s" suffix in static builds
@@ -20,5 +18,17 @@ project {
 
   specific(vc11) {
     macros += _VARIADIC_MAX=10
+  }
+
+  specific(cmake) {
+    // Include path assuming googletest is added via find_package()
+    includes += ${googletest_SOURCE_DIR}/googletest/include
+
+    // With CMake, it is always just "gtest"
+    libs -= gtest
+    lit_libs += gtest
+  } else {
+    includes += $(GTEST_ROOT)/include
+    libpaths += $(GTEST_ROOT)/lib
   }
 }

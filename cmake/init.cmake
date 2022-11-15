@@ -1,7 +1,7 @@
 # Distributed under the OpenDDS License. See accompanying LICENSE
 # file or http://www.opendds.org/license.html for details.
 
-include(${CMAKE_CURRENT_LIST_DIR}/config.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/config.cmake OPTIONAL)
 
 if(NOT DEFINED OPENDDS_DEBUG)
   set(OPENDDS_DEBUG ON)

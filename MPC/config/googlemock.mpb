@@ -8,4 +8,15 @@ project : googletest {
     libs += gmock
   }
 
+  specific(cmake) {
+    libs -= gmock
+    lit_libs += gmock
+  }
+
+  // This is required when building googlemock as a shared library
+  verbatim(cmake, macros, 1) {
+    if(BUILD_SHARED_LIBS)
+      add_compile_definitions(GTEST_LINKED_AS_SHARED_LIBRARY)
+    endif()
+  }
 }
