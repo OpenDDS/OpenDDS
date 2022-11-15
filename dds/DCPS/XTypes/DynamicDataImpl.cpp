@@ -23,7 +23,7 @@ DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
 
 DDS::DynamicType_ptr DynamicDataImpl::type()
 {
-  return type_.in();
+  return DDS::DynamicType::_duplicate(type_);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)

@@ -1814,7 +1814,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_wstring_values(DDS::WstringSeq& v
 
 DDS::DynamicType_ptr DynamicDataXcdrReadImpl::type()
 {
-  return type_.in();
+  return DDS::DynamicType::_duplicate(type_);
 }
 
 bool DynamicDataXcdrReadImpl::check_xcdr1_mutable(DDS::DynamicType_ptr dt)
