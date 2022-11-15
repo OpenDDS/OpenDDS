@@ -7,4 +7,4 @@ author: OpenDDS
 When the Naval Air Systems Command needed a reliable communications system that could scale to accommodate several hundred participants, 
 OpenDDS middleware and Object Computing's engineering team delivered.
 
-[Read the full case study.](https://objectcomputing.com/products/opendds/resources/rtpsrelay-iot](https://objectcomputing.com/case-studies/navair)
+[Read the full case study.](https://objectcomputing.com/case-studies/navair)
