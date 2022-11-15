@@ -1094,6 +1094,124 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const COR
 #endif
 }
 
+DDS::ReturnCode_t DynamicDataImpl::get_simple_value_boolean(DCPS::Value& value,
+                                                            DDS::MemberId id) const
+{
+  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  if (single_it != container_.single_map_.end()) {
+    value = single_it->second.get<ACE_OutputCDR::from_boolean>().val_;
+    return DDS::RETCODE_OK;
+  }
+  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  if (complex_it != container_.complex_map_.end()) {
+    const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
+    DataContainer::const_single_iterator inner_it =
+      inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
+    if (inner_it != inner_dd->container_.single_map_.end()) {
+      value = inner_it->second.get<ACE_OutputCDR::from_boolean>().val_;
+      return DDS::RETCODE_OK;
+    }
+  }
+  return DDS::RETCODE_ERROR;
+}
+
+template<typename ValueType>
+DDS::ReturnCode_t DynamicDataImpl::get_simple_value_primitive(DCPS::Value& value,
+                                                              DDS::MemberId id) const
+{
+  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  if (single_it != container_.single_map_.end()) {
+    value = single_it->second.get<ValueType>();
+    return DDS::RETCODE_OK;
+  }
+  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  if (complex_it != container_.complex_map_.end()) {
+    const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
+    DataContainer::const_single_iterator inner_it =
+      inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
+    if (inner_it != inner_dd->container_.single_map_.end()) {
+      value = inner_it->second.get<ValueType>();
+      return DDS::RETCODE_OK;
+    }
+  }
+  return DDS::RETCODE_ERROR;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
+                                                           DDS::MemberId id) const
+{
+  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  if (single_it != container_.single_map_.end()) {
+    value = single_it->second.get<const char*>();
+    return DDS::RETCODE_OK;
+  }
+  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  if (complex_it != container_.complex_map_.end()) {
+    // The string member has its own DynamicData object.
+    const DynamicDataImpl* str_dd = dynamic_cast<const DynamicDataImpl*>(complex_it->second.in());
+    const bool is_empty = str_dd->container_.single_map_.empty() &&
+      str_dd->container_.complex_map_.empty();
+    if (is_empty) { // The DynamicData object contains no data. Treat as an empty string.
+      value = "";
+      return DDS::RETCODE_OK;
+    }
+    CORBA::ULong largest_index;
+    if (!str_dd->container_.get_largest_index_basic(largest_index)) {
+      return DDS::RETCODE_ERROR;
+    }
+    const CORBA::ULong length = largest_index + 2;
+    CORBA::String_var str = CORBA::string_alloc(length);
+    ACE_OS::memset(str._retn(), 0, length);
+    if (!str_dd->container_.reconstruct_string_value(str._retn())) {
+      return DDS::RETCODE_ERROR;
+    }
+    value = str._retn();
+    return DDS::RETCODE_OK;
+  }
+  return DDS::RETCODE_ERROR;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::MemberId id)
+{
+  DDS::DynamicTypeMember_var dtm;
+  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  DDS::MemberDescriptor_var md;
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  DDS::DynamicType_var member_type = get_base_type(md->type());
+  const TypeKind member_kind = member_type->get_kind();
+  switch (member_kind) {
+  case TK_BOOLEAN:
+    return get_simple_value_boolean(value, id);
+  case TK_INT32:
+    return get_simple_value_primitive<CORBA::Long>(value, id);
+  case TK_UINT32:
+    return get_simple_value_primitive<CORBA::ULong>(value, id);
+  case TK_INT64:
+    return get_simple_value_primitive<CORBA::LongLong>(value, id);
+  case TK_UINT64:
+    return get_simple_value_primitive<CORBA::ULongLong>(value, id);
+  case TK_CHAR8:
+    return get_simple_value_primitive<CORBA::Char>(value, id);
+  case TK_FLOAT64:
+    return get_simple_value_primitive<CORBA::Double>(value, id);
+  case TK_FLOAT128:
+    return get_simple_value_primitive<CORBA::LongDouble>(value, id);
+  case TK_STRING8:
+    return get_simple_value_string(value, id);
+  default:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_simple_value:"
+                 " Member type %C is not supported by DCPS::Value\n",
+                 typekind_to_string(member_kind)));
+    }
+  }
+  return DDS::RETCODE_ERROR;
+}
+
 bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_ptr value)
 {
   DDS::DynamicTypeMember_var member;

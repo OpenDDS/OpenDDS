@@ -9,6 +9,7 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
 
+#  include <DCPS/FilterEvaluator.h>
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -327,7 +328,14 @@ public:
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
                                        const DDS::WstringSeq& value);
 
+  DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
+
 private:
+  DDS::ReturnCode_t get_simple_value_boolean(DCPS::Value& value, DDS::MemberId id) const;
+  template<typename ValueType>
+  DDS::ReturnCode_t get_simple_value_primitive(DCPS::Value& value, DDS::MemberId id) const;
+  DDS::ReturnCode_t get_simple_value_string(DCPS::Value& value, DDS::MemberId id) const;
+
   bool is_basic_type(TypeKind tk) const;
 
   template<TypeKind MemberTypeKind, typename MemberType>
