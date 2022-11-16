@@ -376,7 +376,7 @@ private:
   DDS::ReturnCode_t set_char_common(DDS::MemberId id, const FromCharT& value);
 
   bool check_index_from_id(TypeKind tk, DDS::MemberId id, CORBA::ULong bound) const;
-  bool is_discriminator_type(TypeKind tk) const;
+  static bool is_valid_discriminator_type(TypeKind tk) const;
   bool is_default_member_selected(CORBA::Long disc_val, DDS::MemberId default_id) const;
   bool read_discriminator(CORBA::Long& disc_val) const;
   DDS::MemberId find_selected_member() const;
