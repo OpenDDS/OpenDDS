@@ -8,7 +8,7 @@
 #include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/XTypes/DynamicDataImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 #if defined ACE_AS_STATIC_LIBS && !defined OPENDDS_SAFETY_PROFILE
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>

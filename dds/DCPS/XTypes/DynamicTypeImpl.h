@@ -97,8 +97,7 @@ private:
   MapType map_;
 };
 
-class OpenDDS_Dcps_Export DynamicTypeImpl : public DDS::DynamicType
-{
+class OpenDDS_Dcps_Export DynamicTypeImpl : public DDS::DynamicType {
 public:
   DynamicTypeImpl();
   ~DynamicTypeImpl();

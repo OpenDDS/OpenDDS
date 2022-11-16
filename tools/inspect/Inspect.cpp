@@ -8,7 +8,7 @@
 #include <dds/DCPS/Recorder.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
-#include <dds/DCPS/XTypes/DynamicDataImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/RtpsDiscoveryConfig.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>

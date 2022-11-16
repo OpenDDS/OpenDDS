@@ -4,7 +4,7 @@
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
-#include <dds/DCPS/XTypes/DynamicDataImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
 
 #include <dds/DCPS/SafetyProfileStreams.h>
 
@@ -359,9 +359,7 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_string_value(str, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.str.in(), str);
-  CORBA::string_free(str);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 
 #ifdef DDS_HAS_WCHAR
   ACE_CDR::WChar* wstr = 0;
@@ -377,9 +375,7 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = data->get_complex_value(nested_dd, id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = nested_dd->get_wstring_value(wstr, random_id);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  EXPECT_STREQ(expected.wstr.in(), wstr);
-  CORBA::wstring_free(wstr);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 #endif
 
   // Reading members out-of-order.
@@ -910,7 +906,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromStruct)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_single_value_struct<MutableSingleValueStruct>(&data);
 }
@@ -957,7 +953,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_StructWithOptionalMembers)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_index_mapping(&data);
 }
@@ -981,7 +977,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
       0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x0a // +8=20 int_32
     };
     msg.copy((const char*)int32_union, sizeof(int32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int32_union(&data);
   }
   {
@@ -992,7 +988,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint32_union, sizeof(uint32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint32_union(&data);
   }
   {
@@ -1003,7 +999,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int8_union, sizeof(int8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int8_union(&data);
   }
   {
@@ -1014,7 +1010,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint8_union, sizeof(uint8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint8_union(&data);
   }
   {
@@ -1025,7 +1021,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int16_union, sizeof(int16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int16_union(&data);
   }
   {
@@ -1036,7 +1032,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint16_union, sizeof(uint16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint16_union(&data);
   }
   {
@@ -1047,7 +1043,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int64_union, sizeof(int64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int64_union(&data);
   }
   {
@@ -1058,7 +1054,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint64_union, sizeof(uint64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint64_union(&data);
   }
   {
@@ -1069,7 +1065,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float32_union, sizeof(float32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float32_union(&data);
   }
   {
@@ -1080,7 +1076,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float64_union, sizeof(float64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float64_union(&data);
   }
   {
@@ -1092,7 +1088,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float128_union, sizeof(float128_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float128_union(&data);
   }
   {
@@ -1103,7 +1099,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)char8_union, sizeof(char8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_char8_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -1115,7 +1111,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)char16_union, sizeof(char16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_char16_union(&data);
   }
 #endif
@@ -1127,7 +1123,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)byte_union, sizeof(byte_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_byte_union(&data);
   }
   {
@@ -1138,7 +1134,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)bool_union, sizeof(bool_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_bool_union(&data);
   }
   {
@@ -1149,7 +1145,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)str_union, sizeof(str_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_string_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -1162,7 +1158,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)wstr_union, sizeof(wstr_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_wstring_union(&data);
   }
 #endif
@@ -1175,7 +1171,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)enum_union, sizeof(enum_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_enum_union(&data);
   }
 }
@@ -1216,7 +1212,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadSequenceFromStruct)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_sequence_value_struct<MutableSequenceStruct>(&data);
 }
@@ -1241,7 +1237,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadSequenceFromUnion)
       0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0b // int_32s
     };
     msg.copy((const char*)int32s_union, sizeof(int32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int32s_union(&data);
   }
   {
@@ -1253,7 +1249,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadSequenceFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint32s_union, sizeof(uint32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint32s_union(&data);
   }
 }
@@ -1277,7 +1273,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromArray)
   };
   ACE_Message_Block msg(256);
   msg.copy((const char*)array_struct, sizeof(array_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
   verify_array_struct(&data);
 }
 
@@ -1320,7 +1316,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_SkipNestedMembers)
 
   ACE_Message_Block msg(128);
   msg.copy((const char*)mutable_struct, sizeof(mutable_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
@@ -1360,7 +1356,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_SkipNestedMembers)
   // Test the validity of inner DynamicData when the outer one no longer exists.
   DDS::DynamicData_var nested;
   {
-    XTypes::DynamicDataImpl enclosing(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl enclosing(&msg, xcdr2, dt);
     ret = enclosing.get_complex_value(nested, 1);
     EXPECT_EQ(DDS::RETCODE_OK, ret);
   }
@@ -1410,7 +1406,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromStruct)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_single_value_struct<AppendableSingleValueStruct>(&data);
 }
@@ -1449,7 +1445,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromStructXCDR1)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
 
   verify_single_value_struct<AppendableSingleValueStruct>(&data);
 }
@@ -1492,7 +1488,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_StructWithOptionalMembers)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_index_mapping(&data);
 }
@@ -1516,7 +1512,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
       0x00,0x00,0x00,0x0a // int_32
     };
     msg.copy((const char*)int32_union, sizeof(int32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int32_union(&data);
   }
   {
@@ -1527,7 +1523,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint32_union, sizeof(uint32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint32_union(&data);
   }
   {
@@ -1538,7 +1534,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int8_union, sizeof(int8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int8_union(&data);
   }
   {
@@ -1549,7 +1545,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint8_union, sizeof(uint8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint8_union(&data);
   }
   {
@@ -1560,7 +1556,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int16_union, sizeof(int16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int16_union(&data);
   }
   {
@@ -1571,7 +1567,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint16_union, sizeof(uint16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint16_union(&data);
   }
   {
@@ -1582,7 +1578,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int64_union, sizeof(int64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int64_union(&data);
   }
   {
@@ -1593,7 +1589,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint64_union, sizeof(uint64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint64_union(&data);
   }
   {
@@ -1604,7 +1600,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float32_union, sizeof(float32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float32_union(&data);
   }
   {
@@ -1615,7 +1611,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float64_union, sizeof(float64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float64_union(&data);
   }
   {
@@ -1626,7 +1622,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float128_union, sizeof(float128_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float128_union(&data);
   }
   {
@@ -1637,7 +1633,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)char8_union, sizeof(char8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_char8_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -1649,7 +1645,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)char16_union, sizeof(char16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_char16_union(&data);
   }
 #endif
@@ -1661,7 +1657,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)byte_union, sizeof(byte_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_byte_union(&data);
   }
   {
@@ -1672,7 +1668,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)bool_union, sizeof(bool_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_bool_union(&data);
   }
   {
@@ -1683,7 +1679,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)str_union, sizeof(str_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_string_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -1695,7 +1691,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)wstr_union, sizeof(wstr_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_wstring_union(&data);
   }
 #endif
@@ -1707,7 +1703,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)enum_union, sizeof(enum_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_enum_union(&data);
   }
 }
@@ -1730,7 +1726,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
       0x00,0x00,0x00,0x0a // int_32
     };
     msg.copy((const char*)int32_union, sizeof(int32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int32_union(&data);
   }
   {
@@ -1740,7 +1736,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint32_union, sizeof(uint32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint32_union(&data);
   }
   {
@@ -1750,7 +1746,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)int8_union, sizeof(int8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int8_union(&data);
   }
   {
@@ -1760,7 +1756,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint8_union, sizeof(uint8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint8_union(&data);
   }
   {
@@ -1770,7 +1766,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)int16_union, sizeof(int16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int16_union(&data);
   }
   {
@@ -1780,7 +1776,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint16_union, sizeof(uint16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint16_union(&data);
   }
   {
@@ -1790,7 +1786,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)int64_union, sizeof(int64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int64_union(&data);
   }
   {
@@ -1800,7 +1796,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint64_union, sizeof(uint64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint64_union(&data);
   }
   {
@@ -1810,7 +1806,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)float32_union, sizeof(float32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_float32_union(&data);
   }
   {
@@ -1820,7 +1816,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)float64_union, sizeof(float64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_float64_union(&data);
   }
   {
@@ -1830,7 +1826,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)float128_union, sizeof(float128_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_float128_union(&data);
   }
   {
@@ -1840,7 +1836,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)char8_union, sizeof(char8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_char8_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -1851,7 +1847,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)char16_union, sizeof(char16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_char16_union(&data);
   }
 #endif
@@ -1862,7 +1858,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)byte_union, sizeof(byte_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_byte_union(&data);
   }
   {
@@ -1872,7 +1868,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)bool_union, sizeof(bool_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_bool_union(&data);
   }
   {
@@ -1882,7 +1878,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)str_union, sizeof(str_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_string_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -1893,7 +1889,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)wstr_union, sizeof(wstr_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_wstring_union(&data);
   }
 #endif
@@ -1904,7 +1900,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)enum_union, sizeof(enum_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_enum_union(&data);
   }
 }
@@ -1945,7 +1941,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadSequenceFromStruct)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_sequence_value_struct<AppendableSequenceStruct>(&data);
 }
@@ -1985,7 +1981,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadSequenceFromStructXCDR1)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
 
   verify_sequence_value_struct<AppendableSequenceStruct>(&data);
 }
@@ -2009,7 +2005,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadSequenceFromUnion)
       0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0b // int_32s
     };
     msg.copy((const char*)int32s_union, sizeof(int32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int32s_union(&data);
   }
   {
@@ -2020,7 +2016,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadSequenceFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint32s_union, sizeof(uint32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint32s_union(&data);
   }
 }
@@ -2043,7 +2039,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadSequenceFromUnionXCDR1)
       0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0b // int_32s
     };
     msg.copy((const char*)int32s_union, sizeof(int32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int32s_union(&data);
   }
   {
@@ -2053,7 +2049,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadSequenceFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint32s_union, sizeof(uint32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint32s_union(&data);
   }
 }
@@ -2077,7 +2073,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromArray)
   };
   ACE_Message_Block msg(256);
   msg.copy((const char*)array_struct, sizeof(array_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
   verify_array_struct(&data);
 }
 
@@ -2099,7 +2095,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_ReadValueFromArrayXCDR1)
   };
   ACE_Message_Block msg(256);
   msg.copy((const char*)array_struct, sizeof(array_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
   verify_array_struct(&data);
 }
 
@@ -2142,7 +2138,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_SkipNestedMembers)
 
   ACE_Message_Block msg(128);
   msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
@@ -2219,7 +2215,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_SkipNestedMembersXCDR1)
 
   ACE_Message_Block msg(128);
   msg.copy((const char*)appendable_struct, sizeof(appendable_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
@@ -2293,7 +2289,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromStruct)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_single_value_struct<FinalSingleValueStruct>(&data);
 }
@@ -2332,7 +2328,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromStructXCDR1)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
 
   verify_single_value_struct<FinalSingleValueStruct>(&data);
 }
@@ -2374,7 +2370,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_StructWithOptionalMembers)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_index_mapping(&data);
 }
@@ -2397,7 +2393,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
       0x00,0x00,0x00,0x0a  // +4=8 int_32
     };
     msg.copy((const char*)int32_union, sizeof(int32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int32_union(&data);
   }
   {
@@ -2407,7 +2403,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint32_union, sizeof(uint32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint32_union(&data);
   }
   {
@@ -2417,7 +2413,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int8_union, sizeof(int8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int8_union(&data);
   }
   {
@@ -2427,7 +2423,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint8_union, sizeof(uint8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint8_union(&data);
   }
   {
@@ -2437,7 +2433,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int16_union, sizeof(int16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int16_union(&data);
   }
   {
@@ -2447,7 +2443,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint16_union, sizeof(uint16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint16_union(&data);
   }
   {
@@ -2457,7 +2453,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)int64_union, sizeof(int64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int64_union(&data);
   }
   {
@@ -2467,7 +2463,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint64_union, sizeof(uint64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint64_union(&data);
   }
   {
@@ -2477,7 +2473,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float32_union, sizeof(float32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float32_union(&data);
   }
   {
@@ -2487,7 +2483,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float64_union, sizeof(float64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float64_union(&data);
   }
   {
@@ -2497,7 +2493,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)float128_union, sizeof(float128_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_float128_union(&data);
   }
   {
@@ -2507,7 +2503,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)char8_union, sizeof(char8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_char8_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -2518,7 +2514,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)char16_union, sizeof(char16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_char16_union(&data);
   }
 #endif
@@ -2529,7 +2525,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)byte_union, sizeof(byte_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_byte_union(&data);
   }
   {
@@ -2539,7 +2535,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)bool_union, sizeof(bool_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_bool_union(&data);
   }
   {
@@ -2549,7 +2545,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)str_union, sizeof(str_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_string_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -2560,7 +2556,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)wstr_union, sizeof(wstr_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_wstring_union(&data);
   }
 #endif
@@ -2571,7 +2567,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnion)
     };
     msg.reset();
     msg.copy((const char*)enum_union, sizeof(enum_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_enum_union(&data);
   }
 }
@@ -2594,7 +2590,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
       0x00,0x00,0x00,0x0a  // +4=8 int_32
     };
     msg.copy((const char*)int32_union, sizeof(int32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int32_union(&data);
   }
   {
@@ -2604,7 +2600,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint32_union, sizeof(uint32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint32_union(&data);
   }
   {
@@ -2614,7 +2610,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)int8_union, sizeof(int8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int8_union(&data);
   }
   {
@@ -2624,7 +2620,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint8_union, sizeof(uint8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint8_union(&data);
   }
   {
@@ -2634,7 +2630,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)int16_union, sizeof(int16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int16_union(&data);
   }
   {
@@ -2644,7 +2640,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint16_union, sizeof(uint16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint16_union(&data);
   }
   {
@@ -2654,7 +2650,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)int64_union, sizeof(int64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int64_union(&data);
   }
   {
@@ -2664,7 +2660,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint64_union, sizeof(uint64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint64_union(&data);
   }
   {
@@ -2674,7 +2670,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)float32_union, sizeof(float32_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_float32_union(&data);
   }
   {
@@ -2684,7 +2680,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)float64_union, sizeof(float64_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_float64_union(&data);
   }
   {
@@ -2694,7 +2690,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)float128_union, sizeof(float128_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_float128_union(&data);
   }
   {
@@ -2704,7 +2700,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)char8_union, sizeof(char8_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_char8_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -2715,7 +2711,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)char16_union, sizeof(char16_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_char16_union(&data);
   }
 #endif
@@ -2726,7 +2722,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)byte_union, sizeof(byte_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_byte_union(&data);
   }
   {
@@ -2736,7 +2732,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)bool_union, sizeof(bool_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_bool_union(&data);
   }
   {
@@ -2746,7 +2742,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)str_union, sizeof(str_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_string_union(&data);
   }
 #ifdef DDS_HAS_WCHAR
@@ -2757,7 +2753,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)wstr_union, sizeof(wstr_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_wstring_union(&data);
   }
 #endif
@@ -2768,7 +2764,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)enum_union, sizeof(enum_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_enum_union(&data);
   }
 }
@@ -2808,7 +2804,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadSequenceFromStruct)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_sequence_value_struct<FinalSequenceStruct>(&data);
 }
@@ -2848,7 +2844,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadSequenceFromStructXCDR1)
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)sequence_struct, sizeof(sequence_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
 
   verify_sequence_value_struct<FinalSequenceStruct>(&data);
 }
@@ -2871,7 +2867,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadSequenceFromUnion)
       0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0b // int_32s
     };
     msg.copy((const char*)int32s_union, sizeof(int32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_int32s_union(&data);
   }
   {
@@ -2881,7 +2877,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadSequenceFromUnion)
     };
     msg.reset();
     msg.copy((const char*)uint32s_union, sizeof(uint32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
     verify_uint32s_union(&data);
   }
 }
@@ -2904,7 +2900,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadSequenceFromUnionXCDR1)
       0x00,0x00,0x00,0x02, 0x00,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0b // int_32s
     };
     msg.copy((const char*)int32s_union, sizeof(int32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_int32s_union(&data);
   }
   {
@@ -2914,7 +2910,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadSequenceFromUnionXCDR1)
     };
     msg.reset();
     msg.copy((const char*)uint32s_union, sizeof(uint32s_union));
-    XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+    XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
     verify_uint32s_union(&data);
   }
 }
@@ -2937,7 +2933,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromArray)
   };
   ACE_Message_Block msg(256);
   msg.copy((const char*)array_struct, sizeof(array_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
   verify_array_struct(&data);
 }
 
@@ -2959,7 +2955,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_ReadValueFromArrayXCDR1)
   };
   ACE_Message_Block msg(256);
   msg.copy((const char*)array_struct, sizeof(array_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
   verify_array_struct(&data);
 }
 
@@ -3001,7 +2997,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_SkipNestedMembers)
 
   ACE_Message_Block msg(128);
   msg.copy((const char*)final_struct, sizeof(final_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr2, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);
@@ -3077,7 +3073,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_SkipNestedMembersXCDR1)
 
   ACE_Message_Block msg(128);
   msg.copy((const char*)final_struct, sizeof(final_struct));
-  XTypes::DynamicDataImpl data(&msg, xcdr1, dt);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr1, dt);
 
   DDS::DynamicData_var nested_level1;
   DDS::ReturnCode_t ret = data.get_complex_value(nested_level1, 1);

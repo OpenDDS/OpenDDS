@@ -31,7 +31,7 @@ public:
   DynamicDataAdapter(DDS::DynamicType_ptr type,
                      const DCPS::MetaStruct& meta_struct,
                      const T& value)
-    : type_(DDS::DynamicType::_duplicate(type))
+    : type_(get_base_type(type))
     , meta_struct_(meta_struct)
     , value_(value)
   {}

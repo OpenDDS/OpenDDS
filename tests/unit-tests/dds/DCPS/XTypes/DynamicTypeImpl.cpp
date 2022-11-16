@@ -257,7 +257,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_PrimitiveKind)
   DDS::MemberDescriptor_var first_expected_md = new XTypes::MemberDescriptorImpl();
   //first_expected_dtm->set_parent(expected_dt);
   first_expected_md->name("TK_INT32");
-  first_expected_md->id(ACE_UINT32_MAX);
+  first_expected_md->id(0);
   first_expected_md->index(0);
   first_expected_md->is_default_label(1);
   first_expected_md->try_construct_kind(DDS::DISCARD);
@@ -266,7 +266,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_PrimitiveKind)
   DDS::MemberDescriptor_var second_expected_md = new XTypes::MemberDescriptorImpl();
   //second_expected_dtm->set_parent(expected_dt);
   second_expected_md->name("TK_CHAR8");
-  second_expected_md->id(ACE_UINT32_MAX);
+  second_expected_md->id(1);
   second_expected_md->index(1);
   second_expected_md->try_construct_kind(DDS::DISCARD);
   first_expected_md->type(expected_dt);
@@ -361,7 +361,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   DDS::MemberDescriptor_var first_expected_md = new XTypes::MemberDescriptorImpl();
   //first_expected_dtm->set_parent(enum_expected_dt);
   first_expected_md->name("TK_INT32");
-  first_expected_md->id(ACE_UINT32_MAX);
+  first_expected_md->id(0);
   first_expected_md->index(0);
   first_expected_md->is_default_label(1);
   first_expected_md->try_construct_kind(DDS::DISCARD);
@@ -370,7 +370,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   DDS::MemberDescriptor_var second_expected_md = new XTypes::MemberDescriptorImpl();
   //second_expected_dtm->set_parent(enum_expected_dt);
   second_expected_md->name("TK_CHAR8");
-  second_expected_md->id(ACE_UINT32_MAX);
+  second_expected_md->id(1);
   second_expected_md->index(1);
   second_expected_md->try_construct_kind(DDS::DISCARD);
   first_expected_md->type(enum_expected_dt);
