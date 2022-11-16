@@ -1070,6 +1070,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_value(DDS::MemberId id, const COR
 #endif
 }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value_boolean(DCPS::Value& value,
                                                             DDS::MemberId id) const
 {
@@ -1208,6 +1209,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::Mem
   }
   return DDS::RETCODE_ERROR;
 }
+#endif
 
 bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_ptr value)
 {

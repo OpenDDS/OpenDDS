@@ -328,14 +328,18 @@ public:
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
                                        const DDS::WstringSeq& value);
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
+#endif
 
 private:
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   DDS::ReturnCode_t get_simple_value_boolean(DCPS::Value& value, DDS::MemberId id) const;
   DDS::ReturnCode_t get_simple_value_char(DCPS::Value& value, DDS::MemberId id) const;
   template<typename ValueType>
   DDS::ReturnCode_t get_simple_value_primitive(DCPS::Value& value, DDS::MemberId id) const;
   DDS::ReturnCode_t get_simple_value_string(DCPS::Value& value, DDS::MemberId id) const;
+#endif
 
   bool is_basic_type(TypeKind tk) const;
 
