@@ -332,6 +332,7 @@ public:
 
 private:
   DDS::ReturnCode_t get_simple_value_boolean(DCPS::Value& value, DDS::MemberId id) const;
+  DDS::ReturnCode_t get_simple_value_char(DCPS::Value& value, DDS::MemberId id) const;
   template<typename ValueType>
   DDS::ReturnCode_t get_simple_value_primitive(DCPS::Value& value, DDS::MemberId id) const;
   DDS::ReturnCode_t get_simple_value_string(DCPS::Value& value, DDS::MemberId id) const;

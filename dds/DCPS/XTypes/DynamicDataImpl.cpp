@@ -1091,6 +1091,27 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_boolean(DCPS::Value& value,
   return DDS::RETCODE_ERROR;
 }
 
+DDS::ReturnCode_t DynamicDataImpl::get_simple_value_char(DCPS::Value& value,
+                                                         DDS::MemberId id) const
+{
+  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  if (single_it != container_.single_map_.end()) {
+    value = single_it->second.get<ACE_OutputCDR::from_char>().val_;
+    return DDS::RETCODE_OK;
+  }
+  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  if (complex_it != container_.complex_map_.end()) {
+    const DynamicDataImpl* inner_dd = dynamic_cast<DynamicDataImpl*>(complex_it->second.in());
+    DataContainer::const_single_iterator inner_it =
+      inner_dd->container_.single_map_.find(MEMBER_ID_INVALID);
+    if (inner_it != inner_dd->container_.single_map_.end()) {
+      value = inner_it->second.get<ACE_OutputCDR::from_char>().val_;
+      return DDS::RETCODE_OK;
+    }
+  }
+  return DDS::RETCODE_ERROR;
+}
+
 template<typename ValueType>
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value_primitive(DCPS::Value& value,
                                                               DDS::MemberId id) const
@@ -1171,7 +1192,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::Mem
   case TK_UINT64:
     return get_simple_value_primitive<CORBA::ULongLong>(value, id);
   case TK_CHAR8:
-    return get_simple_value_primitive<CORBA::Char>(value, id);
+    return get_simple_value_char(value, id);
   case TK_FLOAT64:
     return get_simple_value_primitive<CORBA::Double>(value, id);
   case TK_FLOAT128:
