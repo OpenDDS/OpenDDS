@@ -178,7 +178,7 @@ bool DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& va
   return insert_single(id, value);
 }
 
-bool DynamicDataImpl::is_valid_discriminator_type(TypeKind tk) const
+bool DynamicDataImpl::is_valid_discriminator_type(TypeKind tk)
 {
   switch (tk) {
   case TK_BOOLEAN:
