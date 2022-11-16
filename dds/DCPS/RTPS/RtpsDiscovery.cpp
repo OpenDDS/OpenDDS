@@ -136,7 +136,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->lease_duration(TimeDuration(duration));
         } else if (name == "MaxLeaseDuration") {
           const OPENDDS_STRING& value = it->second;
-          int duration;
+          int duration = 0;
           if (!DCPS::convertToInteger(value, duration)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -561,7 +561,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "MaxAuthTime") {
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
-          int int_value;
+          int int_value = 0;
           if (DCPS::convertToInteger(string_value, int_value)) {
             config->max_auth_time(TimeDuration(int_value));
           } else {
@@ -700,7 +700,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->undirected_spdp(bool(smInt));
         } else if (name == "PeriodicDirectedSpdp") {
           const OPENDDS_STRING& value = it->second;
-          int smInt;
+          int smInt = 0;
           if (!DCPS::convertToInteger(value, smInt)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
@@ -763,7 +763,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
         } else if (name == "SedpReceivePreallocatedDataBlocks") {
           const String& string_value = it->second;
-          size_t value;
+          size_t value = 0;
           if (DCPS::convertToInteger(string_value, value)) {
             config->sedp_receive_preallocated_data_blocks(value);
           } else {

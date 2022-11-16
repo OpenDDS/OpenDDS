@@ -1053,11 +1053,11 @@ Spdp::data_received(const DataSubmessage& data,
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
-  ParticipantData_t pdata = ParticipantData_t();
+  ParticipantData_t pdata;
 
   pdata.participantProxy.domainId = domain_;
   pdata.discoveredAt = now.to_monotonic_time();
-
+  pdata.ddsParticipantDataSecure.base.base.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -1307,6 +1307,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   DDS::Security::ParticipantStatelessMessage msg = DDS::Security::ParticipantStatelessMessage();
   msg.message_identity.source_guid = guid_;
+  msg.message_identity.sequence_number = 0;
   msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
   msg.destination_participant_guid = guid;
   msg.destination_endpoint_guid = GUID_UNKNOWN;
@@ -1549,6 +1550,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
     DDS::Security::ParticipantStatelessMessage reply = DDS::Security::ParticipantStatelessMessage();
     reply.message_identity.source_guid = guid_;
+    reply.message_identity.sequence_number = 0;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
@@ -3784,8 +3786,9 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 
     const DCPS::RepoId reader = make_id(peer, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
 
-    DDS::Security::ParticipantVolatileMessageSecure msg = DDS::Security::ParticipantVolatileMessageSecure();
+    DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;
+    msg.related_message_identity.source_guid = GUID_UNKNOWN;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
     msg.destination_participant_guid = peer;
     msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant

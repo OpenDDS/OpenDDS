@@ -4375,7 +4375,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure = ParameterListConverter::DiscoveredSubscription_SecurityWrapper();
+    ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure;
     if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")

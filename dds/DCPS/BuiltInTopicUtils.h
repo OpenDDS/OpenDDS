@@ -82,6 +82,8 @@ topicIsBIT(const char* name, const char* type)
 
 class DomainParticipantImpl;
 
+const DDS::BuiltinTopicKey_t BUILTIN_TOPIC_KEY_UNKNOWN = { { 0 } };
+
 /**
  * Functor for ordering BuiltinKey_t.
  *
