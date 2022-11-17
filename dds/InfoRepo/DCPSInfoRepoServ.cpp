@@ -65,7 +65,7 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
   }
 }
 
-InfoRepo::~InfoRepo() throw()
+InfoRepo::~InfoRepo()
 {
   this->finalize();
 }
