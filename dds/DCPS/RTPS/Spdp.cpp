@@ -1057,7 +1057,9 @@ Spdp::data_received(const DataSubmessage& data,
 
   pdata.participantProxy.domainId = domain_;
   pdata.discoveredAt = now.to_monotonic_time();
+#ifdef OPENDDS_SECURITY
   pdata.ddsParticipantDataSecure.base.base.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+#endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
