@@ -43,30 +43,37 @@ TEST(dds_DCPS_GuidGenerator, maintest)
     gen.populate(g2);
     EXPECT_TRUE(not_null(g1));
     EXPECT_TRUE(compare_prefix(g1,g2) != 0);
-  }
+
+
+    int val1 = gen.interfaceName("Test_NotARealInterface");
+    int val2 = gen.interfaceName("Test_NotARealInterface"); // synthesize a shortcut "found" that is a false success
+
+    EXPECT_TRUE(val1 == -1); // This is a valid failure
+    EXPECT_TRUE(val2 == 0); // but methinks the shortcut is a bug
+}
 
   // Test GUID converter
   {
     GUID_t guid;
-    guid.guidPrefix[ 0] =  1;
-    guid.guidPrefix[ 1] =  2;
-    guid.guidPrefix[ 2] =  3;
-    guid.guidPrefix[ 3] =  4;
-    guid.guidPrefix[ 4] =  5;
-    guid.guidPrefix[ 5] =  6;
-    guid.guidPrefix[ 6] =  7;
-    guid.guidPrefix[ 7] =  8;
-    guid.guidPrefix[ 8] =  9;
-    guid.guidPrefix[ 9] = 10;
-    guid.guidPrefix[10] = 11;
-    guid.guidPrefix[11] = 12;
+    guid.guidPrefix[ 0] = 0x01;
+    guid.guidPrefix[ 1] = 0x02;
+    guid.guidPrefix[ 2] = 0x03;
+    guid.guidPrefix[ 3] = 0x04;
+    guid.guidPrefix[ 4] = 0x05;
+    guid.guidPrefix[ 5] = 0x06;
+    guid.guidPrefix[ 6] = 0x07;
+    guid.guidPrefix[ 7] = 0x08;
+    guid.guidPrefix[ 8] = 0x09;
+    guid.guidPrefix[ 9] = 0x0A;
+    guid.guidPrefix[10] = 0x0B;
+    guid.guidPrefix[11] = 0x0C;
     guid.entityId.entityKey[0] = guid.entityId.entityKey[1] = guid.entityId.entityKey[2] = 0;
     guid.entityId.entityKind = 0;
     EXPECT_TRUE(GuidConverter(guid).uniqueParticipantId() == "0102030405060708090a0b0c");
 
-    guid.guidPrefix[2] = 233;
-    guid.guidPrefix[4] = 244;
-    guid.guidPrefix[6] = 255;
+    guid.guidPrefix[2] = 0xE9;
+    guid.guidPrefix[4] = 0xF4;
+    guid.guidPrefix[6] = 0xFF;
     EXPECT_TRUE(GuidConverter(guid).uniqueParticipantId() == "0102e904f406ff08090a0b0c");
   }
 }
