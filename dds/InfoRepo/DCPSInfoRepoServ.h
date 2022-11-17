@@ -32,7 +32,7 @@ public:
   };
 
   InfoRepo(int argc, ACE_TCHAR *argv[]);
-  ~InfoRepo() throw();
+  ~InfoRepo();
   void run();
 
   /// ShutdownInterface used to schedule a shutdown.
