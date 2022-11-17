@@ -8,9 +8,7 @@ use lib "$ENV{ACE_ROOT}/bin";
 use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 
-PerlDDS::add_lib_path('../ConsolidatedMessengerIdl');
-
 my $test = new PerlDDS::TestFramework();
-$test->process('test', 'TypeSupportPlugin', join(' ', @ARGV));
+$test->process('test', 'TypeSupportPluginUser', join(' ', @ARGV));
 $test->start_process('test');
 exit $test->finish(60);

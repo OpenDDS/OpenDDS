@@ -1,0 +1,5 @@
+@topic
+struct TopicType {
+  @key long key;
+  string value;
+};
