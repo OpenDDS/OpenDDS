@@ -13,4 +13,6 @@ project(TypeSupportPluginUser): dcps_test {
   Source_Files {
     TypeSupportPlugin.cpp
   }
+  IDL_Files {
+  }
 }
