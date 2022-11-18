@@ -24,7 +24,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   const char* type_name = "TopicType";
   ACE_DEBUG((LM_DEBUG, "Getting TypeSupport for %C\n", type_name));
-  DDS::TypeSupport_ptr ts = Registered_Data_Types->lookup(0, type_name);
+  DDS::TypeSupport_var ts = Registered_Data_Types->lookup(0, type_name);
   if (!ts) {
     ACE_ERROR((LM_ERROR, "ERROR: TypeSupport wasn't registered!\n"));
     return 1;
