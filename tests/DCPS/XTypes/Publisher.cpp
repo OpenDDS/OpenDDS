@@ -1,5 +1,7 @@
 #include "Common.h"
-#include "PublisherTypeSupportImpl.h"
+#include "PublisherNonMutableStructsTypeSupportImpl.h"
+#include "PublisherMutableStructsTypeSupportImpl.h"
+#include "PublisherUnionsTypeSupportImpl.h"
 #include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
