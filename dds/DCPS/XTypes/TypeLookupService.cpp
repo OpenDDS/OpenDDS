@@ -877,22 +877,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
   DynamicTypeImpl* dt = new DynamicTypeImpl();
   DDS::DynamicType_var dt_var = dt;
   DDS::TypeDescriptor_var td = new TypeDescriptorImpl();
-  {
-    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-    const GuidTypeMap::iterator guid_found = gt_map_.find(guid);
-    if (guid_found != gt_map_.end()) {
-      const DynamicTypeMap::const_iterator ti_found = guid_found->second.find(ti);
-      if (ti_found != guid_found->second.end()) {
-        return DDS::DynamicType::_duplicate(ti_found->second);
-      } else {
-        guid_found->second.insert(std::make_pair(ti, dt_var));
-      }
-    } else {
-      DynamicTypeMap dt_map;
-      dt_map.insert(std::make_pair(ti, dt_var));
-      gt_map_.insert(std::make_pair(guid, dt_map));
-    }
-  }
+  bool cache = true;
 
   switch (ti.kind()) {
   case TK_BOOLEAN:
@@ -1100,6 +1085,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     if (get_type_object_i(ti).kind == TK_NONE) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TypeLookupService::type_identifier_to_dynamic -")
                  ACE_TEXT(" get_type_object_i returned TK_NONE\n")));
+      cache = false;
     } else {
       complete_to_dynamic_i(dt, get_type_object_i(ti).complete, guid);
     }
@@ -1109,6 +1095,7 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
       ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) TypeLookupService::type_identifier_to_dynamic -")
                  ACE_TEXT(" Encountered EK_MINIMAL: returning nil Dynamic Type\n")));
     }
+    cache = false;
     break;
   case TK_ANNOTATION:
     td->kind(TK_ANNOTATION);
@@ -1117,6 +1104,25 @@ DDS::DynamicType_ptr TypeLookupService::type_identifier_to_dynamic(const TypeIde
     dt->set_descriptor(td);
     break;
   }
+
+  if (cache) {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    const GuidTypeMap::iterator guid_found = gt_map_.find(guid);
+    if (guid_found != gt_map_.end()) {
+      const DynamicTypeMap::const_iterator ti_found = guid_found->second.find(ti);
+      if (ti_found != guid_found->second.end()) {
+        ACE_DEBUG((LM_DEBUG, "(%P|%t) return cached\n"));
+        return DDS::DynamicType::_duplicate(ti_found->second);
+      } else {
+        guid_found->second.insert(std::make_pair(ti, dt_var));
+      }
+    } else {
+      DynamicTypeMap dt_map;
+      dt_map.insert(std::make_pair(ti, dt_var));
+      gt_map_.insert(std::make_pair(guid, dt_map));
+    }
+  }
+
   return dt_var._retn();
 }
 #endif // OPENDDS_SAFETY_PROFILE

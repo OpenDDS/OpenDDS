@@ -319,6 +319,11 @@ public:
   RcHandle<DCPS::TransportInst> sedp_transport_inst(DDS::DomainId_t domainId,
                                                     const GUID_t& partId) const;
 
+  void request_remote_complete_type_objects(
+    DDS::DomainId_t domain, const GUID_t& local_participant,
+    const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
+    DCPS::TypeObjReqCond& cond);
+
 private:
 
   // This mutex only protects the participants map

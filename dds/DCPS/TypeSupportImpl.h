@@ -111,6 +111,10 @@ public:
   virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
+  virtual const XTypes::TypeInformation* preset_type_info() const
+  {
+    return 0;
+  }
 
   void add_types(const XTypes::TypeLookupService_rch& tls) const;
   void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;

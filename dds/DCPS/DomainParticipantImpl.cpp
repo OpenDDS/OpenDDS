@@ -2612,6 +2612,90 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   return result;
 }
 
+DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
+  DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key)
+{
+  if (!type_lookup_service_) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+        "Can't get a DynamicType, no type look service\n"));
+    }
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+
+  XTypes::TypeInformation ti = type_lookup_service_->get_type_info(key);
+  if (ti.complete.typeid_with_size.typeobject_serialized_size == 0) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+        "Can't get a DynamicType, type info is missing complete\n"));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  const GUID_t remote_entity = bit_key_to_repo_id(key);
+  DDS::DynamicType_var got_type;
+  if (!get_dynamic_type_i(got_type, remote_entity, ti)) {
+    return DDS::RETCODE_ERROR;
+  }
+  if (!got_type) {
+    // We don't have it, first try to ask the remote for the complete
+    // TypeObjects, then try again.
+    Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
+    TypeObjReqCond cond;
+    disco->request_remote_complete_type_objects(domain_id_, dp_id_, remote_entity, ti, cond);
+    const DDS::ReturnCode_t rc = cond.wait();
+    if (rc != DDS::RETCODE_OK) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+          "Couldn't get remote compete type object: %C\n", retcode_to_string(rc)));
+      }
+      return rc;
+    }
+
+    if (!get_dynamic_type_i(got_type, remote_entity, ti) || !got_type) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
+          "remote request was successful, but still can't get DynamicType\n"));
+      }
+      return DDS::RETCODE_ERROR;
+    }
+  }
+
+  if (got_type) {
+    XTypes::DynamicTypeImpl* impl = dynamic_cast<XTypes::DynamicTypeImpl*>(got_type.in());
+    impl->set_complete_type_identifier(ti.complete.typeid_with_size.type_id);
+    /* dt->set_complete_type_map(ctm); */
+    impl->set_minimal_type_identifier(ti.minimal.typeid_with_size.type_id);
+    /* dt->set_minimal_type_map(mtm); */
+  }
+
+  type = got_type;
+
+  return DDS::RETCODE_OK;
+}
+
+bool DomainParticipantImpl::get_dynamic_type_i(
+  DDS::DynamicType_var& type, const GUID_t& remote_entity, const XTypes::TypeInformation& type_info)
+{
+  type = type_lookup_service_->type_identifier_to_dynamic(
+    type_info.complete.typeid_with_size.type_id, remote_entity);
+  DDS::TypeDescriptor_var td;
+  if (!type || type->get_descriptor(td) != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type_i: "
+        "Got an invalid DynamicType\n"));
+    }
+    return false;
+  }
+  if (!td) {
+    // We got it, so the type lookup service knows about the type, but the
+    // descriptor is null, probably because the complete type object is missing.
+    // Set type to null and return true to signal the caller to try again.
+    type = 0;
+  }
+  return true;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

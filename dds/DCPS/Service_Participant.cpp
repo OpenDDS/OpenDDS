@@ -3011,6 +3011,12 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
   return XTypes::TypeInformation();
 }
 
+DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
+  DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
+{
+  return dynamic_cast<DomainParticipantImpl*>(participant)->get_dynamic_type(type, key);
+}
+
 XTypes::TypeObject
 Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
                                      const XTypes::TypeIdentifier& ti) const

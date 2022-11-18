@@ -1391,8 +1391,11 @@ private:
 
   virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
 
-protected:
+  void request_remote_complete_type_objects(
+    const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
+    DCPS::TypeObjReqCond& cond);
 
+protected:
 #ifdef OPENDDS_SECURITY
   DDS::Security::DatawriterCryptoHandle
   generate_remote_matched_writer_crypto_handle(const DCPS::RepoId& writer,
@@ -1537,11 +1540,16 @@ protected:
   };
 
   struct MatchingPair {
-    MatchingPair(GUID_t writer, GUID_t reader)
-      : writer_(writer), reader_(reader) {}
+    MatchingPair(GUID_t writer, GUID_t reader, DCPS::TypeObjReqCond* non_match_cond = 0)
+      : writer_(writer)
+      , reader_(reader)
+      , non_match_cond_(non_match_cond)
+    {
+    }
 
     GUID_t writer_;
     GUID_t reader_;
+    DCPS::TypeObjReqCond* non_match_cond_;
 
     bool operator<(const MatchingPair& a_other) const
     {
@@ -1552,6 +1560,8 @@ protected:
       if (GUID_tKeyLessThan()(reader_, a_other.reader_)) return true;
 
       if (GUID_tKeyLessThan()(a_other.reader_, reader_)) return false;
+
+      if (non_match_cond_ < a_other.non_match_cond_) return true;
 
       return false;
     }
@@ -1564,7 +1574,7 @@ protected:
 
   void match(const GUID_t& writer, const GUID_t& reader);
 
-  void need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
+  bool need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
                                           bool& need_minimal,
                                           bool& need_complete) const;
 
@@ -1572,11 +1582,10 @@ protected:
 
   void match_continue(const GUID_t& writer, const GUID_t& reader);
 
-  void save_matching_data_and_get_typeobjects(const XTypes::TypeInformation* type_info,
-                                              MatchingData& md, const MatchingPair& mp,
-                                              const DCPS::RepoId& remote_id,
-                                              bool is_discovery_protected,
-                                              bool get_minimal, bool get_complete);
+  void request_type_objects(const XTypes::TypeInformation* type_info,
+    const MatchingPair& mp, const DCPS::RepoId& remote_id, bool is_discovery_protected,
+    bool get_minimal, bool get_complete);
+
   void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
                                MatchingData& md, bool get_minimal, const DCPS::RepoId& remote_id,
                                bool is_discovery_protected);

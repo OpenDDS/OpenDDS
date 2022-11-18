@@ -1471,6 +1471,15 @@ void RtpsDiscovery::create_bit_dr(DDS::TopicDescription_ptr topic,
   dri->enable();
 }
 
+void RtpsDiscovery::request_remote_complete_type_objects(
+  DDS::DomainId_t domain, const GUID_t& local_participant,
+  const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
+  DCPS::TypeObjReqCond& cond)
+{
+  ParticipantHandle spdp = get_part(domain, local_participant);
+  spdp->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

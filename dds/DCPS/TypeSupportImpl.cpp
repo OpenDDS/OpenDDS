@@ -96,6 +96,12 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
 
 void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
 {
+  const XTypes::TypeInformation* const preset = preset_type_info();
+  if (preset) {
+    type_info = *preset;
+    return;
+  }
+
   to_type_info_i(type_info.minimal, getMinimalTypeIdentifier(), getMinimalTypeMap());
 
   // Properly populate the complete member if complete TypeObjects are generated.

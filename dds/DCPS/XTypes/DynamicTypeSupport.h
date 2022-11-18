@@ -231,6 +231,8 @@ public:
   const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;
   const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;
 
+  const OpenDDS::XTypes::TypeInformation* preset_type_info() const;
+
   DynamicType_ptr get_type()
   {
     return DynamicType::_duplicate(type_);
