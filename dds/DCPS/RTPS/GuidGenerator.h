@@ -53,6 +53,9 @@ public:
   /// doing so.
   void populate(DCPS::GUID_t& container);
 
+  // public method for applying unit test on count incrementation from populate()
+  ACE_UINT16 testCount() { return counter_; }
+
 private:
   enum {NODE_ID_SIZE = 6};
 
