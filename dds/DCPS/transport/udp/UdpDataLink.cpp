@@ -277,7 +277,7 @@ UdpDataLink::control_received(ReceivedDataSample& sample,
   // the connection handshaking, so receiving one is an indication of the
   // passive_connection event.  In the future the submessage_id_ could be used
   // to allow different types of messages here.
-  static_cast<UdpTransport&>(this->impl()).passive_connection(remote_address, sample.sample_);
+  static_cast<UdpTransport&>(this->impl()).passive_connection(remote_address, sample);
 }
 
 void

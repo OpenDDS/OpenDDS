@@ -19,7 +19,7 @@
 #include <dds/DCPS/transport/framework/TransportSendElement.h>
 #include <dds/DCPS/transport/framework/TransportSendControlElement.h>
 #include <dds/DCPS/transport/framework/RemoveAllVisitor.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #ifdef OPENDDS_SECURITY
 #  include <dds/DCPS/security/framework/SecurityRegistry.h>
@@ -3553,7 +3553,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
             ++cumulative_send_count;
             continue;
           }
-        } else if (proxy.pre_contains(seq)) {
+        } else if (proxy.pre_contains(seq) || seq > max_sn_) {
           // Can't answer, don't gap.
           continue;
         }
@@ -3602,7 +3602,7 @@ RtpsUdpDataLink::RtpsWriter::gather_nack_replies_i(MetaSubmessageVec& meta_subme
           }
           continue;
         }
-      } else if (proxy.pre_contains(seq)) {
+      } else if (proxy.pre_contains(seq) || seq > max_sn_) {
         // Can't answer, don't gap.
         continue;
       }

@@ -5,8 +5,8 @@
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H
-#define OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H
+#ifndef OPENDDS_DCPS_RTPS_MESSAGEUTILS_H
+#define OPENDDS_DCPS_RTPS_MESSAGEUTILS_H
 
 #include "RtpsCoreTypeSupportImpl.h"
 #include "rtps_export.h"
@@ -126,39 +126,6 @@ inline bool operator<(const ProtocolVersion_t& v1, const ProtocolVersion_t& v2)
 OpenDDS_Rtps_Export
 DCPS::TimeDuration rtps_duration_to_time_duration(const Duration_t& rtps_duration, const ProtocolVersion_t& version, const VendorId_t& vendor);
 
-/// Utility for iterating through a contiguous buffer (either really contiguous
-/// or virtually contiguous using message block chaining) of RTPS Submessages
-/// optionally prefixed by the RTPS Header
-class OpenDDS_Rtps_Export MessageParser {
-public:
-  explicit MessageParser(const ACE_Message_Block& in);
-  explicit MessageParser(const DDS::OctetSeq& in);
-
-  bool parseHeader();
-  bool parseSubmessageHeader();
-  bool hasNextSubmessage() const;
-  bool skipToNextSubmessage();
-  bool skipSubmessageContent();
-
-  const Header& header() const { return header_; }
-  SubmessageHeader submessageHeader() const { return sub_; }
-  size_t remaining() const { return in_ ? in_->total_length() : fromSeq_.length(); }
-  const char* current() const { return ser_.pos_rd(); }
-
-  DCPS::Serializer& serializer() { return ser_; }
-
-  template <typename T>
-  bool operator>>(T& rhs) { return ser_ >> rhs; }
-
-private:
-  ACE_Message_Block fromSeq_;
-  DCPS::Message_Block_Ptr in_;
-  DCPS::Serializer ser_;
-  Header header_;
-  SubmessageHeader sub_;
-  size_t smContentStart_;
-};
-
 OpenDDS_Rtps_Export
 bool bitmapNonEmpty(const SequenceNumberSet& snSet);
 
@@ -275,4 +242,4 @@ handle_to_octets(DDS::Security::NativeCryptoHandle handle)
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* OPENDDS_DCPS_RTPS_BASEMESSAGEUTILS_H */
+#endif /* OPENDDS_DCPS_RTPS_MESSAGEUTILS_H */

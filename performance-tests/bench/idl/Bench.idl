@@ -187,11 +187,30 @@ module Bench {
     };
     typedef sequence<NodePrototype> NodePrototypes;
 
+    enum ParameterKind { PK_NUMBER, PK_STRING, PK_TIME };
+    union ParameterValue switch (ParameterKind) {
+      case PK_NUMBER:
+        double number_param;
+      case PK_STRING:
+        string string_param;
+      case PK_TIME:
+        Builder::TimeStamp time_param;
+    };
+
+    struct Parameter {
+      string name;
+      string desc;
+      ParameterValue value;
+    };
+    typedef sequence<Parameter> ParameterSeq;
+
     // This is the type of the scenario configuration
     struct ScenarioPrototype {
       // Unused Metadata
       string name;
       string desc;
+      // Scenario parameters (for comparison with other scenarios)
+      ParameterSeq scenario_parameters;
       // Workers that must be deployed in sets
       NodePrototypes nodes;
       // Workers that can be assigned to any node
@@ -230,6 +249,8 @@ module Bench {
 
     struct Report {
       string scenario_name;
+      ParameterSeq run_parameters;
+      ParameterSeq scenario_parameters;
       Builder::TimeStamp time;
       NodeReportSeq node_reports;
       unsigned long missing_reports;

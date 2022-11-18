@@ -225,6 +225,7 @@ enum { MAX_SEND_BLOCKS = 50 };
 
 /// Allocators used for transport receiving logic.
 enum { RECEIVE_DATA_BUFFER_SIZE = 65536 };
+enum { DEFAULT_TRANSPORT_RECEIVE_BUFFERS = 16 };
 
 typedef Cached_Allocator_With_Overflow<ACE_Message_Block, RECEIVE_SYNCH>
   TransportMessageBlockAllocator;

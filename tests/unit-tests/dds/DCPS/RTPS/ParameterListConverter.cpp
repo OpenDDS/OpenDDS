@@ -7,7 +7,7 @@
 #include "ace/OS_main.h"
 #include "dds/DCPS/Definitions.h"
 #include "dds/DCPS/GuidBuilder.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 #include "dds/DCPS/RTPS/ParameterListConverter.h"
 #include "dds/DCPS/RTPS/RtpsCoreC.h"

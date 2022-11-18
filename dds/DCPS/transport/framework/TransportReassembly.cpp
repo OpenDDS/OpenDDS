@@ -78,6 +78,7 @@ TransportReassembly::insert(FragRangeList& flist,
     if (next < fr.transport_seq_.first.getValue()) {
       // insert before 'it'
       fri_map[seqRange.second.getValue()] = flist.insert(it, FragRange(seqRange, data));
+      data.clear();
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "inserted on left\n"));
       return true;
@@ -90,15 +91,12 @@ TransportReassembly::insert(FragRangeList& flist,
         return false;
       }
       fr.rec_ds_.header_ = joined;
-      if (fr.rec_ds_.sample_ && data.sample_) {
-        ACE_Message_Block* last;
-        for (last = data.sample_.get(); last->cont(); last = last->cont()) ;
-        last->cont(fr.rec_ds_.sample_.release());
-        fr.rec_ds_.sample_.reset(data.sample_.release());
+      if (fr.rec_ds_.has_data() && data.has_data()) {
+        fr.rec_ds_.prepend(data);
       } else {
-        fr.rec_ds_.sample_.reset();
+        fr.rec_ds_.clear();
+        data.clear();
       }
-      data.sample_.reset();
       fr.transport_seq_.first = seqRange.first;
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "combined on left\n"));
@@ -106,7 +104,7 @@ TransportReassembly::insert(FragRangeList& flist,
 
     } else if (prev == fr.transport_seq_.second.getValue()) {
       // combine on right of fr
-      if (!fr.rec_ds_.sample_) {
+      if (!fr.rec_ds_.has_data()) {
         fr.rec_ds_.header_.more_fragments_ = true;
       }
       DataSampleHeader joined;
@@ -115,14 +113,11 @@ TransportReassembly::insert(FragRangeList& flist,
         return false;
       }
       fr.rec_ds_.header_ = joined;
-      if (fr.rec_ds_.sample_ && data.sample_) {
-        ACE_Message_Block* last;
-        for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
-        last->cont(data.sample_.release());
-      }
-      else {
-        fr.rec_ds_.sample_.reset();
-        data.sample_.reset();
+      if (fr.rec_ds_.has_data() && data.has_data()) {
+        fr.rec_ds_.append(data);
+      } else {
+        fr.rec_ds_.clear();
+        data.clear();
       }
 
       fri_map.erase(fit++);
@@ -137,7 +132,7 @@ TransportReassembly::insert(FragRangeList& flist,
       // check if the next FragRange in the list needs to be combined
       if (++it != flist.end()) {
         if (next == it->transport_seq_.first.getValue()) {
-          if (!fr.rec_ds_.sample_) {
+          if (!fr.rec_ds_.has_data()) {
             fr.rec_ds_.header_.more_fragments_ = true;
           }
           if (!DataSampleHeader::join(fr.rec_ds_.header_, it->rec_ds_.header_,
@@ -146,19 +141,17 @@ TransportReassembly::insert(FragRangeList& flist,
             return false;
           }
           fr.rec_ds_.header_ = joined;
-          if (!it->rec_ds_.sample_) {
-            fr.rec_ds_.sample_.reset();
+          if (!it->rec_ds_.has_data()) {
+            fr.rec_ds_.clear();
           } else {
-            if (!fr.rec_ds_.sample_) {
+            if (!fr.rec_ds_.has_data()) {
               ACE_ERROR((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
                          ACE_TEXT("OpenDDS::DCPS::TransportReassembly::insert, ")
                          ACE_TEXT("Cannot dereference null pointer fr.rec_ds_.sample_\n")));
               return false;
             }
-            ACE_Message_Block* last;
-            for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
-            last->cont(it->rec_ds_.sample_.release());
+            fr.rec_ds_.append(it->rec_ds_);
           }
           fit->second = bookmark;
           needs_insert = false;
@@ -184,6 +177,7 @@ TransportReassembly::insert(FragRangeList& flist,
   fri_map[seqRange.second.getValue()] = flist.insert(flist.end(), FragRange(seqRange, data));
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
     "inserted at end of list\n"));
+  data.clear();
   return true;
 }
 
@@ -320,6 +314,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   if (iter == fragments_.end()) {
     fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags, expiration);
     expiration_queue_.push_back(std::make_pair(expiration, key));
+    data.clear();
     // since this is the first fragment we've seen, it can't possibly be done
     if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
@@ -354,15 +349,15 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   if (iter->second.have_first_
       && iter->second.range_list_.size() == 1
       && !iter->second.range_list_.front().rec_ds_.header_.more_fragments_) {
-    swap(data, iter->second.range_list_.front().rec_ds_);
+    std::swap(data, iter->second.range_list_.front().rec_ds_);
     fragments_.erase(iter);
     completed_[key.publication_].insert(key.data_sample_seq_);
     if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
                  "removed frag, returning %C with %B fragments\n",
-                 data.sample_ ? "true (complete)" : "false (incomplete)", fragments_.size()));
+                 data.has_data() ? "true (complete)" : "false (incomplete)", fragments_.size()));
     }
-    return data.sample_.get(); // could be false if we had data_unavailable()
+    return data.has_data(); // could be false if we had data_unavailable()
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
@@ -384,7 +379,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
     FragRangeList& flist = iter->second.range_list_;
     FragRangeIterMap& fri_map = iter->second.range_finder_;
 
-    ReceivedDataSample dummy(0);
+    ReceivedDataSample dummy;
     dummy.header_.sequence_ = key.data_sample_seq_;
 
     // check if we should expand the front element (only if !have_first)

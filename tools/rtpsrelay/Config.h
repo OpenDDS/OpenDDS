@@ -285,6 +285,16 @@ public:
     return admission_control_queue_duration_;
   }
 
+  void run_time(OpenDDS::DCPS::TimeDuration value)
+  {
+    run_time_ = value;
+  }
+
+  OpenDDS::DCPS::TimeDuration run_time() const
+  {
+    return run_time_;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -311,6 +321,7 @@ private:
   bool restart_detection_;
   size_t admission_control_queue_size_;
   OpenDDS::DCPS::TimeDuration admission_control_queue_duration_;
+  OpenDDS::DCPS::TimeDuration run_time_;
 };
 
 }

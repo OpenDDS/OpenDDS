@@ -102,7 +102,7 @@
         "subscribers": [
           { "name": "subscriber_B1",
 
-            "qos": { "partition": { "name": [ "bench_showtime_mixed" ] } },
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datareaders": [
@@ -131,7 +131,7 @@
         "publishers": [
           { "name": "publisher_B1",
 
-            "qos": { "partition": { "name": [ "bench_showtime_mixed" ] } },
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datawriters": [
@@ -176,7 +176,7 @@
         "subscribers": [
           { "name": "subscriber_B2",
 
-            "qos": { "partition": { "name": [ "bench_showtime_mixed" ] } },
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datareaders": [
@@ -218,7 +218,7 @@
         "publishers": [
           { "name": "publisher_B2",
 
-            "qos": { "partition": { "name": [ "bench_showtime_mixed" ] } },
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datawriters": [

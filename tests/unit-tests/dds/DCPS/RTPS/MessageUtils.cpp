@@ -18,7 +18,7 @@
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/transport/rtps_udp/RtpsSampleHeader.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <iostream>
 #include <cstring>
@@ -67,7 +67,7 @@ void matches(const DataFragSubmessage& df, const DataFragSubmessage& expected)
   }
 }
 
-TEST(dds_DCPS_RTPS_BaseMessageUtils, maintest)
+TEST(dds_DCPS_RTPS_MessageUtils, maintest)
 {
   const VendorId_t SomeoneElse = { { '\x04', '\x02' } };
 

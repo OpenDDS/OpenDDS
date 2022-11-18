@@ -175,6 +175,7 @@ Linux family:
 * Debian 9.4 (i686)
 * Ubuntu 18.04 LTS (x86\_64)
 * openSUSE 42.1 (x86\_64)
+* Yocto 2.5.3 (ARMv8)
 
 Windows family:
 * Windows 7 (32-bit, 64-bit)
@@ -206,7 +207,7 @@ This release of OpenDDS has been tested using the following compilers:
 * Microsoft Visual C++ 14.2 (Visual Studio 2019) cl 19.29.30146
 * gcc 4.4.7, 4.8.5
 * gcc 6.2.1, 6.3.0
-* gcc 7.2.0, 7.5.0
+* gcc 7.2.0, 7.3.0, 7.5.0
 * gcc 8.2.0, 8.2.1
 * gcc 9.3.1
 * gcc 12.2.0

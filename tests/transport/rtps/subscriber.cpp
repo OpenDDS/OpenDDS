@@ -10,7 +10,7 @@
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 
 #include <dds/DCPS/RepoIdBuilder.h>
 #include <dds/DCPS/GuidConverter.h>
@@ -72,7 +72,8 @@ public:
 
     switch (sample.header_.message_id_) {
     case SAMPLE_DATA: {
-      Serializer ser(sample.sample_.get(), encoding);
+      Message_Block_Ptr payload(sample.data());
+      Serializer ser(payload.get(), encoding);
 
       OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {
@@ -130,7 +131,8 @@ public:
     case DISPOSE_INSTANCE:
     case UNREGISTER_INSTANCE:
     case DISPOSE_UNREGISTER_INSTANCE: {
-      Serializer ser(sample.sample_.get(), encoding);
+      Message_Block_Ptr payload(sample.data());
+      Serializer ser(payload.get(), encoding);
 
       OpenDDS::DCPS::EncapsulationHeader encap;
       if (!(ser >> encap)) {

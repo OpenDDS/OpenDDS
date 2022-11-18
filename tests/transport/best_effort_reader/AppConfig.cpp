@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include <ace/Basic_Types.h>
 #include <ace/Get_Opt.h>
 #ifdef ACE_AS_STATIC_LIBS

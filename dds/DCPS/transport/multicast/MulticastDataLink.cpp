@@ -290,7 +290,8 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
     // Transport control samples are delivered to all sessions
     // regardless of association status:
     {
-      char* const ptr = sample.sample_ ? sample.sample_->rd_ptr() : 0;
+      Message_Block_Ptr payload(sample.data());
+      char* const ptr = payload ? payload->rd_ptr() : 0;
 
       ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX,
           guard,
@@ -304,7 +305,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         // Depending on the data, we may need to send SYNACK.
 
         guard.release();
-        syn_received_no_session(theader.source_, sample.sample_,
+        syn_received_no_session(theader.source_, payload,
                                 theader.swap_bytes());
 
         guard.acquire();
@@ -314,7 +315,7 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
         }
 
         if (ptr) {
-          sample.sample_->rd_ptr(ptr);
+          payload->rd_ptr(ptr);
         }
         return;
       }
@@ -325,12 +326,12 @@ MulticastDataLink::sample_received(ReceivedDataSample& sample)
       for (MulticastSessionMap::iterator it(temp_sessions.begin());
           it != temp_sessions.end(); ++it) {
         it->second->control_received(sample.header_.submessage_id_,
-                                     sample.sample_);
+                                     payload);
         it->second->record_header_received(theader);
 
         // reset read pointer
         if (ptr) {
-          sample.sample_->rd_ptr(ptr);
+          payload->rd_ptr(ptr);
         }
       }
     }

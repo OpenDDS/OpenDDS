@@ -4141,7 +4141,8 @@ Sedp::Reader::data_received(const DCPS::ReceivedDataSample& sample)
 
     // Get Encoding from Encapsulation
     Encoding encoding;
-    Serializer ser(sample.sample_.get(), encoding);
+    DCPS::Message_Block_Ptr payload(sample.data(&mb_alloc_));
+    Serializer ser(payload.get(), encoding);
     DCPS::EncapsulationHeader encap;
     if (!(ser >> encap)) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: Sedp::Reader::data_received - ")
@@ -4374,7 +4375,7 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
       return;
     }
 
-    ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure = ParameterListConverter::DiscoveredSubscription_SecurityWrapper();
+    ParameterListConverter::DiscoveredSubscription_SecurityWrapper rdata_secure;
     if (!ParameterListConverter::from_param_list(data, rdata_secure, sedp_.use_xtypes_, rdata_secure.type_info)) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR Sedp::DiscoveryReader::data_received_i - ")

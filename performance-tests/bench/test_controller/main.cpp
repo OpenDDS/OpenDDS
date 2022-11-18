@@ -116,6 +116,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     overrides.bench_partition_suffix = ss.str();
   }
 
+  Bench::TestController::ParameterSeq run_parameters;
+
   const char* usage = "usage: test_controller [-h|--help] | TEST_CONTEXT SCENARIO_ID [OPTIONS...]";
   try {
     for (int i = 1; i < argc; i++) {
@@ -172,7 +174,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
           << "--json                       Output full JSON report as '<resuld-id>.json' in the test conext." << std::endl
           << "                             By default, this not enabled. This report will contain" << std::endl
           << "                             the full raw Bench::TestController report, including all" << std::endl
-          << "                             node controller and worker reports (and DDS entity reports)" << std::endl;
+          << "                             node controller and worker reports (and DDS entity reports)" << std::endl
+          << "--show-worker-logs           Output full logs of workers after test run. Possibly a every" << std::endl
+          << "                             large amount of log information, depending on configuration." << std::endl
+          << "                             Handy for parsing for errors and warnings in log files." << std::endl
+          << "--add-run-param PARAM=VALUE  Specify a test run parameter to embed in the output report." << std::endl
+          << "                             Handy for correlating test run scenarios after the fact." << std::endl;
 //            ################################################################################
         return 0;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--prealloc-scenario-out"))) {
@@ -206,6 +213,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
         json_result = true;
       } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--show-worker-logs"))) {
         show_worker_logs = true;
+      } else if (!ACE_OS::strcmp(argument, ACE_TEXT("--add-run-param"))) {
+        std::string param_str = get_option_argument(i, argc, argv);
+        run_parameters.length(run_parameters.length() + 1);
+        auto eq_pos = param_str.find_first_of('=');
+        auto& param = run_parameters[run_parameters.length() - 1];
+        param.name = param_str.substr(0, eq_pos).c_str();
+        param.desc = "";
+        param.value.string_param(eq_pos != std::string::npos ? param_str.substr(eq_pos + 1).c_str() : "");
+        std::cout << "Adding run parameter with name = '" << param.name << "' and value = '" << param.value.string_param() << "'" << std::endl;
       } else if (test_context_path.empty() && argument[0] != '-') {
         test_context_path = ACE_TEXT_ALWAYS_CHAR(argument);
       } else if (scenario_id.empty() && argument[0] != '-') {
@@ -305,13 +321,44 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ss << "Using " << scenario_path;
     const std::string name = scenario_prototype.name.in();
     const std::string desc = scenario_prototype.desc.in();
-    if (!name.empty() || !desc.empty()) {
+    uint32_t plen = scenario_prototype.scenario_parameters.length();
+    if (!name.empty() || !desc.empty() || plen) {
       ss << ':';
       if (!name.empty()) {
         ss << std::endl << "    Name: " << name;
       }
       if (!desc.empty()) {
         ss << std::endl << "    Description: " << desc;
+      }
+      if (plen) {
+        ss << std::endl << "    Parameters:";
+        for (uint32_t i = 0; i < plen; ++i) {
+          const auto& p = scenario_prototype.scenario_parameters[i];
+          std::ostringstream ss_val;
+          switch (p.value._d()) {
+            case Bench::TestController::PK_NUMBER:
+            {
+              ss_val << p.value.number_param();
+              break;
+            }
+            case Bench::TestController::PK_STRING:
+            {
+              ss_val << p.value.string_param();
+              break;
+            }
+            case Bench::TestController::PK_TIME:
+            {
+              ss_val << p.value.time_param();
+              break;
+            }
+            default:
+            {
+              OPENDDS_ASSERT(false); // Should not happen
+              break;
+            }
+          }
+          ss << std::endl << "        " << p.name << ": " << ss_val.str();
+        }
       }
     }
     ss << std::endl;
@@ -381,6 +428,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       report.scenario_name = scenario_id.c_str();
       report.time = Builder::get_sys_time();
       scenario_manager.execute(allocated_scenario, report);
+
+      report.scenario_parameters = scenario_prototype.scenario_parameters;
+      report.run_parameters = run_parameters;
 
       std::ofstream result_file(result_path);
       if (!result_file.is_open()) {

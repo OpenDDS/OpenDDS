@@ -7,7 +7,7 @@
 
 #include "ParameterListConverter.h"
 
-#include "BaseMessageUtils.h"
+#include "MessageUtils.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/GuidUtils.h>

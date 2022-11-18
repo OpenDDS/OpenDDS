@@ -5,6 +5,8 @@
 
 #include "RtpsDiscovery.h"
 
+#include "RtpsDiscoveryConfig.h"
+
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/ConfigUtils.h>
@@ -22,83 +24,12 @@
 #include <cstdlib>
 #include <limits>
 
-namespace {
-  u_short get_default_d0(u_short fallback)
-  {
-#if !defined ACE_LACKS_GETENV && !defined ACE_LACKS_ENV
-    const char* from_env = std::getenv("OPENDDS_RTPS_DEFAULT_D0");
-    if (from_env) {
-      return static_cast<u_short>(std::atoi(from_env));
-    }
-#endif
-    return fallback;
-  }
-}
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace RTPS {
 
 using DCPS::TimeDuration;
-
-RtpsDiscoveryConfig::RtpsDiscoveryConfig()
-  : resend_period_(30 /*seconds*/) // see RTPS v2.1 9.6.1.4.2
-  , quick_resend_ratio_(0.1)
-  , min_resend_delay_(TimeDuration::from_msec(100))
-  , lease_duration_(300)
-  , max_lease_duration_(300)
-#ifdef OPENDDS_SECURITY
-  , security_unsecure_lease_duration_(30)
-  , max_participants_in_authentication_(0)
-#endif
-  , lease_extension_(0)
-  , pb_(7400) // see RTPS v2.1 9.6.1.3 for PB, DG, PG, D0, D1 defaults
-  , dg_(250)
-  , pg_(2)
-  , d0_(get_default_d0(0))
-  , d1_(10)
-  , dx_(2)
-  , ttl_(1)
-#if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-  , send_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-  , recv_buffer_size_(ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
-#else
-  , send_buffer_size_(0)
-  , recv_buffer_size_(0)
-#endif
-  , sedp_multicast_(true)
-  , sedp_local_address_(u_short(0), "0.0.0.0")
-  , spdp_local_address_(u_short(0), "0.0.0.0")
-  , default_multicast_group_(u_short(0), "239.255.0.1") /*RTPS v2.1 9.6.1.4.1*/
-#ifdef ACE_HAS_IPV6
-  , ipv6_sedp_local_address_(u_short(0), "::")
-  , ipv6_spdp_local_address_(u_short(0), "::")
-  , ipv6_default_multicast_group_(u_short(0), "FF03::1")
-#endif
-  , max_auth_time_(300, 0)
-  , auth_resend_period_(1, 0)
-  , max_spdp_sequence_msg_reset_check_(3)
-  , spdp_rtps_relay_send_period_(30, 0)
-  , use_rtps_relay_(false)
-  , rtps_relay_only_(false)
-  , use_ice_(false)
-  , sedp_max_message_size_(DCPS::TransportSendStrategy::UDP_MAX_MESSAGE_SIZE)
-  , undirected_spdp_(true)
-  , periodic_directed_spdp_(false)
-  , secure_participant_user_data_(false)
-  , max_type_lookup_service_reply_period_(5, 0)
-  , use_xtypes_(XTYPES_MINIMAL)
-  , sedp_heartbeat_period_(0, 200*1000 /*microseconds*/)
-  , sedp_nak_response_delay_(0, 100*1000 /*microseconds*/)
-  , sedp_send_delay_(0, 10 * 1000)
-  , sedp_passive_connect_duration_(TimeDuration::from_msec(DCPS::TransportConfig::DEFAULT_PASSIVE_CONNECT_DURATION))
-  , participant_flags_(PFLAGS_THIS_VERSION)
-  , sedp_responsive_mode_(false)
-  , sedp_receive_preallocated_message_blocks_(0)
-  , sedp_receive_preallocated_data_blocks_(0)
-  , check_source_ip_(true)
-{}
 
 RtpsDiscovery::RtpsDiscovery(const RepoKey& key)
   : Discovery(key)
@@ -205,7 +136,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->lease_duration(TimeDuration(duration));
         } else if (name == "MaxLeaseDuration") {
           const OPENDDS_STRING& value = it->second;
-          int duration;
+          int duration = 0;
           if (!DCPS::convertToInteger(value, duration)) {
             ACE_ERROR_RETURN((LM_ERROR,
               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config(): ")
@@ -630,7 +561,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
         } else if (name == "MaxAuthTime") {
           // In seconds.
           const OPENDDS_STRING& string_value = it->second;
-          int int_value;
+          int int_value = 0;
           if (DCPS::convertToInteger(string_value, int_value)) {
             config->max_auth_time(TimeDuration(int_value));
           } else {
@@ -769,7 +700,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           config->undirected_spdp(bool(smInt));
         } else if (name == "PeriodicDirectedSpdp") {
           const OPENDDS_STRING& value = it->second;
-          int smInt;
+          int smInt = 0;
           if (!DCPS::convertToInteger(value, smInt)) {
             ACE_ERROR_RETURN((LM_ERROR,
                               ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
@@ -832,7 +763,7 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
           }
         } else if (name == "SedpReceivePreallocatedDataBlocks") {
           const String& string_value = it->second;
-          size_t value;
+          size_t value = 0;
           if (DCPS::convertToInteger(string_value, value)) {
             config->sedp_receive_preallocated_data_blocks(value);
           } else {

@@ -14,6 +14,8 @@
 #include <dds/DCPS/WaitSet.h>
 
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#include <dds/DCPS/RTPS/RtpsDiscoveryConfig.h>
+
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
 
 #include "dds/DCPS/StaticIncludes.h"

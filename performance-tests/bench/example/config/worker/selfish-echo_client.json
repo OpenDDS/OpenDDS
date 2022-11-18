@@ -52,6 +52,10 @@
         ],
         "publishers": [
           { "name": "publisher_01",
+
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
+            "qos_mask": { "partition": { "has_name": true } },
+
             "datawriters": [
               { "name": "datawriter_01",
                 "topic_name": "topic_01",

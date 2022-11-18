@@ -85,7 +85,7 @@
         "subscribers": [
           { "name": "subscriber_C1",
 
-            "qos": { "partition": { "name": [ "bench_showtime_mixed" ] } },
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datareaders": [
@@ -127,7 +127,7 @@
         "publishers": [
           { "name": "publisher_C1",
 
-            "qos": { "partition": { "name": [ "bench_showtime_mixed" ] } },
+            "qos": { "partition": { "name": [ "bench_partition" ] } },
             "qos_mask": { "partition": { "has_name": true } },
 
             "datawriters": [
