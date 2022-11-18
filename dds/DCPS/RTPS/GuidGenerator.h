@@ -53,6 +53,12 @@ public:
   /// doing so.
   void populate(DCPS::GUID_t& container);
 
+  // public method for applying unit test coverage on getCount();
+  ACE_UINT16 testCount() { return getCount(); };
+
+  // public method for zeroing out counter, exclusively for unit testing;
+  void testInitCount() { counter_ = 0; };
+
 private:
   enum {NODE_ID_SIZE = 6};
 
