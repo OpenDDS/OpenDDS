@@ -190,11 +190,12 @@ DDS::DynamicType_ptr TypeSupportImpl::get_type_from_type_lookup_service()
   const XTypes::TypeMap& mtm = getMinimalTypeMap();
   XTypes::DynamicTypeImpl* dt = dynamic_cast<XTypes::DynamicTypeImpl*>(
     type_lookup_service_->type_identifier_to_dynamic(cti, GUID_UNKNOWN));
-  dt->set_complete_type_identifier(cti);
-  dt->set_complete_type_map(ctm);
-  dt->set_minimal_type_identifier(mti);
-  dt->set_minimal_type_map(mtm);
-
+  if (dt) {
+    dt->set_complete_type_identifier(cti);
+    dt->set_complete_type_map(ctm);
+    dt->set_minimal_type_identifier(mti);
+    dt->set_minimal_type_map(mtm);
+  }
   return dt;
 }
 #endif
