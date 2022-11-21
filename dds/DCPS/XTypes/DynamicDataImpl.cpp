@@ -2649,7 +2649,7 @@ bool DynamicDataImpl::DataContainer::set_primitive_values(DDS::UInt8Seq& collect
     const DynamicDataImpl* elem_dd = dynamic_cast<const DynamicDataImpl*>(it->second.in());
     if (!elem_dd) {
       return false;
-    } 
+    }
     const_single_iterator elem_it = elem_dd->container_.single_map_.find(MEMBER_ID_INVALID);
     if (elem_it != elem_dd->container_.single_map_.end()) {
       collection[index] = elem_it->second.get<ACE_OutputCDR::from_uint8>().val_;
