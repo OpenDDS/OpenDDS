@@ -6233,7 +6233,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
 
   CORBA::Long disc_value;
   if (has_disc) {
-    if (!get_discriminator_value(disc_value, single_it, complex_it, disc_type)} {
+    if (!get_discriminator_value(disc_value, single_it, complex_it, disc_type)) {
       return false;
     }
   } else if (!set_default_discriminator_value(disc_value, disc_type)) {
