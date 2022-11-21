@@ -6302,7 +6302,7 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -6356,7 +6356,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -6442,7 +6442,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -6568,7 +6568,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -7019,7 +7019,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -7187,7 +7187,7 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -7241,7 +7241,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -7327,7 +7327,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -7453,7 +7453,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -7902,7 +7902,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -8081,7 +8081,7 @@ jobs:
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -8147,7 +8147,7 @@ jobs:
         tar xvJf openssl3_w19.tar.xz
         rm -f openssl3_w19.tar.xz
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -8381,7 +8381,7 @@ jobs:
         tar xvJf openssl3_w19.tar.xz
         rm -f openssl3_w19.tar.xz
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -8536,7 +8536,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -8686,7 +8686,7 @@ jobs:
         tar xvJf openssl3_w19.tar.xz
         rm -f openssl3_w19.tar.xz
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -8844,7 +8844,7 @@ jobs:
     - name: install vcpkg packages
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       id: runvcpkg
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
@@ -8929,7 +8929,7 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -8993,7 +8993,7 @@ jobs:
         rm -f wireshark_w19-release.tar.xz
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -9198,7 +9198,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -9353,7 +9353,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -9494,7 +9494,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -9669,7 +9669,7 @@ jobs:
         key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -9726,7 +9726,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -9812,7 +9812,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -9940,7 +9940,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -10069,7 +10069,7 @@ jobs:
 
     steps:
     - name: install xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse xerces-c
@@ -10170,7 +10170,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -10329,7 +10329,7 @@ jobs:
         key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
     - name: install openssl & xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -10383,7 +10383,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -10469,7 +10469,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -10595,7 +10595,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -10739,7 +10739,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
@@ -10880,7 +10880,7 @@ jobs:
 
     steps:
     - name: install openssl & xerces-c
-      uses: lukka/run-vcpkg@v7
+      uses: lukka/run-vcpkg@v10
       with:
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         vcpkgArguments: --recurse openssl xerces-c
