@@ -16,10 +16,13 @@
 
 #include <ace/Select_Reactor.h>
 #include <ace/WFMO_Reactor.h>
-#include <ace/Proactor.h>
-#include <ace/Proactor_Impl.h>
-#include <ace/WIN32_Proactor.h>
 #include <ace/OS_NS_Thread.h>
+
+#ifdef OPENDDS_REACTOR_TASK_ASYNC
+#  include <ace/Proactor.h>
+#  include <ace/Proactor_Impl.h>
+#  include <ace/WIN32_Proactor.h>
+#endif
 
 #include <exception>
 #include <cstring>

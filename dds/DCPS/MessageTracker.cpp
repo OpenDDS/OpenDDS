@@ -8,7 +8,6 @@
 #include "MessageTracker.h"
 #include "Service_Participant.h"
 
-#include <ace/Synch.h>
 #include <ace/ACE.h>
 #include <ace/Guard_T.h>
 #include <ace/OS_NS_time.h>

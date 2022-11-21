@@ -9,7 +9,6 @@
 
 #include "ace/Log_Msg.h"
 #include "ace/Reverse_Lock_T.h"
-#include "ace/Synch.h"
 
 #include "ReactorInterceptor.h"
 #include "Service_Participant.h"

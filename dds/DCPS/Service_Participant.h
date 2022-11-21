@@ -29,7 +29,6 @@
 #include <ace/Task.h>
 #include <ace/Time_Value.h>
 #include <ace/ARGV.h>
-#include <ace/Barrier.h>
 
 #include <memory>
 
