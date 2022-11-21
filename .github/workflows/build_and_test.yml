@@ -8862,7 +8862,7 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
     - name: build WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-cmake@v3
+      uses: lukka/run-cmake@v10
       with:
         cmakeListsTxtPath: winflexbison/CMakeLists.txt
     - name: set Wireshark environment
@@ -8874,7 +8874,7 @@ jobs:
         type %GITHUB_ENV%
     - name: build Wireshark
       if: steps.cache-artifact.outputs.cache-hit != 'true'
-      uses: lukka/run-cmake@v3
+      uses: lukka/run-cmake@v10
       with:
         cmakeListsTxtPath: wireshark/CMakeLists.txt
         cmakeListsOrSettingsJson: CMakeListsTxtAdvanced
