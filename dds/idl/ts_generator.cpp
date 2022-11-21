@@ -506,6 +506,9 @@ namespace face_ts_generator {
       "  OpenDDS::FaceTSS::register_callback(connection_id, waitset,\n"
       "                                      data_callback,\n"
       "                                      max_message_size, return_code);\n"
+      "}\n\n"
+      "namespace {\n"
+      "  OpenDDS::DCPS::TypeSupportInitializer<" << cxx_name << "TypeSupportImpl> ts_init_" << name_underscores << ";\n"
       "}\n\n";
   }
 }
