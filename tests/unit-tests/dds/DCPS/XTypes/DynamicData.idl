@@ -140,7 +140,7 @@ struct FinalNestedStructInner {
   @id(0) long l;
 };
 
-// Reading single value from struct.
+// Read/write single value from struct.
 @mutable
 struct MutableSingleValueStruct {
   SINGLE_VALUE_MEMBERS

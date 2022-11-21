@@ -1,14 +1,12 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 
 #include "../../../DynamicDataTypeSupportImpl.h"
+#include "../../../../Utils/DataView.h"
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
 #include <dds/DCPS/XTypes/DynamicDataXcdrReadImpl.h>
-
-#include <dds/DCPS/SafetyProfileStreams.h>
-
-#include <gtest/gtest.h>
+#include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 using namespace OpenDDS;
 
@@ -400,6 +398,72 @@ void verify_single_value_struct(DDS::DynamicData_ptr data)
   ret = nested_dd->get_int32_value(my_enum, random_id);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   EXPECT_EQ(expected.my_enum, my_enum);
+}
+
+template<typename StructType>
+void verify_write_single_value_struct(DDS::DynamicType_var type, const DataView& expected_cdr)
+{
+  StructType input;
+  set_single_value_struct(input);
+  XTypes::DynamicDataImpl data(type);
+  DDS::ReturnCode_t ret = data.set_int32_value(0, input.my_enum);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_int32_value(1, input.int_32);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_uint32_value(2, input.uint_32);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_int8_value(3, input.int_8);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_uint8_value(4, input.uint_8);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_int16_value(5, input.int_16);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_uint16_value(6, input.uint_16);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_int64_value(7, input.int_64);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_uint64_value(8, input.uint_64);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_float32_value(9, input.float_32);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_float64_value(10, input.float_64);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_float128_value(11, input.float_128);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_char8_value(12, input.char_8);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+#ifdef DDS_HAS_WCHAR
+  ret = data.set_char16_value(13, input.char_16);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+#endif
+  ret = data.set_byte_value(14, input.byte);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_boolean_value(15, input._cxx_bool);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicTypeMember_var dtm;
+  ret = type->get_member(dtm, 16);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::MemberDescriptor_var md;
+  ret = dtm->get_descriptor(md);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  //  XTypes::DynamicDataImpl nested_data(md->type());
+  //  DDS::DynamicData_var nested_data = new XTypes::DynamicDataImpl(md->type());
+  XTypes::DynamicDataImpl* nested_data = new XTypes::DynamicDataImpl(md->type());
+  ret = nested_data->set_int32_value(0, input.nested_struct.l);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret =  data.set_complex_value(16, nested_data);
+  ret = data.set_string_value(17, input.str);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+#ifdef DDS_HAS_WCHAR
+  ret = data.set_wstring_value(18, input.wstr);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+#endif
+
+  // Serialize and check the content.
+  ACE_Message_Block buffer(1024);
+  DCPS::Serializer ser(&buffer, xcdr2);
+  ASSERT_TRUE(ser << data);
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
 }
 
 void verify_index_mapping(DDS::DynamicData_ptr data)
@@ -880,7 +944,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromStruct)
   tls.add(type_map.begin(), type_map.end());
   DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
-  unsigned char single_value_struct[] = {
+  const unsigned char single_value_struct[] = {
     0x00,0x00,0x00,0xc2, // +4=4 dheader
     0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x03, // +4+4=12 my_enum
     0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x0a, // +4+4=20 int_32
@@ -909,6 +973,9 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_ReadValueFromStruct)
   XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
 
   verify_single_value_struct<MutableSingleValueStruct>(&data);
+
+  // Test writing direction
+  verify_write_single_value_struct<MutableSingleValueStruct>(dt, single_value_struct);
 }
 
 TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_StructWithOptionalMembers)
