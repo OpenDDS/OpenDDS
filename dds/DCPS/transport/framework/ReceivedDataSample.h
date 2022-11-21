@@ -112,6 +112,8 @@ private:
     size_t rd_ptr_, wr_ptr_;
   };
 
+  friend void swap(MessageBlock& lhs, MessageBlock& rhs);
+
   OPENDDS_VECTOR(MessageBlock) blocks_;
 };
 
@@ -130,9 +132,18 @@ inline ReceivedDataSample::MessageBlock::MessageBlock(const MessageBlock& rhs)
 inline ReceivedDataSample::MessageBlock&
 ReceivedDataSample::MessageBlock::operator=(const MessageBlock& rhs)
 {
-  MessageBlock copy(rhs);
-  std::swap(*this, copy);
+  if (&rhs != this) {
+    MessageBlock copy(rhs);
+    swap(*this, copy);
+  }
   return *this;
+}
+
+inline void swap(ReceivedDataSample::MessageBlock& lhs, ReceivedDataSample::MessageBlock& rhs)
+{
+  std::swap(lhs.data_, rhs.data_);
+  std::swap(lhs.rd_ptr_, rhs.rd_ptr_);
+  std::swap(lhs.wr_ptr_, rhs.wr_ptr_);
 }
 
 #ifdef ACE_HAS_CPP11
@@ -147,9 +158,7 @@ inline ReceivedDataSample::MessageBlock::MessageBlock(MessageBlock&& rhs)
 inline ReceivedDataSample::MessageBlock&
 ReceivedDataSample::MessageBlock::operator=(MessageBlock&& rhs)
 {
-  std::swap(data_, rhs.data_);
-  std::swap(rd_ptr_, rhs.rd_ptr_);
-  std::swap(wr_ptr_, rhs.wr_ptr_);
+  swap(*this, rhs);
   return *this;
 }
 #endif
