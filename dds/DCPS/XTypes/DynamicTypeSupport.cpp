@@ -18,6 +18,20 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+DynamicSample::DynamicSample()
+{}
+
+DynamicSample::DynamicSample(const DynamicSample& d)
+  : Sample(d.mutability_, d.extent_)
+  , data_(d.data_)
+{}
+
+DynamicSample& DynamicSample::operator=(const DynamicSample& rhs)
+{
+  //TODO
+  return *this;
+}
+
 bool DynamicSample::serialize(DCPS::Serializer& ser) const
 {
   ACE_UNUSED_ARG(ser);
@@ -47,6 +61,116 @@ bool DynamicSample::compare(const DCPS::Sample& other) const
 }
 
 } // namespace XTypes
+
+namespace DCPS {
+
+bool operator>>(Serializer& strm, XTypes::DynamicSample& sample)
+{
+  return sample.deserialize(strm);
+}
+
+bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample)
+{
+  sample.value.key_only(true);
+  return sample.value.deserialize(strm);
+}
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+
+template <>
+struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
+  typedef XTypes::DynamicSample T;
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  void* allocate() const { return 0; }
+
+  void deallocate(void*) const {}
+
+  size_t numDcpsKeys() const { return 0; }
+#endif /* OPENDDS_NO_MULTI_TOPIC */
+
+  bool isDcpsKey(const char* field) const
+  {
+    //TODO
+    return false;
+  }
+
+  ACE_CDR::ULong map_name_to_id(const char* field) const
+  {
+    //TODO
+    return 0;
+  }
+
+  Value getValue(const void* stru, DDS::MemberId memberId) const
+  {
+    const T& typed = *static_cast<const T*>(stru);
+    Value v(0);
+    //TODO
+    return v;
+  }
+
+  Value getValue(const void* stru, const char* field) const
+  {
+    const T& typed = *static_cast<const T*>(stru);
+    Value v(0);
+    //TODO
+    return v;
+  }
+
+  Value getValue(Serializer& strm, const char* field) const
+  {
+    Value v(0);
+    //TODO
+    return v;
+  }
+
+  ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
+  {
+    //TODO
+    return ComparatorBase::Ptr();
+  }
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  const char** getFieldNames() const
+  {
+    return 0;
+  }
+
+  const void* getRawField(const void*, const char*) const
+  {
+    return 0;
+  }
+
+  void assign(void*, const char*, const void*, const char*, const MetaStruct&) const
+  {
+  }
+#endif
+
+  bool compare(const void* lhs, const void* rhs, const char* field) const
+  {
+    //TODO
+    return false;
+  }
+};
+
+template <>
+OpenDDS_Dcps_Export
+const MetaStruct& getMetaStruct<XTypes::DynamicSample>()
+{
+  static const MetaStructImpl<XTypes::DynamicSample> m;
+  return m;
+}
+
+template <>
+OpenDDS_Dcps_Export
+const MetaStruct& getMetaStruct<DDS::DynamicData*>() //TODO: this is needed to resolve a linker error
+{
+  static const MetaStructImpl<XTypes::DynamicSample> m;
+  return m;
+}
+#endif
+
+} // namespace DCPS
 } // namespace OpenDDS
 
 namespace DDS {
@@ -104,8 +228,7 @@ DataWriter_ptr DynamicTypeSupport::create_datawriter()
 
 DataReader_ptr DynamicTypeSupport::create_datareader()
 {
-  // TODO
-  return 0;
+  return new DynamicDataReaderImpl();
 }
 
 #  ifndef OPENDDS_NO_MULTI_TOPIC

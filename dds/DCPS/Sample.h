@@ -40,6 +40,12 @@ public:
     KeyOnly
   };
 
+  Sample()
+  : mutability_(Mutable)
+  , extent_(Full)
+  {
+  }
+
   Sample(Mutability mutability, Extent extent)
   : mutability_(mutability)
   , extent_(extent)
@@ -69,17 +75,20 @@ public:
   {
     return copy(mutability, extent_);
   }
+
 #ifndef OPENDDS_SAFETY_PROFILE
   virtual DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr type) const = 0;
 #endif
+
   virtual const void* native_data() const = 0;
+
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const = 0;
 #endif
 
 protected:
-  const Mutability mutability_;
-  const Extent extent_;
+  Mutability mutability_;
+  Extent extent_;
 };
 
 struct OpenDDS_Dcps_Export SampleRchCmp {

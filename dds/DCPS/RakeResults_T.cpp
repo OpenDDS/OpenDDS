@@ -18,16 +18,16 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-template <class SampleSeq>
-RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
-                                    SampleSeq& received_data,
-                                    DDS::SampleInfoSeq& info_seq,
-                                    CORBA::Long max_samples,
-                                    DDS::PresentationQosPolicy presentation,
+template <class MessageType>
+RakeResults<MessageType>::RakeResults(DataReaderImpl* reader,
+                                      SampleSeq& received_data,
+                                      DDS::SampleInfoSeq& info_seq,
+                                      CORBA::Long max_samples,
+                                      DDS::PresentationQosPolicy presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                    DDS::QueryCondition_ptr cond,
+                                      DDS::QueryCondition_ptr cond,
 #endif
-                                    Operation_t oper)
+                                      Operation_t oper)
   : reader_(reader)
   , received_data_(received_data)
   , info_seq_(info_seq)
@@ -80,11 +80,11 @@ RakeResults<SampleSeq>::RakeResults(DataReaderImpl* reader,
 #endif
 }
 
-template <class SampleSeq>
-bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
-                                           ReceivedDataElementList* rdel,
-                                           SubscriptionInstance_rch instance,
-                                           size_t index_in_instance)
+template <class MessageType>
+bool RakeResults<MessageType>::insert_sample(ReceivedDataElement* sample,
+                                             ReceivedDataElementList* rdel,
+                                             SubscriptionInstance_rch instance,
+                                             size_t index_in_instance)
 {
 #ifndef OPENDDS_NO_QUERY_CONDITION
 
@@ -119,12 +119,11 @@ bool RakeResults<SampleSeq>::insert_sample(ReceivedDataElement* sample,
   return true;
 }
 
-template <class SampleSeq>
+template <class MessageType>
 template <class FwdIter>
-bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
-                                       typename SampleSeq::PrivateMemberAccess& received_data_p)
+bool RakeResults<MessageType>::copy_into(FwdIter iter, FwdIter end,
+                                         MessageSequenceAdapterType& received_data_p)
 {
-  typedef typename SampleSeq::value_type Sample;
   typedef OPENDDS_MAP(SubscriptionInstance*, InstanceData) InstanceMap;
   InstanceMap inst_map;
 
@@ -138,11 +137,11 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
 
     if (received_data_.maximum() != 0) {
       if (rde->registered_data_ == 0) {
-        received_data_p.assign_sample(idx, Sample());
+        received_data_p.assign_sample(idx, MessageType());
 
       } else {
         received_data_p.assign_sample(idx,
-                                      *static_cast<Sample*>(rde->registered_data_));
+                                      *static_cast<MessageType*>(rde->registered_data_));
       }
 
     } else {
@@ -226,10 +225,10 @@ bool RakeResults<SampleSeq>::copy_into(FwdIter iter, FwdIter end,
   return true;
 }
 
-template <class SampleSeq>
-bool RakeResults<SampleSeq>::copy_to_user()
+template <class MessageType>
+bool RakeResults<MessageType>::copy_to_user()
 {
-  typename SampleSeq::PrivateMemberAccess received_data_p(received_data_);
+  MessageSequenceAdapterType received_data_p(received_data_);
 
   if (do_sort_) {
     size_t len = std::min(static_cast<size_t>(sorted_.size()),
