@@ -10,36 +10,51 @@
 
 #  include "DynamicTypeImpl.h"
 #  include "Utils.h"
+#  include "DynamicDataImpl.h"
 
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/DCPS_Utils.h>
+
+using namespace OpenDDS::DCPS;
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-bool DynamicSample::serialize(DCPS::Serializer& ser) const
+bool DynamicSample::serialize(Serializer& ser) const
+{
+  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
+  if (!ddi) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialize: "
+        "currently we only support DyanmicDataImpl\n"));
+    }
+    return false;
+  }
+  return ser << *ddi;
+}
+
+bool DynamicSample::deserialize(Serializer& ser)
 {
   ACE_UNUSED_ARG(ser);
   // TODO
   return false;
 }
 
-bool DynamicSample::deserialize(DCPS::Serializer& ser)
+size_t DynamicSample::serialized_size(const Encoding& enc) const
 {
-  ACE_UNUSED_ARG(ser);
-  // TODO
-  return false;
+  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
+  if (!ddi) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
+        "currently we only support DyanmicDataImpl\n"));
+    }
+    return 0;
+  }
+  return DCPS::serialized_size(enc, *ddi);
 }
 
-size_t DynamicSample::serialized_size(const DCPS::Encoding& enc) const
-{
-  ACE_UNUSED_ARG(enc);
-  // TODO
-  return 0;
-}
-
-bool DynamicSample::compare(const DCPS::Sample& other) const
+bool DynamicSample::compare(const Sample& other) const
 {
   ACE_UNUSED_ARG(other);
   // TODO
@@ -51,7 +66,6 @@ bool DynamicSample::compare(const DCPS::Sample& other) const
 
 namespace DDS {
 
-using namespace OpenDDS::DCPS;
 using namespace OpenDDS::XTypes;
 
 void DynamicTypeSupport::representations_allowed_by_type(DataRepresentationIdSeq& seq)

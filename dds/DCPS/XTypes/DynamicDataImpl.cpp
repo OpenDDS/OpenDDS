@@ -82,8 +82,11 @@ DDS::ReturnCode_t DynamicDataImpl::return_loaned_value(DDS::DynamicData_ptr /*va
 
 DDS::DynamicData_ptr DynamicDataImpl::clone()
 {
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::clone: Not implemented\n"));
-  return 0;
+  DynamicDataImpl* const ddi = new DynamicDataImpl(type());
+  ddi->container_.single_map_ = container_.single_map_;
+  ddi->container_.sequence_map_ = container_.sequence_map_;
+  ddi->container_.complex_map_ = container_.complex_map_;
+  return ddi;
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value)

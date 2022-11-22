@@ -1,4 +1,3 @@
-// -*- C++ -*-
 #include "HelloWorldTypeSupportImpl.h"
 
 #include <tests/Utils/DistributedConditionSet.h>
@@ -6,10 +5,23 @@
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/StaticIncludes.h>
+#include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
+#include <dds/DCPS/XTypes/DynamicDataImpl.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
+
+bool check_rc(DDS::ReturnCode_t rc, const char* what)
+{
+  if (rc != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "publisher (%P|%t) ERROR: %C: %C\n",
+      what, OpenDDS::DCPS::retcode_to_string(rc)));
+    return true;
+  }
+  return false;
+}
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -28,8 +40,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                    0);
 
   HelloWorld::MessageTypeSupport_var type_support = new HelloWorld::MessageTypeSupportImpl();
-  type_support->register_type(participant, "");
   CORBA::String_var type_name = type_support->get_type_name();
+
+  DDS::DynamicType_var dt = type_support->get_type();
+  DDS::TypeSupport_var dts = new DDS::DynamicTypeSupport(dt);
+  if (check_rc(dts->register_type(participant, type_name), "register_type failed")) {
+    return 1;
+  }
 
   DDS::Topic_var topic = participant->create_topic(HelloWorld::MESSAGE_TOPIC_NAME,
                                                    type_name,
@@ -45,15 +62,18 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                                                                  DATAWRITER_QOS_DEFAULT,
                                                                  0,
                                                                  0);
-
-  HelloWorld::MessageDataWriter_var message_data_writer = HelloWorld::MessageDataWriter::_narrow(data_writer);
-
-  HelloWorld::Message message;
-  message.value = "Hello World!";
+  DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
 
   distributed_condition_set->wait_for(HelloWorld::PUBLISHER, HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_READY);
 
-  message_data_writer->write(message, DDS::HANDLE_NIL);
+  DDS::DynamicData_var dd = new OpenDDS::XTypes::DynamicDataImpl(dt);
+  if (check_rc(dd->set_string_value(0, "Hello, World!"), "set_string_value failed")) {
+    return 1;
+  }
+
+  if (check_rc(ddw->write(dd, DDS::HANDLE_NIL), "write failed")) {
+    return 1;
+  }
 
   distributed_condition_set->wait_for(HelloWorld::PUBLISHER, HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_DONE);
 
