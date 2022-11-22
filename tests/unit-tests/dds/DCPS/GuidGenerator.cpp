@@ -56,19 +56,25 @@ TEST(dds_DCPS_RTPS_GuidGenerator, getCount)
 {
   // Test GUID uniqueness
   GuidGenerator gen;
-  GUID_t g1, g2, g3, g4, g5;
+  GUID_t g1, g2, g3, g4, g5, gIncr;
+  unsigned int zeroCountOffset = gen.testCount();
 
-  int zeroCountOffset = gen.testCount();
+  // prevent additive int rollover in a rare 16-off case.
+  while (zeroCountOffset >= 0xfffffff0){
+    gen.populate(gIncr); // the side effect will increment the count so we can continue testing.
+    zeroCountOffset = gen.testCount();
+  }
+
   gen.populate(g1); // count -> 1
-  int oneCount = gen.testCount();
+  unsigned int oneCount = gen.testCount();
   gen.populate(g2); // count -> 2
   gen.populate(g3); // count -> 3
   gen.populate(g4); // count -> 4
   gen.populate(g5); // count -> 5
-  int fiveCount = gen.testCount();
+  unsigned int fiveCount = gen.testCount();
 
-  EXPECT_EQ(1, oneCount - zeroCountOffset);
-  EXPECT_EQ(5, fiveCount - zeroCountOffset);
+  EXPECT_EQ(1, oneCount - zeroCountOffset) << "Failure after getCount with one increment.";
+  EXPECT_EQ(5, fiveCount - zeroCountOffset) << "Failure after getCount with five increments.";
 }
 
 TEST(dds_DCPS_RTPS_GuidGenerator, interfaceName)
