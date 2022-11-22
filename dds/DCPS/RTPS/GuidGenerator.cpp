@@ -165,7 +165,7 @@ GuidGenerator::interfaceName(const char* iface)
   }
   ACE_OS::close(h);
   std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
-  
+
   interface_name_ = iface;
   return 0;
 #elif defined ACE_HAS_SIOCGIFCONF || defined ACE_HAS_MAC_OSX
@@ -200,7 +200,7 @@ GuidGenerator::interfaceName(const char* iface)
   }
 
   ACE_OS::close(h);
-  
+
   if(found) {
       interface_name_ = iface;
       return 0;
