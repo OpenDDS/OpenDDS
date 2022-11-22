@@ -29,28 +29,44 @@ option(OPENDDS_GTEST "Use Google Test Framework" OFF)
 # External Configuration Section
 # ******************************************************************
 
-## Check for ACE_ROOT
-if(NOT ACE_ROOT AND DEFINED ENV{ACE_ROOT})
-  set(ACE_ROOT $ENV{ACE_ROOT})
-endif()
-if(ACE_ROOT)
-  set(ACE_BIN_DIR ${ACE_ROOT}/bin)
-  set(ACE_INCLUDE_DIRS ${ACE_ROOT})
+if(ACE_FOR_OPENDDS)
+  find_package(ACE_for_OpenDDS)
 else()
-  message(FATAL_ERROR "You must provide ACE_ROOT either through -D or environment variable.")
-endif()
+  ## Check for ACE_ROOT
+  if(NOT ACE_ROOT AND DEFINED ENV{ACE_ROOT})
+    set(ACE_ROOT $ENV{ACE_ROOT})
+  endif()
+  if(ACE_ROOT)
+    set(ACE_BIN_DIR ${ACE_ROOT}/bin)
+    set(ACE_INCLUDE_DIRS ${ACE_ROOT})
 
-## Check for TAO_ROOT
-if(NOT TAO_ROOT AND DEFINED ENV{TAO_ROOT})
-  set(TAO_ROOT $ENV{TAO_ROOT})
-endif()
-if(TAO_ROOT)
-  set(TAO_BIN_DIR ${ACE_ROOT}/bin)
-  set(TAO_LIB_DIR ${ACE_ROOT}/lib)
-  set(TAO_INCLUDE_DIR ${TAO_ROOT})
-  set(TAO_INCLUDE_DIRS "${TAO_INCLUDE_DIR}" "${TAO_INCLUDE_DIR}/orbsvcs")
-else()
-  message(FATAL_ERROR "You must provide TAO_ROOT either through -D or environment variable.")
+    ## This will have to remain as long as we support a version of ACE
+    ## that doesn't have CMake support.
+    if(NOT TARGET ACE::ACE)
+      add_library(ACE::ACE INTERFACE IMPORTED)
+      ## Having a different library name for MSVC is temporary.
+      if(MSVC)
+        set_target_properties(ACE::ACE PROPERTIES INTERFACE_LINK_LIBRARIES ACEd)
+      else()
+        set_target_properties(ACE::ACE PROPERTIES INTERFACE_LINK_LIBRARIES ACE)
+      endif()
+    endif()
+  else()
+    message(FATAL_ERROR "You must provide ACE_ROOT either through -D or environment variable.")
+  endif()
+
+  ## Check for TAO_ROOT
+  if(NOT TAO_ROOT AND DEFINED ENV{TAO_ROOT})
+    set(TAO_ROOT $ENV{TAO_ROOT})
+  endif()
+  if(TAO_ROOT)
+    set(TAO_BIN_DIR ${ACE_ROOT}/bin)
+    set(TAO_LIB_DIR ${ACE_ROOT}/lib)
+    set(TAO_INCLUDE_DIR ${TAO_ROOT})
+    set(TAO_INCLUDE_DIRS "${TAO_INCLUDE_DIR}" "${TAO_INCLUDE_DIR}/orbsvcs")
+  else()
+    message(FATAL_ERROR "You must provide TAO_ROOT either through -D or environment variable.")
+  endif()
 endif()
 
 include(FetchContent)

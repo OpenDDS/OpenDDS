@@ -140,14 +140,18 @@ if(OPENDDS_XERCES3)
   endif()
 endif()
 
-set(_ace_libs
-  ACE
-)
+if(ACE_FOR_OPENDDS)
+  set(_ace_libs ACE_for_OpenDDS)
+else()
+  set(_ace_libs ACE)
+endif()
 
 if(OPENDDS_XERCES3)
   list(APPEND _ace_libs ACE_XML_Utils)
 endif()
 
+
+if(NOT OPENDDS_SAFETY_PROFILE)
 set(_tao_libs
   TAO_IORManip
   TAO_ImR_Client
@@ -162,6 +166,7 @@ set(_tao_libs
   TAO_AnyTypeCode
   TAO
 )
+endif()
 
 set(_opendds_libs
   OpenDDS_Dcps
@@ -184,7 +189,10 @@ if(OPENDDS_SECURITY)
   list(APPEND _opendds_libs OpenDDS_QOS_XML_XSC_Handler OpenDDS_Security)
 endif()
 
-list(APPEND _all_libs ${_opendds_libs} ${_ace_libs} ${_tao_libs})
+list(APPEND _all_libs ${_opendds_libs} ${_ace_libs})
+if(NOT OPENDDS_SAFETY_PROFILE)
+  list(APPEND _all_libs ${_tao_libs})
+endif()
 
 set(ACE_DEPS
   Threads::Threads
@@ -367,8 +375,14 @@ function(opendds_find_our_libraries_for_config config suffix)
     endforeach()
   endmacro()
 
-  find_library_group("ACE" "${_ace_libs}")
-  find_library_group("TAO" "${_tao_libs}")
+  if(ACE_FOR_OPENDDS)
+    find_library_group("ACE_FOR_OPENDDS" "${_ace_libs}")
+  else()
+    find_library_group("ACE" "${_ace_libs}")
+  endif()
+  if(NOT OPENDDS_SAFETY_PROFILE)
+    find_library_group("TAO" "${_tao_libs}")
+  endif()
   find_library_group("OPENDDS" "${_opendds_libs}")
 endfunction()
 
@@ -395,13 +409,20 @@ if(NOT BUILDING_OPENDDS_CORE)
   )
 endif()
 
+if(ACE_FOR_OPENDDS)
+  list(APPEND _opendds_required_deps ACE_FOR_OPENDDS_LIBRARY)
+else()
+  list(APPEND _opendds_required_deps ACE_LIBRARY)
+endif()
 list(APPEND _opendds_required_deps
-  ACE_LIBRARY
   ACE_GPERF
-  TAO_LIBRARY
   TAO_IDL
   PERL
 )
+
+if(NOT OPENDDS_SAFETY_PROFILE)
+  list(APPEND _opendds_required_deps TAO_LIBRARY)
+endif()
 
 foreach(_dep ${_opendds_required_deps})
   if(NOT ${_dep})
@@ -500,15 +521,21 @@ endfunction()
 if(OPENDDS_FOUND)
   include("${CMAKE_CURRENT_LIST_DIR}/options.cmake")
 
-if(NOT BUILDING_OPENDDS_CORE)
-  _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
-endif()
+  if(NOT BUILDING_OPENDDS_CORE)
+    _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
+  endif()
   _OPENDDS_ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")
   _OPENDDS_ADD_TARGET_BINARY(ace_gperf "${ACE_GPERF}")
   _OPENDDS_ADD_TARGET_BINARY(perl "${PERL}")
 
-  opendds_add_library_group("ACE" "${_ace_libs}" TRUE)
-  opendds_add_library_group("TAO" "${_tao_libs}" TRUE)
+  if(ACE_FOR_OPENDDS)
+    opendds_add_library_group("ACE_FOR_OPENDDS" "${_ace_libs}" TRUE)
+  else()
+    opendds_add_library_group("ACE" "${_ace_libs}" TRUE)
+  endif()
+  if(NOT OPENDDS_SAFETY_PROFILE)
+    opendds_add_library_group("TAO" "${_tao_libs}" TRUE)
+  endif()
   opendds_add_library_group("OpenDDS" "${_opendds_libs}" FALSE)
 
   if(NOT TARGET OpenDDS::OpenDDS)
