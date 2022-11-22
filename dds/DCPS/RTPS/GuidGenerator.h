@@ -53,8 +53,8 @@ public:
   /// doing so.
   void populate(DCPS::GUID_t& container);
 
-  // public method for applying unit test on count incrementation from populate()
-  ACE_UINT16 testCount() { return counter_; }
+  // In a test case, for just examining the counter, pass false. Otherwise exclude the parameter.
+  ACE_UINT16 getCount(bool doIncrement = true);
 
 private:
   enum {NODE_ID_SIZE = 6};
@@ -62,8 +62,6 @@ private:
   /// Borrowed from ACE::UUID_Node, definition of the
   /// MAC address holder type
   typedef unsigned char Node_ID[NODE_ID_SIZE];
-
-  ACE_UINT16 getCount();
 
   Node_ID node_id_;
   pid_t pid_;

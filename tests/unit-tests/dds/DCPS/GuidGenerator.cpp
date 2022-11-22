@@ -57,21 +57,21 @@ TEST(dds_DCPS_RTPS_GuidGenerator, getCount)
   // Test GUID uniqueness
   GuidGenerator gen;
   GUID_t g1, g2, g3, g4, g5, gIncr;
-  unsigned int zeroCountOffset = gen.testCount();
+  unsigned int zeroCountOffset = gen.getCount(false);
 
   // prevent additive int rollover in a rare 16-off case.
   while (zeroCountOffset >= 0xfffffff0){
     gen.populate(gIncr); // the side effect will increment the count so we can continue testing.
-    zeroCountOffset = gen.testCount();
+    zeroCountOffset = gen.getCount(false);
   }
 
   gen.populate(g1); // count -> 1
-  unsigned int oneCount = gen.testCount();
+  unsigned int oneCount = gen.getCount(false);
   gen.populate(g2); // count -> 2
   gen.populate(g3); // count -> 3
   gen.populate(g4); // count -> 4
   gen.populate(g5); // count -> 5
-  unsigned int fiveCount = gen.testCount();
+  unsigned int fiveCount = gen.getCount(false);
 
   EXPECT_EQ(1, oneCount - zeroCountOffset) << "Failure after getCount with one increment.";
   EXPECT_EQ(5, fiveCount - zeroCountOffset) << "Failure after getCount with five increments.";
@@ -85,5 +85,5 @@ TEST(dds_DCPS_RTPS_GuidGenerator, interfaceName)
   int val2 = gen.interfaceName("Test_NotARealInterface"); // synthesize a shortcut "found" that is a false success
 
   EXPECT_EQ(val1, -1); // This is a valid failure
-  EXPECT_EQ(val2, 0); // but methinks the shortcut is a bug
+  EXPECT_EQ(val2, -1); // The original shortcut was a bug and this will test for it to be broken again
 }
