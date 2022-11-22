@@ -44,12 +44,8 @@ else()
     ## that doesn't have CMake support.
     if(NOT TARGET ACE::ACE)
       add_library(ACE::ACE INTERFACE IMPORTED)
-      ## Having a different library name for MSVC is temporary.
-      if(MSVC)
-        set_target_properties(ACE::ACE PROPERTIES INTERFACE_LINK_LIBRARIES ACEd)
-      else()
-        set_target_properties(ACE::ACE PROPERTIES INTERFACE_LINK_LIBRARIES ACE)
-      endif()
+      set_target_properties(ACE::ACE PROPERTIES INTERFACE_LINK_LIBRARIES
+                            "$<IF:$<CONFIG:Debug>,ACEd,ACE>")
     endif()
   else()
     message(FATAL_ERROR "You must provide ACE_ROOT either through -D or environment variable.")
