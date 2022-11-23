@@ -275,10 +275,8 @@ void LanguageMapping::emit_tao_header(std::ostringstream& out) const
   }
 }
 
-void LanguageMapping::postprocess(const char* fn, const std::ostringstream& content, int iwhich) const
+void LanguageMapping::postprocess(const char* fn, const std::ostringstream& content, int which) const
 {
-  const BE_BuiltinGlobalData::stream_enum_t which =
-    static_cast<BE_BuiltinGlobalData::stream_enum_t>(iwhich);
   std::ostringstream out;
 
   if (which == BE_BuiltinGlobalData::STREAM_H ||
@@ -348,7 +346,7 @@ void LanguageMapping::postprocess(const char* fn, const std::ostringstream& cont
   }
   break;
   default:
-    postprocess_guard_begin(macrofied, out, iwhich);
+    postprocess_guard_begin(macrofied, out, which);
     break;
   }
 
@@ -363,7 +361,7 @@ void LanguageMapping::postprocess(const char* fn, const std::ostringstream& cont
     out << "#endif /* " << macrofied << " */\n";
     break;
   default:
-    postprocess_guard_end(macrofied, out, iwhich);
+    postprocess_guard_end(macrofied, out, which);
     break;
   }
 

@@ -89,10 +89,30 @@ public:
     STREAM_LAST_VALUE,
   };
 
+  class StreamEnum
+  {
+  public:
+    StreamEnum(int value = STREAM_LAST_VALUE)
+      : value_(value) {
+    }
+
+    operator int() const {
+      return value_;
+    }
+
+  private:
+    int value_;
+  };
+
+  /// Enable a new stream value to be used in conjunction with the
+  /// add_include, conditional_include, and the get_include_block methods.
+  StreamEnum register_stream();
+
   void reset_includes();
 
   void add_include(const char* file, int which = STREAM_H);
   void conditional_include(const char* file, int which, const char* condition);
+  std::string get_include_block(int which);
 
   /// Called to indicate that OpenDDS marshaling (serialization) code for the
   /// current file will depend on marshaling code generated for the indicated
@@ -103,8 +123,6 @@ public:
 
   void set_inc_paths(const char* cmdline);
   void add_inc_path(const char* path);
-
-  std::string get_include_block(stream_enum_t which);
 
   ACE_CString export_macro() const;
   void export_macro(const ACE_CString& str);
@@ -267,6 +285,10 @@ private:
   typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
   MemberIdMap member_id_map_;
   bool old_typeobject_encoding_;
+
+  // Hold dynamic language mapping stream enums
+  typedef std::set<StreamEnum> StreamEnumSet;
+  StreamEnumSet stream_enum_set_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;

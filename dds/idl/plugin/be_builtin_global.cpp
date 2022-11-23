@@ -497,6 +497,21 @@ namespace {
   vector<string> inc_path_vector_;
 }
 
+BE_BuiltinGlobalData::StreamEnum BE_BuiltinGlobalData::register_stream()
+{
+  // Count up from the last built-in stream value passing back the first
+  // successful addition to the stream set.  This isn't the most efficient
+  // way to do this, but there won't be that many calls to this method.
+  for (int value = STREAM_LAST_VALUE; true; value++) {
+    const StreamEnum stream_enum(value);
+    const std::pair<StreamEnumSet::iterator, bool> status =
+                                      stream_enum_set_.insert(stream_enum);
+    if (status.second) {
+      return stream_enum;
+    }
+  }
+}
+
 void
 BE_BuiltinGlobalData::reset_includes()
 {
@@ -670,7 +685,7 @@ namespace {
 }
 
 string
-BE_BuiltinGlobalData::get_include_block(BE_BuiltinGlobalData::stream_enum_t which)
+BE_BuiltinGlobalData::get_include_block(int which)
 {
   const LanguageMapping::Includes_t* inc = 0;
 
