@@ -136,11 +136,10 @@ GuidGenerator::interfaceName(const char* iface)
   }
 
   alloc->free(addrs);
-  if(found) {
+  if (found) {
       interface_name_ = iface;
       return 0;
-  }
-  else {
+  } else {
     return -1;
   }
 
@@ -201,11 +200,10 @@ GuidGenerator::interfaceName(const char* iface)
 
   ACE_OS::close(h);
 
-  if(found) {
+  if (found) {
       interface_name_ = iface;
       return 0;
-  }
-  else {
+  } else {
     return -1;
   }
 #elif defined ACE_VXWORKS

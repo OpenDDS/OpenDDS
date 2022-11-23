@@ -14,20 +14,20 @@ using namespace OpenDDS::DCPS;
 
 int compare_prefix(GUID_t &g1, GUID_t &g2)
 {
-  for(size_t i = 0; i < sizeof(g1.guidPrefix); i++)
-  {
-    if(g1.guidPrefix[i] != g2.guidPrefix[i])
+  for(size_t i = 0; i < sizeof(g1.guidPrefix); i++) {
+    if (g1.guidPrefix[i] != g2.guidPrefix[i]) {
       return g1.guidPrefix[i] < g2.guidPrefix[i] ? -1 : 1;
+    }
   }
   return 0;
 }
 
 bool not_null(GUID_t &g1)
 {
-  for(size_t i = 2; i < sizeof(g1.guidPrefix); i++)
-  {
-    if(g1.guidPrefix[i] != 0)
+  for(size_t i = 2; i < sizeof(g1.guidPrefix); i++) {
+    if (g1.guidPrefix[i] != 0) {
       return true;
+    }
   }
   return false;
 }
@@ -60,7 +60,7 @@ TEST(dds_DCPS_RTPS_GuidGenerator, getCount)
   unsigned int zeroCountOffset = gen.getCount(false);
 
   // prevent additive int rollover in a rare 16-off case.
-  while (zeroCountOffset >= 0xfffffff0){
+  while (zeroCountOffset >= 0xfffffff0) {
     gen.populate(gIncr); // the side effect will increment the count so we can continue testing.
     zeroCountOffset = gen.getCount(false);
   }
