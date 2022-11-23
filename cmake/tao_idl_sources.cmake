@@ -99,6 +99,18 @@ function(tao_idl_command target)
   ## convert all include paths to be relative to binary tree instead of to source tree
   file(RELATIVE_PATH _rel_path_to_source_tree ${_working_binary_dir} ${_working_source_dir})
   foreach(flag ${_arg_IDL_FLAGS})
+    ## Because we no longer require TAO_ROOT to be set as an environment
+    ## variable, we need to replace instances of $(TAO_ROOT) with the actual
+    ## value of the TAO_ROOT CMake variable.
+    string(REGEX MATCH "(.*)\\$\\(([^\\)]+)\\)(.*)" matched "${flag}")
+    if (matched)
+      if (${${CMAKE_MATCH_2}})
+        set(flag "${CMAKE_MATCH_1}${${${CMAKE_MATCH_2}}}${CMAKE_MATCH_3}")
+      else()
+        set(flag "${CMAKE_MATCH_1}_UNDEFINED_${CMAKE_MATCH_3}")
+      endif()
+    endif()
+
     if("${flag}" MATCHES "^-I(\\.\\..*)")
       list(APPEND _converted_flags -I${_rel_path_to_source_tree}/${CMAKE_MATCH_1})
     else()

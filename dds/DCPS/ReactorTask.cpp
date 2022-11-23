@@ -63,7 +63,7 @@ void ReactorTask::wait_for_startup_i() const
 
 void ReactorTask::cleanup()
 {
-#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
+#ifdef OPENDDS_REACTOR_TASK_ASYNC
   if (proactor_) {
     reactor_->remove_handler(
       proactor_->implementation()->get_handle(),
@@ -209,7 +209,7 @@ void ReactorTask::stop()
 
     state_ = STATE_SHUT_DOWN;
 
-#if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
+#ifdef OPENDDS_REACTOR_TASK_ASYNC
     // Remove the proactor handler so the reactor stops forwarding messages.
     if (proactor_) {
       reactor_->remove_handler(

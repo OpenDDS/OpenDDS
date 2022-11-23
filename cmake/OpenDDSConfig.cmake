@@ -402,13 +402,6 @@ foreach(_lib ${_all_libs})
   select_library_configurations(${_LIB_VAR})
 endforeach()
 
-if(NOT BUILDING_OPENDDS_CORE)
-  list(APPEND _opendds_required_deps
-    OPENDDS_DCPS_LIBRARY
-    OPENDDS_IDL
-  )
-endif()
-
 if(ACE_FOR_OPENDDS)
   list(APPEND _opendds_required_deps ACE_FOR_OPENDDS_LIBRARY)
 else()
@@ -438,7 +431,10 @@ else()
 endif()
 
 macro(_OPENDDS_ADD_TARGET_BINARY  target  path)
-  if (NOT TARGET ${target} AND EXISTS "${path}")
+  ## We need to add the imported target even if it does not exist.
+  ## In the case of opendds_idl, we expect that target to always exist.
+  ## It will become apparent later if it is missing and required.
+  if (NOT TARGET ${target})
     add_executable(${target} IMPORTED)
     set_target_properties(${target}
       PROPERTIES
@@ -521,7 +517,7 @@ endfunction()
 if(OPENDDS_FOUND)
   include("${CMAKE_CURRENT_LIST_DIR}/options.cmake")
 
-  if(NOT BUILDING_OPENDDS_CORE)
+  if(NOT BUILDING_OPENDDS_CORE OR OPENDDS_SAFETY_PROFILE)
     _OPENDDS_ADD_TARGET_BINARY(opendds_idl "${OPENDDS_IDL}")
   endif()
   _OPENDDS_ADD_TARGET_BINARY(tao_idl "${TAO_IDL}")

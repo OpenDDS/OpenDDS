@@ -12,6 +12,11 @@ if (!defined $ENV{ACE_ROOT}) {
   exit(1);
 }
 
+if (!defined $ENV{TAO_ROOT}) {
+  print("You must define the TAO_ROOT environment variable.\n");
+  exit(1);
+}
+
 if (!defined $ENV{DDS_ROOT}) {
   print("You must define the DDS_ROOT environment variable.\n");
   exit(1);

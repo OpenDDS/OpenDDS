@@ -3,6 +3,7 @@
 #include "tao/Environment.h"
 #include "tao/ORB_Constants.h"
 #include "tao/CORBA_String.h"
+#include "tao/Version.h"
 
 #include "ace/Malloc.h"
 #include "ace/SString.h"
@@ -44,6 +45,8 @@ CORBA::Exception::Exception (const CORBA::Exception &src)
 // responsible for releasing any storage owned by the exception.  It
 // can do this because it's got the local name and the id.
 
+#if ((TAO_MAJOR_VERSION < 3) || \
+     (TAO_MAJOR_VERSION == 3 && TAO_MINOR_VERSION == 0 && TAO_MICRO_VERSION == 0))
 CORBA::Exception::Exception (void)
   : id_ (),
     name_ ()
@@ -53,6 +56,7 @@ CORBA::Exception::Exception (void)
 CORBA::Exception::~Exception (void)
 {
 }
+#endif
 
 CORBA::Exception &
 CORBA::Exception::operator= (const CORBA::Exception &src)

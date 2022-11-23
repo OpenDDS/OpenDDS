@@ -38,6 +38,7 @@ else()
   endif()
   if(ACE_ROOT)
     set(ACE_BIN_DIR ${ACE_ROOT}/bin)
+    set(ACE_LIB_DIR ${ACE_ROOT}/lib)
     set(ACE_INCLUDE_DIRS ${ACE_ROOT})
 
     ## This will have to remain as long as we support a version of ACE
