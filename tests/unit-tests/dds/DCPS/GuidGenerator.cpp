@@ -14,7 +14,7 @@ using namespace OpenDDS::DCPS;
 
 int compare_prefix(GUID_t &g1, GUID_t &g2)
 {
-  for(size_t i = 0; i < sizeof(g1.guidPrefix); i++) {
+  for (size_t i = 0; i < sizeof(g1.guidPrefix); i++) {
     if (g1.guidPrefix[i] != g2.guidPrefix[i]) {
       return g1.guidPrefix[i] < g2.guidPrefix[i] ? -1 : 1;
     }
@@ -24,7 +24,7 @@ int compare_prefix(GUID_t &g1, GUID_t &g2)
 
 bool not_null(GUID_t &g1)
 {
-  for(size_t i = 2; i < sizeof(g1.guidPrefix); i++) {
+  for (size_t i = 2; i < sizeof(g1.guidPrefix); i++) {
     if (g1.guidPrefix[i] != 0) {
       return true;
     }
