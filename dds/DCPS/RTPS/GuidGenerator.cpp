@@ -139,8 +139,7 @@ GuidGenerator::interfaceName(const char* iface)
   if (found) {
     interface_name_ = iface;
     return 0;
-  }
-  else {
+  } else {
     return -1;
   }
 
@@ -204,8 +203,7 @@ GuidGenerator::interfaceName(const char* iface)
   if (found) {
     interface_name_ = iface;
     return 0;
-  }
-  else {
+  } else {
     return -1;
   }
 #elif defined ACE_VXWORKS
