@@ -403,7 +403,7 @@ private:
 #ifdef DDS_HAS_WCHAR
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_wchar& value);
 #endif
-
+  bool insert_single(DDS::MemberId id, const CORBA::LongDouble& value);
   template<typename SingleType>
   bool insert_single(DDS::MemberId id, const SingleType& value);
 

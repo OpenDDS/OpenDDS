@@ -376,6 +376,63 @@ template<> const ACE_OutputCDR::from_wchar& DynamicDataImpl::SingleValue::get() 
 template<> const CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const { return wstr_; }
 #endif
 
+////////////////////////////////////////////
+// THis is only for debugging float128 type
+bool DynamicDataImpl::insert_single(DDS::MemberId id, const CORBA::LongDouble& input)
+{
+#if ACE_BIG_ENDIAN
+  unsigned char value[] = { 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+#else
+  unsigned char value[] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xff,0x3f };
+#endif
+
+#if ACE_SIZEOF_LONG_DOUBLE == 16
+  if (ACE_OS::memcmp((const void*)value, (const void*)&input, 16) != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
+               " (16 bit long double) Input is not correct!!\n"));
+  }
+#else
+  if (ACE_OS::memcmp((const void*)value, (const void*)input.ld, 16) != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
+               " Input is not correct!!\n"));
+  }
+#endif
+
+  container_.complex_map_.erase(id);
+  container_.single_map_.insert(std::make_pair(id, input));
+
+  // Read from container to verify.
+  DataContainer::const_single_iterator it = container_.single_map_.find(id);
+  if (it == container_.single_map_.end()) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDatImpl::insert_single:"
+               " Value is inserted but failed to lookup!\n"));
+  }
+  const CORBA::LongDouble& ld = it->second.get<CORBA::LongDouble>();
+#if ACE_SIZEOF_LONG_DOUBLE == 16
+  if (ACE_OS::memcmp((const void*)value, (const void*)&ld, 16) != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
+               " Read an incorrect value from the single map!!\n"));
+  }
+  if (ACE_OS::memcmp((const void*)&input, (const void*)&ld, 16) != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
+               " Input is different than the stored value\n"));
+  }
+#else
+  if (ACE_OS::memcmp((const void*)value, (const void*)ld.ld, 16) != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
+               " Read an incorrect value from the single map!!\n"));
+  }
+  if (ACE_OS::memcmp((const void*)input.ld, (const void*)ld.ld, 16) != 0) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
+               " Input is different than the stored value\n"));
+  }
+#endif
+
+  return true;
+}
+// End debug code
+////////////////////////////////////////////
+
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                                          DataContainer::const_single_iterator it) const
 {
@@ -5802,11 +5859,14 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
 
     const_complex_iterator it = complex_map_.find(id);
     if (it != complex_map_.end()) {
-      return serialize_complex_aggregated_member_xcdr2(ser, it, optional,
-                                                       must_understand, extensibility);
+      if (!serialize_complex_aggregated_member_xcdr2(ser, it, optional,
+                                                     must_understand, extensibility)) {
+        return false;
+      }
+    } else if (!serialize_complex_aggregated_member_xcdr2_default(ser, id, member_type, optional,
+                                                                  must_understand, extensibility)) {
+      return false;
     }
-    return serialize_complex_aggregated_member_xcdr2_default(ser, id, member_type, optional,
-                                                             must_understand, extensibility);
   }
   return true;
 }

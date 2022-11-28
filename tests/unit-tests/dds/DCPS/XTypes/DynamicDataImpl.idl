@@ -1,0 +1,155 @@
+#include <tao/LongSeq.pidl>
+#include <tao/ULongSeq.pidl>
+#include <tao/Int8Seq.pidl>
+#include <tao/UInt8Seq.pidl>
+#include <tao/ShortSeq.pidl>
+#include <tao/UShortSeq.pidl>
+#include <tao/LongLongSeq.pidl>
+#include <tao/ULongLongSeq.pidl>
+#include <tao/FloatSeq.pidl>
+#include <tao/DoubleSeq.pidl>
+#include <tao/LongDoubleSeq.pidl>
+#include <tao/CharSeq.pidl>
+#include <tao/WCharSeq.pidl>
+#include <tao/OctetSeq.pidl>
+#include <tao/BooleanSeq.pidl>
+#include <tao/StringSeq.pidl>
+#include <tao/WStringSeq.pidl>
+
+module DynamicDataImpl {
+
+enum SomeEnum {
+  E_INT32, // 0
+  E_UINT32, // 1
+  E_INT8, // 2
+  E_UINT8, // 3
+  E_INT16, // 4
+  E_UINT16, // 5
+  E_INT64, // 6
+  E_UINT64, // 7
+  E_FLOAT32, // 8
+  E_FLOAT64, // 9
+  E_FLOAT128, // 10
+  E_CHAR8, // 11
+  E_CHAR16, // 12
+  E_BYTE, // 13
+  E_BOOL, // 14
+  E_STRING8, // 15
+  E_STRING16 // 16
+};
+
+typedef sequence<SomeEnum> SomeEnumSeq;
+typedef sequence<long> Int32Seq;
+typedef sequence<unsigned long> UInt32Seq;
+typedef sequence<int8> Int8Seq;
+typedef sequence<uint8> UInt8Seq;
+typedef sequence<short> Int16Seq;
+typedef sequence<unsigned short> UInt16Seq;
+typedef sequence<long long> Int64Seq;
+typedef sequence<unsigned long long> UInt64Seq;
+typedef sequence<float> Float32Seq;
+typedef sequence<double> Float64Seq;
+typedef sequence<long double> Float128Seq;
+typedef sequence<char> Char8Seq;
+typedef sequence<wchar> Char16Seq;
+typedef sequence<octet> ByteSeq;
+typedef sequence<boolean> BoolSeq;
+typedef sequence<string> StringSeq;
+typedef sequence<wstring> WStringSeq;
+
+// TODO: Add a long double member with Id 11
+#define WRITE_SINGLE_VALUE_MEMBERS \
+  @id(0) SomeEnum my_enum; \
+  @id(1) long int_32; \
+  @id(2) unsigned long uint_32; \
+  @id(3) int8 int_8; \
+  @id(4) uint8 uint_8; \
+  @id(5) short int_16; \
+  @id(6) unsigned short uint_16; \
+  @id(7) long long int_64; \
+  @id(8) unsigned long long uint_64; \
+  @id(9) float float_32; \
+  @id(10) double float_64; \
+  @id(12) char char_8; \
+  @id(13) wchar char_16; \
+  @id(14) octet byte; \
+  @id(15) boolean bool; \
+  @id(16) FinalNestedStructInner nested_struct; \
+  @id(17) string str; \
+  @id(18) wstring wstr;
+
+// TODO: Add a long double member with Id 11
+#define WRITE_SINGLE_VALUE_BRANCHES \
+  case E_INT32: \
+    @id(1) long int_32; \
+  case E_UINT32: \
+    @id(2) unsigned long uint_32; \
+  case E_INT8: \
+    @id(3) int8 int_8; \
+  case E_UINT8: \
+    @id(4) uint8 uint_8; \
+  case E_INT16: \
+    @id(5) short int_16; \
+  case E_UINT16: \
+    @id(6) unsigned short uint_16; \
+  case E_INT64: \
+    @id(7) long long int_64; \
+  case E_UINT64: \
+    @id(8) unsigned long long uint_64; \
+  case E_FLOAT32: \
+    @id(9) float float_32; \
+  case E_FLOAT64: \
+    @id(10) double float_64; \
+  case E_CHAR8: \
+    @id(12) char char_8; \
+  case E_CHAR16: \
+    @id(13) wchar char_16; \
+  case E_BYTE: \
+    @id(14) octet byte_; \
+  case E_BOOL: \
+    @id(15) boolean bool_; \
+  case E_STRING8: \
+    @id(16) string str; \
+  case E_STRING16: \
+    @id(17) wstring wstr; \
+  default: \
+    @id(18) SomeEnum my_enum;
+
+@final
+struct FinalNestedStructInner {
+  @id(0) long l;
+};
+
+// Write single value to struct.
+@mutable
+struct WriteMutableSingleValueStruct {
+  WRITE_SINGLE_VALUE_MEMBERS
+};
+
+@appendable
+struct WriteAppendableSingleValueStruct {
+  WRITE_SINGLE_VALUE_MEMBERS
+};
+
+@final
+struct WriteFinalSingleValueStruct {
+  WRITE_SINGLE_VALUE_MEMBERS
+};
+
+// Write single value to union.
+@mutable
+union WriteMutableSingleValueUnion switch (SomeEnum) {
+  WRITE_SINGLE_VALUE_BRANCHES
+};
+
+@appendable
+union WriteAppendableSingleValueUnion switch (SomeEnum) {
+  WRITE_SINGLE_VALUE_BRANCHES
+};
+
+@final
+union WriteFinalSingleValueUnion switch (SomeEnum) {
+  WRITE_SINGLE_VALUE_BRANCHES
+};
+
+}; // module DynamicDataImpl

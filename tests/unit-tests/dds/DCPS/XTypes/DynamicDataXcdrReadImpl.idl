@@ -134,13 +134,12 @@ typedef sequence<wstring> WStringSeq;
   @id(16) StringSeq str_s; \
   @id(17) WStringSeq wstr_s;
 
-
 @final
 struct FinalNestedStructInner {
   @id(0) long l;
 };
 
-// Read/write single value from struct.
+// Read single value from struct.
 @mutable
 struct MutableSingleValueStruct {
   SINGLE_VALUE_MEMBERS
@@ -156,7 +155,7 @@ struct FinalSingleValueStruct {
   SINGLE_VALUE_MEMBERS
 };
 
-// Reading single value from union.
+// Read single value from union.
 @mutable
 union MutableSingleValueUnion switch (SomeEnum) {
   SINGLE_VALUE_BRANCHES
@@ -172,7 +171,7 @@ union FinalSingleValueUnion switch (SomeEnum) {
   SINGLE_VALUE_BRANCHES
 };
 
-// Reading single value from sequence and reading sequence from struct.
+// Read single value from sequence and reading sequence from struct.
 @mutable
 struct MutableSequenceStruct {
   SEQUENCE_VALUE_MEMBERS

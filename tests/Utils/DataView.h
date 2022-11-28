@@ -11,6 +11,8 @@
 #include <string>
 #include <sstream>
 
+namespace {
+
 typedef std::vector<char> DataVec;
 
 struct DataView {
@@ -118,6 +120,8 @@ bool operator==(const DataView& a, const DataView& b)
     << b_expr << " (size " << b.size << ").\n"
     << a_expr << " is on the left, " << b_expr << " is on the right:\n"
     << result.str();
+}
+
 }
 
 #endif // TESTUTILS_DATAVIEW_H
