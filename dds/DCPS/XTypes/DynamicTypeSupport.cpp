@@ -15,11 +15,11 @@
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/DCPS_Utils.h>
 
-using namespace OpenDDS::DCPS;
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+using namespace OpenDDS::DCPS;
 
 bool DynamicSample::serialize(Serializer& ser) const
 {
@@ -27,7 +27,7 @@ bool DynamicSample::serialize(Serializer& ser) const
   if (!ddi) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialize: "
-        "currently we only support DyanmicDataImpl\n"));
+        "currently we only support DynamicDataImpl, the kind supplied by DynamicDataFactory\n"));
     }
     return false;
   }
@@ -47,7 +47,7 @@ size_t DynamicSample::serialized_size(const Encoding& enc) const
   if (!ddi) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
-        "currently we only support DyanmicDataImpl\n"));
+        "currently we only support DynamicDataImpl, the kind supplied by DynamicDataFactory\n"));
     }
     return 0;
   }
@@ -132,25 +132,25 @@ DataReader_ptr DynamicTypeSupport::create_multitopic_datareader()
 
 const TypeIdentifier& DynamicTypeSupport::getMinimalTypeIdentifier() const
 {
-  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  DynamicTypeImpl* const dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
   return dti->get_minimal_type_identifier();
 }
 
 const TypeMap& DynamicTypeSupport::getMinimalTypeMap() const
 {
-  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  DynamicTypeImpl* const dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
   return dti->get_minimal_type_map();
 }
 
 const TypeIdentifier& DynamicTypeSupport::getCompleteTypeIdentifier() const
 {
-  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  DynamicTypeImpl* const dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
   return dti->get_complete_type_identifier();
 }
 
 const TypeMap& DynamicTypeSupport::getCompleteTypeMap() const
 {
-  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  DynamicTypeImpl* const dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
   return dti->get_complete_type_map();
 }
 

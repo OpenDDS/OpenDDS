@@ -7,9 +7,11 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataImpl.h"
+
 #  include "DynamicTypeMemberImpl.h"
 
 #  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
+#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -19,6 +21,14 @@ namespace XTypes {
 DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
   : DynamicDataBase(type)
   , container_(type_, this)
+{}
+
+DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
+  : CORBA::Object()
+  , CORBA::LocalObject()
+  , DCPS::RcObject()
+  , DynamicDataBase(other.type_)
+  , container_(other.container_, this)
 {}
 
 DDS::DynamicType_ptr DynamicDataImpl::type()
@@ -82,11 +92,7 @@ DDS::ReturnCode_t DynamicDataImpl::return_loaned_value(DDS::DynamicData_ptr /*va
 
 DDS::DynamicData_ptr DynamicDataImpl::clone()
 {
-  DynamicDataImpl* const ddi = new DynamicDataImpl(type());
-  ddi->container_.single_map_ = container_.single_map_;
-  ddi->container_.sequence_map_ = container_.sequence_map_;
-  ddi->container_.complex_map_ = container_.complex_map_;
-  return ddi;
+  return new DynamicDataImpl(*this);
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value)

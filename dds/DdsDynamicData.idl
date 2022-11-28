@@ -161,6 +161,16 @@ module DDS {
 
   local interface DynamicData;
 
+  local interface DynamicDataFactoryInterf {
+    // Implemented in C++
+    //static DynamicDataFactory get_instance();
+    // Not Implemented
+    //static DDS::ReturnCode_t delete_instance();
+    DynamicData create_data(in DynamicType type);
+    // Not Implemented
+    //static DDS::ReturnCode_t delete_instance(in DynamicData data);
+  };
+
   local interface DynamicData {
     readonly attribute DynamicType type;
 

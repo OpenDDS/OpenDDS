@@ -7,7 +7,7 @@
 #include <dds/DCPS/StaticIncludes.h>
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/XTypes/DynamicTypeSupport.h>
-#include <dds/DCPS/XTypes/DynamicDataImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -66,11 +66,10 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   distributed_condition_set->wait_for(HelloWorld::PUBLISHER, HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_READY);
 
-  DDS::DynamicData_var dd = new OpenDDS::XTypes::DynamicDataImpl(dt);
+  DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(dt);
   if (check_rc(dd->set_string_value(0, "Hello, World!"), "set_string_value failed")) {
     return 1;
   }
-
   if (check_rc(ddw->write(dd, DDS::HANDLE_NIL), "write failed")) {
     return 1;
   }

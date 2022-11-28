@@ -10,7 +10,6 @@
 #  include "DynamicDataBase.h"
 
 #  include <dds/DCPS/FilterEvaluator.h>
-#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -30,6 +29,7 @@ namespace XTypes {
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
   DynamicDataImpl(DDS::DynamicType_ptr type);
+  DynamicDataImpl(const DynamicDataImpl& other);
 
   DDS::DynamicType_ptr type();
 
@@ -556,6 +556,14 @@ private:
 
     DataContainer(const DDS::DynamicType_var& type, const DynamicDataImpl* data)
       : type_(type), data_(data) {}
+
+    DataContainer(const DataContainer& other, const DynamicDataImpl* data)
+      : single_map_(other.single_map_)
+      , sequence_map_(other.sequence_map_)
+      , complex_map_(other.complex_map_)
+      , type_(data->type_)
+      , data_(data)
+    {}
 
     // Get the largest index of all elements in each map.
     // Call only for collection-like types (sequence, string, etc).

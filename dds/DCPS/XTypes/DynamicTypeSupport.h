@@ -24,13 +24,13 @@ public:
   DynamicSample(DDS::DynamicData_ptr data,
     DCPS::Sample::Mutability mutability, DCPS::Sample::Extent extent)
   : Sample(mutability, extent)
-  , data_(data)
+  , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
   DynamicSample(DDS::DynamicData_ptr data, DCPS::Sample::Extent extent)
   : Sample(DCPS::Sample::ReadOnly, extent)
-  , data_(data)
+  , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
@@ -189,8 +189,8 @@ public:
   typedef DynamicTypeSupport_ptr _ptr_type;
   typedef DynamicTypeSupport_var _var_type;
 
-  DynamicTypeSupport(DynamicType_var type)
-  : type_(type)
+  DynamicTypeSupport(DynamicType_ptr type)
+  : TypeSupportImpl(type)
   , name_(type->get_name())
   {
   }
@@ -231,11 +231,6 @@ public:
   const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;
   const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;
 
-  DynamicType_ptr get_type()
-  {
-    return DynamicType::_duplicate(type_);
-  }
-
 #  ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const OpenDDS::DCPS::MetaStruct& getMetaStructForType()
   {
@@ -263,7 +258,6 @@ public:
   static DynamicTypeSupport_ptr _duplicate(DynamicTypeSupport_ptr obj);
 
 protected:
-  DynamicType_var type_;
   CORBA::String_var name_;
 };
 
