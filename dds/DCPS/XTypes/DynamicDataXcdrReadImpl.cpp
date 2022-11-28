@@ -2470,6 +2470,9 @@ bool DynamicDataXcdrReadImpl::skip_all()
         return false;
       }
       DynamicTypeMembersByIdImpl* members_impl = dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
+      if (!members_impl) {
+        return false;
+      }
 
       bool has_default = false;
       DDS::MemberDescriptor_var default_member;

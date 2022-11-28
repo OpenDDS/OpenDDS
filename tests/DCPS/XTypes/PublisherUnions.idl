@@ -1,0 +1,43 @@
+#include "Common.idl"
+
+@topic
+@mutable
+union ModifiedMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+union ModifiedDiscMutableUnion switch (ModifiedUnionDisc) {
+case E_KEY_MODIFIED:
+  @id(6) long key_field;
+case E_OCTET_FIELD_MODIFIED:
+  @id(8) octet octet_field;
+case E_ADDITIONAL_FIELD_MODIFIED:
+  @id(12) long additional_field;
+};
+
+@topic
+@mutable
+union ModifiedTypeMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) string key_field;
+case E_OCTET_FIELD:
+  @id(8) string octet_field;
+case E_ADDITIONAL_FIELD:
+  @id(12) string additional_field;
+};
+
+@topic
+@mutable
+union ModifiedNameMutableUnion switch (UnionDisc) {
+case E_KEY:
+  @id(6) long key_field_modified;
+case E_OCTET_FIELD:
+  @id(8) octet octet_field_modified;
+case E_ADDITIONAL_FIELD:
+  @id(12) long additional_field_modified;
+};

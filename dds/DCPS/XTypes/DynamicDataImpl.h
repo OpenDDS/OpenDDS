@@ -939,7 +939,7 @@ private:
 
     bool set_default_discriminator_value(CORBA::Long& value,
                                          const DDS::DynamicType_var& disc_type) const;
-    void get_discriminator_value(CORBA::Long& value, const_single_iterator single_it,
+    bool get_discriminator_value(CORBA::Long& value, const_single_iterator single_it,
       const_complex_iterator complex_it, const DDS::DynamicType_var& disc_type) const;
     bool serialized_size_discriminator_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       const DDS::DynamicType_var& disc_type, DDS::ExtensibilityKind extensibility,
