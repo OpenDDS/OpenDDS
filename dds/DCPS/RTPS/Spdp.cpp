@@ -3420,7 +3420,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
   }
 
   if (!fixed_port && outer->config_->spdp_request_random_port()) {
-    ACE_INET_Addr addr = ACE_INET_Addr();
+    ACE_INET_Addr addr;
     if (unicast_socket_.get_local_addr(addr) == 0) {
       uni_port_ = addr.get_port_number();
     }
