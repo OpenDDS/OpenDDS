@@ -263,25 +263,30 @@ class OpenDDS_Dcps_Export DynamicDataReaderImpl
   : public DCPS::DataReaderImpl_T<DynamicSample>
 {
 public:
+  typedef DCPS::DataReaderImpl_T<DynamicSample> Base;
 
-  DDS::ReturnCode_t read_next_sample(DDS::DynamicData*&, DDS::SampleInfo&)
+  DDS::ReturnCode_t read_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
   {
-    return DDS::RETCODE_UNSUPPORTED;
+    DynamicSample ds(dyn);
+    return Base::read_next_sample(ds, si);
   }
 
-  DDS::ReturnCode_t take_next_sample(DDS::DynamicData*&, DDS::SampleInfo&)
+  DDS::ReturnCode_t take_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
   {
-    return DDS::RETCODE_UNSUPPORTED;
+    DynamicSample ds(dyn);
+    return Base::take_next_sample(ds, si);
   }
 
-  DDS::InstanceHandle_t lookup_instance(DDS::DynamicData*)
+  DDS::InstanceHandle_t lookup_instance(DDS::DynamicData* dyn)
   {
-    return DDS::HANDLE_NIL;
+    DynamicSample ds(dyn);
+    return Base::lookup_instance(ds);
   }
 
-  DDS::ReturnCode_t get_key_value(DDS::DynamicData*&, DDS::InstanceHandle_t)
+  DDS::ReturnCode_t get_key_value(DDS::DynamicData*& dyn, DDS::InstanceHandle_t ih)
   {
-    return DDS::RETCODE_UNSUPPORTED;
+    DynamicSample ds(dyn);
+    return Base::get_key_value(ds, ih);
   }
 };
 
