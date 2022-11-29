@@ -90,38 +90,50 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 {
   // The same member might be already written to complex_map_.
   // Make sure there is only one entry for each member.
-  container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.single_map_.erase(id);
+  }
   return container_.single_map_.insert(std::make_pair(id, value)).second;
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value)
 {
-  container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.single_map_.erase(id);
+  }
   return container_.single_map_.insert(std::make_pair(id, value)).second;
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_char& value)
 {
-  container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.single_map_.erase(id);
+  }
   return container_.single_map_.insert(std::make_pair(id, value)).second;
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_octet& value)
 {
-  container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.single_map_.erase(id);
+  }
   return container_.single_map_.insert(std::make_pair(id, value)).second;
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_boolean& value)
 {
-  container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.single_map_.erase(id);
+  }
   return container_.single_map_.insert(std::make_pair(id, value)).second;
 }
 
 #ifdef DDS_HAS_WCHAR
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_wchar& value)
 {
-  container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.single_map_.erase(id);
+  }
   return container_.single_map_.insert(std::make_pair(id, value)).second;
 }
 #endif
@@ -129,14 +141,18 @@ bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_
 template<typename SingleType>
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const SingleType& value)
 {
-  container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.single_map_.erase(id);
+  }
   return container_.single_map_.insert(std::make_pair(id, value)).second;
 }
 
 bool DynamicDataImpl::insert_complex(DDS::MemberId id, const DDS::DynamicData_var& value)
 {
   if (container_.single_map_.erase(id) == 0) {
-    container_.sequence_map_.erase(id);
+    if (container_.sequence_map_.erase(id) == 0) {
+      container_.complex_map_.erase(id);
+    }
   }
   return container_.complex_map_.insert(std::make_pair(id, value)).second;
 }
@@ -818,7 +834,6 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
                                                 get_base_type(descriptor->discriminator_type()))) {
       return false;
     }
-
     // Prohibit writing another member if a member was already written.
     // Overwrite the same member is allowed.
     if (selected_id != MEMBER_ID_INVALID && selected_id != id) {
@@ -1442,8 +1457,8 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::Dyna
 template<typename SequenceType>
 bool DynamicDataImpl::insert_sequence(DDS::MemberId id, const SequenceType& value)
 {
-  if (container_.complex_map_.count(id) > 0) {
-    container_.complex_map_.erase(id);
+  if (container_.complex_map_.erase(id) == 0) {
+    container_.sequence_map_.erase(id);
   }
   return container_.sequence_map_.insert(std::make_pair(id, value)).second;
 }
