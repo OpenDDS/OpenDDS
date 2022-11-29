@@ -46,8 +46,9 @@ DDS::DynamicDataFactory_ptr Objref_Traits<DDS::DynamicDataFactory>::duplicate(DD
   return DDS::DynamicDataFactory::_duplicate(p);
 }
 
-void Objref_Traits<DDS::DynamicDataFactory>::release(DDS::DynamicDataFactory_ptr)
+void Objref_Traits<DDS::DynamicDataFactory>::release(DDS::DynamicDataFactory_ptr p)
 {
+  CORBA::release(p);
 }
 
 DDS::DynamicDataFactory_ptr Objref_Traits<DDS::DynamicDataFactory>::nil()
@@ -56,9 +57,9 @@ DDS::DynamicDataFactory_ptr Objref_Traits<DDS::DynamicDataFactory>::nil()
 }
 
 CORBA::Boolean Objref_Traits<DDS::DynamicDataFactory>::marshal(
-  const DDS::DynamicDataFactory_ptr p, TAO_OutputCDR& cdr)
+  const DDS::DynamicDataFactory_ptr, TAO_OutputCDR&)
 {
-  return CORBA::Object::marshal(p, cdr);
+  return false;
 }
 
 } // namespace TAO

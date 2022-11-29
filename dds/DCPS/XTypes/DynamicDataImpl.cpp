@@ -25,6 +25,7 @@ DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
 
 DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   : CORBA::Object()
+  , DynamicData()
   , CORBA::LocalObject()
   , DCPS::RcObject()
   , DynamicDataBase(other.type_)

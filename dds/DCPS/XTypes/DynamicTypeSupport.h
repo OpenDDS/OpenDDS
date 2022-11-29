@@ -189,7 +189,7 @@ public:
   typedef DynamicTypeSupport_ptr _ptr_type;
   typedef DynamicTypeSupport_var _var_type;
 
-  DynamicTypeSupport(DynamicType_ptr type)
+  explicit DynamicTypeSupport(DynamicType_ptr type)
   : TypeSupportImpl(type)
   , name_(type->get_name())
   {

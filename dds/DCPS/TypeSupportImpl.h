@@ -73,7 +73,7 @@ public:
   TypeSupportImpl() {}
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  TypeSupportImpl(DDS::DynamicType_ptr type)
+  explicit TypeSupportImpl(DDS::DynamicType_ptr type)
   : type_(DDS::DynamicType::_duplicate(type))
   {
   }

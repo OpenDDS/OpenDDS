@@ -185,9 +185,9 @@ DDS::DynamicTypeSupport_ptr Objref_Traits<DDS::DynamicTypeSupport>::nil()
 }
 
 CORBA::Boolean Objref_Traits<DDS::DynamicTypeSupport>::marshal(
-  const DDS::DynamicTypeSupport_ptr p, TAO_OutputCDR& cdr)
+  const DDS::DynamicTypeSupport_ptr, TAO_OutputCDR&)
 {
-  return CORBA::Object::marshal(p, cdr);
+  return false;
 }
 
 } // namespace TAO
