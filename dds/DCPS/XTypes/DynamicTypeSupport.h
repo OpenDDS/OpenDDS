@@ -58,14 +58,14 @@ public:
 
   bool to_message_block(ACE_Message_Block&) const
   {
-    // Not needed?
+    // Not needed
     OPENDDS_ASSERT(false);
     return false;
   }
 
   bool from_message_block(const ACE_Message_Block&)
   {
-    // Not needed?
+    // Not needed
     OPENDDS_ASSERT(false);
     return false;
   }
