@@ -71,7 +71,7 @@ bool operator>>(Serializer& strm, XTypes::DynamicSample& sample)
 
 bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample)
 {
-  sample.value.key_only(true);
+  sample.value.set_key_only(true);
   return sample.value.deserialize(strm);
 }
 

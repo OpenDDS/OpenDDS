@@ -49,7 +49,7 @@ public:
   {
   }
 
-  void key_only(bool k) { extent_ = k ? Sample::KeyOnly : Sample::Full; }
+  void set_key_only(bool k) { extent_ = k ? Sample::KeyOnly : Sample::Full; }
 
   bool serialize(DCPS::Serializer& ser) const;
   bool deserialize(DCPS::Serializer& ser);
