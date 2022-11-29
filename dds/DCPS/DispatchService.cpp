@@ -9,6 +9,7 @@
 
 #include "debug.h"
 #include "DispatchService.h"
+#include "Service_Participant.h"
 #include "TimeDuration.h"
 
 #include <ace/Reverse_Lock_T.h>
@@ -53,7 +54,7 @@ void DispatchService::shutdown(bool immediate, EventQueue* const pending)
   }
 
   while (running_threads_) {
-    cv_.wait(tsm_);
+    cv_.wait(TheServiceParticipant->get_thread_status_manager());
   }
 
   if (pending) {
@@ -188,9 +189,9 @@ void DispatchService::run_event_loop()
         cv_.notify_all();
       } else if (allow_dispatch_ && timer_queue_map_.size()) {
         MonotonicTimePoint deadline(timer_queue_map_.begin()->first);
-        cv_.wait_until(deadline, tsm_);
+        cv_.wait_until(deadline, TheServiceParticipant->get_thread_status_manager());
       } else {
-        cv_.wait(tsm_);
+        cv_.wait(TheServiceParticipant->get_thread_status_manager());
       }
     }
 
