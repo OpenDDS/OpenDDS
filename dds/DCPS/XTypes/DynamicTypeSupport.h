@@ -257,7 +257,7 @@ const MetaStruct& getMetaStruct<XTypes::DynamicSample>();
 
 template <>
 DDS::ReturnCode_t
-DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle& gen,
+DataReaderImpl_T<XTypes::DynamicSample>::read_generic(DataReaderImpl::GenericBundle& gen,
                                                       DDS::SampleStateMask sample_states,
                                                       DDS::ViewStateMask view_states,
                                                       DDS::InstanceStateMask instance_states,
