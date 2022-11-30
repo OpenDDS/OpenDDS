@@ -3901,8 +3901,6 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
           }
 
           if (it->first.non_match_cond_) {
-            ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupReplyReader::process_type_lookup_reply: %d %d\n",
-                  it->second.got_minimal, it->second.got_complete));
             it->first.non_match_cond_->done(DDS::RETCODE_OK);
             sedp_.matching_data_buffer_.erase(it);
             return true;
@@ -6882,15 +6880,42 @@ void Sedp::request_remote_complete_type_objects(
   DCPS::TypeObjReqCond& cond)
 {
   MatchingPair mp(DCPS::GUID_UNKNOWN, DCPS::GUID_UNKNOWN, &cond);
-  if (DCPS::GuidConverter(remote_entity).isWriter()) {
+  bool discovered = false;
+  bool discovery_protected = false;
+  DCPS::GuidConverter gc(remote_entity);
+  if (gc.isWriter()) {
     mp.writer_ = remote_entity;
-  } else {
+    DiscoveredPublicationIter dpi = discovered_publications_.find(remote_entity);
+    if (dpi != discovered_publications_.end()) {
+      discovered = true;
+#ifdef OPENDDS_SECURITY
+      discovery_protected = dpi->second.security_attribs_.base.is_discovery_protected;
+#endif
+    }
+  } else if (gc.isReader()) {
     mp.reader_ = remote_entity;
+    DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(remote_entity);
+    if (dsi != discovered_subscriptions_.end()) {
+      discovered = true;
+#ifdef OPENDDS_SECURITY
+      discovery_protected = dsi->second.security_attribs_.base.is_discovery_protected;
+#endif
+    }
   }
+
+  if (!discovered) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Sedp::request_remote_complete_type_objects: ",
+        "GUID passed, %C, is not a discovered reader or writer\n",
+        String(gc).c_str()));
+    }
+    cond.done(DDS::RETCODE_BAD_PARAMETER);
+  }
+
   request_type_objects(
     &remote_type_info,
     mp, remote_entity,
-    false, // TODO
+    discovery_protected,
     false, true);
 }
 

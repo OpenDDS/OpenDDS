@@ -2629,71 +2629,56 @@ DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
         "Can't get a DynamicType, type info is missing complete\n"));
     }
-    return DDS::RETCODE_BAD_PARAMETER;
+    return DDS::RETCODE_NO_DATA;
   }
 
-  const GUID_t remote_entity = bit_key_to_repo_id(key);
-  DDS::DynamicType_var got_type;
-  if (!get_dynamic_type_i(got_type, remote_entity, ti)) {
-    return DDS::RETCODE_ERROR;
-  }
-  if (!got_type) {
-    // We don't have it, first try to ask the remote for the complete
-    // TypeObjects, then try again.
+  const XTypes::TypeIdentifier& ctid = ti.complete.typeid_with_size.type_id;
+  const GUID_t entity = bit_key_to_repo_id(key);
+  if (!type_lookup_service_->has_complete(ctid)) {
+    // We don't have it, try to asking the remote for the complete
+    // TypeObjects.
+    if (DCPS_debug_level >= 4) {
+      ACE_DEBUG((LM_DEBUG, "(%P|%t) DomainParticipantImpl::get_dynamic_type: "
+        "requesting remote complete TypeObject from %C\n", LogGuid(entity).c_str()));
+    }
     Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
     TypeObjReqCond cond;
-    disco->request_remote_complete_type_objects(domain_id_, dp_id_, remote_entity, ti, cond);
+    disco->request_remote_complete_type_objects(domain_id_, dp_id_, entity, ti, cond);
     const DDS::ReturnCode_t rc = cond.wait();
     if (rc != DDS::RETCODE_OK) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
-          "Couldn't get remote compete type object: %C\n", retcode_to_string(rc)));
+          "Couldn't get remote complete type object: %C\n", retcode_to_string(rc)));
       }
       return rc;
     }
 
-    if (!get_dynamic_type_i(got_type, remote_entity, ti) || !got_type) {
+    if (!type_lookup_service_->has_complete(ctid)) {
       if (log_level >= LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
-          "remote request was successful, but still can't get DynamicType\n"));
+          "request_remote_complete_type_objects succeeded, but type lookup service still says it "
+          "doesn't have the complete TypeObject?\n"));
       }
       return DDS::RETCODE_ERROR;
     }
   }
 
-  if (got_type) {
-    XTypes::DynamicTypeImpl* impl = dynamic_cast<XTypes::DynamicTypeImpl*>(got_type.in());
-    impl->set_complete_type_identifier(ti.complete.typeid_with_size.type_id);
-    /* dt->set_complete_type_map(ctm); */
-    impl->set_minimal_type_identifier(ti.minimal.typeid_with_size.type_id);
-    /* dt->set_minimal_type_map(mtm); */
-  }
-
-  type = got_type;
-
-  return DDS::RETCODE_OK;
-}
-
-bool DomainParticipantImpl::get_dynamic_type_i(
-  DDS::DynamicType_var& type, const GUID_t& remote_entity, const XTypes::TypeInformation& type_info)
-{
-  type = type_lookup_service_->type_identifier_to_dynamic(
-    type_info.complete.typeid_with_size.type_id, remote_entity);
   DDS::TypeDescriptor_var td;
-  if (!type || type->get_descriptor(td) != DDS::RETCODE_OK) {
+  DDS::DynamicType_var got_type = type_lookup_service_->type_identifier_to_dynamic(ctid, entity);
+  if (!got_type || got_type->get_descriptor(td) != DDS::RETCODE_OK || !td) {
     if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type_i: "
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
         "Got an invalid DynamicType\n"));
     }
-    return false;
+    return DDS::RETCODE_ERROR;
   }
-  if (!td) {
-    // We got it, so the type lookup service knows about the type, but the
-    // descriptor is null, probably because the complete type object is missing.
-    // Set type to null and return true to signal the caller to try again.
-    type = 0;
-  }
-  return true;
+  type = got_type;
+
+  XTypes::DynamicTypeImpl* impl = dynamic_cast<XTypes::DynamicTypeImpl*>(type.in());
+  impl->set_complete_type_identifier(ctid);
+  impl->set_minimal_type_identifier(ti.minimal.typeid_with_size.type_id);
+
+  return DDS::RETCODE_OK;
 }
 
 } // namespace DCPS

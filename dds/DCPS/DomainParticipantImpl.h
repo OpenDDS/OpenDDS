@@ -423,9 +423,6 @@ public:
     DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key);
 
 private:
-  bool get_dynamic_type_i(
-    DDS::DynamicType_var& type, const GUID_t& remote, const XTypes::TypeInformation& type_info);
-
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
   bool validate_subscriber_qos(DDS::SubscriberQos & subscriber_qos);
 

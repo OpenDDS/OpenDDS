@@ -661,6 +661,10 @@ public:
 
   RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
+  void request_remote_complete_type_objects(
+    const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
+    DCPS::TypeObjReqCond& cond);
+
 private:
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
 #ifdef OPENDDS_SECURITY
@@ -1390,10 +1394,6 @@ private:
 #endif
 
   virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
-
-  void request_remote_complete_type_objects(
-    const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
-    DCPS::TypeObjReqCond& cond);
 
 protected:
 #ifdef OPENDDS_SECURITY
