@@ -96,6 +96,12 @@ namespace OpenDDS {
       }
 
       const MessageType* message() const { return this; }
+
+#ifndef OPENDDS_HAS_STD_UNIQUE_PTR
+      using EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>::_remove_ref;
+      using EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>::_add_ref;
+      using EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>::ref_count;
+#endif
     };
 
     struct MessageTypeMemoryBlock {

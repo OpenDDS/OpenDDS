@@ -312,7 +312,7 @@ protected:
     : ref_count_(1)
   {
   }
-private:
+
   template <typename U>
   friend class container_supported_unique_ptr;
 
@@ -331,6 +331,8 @@ private:
     }
   }
   long ref_count() const { return ref_count_.value(); }
+
+private:
   ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
 };
 
