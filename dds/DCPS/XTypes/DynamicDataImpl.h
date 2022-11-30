@@ -461,6 +461,7 @@ private:
     SingleValue(ACE_OutputCDR::from_wchar from_wchar);
     SingleValue(const CORBA::WChar* wstr);
 #endif
+    SingleValue(const SingleValue& other);
 
     ~SingleValue();
 

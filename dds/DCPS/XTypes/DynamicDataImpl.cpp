@@ -389,6 +389,68 @@ template<> const ACE_OutputCDR::from_wchar& DynamicDataImpl::SingleValue::get() 
 template<> const CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const { return wstr_; }
 #endif
 
+// Has to be below the get methods, or else there's a template specialization issue.
+DynamicDataImpl::SingleValue::SingleValue(const SingleValue& other)
+{
+  kind_ = other.kind_;
+  active_ = 0;
+  switch (kind_) {
+  case TK_INT8:
+    active_ = new(int8_) ACE_OutputCDR::from_int8(other.get<ACE_OutputCDR::from_int8>());
+    break;
+  case TK_UINT8:
+    active_ = new(uint8_) ACE_OutputCDR::from_uint8(other.get<ACE_OutputCDR::from_uint8>());
+    break;
+  case TK_INT16:
+    int16_ = other.int16_;
+    break;
+  case TK_UINT16:
+    uint16_ = other.uint16_;
+    break;
+  case TK_INT32:
+    int32_ = other.int32_;
+    break;
+  case TK_UINT32:
+    uint32_ = other.uint32_;
+    break;
+  case TK_INT64:
+    int64_ = other.int64_;
+    break;
+  case TK_UINT64:
+    uint64_ = other.uint64_;
+    break;
+  case TK_FLOAT32:
+    float32_ = other.float32_;
+    break;
+  case TK_FLOAT64:
+    float64_ = other.float64_;
+    break;
+  case TK_FLOAT128:
+    float128_ = other.float128_;
+    break;
+  case TK_BOOLEAN:
+    active_ = new(boolean_) ACE_OutputCDR::from_boolean(other.get<ACE_OutputCDR::from_boolean>());
+    break;
+  case TK_BYTE:
+    active_ = new(byte_) ACE_OutputCDR::from_octet(other.get<ACE_OutputCDR::from_octet>());
+    break;
+  case TK_CHAR8:
+    active_ = new(char8_) ACE_OutputCDR::from_char(other.get<ACE_OutputCDR::from_char>());
+    break;
+  case TK_STRING8:
+    str_ = ACE_OS::strdup(other.str_);
+    break;
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    active_ = new(char16_) ACE_OutputCDR::from_wchar(other.get<ACE_OutputCDR::from_wchar>());
+    break;
+  case TK_STRING16:
+    wstr_ = ACE_OS::strdup(other.wstr_);
+    break;
+#endif
+  }
+}
+
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                                          DataContainer::const_single_iterator it) const
 {
