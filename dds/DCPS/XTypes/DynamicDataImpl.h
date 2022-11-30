@@ -491,6 +491,9 @@ private:
       const CORBA::WChar* wstr_;
 #endif
     };
+
+  private:
+    SingleValue& operator=(const SingleValue&); // = delete
   };
 
   struct SequenceValue {

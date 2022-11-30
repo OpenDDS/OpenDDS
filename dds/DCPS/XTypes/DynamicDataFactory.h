@@ -37,6 +37,11 @@ public:
 
   DynamicData_ptr create_data(DynamicType_ptr type);
 
+  ReturnCode_t delete_data(DynamicData_ptr /*data*/)
+  {
+    return RETCODE_OK;
+  }
+
   CORBA::Boolean _is_a(const char* type_id)
   {
     return DynamicDataFactoryInterf::_is_a(type_id);

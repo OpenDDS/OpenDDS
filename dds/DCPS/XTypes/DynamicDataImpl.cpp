@@ -391,9 +391,9 @@ template<> const CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const 
 
 // Has to be below the get methods, or else there's a template specialization issue.
 DynamicDataImpl::SingleValue::SingleValue(const SingleValue& other)
+  : kind_(other.kind_)
+  , active_(0)
 {
-  kind_ = other.kind_;
-  active_ = 0;
   switch (kind_) {
   case TK_INT8:
     active_ = new(int8_) ACE_OutputCDR::from_int8(other.get<ACE_OutputCDR::from_int8>());

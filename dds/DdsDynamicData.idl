@@ -167,8 +167,8 @@ module DDS {
     // Not Implemented
     //static DDS::ReturnCode_t delete_instance();
     DynamicData create_data(in DynamicType type);
-    // Not Implemented
-    //static DDS::ReturnCode_t delete_instance(in DynamicData data);
+    /// This is a NOP in OpenDDS
+    DDS::ReturnCode_t delete_data(in DynamicData data);
   };
 
   local interface DynamicData {
