@@ -77,7 +77,7 @@ bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample)
 
 template <>
 DDS::ReturnCode_t
-DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle&,
+DataReaderImpl_T<XTypes::DynamicSample>::read_generic(DataReaderImpl::GenericBundle&,
                                                       DDS::SampleStateMask,
                                                       DDS::ViewStateMask,
                                                       DDS::InstanceStateMask,
