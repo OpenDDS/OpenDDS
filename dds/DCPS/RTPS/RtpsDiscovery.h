@@ -408,15 +408,13 @@ public:
 
 #endif
 
-  AddrVec spdp_send_addrs() const
+  bool spdp_request_random_port() const
   {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, AddrVec());
-    return spdp_send_addrs_;
+    return spdp_request_random_port_.value();
   }
-  void spdp_send_addrs(const AddrVec& addrs)
+  void spdp_request_random_port(bool f)
   {
-    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
-    spdp_send_addrs_ = addrs;
+    spdp_request_random_port_ = f;
   }
 
   OPENDDS_STRING guid_interface() const
@@ -428,6 +426,17 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, lock_);
     guid_interface_ = gi;
+  }
+
+  AddrVec spdp_send_addrs() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, AddrVec());
+    return spdp_send_addrs_;
+  }
+  void spdp_send_addrs(const AddrVec& addrs)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, lock_);
+    spdp_send_addrs_ = addrs;
   }
 
   DCPS::TimeDuration max_auth_time() const
@@ -773,6 +782,7 @@ private:
   ACE_INET_Addr ipv6_sedp_local_address_, ipv6_sedp_advertised_address_, ipv6_spdp_local_address_;
   ACE_INET_Addr ipv6_default_multicast_group_;
 #endif
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> spdp_request_random_port_;
   OPENDDS_STRING guid_interface_;
   AddrVec spdp_send_addrs_;
   DCPS::TimeDuration max_auth_time_;

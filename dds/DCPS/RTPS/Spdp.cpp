@@ -3425,7 +3425,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
   if (fixed_port) {
     uni_port_ = local_addr.get_port_number();
-  } else {
+  } else if (!outer->config_->spdp_request_random_port()) {
     uni_port_ = port_common + outer->config_->d1() + (outer->config_->pg() * participant_id);
     local_addr.set_port_number(uni_port_);
   }
@@ -3448,6 +3448,13 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
+  }
+
+  if (!fixed_port && outer->config_->spdp_request_random_port()) {
+    ACE_INET_Addr addr;
+    if (unicast_socket_.get_local_addr(addr) == 0) {
+      uni_port_ = addr.get_port_number();
+    }
   }
 
   if (DCPS::DCPS_debug_level > 3) {
