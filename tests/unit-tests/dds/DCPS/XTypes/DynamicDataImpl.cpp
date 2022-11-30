@@ -1118,27 +1118,6 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
   ret = data.set_int32_values(2, my_enums);
   EXPECT_NE(ret, DDS::RETCODE_OK);
 
-  // Set elements of my_enums individually
-  DDS::DynamicTypeMember_var dtm;
-  ret = type->get_member(dtm, 0);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  DDS::MemberDescriptor_var md;
-  ret = dtm->get_descriptor(md);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  DDS::DynamicData_var enums_dd = new XTypes::DynamicDataImpl(md->type());
-  // Get Id for the next element
-  // TODO: Implement get_member_id_at_index
-  DDS::MemberId id = get_member_id_at_index(0);
-  EXPECT_EQ(id, DDS::MemberId(0));
-  ret = enums_dd->set_int32_value(id, E_UINT32);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  id = get_member_id_at_index(1);
-  EXPECT_EQ(id, DDS::MemberId(1));
-  ret = enums_dd->set_int32_value(id, E_INT8);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_complex_value(0, enums_dd);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-
   /// int_32s
   DDS::Int32Seq int_32s;
   set_sequences(int_32s, input.int_32s);
@@ -1146,6 +1125,156 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_int32_values(1, int_32s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// uint_32s
+  DDS::UInt32Seq uint_32s;
+  set_sequences(uint_32s, input.uint_32s);
+  ret = data.set_uint32_values(4, uint_32s);
+  EXPECT_NE(ret, DDS::RETCODE_OK);
+  ret =  data.set_uint32_values(2, uint_32s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// int_8s
+  DDS::Int8Seq int_8s;
+  set_sequences(int_8s, input.int_8s);
+  ret = data.set_int8_values(3, int_8s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// uint_8s
+  DDS::UInt8Seq uint_8s;
+  set_sequences(uint_8s, input.uint_8s);
+  ret = data.set_uint8_values(4, uint_8s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// int_16s
+  DDS::Int16Seq int_16s;
+  set_sequences(int_16s, input.int_16s);
+  ret = data.set_int16_values(5, int_16s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// uint_16s
+  DDS::UInt16Seq uint_16s;
+  set_sequences(uint_16s, input.uint_16s);
+  ret = data.set_uint16_values(6, uint_16s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// int_64s
+  DDS::Int64Seq int_64s;
+  set_sequences(int_64s, input.int_64s);
+  ret = data.set_int64_values(7, int_64s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// uint_64s
+  DDS::UInt64Seq uint_64s;
+  set_sequences(uint_64s, input.uint_64s);
+  ret = data.set_uint64_values(8, uint_64s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// float_32s
+  DDS::Float32Seq float_32s;
+  set_sequences(float_32s, input.float_32s);
+  ret = data.set_float32_values(9, float_32s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// float_64s
+  DDS::Float64Seq float_64s;
+  set_sequences(float_64s, input.float_64s);
+  ret = data.set_float64_values(10, float_64s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// char_8s
+  DDS::CharSeq char_8s;
+  set_sequences(char_8s, input.char_8s);
+  ret = data.set_char8_values(12, char_8s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+#ifdef DDS_HAS_WCHAR
+  /// char_16s
+  DDS::WcharSeq char_16s;
+  set_sequences(char_16s, input.char_16s);
+  ret = data.set_char16_values(13, char_16s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+#endif
+
+  /// byte_s
+  DDS::ByteSeq byte_s;
+  set_sequences(byte_s, input.byte_s);
+  ret = data.set_byte_values(14, byte_s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// bool_s
+  DDS::BooleanSeq bool_s;
+  set_sequences(bool_s, input.bool_s);
+  ret = data.set_boolean_values(15, bool_s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// str_s
+  DDS::StringSeq str_s;
+  set_sequences(str_s, input.str_s);
+  ret = data.set_string_values(16, str_s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+#ifdef DDS_HAS_WCHAR
+  /// wstr_s
+  DDS::WstringSeq wstr_s;
+  set_sequences(wstr_s, input.wstr_s);
+  ret = data.set_wstring_values(17, wstr_s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+#endif
+  {
+    ACE_Message_Block buffer(512);
+    DCPS::Serializer ser(&buffer, xcdr2);
+    ASSERT_TRUE(ser << data);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+
+  // Rewrite some members.
+  {
+    // Set elements of my_enums individually
+    DDS::DynamicTypeMember_var dtm;
+    ret = type->get_member(dtm, 0);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    DDS::MemberDescriptor_var md;
+    ret = dtm->get_descriptor(md);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    DDS::DynamicData_var enums_dd = new XTypes::DynamicDataImpl(md->type());
+    DDS::MemberId id = enums_dd->get_member_id_at_index(0);
+    EXPECT_EQ(id, DDS::MemberId(0));
+    ret = enums_dd->set_int32_value(id, E_UINT32);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    id = enums_dd->get_member_id_at_index(1);
+    EXPECT_EQ(id, DDS::MemberId(1));
+    ret = enums_dd->set_int32_value(id, E_INT8);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    ret = data.set_complex_value(0, enums_dd);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+  }
+  {
+    // Set elements of uint_32s individually
+    DDS::DynamicTypeMember_var dtm;
+    ret = type->get_member(dtm, 2);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    DDS::MemberDescriptor_var md;
+    ret = dtm->get_descriptor(md);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    DDS::DynamicData_var uint32s_dd = new XTypes::DynamicDataImpl(md->type());
+    DDS::MemberId id = uint32s_dd->get_member_id_at_index(0);
+    EXPECT_EQ(id, DDS::MemberId(0));
+    ret = uint32s_dd->set_uint32_value(id, uint_32s[0]);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    id = uint32s_dd->get_member_id_at_index(1);
+    EXPECT_EQ(id, DDS::MemberId(1));
+    ret = uint32s_dd->set_uint32_value(id, uint_32s[1]);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    ret = data.set_complex_value(2, uint32s_dd);
+    EXPECT_EQ(ret, DDS::RETCODE_OK);
+  }
+  {
+    ACE_Message_Block buffer(512);
+    DCPS::Serializer ser(&buffer, xcdr2);
+    ASSERT_TRUE(ser << data);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
 }
 
 /////////////////////////// Mutable tests ///////////////////////////
@@ -1394,6 +1523,9 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
   tls.add(type_map.begin(), type_map.end());
   DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
+  // Ideally, there would be a similar set of verifying functions for appendable and final.
+  // But they will be different only in the serialization part. So these should be good
+  // enough to test that default values are written correctly.
   verify_default_int32_union_mutable(dt);
   verify_default_uint32_union_mutable(dt);
   verify_default_int8_union_mutable(dt);
