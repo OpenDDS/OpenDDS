@@ -178,13 +178,21 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
   case TK_INT8:
   case TK_UINT8:
   case TK_CHAR8:
+#ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
+#endif
   case TK_ENUM:
-    // Value of enum or primitive types can be indicated by MEMBER_ID_INVALID Id
-    // (Section 7.5.2.11.1)
+    // Value of enum or primitive types can be indicated by Id MEMBER_ID_INVALID
+    // or by index 0 (Section 7.5.2.11.1).
+    if (index != 0 && DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                 " Received invalid index (%d) for type %C\n", index, typekind_to_string(tk)));
+    }
     return MEMBER_ID_INVALID;
   case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
   case TK_STRING16:
+#endif
   case TK_BITMASK:
   case TK_SEQUENCE:
   case TK_ARRAY:
@@ -981,6 +989,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
+  // This is an extension to the XTypes spec where the value of a bitmask DynamicData
+  // can be read as a whole as a unsigned integer.
   if (tk == enum_or_bitmask) {
     // Per XTypes spec, the value of a DynamicData object of primitive type or TK_ENUM is
     // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such

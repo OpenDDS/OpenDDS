@@ -46,6 +46,12 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   XTypes::DynamicDataImpl data(type);
   DDS::ReturnCode_t ret = data.set_int32_value(0, input.my_enum);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
+  // Set int_32 but use wrong Id
+  ret = data.set_int32_value(2, input.int_32);
+  EXPECT_NE(ret, DDS::RETCODE_OK);
+  // Set int_32 but use wrong interface
+  ret = data.set_uint32_value(1, static_cast<CORBA::ULong>(input.int_32));
+  EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(1, input.int_32);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint32_value(2, input.uint_32);
@@ -85,9 +91,7 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   DDS::MemberDescriptor_var md;
   ret = dtm->get_descriptor(md);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  // TODO: Use _var here and update DynamicDataImpl's set_complex_value to duplicate the
-  // input pointer.
-  XTypes::DynamicDataImpl* nested_data = new XTypes::DynamicDataImpl(md->type());
+  DDS::DynamicData_var nested_data = new XTypes::DynamicDataImpl(md->type());
   ret = nested_data->set_int32_value(0, input.nested_struct.l);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret =  data.set_complex_value(16, nested_data);
@@ -112,7 +116,7 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = dtm->get_descriptor(md);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  XTypes::DynamicDataImpl* int16_dd = new XTypes::DynamicDataImpl(md->type());
+  DDS::DynamicData_var int16_dd = new XTypes::DynamicDataImpl(md->type());
   // Using incorrect interface
   ret = int16_dd->set_int32_value(XTypes::MEMBER_ID_INVALID, 10);
   EXPECT_NE(ret, DDS::RETCODE_OK);
@@ -1049,11 +1053,106 @@ void verify_default_enum_union_mutable(DDS::DynamicType_var dt)
   }
 }
 
+template<typename StructType>
+void set_sequence_value_struct(StructType& a)
+{
+  a.my_enums.length(2);
+  a.my_enums[0] = E_UINT32; a.my_enums[1] = E_INT8;
+  a.int_32s.length(3);
+  a.int_32s[0] = 3; a.int_32s[1] = 4; a.int_32s[2] = 5;
+  a.uint_32s.length(2);
+  a.uint_32s[0] = 10; a.uint_32s[1] = 11;
+  a.int_8s.length(3);
+  a.int_8s[0] = 12; a.int_8s[1] = 13; a.int_8s[2] = 14;
+  a.uint_8s.length(2);
+  a.uint_8s[0] = 15; a.uint_8s[1] = 16;
+  a.int_16s.length(2);
+  a.int_16s[0] = 1; a.int_16s[1] = 2;
+  a.uint_16s.length(3);
+  a.uint_16s[0] = 3; a.uint_16s[1] = 4; a.uint_16s[2] = 5;
+  a.int_64s.length(2);
+  a.int_64s[0] = 0x7ffffffffffffffe; a.int_64s[1] = 0x7fffffffffffffff;
+  a.uint_64s.length(1);
+  a.uint_64s[0] = 0xffffffffffffffff;
+  a.float_32s.length(1);
+  a.float_32s[0] = 1.0f;
+  a.float_64s.length(1);
+  a.float_64s[0] = 1.0;
+  a.char_8s.length(2);
+  a.char_8s[0] = 'a'; a.char_8s[1] = 'b';
+  a.byte_s.length(2);
+  a.byte_s[0] = 0xee; a.byte_s[1] = 0xff;
+  a.bool_s.length(1);
+  a.bool_s[0] = 1;
+  a.str_s.length(1);
+  a.str_s[0] = "abc";
+#ifdef DDS_HAS_WCHAR
+  a.char_16s.length(3);
+  a.char_16s[0] = 'c'; a.char_16s[1] = 'd'; a.char_16s[2] = 'e';
+  a.wstr_s.length(2);
+  a.wstr_s[0] = L"def"; a.wstr_s[1] = L"ghi";
+#endif
+}
+
+template<typename SequenceTypeA, typename SequenceTypeB>
+void set_sequences(SequenceTypeA& target, const SequenceTypeB& source)
+{
+  target.length(source.length());
+  for (unsigned i = 0; i < source.length(); ++i) {
+    target[i] = source[i];
+  }
+}
+
+template<typename StructType>
+void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& expected_cdr)
+{
+  StructType input;
+  set_sequence_value_struct(input);
+  XTypes::DynamicDataImpl data(type);
+
+  /// my_enums
+  DDS::Int32Seq my_enums;
+  set_sequences(my_enums, input.my_enums);
+  DDS::ReturnCode_t ret = data.set_int32_values(0, my_enums);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_int32_values(2, my_enums);
+  EXPECT_NE(ret, DDS::RETCODE_OK);
+
+  // Set elements of my_enums individually
+  DDS::DynamicTypeMember_var dtm;
+  ret = type->get_member(dtm, 0);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::MemberDescriptor_var md;
+  ret = dtm->get_descriptor(md);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicData_var enums_dd = new XTypes::DynamicDataImpl(md->type());
+  // Get Id for the next element
+  // TODO: Implement get_member_id_at_index
+  DDS::MemberId id = get_member_id_at_index(0);
+  EXPECT_EQ(id, DDS::MemberId(0));
+  ret = enums_dd->set_int32_value(id, E_UINT32);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  id = get_member_id_at_index(1);
+  EXPECT_EQ(id, DDS::MemberId(1));
+  ret = enums_dd->set_int32_value(id, E_INT8);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_complex_value(0, enums_dd);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  /// int_32s
+  DDS::Int32Seq int_32s;
+  set_sequences(int_32s, input.int_32s);
+  ret = data.set_int32_values(3, int_32s);
+  EXPECT_NE(ret, DDS::RETCODE_OK);
+  ret = data.set_int32_values(1, int_32s);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+}
+
 /////////////////////////// Mutable tests ///////////////////////////
 TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
 {
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_WriteMutableSingleValueStruct_xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_WriteMutableSingleValueStruct_xtag>();
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
   const XTypes::TypeMap::const_iterator it = type_map.find(ti);
   EXPECT_TRUE(it != type_map.end());
 
@@ -1085,7 +1184,19 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
     0x40,0x00,0x00,0x12, 0x00,0x00,0x00,0x0a,
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +4+4+10=198 swtr
   };
-  verify_single_value_struct<WriteMutableSingleValueStruct>(dt, single_value_struct);
+  verify_single_value_struct<MutableSingleValueStruct>(dt, single_value_struct);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStructDefault)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
   // Test write when some members take default values.
   const unsigned char default_single_value[] = {
@@ -1112,13 +1223,13 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
     0x40,0x00,0x00,0x12, 0x00,0x00,0x00,0x0a,
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +4+4+10=198 swtr
   };
-  verify_default_single_value_struct<WriteMutableSingleValueStruct>(dt, default_single_value);
+  verify_default_single_value_struct<MutableSingleValueStruct>(dt, default_single_value);
 }
 
 TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
 {
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_WriteMutableSingleValueUnion_xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_WriteMutableSingleValueUnion_xtag>();
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
   const XTypes::TypeMap::const_iterator it = type_map.find(ti);
   EXPECT_TRUE(it != type_map.end());
 
@@ -1270,10 +1381,12 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
   }
 }
 
+// TODO: Add a test case for optional members
+
 TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
 {
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_WriteMutableSingleValueUnion_xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_WriteMutableSingleValueUnion_xtag>();
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
   const XTypes::TypeMap::const_iterator it = type_map.find(ti);
   EXPECT_TRUE(it != type_map.end());
 
@@ -1301,5 +1414,51 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
   verify_default_wstring_union_mutable(dt);
   verify_default_enum_union_mutable(dt);
 }
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char sequence_struct[] = {
+    0x00,0x00,0x01,0x56, // +4=4 dheader
+    0x40,0,0,0, 0,0,0,16, 0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // +24=28 my_enums
+    0x60,0,0,1, 0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // +20=48 int_32s
+    0x60,0,0,2, 0,0,0,2, 0,0,0,10, 0,0,0,11, // +16=64 uint_32s
+    0x50,0,0,3, 0,0,0,3, 12,13,14,(0), // +12=76 int_8s
+    0x50,0,0,4, 0,0,0,2, 15,16,(0),(0), // +12=88 uint_8s
+    0x30,0,0,5, 0,0,0,2, 0,1,0,2, // +12=100 int_16s
+    0x40,0,0,6, 0,0,0,10, 0,0,0,3, 0,3,0,4,0,5,(0),(0), // +20=120 uint_16s
+    0x70,0,0,7, 0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +24=144 int_64s
+    0x70,0,0,8, 0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // +16=160 uint_64s
+    0x60,0,0,9, 0,0,0,1, 0x3f,0x80,0x00,0x00, // +12=172 float_32s
+    0x70,0,0,10, 0,0,0,1, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // +16=188 float_64s
+    //    0x40,0,0,11, 0,0,0,20, 0,0,0,1, 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0, // +28=216 float_128s
+    0x40,0,0,12, 0,0,0,6, 0,0,0,2, 'a','b',(0),(0), // +16=232 char_8s
+    0x40,0,0,13, 0,0,0,10, 0,0,0,3, 0,0x63,0,0x64,0,0x65,(0),(0), // +20=252 char_16s
+    0x40,0,0,14, 0,0,0,6, 0,0,0,2, 0xee,0xff,(0),(0), // +16=268 byte_s
+    0x40,0,0,15, 0,0,0,5, 0,0,0,1, 1,(0),(0),(0), // +16=284 bool_s
+    0x40,0,0,16, 0,0,0,16, 0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // +24=308 str_s
+    0x40,0,0,17, 0,0,0,30, 0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // +38=346 wstr_s
+  };
+  verify_sequence_value_struct<MutableSequenceStruct>(dt, sequence_struct);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
+{
+  // TODO
+}
+
+/////////////////////////// Appendable tests ///////////////////////////
+
+/////////////////////////// Final tests ///////////////////////////
 
 #endif // OPENDDS_SAFETY_PROFILE

@@ -1,3 +1,5 @@
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include <tao/LongSeq.pidl>
 #include <tao/ULongSeq.pidl>
 #include <tao/Int8Seq.pidl>
@@ -371,3 +373,5 @@ struct AppendableArrayStruct {
 struct MutableArrayStruct {
   ARRAY_MEMBERS
 };
+
+#endif // OPENDDS_SAFETY_PROFILE

@@ -1,3 +1,5 @@
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include <tao/LongSeq.pidl>
 #include <tao/ULongSeq.pidl>
 #include <tao/Int8Seq.pidl>
@@ -57,8 +59,8 @@ typedef sequence<boolean> BoolSeq;
 typedef sequence<string> StringSeq;
 typedef sequence<wstring> WStringSeq;
 
-// TODO: Add a long double member with Id 11
-#define WRITE_SINGLE_VALUE_MEMBERS \
+// TODO: Add a long double member
+#define SINGLE_VALUE_MEMBERS \
   @id(0) SomeEnum my_enum; \
   @id(1) long int_32; \
   @id(2) unsigned long uint_32; \
@@ -78,8 +80,8 @@ typedef sequence<wstring> WStringSeq;
   @id(17) string str; \
   @id(18) wstring wstr;
 
-// TODO: Add a long double member with Id 11
-#define WRITE_SINGLE_VALUE_BRANCHES \
+// TODO: Add a long double member
+#define SINGLE_VALUE_BRANCHES \
   case E_INT32: \
     @id(1) long int_32; \
   case E_UINT32: \
@@ -115,6 +117,26 @@ typedef sequence<wstring> WStringSeq;
   default: \
     @id(18) SomeEnum my_enum;
 
+// TODO: Add a long double sequence member
+#define SEQUENCE_VALUE_MEMBERS \
+  @id(0) SomeEnumSeq my_enums; \
+  @id(1) Int32Seq int_32s; \
+  @id(2) UInt32Seq uint_32s; \
+  @id(3) Int8Seq int_8s; \
+  @id(4) UInt8Seq uint_8s; \
+  @id(5) Int16Seq int_16s; \
+  @id(6) UInt16Seq uint_16s; \
+  @id(7) Int64Seq int_64s; \
+  @id(8) UInt64Seq uint_64s; \
+  @id(9) Float32Seq float_32s; \
+  @id(10) Float64Seq float_64s; \
+  @id(12) Char8Seq char_8s; \
+  @id(13) Char16Seq char_16s; \
+  @id(14) ByteSeq byte_s; \
+  @id(15) BoolSeq bool_s; \
+  @id(16) StringSeq str_s; \
+  @id(17) WStringSeq wstr_s;
+
 @final
 struct FinalNestedStructInner {
   @id(0) long l;
@@ -122,34 +144,52 @@ struct FinalNestedStructInner {
 
 // Write single value to struct.
 @mutable
-struct WriteMutableSingleValueStruct {
-  WRITE_SINGLE_VALUE_MEMBERS
+struct MutableSingleValueStruct {
+  SINGLE_VALUE_MEMBERS
 };
 
 @appendable
-struct WriteAppendableSingleValueStruct {
-  WRITE_SINGLE_VALUE_MEMBERS
+struct AppendableSingleValueStruct {
+  SINGLE_VALUE_MEMBERS
 };
 
 @final
-struct WriteFinalSingleValueStruct {
-  WRITE_SINGLE_VALUE_MEMBERS
+struct FinalSingleValueStruct {
+  SINGLE_VALUE_MEMBERS
 };
 
 // Write single value to union.
 @mutable
-union WriteMutableSingleValueUnion switch (SomeEnum) {
-  WRITE_SINGLE_VALUE_BRANCHES
+union MutableSingleValueUnion switch (SomeEnum) {
+  SINGLE_VALUE_BRANCHES
 };
 
 @appendable
-union WriteAppendableSingleValueUnion switch (SomeEnum) {
-  WRITE_SINGLE_VALUE_BRANCHES
+union AppendableSingleValueUnion switch (SomeEnum) {
+  SINGLE_VALUE_BRANCHES
 };
 
 @final
-union WriteFinalSingleValueUnion switch (SomeEnum) {
-  WRITE_SINGLE_VALUE_BRANCHES
+union FinalSingleValueUnion switch (SomeEnum) {
+  SINGLE_VALUE_BRANCHES
+};
+
+// Write values to sequence and write sequence to struct.
+@mutable
+struct MutableSequenceStruct {
+  SEQUENCE_VALUE_MEMBERS
+};
+
+@appendable
+struct AppendableSequenceStruct {
+  SEQUENCE_VALUE_MEMBERS
+};
+
+@final
+struct FinalSequenceStruct {
+  SEQUENCE_VALUE_MEMBERS
 };
 
 }; // module DynamicDataImpl
+
+#endif // OPENDDS_SAFETY_PROFILE

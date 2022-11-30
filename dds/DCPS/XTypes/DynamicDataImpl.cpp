@@ -38,12 +38,97 @@ CORBA::Boolean DynamicDataImpl::equals(DDS::DynamicData_ptr /*other*/)
   return false;
 }
 
-DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong /*index*/)
+DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 {
-  // Not sure if this should be supported for the writing direction.
-  // The index is counted from the serialized data but when this is
-  // called the user may not finish setting all the fields they want yet.
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::get_member_id_at_index: Not implemented\n"));
+  const TypeKind tk = type_->get_kind();
+  switch (tk) {
+  case TK_BOOLEAN:
+  case TK_BYTE:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+  case TK_FLOAT32:
+  case TK_FLOAT64:
+  case TK_FLOAT128:
+  case TK_INT8:
+  case TK_UINT8:
+  case TK_CHAR8:
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+#endif
+  case TK_ENUM:
+    // Value of enum or primitive types can be indicated by Id MEMBER_ID_INVALID
+    // or by index 0 (Section 7.5.2.11.1).
+    if (index != 0 && DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
+                 " Received invalid index (%d) for type %C\n", index, typekind_to_string(tk)));
+    }
+    return MEMBER_ID_INVALID;
+  case TK_BITMASK:
+    // TODO: Bitmask type needs improvement. See comments in set_single_value method.
+    return MEMBER_ID_INVALID;
+  case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16:
+#endif
+  case TK_SEQUENCE: {
+    DDS::TypeDescriptor_var descriptor;
+    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      return MEMBER_ID_INVALID;
+    }
+    const CORBA::ULong bound = descriptor->bound()[0];
+    if (bound > 0 && index >= bound) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
+                   " Input index (%d) is out-of-bound (bound is %d)\n", index, bound));
+      }
+      return MEMBER_ID_INVALID;
+    }
+    return index;
+  }
+  case TK_ARRAY: {
+    DDS::TypeDescriptor_var descriptor;
+    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      return MEMBER_ID_INVALID;
+    }
+    CORBA::ULong length = 1;
+    const DDS::BoundSeq& bounds = descriptor->bound();
+    for (CORBA::ULong i = 0; i < bounds.length(); ++i) {
+      length *= bounds[i];
+    }
+    if (index >= length) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
+                   " Input index (%d) is out-of-bound (array length is %d)\n", index, length));
+      }
+      return MEMBER_ID_INVALID;
+    }
+    return index;
+  }
+  case TK_MAP:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
+                 " Map is currently not supported\n"));
+    }
+    return MEMBER_ID_INVALID;
+  case TK_STRUCTURE:
+  case TK_UNION: {
+    // TODO: If all elements are non-optional, since members are serialized in the
+    // same order as stored in DynamicType, the input index can be used to get the
+    // Id of the member from its DynamicTypeMember. If there is an optional member,
+    // it won't be possible to determine which member is located at the given index
+    // in the final serialized buffer. So maybe we don't support this for these types?
+    return MEMBER_ID_INVALID;
+  }
+  }
+
+  if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
+               " Calling on an unexpected type %C\n", typekind_to_string(tk)));
+  }
   return MEMBER_ID_INVALID;
 }
 
@@ -929,6 +1014,12 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
+  // TODO: Bitmask can be stored as a whole as a unsigned integer using MEMBER_ID_INVALID
+  // (this is an extension to the XTypes spec). Elements of the bitmask can also be set
+  // using the set_boolean_value interface. The two copies of the bitmask value must be
+  // made consistent. For example, when a bit in the bitmask is updated, either update
+  // the unsigned integer representation or invalidate it. Similarly, when the unsigned
+  // integer value is updated, either update the stored elements or invalidate them all.
   if (tk == enum_or_bitmask) {
     const CORBA::ULong bit_bound = descriptor->bound()[0];
     good = id == MEMBER_ID_INVALID && bit_bound >= lower && bit_bound <= upper &&
@@ -1298,7 +1389,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::Mem
 }
 #endif
 
-bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_ptr value)
+bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value)
 {
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
@@ -1317,7 +1408,7 @@ bool DynamicDataImpl::set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_p
   return insert_complex(id, value);
 }
 
-bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_ptr value,
+bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
                                            const DDS::TypeDescriptor_var& descriptor)
 {
   if (id == DISCRIMINATOR_ID) {
@@ -1338,7 +1429,7 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_pt
         return false;
       }
       CORBA::Long disc_val;
-      const DynamicDataImpl* dd_impl = dynamic_cast<const DynamicDataImpl*>(value);
+      const DynamicDataImpl* dd_impl = dynamic_cast<const DynamicDataImpl*>(value.in());
       if (!dd_impl || !dd_impl->read_discriminator(disc_val)) {
         return false;
       }
@@ -1404,7 +1495,8 @@ bool DynamicDataImpl::validate_member_id_collection(const DDS::TypeDescriptor_va
   return false;
 }
 
-bool DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_ptr value, TypeKind collection_tk)
+bool DynamicDataImpl::set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value,
+                                                TypeKind collection_tk)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1427,20 +1519,21 @@ DDS::ReturnCode_t DynamicDataImpl::set_complex_value(DDS::MemberId id, DDS::Dyna
     return DDS::RETCODE_ERROR;
   }
 
+  DDS::DynamicData_var value_var = DDS::DynamicData::_duplicate(value);
   const TypeKind tk = type_->get_kind();
   bool good = false;
 
   switch (tk) {
   case TK_STRUCTURE:
-    good = set_complex_to_struct(id, value);
+    good = set_complex_to_struct(id, value_var);
     break;
   case TK_UNION:
-    good = set_complex_to_union(id, value, descriptor);
+    good = set_complex_to_union(id, value_var, descriptor);
     break;
   case TK_SEQUENCE:
   case TK_ARRAY:
   case TK_MAP:
-    good = set_complex_to_collection(id, value, tk);
+    good = set_complex_to_collection(id, value_var, tk);
     break;
   default:
     good = false;
