@@ -1,4 +1,3 @@
-// -*- C++ -*-
 #include "HelloWorldTypeSupportImpl.h"
 
 #include <tests/Utils/DistributedConditionSet.h>
@@ -30,7 +29,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   HelloWorld::MessageTypeSupport_var type_support = new HelloWorld::MessageTypeSupportImpl;
   type_support->register_type(participant, "");
-  CORBA::String_var type_name = type_support->get_type_name();
+  CORBA::String_var type_name = type_support->get_type_name ();
 
   DDS::Topic_var topic = participant->create_topic(HelloWorld::MESSAGE_TOPIC_NAME,
                                                    type_name,
@@ -63,6 +62,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   wait_set->attach_condition(read_condition);
 
   bool done = false;
+  bool got_message = false;
   while (!done) {
     DDS::ConditionSeq conditions;
     const DDS::Duration_t timeout = { 1, 0 };
@@ -73,6 +73,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     message_data_reader->take(messages, infos, DDS::LENGTH_UNLIMITED,
                               DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
     for (unsigned int idx = 0; idx != messages.length(); ++idx) {
+      if (!strcmp(messages[idx].value.in(), "Hello, World!")) {
+        got_message = true;
+      }
       if (infos[idx].valid_data) {
         ACE_DEBUG((LM_DEBUG, "received %C\n", messages[idx].value.in()));
         distributed_condition_set->post(HelloWorld::SUBSCRIBER, HelloWorld::SUBSCRIBER_DONE);
@@ -86,6 +89,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   participant->delete_contained_entities();
   domain_participant_factory->delete_participant(participant);
   TheServiceParticipant->shutdown();
+
+  if (!got_message) {
+    ACE_ERROR((LM_ERROR, "subscriber (%P|%t) failed to get expected message\n"));
+    return 1;
+  }
 
   return 0;
 }

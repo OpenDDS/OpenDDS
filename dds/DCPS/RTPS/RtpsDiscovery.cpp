@@ -322,6 +322,17 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
                              -1);
           }
           config->spdp_local_address(addr);
+        } else if (name == "SpdpRequestRandomPort") {
+          const OPENDDS_STRING& value = it->second;
+          int smInt = 0;
+          if (!DCPS::convertToInteger(value, smInt)) {
+            ACE_ERROR_RETURN((LM_ERROR,
+                              ACE_TEXT("(%P|%t) RtpsDiscovery::Config::discovery_config ")
+                              ACE_TEXT("Invalid entry (%C) for SpdpRequestRandomPort in ")
+                              ACE_TEXT("[rtps_discovery/%C] section.\n"),
+                              value.c_str(), rtps_name.c_str()), -1);
+          }
+          config->spdp_request_random_port(bool(smInt));
         } else if (name == "GuidInterface") {
           config->guid_interface(it->second);
         } else if (name == "InteropMulticastOverride") {
