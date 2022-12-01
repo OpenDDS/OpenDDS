@@ -725,13 +725,6 @@ namespace OpenDDS {
     return false;
   }
 
-#ifndef OPENDDS_NO_QUERY_CONDITION
-  ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
-  {
-    return getMetaStruct<MessageType>().create_qc_comparator(field, next);
-  }
-#endif
-
   DDS::ReturnCode_t read_generic(GenericBundle& gen,
                                  DDS::SampleStateMask sample_states,
                                  DDS::ViewStateMask view_states,
