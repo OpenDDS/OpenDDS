@@ -69,7 +69,7 @@ InfoRepo::~InfoRepo()
 {
   try {
     this->finalize();
-  } catch(const OpenDDS::Federator::Incomplete&) {}
+  } catch (const OpenDDS::Federator::Incomplete&) {}
 }
 
 void
