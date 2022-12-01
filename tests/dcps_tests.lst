@@ -499,4 +499,6 @@ tests/DCPS/HelloWorld/run_test.pl ini=rtps.ini: RTPS !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/ZeroEnum/run_test.pl: !OPENDDS_SAFETY_PROFILE
 
-tests/DCPS/TypeSupportPlugin/run_test.pl: !DCPS_MIN
+tests/DCPS/TypeSupportPlugin/run_test.pl: !DCPS_MIN !BROKEN_DLCLOSE
+
+tests/DCPS/DynamicDataWriter/run_test.pl ini=rtps.ini: RTPS !OPENDDS_SAFETY_PROFILE

@@ -654,11 +654,6 @@ public:
   }
 #endif
 
-  void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
-  {
-    type_lookup_service_ = type_lookup_service;
-  }
-
   RcHandle<DCPS::TransportInst> transport_inst() const { return transport_inst_; }
 
 private:

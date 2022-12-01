@@ -59,6 +59,7 @@ RtpsDiscoveryConfig::RtpsDiscoveryConfig()
   , ipv6_spdp_local_address_(u_short(0), "::")
   , ipv6_default_multicast_group_(u_short(0), "FF03::1")
 #endif
+  , spdp_request_random_port_(false)
   , max_auth_time_(300, 0)
   , auth_resend_period_(1, 0)
   , max_spdp_sequence_msg_reset_check_(3)

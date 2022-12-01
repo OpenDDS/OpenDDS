@@ -7,9 +7,11 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataImpl.h"
+
 #  include "DynamicTypeMemberImpl.h"
 
 #  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
+#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -19,6 +21,15 @@ namespace XTypes {
 DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
   : DynamicDataBase(type)
   , container_(type_, this)
+{}
+
+DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
+  : CORBA::Object()
+  , DynamicData()
+  , CORBA::LocalObject()
+  , DCPS::RcObject()
+  , DynamicDataBase(other.type_)
+  , container_(other.container_, this)
 {}
 
 DDS::DynamicType_ptr DynamicDataImpl::type()
@@ -167,8 +178,7 @@ DDS::ReturnCode_t DynamicDataImpl::return_loaned_value(DDS::DynamicData_ptr /*va
 
 DDS::DynamicData_ptr DynamicDataImpl::clone()
 {
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::clone: Not implemented\n"));
-  return 0;
+  return new DynamicDataImpl(*this);
 }
 
 bool DynamicDataImpl::insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value)
@@ -480,62 +490,67 @@ template<> const ACE_OutputCDR::from_wchar& DynamicDataImpl::SingleValue::get() 
 template<> const CORBA::WChar* const& DynamicDataImpl::SingleValue::get() const { return wstr_; }
 #endif
 
-////////////////////////////////////////////
-// THis is only for debugging float128 type
-bool DynamicDataImpl::insert_single(DDS::MemberId id, const CORBA::LongDouble& input)
+// Has to be below the get methods, or else there's a template specialization issue.
+DynamicDataImpl::SingleValue::SingleValue(const SingleValue& other)
+  : kind_(other.kind_)
+  , active_(0)
 {
-#if ACE_BIG_ENDIAN
-  unsigned char value[] = { 0x3f,0xff,0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
-#else
-  unsigned char value[] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0xff,0x3f };
+  switch (kind_) {
+  case TK_INT8:
+    active_ = new(int8_) ACE_OutputCDR::from_int8(other.get<ACE_OutputCDR::from_int8>());
+    break;
+  case TK_UINT8:
+    active_ = new(uint8_) ACE_OutputCDR::from_uint8(other.get<ACE_OutputCDR::from_uint8>());
+    break;
+  case TK_INT16:
+    int16_ = other.int16_;
+    break;
+  case TK_UINT16:
+    uint16_ = other.uint16_;
+    break;
+  case TK_INT32:
+    int32_ = other.int32_;
+    break;
+  case TK_UINT32:
+    uint32_ = other.uint32_;
+    break;
+  case TK_INT64:
+    int64_ = other.int64_;
+    break;
+  case TK_UINT64:
+    uint64_ = other.uint64_;
+    break;
+  case TK_FLOAT32:
+    float32_ = other.float32_;
+    break;
+  case TK_FLOAT64:
+    float64_ = other.float64_;
+    break;
+  case TK_FLOAT128:
+    float128_ = other.float128_;
+    break;
+  case TK_BOOLEAN:
+    active_ = new(boolean_) ACE_OutputCDR::from_boolean(other.get<ACE_OutputCDR::from_boolean>());
+    break;
+  case TK_BYTE:
+    active_ = new(byte_) ACE_OutputCDR::from_octet(other.get<ACE_OutputCDR::from_octet>());
+    break;
+  case TK_CHAR8:
+    active_ = new(char8_) ACE_OutputCDR::from_char(other.get<ACE_OutputCDR::from_char>());
+    break;
+  case TK_STRING8:
+    str_ = ACE_OS::strdup(other.str_);
+    break;
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    active_ = new(char16_) ACE_OutputCDR::from_wchar(other.get<ACE_OutputCDR::from_wchar>());
+    break;
+  case TK_STRING16:
+    wstr_ = ACE_OS::strdup(other.wstr_);
+    break;
 #endif
-
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  if (ACE_OS::memcmp((const void*)value, (const void*)&input, 16) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
-               " (16 bit long double) Input is not correct!!\n"));
   }
-#else
-  if (ACE_OS::memcmp((const void*)value, (const void*)input.ld, 16) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
-               " Input is not correct!!\n"));
-  }
-#endif
-
-  container_.complex_map_.erase(id);
-  container_.single_map_.insert(std::make_pair(id, input));
-
-  // Read from container to verify.
-  DataContainer::const_single_iterator it = container_.single_map_.find(id);
-  if (it == container_.single_map_.end()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDatImpl::insert_single:"
-               " Value is inserted but failed to lookup!\n"));
-  }
-  const CORBA::LongDouble& ld = it->second.get<CORBA::LongDouble>();
-#if ACE_SIZEOF_LONG_DOUBLE == 16
-  if (ACE_OS::memcmp((const void*)value, (const void*)&ld, 16) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
-               " Read an incorrect value from the single map!!\n"));
-  }
-  if (ACE_OS::memcmp((const void*)&input, (const void*)&ld, 16) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
-               " Input is different than the stored value\n"));
-  }
-#else
-  if (ACE_OS::memcmp((const void*)value, (const void*)ld.ld, 16) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
-               " Read an incorrect value from the single map!!\n"));
-  }
-  if (ACE_OS::memcmp((const void*)input.ld, (const void*)ld.ld, 16) != 0) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::insert_single:"
-               " Input is different than the stored value\n"));
-  }
-#endif
-
-  return true;
 }
-// End debug code
-////////////////////////////////////////////
 
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                                          DataContainer::const_single_iterator it) const

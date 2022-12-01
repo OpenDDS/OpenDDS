@@ -47,7 +47,8 @@ bool get_topic(TypeSupport_var& ts, const DomainParticipant_var dp, const std::s
     ACE_ERROR((LM_ERROR, "ERROR: Can't create dynamic type support on safety profile\n"));
     return false;
 #else
-    ts = new DDS::DynamicTypeSupport(native_ts->get_type());
+    DDS::DynamicType_var dt = native_ts->get_type();
+    ts = new DDS::DynamicTypeSupport(dt);
 #endif
   } else {
     ts = TypeSupport::_duplicate(native_ts);

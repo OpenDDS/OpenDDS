@@ -356,11 +356,6 @@ protected:
 
   bool announce_domain_participant_qos();
 
-  void type_lookup_service(const XTypes::TypeLookupService_rch type_lookup_service)
-  {
-    endpoint_manager().type_lookup_service(type_lookup_service);
-  }
-
 private:
 
 #ifdef OPENDDS_SECURITY
