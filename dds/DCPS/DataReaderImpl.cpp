@@ -1269,7 +1269,7 @@ DataReaderImpl::enable()
     {
       ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
       security_config_ = participant->get_security_config();
-      dynamic_type_ = type_lookup_service->type_identifier_to_dynamic(typesupport->getCompleteTypeIdentifier(), subscription_id);
+      dynamic_type_ = typesupport->get_type();
     }
 #endif
 

@@ -1052,11 +1052,13 @@ Spdp::data_received(const DataSubmessage& data,
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
-  ParticipantData_t pdata = ParticipantData_t();
+  ParticipantData_t pdata;
 
   pdata.participantProxy.domainId = domain_;
   pdata.discoveredAt = now.to_monotonic_time();
-
+#ifdef OPENDDS_SECURITY
+  pdata.ddsParticipantDataSecure.base.base.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+#endif
 
   if (!ParameterListConverter::from_param_list(plist, pdata)) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -1306,6 +1308,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 
   DDS::Security::ParticipantStatelessMessage msg = DDS::Security::ParticipantStatelessMessage();
   msg.message_identity.source_guid = guid_;
+  msg.message_identity.sequence_number = 0;
   msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
   msg.destination_participant_guid = guid;
   msg.destination_endpoint_guid = GUID_UNKNOWN;
@@ -1548,6 +1551,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   case HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY: {
     DDS::Security::ParticipantStatelessMessage reply = DDS::Security::ParticipantStatelessMessage();
     reply.message_identity.source_guid = guid_;
+    reply.message_identity.sequence_number = 0;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
@@ -3389,7 +3393,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
   if (fixed_port) {
     uni_port_ = local_addr.get_port_number();
-  } else {
+  } else if (!outer->config_->spdp_request_random_port()) {
     uni_port_ = port_common + outer->config_->d1() + (outer->config_->pg() * participant_id);
     local_addr.set_port_number(uni_port_);
   }
@@ -3412,6 +3416,13 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
+  }
+
+  if (!fixed_port && outer->config_->spdp_request_random_port()) {
+    ACE_INET_Addr addr;
+    if (unicast_socket_.get_local_addr(addr) == 0) {
+      uni_port_ = addr.get_port_number();
+    }
   }
 
   if (DCPS::DCPS_debug_level > 3) {
@@ -3783,8 +3794,9 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 
     const DCPS::RepoId reader = make_id(peer, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
 
-    DDS::Security::ParticipantVolatileMessageSecure msg = DDS::Security::ParticipantVolatileMessageSecure();
+    DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;
+    msg.related_message_identity.source_guid = GUID_UNKNOWN;
     msg.message_class_id = DDS::Security::GMCLASSID_SECURITY_PARTICIPANT_CRYPTO_TOKENS;
     msg.destination_participant_guid = peer;
     msg.destination_endpoint_guid = GUID_UNKNOWN; // unknown = whole participant

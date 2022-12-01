@@ -1,0 +1,18 @@
+project(TypeSupportPlugin): dcps_test {
+  TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
+    TypeSupportPlugin.idl
+  }
+
+  Source_Files {
+  }
+}
+
+project(TypeSupportPluginUser): dcps_test {
+  exename = TypeSupportPluginUser
+  Source_Files {
+    TypeSupportPlugin.cpp
+  }
+  IDL_Files {
+  }
+}

@@ -188,9 +188,23 @@ public:
     return get_type_from_type_lookup_service();
   }
 #endif
+};
 
-protected:
-  XTypes::TypeLookupService_rch type_lookup_service_;
+template <typename T>
+struct TypeSupportInitializer {
+  TypeSupportInitializer()
+    : ts_(new T)
+  {
+    ts_->register_type(0, "");
+  }
+
+  ~TypeSupportInitializer()
+  {
+    T* const t = dynamic_cast<T*>(ts_.in());
+    ts_->unregister_type(0, t ? t->name() : 0);
+  }
+
+  typename T::_var_type ts_;
 };
 
 } // namespace DCPS

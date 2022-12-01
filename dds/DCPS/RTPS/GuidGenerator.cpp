@@ -89,19 +89,24 @@ GuidGenerator::GuidGenerator()
 }
 
 ACE_UINT16
-GuidGenerator::getCount()
+GuidGenerator::getCount(bool doIncrement)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(counter_lock_);
-  return counter_++;
+  if (doIncrement) {
+    ++counter_;
+  }
+  return counter_;
 }
 
 int
 GuidGenerator::interfaceName(const char* iface)
 {
+  // A shortcut to determine if a *valid* interface was already checked.
+  // The shortcut value (interface_name_) is stored IFF the method returns 0.
   if (interface_name_ == iface) {
     return 0;
   }
-  interface_name_ = iface;
+
   // See ace/OS_NS_netdb.cpp ACE_OS::getmacaddress()
 #if defined ACE_WIN32 && !defined ACE_HAS_WINCE
   ULONG size;
@@ -122,7 +127,7 @@ GuidGenerator::interfaceName(const char* iface)
 
   bool found = false;
   for (IP_ADAPTER_ADDRESSES* iter = addrs; iter && !found; iter = iter->Next) {
-    if (ACE_Wide_To_Ascii(iter->FriendlyName).char_rep() == interface_name_) {
+    if (ACE_Wide_To_Ascii(iter->FriendlyName).char_rep() == iface) {
       std::memcpy(node_id_, iter->PhysicalAddress,
                   std::min(static_cast<size_t>(iter->PhysicalAddressLength),
                            sizeof node_id_));
@@ -131,7 +136,13 @@ GuidGenerator::interfaceName(const char* iface)
   }
 
   alloc->free(addrs);
-  return found ? 0 : -1;
+  if (found) {
+    interface_name_ = iface;
+    return 0;
+  } else {
+    return -1;
+  }
+
 #elif defined ACE_LINUX || defined ACE_ANDROID
   ifreq ifr;
   // Guarantee that iface will fit in ifr.ifr_name and still be null terminated
@@ -153,6 +164,8 @@ GuidGenerator::interfaceName(const char* iface)
   }
   ACE_OS::close(h);
   std::memcpy(node_id_, ifr.ifr_addr.sa_data, sizeof node_id_);
+
+  interface_name_ = iface;
   return 0;
 #elif defined ACE_HAS_SIOCGIFCONF || defined ACE_HAS_MAC_OSX
   const ACE_HANDLE h = ACE_OS::socket(AF_INET, SOCK_DGRAM, 0);
@@ -186,7 +199,13 @@ GuidGenerator::interfaceName(const char* iface)
   }
 
   ACE_OS::close(h);
-  return found ? 0 : -1;
+
+  if (found) {
+    interface_name_ = iface;
+    return 0;
+  } else {
+    return -1;
+  }
 #elif defined ACE_VXWORKS
   int name[] = {CTL_NET, AF_ROUTE, 0, 0, NET_RT_IFLIST, 0};
   static const size_t name_elts = sizeof name / sizeof name[0];
@@ -215,6 +234,8 @@ GuidGenerator::interfaceName(const char* iface)
         && addr->sdl_alen >= sizeof node_id_) {
       std::memcpy(node_id_, LLADDR(addr), sizeof node_id_);
       alloc->free(result);
+
+      interface_name_ = iface;
       return 0;
     }
 

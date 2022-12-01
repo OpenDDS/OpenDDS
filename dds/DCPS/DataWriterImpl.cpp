@@ -1522,7 +1522,7 @@ DataWriterImpl::enable()
 #if defined(OPENDDS_SECURITY)
   security_config_ = participant->get_security_config();
   participant_permissions_handle_ = participant->permissions_handle();
-  dynamic_type_ = type_lookup_service->type_identifier_to_dynamic(type_support_->getCompleteTypeIdentifier(), publication_id);
+  dynamic_type_ = type_support_->get_type();
 #endif
 
   if (DCPS_debug_level >= 2) {

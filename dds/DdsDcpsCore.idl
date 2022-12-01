@@ -444,7 +444,8 @@ module DDS {
     // This is for when we support XCDR1.
     // @mutable
     struct SubscriptionBuiltinTopicData {
-      @id(0x005A) BUILT_IN_TOPIC_KEY BuiltinTopicKey_t key;
+      BUILT_IN_TOPIC_KEY
+      @id(0x005A) BuiltinTopicKey_t key;
       @id(0x0050) BuiltinTopicKey_t participant_key;
       @id(0x0005) string topic_name;
       @id(0x0007) string type_name;

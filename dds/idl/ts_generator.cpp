@@ -229,17 +229,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  virtual const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;\n"
       "\n"
       "  static " << ts_short_name << "TypeSupport::_ptr_type _narrow(CORBA::Object_ptr obj);\n"
-      "};\n"
-      "\n"
-      "namespace {\n"
-      "struct " << name_underscores << "_Initializer {\n"
-      "  " << name_underscores << "_Initializer()\n"
-      "  {\n"
-      "    " << ts_name << "TypeSupport_var ts = new " << ts_short_name << "TypeSupportImpl;\n"
-      "    ts->register_type(0, \"\");\n"
-      "  }\n"
-      "} init_" << name_underscores << ";\n"
-      "}\n\n";
+      "};\n\n";
   }
   be_global->header_ << be_global->versioning_end() << "\n";
 
@@ -280,6 +270,9 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
       "  return OpenDDS::DCPS::getMetaStruct<" << short_name << ">();\n"
       "}\n"
       "#endif /* !OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */\n\n"
+      "namespace {\n"
+      "  OpenDDS::DCPS::TypeSupportInitializer<" << ts_short_name << "TypeSupportImpl> ts_init_" << name_underscores << ";\n"
+      "}\n"
       "\n"
       "const OpenDDS::XTypes::TypeIdentifier& " << ts_short_name << "TypeSupportImpl::getMinimalTypeIdentifier() const\n"
       "{\n";
@@ -513,6 +506,9 @@ namespace face_ts_generator {
       "  OpenDDS::FaceTSS::register_callback(connection_id, waitset,\n"
       "                                      data_callback,\n"
       "                                      max_message_size, return_code);\n"
+      "}\n\n"
+      "namespace {\n"
+      "  OpenDDS::DCPS::TypeSupportInitializer<" << cxx_name << "TypeSupportImpl> ts_init_" << name_underscores << ";\n"
       "}\n\n";
   }
 }

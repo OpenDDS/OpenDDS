@@ -17,6 +17,7 @@
 #include "ICE/Ice.h"
 
 #include "dds/DCPS/XTypes/TypeObject.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -34,7 +35,9 @@ struct DiscoveredPublication_SecurityWrapper {
   XTypes::TypeInformation type_info;
 
   DiscoveredPublication_SecurityWrapper()
-    : have_ice_agent_info(false) {
+    : have_ice_agent_info(false)
+  {
+    data.ddsPublicationData.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
     security_info.endpoint_security_attributes = 0;
     security_info.plugin_endpoint_security_attributes = 0;
   }
@@ -49,7 +52,9 @@ struct DiscoveredSubscription_SecurityWrapper {
   XTypes::TypeInformation type_info;
 
   DiscoveredSubscription_SecurityWrapper()
-    : have_ice_agent_info(false) {
+    : have_ice_agent_info(false)
+  {
+    data.ddsSubscriptionData.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
     security_info.endpoint_security_attributes = 0;
     security_info.plugin_endpoint_security_attributes = 0;
   }

@@ -28,6 +28,7 @@
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include "BuiltInTopicUtils.h"
 #endif
+#include "XTypes/DynamicDataXcdrReadImpl.h"
 #include "transport/framework/EntryExit.h"
 #include "transport/framework/TransportExceptions.h"
 
@@ -1011,7 +1012,7 @@ DDS::DynamicData_ptr RecorderImpl::get_dynamic_data(const RawDataSample& sample)
   }
 
   DDS::DynamicType_var dt = dt_found->second;
-  XTypes::DynamicDataImpl* dd = new XTypes::DynamicDataImpl(sample.sample_.get(), enc, dt);
+  XTypes::DynamicDataXcdrReadImpl* dd = new XTypes::DynamicDataXcdrReadImpl(sample.sample_.get(), enc, dt);
   DDS::DynamicData_var dd_var = dd;
   if (!dd->check_xcdr1_mutable(dt)) {
     if (log_level >= LogLevel::Notice) {

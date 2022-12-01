@@ -60,7 +60,8 @@ public:
       return false;
     }
 
-    if (0 == key->type()) {
+    DDS::DynamicType_var key_type = key->type();
+    if (0 == key_type) {
       flags_ |= CHECK_LOCAL_DATAWRITER_REGISTER_INSTANCE_FALSE;
       condition_.notify_one();
       return OpenDDS::Security::CommonUtilities::set_security_error(ex, -1, 0, "CustomAccessControl::check_local_datawriter_register_instance: No type support");
@@ -104,7 +105,8 @@ public:
       return false;
     }
 
-    if (0 == key->type()) {
+    DDS::DynamicType_var key_type = key->type();
+    if (0 == key_type) {
       flags_ |= CHECK_LOCAL_DATAWRITER_DISPOSE_INSTANCE_FALSE;
       condition_.notify_one();
       return OpenDDS::Security::CommonUtilities::set_security_error(ex, -1, 0, "CustomAccessControl::check_local_datawriter_dispose_instance: No type support");
@@ -149,7 +151,8 @@ public:
       return false;
     }
 
-    if (0 == key->type()) {
+    DDS::DynamicType_var key_type = key->type();
+    if (0 == key_type) {
       flags_ |= CHECK_REMOTE_DATAWRITER_REGISTER_INSTANCE_FALSE;
       condition_.notify_one();
       return OpenDDS::Security::CommonUtilities::set_security_error(ex, -1, 0, "CustomAccessControl::check_remote_datawriter_register_instance: No type support");
@@ -194,7 +197,8 @@ public:
       return false;
     }
 
-    if (0 == key->type()) {
+    DDS::DynamicType_var key_type = key->type();
+    if (0 == key_type) {
       flags_ |= CHECK_REMOTE_DATAWRITER_DISPOSE_INSTANCE_FALSE;
       condition_.notify_one();
       return OpenDDS::Security::CommonUtilities::set_security_error(ex, -1, 0, "CustomAccessControl::check_remote_datawriter_dispose_instance: No type support");
