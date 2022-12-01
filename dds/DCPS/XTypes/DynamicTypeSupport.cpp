@@ -75,9 +75,10 @@ bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample)
   return sample.value.deserialize(strm);
 }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 template <>
 DDS::ReturnCode_t
-DataReaderImpl_T<XTypes::DynamicSample>::read_generic(DataReaderImpl::GenericBundle&,
+DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle&,
                                                       DDS::SampleStateMask,
                                                       DDS::ViewStateMask,
                                                       DDS::InstanceStateMask,
@@ -85,6 +86,7 @@ DataReaderImpl_T<XTypes::DynamicSample>::read_generic(DataReaderImpl::GenericBun
 {
   return DDS::RETCODE_UNSUPPORTED;
 }
+#endif
 
 template <>
 DDS::ReturnCode_t

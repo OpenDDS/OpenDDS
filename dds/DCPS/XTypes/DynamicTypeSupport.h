@@ -253,15 +253,16 @@ bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample);
 template <>
 OpenDDS_Dcps_Export
 const MetaStruct& getMetaStruct<XTypes::DynamicSample>();
-#endif
 
 template <>
 DDS::ReturnCode_t
-DataReaderImpl_T<XTypes::DynamicSample>::read_generic(DataReaderImpl::GenericBundle& gen,
+DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle& gen,
                                                       DDS::SampleStateMask sample_states,
                                                       DDS::ViewStateMask view_states,
                                                       DDS::InstanceStateMask instance_states,
                                                       bool adjust_ref_count);
+#endif
+
 template <>
 DDS::ReturnCode_t
 DataReaderImpl_T<XTypes::DynamicSample>::take(AbstractSamples& samples,
