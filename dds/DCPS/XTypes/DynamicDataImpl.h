@@ -28,7 +28,7 @@ namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
-  DynamicDataImpl(DDS::DynamicType_ptr type);
+  explicit DynamicDataImpl(DDS::DynamicType_ptr type);
   DynamicDataImpl(const DynamicDataImpl& other);
 
   DDS::DynamicType_ptr type();

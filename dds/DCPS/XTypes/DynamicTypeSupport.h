@@ -73,8 +73,7 @@ public:
   DCPS::Sample_rch copy(DCPS::Sample::Mutability mutability, DCPS::Sample::Extent extent) const
   {
     DDS::DynamicData_var dd = data_->clone();
-    return DCPS::dynamic_rchandle_cast<Sample>(DCPS::make_rch<DynamicSample>(
-      dd, mutability, extent));
+    return DCPS::make_rch<DynamicSample>(dd, mutability, extent);
   }
 
   DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr) const
@@ -201,6 +200,8 @@ public:
   }
 };
 
+// Types supporting the dynamic DataReader:
+
 struct DynamicSequenceAdapter {
   explicit DynamicSequenceAdapter(DDS::DynamicDataSeq& seq)
     : seq_(seq)
@@ -239,6 +240,7 @@ struct DDSTraits<XTypes::DynamicSample> {
   static bool gen_has_key() { return false; }
   static size_t key_count() { return 0; }
 };
+
 template <>
 struct MarshalTraits<XTypes::DynamicSample> {
   static bool to_message_block(ACE_Message_Block&, const XTypes::DynamicSample&) { return false; }
@@ -270,6 +272,10 @@ DataReaderImpl_T<XTypes::DynamicSample>::take(AbstractSamples& samples,
                                               DDS::ViewStateMask view_states,
                                               DDS::InstanceStateMask instance_states);
 #endif
+
+template <>
+void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample&);
+
 } // namespace DCPS
 
 namespace XTypes {
@@ -303,6 +309,12 @@ public:
     DynamicSample ds(dyn);
     return Base::get_key_value(ds, ih);
   }
+
+  void install_type_support(DCPS::TypeSupportImpl*);
+  void imbue_type(DynamicSample& sample);
+
+private:
+  DDS::DynamicType_var type_;
 };
 
 } // namespace XTypes

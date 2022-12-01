@@ -8,9 +8,10 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicTypeSupport.h"
 
+#  include "DynamicDataImpl.h"
+#  include "DynamicDataXcdrReadImpl.h"
 #  include "DynamicTypeImpl.h"
 #  include "Utils.h"
-#  include "DynamicDataImpl.h"
 
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/DCPS_Utils.h>
@@ -31,28 +32,12 @@ DynamicSample::DynamicSample(const DynamicSample& d)
 
 DynamicSample& DynamicSample::operator=(const DynamicSample& rhs)
 {
-  //TODO
-  return *this;
-}
-
-bool DynamicSample::serialize(Serializer& ser) const
-{
-  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
-  if (!ddi) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialize: "
-        "currently we only support DynamicDataImpl, the kind supplied by DynamicDataFactory\n"));
-    }
-    return false;
+  if (this != &rhs) {
+    mutability_ = rhs.mutability_;
+    extent_ = rhs.extent_;
+    data_ = rhs.data_;
   }
-  return ser << *ddi;
-}
-
-bool DynamicSample::deserialize(Serializer& ser)
-{
-  ACE_UNUSED_ARG(ser);
-  // TODO
-  return false;
+  return *this;
 }
 
 size_t DynamicSample::serialized_size(const Encoding& enc) const
@@ -61,11 +46,32 @@ size_t DynamicSample::serialized_size(const Encoding& enc) const
   if (!ddi) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
-        "currently we only support DynamicDataImpl, the kind supplied by DynamicDataFactory\n"));
+        "DynamicData must be DynamicDataImpl, the type supplied by DynamicDataFactory\n"));
     }
     return 0;
   }
   return DCPS::serialized_size(enc, *ddi);
+}
+
+bool DynamicSample::serialize(Serializer& ser) const
+{
+  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
+  if (!ddi) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialize: "
+        "DynamicData must be DynamicDataImpl, the type supplied by DynamicDataFactory\n"));
+    }
+    return false;
+  }
+  return ser << *ddi;
+}
+
+bool DynamicSample::deserialize(Serializer& ser)
+{
+  //TODO: review design
+  const DDS::DynamicType_var type = data_->type();
+  data_ = new DynamicDataXcdrReadImpl(ser, type);
+  return true;
 }
 
 bool DynamicSample::compare(const Sample& other) const
@@ -73,6 +79,17 @@ bool DynamicSample::compare(const Sample& other) const
   ACE_UNUSED_ARG(other);
   // TODO
   return false;
+}
+
+void DynamicDataReaderImpl::install_type_support(TypeSupportImpl* ts)
+{
+  type_ = ts->get_type();
+}
+
+void DynamicDataReaderImpl::imbue_type(DynamicSample& ds)
+{
+  const DDS::DynamicData_var data = new DynamicDataImpl(type_);
+  ds = DynamicSample(data);
 }
 
 } // namespace XTypes
@@ -88,6 +105,15 @@ bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample)
 {
   sample.value.set_key_only(true);
   return sample.value.deserialize(strm);
+}
+
+template <>
+void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample& sample)
+{
+  XTypes::DynamicDataReaderImpl* const self = dynamic_cast<XTypes::DynamicDataReaderImpl*>(this);
+  if (self) {
+    self->imbue_type(sample);
+  }
 }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE

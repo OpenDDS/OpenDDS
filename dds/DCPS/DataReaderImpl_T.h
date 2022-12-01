@@ -1070,6 +1070,7 @@ protected:
                                                 bool full_copy)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
+    dynamic_hook(*data);
     RcHandle<MessageHolder> message_holder;
 
     Message_Block_Ptr payload(sample.data(&mb_alloc_));
@@ -1247,6 +1248,10 @@ protected:
   }
 
 private:
+
+  /// Available for specialization so that some types of MessageType can observe and
+  /// change the sample before dds_demarshal deserializes into it
+  void dynamic_hook(MessageType&) {}
 
   bool store_instance_data_check(unique_ptr<MessageTypeWithAllocator>& instance_data,
                                  DDS::InstanceHandle_t publication_handle,
