@@ -222,13 +222,6 @@ const MetaStruct& getMetaStruct<XTypes::DynamicSample>()
   return m;
 }
 
-template <>
-OpenDDS_Dcps_Export
-const MetaStruct& getMetaStruct<DDS::DynamicData*>() //TODO: this is needed to resolve a linker error
-{
-  static const MetaStructImpl<XTypes::DynamicSample> m;
-  return m;
-}
 #endif
 
 } // namespace DCPS
