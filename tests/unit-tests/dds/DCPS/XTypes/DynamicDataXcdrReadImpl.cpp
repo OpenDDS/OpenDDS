@@ -1381,7 +1381,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_ReadValueFromStruct)
   DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
   unsigned char single_value_struct[] = {
-    0x00,0x00,0x00,0x60,  // +4=4 dheader
+    0x00,0x00,0x00,0x5e,  // +4=4 dheader
     0x00,0x00,0x00,0x03, // +4=8 my_enum
     0x00,0x00,0x00,0x0a, // +4=12 int_32
     0x00,0x00,0x00,0x0b, // +4=16 uint_32
@@ -1400,7 +1400,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_ReadValueFromStruct)
     0x01, // +1=74 bool
     (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=80 nested_struct
     0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=88 str
-    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=100 swtr
+    0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +10=98 wstr
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));
@@ -2283,7 +2283,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_ReadValueFromStruct)
     0x01, // +1=70 bool
     (0), (0), 0x00,0x00,0x00,0x0c, // +(2)+4=76 nested_struct
     0x00,0x00,0x00,0x04, 'a','b','c','\0', // +8=84 str
-    0x00,0x00,0x00,0x08, 0,0x61,0,0x62,0,0x63,0,0, // +12=96 swtr
+    0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +10=94 wstr
   };
   ACE_Message_Block msg(1024);
   msg.copy((const char*)single_value_struct, sizeof(single_value_struct));

@@ -190,6 +190,71 @@ struct FinalSequenceStruct {
   SEQUENCE_VALUE_MEMBERS
 };
 
+#define NESTED_UNION_BRANCHES \
+  case E_INT32: \
+    @id(0) long l; \
+  case E_UINT32: \
+    @id(1) unsigned long ul; \
+  case E_CHAR8: \
+    @id(2) char c;
+
+@final
+union FinalNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@mutable
+union MutableNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
+@appendable
+struct AppendableNestedStructInner {
+  @id(0) long l;
+};
+
+@final
+struct FinalNestedStructOuter {
+  @id(0) long l;
+  @id(1) AppendableNestedStructInner inner;
+  @id(2) short s;
+};
+
+@mutable
+struct MutableNestedStructOuter {
+  @id(0) octet o;
+  @id(1) FinalNestedStructInner inner;
+  @id(2) boolean b;
+};
+
+@appendable
+struct AppendableStruct {
+  @id(0) char c;
+  @id(1) MutableNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) MutableNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+@mutable
+struct MutableStruct {
+  @id(0) char c;
+  @id(1) FinalNestedStructOuter outer;
+  @id(2) short s;
+  @id(3) FinalNestedUnionInner inner;
+  @id(4) int8 i;
+};
+
+#define ARRAY_MEMBERS \
+  @id(0) long int_32a[2]; \
+  @id(1) unsigned long uint_32a[2]; \
+  @id(2) int8 int_8a[2];
+
+@mutable
+struct MutableArrayStruct {
+  ARRAY_MEMBERS
+};
+
 }; // module DynamicDataImpl
 
 #endif // OPENDDS_SAFETY_PROFILE
