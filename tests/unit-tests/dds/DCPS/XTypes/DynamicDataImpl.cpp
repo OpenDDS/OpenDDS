@@ -1912,6 +1912,67 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
     0x11 // +1=57 i
   };
 
+  XTypes::DynamicDataImpl data(dt);
+  // c
+  DDS::ReturnCode_t ret = data.set_char8_value(0, 'a');
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // outer
+  DDS::DynamicTypeMember_var dtm;
+  ret = dt->get_member(dtm, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::MemberDescriptor_var md;
+  ret = dtm->get_descriptor(md);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicData_var outer_dd = new XTypes::DynamicDataImpl(md->type());
+  //    outer.o
+  ret = outer_dd->set_byte_value(0, 0xff);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  //    outer.inner
+  DDS::DynamicTypeMember_var dtm2;
+  ret = md->type()->get_member(dtm2, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::MemberDescriptor_var md2;
+  ret = dtm2->get_descriptor(md2);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicData_var outer_inner_dd = new XTypes::DynamicDataImpl(md2->type());
+  ret = outer_inner_dd->set_int32_value(0, 0x7fffffff);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = outer_dd->set_complex_value(1, outer_inner_dd);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  //    outer.b
+  ret = outer_dd->set_boolean_value(2, true);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_complex_value(1, outer_dd);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // s
+  ret = data.set_int16_value(2, 0x000a);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // inner
+  dtm = 0;
+  ret = dt->get_member(dtm, 3);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  md = 0;
+  ret = dtm->get_descriptor(md);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicData_var inner_dd = new XTypes::DynamicDataImpl(md->type());
+  ret = inner_dd->set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = inner_dd->set_uint32_value(1, 0xffffffff);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_complex_value(3, inner_dd);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // i
+  ret = data.set_int8_value(4, 0x11);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  ACE_Message_Block buffer(128);
+  DCPS::Serializer ser(&buffer, xcdr2);
+  ASSERT_TRUE(ser << data);
+  EXPECT_PRED_FORMAT2(assert_DataView, appendable_struct, buffer);
 }
 
 /////////////////////////// Final tests ///////////////////////////
@@ -1949,4 +2010,94 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
   verify_single_value_struct<FinalSingleValueStruct>(dt, single_value_struct);
 }
 
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char final_struct[] = {
+    'a',(0),(0),(0), // +4=4 c
+    /////////// outer (AppendableNestedStructOuter) ///////////
+    0x00,0x00,0x00,0x12, // +4=8 dheader
+    0x12,0x34,0x56,0x78, // +4=12 ul
+    0x00,0x00,0x00,0x08, 0x20,0x00,0x00,0x00, 0x7f,0xff,0xff,0xff, // +12=24 inner.l
+    0x43,0x21, // +2=26 us
+    ////////////////////////////////////////////////////////
+    0x00,0x0a, // +2=28 s
+    /////////// inner (AppendableNestedUnionInner) ////////////
+    0x00,0x00,0x00,0x08, // +4=32 dheader
+    0x00,0x00,0x00,0x01, // +4=36 discriminator
+    0xff,0xff,0xff,0xff, // +4=40 ul
+    ////////////////////////////////////////////////////////
+    0x11 // +1=41 i
+  };
+
+  XTypes::DynamicDataImpl data(dt);
+  // c
+  DDS::ReturnCode_t ret = data.set_char8_value(0, 'a');
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // outer
+  DDS::DynamicTypeMember_var dtm;
+  ret = dt->get_member(dtm, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::MemberDescriptor_var md;
+  ret = dtm->get_descriptor(md);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicData_var outer_dd = new XTypes::DynamicDataImpl(md->type());
+  //    outer.ul
+  ret = outer_dd->set_uint32_value(0, 0x12345678);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  //    outer.inner
+  DDS::DynamicTypeMember_var dtm2;
+  ret = md->type()->get_member(dtm2, 1);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::MemberDescriptor_var md2;
+  ret = dtm2->get_descriptor(md2);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicData_var outer_inner_dd = new XTypes::DynamicDataImpl(md2->type());
+  ret = outer_inner_dd->set_int32_value(0, 0x7fffffff);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = outer_dd->set_complex_value(1, outer_inner_dd);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  //    outer.us
+  ret = outer_dd->set_uint16_value(2, 0x4321);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_complex_value(1, outer_dd);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // s
+  ret = data.set_int16_value(2, 0x000a);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // inner
+  dtm = 0;
+  ret = dt->get_member(dtm, 3);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  md = 0;
+  ret = dtm->get_descriptor(md);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  DDS::DynamicData_var inner_dd = new XTypes::DynamicDataImpl(md->type());
+  ret = inner_dd->set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = inner_dd->set_uint32_value(1, 0xffffffff);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_complex_value(3, inner_dd);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // i
+  ret = data.set_int8_value(4, 0x11);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  ACE_Message_Block buffer(128);
+  DCPS::Serializer ser(&buffer, xcdr2);
+  ASSERT_TRUE(ser << data);
+  EXPECT_PRED_FORMAT2(assert_DataView, final_struct, buffer);
+}
 #endif // OPENDDS_SAFETY_PROFILE

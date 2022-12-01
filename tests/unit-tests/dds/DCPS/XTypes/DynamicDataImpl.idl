@@ -190,6 +190,38 @@ struct FinalSequenceStruct {
   SEQUENCE_VALUE_MEMBERS
 };
 
+// Write to struct with nested aggregated members
+@appendable
+struct AppendableNestedStructInner {
+  @id(0) long l;
+};
+
+@mutable
+struct MutableNestedStructInner {
+  @id(0) long l;
+};
+
+@final
+struct FinalNestedStructOuter {
+  @id(0) long l;
+  @id(1) AppendableNestedStructInner inner;
+  @id(2) short s;
+};
+
+@appendable
+struct AppendableNestedStructOuter {
+  @id(0) unsigned long ul;
+  @id(1) MutableNestedStructInner inner;
+  @id(2) unsigned short us;
+};
+
+@mutable
+struct MutableNestedStructOuter {
+  @id(0) octet o;
+  @id(1) FinalNestedStructInner inner;
+  @id(2) boolean b;
+};
+
 #define NESTED_UNION_BRANCHES \
   case E_INT32: \
     @id(0) long l; \
@@ -203,28 +235,23 @@ union FinalNestedUnionInner switch (SomeEnum) {
   NESTED_UNION_BRANCHES
 };
 
+@appendable
+union AppendableNestedUnionInner switch (SomeEnum) {
+  NESTED_UNION_BRANCHES
+};
+
 @mutable
 union MutableNestedUnionInner switch (SomeEnum) {
   NESTED_UNION_BRANCHES
 };
 
-@appendable
-struct AppendableNestedStructInner {
-  @id(0) long l;
-};
-
 @final
-struct FinalNestedStructOuter {
-  @id(0) long l;
-  @id(1) AppendableNestedStructInner inner;
+struct FinalStruct {
+  @id(0) char c;
+  @id(1) AppendableNestedStructOuter outer;
   @id(2) short s;
-};
-
-@mutable
-struct MutableNestedStructOuter {
-  @id(0) octet o;
-  @id(1) FinalNestedStructInner inner;
-  @id(2) boolean b;
+  @id(3) AppendableNestedUnionInner inner;
+  @id(4) int8 i;
 };
 
 @appendable
