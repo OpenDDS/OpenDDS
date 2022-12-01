@@ -60,7 +60,7 @@ RakeResults<MessageType>::RakeResults(DataReaderImpl* reader,
       for (size_t i = order_bys.size(); i > 0; --i) {
         const String& fieldspec = order_bys[i - 1];
         //FUTURE: handle ASC / DESC as an extension to the DDS spec?
-        cmp = reader->create_qc_comparator(fieldspec.c_str(), cmp);
+        cmp = getMetaStruct<MessageType>().create_qc_comparator(fieldspec.c_str(), cmp);
       }
 
       SortedSetCmp comparator(cmp);
