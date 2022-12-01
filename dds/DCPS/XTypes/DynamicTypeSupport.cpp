@@ -101,7 +101,6 @@ DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle&,
 {
   return DDS::RETCODE_UNSUPPORTED;
 }
-#endif
 
 template <>
 DDS::ReturnCode_t
@@ -112,8 +111,6 @@ DataReaderImpl_T<XTypes::DynamicSample>::take(AbstractSamples&,
 {
   return DDS::RETCODE_UNSUPPORTED;
 }
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
 template <>
 struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
