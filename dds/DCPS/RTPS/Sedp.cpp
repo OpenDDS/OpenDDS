@@ -46,6 +46,9 @@
 #include <cstring>
 
 namespace {
+
+const OpenDDS::DCPS::MonotonicTime_t MTZERO = { 0, 0 };
+
 bool checkAndAssignQos(DDS::PublicationBuiltinTopicData& dest,
                        const DDS::PublicationBuiltinTopicData& src)
 {
@@ -4422,6 +4425,8 @@ Sedp::DiscoveryReader::data_received_i(const DCPS::ReceivedDataSample& sample,
     }
 
     Security::SPDPdiscoveredParticipantData pdata;
+    pdata.ddsParticipantDataSecure.base.base.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+    pdata.discoveredAt = MTZERO;
 
     if (!ParameterListConverter::from_param_list(data, pdata)) {
       ACE_ERROR((LM_ERROR,
@@ -6704,6 +6709,9 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
   } else if (equal_guid_prefixes(writer, participant_id_) && equal_guid_prefixes(reader, participant_id_)) {
     DCPS::ReaderAssociation ra = DCPS::ReaderAssociation();
     ra.readerId = reader;
+    ra.participantDiscoveredAt = MTZERO;
+    ra.readerQos = TheServiceParticipant->initial_DataReaderQos();
+    ra.subQos = TheServiceParticipant->initial_SubscriberQos();
     event_dispatcher_->dispatch(DCPS::make_rch<WriterRemoveAssociations>(DCPS::make_rch<WriterAssociationRecord>(callbacks, writer, ra)));
   }
 }
@@ -6731,6 +6739,10 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
   } else if (equal_guid_prefixes(reader, participant_id_) && equal_guid_prefixes(writer, participant_id_)) {
     DCPS::WriterAssociation wa = DCPS::WriterAssociation();
     wa.writerId = writer;
+    wa.participantDiscoveredAt = MTZERO;
+    wa.pubQos = TheServiceParticipant->initial_PublisherQos();
+    wa.transportContext = 0;
+    wa.writerQos = TheServiceParticipant->initial_DataWriterQos();
     event_dispatcher_->dispatch(DCPS::make_rch<ReaderRemoveAssociations>(DCPS::make_rch<ReaderAssociationRecord>(callbacks, reader, wa)));
   }
 }
