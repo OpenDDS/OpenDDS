@@ -28,7 +28,7 @@ typedef RcHandle<const Sample> ConstSample_rch;
  * from opendds_idl or a DynamicData. This is meant to be used by
  * DataReaderImpl and DataWriterImpl.
  */
-class OpenDDS_Dcps_Export Sample : public virtual RcObject {
+class OpenDDS_Dcps_Export Sample : public RcObject {
 public:
   enum Mutability {
     Mutable,
