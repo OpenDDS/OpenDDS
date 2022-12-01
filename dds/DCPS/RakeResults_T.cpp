@@ -49,7 +49,7 @@ RakeResults<MessageType>::RakeResults(DataReaderImpl* reader,
       return;
     }
     do_filter_ = qci->hasFilter();
-    std::vector<OPENDDS_STRING> order_bys = qci->getOrderBys();
+    std::vector<String> order_bys = qci->getOrderBys();
     do_sort_ = order_bys.size() > 0;
 
     if (do_sort_) {
@@ -58,10 +58,9 @@ RakeResults<MessageType>::RakeResults(DataReaderImpl* reader,
       // Iterate in reverse over the comma-separated fields so that the
       // top-level comparison is the leftmost.  The others will be chained.
       for (size_t i = order_bys.size(); i > 0; --i) {
-        const OPENDDS_STRING& fieldspec = order_bys[i - 1];
+        const String& fieldspec = order_bys[i - 1];
         //FUTURE: handle ASC / DESC as an extension to the DDS spec?
-        cmp = getMetaStruct<typename SampleSeq::value_type>()
-          .create_qc_comparator(fieldspec.c_str(), cmp);
+        cmp = reader->create_qc_comparator(fieldspec.c_str(), cmp);
       }
 
       SortedSetCmp comparator(cmp);
@@ -72,8 +71,7 @@ RakeResults<MessageType>::RakeResults(DataReaderImpl* reader,
   } else {
 #endif
     // PRESENTATION ordered access (TOPIC)
-    this->do_sort_ = presentation.ordered_access == true &&
-                     presentation.access_scope == DDS::TOPIC_PRESENTATION_QOS;
+   do_sort_ = presentation.ordered_access && presentation.access_scope == DDS::TOPIC_PRESENTATION_QOS;
 #ifndef OPENDDS_NO_QUERY_CONDITION
   }
 

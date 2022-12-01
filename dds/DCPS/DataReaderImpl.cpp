@@ -1746,6 +1746,14 @@ bool DataReaderImpl::contains_sample(DDS::SampleStateMask sample_states,
   return lookup_matching_instances(sample_states, view_states, instance_states).size();
 }
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
+ComparatorBase::Ptr DataReaderImpl::create_qc_comparator(const char*, ComparatorBase::Ptr) const
+{
+  // see DataReaderImpl_T for actual implementation
+  return ComparatorBase::Ptr();
+}
+#endif
+
 DDS::DataReaderListener_ptr
 DataReaderImpl::listener_for(DDS::StatusKind kind)
 {

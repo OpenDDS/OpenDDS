@@ -392,6 +392,10 @@ public:
                                         const DDS::StringSeq& params) = 0;
 #endif
 
+#ifndef OPENDDS_NO_QUERY_CONDITION
+  virtual ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const;
+#endif
+
   virtual RcHandle<MessageHolder> dds_demarshal(const ReceivedDataSample& sample,
                                                 DDS::InstanceHandle_t publication_handle,
                                                 SubscriptionInstance_rch& instance,
