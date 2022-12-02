@@ -1421,6 +1421,25 @@ struct Cxx11Generator : GeneratorBase
   bool scoped_enum() { return true; }
   std::string enum_base() { return " : uint32_t"; }
 
+  void gen_union_pragma_pre()
+  {
+    // Older versions of gcc will complain because it appears that a primitive
+    // default constructor is not called for anonymous unions.
+    be_global->lang_header_ <<
+      "#ifdef __GNUC__\n"
+      "#  pragma GCC diagnostic push\n"
+      "#  pragma GCC diagnostic ignored \"-Wmaybe-uninitialized\"\n"
+      "#endif\n";
+  }
+
+  void gen_union_pragma_post()
+  {
+    be_global->lang_header_ <<
+      "#ifdef __GNUC__\n"
+      "#  pragma GCC diagnostic pop\n"
+      "#endif\n\n";
+  }
+
   void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE, const char*)
   {
     be_global->lang_header_ <<
@@ -1699,6 +1718,7 @@ struct Cxx11Generator : GeneratorBase
     const std::string d_type = generator_->map_type(discriminator);
     const std::string defVal = generateDefaultValue(u);
 
+    gen_union_pragma_pre();
     gen_common_strunion_pre(nm);
 
     be_global->lang_header_ <<
@@ -1731,6 +1751,7 @@ struct Cxx11Generator : GeneratorBase
       "  void _reset();\n";
 
     gen_common_strunion_post(nm);
+    gen_union_pragma_post();
 
     const ScopedNamespaceGuard namespacesCpp(name, be_global->impl_);
     be_global->impl_ <<
