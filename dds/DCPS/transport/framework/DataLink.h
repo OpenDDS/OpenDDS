@@ -194,7 +194,7 @@ public:
   // The connection has been broken. No locks are being held.
   // Take a snapshot of current associations which will be removed
   // by DataLinkCleanupTask.
-  bool release_resources();
+  void release_resources();
 
   // Used by to inform the send strategy to clear all unsent samples upon
   // backpressure timed out.
