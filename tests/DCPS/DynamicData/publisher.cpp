@@ -6,10 +6,8 @@
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/StaticIncludes.h>
-
-#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 #include <dds/DCPS/XTypes/DynamicDataFactory.h>
-
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 #ifdef ACE_AS_STATIC_LIBS
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
@@ -39,7 +37,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   DDS::DomainParticipantFactory_var domain_participant_factory = TheParticipantFactoryWithArgs(argc, argv);
 
   ACE_Argv_Type_Converter conv(argc, argv);
-  char** argva = conv.get_ASCII_argv();
+  char** const argva = conv.get_ASCII_argv();
   bool dynamic = false;
   for (int i = 1; i < argc; ++i) {
     if (0 == std::strcmp("-dynamic", argva[i])) {
