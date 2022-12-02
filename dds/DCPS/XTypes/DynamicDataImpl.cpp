@@ -302,7 +302,7 @@ DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_boolean value)
 {}
 
 DynamicDataImpl::SingleValue::SingleValue(const char* str)
-  : kind_(TK_STRING8), active_(&str_), str_(ACE_OS::strdup(str))
+  : kind_(TK_STRING8), active_(0), str_(ACE_OS::strdup(str))
 {}
 
 #ifdef DDS_HAS_WCHAR
@@ -311,7 +311,7 @@ DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_wchar value)
 {}
 
 DynamicDataImpl::SingleValue::SingleValue(const CORBA::WChar* wstr)
-  : kind_(TK_STRING16), active_(&wstr_), wstr_(ACE_OS::strdup(wstr))
+  : kind_(TK_STRING16), active_(0), wstr_(ACE_OS::strdup(wstr))
 {}
 #endif
 
