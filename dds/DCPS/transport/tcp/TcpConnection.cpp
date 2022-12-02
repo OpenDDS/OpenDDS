@@ -82,7 +82,7 @@ OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch&
 
   link_ = link;
   if (link_) {
-    impl_ = TcpTransport_rch(static_cast<TcpTransport*>(&link_->impl()), inc_count());
+    impl_ = dynamic_rchandle_cast<TcpTransport>(link_->impl());
   } else {
     impl_.reset();
   }
@@ -134,15 +134,18 @@ OpenDDS::DCPS::TcpConnection::active_open()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   active_open(%C->%C)\n",
         LogAddr(local_address_).c_str(), LogAddr(remote_address_).c_str()));
 
-  TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
+  RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
 
-  if (on_active_connection_established() != -1 && transport.connect_tcp_datalink(*link_, rchandle_from(this)) != -1)
-    return 0;
+  if (transport) {
+    if (on_active_connection_established() != -1 && transport->connect_tcp_datalink(*link_, rchandle_from(this)) != -1) {
+      return 0;
+    }
 
-  const bool is_loop(local_address_ == remote_address_);
-  const PriorityKey key(transport_priority_, remote_address_,
+    const bool is_loop(local_address_ == remote_address_);
+    const PriorityKey key(transport_priority_, remote_address_,
                       is_loop, true /* active */);
-  transport.async_connect_failed(key);
+    transport->async_connect_failed(key);
+  }
   return -1;
 }
 
@@ -343,10 +346,12 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
     if (this->conn_retry_counter_ >= this->tcp_config_->conn_retry_attempts_) {
       this->handle_stop_reconnecting();
     } else {
-      TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
-      transport.connector_.close();
+      RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+      if (transport) {
+        transport->connector_.close();
 
-      this->reconnect_state_ = ACTIVE_WAITING_STATE;
+        this->reconnect_state_ = ACTIVE_WAITING_STATE;
+      }
     }
   } else {
     TcpSendStrategy_rch send_strategy = this->send_strategy();
@@ -593,19 +598,21 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
             reconnect_state_string(), this->conn_retry_counter_, retry_delay_msec));
     }
 
-    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
     ACE_Time_Value timeout;
     timeout.msec(static_cast<int>(retry_delay_msec));
 
     TcpConnection* pconn = this;
     int ret;
     {
-      ACE_Reverse_Lock<LockType> rev_lock(this->reconnect_lock_);
-      ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
-      // We need to temporarily release the lock here because the connect could occasionally be synchronous
-      // if the source and destination are on the same host. When the call become synchronous, active_reconnect_open()
-      // would be called and try to acquired the lock in the same thread.
-      ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
+      RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+      if (transport) {
+        ACE_Reverse_Lock<LockType> rev_lock(this->reconnect_lock_);
+        ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+        // We need to temporarily release the lock here because the connect could occasionally be synchronous
+        // if the source and destination are on the same host. When the call become synchronous, active_reconnect_open()
+        // would be called and try to acquired the lock in the same thread.
+        ret = transport->connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
+      }
     }
 
     if (ret == -1 && errno != EWOULDBLOCK)
@@ -697,21 +704,25 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
       config_name().c_str(), LogAddr(remote_address_).c_str()));
 
     // build key and remove from service
-    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
-
     const bool is_loop(local_address_ == remote_address_);
     const PriorityKey key(transport_priority_, remote_address_,
                           is_loop, true /* active */);
 
-    transport.async_connect_failed(key);
+    RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+    if (transport) {
+      transport->async_connect_failed(key);
     }
-
     break;
+  }
   case ACTIVE_RECONNECTING_STATE: {
     // we get the timeout before the network stack reports the destination is unreachable
     // cancel the async connect operation and retry it.
-    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
-    transport.connector_.cancel(this);
+    {
+      RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+      if (transport) {
+        transport->connector_.cancel(this);
+      }
+    }
     this->active_reconnect_i();
     break;
   }

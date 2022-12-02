@@ -64,19 +64,19 @@ using RTPS::to_rtps_seqnum;
 
 const size_t ONE_SAMPLE_PER_PACKET = 1;
 
-RtpsUdpDataLink::RtpsUdpDataLink(RtpsUdpTransport& transport,
+RtpsUdpDataLink::RtpsUdpDataLink(RcHandle<RtpsUdpTransport> transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
                                  const ReactorTask_rch& reactor_task,
                                  InternalTransportStatistics& transport_statistics,
                                  ACE_Thread_Mutex& transport_statistics_mutex)
-  : DataLink(transport, // 3 data link "attributes", below, are unused
+  : DataLink(dynamic_rchandle_cast<TransportImpl>(transport), // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
              false)     // is_active
   , reactor_task_(reactor_task)
   , job_queue_(make_rch<JobQueue>(reactor_task->get_reactor()))
-  , event_dispatcher_(transport.event_dispatcher())
+  , event_dispatcher_(transport->event_dispatcher())
   , mb_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , db_allocator_(TheServiceParticipant->association_chunk_multiplier())
   , custom_allocator_(TheServiceParticipant->association_chunk_multiplier() * config.anticipated_fragments_, RtpsSampleHeader::FRAG_SIZE)
@@ -117,10 +117,10 @@ RtpsUdpDataLink::~RtpsUdpDataLink()
   flush_send_queue_sporadic_->cancel();
 }
 
-RtpsUdpInst&
+const RtpsUdpInst&
 RtpsUdpDataLink::config() const
 {
-  return static_cast<RtpsUdpTransport&>(impl()).config();
+  return dynamic_rchandle_cast<RtpsUdpTransport>(impl())->config();
 }
 
 bool
@@ -301,7 +301,7 @@ RtpsUdpDataLink::open(const ACE_SOCK_Dgram& unicast_socket
   ipv6_unicast_socket_ = ipv6_unicast_socket;
 #endif
 
-  RtpsUdpInst& cfg = config();
+  const RtpsUdpInst& cfg = config();
 
   if (cfg.use_multicast_) {
 #ifdef ACE_HAS_MAC_OSX
@@ -4528,10 +4528,10 @@ RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData()
   }
 }
 
-RtpsUdpTransport&
+RcHandle<RtpsUdpTransport>
 RtpsUdpDataLink::transport()
 {
-  return static_cast<RtpsUdpTransport&>(impl());
+  return dynamic_rchandle_cast<RtpsUdpTransport>(impl());
 }
 
 RtpsUdpSendStrategy_rch
@@ -4743,7 +4743,8 @@ RtpsUdpDataLink::get_ice_agent() const
 
 WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {
-  return impl().get_ice_endpoint();
+  RcHandle<TransportImpl> ti = impl();
+  return ti ? ti->get_ice_endpoint() : WeakRcHandle<ICE::Endpoint>();
 }
 
 bool RtpsUdpDataLink::is_leading(const GUID_t& writer_id,

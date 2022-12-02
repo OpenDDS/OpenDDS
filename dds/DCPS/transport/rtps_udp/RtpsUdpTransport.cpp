@@ -145,7 +145,7 @@ RtpsUdpTransport::make_datalink(const GuidPrefix_t& local_prefix)
 #endif
   }
 
-  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(ref(*this), local_prefix, config(), reactor_task(), ref(transport_statistics_), ref(transport_statistics_mutex_));
+  RtpsUdpDataLink_rch link = make_rch<RtpsUdpDataLink>(rchandle_from(this), local_prefix, config(), reactor_task(), ref(transport_statistics_), ref(transport_statistics_mutex_));
 
 #if defined(OPENDDS_SECURITY)
   link->local_crypto_handle(local_crypto_handle_);

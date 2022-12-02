@@ -27,10 +27,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-UdpDataLink::UdpDataLink(UdpTransport& transport,
-                         Priority   priority,
+UdpDataLink::UdpDataLink(RcHandle<UdpTransport> transport,
+                         Priority priority,
                          const ReactorTask_rch& reactor_task,
-                         bool       active)
+                         bool active)
   : DataLink(transport,
              priority,
              false, // is_loopback,
@@ -47,7 +47,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 {
   this->remote_address_ = remote_address;
 
-  UdpInst& config = static_cast<UdpTransport&>(this->impl()).config();
+  UdpInst& config = dynamic_rchandle_cast<UdpTransport>(impl())->config();
 
   this->is_loopback_ = this->remote_address_ == config.local_address();
 
@@ -155,7 +155,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       LogAddr(remote_address).c_str()));
 
     TransportLocator info;
-    impl().connection_info_i(info, CONNINFO_ALL);
+    impl()->connection_info_i(info, CONNINFO_ALL);
     ACE_Message_Block* data_block;
     ACE_NEW_RETURN(data_block,
                    ACE_Message_Block(info.data.length()+sizeof(Priority),
@@ -277,7 +277,7 @@ UdpDataLink::control_received(ReceivedDataSample& sample,
   // the connection handshaking, so receiving one is an indication of the
   // passive_connection event.  In the future the submessage_id_ could be used
   // to allow different types of messages here.
-  static_cast<UdpTransport&>(this->impl()).passive_connection(remote_address, sample);
+  dynamic_rchandle_cast<UdpTransport>(impl())->passive_connection(remote_address, sample);;
 }
 
 void

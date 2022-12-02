@@ -362,7 +362,7 @@ RtpsUdpReceiveStrategy::receive_bytes(iovec iov[],
 #ifdef OPENDDS_SECURITY
                                            link_->get_ice_agent(), link_->get_ice_endpoint(),
 #endif
-                                           link_->transport(), stop);
+                                           *link_->transport(), stop);
 #endif
   remote_address_ = remote_address;
 

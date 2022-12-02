@@ -88,7 +88,7 @@ public:
   /// created this DataLink.  The ability to specify a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl& impl, Priority priority, bool is_loopback, bool is_active);
+  DataLink(RcHandle<TransportImpl> impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
   /// Reactor invokes this after being notified in schedule_stop or cancel_release
@@ -250,7 +250,7 @@ public:
   /// targets of this DataLink (see is_target()).
   GUIDSeq* target_intersection(const RepoId& pub_id, const GUIDSeq& in, size_t& n_subs);
 
-  TransportImpl& impl() const;
+  RcHandle<TransportImpl> impl() const;
 
   void default_listener(const TransportReceiveListener_wrch& trl);
   TransportReceiveListener_wrch default_listener() const;
@@ -413,8 +413,8 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, LocalAssociationInfo, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
-  /// A reference to the TransportImpl that created this DataLink.
-  TransportImpl& impl_;
+  /// A weak rchandle to the TransportImpl that created this DataLink.
+  WeakRcHandle<TransportImpl> impl_;
 
   /// The id for this DataLink
   ACE_UINT64 id_;

@@ -38,7 +38,7 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-MulticastDataLink::MulticastDataLink(MulticastTransport& transport,
+MulticastDataLink::MulticastDataLink(RcHandle<MulticastTransport> transport,
                                      const MulticastSessionFactory_rch& session_factory,
                                      MulticastPeer local_peer,
                                      MulticastInst& config,
@@ -170,7 +170,7 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
   }
 
   MulticastSession_rch session =
-    this->session_factory_->create(transport().reactor_task()->interceptor(), this, remote_peer);
+    this->session_factory_->create(transport()->reactor_task()->interceptor(), this, remote_peer);
   if (session.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: ")
@@ -423,7 +423,7 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     return;
   }
 
-  transport().passive_connection(local_peer, source);
+  transport()->passive_connection(local_peer, source);
 }
 
 void

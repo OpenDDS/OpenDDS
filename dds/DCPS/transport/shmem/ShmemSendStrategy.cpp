@@ -19,13 +19,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 ShmemSendStrategy::ShmemSendStrategy(ShmemDataLink* link)
-  : TransportSendStrategy(0, link->impl(),
+  : TransportSendStrategy(0, *link->impl(),
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>())
   , link_(link)
   , current_data_(0)
-  , datalink_control_size_(link->impl().config().datalink_control_size_)
+  , datalink_control_size_(link->config().datalink_control_size_)
 {
 #ifdef OPENDDS_SHMEM_UNIX
   memset(&peer_semaphore_, 0, sizeof(peer_semaphore_));

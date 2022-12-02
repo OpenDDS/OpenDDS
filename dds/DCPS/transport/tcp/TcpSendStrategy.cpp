@@ -24,7 +24,7 @@ OpenDDS::DCPS::TcpSendStrategy::TcpSendStrategy(
   TcpSynchResource* synch_resource,
   const ReactorTask_rch& task,
   Priority priority)
-  : TransportSendStrategy(id, link.impl(),
+  : TransportSendStrategy(id, *link.impl(),
                           synch_resource, priority,
                           make_rch<ReactorSynchStrategy>(this,task->get_reactor()))
   , link_(link)
