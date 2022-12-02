@@ -20,7 +20,9 @@ class DynamicDataImpl;
 }
 
 namespace DCPS {
+OpenDDS_Dcps_Export
 bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
 }
 

@@ -75,7 +75,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     // or by index 0 (Section 7.5.2.11.1).
     if (index != 0 && DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
-                 " Received invalid index (%d) for type %C\n", index, typekind_to_string(tk)));
+                 " Received invalid index (%u) for type %C\n", index, typekind_to_string(tk)));
     }
     return MEMBER_ID_INVALID;
   case TK_BITMASK:
@@ -94,7 +94,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     if (bound > 0 && index >= bound) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
-                   " Input index (%d) is out-of-bound (bound is %d)\n", index, bound));
+                   " Input index (%u) is out-of-bound (bound is %u)\n", index, bound));
       }
       return MEMBER_ID_INVALID;
     }
@@ -113,7 +113,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     if (index >= length) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
-                   " Input index (%d) is out-of-bound (array length is %d)\n", index, length));
+                   " Input index (%u) is out-of-bound (array length is %u)\n", index, length));
       }
       return MEMBER_ID_INVALID;
     }

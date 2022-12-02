@@ -1,6 +1,7 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 
-#include "../../../DynamicDataImplTypeSupportImpl.h"
+#include <DynamicDataImplTypeSupportImpl.h>
+
 #include "../../../../Utils/DataView.h"
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
@@ -48,10 +49,10 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   // Set int_32 but use wrong Id
   ret = data.set_int32_value(2, input.int_32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   // Set int_32 but use wrong interface
   ret = data.set_uint32_value(1, static_cast<CORBA::ULong>(input.int_32));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_value(1, input.int_32);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint32_value(2, input.uint_32);
@@ -74,7 +75,7 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   // Member type at the given Id does not match interface
   ret = data.set_char8_value(14, input.char_8);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_char8_value(12, input.char_8);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 #ifdef DDS_HAS_WCHAR
@@ -119,10 +120,10 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   DDS::DynamicData_var int16_dd = new XTypes::DynamicDataImpl(md->type());
   // Using incorrect interface
   ret = int16_dd->set_int32_value(XTypes::MEMBER_ID_INVALID, 10);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   // Use correct interface but wrong id (expect MEMBER_ID_INVALID)
   ret = int16_dd->set_int16_value(rewrite_id, input.int_16);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = int16_dd->set_int16_value(XTypes::MEMBER_ID_INVALID, input.int_16);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_complex_value(rewrite_id, int16_dd);
@@ -198,10 +199,10 @@ void verify_int32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   }
   // A new discriminator value doesn't select the existing member.
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   // Write a member that isn't selected by the existing discriminator.
   ret = data.set_uint32_value(2, CORBA::ULong(10));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   // Rewrite the selected member.
   ret = data.set_int32_value(1, CORBA::Long(11));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
@@ -268,9 +269,9 @@ void verify_uint32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT8);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_value(1, CORBA::Long(10));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::ULong(11));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
