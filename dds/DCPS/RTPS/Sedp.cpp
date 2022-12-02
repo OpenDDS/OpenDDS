@@ -6910,6 +6910,7 @@ void Sedp::request_remote_complete_type_objects(
         String(gc).c_str()));
     }
     cond.done(DDS::RETCODE_BAD_PARAMETER);
+    return;
   }
 
   request_type_objects(
