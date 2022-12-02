@@ -5,17 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_NS_unistd.h"
-
 #include "TimingChecker.h"
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/SporadicTask.h"
-#include "dds/DCPS/ReactorTask.h"
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/SporadicTask.h>
+#include <dds/DCPS/ReactorTask.h>
 
-#include "../../../DCPS/common/TestSupport.h"
+#include <ace/OS_NS_unistd.h>
+
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 using namespace OpenDDS::DCPS;
+
+namespace {
 
 ACE_Atomic_Op<ACE_Thread_Mutex, unsigned int> total_count = 0;
 
@@ -44,8 +47,9 @@ struct TestObj : public virtual RcObject
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> do_schedule_;
 };
 
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+} // (anonymous) namespace
+
+TEST(dds_DCPS_SporadicTask, TimingChecker)
 {
   using namespace OpenDDS::DCPS;
 
@@ -62,10 +66,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   RcHandle<TestObj> obj = make_rch<TestObj>(time_source, reactor_task.interceptor());
   obj->sporadic_->schedule(TimeDuration::from_msec(2000));
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 0);
+  EXPECT_EQ(total_count, 0);
   ACE_OS::sleep(5);
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 1);
+  EXPECT_EQ(total_count, 1);
   obj->set_do_schedule(true);
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000);
   size_t schedule_calls = 0;
@@ -80,22 +84,21 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1)
   if (tight_timing) {
-    TEST_CHECK(total_count == 21);
+    EXPECT_EQ(total_count, 21);
   } else {
-    TEST_CHECK(total_count >= 16);
-    TEST_CHECK(total_count <= 21);
+    EXPECT_GE(total_count, 16);
+    EXPECT_LE(total_count, 21);
   }
   ACE_OS::sleep(2);
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
   // No lingering enables / executions mean total count should be unchanged
   if (tight_timing) {
-    TEST_CHECK(total_count == 21);
+    EXPECT_EQ(total_count, 21);
   } else {
-    TEST_CHECK(total_count >= 16);
-    TEST_CHECK(total_count <= 21);
+    EXPECT_GE(total_count, 16);
+    EXPECT_LE(total_count, 21);
   }
   obj->sporadic_->cancel();
 
   reactor_task.stop();
-  return 0;
 }
