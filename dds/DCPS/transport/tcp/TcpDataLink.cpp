@@ -270,7 +270,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 
   if (released) {
     RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(impl());
-    if (transport) { 
+    if (transport) {
       const int result = transport->connect_tcp_datalink(*this, connection);
       if (result == 0) {
         do_association_actions();
