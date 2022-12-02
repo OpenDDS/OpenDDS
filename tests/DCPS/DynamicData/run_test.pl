@@ -15,8 +15,11 @@ use strict;
 my $test = new PerlDDS::TestFramework();
 $test->setup_discovery();
 
-$test->process('subscriber', 'subscriber');
-$test->process('publisher', 'publisher');
+my $dyn;
+$test->flag('dyn', \$dyn);
+
+$test->process('subscriber', 'subscriber', $dyn eq 'dr' ? '-dynamic' : '');
+$test->process('publisher', 'publisher', $dyn eq 'dw' ? '-dynamic' : '');
 
 rmtree './DCS';
 
