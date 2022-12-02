@@ -5,6 +5,7 @@
 
 #include "RtpsUdpTransport.h"
 
+#include "RtpsUdpDataLink.h"
 #include "RtpsUdpInst.h"
 #include "RtpsUdpInst_rch.h"
 #include "RtpsUdpSendStrategy.h"
@@ -342,6 +343,22 @@ RtpsUdpTransport::use_datalink(const RepoId& local_id,
 
   return true;
 }
+
+#if defined(OPENDDS_SECURITY)
+void
+RtpsUdpTransport::local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
+{
+  RtpsUdpDataLink_rch link;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(links_lock_);
+    local_crypto_handle_ = pch;
+    link = link_;
+  }
+  if (link) {
+    link->local_crypto_handle(pch);
+  }
+}
+#endif
 
 void
 RtpsUdpTransport::get_connection_addrs(const TransportBLOB& remote,

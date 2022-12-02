@@ -38,7 +38,7 @@ namespace {
   const Encoding::Kind encoding_kind = Encoding::KIND_UNALIGNED_CDR;
 }
 
-MulticastDataLink::MulticastDataLink(RcHandle<MulticastTransport> transport,
+MulticastDataLink::MulticastDataLink(const MulticastTransport_rch& transport,
                                      const MulticastSessionFactory_rch& session_factory,
                                      MulticastPeer local_peer,
                                      MulticastInst& config,

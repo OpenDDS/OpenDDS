@@ -5,9 +5,11 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include "RtpsSampleHeader.h"
 #include "RtpsUdpInst.h"
 #include "RtpsUdpLoader.h"
 #include "RtpsUdpTransport.h"
+#include "RtpsUdpSendStrategy.h"
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/NetworkResource.h>

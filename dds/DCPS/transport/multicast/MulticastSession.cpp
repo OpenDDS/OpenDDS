@@ -6,10 +6,11 @@
  */
 
 #include "MulticastSession.h"
+#include "MulticastReceiveStrategy.h"
 
-#include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/GuidConverter.h>
 
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 #include <cmath>
 

@@ -68,11 +68,11 @@ MulticastTransport::make_datalink(const RepoId& local_id,
             priority, active), 2);
 
   MulticastDataLink_rch link(make_rch<MulticastDataLink>(rchandle_from(this),
-                                   session_factory,
-                                   local_peer,
-                                   ref(config()),
-                                   reactor_task(),
-                                   active));
+                                                         session_factory,
+                                                         local_peer,
+                                                         ref(config()),
+                                                         reactor_task(),
+                                                         active));
 
   // Join multicast group:
   if (!link->join(this->config().group_address_)) {

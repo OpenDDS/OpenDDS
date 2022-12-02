@@ -10,11 +10,12 @@
 
 #include "Rtps_Udp_Export.h"
 
-#include "dds/DCPS/transport/framework/TransportInst.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/NetworkAddress.h"
+#include "RtpsUdpTransport_rch.h"
 
-#include "dds/DCPS/RTPS/ICE/Ice.h"
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/RTPS/ICE/Ice.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -247,4 +248,4 @@ inline NetworkAddress RtpsUdpInst::stun_server_address() const
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* DCPS_RTPSUDPINST_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPINST_H */

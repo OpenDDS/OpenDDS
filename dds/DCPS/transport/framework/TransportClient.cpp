@@ -1057,7 +1057,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
           pub_links = subset;
         }
 
-  #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  #endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 
         // This will do several things, including adding to the membership
         // of the send_links set.  Any DataLinks added to the send_links

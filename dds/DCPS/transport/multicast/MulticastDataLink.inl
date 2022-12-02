@@ -10,10 +10,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ACE_INLINE RcHandle<MulticastTransport>
+ACE_INLINE MulticastTransport_rch
 MulticastDataLink::transport()
 {
-  return dynamic_rchandle_cast<MulticastTransport>(DataLink::impl());
+  return dynamic_rchandle_cast<MulticastTransport>(impl());
 }
 
 ACE_INLINE MulticastPeer

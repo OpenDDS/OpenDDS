@@ -28,12 +28,12 @@ namespace {
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpDataLink::TcpDataLink(
+  const OpenDDS::DCPS::TcpTransport_rch& transport_impl,
   const ACE_INET_Addr& remote_address,
-  RcHandle<OpenDDS::DCPS::TcpTransport> transport_impl,
   Priority priority,
   bool is_loopback,
   bool is_active)
-  : DataLink(dynamic_rchandle_cast<TransportImpl>(transport_impl), priority, is_loopback, is_active)
+  : DataLink(transport_impl, priority, is_loopback, is_active)
   , remote_address_(remote_address)
   , graceful_disconnect_sent_(false)
   , release_is_pending_(false)

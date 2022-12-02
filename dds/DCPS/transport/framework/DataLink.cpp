@@ -39,7 +39,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 /// Only called by our TransportImpl object.
-DataLink::DataLink(RcHandle<TransportImpl> impl, Priority priority, bool is_loopback,
+DataLink::DataLink(const RcHandle<TransportImpl>& impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
     impl_(impl),
@@ -767,7 +767,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
     subset.data_received(sample, incl_excl, constrain);
 
   } else {
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 
     if (DCPS_debug_level > 9) {
       // Just get the set to do our dirty work by having it iterate over its
@@ -788,7 +788,7 @@ DataLink::data_received_i(ReceivedDataSample& sample,
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   }
 
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 }
 
 // static
@@ -1154,9 +1154,9 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
   if ((result == -1) && (errno != ENOTSUP)
 #ifdef WSAEINVAL
       && (errno != WSAEINVAL)
-#endif
+#endif /* WSAINVAL */
      ) {
-#endif // IP_TOS
+#endif /* IP_TOS */
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataLink::set_dscp_codepoint() - ")
                ACE_TEXT("failed to set the %C codepoint to %d: %m, ")
@@ -1171,7 +1171,7 @@ DataLink::set_dscp_codepoint(int cp, ACE_SOCK& socket)
                which,
                cp));
   }
-#endif
+#endif /* IP_TOS */
 }
 
 bool
