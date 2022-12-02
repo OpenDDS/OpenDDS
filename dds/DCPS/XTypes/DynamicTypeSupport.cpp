@@ -150,42 +150,44 @@ struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
   size_t numDcpsKeys() const { return 0; }
 #endif /* OPENDDS_NO_MULTI_TOPIC */
 
-  bool isDcpsKey(const char* field) const
+  bool isDcpsKey(const char* /*field*/) const
   {
     //TODO
     return false;
   }
 
-  ACE_CDR::ULong map_name_to_id(const char* field) const
+  ACE_CDR::ULong map_name_to_id(const char* /*field*/) const
   {
     //TODO
     return 0;
   }
 
-  Value getValue(const void* stru, DDS::MemberId memberId) const
+  Value getValue(const void* stru, DDS::MemberId /*memberId*/) const
   {
     const T& typed = *static_cast<const T*>(stru);
+    ACE_UNUSED_ARG(typed);
     Value v(0);
     //TODO
     return v;
   }
 
-  Value getValue(const void* stru, const char* field) const
+  Value getValue(const void* stru, const char* /*field*/) const
   {
     const T& typed = *static_cast<const T*>(stru);
+    ACE_UNUSED_ARG(typed);
     Value v(0);
     //TODO
     return v;
   }
 
-  Value getValue(Serializer& strm, const char* field) const
+  Value getValue(Serializer& /*strm*/, const char* /*field*/) const
   {
     Value v(0);
     //TODO
     return v;
   }
 
-  ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
+  ComparatorBase::Ptr create_qc_comparator(const char* /*field*/, ComparatorBase::Ptr /*next*/) const
   {
     //TODO
     return ComparatorBase::Ptr();
@@ -207,7 +209,7 @@ struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
   }
 #endif
 
-  bool compare(const void* lhs, const void* rhs, const char* field) const
+  bool compare(const void* /*lhs*/, const void* /*rhs*/, const char* /*field*/) const
   {
     //TODO
     return false;

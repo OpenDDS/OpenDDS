@@ -315,6 +315,12 @@ public:
 
 private:
   DDS::DynamicType_var type_;
+
+  // work around "hides overloaded virtual" warnings
+  using Base::read_next_sample;
+  using Base::take_next_sample;
+  using Base::lookup_instance;
+  using Base::get_key_value;
 };
 
 } // namespace XTypes

@@ -14,6 +14,8 @@
 #  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
+#include <ace/Argv_Type_Converter.h>
+
 void read_dynamic(DDS::DataReader_var& dr, bool& done, bool& got_message);
 void read_plain(DDS::DataReader_var& dr, bool& done, bool& got_message);
 
@@ -28,9 +30,11 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   DDS::DomainParticipantFactory_var domain_participant_factory = TheParticipantFactoryWithArgs(argc, argv);
 
+  ACE_Argv_Type_Converter conv(argc, argv);
+  char** argva = conv.get_ASCII_argv();
   bool dynamic = false;
   for (int i = 1; i < argc; ++i) {
-    if (0 == std::strcmp("-dynamic", argv[i])) {
+    if (0 == std::strcmp("-dynamic", argva[i])) {
       dynamic = true;
       break;
     }
