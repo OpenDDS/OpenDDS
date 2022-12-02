@@ -872,12 +872,12 @@ OpenDDS::DCPS::TcpConnection::relink_from_recv(bool do_suspend)
     send_strategy->suspend_send();
 }
 
-bool
+void
 OpenDDS::DCPS::TcpConnection::tear_link()
 {
   DBG_ENTRY_LVL("TcpConnection","tear_link",6);
 
-  return this->link_->release_resources();
+  return link_->release_resources();
 }
 
 void

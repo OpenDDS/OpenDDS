@@ -988,14 +988,16 @@ DataLink::pre_stop_i()
   }
 }
 
-bool
+void
 DataLink::release_resources()
 {
   DBG_ENTRY_LVL("DataLink", "release_resources", 6);
 
   this->prepare_release();
   RcHandle<TransportImpl> impl = impl_.lock();
-  return impl->release_link_resources(this);
+  if (impl) {
+    impl->release_link_resources(this);
+  }
 }
 
 bool
@@ -1075,7 +1077,9 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
     VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
     {
       RcHandle<TransportImpl> impl = impl_.lock();
-      impl->unbind_link(this);
+      if (impl) {
+        impl->unbind_link(this);
+      }
     }
     if (assoc_by_remote_.empty() && assoc_by_local_.empty()) {
       this->stop();
