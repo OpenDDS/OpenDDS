@@ -72,6 +72,13 @@ class OpenDDS_Dcps_Export TypeSupportImpl
 public:
   TypeSupportImpl() {}
 
+#ifndef OPENDDS_SAFETY_PROFILE
+  explicit TypeSupportImpl(DDS::DynamicType_ptr type)
+  : type_(DDS::DynamicType::_duplicate(type))
+  {
+  }
+#endif
+
   virtual ~TypeSupportImpl();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
@@ -89,6 +96,13 @@ public:
   /// NOTE: This one implements the IDL TypeSupport method so it returns a CORBA String
   /// that the caller must take ownership of.
   virtual char* get_type_name();
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  virtual DDS::DynamicType_ptr get_type()
+  {
+    return DDS::DynamicType::_duplicate(type_);
+  }
+#endif
 
   virtual size_t key_count() const = 0;
   bool has_dcps_key()
@@ -121,7 +135,9 @@ public:
 
 protected:
 #ifndef OPENDDS_SAFETY_PROFILE
-  DDS::DynamicType_ptr get_type_from_type_lookup_service();
+  void get_type_from_type_lookup_service();
+
+  DDS::DynamicType_var type_;
 #endif
 
 private:
@@ -185,7 +201,8 @@ public:
 #ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicType_ptr get_type()
   {
-    return get_type_from_type_lookup_service();
+    get_type_from_type_lookup_service();
+    return TypeSupportImpl::get_type();
   }
 #endif
 };

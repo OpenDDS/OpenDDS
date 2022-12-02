@@ -24,13 +24,13 @@ public:
   DynamicSample(DDS::DynamicData_ptr data,
     DCPS::Sample::Mutability mutability, DCPS::Sample::Extent extent)
   : Sample(mutability, extent)
-  , data_(data)
+  , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
   DynamicSample(DDS::DynamicData_ptr data, DCPS::Sample::Extent extent)
   : Sample(DCPS::Sample::ReadOnly, extent)
-  , data_(data)
+  , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
@@ -55,8 +55,9 @@ public:
 
   DCPS::Sample_rch copy(DCPS::Sample::Mutability mutability, DCPS::Sample::Extent extent) const
   {
+    DDS::DynamicData_var dd = data_->clone();
     return DCPS::dynamic_rchandle_cast<Sample>(DCPS::make_rch<DynamicSample>(
-      data_->clone(), mutability, extent));
+      dd, mutability, extent));
   }
 
   DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr) const
@@ -189,8 +190,8 @@ public:
   typedef DynamicTypeSupport_ptr _ptr_type;
   typedef DynamicTypeSupport_var _var_type;
 
-  DynamicTypeSupport(DynamicType_var type)
-  : type_(type)
+  explicit DynamicTypeSupport(DynamicType_ptr type)
+  : TypeSupportImpl(type)
   , name_(type->get_name())
   {
   }
@@ -265,7 +266,6 @@ public:
   static DynamicTypeSupport_ptr _duplicate(DynamicTypeSupport_ptr obj);
 
 protected:
-  DynamicType_var type_;
   CORBA::String_var name_;
 };
 
