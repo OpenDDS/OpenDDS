@@ -1721,6 +1721,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
       // replier.
 
       // Send the final first because match_authenticated takes forever.
+      reply.message_identity.sequence_number = 0;
       if (send_handshake_message(src_participant, iter->second, reply) != DDS::RETCODE_OK) {
         if (DCPS::security_debug.auth_warn) {
           ACE_DEBUG((LM_WARNING, ACE_TEXT("(%P|%t) {auth_warn} WARNING: Spdp::handle_handshake_message() - ")
@@ -2472,7 +2473,9 @@ Spdp::SpdpTransport::~SpdpTransport()
 
   if (outer) {
     ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
-    dispose_unregister();
+    try {
+      dispose_unregister();
+    } catch (const CORBA::BAD_PARAM&) {}
     outer->eh_shutdown_ = true;
     outer->shutdown_cond_.notify_all();
   }
