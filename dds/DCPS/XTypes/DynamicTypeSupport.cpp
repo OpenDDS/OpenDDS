@@ -16,6 +16,8 @@
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/DCPS_Utils.h>
 
+#  include <ace/Malloc_Base.h>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
@@ -68,9 +70,24 @@ bool DynamicSample::serialize(Serializer& ser) const
 
 bool DynamicSample::deserialize(Serializer& ser)
 {
-  //TODO: review design
+  // DynamicDataXcdrReadImpl uses a message block to read the data on demand,
+  // but it can't be the same message block that 'ser' already has.  That one
+  // (or more than one if there's chaining) uses the allocators and locking
+  // strategy from the transport.
+  const ACE_CDR::ULong len = static_cast<ACE_CDR::ULong>(ser.length());
+  ACE_Allocator* const alloc = ACE_Allocator::instance();
+  const Message_Block_Ptr mb(new(alloc->malloc(sizeof(ACE_Message_Block)))
+    ACE_Message_Block(len, ACE_Message_Block::MB_DATA, 0, 0, alloc, 0,
+      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, ACE_Time_Value::zero,
+      ACE_Time_Value::max_time, alloc, alloc));
+  unsigned char* const out = reinterpret_cast<unsigned char*>(mb->wr_ptr());
+  if (!ser.read_octet_array(out, len)) {
+    return false;
+  }
+  mb->wr_ptr(len);
+
   const DDS::DynamicType_var type = data_->type();
-  data_ = new DynamicDataXcdrReadImpl(ser, type);
+  data_ = new DynamicDataXcdrReadImpl(mb.get(), ser.encoding(), type);
   return true;
 }
 
