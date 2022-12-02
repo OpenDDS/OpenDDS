@@ -94,7 +94,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
   , public virtual InternalDataReaderListener<NetworkInterfaceAddress>
 {
 public:
-  RtpsUdpDataLink(RtpsUdpTransport& transport,
+  RtpsUdpDataLink(RcHandle<RtpsUdpTransport> transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
                   const ReactorTask_rch& reactor_task,
@@ -108,7 +108,7 @@ public:
   RemoveResult remove_sample(const DataSampleElement* sample);
   void remove_all_msgs(const RepoId& pub_id);
 
-  RtpsUdpInst& config() const;
+  const RtpsUdpInst& config() const;
 
   ACE_Reactor* get_reactor();
   bool reactor_is_shut_down();
@@ -239,7 +239,7 @@ public:
   static bool separate_message(EntityId_t entity);
 #endif
 
-  RtpsUdpTransport& transport();
+  RcHandle<RtpsUdpTransport> transport();
 
   void enable_response_queue();
   void disable_response_queue(bool send_immediately);

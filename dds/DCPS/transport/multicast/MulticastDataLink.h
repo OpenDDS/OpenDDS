@@ -42,7 +42,7 @@ typedef RcHandle<MulticastTransport> MulticastTransport_rch;
 class OpenDDS_Multicast_Export MulticastDataLink
   : public DataLink {
 public:
-  MulticastDataLink(MulticastTransport& transport,
+  MulticastDataLink(RcHandle<MulticastTransport> transport,
                     const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
                     MulticastInst& config,
@@ -50,7 +50,7 @@ public:
                     bool is_active);
   virtual ~MulticastDataLink();
 
-  MulticastTransport& transport();
+  RcHandle<MulticastTransport> transport();
 
   MulticastPeer local_peer() const;
 

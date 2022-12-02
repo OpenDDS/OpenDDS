@@ -31,7 +31,7 @@ namespace {
   const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
 }
 
-ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
+ShmemDataLink::ShmemDataLink(RcHandle<ShmemTransport> transport)
   : DataLink(transport,
              0,     // priority
              false, // is_loopback,
@@ -39,7 +39,7 @@ ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
   , send_strategy_(make_rch<ShmemSendStrategy>(this))
   , recv_strategy_(make_rch<ShmemReceiveStrategy>(this))
   , peer_alloc_(0)
-  , reactor_task_(transport.reactor_task())
+  , reactor_task_(transport->reactor_task())
 {
 }
 
@@ -230,10 +230,10 @@ ShmemDataLink::stop_i()
   }
 }
 
-ShmemTransport&
+RcHandle<ShmemTransport>
 ShmemDataLink::impl() const
 {
-  return static_cast<ShmemTransport&>(DataLink::impl());
+  return dynamic_rchandle_cast<ShmemTransport>(DataLink::impl());
 }
 
 ShmemAllocator*
@@ -246,19 +246,19 @@ ShmemDataLink::peer_allocator()
 ShmemAllocator*
 ShmemDataLink::local_allocator()
 {
-  return impl().alloc();
+  return impl()->alloc();
 }
 
 std::string
 ShmemDataLink::local_address()
 {
-  return impl().address();
+  return impl()->address();
 }
 
 void
 ShmemDataLink::signal_semaphore()
 {
-  return impl().signal_semaphore();
+  return impl()->signal_semaphore();
 }
 
 pid_t
@@ -269,7 +269,7 @@ ShmemDataLink::peer_pid()
 
 ShmemInst& ShmemDataLink::config() const
 {
-  return static_cast<ShmemTransport&>(impl()).config();
+  return impl()->config();
 }
 
 } // namespace DCPS

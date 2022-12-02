@@ -35,10 +35,10 @@ typedef RcHandle<UdpTransport> UdpTransport_rch;
 class OpenDDS_Udp_Export UdpDataLink
   : public DataLink {
 public:
-  UdpDataLink(UdpTransport& transport,
-              Priority   priority,
+  UdpDataLink(RcHandle<UdpTransport> transport,
+              Priority priority,
               const ReactorTask_rch& reactor_task,
-              bool          active);
+              bool active);
 
   bool active() const;
 

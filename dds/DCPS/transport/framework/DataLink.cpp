@@ -39,7 +39,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 /// Only called by our TransportImpl object.
-DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
+DataLink::DataLink(RcHandle<TransportImpl> impl, Priority priority, bool is_loopback,
                    bool is_active)
   : stopped_(false),
     impl_(impl),
@@ -49,15 +49,15 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
     is_active_(is_active),
     started_(false),
     send_response_listener_("DataLink"),
-    interceptor_(impl_.reactor(), impl_.reactor_owner())
+    interceptor_(impl->reactor(), impl->reactor_owner())
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
-  datalink_release_delay_ = TimeDuration::from_msec(impl.config().datalink_release_delay_);
+  datalink_release_delay_ = TimeDuration::from_msec(impl->config().datalink_release_delay_);
 
   id_ = DataLink::get_next_datalink_id();
 
-  if (impl.config().thread_per_connection_) {
+  if (impl->config().thread_per_connection_) {
     this->thr_per_con_send_task_.reset(new ThreadPerConnectionSendTask(this));
 
     if (this->thr_per_con_send_task_->open() == -1) {
@@ -73,7 +73,7 @@ DataLink::DataLink(TransportImpl& impl, Priority priority, bool is_loopback,
   }
 
   // Initialize transport control sample allocators:
-  size_t control_chunks = impl.config().datalink_control_chunks_;
+  size_t control_chunks = impl->config().datalink_control_chunks_;
 
   this->mb_allocator_.reset(new MessageBlockAllocator(control_chunks));
   this->db_allocator_.reset(new DataBlockAllocator(control_chunks));
@@ -95,10 +95,10 @@ DataLink::~DataLink()
   }
 }
 
-TransportImpl&
+RcHandle<TransportImpl>
 DataLink::impl() const
 {
-  return impl_;
+  return impl_.lock();
 }
 
 bool
@@ -268,11 +268,14 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - not scheduling or stopping\n")));
     }
-    ACE_Reactor_Timer_Interface* reactor = impl_.timer();
-    if (reactor->cancel_timer(this) > 0) {
-      if (DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_DEBUG,
-                   ACE_TEXT("(%P|%t) DataLink::handle_exception() - cancelled future release timer\n")));
+    RcHandle<TransportImpl> impl = impl_.lock();
+    if (impl) {
+      ACE_Reactor_Timer_Interface* reactor = impl->timer();
+      if (reactor && reactor->cancel_timer(this) > 0) {
+        if (DCPS_debug_level > 0) {
+          ACE_DEBUG((LM_DEBUG,
+                     ACE_TEXT("(%P|%t) DataLink::handle_exception() - cancelled future release timer\n")));
+        }
       }
     }
     return 0;
@@ -296,9 +299,12 @@ DataLink::handle_exception(ACE_HANDLE /* fd */)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLink::handle_exception() - (delay) scheduling timer for future release\n")));
     }
-    ACE_Reactor_Timer_Interface* reactor = impl_.timer();
-    const TimeDuration future_release_time = scheduled_to_stop_at_ - now;
-    reactor->schedule_timer(this, 0, future_release_time.value());
+    RcHandle<TransportImpl> impl = impl_.lock();
+    if (impl) {
+      ACE_Reactor_Timer_Interface* reactor = impl->timer();
+      const TimeDuration future_release_time = scheduled_to_stop_at_ - now;
+      reactor->schedule_timer(this, 0, future_release_time.value());
+    }
   }
   return 0;
 }
@@ -324,8 +330,16 @@ DataLink::schedule_stop(const MonotonicTimePoint& schedule_to_stop_at)
 void
 DataLink::notify_reactor()
 {
-  ReactorTask_rch reactor(impl_.reactor_task());
-  reactor->get_reactor()->notify(this);
+  RcHandle<TransportImpl> impl = impl_.lock();
+  if (impl) {
+    ReactorTask_rch rt(impl->reactor_task());
+    if (rt) {
+      ACE_Reactor* reactor = rt->get_reactor();
+      if (reactor) {
+        reactor->notify(this);
+      }
+    }
+  }
 }
 
 void
@@ -528,8 +542,9 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
     RepoIdSet& ris = assoc_by_local_[local_id].associated_;
     if (ris.size() == 1) {
       DataLinkSet_rch& links = released_locals[local_id];
-      if (links.is_nil())
+      if (links.is_nil()) {
         links = make_rch<DataLinkSet>();
+      }
       links->insert_link(rchandle_from(this));
       assoc_by_local_.erase(local_id);
     } else {
@@ -542,11 +557,15 @@ DataLink::release_reservations(RepoId remote_id, RepoId local_id,
                 ACE_TEXT("release_datalink due to no remaining pubs or subs.\n")), 5);
 
       guard.release();
-      impl_.release_datalink(this);
+      RcHandle<TransportImpl> impl = impl_.lock();
+      if (impl) {
+        impl->release_datalink(this);
+      }
     }
   }
-  if (release_remote_required)
+  if (release_remote_required) {
     release_remote_i(remote_id);
+  }
 }
 
 void
@@ -803,9 +822,13 @@ DataLink::transport_shutdown()
   this->set_scheduling_release(false);
   scheduled_to_stop_at_ = MonotonicTimePoint::zero_value;
 
-  ACE_Reactor_Timer_Interface* reactor = impl_.timer();
-  reactor->cancel_timer(this);
-
+  {
+    RcHandle<TransportImpl> impl = impl_.lock();
+    if (impl) {
+      ACE_Reactor_Timer_Interface* reactor = impl->timer();
+      reactor->cancel_timer(this);
+    }
+  }
   this->stop();
   // this->send_listeners_.clear();
   // this->recv_listeners_.clear();
@@ -971,7 +994,8 @@ DataLink::release_resources()
   DBG_ENTRY_LVL("DataLink", "release_resources", 6);
 
   this->prepare_release();
-  return impl_.release_link_resources(this);
+  RcHandle<TransportImpl> impl = impl_.lock();
+  return impl->release_link_resources(this);
 }
 
 bool
@@ -1049,8 +1073,10 @@ DataLink::handle_timeout(const ACE_Time_Value& /*tv*/, const void* /*arg*/)
 
   if (!scheduled_to_stop_at_.is_zero()) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) DataLink::handle_timeout called\n"), 4);
-    impl_.unbind_link(this);
-
+    {
+      RcHandle<TransportImpl> impl = impl_.lock();
+      impl->unbind_link(this);
+    }
     if (assoc_by_remote_.empty() && assoc_by_local_.empty()) {
       this->stop();
     }

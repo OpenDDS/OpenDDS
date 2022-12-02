@@ -106,7 +106,7 @@ bool
           end = tc->links_.map().end(); iter != end;)
     {
       const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
-      negotiated += datalink->impl().config().name();
+      negotiated += datalink->impl()->config().name();
       if (++iter != end)
         {
           negotiated += ", ";
@@ -124,7 +124,7 @@ bool
 
       const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
 
-      if (datalink->impl().config().name() == name)
+      if (datalink->impl()->config().name() == name)
         {
 //          ACE_DEBUG((LM_DEBUG,
 //                     ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),
