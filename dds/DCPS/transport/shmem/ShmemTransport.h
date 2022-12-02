@@ -7,6 +7,7 @@
 #define OPENDDS_DCPS_TRANSPORT_SHMEM_SHMEMTRANSPORT_H
 
 #include "Shmem_Export.h"
+#include "ShmemAllocator.h"
 #include "ShmemDataLink_rch.h"
 #include "ShmemDataLink.h"
 

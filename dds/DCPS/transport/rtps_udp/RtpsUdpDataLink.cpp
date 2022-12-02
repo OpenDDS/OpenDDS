@@ -64,13 +64,13 @@ using RTPS::to_rtps_seqnum;
 
 const size_t ONE_SAMPLE_PER_PACKET = 1;
 
-RtpsUdpDataLink::RtpsUdpDataLink(RcHandle<RtpsUdpTransport> transport,
+RtpsUdpDataLink::RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                                  const GuidPrefix_t& local_prefix,
                                  const RtpsUdpInst& config,
                                  const ReactorTask_rch& reactor_task,
                                  InternalTransportStatistics& transport_statistics,
                                  ACE_Thread_Mutex& transport_statistics_mutex)
-  : DataLink(dynamic_rchandle_cast<TransportImpl>(transport), // 3 data link "attributes", below, are unused
+  : DataLink(transport, // 3 data link "attributes", below, are unused
              0,         // priority
              false,     // is_loopback
              false)     // is_active
@@ -4528,7 +4528,7 @@ RtpsUdpDataLink::DeliverHeldData::~DeliverHeldData()
   }
 }
 
-RcHandle<RtpsUdpTransport>
+RtpsUdpTransport_rch
 RtpsUdpDataLink::transport()
 {
   return dynamic_rchandle_cast<RtpsUdpTransport>(impl());

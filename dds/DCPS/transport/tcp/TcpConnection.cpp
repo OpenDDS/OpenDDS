@@ -602,7 +602,8 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
     timeout.msec(static_cast<int>(retry_delay_msec));
 
     TcpConnection* pconn = this;
-    int ret;
+    int ret = -1;
+    errno = ENODEV;
     {
       RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
       if (transport) {

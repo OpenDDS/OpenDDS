@@ -8,13 +8,13 @@
 
 #include "Rtps_Udp_Export.h"
 
-#include "RtpsUdpSendStrategy.h"
-#include "RtpsUdpSendStrategy_rch.h"
-#include "RtpsUdpReceiveStrategy.h"
-#include "RtpsUdpReceiveStrategy_rch.h"
-#include "RtpsCustomizedElement.h"
-#include "LocatorCacheKey.h"
 #include "BundlingCacheKey.h"
+#include "LocatorCacheKey.h"
+#include "RtpsCustomizedElement.h"
+#include "RtpsUdpDataLink_rch.h"
+#include "RtpsUdpReceiveStrategy_rch.h"
+#include "RtpsUdpSendStrategy_rch.h"
+#include "RtpsUdpTransport_rch.h"
 #include "TransactionalRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
@@ -70,10 +70,8 @@ namespace ICE {
 namespace DCPS {
 
 class RtpsUdpInst;
-class RtpsUdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
-typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
 struct SeqReaders {
@@ -94,7 +92,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
   , public virtual InternalDataReaderListener<NetworkInterfaceAddress>
 {
 public:
-  RtpsUdpDataLink(RcHandle<RtpsUdpTransport> transport,
+  RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                   const GuidPrefix_t& local_prefix,
                   const RtpsUdpInst& config,
                   const ReactorTask_rch& reactor_task,
@@ -239,7 +237,7 @@ public:
   static bool separate_message(EntityId_t entity);
 #endif
 
-  RcHandle<RtpsUdpTransport> transport();
+  RtpsUdpTransport_rch transport();
 
   void enable_response_queue();
   void disable_response_queue(bool send_immediately);
@@ -969,4 +967,4 @@ namespace std
 # include "RtpsUdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif  /* DCPS_RTPSUDPDATALINK_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H */

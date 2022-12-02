@@ -6,18 +6,18 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 
-#include "RtpsUdpDataLink.h"
 #include "RtpsUdpDataLink_rch.h"
 #include "Rtps_Udp_Export.h"
 
-#include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/ConnectionRecords.h>
+#include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/SporadicTask.h>
-#include <dds/DCPS/transport/framework/TransportImpl.h>
-#include <dds/DCPS/transport/framework/TransportClient.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
-
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -118,18 +118,7 @@ private:
                     const TransportClient_rch& client);
 
 #if defined(OPENDDS_SECURITY)
-  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
-  {
-    RtpsUdpDataLink_rch link;
-    {
-      ACE_Guard<ACE_Thread_Mutex> guard(links_lock_);
-      local_crypto_handle_ = pch;
-      link = link_;
-    }
-    if (link) {
-      link->local_crypto_handle(pch);
-    }
-  }
+  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
 #endif
 
   //protects access to link_ for duration of make_datalink
@@ -192,7 +181,7 @@ private:
   typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
   void relay_stun_task(const MonotonicTimePoint& now);
   RcHandle<Sporadic> relay_stun_task_;
-  DCPS::FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
   ThreadLockType relay_stun_task_falloff_mutex_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
 
@@ -216,4 +205,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* DCPS_RTPSUDPTRANSPORT_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H */

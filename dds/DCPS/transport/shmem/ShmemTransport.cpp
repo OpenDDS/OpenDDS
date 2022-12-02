@@ -132,7 +132,7 @@ ShmemTransport::configure_i(ShmemInst& config)
                     ACE_TEXT("ShmemTransport::configure_i: ")
                     ACE_TEXT("no platform support for shared memory!\n")),
                    false);
-#else // ifdef OPENDDS_SHMEM_UNSUPPORTED
+#else /* OPENDDS_SHMEM_UNSUPPORTED */
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 #  if defined OPENDDS_SHMEM_WINDOWS
@@ -142,7 +142,7 @@ ShmemTransport::configure_i(ShmemInst& config)
   alloc_opts.segment_size_ = config.pool_size_;
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
-#  endif // if defined OPENDDS_SHMEM_WINDOWS
+#  endif /* OPENDDS_SHMEM_WINDOWS */
 
   alloc_.reset(
     new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(config.poolname().c_str()),
@@ -176,7 +176,7 @@ ShmemTransport::configure_i(ShmemInst& config)
   ace_sema.lock_ = PTHREAD_MUTEX_INITIALIZER;
   ace_sema.count_nonzero_ = PTHREAD_COND_INITIALIZER;
 #    endif
-#  endif // if defined OPENDDS_SHMEM_WINDOWS
+#  endif /* OPENDDS_SHMEM_WINDOWS */
   if (!ok) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("ShmemTransport::configure_i: ")
@@ -190,7 +190,7 @@ ShmemTransport::configure_i(ShmemInst& config)
             this, config.poolname().c_str()), 1);
 
   return true;
-#endif // ifdef OPENDDS_SHMEM_UNSUPPORTED
+#endif /* OPENDDS_SHMEM_UNSUPPORTED */
 }
 
 void
@@ -221,8 +221,8 @@ ShmemTransport::shutdown_i()
     ::CloseHandle(*pSem);
 #  elif defined OPENDDS_SHMEM_UNIX
     ::sem_destroy(pSem);
-#  endif // if defined OPENDDS_SHMEM_WINDOWS
-#endif // ifndef OPENDDS_SHMEM_UNSUPPORTED
+#  endif /* OPENDDS_SHMEM_WINDOWS */
+#endif /* OPENDDS_SHMEM_UNSUPPORTED */
 
     alloc_->release(1 /*close*/);
     alloc_.reset();

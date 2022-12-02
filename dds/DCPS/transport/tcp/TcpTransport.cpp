@@ -99,7 +99,7 @@ TcpTransport::connect_datalink(const RemoteTransport& remote,
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
     }
 
-    link = make_rch<TcpDataLink>(key.address(), rchandle_from(this), attribs.priority_,
+    link = make_rch<TcpDataLink>(rchandle_from(this), key.address(), attribs.priority_,
                                 key.is_loopback(), true /*active*/);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::connect_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
@@ -246,7 +246,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
     }
 
-    link = make_rch<TcpDataLink>(key.address(), rchandle_from(this), key.priority(),
+    link = make_rch<TcpDataLink>(rchandle_from(this), key.address(), key.priority(),
                                  key.is_loopback(), key.is_active());
     VDBG_LVL((LM_DEBUG, "(%P|%t) TcpTransport::accept_datalink create new link[%@]\n", link.in()), 0);
     if (links_.bind(key, link) != 0 /*OK*/) {
