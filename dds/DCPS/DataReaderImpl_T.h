@@ -80,6 +80,12 @@ namespace OpenDDS {
       return false;
     }
 
+    // work around "hides overloaded virtual" warnings when MessageType=DynamicSample
+    using Interface::read_next_sample;
+    using Interface::take_next_sample;
+    using Interface::lookup_instance;
+    using Interface::get_key_value;
+
     class MessageTypeWithAllocator
       : public MessageType
       , public EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>
