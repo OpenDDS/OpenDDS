@@ -10,19 +10,15 @@
 #include "RtpsUdpInst.h"
 #include "RtpsUdpTransport.h"
 
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 #include <dds/DCPS/LogAddr.h>
-
-#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
-#include "dds/DCPS/transport/framework/TransportCustomizedElement.h"
-#include "dds/DCPS/transport/framework/TransportSendElement.h"
-
-#include "dds/DCPS/RTPS/MessageUtils.h"
-#include "dds/DCPS/RTPS/MessageParser.h"
-#include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-
-#include "dds/DCPS/Serializer.h"
-
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
+#include <dds/DCPS/RTPS/MessageParser.h>
+#include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
+#include <dds/DCPS/transport/framework/NullSynchStrategy.h>
+#include <dds/DCPS/transport/framework/TransportCustomizedElement.h>
+#include <dds/DCPS/transport/framework/TransportSendElement.h>
 
 #include <cstring>
 
