@@ -20,6 +20,7 @@
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/DataSampleElement.h>
