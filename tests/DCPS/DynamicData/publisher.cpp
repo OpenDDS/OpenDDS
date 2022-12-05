@@ -90,7 +90,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   if (dynamic) {
     DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(data_writer);
     DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(dt);
-    if (check_rc(dd->set_string_value(0, "Hello, World!"), "set_string_value failed")) {
+    if (check_rc(dd->set_string_value(0, HelloWorld::MESSAGE_EXAMPLE_VALUE), "set_string_value failed")) {
       return 1;
     }
     if (check_rc(ddw->write(dd, DDS::HANDLE_NIL), "write (dynamic) failed")) {
@@ -99,7 +99,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   } else {
     HelloWorld::MessageDataWriter_var mdw = HelloWorld::MessageDataWriter::_narrow(data_writer);
     HelloWorld::Message msg;
-    msg.value = "Hello, World!";
+    msg.value = HelloWorld::MESSAGE_EXAMPLE_VALUE;
     if (check_rc(mdw->write(msg, DDS::HANDLE_NIL), "write (plain) failed")) {
       return 1;
     }

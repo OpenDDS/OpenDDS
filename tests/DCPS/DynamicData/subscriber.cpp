@@ -125,7 +125,7 @@ void read_plain(DDS::DataReader_var& data_reader, bool& done, bool& got_message)
   message_data_reader->take(messages, infos, DDS::LENGTH_UNLIMITED,
                             DDS::ANY_SAMPLE_STATE, DDS::ANY_VIEW_STATE, DDS::ANY_INSTANCE_STATE);
   for (unsigned int idx = 0; idx != messages.length(); ++idx) {
-    if (!strcmp(messages[idx].value.in(), "Hello, World!")) {
+    if (!strcmp(messages[idx].value.in(), HelloWorld::MESSAGE_EXAMPLE_VALUE)) {
       got_message = true;
     }
     if (infos[idx].valid_data) {
@@ -145,7 +145,7 @@ void read_dynamic(DDS::DataReader_var& data_reader, bool& done, bool& got_messag
   for (unsigned int idx = 0; idx != messages.length(); ++idx) {
     CORBA::String_var str;
     messages[idx]->get_string_value(str, 0);
-    if (!strcmp(str.in(), "Hello, World!")) {
+    if (!strcmp(str.in(), HelloWorld::MESSAGE_EXAMPLE_VALUE)) {
       got_message = true;
     }
     if (infos[idx].valid_data) {
