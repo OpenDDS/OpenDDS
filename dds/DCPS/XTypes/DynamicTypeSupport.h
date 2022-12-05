@@ -32,20 +32,20 @@ public:
 
   DynamicSample(DDS::DynamicData_ptr data,
                 Mutability mutability, Extent extent)
-  : Sample(mutability, extent)
-  , data_(DDS::DynamicData::_duplicate(data))
+    : Sample(mutability, extent)
+    , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
   DynamicSample(DDS::DynamicData_ptr data, Extent extent)
-  : Sample(Sample::ReadOnly, extent)
-  , data_(DDS::DynamicData::_duplicate(data))
+    : Sample(Sample::ReadOnly, extent)
+    , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
   DynamicSample(DDS::DynamicData_ptr data)
-  : Sample(Sample::ReadOnly, Sample::Full)
-  , data_(DDS::DynamicData::_duplicate(data))
+    : Sample(Sample::ReadOnly, Sample::Full)
+    , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
@@ -244,7 +244,7 @@ struct DDSTraits<XTypes::DynamicSample> {
 template <>
 struct MarshalTraits<XTypes::DynamicSample> {
   static bool to_message_block(ACE_Message_Block&, const XTypes::DynamicSample&) { return false; }
-  static bool from_message_block( XTypes::DynamicSample&, const ACE_Message_Block&) { return false; }
+  static bool from_message_block(XTypes::DynamicSample&, const ACE_Message_Block&) { return false; }
   static Extensibility extensibility() { return APPENDABLE; }
   static Extensibility max_extensibility_level() { return APPENDABLE; }
 };
@@ -342,8 +342,8 @@ public:
   typedef DynamicTypeSupport_var _var_type;
 
   explicit DynamicTypeSupport(DynamicType_ptr type)
-  : TypeSupportImpl(type)
-  , name_(type->get_name())
+    : TypeSupportImpl(type)
+    , name_(type->get_name())
   {
   }
 

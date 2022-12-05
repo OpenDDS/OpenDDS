@@ -71,7 +71,7 @@ RakeResults<MessageType>::RakeResults(DataReaderImpl* reader,
   } else {
 #endif
     // PRESENTATION ordered access (TOPIC)
-   do_sort_ = presentation.ordered_access && presentation.access_scope == DDS::TOPIC_PRESENTATION_QOS;
+    do_sort_ = presentation.ordered_access && presentation.access_scope == DDS::TOPIC_PRESENTATION_QOS;
 #ifndef OPENDDS_NO_QUERY_CONDITION
   }
 
