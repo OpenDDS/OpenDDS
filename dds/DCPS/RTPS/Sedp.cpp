@@ -6710,8 +6710,9 @@ void Sedp::cleanup_writer_association(DCPS::DataWriterCallbacks_wrch callbacks,
     DCPS::ReaderAssociation ra = DCPS::ReaderAssociation();
     ra.readerId = reader;
     ra.participantDiscoveredAt = MTZERO;
-    ra.readerQos = TheServiceParticipant->initial_DataReaderQos();
     ra.subQos = TheServiceParticipant->initial_SubscriberQos();
+    ra.readerQos = TheServiceParticipant->initial_DataReaderQos();
+    ra.transportContext = 0;
     event_dispatcher_->dispatch(DCPS::make_rch<WriterRemoveAssociations>(DCPS::make_rch<WriterAssociationRecord>(callbacks, writer, ra)));
   }
 }
@@ -6741,8 +6742,8 @@ void Sedp::cleanup_reader_association(DCPS::DataReaderCallbacks_wrch callbacks,
     wa.writerId = writer;
     wa.participantDiscoveredAt = MTZERO;
     wa.pubQos = TheServiceParticipant->initial_PublisherQos();
-    wa.transportContext = 0;
     wa.writerQos = TheServiceParticipant->initial_DataWriterQos();
+    wa.transportContext = 0;
     event_dispatcher_->dispatch(DCPS::make_rch<ReaderRemoveAssociations>(DCPS::make_rch<ReaderAssociationRecord>(callbacks, reader, wa)));
   }
 }
