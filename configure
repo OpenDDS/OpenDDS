@@ -2075,7 +2075,7 @@ sub write_opendds_mwc {
   my $fd = backup_and_open($path);
   print $fd <<"EOF";
 #!/usr/bin/env perl
-if (!defined(\$ENV{ACE_ROOT}) || !defined(\$MPC_ROOT)) {
+if (!defined(\$ENV{ACE_ROOT}) || !defined(\$ENV{MPC_ROOT})) {
   die("The enviroment needs to be setup.");
 }
 exec('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV)
