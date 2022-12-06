@@ -33,7 +33,7 @@ namespace {
 
 RtpsUdpSendStrategy::RtpsUdpSendStrategy(RtpsUdpDataLink* link,
                                          const GuidPrefix_t& local_prefix)
-  : TransportSendStrategy(0, *link->impl(),
+  : TransportSendStrategy(0, link->impl(),
                           0,  // synch_resource
                           link->transport_priority(),
                           make_rch<NullSynchStrategy>()),

@@ -11,6 +11,7 @@
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
 #include "BasicQueue_T.h"
+#include "TransportImpl_rch.h"
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
@@ -170,7 +171,7 @@ public:
 protected:
 
   TransportSendStrategy(std::size_t id,
-                        TransportImpl& transport,
+                        const TransportImpl_rch& transport,
                         ThreadSynchResource* synch_resource,
                         Priority priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
@@ -420,7 +421,7 @@ private:
   MessageBlockAllocator replaced_element_mb_allocator_;
   DataBlockAllocator replaced_element_db_allocator_;
 
-  TransportImpl& transport_;
+  WeakRcHandle<TransportImpl> transport_;
 
   bool graceful_disconnecting_;
 
