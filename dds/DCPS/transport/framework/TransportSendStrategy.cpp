@@ -700,7 +700,7 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
   bool transport_shutdown = true;
   TransportImpl_rch transport = transport_.lock();
   if (transport) {
-    transport->is_shut_down();
+    transport_shutdown = transport->is_shut_down();
   }
 
   if (num_delayed_notifications == 1) {
