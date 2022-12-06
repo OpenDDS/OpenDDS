@@ -60,14 +60,14 @@ namespace {
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy(
   std::size_t id,
-  TransportImpl& transport,
+  const TransportImpl_rch& transport,
   ThreadSynchResource* synch_resource,
   Priority priority,
   const ThreadSynchStrategy_rch& thread_sync_strategy)
   : ThreadSynchWorker(id),
-    max_samples_(transport.config().max_samples_per_packet_),
-    optimum_size_(transport.config().optimum_packet_size_),
-    max_size_(transport.config().max_packet_size_),
+    max_samples_(transport->config().max_samples_per_packet_),
+    optimum_size_(transport->config().optimum_packet_size_),
+    max_size_(transport->config().max_packet_size_),
     max_header_size_(0),
     header_block_(0),
     pkt_chain_(0),
@@ -693,10 +693,15 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
     }
   }
 
-  if (!found_element)
+  if (!found_element) {
     return false;
+  }
 
-  bool transport_shutdown = transport_.is_shut_down();
+  bool transport_shutdown = true;
+  TransportImpl_rch transport = transport_.lock();
+  if (transport) {
+    transport->is_shut_down();
+  }
 
   if (num_delayed_notifications == 1) {
     // optimization for the common case
@@ -1493,7 +1498,10 @@ TransportSendStrategy::direct_send(bool do_relink)
                   "send_bytes"), 1);
 
         if (Transport_debug_level > 0) {
-          transport_.config().dump();
+          TransportImpl_rch transport = transport_.lock();
+          if (transport) {
+            transport->config().dump();
+          }
         }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
