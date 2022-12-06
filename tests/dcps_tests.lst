@@ -502,3 +502,4 @@ tests/DCPS/ZeroEnum/run_test.pl: !OPENDDS_SAFETY_PROFILE
 tests/DCPS/TypeSupportPlugin/run_test.pl: !DCPS_MIN !BROKEN_DLCLOSE
 
 tests/DCPS/DynamicDataWriter/run_test.pl ini=rtps.ini: RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/DynamicResponse/run_test.pl: RTPS !OPENDDS_SAFETY_PROFILE
