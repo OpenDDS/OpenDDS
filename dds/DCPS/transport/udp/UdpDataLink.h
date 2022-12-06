@@ -13,6 +13,8 @@
 #include "UdpReceiveStrategy_rch.h"
 #include "UdpSendStrategy_rch.h"
 #include "UdpTransport_rch.h"
+#include "UdpReceiveStrategy.h"
+#include "UdpSendStrategy.h"
 
 #include <ace/Basic_Types.h>
 #include <ace/SOCK_Dgram.h>

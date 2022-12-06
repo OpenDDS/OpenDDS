@@ -8,10 +8,9 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_UDP_UDPTRANSPORT_H
 #define OPENDDS_DCPS_TRANSPORT_UDP_UDPTRANSPORT_H
 
-#include "UdpDataLink.h"
-
 #include "Udp_Export.h"
 #include "UdpDataLink_rch.h"
+#include "UdpDataLink.h"
 
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/ConditionVariable.h>

@@ -6,8 +6,9 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 
-#include "RtpsUdpDataLink_rch.h"
 #include "Rtps_Udp_Export.h"
+#include "RtpsUdpDataLink_rch.h"
+#include "RtpsUdpDataLink.h"
 
 #include <dds/DCPS/ConnectionRecords.h>
 #include <dds/DCPS/FibonacciSequence.h>
