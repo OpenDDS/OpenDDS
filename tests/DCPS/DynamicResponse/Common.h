@@ -97,6 +97,23 @@ struct Test {
     return true;
   }
 
+  template <typename DataWriterType>
+  typename DataWriterType::_var_type create_writer(DDS::Topic_var& topic)
+  {
+    DDS::DataWriterQos qos;
+    pub->get_default_datawriter_qos(qos);
+    qos.history.kind = DDS::KEEP_ALL_HISTORY_QOS;
+    qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
+    DDS::DataWriter_var dw =
+      pub->create_datawriter(topic, qos, 0, OpenDDS::DCPS::DEFAULT_STATUS_MASK);
+    typename DataWriterType::_var_type dw2 = DataWriterType::_narrow(dw);
+    if (!dw2) {
+      ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: create_datawriter failed!\n", name));
+      exit_status = 1;
+    }
+    return dw2;
+  }
+
   bool check_rc(DDS::ReturnCode_t rc, const std::string& what)
   {
     if (rc != DDS::RETCODE_OK) {
@@ -110,11 +127,14 @@ struct Test {
 
   void wait_for(const std::string& actor, const std::string& what)
   {
+    ACE_DEBUG((LM_DEBUG, "%C is waiting for %C to post %C\n", name, actor.c_str(), what.c_str()));
     dcs->wait_for(name, actor, what);
+    ACE_DEBUG((LM_DEBUG, "%C is DONE waiting for %C to post %C\n", name, actor.c_str(), what.c_str()));
   }
 
   void post(const std::string& what)
   {
+    ACE_DEBUG((LM_DEBUG, "%C is posting %C\n", name, what.c_str()));
     dcs->post(name, what);
   }
 };
@@ -151,15 +171,9 @@ struct Topic {
       return false;
     }
 
-    DDS::DataWriter_var dw =
-      t.pub->create_datawriter(topic, DATAWRITER_QOS_DEFAULT, 0 ,DEFAULT_STATUS_MASK);
-    writer = DataWriterType::_narrow(dw);
-    if (!writer) {
-      ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: create_datawriter failed!\n", t.name));
-      return false;
-    }
+    writer = t.create_writer<DataWriterType>(topic);
 
-    return true;
+    return writer;
   }
 
   bool init_bit(const char* name)

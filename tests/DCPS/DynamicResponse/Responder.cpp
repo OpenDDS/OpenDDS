@@ -1,7 +1,11 @@
 #include "Common.h"
 
+#include <tests/Utils/StatusMatching.h>
+
 #include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 #include <dds/DCPS/XTypes/DynamicDataFactory.h>
+
+#include <dds/DdsDcpsCoreTypeSupportC.h>
 
 #include <string>
 
@@ -73,12 +77,12 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
         continue;
       }
 
-      DDS::DataWriter_var dw = t.pub->create_datawriter(topic.topic, DATAWRITER_QOS_DEFAULT, 0,
-        OpenDDS::DCPS::DEFAULT_STATUS_MASK);
-      topic.writer = DDS::DynamicDataWriter::_narrow(dw);
-      if (!topic.writer) {
-        ACE_ERROR((LM_ERROR, "%C (%P|%t) ERROR: dynamic create_datawriter failed!\n", t.name));
-        t.exit_status = 1;
+      topic.writer = t.create_writer<DDS::DynamicDataWriter>(topic.topic);
+
+      DDS::DataWriter_var dw = DDS::DataWriter::_duplicate(topic.writer);
+      if (Utils::wait_match(dw, 1, Utils::EQ)) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dw\n"));
+        continue;
       }
     }
   }
@@ -86,7 +90,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
   for (DynamicTopicMap::iterator it = topics.begin(); it != topics.end(); ++it) {
     DynamicTopic& topic = it->second;
     if (topic.type) {
-      // TODO Read
+      // TODO: Read First
 
       DDS::DynamicData_var dd = DDS::DynamicDataFactory::get_instance()->create_data(topic.type);
       const DDS::TypeKind tk = topic.type->get_kind();

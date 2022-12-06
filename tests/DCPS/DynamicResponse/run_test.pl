@@ -4,12 +4,16 @@ eval '(exit $?0)' && eval 'exec perl -S $0 ${1+"$@"}'
 
 use strict;
 
+use File::Path /rmtree/;
 use lib "$ENV{ACE_ROOT}/bin";
 use lib "$ENV{DDS_ROOT}/bin";
 use PerlDDS::Run_Test;
 
+rmtree('./DCS');
+
 my $test = new PerlDDS::TestFramework();
 $test->{dcps_debug_level} = 4;
+$test->ignore_error("not found in local type map"); # TODO: Fix and remove
 $test->process('origin', 'origin');
 $test->process('responder', 'responder');
 $test->start_process('origin');
