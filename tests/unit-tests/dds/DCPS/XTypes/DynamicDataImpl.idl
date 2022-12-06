@@ -1,3 +1,5 @@
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include <tao/LongSeq.pidl>
 #include <tao/ULongSeq.pidl>
 #include <tao/Int8Seq.pidl>
@@ -15,6 +17,8 @@
 #include <tao/BooleanSeq.pidl>
 #include <tao/StringSeq.pidl>
 #include <tao/WStringSeq.pidl>
+
+module DynamicDataImpl {
 
 enum SomeEnum {
   E_INT32, // 0
@@ -55,6 +59,7 @@ typedef sequence<boolean> BoolSeq;
 typedef sequence<string> StringSeq;
 typedef sequence<wstring> WStringSeq;
 
+// TODO: Add a long double member
 #define SINGLE_VALUE_MEMBERS \
   @id(0) SomeEnum my_enum; \
   @id(1) long int_32; \
@@ -67,7 +72,6 @@ typedef sequence<wstring> WStringSeq;
   @id(8) unsigned long long uint_64; \
   @id(9) float float_32; \
   @id(10) double float_64; \
-  @id(11) long double float_128; \
   @id(12) char char_8; \
   @id(13) wchar char_16; \
   @id(14) octet byte; \
@@ -76,6 +80,7 @@ typedef sequence<wstring> WStringSeq;
   @id(17) string str; \
   @id(18) wstring wstr;
 
+// TODO: Add a long double member
 #define SINGLE_VALUE_BRANCHES \
   case E_INT32: \
     @id(1) long int_32; \
@@ -97,8 +102,6 @@ typedef sequence<wstring> WStringSeq;
     @id(9) float float_32; \
   case E_FLOAT64: \
     @id(10) double float_64; \
-  case E_FLOAT128: \
-    @id(11) long double float_128; \
   case E_CHAR8: \
     @id(12) char char_8; \
   case E_CHAR16: \
@@ -114,6 +117,7 @@ typedef sequence<wstring> WStringSeq;
   default: \
     @id(18) SomeEnum my_enum;
 
+// TODO: Add a long double sequence member
 #define SEQUENCE_VALUE_MEMBERS \
   @id(0) SomeEnumSeq my_enums; \
   @id(1) Int32Seq int_32s; \
@@ -126,7 +130,6 @@ typedef sequence<wstring> WStringSeq;
   @id(8) UInt64Seq uint_64s; \
   @id(9) Float32Seq float_32s; \
   @id(10) Float64Seq float_64s; \
-  @id(11) Float128Seq float_128s; \
   @id(12) Char8Seq char_8s; \
   @id(13) Char16Seq char_16s; \
   @id(14) ByteSeq byte_s; \
@@ -134,13 +137,12 @@ typedef sequence<wstring> WStringSeq;
   @id(16) StringSeq str_s; \
   @id(17) WStringSeq wstr_s;
 
-
 @final
 struct FinalNestedStructInner {
   @id(0) long l;
 };
 
-// Reading single value from struct.
+// Write single value to struct.
 @mutable
 struct MutableSingleValueStruct {
   SINGLE_VALUE_MEMBERS
@@ -156,7 +158,7 @@ struct FinalSingleValueStruct {
   SINGLE_VALUE_MEMBERS
 };
 
-// Reading single value from union.
+// Write single value to union.
 @mutable
 union MutableSingleValueUnion switch (SomeEnum) {
   SINGLE_VALUE_BRANCHES
@@ -172,7 +174,7 @@ union FinalSingleValueUnion switch (SomeEnum) {
   SINGLE_VALUE_BRANCHES
 };
 
-// Reading single value from sequence and reading sequence from struct.
+// Write values to sequence and write sequence to struct.
 @mutable
 struct MutableSequenceStruct {
   SEQUENCE_VALUE_MEMBERS
@@ -188,7 +190,7 @@ struct FinalSequenceStruct {
   SEQUENCE_VALUE_MEMBERS
 };
 
-// Test skipping nested aggregated members.
+// Write to struct with nested aggregated members
 @appendable
 struct AppendableNestedStructInner {
   @id(0) long l;
@@ -244,38 +246,6 @@ union MutableNestedUnionInner switch (SomeEnum) {
 };
 
 @final
-struct FinalNestedStructOuterXCDR1 {
-  @id(0) unsigned long ul;
-  @id(1) FinalNestedStructInner inner;
-  @id(2) unsigned short us;
-};
-
-@final
-struct FinalStructXCDR1 {
-  @id(0) char c;
-  @id(1) FinalNestedStructOuterXCDR1 outer;
-  @id(2) short s;
-  @id(3) FinalNestedUnionInner inner;
-  @id(4) int8 i;
-};
-
-@appendable
-struct AppendableNestedStructOuterXCDR1 {
-  @id(0) unsigned long ul;
-  @id(1) AppendableNestedStructInner inner;
-  @id(2) unsigned short us;
-};
-
-@appendable
-struct AppendableStructXCDR1 {
-  @id(0) char c;
-  @id(1) AppendableNestedStructOuterXCDR1 outer;
-  @id(2) short s;
-  @id(3) AppendableNestedUnionInner inner;
-  @id(4) int8 i;
-};
-
-@final
 struct FinalStruct {
   @id(0) char c;
   @id(1) AppendableNestedStructOuter outer;
@@ -302,73 +272,16 @@ struct MutableStruct {
   @id(4) int8 i;
 };
 
-#define SEQUENCE_VALUE_BRANCHES \
-  case E_INT32: \
-    @id(1) Int32Seq int_32s; \
-  case E_UINT32: \
-    @id(2) UInt32Seq uint_32s; \
-  case E_INT8: \
-    @id(3) Int8Seq int_8s; \
-  case E_UINT8: \
-    @id(4) UInt8Seq uint_8s; \
-  case E_INT16: \
-    @id(5) Int16Seq int_16s; \
-  case E_UINT16: \
-    @id(6) UInt16Seq uint_16s; \
-  case E_INT64: \
-    @id(7) Int64Seq int_64s; \
-  case E_UINT64: \
-    @id(8) UInt64Seq uint_64s; \
-  case E_FLOAT32: \
-    @id(9) Float32Seq float_32s; \
-  case E_FLOAT64: \
-    @id(10) Float64Seq float_64s; \
-  case E_FLOAT128: \
-    @id(11) Float128Seq float_128s; \
-  case E_CHAR8: \
-    @id(12) Char8Seq char_8s; \
-  case E_CHAR16: \
-    @id(13) Char16Seq char_16s; \
-  case E_BYTE: \
-    @id(14) ByteSeq byte_s; \
-  case E_BOOL: \
-    @id(15) BoolSeq bool_s; \
-  case E_STRING8: \
-    @id(16) StringSeq str_s; \
-  case E_STRING16: \
-    @id(17) WStringSeq wstr_s;
-
-@final
-union FinalSequenceUnion switch (SomeEnum) {
-  SEQUENCE_VALUE_BRANCHES
-};
-
-@appendable
-union AppendableSequenceUnion switch (SomeEnum) {
-  SEQUENCE_VALUE_BRANCHES
-};
-
-@mutable
-union MutableSequenceUnion switch (SomeEnum) {
-  SEQUENCE_VALUE_BRANCHES
-};
-
 #define ARRAY_MEMBERS \
   @id(0) long int_32a[2]; \
   @id(1) unsigned long uint_32a[2]; \
   @id(2) int8 int_8a[2];
 
-@final
-struct FinalArrayStruct {
-  ARRAY_MEMBERS
-};
-
-@appendable
-struct AppendableArrayStruct {
-  ARRAY_MEMBERS
-};
-
 @mutable
 struct MutableArrayStruct {
   ARRAY_MEMBERS
 };
+
+}; // module DynamicDataImpl
+
+#endif // OPENDDS_SAFETY_PROFILE

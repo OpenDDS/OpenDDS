@@ -20,7 +20,9 @@ class DynamicDataImpl;
 }
 
 namespace DCPS {
+OpenDDS_Dcps_Export
 bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
 }
 
@@ -388,10 +390,10 @@ private:
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
   bool find_selected_member_and_discriminator(DDS::MemberId& selected_id,
     bool& has_disc, CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type) const;
-  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_ptr value);
-  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_ptr value,
+  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
+  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
                             const DDS::TypeDescriptor_var& descriptor);
-  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_ptr value, TypeKind tk);
+  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value, TypeKind tk);
   bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
                                      DDS::MemberId id, TypeKind collection_tk) const;
 
@@ -403,7 +405,6 @@ private:
 #ifdef DDS_HAS_WCHAR
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_wchar& value);
 #endif
-
   template<typename SingleType>
   bool insert_single(DDS::MemberId id, const SingleType& value);
 
