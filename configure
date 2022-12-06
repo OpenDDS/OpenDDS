@@ -39,6 +39,12 @@ my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
 
+my @default_configh = (
+  '#define ACE_DISABLE_MKTEMP',
+  '#define ACE_DISABLE_TEMPNAM',
+  '#define ACE_LACKS_READDIR_R',
+);
+
 sub perlOS_to_host {
   return 'win32' if $^O eq 'MSWin32';
   return 'macosx' if $^O eq 'darwin';
@@ -1045,6 +1051,9 @@ sub write_config_h {
   $opts{'optimize'} = 0 if (!exists $opts{'optimize'} || exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
+  for my $line (@default_configh) {
+    print $CFGH "$line\n";
+  }
   if ($buildEnv{'build'} eq 'target') {
     for my $line (@{$opts{'configh'}}) {
       print $CFGH "$line\n";
