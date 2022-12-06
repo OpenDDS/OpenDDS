@@ -20,8 +20,8 @@ flexible way to use the middleware without needing code generation from schema.
 -   Review existing Dynamic Data support in OpenDDS
 -   Overview of new Dynamic Data capabilities
 -   Demo of Dynamic Data applications
--   inspect
--   opendds-monitor
+  -   inspect
+  -   opendds-monitor
 -   Next steps for Dynamic Data support
 
 This webinar is intended for technologists in development, testing, and operations roles as well as technical leads who have experience with DDS or similar publish/subscribe frameworks.
