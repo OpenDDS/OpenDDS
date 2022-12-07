@@ -8,12 +8,15 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicTypeSupport.h"
 
+#  include "DynamicDataImpl.h"
+#  include "DynamicDataXcdrReadImpl.h"
 #  include "DynamicTypeImpl.h"
 #  include "Utils.h"
-#  include "DynamicDataImpl.h"
 
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/DCPS_Utils.h>
+
+#  include <ace/Malloc_Base.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
@@ -21,24 +24,22 @@ namespace XTypes {
 
 using namespace OpenDDS::DCPS;
 
-bool DynamicSample::serialize(Serializer& ser) const
-{
-  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
-  if (!ddi) {
-    if (log_level >= LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialize: "
-        "currently we only support DynamicDataImpl, the kind supplied by DynamicDataFactory\n"));
-    }
-    return false;
-  }
-  return ser << *ddi;
-}
+DynamicSample::DynamicSample()
+{}
 
-bool DynamicSample::deserialize(Serializer& ser)
+DynamicSample::DynamicSample(const DynamicSample& d)
+  : Sample(d.mutability_, d.extent_)
+  , data_(d.data_)
+{}
+
+DynamicSample& DynamicSample::operator=(const DynamicSample& rhs)
 {
-  ACE_UNUSED_ARG(ser);
-  // TODO
-  return false;
+  if (this != &rhs) {
+    mutability_ = rhs.mutability_;
+    extent_ = rhs.extent_;
+    data_ = rhs.data_;
+  }
+  return *this;
 }
 
 size_t DynamicSample::serialized_size(const Encoding& enc) const
@@ -47,11 +48,47 @@ size_t DynamicSample::serialized_size(const Encoding& enc) const
   if (!ddi) {
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::serialized_size: "
-        "currently we only support DynamicDataImpl, the kind supplied by DynamicDataFactory\n"));
+        "DynamicData must be DynamicDataImpl, the type supplied by DynamicDataFactory\n"));
     }
     return 0;
   }
   return DCPS::serialized_size(enc, *ddi);
+}
+
+bool DynamicSample::serialize(Serializer& ser) const
+{
+  const DynamicDataImpl* const ddi = dynamic_cast<DynamicDataImpl*>(data_.in());
+  if (!ddi) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicSample::serialize: "
+        "DynamicData must be DynamicDataImpl, the type supplied by DynamicDataFactory\n"));
+    }
+    return false;
+  }
+  return ser << *ddi;
+}
+
+bool DynamicSample::deserialize(Serializer& ser)
+{
+  // DynamicDataXcdrReadImpl uses a message block to read the data on demand,
+  // but it can't be the same message block that 'ser' already has.  That one
+  // (or more than one if there's chaining) uses the allocators and locking
+  // strategy from the transport.
+  const ACE_CDR::ULong len = static_cast<ACE_CDR::ULong>(ser.length());
+  ACE_Allocator* const alloc = ACE_Allocator::instance();
+  const Message_Block_Ptr mb(new(alloc->malloc(sizeof(ACE_Message_Block)))
+    ACE_Message_Block(len, ACE_Message_Block::MB_DATA, 0, 0, alloc, 0,
+      ACE_DEFAULT_MESSAGE_BLOCK_PRIORITY, ACE_Time_Value::zero,
+      ACE_Time_Value::max_time, alloc, alloc));
+  unsigned char* const out = reinterpret_cast<unsigned char*>(mb->wr_ptr());
+  if (!ser.read_octet_array(out, len)) {
+    return false;
+  }
+  mb->wr_ptr(len);
+
+  const DDS::DynamicType_var type = data_->type();
+  data_ = new DynamicDataXcdrReadImpl(mb.get(), ser.encoding(), type);
+  return true;
 }
 
 bool DynamicSample::compare(const Sample& other) const
@@ -61,7 +98,152 @@ bool DynamicSample::compare(const Sample& other) const
   return false;
 }
 
+void DynamicDataReaderImpl::install_type_support(TypeSupportImpl* ts)
+{
+  type_ = ts->get_type();
+}
+
+void DynamicDataReaderImpl::imbue_type(DynamicSample& ds)
+{
+  const DDS::DynamicData_var data = new DynamicDataImpl(type_);
+  ds = DynamicSample(data);
+}
+
 } // namespace XTypes
+
+namespace DCPS {
+
+bool operator>>(Serializer& strm, XTypes::DynamicSample& sample)
+{
+  return sample.deserialize(strm);
+}
+
+bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample)
+{
+  sample.value.set_key_only(true);
+  return sample.value.deserialize(strm);
+}
+
+template <>
+void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample& sample)
+{
+  XTypes::DynamicDataReaderImpl* const self = dynamic_cast<XTypes::DynamicDataReaderImpl*>(this);
+  if (self) {
+    self->imbue_type(sample);
+  }
+}
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+template <>
+DDS::ReturnCode_t
+DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle&,
+                                                      DDS::SampleStateMask,
+                                                      DDS::ViewStateMask,
+                                                      DDS::InstanceStateMask,
+                                                      bool)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+template <>
+DDS::ReturnCode_t
+DataReaderImpl_T<XTypes::DynamicSample>::take(AbstractSamples&,
+                                              DDS::SampleStateMask,
+                                              DDS::ViewStateMask,
+                                              DDS::InstanceStateMask)
+{
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+template <>
+struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
+  typedef XTypes::DynamicSample T;
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  void* allocate() const { return 0; }
+
+  void deallocate(void*) const {}
+
+  size_t numDcpsKeys() const { return 0; }
+#endif /* OPENDDS_NO_MULTI_TOPIC */
+
+  bool isDcpsKey(const char* /*field*/) const
+  {
+    //TODO
+    return false;
+  }
+
+  ACE_CDR::ULong map_name_to_id(const char* /*field*/) const
+  {
+    //TODO
+    return 0;
+  }
+
+  Value getValue(const void* stru, DDS::MemberId /*memberId*/) const
+  {
+    const T& typed = *static_cast<const T*>(stru);
+    ACE_UNUSED_ARG(typed);
+    Value v(0);
+    //TODO
+    return v;
+  }
+
+  Value getValue(const void* stru, const char* /*field*/) const
+  {
+    const T& typed = *static_cast<const T*>(stru);
+    ACE_UNUSED_ARG(typed);
+    Value v(0);
+    //TODO
+    return v;
+  }
+
+  Value getValue(Serializer& /*strm*/, const char* /*field*/) const
+  {
+    Value v(0);
+    //TODO
+    return v;
+  }
+
+  ComparatorBase::Ptr create_qc_comparator(const char* /*field*/, ComparatorBase::Ptr /*next*/) const
+  {
+    //TODO
+    return ComparatorBase::Ptr();
+  }
+
+#ifndef OPENDDS_NO_MULTI_TOPIC
+  const char** getFieldNames() const
+  {
+    return 0;
+  }
+
+  const void* getRawField(const void*, const char*) const
+  {
+    return 0;
+  }
+
+  void assign(void*, const char*, const void*, const char*, const MetaStruct&) const
+  {
+  }
+#endif
+
+  bool compare(const void* /*lhs*/, const void* /*rhs*/, const char* /*field*/) const
+  {
+    //TODO
+    return false;
+  }
+};
+
+template <>
+OpenDDS_Dcps_Export
+const MetaStruct& getMetaStruct<XTypes::DynamicSample>()
+{
+  static const MetaStructImpl<XTypes::DynamicSample> m;
+  return m;
+}
+
+#endif
+
+} // namespace DCPS
 } // namespace OpenDDS
 
 namespace DDS {
@@ -118,8 +300,7 @@ DataWriter_ptr DynamicTypeSupport::create_datawriter()
 
 DataReader_ptr DynamicTypeSupport::create_datareader()
 {
-  // TODO
-  return 0;
+  return new DynamicDataReaderImpl();
 }
 
 #  ifndef OPENDDS_NO_MULTI_TOPIC

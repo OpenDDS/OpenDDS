@@ -67,6 +67,121 @@ local interface DynamicDataWriter : DataWriter {
     in DynamicData instance_data);
 };
 
+typedef sequence<DynamicData> DynamicDataSeq;
+
+local interface DynamicDataReader : DataReader {
+  ReturnCode_t read(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq info_seq,
+    in long max_samples,
+    in SampleStateMask sample_states,
+    in ViewStateMask view_states,
+    in InstanceStateMask instance_states);
+
+  ReturnCode_t take(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq info_seq,
+    in long max_samples,
+    in SampleStateMask sample_states,
+    in ViewStateMask view_states,
+    in InstanceStateMask instance_states);
+
+  ReturnCode_t read_w_condition(
+    inout DynamicDataSeq data_values,
+    inout SampleInfoSeq sample_infos,
+    in long max_samples,
+    in ReadCondition a_condition);
+
+  ReturnCode_t take_w_condition(
+    inout DynamicDataSeq data_values,
+    inout SampleInfoSeq sample_infos,
+    in long max_samples,
+    in ReadCondition a_condition);
+
+  ReturnCode_t read_next_sample(
+    inout DynamicData received_data,
+    inout SampleInfo sample_info);
+
+  ReturnCode_t take_next_sample(
+    inout DynamicData received_data,
+    inout SampleInfo sample_info);
+
+  ReturnCode_t read_instance(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq info_seq,
+    in long max_samples,
+    in InstanceHandle_t a_handle,
+    in SampleStateMask sample_states,
+    in ViewStateMask view_states,
+    in InstanceStateMask instance_states);
+
+  ReturnCode_t take_instance(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq info_seq,
+    in long max_samples,
+    in InstanceHandle_t a_handle,
+    in SampleStateMask sample_states,
+    in ViewStateMask view_states,
+    in InstanceStateMask instance_states);
+
+  ReturnCode_t read_instance_w_condition(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq sample_infos,
+    in long max_samples,
+    in InstanceHandle_t a_handle,
+    in ReadCondition a_condition);
+
+  ReturnCode_t take_instance_w_condition(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq sample_infos,
+    in long max_samples,
+    in InstanceHandle_t a_handle,
+    in ReadCondition a_condition);
+
+  ReturnCode_t read_next_instance(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq info_seq,
+    in long max_samples,
+    in InstanceHandle_t a_handle,
+    in SampleStateMask sample_states,
+    in ViewStateMask view_states,
+    in InstanceStateMask instance_states);
+
+  ReturnCode_t take_next_instance(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq info_seq,
+    in long max_samples,
+    in InstanceHandle_t a_handle,
+    in SampleStateMask sample_states,
+    in ViewStateMask view_states,
+    in InstanceStateMask instance_states);
+
+  ReturnCode_t read_next_instance_w_condition(
+    inout DynamicDataSeq data_values,
+    inout SampleInfoSeq sample_infos,
+    in long max_samples,
+    in InstanceHandle_t previous_handle,
+    in ReadCondition a_condition);
+
+  ReturnCode_t take_next_instance_w_condition(
+    inout DynamicDataSeq data_values,
+    inout SampleInfoSeq sample_infos,
+    in long max_samples,
+    in InstanceHandle_t previous_handle,
+    in ReadCondition a_condition);
+
+  ReturnCode_t return_loan(
+    inout DynamicDataSeq received_data,
+    inout SampleInfoSeq info_seq);
+
+  ReturnCode_t get_key_value(
+    inout DynamicData key_holder,
+    in InstanceHandle_t handle);
+
+  InstanceHandle_t lookup_instance(
+    in DynamicData instance_data);
+};
+
 }; // module DDS
 
 #endif // OPENDDS_SAFETY_PROFILE
