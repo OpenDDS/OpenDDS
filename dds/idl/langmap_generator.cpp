@@ -1426,7 +1426,7 @@ struct Cxx11Generator : GeneratorBase
     // Older versions of gcc will complain because it appears that a primitive
     // default constructor is not called for anonymous unions.
     be_global->lang_header_ <<
-      "#ifdef __GNUC__\n"
+      "#if defined(__GNUC__) && !defined(__clang__)\n"
       "#  pragma GCC diagnostic push\n"
       "#  pragma GCC diagnostic ignored \"-Wmaybe-uninitialized\"\n"
       "#endif\n";
@@ -1435,7 +1435,7 @@ struct Cxx11Generator : GeneratorBase
   void gen_union_pragma_post()
   {
     be_global->lang_header_ <<
-      "#ifdef __GNUC__\n"
+      "#if defined(__GNUC__) && !defined(__clang__)\n"
       "#  pragma GCC diagnostic pop\n"
       "#endif\n\n";
   }
