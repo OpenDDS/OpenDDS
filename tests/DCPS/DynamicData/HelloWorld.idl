@@ -6,6 +6,7 @@
 module HelloWorld {
 
   const long HELLO_WORLD_DOMAIN = 111;
+  const string MESSAGE_EXAMPLE_VALUE = "Hello, World!";
 
   @topic
   struct Message {

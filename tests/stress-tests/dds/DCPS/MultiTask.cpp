@@ -5,17 +5,20 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "ace/OS_NS_unistd.h"
-
 #include "TimingChecker.h"
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/MultiTask.h"
-#include "dds/DCPS/ReactorTask.h"
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/MultiTask.h>
+#include <dds/DCPS/ReactorTask.h>
 
-#include "../../../DCPS/common/TestSupport.h"
+#include <ace/OS_NS_unistd.h>
+
+#include <gtest/gtest.h>
+#include <gmock/gmock.h>
 
 using namespace OpenDDS::DCPS;
+
+namespace {
 
 ACE_Atomic_Op<ACE_Thread_Mutex, unsigned int> total_count = 0;
 
@@ -43,8 +46,9 @@ struct TestObj : public virtual RcObject
   ACE_Atomic_Op<ACE_Thread_Mutex, bool> do_enable_;
 };
 
-int
-ACE_TMAIN(int, ACE_TCHAR*[])
+} // (anonymous) namespace
+
+TEST(dds_DCPS_MultiTask, TimingChecker)
 {
   using namespace OpenDDS::DCPS;
 
@@ -57,10 +61,10 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   RcHandle<TestObj> obj = make_rch<TestObj>(reactor_task.interceptor());
   obj->multi_->enable(TimeDuration::from_msec(2000)); // 2.0 seconds
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 0);
+  EXPECT_EQ(total_count, 0);
   ACE_OS::sleep(5); // 5.0 seconds
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 2); // expect 2 executions within a 5.0 second interval when period is 2.0 seconds
+  EXPECT_EQ(total_count, 2); // expect 2 executions within a 5.0 second interval when period is 2.0 seconds
   obj->set_do_enable(true);
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000); // 2.0 seconds from now
   size_t enable_calls = 0;
@@ -75,22 +79,21 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1)
   if (tight_timing) {
-    TEST_CHECK(total_count == 22);
+    EXPECT_EQ(total_count, 22);
   } else {
-    TEST_CHECK(total_count >= 17);
-    TEST_CHECK(total_count <= 22);
+    EXPECT_GE(total_count, 17);
+    EXPECT_LE(total_count, 22);
   }
   ACE_OS::sleep(5); // sleep for 5.0 more seconds, should fall back to 2.0 second default period
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1), 2 more from last slow period
   if (tight_timing) {
-    TEST_CHECK(total_count == 24);
+    EXPECT_EQ(total_count, 24);
   } else {
-    TEST_CHECK(total_count >= 19);
-    TEST_CHECK(total_count <= 24);
+    EXPECT_GE(total_count, 19);
+    EXPECT_LE(total_count, 24);
   }
   obj->multi_->disable();
 
   reactor_task.stop();
-  return 0;
 }

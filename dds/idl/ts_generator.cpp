@@ -179,6 +179,7 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "struct DDSTraits<" << cxx_name << "> {\n"
     "  typedef " << cxx_name << " MessageType;\n"
     "  typedef " << ts_name << be_global->sequence_suffix() << " MessageSequenceType;\n"
+    "  typedef " << ts_name << be_global->sequence_suffix() << "::PrivateMemberAccess MessageSequenceAdapterType;\n"
     "  typedef " << ts_name << "TypeSupport TypeSupportType;\n"
     "  typedef " << ts_name << "TypeSupportImpl TypeSupportImplType;\n"
     "  typedef " << ts_name << "DataWriter DataWriterType;\n"

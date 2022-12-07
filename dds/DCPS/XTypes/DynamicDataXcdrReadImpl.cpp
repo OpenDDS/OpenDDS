@@ -63,7 +63,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
+    throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
   }
 }
 
@@ -78,7 +78,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
+    throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
   }
 
   strm_.rdstate(align_state_);
@@ -178,13 +178,21 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
   case TK_INT8:
   case TK_UINT8:
   case TK_CHAR8:
+#ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
+#endif
   case TK_ENUM:
-    // Value of enum or primitive types can be indicated by MEMBER_ID_INVALID Id
-    // (Section 7.5.2.11.1)
+    // Value of enum or primitive types can be indicated by Id MEMBER_ID_INVALID
+    // or by index 0 (Section 7.5.2.11.1).
+    if (index != 0 && DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                 " Received invalid index (%d) for type %C\n", index, typekind_to_string(tk)));
+    }
     return MEMBER_ID_INVALID;
   case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
   case TK_STRING16:
+#endif
   case TK_BITMASK:
   case TK_SEQUENCE:
   case TK_ARRAY:
@@ -584,7 +592,7 @@ bool DynamicDataXcdrReadImpl::read_value(ValueType& value, TypeKind tk)
 
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& value, MemberId id,
-                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md;
   if (get_from_struct_common_checks(md, id, MemberTypeKind)) {
@@ -696,7 +704,7 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_from_union_common_checks(Mem
 
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataXcdrReadImpl::get_value_from_union(MemberType& value, MemberId id,
-                                           TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                   TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -901,7 +909,7 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
 
 template<TypeKind ElementTypeKind, typename ElementType>
 bool DynamicDataXcdrReadImpl::get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
-                                                TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                        TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -965,7 +973,7 @@ void DynamicDataXcdrReadImpl::setup_stream(ACE_Message_Block* chain)
 
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, MemberId id,
-                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   if (!is_type_supported(ValueTypeKind, "get_single_value")) {
     return DDS::RETCODE_ERROR;
@@ -981,6 +989,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
+  // This is an extension to the XTypes spec where the value of a bitmask DynamicData
+  // can be read as a whole as a unsigned integer.
   if (tk == enum_or_bitmask) {
     // Per XTypes spec, the value of a DynamicData object of primitive type or TK_ENUM is
     // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
@@ -1433,7 +1443,7 @@ bool DynamicDataXcdrReadImpl::read_values(SequenceType& value, TypeKind elem_tk)
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, MemberId id,
-                                             TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                     TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md;
   if (get_from_struct_common_checks(md, id, ElementTypeKind, true)) {
@@ -1462,7 +1472,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, Member
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberId id,
-                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md = get_from_union_common_checks(id, "get_values_from_union");
   if (!md) {
@@ -1533,7 +1543,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_sequence(SequenceType& value, MemberId id,
-                                               TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                       TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1585,7 +1595,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_sequence(SequenceType& value, Memb
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_array(SequenceType& value, MemberId id,
-                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1630,7 +1640,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_array(SequenceType& value, MemberI
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_map(SequenceType& value, MemberId id,
-                                          TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                  TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1675,7 +1685,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_map(SequenceType& value, MemberId 
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_sequence_values(SequenceType& value, MemberId id,
-                                                       TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                               TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   if (!is_type_supported(ElementTypeKind, "get_sequence_values")) {
     return DDS::RETCODE_ERROR;

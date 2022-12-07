@@ -375,6 +375,13 @@ private:
     , have_ice_agent_info_(false)
 #endif
     {
+#ifdef OPENDDS_SECURITY
+      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
+      security_attribs_.is_key_protected = 0;
+      security_attribs_.is_payload_protected = 0;
+      security_attribs_.is_submessage_protected = 0;
+      security_attribs_.plugin_endpoint_attributes = 0;
+#endif
     }
 
     explicit DiscoveredSubscription(const DCPS::DiscoveredReaderData& r)
@@ -387,6 +394,13 @@ private:
     , have_ice_agent_info_(false)
 #endif
     {
+#ifdef OPENDDS_SECURITY
+      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
+      security_attribs_.is_key_protected = 0;
+      security_attribs_.is_payload_protected = 0;
+      security_attribs_.is_submessage_protected = 0;
+      security_attribs_.plugin_endpoint_attributes = 0;
+#endif
     }
 
     RepoIdSet matched_endpoints_;
@@ -427,6 +441,13 @@ private:
     , have_ice_agent_info_(false)
 #endif
     {
+#ifdef OPENDDS_SECURITY
+      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
+      security_attribs_.is_key_protected = 0;
+      security_attribs_.is_payload_protected = 0;
+      security_attribs_.is_submessage_protected = 0;
+      security_attribs_.plugin_endpoint_attributes = 0;
+#endif
     }
 
     explicit DiscoveredPublication(const DCPS::DiscoveredWriterData& w)
@@ -438,6 +459,13 @@ private:
     , have_ice_agent_info_(false)
 #endif
     {
+#ifdef OPENDDS_SECURITY
+      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
+      security_attribs_.is_key_protected = 0;
+      security_attribs_.is_payload_protected = 0;
+      security_attribs_.is_submessage_protected = 0;
+      security_attribs_.plugin_endpoint_attributes = 0;
+#endif
     }
 
     RepoIdSet matched_endpoints_;
