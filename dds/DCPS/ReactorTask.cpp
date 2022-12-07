@@ -87,8 +87,7 @@ void ReactorTask::cleanup()
   timer_queue_ = 0;
 }
 
-int ReactorTask::open_reactor_task(void*,
-                                   ThreadStatusManager* thread_status_manager,
+int ReactorTask::open_reactor_task(ThreadStatusManager* thread_status_manager,
                                    const String& name,
                                    ACE_Reactor* reactor)
 {

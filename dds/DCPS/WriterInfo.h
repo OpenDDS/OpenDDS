@@ -16,6 +16,7 @@
 #include "DisjointSequence.h"
 #include "PoolAllocator.h"
 #include "RcObject.h"
+#include "SporadicTask.h"
 #include "TimeTypes.h"
 
 #include "transport/framework/ReceivedDataSample.h"

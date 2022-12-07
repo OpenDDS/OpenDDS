@@ -75,12 +75,11 @@ public:
   explicit ReactorTask(bool useAsyncSend);
   virtual ~ReactorTask();
 
-  int open_reactor_task(void*,
+  int open_reactor_task(ThreadStatusManager* thread_status_manager = 0,
                         const String& name = "",
                         ACE_Reactor* reactor = 0);
-  virtual int open(void* ptr) {
-    return open_reactor_task(ptr);
-  }
+
+  virtual int open(void*) { return open_reactor_task(); }
   virtual int svc();
   virtual int close(u_long flags = 0);
 

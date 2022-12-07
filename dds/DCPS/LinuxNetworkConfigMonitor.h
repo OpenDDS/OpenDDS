@@ -27,7 +27,10 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor : public RcEventHandler, public NetworkConfigMonitor {
+class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor
+  : public virtual RcEventHandler
+  , public virtual NetworkConfigMonitor
+{
 public:
   explicit LinuxNetworkConfigMonitor(ReactorTask_rch reactor_task);
   bool open();
@@ -36,47 +39,50 @@ public:
 private:
   class OpenHandler : public ReactorTask::Command {
   public:
-    RegisterHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
+    OpenHandler(const RcHandle<LinuxNetworkConfigMonitor>& lncm)
       : lncm_(lncm)
+      , condition_(mutex_)
+      , done_(false)
+      , retval_(false)
     {}
+
+    bool wait() const;
 
   private:
     void execute(ReactorWrapper& reactor_wrapper);
-    {
-      RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
-      if (!lncm) {
-        return;
-      }
-      ACE_GUARD(ACE_Thread_Mutex, g, lncm->socket_mutex_);
-      if (reactor()->register_handler(lncm.get(), READ_MASK) != 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
-      }
-    }
 
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
+    mutable ACE_Thread_Mutex mutex_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
+    bool done_;
+    bool retval_;
   };
 
   bool open_i(ReactorWrapper& reactor_wrapper);
+
   class CloseHandler : public ReactorTask::Command {
   public:
-    RemoveHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
+    CloseHandler(const RcHandle<LinuxNetworkConfigMonitor>& lncm)
       : lncm_(lncm)
+      , condition_(mutex_)
+      , done_(false)
+      , retval_(false)
     {}
 
-    void execute()
-    {
-      RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
-      if (!lncm) {
-        return;
+    bool wait() const;
+
+  private:
     void execute(ReactorWrapper& reactor_wrapper);
-      ACE_GUARD(ACE_Thread_Mutex, g, lncm->socket_mutex_);
-      reactor()->remove_handler(lncm.get(), READ_MASK);
-    }
 
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
+    mutable ACE_Thread_Mutex mutex_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
+    bool done_;
+    bool retval_;
   };
 
   bool close_i(ReactorWrapper& reactor_wrapper);
+
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
   void read_messages();

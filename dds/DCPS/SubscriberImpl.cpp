@@ -750,21 +750,18 @@ SubscriberImpl::begin_access()
       return DDS::RETCODE_NOT_ENABLED;
     }
 
-  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
-    return DDS::RETCODE_OK;
-  }
-
-  DataReaderSet to_call;
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     si_lock_,
-                     DDS::RETCODE_ERROR);
+    if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+      return DDS::RETCODE_OK;
+    }
 
     ++access_depth_;
     // We should only notify subscription on the first
     // and last change to the current change set:
     if (access_depth_ == 1) {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       dr_set_guard,
+                       dr_set_lock_,
+                       DDS::RETCODE_ERROR);
       to_call = datareader_set_;
     }
   }
@@ -793,16 +790,9 @@ SubscriberImpl::end_access()
       return DDS::RETCODE_NOT_ENABLED;
     }
 
-  if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
-    return DDS::RETCODE_OK;
-  }
-
-  DataReaderSet to_call;
-  {
-    ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
-                     guard,
-                     si_lock_,
-                     DDS::RETCODE_ERROR);
+    if (qos_.presentation.access_scope != DDS::GROUP_PRESENTATION_QOS) {
+      return DDS::RETCODE_OK;
+    }
 
     if (access_depth_ == 0) {
       if (DCPS_debug_level > 0) {
@@ -817,6 +807,10 @@ SubscriberImpl::end_access()
     // We should only notify subscription on the first
     // and last change to the current change set:
     if (access_depth_ == 0) {
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
+                       dr_set_guard,
+                       dr_set_lock_,
+                       DDS::RETCODE_ERROR);
       to_call = datareader_set_;
     }
   }

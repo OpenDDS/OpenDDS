@@ -20,7 +20,6 @@
 #include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/JobQueue.h>
-#include <dds/DCPS/NetworkConfigMonitor.h>
 #include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #ifdef OPENDDS_SECURITY
