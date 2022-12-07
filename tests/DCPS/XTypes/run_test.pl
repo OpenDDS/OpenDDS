@@ -338,7 +338,7 @@ sub run_test {
     push(@reader_args, "--reg-type $v->{r_reg_type}");
   }
   push(@reader_args, '--dynamic-ts') if ($dynamic_readers);
-  push(@reader_args, '--skip-read') if ($dynamic_writers);
+  #  push(@reader_args, '--skip-read') if ($dynamic_writers);
 
   push(@reader_args, @test_args);
   $test->process("reader_$test_name_param", './subscriber', join(' ', @reader_args));

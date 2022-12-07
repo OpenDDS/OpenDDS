@@ -6,246 +6,365 @@
 
 #include <dds/DCPS/DCPS_Utils.h>
 
-void write_plain_cdr_struct(const DataWriter_var& dw)
+bool check_rc(DDS::ReturnCode_t ret, const char* what)
 {
-  PlainCdrStructDataWriter_var typed_dw = PlainCdrStructDataWriter::_narrow(dw);
-
-  PlainCdrStruct pcs;
-  pcs.key_field = key_value;
-  pcs.value_field = 1;
-
-  const ReturnCode_t ret = typed_dw->write(pcs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_plain_cdr_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
+  if (ret != DDS::RETCODE_OK) {
+    ACE_ERROR((LM_ERROR, "ERROR: %C: %C\n", what, OpenDDS::DCPS::retcode_to_string(ret)));
+    return false;
   }
+  return true;
+}
+
+void write_plain_cdr_struct(const DataWriter_var& dw, bool dynamic)
+{
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: PlainCdrStruct\n"));
   }
+  if (!dynamic) {
+    PlainCdrStructDataWriter_var typed_dw = PlainCdrStructDataWriter::_narrow(dw);
+
+    PlainCdrStruct pcs;
+    pcs.key_field = key_value;
+    pcs.value_field = 1;
+
+    const ReturnCode_t ret = typed_dw->write(pcs, HANDLE_NIL);
+    check_rc(ret, "write_plain_cdr_struct returned ");
+  } else {
+    PlainCdrStructTypeSupport_var ts = new PlainCdrStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, key_value);
+    if (!check_rc(ret, "write_plain_cdr_struct: set key_field returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(1, 1);
+    if (!check_rc(ret, "write_plain_cdr_struct: set value_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_plain_cdr_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_plain_cdr_struct: write dynamic data returned ");
+  }
 }
 
-void write_final_struct(const DataWriter_var& dw)
+void write_final_struct(const DataWriter_var& dw, bool dynamic)
 {
-  FinalStructPubDataWriter_var typed_dw = FinalStructPubDataWriter::_narrow(dw);
-
-  FinalStructPub fs;
-  fs.key_field = key_value;
-
-  const ReturnCode_t ret = typed_dw->write(fs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_final_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: FinalStructPub\n"));
   }
+  if (!dynamic) {
+    FinalStructPubDataWriter_var typed_dw = FinalStructPubDataWriter::_narrow(dw);
+
+    FinalStructPub fs;
+    fs.key_field = key_value;
+
+    const ReturnCode_t ret = typed_dw->write(fs, HANDLE_NIL);
+    check_rc(ret, "write_final_struct returned ");
+  } else {
+    FinalStructPubTypeSupport_var ts = new FinalStructPubTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, key_value);
+    if (!check_rc(ret, "write_final_struct: set key_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_final_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_final_struct: write dynamic data returned ");
+  }
 }
 
-void write_modified_final_struct(const DataWriter_var& dw)
+void write_modified_final_struct(const DataWriter_var& dw, bool dynamic)
 {
-  ModifiedFinalStructDataWriter_var typed_dw = ModifiedFinalStructDataWriter::_narrow(dw);
-
-  ModifiedFinalStruct mfs;
-  mfs.key_field = key_value;
-  mfs.additional_field = FINAL_STRUCT_AF;
-
-  const ReturnCode_t ret = typed_dw->write(mfs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_modified_final_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedFinalStruct\n"));
   }
+  if (!dynamic) {
+    ModifiedFinalStructDataWriter_var typed_dw = ModifiedFinalStructDataWriter::_narrow(dw);
+
+    ModifiedFinalStruct mfs;
+    mfs.key_field = key_value;
+    mfs.additional_field = FINAL_STRUCT_AF;
+
+    const ReturnCode_t ret = typed_dw->write(mfs, HANDLE_NIL);
+    check_rc(ret, "write_modified_final_struct returned ");
+  } else {
+    ModifiedFinalStructTypeSupport_var ts = new ModifiedFinalStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, key_value);
+    if (!check_rc(ret, "write_modified_final_struct: set key_field returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(1, FINAL_STRUCT_AF);
+    if (!check_rc(ret, "write_modified_final_struct: set additional_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_modified_final_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_modified_final_struct: write dynamic data returned ");
+  }
 }
 
-void write_appendable_struct_no_xtypes(const DataWriter_var& dw)
+void write_appendable_struct_no_xtypes(const DataWriter_var& dw, bool dynamic)
 {
-  AppendableStructNoXTypesDataWriter_var typed_dw = AppendableStructNoXTypesDataWriter::_narrow(dw);
-
-  AppendableStructNoXTypes as;
-  as.key_field = key_value;
-
-  const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_appendable_struct_no_xtypes returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AppendableStructNoXTypes\n"));
   }
+  if (!dynamic) {
+    AppendableStructNoXTypesDataWriter_var typed_dw = AppendableStructNoXTypesDataWriter::_narrow(dw);
+
+    AppendableStructNoXTypes as;
+    as.key_field = key_value;
+
+    const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
+    check_rc(ret, "write_appendable_struct_no_xtypes returned ");
+  } else {
+    AppendableStructNoXTypesTypeSupport_var ts = new AppendableStructNoXTypesTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, key_value);
+    if (!check_rc(ret, "write_appendable_struct_no_xtypes: set key_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_appendable_struct_no_xtypes: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_appendable_struct_no_xtypes: write dynamic data returned ");
+  }
 }
 
-void write_additional_prefix_field_struct(const DataWriter_var& dw)
+void write_additional_prefix_field_struct(const DataWriter_var& dw, bool dynamic)
 {
-  AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
-
-  AdditionalPrefixFieldStruct apfs;
-  apfs.key_field = key_value;
-  apfs.additional_field = APPENDABLE_STRUCT_AF;
-
-  const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_additional_prefix_field_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPrefixFieldStruct\n"));
   }
+  if (!dynamic) {
+    AdditionalPrefixFieldStructDataWriter_var typed_dw = AdditionalPrefixFieldStructDataWriter::_narrow(dw);
+
+    AdditionalPrefixFieldStruct apfs;
+    apfs.key_field = key_value;
+    apfs.additional_field = APPENDABLE_STRUCT_AF;
+
+    const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
+    check_rc(ret, "write_additional_prefix_field_struct returned");
+  } else {
+    AdditionalPrefixFieldStructTypeSupport_var ts = new AdditionalPrefixFieldStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, APPENDABLE_STRUCT_AF);
+    if (!check_rc(ret, "write_additional_prefix_field_struct: set additional_field returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(1, key_value);
+    if (!check_rc(ret, "write_additional_prefix_field_struct: set key_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_additional_prefix_field_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_additional_prefix_field_struct: write dynamic data returned ");
+  }
 }
 
-void write_base_appendable_struct(const DataWriter_var& dw)
+void write_base_appendable_struct(const DataWriter_var& dw, bool dynamic)
 {
-  BaseAppendableStructDataWriter_var typed_dw = BaseAppendableStructDataWriter::_narrow(dw);
-
-  BaseAppendableStruct bas;
-  bas.key_field = key_value;
-
-  const ReturnCode_t ret = typed_dw->write(bas, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_base_appendable_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: BaseAppendableStruct\n"));
   }
+  if (!dynamic) {
+    BaseAppendableStructDataWriter_var typed_dw = BaseAppendableStructDataWriter::_narrow(dw);
+
+    BaseAppendableStruct bas;
+    bas.key_field = key_value;
+
+    const ReturnCode_t ret = typed_dw->write(bas, HANDLE_NIL);
+    check_rc(ret, "write_base_appendable_struct returned ");
+  } else {
+    BaseAppendableStructTypeSupport_var ts = new BaseAppendableStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, key_value);
+    if (!check_rc(ret, "write_base_appendable_struct: set key_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_base_appendable_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_base_appendable_struct: write dynamic data returned ");
+  }
 }
 
-void write_additional_postfix_field_struct(const DataWriter_var& dw)
+void write_additional_postfix_field_struct(const DataWriter_var& dw, bool dynamic)
 {
-  AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
-
-  AdditionalPostfixFieldStruct apfs;
-  apfs.key_field = key_value;
-  apfs.additional_field = APPENDABLE_STRUCT_AF;
-
-  const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_additional_postfix_field_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AdditionalPostfixFieldStruct\n"));
   }
+  if (!dynamic) {
+    AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
+
+    AdditionalPostfixFieldStruct apfs;
+    apfs.key_field = key_value;
+    apfs.additional_field = APPENDABLE_STRUCT_AF;
+
+    const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
+    check_rc(ret, "write_additional_postfix_field_struct returned ");
+  } else {
+    // TODO:
+  }
 }
 
-void write_modified_mutable_struct(const DataWriter_var& dw)
+void write_modified_mutable_struct(const DataWriter_var& dw, bool dynamic)
 {
-  ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
-
-  ModifiedMutableStruct ams;
-  ams.key_field = key_value;
-  ams.additional_field = MUTABLE_STRUCT_AF;
-
-  const ReturnCode_t ret = typed_dw->write(ams, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_modified_mutable_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableStruct\n"));
   }
+  if (!dynamic) {
+    ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
+
+    ModifiedMutableStruct ams;
+    ams.key_field = key_value;
+    ams.additional_field = MUTABLE_STRUCT_AF;
+
+    const ReturnCode_t ret = typed_dw->write(ams, HANDLE_NIL);
+    check_rc(ret, "write_modified_mutable_struct returned ");
+  } else {
+    // TODO:
+  }
 }
 
-void write_mutable_base_struct(const DataWriter_var& dw)
+void write_mutable_base_struct(const DataWriter_var& dw, bool dynamic)
 {
-  MutableBaseStructDataWriter_var typed_dw = MutableBaseStructDataWriter::_narrow(dw);
-
-  MutableBaseStruct mbs;
-  mbs.key_field = key_value;
-
-  const ReturnCode_t ret = typed_dw->write(mbs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_mutable_base_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: MutableBaseStruct\n"));
   }
+  if (!dynamic) {
+    MutableBaseStructDataWriter_var typed_dw = MutableBaseStructDataWriter::_narrow(dw);
+
+    MutableBaseStruct mbs;
+    mbs.key_field = key_value;
+
+    const ReturnCode_t ret = typed_dw->write(mbs, HANDLE_NIL);
+    check_rc(ret, "write_mutable_base_struct returned ");
+  } else {
+    // TODO:
+  }
 }
 
-void write_modified_mutable_union(const DataWriter_var& dw)
+void write_modified_mutable_union(const DataWriter_var& dw, bool dynamic)
 {
-  ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
-
-  ModifiedMutableUnion mmu;
-  mmu.key_field(key_value);
-
-  const ReturnCode_t ret = typed_dw->write(mmu, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_modified_mutable_union returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedMutableUnion\n"));
   }
+  if (!dynamic) {
+    ModifiedMutableUnionDataWriter_var typed_dw = ModifiedMutableUnionDataWriter::_narrow(dw);
+
+    ModifiedMutableUnion mmu;
+    mmu.key_field(key_value);
+
+    const ReturnCode_t ret = typed_dw->write(mmu, HANDLE_NIL);
+    check_rc(ret, "write_modified_mutable_union returned ");
+  } else {
+    // TODO:
+  }
 }
 
-void write_trim64_struct(const DataWriter_var& dw)
+void write_trim64_struct(const DataWriter_var& dw, bool dynamic)
 {
-  Trim64StructDataWriter_var typed_dw = Trim64StructDataWriter::_narrow(dw);
-
-  Trim64Struct tcs;
-  tcs.trim_string = STRING_26.c_str();
-
-  const ReturnCode_t ret = typed_dw->write(tcs, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_trim64_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: Trim64Struct\n"));
   }
+  if (!dynamic) {
+    Trim64StructDataWriter_var typed_dw = Trim64StructDataWriter::_narrow(dw);
+
+    Trim64Struct tcs;
+    tcs.trim_string = STRING_26.c_str();
+
+    const ReturnCode_t ret = typed_dw->write(tcs, HANDLE_NIL);
+    check_rc(ret, "write_trim64_struct returned ");
+  } else {
+    // TODO:
+  }
 }
 
-void write_appendable_struct_with_dependency(const DataWriter_var& dw)
+void write_appendable_struct_with_dependency(const DataWriter_var& dw, bool dynamic)
 {
-  AppendableStructWithDependencyDataWriter_var typed_dw = AppendableStructWithDependencyDataWriter::_narrow(dw);
-
-  AppendableStructWithDependency as;
-  as.key_field = key_value;
-  as.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
-
-  const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_appendable_struct_with_dependency returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: AppendableStructWithDependency\n"));
   }
+  if (!dynamic) {
+    AppendableStructWithDependencyDataWriter_var typed_dw = AppendableStructWithDependencyDataWriter::_narrow(dw);
+
+    AppendableStructWithDependency as;
+    as.key_field = key_value;
+    as.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
+
+    const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
+    check_rc(ret, "write_appendable_struct_with_dependency returned ");
+  } else {
+    // TODO:
+  }
 }
 
-void write_modified_name_mutable_struct(const DataWriter_var& dw)
+void write_modified_name_mutable_struct(const DataWriter_var& dw, bool dynamic)
 {
-  ModifiedNameMutableStructDataWriter_var typed_dw = ModifiedNameMutableStructDataWriter::_narrow(dw);
-  ModifiedNameMutableStruct sample;
-  sample.key_field_modified = key_value;
-  sample.additional_field_modified = MUTABLE_STRUCT_AF;
-
-  const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_modified_name_mutable_struct returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: ModifiedNameMutableStruct\n"));
   }
+  if (!dynamic) {
+    ModifiedNameMutableStructDataWriter_var typed_dw = ModifiedNameMutableStructDataWriter::_narrow(dw);
+    ModifiedNameMutableStruct sample;
+    sample.key_field_modified = key_value;
+    sample.additional_field_modified = MUTABLE_STRUCT_AF;
+
+    const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
+    check_rc(ret, "write_modified_name_mutable_struct returned ");
+  } else {
+    // TODO:
+  }
 }
 
-void write_modified_name_mutable_union(const DataWriter_var& dw)
+void write_modified_name_mutable_union(const DataWriter_var& dw, bool dynamic)
 {
-  ModifiedNameMutableUnionDataWriter_var typed_dw = ModifiedNameMutableUnionDataWriter::_narrow(dw);
-  ModifiedNameMutableUnion sample;
-  sample.key_field_modified(key_value);
-
-  const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
-  if (ret != RETCODE_OK) {
-    ACE_ERROR((LM_ERROR, "ERROR: write_modified_name_mutable_union returned %C\n",
-               OpenDDS::DCPS::retcode_to_string(ret)));
-  }
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer:  ModifiedNameMutableUnion\n"));
+  }
+  if (!dynamic) {
+    ModifiedNameMutableUnionDataWriter_var typed_dw = ModifiedNameMutableUnionDataWriter::_narrow(dw);
+    ModifiedNameMutableUnion sample;
+    sample.key_field_modified(key_value);
+
+    const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
+    check_rc(ret, "write_modified_name_mutable_union returned ");
+  } else {
+    // TODO:
   }
 }
 
@@ -486,35 +605,35 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (!expect_inconsistent_topic && !expect_incompatible_qos && !dynamic) {
+  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
     if (type == "PlainCdrStruct") {
-      write_plain_cdr_struct(dw);
+      write_plain_cdr_struct(dw, dynamic);
     } else if (type == "FinalStructPub") {
-      write_final_struct(dw);
+      write_final_struct(dw, dynamic);
     } else if (type == "ModifiedFinalStruct") {
-      write_modified_final_struct(dw);
+      write_modified_final_struct(dw, dynamic);
     } else if (type == "BaseAppendableStruct") {
-      write_base_appendable_struct(dw);
+      write_base_appendable_struct(dw, dynamic);
     } else if (type == "AppendableStructNoXTypes") {
-      write_appendable_struct_no_xtypes(dw);
+      write_appendable_struct_no_xtypes(dw, dynamic);
     } else if (type == "AdditionalPrefixFieldStruct") {
-      write_additional_prefix_field_struct(dw);
+      write_additional_prefix_field_struct(dw, dynamic);
     } else if (type == "AdditionalPostfixFieldStruct") {
-      write_additional_postfix_field_struct(dw);
+      write_additional_postfix_field_struct(dw, dynamic);
     } else if (type == "ModifiedMutableStruct") {
-      write_modified_mutable_struct(dw);
+      write_modified_mutable_struct(dw, dynamic);
     } else if (type == "ModifiedMutableUnion") {
-      write_modified_mutable_union(dw);
+      write_modified_mutable_union(dw, dynamic);
     } else if (type == "Trim64Struct") {
-      write_trim64_struct(dw);
+      write_trim64_struct(dw, dynamic);
     } else if (type == "AppendableStructWithDependency") {
-      write_appendable_struct_with_dependency(dw);
+      write_appendable_struct_with_dependency(dw, dynamic);
     } else if (type == "ModifiedNameMutableStruct") {
-      write_modified_name_mutable_struct(dw);
+      write_modified_name_mutable_struct(dw, dynamic);
     } else if (type == "ModifiedNameMutableUnion") {
-      write_modified_name_mutable_union(dw);
+      write_modified_name_mutable_union(dw, dynamic);
     } else if (type == "MutableBaseStruct") {
-      write_mutable_base_struct(dw);
+      write_mutable_base_struct(dw, dynamic);
     }
   }
   ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));
