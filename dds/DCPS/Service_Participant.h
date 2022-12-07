@@ -447,8 +447,10 @@ public:
   XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
                                                const DDS::BuiltinTopicKey_t& key) const;
 
+#ifndef OPENDDS_SAFETY_PROFILE
   DDS::ReturnCode_t get_dynamic_type(DDS::DynamicType_var& type,
     DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const;
+#endif
 
   /**
    * Get TypeObject for a given TypeIdentifier.

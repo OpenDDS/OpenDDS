@@ -2612,6 +2612,7 @@ bool DomainParticipantImpl::set_wait_pending_deadline(const MonotonicTimePoint& 
   return result;
 }
 
+#ifndef OPENDDS_SAFETY_PROFILE
 DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
   DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key)
 {
@@ -2680,6 +2681,7 @@ DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
 
   return DDS::RETCODE_OK;
 }
+#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

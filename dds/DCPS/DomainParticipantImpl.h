@@ -419,8 +419,10 @@ public:
   bool prepare_to_delete_datawriters();
   bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
+#ifndef OPENDDS_SAFETY_PROFILE
   DDS::ReturnCode_t get_dynamic_type(
     DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key);
+#endif
 
 private:
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
