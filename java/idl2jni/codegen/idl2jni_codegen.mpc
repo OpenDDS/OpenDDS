@@ -1,4 +1,4 @@
-project: aceexe, crosscompile, opendds_idl_plugin, install {
+project: crosscompile, opendds_idl_plugin, install {
   sharedname   = idl2jni
   libout       = $(DDS_ROOT)/lib
   dynamicflags = IDL2JNI_BUILD_DLL
