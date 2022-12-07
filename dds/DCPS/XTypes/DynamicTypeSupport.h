@@ -280,7 +280,14 @@ void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample
 
 namespace XTypes {
 
-class OpenDDS_Dcps_Export DynamicDataReaderImpl
+#if defined _MSC_VER && _MSC_VER < 1700
+#define OPENDDS_MAYBE_EXPORT
+#else
+#define OPENDDS_MAYBE_EXPORT OpenDDS_Dcps_Export
+#endif
+
+class OPENDDS_MAYBE_EXPORT DynamicDataReaderImpl
+#undef OPENDDS_MAYBE_EXPORT
   : public DCPS::DataReaderImpl_T<DynamicSample>
 {
 public:
