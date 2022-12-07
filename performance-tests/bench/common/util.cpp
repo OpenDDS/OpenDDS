@@ -74,7 +74,7 @@ std::string create_temp_dir(const std::string& prefix)
   // Append the process id and create the directory
   const size_t len = ACE_OS::strlen(buffer);
   ACE_OS::snprintf(buffer + len, PATH_MAX - len - 1,
-                   "_%d", ACE_OS::getpid());
+                   ACE_TEXT("_%d"), ACE_OS::getpid());
   if (ACE_OS::mkdir(buffer, S_IRWXU) == -1) {
     return "";
   }
