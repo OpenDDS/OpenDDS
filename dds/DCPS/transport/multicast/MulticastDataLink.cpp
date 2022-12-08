@@ -169,28 +169,31 @@ MulticastDataLink::find_or_create_session(MulticastPeer remote_peer)
     return it->second;
   }
 
-  MulticastSession_rch session =
-    this->session_factory_->create(transport()->reactor_task()->interceptor(), this, remote_peer);
-  if (session.is_nil()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("MulticastDataLink::find_or_create_session: ")
-        ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
-        (unsigned int) (remote_peer >> 32),
-        (unsigned int) remote_peer),
-        MulticastSession_rch());
-  }
+  MulticastSession_rch session;
+  MulticastTransport_rch mt = transport();
+  if (mt) {
+    session = session_factory_->create(mt->reactor_task()->interceptor(), this, remote_peer);
+    if (session.is_nil()) {
+      ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("MulticastDataLink::find_or_create_session: ")
+          ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
+          (unsigned int) (remote_peer >> 32),
+          (unsigned int) remote_peer),
+          MulticastSession_rch());
+    }
 
-  std::pair<MulticastSessionMap::iterator, bool> pair = this->sessions_.insert(
-      MulticastSessionMap::value_type(remote_peer, session));
-  if (pair.first == this->sessions_.end()) {
-    ACE_ERROR_RETURN((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: ")
-        ACE_TEXT("MulticastDataLink::find_or_create_session: ")
-        ACE_TEXT("failed to insert session for remote peer: %#08x%08x!\n"),
-        (unsigned int) (remote_peer >> 32),
-        (unsigned int) remote_peer),
-        MulticastSession_rch());
+    std::pair<MulticastSessionMap::iterator, bool> pair = this->sessions_.insert(
+        MulticastSessionMap::value_type(remote_peer, session));
+    if (pair.first == this->sessions_.end()) {
+      ACE_ERROR_RETURN((LM_ERROR,
+          ACE_TEXT("(%P|%t) ERROR: ")
+          ACE_TEXT("MulticastDataLink::find_or_create_session: ")
+          ACE_TEXT("failed to insert session for remote peer: %#08x%08x!\n"),
+          (unsigned int) (remote_peer >> 32),
+          (unsigned int) remote_peer),
+          MulticastSession_rch());
+    }
   }
   return session;
 }
@@ -423,7 +426,10 @@ MulticastDataLink::syn_received_no_session(MulticastPeer source,
     return;
   }
 
-  transport()->passive_connection(local_peer, source);
+  MulticastTransport_rch mt= transport();
+  if (mt) {
+    mt->passive_connection(local_peer, source);
+  }
 }
 
 void

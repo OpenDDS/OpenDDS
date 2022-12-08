@@ -323,9 +323,6 @@ protected:
   AtomicBool is_shut_down_;
 };
 
-typedef RcHandle<TransportImpl> TransportImpl_rch;
-typedef WeakRcHandle<TransportImpl> TransportImpl_wrch;
-
 } // namespace DCPS
 } // namespace OpenDDS
 

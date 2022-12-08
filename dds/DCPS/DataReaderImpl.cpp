@@ -3233,7 +3233,7 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
   TransportClient::add_link(link, peer);
   OPENDDS_STRING type;
   {
-    RcHandle<TransportImpl> impl = link->impl();
+    TransportImpl_rch impl = link->impl();
     if (impl) {
       type = impl->transport_type();
     }

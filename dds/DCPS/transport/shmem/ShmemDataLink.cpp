@@ -246,19 +246,23 @@ ShmemDataLink::peer_allocator()
 ShmemAllocator*
 ShmemDataLink::local_allocator()
 {
-  return transport()->alloc();
+  ShmemAllocator* result = 0;
+  INLINE_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), alloc(), result);
+  return result;
 }
 
 std::string
 ShmemDataLink::local_address()
 {
-  return transport()->address();
+  std::string result;
+  INLINE_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), address(), result);
+  return result;
 }
 
 void
 ShmemDataLink::signal_semaphore()
 {
-  return transport()->signal_semaphore();
+  INLINE_TEST_AND_CALL(ShmemTransport_rch, transport(), signal_semaphore());
 }
 
 pid_t
