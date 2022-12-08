@@ -88,7 +88,8 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("port_offset"),
                    this->port_offset_, u_short)
 
-  ACE_TString group_address_s;
+  // Explicitly initialize this string to stop gcc 11 from issuing a warning.
+  ACE_TString group_address_s(ACE_TEXT(""));
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("group_address"),
                            group_address_s)
   if (group_address_s.is_empty()) {

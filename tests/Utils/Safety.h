@@ -40,6 +40,10 @@ void operator delete(void* ptr) {
   ::free(ptr);
 }
 
+void operator delete(void* ptr, std::size_t) {
+  ::free(ptr);
+}
+
 void* operator new(size_t sz, const std::nothrow_t&)
 {
   if (no_global_new) {
@@ -90,6 +94,10 @@ void* operator new[](size_t sz)
 }
 
 void operator delete[](void* ptr) {
+  ::free(ptr);
+}
+
+void operator delete[](void* ptr, std::size_t) {
   ::free(ptr);
 }
 

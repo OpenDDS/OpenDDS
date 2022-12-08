@@ -39,6 +39,11 @@ my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
 
+my @default_configh = (
+  '#define ACE_DISABLE_MKTEMP',
+  '#define ACE_LACKS_READDIR_R',
+);
+
 sub perlOS_to_host {
   return 'win32' if $^O eq 'MSWin32';
   return 'macosx' if $^O eq 'darwin';
@@ -210,6 +215,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'doc-group3|doc_group3!', 'Use the DOC Group release of TAO 3.x (no)',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
     'force-ace-tao', 'Force configuration of ACE/TAO (no)',
+    'no-disable-deprecated', 'Turn off disabling deprecated interfaces when' .
+                             $argIndent . 'configuring ACE/TAO (no)',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -384,6 +391,7 @@ my %opts = %{parseArgs()};
 my $debug = exists $opts{'debug'} ? $opts{'debug'} : 1;
 my $backup = exists $opts{'backup'} ? $opts{'backup'} : 1;
 my $force_ace_tao = exists $opts{'force-ace-tao'} ? $opts{'force-ace-tao'} : 0;
+my $no_disable_deprecated = exists $opts{'no-disable-deprecated'} ? $opts{'no-disable-deprecated'} : 0;
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -1045,6 +1053,11 @@ sub write_config_h {
   $opts{'optimize'} = 0 if (!exists $opts{'optimize'} && !exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
+  if (!$no_disable_deprecated) {
+    for my $line (@default_configh) {
+      print $CFGH "$line\n";
+    }
+  }
   if ($buildEnv{'build'} eq 'target') {
     for my $line (@{$opts{'configh'}}) {
       print $CFGH "$line\n";

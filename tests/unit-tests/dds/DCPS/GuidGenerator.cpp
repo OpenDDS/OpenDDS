@@ -73,8 +73,8 @@ TEST(dds_DCPS_RTPS_GuidGenerator, getCount)
   gen.populate(g5); // count -> 5
   unsigned int fiveCount = gen.getCount(false);
 
-  EXPECT_EQ(1, oneCount - zeroCountOffset) << "Failure after getCount with one increment.";
-  EXPECT_EQ(5, fiveCount - zeroCountOffset) << "Failure after getCount with five increments.";
+  EXPECT_EQ(1u, oneCount - zeroCountOffset) << "Failure after getCount with one increment.";
+  EXPECT_EQ(5u, fiveCount - zeroCountOffset) << "Failure after getCount with five increments.";
 }
 
 TEST(dds_DCPS_RTPS_GuidGenerator, interfaceName)
