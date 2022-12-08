@@ -668,6 +668,7 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
                                         const string &jniArrayType, const string &taoTypeName, bool sequence,
                                         const string &length, bool elementIsObjref /* = false */)
 {
+  const bool lengthIsConstant = !sequence;
   commonSetup c(name, jniArrayType.c_str(), false, !sequence);
   string preLoop, postLoopCxx, postLoopJava, preNewArray, newArrayExtra,
   postNewArray, loopCxx, loopJava, actualJniType = jniType,
@@ -809,12 +810,21 @@ bool idl_mapping_jni::gen_jarray_copies(UTL_ScopedName *name,
   "  target = arr;\n";
 
   ostringstream toCxxBody;
+  if (lengthIsConstant) {
+    toCxxBody <<
+      "  const CORBA::ULong target_len = " << length << ";\n";
+  }
   toCxxBody <<
   "  " << actualJniType << "Array arr = source;\n"
   "  jsize len = jni->GetArrayLength (arr);\n"
   << resizeCxx
   << preLoop <<
-  "  for (CORBA::ULong i = 0; i < static_cast<CORBA::ULong> (len); ++i)\n"
+  "  for (CORBA::ULong i = 0; ";
+  if (lengthIsConstant) {
+    toCxxBody << "i < target_len && ";
+  }
+  toCxxBody <<
+  "i < static_cast<CORBA::ULong> (len); ++i)\n"
   "    {\n"
   << loopCxx <<
   "    }\n"
