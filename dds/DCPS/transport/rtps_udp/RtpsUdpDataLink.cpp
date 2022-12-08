@@ -4743,7 +4743,7 @@ RtpsUdpDataLink::get_ice_agent() const
 
 WeakRcHandle<ICE::Endpoint>
 RtpsUdpDataLink::get_ice_endpoint() const {
-  RcHandle<TransportImpl> ti = impl();
+  TransportImpl_rch ti = impl();
   return ti ? ti->get_ice_endpoint() : WeakRcHandle<ICE::Endpoint>();
 }
 

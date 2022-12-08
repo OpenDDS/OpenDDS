@@ -173,7 +173,10 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
   }
 
   if (call_passive_connection) {
-    this->link_->transport()->passive_connection(this->link_->local_peer(), this->remote_peer_);
+    MulticastTransport_rch transport = link_->transport();
+    if (transport) {
+      transport->passive_connection(link_->local_peer(), remote_peer_);
+    }
   }
 
   // MULTICAST_SYN control samples are always positively
