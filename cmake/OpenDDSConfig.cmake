@@ -137,6 +137,14 @@ if(OPENDDS_XERCES3)
   endif()
 endif()
 
+## ACE provides (or uses) many deprecated functions.
+## For now, we'll silence the warnings.
+if(MSVC)
+  add_compile_options(/wd4996)
+  add_compile_definitions(_CRT_SECURE_NO_WARNINGS
+                          _WINSOCK_DEPRECATED_NO_WARNINGS)
+endif()
+
 set(_ace_libs
   ACE
 )
