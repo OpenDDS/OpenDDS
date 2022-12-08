@@ -45,9 +45,9 @@ public:
 
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
-  DDS::ReturnCode_t clear_value(DDS::MemberId /*id*/);
-  DDS::DynamicData_ptr loan_value(DDS::MemberId /*id*/);
-  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr /*value*/);
+  DDS::ReturnCode_t clear_value(DDS::MemberId id);
+  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
+  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr value);
 
   DDS::DynamicData_ptr clone();
 

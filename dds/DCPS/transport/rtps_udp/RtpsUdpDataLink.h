@@ -22,7 +22,6 @@
 #include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
-#include <dds/DCPS/NetworkConfigMonitor.h>
 #include <dds/DCPS/DataSampleElement.h>
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/GuidConverter.h>

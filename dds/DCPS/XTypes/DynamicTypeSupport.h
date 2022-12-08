@@ -7,8 +7,9 @@
 #define OPENDDS_DCPS_XTYPES_DYNAMIC_TYPE_SUPPORT_H
 
 #ifndef OPENDDS_SAFETY_PROFILE
-#  include <dds/DCPS/Sample.h>
+#  include <dds/DCPS/DataReaderImpl_T.h>
 #  include <dds/DCPS/DataWriterImpl.h>
+#  include <dds/DCPS/Sample.h>
 #  include <dds/DCPS/RcHandle_T.h>
 
 #  include <dds/DdsDynamicTypeSupportC.h>
@@ -16,23 +17,39 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
+namespace DDS {
+  class DynamicTypeSupport;
+}
+
 namespace OpenDDS {
 namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicSample : public DCPS::Sample {
 public:
+  DynamicSample();
+  DynamicSample(const DynamicSample&);
+  DynamicSample& operator=(const DynamicSample&);
+
   DynamicSample(DDS::DynamicData_ptr data,
-    DCPS::Sample::Mutability mutability, DCPS::Sample::Extent extent)
-  : Sample(mutability, extent)
-  , data_(DDS::DynamicData::_duplicate(data))
+                Mutability mutability, Extent extent)
+    : Sample(mutability, extent)
+    , data_(DDS::DynamicData::_duplicate(data))
   {
   }
 
-  DynamicSample(DDS::DynamicData_ptr data, DCPS::Sample::Extent extent)
-  : Sample(DCPS::Sample::ReadOnly, extent)
-  , data_(DDS::DynamicData::_duplicate(data))
+  DynamicSample(DDS::DynamicData_ptr data, Extent extent)
+    : Sample(Sample::ReadOnly, extent)
+    , data_(DDS::DynamicData::_duplicate(data))
   {
   }
+
+  DynamicSample(DDS::DynamicData_ptr data)
+    : Sample(Sample::ReadOnly, Sample::Full)
+    , data_(DDS::DynamicData::_duplicate(data))
+  {
+  }
+
+  void set_key_only(bool k) { extent_ = k ? Sample::KeyOnly : Sample::Full; }
 
   bool serialize(DCPS::Serializer& ser) const;
   bool deserialize(DCPS::Serializer& ser);
@@ -41,14 +58,14 @@ public:
 
   bool to_message_block(ACE_Message_Block&) const
   {
-    // Not needed?
+    // Not needed
     OPENDDS_ASSERT(false);
     return false;
   }
 
   bool from_message_block(const ACE_Message_Block&)
   {
-    // Not needed?
+    // Not needed
     OPENDDS_ASSERT(false);
     return false;
   }
@@ -56,11 +73,15 @@ public:
   DCPS::Sample_rch copy(DCPS::Sample::Mutability mutability, DCPS::Sample::Extent extent) const
   {
     DDS::DynamicData_var dd = data_->clone();
-    return DCPS::dynamic_rchandle_cast<Sample>(DCPS::make_rch<DynamicSample>(
-      dd, mutability, extent));
+    return DCPS::make_rch<DynamicSample>(dd, mutability, extent);
   }
 
   DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr) const
+  {
+    return data_;
+  }
+
+  DDS::DynamicData_var dynamic_data() const
   {
     return data_;
   }
@@ -78,6 +99,13 @@ public:
     return false;
   }
 #  endif
+
+  struct KeyLessThan {
+    bool operator()(const DynamicSample& lhs, const DynamicSample& rhs) const
+    {
+      return lhs.compare(rhs);
+    }
+  };
 
 protected:
   DDS::DynamicData_var data_;
@@ -156,7 +184,7 @@ public:
     return DataWriterImpl::lookup_instance(sample);
   }
 
-  CORBA::Boolean _is_a(const char* type_id)
+  bool _is_a(const char* type_id)
   {
     return DDS::DynamicDataWriter::_is_a(type_id);
   }
@@ -166,10 +194,140 @@ public:
     return DDS::DynamicDataWriter::_interface_repository_id();
   }
 
-  CORBA::Boolean marshal(TAO_OutputCDR&)
+  bool marshal(TAO_OutputCDR&)
   {
     return false;
   }
+};
+
+// Types supporting the dynamic DataReader:
+
+struct DynamicSequenceAdapter {
+  explicit DynamicSequenceAdapter(DDS::DynamicDataSeq& seq)
+    : seq_(seq)
+  {}
+
+  DDS::DynamicDataSeq& seq_;
+
+  ACE_CDR::ULong max_slots() const { return seq_.maximum(); }
+  void internal_set_length(ACE_CDR::ULong len) { seq_.length(len); }
+
+  void assign_sample(ACE_CDR::ULong i, const DynamicSample& d)
+  {
+    seq_[i] = d.dynamic_data();
+  }
+
+  void assign_ptr(ACE_CDR::ULong, const DCPS::ReceivedDataElement*) {}
+  void set_loaner(DCPS::DataReaderImpl*) {}
+  void increment_references() {}
+};
+}
+
+namespace DCPS {
+
+template <>
+struct DDSTraits<XTypes::DynamicSample> {
+  typedef XTypes::DynamicSample MessageType;
+  typedef DDS::DynamicDataSeq MessageSequenceType;
+  typedef XTypes::DynamicSequenceAdapter MessageSequenceAdapterType;
+  typedef DDS::DynamicTypeSupport TypeSupportType;
+  typedef DDS::DynamicDataWriter DataWriterType;
+  typedef DDS::DynamicDataReader DataReaderType;
+  typedef XTypes::DynamicSample::KeyLessThan LessThanType;
+  typedef DCPS::KeyOnly<const XTypes::DynamicSample> KeyOnlyType;
+
+  static const char* type_name() { return "Dynamic"; } // used for logging
+  static bool gen_has_key() { return false; }
+  static size_t key_count() { return 0; }
+};
+
+template <>
+struct MarshalTraits<XTypes::DynamicSample> {
+  static bool to_message_block(ACE_Message_Block&, const XTypes::DynamicSample&) { return false; }
+  static bool from_message_block(XTypes::DynamicSample&, const ACE_Message_Block&) { return false; }
+  static Extensibility extensibility() { return APPENDABLE; }
+  static Extensibility max_extensibility_level() { return APPENDABLE; }
+};
+
+bool operator>>(Serializer& strm, XTypes::DynamicSample& sample);
+bool operator>>(Serializer& strm, const KeyOnly<XTypes::DynamicSample>& sample);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+template <>
+OpenDDS_Dcps_Export
+const MetaStruct& getMetaStruct<XTypes::DynamicSample>();
+
+template <>
+DDS::ReturnCode_t
+DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle& gen,
+                                                      DDS::SampleStateMask sample_states,
+                                                      DDS::ViewStateMask view_states,
+                                                      DDS::InstanceStateMask instance_states,
+                                                      bool adjust_ref_count);
+
+template <>
+DDS::ReturnCode_t
+DataReaderImpl_T<XTypes::DynamicSample>::take(AbstractSamples& samples,
+                                              DDS::SampleStateMask sample_states,
+                                              DDS::ViewStateMask view_states,
+                                              DDS::InstanceStateMask instance_states);
+#endif
+
+template <>
+void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample&);
+
+} // namespace DCPS
+
+namespace XTypes {
+
+#if defined _MSC_VER && _MSC_VER < 1700
+#define OPENDDS_MAYBE_EXPORT
+#else
+#define OPENDDS_MAYBE_EXPORT OpenDDS_Dcps_Export
+#endif
+
+class OPENDDS_MAYBE_EXPORT DynamicDataReaderImpl
+#undef OPENDDS_MAYBE_EXPORT
+  : public DCPS::DataReaderImpl_T<DynamicSample>
+{
+public:
+  typedef DCPS::DataReaderImpl_T<DynamicSample> Base;
+
+  DDS::ReturnCode_t read_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
+  {
+    DynamicSample ds(dyn);
+    return Base::read_next_sample(ds, si);
+  }
+
+  DDS::ReturnCode_t take_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
+  {
+    DynamicSample ds(dyn);
+    return Base::take_next_sample(ds, si);
+  }
+
+  DDS::InstanceHandle_t lookup_instance(DDS::DynamicData* dyn)
+  {
+    DynamicSample ds(dyn);
+    return Base::lookup_instance(ds);
+  }
+
+  DDS::ReturnCode_t get_key_value(DDS::DynamicData*& dyn, DDS::InstanceHandle_t ih)
+  {
+    DynamicSample ds(dyn);
+    return Base::get_key_value(ds, ih);
+  }
+
+  void install_type_support(DCPS::TypeSupportImpl*);
+  void imbue_type(DynamicSample& sample);
+
+private:
+  DDS::DynamicType_var type_;
+
+  // work around "hides overloaded virtual" warnings
+  using Base::read_next_sample;
+  using Base::take_next_sample;
+  using Base::lookup_instance;
+  using Base::get_key_value;
 };
 
 } // namespace XTypes
@@ -191,8 +349,8 @@ public:
   typedef DynamicTypeSupport_var _var_type;
 
   explicit DynamicTypeSupport(DynamicType_ptr type)
-  : TypeSupportImpl(type)
-  , name_(type->get_name())
+    : TypeSupportImpl(type)
+    , name_(type->get_name())
   {
   }
 

@@ -28,53 +28,59 @@ namespace DCPS {
 
 class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor
   : public virtual RcEventHandler
-  , public virtual NetworkConfigMonitor {
+  , public virtual NetworkConfigMonitor
+{
 public:
   explicit LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor);
   bool open();
   bool close();
 
 private:
-  class RegisterHandler : public ReactorInterceptor::Command {
+  class OpenHandler : public ReactorInterceptor::Command {
   public:
-    RegisterHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
+    OpenHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
+      , condition_(mutex_)
+      , done_(false)
+      , retval_(false)
     {}
+
+    bool wait() const;
 
   private:
-    void execute()
-    {
-      RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
-      if (!lncm) {
-        return;
-      }
-      ACE_GUARD(ACE_Thread_Mutex, g, lncm->socket_mutex_);
-      if (reactor()->register_handler(lncm.get(), READ_MASK) != 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
-      }
-    }
+    void execute();
 
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
+    mutable ACE_Thread_Mutex mutex_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
+    bool done_;
+    bool retval_;
   };
 
-  class RemoveHandler : public ReactorInterceptor::Command {
+  bool open_i();
+
+  class CloseHandler : public ReactorInterceptor::Command {
   public:
-    RemoveHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
+    CloseHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
+      , condition_(mutex_)
+      , done_(false)
+      , retval_(false)
     {}
 
-    void execute()
-    {
-      RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
-      if (!lncm) {
-        return;
-      }
-      ACE_GUARD(ACE_Thread_Mutex, g, lncm->socket_mutex_);
-      reactor()->remove_handler(lncm.get(), READ_MASK);
-    }
+    bool wait() const;
+
+  private:
+    void execute();
 
     WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
+    mutable ACE_Thread_Mutex mutex_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
+    bool done_;
+    bool retval_;
   };
+
+  bool close_i();
 
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);

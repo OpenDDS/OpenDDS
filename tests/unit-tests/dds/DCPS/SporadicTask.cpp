@@ -8,7 +8,7 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
 
-#include "dds/DCPS/SporadicTask.h"
+#include <dds/DCPS/SporadicTask.h>
 
 #include <ace/Thread_Manager.h>
 #include <ace/Log_Msg_Backend.h>

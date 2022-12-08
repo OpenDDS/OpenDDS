@@ -18,7 +18,6 @@
 #include "Task.h"
 
 #include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/NetworkConfigMonitor.h"
 #include "dds/DCPS/InternalDataReader.h"
 #include "dds/DCPS/ReactorInterceptor.h"
 #include "dds/DCPS/Service_Participant.h"

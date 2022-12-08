@@ -814,6 +814,7 @@ protected:
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
+  virtual void install_type_support(TypeSupportImpl*) {}
 
   virtual void set_instance_state_i(DDS::InstanceHandle_t instance,
                                     DDS::InstanceHandle_t publication_handle,

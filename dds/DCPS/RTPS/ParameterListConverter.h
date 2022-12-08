@@ -38,6 +38,7 @@ struct DiscoveredPublication_SecurityWrapper {
     : have_ice_agent_info(false)
   {
     data.ddsPublicationData.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+    data.ddsPublicationData.participant_key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
     security_info.endpoint_security_attributes = 0;
     security_info.plugin_endpoint_security_attributes = 0;
   }
@@ -55,6 +56,7 @@ struct DiscoveredSubscription_SecurityWrapper {
     : have_ice_agent_info(false)
   {
     data.ddsSubscriptionData.key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
+    data.ddsSubscriptionData.participant_key = DCPS::BUILTIN_TOPIC_KEY_UNKNOWN;
     security_info.endpoint_security_attributes = 0;
     security_info.plugin_endpoint_security_attributes = 0;
   }

@@ -1050,7 +1050,7 @@ sub write_config_h {
   my %buildEnv = %{shift()};
   my $platform = $opts{$buildEnv{'build'}};
   my $pi = $platforminfo{$platform};
-  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} || exists $opts{'sanitize'});
+  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} && !exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
   if (!$no_disable_deprecated) {
@@ -2088,7 +2088,7 @@ sub write_opendds_mwc {
   my $fd = backup_and_open($path);
   print $fd <<"EOF";
 #!/usr/bin/env perl
-if (!defined(\$ENV{ACE_ROOT}) || !defined(\$MPC_ROOT)) {
+if (!defined(\$ENV{ACE_ROOT}) || !defined(\$ENV{MPC_ROOT})) {
   die("The enviroment needs to be setup.");
 }
 exec('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV)
