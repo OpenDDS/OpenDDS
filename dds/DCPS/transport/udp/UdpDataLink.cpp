@@ -155,7 +155,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       LogAddr(remote_address).c_str()));
 
     TransportLocator info = TransportLocator();
-    INLINE_TEST_AND_CALL(TransportImpl_rch, impl(), connection_info_i(info, CONNINFO_ALL));
+    OPENDDS_TEST_AND_CALL(TransportImpl_rch, impl(), connection_info_i(info, CONNINFO_ALL));
     ACE_Message_Block* data_block;
     ACE_NEW_RETURN(data_block,
                    ACE_Message_Block(info.data.length()+sizeof(Priority),
@@ -277,7 +277,7 @@ UdpDataLink::control_received(ReceivedDataSample& sample,
   // the connection handshaking, so receiving one is an indication of the
   // passive_connection event.  In the future the submessage_id_ could be used
   // to allow different types of messages here.
-  INLINE_TEST_AND_CALL(UdpTransport_rch, dynamic_rchandle_cast<UdpTransport>(impl()), passive_connection(remote_address, sample));
+  OPENDDS_TEST_AND_CALL(UdpTransport_rch, dynamic_rchandle_cast<UdpTransport>(impl()), passive_connection(remote_address, sample));
 }
 
 void
