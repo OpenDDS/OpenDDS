@@ -1,9 +1,21 @@
 #ifndef  DDS_DEMO_ISHAPES_FILTER_DIALOG_HPP_
 #define  DDS_DEMO_ISHAPES_FILTER_DIALOG_HPP_
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtGui/QtGui>
 #include <QtCore/QRect>
 #include <ui_filterForm.h>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <ShapesWidget.hpp>
 
 class FilterDialog : public QDialog {
