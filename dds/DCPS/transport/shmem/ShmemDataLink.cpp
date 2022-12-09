@@ -247,7 +247,7 @@ ShmemAllocator*
 ShmemDataLink::local_allocator()
 {
   ShmemAllocator* result = 0;
-  INLINE_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), alloc(), result);
+  OPENDDS_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), alloc(), result);
   return result;
 }
 
@@ -255,14 +255,14 @@ std::string
 ShmemDataLink::local_address()
 {
   std::string result;
-  INLINE_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), address(), result);
+  OPENDDS_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), address(), result);
   return result;
 }
 
 void
 ShmemDataLink::signal_semaphore()
 {
-  INLINE_TEST_AND_CALL(ShmemTransport_rch, transport(), signal_semaphore());
+  OPENDDS_TEST_AND_CALL(ShmemTransport_rch, transport(), signal_semaphore());
 }
 
 pid_t

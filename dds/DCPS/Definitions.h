@@ -66,8 +66,8 @@
 #  define OPENDDS_ASSERT(C) assert(C)
 #endif
 
-#define INLINE_TEST_AND_CALL(TYPE, TEST, CALL) do { TYPE temp = TEST; if (temp) { temp->CALL; } } while (false);
-#define INLINE_TEST_AND_CALL_ASSIGN(TYPE, TEST, CALL, VAL) do { TYPE temp = TEST; if (temp) { VAL = temp->CALL; } } while (false);
+#define OPENDDS_TEST_AND_CALL(TYPE, TEST, CALL) do { TYPE temp = TEST; if (temp) { temp->CALL; } } while (false);
+#define OPENDDS_TEST_AND_CALL_ASSIGN(TYPE, TEST, CALL, VAL) do { TYPE temp = TEST; if (temp) { VAL = temp->CALL; } } while (false);
 
 #include <tao/orbconf.h>
 #if defined TAO_HAS_IDL_FEATURES && TAO_HAS_IDL_FEATURES
