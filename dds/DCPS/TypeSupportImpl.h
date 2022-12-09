@@ -131,7 +131,6 @@ public:
   }
 
   void add_types(const XTypes::TypeLookupService_rch& tls) const;
-  void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
 
 protected:
 #ifndef OPENDDS_SAFETY_PROFILE

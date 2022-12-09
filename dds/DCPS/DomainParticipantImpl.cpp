@@ -2619,7 +2619,7 @@ DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
   if (!type_lookup_service_) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
-        "Can't get a DynamicType, no type look service\n"));
+        "Can't get a DynamicType, no type lookup service\n"));
     }
     return DDS::RETCODE_UNSUPPORTED;
   }
