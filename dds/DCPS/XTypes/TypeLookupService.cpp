@@ -81,12 +81,6 @@ const TypeObject& TypeLookupService::get_type_object_i(const TypeIdentifier& typ
   return to_empty_;
 }
 
-bool TypeLookupService::has_complete(const TypeIdentifier& ti) const
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
-  return ti.kind() == EK_COMPLETE && type_map_.count(ti);
-}
-
 bool TypeLookupService::get_type_dependencies(const TypeIdentifier& type_id,
   TypeIdentifierWithSizeSeq& dependencies) const
 {
@@ -1179,6 +1173,12 @@ void TypeLookupService::remove_guid_from_dynamic_map(const DCPS::GUID_t& guid)
         "Alerted to removal of %C, removing GUID from GuidTypeMap.\n", DCPS::to_string(guid).c_str()));
     }
   }
+}
+
+bool TypeLookupService::has_complete(const TypeIdentifier& ti) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  return ti.kind() == EK_COMPLETE && type_map_.count(ti);
 }
 #endif
 

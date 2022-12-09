@@ -2678,6 +2678,7 @@ DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
   XTypes::DynamicTypeImpl* impl = dynamic_cast<XTypes::DynamicTypeImpl*>(type.in());
   impl->set_complete_type_identifier(ctid);
   impl->set_minimal_type_identifier(ti.minimal.typeid_with_size.type_id);
+  impl->set_preset_type_info(ti);
 
   return DDS::RETCODE_OK;
 }

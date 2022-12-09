@@ -46,46 +46,56 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   t.wait_for("origin", "ready");
 
-  DDS::PublicationBuiltinTopicDataSeq pub_bit_seq;
-  if (!pub_bit.read_multiple(pub_bit_seq)) {
-    return 1;
-  }
-  for (unsigned i = 0; i < pub_bit_seq.length(); ++i) {
-    DDS::PublicationBuiltinTopicData& pb = pub_bit_seq[i];
-    ACE_DEBUG((LM_DEBUG, "Learned about topic \"%C\" type \"%C\"\n",
-      pb.topic_name.in(), pb.type_name.in()));
+  size_t found_count = 0;
+  while (found_count < topics.size()) {
+    ACE_DEBUG((LM_DEBUG, "Found %B/%B topics, waiting...\n", found_count, topics.size()));
+    DDS::PublicationBuiltinTopicDataSeq pub_bit_seq;
+    if (!pub_bit.read_multiple(pub_bit_seq)) {
+      return 1;
+    }
+    for (unsigned i = 0; i < pub_bit_seq.length(); ++i) {
+      DDS::PublicationBuiltinTopicData& pb = pub_bit_seq[i];
+      ACE_DEBUG((LM_DEBUG, "Learned about topic \"%C\" type \"%C\"\n",
+        pb.topic_name.in(), pb.type_name.in()));
 
-    DynamicTopicMap::iterator it = topics.find(pb.topic_name.in());
-    if (it == topics.end()) {
-      ACE_ERROR((LM_ERROR, "ERROR: Unexpected topic %C\n", pb.topic_name.in()));
-    } else {
-      DynamicTopic& topic = it->second;
-      const DDS::ReturnCode_t rc =
-        TheServiceParticipant->get_dynamic_type(topic.type, t.dp, pb.key);
-      if (rc != topic.get_dynamic_type_rc) {
-        ACE_ERROR((LM_ERROR, "ERROR: Expected %C, but got %C\n",
-          retcode_to_string(topic.get_dynamic_type_rc), retcode_to_string(rc)));
-        t.exit_status = 1;
-      }
-      if (rc != DDS::RETCODE_OK) {
-        continue;
-      }
+      DynamicTopicMap::iterator it = topics.find(pb.topic_name.in());
+      if (it == topics.end()) {
+        ACE_ERROR((LM_ERROR, "ERROR: Unexpected topic %C\n", pb.topic_name.in()));
+      } else {
+        DynamicTopic& topic = it->second;
+        if (topic.found) {
+          continue;
+        }
+        topic.found = true;
+        ++found_count;
+        const DDS::ReturnCode_t rc =
+          TheServiceParticipant->get_dynamic_type(topic.type, t.dp, pb.key);
+        if (rc != topic.get_dynamic_type_rc) {
+          ACE_ERROR((LM_ERROR, "ERROR: Expected %C, but got %C\n",
+            retcode_to_string(topic.get_dynamic_type_rc), retcode_to_string(rc)));
+          t.exit_status = 1;
+        }
+        if (rc != DDS::RETCODE_OK) {
+          continue;
+        }
 
-      topic.ts = new DDS::DynamicTypeSupport(topic.type);
-      if (!t.init_topic(topic.ts, topic.topic)) {
-        t.exit_status = 1;
-        continue;
-      }
+        topic.ts = new DDS::DynamicTypeSupport(topic.type);
+        if (!t.init_topic(topic.ts, topic.topic)) {
+          t.exit_status = 1;
+          continue;
+        }
 
-      topic.writer = t.create_writer<DDS::DynamicDataWriter>(topic.topic);
+        topic.writer = t.create_writer<DDS::DynamicDataWriter>(topic.topic);
 
-      DDS::DataWriter_var dw = DDS::DataWriter::_duplicate(topic.writer);
-      if (Utils::wait_match(dw, 1, Utils::EQ)) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dw\n"));
-        continue;
+        DDS::DataWriter_var dw = DDS::DataWriter::_duplicate(topic.writer);
+        if (Utils::wait_match(dw, 1, Utils::EQ)) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: main(): Error waiting for match for dw\n"));
+          continue;
+        }
       }
     }
   }
+  ACE_DEBUG((LM_DEBUG, "Found all %B topics\n", topics.size()));
 
   for (DynamicTopicMap::iterator it = topics.begin(); it != topics.end(); ++it) {
     DynamicTopic& topic = it->second;

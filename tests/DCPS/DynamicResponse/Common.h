@@ -15,6 +15,7 @@ struct Test {
   const char* const name;
   int exit_status;
   DistributedConditionSet_rch dcs;
+  DDS::DomainParticipantFactory_var dpf;
   DDS::DomainParticipant_var dp;
   DDS::Subscriber_var sub;
   DDS::Publisher_var pub;
@@ -31,11 +32,10 @@ struct Test {
     ACE_DEBUG((LM_DEBUG, "%C (%P|%t) shutting down...\n", name));
 
     dp->delete_contained_entities();
-    TheParticipantFactory->delete_participant(dp);
+    dpf->delete_participant(dp);
     TheServiceParticipant->shutdown();
 
-    ACE_DEBUG((LM_DEBUG, "%C (%P|%t) done\n", name));
-    post("done");
+    ACE_DEBUG((LM_DEBUG, "%C (%P|%t) shutdown\n", name));
   }
 
   bool init(int& argc, ACE_TCHAR* argv[])
@@ -43,7 +43,7 @@ struct Test {
     using namespace OpenDDS::DCPS;
     using namespace OpenDDS::RTPS;
 
-    DDS::DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
+    dpf = TheParticipantFactoryWithArgs(argc, argv);
 
     const DDS::DomainId_t domain = 12;
 
@@ -144,6 +144,7 @@ struct Topic {
   typedef OpenDDS::DCPS::DDSTraits<TopicType> Traits;
 
   Test& t;
+  std::string name;
   DDS::TypeSupport_var ts;
   DDS::Topic_var topic;
   typedef typename Traits::DataWriterType DataWriterType;
@@ -162,6 +163,9 @@ struct Topic {
     if (!t.init_topic(ts, topic)) {
       return false;
     }
+
+    CORBA::String_var type_name = ts->get_type_name();
+    name = type_name.in();
 
     DDS::DataReader_var dr =
       t.sub->create_datareader(topic, DATAREADER_QOS_DEFAULT, 0 ,DEFAULT_STATUS_MASK);
@@ -200,6 +204,7 @@ struct Topic {
   bool read_one(TopicType& msg)
   {
     DDS::DataReader_var dr = DDS::DataReader::_duplicate(reader);
+    ACE_DEBUG((LM_DEBUG, "%C (%P|%t) waiting for sample on %C\n", t.name, name.c_str()));
     Utils::waitForSample(dr);
     DDS::SampleInfo info;
     return t.check_rc(reader->read_next_sample(msg, info), "read failed");

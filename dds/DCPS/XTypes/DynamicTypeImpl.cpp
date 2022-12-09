@@ -16,6 +16,7 @@ namespace OpenDDS {
 namespace XTypes {
 
 DynamicTypeImpl::DynamicTypeImpl()
+  : preset_type_info_set_(false)
 {}
 
 DynamicTypeImpl::~DynamicTypeImpl()
