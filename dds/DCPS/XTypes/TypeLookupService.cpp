@@ -763,8 +763,10 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
   case TK_STRUCTURE: {
     td->kind(TK_STRUCTURE);
     td->name(cto.struct_type.header.detail.type_name.c_str());
-    const DDS::DynamicType_var temp = type_identifier_to_dynamic(cto.struct_type.header.base_type, guid);
-    td->base_type(temp);
+    if (cto.struct_type.header.base_type.kind() != TK_NONE) {
+      const DDS::DynamicType_var base = type_identifier_to_dynamic(cto.struct_type.header.base_type, guid);
+      td->base_type(base);
+    }
     td->extensibility_kind(type_flags_to_extensibility(cto.struct_type.struct_flags));
     td->is_nested(cto.struct_type.struct_flags & IS_NESTED);
     for (ACE_CDR::ULong i = 0; i < cto.struct_type.member_seq.length(); ++i) {
