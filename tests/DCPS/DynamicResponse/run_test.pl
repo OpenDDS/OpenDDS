@@ -13,7 +13,6 @@ rmtree('./DCS');
 
 my $test = new PerlDDS::TestFramework();
 $test->{dcps_debug_level} = 4;
-$test->ignore_error("not found in local type map"); # TODO: Fix and remove
 $test->process('origin', 'origin');
 $test->process('responder', 'responder');
 $test->start_process('origin');
