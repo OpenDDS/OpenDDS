@@ -53,27 +53,33 @@ DataLink::DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loo
 {
   DBG_ENTRY_LVL("DataLink", "DataLink", 6);
 
-  datalink_release_delay_ = TimeDuration::from_msec(impl->config().datalink_release_delay_);
-
   id_ = DataLink::get_next_datalink_id();
 
-  if (impl->config().thread_per_connection_) {
-    this->thr_per_con_send_task_.reset(new ThreadPerConnectionSendTask(this));
+  long datalink_release_delay = TransportInst::DEFAULT_DATALINK_RELEASE_DELAY;
+  size_t control_chunks = TransportInst::DEFAULT_DATALINK_CONTROL_CHUNKS;
 
-    if (this->thr_per_con_send_task_->open() == -1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) DataLink::DataLink: ")
-                 ACE_TEXT("failed to open ThreadPerConnectionSendTask\n")));
+  TransportInst_rch cfg = impl->config();
+  if (cfg) {
+    datalink_release_delay = cfg->datalink_release_delay_;
+    if (cfg->thread_per_connection_) {
+      thr_per_con_send_task_.reset(new ThreadPerConnectionSendTask(this));
 
-    } else if (DCPS_debug_level > 4) {
-      ACE_DEBUG((LM_DEBUG,
-                 ACE_TEXT("(%P|%t) DataLink::DataLink - ")
-                 ACE_TEXT("started new thread to send data with.\n")));
+      if (thr_per_con_send_task_->open() == -1) {
+        ACE_ERROR((LM_ERROR,
+                   ACE_TEXT("(%P|%t) DataLink::DataLink: ")
+                   ACE_TEXT("failed to open ThreadPerConnectionSendTask\n")));
+
+      } else if (DCPS_debug_level > 4) {
+        ACE_DEBUG((LM_DEBUG,
+                   ACE_TEXT("(%P|%t) DataLink::DataLink - ")
+                   ACE_TEXT("started new thread to send data with.\n")));
+      }
     }
+    control_chunks = cfg->datalink_control_chunks_;
   }
 
   // Initialize transport control sample allocators:
-  size_t control_chunks = impl->config().datalink_control_chunks_;
+  datalink_release_delay_ = TimeDuration::from_msec(datalink_release_delay);
 
   this->mb_allocator_.reset(new MessageBlockAllocator(control_chunks));
   this->db_allocator_.reset(new DataBlockAllocator(control_chunks));

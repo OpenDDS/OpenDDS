@@ -40,10 +40,12 @@ MulticastDataLink::send_buffer()
   return this->send_buffer_.get();
 }
 
-ACE_INLINE MulticastInst&
+ACE_INLINE MulticastInst_rch
 MulticastDataLink::config()
 {
-  return transport()->config();
+  MulticastInst_rch result;
+  OPENDDS_TEST_AND_CALL_ASSIGN(MulticastTransport_rch, transport(), config(), result);
+  return result;
 }
 
 ACE_INLINE ReactorTask_rch

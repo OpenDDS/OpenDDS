@@ -73,7 +73,7 @@ public:
   void read() { recv_strategy_->read(); }
   void signal_semaphore();
   ShmemTransport_rch transport() const;
-  ShmemInst& config() const;
+  ShmemInst_rch config() const;
 
 protected:
   ShmemSendStrategy_rch send_strategy_;

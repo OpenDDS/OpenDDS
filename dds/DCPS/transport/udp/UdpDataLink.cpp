@@ -47,9 +47,12 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
 {
   this->remote_address_ = remote_address;
 
-  UdpInst& config = dynamic_rchandle_cast<UdpTransport>(impl())->config();
+  UdpInst_rch cfg = dynamic_rchandle_cast<UdpTransport>(impl())->config();
+  if (!cfg) {
+    return false;
+  }
 
-  this->is_loopback_ = this->remote_address_ == config.local_address();
+  this->is_loopback_ = this->remote_address_ == cfg->local_address();
 
   ACE_INET_Addr local_address;
   if (this->active_) {
@@ -57,7 +60,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
       local_address.set(0, "", 0, remote_address.get_type());
     }
   } else {
-    local_address = config.local_address();
+    local_address = cfg->local_address();
   }
 
   if (!open_appropriate_socket_type(this->socket_, local_address)) {
@@ -73,7 +76,7 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
   // If listening on "any" host/port, need to record the actual port number
   // selected by the OS, as well as our actual hostname, into the config_
   // object's local_address_ for use in UdpTransport::connection_info_i().
-  if (!this->active_ && config.local_address().is_any()) {
+  if (!this->active_ && cfg->local_address().is_any()) {
     ACE_INET_Addr address;
     if (this->socket_.get_local_addr(address) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -86,11 +89,11 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
               ACE_TEXT("(%P|%t) UdpDataLink::open listening on host %C:%hu\n"),
               hostname.c_str(), port), 2);
 
-    config.local_address(port, hostname.c_str());
+    cfg->local_address(port, hostname.c_str());
 
   // Similar case to the "if" case above, but with a bound host/IP but no port
   } else if (!this->active_ &&
-             0 == config.local_address().get_port_number()) {
+             0 == cfg->local_address().get_port_number()) {
     ACE_INET_Addr address;
     if (this->socket_.get_local_addr(address) != 0) {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -101,11 +104,11 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     VDBG_LVL((LM_DEBUG,
               ACE_TEXT("(%P|%t) UdpDataLink::open listening on port %hu\n"),
               port), 2);
-    config.local_address_set_port(port);
+    cfg->local_address_set_port(port);
   }
 
-  if (config.send_buffer_size_ > 0) {
-    int snd_size = config.send_buffer_size_;
+  if (cfg->send_buffer_size_ > 0) {
+    int snd_size = cfg->send_buffer_size_;
     if (this->socket_.set_option(SOL_SOCKET,
                                 SO_SNDBUF,
                                 (void *) &snd_size,
@@ -119,8 +122,8 @@ UdpDataLink::open(const ACE_INET_Addr& remote_address)
     }
   }
 
-  if (config.rcv_buffer_size_ > 0) {
-    int rcv_size = config.rcv_buffer_size_;
+  if (cfg->rcv_buffer_size_ > 0) {
+    int rcv_size = cfg->rcv_buffer_size_;
     if (this->socket_.set_option(SOL_SOCKET,
                                 SO_RCVBUF,
                                 (void *) &rcv_size,

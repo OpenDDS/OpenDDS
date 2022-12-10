@@ -31,6 +31,10 @@ typedef RcHandle<TransportReceiveListener> TransportReceiveListener_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
+
+  static const suseconds_t DEFAULT_NAK_RESPONSE_DELAY_USEC = 200000; // default from RTPS
+  static const time_t DEFAULT_HEARTBEAT_PERIOD_SEC = 1; // no default in RTPS spec
+
   ACE_INT32 send_buffer_size_;
   ACE_INT32 rcv_buffer_size_;
 
