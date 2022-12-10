@@ -95,7 +95,7 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
 public:
   RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                   const GuidPrefix_t& local_prefix,
-                  const RtpsUdpInst& config,
+                  const RtpsUdpInst_rch& config,
                   const ReactorTask_rch& reactor_task,
                   InternalTransportStatistics& transport_statistics,
                   ACE_Thread_Mutex& transport_statistics_mutex);
@@ -107,7 +107,7 @@ public:
   RemoveResult remove_sample(const DataSampleElement* sample);
   void remove_all_msgs(const RepoId& pub_id);
 
-  const RtpsUdpInst& config() const;
+  RtpsUdpInst_rch config() const;
 
   ACE_Reactor* get_reactor();
   bool reactor_is_shut_down();
@@ -461,6 +461,7 @@ private:
     RcHandle<SporadicEvent> heartbeat_;
     RcHandle<SporadicEvent> nack_response_;
 
+    const TimeDuration initial_fallback_;
     FibonacciSequence<TimeDuration> fallback_;
 
     void send_heartbeats(const MonotonicTimePoint& now);
@@ -525,10 +526,11 @@ private:
     void log_remote_counts(const char* funcname);
 
   public:
-    RtpsWriter(TransportClient_rch client, RcHandle<RtpsUdpDataLink> link,
+    RtpsWriter(const TransportClient_rch& client, const RtpsUdpDataLink_rch& link,
                const RepoId& id, bool durable,
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
-    ~RtpsWriter();
+    virtual ~RtpsWriter();
+
     SequenceNumber max_data_seq(const SingleSendBuffer::Proxy& proxy,
                                 const ReaderInfo_rch&) const;
     SequenceNumber update_max_sn(const RepoId& reader, SequenceNumber seq);
@@ -617,15 +619,8 @@ private:
 
   class RtpsReader : public virtual RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id)
-      : link_(link)
-      , id_(id)
-      , stopping_(false)
-      , nackfrag_count_(0)
-      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks)))
-    {}
-
-    ~RtpsReader();
+    RtpsReader(const RtpsUdpDataLink_rch& link, const RepoId& id);
+    virtual ~RtpsReader();
 
     bool add_writer(const WriterInfo_rch& info);
     bool has_writer(const RepoId& id) const;
@@ -680,6 +675,7 @@ private:
     bool stopping_;
     CORBA::Long nackfrag_count_;
     RcHandle<SporadicEvent> preassociation_task_;
+    TimeDuration heartbeat_period_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 

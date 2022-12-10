@@ -36,7 +36,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
   , last_received_()
   , recvd_sample_(0)
   , total_frags_(0)
-  , reassembly_(link->config().fragment_reassembly_timeout_)
+  , reassembly_(link->config()->fragment_reassembly_timeout_)
   , receiver_(local_prefix)
   , thread_status_manager_(thread_status_manager)
 #ifdef OPENDDS_SECURITY
@@ -240,9 +240,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   }
 
   if (n > 0 && ret > 0 && iov[0].iov_len >= 4 && std::memcmp(iov[0].iov_base, "RTPS", 4) == 0) {
-    if (tport.config().count_messages()) {
+    RtpsUdpInst_rch cfg = tport.config();
+    if (cfg && cfg->count_messages()) {
       const NetworkAddress ra(remote_address);
-      const InternalMessageCountKey key(ra, MCK_RTPS, ra == tport.config().rtps_relay_address());
+      const InternalMessageCountKey key(ra, MCK_RTPS, ra == cfg->rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
       tport.transport_statistics_.message_count[key].recv(ret);
     }
@@ -280,9 +281,10 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
   STUN::Message message;
   message.block = head;
   if (serializer >> message) {
-    if (tport.config().count_messages()) {
+    RtpsUdpInst_rch cfg = tport.config();
+    if (cfg && cfg->count_messages()) {
       const NetworkAddress ra(remote_address);
-      const InternalMessageCountKey key(ra, MCK_STUN, ra == tport.config().rtps_relay_address());
+      const InternalMessageCountKey key(ra, MCK_STUN, ra == cfg->rtps_relay_address());
       ACE_GUARD_RETURN(ACE_Thread_Mutex, g, tport.transport_statistics_mutex_, -1);
       tport.transport_statistics_.message_count[key].recv(ret);
     }
@@ -1032,7 +1034,8 @@ RtpsUdpReceiveStrategy::stop_i()
                           ACE_Event_Handler::READ_MASK);
 #endif
 
-  if (link_->config().use_multicast_) {
+  RtpsUdpInst_rch cfg = link_->config();
+  if (cfg && cfg->use_multicast_) {
     reactor->remove_handler(link_->multicast_socket().get_handle(),
                             ACE_Event_Handler::READ_MASK);
 #ifdef ACE_HAS_IPV6

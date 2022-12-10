@@ -26,14 +26,14 @@ class ShmemInst;
 
 class OpenDDS_Shmem_Export ShmemTransport : public TransportImpl {
 public:
-  explicit ShmemTransport(ShmemInst& inst);
+  explicit ShmemTransport(const ShmemInst_rch& inst);
 
   // used by our DataLink:
   ShmemAllocator* alloc() { return alloc_.get(); }
   std::string address();
   void signal_semaphore();
 
-  ShmemInst& config() const;
+  ShmemInst_rch config() const;
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -49,7 +49,7 @@ protected:
                                             bool disassociate,
                                             bool association_failed);
 
-  bool configure_i(ShmemInst& config);
+  bool configure_i(const ShmemInst_rch& config);
 
   virtual void shutdown_i();
 

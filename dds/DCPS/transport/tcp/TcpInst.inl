@@ -17,8 +17,8 @@ OpenDDS::DCPS::TcpInst::TcpInst(const OPENDDS_STRING& name)
     conn_retry_backoff_multiplier_(2.0),
     conn_retry_attempts_(3),
     max_output_pause_period_(-1),
-    passive_reconnect_duration_(2000),
-    active_conn_timeout_period_(5000)
+    passive_reconnect_duration_(DEFAULT_PASSIVE_RECONNECT_DURATION),
+    active_conn_timeout_period_(DEFAULT_ACTIVE_CONN_TIMEOUT_PERIOD)
 {
   DBG_ENTRY_LVL("TcpInst", "TcpInst", 6);
 }

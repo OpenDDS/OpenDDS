@@ -102,7 +102,8 @@ ShmemDataLink::open(const std::string& peer_address)
 
   assoc_resends_task_ = make_rch<SmPeriodicTask>(reactor_task_->interceptor(),
     ref(*this), &ShmemDataLink::resend_association_msgs);
-  assoc_resends_task_->enable(false, config().association_resend_period());
+  ShmemInst_rch cfg = config();
+  assoc_resends_task_->enable(false, cfg ? cfg->association_resend_period() : TimeDuration(0, ShmemInst::DEFAULT_ASSOCIATION_RESEND_PERIOD_USEC));
 
   return true;
 }
@@ -122,8 +123,8 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
   send_association_msg(local_sub, remote_pub);
   // Resend until we get a response.
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
-  assoc_resends_.insert(std::pair<GuidPair, size_t>(GuidPair(local_sub, remote_pub),
-    config().association_resend_max_count()));
+  ShmemInst_rch cfg = config();
+  assoc_resends_.insert(std::pair<GuidPair, size_t>(GuidPair(local_sub, remote_pub), cfg ? cfg->association_resend_max_count() : ShmemInst::DEFAULT_ASSOCIATION_RESEND_MAX_COUNT));
   return result;
 }
 
@@ -271,9 +272,10 @@ ShmemDataLink::peer_pid()
   return std::atoi(peer_address_.c_str() + peer_address_.find('-') + 1);
 }
 
-ShmemInst& ShmemDataLink::config() const
+ShmemInst_rch
+ShmemDataLink::config() const
 {
-  return transport()->config();
+  return dynamic_rchandle_cast<ShmemInst>(transport()->config());
 }
 
 } // namespace DCPS

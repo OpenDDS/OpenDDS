@@ -39,7 +39,7 @@ public:
   MulticastDataLink(const MulticastTransport_rch& transport,
                     const MulticastSessionFactory_rch& session_factory,
                     MulticastPeer local_peer,
-                    MulticastInst& config,
+                    const MulticastInst_rch& config,
                     const ReactorTask_rch& reactor_task,
                     bool is_active);
   virtual ~MulticastDataLink();
@@ -54,7 +54,7 @@ public:
 
   SingleSendBuffer* send_buffer();
 
-  MulticastInst& config();
+  MulticastInst_rch config();
 
   ReactorTask_rch reactor_task();
   ACE_Reactor* get_reactor();

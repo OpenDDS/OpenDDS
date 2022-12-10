@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-ShmemTransport::ShmemTransport(ShmemInst& inst)
+ShmemTransport::ShmemTransport(const ShmemInst_rch& inst)
   : TransportImpl(inst)
 {
   if (! (configure_i(inst) && open()) ) {
@@ -33,10 +33,10 @@ ShmemTransport::ShmemTransport(ShmemInst& inst)
   }
 }
 
-ShmemInst&
+ShmemInst_rch
 ShmemTransport::config() const
 {
-  return static_cast<ShmemInst&>(TransportImpl::config());
+  return dynamic_rchandle_cast<ShmemInst>(TransportImpl::config());
 }
 
 ShmemDataLink_rch
@@ -60,10 +60,11 @@ ShmemTransport::connect_datalink(const RemoteTransport& remote,
                                  const TransportClient_rch& client)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
-  if (key.first != this->config().hostname()) {
+  ShmemInst_rch cfg = config();
+  if (!cfg || key.first != cfg->hostname()) {
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::connect_datalink ")
               ACE_TEXT("link %C:%C not found, hostname %C.\n"),
-              key.first.c_str(), key.second.c_str(), this->config().hostname().c_str()), 2);
+              key.first.c_str(), key.second.c_str(), cfg->hostname().c_str()), 2);
     return AcceptConnectResult();
   }
   GuardType guard(links_lock_);
@@ -96,10 +97,11 @@ ShmemTransport::accept_datalink(const RemoteTransport& remote,
                                 const TransportClient_rch& /*client*/)
 {
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
-  if (key.first != this->config().hostname()) {
+  ShmemInst_rch cfg = config();
+  if (!cfg || key.first != cfg->hostname()) {
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) ShmemTransport::accept_datalink ")
               ACE_TEXT("link %C:%C not found, hostname %C.\n"),
-              key.first.c_str(), key.second.c_str(), this->config().hostname().c_str()), 2);
+              key.first.c_str(), key.second.c_str(), cfg->hostname().c_str()), 2);
     return AcceptConnectResult();
   }
   GuardType guard(links_lock_);
@@ -122,9 +124,13 @@ ShmemTransport::stop_accepting_or_connecting(const TransportClient_wrch&, const 
 }
 
 bool
-ShmemTransport::configure_i(ShmemInst& config)
+ShmemTransport::configure_i(const ShmemInst_rch& config)
 {
-  create_reactor_task(false, "ShmemTransport" + config.name());
+  if (!config) {
+    return false;
+  }
+
+  create_reactor_task(false, "ShmemTransport" + config->name());
 
 #ifdef OPENDDS_SHMEM_UNSUPPORTED
   ACE_UNUSED_ARG(config);
@@ -136,16 +142,16 @@ ShmemTransport::configure_i(ShmemInst& config)
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
 #  if defined OPENDDS_SHMEM_WINDOWS
-  alloc_opts.max_size_ = config.pool_size_;
+  alloc_opts.max_size_ = config->pool_size_;
 #  elif defined OPENDDS_SHMEM_UNIX
   alloc_opts.base_addr_ = 0;
-  alloc_opts.segment_size_ = config.pool_size_;
+  alloc_opts.segment_size_ = config->pool_size_;
   alloc_opts.minimum_bytes_ = alloc_opts.segment_size_;
   alloc_opts.max_segments_ = 1;
 #  endif /* OPENDDS_SHMEM_WINDOWS */
 
   alloc_.reset(
-    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(config.poolname().c_str()),
+    new ShmemAllocator(ACE_TEXT_CHAR_TO_TCHAR(config->poolname().c_str()),
                        0 /*lock_name is optional*/, &alloc_opts));
 
   void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
@@ -187,7 +193,7 @@ ShmemTransport::configure_i(ShmemInst& config)
   read_task_.reset(new ReadTask(this, ace_sema));
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemTransport %@ configured with address %C\n",
-            this, config.poolname().c_str()), 1);
+            this, config->poolname().c_str()), 1);
 
   return true;
 #endif /* OPENDDS_SHMEM_UNSUPPORTED */
@@ -232,8 +238,12 @@ ShmemTransport::shutdown_i()
 bool
 ShmemTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  config().populate_locator(info, flags);
-  return true;
+  ShmemInst_rch cfg = config();
+  if (cfg) {
+    cfg->populate_locator(info, flags);
+    return true;
+  }
+  return false;
 }
 
 std::pair<std::string, std::string>
@@ -337,7 +347,8 @@ ShmemTransport::signal_semaphore()
 std::string
 ShmemTransport::address()
 {
-  return this->config().poolname();
+  ShmemInst_rch cfg = config();
+  return cfg ? cfg->poolname() : std::string();
 }
 
 } // namespace DCPS

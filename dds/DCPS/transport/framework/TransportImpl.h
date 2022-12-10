@@ -7,6 +7,7 @@
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
 
 #include "TransportDefs.h"
+#include "TransportInst_rch.h"
 #include "TransportInst.h"
 #include "DataLinkCleanupTask.h"
 
@@ -75,7 +76,7 @@ public:
 
   /// Expose the configuration information so others can see what
   /// we can do.
-  TransportInst& config() const;
+  TransportInst_rch config() const;
 
   /// Called by our connection_info() method to allow the concrete
   /// TransportImpl subclass to do the dirty work since it really
@@ -181,7 +182,7 @@ public:
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
 
 protected:
-  TransportImpl(TransportInst& config);
+  TransportImpl(TransportInst_rch config);
 
   bool open();
 
@@ -293,7 +294,7 @@ public:
 
   /// A reference to the TransportInst
   /// object that was supplied to us during our configure() method.
-  TransportInst& config_;
+  WeakRcHandle<TransportInst> config_;
 
   /// The reactor (task) object - may not even be used if the concrete
   /// subclass (of TransportImpl) doesn't require a reactor.

@@ -29,8 +29,8 @@ class RtpsUdpInst;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
-  RtpsUdpTransport(RtpsUdpInst& inst);
-  RtpsUdpInst& config() const;
+  RtpsUdpTransport(const RtpsUdpInst_rch& inst);
+  RtpsUdpInst_rch config() const;
 #ifdef OPENDDS_SECURITY
   DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
 #endif
@@ -67,7 +67,7 @@ private:
                                             bool disassociate,
                                             bool association_failed);
 
-  bool configure_i(RtpsUdpInst& config);
+  bool configure_i(const RtpsUdpInst_rch& config);
 
   void client_stop(const RepoId& localId);
 
