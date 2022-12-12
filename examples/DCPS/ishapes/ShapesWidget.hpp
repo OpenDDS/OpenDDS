@@ -2,9 +2,21 @@
 #ifndef _SHAPESWIDGET_HPP
 #define _SHAPESWIDGET_HPP
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtWidgets/QWidget>
 #include <QtCore/QRect>
 #include <QtGui/QPixmap>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <vector>
 #include <Shape.hpp>
 

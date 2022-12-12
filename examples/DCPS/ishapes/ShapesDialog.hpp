@@ -4,9 +4,20 @@
 
 #include "ShapeTypeTypeSupportC.h"
 
-#include <QtGui/QtGui>
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
 
+#include <QtGui/QtGui>
 #include <ui_iShapesForm.h>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <WriterQosDialog.hpp>
 #include <ReaderQosDialog.hpp>
 #include <FilterDialog.hpp>

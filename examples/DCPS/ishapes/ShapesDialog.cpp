@@ -1,6 +1,19 @@
 #include "config.hpp"
 #include "ShapesDialog.hpp"
+
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtGui/QtGui>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <iostream>
 #include <sstream>
 #include <Circle.hpp>
