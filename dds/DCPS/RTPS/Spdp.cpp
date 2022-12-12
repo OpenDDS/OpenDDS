@@ -10,7 +10,6 @@
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
 
-
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>

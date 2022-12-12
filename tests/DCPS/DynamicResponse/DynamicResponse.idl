@@ -1,0 +1,10 @@
+@topic
+struct SimpleStruct {
+  string string_value;
+};
+
+@topic
+union SimpleUnion switch (int16) {
+case 0:
+  string string_value;
+};

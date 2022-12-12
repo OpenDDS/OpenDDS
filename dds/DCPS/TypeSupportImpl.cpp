@@ -96,6 +96,12 @@ void TypeSupportImpl::to_type_info_i(XTypes::TypeIdentifierWithDependencies& ti_
 
 void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
 {
+  const XTypes::TypeInformation* const preset = preset_type_info();
+  if (preset) {
+    type_info = *preset;
+    return;
+  }
+
   to_type_info_i(type_info.minimal, getMinimalTypeIdentifier(), getMinimalTypeMap());
 
   // Properly populate the complete member if complete TypeObjects are generated.
@@ -110,6 +116,11 @@ void TypeSupportImpl::to_type_info(XTypes::TypeInformation& type_info) const
 void TypeSupportImpl::add_types(const XTypes::TypeLookupService_rch& tls) const
 {
   using namespace XTypes;
+  if (preset_type_info()) {
+    // In the case where TypeInformation was pre-set, the participant's TypeLookupService
+    // already has the types and dependencies based on responses to RPC requests.
+    return;
+  }
   const TypeMap& minTypeMap = getMinimalTypeMap();
   tls->add(minTypeMap.begin(), minTypeMap.end());
   const TypeMap& comTypeMap = getCompleteTypeMap();
@@ -137,6 +148,8 @@ void TypeSupportImpl::add_types(const XTypes::TypeLookupService_rch& tls) const
     }
     tls->add(altComMap.begin(), altComMap.end());
   }
+  populate_dependencies_i(tls, XTypes::EK_MINIMAL);
+  populate_dependencies_i(tls, XTypes::EK_COMPLETE);
 }
 
 void TypeSupportImpl::populate_dependencies_i(const XTypes::TypeLookupService_rch& tls,
@@ -169,11 +182,6 @@ void TypeSupportImpl::populate_dependencies_i(const XTypes::TypeLookupService_rc
   tls->add_type_dependencies(type_id, deps_with_size);
 }
 
-void TypeSupportImpl::populate_dependencies(const XTypes::TypeLookupService_rch& tls) const
-{
-  populate_dependencies_i(tls, XTypes::EK_MINIMAL);
-  populate_dependencies_i(tls, XTypes::EK_COMPLETE);
-}
 
 #ifndef OPENDDS_SAFETY_PROFILE
 void TypeSupportImpl::get_type_from_type_lookup_service()
@@ -182,7 +190,6 @@ void TypeSupportImpl::get_type_from_type_lookup_service()
     if (!type_lookup_service_) {
       type_lookup_service_ = make_rch<XTypes::TypeLookupService>();
       add_types(type_lookup_service_);
-      populate_dependencies(type_lookup_service_);
     }
 
     const XTypes::TypeIdentifier& cti = getCompleteTypeIdentifier();

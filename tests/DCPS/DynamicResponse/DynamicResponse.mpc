@@ -1,0 +1,31 @@
+project(*Origin): dcps_test, dcps_rtps_udp {
+  exename = origin
+  requires += no_opendds_safety_profile built_in_topics
+
+  Source_Files {
+    Origin.cpp
+  }
+
+  IDL_Files {
+    DynamicResponse.idl
+    DynamicResponseNotComplete.idl
+  }
+
+  TypeSupport_Files {
+    dcps_ts_flags += -Gxtypes-complete
+    DynamicResponse.idl
+  }
+
+  TypeSupport_Files {
+    DynamicResponseNotComplete.idl
+  }
+}
+
+project(*Responder): dcps_test, dcps_rtps_udp {
+  exename = responder
+  requires += no_opendds_safety_profile built_in_topics
+
+  Source_Files {
+    Responder.cpp
+  }
+}
