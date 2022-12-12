@@ -137,14 +137,6 @@ if(OPENDDS_XERCES3)
   endif()
 endif()
 
-## ACE provides (or uses) many deprecated functions.
-## For now, we'll silence the warnings.
-if(MSVC)
-  add_compile_options(/wd4996)
-  add_compile_definitions(_CRT_SECURE_NO_WARNINGS
-                          _WINSOCK_DEPRECATED_NO_WARNINGS)
-endif()
-
 set(_ace_libs
   ACE
 )
@@ -540,6 +532,15 @@ if(OPENDDS_FOUND)
       get_target_property(_target_location ${_target} LOCATION)
       message(STATUS "${_target} -> ${_target_location}")
     endforeach()
+  endif()
+
+  ## ACE provides (or uses) many deprecated functions.
+  ## For now, we'll silence the warnings.
+  if(MSVC)
+    target_compile_options(ACE::ACE INTERFACE /wd4996)
+    target_compile_definitions(ACE::ACE INTERFACE
+                               _CRT_SECURE_NO_WARNINGS
+                               _WINSOCK_DEPRECATED_NO_WARNINGS)
   endif()
 endif()
 
