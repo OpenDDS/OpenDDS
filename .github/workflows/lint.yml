@@ -17,7 +17,7 @@ env:
 
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
     - name: checkout OpenDDS
       uses: actions/checkout@v3
@@ -30,7 +30,7 @@ jobs:
         ref: ace6tao2
         path: ${{ env.DOC_ROOT }}
     - name: Install Perl Dependencies
-      uses: shogo82148/actions-setup-perl@v1
+      uses: shogo82148/actions-setup-perl@v1.19.0
       with:
         install-modules: |
           YAML
