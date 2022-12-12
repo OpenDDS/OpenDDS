@@ -28,4 +28,7 @@ project(*Responder): dcps_test, dcps_rtps_udp {
   Source_Files {
     Responder.cpp
   }
+
+  IDL_Files {
+  }
 }
