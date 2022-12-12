@@ -390,6 +390,13 @@ public:
   const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;
   const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;
 
+  const OpenDDS::XTypes::TypeInformation* preset_type_info() const;
+
+  DynamicType_ptr get_type()
+  {
+    return DynamicType::_duplicate(type_);
+  }
+
 #  ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const OpenDDS::DCPS::MetaStruct& getMetaStructForType()
   {

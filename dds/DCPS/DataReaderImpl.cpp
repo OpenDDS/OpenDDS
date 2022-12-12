@@ -1250,7 +1250,7 @@ DataReaderImpl::enable()
 
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
     typesupport->add_types(type_lookup_service);
-    typesupport->populate_dependencies(type_lookup_service);
+
     install_type_support(typesupport);
 
     const RepoId subscription_id =

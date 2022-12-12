@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,28 +6,27 @@
 #ifndef OPENDDS_DCPS_DISCOVERY_H
 #define OPENDDS_DCPS_DISCOVERY_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "RcObject.h"
 #include "RcHandle_T.h"
 #include "unique_ptr.h"
 #include "XTypes/TypeObject.h"
 #include "XTypes/TypeLookupService.h"
-
 #include "DataReaderCallbacks.h"
 #include "DataWriterCallbacks.h"
 #include "TopicCallbacks.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-
 #include "PoolAllocator.h"
 #include "PoolAllocationBase.h"
+#include "ConditionVariable.h"
 
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsSubscriptionC.h>
 #ifdef OPENDDS_SECURITY
-#include "dds/DdsSecurityCoreC.h"
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
@@ -44,6 +41,24 @@ class DomainParticipantImpl;
 class DataWriterImpl;
 class DataReaderImpl;
 class BitSubscriber;
+
+struct OpenDDS_Dcps_Export TypeObjReqCond {
+  typedef ACE_Thread_Mutex LockType;
+  LockType lock;
+  ConditionVariable<LockType> cond;
+  bool waiting;
+  DDS::ReturnCode_t rc;
+
+  TypeObjReqCond()
+  : cond(lock)
+  , waiting(true)
+  , rc(DDS::RETCODE_OK)
+  {
+  }
+
+  DDS::ReturnCode_t wait();
+  void done(DDS::ReturnCode_t retcode);
+};
 
 /**
  * @class Discovery
@@ -259,12 +274,19 @@ public:
                                  const RepoId& /*part_id*/,
                                  DDS::LivelinessQosPolicyKind /*kind*/) { }
 
+  virtual void request_remote_complete_type_objects(
+    DDS::DomainId_t /*domain*/, const GUID_t& /*local_participant*/,
+    const GUID_t& /*remote_entity*/, const XTypes::TypeInformation& /*remote_type_info*/,
+    TypeObjReqCond& cond)
+  {
+    cond.done(DDS::RETCODE_UNSUPPORTED);
+  }
+
 protected:
   DDS::ReturnCode_t create_bit_topics(DomainParticipantImpl* participant);
 
 private:
-  RepoKey        key_;
-
+  RepoKey key_;
 };
 
 typedef RcHandle<Discovery> Discovery_rch;

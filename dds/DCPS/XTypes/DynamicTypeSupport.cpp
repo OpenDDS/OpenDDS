@@ -335,6 +335,12 @@ const TypeMap& DynamicTypeSupport::getCompleteTypeMap() const
   return dti->get_complete_type_map();
 }
 
+const OpenDDS::XTypes::TypeInformation* DynamicTypeSupport::preset_type_info() const
+{
+  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  return dti->get_preset_type_info();
+}
+
 DynamicTypeSupport_ptr DynamicTypeSupport::_duplicate(DynamicTypeSupport_ptr obj)
 {
   if (obj) {
