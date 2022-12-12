@@ -9,7 +9,6 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPINST_H
 
 #include "Rtps_Udp_Export.h"
-
 #include "RtpsUdpTransport_rch.h"
 
 #include <dds/DCPS/NetworkAddress.h>

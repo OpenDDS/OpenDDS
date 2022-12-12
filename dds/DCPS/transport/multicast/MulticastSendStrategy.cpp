@@ -40,7 +40,7 @@ MulticastSendStrategy::prepare_header_i()
 ssize_t
 MulticastSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
-  MulticastInst_rch cfg= link_->config();
+  MulticastInst_rch cfg = link_->config();
   return (cfg && cfg->async_send()) ? async_send(iov, n, cfg->group_address_) : sync_send(iov, n);
 }
 

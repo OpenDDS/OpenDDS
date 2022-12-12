@@ -9,7 +9,6 @@
 #define OPENDDS_DCPS_TRANSPORT_MULTICAST_MULTICASTDATALINK_H
 
 #include "Multicast_Export.h"
-
 #include "MulticastInst.h"
 #include "MulticastSendStrategy_rch.h"
 #include "MulticastReceiveStrategy_rch.h"
@@ -20,7 +19,6 @@
 
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/PoolAllocator.h>
-
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
