@@ -153,8 +153,12 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
 {
   MulticastInst_rch cfg = config();
 
+  if (!cfg) {
+    return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+  }
+
   // Check that the remote reliability matches.
-  if (!cfg || get_remote_reliability(remote) != cfg->is_reliable()) {
+  if (get_remote_reliability(remote) != cfg->is_reliable()) {
     return AcceptConnectResult();
   }
 
@@ -209,8 +213,12 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 {
   MulticastInst_rch cfg = config();
 
+  if (!cfg) {
+    return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+  }
+
   // Check that the remote reliability matches.
-  if (!cfg || get_remote_reliability(remote) != cfg->is_reliable()) {
+  if (get_remote_reliability(remote) != cfg->is_reliable()) {
     return AcceptConnectResult();
   }
 
