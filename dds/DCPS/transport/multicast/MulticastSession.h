@@ -126,7 +126,7 @@ private:
   RcHandle<Sporadic> syn_watchdog_;
   TimeDuration syn_delay_;
   const TimeDuration initial_syn_delay_;
-  OPENDDS_STRING config_name;
+  String config_name;
 };
 
 } // namespace DCPS
