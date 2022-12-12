@@ -1970,6 +1970,51 @@ DynamicDataImpl::SequenceValue::SequenceValue(const DDS::WstringSeq& wstr_seq)
 {}
 #endif
 
+DynamicDataImpl::SequenceValue::SequenceValue(const SequenceValue& rhs)
+  : elem_kind_(rhs.elem_kind_), active_(0)
+{
+#define SEQUENCE_VALUE_PLACEMENT_NEW(T, N)  active_ = new(N) DDS::T(reinterpret_cast<const DDS::T&>(rhs.N)); break;
+  switch (elem_kind_) {
+  case TK_INT32:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int32Seq, int32_seq_);
+  case TK_UINT32:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt32Seq, uint32_seq_);
+  case TK_INT8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int8Seq, int8_seq_);
+  case TK_UINT8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt8Seq, uint8_seq_);
+  case TK_INT16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int16Seq, int16_seq_);
+  case TK_UINT16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt16Seq, uint16_seq_);
+  case TK_INT64:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int64Seq, int64_seq_);
+  case TK_UINT64:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt64Seq, uint64_seq_);
+  case TK_FLOAT32:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Float32Seq, float32_seq_);
+  case TK_FLOAT64:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Float64Seq, float64_seq_);
+  case TK_FLOAT128:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Float128Seq, float128_seq_);
+  case TK_CHAR8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(CharSeq, char8_seq_);
+  case TK_BYTE:
+    SEQUENCE_VALUE_PLACEMENT_NEW(ByteSeq, byte_seq_);
+  case TK_BOOLEAN:
+    SEQUENCE_VALUE_PLACEMENT_NEW(BooleanSeq, boolean_seq_);
+  case TK_STRING8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(StringSeq, string_seq_);
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(WcharSeq, char16_seq_);
+  case TK_STRING16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(WstringSeq, wstring_seq_);
+#endif
+  }
+#undef SEQUENCE_VALUE_PLACEMENT_NEW
+}
+
 DynamicDataImpl::SequenceValue::~SequenceValue()
 {
 #define SEQUENCE_VALUE_DESTRUCT(T) static_cast<DDS::T*>(active_)->~T(); break

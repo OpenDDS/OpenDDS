@@ -518,6 +518,7 @@ private:
     SequenceValue(const DDS::WstringSeq& wstr_seq);
 #endif
 
+    SequenceValue(const SequenceValue& rhs);
     ~SequenceValue();
 
     template<typename T> const T& get() const;
@@ -547,6 +548,9 @@ private:
 #endif
 #undef SEQUENCE_VALUE_MEMBER
     };
+
+  private:
+    SequenceValue& operator=(const SequenceValue& rhs);
   };
 
   typedef OPENDDS_VECTOR(CORBA::ULong) IndexToIdMap;
