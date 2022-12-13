@@ -2124,6 +2124,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
     if (!CORBA::is_nil(sub_listener.in()) && !coherent_) {
       if (!is_bit()) {
         sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+        sub.reset();
         ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
         sub_listener->on_data_on_readers(sub.in());
       } else {
@@ -2139,6 +2140,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         if (!is_bit()) {
           set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+          sub.reset();
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
           listener->on_data_available(this);
         } else {
