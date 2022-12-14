@@ -11,6 +11,7 @@
 #  include "TypeObject.h"
 
 #  include <dds/DCPS/PoolAllocator.h>
+#  include <dds/DCPS/Sample.h>
 #  include <dds/DCPS/Serializer.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -27,7 +28,8 @@ public:
   /// responsible for the release of the input message block chain.
   DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                           const DCPS::Encoding& encoding,
-                          DDS::DynamicType_ptr type);
+                          DDS::DynamicType_ptr type,
+                          DCPS::Sample::Extent ext = DCPS::Sample::Full);
 
   /// Use this when you want to pass the alignment state of a given Serializer object over.
   /// A typical use case would be when a part of the data has already been consumed from
@@ -528,6 +530,7 @@ private:
   ACE_Message_Block* chain_;
 
   DCPS::Encoding encoding_;
+  DCPS::Sample::Extent extent_;
 
   /// Indicate whether the alignment state of a Serializer object associated
   /// with this DynamicData needs to be reset.

@@ -46,6 +46,7 @@ namespace XTypes {
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   : chain_(0)
   , encoding_(DCPS::Encoding::KIND_XCDR2)
+  , extent_(DCPS::Sample::Full)
   , reset_align_state_(false)
   , strm_(0, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
@@ -53,10 +54,12 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                                                  const DCPS::Encoding& encoding,
-                                                 DDS::DynamicType_ptr type)
+                                                 DDS::DynamicType_ptr type,
+                                                 DCPS::Sample::Extent ext)
   : DynamicDataBase(type)
   , chain_(chain->duplicate())
   , encoding_(encoding)
+  , extent_(ext)
   , reset_align_state_(false)
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
@@ -71,6 +74,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
   : DynamicDataBase(type)
   , chain_(ser.current()->duplicate())
   , encoding_(ser.encoding())
+  , extent_(DCPS::Sample::Full)
   , reset_align_state_(true)
   , align_state_(ser.rdstate())
   , strm_(chain_, encoding_)
@@ -114,6 +118,7 @@ void DynamicDataXcdrReadImpl::copy(const DynamicDataXcdrReadImpl& other)
   ACE_Message_Block::release(chain_);
   chain_ = other.chain_->duplicate();
   encoding_ = other.encoding_;
+  extent_ = other.extent_;
   reset_align_state_ = other.reset_align_state_;
   align_state_ = other.align_state_;
   strm_ = other.strm_;
