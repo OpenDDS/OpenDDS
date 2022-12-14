@@ -10,6 +10,7 @@
 #  include "DynamicDataBase.h"
 
 #  include <dds/DCPS/FilterEvaluator.h>
+#  include <dds/DCPS/Sample.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,6 +25,10 @@ OpenDDS_Dcps_Export
 bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
 OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
+OpenDDS_Dcps_Export
+bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<const XTypes::DynamicDataImpl>& data);
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const KeyOnly<const XTypes::DynamicDataImpl>& data);
 }
 
 namespace XTypes {
@@ -947,12 +952,13 @@ private:
       DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
     bool serialize_sequence_struct_member_xcdr2(DCPS::Serializer& ser, DDS::MemberId id,
       TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
-    bool serialized_size_structure_xcdr2(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_structure_xcdr2(DCPS::Serializer& ser) const;
-    bool serialized_size_structure_xcdr1(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_structure_xcdr1(DCPS::Serializer& ser) const;
-    bool serialized_size_structure(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_structure(DCPS::Serializer& ser) const;
+    bool serialized_size_structure_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_structure_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_structure_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_structure_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_structure(const DCPS::Encoding& encoding, size_t& size,
+                                   DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
+    bool serialize_structure(DCPS::Serializer& ser, DCPS::Sample::Extent = DCPS::Sample::Full) const;
 
     bool set_default_discriminator_value(CORBA::Long& value,
                                          const DDS::DynamicType_var& disc_type) const;
@@ -970,12 +976,13 @@ private:
                                          DDS::ExtensibilityKind extensibility) const;
     bool select_union_member(CORBA::Long disc_value, bool& found_selected_member,
                              DDS::MemberDescriptor_var& selected_md) const;
-    bool serialized_size_union_xcdr2(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_union_xcdr2(DCPS::Serializer& ser) const;
-    bool serialized_size_union_xcdr1(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_union_xcdr1(DCPS::Serializer& ser) const;
-    bool serialized_size_union(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_union(DCPS::Serializer& ser) const;
+    bool serialized_size_union_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_union_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_union_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_union(const DCPS::Encoding& encoding, size_t& size,
+                               DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
+    bool serialize_union(DCPS::Serializer& ser, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
 
     // Internal data
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
@@ -996,6 +1003,12 @@ private:
 
   friend OpenDDS_Dcps_Export
   bool DCPS::operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
+
+  friend OpenDDS_Dcps_Export
+  bool DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DCPS::KeyOnly<const DynamicDataImpl>& data);
+
+  friend OpenDDS_Dcps_Export
+  bool DCPS::operator<<(DCPS::Serializer& ser, const DCPS::KeyOnly<const DynamicDataImpl>& data);
 };
 
 } // namespace XTypes

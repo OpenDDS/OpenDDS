@@ -52,7 +52,9 @@ size_t DynamicSample::serialized_size(const Encoding& enc) const
     }
     return 0;
   }
-  return DCPS::serialized_size(enc, *ddi);
+  return key_only()
+    ? DCPS::serialized_size(enc, DCPS::KeyOnly<const DynamicDataImpl>(*ddi))
+    : DCPS::serialized_size(enc, *ddi);
 }
 
 bool DynamicSample::serialize(Serializer& ser) const
@@ -65,7 +67,9 @@ bool DynamicSample::serialize(Serializer& ser) const
     }
     return false;
   }
-  return ser << *ddi;
+  return key_only()
+    ? ser << DCPS::KeyOnly<const DynamicDataImpl>(*ddi)
+    : ser << *ddi;
 }
 
 bool DynamicSample::deserialize(Serializer& ser)
