@@ -2111,7 +2111,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (! ptr->coherent_change_) {
 #endif
-    RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
+    RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant();
     if (!sub || get_deleted())
       return;
 
