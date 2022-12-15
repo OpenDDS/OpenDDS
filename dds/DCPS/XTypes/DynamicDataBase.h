@@ -28,6 +28,7 @@ public:
 
   static bool has_explicit_keys(DDS::DynamicType* dt);
   static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);
+  static DCPS::Sample::Extent nested(DCPS::Sample::Extent ext);
 
 protected:
   /// Verify that a given type is primitive or string or wstring.
@@ -39,6 +40,18 @@ protected:
   /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
 };
+
+inline bool DynamicDataBase::exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys)
+{
+  // see Fields::Iterator and explicit_keys_only() in opendds_idl's dds_generator.h
+  const bool explicit_keys_only = ext == DCPS::Sample::KeyOnly || (ext == DCPS::Sample::NestedKeyOnly && has_explicit_keys);
+  return explicit_keys_only && !is_key;
+}
+
+inline DCPS::Sample::Extent DynamicDataBase::nested(DCPS::Sample::Extent ext)
+{
+  return ext == DCPS::Sample::KeyOnly ? DCPS::Sample::NestedKeyOnly : ext;
+}
 
 } // namespace XTypes
 } // namespace OpenDDS

@@ -913,15 +913,15 @@ private:
       DDS::ExtensibilityKind extensibility) const;
     bool serialized_size_complex_aggregated_member_xcdr2_default(const DCPS::Encoding& encoding,
       size_t& size, const DDS::DynamicType_var& member_type, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
+      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
     bool serialize_complex_aggregated_member_xcdr2_default(DCPS::Serializer& ser, DDS::MemberId id,
       const DDS::DynamicType_var& member_type, bool optional, bool must_understand,
-      DDS::ExtensibilityKind extensibility) const;
+      DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
     bool serialized_size_complex_aggregated_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       const_complex_iterator it, bool optional, DDS::ExtensibilityKind extensibility,
-      size_t& mutable_running_total) const;
+      size_t& mutable_running_total, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
     bool serialize_complex_aggregated_member_xcdr2(DCPS::Serializer& ser, const_complex_iterator it,
-      bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
+      bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
     bool serialized_size_basic_struct_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       DDS::MemberId id, const DDS::DynamicType_var& member_type, bool optional,
       DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
