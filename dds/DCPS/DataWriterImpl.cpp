@@ -176,7 +176,7 @@ DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(publication_id_, participant.get());
+  return get_entity_instance_handle(publication_id_, participant);
 }
 
 DDS::InstanceHandle_t
