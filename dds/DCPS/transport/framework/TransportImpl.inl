@@ -15,10 +15,10 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-ACE_INLINE OpenDDS::DCPS::TransportInst&
+ACE_INLINE OpenDDS::DCPS::TransportInst_rch
 OpenDDS::DCPS::TransportImpl::config() const
 {
-  return this->config_;
+  return config_.lock();
 }
 
 ACE_INLINE OpenDDS::DCPS::ReactorTask_rch

@@ -6,10 +6,11 @@
  */
 
 #include "MulticastSession.h"
+#include "MulticastReceiveStrategy.h"
 
-#include "dds/DCPS/GuidConverter.h"
+#include <dds/DCPS/GuidConverter.h>
 
-#include "ace/Log_Msg.h"
+#include <ace/Log_Msg.h>
 
 #include <cmath>
 
@@ -35,12 +36,14 @@ MulticastSession::MulticastSession(RcHandle<ReactorInterceptor> interceptor,
   , reverse_start_lock_(start_lock_)
   , started_(false)
   , active_(true)
-  , reassembly_(link->config().fragment_reassembly_timeout_)
+  , reassembly_(link->config()->fragment_reassembly_timeout_)
   , acked_(false)
   , syn_watchdog_(make_rch<Sporadic>(TheServiceParticipant->time_source(),
                                      interceptor,
                                      rchandle_from(this),
                                      &MulticastSession::send_all_syn))
+  , initial_syn_delay_(link->config()->syn_interval_)
+  , config_name(link->config()->name())
 {}
 
 MulticastSession::~MulticastSession()
@@ -66,7 +69,7 @@ void
 MulticastSession::start_syn()
 {
   syn_watchdog_->cancel();
-  syn_delay_ = link()->config().syn_interval_;
+  syn_delay_ = initial_syn_delay_;
   syn_watchdog_->schedule(TimeDuration(0));
 }
 
@@ -155,7 +158,7 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
     VDBG_LVL((LM_DEBUG,
               "(%P|%t) MulticastSession[%C]::syn_received "
               "local %#08x%08x %C remote %#08x%08x %C\n",
-              this->link()->config().name().c_str(),
+              config_name.c_str(),
               (unsigned int)(this->link()->local_peer() >> 32),
               (unsigned int) this->link()->local_peer(),
               LogGuid(local_reader).c_str(),
@@ -172,7 +175,10 @@ MulticastSession::syn_received(const Message_Block_Ptr& control)
   }
 
   if (call_passive_connection) {
-    this->link_->transport().passive_connection(this->link_->local_peer(), this->remote_peer_);
+    MulticastTransport_rch transport = link_->transport();
+    if (transport) {
+      transport->passive_connection(link_->local_peer(), remote_peer_);
+    }
   }
 
   // MULTICAST_SYN control samples are always positively
@@ -217,7 +223,7 @@ MulticastSession::send_syn(const RepoId& local_writer,
   VDBG_LVL((LM_DEBUG,
             "(%P|%t) MulticastSession[%C]::send_syn "
             "local %#08x%08x %C remote %#08x%08x %C\n",
-            this->link()->config().name().c_str(),
+            config_name.c_str(),
             (unsigned int)(this->link()->local_peer() >> 32),
             (unsigned int) this->link()->local_peer(),
             LogGuid(local_writer).c_str(),
@@ -259,7 +265,7 @@ MulticastSession::synack_received(const Message_Block_Ptr& control)
   VDBG_LVL((LM_DEBUG,
             "(%P|%t) MulticastSession[%C]::synack_received "
             "local %#08x%08x %C remote %#08x%08x %C\n",
-            this->link()->config().name().c_str(),
+            config_name.c_str(),
             (unsigned int)(this->link()->local_peer() >> 32),
             (unsigned int) this->link()->local_peer(),
             LogGuid(local_writer).c_str(),
@@ -293,7 +299,7 @@ MulticastSession::send_synack(const RepoId& local_reader,
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastSession[%C]::send_synack "
                       "local %#08x%08x %C remote %#08x%08x %C active %d\n",
-                      this->link()->config().name().c_str(),
+                      config_name.c_str(),
                       (unsigned int)(this->link()->local_peer() >> 32),
                       (unsigned int) this->link()->local_peer(),
                       LogGuid(local_reader).c_str(),

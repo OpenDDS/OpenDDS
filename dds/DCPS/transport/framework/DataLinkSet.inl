@@ -63,7 +63,7 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
         itr->second->send(tce);
 
       } else {
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 
         // Tell the DataLink to send it.
         itr->second->send(send_element);

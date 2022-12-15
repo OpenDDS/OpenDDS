@@ -24,8 +24,8 @@ ShmemInst::ShmemInst(const std::string& name)
   , pool_size_(16 * 1024 * 1024)
   , datalink_control_size_(4 * 1024)
   , hostname_(get_fully_qualified_hostname())
-  , association_resend_period_(0, 250000)
-  , association_resend_max_count_(10)
+  , association_resend_period_(0, DEFAULT_ASSOCIATION_RESEND_PERIOD_USEC)
+  , association_resend_max_count_(DEFAULT_ASSOCIATION_RESEND_MAX_COUNT)
 {
   std::ostringstream pool;
   pool << "OpenDDS-" << ACE_OS::getpid() << '-' << this->name();
@@ -35,7 +35,7 @@ ShmemInst::ShmemInst(const std::string& name)
 TransportImpl_rch
 ShmemInst::new_impl()
 {
-  return make_rch<ShmemTransport>(ref(*this));
+  return make_rch<ShmemTransport>(rchandle_from(this));
 }
 
 int

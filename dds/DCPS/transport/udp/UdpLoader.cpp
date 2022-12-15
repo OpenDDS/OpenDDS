@@ -6,6 +6,10 @@
  */
 
 #include "UdpLoader.h"
+#include "UdpSendStrategy.h"
+#include "UdpReceiveStrategy.h"
+#include "UdpDataLink.h"
+#include "UdpTransport.h"
 #include "UdpInst.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"

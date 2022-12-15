@@ -10,6 +10,7 @@
 
 #include "Multicast_Export.h"
 
+#include "MulticastInst_rch.h"
 #include "MulticastDataLink_rch.h"
 #include "MulticastTypes.h"
 
@@ -21,19 +22,17 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class MulticastInst;
-
 class MulticastSession;
 typedef RcHandle<MulticastSession> MulticastSession_rch;
 
 class OpenDDS_Multicast_Export MulticastTransport : public TransportImpl {
 public:
-  explicit MulticastTransport(MulticastInst& inst);
+  explicit MulticastTransport(const MulticastInst_rch& inst);
   ~MulticastTransport();
 
   void passive_connection(MulticastPeer local_peer, MulticastPeer remote_peer);
 
-  MulticastInst& config() const;
+  MulticastInst_rch config() const;
 
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -49,7 +48,7 @@ protected:
                                             bool disassociate,
                                             bool association_failed);
 
-  bool configure_i(MulticastInst& config);
+  bool configure_i(const MulticastInst_rch& config);
 
   virtual void shutdown_i();
 
@@ -75,8 +74,6 @@ private:
 
   MulticastSession_rch start_session(const MulticastDataLink_rch& link,
                                      MulticastPeer remote_peer, bool active);
-
-  //RcHandle<MulticastInst> config_i_;
 
   ThreadLockType links_lock_;
   /// link for pubs.

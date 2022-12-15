@@ -8,10 +8,9 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_UDP_UDPTRANSPORT_H
 #define OPENDDS_DCPS_TRANSPORT_UDP_UDPTRANSPORT_H
 
-#include "UdpDataLink.h"
-
 #include "Udp_Export.h"
 #include "UdpDataLink_rch.h"
+#include "UdpDataLink.h"
 
 #include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/ConditionVariable.h>
@@ -29,11 +28,11 @@ class UdpInst;
 
 class OpenDDS_Udp_Export UdpTransport : public TransportImpl {
 public:
-  explicit UdpTransport(UdpInst& inst);
+  explicit UdpTransport(const UdpInst_rch& inst);
 
   void passive_connection(const ACE_INET_Addr& remote_address,
                           const ReceivedDataSample& data);
-  UdpInst& config() const;
+  UdpInst_rch config() const;
 protected:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
                                                const ConnectionAttribs& attribs,
@@ -48,7 +47,7 @@ protected:
                                             bool disassociate,
                                             bool association_failed);
 
-  bool configure_i(UdpInst& config);
+  bool configure_i(const UdpInst_rch& config);
 
   virtual void shutdown_i();
 

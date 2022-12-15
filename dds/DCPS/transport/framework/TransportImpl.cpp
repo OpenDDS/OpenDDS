@@ -30,7 +30,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportImpl::TransportImpl(TransportInst& config)
+TransportImpl::TransportImpl(TransportInst_rch config)
   : config_(config)
   , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
   , last_link_(0)
@@ -151,7 +151,8 @@ TransportImpl::dump()
 OPENDDS_STRING
 TransportImpl::dump_to_str()
 {
-  return config_.dump_to_str();
+  TransportInst_rch cfg = config_.lock();
+  return cfg ? cfg->dump_to_str() : OPENDDS_STRING();
 }
 
 }
