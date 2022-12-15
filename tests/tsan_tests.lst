@@ -14,6 +14,10 @@
 tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
 tests/stress-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
 
+tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
+tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
+tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
+
 tests/transport/simple/run_test.pl bp: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/transport/simple/run_test.pl n: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
