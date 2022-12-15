@@ -30,7 +30,7 @@ jobs:
         ref: ace6tao2
         path: ${{ env.DOC_ROOT }}
     - name: Install Perl Dependencies
-      uses: shogo82148/actions-setup-perl@v1.19.0
+      uses: shogo82148/actions-setup-perl@v1
       with:
         install-modules: |
           YAML
