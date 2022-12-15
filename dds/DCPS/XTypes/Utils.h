@@ -64,6 +64,9 @@ typedef OPENDDS_VECTOR(MemberPath) MemberPathVec;
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count);
 
+OpenDDS_Dcps_Export DDS::ReturnCode_t key_compare(
+  DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, bool& result);
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
