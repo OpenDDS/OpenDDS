@@ -37,7 +37,8 @@ public:
 
   enum Extent {
     Full,
-    KeyOnly
+    KeyOnly,
+    NestedKeyOnly
   };
 
   Sample()
@@ -50,6 +51,7 @@ public:
     : mutability_(mutability)
     , extent_(extent)
   {
+    OPENDDS_ASSERT(extent != NestedKeyOnly);
   }
 
   virtual ~Sample() {}

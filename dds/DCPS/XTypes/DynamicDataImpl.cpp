@@ -5960,6 +5960,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
     return false;
   }
   const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+  const bool struct_has_explicit_keys = has_explicit_keys(type_);
 
   // Delimiter
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
@@ -5979,7 +5980,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
       return false;
     }
 
-    if (ext == DCPS::Sample::KeyOnly && !md->is_key()) {
+    if (exclude_member(ext, md->is_key(), struct_has_explicit_keys)) {
       continue;
     }
 
@@ -6035,6 +6036,7 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
     return false;
   }
   const DDS::ExtensibilityKind extensibility = descriptor->extensibility_kind();
+  const bool struct_has_explicit_keys = has_explicit_keys(type_);
 
   // Delimiter
   const DCPS::Encoding& encoding = ser.encoding();
@@ -6057,7 +6059,7 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
       return false;
     }
 
-    if (ext == DCPS::Sample::KeyOnly && !md->is_key()) {
+    if (exclude_member(ext, md->is_key(), struct_has_explicit_keys)) {
       continue;
     }
 

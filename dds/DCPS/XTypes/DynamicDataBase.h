@@ -11,6 +11,7 @@
 
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/LocalObject.h>
+#  include <dds/DCPS/Sample.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -24,6 +25,9 @@ public:
 
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::MemberId get_member_id_by_name(const char* name);
+
+  static bool has_explicit_keys(DDS::DynamicType* dt);
+  static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);
 
 protected:
   /// Verify that a given type is primitive or string or wstring.
