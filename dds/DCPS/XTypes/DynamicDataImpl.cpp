@@ -4227,7 +4227,8 @@ bool DynamicDataImpl::DataContainer::get_index_to_id_from_complex(IndexToIdMap& 
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encoding& encoding,
-                                                              size_t& size) const
+                                                              size_t& size,
+                                                              DCPS::Sample::Extent ext) const
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -4315,7 +4316,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
   return serialized_size_complex_sequence(encoding, size, index_to_id, elem_type);
 }
 
-bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser) const
+bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -5029,7 +5030,8 @@ bool DynamicDataImpl::DataContainer::serialize_complex_array(
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding& encoding,
-                                                           size_t& size) const
+                                                           size_t& size,
+                                                           DCPS::Sample::Extent ext) const
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -5099,7 +5101,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding&
   return serialized_size_complex_array(encoding, size, index_to_id, elem_type);
 }
 
-bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser) const
+bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -5393,7 +5395,8 @@ bool DynamicDataImpl::DataContainer::serialized_size_complex_aggregated_member_x
   if (extensibility == DDS::MUTABLE) {
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
-  return serialized_size(encoding, size, DynamicDataImpl(member_type)); //TODO
+
+  return DynamicDataImpl(member_type).serialized_size_i(encoding, size, ext);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_aggregated_member_xcdr2_default(
@@ -5411,12 +5414,12 @@ bool DynamicDataImpl::DataContainer::serialize_complex_aggregated_member_xcdr2_d
   const DynamicDataImpl default_value(member_type);
   if (extensibility == DDS::MUTABLE) {
     size_t member_size = 0;
-    serialized_size(ser.encoding(), member_size, default_value);
+    default_value.serialized_size_i(ser.encoding(), member_size, ext);
     if (!ser.write_parameter_id(id, member_size, must_understand)) {
       return false;
     }
   }
-  return ser << default_value; //TODO
+  return default_value.serialize_i(ser, ext);
 }
 
 // Serialize a member of an aggregated type stored in the complex map,
@@ -5437,7 +5440,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_complex_aggregated_member_x
   } else if (extensibility == DDS::MUTABLE) {
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
-  return serialized_size(encoding, size, *data_impl); //TODO
+  return data_impl->serialized_size_i(encoding, size, ext);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_aggregated_member_xcdr2(
@@ -5461,7 +5464,7 @@ bool DynamicDataImpl::DataContainer::serialize_complex_aggregated_member_xcdr2(
       return false;
     }
   }
-  return ser << *data_impl; //TODO
+  return data_impl->serialize_i(ser, ext);
 }
 
 // Serialize struct member whose type is basic or compatible with a basic type,
@@ -5498,7 +5501,8 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_struct_member_xcdr2(
                                                           optional, extensibility, mutable_running_total);
   }
   return serialized_size_complex_aggregated_member_xcdr2(encoding, size, complex_it, optional,
-                                                         extensibility, mutable_running_total);
+                                                         extensibility, mutable_running_total,
+                                                         DCPS::Sample::Full);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::Serializer& ser,
@@ -5546,7 +5550,8 @@ bool DynamicDataImpl::DataContainer::serialize_basic_struct_member_xcdr2(DCPS::S
                                                     must_understand, extensibility);
   }
   return serialize_complex_aggregated_member_xcdr2(ser, complex_it, optional,
-                                                   must_understand, extensibility);
+                                                   must_understand, extensibility,
+                                                   DCPS::Sample::Full);
 }
 
 void DynamicDataImpl::DataContainer::serialized_size_sequence_member_default_value(
@@ -5897,7 +5902,8 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_aggregated_member_xcdr2(
 // Serialize a struct member whose type is sequence of basic type or enum or bitmask.
 bool DynamicDataImpl::DataContainer::serialized_size_sequence_struct_member_xcdr2(
   const DCPS::Encoding& encoding, size_t& size, DDS::MemberId id, TypeKind elem_tk,
-  bool optional, DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const
+  bool optional, DDS::ExtensibilityKind extensibility, size_t& mutable_running_total,
+  DCPS::Sample::Extent ext) const
 {
   const_sequence_iterator seq_it = sequence_map_.find(id);
   const_complex_iterator complex_it = complex_map_.find(id);
@@ -5920,12 +5926,14 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence_struct_member_xcdr
     return true;
   }
   return serialized_size_complex_aggregated_member_xcdr2(encoding, size, complex_it, optional,
-                                                         extensibility, mutable_running_total);
+                                                         extensibility, mutable_running_total,
+                                                         DCPS::Sample::Full);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_sequence_struct_member_xcdr2(DCPS::Serializer& ser,
   DDS::MemberId id, TypeKind elem_tk, bool optional,
-  bool must_understand, DDS::ExtensibilityKind extensibility) const
+  bool must_understand, DDS::ExtensibilityKind extensibility,
+  DCPS::Sample::Extent ext) const
 {
   const DCPS::Encoding& encoding = ser.encoding();
   const_sequence_iterator seq_it = sequence_map_.find(id);
@@ -5952,7 +5960,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_struct_member_xcdr2(DCPS
                                                       must_understand, extensibility);
   }
   return serialize_complex_aggregated_member_xcdr2(ser, complex_it, optional,
-                                                   must_understand, extensibility);
+                                                   must_understand, extensibility, ext);
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
@@ -6007,7 +6015,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr2(
       const TypeKind elem_tk = elem_type->get_kind();
       if (data_->is_basic_type(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
         if (!serialized_size_sequence_struct_member_xcdr2(encoding, size, id, elem_tk, optional,
-                                                          extensibility, mutable_running_total)) {
+                                                          extensibility, mutable_running_total, nested(ext))) {
           return false;
         }
         continue;
@@ -6089,7 +6097,7 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
       const TypeKind elem_tk = elem_type->get_kind();
       if (data_->is_basic_type(elem_tk) || elem_tk == TK_ENUM || elem_tk == TK_BITMASK) {
         if (!serialize_sequence_struct_member_xcdr2(ser, id, elem_tk, optional,
-                                                    must_understand, extensibility)) {
+                                                    must_understand, extensibility, nested(ext))) {
           return false;
         }
         continue;
@@ -6099,13 +6107,11 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
     const_complex_iterator it = complex_map_.find(id);
     if (it != complex_map_.end()) {
       if (!serialize_complex_aggregated_member_xcdr2(ser, it, optional,
-                                                     must_understand, extensibility,
-                                                     nested(ext))) {
+                                                     must_understand, extensibility, nested(ext))) {
         return false;
       }
     } else if (!serialize_complex_aggregated_member_xcdr2_default(ser, id, member_type, optional,
-                                                                  must_understand, extensibility,
-                                                                  nested(ext))) {
+                                                                  must_understand, extensibility, nested(ext))) {
       return false;
     }
   }
@@ -6377,7 +6383,8 @@ bool DynamicDataImpl::DataContainer::serialized_size_selected_member_xcdr2(
   const_complex_iterator complex_it = complex_map_.find(selected_id);
   if (complex_it != complex_map_.end()) {
     return serialized_size_complex_aggregated_member_xcdr2(encoding, size, complex_it, optional,
-                                                           extensibility, mutable_running_total);
+                                                           extensibility, mutable_running_total,
+                                                           DCPS::Sample::Full);
   }
   return false;
 }
@@ -6417,7 +6424,8 @@ bool DynamicDataImpl::DataContainer::serialize_selected_member_xcdr2(DCPS::Seria
   const_complex_iterator complex_it = complex_map_.find(selected_id);
   if (complex_it != complex_map_.end()) {
     return serialize_complex_aggregated_member_xcdr2(ser, complex_it, optional,
-                                                     must_understand, extensibility);
+                                                     must_understand, extensibility,
+                                                     DCPS::Sample::Full);
   }
   return false;
 }
@@ -6503,7 +6511,8 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
       DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
       const bool optional = selected_md->is_optional();
       if (!serialized_size_complex_aggregated_member_xcdr2_default(encoding, size, selected_type, optional,
-                                                                   extensibility, mutable_running_total)) {
+                                                                   extensibility, mutable_running_total,
+                                                                   DCPS::Sample::Full)) {
         return false;
       }
     }
@@ -6593,7 +6602,8 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
       const bool optional = selected_md->is_optional();
       const bool must_understand = selected_md->is_must_understand();
       return serialize_complex_aggregated_member_xcdr2_default(ser, id, selected_type, optional,
-                                                               must_understand, extensibility);
+                                                               must_understand, extensibility,
+                                                               DCPS::Sample::Full);
     }
     return true;
   }
@@ -6687,13 +6697,10 @@ bool DynamicDataImpl::DataContainer::serialize_union(DCPS::Serializer& ser, DCPS
   }
   return false;
 }
-} // namespace XTypes
 
-namespace DCPS {
-bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data)
+bool DynamicDataImpl::serialized_size_i(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const
 {
-  using namespace XTypes;
-  const TypeKind tk = data.type_->get_kind();
+  const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_INT32:
     return primitive_serialized_size(encoding, size, CORBA::Long());
@@ -6734,118 +6741,115 @@ bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::Dynam
     primitive_serialized_size_boolean(encoding, size);
     return true;
   case TK_ENUM:
-    return data.container_.serialized_size_enum(encoding, size, data.type_);
+    return container_.serialized_size_enum(encoding, size, type_);
   case TK_BITMASK:
-    return data.container_.serialized_size_bitmask(encoding, size, data.type_);
+    return container_.serialized_size_bitmask(encoding, size, type_);
   case TK_STRING8:
-    return data.container_.serialized_size_string(encoding, size);
+    return container_.serialized_size_string(encoding, size);
 #ifdef DDS_HAS_WCHAR
   case TK_STRING16:
-    return data.container_.serialized_size_wstring(encoding, size);
+    return container_.serialized_size_wstring(encoding, size);
 #endif
   case TK_STRUCTURE:
-    return data.container_.serialized_size_structure(encoding, size);
+    return container_.serialized_size_structure(encoding, size, ext);
   case TK_UNION:
-    return data.container_.serialized_size_union(encoding, size);
+    return container_.serialized_size_union(encoding, size, ext);
   case TK_SEQUENCE:
-    return data.container_.serialized_size_sequence(encoding, size);
+    return container_.serialized_size_sequence(encoding, size, ext);
   case TK_ARRAY:
-    return data.container_.serialized_size_array(encoding, size);
+    return container_.serialized_size_array(encoding, size, ext);
   case TK_MAP:
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: operator<<: Serialization of map types is not supported\n"));
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialized_size_i: Serialization of map types is not supported\n"));
     }
   }
   return false;
+}
+
+bool DynamicDataImpl::serialize_i(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
+{
+  const TypeKind tk = type_->get_kind();
+  switch (tk) {
+  case TK_INT32:
+    return container_.serialize_primitive_value(ser, CORBA::Long());
+  case TK_UINT32:
+    return container_.serialize_primitive_value(ser, CORBA::ULong());
+  case TK_INT8:
+    return container_.serialize_primitive_value(ser, ACE_OutputCDR::from_int8(CORBA::Int8()));
+  case TK_UINT8:
+    return container_.serialize_primitive_value(ser, ACE_OutputCDR::from_uint8(CORBA::UInt8()));
+  case TK_INT16:
+    return container_.serialize_primitive_value(ser, CORBA::Short());
+  case TK_UINT16:
+    return container_.serialize_primitive_value(ser, CORBA::UShort());
+  case TK_INT64:
+    return container_.serialize_primitive_value(ser, CORBA::LongLong());
+  case TK_UINT64:
+    return container_.serialize_primitive_value(ser, CORBA::ULongLong());
+  case TK_FLOAT32:
+    return container_.serialize_primitive_value(ser, CORBA::Float());
+  case TK_FLOAT64:
+    return container_.serialize_primitive_value(ser, CORBA::Double());
+  case TK_FLOAT128:
+    return container_.serialize_primitive_value(ser, CORBA::LongDouble());
+  case TK_CHAR8:
+    return container_.serialize_primitive_value(ser, ACE_OutputCDR::from_char(CORBA::Char()));
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    return container_.serialize_primitive_value(ser, ACE_OutputCDR::from_wchar(CORBA::WChar()));
+#endif
+  case TK_BYTE:
+    return container_.serialize_primitive_value(ser, ACE_OutputCDR::from_octet(CORBA::Octet()));
+  case TK_BOOLEAN:
+    return container_.serialize_primitive_value(ser, ACE_OutputCDR::from_boolean(CORBA::Boolean()));
+  case TK_ENUM:
+    return container_.serialize_enum_value(ser);
+  case TK_BITMASK:
+    return container_.serialize_bitmask_value(ser);
+  case TK_STRING8:
+    return container_.serialize_string_value(ser);
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16:
+    return container_.serialize_wstring_value(ser);
+#endif
+  case TK_STRUCTURE:
+    return container_.serialize_structure(ser, ext);
+  case TK_UNION:
+    return container_.serialize_union(ser, ext);
+  case TK_SEQUENCE:
+    return container_.serialize_sequence(ser, ext);
+  case TK_ARRAY:
+    return container_.serialize_array(ser, ext);
+  case TK_MAP:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::serialize_i: Serialization of map types is not supported\n"));
+    }
+  }
+  return false;
+}
+
+} // namespace XTypes
+
+namespace DCPS {
+
+bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data)
+{
+  return data.serialized_size_i(encoding, size, Sample::Full);
 }
 
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data)
 {
-  using namespace XTypes;
-  const TypeKind tk = data.type_->get_kind();
-  switch (tk) {
-  case TK_INT32:
-    return data.container_.serialize_primitive_value(ser, CORBA::Long());
-  case TK_UINT32:
-    return data.container_.serialize_primitive_value(ser, CORBA::ULong());
-  case TK_INT8:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_int8(CORBA::Int8()));
-  case TK_UINT8:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_uint8(CORBA::UInt8()));
-  case TK_INT16:
-    return data.container_.serialize_primitive_value(ser, CORBA::Short());
-  case TK_UINT16:
-    return data.container_.serialize_primitive_value(ser, CORBA::UShort());
-  case TK_INT64:
-    return data.container_.serialize_primitive_value(ser, CORBA::LongLong());
-  case TK_UINT64:
-    return data.container_.serialize_primitive_value(ser, CORBA::ULongLong());
-  case TK_FLOAT32:
-    return data.container_.serialize_primitive_value(ser, CORBA::Float());
-  case TK_FLOAT64:
-    return data.container_.serialize_primitive_value(ser, CORBA::Double());
-  case TK_FLOAT128:
-    return data.container_.serialize_primitive_value(ser, CORBA::LongDouble());
-  case TK_CHAR8:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_char(CORBA::Char()));
-#ifdef DDS_HAS_WCHAR
-  case TK_CHAR16:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_wchar(CORBA::WChar()));
-#endif
-  case TK_BYTE:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_octet(CORBA::Octet()));
-  case TK_BOOLEAN:
-    return data.container_.serialize_primitive_value(ser, ACE_OutputCDR::from_boolean(CORBA::Boolean()));
-  case TK_ENUM:
-    return data.container_.serialize_enum_value(ser);
-  case TK_BITMASK:
-    return data.container_.serialize_bitmask_value(ser);
-  case TK_STRING8:
-    return data.container_.serialize_string_value(ser);
-#ifdef DDS_HAS_WCHAR
-  case TK_STRING16:
-    return data.container_.serialize_wstring_value(ser);
-#endif
-  case TK_STRUCTURE:
-    return data.container_.serialize_structure(ser);
-  case TK_UNION:
-    return data.container_.serialize_union(ser);
-  case TK_SEQUENCE:
-    return data.container_.serialize_sequence(ser);
-  case TK_ARRAY:
-    return data.container_.serialize_array(ser);
-  case TK_MAP:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: operator<<: Serialization of map types is not supported\n"));
-    }
-  }
-  return false;
+  return data.serialize_i(ser, Sample::Full);
 }
 
 bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<const XTypes::DynamicDataImpl>& key)
 {
-  using namespace XTypes;
-  switch (key.value.type_->get_kind()) {
-  case TK_STRUCTURE:
-    return key.value.container_.serialized_size_structure(encoding, size, Sample::KeyOnly);
-  case TK_UNION:
-    return key.value.container_.serialized_size_union(encoding, size, Sample::KeyOnly);
-  default:
-    return false;
-  }
+  return key.value.serialized_size_i(encoding, size, Sample::KeyOnly);
 }
 
 bool operator<<(Serializer& ser, const KeyOnly<const XTypes::DynamicDataImpl>& key)
 {
-  using namespace XTypes;
-  switch (key.value.type_->get_kind()) {
-  case TK_STRUCTURE:
-    return key.value.container_.serialize_structure(ser, Sample::KeyOnly);
-  case TK_UNION:
-    return key.value.container_.serialize_union(ser, Sample::KeyOnly);
-  default:
-    return false;
-  }
+  return key.value.serialize_i(ser, Sample::KeyOnly);
 }
 
 } // namespace DCPS

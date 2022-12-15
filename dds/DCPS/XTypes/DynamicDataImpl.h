@@ -814,8 +814,8 @@ private:
     bool serialize_complex_sequence(DCPS::Serializer& ser, CORBA::ULong size, CORBA::ULong bound,
                                     const DDS::DynamicType_var& elem_type) const;
     bool get_index_to_id_from_complex(IndexToIdMap& index_to_id, CORBA::ULong bound) const;
-    bool serialized_size_sequence(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_sequence(DCPS::Serializer& ser) const;
+    bool serialized_size_sequence(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
     // Serialize array
     void serialized_size_primitive_array(const DCPS::Encoding& encoding, size_t& size,
@@ -893,8 +893,8 @@ private:
       const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const;
     bool serialize_complex_array(DCPS::Serializer& ser, CORBA::ULong length,
                                  const DDS::DynamicType_var& elem_type) const;
-    bool serialized_size_array(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_array(DCPS::Serializer& ser) const;
+    bool serialized_size_array(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_array(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
     bool serialized_size_primitive_member(const DCPS::Encoding& encoding, size_t& size,
                                           TypeKind member_tk) const;
@@ -913,15 +913,15 @@ private:
       DDS::ExtensibilityKind extensibility) const;
     bool serialized_size_complex_aggregated_member_xcdr2_default(const DCPS::Encoding& encoding,
       size_t& size, const DDS::DynamicType_var& member_type, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
+      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
     bool serialize_complex_aggregated_member_xcdr2_default(DCPS::Serializer& ser, DDS::MemberId id,
       const DDS::DynamicType_var& member_type, bool optional, bool must_understand,
-      DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
+      DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
     bool serialized_size_complex_aggregated_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       const_complex_iterator it, bool optional, DDS::ExtensibilityKind extensibility,
-      size_t& mutable_running_total, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
+      size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
     bool serialize_complex_aggregated_member_xcdr2(DCPS::Serializer& ser, const_complex_iterator it,
-      bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
+      bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
     bool serialized_size_basic_struct_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       DDS::MemberId id, const DDS::DynamicType_var& member_type, bool optional,
       DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
@@ -949,16 +949,16 @@ private:
       TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
     bool serialized_size_sequence_struct_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       DDS::MemberId id, TypeKind elem_tk, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
+      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
     bool serialize_sequence_struct_member_xcdr2(DCPS::Serializer& ser, DDS::MemberId id,
-      TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
+      TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
     bool serialized_size_structure_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
     bool serialize_structure_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
     bool serialized_size_structure_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
     bool serialize_structure_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
     bool serialized_size_structure(const DCPS::Encoding& encoding, size_t& size,
-                                   DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
-    bool serialize_structure(DCPS::Serializer& ser, DCPS::Sample::Extent = DCPS::Sample::Full) const;
+                                   DCPS::Sample::Extent ext) const;
+    bool serialize_structure(DCPS::Serializer& ser, DCPS::Sample::Extent) const;
 
     bool set_default_discriminator_value(CORBA::Long& value,
                                          const DDS::DynamicType_var& disc_type) const;
@@ -981,8 +981,8 @@ private:
     bool serialized_size_union_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
     bool serialize_union_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
     bool serialized_size_union(const DCPS::Encoding& encoding, size_t& size,
-                               DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
-    bool serialize_union(DCPS::Serializer& ser, DCPS::Sample::Extent ext = DCPS::Sample::Full) const;
+                               DCPS::Sample::Extent ext) const;
+    bool serialize_union(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
     // Internal data
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
@@ -997,6 +997,9 @@ private:
                           DataContainer::const_single_iterator it) const;
 
   DataContainer container_;
+
+  bool serialized_size_i(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+  bool serialize_i(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
   friend OpenDDS_Dcps_Export
   bool DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
