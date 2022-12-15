@@ -13,6 +13,7 @@
 #include "TransportStrategy.h"
 #include "TransportDefs.h"
 #include "TransportHeader.h"
+#include "TransportInst_rch.h"
 
 #include "ace/INET_Addr.h"
 #include "ace/Lock_Adapter_T.h"
@@ -22,8 +23,6 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
-
-class TransportInst;
 
 struct OpenDDS_Dcps_Export TransportReceiveConstants { // non-template base for constants only
   //
@@ -79,7 +78,7 @@ public:
   ACE_Message_Block* to_msgblock(const ReceivedDataSample& sample);
 
 protected:
-  explicit TransportReceiveStrategy(const TransportInst& config,
+  explicit TransportReceiveStrategy(const TransportInst_rch& config,
                                     size_t receive_buffers_count = RECEIVE_BUFFERS);
 
   /// Only our subclass knows how to do this.

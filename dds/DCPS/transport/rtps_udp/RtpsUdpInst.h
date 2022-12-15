@@ -9,12 +9,12 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPINST_H
 
 #include "Rtps_Udp_Export.h"
+#include "RtpsUdpTransport_rch.h"
 
-#include "dds/DCPS/transport/framework/TransportInst.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "dds/DCPS/NetworkAddress.h"
-
-#include "dds/DCPS/RTPS/ICE/Ice.h"
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/RTPS/ICE/Ice.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -30,6 +30,10 @@ typedef RcHandle<TransportReceiveListener> TransportReceiveListener_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpInst : public TransportInst {
 public:
+
+  static const suseconds_t DEFAULT_NAK_RESPONSE_DELAY_USEC = 200000; // default from RTPS
+  static const time_t DEFAULT_HEARTBEAT_PERIOD_SEC = 1; // no default in RTPS spec
+
   ACE_INT32 send_buffer_size_;
   ACE_INT32 rcv_buffer_size_;
 
@@ -247,4 +251,4 @@ inline NetworkAddress RtpsUdpInst::stun_server_address() const
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* DCPS_RTPSUDPINST_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPINST_H */

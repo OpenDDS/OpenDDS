@@ -37,7 +37,7 @@ UdpInst::UdpInst(const std::string& name)
 TransportImpl_rch
 UdpInst::new_impl()
 {
-  return make_rch<UdpTransport>(ref(*this));
+  return make_rch<UdpTransport>(rchandle_from(this));
 }
 
 int

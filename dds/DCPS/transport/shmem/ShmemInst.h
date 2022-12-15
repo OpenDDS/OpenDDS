@@ -20,6 +20,9 @@ namespace DCPS {
 class OpenDDS_Shmem_Export ShmemInst : public TransportInst {
 public:
 
+  static const suseconds_t DEFAULT_ASSOCIATION_RESEND_PERIOD_USEC = 250000;
+  static const long DEFAULT_ASSOCIATION_RESEND_MAX_COUNT = 10;
+
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 

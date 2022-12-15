@@ -7,19 +7,19 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H
 
 #include "Rtps_Udp_Export.h"
-
-#include "RtpsUdpSendStrategy.h"
-#include "RtpsUdpSendStrategy_rch.h"
-#include "RtpsUdpReceiveStrategy.h"
-#include "RtpsUdpReceiveStrategy_rch.h"
-#include "RtpsCustomizedElement.h"
-#include "LocatorCacheKey.h"
 #include "BundlingCacheKey.h"
+#include "LocatorCacheKey.h"
+#include "RtpsCustomizedElement.h"
+#include "RtpsUdpDataLink_rch.h"
+#include "RtpsUdpReceiveStrategy_rch.h"
+#include "RtpsUdpSendStrategy_rch.h"
+#include "RtpsUdpTransport_rch.h"
 #include "TransactionalRtpsSendQueue.h"
 
 #include <dds/DCPS/transport/framework/DataLink.h>
 #include <dds/DCPS/ReactorTask.h>
 #include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendBuffer.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/DataSampleElement.h>
@@ -70,10 +70,8 @@ namespace ICE {
 namespace DCPS {
 
 class RtpsUdpInst;
-class RtpsUdpTransport;
 class ReceivedDataSample;
 typedef RcHandle<RtpsUdpInst> RtpsUdpInst_rch;
-typedef RcHandle<RtpsUdpTransport> RtpsUdpTransport_rch;
 typedef RcHandle<TransportClient> TransportClient_rch;
 
 struct SeqReaders {
@@ -94,9 +92,9 @@ class OpenDDS_Rtps_Udp_Export RtpsUdpDataLink
   , public virtual InternalDataReaderListener<NetworkInterfaceAddress>
 {
 public:
-  RtpsUdpDataLink(RtpsUdpTransport& transport,
+  RtpsUdpDataLink(const RtpsUdpTransport_rch& transport,
                   const GuidPrefix_t& local_prefix,
-                  const RtpsUdpInst& config,
+                  const RtpsUdpInst_rch& config,
                   const ReactorTask_rch& reactor_task,
                   InternalTransportStatistics& transport_statistics,
                   ACE_Thread_Mutex& transport_statistics_mutex);
@@ -108,7 +106,7 @@ public:
   RemoveResult remove_sample(const DataSampleElement* sample);
   void remove_all_msgs(const RepoId& pub_id);
 
-  RtpsUdpInst& config() const;
+  RtpsUdpInst_rch config() const;
 
   ACE_Reactor* get_reactor();
   bool reactor_is_shut_down();
@@ -239,7 +237,7 @@ public:
   static bool separate_message(EntityId_t entity);
 #endif
 
-  RtpsUdpTransport& transport();
+  RtpsUdpTransport_rch transport();
 
   void enable_response_queue();
   void disable_response_queue(bool send_immediately);
@@ -462,6 +460,7 @@ private:
     RcHandle<SporadicEvent> heartbeat_;
     RcHandle<SporadicEvent> nack_response_;
 
+    const TimeDuration initial_fallback_;
     FibonacciSequence<TimeDuration> fallback_;
 
     void send_heartbeats(const MonotonicTimePoint& now);
@@ -526,10 +525,11 @@ private:
     void log_remote_counts(const char* funcname);
 
   public:
-    RtpsWriter(TransportClient_rch client, RcHandle<RtpsUdpDataLink> link,
+    RtpsWriter(const TransportClient_rch& client, const RtpsUdpDataLink_rch& link,
                const RepoId& id, bool durable,
                SequenceNumber max_sn, CORBA::Long heartbeat_count, size_t capacity);
-    ~RtpsWriter();
+    virtual ~RtpsWriter();
+
     SequenceNumber max_data_seq(const SingleSendBuffer::Proxy& proxy,
                                 const ReaderInfo_rch&) const;
     SequenceNumber update_max_sn(const RepoId& reader, SequenceNumber seq);
@@ -618,15 +618,8 @@ private:
 
   class RtpsReader : public virtual RcObject {
   public:
-    RtpsReader(RcHandle<RtpsUdpDataLink> link, const RepoId& id)
-      : link_(link)
-      , id_(id)
-      , stopping_(false)
-      , nackfrag_count_(0)
-      , preassociation_task_(make_rch<SporadicEvent>(link->event_dispatcher(), make_rch<PmfNowEvent<RtpsReader> >(rchandle_from(this), &RtpsReader::send_preassociation_acknacks)))
-    {}
-
-    ~RtpsReader();
+    RtpsReader(const RtpsUdpDataLink_rch& link, const RepoId& id);
+    virtual ~RtpsReader();
 
     bool add_writer(const WriterInfo_rch& info);
     bool has_writer(const RepoId& id) const;
@@ -681,6 +674,7 @@ private:
     bool stopping_;
     CORBA::Long nackfrag_count_;
     RcHandle<SporadicEvent> preassociation_task_;
+    TimeDuration heartbeat_period_;
   };
   typedef RcHandle<RtpsReader> RtpsReader_rch;
 
@@ -969,4 +963,4 @@ namespace std
 # include "RtpsUdpDataLink.inl"
 #endif  /* __ACE_INLINE__ */
 
-#endif  /* DCPS_RTPSUDPDATALINK_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPDATALINK_H */
