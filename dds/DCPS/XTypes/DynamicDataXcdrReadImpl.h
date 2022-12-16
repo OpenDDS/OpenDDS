@@ -376,6 +376,8 @@ private:
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
 
+  bool exclude_struct_member(MemberId id, DDS::MemberDescriptor_var& md) const;
+
   ///@{
   /** Reading a value of type primitive, string, or wstring as a member of a struct, union,
    *  or a collection (sequence, array, map). TK_ENUM should be passed to @a enum_or_bitmask
@@ -425,7 +427,7 @@ private:
   ///
   bool skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id);
 
-  bool get_from_struct_common_checks(DDS::MemberDescriptor_var& md, MemberId id,
+  bool get_from_struct_common_checks(const DDS::MemberDescriptor_var& md, MemberId id,
                                      TypeKind kind, bool is_sequence = false);
 
   /// Return the member descriptor for the selected member from a union data or null.

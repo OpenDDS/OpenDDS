@@ -595,11 +595,43 @@ bool DynamicDataXcdrReadImpl::read_value(ValueType& value, TypeKind tk)
   return false;
 }
 
+// Check if a struct member with the given Id is excluded from a sample (in case of
+// KeyOnly or NestedKeyOnly serialization).
+bool DynamicDataXcdrReadImpl::exclude_struct_member(MemberId id, DDS::MemberDescriptor_var& md) const
+{
+  DDS::DynamicTypeMember_var dtm;
+  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataXcdrReadImpl::exclude_struct_member:"
+                 " Failed to get DynamicTypeMember for member with ID %d\n", id));
+
+    }
+    return false;
+  }
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) DynamicDataXcdrReadImpl::exclude_struct_member:"
+                 " Failed to get MemberDescriptor for member with ID %d\n", id));
+    }
+    return false;
+  }
+  return exclude_member(extent_, md->is_key(), has_explicit_keys(type_));
+}
+
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& value, MemberId id,
-                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
+  TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md;
+  if (exclude_struct_member(id, md)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_struct:"
+                 " Attempted to read a member not included in a %C sample\n",
+                 extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
+    }
+    return false;
+  }
+
   if (get_from_struct_common_checks(md, id, MemberTypeKind)) {
     return skip_to_struct_member(md, id) && read_value(value, MemberTypeKind);
   }
@@ -1135,7 +1167,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_char_common(CharT& value, MemberI
   case TK_STRUCTURE:
     {
       ToCharT wrap(value);
-      good = get_value_from_struct<CharKind>(wrap, id);
+      good = get_value_from_struct<CharKind>(wrap, id, extent_);
       break;
     }
   case TK_UNION:
@@ -1247,7 +1279,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
   case TK_STRUCTURE:
     {
       ACE_InputCDR::to_boolean to_bool(value);
-      good = get_value_from_struct<TK_BOOLEAN>(to_bool, id);
+      good = get_value_from_struct<TK_BOOLEAN>(to_bool, id, extent_);
       break;
     }
   case TK_UNION:
@@ -1448,9 +1480,18 @@ bool DynamicDataXcdrReadImpl::read_values(SequenceType& value, TypeKind elem_tk)
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, MemberId id,
-                                                     TypeKind enum_or_bitmask, LBound lower, LBound upper)
+  TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md;
+  if (exclude_struct_member(id, md)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_struct:"
+                 " Attempted to read a member not included in a %C sample\n",
+                 extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
+    }
+    return false;
+  }
+
   if (get_from_struct_common_checks(md, id, ElementTypeKind, true)) {
     return skip_to_struct_member(md, id) && read_values(value, ElementTypeKind);
   }
@@ -1865,6 +1906,27 @@ bool DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* membe
     }
 
     for (ACE_CDR::ULong i = 0; i < member_desc->index(); ++i) {
+      DDS::DynamicTypeMember_var dtm;
+      if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
+                     " Failed to get DynamicTypeMember for member at index %d\n", i));
+        }
+        return false;
+      }
+      DDS::MemberDescriptor_var md;
+      if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
+                     " Failed to get MemberDescriptor for member at index %d\n", i));
+        }
+        return false;
+      }
+      if (exclude_member(extent_, md->is_key(), has_explicit_keys(type_))) {
+        // This member is not present in the sample, don't need to do anything.
+        continue;
+      }
+
       ACE_CDR::ULong num_skipped;
       if (!skip_struct_member_at_index(i, num_skipped)) {
         if (DCPS::DCPS_debug_level >= 1) {
@@ -1957,24 +2019,9 @@ bool DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* membe
   }
 }
 
-bool DynamicDataXcdrReadImpl::get_from_struct_common_checks(DDS::MemberDescriptor_var& md, MemberId id, TypeKind kind, bool is_sequence)
+bool DynamicDataXcdrReadImpl::get_from_struct_common_checks(const DDS::MemberDescriptor_var& md,
+  MemberId id, TypeKind kind, bool is_sequence)
 {
-  DDS::DynamicTypeMember_var member;
-  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-    if (DCPS::DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_from_struct_common_checks -")
-                 ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
-    }
-    return false;
-  }
-
-  if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-    if (DCPS::DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_from_struct_common_checks -")
-                 ACE_TEXT(" Failed to get member descriptor for member with ID %d\n"), id));
-    }
-    return false;
-  }
   const DDS::DynamicType_ptr member_dt = md->type();
   if (!member_dt) {
     if (DCPS::DCPS_debug_level >= 1) {
