@@ -6,6 +6,7 @@
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 using namespace OpenDDS;
@@ -2156,6 +2157,47 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteKeyOnly)
     {2, 0, 0, 0, // DHEADER
      expected_value & 0xff, (expected_value >> 8) & 0xff
     };
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 3));
+  DDS::MemberDescriptor_var md;
+  ASSERT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var inner = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  ASSERT_EQ(DDS::RETCODE_OK, data.set_complex_value(3, inner));
+
+  const XTypes::MemberId id_disc = inner->get_member_id_by_name("discriminator");
+  EXPECT_NE(id_disc, XTypes::MEMBER_ID_INVALID);
+  static const SomeEnum expected_value = E_UINT64;
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int32_value(id_disc, expected_value));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const unsigned char expected_buffer[] =
+    {8, 0, 0, 0, // DHEADER
+     3, 0, 0, 0x20, // EMHEADER1 for 'inner'
+     expected_value & 0xff, 0, 0, 0
+    };
+  static const size_t expected_size = sizeof expected_buffer;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
 
