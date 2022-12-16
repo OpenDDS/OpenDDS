@@ -3117,7 +3117,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_generic_string_collection(
       const_single_iterator single_it = single_map_.find(id);
       if (single_it != single_map_.end()) {
         serialized_size_string_common(encoding, size, single_it->second);
-      } else if (!serialized_size_complex_member_i(encoding, size, id)) {
+      } else if (!serialized_size_complex_member_i(encoding, size, id, DCPS::Sample::Full)) {
         return false;
       }
     } else {
@@ -3154,7 +3154,7 @@ bool DynamicDataImpl::DataContainer::serialize_generic_string_collection(DCPS::S
         if (!serialize_single_value(ser, single_it->second)) {
           return false;
         }
-      } else if (!serialize_complex_member_i(ser, id)) {
+      } else if (!serialize_complex_member_i(ser, id, DCPS::Sample::Full)) {
         return false;
       }
     } else { // Not set by the user. Use default value.
@@ -3759,14 +3759,14 @@ bool DynamicDataImpl::DataContainer::get_index_to_id_map(IndexToIdMap& index_to_
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_complex_member_i(
-  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId id) const
+  const DCPS::Encoding& encoding, size_t& size, DDS::MemberId id, DCPS::Sample::Extent ext) const
 {
   const DDS::DynamicData_var& dd_var = complex_map_.at(id);
   const DynamicDataImpl* data_impl = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
   if (!data_impl) {
     return false;
   }
-  return serialized_size(encoding, size, *data_impl);
+  return data_impl->serialized_size_i(encoding, size, ext);
 }
 
 template<typename SequenceType>
@@ -3780,7 +3780,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_nested_basic_sequences(
       const_sequence_iterator it = sequence_map_.find(id);
       if (it != sequence_map_.end()) {
         serialized_size_sequence_value(encoding, size, it->second);
-      } else if (!serialized_size_complex_member_i(encoding, size, id)) {
+      } else if (!serialized_size_complex_member_i(encoding, size, id, DCPS::Sample::Full)) {
         return false;
       }
     } else { // Empty sequence
@@ -3805,14 +3805,15 @@ bool DynamicDataImpl::DataContainer::serialized_size_nesting_basic_sequence(
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_member_i(DCPS::Serializer& ser,
-                                                                DDS::MemberId id) const
+                                                                DDS::MemberId id,
+                                                                DCPS::Sample::Extent ext) const
 {
   const DDS::DynamicData_var& dd_var = complex_map_.at(id);
   const DynamicDataImpl* data_impl = dynamic_cast<const DynamicDataImpl*>(dd_var.in());
   if (!data_impl) {
     return false;
   }
-  return ser << *data_impl;
+  return data_impl->serialize_i(ser, ext);
 }
 
 template<typename SequenceType>
@@ -3827,7 +3828,7 @@ bool DynamicDataImpl::DataContainer::serialize_nested_basic_sequences(DCPS::Seri
         if (!serialize_sequence_value(ser, it->second)) {
           return false;
         }
-      } else if (!serialize_complex_member_i(ser, id)) {
+      } else if (!serialize_complex_member_i(ser, id, DCPS::Sample::Full)) {
         return false;
       }
     } else {
@@ -3969,7 +3970,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_nested_enum_sequences(
       const_sequence_iterator it = sequence_map_.find(id);
       if (it != sequence_map_.end()) {
         serialized_size_enum_sequence(encoding, size, it);
-      } else if (!serialized_size_complex_member_i(encoding, size, id)) {
+      } else if (!serialized_size_complex_member_i(encoding, size, id, DCPS::Sample::Full)) {
         return false;
       }
     } else {
@@ -4002,7 +4003,7 @@ bool DynamicDataImpl::DataContainer::serialize_nested_enum_sequences(
         if (!serialize_enum_sequence(ser, it)) {
           return false;
         }
-      } else if (!serialize_complex_member_i(ser, id)) {
+      } else if (!serialize_complex_member_i(ser, id, DCPS::Sample::Full)) {
         return false;
       }
     } else { // Empty sequence of enums
@@ -4054,7 +4055,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_nested_bitmask_sequences(
       const_sequence_iterator it = sequence_map_.find(id);
       if (it != sequence_map_.end()) {
         serialized_size_bitmask_sequence(encoding, size, it);
-      } else if (!serialized_size_complex_member_i(encoding, size, id)) {
+      } else if (!serialized_size_complex_member_i(encoding, size, id, DCPS::Sample::Full)) {
         return false;
       }
     } else {
@@ -4087,7 +4088,7 @@ bool DynamicDataImpl::DataContainer::serialize_nested_bitmask_sequences(DCPS::Se
         if (!serialize_bitmask_sequence(ser, it)) {
           return false;
         }
-      } else if (!serialize_complex_member_i(ser, id)) {
+      } else if (!serialize_complex_member_i(ser, id, DCPS::Sample::Full)) {
         return false;
       }
     } else { // Empty sequence of bitmasks
@@ -4131,17 +4132,17 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_sequence(DCPS::Se
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_complex_member(const DCPS::Encoding& encoding,
-  size_t& size, DDS::MemberId id, const DDS::DynamicType_var& elem_type) const
+  size_t& size, DDS::MemberId id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const
 {
   if (id != MEMBER_ID_INVALID) {
-    return serialized_size_complex_member_i(encoding, size, id);
+    return serialized_size_complex_member_i(encoding, size, id, ext);
   } else {
-    return serialized_size(encoding, size, DynamicDataImpl(elem_type));
+    return DynamicDataImpl(elem_type).serialized_size_i(encoding, size, ext);
   }
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_complex_sequence(const DCPS::Encoding& encoding,
-  size_t& size, const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const
+  size_t& size, const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const
 {
   serialized_size_delimiter(encoding, size);
   primitive_serialized_size_ulong(encoding, size);
@@ -4149,7 +4150,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_complex_sequence(const DCPS
     return true;
   }
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
-    if (!serialized_size_complex_member(encoding, size, index_to_id[i], elem_type)) {
+    if (!serialized_size_complex_member(encoding, size, index_to_id[i], elem_type, ext)) {
       return false;
     }
   }
@@ -4157,16 +4158,16 @@ bool DynamicDataImpl::DataContainer::serialized_size_complex_sequence(const DCPS
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_sequence_i(DCPS::Serializer& ser,
-  const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const
+  const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const
 {
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
     const CORBA::ULong id = index_to_id[i];
     if (id != MEMBER_ID_INVALID) {
-      if (!serialize_complex_member_i(ser, id)) {
+      if (!serialize_complex_member_i(ser, id, ext)) {
         return false;
       }
     } else {
-      if (!(ser << DynamicDataImpl(elem_type))) {
+      if (!DynamicDataImpl(elem_type).serialize_i(ser, ext)) {
         return false;
       }
     }
@@ -4175,7 +4176,7 @@ bool DynamicDataImpl::DataContainer::serialize_complex_sequence_i(DCPS::Serializ
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_sequence(DCPS::Serializer& ser,
-  CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& elem_type) const
+  CORBA::ULong size, CORBA::ULong bound, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const
 {
   IndexToIdMap index_to_id(size, MEMBER_ID_INVALID);
   for (const_complex_iterator it = complex_map_.begin(); it != complex_map_.end(); ++it) {
@@ -4189,7 +4190,7 @@ bool DynamicDataImpl::DataContainer::serialize_complex_sequence(DCPS::Serializer
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
   if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
-    if (!serialized_size_complex_sequence(encoding, total_size, index_to_id, elem_type) ||
+    if (!serialized_size_complex_sequence(encoding, total_size, index_to_id, elem_type, ext) ||
         !ser.write_delimiter(total_size)) {
       return false;
     }
@@ -4201,7 +4202,7 @@ bool DynamicDataImpl::DataContainer::serialize_complex_sequence(DCPS::Serializer
   if (size == 0) {
     return true;
   }
-  return serialize_complex_sequence_i(ser, index_to_id, elem_type);
+  return serialize_complex_sequence_i(ser, index_to_id, elem_type, ext);
 }
 
 bool DynamicDataImpl::DataContainer::get_index_to_id_from_complex(IndexToIdMap& index_to_id,
@@ -4313,7 +4314,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
   if (!get_index_to_id_from_complex(index_to_id, bound)) {
     return false;
   }
-  return serialized_size_complex_sequence(encoding, size, index_to_id, elem_type);
+  return serialized_size_complex_sequence(encoding, size, index_to_id, elem_type, ext);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
@@ -4391,7 +4392,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, D
     }
     length = largest_index + 1;
   }
-  return serialize_complex_sequence(ser, length, bound, elem_type);
+  return serialize_complex_sequence(ser, length, bound, elem_type, ext);
 }
 
 void DynamicDataImpl::DataContainer::serialized_size_primitive_array(const DCPS::Encoding& encoding,
@@ -4995,11 +4996,12 @@ bool DynamicDataImpl::DataContainer::serialize_nesting_bitmask_array(DCPS::Seria
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_complex_array(const DCPS::Encoding& encoding,
-  size_t& size, const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const
+  size_t& size, const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type,
+  DCPS::Sample::Extent ext) const
 {
   serialized_size_delimiter(encoding, size);
   for (CORBA::ULong i = 0; i < index_to_id.size(); ++i) {
-    if (!serialized_size_complex_member(encoding, size, index_to_id[i], elem_type)) {
+    if (!serialized_size_complex_member(encoding, size, index_to_id[i], elem_type, ext)) {
       return false;
     }
   }
@@ -5007,7 +5009,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_complex_array(const DCPS::E
 }
 
 bool DynamicDataImpl::DataContainer::serialize_complex_array(
-  DCPS::Serializer& ser, CORBA::ULong length, const DDS::DynamicType_var& elem_type) const
+  DCPS::Serializer& ser, CORBA::ULong length, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const
 {
   IndexToIdMap index_to_id(length, MEMBER_ID_INVALID);
   for (const_complex_iterator it = complex_map_.begin(); it != complex_map_.end(); ++it) {
@@ -5021,12 +5023,12 @@ bool DynamicDataImpl::DataContainer::serialize_complex_array(
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
   if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
-    if (!serialized_size_complex_array(encoding, total_size, index_to_id, elem_type) ||
+    if (!serialized_size_complex_array(encoding, total_size, index_to_id, elem_type, ext) ||
         !ser.write_delimiter(total_size)) {
       return false;
     }
   }
-  return serialize_complex_sequence_i(ser, index_to_id, elem_type);
+  return serialize_complex_sequence_i(ser, index_to_id, elem_type, ext);
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding& encoding,
@@ -5098,7 +5100,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding&
   if (!get_index_to_id_from_complex(index_to_id, length)) {
     return false;
   }
-  return serialized_size_complex_array(encoding, size, index_to_id, elem_type);
+  return serialized_size_complex_array(encoding, size, index_to_id, elem_type, ext);
 }
 
 bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
@@ -5147,7 +5149,7 @@ bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser, DCPS
       return serialize_nesting_bitmask_array(ser, length);
     }
   }
-  return serialize_complex_array(ser, length, elem_type);
+  return serialize_complex_array(ser, length, elem_type, ext);
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_primitive_member(const DCPS::Encoding& encoding,
@@ -5459,7 +5461,7 @@ bool DynamicDataImpl::DataContainer::serialize_complex_aggregated_member_xcdr2(
     }
   } else if (extensibility == DDS::MUTABLE) {
     size_t member_size = 0;
-    if (!serialized_size(ser.encoding(), member_size, *data_impl) ||
+    if (!data_impl->serialized_size_i(ser.encoding(), member_size, ext) ||
         !ser.write_parameter_id(it->first, member_size, must_understand)) {
       return false;
     }
@@ -6055,7 +6057,7 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
-    if (!serialized_size(encoding, total_size, *data_) || !ser.write_delimiter(total_size)) {
+    if (!data_->serialized_size_i(encoding, total_size, ext) || !ser.write_delimiter(total_size)) {
       return false;
     }
   }
@@ -6472,6 +6474,11 @@ bool DynamicDataImpl::DataContainer::select_union_member(CORBA::Long disc_value,
 bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Encoding& encoding,
                                                                  size_t& size, DCPS::Sample::Extent ext) const
 {
+  if (ext == DCPS::Sample::KeyOnly && !has_explicit_keys(type_)) {
+    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
+    return true;
+  }
+
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
@@ -6481,11 +6488,21 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
     serialized_size_delimiter(encoding, size);
   }
 
+  size_t mutable_running_total = 0;
+  DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
+  if (ext != DCPS::Sample::Full) {
+    if (!serialized_size_discriminator_member_xcdr2(encoding, size, disc_type,
+                                                    extensibility, mutable_running_total)) {
+      return false;
+    }
+    serialized_size_list_end_parameter_id(encoding, size, mutable_running_total);
+    return true;
+  }
+
   const_single_iterator single_it = single_map_.find(DISCRIMINATOR_ID);
   const_complex_iterator complex_it = complex_map_.find(DISCRIMINATOR_ID);
   const bool has_disc = single_it != single_map_.end() || complex_it != complex_map_.end();
   const DDS::MemberId selected_id = data_->find_selected_member();
-  DDS::DynamicType_var disc_type = get_base_type(descriptor->discriminator_type());
 
   CORBA::Long disc_value;
   if (has_disc) {
@@ -6496,7 +6513,6 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
     return false;
   }
 
-  size_t mutable_running_total = 0;
   if (selected_id == MEMBER_ID_INVALID) {
     bool found_selected_member = false;
     DDS::MemberDescriptor_var  selected_md;
@@ -6550,6 +6566,11 @@ bool DynamicDataImpl::DataContainer::serialized_size_union_xcdr2(const DCPS::Enc
 
 bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const
 {
+  if (ext == DCPS::Sample::KeyOnly && !has_explicit_keys(type_)) {
+    // nothing is serialized (not even a delimiter) for key-only serialization when there is no @key
+    return true;
+  }
+
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
@@ -6560,7 +6581,7 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
   const DCPS::Encoding& encoding = ser.encoding();
   size_t total_size = 0;
   if (extensibility == DDS::APPENDABLE || extensibility == DDS::MUTABLE) {
-    if (!serialized_size(encoding, total_size, *data_) || !ser.write_delimiter(total_size)) {
+    if (!data_->serialized_size_i(encoding, total_size, ext) || !ser.write_delimiter(total_size)) {
       return false;
     }
   }
@@ -6650,12 +6671,12 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
   } else {
     if (extensibility == DDS::MUTABLE) {
       size_t disc_size = 0;
-      serialized_size_complex_member_i(encoding, disc_size, complex_it->first);
+      serialized_size_complex_member_i(encoding, disc_size, complex_it->first, DCPS::Sample::Full);
       if (!ser.write_parameter_id(0, disc_size, false)) {
         return false;
       }
     }
-    if (!serialize_complex_member_i(ser, complex_it->first)) {
+    if (!serialize_complex_member_i(ser, complex_it->first, DCPS::Sample::Full)) {
       return false;
     }
   }

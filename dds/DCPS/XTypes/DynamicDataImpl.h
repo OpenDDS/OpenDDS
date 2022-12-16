@@ -766,7 +766,7 @@ private:
     bool serialize_sequence_value(DCPS::Serializer& ser, const SequenceValue& sv) const;
     bool get_index_to_id_map(IndexToIdMap& index_to_id, CORBA::ULong bound) const;
     bool serialized_size_complex_member_i(const DCPS::Encoding& encoding, size_t& size,
-                                          DDS::MemberId id) const;
+                                          DDS::MemberId id, DCPS::Sample::Extent ext) const;
 
     template<typename SequenceType>
     bool serialized_size_nested_basic_sequences(const DCPS::Encoding& encoding, size_t& size,
@@ -776,7 +776,7 @@ private:
     bool serialized_size_nesting_basic_sequence(const DCPS::Encoding& encoding, size_t& size,
       const IndexToIdMap& index_to_id, SequenceType protoseq) const;
 
-    bool serialize_complex_member_i(DCPS::Serializer& ser, DDS::MemberId id) const;
+    bool serialize_complex_member_i(DCPS::Serializer& ser, DDS::MemberId id, DCPS::Sample::Extent ext) const;
 
     template<typename SequenceType>
     bool serialize_nested_basic_sequences(DCPS::Serializer& ser, const IndexToIdMap& index_to_id,
@@ -806,13 +806,14 @@ private:
     bool serialize_nesting_bitmask_sequence(DCPS::Serializer& ser, CORBA::ULong size,
                                             CORBA::ULong bound) const;
     bool serialized_size_complex_member(const DCPS::Encoding& encoding, size_t& size,
-                                        DDS::MemberId id, const DDS::DynamicType_var& elem_type) const;
+                                        DDS::MemberId id, const DDS::DynamicType_var& elem_type,
+                                        DCPS::Sample::Extent ext) const;
     bool serialized_size_complex_sequence(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const;
+      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool serialize_complex_sequence_i(DCPS::Serializer& ser, const IndexToIdMap& index_to_id,
-                                      const DDS::DynamicType_var& elem_type) const;
+                                      const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool serialize_complex_sequence(DCPS::Serializer& ser, CORBA::ULong size, CORBA::ULong bound,
-                                    const DDS::DynamicType_var& elem_type) const;
+                                    const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool get_index_to_id_from_complex(IndexToIdMap& index_to_id, CORBA::ULong bound) const;
     bool serialized_size_sequence(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
     bool serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
@@ -890,9 +891,9 @@ private:
                                                const IndexToIdMap& index_to_id) const;
     bool serialize_nesting_bitmask_array(DCPS::Serializer& ser, CORBA::ULong length) const;
     bool serialized_size_complex_array(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const;
+      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool serialize_complex_array(DCPS::Serializer& ser, CORBA::ULong length,
-                                 const DDS::DynamicType_var& elem_type) const;
+                                 const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool serialized_size_array(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
     bool serialize_array(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
