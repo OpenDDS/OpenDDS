@@ -5,8 +5,7 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include <gtestWrapper.h>
 
 #include <dds/DCPS/SporadicTask.h>
 

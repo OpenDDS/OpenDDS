@@ -13,8 +13,7 @@
 
 #include <ace/OS_NS_unistd.h>
 
-#include <gtest/gtest.h>
-#include <gmock/gmock.h>
+#include <gtestWrapper.h>
 
 using namespace OpenDDS::DCPS;
 
