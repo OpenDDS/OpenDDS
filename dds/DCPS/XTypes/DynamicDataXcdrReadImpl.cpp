@@ -70,11 +70,12 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
   }
 }
 
-DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type)
+DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
+                                                 DCPS::Sample::Extent ext)
   : DynamicDataBase(type)
   , chain_(ser.current()->duplicate())
   , encoding_(ser.encoding())
-  , extent_(DCPS::Sample::Full)
+  , extent_(ext)
   , reset_align_state_(true)
   , align_state_(ser.rdstate())
   , strm_(chain_, encoding_)
@@ -561,7 +562,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::return_loaned_value(DDS::DynamicData_
 
 DDS::DynamicData_ptr DynamicDataXcdrReadImpl::clone()
 {
-  return new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_);
+  return new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_, extent_);
 }
 
 template<typename ValueType>
@@ -1359,7 +1360,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         if (!member_type) {
           good = false;
         } else {
-          value = new DynamicDataXcdrReadImpl(strm_, member_type);
+          value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
         }
       }
       break;

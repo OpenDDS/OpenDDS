@@ -34,7 +34,8 @@ public:
   /// Use this when you want to pass the alignment state of a given Serializer object over.
   /// A typical use case would be when a part of the data has already been consumed from
   /// @a ser and you want to give the remaining to DynamicData.
-  DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type);
+  DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
+                          DCPS::Sample::Extent ext = DCPS::Sample::Full);
 
   DynamicDataXcdrReadImpl(const DynamicDataXcdrReadImpl& other);
   DynamicDataXcdrReadImpl& operator=(const DynamicDataXcdrReadImpl& other);
