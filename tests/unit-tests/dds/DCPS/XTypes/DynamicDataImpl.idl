@@ -204,7 +204,7 @@ struct MutableNestedStructInner {
 @final
 struct FinalNestedStructOuter {
   @id(0) long l;
-  @id(1) AppendableNestedStructInner inner;
+  @id(1) @key AppendableNestedStructInner inner;
   @id(2) short s;
 };
 
@@ -275,7 +275,7 @@ struct MutableStruct {
 #define ARRAY_MEMBERS \
   @id(0) long int_32a[2]; \
   @id(1) unsigned long uint_32a[2]; \
-  @id(2) int8 int_8a[2];
+  @id(2) @key int8 int_8a[2];
 
 @mutable
 struct MutableArrayStruct {
