@@ -6,6 +6,7 @@
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 using namespace OpenDDS;
@@ -2100,5 +2101,187 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
   DCPS::Serializer ser(&buffer, xcdr2);
   ASSERT_TRUE(ser << data);
   EXPECT_PRED_FORMAT2(assert_DataView, final_struct, buffer);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+  static const ACE_CDR::Int8 expected_value = 42;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int8_value(4, expected_value));
+
+  static const DCPS::Encoding xcdr2_noswap(DCPS::Encoding::KIND_XCDR2);
+  static const size_t expected_size = 1u;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_noswap, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_noswap);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  static const unsigned char expected_buffer[] = {expected_value};
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+  static const ACE_CDR::Short expected_value = 42;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_value(2, expected_value));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const size_t expected_size = 6u;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  static const unsigned char expected_buffer[] =
+    {2, 0, 0, 0, // DHEADER
+     expected_value & 0xff, (expected_value >> 8) & 0xff
+    };
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 3));
+  DDS::MemberDescriptor_var md;
+  ASSERT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var inner = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  ASSERT_EQ(DDS::RETCODE_OK, data.set_complex_value(3, inner));
+
+  const XTypes::MemberId id_disc = inner->get_member_id_by_name("discriminator");
+  EXPECT_NE(id_disc, XTypes::MEMBER_ID_INVALID);
+  static const SomeEnum expected_value = E_UINT64;
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int32_value(id_disc, expected_value));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const unsigned char expected_buffer[] =
+    {8, 0, 0, 0, // DHEADER
+     3, 0, 0, 0x20, // EMHEADER1 for 'inner'
+     expected_value & 0xff, 0, 0, 0
+    };
+  static const size_t expected_size = sizeof expected_buffer;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, MutableArray_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 2));
+  DDS::MemberDescriptor_var md;
+  ASSERT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var inner = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  ASSERT_EQ(DDS::RETCODE_OK, data.set_complex_value(2, inner));
+
+  const XTypes::MemberId id0 = inner->get_member_id_at_index(0u);
+  EXPECT_NE(id0, XTypes::MEMBER_ID_INVALID);
+  static const ACE_CDR::Int8 expected_values[] = {9, 23};
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int8_value(id0, expected_values[0]));
+  const XTypes::MemberId id1 = inner->get_member_id_at_index(1u);
+  EXPECT_NE(id0, XTypes::MEMBER_ID_INVALID);
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int8_value(id1, expected_values[1]));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const unsigned char expected_buffer[] =
+    {6, 0, 0, 0, // DHEADER
+     2, 0, 0, 0x10, // EMHEADER1 for 'int_8a'
+     static_cast<unsigned char>(expected_values[0]), static_cast<unsigned char>(expected_values[1])
+    };
+  static const size_t expected_size = sizeof expected_buffer;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Nested_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalNestedStructOuter_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalNestedStructOuter_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 1));
+  DDS::MemberDescriptor_var md;
+  ASSERT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var inner = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  ASSERT_EQ(DDS::RETCODE_OK, data.set_complex_value(1, inner));
+
+  const XTypes::MemberId id = inner->get_member_id_by_name("l");
+  EXPECT_NE(id, XTypes::MEMBER_ID_INVALID);
+  static const ACE_CDR::Long expected_value = 99;
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int32_value(id, expected_value));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const unsigned char expected_buffer[] =
+    {4, 0, 0, 0, // DHEADER for 'inner'
+     expected_value & 0xff, 0, 0, 0
+    };
+  static const size_t expected_size = sizeof expected_buffer;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
 #endif // OPENDDS_SAFETY_PROFILE

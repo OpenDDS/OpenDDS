@@ -789,7 +789,7 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
       type_identifier_to_dynamic(cto.union_type.discriminator.common.type_id, guid);
     td->discriminator_type(disc_type);
     DDS::MemberDescriptor_var disc_md = new MemberDescriptorImpl();
-    disc_md->name("_d");
+    disc_md->name("discriminator");
     disc_md->is_key(cto.union_type.discriminator.common.member_flags & IS_KEY);
     disc_md->type(disc_type);
     disc_md->id(DISCRIMINATOR_ID);
