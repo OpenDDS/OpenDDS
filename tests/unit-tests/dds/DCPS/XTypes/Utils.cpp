@@ -258,8 +258,8 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_type)
   MemberPathVec keys;
   EXPECT_RC_OK(get_keys(dt, keys));
   std::vector<std::string> expected_names;
-  expected_names.push_back("_d");
-  expected_names.push_back("_d");
+  expected_names.push_back("discriminator");
+  expected_names.push_back("discriminator");
   expected_names.push_back("another_key");
   std::vector<std::string> actual_names;
   for (MemberPathVec::iterator it = keys.begin(); it != keys.end(); ++it) {
