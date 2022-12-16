@@ -48,7 +48,7 @@ DataReaderRemoteImpl::add_association(const RepoId& yourId,
 
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataReaderCallbacks> parent = parent_.lock();
-  if (parent.in()) {
+  if (parent) {
     parent->add_association(yourId, writer, active);
   }
 }
@@ -59,7 +59,7 @@ DataReaderRemoteImpl::remove_associations(const WriterIdSeq& writers,
 {
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataReaderCallbacks> parent = parent_.lock();
-  if (parent.in()) {
+  if (parent) {
     parent->remove_associations(writers, notify_lost);
   }
 }
@@ -70,7 +70,7 @@ DataReaderRemoteImpl::update_incompatible_qos(
 {
   // the local copy of parent_ is necessary to prevent race condition
   RcHandle<DataReaderCallbacks> parent = parent_.lock();
-  if (parent.in()) {
+  if (parent) {
     parent->update_incompatible_qos(status);
   }
 }
