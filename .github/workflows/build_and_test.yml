@@ -8892,7 +8892,7 @@ jobs:
     - name: setup for run-vcpkg
       shell: bash
       run: |
-        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "qt-wineextras", "qt5-tools", "qt5-svg", "qt5-multimedia", "qt5-declarative" ] }' > vcpkg.json
+        echo '{ "name": "opendds", "version-string": "github-actions", "dependencies": [ "qt-winextras", "qt5-tools", "qt5-svg", "qt5-multimedia", "qt5-declarative" ] }' > vcpkg.json
     - name: install vcpkg packages
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       id: runvcpkg
