@@ -8898,7 +8898,6 @@ jobs:
       id: runvcpkg
       uses: lukka/run-vcpkg@v10
       with:
-        vcpkgDirectory: '${{ github.workspace }}/vcpkg-qt'
         vcpkgGitCommitId: b86c0c35b88e2bf3557ff49dc831689c2f085090
         runVcpkgInstall: true
     - name: checkout WinFlexBison
