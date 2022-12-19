@@ -1367,7 +1367,7 @@ void verify_array_struct_default(DDS::DynamicType_var type, const DataView& expe
 }
 
 /////////////////////////// Mutable tests ///////////////////////////
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
@@ -1403,7 +1403,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
   verify_single_value_struct<MutableSingleValueStruct>(dt, single_value_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStructDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStructDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
@@ -1440,7 +1440,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStructDefault)
   verify_default_single_value_struct<MutableSingleValueStruct>(dt, default_single_value);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
@@ -1597,7 +1597,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
 
 // TODO: Add a test case for optional members
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
@@ -1632,7 +1632,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
   verify_default_enum_union_mutable(dt);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
@@ -1668,7 +1668,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
   verify_sequence_value_struct<MutableSequenceStruct>(dt, sequence_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
@@ -1703,17 +1703,17 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
   verify_sequence_value_struct_default<MutableSequenceStruct>(dt, sequence_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
 {
   // TODO: Write to union with members are sequence of basic types
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceUnionDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceUnionDefault)
 {
   // TODO: Sequence members of a union take default value.
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
@@ -1733,7 +1733,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
   verify_array_struct(dt, expected_cdr);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
@@ -1753,7 +1753,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
   verify_array_struct_default(dt, expected_cdr);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableStruct_xtag>();
@@ -1850,7 +1850,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
 }
 
 /////////////////////////// Appendable tests ///////////////////////////
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableSingleValueStruct_xtag>();
@@ -1885,7 +1885,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
   verify_single_value_struct<AppendableSingleValueStruct>(dt, single_value_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
@@ -1978,7 +1978,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
 }
 
 /////////////////////////// Final tests ///////////////////////////
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
@@ -2012,7 +2012,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
   verify_single_value_struct<FinalSingleValueStruct>(dt, single_value_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalStruct_xtag>();
@@ -2103,7 +2103,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
   EXPECT_PRED_FORMAT2(assert_DataView, final_struct, buffer);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteKeyOnly)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteKeyOnly)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalStruct_xtag>();
@@ -2130,7 +2130,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteKeyOnly)
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteKeyOnly)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteKeyOnly)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
@@ -2160,7 +2160,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteKeyOnly)
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteKeyOnly)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteKeyOnly)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableStruct_xtag>();
@@ -2201,7 +2201,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteKeyOnly)
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, MutableArray_WriteKeyOnly)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, MutableArray_WriteKeyOnly)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
@@ -2245,7 +2245,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, MutableArray_WriteKeyOnly)
   EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Nested_WriteKeyOnly)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Nested_WriteKeyOnly)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalNestedStructOuter_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalNestedStructOuter_xtag>();
