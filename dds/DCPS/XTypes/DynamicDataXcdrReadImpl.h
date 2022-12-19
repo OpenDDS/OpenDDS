@@ -377,7 +377,7 @@ private:
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
 
-  /// Check if a member with a given id is excluded from struct saple.
+  /// Check if a member with a given id is excluded from struct sample.
   bool exclude_struct_member(MemberId id, DDS::MemberDescriptor_var& md) const;
 
   /// Check if a member with a given Id is excluded from a union sample.
