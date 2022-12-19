@@ -223,6 +223,37 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
           return MEMBER_ID_INVALID;
         }
 
+        if (extent_ != DCPS::Sample::Full) {
+          const bool struct_has_explicit_keys = has_explicit_keys(type_);
+          if (struct_has_explicit_keys) {
+            // All and only explicit keys will be present in the binary stream.
+            // Index of the next member in the binary stream.
+            ACE_CDR::ULong curr_index = 0;
+            for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
+              DDS::DynamicTypeMember_var dtm;
+              if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+                return MEMBER_ID_INVALID;
+              }
+              DDS::MemberDescriptor_var md;
+              if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+                return MEMBER_ID_INVALID;
+              }
+              if (exclude_member(extent_, md->is_key(), struct_has_explicit_keys)) {
+                continue;
+              }
+              if (curr_index == index) {
+                return md->id();
+              }
+              ++curr_index;
+            }
+            // Should never reach here!
+            return MEMBER_ID_INVALID;
+          } else if (extent_ == DCPS::Sample::KeyOnly) {
+            return MEMBER_ID_INVALID;
+          }
+        }
+
+        // A Full sample or a NestedKeyOnly sample with no explicit key.
         if (!has_optional) {
           DDS::DynamicTypeMember_var member;
           if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
@@ -365,6 +396,30 @@ ACE_CDR::ULong DynamicDataXcdrReadImpl::get_item_count()
         return 0;
       }
 
+      if (extent_ != DCPS::Sample::Full) {
+        const bool struct_has_explicit_keys = has_explicit_keys(type_);
+        if (struct_has_explicit_keys) {
+          ACE_CDR::ULong num_explicit_keys = 0;
+          for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
+            DDS::DynamicTypeMember_var dtm;
+            if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+              return 0;
+            }
+            DDS::MemberDescriptor_var md;
+            if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+              return 0;
+            }
+            if (md->is_key()) {
+              ++num_explicit_keys;
+            }
+          }
+          return num_explicit_keys;
+        } else if (extent_ == DCPS::Sample::KeyOnly) {
+          return 0;
+        }
+      }
+
+      // Full sample or NestedKeyOnly sample with no explicit key.
       if (!has_optional) {
         return type_->get_member_count();
       }
