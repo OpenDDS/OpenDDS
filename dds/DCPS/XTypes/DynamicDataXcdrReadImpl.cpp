@@ -325,8 +325,28 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
     }
   case TK_UNION:
     {
+      if (extent_ == DCPS::Sample::KeyOnly) {
+        DDS::DynamicTypeMember_var disc_dtm;
+        if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+          return MEMBER_ID_INVALID;
+        }
+        DDS::MemberDescriptor_var disc_md;
+        if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+          return MEMBER_ID_INVALID;
+        }
+        if (!disc_md->is_key()) {
+          // The sample is empty.
+          return MEMBER_ID_INVALID;
+        }
+      }
+
       if (index == 0) {
         return DISCRIMINATOR_ID;
+      }
+
+      if (extent_ != DCPS::Sample::Full) {
+        // KeyOnly or NestedKeyOnly sample can only contain discriminator.
+        return MEMBER_ID_INVALID;
       }
 
       // Get the Id of the selected member.
@@ -489,6 +509,23 @@ ACE_CDR::ULong DynamicDataXcdrReadImpl::get_item_count()
     }
   case TK_UNION:
     {
+      if (extent_ == DCPS::Sample::KeyOnly) {
+        DDS::DynamicTypeMember_var disc_dtm;
+        if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+          return 0;
+        }
+        DDS::MemberDescriptor_var disc_md;
+        if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+          return 0;
+        }
+        if (!disc_md->is_key()) {
+          return 0;
+        }
+      }
+      if (extent_ != DCPS::Sample::Full) {
+        return 1;
+      }
+
       const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
       if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
         if (!strm_.skip_delimiter()) {
@@ -682,7 +719,7 @@ bool DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& value, MemberId 
   if (exclude_struct_member(id, md)) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_struct:"
-                 " Attempted to read a member not included in a %C sample\n",
+                 " Attempted to read an excluded member from a %C sample\n",
                  extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
     }
     return false;
@@ -795,10 +832,53 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_from_union_common_checks(Mem
   return md._retn();
 }
 
+bool DynamicDataXcdrReadImpl::exclude_union_member(MemberId id) const
+{
+  if (extent_ == DCPS::Sample::Full) {
+    return false;
+  }
+
+  if (id != DISCRIMINATOR_ID) {
+    return true;
+  }
+
+  if (extent_ == DCPS::Sample::KeyOnly) {
+    // Discriminator not marked as key is not included in a KeyOnly sample.
+    DDS::DynamicTypeMember_var disc_dtm;
+    if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
+                   " Failed to get DynamicTypeMember for discriminator\n"));
+      }
+      return false;
+    }
+    DDS::MemberDescriptor_var disc_md;
+    if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
+                   " Failed to get MemberDescriptor for discriminator\n"));
+      }
+      return false;
+    }
+    if (!disc_md->is_key()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataXcdrReadImpl::get_value_from_union(MemberType& value, MemberId id,
                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
+  if (exclude_union_member(id)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_union::"
+                 " Reading an excluded member with Id %u\n", id));
+    }
+    return false;
+  }
+
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
@@ -1393,21 +1473,17 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
   switch (tk) {
   case TK_STRUCTURE:
     {
-      DDS::DynamicTypeMember_var member;
-      if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-        if (DCPS::DCPS_debug_level >= 1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_complex_value -")
-                     ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
+      DDS::MemberDescriptor_var md;
+      if (exclude_struct_member(id, md)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
+                     " Attempted to read an excluded member from a %C struct sample\n",
+                     extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
         }
         good = false;
         break;
       }
 
-      DDS::MemberDescriptor_var md;
-      if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-        good = false;
-        break;
-      }
       if (!skip_to_struct_member(md, id)) {
         good = false;
       } else {
@@ -1422,6 +1498,16 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
     }
   case TK_UNION:
     {
+      if (exclude_union_member(id)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
+                     " Attempted to read an excluded member from a %C union sample\n",
+                     extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
+        }
+        good = false;
+        break;
+      }
+
       if (id == DISCRIMINATOR_ID) {
         if (descriptor->extensibility_kind() == DDS::APPENDABLE || descriptor->extensibility_kind() == DDS::MUTABLE) {
           if (!strm_.skip_delimiter()) {
@@ -1440,7 +1526,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
             break;
           }
         }
-        value = new DynamicDataXcdrReadImpl(strm_, disc_type);
+        value = new DynamicDataXcdrReadImpl(strm_, disc_type, nested(extent_));
         break;
       }
 
@@ -1463,7 +1549,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
       if (!member_type) {
         good = false;
       } else {
-        value = new DynamicDataXcdrReadImpl(strm_, member_type);
+        value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
       }
       break;
     }
@@ -1476,7 +1562,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
           (tk == TK_MAP && !skip_to_map_element(id))) {
         good = false;
       } else {
-        value = new DynamicDataXcdrReadImpl(strm_, descriptor->element_type());
+        value = new DynamicDataXcdrReadImpl(strm_, descriptor->element_type(), nested(extent_));
       }
       break;
     }
@@ -1576,6 +1662,22 @@ template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberId id,
                                                     TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
+  if (id == DISCRIMINATOR_ID) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
+                 " Attempted to read discriminator as a sequence\n"));
+    }
+    return false;
+  }
+
+  if (exclude_union_member(id)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
+                 " Attempted to read an excluded member with Id %u\n", id));
+    }
+    return false;
+  }
+
   DDS::MemberDescriptor_var md = get_from_union_common_checks(id, "get_values_from_union");
   if (!md) {
     return false;
