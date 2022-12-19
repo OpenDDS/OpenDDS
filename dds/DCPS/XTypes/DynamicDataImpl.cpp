@@ -268,9 +268,11 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
   case TK_FLOAT64:
     insert_single(id, CORBA::Double(0.0));
     break;
-  case TK_FLOAT128:
-    insert_single(id, CORBA::LongDouble(0.0));
+  case TK_FLOAT128: {
+    const ACE_CDR::LongDouble ld = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+    insert_single(id, ld);
     break;
+  }
   case TK_CHAR8:
     insert_single(id, ACE_OutputCDR::from_char('\0'));
     break;
