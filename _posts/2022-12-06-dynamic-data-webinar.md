@@ -6,6 +6,8 @@ author: OpenDDS
 ---
 December 14th, 2022
 
+[WATCH THE WEBINAR]([https://youtu.be/9uAA9YfMKkM] "OpenDDS with Dynamic Data")
+
 **Overview**
 
 The DDS standard defines a method for building distributed applications using a publish/subscribe\
@@ -26,4 +28,5 @@ flexible way to use the middleware without needing code generation from schema.
 
 This webinar is intended for technologists in development, testing, and operations roles as well as technical leads who have experience with DDS or similar publish/subscribe frameworks.
 
-[REGISTER TODAY!](https://us02web.zoom.us/webinar/register/WN_IdaQQ43pSza3RClx9aQubw "OpenDDS with Dynamic Data")
+[WATCH THE WEBINAR]([https://youtu.be/9uAA9YfMKkM] "OpenDDS with Dynamic Data")
+
