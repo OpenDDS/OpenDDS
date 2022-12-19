@@ -3110,4 +3110,176 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_SkipNestedMembersXCDR1)
   EXPECT_EQ(expected.i, i);
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_SingleKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  const ACE_CDR::Short expected_value = 81;
+  const unsigned char expected_cdr[] = { 0x00, 0x51 };
+  ACE_Message_Block msg(32);
+  msg.copy((const char*)expected_cdr, sizeof(expected_cdr));
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt, DCPS::Sample::KeyOnly);
+
+  EXPECT_EQ(ACE_CDR::ULong(1), data.get_item_count());
+  XTypes::MemberId id = data.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(2), id);
+  ACE_CDR::Short s_val;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int16_value(s_val, id));
+  EXPECT_EQ(expected_value, s_val);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_NestedStructKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::AppendableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::AppendableStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  const ACE_CDR::Octet expected_o = 0xfe;
+  const ACE_CDR::Boolean expected_b = true;
+  const unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x11,// dheader
+    /////////// outer (MutableNestedStructOuter) ///////////
+    0x00,0x00,0x00,0x0d, // dheader
+    0x00,0x00,0x00,0x00, 0xfe,(0),(0),(0), // o
+    0x00,0x00,0x00,0x02, 0x01, // b
+    ////////////////////////////////////////////////////////
+  };
+  ACE_Message_Block msg(32);
+  msg.copy((const char*)expected_cdr, sizeof(expected_cdr));
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt, DCPS::Sample::KeyOnly);
+
+  EXPECT_EQ(ACE_CDR::ULong(1), data.get_item_count());
+  XTypes::MemberId id = data.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(1), id);
+  DDS::DynamicData_var nested_data;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(nested_data, id));
+  EXPECT_EQ(ACE_CDR::ULong(2), nested_data->get_item_count());
+  id = nested_data->get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(0), id);
+  ACE_CDR::Octet octet_val;
+  EXPECT_EQ(DDS::RETCODE_OK, nested_data->get_byte_value(octet_val, id));
+  EXPECT_EQ(expected_o, octet_val);
+  id = nested_data->get_member_id_at_index(1);
+  EXPECT_EQ(XTypes::MemberId(2), id);
+  ACE_CDR::Boolean bool_val;
+  EXPECT_EQ(DDS::RETCODE_OK, nested_data->get_boolean_value(bool_val, id));
+  EXPECT_EQ(expected_b, bool_val);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_NestedUnionKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::MutableStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  const SomeEnum expected_disc = E_UINT32;
+  const unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x08, // dheader
+    /////////// inner (FinalNestedUnionInner) ////////////
+    0x20,0x00,0x00,0x03, // Emheader
+    0x00,0x00,0x00,0x01, // discriminator
+    ////////////////////////////////////////////////////////
+  };
+  ACE_Message_Block msg(32);
+  msg.copy((const char*)expected_cdr, sizeof(expected_cdr));
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt, DCPS::Sample::KeyOnly);
+
+  EXPECT_EQ(ACE_CDR::ULong(1), data.get_item_count());
+  XTypes::MemberId id = data.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(3), id);
+  DDS::DynamicData_var nested_data;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(nested_data, id));
+  EXPECT_EQ(ACE_CDR::ULong(1), nested_data->get_item_count());
+  id = nested_data->get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::DISCRIMINATOR_ID, id);
+  ACE_CDR::Long disc_val;
+  EXPECT_EQ(DDS::RETCODE_OK, nested_data->get_int32_value(disc_val, id));
+  EXPECT_EQ(expected_disc, disc_val);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ArrayKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::MutableArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::MutableArrayStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  const unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x6, // dheader
+    0x10,0x00,0x00,0x02, 0x7e, 0x7f // int_8a
+  };
+  ACE_Message_Block msg(32);
+  msg.copy((const char*)expected_cdr, sizeof(expected_cdr));
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt, DCPS::Sample::KeyOnly);
+
+  EXPECT_EQ(ACE_CDR::ULong(1), data.get_item_count());
+  XTypes::MemberId id = data.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(2), id);
+  DDS::DynamicData_var nested_data;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(nested_data, id));
+  EXPECT_EQ(ACE_CDR::ULong(2), nested_data->get_item_count());
+  id = nested_data->get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(0), id);
+  ACE_CDR::Int8 val;
+  EXPECT_EQ(DDS::RETCODE_OK, nested_data->get_int8_value(val, id));
+  EXPECT_EQ(0x7e, val);
+  id = nested_data->get_member_id_at_index(1);
+  EXPECT_EQ(XTypes::MemberId(1), id);
+  EXPECT_EQ(DDS::RETCODE_OK, nested_data->get_int8_value(val, id));
+  EXPECT_EQ(0x7f, val);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_ImplicitNestedKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalNestedStructOuter_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalNestedStructOuter_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  const unsigned char expected_cdr[] = {
+    0x20,0x00,0x00,0x01, // Dheader of inner
+    0x00,0x00,0xee,0xff //l
+  };
+  ACE_Message_Block msg(32);
+  msg.copy((const char*)expected_cdr, sizeof(expected_cdr));
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt, DCPS::Sample::KeyOnly);
+
+  EXPECT_EQ(ACE_CDR::ULong(1), data.get_item_count());
+  XTypes::MemberId id = data.get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(1), id);
+  DDS::DynamicData_var nested_data;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(nested_data, id));
+  EXPECT_EQ(ACE_CDR::ULong(1), nested_data->get_item_count());
+  id = nested_data->get_member_id_at_index(0);
+  EXPECT_EQ(XTypes::MemberId(0), id);
+  ACE_CDR::Long val;
+  EXPECT_EQ(DDS::RETCODE_OK, nested_data->get_int32_value(val, id));
+  EXPECT_EQ(0xeeff, val);
+}
+
 #endif // OPENDDS_SAFETY_PROFILE
