@@ -695,7 +695,7 @@ bool DynamicDataXcdrReadImpl::exclude_struct_member(MemberId id, DDS::MemberDesc
   DDS::DynamicTypeMember_var dtm;
   if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_struct_member:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_struct_member:"
                  " Failed to get DynamicTypeMember for member with ID %d\n", id));
 
     }
@@ -703,7 +703,7 @@ bool DynamicDataXcdrReadImpl::exclude_struct_member(MemberId id, DDS::MemberDesc
   }
   if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_struct_member:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_struct_member:"
                  " Failed to get MemberDescriptor for member with ID %d\n", id));
     }
     return false;
@@ -718,7 +718,7 @@ bool DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& value, MemberId 
   DDS::MemberDescriptor_var md;
   if (exclude_struct_member(id, md)) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_struct:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_struct:"
                  " Attempted to read an excluded member from a %C sample\n",
                  extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
     }
@@ -847,7 +847,7 @@ bool DynamicDataXcdrReadImpl::exclude_union_member(MemberId id) const
     DDS::DynamicTypeMember_var disc_dtm;
     if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
                    " Failed to get DynamicTypeMember for discriminator\n"));
       }
       return false;
@@ -855,7 +855,7 @@ bool DynamicDataXcdrReadImpl::exclude_union_member(MemberId id) const
     DDS::MemberDescriptor_var disc_md;
     if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
                    " Failed to get MemberDescriptor for discriminator\n"));
       }
       return false;
@@ -873,7 +873,7 @@ bool DynamicDataXcdrReadImpl::get_value_from_union(MemberType& value, MemberId i
 {
   if (exclude_union_member(id)) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_union::"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_union::"
                  " Reading an excluded member with Id %u\n", id));
     }
     return false;
@@ -1476,7 +1476,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
       DDS::MemberDescriptor_var md;
       if (exclude_struct_member(id, md)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
                      " Attempted to read an excluded member from a %C struct sample\n",
                      extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
         }
@@ -1500,7 +1500,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
     {
       if (exclude_union_member(id)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
                      " Attempted to read an excluded member from a %C union sample\n",
                      extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
         }
@@ -1627,7 +1627,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, Member
   DDS::MemberDescriptor_var md;
   if (exclude_struct_member(id, md)) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_struct:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_struct:"
                  " Attempted to read a member not included in a %C sample\n",
                  extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
     }
@@ -1664,7 +1664,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
 {
   if (id == DISCRIMINATOR_ID) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
                  " Attempted to read discriminator as a sequence\n"));
     }
     return false;
@@ -1672,7 +1672,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
 
   if (exclude_union_member(id)) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
                  " Attempted to read an excluded member with Id %u\n", id));
     }
     return false;
@@ -2067,7 +2067,7 @@ bool DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* membe
       DDS::DynamicTypeMember_var dtm;
       if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
                      " Failed to get DynamicTypeMember for member at index %d\n", i));
         }
         return false;
@@ -2075,7 +2075,7 @@ bool DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* membe
       DDS::MemberDescriptor_var md;
       if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-          ACE_ERROR((LM_ERROR, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
                      " Failed to get MemberDescriptor for member at index %d\n", i));
         }
         return false;
