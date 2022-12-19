@@ -5905,7 +5905,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_aggregated_member_xcdr2(
 bool DynamicDataImpl::DataContainer::serialized_size_sequence_struct_member_xcdr2(
   const DCPS::Encoding& encoding, size_t& size, DDS::MemberId id, TypeKind elem_tk,
   bool optional, DDS::ExtensibilityKind extensibility, size_t& mutable_running_total,
-  DCPS::Sample::Extent ext) const
+  DCPS::Sample::Extent) const
 {
   const_sequence_iterator seq_it = sequence_map_.find(id);
   const_complex_iterator complex_it = complex_map_.find(id);
@@ -6121,7 +6121,7 @@ bool DynamicDataImpl::DataContainer::serialize_structure_xcdr2(DCPS::Serializer&
 }
 
 bool DynamicDataImpl::DataContainer::serialized_size_structure_xcdr1(
-  const DCPS::Encoding& /*encoding*/, size_t& /*size*/, DCPS::Sample::Extent ext) const
+  const DCPS::Encoding& /*encoding*/, size_t& /*size*/, DCPS::Sample::Extent /*ext*/) const
 {
   // TODO: Support Final & Mutable extensibility?
   return false;
