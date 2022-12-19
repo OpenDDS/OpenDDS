@@ -241,7 +241,7 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
 {
   DBG_ENTRY_LVL("TcpDataLink","reconnect",6);
 
-  TcpConnection_rch existing_connection(this->connection_.lock());
+  TcpConnection_rch existing_connection(connection_.lock());
   // Sanity check - the connection should exist already since we are reconnecting.
   if (!existing_connection) {
     VDBG_LVL((LM_ERROR,
@@ -253,18 +253,20 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
   existing_connection->transfer(connection.in());
 
   bool released = false;
-  TransportStrategy_rch brs;
-  TransportSendStrategy_rch bss;
+  TcpReceiveStrategy_rch trs;
+  TcpSendStrategy_rch tss;
 
   {
-    GuardType guard2(this->strategy_lock_);
+    GuardType strategy_guard(strategy_lock_);
 
-    if (this->receive_strategy_.is_nil() && this->send_strategy_.is_nil()) {
+    trs = dynamic_rchandle_cast<TcpReceiveStrategy>(receive_strategy_);
+    tss = dynamic_rchandle_cast<TcpSendStrategy>(send_strategy_);
+
+    if (!trs || !tss) {
+      // if either are invalid, both should be
+      receive_strategy_.reset();
+      send_strategy_.reset();
       released = true;
-
-    } else {
-      brs = this->receive_strategy_;
-      bss = this->send_strategy_;
     }
   }
 
@@ -277,21 +279,18 @@ OpenDDS::DCPS::TcpDataLink::reconnect(const TcpConnection_rch& connection)
       }
       return result;
     }
+    return -1;
   }
 
-  this->connection_ = connection;
-
-  TcpReceiveStrategy* rs = static_cast<TcpReceiveStrategy*>(brs.in());
-
-  TcpSendStrategy* ss = static_cast<TcpSendStrategy*>(bss.in());
+  connection_ = connection;
 
   // Associate the new connection object with the receiveing strategy and disassociate
   // the old connection object with the receiveing strategy.
-  int rs_result = rs->reset(existing_connection.in(), connection.in());
+  int rs_result = trs->reset(existing_connection.in(), connection.in());
 
   // Associate the new connection object with the sending strategy and disassociate
   // the old connection object with the sending strategy.
-  int ss_result = ss->reset();
+  int ss_result = tss->reset();
 
   if (rs_result == 0 && ss_result == 0) {
     do_association_actions();
