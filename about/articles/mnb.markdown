@@ -6,6 +6,7 @@ categories: [opendds]
 ---
 OCI publishes Middleware News Brief and SETT (Software Engineering Tech Trends) articles on a number of topics.  The following are related to OpenDDS:
 
+- [Custom Bridges Between RESTful Web Services and DDS](https://objectcomputing.com/resources/publications/SETT/custom-bridges-between-restful-web-services-and-dds)
 - [Converting a RESTful Webservice to OpenDDS: Security](https://objectcomputing.com/resources/publications/mnb/2022/07/15/converting-restful-webservice-opendds-security)
 - [Bridging OpenDDS and MQTT Messaging](https://objectcomputing.com/resources/publications/mnb/2022/06/01/bridging-opendds-and-mqtt-messaging)
 - [Reading Data Dynamically with OpenDDS DynamicData](https://objectcomputing.com/resources/publications/mnb/2022/03/04/reading-data-dynamically-opendds-dynamicdata)
