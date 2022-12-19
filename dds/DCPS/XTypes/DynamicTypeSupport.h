@@ -150,7 +150,7 @@ public:
   DDS::ReturnCode_t write_w_timestamp(DDS::DynamicData_ptr instance_data,
     DDS::InstanceHandle_t handle, const DDS::Time_t& source_timestamp)
   {
-    const DynamicSample sample(instance_data, DCPS::Sample::KeyOnly);
+    const DynamicSample sample(instance_data, DCPS::Sample::Full);
     return DataWriterImpl::write_w_timestamp(sample, handle, source_timestamp);
   }
 
