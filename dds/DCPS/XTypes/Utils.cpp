@@ -172,55 +172,13 @@ DDS::ReturnCode_t MemberPath::get_member_from_data(
       return rc;
     }
   }
-  container = current_data._retn();
+  container = current_data;
 
   return DDS::RETCODE_OK;
 }
 
 namespace {
-  DDS::ReturnCode_t get_keys_i(DDS::DynamicType_ptr type, MemberPathVec& paths,
-    const MemberPath& base_path);
-
-  DDS::ReturnCode_t get_keys_i_struct(DynamicTypeMembersByIdImpl* members, MemberPathVec& paths,
-    const MemberPath& base_path, bool implied_all_check = false)
-  {
-    bool implied_all = false;
-    if (!implied_all_check && base_path.level() > 0) {
-      // If there are no explicit keys, then they are implied to all be keys.
-      // TODO: Except when @key(FALSE)
-      MemberPathVec explicit_key;
-      const DDS::ReturnCode_t rc = get_keys_i_struct(members, explicit_key, base_path, true);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
-      implied_all = explicit_key.empty();
-    }
-
-    for (DynamicTypeMembersByIdImpl::const_iterator it = members->begin();
-        it != members->end(); ++it) {
-      DDS::MemberDescriptor_var md;
-      DDS::ReturnCode_t rc = it->second->get_descriptor(md);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
-      if (implied_all || md->is_key()) {
-        const DDS::MemberId id = md->id();
-        if (implied_all_check) {
-          paths.push_back(MemberPath(base_path, id));
-          break; // Just need one explict key to know we can't imply all are keys
-        }
-
-        rc = get_keys_i(md->type(), paths, MemberPath(base_path, id));
-        if (rc != DDS::RETCODE_OK) {
-          return rc;
-        }
-      }
-    }
-
-    return DDS::RETCODE_OK;
-  }
-
-  DDS::ReturnCode_t get_keys_i(DDS::DynamicType_ptr type, MemberPathVec& paths,
+  DDS::ReturnCode_t get_values_i(DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter,
     const MemberPath& base_path)
   {
     DDS::DynamicType_var base_type = get_base_type(type);
@@ -237,45 +195,91 @@ namespace {
           return rc;
         }
 
-        DynamicTypeMembersByIdImpl* const members_impl =
+        DynamicTypeMembersByIdImpl* const members_i =
           dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
-        if (!members_impl) {
+        if (!members_i) {
           return DDS::RETCODE_BAD_PARAMETER;
         }
 
-        return get_keys_i_struct(members_impl, paths, base_path);
+        bool include_all = filter == Filter_All;
+        if (filter == Filter_NestedKeys) {
+          // If there are no explicit keys, then they are implied to all be keys.
+          // TODO: Except when @key(FALSE)
+          include_all = true;
+          for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
+              it != members_i->end(); ++it) {
+            DDS::MemberDescriptor_var md;
+            DDS::ReturnCode_t rc = it->second->get_descriptor(md);
+            if (rc != DDS::RETCODE_OK) {
+              return rc;
+            }
+            if (md->is_key()) {
+              include_all = false;
+              break;
+            }
+          }
+        }
+
+        for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
+            it != members_i->end(); ++it) {
+          DDS::MemberDescriptor_var md;
+          DDS::ReturnCode_t rc = it->second->get_descriptor(md);
+          if (rc != DDS::RETCODE_OK) {
+            return rc;
+          }
+          if ((filter == Filter_NonKeys) != (include_all || md->is_key())) {
+            const MemberPath path(base_path, md->id());
+            rc = get_values_i(md->type(), paths,
+              filter == Filter_Keys ? Filter_NestedKeys : filter, path);
+            if (rc != DDS::RETCODE_OK) {
+              return rc;
+            }
+          }
+        }
       }
+      break;
+
     case TK_UNION:
       {
         DDS::DynamicTypeMember_var disc;
         const MemberId id = DISCRIMINATOR_ID;
         const MemberPath this_path(base_path, id);
-        if (base_path.level() == 0) {
-          DDS::ReturnCode_t rc = type->get_member(disc, id);
-          if (rc != DDS::RETCODE_OK) {
-            return rc;
+        bool include = false;
+        switch (filter) {
+        case Filter_Keys:
+        case Filter_NonKeys:
+          {
+            DDS::ReturnCode_t rc = type->get_member(disc, id);
+            if (rc != DDS::RETCODE_OK) {
+              return rc;
+            }
+            DDS::MemberDescriptor_var md;
+            rc = disc->get_descriptor(md);
+            if (rc != DDS::RETCODE_OK) {
+              return rc;
+            }
+            include = (filter == Filter_NonKeys) != md->is_key();
           }
-          DDS::MemberDescriptor_var md;
-          rc = disc->get_descriptor(md);
-          if (rc != DDS::RETCODE_OK) {
-            return rc;
-          }
-          if (md->is_key()) {
-            paths.push_back(this_path);
-          }
-        } else {
+          break;
+        case Filter_All:
+        case Filter_NestedKeys:
           // If we're here then the union field has been marked so the
           // disciminator is an implied key even if it doesn't have @key.
           // TODO: Except when @key(FALSE)
+          include = true;
+          break;
+        }
+        if (include) {
           paths.push_back(this_path);
         }
       }
       break;
+
     default:
       if (base_path.level() == 0) {
         if (log_level >= LogLevel::Notice) {
-          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: get_keys_i: "
-            "get_keys was passed an invalid topic type: %C\n",
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: get_values_i: "
+            "get_values was passed an invalid topic type: %C\n",
             typekind_to_string(kind)));
         }
         return DDS::RETCODE_BAD_PARAMETER;
@@ -288,9 +292,14 @@ namespace {
   }
 }
 
+DDS::ReturnCode_t get_values(DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter)
+{
+  return get_values_i(type, paths, filter, MemberPath());
+}
+
 DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths)
 {
-  return get_keys_i(type, paths, MemberPath());
+  return get_values(type, paths, Filter_Keys);
 }
 
 DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count)
@@ -354,7 +363,7 @@ namespace {
       {
         CORBA::UInt8 v;
         rc = src->get_uint8_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
+        if (rc == DDS::RETCODE_OK) {
           value = v;
         }
       }
@@ -363,7 +372,7 @@ namespace {
       {
         CORBA::UInt16 v;
         rc = src->get_uint16_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
+        if (rc == DDS::RETCODE_OK) {
           value = v;
         }
       }
@@ -372,7 +381,7 @@ namespace {
       {
         CORBA::UInt32 v;
         rc = src->get_uint32_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
+        if (rc == DDS::RETCODE_OK) {
           value = v;
         }
       }
@@ -405,7 +414,7 @@ namespace {
       {
         CORBA::Int8 v;
         rc = src->get_int8_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
+        if (rc == DDS::RETCODE_OK) {
           value = v;
         }
       }
@@ -414,7 +423,7 @@ namespace {
       {
         CORBA::Int16 v;
         rc = src->get_int16_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
+        if (rc == DDS::RETCODE_OK) {
           value = v;
         }
       }
@@ -423,7 +432,7 @@ namespace {
       {
         CORBA::Int32 v;
         rc = src->get_int32_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
+        if (rc == DDS::RETCODE_OK) {
           value = v;
         }
       }
@@ -439,36 +448,62 @@ namespace {
   void cmp(int& result, T a, T b)
   {
     if (a < b) {
-      result = 1;
-    } else if (a > b) {
       result = -1;
+    } else if (a > b) {
+      result = 1;
+    } else {
+      result = 0;
     }
-    result = 0;
   }
 
-  DDS::ReturnCode_t member_key_compare(int& result,
+  bool sequence_like(DDS::TypeKind tk)
+  {
+    return tk == TK_ARRAY || tk == TK_SEQUENCE;
+  }
+
+  DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& type,
+    DDS::DynamicData_ptr data, DDS::MemberId id)
+  {
+    const DDS::DynamicType_ptr data_type = data->type();
+    if (sequence_like(data_type->get_kind())) {
+      DDS::TypeDescriptor_var td;
+      DDS::ReturnCode_t rc = data_type->get_descriptor(td);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      type = get_base_type(td->element_type());
+    } else {
+      DDS::MemberDescriptor_var md;
+      DDS::ReturnCode_t rc = data->get_descriptor(md, id);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      type = get_base_type(md->type());
+    }
+    return DDS::RETCODE_OK;
+  }
+
+  DDS::ReturnCode_t member_compare(int& result,
     DDS::DynamicData_ptr a_data, DDS::MemberId a_id,
     DDS::DynamicData_ptr b_data, DDS::MemberId b_id)
   {
-    DDS::MemberDescriptor_var a_md;
-    DDS::ReturnCode_t rc = a_data->get_descriptor(a_md, a_id);
+    DDS::DynamicType_var a_type;
+    DDS::ReturnCode_t rc = get_member_type(a_type, a_data, a_id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    DDS::DynamicType_var a_type = get_base_type(a_md->type());
     const DDS::TypeKind tk = a_type->get_kind();
 
-    DDS::MemberDescriptor_var b_md;
-    b_data->get_descriptor(b_md, b_id);
+    DDS::DynamicType_var b_type;
+    rc = get_member_type(b_type, b_data, b_id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    DDS::DynamicType_var b_type = get_base_type(b_md->type());
     const DDS::TypeKind b_tk = b_type->get_kind();
 
     if (tk != b_tk) {
       if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: member_key_compare: "
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: member_compare: "
           "trying to compare a %C to a %C\n",
           typekind_to_string(tk),
           typekind_to_string(b_tk)));
@@ -680,13 +715,12 @@ namespace {
                 const ACE_CDR::UInt32 count = std::min(a_count, b_count);
                 for (ACE_CDR::UInt32 i = 0;
                     a_rc == DDS::RETCODE_OK && i < count && result == 0; ++i) {
-                  a_rc = b_rc = member_key_compare(result,
+                  a_rc = b_rc = member_compare(result,
                     a_value, a_value->get_member_id_at_index(i),
                     b_value, b_value->get_member_id_at_index(i));
                 }
                 if (result == 0 && a_count != b_count) {
-                  // This mimics strcmp
-                  result = count == a_count ? 1 : -1;
+                  result = count == a_count ? -1 : 1;
                 }
               }
               break;
@@ -709,7 +743,7 @@ namespace {
     case TK_ANNOTATION:
     default:
       if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: member_compare(DynamicData): "
           "member has unexpected TypeKind %C\n", typekind_to_string(b_tk)));
       }
       a_rc = DDS::RETCODE_BAD_PARAMETER;
@@ -717,18 +751,14 @@ namespace {
     }
 
     if (a_rc != DDS::RETCODE_OK || b_rc != DDS::RETCODE_OK) {
-      const CORBA::String_var b_type_name = b_type->get_name();
-      const CORBA::String_var b_member_name = b_md->name();
-      const CORBA::String_var a_type_name = a_type->get_name();
-      const CORBA::String_var a_member_name = a_md->name();
+      const CORBA::String_var b_type_name = b_data->type()->get_name();
+      const CORBA::String_var a_type_name = a_data->type()->get_name();
       if (log_level >= LogLevel::Warning) {
-        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
-          "Could not copy member type %C id %u from %C.%C to %C.%C: "
-          "get: %C set: %C\n",
-          typekind_to_string(b_tk), a_id,
-          b_type_name.in(), b_member_name.in(),
-          a_type_name.in(), a_member_name.in(),
-          retcode_to_string(a_rc), retcode_to_string(b_rc)));
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: member_compare(DynamicData): "
+          "Could not compare member type %C id %u from %C (%C) to %C (%C)\n",
+          typekind_to_string(tk), a_id,
+          a_type_name.in(), retcode_to_string(a_rc),
+          b_type_name.in(), retcode_to_string(b_rc)));
       }
     }
 
@@ -736,11 +766,12 @@ namespace {
   }
 }
 
-DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b)
+DDS::ReturnCode_t less_than(
+  bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter)
 {
   DDS::DynamicType_var a_type = a->type();
   MemberPathVec paths;
-  DDS::ReturnCode_t rc = get_keys(a_type, paths);
+  DDS::ReturnCode_t rc = get_values(a_type, paths, filter);
   if (rc != DDS::RETCODE_OK) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: key_compare: get_keys failed: %C\n",
@@ -775,18 +806,23 @@ DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::Dynam
       return rc;
     }
 
-    int c = 0;
-    rc = member_key_compare(c, a_container, a_member_id, b_container, b_member_id);
+    int compare = 0;
+    rc = member_compare(compare, a_container, a_member_id, b_container, b_member_id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    if (c != 0) {
-      result = c < 0;
+    if (compare != 0) {
+      result = compare < 0;
       return DDS::RETCODE_OK;
     }
   }
 
   return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b)
+{
+  return less_than(result, a, b, Filter_Keys);
 }
 
 } // namespace XTypes

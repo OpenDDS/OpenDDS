@@ -548,6 +548,11 @@ OpenDDS::DCPS::String canonical_name(UTL_ScopedName* sn)
   return dds_generator::scoped_helper(sn, "::", EscapeContext_StripEscapes);
 }
 
+OpenDDS::DCPS::String canonical_name(Identifier* id)
+{
+  return dds_generator::to_string(id, EscapeContext_StripEscapes);
+}
+
 }
 
 void
@@ -1090,7 +1095,8 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     }
 
     minimal_member.common.member_type_id = get_minimal_type_identifier(field->field_type());
-    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, field->local_name()->get_string());
+    const std::string name = canonical_name(field->local_name());
+    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, name);
     minimal_to.minimal.struct_type.member_seq.append(minimal_member);
 
     OpenDDS::XTypes::CompleteStructMember complete_member;
@@ -1098,7 +1104,7 @@ typeobject_generator::generate_struct_type_identifier(AST_Type* type)
     complete_member.common.member_flags = minimal_member.common.member_flags;
     complete_member.common.member_type_id = get_complete_type_identifier(field->field_type());
 
-    complete_member.detail.name = field->local_name()->get_string();
+    complete_member.detail.name = name;
     set_builtin_member_annotations(field, complete_member.detail.ann_builtin);
 
     complete_to.complete.struct_type.member_seq.append(complete_member);
@@ -1185,7 +1191,8 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     }
     minimal_member.common.label_seq.sort();
 
-    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, branch->local_name()->get_string());
+    const std::string name = canonical_name(branch->local_name());
+    OpenDDS::XTypes::hash_member_name(minimal_member.detail.name_hash, name);
     minimal_to.minimal.union_type.member_seq.append(minimal_member);
 
     OpenDDS::XTypes::CompleteUnionMember complete_member;
@@ -1194,7 +1201,7 @@ typeobject_generator::generate_union_type_identifier(AST_Type* type)
     complete_member.common.type_id = get_complete_type_identifier(branch->field_type());
     complete_member.common.label_seq = minimal_member.common.label_seq;
 
-    complete_member.detail.name = branch->local_name()->get_string();
+    complete_member.detail.name = name;
     set_builtin_member_annotations(branch, complete_member.detail.ann_builtin);
 
     complete_to.complete.union_type.member_seq.append(complete_member);
@@ -1247,12 +1254,13 @@ typeobject_generator::generate_enum_type_identifier(AST_Type* type)
     OpenDDS::XTypes::MinimalEnumeratedLiteral minimal_lit;
     minimal_lit.common.value = contents[i]->constant_value()->ev()->u.eval;
     minimal_lit.common.flags = (i == default_literal_idx ? OpenDDS::XTypes::IS_DEFAULT : 0);
-    OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, contents[i]->local_name()->get_string());
+    const std::string name = canonical_name(contents[i]->local_name());
+    OpenDDS::XTypes::hash_member_name(minimal_lit.detail.name_hash, name);
     minimal_to.minimal.enumerated_type.literal_seq.append(minimal_lit);
 
     OpenDDS::XTypes::CompleteEnumeratedLiteral complete_lit;
     complete_lit.common = minimal_lit.common;
-    complete_lit.detail.name = contents[i]->local_name()->get_string();
+    complete_lit.detail.name = name;
 
     complete_to.complete.enumerated_type.literal_seq.append(complete_lit);
   }

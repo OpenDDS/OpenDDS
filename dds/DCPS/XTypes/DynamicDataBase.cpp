@@ -123,6 +123,35 @@ bool DynamicDataBase::is_primitive(TypeKind tk) const
   }
 }
 
+bool DynamicDataBase::is_basic(TypeKind tk) const
+{
+  if (is_primitive(tk)) {
+    return true;
+  }
+  switch (tk) {
+  case TK_STRING8:
+  case TK_STRING16:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool DynamicDataBase::is_complex(TypeKind tk) const
+{
+  switch (tk) {
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+  case TK_MAP:
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_BITSET:
+    return true;
+  default:
+    return false;
+  }
+}
+
 bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
                                         ACE_CDR::ULong bound) const
 {
@@ -147,6 +176,51 @@ bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
     }
   }
   return false;
+}
+
+bool DynamicDataBase::check_member(
+  DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
+  const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk)
+{
+  DDS::ReturnCode_t rc = get_descriptor(md, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  type = get_base_type(md->type());
+  if (!type) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  const TypeKind type_kind = type->get_kind();
+  bool invalid_tk = true;
+  if (is_basic(tk)) {
+    invalid_tk = type_kind != tk;
+  } else if (tk == TK_NONE) {
+    invalid_tk = !is_complex(type_kind);
+  }
+  if (invalid_tk) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      const CORBA::String_var member_name = md->name();
+      const CORBA::String_var type_name = type_->get_name();
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %C: "
+        "trying to %C %C.%C id %u kind %C as an invalid kind %C\n",
+        method, what, type_name.in(), member_name.in(), id, typekind_to_string(type_kind),
+        typekind_to_string(tk)));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  return DDS::RETCODE_OK;
+}
+
+CORBA::ULong DynamicDataBase::bound_total(DDS::TypeDescriptor_var descriptor)
+{
+  CORBA::ULong total = 1;
+  const DDS::BoundSeq& bounds = descriptor->bound();
+  for (CORBA::ULong i = 0; i < bounds.length(); ++i) {
+    total *= bounds[i];
+  }
+  return total;
 }
 
 } // namespace XTypes

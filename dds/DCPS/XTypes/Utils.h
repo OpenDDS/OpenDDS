@@ -61,11 +61,22 @@ public:
 };
 typedef OPENDDS_VECTOR(MemberPath) MemberPathVec;
 
+enum Filter {
+  Filter_All,
+  Filter_Keys,
+  Filter_NestedKeys,
+  Filter_NonKeys
+};
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_values(
+  DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter);
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count);
 
-OpenDDS_Dcps_Export DDS::ReturnCode_t key_compare(
-  DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, bool& result);
+OpenDDS_Dcps_Export DDS::ReturnCode_t less_than(
+  bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter);
+OpenDDS_Dcps_Export DDS::ReturnCode_t key_less_than(
+  bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b);
 
 } // namespace XTypes
 } // namespace OpenDDS

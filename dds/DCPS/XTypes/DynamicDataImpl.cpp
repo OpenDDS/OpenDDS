@@ -18,10 +18,15 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+using DCPS::LogLevel;
+using DCPS::log_level;
+
 DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
   : DynamicDataBase(type)
   , container_(type_, this)
-{}
+{
+  clear_all_values();
+}
 
 DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   : CORBA::Object()
@@ -105,11 +110,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
       return MEMBER_ID_INVALID;
     }
-    CORBA::ULong length = 1;
-    const DDS::BoundSeq& bounds = descriptor->bound();
-    for (CORBA::ULong i = 0; i < bounds.length(); ++i) {
-      length *= bounds[i];
-    }
+    const CORBA::ULong length = bound_total(descriptor);
     if (index >= length) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_member_id_at_index:"
@@ -132,7 +133,7 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     // Id of the member from its DynamicTypeMember. If there is an optional member,
     // it won't be possible to determine which member is located at the given index
     // in the final serialized buffer. So maybe we don't support this for these types?
-    return MEMBER_ID_INVALID;
+    return index;
   }
   }
 
@@ -145,13 +146,55 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 
 ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
-  return static_cast<ACE_CDR::ULong>(
+  ACE_CDR::ULong count = static_cast<ACE_CDR::ULong>(
     container_.single_map_.size() + container_.sequence_map_.size() + container_.complex_map_.size());
+  const TypeKind tk = type_->get_kind();
+  if (tk == TK_UNION) {
+    // TODO: Return the correct count
+    count -= 1;
+  }
+  return count;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
 {
-  return DDS::RETCODE_UNSUPPORTED;
+  const TypeKind tk = type_->get_kind();
+  if (tk == TK_ARRAY) {
+    DDS::TypeDescriptor_var td;
+    DDS::ReturnCode_t rc = type_->get_descriptor(td);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    const CORBA::ULong total = bound_total(td);
+    for (CORBA::ULong i = 0; i < total; ++i) {
+      rc = clear_value(get_member_id_at_index(i));
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+    }
+    return DDS::RETCODE_OK;
+  }
+
+  DDS::DynamicTypeMembersById_var members;
+  DDS::ReturnCode_t rc = type_->get_all_members(members);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+
+  DynamicTypeMembersByIdImpl* const members_i =
+    dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
+  if (!members_i) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
+      it != members_i->end(); ++it) {
+    rc = clear_value(it->first);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+  }
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_nonkey_values()
@@ -159,9 +202,114 @@ DDS::ReturnCode_t DynamicDataImpl::clear_nonkey_values()
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId /*id*/)
+DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
 {
-  return DDS::RETCODE_UNSUPPORTED;
+  const TypeKind this_tk = type_->get_kind();
+  DDS::DynamicType_var value_type;
+  if (this_tk == TK_ARRAY) {
+    DDS::TypeDescriptor_var descriptor;
+    DDS::ReturnCode_t rc = type_->get_descriptor(descriptor);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    value_type = get_base_type(descriptor->element_type());
+
+  } else {
+    DDS::DynamicTypeMember_var dtm;
+    DDS::ReturnCode_t rc = type_->get_member(dtm, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+
+    DDS::MemberDescriptor_var md;
+    rc = dtm->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+
+    value_type = get_base_type(md->type());
+  }
+  const TypeKind tk = value_type->get_kind();
+
+  switch (tk) {
+  case TK_BOOLEAN:
+    insert_single(id, ACE_OutputCDR::from_boolean(false));
+    break;
+  case TK_BYTE:
+    insert_single(id, ACE_OutputCDR::from_octet(0));
+    break;
+  case TK_UINT8:
+    insert_single(id, ACE_OutputCDR::from_uint8(0));
+    break;
+  case TK_UINT16:
+    insert_single(id, CORBA::UInt16(0));
+    break;
+  case TK_UINT32:
+    insert_single(id, CORBA::UInt32(0));
+    break;
+  case TK_UINT64:
+    insert_single(id, CORBA::UInt64(0));
+    break;
+  case TK_INT8:
+    insert_single(id, ACE_OutputCDR::from_int8(0));
+    break;
+  case TK_INT16:
+    insert_single(id, CORBA::Int16(0));
+    break;
+  case TK_INT32:
+    insert_single(id, CORBA::Int32(0));
+    break;
+  case TK_INT64:
+    insert_single(id, CORBA::Int64(0));
+    break;
+  case TK_FLOAT32:
+    insert_single(id, CORBA::Float(0.0f));
+    break;
+  case TK_FLOAT64:
+    insert_single(id, CORBA::Double(0.0));
+    break;
+  case TK_FLOAT128:
+    insert_single(id, CORBA::LongDouble(0.0));
+    break;
+  case TK_CHAR8:
+    insert_single(id, ACE_OutputCDR::from_char('\0'));
+    break;
+  case TK_CHAR16:
+    insert_single(id, ACE_OutputCDR::from_wchar(L'\0'));
+    break;
+  case TK_STRING8:
+    insert_single(id, "");
+    break;
+  case TK_STRING16:
+    insert_single(id, L"");
+    break;
+  case TK_ENUM:
+  case TK_BITMASK:
+    // TODO
+    break;
+
+  case TK_ARRAY:
+  case TK_MAP:
+  case TK_BITSET:
+  case TK_SEQUENCE:
+  case TK_STRUCTURE:
+  case TK_UNION:
+    {
+      DDS::DynamicData_var dd = new DynamicDataImpl(value_type);
+      insert_complex(id, dd);
+    }
+    break;
+
+  case TK_ALIAS:
+  case TK_ANNOTATION:
+  default:
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::clear_value: "
+        "member %d has unexpected TypeKind %C\n", id, typekind_to_string(tk)));
+    }
+  }
+
+  return DDS::RETCODE_OK;
 }
 
 DDS::DynamicData_ptr DynamicDataImpl::loan_value(DDS::MemberId /*id*/)
@@ -258,24 +406,15 @@ template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& value,
                                           TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
-  DDS::DynamicTypeMember_var member;
-  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-    return false;
-  }
-
   DDS::MemberDescriptor_var md;
-  if (member->get_descriptor(md) != DDS::RETCODE_OK) {
+  DDS::DynamicType_var member_type;
+  const DDS::ReturnCode_t rc = check_member(
+    md, member_type, "DynamicDataImpl::set_value_to_struct", "set", id, MemberTypeKind);
+  if (rc != DDS::RETCODE_OK) {
     return false;
   }
 
-  const DDS::DynamicType_var member_type = get_base_type(md->type());
-  const TypeKind member_tk = member_type->get_kind();
-
-  if (member_tk != MemberTypeKind && member_tk != enum_or_bitmask) {
-    return false;
-  }
-
-  if (member_tk == enum_or_bitmask) {
+  if (member_type->get_kind() == enum_or_bitmask) {
     DDS::TypeDescriptor_var member_td;
     if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
       return false;
@@ -1744,11 +1883,7 @@ bool DynamicDataImpl::set_values_to_array(DDS::MemberId id, const SequenceType& 
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
-  CORBA::ULong length = 1;
-  const DDS::BoundSeq& bounds = descriptor->bound();
-  for (CORBA::ULong i = 0; i < bounds.length(); ++i) {
-    length *= bounds[i];
-  }
+  const CORBA::ULong length = bound_total(descriptor);
   return
     check_seqmem_in_sequence_and_array<ElementTypeKind>(id, length, enum_or_bitmask, lower, upper) &&
     validate_member_id_collection(descriptor, id, TK_ARRAY) &&
@@ -1893,6 +2028,292 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_values(DDS::MemberId id, const DD
 #else
   return DDS::RETCODE_UNSUPPORTED;
 #endif
+}
+
+template <typename Type>
+DDS::ReturnCode_t DynamicDataImpl::get_single_value(Type& value, DDS::MemberId id, DDS::TypeKind tk)
+{
+  const TypeKind this_tk = type_->get_kind();
+  if (this_tk != TK_ARRAY && this_tk != TK_SEQUENCE) {
+    DDS::MemberDescriptor_var md;
+    DDS::DynamicType_var member_type;
+    const DDS::ReturnCode_t rc = check_member(
+      md, member_type, "DynamicDataImpl::get_single_value", "get", id, tk);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+  }
+
+  DataContainer::const_single_iterator it = container_.single_map_.find(id);
+  if (it == container_.single_map_.end()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  value = it->second.get<Type>();
+
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int8_value(CORBA::Int8& value, DDS::MemberId id)
+{
+  ACE_OutputCDR::from_int8 from(0);
+  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_INT8);
+  if (rc == DDS::RETCODE_OK) {
+    value = from.val_;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint8_value(CORBA::UInt8& value, DDS::MemberId id)
+{
+  ACE_OutputCDR::from_uint8 from(0);
+  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_UINT8);
+  if (rc == DDS::RETCODE_OK) {
+    value = from.val_;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int16_value(CORBA::Short& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_INT16);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint16_value(CORBA::UShort& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_UINT16);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int32_value(CORBA::Long& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_INT32);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint32_value(CORBA::ULong& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_UINT32);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int64_value(CORBA::LongLong& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_INT64);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint64_value(CORBA::ULongLong& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_UINT64);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_float32_value(CORBA::Float& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_FLOAT32);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_float64_value(CORBA::Double& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_FLOAT64);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_float128_value(CORBA::LongDouble& value, DDS::MemberId id)
+{
+  return get_single_value(value, id, TK_FLOAT128);
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_char8_value(CORBA::Char& value, DDS::MemberId id)
+{
+  ACE_OutputCDR::from_char from(0);
+  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_CHAR8);
+  if (rc == DDS::RETCODE_OK) {
+    value = from.val_;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_char16_value(CORBA::WChar& value, DDS::MemberId id)
+{
+  ACE_OutputCDR::from_wchar from(0);
+  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_CHAR16);
+  if (rc == DDS::RETCODE_OK) {
+    value = from.val_;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_byte_value(CORBA::Octet& value, DDS::MemberId id)
+{
+  ACE_OutputCDR::from_octet from(0);
+  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_BYTE);
+  if (rc == DDS::RETCODE_OK) {
+    value = from.val_;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS::MemberId id)
+{
+  ACE_OutputCDR::from_boolean from(0);
+  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_BOOLEAN);
+  if (rc == DDS::RETCODE_OK) {
+    value = from.val_;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
+{
+  const char* orig = 0;
+  const DDS::ReturnCode_t rc = get_single_value(orig, id, TK_STRING8);
+  if (rc == DDS::RETCODE_OK) {
+    value = CORBA::string_dup(orig);
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::MemberId id)
+{
+  const CORBA::WChar* orig = 0;
+  const DDS::ReturnCode_t rc = get_single_value(orig, id, TK_STRING16);
+  if (rc == DDS::RETCODE_OK) {
+    value = CORBA::wstring_dup(orig);
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  DDS::MemberDescriptor_var md;
+  DDS::DynamicType_var member_type;
+  const DDS::ReturnCode_t rc = check_member(
+    md, member_type, "DynamicDataImpl::get_complex_value", "get", id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+
+  DataContainer::const_complex_iterator it = container_.complex_map_.find(id);
+  if (it == container_.complex_map_.end()) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  value = DDS::DynamicData::_duplicate(it->second);
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int32_values(DDS::Int32Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint32_values(DDS::UInt32Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int8_values(DDS::Int8Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint8_values(DDS::UInt8Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int16_values(DDS::Int16Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint16_values(DDS::UInt16Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_int64_values(DDS::Int64Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_uint64_values(DDS::UInt64Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_float32_values(DDS::Float32Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_float64_values(DDS::Float64Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_float128_values(DDS::Float128Seq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_char8_values(DDS::CharSeq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_char16_values(DDS::WcharSeq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_byte_values(DDS::ByteSeq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_boolean_values(DDS::BooleanSeq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_string_values(DDS::StringSeq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::get_wstring_values(DDS::WstringSeq& value, DDS::MemberId id)
+{
+  ACE_UNUSED_ARG(value);
+  ACE_UNUSED_ARG(id);
+  return DDS::RETCODE_UNSUPPORTED;
 }
 
 bool DynamicDataImpl::is_basic_type(TypeKind tk) const
@@ -5035,11 +5456,6 @@ bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding&
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
-  CORBA::ULong length = 1;
-  const DDS::BoundSeq& bound = descriptor->bound();
-  for (CORBA::ULong i = 0; i < bound.length(); ++i) {
-    length *= bound[i];
-  }
 
   const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
@@ -5048,6 +5464,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_array(const DCPS::Encoding&
     return false;
   }
 
+  const CORBA::ULong length = bound_total(descriptor);
   if (data_->is_basic_type(elem_tk)) {
     serialized_size_primitive_array(encoding, size, elem_tk, length);
     return true;
@@ -5105,11 +5522,6 @@ bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser) cons
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
-  CORBA::ULong length = 1;
-  const DDS::BoundSeq& bound = descriptor->bound();
-  for (CORBA::ULong i = 0; i < bound.length(); ++i) {
-    length *= bound[i];
-  }
 
   const DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
@@ -5118,6 +5530,7 @@ bool DynamicDataImpl::DataContainer::serialize_array(DCPS::Serializer& ser) cons
     return false;
   }
 
+  const CORBA::ULong length = bound_total(descriptor);
   if (data_->is_basic_type(elem_tk)) {
     return serialize_primitive_array(ser, elem_tk, length);
   } else if (elem_tk == TK_STRING8) {

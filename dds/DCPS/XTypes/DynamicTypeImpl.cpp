@@ -75,7 +75,7 @@ DDS::ReturnCode_t DynamicTypeImpl::get_member(DDS::DynamicTypeMember_ptr& member
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       CORBA::String_var name = descriptor_->name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicTypeImpl::get_member: "
-        "type %C doesn't have an member with id %d\n", name.in(), id));
+        "type %C doesn't have a member with id %d\n", name.in(), id));
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
