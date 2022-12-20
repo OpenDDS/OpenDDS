@@ -61,8 +61,39 @@ public:
 };
 typedef OPENDDS_VECTOR(MemberPath) MemberPathVec;
 
+enum Filter {
+  Filter_All,
+  Filter_Keys,
+  Filter_NestedKeys,
+  Filter_NonKeys
+};
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_values(
+  DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter);
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t less_than(
+  bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter);
+OpenDDS_Dcps_Export DDS::ReturnCode_t key_less_than(
+  bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b);
+
+OpenDDS_Dcps_Export bool is_int(DDS::TypeKind tk);
+OpenDDS_Dcps_Export bool is_uint(DDS::TypeKind tk);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_uint_value(
+  CORBA::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind);
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_int_value(
+  CORBA::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t bitmask_bound(
+  DDS::DynamicType_ptr type, CORBA::UInt64& bound_max, DDS::TypeKind& bound_kind);
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_bitmask_value(
+  CORBA::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id);
+
+OpenDDS_Dcps_Export DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind);
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_enum_value(
+  CORBA::Int32& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id);
 
 } // namespace XTypes
 } // namespace OpenDDS

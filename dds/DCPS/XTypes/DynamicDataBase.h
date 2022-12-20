@@ -35,7 +35,16 @@ protected:
   ///
   bool is_type_supported(TypeKind tk, const char* func_name);
   bool is_primitive(TypeKind tk) const;
+  bool is_basic(TypeKind tk) const;
+  bool is_complex(TypeKind tk) const;
   bool get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
+
+  bool check_member(DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
+    const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk = TK_NONE);
+
+  static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
+  static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
+  static bool discriminator_selects_no_member(DDS::DynamicType* type, ACE_CDR::Long disc);
 
   /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;

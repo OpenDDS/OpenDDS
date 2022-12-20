@@ -97,9 +97,17 @@ bool DynamicSample::deserialize(Serializer& ser)
 
 bool DynamicSample::compare(const Sample& other) const
 {
-  ACE_UNUSED_ARG(other);
-  // TODO
-  return false;
+  const DynamicSample* const other_same_kind = dynamic_cast<const DynamicSample*>(&other);
+  OPENDDS_ASSERT(other_same_kind);
+  bool is_less_than = false;
+  DDS::ReturnCode_t rc = key_less_than(is_less_than, data_, other_same_kind->data_);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::compare: "
+        "key_less_than returned %C\n", retcode_to_string(rc)));
+    }
+  }
+  return is_less_than;
 }
 
 void DynamicDataReaderImpl::install_type_support(TypeSupportImpl* ts)

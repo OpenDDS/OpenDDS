@@ -49,289 +49,184 @@ public:
 
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
-  DDS::ReturnCode_t clear_value(DDS::MemberId /*id*/);
-  DDS::DynamicData_ptr loan_value(DDS::MemberId /*id*/);
-  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr /*value*/);
+  DDS::ReturnCode_t clear_value(DDS::MemberId id);
+  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
+  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr value);
 
   DDS::DynamicData_ptr clone();
 
-  DDS::ReturnCode_t get_int32_value(CORBA::Long&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-  DDS::ReturnCode_t set_int32_value(DDS::MemberId id,
-                                    CORBA::Long value);
-
-  DDS::ReturnCode_t get_uint32_value(CORBA::ULong&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-  DDS::ReturnCode_t set_uint32_value(DDS::MemberId id,
-                                     CORBA::ULong value);
-
-  DDS::ReturnCode_t get_int8_value(CORBA::Int8&,
-                                   DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int8_value(CORBA::Int8& value,
+                                   DDS::MemberId id);
   DDS::ReturnCode_t set_int8_value(DDS::MemberId id,
                                    CORBA::Int8 value);
 
-  DDS::ReturnCode_t get_uint8_value(CORBA::UInt8&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint8_value(CORBA::UInt8& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_uint8_value(DDS::MemberId id,
                                     CORBA::UInt8 value);
 
-  DDS::ReturnCode_t get_int16_value(CORBA::Short&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int16_value(CORBA::Short& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_int16_value(DDS::MemberId id,
                                     CORBA::Short value);
 
-  DDS::ReturnCode_t get_uint16_value(CORBA::UShort&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint16_value(CORBA::UShort& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_uint16_value(DDS::MemberId id,
                                      CORBA::UShort value);
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int32_value(CORBA::Long& value,
+                                    DDS::MemberId id);
+  DDS::ReturnCode_t set_int32_value(DDS::MemberId id,
+                                    CORBA::Long value);
+
+  DDS::ReturnCode_t get_uint32_value(CORBA::ULong& value,
+                                     DDS::MemberId);
+  DDS::ReturnCode_t set_uint32_value(DDS::MemberId id,
+                                     CORBA::ULong value);
+
+  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_int64_value(DDS::MemberId id,
                                     CORBA::LongLong value);
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_value(DDS::MemberId id,
                                      CORBA::ULongLong value);
 
-  DDS::ReturnCode_t get_float32_value(CORBA::Float&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float32_value(CORBA::Float& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_float32_value(DDS::MemberId id,
                                       CORBA::Float value);
 
-  DDS::ReturnCode_t get_float64_value(CORBA::Double&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float64_value(CORBA::Double& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_float64_value(DDS::MemberId id,
                                       CORBA::Double value);
 
-  DDS::ReturnCode_t get_float128_value(CORBA::LongDouble&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float128_value(CORBA::LongDouble& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_float128_value(DDS::MemberId id,
                                        CORBA::LongDouble value);
 
-  DDS::ReturnCode_t get_char8_value(CORBA::Char&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char8_value(CORBA::Char& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_char8_value(DDS::MemberId id,
                                     CORBA::Char value);
 
-  DDS::ReturnCode_t get_char16_value(CORBA::WChar&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char16_value(CORBA::WChar& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_char16_value(DDS::MemberId id,
                                      CORBA::WChar value);
 
-  DDS::ReturnCode_t get_byte_value(CORBA::Octet&,
-                                   DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_byte_value(CORBA::Octet& value,
+                                   DDS::MemberId id);
   DDS::ReturnCode_t set_byte_value(DDS::MemberId id,
                                    CORBA::Octet value);
 
-  DDS::ReturnCode_t get_boolean_value(CORBA::Boolean&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_boolean_value(CORBA::Boolean& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_boolean_value(DDS::MemberId id,
                                       CORBA::Boolean value);
 
-  DDS::ReturnCode_t get_string_value(char*&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_string_value(char*& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_string_value(DDS::MemberId id,
                                      const char* value);
 
-  DDS::ReturnCode_t get_wstring_value(CORBA::WChar*&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_wstring_value(CORBA::WChar*& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_wstring_value(DDS::MemberId id,
                                       const CORBA::WChar* value);
 
-  DDS::ReturnCode_t get_complex_value(DDS::DynamicData_ptr&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_complex_value(DDS::DynamicData_ptr& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_complex_value(DDS::MemberId id,
                                       DDS::DynamicData_ptr value);
 
-  DDS::ReturnCode_t get_int32_values(DDS::Int32Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int32_values(DDS::Int32Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_int32_values(DDS::MemberId id,
                                      const DDS::Int32Seq& value);
 
-  DDS::ReturnCode_t get_uint32_values(DDS::UInt32Seq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint32_values(DDS::UInt32Seq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_uint32_values(DDS::MemberId id,
                                       const DDS::UInt32Seq& value);
 
-  DDS::ReturnCode_t get_int8_values(DDS::Int8Seq&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int8_values(DDS::Int8Seq& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_int8_values(DDS::MemberId id,
                                     const DDS::Int8Seq& value);
 
-  DDS::ReturnCode_t get_uint8_values(DDS::UInt8Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint8_values(DDS::UInt8Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_uint8_values(DDS::MemberId id,
                                      const DDS::UInt8Seq& value);
 
-  DDS::ReturnCode_t get_int16_values(DDS::Int16Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int16_values(DDS::Int16Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_int16_values(DDS::MemberId id,
                                      const DDS::Int16Seq& value);
 
-  DDS::ReturnCode_t get_uint16_values(DDS::UInt16Seq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint16_values(DDS::UInt16Seq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_uint16_values(DDS::MemberId id,
                                       const DDS::UInt16Seq& value);
 
-  DDS::ReturnCode_t get_int64_values(DDS::Int64Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int64_values(DDS::Int64Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_int64_values(DDS::MemberId id,
                                      const DDS::Int64Seq& value);
 
-  DDS::ReturnCode_t get_uint64_values(DDS::UInt64Seq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint64_values(DDS::UInt64Seq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_values(DDS::MemberId id,
                                       const DDS::UInt64Seq& value);
 
-  DDS::ReturnCode_t get_float32_values(DDS::Float32Seq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float32_values(DDS::Float32Seq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_float32_values(DDS::MemberId id,
                                        const DDS::Float32Seq& value);
 
-  DDS::ReturnCode_t get_float64_values(DDS::Float64Seq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float64_values(DDS::Float64Seq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_float64_values(DDS::MemberId id,
                                        const DDS::Float64Seq& value);
 
-  DDS::ReturnCode_t get_float128_values(DDS::Float128Seq&,
-                                        DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float128_values(DDS::Float128Seq& value,
+                                        DDS::MemberId id);
   DDS::ReturnCode_t set_float128_values(DDS::MemberId id,
                                         const DDS::Float128Seq& value);
 
-  DDS::ReturnCode_t get_char8_values(DDS::CharSeq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char8_values(DDS::CharSeq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_char8_values(DDS::MemberId id,
                                      const DDS::CharSeq& value);
 
-  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_char16_values(DDS::MemberId id,
                                       const DDS::WcharSeq& value);
 
-  DDS::ReturnCode_t get_byte_values(DDS::ByteSeq&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_byte_values(DDS::ByteSeq& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_byte_values(DDS::MemberId id,
                                     const DDS::ByteSeq& value);
 
-  DDS::ReturnCode_t get_boolean_values(DDS::BooleanSeq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_boolean_values(DDS::BooleanSeq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_boolean_values(DDS::MemberId id,
                                        const DDS::BooleanSeq& value);
 
-  DDS::ReturnCode_t get_string_values(DDS::StringSeq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_string_values(DDS::StringSeq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_string_values(DDS::MemberId id,
                                       const DDS::StringSeq& value);
 
-  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
                                        const DDS::WstringSeq& value);
 
@@ -393,14 +288,16 @@ private:
   bool read_discriminator(CORBA::Long& disc_val) const;
   DDS::MemberId find_selected_member() const;
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
-  bool find_selected_member_and_discriminator(DDS::MemberId& selected_id,
-    bool& has_disc, CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type) const;
+
   bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
   bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
                             const DDS::TypeDescriptor_var& descriptor);
   bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value, TypeKind tk);
   bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
                                      DDS::MemberId id, TypeKind collection_tk) const;
+
+  DDS::ReturnCode_t clear_value_i(
+    DDS::MemberId id, DDS::DynamicType_ptr type, DDS::TypeKind treat_as);
 
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value);
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value);
@@ -445,6 +342,9 @@ private:
   DDS::ReturnCode_t set_sequence_values(DDS::MemberId id, const SequenceType& value,
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0, LBound upper = 0);
+
+  template <typename Type>
+  DDS::ReturnCode_t get_single_value(Type& value, DDS::MemberId id, DDS::TypeKind tk);
 
   // Contain data for an instance of a basic type.
   struct SingleValue {
@@ -578,6 +478,8 @@ private:
       , type_(data->type_)
       , data_(data)
     {}
+
+    void clear();
 
     // Get the largest index of all elements in each map.
     // Call only for collection-like types (sequence, string, etc).
@@ -996,6 +898,11 @@ private:
 
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                           DataContainer::const_single_iterator it) const;
+
+  // Add a single value for any valid discriminator value that selects the given member
+  bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
+  bool insert_discriminator(ACE_CDR::Long value);
+  DDS::ReturnCode_t reset_union();
 
   DataContainer container_;
 

@@ -1,10 +1,12 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include <XTypesUtilsTypeSupportImpl.h>
 #  include <key_annotationTypeSupportImpl.h>
+#  include <DynamicDataImplTypeSupportImpl.h>
 
 #  include <dds/DCPS/XTypes/Utils.h>
 #  include <dds/DCPS/XTypes/TypeLookupService.h>
 #  include <dds/DCPS/XTypes/DynamicDataAdapter.h>
+#  include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #  include <dds/DCPS/DCPS_Utils.h>
 
 #  include <gtest/gtest.h>
@@ -299,5 +301,243 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
   ASSERT_EQ(expected_values, actual_values);
 }
 #  endif
+
+TEST_F(dds_DCPS_XTypes_Utils, less_than)
+{
+  using namespace DynamicDataImpl;
+  add_type<LessThanStruct>();
+  DDS::DynamicType_var dt = get_dynamic_type<LessThanStruct>();
+  DDS::DynamicData_var a = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+  DDS::DynamicData_var b = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+
+  bool is_less_than = false;
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  DDS::MemberId id = 0;
+
+  // byte
+  ASSERT_RC_OK(b->set_byte_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_byte_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // bool
+  ++id;
+  ASSERT_RC_OK(b->set_boolean_value(id, true));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_boolean_value(id, true));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // uint_8
+  ++id;
+  ASSERT_RC_OK(b->set_uint8_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_uint8_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // uint_16
+  ++id;
+  ASSERT_RC_OK(b->set_uint16_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_uint16_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // uint_32
+  ++id;
+  ASSERT_RC_OK(b->set_uint32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_uint32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // uint_64
+  ++id;
+  ASSERT_RC_OK(b->set_uint64_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_uint64_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // int_8
+  ++id;
+  ASSERT_RC_OK(b->set_int8_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_int8_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // int_16
+  ++id;
+  ASSERT_RC_OK(b->set_int16_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_int16_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // int_32
+  ++id;
+  ASSERT_RC_OK(b->set_int32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_int32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // int_64
+  ++id;
+  ASSERT_RC_OK(b->set_int64_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_int64_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // float_32
+  ++id;
+  ASSERT_RC_OK(b->set_float32_value(id, 1.0f));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_float32_value(id, 1.0f));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // float_64
+  ++id;
+  ASSERT_RC_OK(b->set_float64_value(id, 1.0));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_float64_value(id, 1.0));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // float_128
+  ++id;
+  ACE_CDR::LongDouble ld1;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld1, 1.0);
+  ASSERT_RC_OK(b->set_float128_value(id, ld1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_float128_value(id, ld1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // char_8
+  ++id;
+  ASSERT_RC_OK(b->set_char8_value(id, '1'));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_char8_value(id, '1'));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // char_16
+  ++id;
+  ASSERT_RC_OK(b->set_char16_value(id, L'1'));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_char16_value(id, L'1'));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // str_8
+  ++id;
+  ASSERT_RC_OK(b->set_string_value(id, "1"));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_string_value(id, "1"));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // str_16
+  ++id;
+  ASSERT_RC_OK(b->set_wstring_value(id, L"1"));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_wstring_value(id, L"1"));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // enu
+  ++id;
+  ASSERT_RC_OK(b->set_int32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_int32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // nested_struct.value
+  ++id;
+  DDS::DynamicData_var a_nested_struct;
+  ASSERT_RC_OK(a->get_complex_value(a_nested_struct, id));
+  DDS::DynamicData_var b_nested_struct;
+  ASSERT_RC_OK(b->get_complex_value(b_nested_struct, id));
+  ASSERT_RC_OK(b_nested_struct->set_int32_value(0, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a_nested_struct->set_int32_value(0, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // nested_union
+  ++id;
+  /* TODO
+  DDS::DynamicData_var a_nested_union;
+  ASSERT_RC_OK(a->get_complex_value(a_nested_union, id));
+  DDS::DynamicData_var b_nested_union;
+  ASSERT_RC_OK(b->get_complex_value(b_nested_union, id));
+  ASSERT_RC_OK(b_nested_union->set_char8_value(1, 'x'));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a_nested_union->set_char8_value(1, 'x'));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+  */
+
+  // uint32_array
+  ++id;
+  DDS::DynamicData_var a_uint32_array;
+  ASSERT_RC_OK(a->get_complex_value(a_uint32_array, id));
+  DDS::DynamicData_var b_uint32_array;
+  ASSERT_RC_OK(b->get_complex_value(b_uint32_array, id));
+  ASSERT_RC_OK(b_uint32_array->set_uint32_value(b_uint32_array->get_member_id_at_index(0), 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a_uint32_array->set_uint32_value(a_uint32_array->get_member_id_at_index(0), 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
+  // uint32_seq
+  ++id;
+  DDS::DynamicData_var a_uint32_seq;
+  ASSERT_RC_OK(a->get_complex_value(a_uint32_seq, id));
+  DDS::DynamicData_var b_uint32_seq;
+  ASSERT_RC_OK(b->get_complex_value(b_uint32_seq, id));
+  // a = {} b = {1}
+  ASSERT_RC_OK(b_uint32_seq->set_uint32_value(b_uint32_seq->get_member_id_at_index(0), 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  // a = {0} b = {1}
+  ASSERT_RC_OK(a_uint32_seq->set_uint32_value(a_uint32_seq->get_member_id_at_index(0), 0));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  // a = {1} b = {1}
+  ASSERT_RC_OK(a_uint32_seq->set_uint32_value(a_uint32_seq->get_member_id_at_index(0), 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+}
 
 #endif // OPENDDS_SAFETY_PROFILE
