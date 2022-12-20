@@ -287,6 +287,34 @@ DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
   return default_branch;
 }
 
+bool DynamicDataBase::discriminator_selects_no_member(DDS::DynamicType* type, ACE_CDR::Long disc)
+{
+  const ACE_CDR::ULong members = type->get_member_count();
+  for (ACE_CDR::ULong i = 0; i < members; ++i) {
+    DDS::DynamicTypeMember_var member;
+    if (type->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (member->get_id() == DISCRIMINATOR_ID) {
+      continue;
+    }
+    DDS::MemberDescriptor_var mdesc;
+    if (member->get_descriptor(mdesc) != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (mdesc->is_default_label()) {
+      return false;
+    }
+    const DDS::UnionCaseLabelSeq& lseq = mdesc->label();
+    for (ACE_CDR::ULong lbl = 0; lbl < lseq.length(); ++lbl) {
+      if (lseq[lbl] == disc) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
 bool DynamicDataBase::has_explicit_keys(DDS::DynamicType* dt)
 {
   // see dds_generator.h struct_has_explicit_keys() in opendds_idl

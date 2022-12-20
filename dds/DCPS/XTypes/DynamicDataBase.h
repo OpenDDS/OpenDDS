@@ -44,6 +44,7 @@ protected:
 
   static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
   static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
+  static bool discriminator_selects_no_member(DDS::DynamicType* type, ACE_CDR::Long disc);
 
   /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;

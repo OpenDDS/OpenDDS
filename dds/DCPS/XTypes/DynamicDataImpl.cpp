@@ -208,19 +208,16 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
   }
 
   if (tk == TK_UNION) {
-    container_.single_map_.clear();
-    container_.sequence_map_.clear();
-    container_.complex_map_.clear();
-    DDS::ReturnCode_t rc = clear_value(DISCRIMINATOR_ID);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
+    const DDS::ReturnCode_t ret = reset_union();
+    if (ret != DDS::RETCODE_OK) {
+      return ret;
     }
     const DDS::MemberId selected_id = get_union_default_member(type_);
     if (selected_id != MEMBER_ID_INVALID) {
       return clear_value(selected_id);
     }
     // this discriminator value doesn't select a member
-    return true;
+    return DDS::RETCODE_OK;
   }
 
   DDS::DynamicTypeMembersById_var members;
@@ -243,6 +240,14 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
     }
   }
   return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t DynamicDataImpl::reset_union()
+{
+  container_.single_map_.clear();
+  container_.sequence_map_.clear();
+  container_.complex_map_.clear();
+  return clear_value(DISCRIMINATOR_ID);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::clear_nonkey_values()
@@ -1067,7 +1072,12 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       if (!cast_to_discriminator_value(disc_value, value)) {
         return false;
       }
-      if (!validate_discriminator(disc_value, selected_md)) {
+
+      if (discriminator_selects_no_member(type_, disc_value)) {
+        if (reset_union() != DDS::RETCODE_OK) {
+          return false;
+        }
+      } else if (!validate_discriminator(disc_value, selected_md)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
                      " Discriminator value %d does not select existing selected member (ID %d)\n",
@@ -1078,7 +1088,9 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
     }
 
   } else { // Writing a selected member
-    clear_all_values();
+    if (reset_union() != DDS::RETCODE_OK) {
+      return false;
+    }
     DDS::DynamicTypeMember_var member;
     if (type_->get_member(member, id) != DDS::RETCODE_OK) {
       return false;
@@ -1671,12 +1683,18 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
       if (!dd_impl || !dd_impl->read_discriminator(disc_val)) {
         return false;
       }
-      if (!validate_discriminator(disc_val, selected_md)) {
+      if (discriminator_selects_no_member(type_, disc_val)) {
+        if (reset_union() != DDS::RETCODE_OK) {
+          return false;
+        }
+      } else if (!validate_discriminator(disc_val, selected_md)) {
         return false;
       }
     }
   } else { // Writing a selected member
-    clear_all_values();
+    if (reset_union() != DDS::RETCODE_OK) {
+      return false;
+    }
     DDS::DynamicTypeMember_var member;
     if (type_->get_member(member, id) != DDS::RETCODE_OK) {
       return false;
@@ -1855,7 +1873,9 @@ bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& 
     return false;
   }
 
-  clear_all_values();
+  if (reset_union() != DDS::RETCODE_OK) {
+    return false;
+  }
 
   DDS::TypeDescriptor_var td;
   if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
