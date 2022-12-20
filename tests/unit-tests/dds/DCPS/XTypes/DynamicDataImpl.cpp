@@ -2323,4 +2323,29 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Union_Defaults)
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(val1, memb1));
   EXPECT_EQ(0, val1);
 }
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Union_Setter)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_NE(it, type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  XTypes::DynamicDataImpl data(dt);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(18, 1)); // select member with ID 18 = my_enum
+  // this changes the discriminator's value to the first lowest positive possible value
+  ACE_CDR::Long disc;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(disc, XTypes::DISCRIMINATOR_ID));
+  EXPECT_EQ(static_cast<int>(DynamicDataImpl::E_FLOAT128), disc);
+
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_value(5, 2)); // select member with ID 5 = int_16
+  // this changes the discriminator's value to the case label E_INT16 = 4
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(disc, XTypes::DISCRIMINATOR_ID));
+  EXPECT_EQ(static_cast<int>(DynamicDataImpl::E_INT16), disc);
+}
 #endif // OPENDDS_SAFETY_PROFILE
