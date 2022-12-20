@@ -26,4 +26,4 @@ flexible way to use the middleware without needing code generation from schema.
 
 This webinar is intended for technologists in development, testing, and operations roles as well as technical leads who have experience with DDS or similar publish/subscribe frameworks.
 
-[Learn More]([https://us02web.zoom.us/webinar/register/WN_IdaQQ43pSza3RClx9aQubw](https://objectcomputing.com/products/opendds/resources/dynamic-data)
+[Learn More](https://objectcomputing.com/products/opendds/resources/dynamic-data)
