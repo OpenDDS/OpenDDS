@@ -19,7 +19,7 @@ OpenDDS 3.23.0 is currently in development, so this list might change.
 - Submodule checkout on Windows (#3812)
 
 ### Notes:
-- Docker images are built for release tags https://github.com/objectcomputing/OpenDDS/pkgs/container/opendds (#3776) 
+- Docker images are built for release tags https://github.com/objectcomputing/OpenDDS/pkgs/container/opendds (#3776)
 
 ## Version 3.22.0 of OpenDDS
 OpenDDS 3.22.0 was released on Sep 16 2022.
