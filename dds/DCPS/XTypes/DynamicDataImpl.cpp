@@ -129,14 +129,45 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
     }
     return MEMBER_ID_INVALID;
   case TK_STRUCTURE:
-  case TK_UNION: {
-    // TODO: If all elements are non-optional, since members are serialized in the
-    // same order as stored in DynamicType, the input index can be used to get the
-    // Id of the member from its DynamicTypeMember. If there is an optional member,
-    // it won't be possible to determine which member is located at the given index
-    // in the final serialized buffer. So maybe we don't support this for these types?
-    return index;
-  }
+    if (index < container_.single_map_.size()) {
+      DataContainer::const_single_iterator it = container_.single_map_.begin();
+      std::advance(it, index);
+      return it->first;
+    }
+    if (index - container_.single_map_.size() < container_.sequence_map_.size()) {
+      DataContainer::const_sequence_iterator it = container_.sequence_map_.begin();
+      std::advance(it, index - container_.single_map_.size());
+      return it->first;
+    }
+    if (index - container_.single_map_.size() - container_.sequence_map_.size() < container_.complex_map_.size()) {
+      DataContainer::const_complex_iterator it = container_.complex_map_.begin();
+      std::advance(it, index - container_.single_map_.size() - container_.sequence_map_.size());
+      return it->first;
+    }
+    return MEMBER_ID_INVALID;
+  case TK_UNION:
+    if (index == 0) {
+      return DISCRIMINATOR_ID;
+    }
+    if (index >= get_item_count()) {
+      return MEMBER_ID_INVALID;
+    }
+    if (!container_.sequence_map_.empty()) {
+      return container_.sequence_map_.begin()->first;
+    }
+    for (DataContainer::const_complex_iterator iter = container_.complex_map_.begin();
+         iter != container_.complex_map_.end(); ++iter) {
+      if (iter->first != DISCRIMINATOR_ID) {
+        return iter->first;
+      }
+    }
+    for (DataContainer::const_single_iterator iter = container_.single_map_.begin();
+         iter != container_.single_map_.end(); ++iter) {
+      if (iter->first != DISCRIMINATOR_ID) {
+        return iter->first;
+      }
+    }
+    return MEMBER_ID_INVALID;
   }
 
   if (DCPS::log_level >= DCPS::LogLevel::Notice) {
