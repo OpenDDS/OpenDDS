@@ -13,6 +13,7 @@
 
 #  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#  include <dds/DCPS/DisjointSequence.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -149,11 +150,6 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
   ACE_CDR::ULong count = static_cast<ACE_CDR::ULong>(
     container_.single_map_.size() + container_.sequence_map_.size() + container_.complex_map_.size());
-  const TypeKind tk = type_->get_kind();
-  if (tk == TK_UNION) {
-    // TODO: Return the correct count
-    count -= 1;
-  }
   return count;
 }
 
@@ -185,6 +181,22 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
       return DDS::RETCODE_OK;
     }
     break;
+  }
+
+  if (tk == TK_UNION) {
+    container_.single_map_.clear();
+    container_.sequence_map_.clear();
+    container_.complex_map_.clear();
+    DDS::ReturnCode_t rc = clear_value(DISCRIMINATOR_ID);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    const DDS::MemberId selected_id = get_union_default_member(type_);
+    if (selected_id != MEMBER_ID_INVALID) {
+      return clear_value(selected_id);
+    }
+    // this discriminator value doesn't select a member
+    return true;
   }
 
   DDS::DynamicTypeMembersById_var members;
@@ -285,12 +297,11 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(
   case TK_FLOAT64:
     insert_single(id, CORBA::Double(0.0));
     break;
-  case TK_FLOAT128:
-    {
-      const ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
-      insert_single(id, value);
-    }
+  case TK_FLOAT128: {
+    const ACE_CDR::LongDouble ld = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+    insert_single(id, ld);
     break;
+  }
   case TK_CHAR8:
     insert_single(id, ACE_OutputCDR::from_char('\0'));
     break;
@@ -885,43 +896,6 @@ bool DynamicDataImpl::validate_discriminator(CORBA::Long disc_val,
   return true;
 }
 
-bool DynamicDataImpl::find_selected_member_and_discriminator(DDS::MemberId& selected_id,
-  bool& has_disc, CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type) const
-{
-  for (DataContainer::const_single_iterator single_it = container_.single_map_.begin();
-       single_it != container_.single_map_.end(); ++single_it) {
-    if (single_it->first == DISCRIMINATOR_ID) {
-      has_disc = true;
-      if (!read_discriminator(disc_val, disc_type, single_it)) {
-        return false;
-      }
-    } else {
-      selected_id = single_it->first;
-    }
-  }
-
-  if (selected_id == MEMBER_ID_INVALID && container_.sequence_map_.size() > 0) {
-    OPENDDS_ASSERT(container_.sequence_map_.size() == 1);
-    selected_id = container_.sequence_map_.begin()->first;
-  }
-
-  if (selected_id == MEMBER_ID_INVALID || !has_disc) {
-    for (DataContainer::const_complex_iterator cmpl_it = container_.complex_map_.begin();
-         cmpl_it != container_.complex_map_.end(); ++cmpl_it) {
-      if (cmpl_it->first == DISCRIMINATOR_ID) {
-        has_disc = true;
-        const DynamicDataImpl* dd_impl = dynamic_cast<const DynamicDataImpl*>(cmpl_it->second.in());
-        if (!dd_impl || !dd_impl->read_discriminator(disc_val)) {
-          return false;
-        }
-      } else {
-        selected_id = cmpl_it->first;
-      }
-    }
-  }
-  return true;
-}
-
 bool DynamicDataImpl::cast_to_discriminator_value(CORBA::Long& disc_value,
                                                   const ACE_OutputCDR::from_boolean& value) const
 {
@@ -1080,6 +1054,7 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
     }
 
   } else { // Writing a selected member
+    clear_all_values();
     DDS::DynamicTypeMember_var member;
     if (type_->get_member(member, id) != DDS::RETCODE_OK) {
       return false;
@@ -1095,40 +1070,85 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       return false;
     }
 
-    if (member_tk == enum_or_bitmask) {
-      DDS::TypeDescriptor_var member_td;
-      if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
-        return false;
-      }
-      const CORBA::ULong bit_bound = member_td->bound()[0];
-      if (bit_bound < lower || bit_bound > upper) {
-        return false;
-      }
-    }
-
-    DDS::MemberId selected_id = MEMBER_ID_INVALID;
-    bool has_disc = false;
-    CORBA::Long disc_val;
-    if (!find_selected_member_and_discriminator(selected_id, has_disc, disc_val,
-                                                get_base_type(descriptor->discriminator_type()))) {
-      return false;
-    }
-    // Prohibit writing another member if a member was already written.
-    // Overwrite the same member is allowed.
-    if (selected_id != MEMBER_ID_INVALID && selected_id != id) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
-                   " Already had an active member (%d)\n", selected_id));
-      }
-      return false;
-    }
-
-    if (selected_id == MEMBER_ID_INVALID && has_disc && !validate_discriminator(disc_val, md)) {
+    if (!insert_valid_discriminator(md)) {
       return false;
     }
   }
 
   return insert_single(id, value);
+}
+
+bool DynamicDataImpl::insert_valid_discriminator(DDS::MemberDescriptor* memberSelected)
+{
+  if (memberSelected->is_default_label()) {
+    DCPS::DisjointSequence::OrderedRanges<ACE_CDR::Long> used;
+    const ACE_CDR::ULong members = type_->get_member_count();
+    for (ACE_CDR::ULong i = 0; i < members; ++i) {
+      DDS::DynamicTypeMember_var member;
+      if (type_->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+        return false;
+      }
+      if (member->get_id() == DISCRIMINATOR_ID || member->get_id() == memberSelected->id()) {
+        continue;
+      }
+      DDS::MemberDescriptor_var mdesc;
+      if (member->get_descriptor(mdesc) != DDS::RETCODE_OK) {
+        return false;
+      }
+      const DDS::UnionCaseLabelSeq& lseq = mdesc->label();
+      for (ACE_CDR::ULong lbl = 0; lbl < lseq.length(); ++lbl) {
+        used.add(lseq[lbl]);
+      }
+    }
+    const ACE_CDR::Long disc = used.empty() ? 0 : used.begin()->second + 1;
+    return insert_discriminator(disc);
+  }
+  const DDS::UnionCaseLabelSeq& lseq = memberSelected->label();
+  return lseq.length() && insert_discriminator(lseq[0]);
+}
+
+bool DynamicDataImpl::insert_discriminator(ACE_CDR::Long value)
+{
+  DDS::DynamicTypeMember_var member;
+  if (type_->get_member(member, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var descriptor;
+  if (member->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType_var discType = get_base_type(descriptor->type());
+  switch (discType ? discType->get_kind() : TK_NONE) {
+  case TK_BOOLEAN:
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_boolean(value));
+  case TK_BYTE:
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_octet(value));
+  case TK_CHAR8:
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_char(value));
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_wchar(value));
+#endif
+  case TK_INT8:
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_int8(value));
+  case TK_UINT8:
+    return insert_single(DISCRIMINATOR_ID, ACE_OutputCDR::from_uint8(value));
+  case TK_INT16:
+    return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::Short>(value));
+  case TK_UINT16:
+    return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::UShort>(value));
+  case TK_ENUM:
+  case TK_INT32:
+    return insert_single(DISCRIMINATOR_ID, value);
+  case TK_UINT32:
+    return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::ULong>(value));
+  case TK_INT64:
+    return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::LongLong>(value));
+  case TK_UINT64:
+    return insert_single(DISCRIMINATOR_ID, static_cast<ACE_CDR::ULongLong>(value));
+  default:
+    return false;
+  }
 }
 
 // Check if a given member ID is valid for a given type with a maximum number of elements.
@@ -1632,6 +1652,7 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
       }
     }
   } else { // Writing a selected member
+    clear_all_values();
     DDS::DynamicTypeMember_var member;
     if (type_->get_member(member, id) != DDS::RETCODE_OK) {
       return false;
@@ -1645,20 +1666,10 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
       return false;
     }
 
-    DDS::MemberId selected_id = MEMBER_ID_INVALID;
-    bool has_disc = false;
-    CORBA::Long disc_val;
-    if (!find_selected_member_and_discriminator(selected_id, has_disc, disc_val,
-                                                get_base_type(descriptor->discriminator_type()))) {
-      return false;
-    }
-    if (selected_id != MEMBER_ID_INVALID && selected_id != id) {
+    if (!insert_valid_discriminator(md)) {
       return false;
     }
 
-    if (selected_id == MEMBER_ID_INVALID && has_disc && !validate_discriminator(disc_val, md)) {
-      return false;
-    }
   }
   return insert_complex(id, value);
 }
@@ -1820,21 +1831,10 @@ bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& 
     return false;
   }
 
+  clear_all_values();
+
   DDS::TypeDescriptor_var td;
   if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
-    return false;
-  }
-
-  // If discriminator was already written, make sure it selects the target member.
-  DDS::MemberId selected_id = MEMBER_ID_INVALID;
-  bool has_disc = false;
-  CORBA::Long disc_val;
-  if (!find_selected_member_and_discriminator(selected_id, has_disc, disc_val,
-                                              get_base_type(td->discriminator_type()))) {
-    return false;
-  }
-
-  if (selected_id != MEMBER_ID_INVALID && selected_id != id) {
     return false;
   }
 
@@ -1846,14 +1846,10 @@ bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& 
   if (member->get_descriptor(md) != DDS::RETCODE_OK) {
     return false;
   }
-
-  if (selected_id == MEMBER_ID_INVALID && has_disc && !validate_discriminator(disc_val, md)) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_values_to_union:"
-                 " Already had an active member (%d)\n", selected_id));
-    }
+  if (!insert_valid_discriminator(md)) {
     return false;
   }
+
   return insert_sequence(id, value);
 }
 

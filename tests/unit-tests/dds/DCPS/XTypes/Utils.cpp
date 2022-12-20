@@ -425,10 +425,12 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
 
   // float_128
   ++id;
-  ASSERT_RC_OK(b->set_float128_value(id, 1.0));
+  ACE_CDR::LongDouble ld1;
+  ACE_CDR_LONG_DOUBLE_ASSIGNMENT(ld1, 1.0);
+  ASSERT_RC_OK(b->set_float128_value(id, ld1));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_TRUE(is_less_than);
-  ASSERT_RC_OK(a->set_float128_value(id, 1.0));
+  ASSERT_RC_OK(a->set_float128_value(id, ld1));
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
 

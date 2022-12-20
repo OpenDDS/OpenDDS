@@ -2101,4 +2101,43 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
   ASSERT_TRUE(ser << data);
   EXPECT_PRED_FORMAT2(assert_DataView, final_struct, buffer);
 }
+
+TEST(DDS_DCPS_XTypes_DynamicDataImpl, Union_Defaults)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_NE(it, type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  XTypes::DynamicDataImpl data(dt);
+  // default state is Discriminator = E_INT32 (0) and member Id 1 (int_32) is selected with value 0
+  EXPECT_EQ(2u, data.get_item_count());
+
+  const DDS::MemberId memb0 = data.get_member_id_at_index(0);
+  EXPECT_NE(OpenDDS::XTypes::MEMBER_ID_INVALID, memb0);
+  DDS::DynamicTypeMember_var member0;
+  EXPECT_EQ(DDS::RETCODE_OK, dt->get_member(member0, memb0));
+  DDS::MemberDescriptor_var desc0;
+  EXPECT_EQ(DDS::RETCODE_OK, member0->get_descriptor(desc0));
+  EXPECT_EQ(OpenDDS::XTypes::TK_ENUM, desc0->type()->get_kind());
+  ACE_CDR::Long val0;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(val0, memb0));
+  EXPECT_EQ(0, val0);
+
+  const DDS::MemberId memb1 = data.get_member_id_at_index(1);
+  EXPECT_NE(OpenDDS::XTypes::MEMBER_ID_INVALID, memb1);
+  DDS::DynamicTypeMember_var member1;
+  EXPECT_EQ(DDS::RETCODE_OK, dt->get_member(member1, memb1));
+  DDS::MemberDescriptor_var desc1;
+  EXPECT_EQ(DDS::RETCODE_OK, member1->get_descriptor(desc1));
+  EXPECT_EQ(OpenDDS::XTypes::TK_INT32, desc1->type()->get_kind());
+  ACE_CDR::Long val1;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(val1, memb1));
+  EXPECT_EQ(0, val1);
+}
 #endif // OPENDDS_SAFETY_PROFILE

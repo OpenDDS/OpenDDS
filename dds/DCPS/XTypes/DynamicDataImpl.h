@@ -283,8 +283,7 @@ private:
   bool read_discriminator(CORBA::Long& disc_val) const;
   DDS::MemberId find_selected_member() const;
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
-  bool find_selected_member_and_discriminator(DDS::MemberId& selected_id,
-    bool& has_disc, CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type) const;
+
   bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
   bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
                             const DDS::TypeDescriptor_var& descriptor);
@@ -891,6 +890,10 @@ private:
 
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                           DataContainer::const_single_iterator it) const;
+
+  // Add a single value for any valid discriminator value that selects the given member
+  bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
+  bool insert_discriminator(ACE_CDR::Long value);
 
   DataContainer container_;
 
