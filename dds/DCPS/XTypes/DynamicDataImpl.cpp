@@ -753,14 +753,14 @@ DynamicDataImpl::SingleValue::SingleValue(const SingleValue& other)
     active_ = new(char8_) ACE_OutputCDR::from_char(other.get<ACE_OutputCDR::from_char>());
     break;
   case TK_STRING8:
-    str_ = ACE_OS::strdup(other.str_);
+    str_ = CORBA::string_dup(other.str_);
     break;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     active_ = new(char16_) ACE_OutputCDR::from_wchar(other.get<ACE_OutputCDR::from_wchar>());
     break;
   case TK_STRING16:
-    wstr_ = ACE_OS::strdup(other.wstr_);
+    wstr_ = CORBA::wstring_dup(other.wstr_);
     break;
 #endif
   }
