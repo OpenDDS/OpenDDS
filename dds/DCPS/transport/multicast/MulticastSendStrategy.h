@@ -37,7 +37,7 @@ protected:
 
   virtual ssize_t send_bytes_i(const iovec iov[], int n);
   ssize_t sync_send(const iovec iov[], int n);
-  ssize_t async_send(const iovec iov[], int n);
+  ssize_t async_send(const iovec iov[], int n, const ACE_INET_Addr& addr);
 
   virtual size_t max_message_size() const
   {

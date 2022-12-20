@@ -31,8 +31,8 @@ use ChangeDir;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.18';
-my $doc_tao3_version = '7.0.10';
+my $doc_tao2_version = '6.5.19';
+my $doc_tao3_version = '7.0.11';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
@@ -41,8 +41,8 @@ my @ARGS = @ARGV;
 
 my @default_configh = (
   '#define ACE_DISABLE_MKTEMP',
-  '#define ACE_LACKS_READDIR_R',
-  '#define ACE_LACKS_TEMPNAM',
+  '#define ACE_DISABLE_READDIR_R',
+  '#define ACE_DISABLE_TEMPNAM',
   '#define TAO_HAS_UIOP 0',
 );
 

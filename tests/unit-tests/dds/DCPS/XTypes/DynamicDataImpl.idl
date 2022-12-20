@@ -204,7 +204,7 @@ struct MutableNestedStructInner {
 @final
 struct FinalNestedStructOuter {
   @id(0) long l;
-  @id(1) AppendableNestedStructInner inner;
+  @id(1) @key AppendableNestedStructInner inner;
   @id(2) short s;
 };
 
@@ -251,14 +251,14 @@ struct FinalStruct {
   @id(1) AppendableNestedStructOuter outer;
   @id(2) short s;
   @id(3) AppendableNestedUnionInner inner;
-  @id(4) int8 i;
+  @id(4) @key int8 i;
 };
 
 @appendable
 struct AppendableStruct {
   @id(0) char c;
   @id(1) MutableNestedStructOuter outer;
-  @id(2) short s;
+  @id(2) @key short s;
   @id(3) MutableNestedUnionInner inner;
   @id(4) int8 i;
 };
@@ -268,14 +268,14 @@ struct MutableStruct {
   @id(0) char c;
   @id(1) FinalNestedStructOuter outer;
   @id(2) short s;
-  @id(3) FinalNestedUnionInner inner;
+  @id(3) @key FinalNestedUnionInner inner;
   @id(4) int8 i;
 };
 
 #define ARRAY_MEMBERS \
   @id(0) long int_32a[2]; \
   @id(1) unsigned long uint_32a[2]; \
-  @id(2) int8 int_8a[2];
+  @id(2) @key int8 int_8a[2];
 
 @mutable
 struct MutableArrayStruct {

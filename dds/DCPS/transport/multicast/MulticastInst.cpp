@@ -33,12 +33,6 @@ const double DEFAULT_SYN_BACKOFF(2.0);
 const long DEFAULT_SYN_INTERVAL(250);
 const long DEFAULT_SYN_TIMEOUT(30000);
 
-const size_t DEFAULT_NAK_DEPTH(32);
-const long DEFAULT_NAK_INTERVAL(500);
-const long DEFAULT_NAK_DELAY_INTERVALS(4);
-const long DEFAULT_NAK_MAX(3);
-const long DEFAULT_NAK_TIMEOUT(30000);
-
 const unsigned char DEFAULT_TTL(1);
 const bool DEFAULT_ASYNC_SEND(false);
 
@@ -148,7 +142,7 @@ MulticastInst::default_group_address(ACE_INET_Addr& group_address)
 TransportImpl_rch
 MulticastInst::new_impl()
 {
-  return make_rch<MulticastTransport>(ref(*this));
+  return make_rch<MulticastTransport>(rchandle_from(this));
 }
 
 OPENDDS_STRING

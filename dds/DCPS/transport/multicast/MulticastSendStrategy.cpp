@@ -40,7 +40,8 @@ MulticastSendStrategy::prepare_header_i()
 ssize_t
 MulticastSendStrategy::send_bytes_i(const iovec iov[], int n)
 {
-  return (this->link_->config().async_send() ? async_send(iov, n) : sync_send(iov, n));
+  MulticastInst_rch cfg = link_->config();
+  return (cfg && cfg->async_send()) ? async_send(iov, n, cfg->group_address_) : sync_send(iov, n);
 }
 
 ssize_t
@@ -63,7 +64,7 @@ MulticastSendStrategy::sync_send(const iovec iov[], int n)
 }
 
 ssize_t
-MulticastSendStrategy::async_send(const iovec iov[], int n)
+MulticastSendStrategy::async_send(const iovec iov[], int n, const ACE_INET_Addr& group_address)
 {
 #if defined (ACE_HAS_WIN32_OVERLAPPED_IO) || defined (ACE_HAS_AIO_CALLS)
   if (!async_init_) {
@@ -88,8 +89,7 @@ MulticastSendStrategy::async_send(const iovec iov[], int n)
   }
 
   size_t bytes_sent = 0;
-  ssize_t result = async_writer_.send(mb, bytes_sent, 0 /*flags*/,
-                                      this->link_->config().group_address_);
+  ssize_t result = async_writer_.send(mb, bytes_sent, 0 /*flags*/, group_address);
 
   if (result < 0) {
     if (mb) mb->release();

@@ -270,8 +270,8 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   if (dr_servant) { // for MultiTopic this will be false
     const char* reason = " (ERROR: unknown reason)";
     DDS::ReturnCode_t rc = DDS::RETCODE_OK;
-    DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
-    if (dr_subscriber != this) {
+    RcHandle<SubscriberImpl> dr_subscriber = dr_servant->get_subscriber_servant();
+    if (dr_subscriber.get() != this) {
       reason = "doesn't belong to this subscriber.";
       rc = DDS::RETCODE_PRECONDITION_NOT_MET;
     } else if (dr_servant->has_zero_copies()) {

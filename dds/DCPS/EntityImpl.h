@@ -76,7 +76,7 @@ protected:
 
   bool get_deleted() const;
 
-  DDS::InstanceHandle_t get_entity_instance_handle(const GUID_t& id, DomainParticipantImpl* participant);
+  DDS::InstanceHandle_t get_entity_instance_handle(const GUID_t& id, const RcHandle<DomainParticipantImpl>& participant);
 
   /// The flag indicates the entity is enabled.
   AtomicBool enabled_;

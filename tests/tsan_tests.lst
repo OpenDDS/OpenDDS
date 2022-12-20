@@ -14,6 +14,10 @@
 tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
 tests/stress-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS
 
+tests/DCPS/GuardCondition/run_test.pl: !DCPS_MIN
+tests/DCPS/StatusCondition/run_test.pl: !DCPS_MIN !DDS_NO_PERSISTENCE_PROFILE
+tests/DCPS/ReadCondition/run_test.pl: !DCPS_MIN
+
 tests/transport/simple/run_test.pl bp: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/transport/simple/run_test.pl n: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
 tests/transport/simple/run_test.pl: !NO_DDS_TRANSPORT !DCPS_MIN !OPENDDS_SAFETY_PROFILE
@@ -76,6 +80,14 @@ tests/DCPS/Ownership/run_test.pl rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_KIND_EXC
 tests/DCPS/Ownership/run_test.pl update_strength rtps: !DCPS_MIN RTPS !NO_BUILT_IN_TOPICS  !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Ownership/run_test.pl liveliness_change rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
 tests/DCPS/Ownership/run_test.pl miss_deadline rtps: !DCPS_MIN RTPS !DDS_NO_OWNERSHIP_KIND_EXCLUSIVE !DDS_NO_OWNERSHIP_PROFILE
+
+tests/DCPS/SharedTransport/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SharedTransport/run_test.pl rtps: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SharedTransport/run_test.pl rtps 2: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SharedTransport/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SharedTransport/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SharedTransport/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE
+tests/DCPS/SharedTransport/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE
 
 tests/DCPS/EntityLifecycleStress/run_test.pl publishers 10 subscribers 10: !OPENDDS_SAFETY_PROFILE
 tests/DCPS/EntityLifecycleStress/run_test.pl rtps publishers 10 subscribers 10: RTPS !OPENDDS_SAFETY_PROFILE
