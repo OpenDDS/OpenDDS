@@ -863,8 +863,7 @@ DDS::ReturnCode_t get_bitmask_value(
   return get_uint_value(value, src, id, bound_kind);
 }
 
-DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type,
-  CORBA::Int32& bound_min, CORBA::Int32& bound_max, DDS::TypeKind& bound_kind)
+DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind)
 {
   const DDS::TypeKind kind = type->get_kind();
   if (kind != TK_ENUM) {
@@ -897,19 +896,14 @@ DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type,
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
-  const CORBA::Int32 max_plus_one = 1 << (bound_size - 1);
-  bound_min = -max_plus_one;
-  bound_max = max_plus_one - 1;
   return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t get_enum_value(
   CORBA::Int32& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
 {
-  CORBA::Int32 bound_min;
-  CORBA::Int32 bound_max;
   DDS::TypeKind bound_kind;
-  DDS::ReturnCode_t rc = enum_bound(type, bound_min, bound_max, bound_kind);
+  DDS::ReturnCode_t rc = enum_bound(type, bound_kind);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
@@ -918,7 +912,7 @@ DDS::ReturnCode_t get_enum_value(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  value = v;
+  value = static_cast<CORBA::Int32>(v);
   return rc;
 }
 

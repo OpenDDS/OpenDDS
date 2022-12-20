@@ -197,9 +197,7 @@ bool DynamicDataBase::check_member(
   switch (type_kind) {
   case TK_ENUM:
     {
-      CORBA::Int32 bound_min;
-      CORBA::Int32 bound_max;
-      rc = enum_bound(type, bound_min, bound_max, cmp_type_kind);
+      rc = enum_bound(type, cmp_type_kind);
       if (rc != DDS::RETCODE_OK) {
         return rc;
       }

@@ -346,10 +346,8 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(
 
   case TK_ENUM:
     {
-      CORBA::Int32 bound_min;
-      CORBA::Int32 bound_max;
       DDS::TypeKind bound_kind;
-      const DDS::ReturnCode_t rc = enum_bound(type, bound_min, bound_max, bound_kind);
+      const DDS::ReturnCode_t rc = enum_bound(type, bound_kind);
       if (rc != DDS::RETCODE_OK) {
         return rc;
       }
