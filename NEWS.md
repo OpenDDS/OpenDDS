@@ -15,12 +15,11 @@ OpenDDS 3.23.0 is currently in development, so this list might change.
 ### Fixes:
 - Unauthenticated participant leads to invalid iterator (#3748)
 - Shmem Association race (#3549)
-- Shemem and tcp null pointer (#3779)
+- Shmem and tcp null pointer (#3779)
 - Submodule checkout on Windows (#3812)
-- Warning on Windows for ShmemDataLink (#3829)
 
 ### Notes:
-- Docker images are built for release tags (#3776)
+- Docker images are built for release tags https://github.com/objectcomputing/OpenDDS/pkgs/container/opendds (#3776) 
 
 ## Version 3.22.0 of OpenDDS
 OpenDDS 3.22.0 was released on Sep 16 2022.
