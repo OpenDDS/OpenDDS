@@ -149,6 +149,37 @@ bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
   return false;
 }
 
+bool DynamicDataBase::has_explicit_keys(DDS::DynamicType* dt)
+{
+  // see dds_generator.h struct_has_explicit_keys() in opendds_idl
+  DDS::TypeDescriptor_var type_descriptor;
+  DDS::ReturnCode_t ret = dt->get_descriptor(type_descriptor);
+  if (ret != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType* const base = type_descriptor->base_type();
+  if (base && has_explicit_keys(base)) {
+    return true;
+  }
+
+  for (ACE_CDR::ULong i = 0; i < dt->get_member_count(); ++i) {
+    DDS::DynamicTypeMember_var member;
+    ret = dt->get_member_by_index(member, i);
+    if (ret != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var descriptor;
+    ret = member->get_descriptor(descriptor);
+    if (ret != DDS::RETCODE_OK) {
+      return false;
+    }
+    if (descriptor->is_key()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 

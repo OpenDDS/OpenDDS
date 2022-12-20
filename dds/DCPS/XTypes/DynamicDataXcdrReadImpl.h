@@ -11,6 +11,7 @@
 #  include "TypeObject.h"
 
 #  include <dds/DCPS/PoolAllocator.h>
+#  include <dds/DCPS/Sample.h>
 #  include <dds/DCPS/Serializer.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -27,12 +28,14 @@ public:
   /// responsible for the release of the input message block chain.
   DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                           const DCPS::Encoding& encoding,
-                          DDS::DynamicType_ptr type);
+                          DDS::DynamicType_ptr type,
+                          DCPS::Sample::Extent ext = DCPS::Sample::Full);
 
   /// Use this when you want to pass the alignment state of a given Serializer object over.
   /// A typical use case would be when a part of the data has already been consumed from
   /// @a ser and you want to give the remaining to DynamicData.
-  DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type);
+  DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
+                          DCPS::Sample::Extent ext = DCPS::Sample::Full);
 
   DynamicDataXcdrReadImpl(const DynamicDataXcdrReadImpl& other);
   DynamicDataXcdrReadImpl& operator=(const DynamicDataXcdrReadImpl& other);
@@ -374,6 +377,12 @@ private:
   template<typename ValueType>
   bool read_value(ValueType& value, TypeKind tk);
 
+  /// Check if a member with a given id is excluded from struct sample.
+  bool exclude_struct_member(MemberId id, DDS::MemberDescriptor_var& md) const;
+
+  /// Check if a member with a given Id is excluded from a union sample.
+  bool exclude_union_member(MemberId id) const;
+
   ///@{
   /** Reading a value of type primitive, string, or wstring as a member of a struct, union,
    *  or a collection (sequence, array, map). TK_ENUM should be passed to @a enum_or_bitmask
@@ -423,7 +432,7 @@ private:
   ///
   bool skip_to_struct_member(DDS::MemberDescriptor* member_desc, MemberId id);
 
-  bool get_from_struct_common_checks(DDS::MemberDescriptor_var& md, MemberId id,
+  bool get_from_struct_common_checks(const DDS::MemberDescriptor_var& md, MemberId id,
                                      TypeKind kind, bool is_sequence = false);
 
   /// Return the member descriptor for the selected member from a union data or null.
@@ -528,6 +537,7 @@ private:
   ACE_Message_Block* chain_;
 
   DCPS::Encoding encoding_;
+  DCPS::Sample::Extent extent_;
 
   /// Indicate whether the alignment state of a Serializer object associated
   /// with this DynamicData needs to be reset.
