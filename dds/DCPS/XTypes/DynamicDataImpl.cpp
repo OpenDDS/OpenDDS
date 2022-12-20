@@ -174,13 +174,6 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
       return DDS::RETCODE_OK;
     }
     break;
-
-  case TK_UNION:
-    {
-      container_.clear();
-      return DDS::RETCODE_OK;
-    }
-    break;
   }
 
   if (tk == TK_UNION) {
