@@ -28,10 +28,13 @@ namespace OpenDDS {
 namespace DCPS {
 
 class DataReaderImpl;
-class ReceivedDataElement;
+typedef RcHandle<DataReaderImpl> DataReaderImpl_rch;
+typedef WeakRcHandle<DataReaderImpl> DataReaderImpl_wrch;
 
 class InstanceState;
 typedef RcHandle<InstanceState> InstanceState_rch;
+
+class ReceivedDataElement;
 
 /**
  * @class InstanceState
@@ -46,7 +49,7 @@ typedef RcHandle<InstanceState> InstanceState_rch;
  */
 class OpenDDS_Dcps_Export InstanceState : public ReactorInterceptor {
 public:
-  InstanceState(DataReaderImpl* reader,
+  InstanceState(const DataReaderImpl_rch& reader,
                 ACE_Recursive_Thread_Mutex& lock,
                 DDS::InstanceHandle_t handle);
 

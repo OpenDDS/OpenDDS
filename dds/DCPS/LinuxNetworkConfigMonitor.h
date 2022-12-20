@@ -38,12 +38,14 @@ public:
 private:
   class OpenHandler : public ReactorInterceptor::Command {
   public:
-    OpenHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
+    OpenHandler(const RcHandle<LinuxNetworkConfigMonitor>& lncm)
       : lncm_(lncm)
       , condition_(mutex_)
       , done_(false)
       , retval_(false)
     {}
+
+    virtual ~OpenHandler() {}
 
     bool wait() const;
 
@@ -61,12 +63,14 @@ private:
 
   class CloseHandler : public ReactorInterceptor::Command {
   public:
-    CloseHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
+    CloseHandler(const RcHandle<LinuxNetworkConfigMonitor>& lncm)
       : lncm_(lncm)
       , condition_(mutex_)
       , done_(false)
       , retval_(false)
     {}
+
+    virtual ~CloseHandler() {}
 
     bool wait() const;
 

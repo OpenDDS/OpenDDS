@@ -1820,7 +1820,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
       OpenDDS::DCPS::SubscriptionInstance_rch instance =
         OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
-          this,
+          rchandle_from(this),
           qos_,
           ref(instances_lock_),
           handle, owns_handle);
