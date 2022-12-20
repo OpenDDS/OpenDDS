@@ -2271,6 +2271,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
   if (it == container_.complex_map_.end()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
+  CORBA::release(value);
   value = DDS::DynamicData::_duplicate(it->second);
   return DDS::RETCODE_OK;
 }
