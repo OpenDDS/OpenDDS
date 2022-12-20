@@ -9,6 +9,7 @@
 #  include "DynamicDataImpl.h"
 
 #  include "DynamicTypeMemberImpl.h"
+#  include "Utils.h"
 
 #  include <dds/DdsDynamicDataSeqTypeSupportImpl.h>
 #  include <dds/DdsDcpsCoreTypeSupportImpl.h>
@@ -159,20 +160,31 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
 DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
 {
   const TypeKind tk = type_->get_kind();
-  if (tk == TK_ARRAY) {
-    DDS::TypeDescriptor_var td;
-    DDS::ReturnCode_t rc = type_->get_descriptor(td);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-    const CORBA::ULong total = bound_total(td);
-    for (CORBA::ULong i = 0; i < total; ++i) {
-      rc = clear_value(get_member_id_at_index(i));
+  switch (tk) {
+  case TK_ARRAY:
+    {
+      DDS::TypeDescriptor_var td;
+      DDS::ReturnCode_t rc = type_->get_descriptor(td);
       if (rc != DDS::RETCODE_OK) {
         return rc;
       }
+      const CORBA::ULong total = bound_total(td);
+      for (CORBA::ULong i = 0; i < total; ++i) {
+        rc = clear_value(get_member_id_at_index(i));
+        if (rc != DDS::RETCODE_OK) {
+          return rc;
+        }
+      }
+      return DDS::RETCODE_OK;
     }
-    return DDS::RETCODE_OK;
+    break;
+
+  case TK_UNION:
+    {
+      container_.clear();
+      return DDS::RETCODE_OK;
+    }
+    break;
   }
 
   DDS::DynamicTypeMembersById_var members;
@@ -229,9 +241,14 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
 
     value_type = get_base_type(md->type());
   }
-  const TypeKind tk = value_type->get_kind();
 
-  switch (tk) {
+  return clear_value_i(id, value_type, value_type->get_kind());
+}
+
+DDS::ReturnCode_t DynamicDataImpl::clear_value_i(
+  DDS::MemberId id, DDS::DynamicType_ptr type, DDS::TypeKind treat_as)
+{
+  switch (treat_as) {
   case TK_BOOLEAN:
     insert_single(id, ACE_OutputCDR::from_boolean(false));
     break;
@@ -269,7 +286,10 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
     insert_single(id, CORBA::Double(0.0));
     break;
   case TK_FLOAT128:
-    insert_single(id, CORBA::LongDouble(0.0));
+    {
+      const ACE_CDR::LongDouble value = ACE_CDR_LONG_DOUBLE_INITIALIZER;
+      insert_single(id, value);
+    }
     break;
   case TK_CHAR8:
     insert_single(id, ACE_OutputCDR::from_char('\0'));
@@ -278,14 +298,34 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
     insert_single(id, ACE_OutputCDR::from_wchar(L'\0'));
     break;
   case TK_STRING8:
-    insert_single(id, "");
+    insert_single(id, CORBA::string_dup(""));
     break;
   case TK_STRING16:
-    insert_single(id, L"");
+    insert_single(id, CORBA::wstring_dup(L""));
     break;
+
   case TK_ENUM:
+    {
+      CORBA::Int32 bound_min;
+      CORBA::Int32 bound_max;
+      DDS::TypeKind bound_kind;
+      const DDS::ReturnCode_t rc = enum_bound(type, bound_min, bound_max, bound_kind);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      return clear_value_i(id, type, bound_kind);
+    }
+    break;
   case TK_BITMASK:
-    // TODO
+    {
+      CORBA::UInt64 bound_max;
+      DDS::TypeKind bound_kind;
+      const DDS::ReturnCode_t rc = bitmask_bound(type, bound_max, bound_kind);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      return clear_value_i(id, type, bound_kind);
+    }
     break;
 
   case TK_ARRAY:
@@ -295,7 +335,7 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
   case TK_STRUCTURE:
   case TK_UNION:
     {
-      DDS::DynamicData_var dd = new DynamicDataImpl(value_type);
+      DDS::DynamicData_var dd = new DynamicDataImpl(type);
       insert_complex(id, dd);
     }
     break;
@@ -305,7 +345,7 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
   default:
     if (log_level >= LogLevel::Warning) {
       ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::clear_value: "
-        "member %d has unexpected TypeKind %C\n", id, typekind_to_string(tk)));
+        "member %d has unexpected TypeKind %C\n", id, typekind_to_string(treat_as)));
     }
   }
 
@@ -542,7 +582,7 @@ DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_boolean value)
 {}
 
 DynamicDataImpl::SingleValue::SingleValue(const char* str)
-  : kind_(TK_STRING8), active_(0), str_(ACE_OS::strdup(str))
+  : kind_(TK_STRING8), active_(0), str_(CORBA::string_dup(str))
 {}
 
 #ifdef DDS_HAS_WCHAR
@@ -551,7 +591,7 @@ DynamicDataImpl::SingleValue::SingleValue(ACE_OutputCDR::from_wchar value)
 {}
 
 DynamicDataImpl::SingleValue::SingleValue(const CORBA::WChar* wstr)
-  : kind_(TK_STRING16), active_(0), wstr_(ACE_OS::strdup(wstr))
+  : kind_(TK_STRING16), active_(0), wstr_(CORBA::wstring_dup(wstr))
 {}
 #endif
 
@@ -570,13 +610,13 @@ DynamicDataImpl::SingleValue::~SingleValue()
   case TK_BOOLEAN:
     SINGLE_VALUE_DESTRUCT(from_boolean);
   case TK_STRING8:
-    ACE_OS::free((void*)str_);
+    CORBA::string_free((char*)str_);
     break;
 #ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     SINGLE_VALUE_DESTRUCT(from_wchar);
   case TK_STRING16:
-    ACE_OS::free((void*)wstr_);
+    CORBA::wstring_free((CORBA::WChar*)wstr_);
     break;
 #endif
   }
@@ -1032,7 +1072,7 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       if (!validate_discriminator(disc_value, selected_md)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::set_value_to_union:"
-                     " Discriminator value %d does not select existing selected member (ID %d)",
+                     " Discriminator value %d does not select existing selected member (ID %d)\n",
                      disc_value, selected_id));
         }
         return false;
@@ -2034,7 +2074,7 @@ template <typename Type>
 DDS::ReturnCode_t DynamicDataImpl::get_single_value(Type& value, DDS::MemberId id, DDS::TypeKind tk)
 {
   const TypeKind this_tk = type_->get_kind();
-  if (this_tk != TK_ARRAY && this_tk != TK_SEQUENCE) {
+  if (this_tk != TK_ARRAY && this_tk != TK_SEQUENCE) { // TODO: Check in these caes
     DDS::MemberDescriptor_var md;
     DDS::DynamicType_var member_type;
     const DDS::ReturnCode_t rc = check_member(
@@ -2518,6 +2558,13 @@ template<> const DDS::WstringSeq& DynamicDataImpl::SequenceValue::get() const
 { SEQUENCE_VALUE_GETTERS(WstringSeq); }
 #endif
 #undef SEQUENCE_VALUE_GETTERS
+
+void DynamicDataImpl::DataContainer::clear()
+{
+  single_map_.clear();
+  complex_map_.clear();
+  sequence_map_.clear();
+}
 
 // Get largest index among elements of a sequence-like type written to the single map.
 bool DynamicDataImpl::DataContainer::get_largest_single_index(CORBA::ULong& largest_index) const
@@ -3600,7 +3647,7 @@ bool DynamicDataImpl::DataContainer::serialize_generic_string_sequence(DCPS::Ser
 
   const DCPS::Encoding& encoding = ser.encoding();
   if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
-    size_t total_size;
+    size_t total_size = 0;
     if (!serialized_size_generic_string_sequence<StringType>(encoding, total_size, index_to_id) ||
         !ser.write_delimiter(total_size)) {
       return false;
@@ -4972,7 +5019,7 @@ bool DynamicDataImpl::DataContainer::serialize_generic_string_array(DCPS::Serial
 
   const DCPS::Encoding& encoding = ser.encoding();
   if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2) {
-    size_t total_size;
+    size_t total_size = 0;
     if (!serialized_size_generic_string_array<StringType>(encoding, total_size, index_to_id) ||
         !ser.write_delimiter(total_size)) {
       return false;

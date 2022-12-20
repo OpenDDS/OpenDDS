@@ -7,6 +7,7 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
+#  include "Utils.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -192,9 +193,33 @@ bool DynamicDataBase::check_member(
   }
 
   const TypeKind type_kind = type->get_kind();
+  TypeKind cmp_type_kind = type_kind;
+  switch (type_kind) {
+  case TK_ENUM:
+    {
+      CORBA::Int32 bound_min;
+      CORBA::Int32 bound_max;
+      rc = enum_bound(type, bound_min, bound_max, cmp_type_kind);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+    }
+    break;
+
+  case TK_BITMASK:
+    {
+      CORBA::UInt64 bound_max;
+      rc = bitmask_bound(type, bound_max, cmp_type_kind);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+    }
+    break;
+  }
+
   bool invalid_tk = true;
-  if (is_basic(tk)) {
-    invalid_tk = type_kind != tk;
+  if (is_basic(cmp_type_kind)) {
+    invalid_tk = cmp_type_kind != tk;
   } else if (tk == TK_NONE) {
     invalid_tk = !is_complex(type_kind);
   }
@@ -203,8 +228,9 @@ bool DynamicDataBase::check_member(
       const CORBA::String_var member_name = md->name();
       const CORBA::String_var type_name = type_->get_name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %C: "
-        "trying to %C %C.%C id %u kind %C as an invalid kind %C\n",
-        method, what, type_name.in(), member_name.in(), id, typekind_to_string(type_kind),
+        "trying to %C %C.%C id %u kind %C (%C) as an invalid kind %C\n",
+        method, what, type_name.in(), member_name.in(), id,
+        typekind_to_string(cmp_type_kind), typekind_to_string(type_kind),
         typekind_to_string(tk)));
     }
     return DDS::RETCODE_BAD_PARAMETER;

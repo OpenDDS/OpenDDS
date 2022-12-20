@@ -1123,6 +1123,8 @@ bool read_empty_xcdr2_nonfinal(DCPS::Serializer& strm)
 const char* typekind_to_string(TypeKind tk)
 {
   switch (tk) {
+  case TK_NONE:
+    return "none";
   case TK_BOOLEAN:
     return "boolean";
   case TK_BYTE:

@@ -468,6 +468,15 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
   ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
   ASSERT_FALSE(is_less_than);
 
+  // enu
+  ++id;
+  ASSERT_RC_OK(b->set_int32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_TRUE(is_less_than);
+  ASSERT_RC_OK(a->set_int32_value(id, 1));
+  ASSERT_RC_OK(less_than(is_less_than, a, b, Filter_All));
+  ASSERT_FALSE(is_less_than);
+
   // nested_struct.value
   ++id;
   DDS::DynamicData_var a_nested_struct;

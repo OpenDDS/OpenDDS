@@ -44,9 +44,9 @@ public:
 
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
-  DDS::ReturnCode_t clear_value(DDS::MemberId /*id*/);
-  DDS::DynamicData_ptr loan_value(DDS::MemberId /*id*/);
-  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr /*value*/);
+  DDS::ReturnCode_t clear_value(DDS::MemberId id);
+  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
+  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr value);
 
   DDS::DynamicData_ptr clone();
 
@@ -292,6 +292,9 @@ private:
   bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
                                      DDS::MemberId id, TypeKind collection_tk) const;
 
+  DDS::ReturnCode_t clear_value_i(
+    DDS::MemberId id, DDS::DynamicType_ptr type, DDS::TypeKind treat_as);
+
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value);
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value);
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_char& value);
@@ -471,6 +474,8 @@ private:
       , type_(data->type_)
       , data_(data)
     {}
+
+    void clear();
 
     // Get the largest index of all elements in each map.
     // Call only for collection-like types (sequence, string, etc).

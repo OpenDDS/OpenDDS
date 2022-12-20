@@ -313,137 +313,6 @@ DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count)
 }
 
 namespace {
-  DDS::ReturnCode_t uint_like_bound(
-    DDS::DynamicType_ptr type, size_t& bound_max, DDS::TypeKind& bound_kind)
-  {
-    const DDS::TypeKind kind = type->get_kind();
-    if (kind != TK_ENUM && kind != TK_BITMASK) {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: uint_like_bound: "
-          "expected bound uint-like, got %C\n",
-          typekind_to_string(kind)));
-      }
-      return DDS::RETCODE_BAD_PARAMETER;
-    }
-
-    DDS::TypeDescriptor_var td;
-    const DDS::ReturnCode_t rc = type->get_descriptor(td);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-
-    const size_t bound_size = td->bound()[0];
-    // enum max is 32, bitmask is 64
-    if (bound_size >= 1 && bound_size <= 8) {
-      bound_kind = TK_UINT8;
-    } else if (bound_size >= 9 && bound_size <= 16) {
-      bound_kind = TK_UINT16;
-    } else if (bound_size >= 17 && bound_size <= 32) {
-      bound_kind = TK_UINT32;
-    } else if (bound_size >= 33 && bound_size <= 64 && kind == TK_BITMASK) {
-      bound_kind = TK_UINT64;
-    } else {
-      if (log_level >= LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: uint_like_bound: "
-          "Got unexpected bound size %B for %C\n",
-          bound_size, typekind_to_string(kind)));
-      }
-      return DDS::RETCODE_BAD_PARAMETER;
-    }
-    bound_max = (1 << bound_size) - 1;
-    return DDS::RETCODE_OK;
-  }
-
-  DDS::ReturnCode_t get_uint_value(
-    CORBA::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
-  {
-    DDS::ReturnCode_t rc = DDS::RETCODE_BAD_PARAMETER;
-    switch (kind) {
-    case TK_UINT8:
-      {
-        CORBA::UInt8 v;
-        rc = src->get_uint8_value(v, id);
-        if (rc == DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_UINT16:
-      {
-        CORBA::UInt16 v;
-        rc = src->get_uint16_value(v, id);
-        if (rc == DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_UINT32:
-      {
-        CORBA::UInt32 v;
-        rc = src->get_uint32_value(v, id);
-        if (rc == DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_UINT64:
-      rc = src->get_uint64_value(value, id);
-      break;
-    }
-    return rc;
-  }
-
-  DDS::ReturnCode_t get_enum_or_bitmask_value(
-    CORBA::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
-  {
-    size_t bound_max;
-    DDS::TypeKind bound_kind;
-    const DDS::ReturnCode_t rc = uint_like_bound(type, bound_max, bound_kind);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-    return get_uint_value(value, src, id, bound_kind);
-  }
-
-  DDS::ReturnCode_t get_int_value(
-    CORBA::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
-  {
-    DDS::ReturnCode_t rc = DDS::RETCODE_BAD_PARAMETER;
-    switch (kind) {
-    case TK_INT8:
-      {
-        CORBA::Int8 v;
-        rc = src->get_int8_value(v, id);
-        if (rc == DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_INT16:
-      {
-        CORBA::Int16 v;
-        rc = src->get_int16_value(v, id);
-        if (rc == DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_INT32:
-      {
-        CORBA::Int32 v;
-        rc = src->get_int32_value(v, id);
-        if (rc == DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_INT64:
-      rc = src->get_int64_value(value, id);
-      break;
-    }
-    return rc;
-  }
-
   template <typename T>
   void cmp(int& result, T a, T b)
   {
@@ -676,13 +545,26 @@ namespace {
       break;
 
     case TK_ENUM:
+      {
+        CORBA::Int32 a_value;
+        a_rc = get_enum_value(a_value, a_type, a_data, a_id);
+        if (a_rc == DDS::RETCODE_OK) {
+          CORBA::Int32 b_value;
+          b_rc = get_enum_value(b_value, b_type, b_data, b_id);
+          if (b_rc == DDS::RETCODE_OK) {
+            cmp(result, a_value, b_value);
+          }
+        }
+      }
+      break;
+
     case TK_BITMASK:
       {
         CORBA::UInt64 a_value;
-        a_rc = get_enum_or_bitmask_value(a_value, a_type, a_data, a_id);
+        a_rc = get_bitmask_value(a_value, a_type, a_data, a_id);
         if (a_rc == DDS::RETCODE_OK) {
           CORBA::UInt64 b_value;
-          b_rc = get_enum_or_bitmask_value(b_value, b_type, b_data, b_id);
+          b_rc = get_bitmask_value(b_value, b_type, b_data, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
           }
@@ -769,7 +651,7 @@ namespace {
 DDS::ReturnCode_t less_than(
   bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter)
 {
-  DDS::DynamicType_var a_type = a->type();
+  const DDS::DynamicType_ptr a_type = a->type();
   MemberPathVec paths;
   DDS::ReturnCode_t rc = get_values(a_type, paths, filter);
   if (rc != DDS::RETCODE_OK) {
@@ -823,6 +705,221 @@ DDS::ReturnCode_t less_than(
 DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b)
 {
   return less_than(result, a, b, Filter_Keys);
+}
+
+bool is_int(DDS::TypeKind tk)
+{
+  switch (tk) {
+  case TK_INT8:
+  case TK_INT16:
+  case TK_INT32:
+  case TK_INT64:
+    return true;
+  default:
+    return false;
+  }
+}
+
+bool is_uint(DDS::TypeKind tk)
+{
+  switch (tk) {
+  case TK_UINT8:
+  case TK_UINT16:
+  case TK_UINT32:
+  case TK_UINT64:
+    return true;
+  default:
+    return false;
+  }
+}
+
+DDS::ReturnCode_t get_uint_value(
+  CORBA::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
+{
+  DDS::ReturnCode_t rc = DDS::RETCODE_BAD_PARAMETER;
+  switch (kind) {
+  case TK_UINT8:
+    {
+      CORBA::UInt8 v;
+      rc = src->get_uint8_value(v, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = v;
+      }
+    }
+    break;
+  case TK_UINT16:
+    {
+      CORBA::UInt16 v;
+      rc = src->get_uint16_value(v, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = v;
+      }
+    }
+    break;
+  case TK_UINT32:
+    {
+      CORBA::UInt32 v;
+      rc = src->get_uint32_value(v, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = v;
+      }
+    }
+    break;
+  case TK_UINT64:
+    rc = src->get_uint64_value(value, id);
+    break;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t get_int_value(
+  CORBA::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
+{
+  DDS::ReturnCode_t rc = DDS::RETCODE_BAD_PARAMETER;
+  switch (kind) {
+  case TK_INT8:
+    {
+      CORBA::Int8 v;
+      rc = src->get_int8_value(v, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = v;
+      }
+    }
+    break;
+  case TK_INT16:
+    {
+      CORBA::Int16 v;
+      rc = src->get_int16_value(v, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = v;
+      }
+    }
+    break;
+  case TK_INT32:
+    {
+      CORBA::Int32 v;
+      rc = src->get_int32_value(v, id);
+      if (rc == DDS::RETCODE_OK) {
+        value = v;
+      }
+    }
+    break;
+  case TK_INT64:
+    rc = src->get_int64_value(value, id);
+    break;
+  }
+  return rc;
+}
+
+DDS::ReturnCode_t bitmask_bound(
+  DDS::DynamicType_ptr type, CORBA::UInt64& bound_max, DDS::TypeKind& bound_kind)
+{
+  const DDS::TypeKind kind = type->get_kind();
+  if (kind != TK_BITMASK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: bitmask_bound: "
+        "expected bitmask, got %C\n",
+        typekind_to_string(kind)));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  DDS::TypeDescriptor_var td;
+  const DDS::ReturnCode_t rc = type->get_descriptor(td);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+
+  const size_t bound_size = td->bound()[0];
+  if (bound_size >= 1 && bound_size <= 8) {
+    bound_kind = TK_UINT8;
+  } else if (bound_size >= 9 && bound_size <= 16) {
+    bound_kind = TK_UINT16;
+  } else if (bound_size >= 17 && bound_size <= 32) {
+    bound_kind = TK_UINT32;
+  } else if (bound_size >= 33 && bound_size <= 64) {
+    bound_kind = TK_UINT64;
+  } else {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: bitmask_bound: "
+        "Got unexpected bound size %B\n",
+        bound_size));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  bound_max = (1 << bound_size) - 1;
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t get_bitmask_value(
+  CORBA::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
+{
+  CORBA::UInt64 bound_max;
+  DDS::TypeKind bound_kind;
+  const DDS::ReturnCode_t rc = bitmask_bound(type, bound_max, bound_kind);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return get_uint_value(value, src, id, bound_kind);
+}
+
+DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type,
+  CORBA::Int32& bound_min, CORBA::Int32& bound_max, DDS::TypeKind& bound_kind)
+{
+  const DDS::TypeKind kind = type->get_kind();
+  if (kind != TK_ENUM) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: enum_bound: "
+        "expected enum, got %C\n",
+        typekind_to_string(kind)));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  DDS::TypeDescriptor_var td;
+  const DDS::ReturnCode_t rc = type->get_descriptor(td);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+
+  const size_t bound_size = td->bound()[0];
+  if (bound_size >= 1 && bound_size <= 8) {
+    bound_kind = TK_INT8;
+  } else if (bound_size >= 9 && bound_size <= 16) {
+    bound_kind = TK_INT16;
+  } else if (bound_size >= 17 && bound_size <= 32) {
+    bound_kind = TK_INT32;
+  } else {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: enum_bound: "
+        "Got unexpected bound size %B\n",
+        bound_size));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+  const CORBA::Int32 max_plus_one = 1 << (bound_size - 1);
+  bound_min = -max_plus_one;
+  bound_max = max_plus_one - 1;
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t get_enum_value(
+  CORBA::Int32& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
+{
+  CORBA::Int32 bound_min;
+  CORBA::Int32 bound_max;
+  DDS::TypeKind bound_kind;
+  DDS::ReturnCode_t rc = enum_bound(type, bound_min, bound_max, bound_kind);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  CORBA::Int64 v;
+  rc = get_int_value(v, src, id, bound_kind);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  value = v;
+  return rc;
 }
 
 } // namespace XTypes

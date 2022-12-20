@@ -1686,7 +1686,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
     0x20,0,0,2, 0,0,0,0, // +8=32 uint_32s
     0x20,0,0,3, 0,0,0,0, // +8=40 int_8s
     0x20,0,0,4, 0,0,0,0, // +8=48 uint_8s
-    0x20,0,0,5, 0,0,0,0, // +8=56int_16s
+    0x20,0,0,5, 0,0,0,0, // +8=56 int_16s
     0x20,0,0,6, 0,0,0,0, // +8=64 uint_16s
     0x20,0,0,7, 0,0,0,0, // +8=72 int_64s
     0x20,0,0,8, 0,0,0,0, // +8=80 uint_64s

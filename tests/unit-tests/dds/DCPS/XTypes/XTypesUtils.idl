@@ -62,6 +62,10 @@ struct MutableMaxMutableStruct {
   AppendableUnion au;
 };
 
+enum Enu_t {
+  X, Y, Z
+};
+
 @topic
 struct LessThanStruct {
   octet byte;
@@ -81,6 +85,7 @@ struct LessThanStruct {
   wchar char_16;
   string str_8;
   wstring str_16;
+  Enu_t enu;
   FinalStruct nested_struct;
   AppendableUnion nested_union;
   uint32 uint_32_array[2];
