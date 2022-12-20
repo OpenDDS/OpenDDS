@@ -1,3 +1,5 @@
+#ifndef OPENDDS_SAFETY_PROFILE
+
 module XTypesUtils {
 
 @final
@@ -93,3 +95,4 @@ struct LessThanStruct {
 };
 
 };
+#endif
