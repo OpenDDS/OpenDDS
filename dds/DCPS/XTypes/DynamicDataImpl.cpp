@@ -148,11 +148,6 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
   ACE_CDR::ULong count = static_cast<ACE_CDR::ULong>(
     container_.single_map_.size() + container_.sequence_map_.size() + container_.complex_map_.size());
-  const TypeKind tk = type_->get_kind();
-  if (tk == TK_UNION) {
-    // TODO: Return the correct count
-    count -= 1;
-  }
   return count;
 }
 
@@ -173,6 +168,22 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
       }
     }
     return DDS::RETCODE_OK;
+  }
+
+  if (tk == TK_UNION) {
+    container_.single_map_.clear();
+    container_.sequence_map_.clear();
+    container_.complex_map_.clear();
+    DDS::ReturnCode_t rc = clear_value(DISCRIMINATOR_ID);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    const DDS::MemberId selected_id = get_union_default_member(type_);
+    if (selected_id != MEMBER_ID_INVALID) {
+      return clear_value(selected_id);
+    }
+    // this discriminator value doesn't select a member
+    return true;
   }
 
   DDS::DynamicTypeMembersById_var members;

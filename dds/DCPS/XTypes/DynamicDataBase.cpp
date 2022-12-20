@@ -223,6 +223,44 @@ CORBA::ULong DynamicDataBase::bound_total(DDS::TypeDescriptor_var descriptor)
   return total;
 }
 
+DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
+{
+  //FUTURE: non-zero defaults for union discriminators are not currently represented
+  // in the MemberDescriptors created by converting CompleteTypeObject to DyanmicType.
+  // When they are supported, change disc_default below to a value derived from the
+  // 'type' parameter.  Note that 64-bit discriminators are not represented in TypeObject.
+  static const ACE_CDR::Long disc_default = 0;
+  DDS::MemberId default_branch = MEMBER_ID_INVALID;
+  const ACE_CDR::ULong members = type->get_member_count();
+  for (ACE_CDR::ULong i = 0; i < members; ++i) {
+    DDS::DynamicTypeMember_var member;
+    if (type->get_member_by_index(member, i) != DDS::RETCODE_OK) {
+      return MEMBER_ID_INVALID;
+    }
+    if (member->get_id() == DISCRIMINATOR_ID) {
+      continue;
+    }
+    DDS::MemberDescriptor_var mdesc;
+    if (member->get_descriptor(mdesc) != DDS::RETCODE_OK) {
+      return MEMBER_ID_INVALID;
+    }
+    if (mdesc->is_default_label()) {
+      default_branch = mdesc->id();
+    } else {
+      const DDS::UnionCaseLabelSeq& lseq = mdesc->label();
+      for (ACE_CDR::ULong lbl = 0; lbl < lseq.length(); ++lbl) {
+        if (lseq[lbl] == disc_default) {
+          return mdesc->id();
+        }
+      }
+    }
+  }
+  // Reaching this point means that there is no explicit label for the default
+  // value of the discriminator.  If there is a default branch, its member is
+  // selected.  Otherwise the 'MEMBER_ID_INVALID' constant is returned.
+  return default_branch;
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 

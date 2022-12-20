@@ -38,6 +38,7 @@ protected:
     const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk = TK_NONE);
 
   static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
+  static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
 
   /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;
