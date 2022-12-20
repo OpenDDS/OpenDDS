@@ -140,10 +140,11 @@ DDS::ReturnCode_t MemberPath::get_member_from_type(
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    current_type = get_base_type(md->type());
-    if (!base_type) {
+    DDS::DynamicType_var next = get_base_type(md->type());
+    if (!next) {
       return DDS::RETCODE_BAD_PARAMETER;
     }
+    current_type = next;
   }
   member = current_member;
 
@@ -159,7 +160,7 @@ DDS::ReturnCode_t MemberPath::get_member_from_data(
   }
 
   MemberIdVec::iterator it = ids.begin();
-  DDS::DynamicData_var current_data = DDS::DynamicData::_duplicate(data);
+  DDS::DynamicData_var current_container = DDS::DynamicData::_duplicate(data);
   while (true) {
     const DDS::MemberId current_id = *it;
     if (++it == ids.end()) {
@@ -167,12 +168,14 @@ DDS::ReturnCode_t MemberPath::get_member_from_data(
       break;
     }
 
-    DDS::ReturnCode_t rc = current_data->get_complex_value(current_data, current_id);
+    DDS::DynamicData_var next;
+    DDS::ReturnCode_t rc = current_container->get_complex_value(next, current_id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
+    current_container = next;
   }
-  container = current_data;
+  container = current_container;
 
   return DDS::RETCODE_OK;
 }
@@ -333,7 +336,7 @@ namespace {
   DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& type,
     DDS::DynamicData_ptr data, DDS::MemberId id)
   {
-    const DDS::DynamicType_ptr data_type = data->type();
+    DDS::DynamicType_var data_type = data->type();
     if (sequence_like(data_type->get_kind())) {
       DDS::TypeDescriptor_var td;
       DDS::ReturnCode_t rc = data_type->get_descriptor(td);
@@ -651,7 +654,7 @@ namespace {
 DDS::ReturnCode_t less_than(
   bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter)
 {
-  const DDS::DynamicType_ptr a_type = a->type();
+  DDS::DynamicType_var a_type = a->type();
   MemberPathVec paths;
   DDS::ReturnCode_t rc = get_values(a_type, paths, filter);
   if (rc != DDS::RETCODE_OK) {
