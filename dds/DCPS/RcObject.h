@@ -32,22 +32,24 @@ namespace DCPS {
   {
   public:
     WeakObject(RcObject* ptr)
-      : ref_count_(1)
-      , ptr_(ptr)
+      : ptr_(ptr)
+      , ref_count_(1)
       , expired_(false)
     {
     }
 
     void _add_ref()
     {
+      ACE_Guard<ACE_SYNCH_MUTEX> guard(mx_);
       ++ref_count_;
     }
 
     void _remove_ref()
     {
+      ACE_Guard<ACE_SYNCH_MUTEX> guard(mx_);
       const long new_count = --ref_count_;
-
       if (new_count == 0) {
+        guard.release();
         delete this;
       }
     }
@@ -56,13 +58,9 @@ namespace DCPS {
     bool set_expire();
 
   private:
-#ifdef ACE_HAS_CPP11
-    std::atomic<long> ref_count_;
-#else
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
-#endif
     ACE_SYNCH_MUTEX mx_;
     RcObject* const ptr_;
+    long ref_count_;
     bool expired_;
   };
 
