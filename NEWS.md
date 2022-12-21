@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
 ## Version 3.23.0 of OpenDDS
-OpenDDS 3.23.0 is currently in development, so this list might change.
+OpenDDS 3.23.0 was released on Dec 21 2022.
 
 ### Additions:
 - DataRepresentationQosPolicy and TypeConsistencyEnforcementQosPolicy can be set through XML (#3763)
