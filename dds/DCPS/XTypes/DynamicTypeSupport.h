@@ -173,7 +173,9 @@ public:
     DCPS::Sample_rch sample;
     const DDS::ReturnCode_t rc = DataWriterImpl::get_key_value(sample, handle);
     if (sample) {
-      key_holder = sample->get_dynamic_data(0);
+      CORBA::release(key_holder);
+      DDS::DynamicData_var result = sample->get_dynamic_data(0);
+      key_holder = result._retn();
     }
     return rc;
   }
@@ -296,13 +298,25 @@ public:
   DDS::ReturnCode_t read_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
   {
     DynamicSample ds(dyn);
-    return Base::read_next_sample(ds, si);
+    const DDS::ReturnCode_t rc = Base::read_next_sample(ds, si);
+    if (rc == DDS::RETCODE_OK) {
+      CORBA::release(dyn);
+      DDS::DynamicData_var result = ds.get_dynamic_data(0);
+      dyn = result._retn();
+    }
+    return rc;
   }
 
   DDS::ReturnCode_t take_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
   {
     DynamicSample ds(dyn);
-    return Base::take_next_sample(ds, si);
+    const DDS::ReturnCode_t rc = Base::take_next_sample(ds, si);
+    if (rc == DDS::RETCODE_OK) {
+      CORBA::release(dyn);
+      DDS::DynamicData_var result = ds.get_dynamic_data(0);
+      dyn = result._retn();
+    }
+    return rc;
   }
 
   DDS::InstanceHandle_t lookup_instance(DDS::DynamicData* dyn)
@@ -314,7 +328,13 @@ public:
   DDS::ReturnCode_t get_key_value(DDS::DynamicData*& dyn, DDS::InstanceHandle_t ih)
   {
     DynamicSample ds(dyn);
-    return Base::get_key_value(ds, ih);
+    const DDS::ReturnCode_t rc = Base::get_key_value(ds, ih);
+    if (rc == DDS::RETCODE_OK) {
+      CORBA::release(dyn);
+      DDS::DynamicData_var result = ds.get_dynamic_data(0);
+      dyn = result._retn();
+    }
+    return rc;
   }
 
   void install_type_support(DCPS::TypeSupportImpl*);

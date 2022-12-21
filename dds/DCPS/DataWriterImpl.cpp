@@ -2905,7 +2905,7 @@ DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::Instanc
   if (it == instance_handles_to_values_.end()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
-  sample = it->second;
+  sample = it->second->copy(Sample::Mutable);
   return DDS::RETCODE_OK;
 }
 
