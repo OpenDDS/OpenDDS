@@ -13,16 +13,22 @@
 #pragma once
 #endif
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/ReactorTask_rch.h"
-#include "dds/DCPS/TimeDuration.h"
-
 #include "TransportDefs.h"
 #include "TransportImpl_rch.h"
 #include "TransportImpl.h"
-#include "ace/Synch_Traits.h"
+
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/TimeDuration.h>
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/OpenddsDcpsExtC.h>
+
+#include <ace/Synch_Traits.h>
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Configuration_Heap;
@@ -55,8 +61,11 @@ namespace DCPS {
  * The TransportInst object is supplied to the
  * TransportImpl::configure() method.
  */
-class OpenDDS_Dcps_Export TransportInst : public RcObject {
+class OpenDDS_Dcps_Export TransportInst : public virtual RcObject {
 public:
+
+  static const long DEFAULT_DATALINK_RELEASE_DELAY = 10000;
+  static const size_t DEFAULT_DATALINK_CONTROL_CHUNKS = 32u;
 
   const OPENDDS_STRING& name() const { return name_; }
 
@@ -108,6 +117,14 @@ public:
   /// The expiration time is relative to the last received fragment.
   TimeDuration fragment_reassembly_timeout_;
 
+  /// Preallocated chunks in allocator for message blocks.
+  /// Default (0) is to use built-in constants in TransportReceiveStrategy
+  size_t receive_preallocated_message_blocks_;
+
+  /// Preallocated chunks in allocator for data blocks and data buffers.
+  /// Default (0) is to use built-in constants in TransportReceiveStrategy
+  size_t receive_preallocated_data_blocks_;
+
   /// Does the transport as configured support RELIABLE_RELIABILITY_QOS?
   virtual bool is_reliable() const = 0;
 
@@ -117,7 +134,7 @@ public:
   /// Populate a transport locator sequence.  Return the number of "locators."
   virtual size_t populate_locator(OpenDDS::DCPS::TransportLocator& trans_info, ConnectionInfoFlags flags) const = 0;
 
-  ICE::Endpoint* get_ice_endpoint();
+  DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
   void rtps_relay_only_now(bool flag);
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);
@@ -125,9 +142,81 @@ public:
   virtual void update_locators(const RepoId& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
 
-  virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
+  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+                                     TransportLocator& /*locators*/) {}
+
+  virtual void rtps_relay_address_change() {}
 
   ReactorTask_rch reactor_task();
+  EventDispatcher_rch event_dispatcher();
+
+  /**
+   * @{
+   * The RtpsUdpSendStrategy can be configured to simulate a lossy
+   * connection by probabilistically not sending RTPS messages.  This
+   * capability is enabled by setting the flag to true.
+   *
+   * The coefficients m and b correspond to a linear model whose
+   * argument is the length of the RTPS message.  The probablility of
+   * dropping the message is p = m * message_length + b.  When sending
+   * a message, a random number is selected from [0.0, 1.0].  If the
+   * random number is less than the drop probability, the message is
+   * dropped.
+   *
+   * The flag and coefficient can be changed dynamically.
+   *
+   * Examples
+   *
+   * m = 0 and b = .5 - the probability of dropping a message is .5
+   * regardless of message length.
+   *
+   * m = .001 and b = .2 - the probability of dropping a 200-byte
+   * message is .4.  In this example, all messages longer than 800
+   * bytes will be dropped.
+   */
+  void drop_messages(bool flag)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    drop_messages_ = flag;
+  }
+
+  void drop_messages_m(double m)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    drop_messages_m_ = m;
+  }
+
+  void drop_messages_b(double b)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    drop_messages_b_ = b;
+  }
+
+  bool should_drop(ssize_t length) const;
+
+  bool should_drop(const iovec iov[], int n, ssize_t& length) const
+  {
+    length = 0;
+    for (int i = 0; i < n; ++i) {
+      length += iov[i].iov_len;
+    }
+    return should_drop(length);
+  }
+  /**@}*/
+
+  void count_messages(bool flag)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, config_lock_);
+    count_messages_ = flag;
+  }
+
+  bool count_messages() const
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+    return count_messages_;
+  }
+
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
 protected:
 
@@ -159,6 +248,14 @@ private:
   const OPENDDS_STRING name_;
 
   TransportImpl_rch impl_;
+
+  bool drop_messages_;
+  double drop_messages_m_;
+  double drop_messages_b_;
+
+  bool count_messages_;
+
+  mutable ACE_Thread_Mutex config_lock_;
 };
 
 } // namespace DCPS

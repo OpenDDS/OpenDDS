@@ -76,7 +76,7 @@ enum AttributeType {
 };
 
 struct OpenDDS_Rtps_Export Attribute {
-  Attribute() : type(LAST_ATTRIBUTE), unknown_length(0) {}
+  Attribute() : type(LAST_ATTRIBUTE), ice_tie_breaker(0), unknown_length(0) {}
 
   AttributeType type;
 
@@ -89,7 +89,8 @@ struct OpenDDS_Rtps_Export Attribute {
     ACE_UINT64 ice_tie_breaker; // ICE_CONTROLLED, ICE_CONTROLLING
     unsigned char guid_prefix[sizeof(DCPS::GuidPrefix_t)]; // GUID_PREFIX
   };
-  struct {
+  struct Err {
+    Err() : code (0) {}
     ACE_UINT16 code;
     std::string reason;
   } error;

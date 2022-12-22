@@ -59,7 +59,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
                   " received unknown instance state %d\n", si.instance_state));
     }
   } else if (status == DDS::RETCODE_NO_DATA) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: reader received DDS::RETCODE_NO_DATA!\n"));;
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: reader received DDS::RETCODE_NO_DATA!\n"));
   } else {
     ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: read Message: Error: status=%d\n", status));
   }

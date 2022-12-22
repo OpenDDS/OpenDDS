@@ -1,0 +1,13 @@
+project: dcps_test, googletest {
+  exename = *
+
+  dcps_ts_flags += -Gxtypes-complete
+
+  Idl_Files {
+    TypeObjectTest.idl
+  }
+
+  TypeSupport_Files {
+    TypeObjectTest.idl
+  }
+}

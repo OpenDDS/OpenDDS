@@ -32,7 +32,4 @@ public class RtpsUdpInst extends TransportInst {
 
     public native long getHeartbeatPeriod();
     public native void setHeartbeatPeriod(long hbp);
-
-    public native long getHeartbeatResponseDelay();
-    public native void setHeartbeatResponseDelay(long hrd);
 }

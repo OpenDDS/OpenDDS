@@ -1,7 +1,6 @@
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/TypeSupportImpl.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
 

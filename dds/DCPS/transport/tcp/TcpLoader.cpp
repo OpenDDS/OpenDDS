@@ -5,8 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
-
 #include "TcpLoader.h"
 #include "TcpInst.h"
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
@@ -57,10 +55,13 @@ TcpLoader::init(int, ACE_TCHAR*[])
     return 0;
 
   TransportRegistry* registry = TheTransportRegistry;
-  registry->register_type(make_rch<TcpType>());
+  if (!registry->register_type(make_rch<TcpType>())) {
+    return 0;
+  }
+
   TransportInst_rch default_inst =
     registry->create_inst(TransportRegistry::DEFAULT_INST_PREFIX +
-                          std::string("0500_TCP"), TCP_NAME, false);
+                          std::string("0500_TCP"), TCP_NAME);
   registry->get_config(TransportRegistry::DEFAULT_CONFIG_NAME)
     ->sorted_insert(default_inst);
 

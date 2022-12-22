@@ -22,8 +22,8 @@ namespace DCPS {
 typedef RepoId PublicationId;
 typedef RepoId SubscriptionId;
 
-} // namespace OpenDDS
 } // namespace DCPS
+} // namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

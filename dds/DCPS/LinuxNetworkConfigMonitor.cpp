@@ -13,6 +13,9 @@
 
 #ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
 
+#include "ThreadStatusManager.h"
+#include "Service_Participant.h"
+
 #include <ace/Netlink_Addr.h>
 
 #include <linux/rtnetlink.h>
@@ -33,24 +36,63 @@ LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch inte
 
 bool LinuxNetworkConfigMonitor::open()
 {
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (!interceptor) {
+    return false;
+  }
+
+  RcHandle<OpenHandler> oh = make_rch<OpenHandler>(rchandle_from(this));
+  interceptor->execute_or_enqueue(oh);
+  return oh->wait();
+}
+
+bool LinuxNetworkConfigMonitor::OpenHandler::wait() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  while (!done_) {
+    condition_.wait(TheServiceParticipant->get_thread_status_manager());
+  }
+  return retval_;
+}
+
+void LinuxNetworkConfigMonitor::OpenHandler::execute()
+{
+  RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
+  if (!lncm) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  retval_ = lncm->open_i();
+  done_ = true;
+  condition_.notify_one();
+}
+
+bool LinuxNetworkConfigMonitor::open_i()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
+
   // Listen to changes in links and IPV4 and IPV6 addresses.
   const pid_t pid = 0;
   ACE_Netlink_Addr addr;
   addr.set(pid, RTMGRP_NOTIFY | RTMGRP_LINK | RTMGRP_IPV4_IFADDR | RTMGRP_IPV6_IFADDR);
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
 #ifdef ACE_ANDROID
-    if (DCPS_debug_level >= 1) {
-      ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open: could not open socket"
-        " this is expected for API30+\n"));
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open_i: could not open socket"
+                 " this is expected for API30+\n"));
     }
 #else
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not open socket: %m\n")));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not open socket: %m\n"));
+    }
 #endif
     return false;
   }
 
   if (socket_.enable(ACE_NONBLOCK) != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not set non-blocking: %m\n")));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not set non-blocking: %m\n"));
+    }
     return false;
   }
 
@@ -68,7 +110,9 @@ bool LinuxNetworkConfigMonitor::open()
   request.msg.rtgen_family = AF_UNSPEC;
 
   if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for links: %m\n")));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not send request for links: %m\n"));
+    }
     return false;
   }
 
@@ -82,15 +126,16 @@ bool LinuxNetworkConfigMonitor::open()
   request.msg.rtgen_family = AF_UNSPEC;
 
   if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for addresses: %m\n")));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not send request for addresses: %m\n"));
+    }
     return false;
   }
 
   read_messages();
 
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (interceptor) {
-    interceptor->execute_or_enqueue(new RegisterHandler(this));
+  if (reactor()->register_handler(this, READ_MASK) != 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not register for input: %m\n")));
   }
 
   return true;
@@ -98,20 +143,51 @@ bool LinuxNetworkConfigMonitor::open()
 
 bool LinuxNetworkConfigMonitor::close()
 {
-  bool retval = true;
-
   ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (interceptor) {
-    ReactorInterceptor::CommandPtr command = interceptor->execute_or_enqueue(new RemoveHandler(this));
-    command->wait();
+  if (!interceptor) {
+    return false;
   }
+
+  RcHandle<CloseHandler> ch = make_rch<CloseHandler>(rchandle_from(this));
+  interceptor->execute_or_enqueue(ch);
+  return ch->wait();
+}
+
+bool LinuxNetworkConfigMonitor::CloseHandler::wait() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  while (!done_) {
+    condition_.wait(TheServiceParticipant->get_thread_status_manager());
+  }
+  return retval_;
+}
+
+void LinuxNetworkConfigMonitor::CloseHandler::execute()
+{
+  RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
+  if (!lncm) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  retval_ = lncm->close_i();
+  done_ = true;
+  condition_.notify_one();
+}
+
+bool LinuxNetworkConfigMonitor::close_i()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
+  reactor()->remove_handler(this, READ_MASK);
 
   if (socket_.close() != 0) {
-    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n")));
-    retval = false;
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::close_i: could not close socket: %m\n"));
+    }
+
+    return false;
   }
 
-  return retval;
+  return true;
 }
 
 ACE_HANDLE LinuxNetworkConfigMonitor::get_handle() const
@@ -121,6 +197,9 @@ ACE_HANDLE LinuxNetworkConfigMonitor::get_handle() const
 
 int LinuxNetworkConfigMonitor::handle_input(ACE_HANDLE)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, -1);
   read_messages();
   return 0;
 }
@@ -130,12 +209,20 @@ void LinuxNetworkConfigMonitor::read_messages()
   char buffer[MAX_NETLINK_MESSAGE_SIZE];
 
   for (;;) {
-    ssize_t buffer_length = socket_.recv(buffer, 4096, 0);
+    ssize_t buffer_length;
+    {
+      if (socket_.get_handle() == -1) {
+        return;
+      }
+      buffer_length = socket_.recv(buffer, 4096, 0);
+    }
     if (buffer_length < 0) {
       if (errno == EAGAIN || errno == EWOULDBLOCK) {
         return;
       }
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::read_messages: could not recv: %m\n")));
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::read_messages: could not recv: %m\n"));
+      }
       return;
     } else if (buffer_length == 0) {
       return;
@@ -155,7 +242,9 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
   case NLMSG_ERROR:
     {
       const nlmsgerr* msg = reinterpret_cast<nlmsgerr*>(NLMSG_DATA(header));
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::process_message: NETLINK error: %C\n"), strerror(-msg->error)));
+      if (log_level >= LogLevel::Error) {
+        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::process_message: NETLINK error: %C\n", strerror(-msg->error)));
+      }
     }
     break;
   case RTM_NEWADDR:
@@ -178,12 +267,19 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
            attr = RTA_NEXT(attr, rta_length)) {
         if (attr->rta_type == IFA_ADDRESS) {
           if (RTA_PAYLOAD(attr) != address_length) {
-            ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n")));
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n"));
+            }
             return;
           }
           ACE_INET_Addr addr;
           addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-          add_address(msg->ifa_index, addr);
+          NetworkInterfaceMap::const_iterator pos = network_interface_map_.find(msg->ifa_index);
+          if (pos != network_interface_map_.end()) {
+            set(NetworkInterfaceAddress(pos->second.name, pos->second.can_multicast, NetworkAddress(addr)));
+          } else if (log_level >= LogLevel::Warning) {
+            ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: cannot find interface for address\n"));
+          }
         }
       }
     }
@@ -208,15 +304,20 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
            attr = RTA_NEXT(attr, rta_length)) {
         if (attr->rta_type == IFA_ADDRESS) {
           if (RTA_PAYLOAD(attr) != address_length) {
-            ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n")));
+            if (log_level >= LogLevel::Warning) {
+              ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::process_message: incorrect address byte count\n"));
+            }
             return;
           }
-          ACE_INET_Addr addr;
-          addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
-          remove_address(msg->ifa_index, addr);
+
+          NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifa_index);
+          if (pos != network_interface_map_.end()) {
+            ACE_INET_Addr addr;
+            addr.set_address(reinterpret_cast<const char*>(RTA_DATA(attr)), address_length, 0);
+            remove_address(pos->second.name, NetworkAddress(addr));
+          }
         }
       }
-
     }
     break;
   case RTM_NEWLINK:
@@ -232,14 +333,23 @@ void LinuxNetworkConfigMonitor::process_message(const nlmsghdr* header)
         }
       }
 
-      remove_interface(msg->ifi_index);
-      add_interface(NetworkInterface(msg->ifi_index, name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK)));
+      // Clean up the old if necessary.
+      NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifi_index);
+      if (pos != network_interface_map_.end()) {
+        remove_interface(pos->second.name);
+        network_interface_map_.erase(pos);
+      }
+      network_interface_map_[msg->ifi_index] = NetworkInterface(name, msg->ifi_flags & (IFF_MULTICAST | IFF_LOOPBACK));
     }
     break;
   case RTM_DELLINK:
     {
       const ifinfomsg* msg = reinterpret_cast<ifinfomsg*>(NLMSG_DATA(header));
-      remove_interface(msg->ifi_index);
+      NetworkInterfaceMap::iterator pos = network_interface_map_.find(msg->ifi_index);
+      if (pos != network_interface_map_.end()) {
+        remove_interface(pos->second.name);
+        network_interface_map_.erase(pos);
+      }
     }
     break;
   }

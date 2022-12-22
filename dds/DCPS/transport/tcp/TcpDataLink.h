@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -10,13 +8,11 @@
 
 #include "TcpConnection_rch.h"
 #include "TcpTransport.h"
-#include "dds/DCPS/transport/framework/DataLink.h"
-#include "ace/INET_Addr.h"
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
+
+#include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/transport/framework/DataLink.h>
+
+#include <ace/INET_Addr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -29,11 +25,11 @@ class TcpReceiveStrategy;
 class TcpDataLink : public DataLink {
 public:
 
-  TcpDataLink(const ACE_INET_Addr& remote_address,
-                    TcpTransport&  transport_impl,
-                    Priority           priority,
-                    bool               is_loopback,
-                    bool               is_active);
+  TcpDataLink(const TcpTransport_rch& transport_impl,
+              const ACE_INET_Addr& remote_address,
+              Priority priority,
+              bool is_loopback,
+              bool is_active);
   virtual ~TcpDataLink();
 
   /// Accessor for the remote address.
@@ -50,6 +46,10 @@ public:
   int reconnect(const TcpConnection_rch& connection);
 
   TcpConnection_rch get_connection();
+
+  bool check_active_client(const RepoId& local_id);
+
+  void client_stop(const RepoId& local_id);
 
   virtual void pre_stop_i();
 
@@ -84,22 +84,24 @@ protected:
   /// handling a shutdown() call.
   virtual void stop_i();
 
+  virtual void send_i(TransportQueueElement* element, bool relink = true);
+  virtual void send_stop_i(RepoId repoId);
+
 private:
   bool handle_send_request_ack(TransportQueueElement* element);
   void send_graceful_disconnect_message();
   void send_association_msg(const RepoId& local, const RepoId& remote);
 
-  ACE_INET_Addr           remote_address_;
+  ACE_INET_Addr remote_address_;
   WeakRcHandle<TcpConnection> connection_;
   bool graceful_disconnect_sent_;
-#ifdef ACE_HAS_CPP11
-  std::atomic<bool> release_is_pending_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> release_is_pending_;
-#endif
+  AtomicBool release_is_pending_;
   typedef OPENDDS_VECTOR(TransportQueueElement*) PendingRequestAcks;
   ACE_SYNCH_MUTEX pending_request_acks_lock_;
   PendingRequestAcks pending_request_acks_;
+  typedef OPENDDS_SET_CMP(RepoId, GUID_tKeyLessThan) RepoIdSetType;
+  RepoIdSetType stopped_clients_;
+  mutable ACE_Thread_Mutex stopped_clients_mutex_;
 };
 
 } // namespace DCPS

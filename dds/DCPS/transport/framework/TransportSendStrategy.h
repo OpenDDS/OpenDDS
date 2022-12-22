@@ -8,24 +8,29 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDSTRATEGY_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDSTRATEGY_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DCPS/PoolAllocator.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
 #include "BasicQueue_T.h"
+#include "TransportImpl_rch.h"
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
 #include "ThreadSynchStrategy_rch.h"
-#include "ace/Synch_Traits.h"
+
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/DataBlockLockPool.h>
+#include <dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h>
 
 #if defined(OPENDDS_SECURITY)
-#include "dds/DdsSecurityCoreC.h"
-#include "dds/DCPS/security/framework/SecurityConfig.h"
-#include "dds/DCPS/security/framework/SecurityConfig_rch.h"
+#include <dds/DdsSecurityCoreC.h>
+#include <dds/DCPS/security/framework/SecurityConfig.h>
+#include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #endif
+
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -166,7 +171,7 @@ public:
 protected:
 
   TransportSendStrategy(std::size_t id,
-                        TransportImpl& transport,
+                        const TransportImpl_rch& transport,
                         ThreadSynchResource* synch_resource,
                         Priority priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
@@ -381,7 +386,7 @@ private:
   unsigned start_counter_;
 
   /// This mode determines how send() calls will be handled.
-  SendMode mode_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, SendMode> mode_;
 
   /// This mode remembers the mode before send is suspended and is
   /// used after the send is resumed because the connection is
@@ -398,6 +403,13 @@ private:
   /// Allocator for header message block.
   unique_ptr<TransportDataBlockAllocator> header_db_allocator_;
 
+  /// DataBlockLockPool
+  unique_ptr<DataBlockLockPool> header_db_lock_pool_;
+
+  /// Allocator for data buffers.
+  typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> DataAllocator;
+  unique_ptr<DataAllocator> header_data_allocator_;
+
   /// The thread synch object.
   unique_ptr<ThreadSynch> synch_;
 
@@ -409,7 +421,7 @@ private:
   MessageBlockAllocator replaced_element_mb_allocator_;
   DataBlockAllocator replaced_element_db_allocator_;
 
-  TransportImpl& transport_;
+  WeakRcHandle<TransportImpl> transport_;
 
   bool graceful_disconnecting_;
 

@@ -20,6 +20,7 @@ DataReaderListenerImpl::DataReaderListenerImpl(DistributedConditionSet_rch dcs,
   , liveliness_changed_count_(0)
   , samples_handled_(0)
   {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     last_status_.alive_count = 0;
     last_status_.not_alive_count = 0;
     last_status_.alive_count_change = 0;
@@ -85,6 +86,8 @@ void DataReaderListenerImpl::on_liveliness_changed(
     ACE_UNUSED_ARG(reader);
     ACE_UNUSED_ARG(status);
 
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
     if (status.alive_count_change > 0) {
       OPENDDS_ASSERT(status.alive_count_change == 1);
       OPENDDS_ASSERT(status.not_alive_count_change <= 0);
@@ -149,10 +152,12 @@ void DataReaderListenerImpl::on_subscription_matched(
         ::DDS::ANY_INSTANCE_STATE);
     }
 
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
     if (status == ::DDS::RETCODE_OK) {
       for (CORBA::ULong i = 0 ; i < si.length() ; ++i) {
         ACE_DEBUG((LM_DEBUG,
-          "%T %C foo[%d]: x = %f y = %f, key = %d\n",
+          "(%P|%t) %T %C foo[%d]: x = %f y = %f, key = %d\n",
           use_take ? "took": "read", i, foo[i].x, foo[i].y, foo[i].key));
         PrintSampleInfo(si[i]) ;
         last_si_ = si[i] ;

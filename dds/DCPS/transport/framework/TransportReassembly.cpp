@@ -17,14 +17,14 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-TransportReassembly::FragKey::FragKey(const PublicationId& pubId,
+FragKey::FragKey(const PublicationId& pubId,
                                       const SequenceNumber& dataSampleSeq)
   : publication_(pubId)
   , data_sample_seq_(dataSampleSeq)
 {
 }
 
-GUID_tKeyLessThan TransportReassembly::FragKey::compare_;
+GUID_tKeyLessThan FragKey::compare_;
 
 TransportReassembly::FragRange::FragRange(const SequenceRange& seqRange,
                                           const ReceivedDataSample& data)
@@ -78,6 +78,7 @@ TransportReassembly::insert(FragRangeList& flist,
     if (next < fr.transport_seq_.first.getValue()) {
       // insert before 'it'
       fri_map[seqRange.second.getValue()] = flist.insert(it, FragRange(seqRange, data));
+      data.clear();
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "inserted on left\n"));
       return true;
@@ -90,15 +91,12 @@ TransportReassembly::insert(FragRangeList& flist,
         return false;
       }
       fr.rec_ds_.header_ = joined;
-      if (fr.rec_ds_.sample_ && data.sample_) {
-        ACE_Message_Block* last;
-        for (last = data.sample_.get(); last->cont(); last = last->cont()) ;
-        last->cont(fr.rec_ds_.sample_.release());
-        fr.rec_ds_.sample_.reset(data.sample_.release());
+      if (fr.rec_ds_.has_data() && data.has_data()) {
+        fr.rec_ds_.prepend(data);
       } else {
-        fr.rec_ds_.sample_.reset();
+        fr.rec_ds_.clear();
+        data.clear();
       }
-      data.sample_.reset();
       fr.transport_seq_.first = seqRange.first;
       VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
         "combined on left\n"));
@@ -106,7 +104,7 @@ TransportReassembly::insert(FragRangeList& flist,
 
     } else if (prev == fr.transport_seq_.second.getValue()) {
       // combine on right of fr
-      if (!fr.rec_ds_.sample_) {
+      if (!fr.rec_ds_.has_data()) {
         fr.rec_ds_.header_.more_fragments_ = true;
       }
       DataSampleHeader joined;
@@ -115,14 +113,11 @@ TransportReassembly::insert(FragRangeList& flist,
         return false;
       }
       fr.rec_ds_.header_ = joined;
-      if (fr.rec_ds_.sample_ && data.sample_) {
-        ACE_Message_Block* last;
-        for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
-        last->cont(data.sample_.release());
-      }
-      else {
-        fr.rec_ds_.sample_.reset();
-        data.sample_.reset();
+      if (fr.rec_ds_.has_data() && data.has_data()) {
+        fr.rec_ds_.append(data);
+      } else {
+        fr.rec_ds_.clear();
+        data.clear();
       }
 
       fri_map.erase(fit++);
@@ -137,7 +132,7 @@ TransportReassembly::insert(FragRangeList& flist,
       // check if the next FragRange in the list needs to be combined
       if (++it != flist.end()) {
         if (next == it->transport_seq_.first.getValue()) {
-          if (!fr.rec_ds_.sample_) {
+          if (!fr.rec_ds_.has_data()) {
             fr.rec_ds_.header_.more_fragments_ = true;
           }
           if (!DataSampleHeader::join(fr.rec_ds_.header_, it->rec_ds_.header_,
@@ -146,19 +141,17 @@ TransportReassembly::insert(FragRangeList& flist,
             return false;
           }
           fr.rec_ds_.header_ = joined;
-          if (!it->rec_ds_.sample_) {
-            fr.rec_ds_.sample_.reset();
+          if (!it->rec_ds_.has_data()) {
+            fr.rec_ds_.clear();
           } else {
-            if (!fr.rec_ds_.sample_) {
+            if (!fr.rec_ds_.has_data()) {
               ACE_ERROR((LM_ERROR,
                          ACE_TEXT("(%P|%t) ERROR: ")
                          ACE_TEXT("OpenDDS::DCPS::TransportReassembly::insert, ")
                          ACE_TEXT("Cannot dereference null pointer fr.rec_ds_.sample_\n")));
               return false;
             }
-            ACE_Message_Block* last;
-            for (last = fr.rec_ds_.sample_.get(); last->cont(); last = last->cont()) ;
-            last->cont(it->rec_ds_.sample_.release());
+            fr.rec_ds_.append(it->rec_ds_);
           }
           fit->second = bookmark;
           needs_insert = false;
@@ -184,15 +177,22 @@ TransportReassembly::insert(FragRangeList& flist,
   fri_map[seqRange.second.getValue()] = flist.insert(flist.end(), FragRange(seqRange, data));
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::insert() "
     "inserted at end of list\n"));
+  data.clear();
   return true;
 }
 
 bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
-                               const RepoId& pub_id) const
+                               const RepoId& pub_id,
+                               ACE_UINT32& total_frags) const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
-  return fragments_.count(FragKey(pub_id, seq));
+  const FragInfoMap::const_iterator iter = fragments_.find(FragKey(pub_id, seq));
+  if (iter != fragments_.end()) {
+    total_frags = iter->second.total_frags_;
+    return true;
+  }
+  return false;
 }
 
 void
@@ -233,18 +233,21 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
   if (first != 1) {
     // Represent the "gap" before the first list element.
     // base == 1 and the first 2 args to fill_bitmap_range() are deltas of base
+    ACE_CDR::ULong bits_added = 0;
     DisjointSequence::fill_bitmap_range(0, first.getLow() - 2,
-                                        bitmap, length, numBits);
+                                        bitmap, length, numBits, bits_added);
   } else if (flist.size() == 1) {
     // No gaps, but we know there are (at least 1) more_fragments
     if (iter->second.total_frags_ == 0) {
-      DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits);
+      ACE_CDR::ULong bits_added = 0;
+      DisjointSequence::fill_bitmap_range(0, 0, bitmap, length, numBits, bits_added);
     } else {
       const size_t rlimit = static_cast<size_t>(flist.back().transport_seq_.second.getValue() - 1);
       const CORBA::ULong ulimit = static_cast<CORBA::ULong>(iter->second.total_frags_ - (base < rlimit ? rlimit : base));
+      ACE_CDR::ULong bits_added = 0;
       DisjointSequence::fill_bitmap_range(0,
                                           ulimit,
-                                          bitmap, length, numBits);
+                                          bitmap, length, numBits, bits_added);
     }
     // NOTE: this could send a nack for fragments that are in flight
     // need to defer setting bitmap till heartbeat extending logic
@@ -260,7 +263,8 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
     }
     const CORBA::ULong low = it->transport_seq_.second.getLow() + 1 - base,
                        high = it_next->transport_seq_.first.getLow() - 1 - base;
-    DisjointSequence::fill_bitmap_range(low, high, bitmap, length, numBits);
+    ACE_CDR::ULong bits_added = 0;
+    DisjointSequence::fill_bitmap_range(low, high, bitmap, length, numBits, bits_added);
   }
 
   return base;
@@ -293,11 +297,11 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
                                   ACE_UINT32 total_frags)
 {
   if (Transport_debug_level > 5) {
-    GuidConverter conv(data.header_.publication_id_);
+    LogGuid logger(data.header_.publication_id_);
     ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
       "tseq %q-%q first %d dseq %q pub %C\n", seqRange.first.getValue(),
       seqRange.second.getValue(), firstFrag ? 1 : 0,
-      data.header_.sequence_.getValue(), OPENDDS_STRING(conv).c_str()));
+      data.header_.sequence_.getValue(), logger.c_str()));
   }
 
   const MonotonicTimePoint now = MonotonicTimePoint::now();
@@ -310,6 +314,7 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   if (iter == fragments_.end()) {
     fragments_[key] = FragInfo(firstFrag, FragRangeList(1, FragRange(seqRange, data)), total_frags, expiration);
     expiration_queue_.push_back(std::make_pair(expiration, key));
+    data.clear();
     // since this is the first fragment we've seen, it can't possibly be done
     if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
@@ -344,15 +349,15 @@ TransportReassembly::reassemble_i(const SequenceRange& seqRange,
   if (iter->second.have_first_
       && iter->second.range_list_.size() == 1
       && !iter->second.range_list_.front().rec_ds_.header_.more_fragments_) {
-    swap(data, iter->second.range_list_.front().rec_ds_);
+    std::swap(data, iter->second.range_list_.front().rec_ds_);
     fragments_.erase(iter);
     completed_[key.publication_].insert(key.data_sample_seq_);
     if (Transport_debug_level > 5 || transport_debug.log_fragment_storage) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
                  "removed frag, returning %C with %B fragments\n",
-                 data.sample_ ? "true (complete)" : "false (incomplete)", fragments_.size()));
+                 data.has_data() ? "true (complete)" : "false (incomplete)", fragments_.size()));
     }
-    return data.sample_.get(); // could be false if we had data_unavailable()
+    return data.has_data(); // could be false if we had data_unavailable()
   }
 
   VDBG((LM_DEBUG, "(%P|%t) DBG:   TransportReassembly::reassemble_i "
@@ -374,7 +379,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
     FragRangeList& flist = iter->second.range_list_;
     FragRangeIterMap& fri_map = iter->second.range_finder_;
 
-    ReceivedDataSample dummy(0);
+    ReceivedDataSample dummy;
     dummy.header_.sequence_ = key.data_sample_seq_;
 
     // check if we should expand the front element (only if !have_first)

@@ -58,11 +58,10 @@ void BitPubListenerImpl::on_data_available(DDS::DataReader_ptr reader)
           CORBA::Long const ownership_strength = data.ownership_strength.value;
           this->partipant_->update_ownership_strength(pub_id, ownership_strength);
           if (DCPS_debug_level > 4) {
-            GuidConverter writer_converter(pub_id);
             ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) BitPubListenerImpl::on_data_available: %X ")
               ACE_TEXT("reset ownership strength %d for writer %C.\n"),
-              this, ownership_strength, OPENDDS_STRING(writer_converter).c_str()));
+              this, ownership_strength, LogGuid(pub_id).c_str()));
           }
 #endif
         }

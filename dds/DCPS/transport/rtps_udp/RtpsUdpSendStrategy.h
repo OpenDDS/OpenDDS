@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,26 +7,25 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPSENDSTRATEGY_H
 
 #include "Rtps_Udp_Export.h"
+#include "RtpsUdpDataLink_rch.h"
 
-#if defined(OPENDDS_SECURITY)
-#include "dds/DdsSecurityCoreC.h"
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/transport/framework/TransportSendStrategy.h>
+#include <dds/DCPS/RTPS/MessageTypes.h>
+
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#include "dds/DCPS/transport/framework/TransportSendStrategy.h"
-
-#include "dds/DCPS/RTPS/MessageTypes.h"
-
-#include "ace/INET_Addr.h"
-#include "ace/SOCK_Dgram.h"
+#include <ace/SOCK_Dgram.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
-class RtpsUdpDataLink;
 class RtpsUdpInst;
-typedef RcHandle<RtpsUdpDataLink> RtpsUdpDataLink_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpSendStrategy
   : public TransportSendStrategy {
@@ -45,16 +42,16 @@ public:
   };
   friend struct OverrideToken;
 
-  OverrideToken override_destinations(const ACE_INET_Addr& destination);
+  OverrideToken override_destinations(const NetworkAddress& destination);
   OverrideToken override_destinations(
-    const OPENDDS_SET(ACE_INET_Addr)& destinations);
+    const AddrSet& destinations);
 
   void send_rtps_control(RTPS::Message& message,
                          ACE_Message_Block& submessages,
-                         const ACE_INET_Addr& destination);
+                         const NetworkAddress& destination);
   void send_rtps_control(RTPS::Message& message,
                          ACE_Message_Block& submessages,
-                         const OPENDDS_SET(ACE_INET_Addr)& destinations);
+                         const AddrSet& destinations);
   void append_submessages(const RTPS::SubmessageSeq& submessages);
 
 #if defined(OPENDDS_SECURITY)
@@ -94,10 +91,10 @@ protected:
 private:
   bool marshal_transport_header(ACE_Message_Block* mb);
   ssize_t send_multi_i(const iovec iov[], int n,
-                       const OPENDDS_SET(ACE_INET_Addr)& addrs);
-  const ACE_SOCK_Dgram& choose_send_socket(const ACE_INET_Addr& addr) const;
+                       const AddrSet& addrs);
+  const ACE_SOCK_Dgram& choose_send_socket(const NetworkAddress& addr) const;
   ssize_t send_single_i(const iovec iov[], int n,
-                        const ACE_INET_Addr& addr);
+                        const NetworkAddress& addr);
 
 #ifdef OPENDDS_SECURITY
   ACE_Message_Block* pre_send_packet(const ACE_Message_Block* plain);
@@ -108,14 +105,16 @@ private:
     DDS::OctetSeq encoded_;
   };
 
-  bool encode_writer_submessage(const RepoId& receiver,
+  bool encode_writer_submessage(const GUID_t& sender,
+                                const GUID_t& receiver,
                                 OPENDDS_VECTOR(Chunk)& replacements,
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
                                 DDS::Security::DatawriterCryptoHandle sender_dwch,
                                 const char* submessage_start, CORBA::Octet msgId);
 
-  bool encode_reader_submessage(const RepoId& receiver,
+  bool encode_reader_submessage(const GUID_t& sender,
+                                const GUID_t& receiver,
                                 OPENDDS_VECTOR(Chunk)& replacements,
                                 DDS::Security::CryptoTransform* crypto,
                                 const DDS::OctetSeq& plain,
@@ -134,8 +133,8 @@ private:
 #endif
 
   RtpsUdpDataLink* link_;
-  const OPENDDS_SET(ACE_INET_Addr)* override_dest_;
-  const ACE_INET_Addr* override_single_dest_;
+  const AddrSet* override_dest_;
+  const NetworkAddress* override_single_dest_;
 
   const size_t max_message_size_;
   RTPS::Message rtps_message_;
@@ -144,7 +143,7 @@ private:
   ACE_Data_Block rtps_header_db_;
   ACE_Message_Block rtps_header_mb_;
   ACE_Thread_Mutex rtps_header_mb_lock_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> network_is_unreachable_;
+  AtomicBool network_is_unreachable_;
 };
 
 } // namespace DCPS

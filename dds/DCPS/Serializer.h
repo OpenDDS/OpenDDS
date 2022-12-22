@@ -11,14 +11,14 @@
  *
  *   void serialized_size(
  *       const Encoding& encoding, size_t& size, const Type& value);
- *     Get the byte size of the representation of value.
+ *     Get the size (in bytes) of the encoded representation of value.
  *
- *   bool operator<<(Serializer& serializer, Type& value);
+ *   bool operator<<(Serializer& serializer, const Type& value);
  *     Tries to encode value into the stream of the serializer. Returns true if
  *     successful, else false.
  *
- *   bool operator>>(Serializer& serializer, const Type& value);
- *     Tries to decodes a representation of Type located at the current
+ *   bool operator>>(Serializer& serializer, Type& value);
+ *     Tries to decode a representation of Type located at the current
  *     position of the stream and use that to set value. Returns true if
  *     successful, else false.
  */
@@ -94,14 +94,16 @@ OpenDDS_Dcps_Export
 void align(size_t& value, size_t by);
 
 /**
- * Represents the settings of the serialized stream. Passed to things like
- * Serializer, serialized_size(), and max_serialized_size(), etc.
+ * Represents the serialization rules. Used to construct a
+ * Serializer and to pass to functions that are used without
+ * a Serializer like serialized_size() and max_serialized_size()
  */
 class OpenDDS_Dcps_Export Encoding {
 public:
   /**
-   * The encoding kinds represent the possible compatible encoding sets used
-   * for serialization.
+   * Kinds are the overall algorithm for serialization.
+   * A Kind value along with other details like alignment and endianness
+   * comprise an Encoding.
    */
   enum Kind {
     /**
@@ -117,7 +119,7 @@ public:
      * This is the classic encoding of OpenDDS used when there is no RTPS
      * transport being used. It has no padding bytes and no XCDR behavior.
      */
-    KIND_UNALIGNED_CDR,
+    KIND_UNALIGNED_CDR
   };
 
   enum Alignment {
@@ -207,7 +209,7 @@ private:
  *
  * This consists of 4 bytes that appear in front of the data. The first two
  * bytes represents the kind of the encoding the data uses and the last two
- * bytes are traditionally reserved.
+ * bytes (known as "options") are traditionally reserved.
  *
  * See XTypes 1.3 7.6.3.1.2
  */
@@ -265,6 +267,11 @@ public:
    */
   bool to_encoding(Encoding& encoding, Extensibility expected_extensibility);
 
+  /**
+   * Like to_encoding, but without an expected extensibility.
+   */
+  bool to_any_encoding(Encoding& encoding);
+
   String to_string() const;
 
   static bool set_encapsulation_options(Message_Block_Ptr& mb);
@@ -274,6 +281,8 @@ private:
   Kind kind_;
   /// The last two bytes as a big endian integer
   ACE_CDR::UShort options_;
+
+  bool to_encoding_i(Encoding& encoding, Extensibility* expected_extensibility_ptr);
 };
 
 class Serializer;
@@ -360,6 +369,10 @@ public:
   // EMHEADER must understand flag
   static const ACE_CDR::ULong emheader_must_understand = 1U << 31U;
 
+  /// Maximum value for member id.
+  static const ACE_CDR::ULong MEMBER_ID_MAX = 0x0FFFFFFF;
+  static const ACE_CDR::ULong MEMBER_ID_MASK = MEMBER_ID_MAX;
+
   /**
    * Constructor with a message block chain.  This installs the
    * message block chain and sets the current block to the first in
@@ -433,6 +446,14 @@ public:
   /// future versions of the spec which may have additional optional fields.
   bool skip(size_t n, int size = 1);
 
+  /// Return a duplicated Message Block (chain) which starts at the current
+  /// read position (rpos) and extends for n bytes.
+  /// This can be used to treat a subset of the original message as if it
+  /// was itself a full message, for example the SerializedPayload or the
+  /// Parameter value inside a ParameterList.
+  /// The returned object should be release()'d (use Message_Block_Ptr)
+  ACE_Message_Block* trim(size_t n) const;
+
   const char* pos_rd() const { return current_ ? current_->rd_ptr() : 0; }
   const char* pos_wr() const { return current_ ? current_->wr_ptr() : 0; }
 
@@ -441,6 +462,11 @@ public:
 
   /// Examine the logical writing position of the stream.
   size_t wpos() const { return wpos_; }
+
+  ACE_Message_Block* current() const
+  {
+    return current_;
+  }
 
   /**
    * Read basic IDL types arrays
@@ -677,6 +703,13 @@ public:
   bool write_list_end_parameter_id();
 
   /**
+   * Skip a delimiter used for XCDR2 delimited data.
+   *
+   * Returns true if successful
+   */
+  bool skip_delimiter();
+
+  /**
    * Read a delimiter used for XCDR2 delimited data.
    *
    * Returns true if successful and size will be set to the size of the CDR
@@ -753,6 +786,18 @@ public:
   }
 
   bool peek(ACE_CDR::ULong& t);
+
+  // This is used by DynamicData and must have all reading-related members of
+  // of Serializer for DynamicData to work correctly.
+  struct RdState {
+    explicit RdState(unsigned char shift = 0, size_t pos = 0)
+      : align_rshift(shift), rpos(pos) {}
+    unsigned char align_rshift;
+    size_t rpos;
+  };
+
+  RdState rdstate() const;
+  void rdstate(const RdState& state);
 
 private:
   ///@{

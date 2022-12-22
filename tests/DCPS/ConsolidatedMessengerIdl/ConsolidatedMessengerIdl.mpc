@@ -2,6 +2,7 @@ project: dcps_test_idl_only_lib {
   idlflags      += -Wb,stub_export_include=Messenger_Export.h \
                    -Wb,stub_export_macro=Messenger_Export -SS
   dcps_ts_flags += -Wb,export_macro=Messenger_Export
+  dcps_ts_flags += -Gxtypes-complete
   dynamicflags  += MESSENGER_BUILD_DLL
 
   TypeSupport_Files {

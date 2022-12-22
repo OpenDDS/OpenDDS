@@ -273,7 +273,7 @@ void send_message(FACE::CONNECTION_ID_TYPE connection_id,
 }
 
 template <typename Msg>
-class Listener : public DCPS::LocalObject<DDS::DataReaderListener> {
+class Listener : public virtual DCPS::LocalObject<DDS::DataReaderListener> {
 public:
   typedef void (*Callback)(FACE::TRANSACTION_ID_TYPE, Msg&,
                            FACE::MESSAGE_TYPE_GUID,

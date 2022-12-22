@@ -6,17 +6,19 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H
 
-#include "RtpsUdpDataLink.h"
-#include "RtpsUdpDataLink_rch.h"
 #include "Rtps_Udp_Export.h"
+#include "RtpsUdpDataLink_rch.h"
+#include "RtpsUdpDataLink.h"
 
-#include <dds/DCPS/PoolAllocator.h>
 #include <dds/DCPS/ConnectionRecords.h>
-#include <dds/DCPS/transport/framework/TransportImpl.h>
-#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/FibonacciSequence.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/SporadicTask.h>
 #include <dds/DCPS/RTPS/ICE/Ice.h>
-
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
+#include <dds/DCPS/transport/framework/TransportClient.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportStatistics.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -27,9 +29,12 @@ class RtpsUdpInst;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpTransport : public TransportImpl {
 public:
-  RtpsUdpTransport(RtpsUdpInst& inst);
-  RtpsUdpInst& config() const;
-  virtual ICE::Endpoint* get_ice_endpoint();
+  RtpsUdpTransport(const RtpsUdpInst_rch& inst);
+  RtpsUdpInst_rch config() const;
+#ifdef OPENDDS_SECURITY
+  DCPS::RcHandle<ICE::Agent> get_ice_agent() const;
+#endif
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
   virtual void rtps_relay_only_now(bool flag);
   virtual void use_rtps_relay_now(bool flag);
   virtual void use_ice_now(bool flag);
@@ -42,7 +47,11 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
-  void get_and_reset_relay_message_counts(RelayMessageCounts& counts);
+  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+                                     TransportLocator& /*locators*/);
+
+  void rtps_relay_address_change();
+  void append_transport_statistics(TransportStatisticsSequence& seq);
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -58,7 +67,7 @@ private:
                                             bool disassociate,
                                             bool association_failed);
 
-  bool configure_i(RtpsUdpInst& config);
+  bool configure_i(const RtpsUdpInst_rch& config);
 
   void client_stop(const RepoId& localId);
 
@@ -101,6 +110,7 @@ private:
   bool use_datalink(const RepoId& local_id,
                     const RepoId& remote_id,
                     const TransportBLOB& remote_data,
+                    const TransportBLOB& discovery_locator,
                     const MonotonicTime_t& participant_discovered_at,
                     ACE_CDR::ULong participant_flags,
                     bool local_reliable, bool remote_reliable,
@@ -109,13 +119,7 @@ private:
                     const TransportClient_rch& client);
 
 #if defined(OPENDDS_SECURITY)
-  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch)
-  {
-    local_crypto_handle_ = pch;
-    if (link_) {
-      link_->local_crypto_handle(pch);
-    }
-  }
+  void local_crypto_handle(DDS::Security::ParticipantCryptoHandle pch);
 #endif
 
   //protects access to link_ for duration of make_datalink
@@ -128,7 +132,7 @@ private:
   typedef ACE_Guard<LockType> GuardType;
   LockType connections_lock_;
 
-  DDS::Subscriber_var bit_sub_;
+  RcHandle<BitSubscriber> bit_sub_;
   GuidPrefix_t local_prefix_;
 
   /// RTPS uses only one link per transport.
@@ -156,7 +160,7 @@ private:
   ConnectionRecords deferred_connection_records_;
 #endif
 
-  struct IceEndpoint : public ACE_Event_Handler, public ICE::Endpoint {
+  struct IceEndpoint : public virtual ACE_Event_Handler, public virtual ICE::Endpoint {
     RtpsUdpTransport& transport;
 
     IceEndpoint(RtpsUdpTransport& a_transport)
@@ -173,20 +177,25 @@ private:
 
     bool network_is_unreachable_;
   };
-  IceEndpoint ice_endpoint_;
-  ICE::ServerReflexiveStateMachine relay_srsm_;
-  typedef PmfPeriodicTask<RtpsUdpTransport> Periodic;
-  RcHandle<Periodic> relay_stun_task_;
-  mutable ACE_Thread_Mutex relay_stun_mutex_;
+  RcHandle<IceEndpoint> ice_endpoint_;
+
+  typedef PmfSporadicTask<RtpsUdpTransport> Sporadic;
   void relay_stun_task(const MonotonicTimePoint& now);
+  RcHandle<Sporadic> relay_stun_task_;
+  FibonacciSequence<TimeDuration> relay_stun_task_falloff_;
+  ThreadLockType relay_stun_task_falloff_mutex_;
+  ICE::ServerReflexiveStateMachine relay_srsm_;
+
+  mutable ACE_Thread_Mutex relay_stun_mutex_;
 
   void start_ice();
   void stop_ice();
 
+  RcHandle<ICE::Agent> ice_agent_;
 #endif
 
-  RelayMessageCounts relay_message_counts_;
-  ACE_Thread_Mutex relay_message_counts_mutex_;
+  InternalTransportStatistics transport_statistics_;
+  ACE_Thread_Mutex transport_statistics_mutex_;
 
   friend class RtpsUdpSendStrategy;
   friend class RtpsUdpReceiveStrategy;
@@ -197,4 +206,4 @@ private:
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif  /* DCPS_RTPSUDPTRANSPORT_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPTRANSPORT_H */

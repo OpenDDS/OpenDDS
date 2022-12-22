@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -16,26 +14,28 @@
 #include "ConfigUtils.h"
 #include "unique_ptr.h"
 #include "ReactorTask.h"
+#include "JobQueue.h"
 #include "NetworkConfigMonitor.h"
 #include "NetworkConfigModifier.h"
 #include "Recorder.h"
 #include "Replayer.h"
+#include "TimeSource.h"
+#include "AtomicBool.h"
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <ace/Task.h>
-#include <ace/Configuration.h>
 #include <ace/Time_Value.h>
 #include <ace/ARGV.h>
 #include <ace/Barrier.h>
 
 #include <memory>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -45,10 +45,11 @@ namespace DCPS {
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
 class DataDurabilityCache;
 #endif
+class ThreadStatusManager;
 
 const char DEFAULT_ORB_NAME[] = "OpenDDS_DCPS";
 
-class ShutdownListener {
+class ShutdownListener : public virtual RcObject {
 public:
   virtual ~ShutdownListener() {}
   virtual void notify_shutdown() = 0;
@@ -78,6 +79,8 @@ public:
   /// Return a singleton instance of this class.
   static Service_Participant* instance();
 
+  const TimeSource& time_source() const;
+
   /// Get the common timer interface.
   /// Intended for use by OpenDDS internals only.
   ACE_Reactor_Timer_Interface* timer();
@@ -88,7 +91,9 @@ public:
 
   ReactorInterceptor_rch interceptor() const;
 
-  void set_shutdown_listener(ShutdownListener* listener);
+  JobQueue_rch job_queue() const;
+
+  void set_shutdown_listener(RcHandle<ShutdownListener> listener);
 
   /**
    * Initialize the DDS client environment and get the
@@ -108,10 +113,14 @@ public:
   /**
    * Stop being a participant in the service.
    *
-   * @note Required Precondition: all DomainParticipants have been
-   *       deleted.
+   * @note
+   * All Domain Participants have to be deleted before calling or
+   * DDS::RETCODE_PRECONDITION_NOT_MET is returned.
+   *
+   * If the Service Participant has already been shutdown then
+   * DDS::RETCODE_ALREADY_DELETED will be returned.
    */
-  void shutdown();
+  DDS::ReturnCode_t shutdown();
 
   /// Accessor for if the participant has been shutdown
   bool is_shut_down() const;
@@ -327,7 +336,7 @@ public:
     bit_enabled_ = b;
   }
 
-  const ACE_INET_Addr& default_address() const { return default_address_; }
+  const NetworkAddress& default_address() const { return default_address_; }
 
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
   /// Get the data durability cache corresponding to the given
@@ -425,8 +434,6 @@ public:
 #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
   NetworkConfigModifier* network_config_modifier();
 #endif
-  NetworkConfigMonitor_rch network_config_monitor();
-
 
   DDS::Duration_t bit_autopurge_nowriter_samples_delay() const;
   void bit_autopurge_nowriter_samples_delay(const DDS::Duration_t& duration);
@@ -434,10 +441,42 @@ public:
   DDS::Duration_t bit_autopurge_disposed_samples_delay() const;
   void bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration);
 
+  /**
+   * Get TypeInformation of a remote entity given the corresponding BuiltinTopicKey_t.
+   */
+  XTypes::TypeInformation get_type_information(DDS::DomainParticipant_ptr participant,
+                                               const DDS::BuiltinTopicKey_t& key) const;
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::ReturnCode_t get_dynamic_type(DDS::DynamicType_var& type,
+    DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const;
+#endif
+
+  /**
+   * Get TypeObject for a given TypeIdentifier.
+   */
+  XTypes::TypeObject get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const;
+
   enum TypeObjectEncoding { Encoding_Normal, Encoding_WriteOldFormat, Encoding_ReadOldFormat };
   TypeObjectEncoding type_object_encoding() const;
   void type_object_encoding(TypeObjectEncoding encoding);
   void type_object_encoding(const char* encoding);
+
+  RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic() const
+  {
+    return network_interface_address_topic_;
+  }
+
+  unsigned int printer_value_writer_indent() const
+  {
+    return printer_value_writer_indent_;
+  }
+
+  void printer_value_writer_indent(unsigned int value)
+  {
+    printer_value_writer_indent_ = value;
+  }
 
 private:
 
@@ -516,7 +555,9 @@ private:
   ACE_ARGV ORB_argv_;
 #endif
 
+  const TimeSource time_source_;
   ReactorTask reactor_task_;
+  JobQueue_rch job_queue_;
 
   RcHandle<DomainParticipantFactoryImpl> dp_factory_servant_;
 
@@ -530,7 +571,7 @@ private:
 
   /// The lock to serialize DomainParticipantFactory singleton
   /// creation and shutdown.
-  TAO_SYNCH_MUTEX      factory_lock_;
+  mutable ACE_Thread_Mutex factory_lock_;
 
   /// The initial values of qos policies.
   DDS::UserDataQosPolicy              initial_UserDataQosPolicy_;
@@ -598,11 +639,7 @@ private:
   int bit_lookup_duration_msec_;
 
   /// The default network address to use.
-  ACE_INET_Addr default_address_;
-
-  /// The configuration object that imports the configuration
-  /// file.
-  ACE_Configuration_Heap cf_;
+  NetworkAddress default_address_;
 
   /// Specifies the name of the transport configuration that
   /// is used when the entity tree does not specify one.  If
@@ -647,15 +684,11 @@ private:
   bool is_discovery_template(const OPENDDS_STRING& name);
 
 public:
-  // thread status reporting
-  TimeDuration get_thread_status_interval();
-  void set_thread_status_interval(TimeDuration interval);
-
   /// getter for lock that protects the static initialization of XTypes related data structures
   ACE_Thread_Mutex& get_static_xtypes_lock();
 
   /// Get the service participant's thread status manager.
-  ThreadStatusManager* get_thread_status_manager();
+  ThreadStatusManager& get_thread_status_manager();
 
   /// Pointer to the monitor factory that is used to create
   /// monitor objects.
@@ -723,9 +756,6 @@ private:
   /// Enable TAO's Bidirectional GIOP?
   bool bidir_giop_;
 
-  /// Enable Internal Thread Status Monitoring
-  TimeDuration thread_status_interval_;
-
   ThreadStatusManager thread_status_manager_;
 
   /// Thread mutex used to protect the static initialization of XTypes data structures
@@ -735,9 +765,9 @@ private:
   bool monitor_enabled_;
 
   /// Used to track state of service participant
-  bool shut_down_;
+  AtomicBool shut_down_;
 
-  ShutdownListener* shutdown_listener_;
+  RcHandle<ShutdownListener> shutdown_listener_;
 
   /// Guard access to the internal maps.
   ACE_Recursive_Thread_Mutex maps_lock_;
@@ -757,6 +787,10 @@ private:
   DDS::Duration_t bit_autopurge_disposed_samples_delay_;
 
   TypeObjectEncoding type_object_encoding_;
+
+  RcHandle<InternalTopic<NetworkInterfaceAddress> > network_interface_address_topic_;
+
+  unsigned int printer_value_writer_indent_;
 };
 
 #define TheServiceParticipant OpenDDS::DCPS::Service_Participant::instance()

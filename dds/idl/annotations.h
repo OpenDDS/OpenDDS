@@ -345,6 +345,7 @@ namespace OpenDDS {
     bool xcdr1;
     bool xcdr2;
     bool xml;
+    bool unaligned;
 
     DataRepresentation()
     {
@@ -356,6 +357,7 @@ namespace OpenDDS {
       xcdr1 |= other.xcdr1;
       xcdr2 |= other.xcdr2;
       xml |= other.xml;
+      unaligned |= other.unaligned;
     }
 
     void set_all(bool value)
@@ -363,6 +365,7 @@ namespace OpenDDS {
       xcdr1 = value;
       xcdr2 = value;
       xml = value;
+      unaligned = value;
     }
 
     bool only_xcdr1() const

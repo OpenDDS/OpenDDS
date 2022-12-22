@@ -8,9 +8,13 @@
 #ifndef DATAREADER_LISTENER_IMPL
 #define DATAREADER_LISTENER_IMPL
 
-#include <dds/DdsDcpsSubscriptionC.h>
 #include "MessengerC.h"
 
+#include <dds/DdsDcpsSubscriptionC.h>
+
+#include <dds/DCPS/ConditionVariable.h>
+#include <dds/DCPS/LocalObject.h>
+#include <dds/DCPS/Service_Participant.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
@@ -51,20 +55,37 @@ public:
     const DDS::SampleLostStatus& status);
 
   long num_reads() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return num_reads_;
   }
 
-  bool verify_result () const {
+  long num_valid_data() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return num_valid_data_;
+  }
+
+  bool verify_result() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return verify_result_;
+  }
+
+  bool wait_valid_data(long expected) const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+    while (num_valid_data_ < expected) {
+      cond_.wait(thread_status_manager);
+    }
+    return num_valid_data_ >= expected;
   }
 
 private:
 
-  DDS::DataReader_var  reader_;
-  long                 num_reads_;
-
-  bool  verify_result_;
-
+  mutable ACE_Thread_Mutex mutex_;
+  mutable OpenDDS::DCPS::ConditionVariable<ACE_Thread_Mutex> cond_;
+  DDS::DataReader_var reader_;
+  long num_reads_;
+  long num_valid_data_;
+  bool verify_result_;
 };
 
 #endif /* DATAREADER_LISTENER_IMPL  */

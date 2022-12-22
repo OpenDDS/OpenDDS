@@ -48,6 +48,7 @@ public class InternalThreadStatusPublisher {
 
     int ret = dr.set_listener(locationListener, OpenDDS.DCPS.DEFAULT_STATUS_MASK.value);
     assert (ret == DDS.RETCODE_OK.value);
+    // No need to invoke the listener because samples are coming.
 
     Publisher pub = participant.create_publisher(PUBLISHER_QOS_DEFAULT.get(), null, DEFAULT_STATUS_MASK.value);
     if (pub == null) {

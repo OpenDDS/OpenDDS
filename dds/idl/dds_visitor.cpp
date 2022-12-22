@@ -12,8 +12,6 @@
 #include "marshal_generator.h"
 #include "keys_generator.h"
 #include "itl_generator.h"
-#include "v8_generator.h"
-#include "rapidjson_generator.h"
 #include "langmap_generator.h"
 #include "value_reader_generator.h"
 #include "value_writer_generator.h"
@@ -62,8 +60,6 @@ namespace {
   ts_generator ts_gen_;
   metaclass_generator mc_gen_;
   itl_generator itl_gen_;
-  v8_generator v8_gen_;
-  rapidjson_generator rj_gen_;
   langmap_generator lm_gen_;
   typeobject_generator to_gen_;
   value_reader_generator value_reader_generator_;
@@ -76,9 +72,18 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
 {
   if (!be_global->no_default_gen()) {
     gen_target_.add_generator(&to_gen_);
-    to_gen_.produce_output(!be_global->suppress_xtypes() && !java_ts_only);
-    gen_target_.add_generator(&value_reader_generator_);
-    gen_target_.add_generator(&value_writer_generator_);
+    const bool generate_xtypes = !be_global->suppress_xtypes() && !java_ts_only;
+    to_gen_.produce_output(generate_xtypes);
+    to_gen_.produce_xtypes_complete(generate_xtypes && be_global->xtypes_complete());
+    if (generate_xtypes && be_global->old_typeobject_encoding()) {
+      to_gen_.use_old_typeobject_encoding();
+    }
+
+    if (be_global->value_reader_writer()) {
+      gen_target_.add_generator(&value_reader_generator_);
+      gen_target_.add_generator(&value_writer_generator_);
+    }
+
     gen_target_.add_generator(&mar_gen_);
     gen_target_.add_generator(&key_gen_);
     gen_target_.add_generator(&ts_gen_);
@@ -86,12 +91,6 @@ dds_visitor::dds_visitor(AST_Decl* scope, bool java_ts_only)
   }
   if (be_global->itl()) {
     gen_target_.add_generator(&itl_gen_);
-  }
-  if (be_global->v8()) {
-    gen_target_.add_generator(&v8_gen_);
-  }
-  if (be_global->rapidjson()) {
-    gen_target_.add_generator(&rj_gen_);
   }
   if (be_global->language_mapping() != BE_GlobalData::LANGMAP_NONE) {
     gen_target_.add_generator(&lm_gen_);

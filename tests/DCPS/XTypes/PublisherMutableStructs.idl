@@ -1,0 +1,42 @@
+#include "Common.idl"
+
+@topic
+@mutable
+struct ModifiedMutableStruct {
+  @id(2) long additional_field;
+  @id(1) @key long key_field;
+};
+
+@topic
+@mutable
+struct MutableBaseStruct {
+  @id(1) @key long key_field;
+};
+
+@topic
+@mutable
+struct ModifiedIdMutableStruct {
+  @id(1) @key long key_field;
+  @id(3) long additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedTypeMutableStruct {
+  @id(1) @key long key_field;
+  @id(2) string additional_field;
+};
+
+@topic
+@mutable
+struct ModifiedNameMutableStruct {
+  @id(1) @key long key_field_modified;
+  @id(2) long additional_field_modified;
+};
+
+// Tryconstruct
+@topic
+@mutable
+struct Trim64Struct {
+  @try_construct(TRIM) str64 trim_string;
+};

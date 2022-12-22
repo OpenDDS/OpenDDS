@@ -30,13 +30,13 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
     InternalThreadBuiltinTopicDataDataReader bitDataReader =
       InternalThreadBuiltinTopicDataDataReaderHelper.narrow(reader);
     if (bitDataReader == null) {
-      System.err.println("InternalThreadStatusListener on_data_available: narrow failed.");;
+      System.err.println("InternalThreadStatusListener on_data_available: narrow failed.");
       System.exit(1);
     }
 
     InternalThreadBuiltinTopicDataHolder info =
       new InternalThreadBuiltinTopicDataHolder(
-        new InternalThreadBuiltinTopicData("", new byte[16]));
+        new InternalThreadBuiltinTopicData("", 0.0));
 
     SampleInfoHolder si = new SampleInfoHolder(new SampleInfo(0, 0, 0,
       new DDS.Time_t(), 0, 0, 0, 0, 0, 0, 0, false, 0));
@@ -46,10 +46,9 @@ public class InternalThreadListener extends DDS._DataReaderListenerLocalBase {
       status = bitDataReader.read_next_sample(info, si)) {
 
       System.out.println("== " + id + " Thread Info ==");
-      String guid = guidFormatter(info.value.participant_guid);
-      System.out.println("  guid: " + guid);
-      System.out.println("   tid: " + info.value.thread_id);
-      System.out.println("  time: " + si.value.source_timestamp.sec);
+      System.out.println("        tid: " + info.value.thread_id);
+      System.out.println("utilization: " + info.value.utilization);
+      System.out.println("       time: " + si.value.source_timestamp.sec);
     }
   }
 

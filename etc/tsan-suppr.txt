@@ -1,0 +1,34 @@
+# Thread sanitizer suppressions
+# See here for how this works:
+#   https://github.com/google/sanitizers/wiki/ThreadSanitizerSuppressions
+
+deadlock:^CORBA::ORB_init
+
+race_top:^ACE_Data_Block::ACE_Data_Block
+race_top:^ACE_Data_Block::release_i
+race_top:^ACE_Event_Handler::reactor
+race_top:^ACE_Locked_Free_List<ACE_Cached_Mem_Pool_Node<*>, ACE_Thread_Mutex>::size
+race_top:^ACE_Proactor::proactor_end_event_loop
+race_top:^ACE_Proactor_Timer_Handler::destroy
+race_top:^ACE_Refcounted_Auto_Ptr_Rep<ACE_Handler::Proxy, ACE_Thread_Mutex>::attach
+race_top:^ACE_Thread_Manager::wait_task
+race_top:^ACE_TSS<*>::ts_get
+race_top:^ACE_Timer_Heap_T<*>::is_empty
+race:^ACE_Log_Msg::default_priority_mask_$
+race:^ACE_Sig_Handler::sig_pending_$
+race:^ACE_OutputCDR::*_version
+race:^ACE_Proactor::cancel_timer
+race:^ACE_Proactor::schedule_timer
+race:^ACE_Thread_Exit::instance
+race:^ACE_TSS_Singleton<*>::instance
+
+race_top:^TAO_Leader_Follower::wait_for_event
+race_top:^TAO_ORB_Core::*shutdown
+race_top:^TAO_Transport::*
+race_top:^TAO_Stub::set_valid_profile
+race:^TAO_IIOP_Acceptor::hostname
+race:^TAO_IIOP_Connection_Handler
+race:^TAO_Wait_On_Leader_Follower::register_handler
+
+race:^OpenDDS::Federator
+race:^OpenDDS::DCPS::DCPS_debug_level

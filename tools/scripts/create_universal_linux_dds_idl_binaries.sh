@@ -7,7 +7,7 @@
 # Prerequisite: docker
 ##############################################################################
 
-buildbits=32
+buildbits=64
 docker_image=phusion/holy-build-box-${buildbits}
 MOUNT_DIR=/OpenDDS
 
@@ -96,6 +96,7 @@ workspace {
   $(TAO_ROOT)/TAO_IDL/tao_idl_fe.mpc
   $(TAO_ROOT)/TAO_IDL/tao_idl_be.mpc
   $(DDS_ROOT)/dds/idl/opendds_idl.mpc
+  $(DDS_ROOT)/dds/DCPS/OpenDDS_Util.mpc
 }
 EEOF
 

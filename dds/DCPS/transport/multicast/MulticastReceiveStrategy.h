@@ -22,7 +22,7 @@ class MulticastDataLink;
 
 class OpenDDS_Multicast_Export MulticastReceiveStrategy
   : public TransportReceiveStrategy<>,
-    public RcEventHandler
+    public virtual RcEventHandler
 {
 public:
   explicit MulticastReceiveStrategy(MulticastDataLink* link);

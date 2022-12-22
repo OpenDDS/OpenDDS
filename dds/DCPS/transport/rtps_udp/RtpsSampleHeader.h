@@ -71,7 +71,7 @@ public:
 private:
   void init(ACE_Message_Block& mb);
 
-  bool valid_, frag_;
+  bool valid_, frag_, data_;
   size_t serialized_size_, message_length_;
 
 public:

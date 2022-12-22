@@ -1,10 +1,9 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
+#include "OpenDDS_jni_helpers.h"
 #include "OpenDDS_DCPS_TheParticipantFactory.h"
 #include "OpenDDS_DCPS_TheServiceParticipant.h"
 #include "OpenDDS_DCPS_NetworkConfigModifier.h"
@@ -17,41 +16,38 @@
 #include "OpenDDS_DCPS_transport_TransportInst.h"
 #include "DDS_WaitSet.h"
 #include "DDS_GuardCondition.h"
-
-#include "idl2jni_runtime.h"
-#include "OpenDDS_jni_helpers.h"
-
-#include "dds/DCPS/Service_Participant.h"
-
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
-#include "dds/DCPS/transport/framework/TransportImpl.h"
-#include "dds/DCPS/transport/framework/TransportExceptions.h"
-#include "dds/DCPS/transport/framework/PerConnectionSynchStrategy.h"
-#include "dds/DCPS/transport/framework/PoolSynchStrategy.h"
-#include "dds/DCPS/transport/framework/NullSynchStrategy.h"
-#include "dds/DCPS/transport/tcp/TcpInst.h"
-#include "dds/DCPS/transport/udp/UdpInst.h"
-#include "dds/DCPS/transport/multicast/MulticastInst.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
-#include "dds/DCPS/transport/tcp/TcpInst_rch.h"
-#include "dds/DCPS/transport/udp/UdpInst_rch.h"
-#include "dds/DCPS/transport/multicast/MulticastInst_rch.h"
-#include "dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h"
-#include "dds/DCPS/transport/framework/TransportInst_rch.h"
-
-#include "dds/DCPS/DomainParticipantImpl.h"
-#include "dds/DCPS/EntityImpl.h"
-#include "dds/DCPS/WaitSet.h"
-#include "dds/DCPS/GuardCondition.h"
-#include <dds/DCPS/LogAddr.h>
-
 #include "DdsDcpsDomainJC.h"
 #include "DdsDcpsPublicationJC.h"
 #include "DdsDcpsSubscriptionJC.h"
 
-#include "ace/Init_ACE.h"
-#include "ace/Service_Config.h"
-#include "ace/Service_Repository.h"
+#include <idl2jni_runtime.h>
+
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/DomainParticipantImpl.h>
+#include <dds/DCPS/EntityImpl.h>
+#include <dds/DCPS/WaitSet.h>
+#include <dds/DCPS/GuardCondition.h>
+#include <dds/DCPS/NetworkAddress.h>
+#include <dds/DCPS/LogAddr.h>
+#include <dds/DCPS/transport/framework/TransportRegistry.h>
+#include <dds/DCPS/transport/framework/TransportImpl.h>
+#include <dds/DCPS/transport/framework/TransportExceptions.h>
+#include <dds/DCPS/transport/framework/PerConnectionSynchStrategy.h>
+#include <dds/DCPS/transport/framework/PoolSynchStrategy.h>
+#include <dds/DCPS/transport/framework/NullSynchStrategy.h>
+#include <dds/DCPS/transport/tcp/TcpInst.h>
+#include <dds/DCPS/transport/udp/UdpInst.h>
+#include <dds/DCPS/transport/multicast/MulticastInst.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst.h>
+#include <dds/DCPS/transport/tcp/TcpInst_rch.h>
+#include <dds/DCPS/transport/udp/UdpInst_rch.h>
+#include <dds/DCPS/transport/multicast/MulticastInst_rch.h>
+#include <dds/DCPS/transport/rtps_udp/RtpsUdpInst_rch.h>
+#include <dds/DCPS/transport/framework/TransportInst_rch.h>
+
+#include <ace/Init_ACE.h>
+#include <ace/Service_Config.h>
+#include <ace/Service_Repository.h>
 
 template <typename CppClass>
 CppClass* recoverCppObj(JNIEnv *jni, jobject jThis);
@@ -115,9 +111,9 @@ jobject JNICALL Java_OpenDDS_DCPS_TheParticipantFactory_getInstance(JNIEnv *jni,
 
 // TheServiceParticipant
 
-void JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown(JNIEnv *, jclass)
+jint JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_shutdown(JNIEnv *, jclass)
 {
-  TheServiceParticipant->shutdown();
+  return TheServiceParticipant->shutdown();
 }
 
 jstring JNICALL Java_OpenDDS_DCPS_TheServiceParticipant_domain_1to_1repo
@@ -1109,7 +1105,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setLocalAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  ACE_INET_Addr addr(jsm_val.c_str());
+  OpenDDS::DCPS::NetworkAddress addr(jsm_val.c_str());
   inst->local_address(addr);
 }
 
@@ -1143,7 +1139,7 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setMulticastGroupAddress
 {
   OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
   JStringMgr jsm_val(jni, val);
-  ACE_INET_Addr addr(jsm_val.c_str());
+  OpenDDS::DCPS::NetworkAddress addr(jsm_val.c_str());
   inst->multicast_group_address(addr);
 }
 
@@ -1195,22 +1191,6 @@ void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatPeriod
   inst->heartbeat_period_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
 }
 
-// RtpsUdpInst::getHeartbeatResponseDelay
-jlong JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_getHeartbeatResponseDelay
-(JNIEnv * jni, jobject jthis)
-{
-  OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  return inst->heartbeat_response_delay_.value().msec();
-}
-
-// RtpsUdpInst::setHeartbeatResponseDelay
-void JNICALL Java_OpenDDS_DCPS_transport_RtpsUdpInst_setHeartbeatResponseDelay
-(JNIEnv * jni, jobject jthis, jlong val)
-{
-  OpenDDS::DCPS::RtpsUdpInst_rch inst = OpenDDS::DCPS::rchandle_from(recoverCppObj<OpenDDS::DCPS:: RtpsUdpInst>(jni, jthis));
-  inst->heartbeat_response_delay_ = OpenDDS::DCPS::TimeDuration::from_msec(val);
-}
-
 // WaitSet and GuardCondition
 
 jlong JNICALL Java_DDS_WaitSet__1jni_1init(JNIEnv *, jclass)
@@ -1224,3 +1204,12 @@ jlong JNICALL Java_DDS_GuardCondition__1jni_1init(JNIEnv *, jclass)
   return reinterpret_cast<jlong>(static_cast<CORBA::Object_ptr>(
                                  new DDS::GuardCondition));
 }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+// Forward declarations of these functions are generated for the forward
+// declaration of DynamicType in DdsDcpsTopic.idl. They shouldn't be used
+// anywhere, but at least on Windows and macOS, declarations need definitions,
+// so these are defined as stubs here.
+void copyToCxx(JNIEnv*, DDS::DynamicType_var&, jobject) {}
+void copyToJava(JNIEnv*, jobject&, const DDS::DynamicType_var&, bool) {}
+#endif

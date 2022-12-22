@@ -1,28 +1,23 @@
-// -*- C++ -*-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#ifndef _GIOP_BASE_H_
-#define _GIOP_BASE_H_
+#ifndef OPENDDS_DISSECTOR_GIOP_BASE_H_
+#define OPENDDS_DISSECTOR_GIOP_BASE_H_
 
-extern "C" {
+#include "ws-wrapper-headers/config.h"
+#include "ws-wrapper-headers/tvbuff.h"
+#include "ws-wrapper-headers/packet-giop.h"
+#include "dissector_export.h"
 
-#include "ws_config.h"
-
-#include <glib.h>
-#include <gmodule.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <epan/packet.h>
 #include <epan/conversation.h>
-#include <epan/dissectors/packet-giop.h>
-} // extern "C"
 
-#include "dissector_export.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
+#include <glib.h>
+#include <gmodule.h>
 
 #include <map>
 #include <string>
@@ -105,4 +100,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _GIOP_BASE_H_
+#endif

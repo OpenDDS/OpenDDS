@@ -17,6 +17,15 @@
 #include <cstring>
 #include <algorithm>
 
+#ifdef OPENDDS_TESTING_FEATURES
+#include <cstdlib>
+#ifdef _MSC_VER
+#define OPENDDS_DRAND48() (rand()*(1./RAND_MAX))
+#else
+#define OPENDDS_DRAND48 drand48
+#endif
+#endif
+
 #if !defined (__ACE_INLINE__)
 # include "TransportInst.inl"
 #endif /* !__ACE_INLINE__ */
@@ -45,6 +54,9 @@ OpenDDS::DCPS::TransportInst::load(ACE_Configuration_Heap& cf,
   // Controls the number of chunks in the allocators used by the datalink
   // for control messages.
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("datalink_control_chunks"), datalink_control_chunks_, size_t)
+
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("receive_preallocated_message_blocks"), receive_preallocated_message_blocks_, size_t)
+  GET_CONFIG_VALUE(cf, sect, ACE_TEXT("receive_preallocated_data_blocks"), receive_preallocated_data_blocks_, size_t)
 
   ACE_TString stringvalue;
   if (cf.get_string_value (sect, ACE_TEXT("passive_connect_duration"), stringvalue) == 0) {
@@ -99,7 +111,9 @@ OpenDDS::DCPS::TransportInst::dump_to_str() const
   ret += formatNameForDump("thread_per_connection")   + (thread_per_connection_ ? "true" : "false") + '\n';
   ret += formatNameForDump("datalink_release_delay")  + to_dds_string(datalink_release_delay_) + '\n';
   ret += formatNameForDump("datalink_control_chunks") + to_dds_string(unsigned(datalink_control_chunks_)) + '\n';
-  ret += formatNameForDump("fragment_reassembly_timeout") + to_dds_string(fragment_reassembly_timeout_.value().msec()) + '\n';
+  ret += formatNameForDump("fragment_reassembly_timeout") + fragment_reassembly_timeout_.str() + '\n';
+  ret += formatNameForDump("receive_preallocated_message_blocks") + to_dds_string(unsigned(receive_preallocated_message_blocks_)) + '\n';
+  ret += formatNameForDump("receive_preallocated_data_blocks") + to_dds_string(unsigned(receive_preallocated_data_blocks_)) + '\n';
   return ret;
 }
 
@@ -163,11 +177,11 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
   addr_str = result;
 }
 
-OpenDDS::ICE::Endpoint*
+OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>
 OpenDDS::DCPS::TransportInst::get_ice_endpoint()
 {
   const OpenDDS::DCPS::TransportImpl_rch temp = impl();
-  return temp ? temp->get_ice_endpoint() : 0;
+  return temp ? temp->get_ice_endpoint() : OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>();
 }
 
 void
@@ -202,6 +216,28 @@ OpenDDS::DCPS::TransportInst::reactor_task()
 {
   const OpenDDS::DCPS::TransportImpl_rch temp = impl();
   return temp ? temp->reactor_task() : OpenDDS::DCPS::ReactorTask_rch();
+}
+
+OpenDDS::DCPS::EventDispatcher_rch
+OpenDDS::DCPS::TransportInst::event_dispatcher()
+{
+  const TransportImpl_rch temp = impl();
+  return temp ? temp->event_dispatcher() : EventDispatcher_rch();
+}
+
+bool
+OpenDDS::DCPS::TransportInst::should_drop(ssize_t length) const
+{
+#ifdef OPENDDS_TESTING_FEATURES
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, config_lock_, false);
+  return drop_messages_ && (OPENDDS_DRAND48() < (length * drop_messages_m_ + drop_messages_b_));
+#else
+  ACE_UNUSED_ARG(length);
+  ACE_ERROR((LM_ERROR,
+             "(%P|%t) ERROR: TransportInst::should_drop: "
+             "caller not conditioned on OPENDDS_TESTING_FEATURES\n"));
+  return false;
+#endif
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

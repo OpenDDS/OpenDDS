@@ -13,12 +13,13 @@
 
 #include "SafetyProfileStreams.h"
 
-#ifndef OPENDDS_NO_TAO
+#ifndef OPENDDS_UTIL_BUILD
 #  include <tao/String_Alloc.h>
 #endif
 
 #include <ace/OS_NS_string.h>
 #include <ace/OS_Memory.h>
+#include <ace/Log_Msg.h>
 
 #include <cstdlib>
 
@@ -27,7 +28,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
 namespace {
 
 ACE_CDR::Char* string_alloc(ACE_CDR::ULong size)
@@ -104,11 +105,10 @@ EncapsulationHeader::EncapsulationHeader(const Encoding& enc, Extensibility ext,
   : kind_(KIND_INVALID)
   , options_(options)
 {
-   if (!from_encoding(enc, ext)) {
-     kind_ = KIND_INVALID;
-   }
+  if (!from_encoding(enc, ext)) {
+    kind_ = KIND_INVALID;
+  }
 }
-
 
 bool EncapsulationHeader::from_encoding(
   const Encoding& encoding, Extensibility extensibility)
@@ -153,6 +153,19 @@ bool EncapsulationHeader::from_encoding(
 bool EncapsulationHeader::to_encoding(
   Encoding& encoding, Extensibility expected_extensibility)
 {
+  return to_encoding_i(encoding, &expected_extensibility);
+}
+
+bool EncapsulationHeader::to_any_encoding(Encoding& encoding)
+{
+  return to_encoding_i(encoding, 0);
+}
+
+bool EncapsulationHeader::to_encoding_i(
+  Encoding& encoding, Extensibility* expected_extensibility_ptr)
+{
+  Extensibility expected_extensibility = expected_extensibility_ptr ?
+    *expected_extensibility_ptr : FINAL; // Placeholder, doesn't matter
   bool wrong_extensibility = true;
   switch (kind_) {
   case KIND_CDR_BE:
@@ -223,7 +236,7 @@ bool EncapsulationHeader::to_encoding(
     return false;
   }
 
-  if (wrong_extensibility) {
+  if (expected_extensibility_ptr && wrong_extensibility) {
     if (DCPS_debug_level > 0) {
       ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR EncapsulationHeader::to_encoding: ")
         ACE_TEXT("Unexpected Extensibility Encoding: %C\n"),
@@ -509,7 +522,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
                         StrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_alloc = string_alloc;
 #else
     str_alloc = CORBA::string_alloc;
@@ -572,7 +585,7 @@ Serializer::free_string(ACE_CDR::Char* str,
                         StrFree str_free)
 {
   if (str_free == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_free = string_free;
 #else
     str_free = CORBA::string_free;
@@ -587,7 +600,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
                         WStrFree str_free)
 {
   if (str_alloc == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_alloc = wstring_alloc;
 #else
     str_alloc = CORBA::wstring_alloc;
@@ -658,13 +671,32 @@ Serializer::free_string(ACE_CDR::WChar* str,
                         WStrFree str_free)
 {
   if (str_free == 0) {
-#ifdef OPENDDS_NO_TAO
+#ifdef OPENDDS_UTIL_BUILD
     str_free = wstring_free;
 #else
     str_free = CORBA::wstring_free;
 #endif
   }
   str_free(str);
+}
+
+ACE_Message_Block* Serializer::trim(size_t n) const
+{
+  if (!good_bit() || !current_ || n > length()) {
+    return 0;
+  }
+  Message_Block_Ptr dup(current_->duplicate());
+  ACE_Message_Block* i = dup.get();
+  for (size_t remain = n; i && remain; i = i->cont()) {
+    if (i->length() >= remain) {
+      i->wr_ptr(i->rd_ptr() + remain);
+      ACE_Message_Block::release(i->cont());
+      i->cont(0);
+      break;
+    }
+    remain -= i->length();
+  }
+  return dup.release();
 }
 
 bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_understand)
@@ -739,6 +771,10 @@ bool Serializer::read_parameter_id(unsigned& id, size_t& size, bool& must_unders
 
 bool Serializer::write_parameter_id(const unsigned id, const size_t size, const bool must_understand)
 {
+  if (static_cast<ACE_CDR::ULong>(id) > MEMBER_ID_MAX) {
+    return false;
+  }
+
   const Encoding::XcdrVersion xcdr = encoding().xcdr_version();
   if (xcdr == Encoding::XCDR_VERSION_1) {
     if (!align_w(xcdr1_pid_alignment)) {

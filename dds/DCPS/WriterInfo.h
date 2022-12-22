@@ -9,15 +9,17 @@
 #ifndef OPENDDS_DCPS_WRITERINFO_H
 #define OPENDDS_DCPS_WRITERINFO_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsCoreC.h"
 #include "PoolAllocator.h"
 #include "RcObject.h"
 #include "Definitions.h"
+#include "ConditionVariable.h"
 #include "CoherentChangeControl.h"
 #include "DisjointSequence.h"
-#include "transport/framework/ReceivedDataSample.h"
 #include "TimeTypes.h"
+#include "transport/framework/ReceivedDataSample.h"
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DdsDcpsCoreC.h>
 
 #ifdef ACE_HAS_CPP11
 #  include <atomic>
@@ -25,14 +27,20 @@
 #  include <ace/Atomic_Op.h>
 #endif
 
+ACE_BEGIN_VERSIONED_NAMESPACE_DECL
+class ACE_Reactor;
+class ACE_Event_Handler;
+ACE_END_VERSIONED_NAMESPACE_DECL
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
 
 class WriterInfo;
+class EndHistoricSamplesMissedSweeper;
 
-class OpenDDS_Dcps_Export WriterInfoListener
+class OpenDDS_Dcps_Export WriterInfoListener: public virtual RcObject
 {
 public:
   WriterInfoListener();
@@ -64,6 +72,7 @@ public:
   virtual void writer_removed(WriterInfo& info);
 };
 
+typedef RcHandle<WriterInfoListener> WriterInfoListener_rch;
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 enum Coherent_State {
@@ -73,17 +82,15 @@ enum Coherent_State {
 };
 #endif
 
-
-
 /// Keeps track of a DataWriter's liveliness for a DataReader.
-class OpenDDS_Dcps_Export WriterInfo : public RcObject {
+class OpenDDS_Dcps_Export WriterInfo : public virtual RcObject {
   friend class WriteInfoListner;
 
 public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
-  enum HistoricSamplesState { NO_TIMER = -1 };
+  enum TimerState { NO_TIMER = -1 };
 
-  WriterInfo(WriterInfoListener* reader,
+  WriterInfo(const WriterInfoListener_rch& reader,
              const PublicationId& writer_id,
              const DDS::DataWriterQos& writer_qos);
 
@@ -98,41 +105,115 @@ public:
   void received_activity(const MonotonicTimePoint& when);
 
   /// returns 1 if the DataWriter is lively; 2 if dead; otherwise returns 0.
-  WriterState get_state() {
+  WriterState state() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return state_;
   };
+
+  void state(WriterState state)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    state_ = state;
+  };
+
+  DDS::InstanceHandle_t handle() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return handle_;
+  }
+
+  void handle(DDS::InstanceHandle_t handle)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    handle_ = handle;
+  };
+
+  PublicationId writer_id() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return writer_id_;
+  }
+
+  CORBA::Long writer_qos_ownership_strength() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return writer_qos_.ownership_strength.value;
+  }
+
+  void writer_qos_ownership_strength(const CORBA::Long writer_qos_ownership_strength)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    writer_qos_.ownership_strength.value = writer_qos_ownership_strength;
+  }
+
+  bool waiting_for_end_historic_samples() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return waiting_for_end_historic_samples_;
+  }
+
+  void waiting_for_end_historic_samples(bool waiting_for_end_historic_samples)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    waiting_for_end_historic_samples_ = waiting_for_end_historic_samples;
+  }
+
+  SequenceNumber last_historic_seq() const
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return last_historic_seq_;
+  }
+
+  void last_historic_seq(const SequenceNumber& last_historic_seq)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    last_historic_seq_ = last_historic_seq;
+  }
 
   const char* get_state_str() const;
 
   /// update liveliness when remove_association is called.
   void removed();
 
-  TimeDuration activity_wait_period() const;
-
-  /// Checks to see if writer has registered activity in either
-  /// liveliness_lease_duration or DCPSPendingTimeout duration
-  /// to allow it to finish before reader removes it
-  bool active() const;
-
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  Coherent_State coherent_change_received ();
-  void reset_coherent_info ();
-  void set_group_info (const CoherentChangeControl& info);
+  Coherent_State coherent_change_received();
+  void reset_coherent_info();
+  void set_group_info(const CoherentChangeControl& info);
+  void add_coherent_samples(const SequenceNumber& seq);
+  void coherent_change(bool group_coherent, const RepoId& publisher_id);
+
+  bool group_coherent() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return group_coherent_;
+  }
+
+  RepoId publisher_id() const {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    return publisher_id_;
+  }
+
 #endif
 
-  void clear_owner_evaluated ();
-  void set_owner_evaluated (DDS::InstanceHandle_t instance, bool flag);
-  bool is_owner_evaluated (DDS::InstanceHandle_t instance);
+  void clear_owner_evaluated();
+  void set_owner_evaluated(DDS::InstanceHandle_t instance, bool flag);
+  bool is_owner_evaluated(DDS::InstanceHandle_t instance);
 
-  //private:
+  void schedule_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper, const ACE_Time_Value& ten_seconds);
+  void cancel_historic_samples_timer(EndHistoricSamplesMissedSweeper* sweeper);
+  bool check_end_historic_samples(EndHistoricSamplesMissedSweeper* sweeper, OPENDDS_MAP(SequenceNumber, ReceivedDataSample)& to_deliver);
+  bool check_historic(const SequenceNumber& seq, const ReceivedDataSample& sample, SequenceNumber& last_historic_seq);
+  void finished_delivering_historic();
+
+private:
+
+  mutable ACE_Thread_Mutex mutex_;
 
   /// Timestamp of last write/dispose/assert_liveliness from this DataWriter
   MonotonicTimePoint last_liveliness_activity_time_;
 
   // Non-negative if this a durable writer which has a timer scheduled
   long historic_samples_timer_;
-  long remove_association_timer_;
-  MonotonicTimePoint removal_deadline_;
 
   /// Temporary holding place for samples received before
   /// the END_HISTORIC_SAMPLES control message.
@@ -143,14 +224,14 @@ public:
 
   bool waiting_for_end_historic_samples_;
 
-  bool scheduled_for_removal_;
-  bool notify_lost_;
+  bool delivering_historic_samples_;
+  ConditionVariable<ACE_Thread_Mutex> delivering_historic_samples_cv_;
 
   /// State of the writer.
   WriterState state_;
 
   /// The DataReader owning this WriterInfo
-  WriterInfoListener* reader_;
+  WeakRcHandle<WriterInfoListener> reader_;
 
   /// DCPSInfoRepo ID of the DataWriter
   PublicationId writer_id_;
@@ -187,12 +268,20 @@ inline
 void
 WriterInfo::received_activity(const MonotonicTimePoint& when)
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+
   last_liveliness_activity_time_ = when;
 
   if (state_ != ALIVE) { // NOT_SET || DEAD
-    reader_->writer_became_alive(*this, when);
+    RcHandle<WriterInfoListener> reader = reader_.lock();
+    guard.release();
+    if (reader) {
+      reader->writer_became_alive(*this, when);
+    }
   }
 }
+
+typedef RcHandle<WriterInfo> WriterInfo_rch;
 
 } // namespace DCPS
 } // namespace

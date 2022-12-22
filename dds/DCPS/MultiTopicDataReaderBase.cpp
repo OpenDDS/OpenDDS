@@ -20,12 +20,13 @@
 
 namespace {
   struct MatchesIncomingName { // predicate for std::find_if()
-    const OPENDDS_STRING& look_for_;
     explicit MatchesIncomingName(const OPENDDS_STRING& s) : look_for_(s) {}
-    bool operator()(const OpenDDS::DCPS::MultiTopicImpl::SubjectFieldSpec& sfs)
-      const {
+
+    bool operator()(const OpenDDS::DCPS::MultiTopicImpl::SubjectFieldSpec& sfs) const {
       return sfs.incoming_name_ == look_for_;
     }
+
+    const OPENDDS_STRING& look_for_;
   };
 
   class Listener
@@ -181,8 +182,7 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
                      ACE_TEXT("incoming field.\n"), *names));
         }
       } else {
-        query_plans_[found->second].projection_.push_back(
-          SubjectFieldSpec(*names));
+        query_plans_[found->second].projection_.push_back(SubjectFieldSpec(*names));
       }
     }
   } else { // "SELECT A, B FROM ..."
@@ -199,21 +199,19 @@ void MultiTopicDataReaderBase::init(const DDS::DataReaderQos& dr_qos,
   }
 
   typedef std::map<OPENDDS_STRING, set<OPENDDS_STRING> >::const_iterator iter_t;
-  for (iter_t iter = joinKeys.begin(); iter != joinKeys.end(); ++iter) {
-    const OPENDDS_STRING& field = iter->first;
-    const set<OPENDDS_STRING>& topics = iter->second;
-    for (set<OPENDDS_STRING>::const_iterator iter2 = topics.begin();
-         iter2 != topics.end(); ++iter2) {
-      const OPENDDS_STRING& topic = *iter2;
+  for (iter_t it = joinKeys.begin(); it != joinKeys.end(); ++it) {
+    const OPENDDS_STRING& field = it->first;
+    const set<OPENDDS_STRING>& topics = it->second;
+    for (set<OPENDDS_STRING>::const_iterator it2 = topics.begin(); it2 != topics.end(); ++it2) {
+      const OPENDDS_STRING& topic = *it2;
       QueryPlan& qp = query_plans_[topic];
-      if (find_if(qp.projection_.begin(), qp.projection_.end(),
-                  MatchesIncomingName(field)) == qp.projection_.end()) {
+      if (find_if(qp.projection_.begin(), qp.projection_.end(), MatchesIncomingName(field))
+          == qp.projection_.end()) {
         qp.keys_projected_out_.push_back(field);
       }
-      for (set<OPENDDS_STRING>::const_iterator iter3 = topics.begin();
-           iter3 != topics.end(); ++iter3) {
-        if (topic != *iter3) { // other topics
-          qp.adjacent_joins_.insert(pair<const OPENDDS_STRING, OPENDDS_STRING>(*iter3, field));
+      for (set<OPENDDS_STRING>::const_iterator it3 = topics.begin(); it3 != topics.end(); ++it3) {
+        if (topic != *it3) { // other topics
+          qp.adjacent_joins_.insert(make_pair(*it3, field));
         }
       }
     }
@@ -261,24 +259,21 @@ void MultiTopicDataReaderBase::data_available(DDS::DataReader_ptr reader)
     throw runtime_error("Incoming DataReader for " + topic +
       " could not be read: " + retcode_to_string(rc));
   }
+
   try {
     const MetaStruct& meta = metaStructFor(reader);
     const QueryPlan& qp = query_plans_[topic];
     for (CORBA::ULong i = 0; i < gen.samples_.size(); ++i) {
-      if (gen.info_[i].valid_data) {
-        incoming_sample(gen.samples_[i], gen.info_[i], topic.c_str(), meta);
-      } else if (gen.info_[i].instance_state != ALIVE_INSTANCE_STATE) {
-        DataReaderImpl* resulting_impl =
-          dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
+      const SampleInfo& si = gen.info_[i];
+      if (si.valid_data) {
+        incoming_sample(gen.samples_[i], si, topic.c_str(), meta);
+      } else if (si.instance_state != ALIVE_INSTANCE_STATE) {
+        DataReaderImpl* resulting_impl = dynamic_cast<DataReaderImpl*>(resulting_reader_.in());
         if (resulting_impl) {
-          set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator
-            iter = qp.instances_.begin();
-          while (iter != qp.instances_.end() &&
-            iter->first != gen.info_[i].instance_handle) ++iter;
-          for (; iter != qp.instances_.end() &&
-            iter->first == gen.info_[i].instance_handle; ++iter) {
-            resulting_impl->set_instance_state(iter->second,
-              gen.info_[i].instance_state);
+          set<pair<InstanceHandle_t, InstanceHandle_t> >::const_iterator iter = qp.instances_.begin();
+          while (iter != qp.instances_.end() && iter->first != si.instance_handle) ++iter;
+          for (; iter != qp.instances_.end() && iter->first == si.instance_handle; ++iter) {
+            resulting_impl->set_instance_state(iter->second, si.instance_state);
           }
         } else {
           ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MultiTopicDataReaderBase::data_available:")

@@ -51,7 +51,7 @@ class SimpleDataWriter
     // Implementing TransportClient
     bool check_transport_qos(const OpenDDS::DCPS::TransportInst&)
       { return true; }
-    const OpenDDS::DCPS::RepoId& get_repo_id() const
+    OpenDDS::DCPS::RepoId get_repo_id() const
       { return pub_id_; }
     DDS::DomainId_t domain_id() const
       { return 0; }
@@ -59,7 +59,11 @@ class SimpleDataWriter
       { return 0; }
     void transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote);
 
-    bool associated() const { return associated_; }
+    bool associated() const
+    {
+      ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+      return associated_;
+    }
 
     int delivered_test_message();
 
@@ -68,6 +72,7 @@ class SimpleDataWriter
 
   protected:
 
+    mutable ACE_Thread_Mutex mutex_;
     const OpenDDS::DCPS::RepoId& pub_id_;
     int num_messages_sent_;
     int num_messages_delivered_;

@@ -1,0 +1,98 @@
+#ifndef OPENDDS_SAFETY_PROFILE
+
+module XTypesUtils {
+
+@final
+@topic
+struct FinalStruct {
+  long value;
+};
+
+@appendable
+@topic
+union AppendableUnion switch (long) {
+case 0:
+  long value;
+case 1:
+  char other_value;
+};
+
+@mutable
+@topic
+struct MutableStruct {
+  long value;
+};
+
+@final
+@topic
+struct FinalMaxFinalStruct {
+  FinalStruct fs;
+};
+
+@final
+@topic
+struct FinalMaxAppendableStruct {
+  FinalStruct fs;
+  AppendableUnion au;
+};
+
+@final
+@topic
+struct FinalMaxMutableStruct {
+  FinalMaxAppendableStruct fmas;
+  MutableStruct ms;
+};
+
+@appendable
+@topic
+struct AppendableMaxAppendableStruct {
+  FinalMaxAppendableStruct fmas;
+};
+
+typedef FinalMaxMutableStruct MaxMutableAlias;
+
+@appendable
+@topic
+union AppendableMaxMutableUnion switch (char) {
+case 'm':
+  MaxMutableAlias fmms;
+};
+
+@mutable
+@topic
+struct MutableMaxMutableStruct {
+  AppendableUnion au;
+};
+
+enum Enu_t {
+  X, Y, Z
+};
+
+@topic
+struct LessThanStruct {
+  octet byte;
+  boolean bool;
+  uint8 uint_8;
+  uint16 uint_16;
+  uint32 uint_32;
+  uint64 uint_64;
+  int8 int_8;
+  int16 int_16;
+  int32 int_32;
+  int64 int_64;
+  float float_32;
+  double float_64;
+  long double float_128;
+  char char_8;
+  wchar char_16;
+  string str_8;
+  wstring str_16;
+  Enu_t enu;
+  FinalStruct nested_struct;
+  AppendableUnion nested_union;
+  uint32 uint_32_array[2];
+  sequence<uint32> uint_32_seq;
+};
+
+};
+#endif

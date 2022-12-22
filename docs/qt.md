@@ -118,7 +118,7 @@ official Qt Windows installer and the default location.
 
 It is possible to build OpenDDS without using the configure script, although
 this is not recommended unless one is familiar with OpenDDS and its build
-system, MPC. To enable Qt5 support the `qt5` feature must be enabled (e.g.
+system, [MPC](https://github.com/DOCGroup/MPC). To enable Qt5 support the `qt5` feature must be enabled (e.g.
 `-features qt5=1`) and environment variables must be set to configure the build
 to use Qt correctly:
 

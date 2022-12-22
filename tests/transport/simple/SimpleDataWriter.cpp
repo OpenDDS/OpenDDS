@@ -103,6 +103,7 @@ SimpleDataWriter::data_delivered(const OpenDDS::DCPS::DataSampleElement* sample)
   // Delete the element
   //delete sample;
 
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ++this->num_messages_delivered_;
 }
 
@@ -127,6 +128,7 @@ SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleElement* sample,
   // Delete the element
   //delete sample;
 
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   ++this->num_messages_delivered_;
 }
 
@@ -134,6 +136,7 @@ SimpleDataWriter::data_dropped(const OpenDDS::DCPS::DataSampleElement* sample,
 int
 SimpleDataWriter::delivered_test_message()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   return (this->num_messages_delivered_ == this->num_messages_sent_) ? 1 : 0;
 }
 
@@ -260,5 +263,6 @@ SimpleDataWriter::transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& r
 {
   ACE_DEBUG((LM_INFO,
              "(%P|%t) DataWriter association with %C is done flags=%d.\n", OpenDDS::DCPS::LogGuid(remote).c_str(), flags));
+  ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   associated_ = true;
 }

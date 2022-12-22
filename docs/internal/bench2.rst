@@ -446,38 +446,33 @@ The example here sets the value of both the ``DCPSSecurity`` and ``DCPSDebugLeve
 
         { "name": "common",
           "properties": [
-            { "name": "DCPSSecurity",
-              "value": "0"
+            { "name": "DCPSDefaultDiscovery",
+              "value":"rtps_disc"
+            },
+            { "name": "DCPSGlobalTransportConfig",
+              "value":"$file"
             },
             { "name": "DCPSDebugLevel",
               "value": "0"
+            },
+            { "name": "DCPSPendingTimeout",
+              "value": "3"
             }
           ]
-        }
-      ],
-      "discoveries": [
-
-Even if there is no configuration section for it (see above), this allows us to create unique discovery instances per domain.
-If both are specified, this will find and use / modify the one specified in the configuration section above.
-Valid types are ``"rtps"`` and ``"repo"`` (requires additional ``"ior"`` element with valid URL)
-
-::
-
-        { "name": "bench_test_rtps",
-          "type": "rtps",
-          "domain": 7
-        }
-      ],
-      "instances": [
-
-Even if there is no configuration section for it (see above), this allows us to create unique transport instances.
-If both are specified, this will find and use / modify the one specified in the configuration section above. Valid types are ``rtps_udp``, ``tcp``, ``udp``, ``ip_multicast``, ``shmem``.
-
-::
-
-        { "name": "rtps_instance_01",
-          "type": "rtps_udp",
-          "domain": 7
+        },
+        { "name": "rtps_discovery/rtps_disc",
+          "properties": [
+            { "name": "ResendPeriod",
+              "value": "5"
+            }
+          ]
+        },
+        { "name": "transport/rtps_transport",
+          "properties": [
+            { "name": "transport_type",
+              "value": "rtps_udp"
+            }
+          ]
         }
       ],
       "participants": [
@@ -633,7 +628,7 @@ Note, actual messages will be slightly larger than this value.
 
 ::
 
-            "value": { "_d": "PVK_ULL", "ull_prop": 512 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 512 }
           },
           { "name": "write_frequency",
 
@@ -642,19 +637,19 @@ In this case, twice a second.
 
 ::
 
-            "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+            "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.0 }
           },
 
 ::
 
           { "name": "filter_class_start_value",
-            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
           },
           { "name": "filter_class_stop_value",
-            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
           },
           { "name": "filter_class_increment",
-            "value": { "_d": "PVK_ULL", "ull_prop": 0 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 0 }
           }
 
 Value range and increment for ``"filter_class"`` data variable, used when writing data.
@@ -669,10 +664,10 @@ This variable is an unsigned integer intended to be used for content filtered to
         "type": "set_cft_parameters",
         "params": [
           { "name": "content_filtered_topic_name",
-            "value": { "_d": "PVK_STRING", "string_prop": "cft_1" }
+            "value": { "$discriminator": "PVK_STRING", "string_prop": "cft_1" }
           },
           { "name": "max_count",
-            "value": { "_d": "PVK_ULL", "ull_prop": 3 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 3 }
           },
 
 Maximum count of "Set" actions to be taken.
@@ -680,7 +675,7 @@ Maximum count of "Set" actions to be taken.
 ::
 
           { "name": "param_count",
-            "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
           },
 
 Number of parameters to be set
@@ -688,7 +683,7 @@ Number of parameters to be set
 ::
 
           { "name": "set_frequency",
-            "value": { "_d": "PVK_DOUBLE", "double_prop": 2.0 }
+            "value": { "$discriminator": "PVK_DOUBLE", "double_prop": 2.0 }
           },
 
 The frequency for set action, per second
@@ -696,7 +691,7 @@ The frequency for set action, per second
 ::
 
           { "name": "acceptable_param_values",
-            "value": { "_d": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
+            "value": { "$discriminator": "PVK_STRING_SEQ_SEQ", "string_seq_seq_prop": [ ["1", "2", "3"] ] }
           },
 
 Lists of allowed values to set to, for each parameter. Worker will iterate thought the list sequentially unless ``"random_order"`` flag (below) is specified
@@ -704,7 +699,7 @@ Lists of allowed values to set to, for each parameter. Worker will iterate thoug
 ::
 
           { "name": "random_order",
-            "value": { "_d": "PVK_ULL", "ull_prop": 1 }
+            "value": { "$discriminator": "PVK_ULL", "ull_prop": 1 }
           }
         ]
     }

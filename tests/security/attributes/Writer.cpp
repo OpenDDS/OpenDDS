@@ -5,12 +5,14 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Args.h"
-#include "SecurityAttributesMessageTypeSupportC.h"
 #include "Writer.h"
 
-#include <dds/DdsDcpsPublicationC.h>
+#include "Args.h"
+#include "SecurityAttributesMessageTypeSupportC.h"
+
 #include <dds/DCPS/WaitSet.h>
+
+#include <dds/DdsDcpsPublicationC.h>
 
 #include <ace/Log_Msg.h>
 #include <ace/OS_NS_stdlib.h>
@@ -59,16 +61,22 @@ Writer::svc()
     DDS::WaitSet_var ws = new DDS::WaitSet;
     ws->attach_condition(condition);
     ws->attach_condition(guard_condition_);
-    DDS::Duration_t timeout =
-      { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+    const DDS::Duration_t timeout = { 1 , 0 };
 
     DDS::ConditionSeq conditions;
     DDS::PublicationMatchedStatus matches = {0, 0, 0, 0, 0};
 
-    do {
+    if (writer_->get_publication_matched_status(matches) != ::DDS::RETCODE_OK) {
+      ACE_ERROR((LM_ERROR,
+                 ACE_TEXT("%N:%l: svc()")
+                 ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
+      ACE_OS::exit(1);
+    }
+
+    while (matches.current_count < 1) {
       DDS::ReturnCode_t ret = ws->wait(conditions, timeout);
 
-      if (ret != DDS::RETCODE_OK) {
+      if (ret != DDS::RETCODE_OK && ret != DDS::RETCODE_TIMEOUT) {
         ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
                    ACE_TEXT(" ERROR: wait failed!\n")));
@@ -88,8 +96,7 @@ Writer::svc()
                    ACE_TEXT(" ERROR: get_publication_matched_status failed!\n")));
         ACE_OS::exit(1);
       }
-
-    } while (matches.current_count < 1);
+    }
 
     ws->detach_condition(condition);
     ws->detach_condition(guard_condition_);

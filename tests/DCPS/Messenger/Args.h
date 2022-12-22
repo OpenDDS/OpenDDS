@@ -48,9 +48,8 @@ int parse_args(int argc, ACE_TCHAR* argv[])
       break;
     case '?':
     default:
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("usage: %s [-t transport]\n"), argv[0]),
-                       EXIT_FAILURE);
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_args: usage: %s [-t transport]\n", argv[0]));
+      return EXIT_FAILURE;
     }
   }
 
@@ -65,18 +64,15 @@ int parse_args(int argc, ACE_TCHAR* argv[])
     OpenDDS::DCPS::TransportConfig_rch config =
       TheTransportRegistry->fix_empty_default();
     if (config.in() == 0) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("no default config\n"), argv[0]),
-                       EXIT_FAILURE);
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_args: no default config\n"));
+      return EXIT_FAILURE;
     }
     else if (config->instances_.size() < 1) {
-      ACE_ERROR_RETURN((LM_ERROR,
-                        ACE_TEXT("no instances on default config\n"), argv[0]),
-                       EXIT_FAILURE);
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: parse_args: no instances on default config\n"));
+      return EXIT_FAILURE;
     }
     else if (config->instances_.size() > 1) {
-      ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("too many instances on default config, using first\n"), argv[0]));
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: parse_args: too many instances on default config, using first\n"));
     }
     OpenDDS::DCPS::TransportInst_rch inst = *(config->instances_.begin());
     inst->thread_per_connection_ = true;

@@ -9,8 +9,7 @@
 #include "be_extern.h"
 #include "be_util.h"
 
-#include <dds/DCPS/RestoreOutputStreamState.h>
-#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/ValueHelper.h>
 
 #include <utl_scoped_name.h>
 #include <utl_identifier.h>
@@ -51,6 +50,8 @@ public:
   virtual ~dds_generator() = 0;
 
   static std::string get_tag_name(const std::string& base_name, bool nested_key_only = false);
+
+  static std::string get_xtag_name(UTL_ScopedName* name);
 
   static bool cxx_escaped(const std::string& s);
 
@@ -386,7 +387,7 @@ namespace AstTypeClassification {
 
   inline Classification classify(AST_Type* type)
   {
-    type = AstTypeClassification::resolveActualType(type);
+    type = resolveActualType(type);
     switch (type->node_type()) {
     case AST_Decl::NT_pre_defined: {
       AST_PredefinedType* p = dynamic_cast<AST_PredefinedType*>(type);
@@ -594,89 +595,12 @@ std::string getEnumLabel(AST_Expression* label_val, AST_Type* disc)
   return e.replace(colon + 2, std::string::npos, label);
 }
 
-template <typename IntType>
-std::ostream& signed_int_helper(std::ostream& o, IntType value, IntType min)
-{
-  /*
-   * It seems that in C/C++ the minus sign and the bare number are parsed
-   * separately for negative integer literals. This can cause compilers
-   * to complain when using the minimum value of a signed integer because
-   * the number without the minus sign is 1 past the max signed value.
-   *
-   * https://stackoverflow.com/questions/65007935
-   *
-   * Apparently the workaround is to write it as `VALUE_PLUS_ONE - 1`.
-   */
-  const bool min_value = value == min;
-  if (min_value) ++value;
-  o << value;
-  if (min_value) o << " - 1";
-  return o;
-}
-
-inline
-std::ostream& hex_value(std::ostream& o, unsigned value, size_t bytes)
-{
-  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
-  o << std::hex << std::setw(bytes * 2) << std::setfill('0') << value;
-  return o;
-}
-
-template <typename CharType>
-unsigned char_value(CharType value)
-{
-  return value;
-}
-
-#if CHAR_MIN < 0
-/*
- * If char is signed, then it needs to be reinterpreted as unsigned char or
- * else static casting '\xff' to a 32-bit unsigned int would result in
- * 0xffffffff because those are both the signed 2's complement forms of -1.
- */
-template <>
-inline unsigned char_value<char>(char value)
-{
-  return reinterpret_cast<unsigned char&>(value);
-}
-#endif
-
-template <typename CharType>
-std::ostream& char_helper(std::ostream& o, CharType value)
-{
-  switch (value) {
-  case '\'':
-  case '\"':
-  case '\\':
-  case '\?':
-    return o << '\\' << static_cast<char>(value);
-  case '\n':
-    return o << "\\n";
-  case '\t':
-    return o << "\\t";
-  case '\v':
-    return o << "\\v";
-  case '\b':
-    return o << "\\b";
-  case '\r':
-    return o << "\\r";
-  case '\f':
-    return o << "\\f";
-  case '\a':
-    return o << "\\a";
-  }
-  const unsigned cvalue = char_value(value);
-  if (cvalue <= UCHAR_MAX && isprint(cvalue)) {
-    return o << static_cast<char>(value);
-  }
-  return hex_value(o << "\\x", cvalue, sizeof(CharType) == 1 ? 1 : 2);
-}
-
 inline
 std::ostream& operator<<(std::ostream& o,
                          const AST_Expression::AST_ExprValue& ev)
 {
-  OpenDDS::DCPS::RestoreOutputStreamState ross(o);
+  using namespace OpenDDS::DCPS;
+  RestoreOutputStreamState ross(o);
   switch (ev.et) {
   case AST_Expression::EV_octet:
     return hex_value(o << "0x", static_cast<int>(ev.u.oval), 1);
@@ -832,14 +756,13 @@ typedef std::string (*CommonFn)(
   const std::string& indent,
   const std::string& name, AST_Type* type,
   const std::string& prefix, bool wrap_nested_key_only, Intro& intro,
-  const std::string&, bool printing);
+  const std::string&);
 
 inline
 void generateCaseBody(
   CommonFn commonFn, CommonFn commonFn2,
   AST_UnionBranch* branch,
-  const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens,
-  bool printing = false)
+  const char* statementPrefix, const char* namePrefix, const char* uni, bool generateBreaks, bool parens)
 {
   using namespace AstTypeClassification;
   const BE_GlobalData::LanguageMapping lmap = be_global->language_mapping();
@@ -942,14 +865,14 @@ void generateCaseBody(
     if (commonFn2) {
       const OpenDDS::XTypes::MemberId id = be_global->get_id(branch);
       contents
-        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "", false)
+        << commonFn2(indent, name + (parens ? "()" : ""), branch->field_type(), "uni", false, intro, "")
         << indent << "if (!strm.write_parameter_id(" << id << ", size)) {\n"
         << indent << "  return false;\n"
         << indent << "}\n";
     }
     const std::string expr = commonFn(indent,
       name + (parens ? "()" : ""), branch->field_type(),
-      std::string(namePrefix) + "uni", false, intro, uni, printing);
+      std::string(namePrefix) + "uni", false, intro, uni);
     if (*statementPrefix) {
       contents <<
         indent << statementPrefix << " " << expr << ";\n" <<
@@ -988,7 +911,7 @@ bool generateSwitchBody(AST_Union*, CommonFn commonFn,
     }
     generateBranchLabels(branch, discriminator, n_labels, has_default);
     generateCaseBody(commonFn, commonFn2, branch, statementPrefix, namePrefix,
-                     uni, breaks, parens, false);
+                     uni, breaks, parens);
     be_global->impl_ <<
       "  }\n";
   }
@@ -1257,6 +1180,34 @@ ACE_CDR::ULong array_element_count(AST_Array* arr)
     count *= arr->dims()[i]->ev()->u.ulval;
   }
   return count;
+}
+
+inline
+ACE_CDR::ULong container_element_limit(AST_Type* type)
+{
+  AST_Type* const act = AstTypeClassification::resolveActualType(type);
+  AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
+  AST_Array* const arr = dynamic_cast<AST_Array*>(act);
+  if (seq && !seq->unbounded()) {
+    return seq->max_size()->ev()->u.ulval;
+  } else if (arr) {
+    return array_element_count(arr);
+  }
+  return 0;
+}
+
+inline
+AST_Type* container_base_type(AST_Type* type)
+{
+  AST_Type* const act = AstTypeClassification::resolveActualType(type);
+  AST_Sequence* const seq = dynamic_cast<AST_Sequence*>(act);
+  AST_Array* const arr = dynamic_cast<AST_Array*>(act);
+  if (seq) {
+    return seq->base_type();
+  } else if (arr) {
+    return arr->base_type();
+  }
+  return 0;
 }
 
 #endif

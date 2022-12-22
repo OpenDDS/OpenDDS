@@ -35,41 +35,45 @@ OpenDDS::DCPS::DataLinkSet::send(DataSampleElement* sample)
     GuardType guard(lock_);
     map_copy = map_;
   }
-  TransportSendElement* send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
 
-  for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
+  if (map_copy.size()) {
+    TransportSendElement* send_element = new TransportSendElement(static_cast<int>(map_copy.size()), sample);
+    for (MapType::iterator itr = map_copy.begin(); itr != map_copy.end(); ++itr) {
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-    if (customHeader) {
-      typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
-      FilterIter fi = sample->get_filter_per_link().find(itr->first);
-      GUIDSeq* guids = 0;
-      if (fi != sample->get_filter_per_link().end()) {
-        guids = fi->second.ptr();
+      if (customHeader) {
+        typedef std::map<DataLinkIdType, GUIDSeq_var>::iterator FilterIter;
+        FilterIter fi = sample->get_filter_per_link().find(itr->first);
+        GUIDSeq* guids = 0;
+        if (fi != sample->get_filter_per_link().end()) {
+          guids = fi->second.ptr();
+        }
+
+        VDBG_LVL((LM_DEBUG,
+                  "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
+                  itr->second.in(), guids ? guids->length() : 0), 5);
+
+        Message_Block_Ptr mb (send_element->msg()->duplicate());
+
+        DataSampleHeader::add_cfentries(guids, mb.get());
+
+        TransportCustomizedElement* tce = new TransportCustomizedElement(send_element);
+        tce->set_msg(move(mb)); // tce now owns ACE_Message_Block chain
+
+        itr->second->send(tce);
+
+      } else {
+#endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
+
+        // Tell the DataLink to send it.
+        itr->second->send(send_element);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
       }
-
-      VDBG_LVL((LM_DEBUG,
-        "(%P|%t) DBG: DataLink %@ filtering %d subscribers.\n",
-        itr->second.in(), guids ? guids->length() : 0), 5);
-
-      Message_Block_Ptr mb (send_element->msg()->duplicate());
-
-      DataSampleHeader::add_cfentries(guids, mb.get());
-
-      TransportCustomizedElement* tce = new TransportCustomizedElement(send_element);
-      tce->set_msg(move(mb)); // tce now owns ACE_Message_Block chain
-
-      itr->second->send(tce);
-
-    } else {
-#endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-
-      // Tell the DataLink to send it.
-      itr->second->send(send_element);
-
-#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-    }
 #endif
+    }
+  } else if (sample->get_send_listener()) {
+    sample->get_send_listener()->data_dropped(sample, true);
   }
 }
 
@@ -107,12 +111,12 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                           pub_id
   if (dup_map.empty()) {
     // similar to the "no links" case in TransportClient::send()
     if (DCPS_debug_level > 4) {
-      const GuidConverter converter(pub_id);
+      const LogGuid logger(pub_id);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataLinkSet::send_control: ")
                  ACE_TEXT("no links for publication %C, ")
                  ACE_TEXT("not sending control message.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 logger.c_str()));
     }
     listener->control_delivered(msg);
     return SEND_CONTROL_OK;

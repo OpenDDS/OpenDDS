@@ -17,8 +17,17 @@ TimeDuration::from_msec(const ACE_UINT64& ms)
 }
 
 ACE_INLINE
+TimeDuration
+TimeDuration::from_double(double duration)
+{
+  ACE_Time_Value rv;
+  rv.set(duration);
+  return TimeDuration(rv);
+}
+
+ACE_INLINE
 TimeDuration::TimeDuration()
-: value_(zero_value.value())
+: value_(ACE_Time_Value())
 {
 }
 
@@ -85,7 +94,7 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator+=(const TimeDuration& other)
 {
-  value(value_ + other.value());
+  value_ += other.value();
   return *this;
 }
 
@@ -93,7 +102,7 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator-=(const TimeDuration& other)
 {
-  value(value_ - other.value());
+  value_ -= other.value();
   return *this;
 }
 
@@ -101,7 +110,14 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator*=(double other)
 {
-  value(value_ * other);
+  value_ *= other;
+  return *this;
+}
+
+ACE_INLINE
+TimeDuration& TimeDuration::operator/=(double other)
+{
+  value_ *= (1.0 / other);
   return *this;
 }
 
@@ -109,7 +125,7 @@ ACE_INLINE
 TimeDuration&
 TimeDuration::operator=(const TimeDuration& other)
 {
-  value(other.value());
+  value_ = other.value();
   return *this;
 }
 
@@ -154,6 +170,19 @@ TimeDuration
 operator*(const TimeDuration& x, double y)
 {
   return TimeDuration(x.value() * y);
+}
+
+ACE_INLINE
+TimeDuration operator/(const TimeDuration& x, double y)
+{
+  return TimeDuration(x.value() * (1.0 / y));
+}
+
+ACE_INLINE
+double operator/(const TimeDuration& x, const TimeDuration& y)
+{
+  return (double(x.value().sec()) * 1000000 + x.value().usec()) /
+         (double(y.value().sec()) * 1000000 + y.value().usec());
 }
 
 ACE_INLINE

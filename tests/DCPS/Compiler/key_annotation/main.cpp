@@ -55,7 +55,7 @@ bool assert_key_only_size(const T& data, size_t expected)
   if (size != expected) {
     const char* type_name = get_type_name<T>();
     ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-      ACE_TEXT("For gen_find_size(OpenDDS::DCPS::KeyOnly<%C>), expected %u ")
+      ACE_TEXT("For serialized_size(OpenDDS::DCPS::KeyOnly<%C>), expected %u ")
       ACE_TEXT("but got %u!\n"),
       type_name, expected, size));
     return true;
@@ -147,6 +147,7 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   {
     KeyCheck<KeyedUnionStruct> c;
     c.add_key("value");
+    c.add_key("keyed_unkeyed_union");
     c.add_key("another_key");
     failed |= c.failed();
   }
@@ -213,7 +214,7 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   // Check KeyOnly for Unions
   failed |= assert_key_only_size(UnkeyedUnion(), 0);
   failed |= assert_key_only_size(KeyedUnion(), 4);
-  failed |= assert_key_only_size(KeyedUnionStruct(), 8);
+  failed |= assert_key_only_size(KeyedUnionStruct(), 12);
 
   return failed;
 }

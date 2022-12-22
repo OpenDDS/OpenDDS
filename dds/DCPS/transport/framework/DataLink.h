@@ -71,7 +71,7 @@ typedef WeakRcHandle<TransportSendListener> TransportSendListener_wrch;
  *    is enabled.
  */
 class OpenDDS_Dcps_Export DataLink
-: public RcEventHandler {
+: public virtual RcEventHandler {
 
   friend class DataLinkCleanupTask;
 
@@ -88,7 +88,7 @@ public:
   /// created this DataLink.  The ability to specify a priority
   /// for individual links is included for construction so its
   /// value can be available for activating any threads.
-  DataLink(TransportImpl& impl, Priority priority, bool is_loopback, bool is_active);
+  DataLink(const TransportImpl_rch& impl, Priority priority, bool is_loopback, bool is_active);
   virtual ~DataLink();
 
   /// Reactor invokes this after being notified in schedule_stop or cancel_release
@@ -194,7 +194,7 @@ public:
   // The connection has been broken. No locks are being held.
   // Take a snapshot of current associations which will be removed
   // by DataLinkCleanupTask.
-  bool release_resources();
+  void release_resources();
 
   // Used by to inform the send strategy to clear all unsent samples upon
   // backpressure timed out.
@@ -250,7 +250,7 @@ public:
   /// targets of this DataLink (see is_target()).
   GUIDSeq* target_intersection(const RepoId& pub_id, const GUIDSeq& in, size_t& n_subs);
 
-  TransportImpl& impl() const;
+  TransportImpl_rch impl() const;
 
   void default_listener(const TransportReceiveListener_wrch& trl);
   TransportReceiveListener_wrch default_listener() const;
@@ -270,7 +270,7 @@ public:
     bool reactor_is_shut_down() const;
   };
 
-  class ImmediateStart : public ReactorInterceptor::Command {
+  class ImmediateStart : public virtual ReactorInterceptor::Command {
   public:
     ImmediateStart(RcHandle<DataLink> link, WeakRcHandle<TransportClient> client, const RepoId& remote) : link_(link), client_(client), remote_(remote) {}
     void execute();
@@ -284,7 +284,7 @@ public:
 
   virtual void send_final_acks (const RepoId& readerid);
 
-  virtual ICE::Endpoint* get_ice_endpoint() const { return 0; }
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() const { return WeakRcHandle<ICE::Endpoint>(); }
 
   virtual bool is_leading(const GUID_t& /*writer*/,
                           const GUID_t& /*reader*/) const { return false; }
@@ -413,8 +413,8 @@ private:
   typedef OPENDDS_MAP_CMP(RepoId, LocalAssociationInfo, GUID_tKeyLessThan) AssocByLocal;
   AssocByLocal assoc_by_local_;
 
-  /// A reference to the TransportImpl that created this DataLink.
-  TransportImpl& impl_;
+  /// A weak rchandle to the TransportImpl that created this DataLink.
+  WeakRcHandle<TransportImpl> impl_;
 
   /// The id for this DataLink
   ACE_UINT64 id_;
@@ -438,8 +438,10 @@ protected:
 
   /// The transport send strategy object for this DataLink.
   TransportSendStrategy_rch send_strategy_;
-
   LockType strategy_lock_;
+
+  TransportSendStrategy_rch get_send_strategy();
+
   typedef OPENDDS_MAP_CMP(RepoId, TransportClient_wrch, GUID_tKeyLessThan) RepoToClientMap;
   typedef OPENDDS_MAP_CMP(RepoId, RepoToClientMap, GUID_tKeyLessThan) OnStartCallbackMap;
   OnStartCallbackMap on_start_callbacks_;

@@ -1,6 +1,7 @@
 #ifndef OPENDDS_DCPS_CONDITIONVARIABLE_H
 #define OPENDDS_DCPS_CONDITIONVARIABLE_H
 
+#include "ThreadStatusManager.h"
 #include "TimeTypes.h"
 #include "debug.h"
 
@@ -49,8 +50,9 @@ public:
   }
 
   /// Block until thread is woken up.
-  CvStatus wait()
+  CvStatus wait(ThreadStatusManager& thread_status_manager)
   {
+    ThreadStatusManager::Sleeper s(thread_status_manager);
     if (impl_.wait() == 0) {
       return CvStatus_NoTimeout;
     }
@@ -61,11 +63,12 @@ public:
   }
 
   /// Block until woken up or until expire_at. Same as wait() if expire_at is zero.
-  CvStatus wait_until(const MonotonicTimePoint& expire_at)
+  CvStatus wait_until(const MonotonicTimePoint& expire_at, ThreadStatusManager& thread_status_manager)
   {
     if (expire_at.is_zero()) {
-      return wait();
+      return wait(thread_status_manager);
     }
+    ThreadStatusManager::Sleeper s(thread_status_manager);
     if (impl_.wait(&expire_at.value()) == 0) {
       return CvStatus_NoTimeout;
     } else if (errno == ETIME) {
@@ -78,11 +81,12 @@ public:
   }
 
   /// Block until woken up or for expire_in. Same as wait() if expire_in is zero.
-  CvStatus wait_for(const TimeDuration& expire_in)
+  CvStatus wait_for(const TimeDuration& expire_in, ThreadStatusManager& thread_status_manager)
   {
     if (expire_in.is_zero()) {
-      return wait();
+      return wait(thread_status_manager);
     }
+    ThreadStatusManager::Sleeper s(thread_status_manager);
     return wait_until(MonotonicTimePoint::now() + expire_in);
   }
 

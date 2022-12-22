@@ -70,7 +70,7 @@ private:
 /// domain of SequenceNumbers -- for a given SingleSendBuffer object, the
 /// sequence numbers passed to insert() must be generated from the same place.
 class OpenDDS_Dcps_Export SingleSendBuffer
-  : public TransportSendBuffer, public RcObject {
+  : public TransportSendBuffer, public virtual RcObject {
 public:
 
   static const size_t UNLIMITED;
@@ -93,6 +93,7 @@ public:
               ACE_Message_Block* chain);
   void insert_fragment(SequenceNumber sequence,
                        SequenceNumber fragment,
+                       bool is_last_fragment,
                        TransportSendStrategy::QueueType* queue,
                        ACE_Message_Block* chain);
 
@@ -178,10 +179,17 @@ public:
     }
 
     void resend_fragments_i(SequenceNumber sequence,
-                            const DisjointSequence& fragments)
+                            const DisjointSequence& fragments,
+                            size_t& cumulative_send_count)
     {
-      ssb_.resend_fragments_i(sequence, fragments);
+      ssb_.resend_fragments_i(sequence, fragments, cumulative_send_count);
     }
+
+    bool has_frags(const SequenceNumber& seq) const
+    {
+      return ssb_.has_frags(seq);
+    }
+
 
   private:
     SingleSendBuffer& ssb_;
@@ -192,6 +200,8 @@ public:
   {
     pre_seq_.clear();
   }
+
+  bool has_frags(const SequenceNumber& seq) const;
 
 private:
   void check_capacity_i(BufferVec& removed);
@@ -208,7 +218,8 @@ private:
   bool resend_i(const SequenceRange& range, DisjointSequence* gaps,
                 const RepoId& destination);
   void resend_fragments_i(SequenceNumber sequence,
-                          const DisjointSequence& fragments);
+                          const DisjointSequence& fragments,
+                          size_t& cumulative_send_count);
 
   size_t n_chunks_;
 

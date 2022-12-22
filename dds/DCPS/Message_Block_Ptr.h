@@ -17,7 +17,14 @@ namespace DCPS {
 struct Message_Block_Deleter
 {
   void operator()(ACE_Message_Block* ptr) const {
-    ACE_Message_Block::release(ptr);
+    // In order to avoid locking order issues for message blocks with different locking strategies,
+    // it is safer to unlink elements in the chain before releasing them individually
+    while (ptr) {
+      ACE_Message_Block* cont = ptr->cont();
+      ptr->cont(0);
+      ACE_Message_Block::release(ptr);
+      ptr = cont;
+    }
   }
 };
 

@@ -3,7 +3,7 @@
 
 #include "export.h"
 
-#include <unordered_set>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -21,7 +21,7 @@ public:
 
   explicit Atom(Kind kind) : kind_(kind), character_(0) {}
   explicit Atom(char c) : kind_(CHARACTER), character_(c) {}
-  Atom(bool negated, const std::unordered_set<char>& characters)
+  Atom(bool negated, const std::set<char>& characters)
     : kind_(negated ? NEGATED_CHARACTER_CLASS : CHARACTER_CLASS)
     , character_(0)
     , characters_(characters) {}
@@ -30,7 +30,7 @@ public:
 
   char character() const { return character_; }
 
-  const std::unordered_set<char>& characters() const { return characters_; }
+  const std::set<char>& characters() const { return characters_; }
 
   bool operator==(const Atom& other) const
   {
@@ -69,7 +69,7 @@ public:
 private:
   Kind kind_;
   char character_;            // For CHARACTER.
-  std::unordered_set<char> characters_; // For CHARACTER_CLASS and NEGATED_CHARACTER_CLASS.
+  std::set<char> characters_; // For CHARACTER_CLASS and NEGATED_CHARACTER_CLASS.
 };
 
 struct AtomHash {
@@ -133,11 +133,10 @@ private:
   bool is_valid_;
 
   static void parse(Name& name, const std::string& buffer, size_t& idx);
-  static Atom::Kind parse_pattern(Name& name, const std::string& buffer, size_t& idx, char expected, Atom::Kind kind);
   static char parse_character(Name& name, const std::string& buffer, size_t& idx);
   static Atom parse_character_class(Name& name, const std::string& buffer, size_t& idx);
-  static void parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::unordered_set<char>& characters);
-  static void parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::unordered_set<char>& characters);
+  static void parse_character_class_tail(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);
+  static void parse_character_or_range(Name& name, const std::string& buffer, size_t& idx, std::set<char>& characters);
 };
 
 OpenDDS_RtpsRelayLib_Export std::ostream& operator<<(std::ostream& out, const Name& name);

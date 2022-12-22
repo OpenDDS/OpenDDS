@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20160303/omg_shared_ca_permissions.xsd">
+<dds xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://www.omg.org/spec/DDS-SECURITY/20170901/omg_shared_ca_permissions.xsd">
   <permissions>
     <grant name="ShapesPermissionTOC">
       <subject_name>/C=US/ST=California/O=Super Swanky Ski and Snow Shop/CN=Tahoe Joe</subject_name>

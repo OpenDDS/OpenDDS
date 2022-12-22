@@ -26,6 +26,13 @@ namespace DCPS {
 class OpenDDS_Multicast_Export MulticastInst
   : public TransportInst {
 public:
+
+  static const size_t DEFAULT_NAK_DEPTH = 32u;
+  static const long DEFAULT_NAK_INTERVAL = 500;
+  static const long DEFAULT_NAK_DELAY_INTERVALS = 4;
+  static const long DEFAULT_NAK_MAX = 3;
+  static const long DEFAULT_NAK_TIMEOUT = 30000;
+
   /// Enables IPv6 default group address selection.
   /// The default value is: false.
   bool default_to_ipv6_;

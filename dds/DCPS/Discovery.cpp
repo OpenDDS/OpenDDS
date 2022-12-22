@@ -1,28 +1,47 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> // Only the _pch include should start with DCPS/
+
 #include "Discovery.h"
+
 #include "Service_Participant.h"
 #include "BuiltInTopicUtils.h"
 #include "Registered_Data_Types.h"
-#include "DdsDcpsCoreC.h"
 #include "Marked_Default_Qos.h"
 #include "SafetyProfileStreams.h"
 #include "DCPS_Utils.h"
 
+#include <dds/DdsDcpsCoreC.h>
+#include <dds/OpenddsDcpsExtC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
-#include "DdsDcpsCoreTypeSupportImpl.h"
-#endif /* DDS_HAS_MINIMUM_BIT */
+#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#  include <dds/OpenddsDcpsExtTypeSupportImpl.h>
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace DCPS {
+
+DDS::ReturnCode_t TypeObjReqCond::wait()
+{
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  while (waiting) {
+    cond.wait(thread_status_manager);
+  }
+  return rc;
+}
+
+void TypeObjReqCond::done(DDS::ReturnCode_t retcode)
+{
+  ACE_GUARD(LockType, g, lock);
+  waiting = false;
+  rc = retcode;
+  cond.notify_all();
+}
 
 const char* Discovery::DEFAULT_REPO = "DEFAULT_REPO";
 const char* Discovery::DEFAULT_RTPS = "DEFAULT_RTPS";

@@ -86,6 +86,10 @@ MonitorFactory::initialize()
 {
 }
 
+void MonitorFactory::deinitialize()
+{
+}
+
 int
 MonitorFactory::service_initialize()
 {

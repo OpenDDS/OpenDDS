@@ -87,6 +87,7 @@ public:
   void reset_includes();
 
   void add_include(const char* file, stream_enum_t which = STREAM_H);
+  void conditional_include(const char* file, stream_enum_t which, const char* condition);
 
   /// Called to indicate that OpenDDS marshaling (serialization) code for the
   /// current file will depend on marshaling code generated for the indicated
@@ -118,7 +119,7 @@ public:
   ACE_CString pch_include() const;
   void pch_include(const ACE_CString& str);
 
-  const std::set<std::string>& cpp_includes() const;
+  const std::set<std::pair<std::string, std::string> >& cpp_includes() const;
   void add_cpp_include(const std::string& str);
 
   bool java() const;
@@ -133,17 +134,17 @@ public:
   bool itl() const;
   void itl(bool b);
 
-  bool v8() const;
-  void v8(bool b);
-
-  bool rapidjson() const;
-  void rapidjson(bool b);
+  bool value_reader_writer() const;
+  void value_reader_writer(bool b);
 
   bool face_ts() const;
   void face_ts(bool b);
 
-  bool printer() const;
-  void printer(bool b);
+  bool xtypes_complete() const;
+  void xtypes_complete(bool b);
+
+  bool old_typeobject_encoding() const { return old_typeobject_encoding_; }
+  void old_typeobject_encoding(bool b) { old_typeobject_encoding_ = b; }
 
   ACE_CString java_arg() const;
   void java_arg(const ACE_CString& str);
@@ -165,7 +166,7 @@ public:
   bool suppress_typecode() const { return suppress_typecode_; }
   bool suppress_xtypes() const { return suppress_xtypes_; }
 
-  static bool writeFile(const char* fileName, const std::string &content);
+  static bool writeFile(const char* fileName, const std::string& content);
 
   /**
    * Based on annotations and global_default_nested_, determine if a type is a
@@ -213,6 +214,8 @@ public:
    */
   bool warn_about_dcps_data_type();
 
+  ExtensibilityKind extensibility(AST_Decl* node, ExtensibilityKind default_extensibility, bool& has_annotation) const;
+  ExtensibilityKind extensibility(AST_Decl* node, ExtensibilityKind default_extensibility) const;
   ExtensibilityKind extensibility(AST_Decl* node) const;
   AutoidKind autoid(AST_Decl* node) const;
   bool id(AST_Decl* node, ACE_CDR::ULong& value) const;
@@ -230,37 +233,49 @@ public:
 
   OpenDDS::DataRepresentation data_representations(AST_Decl* node) const;
 
-  OpenDDS::XTypes::MemberId compute_id(AST_Field* field, AutoidKind auto_id, OpenDDS::XTypes::MemberId& member_id);
+  OpenDDS::XTypes::MemberId compute_id(AST_Structure* stru, AST_Field* field, AutoidKind auto_id,
+    OpenDDS::XTypes::MemberId& member_id);
   OpenDDS::XTypes::MemberId get_id(AST_Field* field);
 
   bool is_nested(AST_Decl* node);
+
+  bool default_enum_extensibility_zero() const
+  {
+    return default_enum_extensibility_zero_;
+  }
 
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
 
   bool java_, suppress_idl_, suppress_typecode_, suppress_xtypes_,
-    no_default_gen_, generate_itl_, generate_v8_,
-    generate_rapidjson_, face_ts_, printer_;
+    no_default_gen_, generate_itl_,
+    generate_value_reader_writer_,
+    generate_xtypes_complete_, face_ts_;
 
   bool filename_only_includes_;
 
   ACE_CString export_macro_, export_include_,
     versioning_name_, versioning_begin_, versioning_end_,
     pch_include_, java_arg_, sequence_suffix_;
-  std::set<std::string> cpp_includes_;
+  std::set<std::pair<std::string, std::string> > cpp_includes_;
 
   LanguageMapping language_mapping_;
 
   bool root_default_nested_;
   bool warn_about_dcps_data_type_;
   ExtensibilityKind default_extensibility_;
+  bool default_enum_extensibility_zero_;
   OpenDDS::DataRepresentation default_data_representation_;
   AutoidKind root_default_autoid_;
   TryConstructFailAction default_try_construct_;
   std::set<std::string> platforms_;
   typedef std::map<AST_Field*, OpenDDS::XTypes::MemberId> MemberIdMap;
   MemberIdMap member_id_map_;
+  typedef std::map<OpenDDS::XTypes::MemberId, AST_Field*> MemberIdCollisionMap;
+  typedef std::map<AST_Structure*, MemberIdCollisionMap> GlobalMemberIdCollisionMap;
+  GlobalMemberIdCollisionMap member_id_collision_map_;
+  bool old_typeobject_encoding_;
 
   bool is_default_nested(UTL_Scope* scope);
   AutoidKind scoped_autoid(UTL_Scope* scope) const;

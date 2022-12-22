@@ -50,7 +50,8 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
     return;
   }
 
-  Serializer ser(sample.sample_.get(), Encoding::KIND_XCDR1,
+  Message_Block_Ptr payload(sample.data());
+  Serializer ser(payload.get(), Encoding::KIND_XCDR1,
                  sample.header_.byte_order_ ? ENDIAN_LITTLE : ENDIAN_BIG);
   TestMsg data;
   if (!deserializeData(data, ser)) {
@@ -59,7 +60,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 
   if (data.key == 99) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("%C received terminating sample\n"),
-      OPENDDS_STRING(GuidConverter(get_repo_id())).c_str()));
+      LogGuid(get_repo_id()).c_str()));
     done_ = true;
     return;
   }
@@ -67,13 +68,11 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
   DDS::Time_t ts = {sample.header_.source_timestamp_sec_, sample.header_.source_timestamp_nanosec_};
   ACE_Time_Value atv = time_to_time_value(ts);
 
-  GuidConverter pub(sample.header_.publication_id_);
-  GuidConverter id(get_repo_id());
   ACE_INT64 seqN = sample.header_.sequence_.getValue();
 
   std::ostringstream oss;
-  oss << '(' << atv.usec() << " usec) data_received by " << OPENDDS_STRING(id)
-    << "\n    Writer " << OPENDDS_STRING(pub) << " seq#" << seqN
+  oss << '(' << atv.usec() << " usec) data_received by " << LogGuid(get_repo_id()).conv_
+    << "\n    Writer " << LogGuid(sample.header_.publication_id_).conv_ << " seq#" << seqN
     << " key:" << data.key << " value:"  << data.value << "\n\n";
 
   ACE_DEBUG((LM_INFO, ACE_TEXT("%C"), oss.str().c_str()));

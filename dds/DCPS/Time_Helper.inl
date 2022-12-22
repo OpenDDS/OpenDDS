@@ -134,6 +134,19 @@ operator-(const DDS::Time_t& t1, const DDS::Time_t& t2)
   return t;
 }
 
+ACE_INLINE DDS::Time_t
+operator-(const DDS::Time_t& t1, const DDS::Duration_t& t2)
+{
+  DDS::Time_t t = { t1.sec - t2.sec, t1.nanosec - t2.nanosec };
+
+  if (t2.nanosec > t1.nanosec) {
+      t.nanosec = (t1.nanosec + ACE_ONE_SECOND_IN_NSECS) - t2.nanosec;
+      t.sec = (t1.sec - 1) - t2.sec;
+    }
+
+  return t;
+}
+
 ACE_INLINE DDS::Duration_t
 operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2)
 {
@@ -165,7 +178,7 @@ DDS::Time_t time_value_to_time(const ACE_Time_Value& tv)
 {
   DDS::Time_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
 
@@ -174,7 +187,7 @@ MonotonicTime_t time_value_to_monotonic_time(const ACE_Time_Value& tv)
 {
   MonotonicTime_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
 
@@ -217,7 +230,7 @@ DDS::Duration_t time_value_to_duration(const ACE_Time_Value& tv)
 {
   DDS::Duration_t t;
   t.sec = ACE_Utils::truncate_cast<CORBA::Long>(tv.sec());
-  t.nanosec = tv.usec() * 1000;
+  t.nanosec = ACE_Utils::truncate_cast<CORBA::ULong>(tv.usec() * 1000);
   return t;
 }
 

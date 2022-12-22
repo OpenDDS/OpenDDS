@@ -29,6 +29,7 @@ This documentation are for those who want to contribute to OpenDDS and those who
 .. toctree::
   :maxdepth: 2
 
+  Development Guidelines <internal/dev_guidelines>
   Documentation Guidelines <internal/docs>
   Unit Testing Guidelines <internal/unit_tests>
   Github Actions <internal/github_actions>

@@ -60,7 +60,8 @@ private:
 
   template<typename Qos>
   static std::string qos_str(const Qos& qos) {
-    std::ostringstream o; o << " qos.user_data: ";
+    std::ostringstream o;
+    o << " qos.user_data: ";
     for (CORBA::ULong i = 0; i < qos.user_data.value.length(); ++i) {
       o << qos.user_data.value[i];
     }

@@ -34,24 +34,21 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
   {
   }
 
+  LocatorCacheKey(const LocatorCacheKey& val)
+    : remote_(val.remote_)
+    , local_(val.local_)
+    , prefer_unicast_(val.prefer_unicast_)
+  {
+  }
+
   bool operator<(const LocatorCacheKey& rhs) const
   {
-    return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) < 0;
+    return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (LocatorCacheKey)) < 0;
   }
 
   bool operator==(const LocatorCacheKey& rhs) const
   {
-    return std::memcmp(this, &rhs, sizeof (LocatorCacheKey)) == 0;
-  }
-
-  LocatorCacheKey& operator=(const LocatorCacheKey& rhs)
-  {
-    if (this != &rhs) {
-      const_cast<GUID_t&>(remote_) = rhs.remote_;
-      const_cast<GUID_t&>(local_) = rhs.local_;
-      const_cast<bool&>(prefer_unicast_) = rhs.prefer_unicast_;
-    }
-    return *this;
+    return std::memcmp(static_cast<const void*>(this), static_cast<const void*>(&rhs), sizeof (LocatorCacheKey)) == 0;
   }
 
   void get_contained_guids(GuidSet& set) const
@@ -61,9 +58,9 @@ struct OpenDDS_Rtps_Udp_Export LocatorCacheKey {
     set.insert(local_);
   }
 
-  const GUID_t remote_;
-  const GUID_t local_;
-  const bool prefer_unicast_;
+  GUID_t remote_;
+  GUID_t local_;
+  bool prefer_unicast_;
 };
 
 #pragma pack(pop)

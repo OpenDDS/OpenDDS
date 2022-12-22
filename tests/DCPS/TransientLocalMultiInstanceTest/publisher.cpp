@@ -227,7 +227,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       ACE_OS::sleep(1);
     }
 
-    ok = listener_servant1->ok_;
+    ok = listener_servant1->ok();
     if (ok) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Reader 1 in pub process received all samples\n")));
     } else {
@@ -267,7 +267,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     }
 
     if (ok) {
-      ok = listener_servant2->ok_;
+      ok = listener_servant2->ok();
       if (ok) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) Reader 2 in pub process received all samples\n")));
       } else {
@@ -276,23 +276,20 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       }
     }
 
-    int ten = 0;
     while (true) {
-      ++ten;
       DDS::PublicationMatchedStatus pubmatched, pubmatched2;
       if (dw1->get_publication_matched_status(pubmatched) != DDS::RETCODE_OK || dw2->get_publication_matched_status(pubmatched2) != DDS::RETCODE_OK) {
         ACE_ERROR((LM_ERROR,
           ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status\n")));
         break;
       }
-      else if (pubmatched.current_count == 4 && pubmatched.total_count == 4 && pubmatched2.current_count == 4 && pubmatched2.total_count == 4) {
+      else if (pubmatched.current_count == 2 && pubmatched.total_count == 4 && pubmatched2.current_count == 2 && pubmatched2.total_count == 4) {
         // subscriber has come and gone
         break;
       }
-      if (ten % 100000 == 0) {
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) pubmatched current_count : %d total_count : %d pubmatched2 current_count : %d total_count : %d\n"),
-          pubmatched.current_count, pubmatched.total_count, pubmatched2.current_count, pubmatched2.total_count));
-      }
+      ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) pubmatched current_count : %d total_count : %d pubmatched2 current_count : %d total_count : %d\n"),
+        pubmatched.current_count, pubmatched.total_count, pubmatched2.current_count, pubmatched2.total_count));
+      ACE_OS::sleep(ACE_Time_Value(0, 200000));
     }
     participant->delete_contained_entities();
     dpf->delete_participant(participant);

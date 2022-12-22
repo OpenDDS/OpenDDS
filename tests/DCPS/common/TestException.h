@@ -5,10 +5,9 @@
 
 class Common_Export TestException
 {
-  public:
-
-    TestException();
-    ~TestException();
+public:
+  TestException();
+  ~TestException();
 };
 
 #endif

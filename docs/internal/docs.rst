@@ -105,11 +105,26 @@ ghfile
 
   :ghfile:`README.md`
 
+  :ghfile:`the \`\`README.md\`\` File <README.md>`
+
+  :ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
+
+  :ghfile:`check out the available support <README.md#support>`
+
 Turns into:
+
+:ghfile:`README.md#support`
 
 :ghfile:`README.md`
 
-The file or directory must exist in the repo.
+:ghfile:`the \`\`README.md\`\` File <README.md>`
+
+:ghfile:`the support section of the \`\`README.md\`\` File <README.md#support>`
+
+:ghfile:`check out the available support <README.md#support>`
+
+The path passed must exist, be relative to the root of the repository, and will have to be committed, if it's not already.
+If there is a URL fragment in the path, like ``README.md#support``, then it will appear in the link URL.
 
 It will try to point to the most specific version of the file:
 
@@ -125,9 +140,17 @@ ghissue
 
   :ghissue:`213`
 
+  :ghissue:`this is the issue <213>`
+
+  :ghissue:`this is **the issue** <213>`
+
 Turns into:
 
 :ghissue:`213`
+
+:ghissue:`this is the issue <213>`
+
+:ghissue:`this is **the issue** <213>`
 
 ghpr
 ----
@@ -136,6 +159,14 @@ ghpr
 
   :ghpr:`1`
 
+  :ghpr:`this is the PR <1>`
+
+  :ghpr:`this is **the PR** <1>`
+
 Turns into:
 
 :ghpr:`1`
+
+:ghpr:`this is the PR <1>`
+
+:ghpr:`this is **the PR** <1>`

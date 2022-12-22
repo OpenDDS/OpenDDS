@@ -24,7 +24,7 @@ class PerConnectionSynch : public ACE_Task_Base,
       public ThreadSynch {
 public:
 
-  PerConnectionSynch(ThreadSynchResource* synch_resource, long priority, int scheduler);
+  PerConnectionSynch(ThreadSynchResource* synch_resource, long priority, long scheduler);
   virtual ~PerConnectionSynch();
 
   virtual void work_available();

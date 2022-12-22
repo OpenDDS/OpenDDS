@@ -2,8 +2,7 @@
 
 #include "../RtpsUtils.h"
 
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
 #include <dds/DCPS/RTPS/RtpsCoreC.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
@@ -12,9 +11,9 @@
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Message_Block_Ptr.h>
+#include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SendStateDataSampleList.h>
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
 
 #include <dds/DdsDcpsGuidC.h>
 
@@ -151,16 +150,14 @@ bool SocketWriter::send(const ACE_Message_Block& mb) const
 {
   for (std::set<ACE_INET_Addr>::const_iterator i = dest_addr_.begin(); i != dest_addr_.end(); ++i) {
     Locator_t locator;
-    locator.kind = address_to_kind(*i);
-    locator.port = i->get_port_number();
-    address_to_bytes(locator.address, *i);
+    address_to_locator(locator, *i);
     ACE_INET_Addr dest;
     locator_to_address(dest, locator, local_addr_.get_type() != AF_INET);
 
     ssize_t res = socket_.send(mb.rd_ptr(), mb.length(), dest);
     if (res >= 0) {
       ACE_DEBUG((LM_INFO, "SocketWriter %C sent %C (%d bytes)\n",
-                 OPENDDS_STRING(GuidConverter(id_)).c_str(), LogAddr::ip(*i).c_str(), res));
+                 LogGuid(id_).c_str(), LogAddr::ip(*i).c_str(), res));
     } else {
       ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: in socket_.send()%m\n")), false);
     }

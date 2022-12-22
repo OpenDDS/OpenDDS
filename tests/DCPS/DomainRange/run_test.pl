@@ -16,10 +16,9 @@ my $result = 0;
 my $dcps_debug_lvl = 10;
 
 sub runTest {
-    my $arg = shift;
+    my $arg = shift // "";
 
     my $test = new PerlDDS::TestFramework();
-    $test->enable_console_logging();
 
     print "*********************************\n";
     print "DomainRangeTest creates a single process with 1 DW and 4 DRs.\n\n";

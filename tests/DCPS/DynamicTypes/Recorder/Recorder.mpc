@@ -1,0 +1,11 @@
+project(XTypes_Dynamic_Recorder): dcps_test, dcps_rtps_udp, msvc_bigobj {
+  requires += no_opendds_safety_profile
+  dcps_ts_flags += -Gxtypes-complete
+  exename = xtypes_dynamic_recorder
+
+  includes += ..
+
+  Source_Files {
+    XTypesDynamicRecorder.cpp
+  }
+}

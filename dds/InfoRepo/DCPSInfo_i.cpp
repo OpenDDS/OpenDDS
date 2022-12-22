@@ -51,6 +51,9 @@ TAO_DDS_DCPSInfo_i::TAO_DDS_DCPSInfo_i(CORBA::ORB_ptr orb
   , shutdown_(shutdown)
   , reassociate_timer_id_(-1)
   , dispatch_check_timer_id_(-1)
+#ifndef DDS_HAS_MINIMUM_BIT
+  , in_cleanup_all_built_in_topics_(false)
+#endif
 {
   if (!TheServiceParticipant->use_bidir_giop()) {
     int argc = 0;
@@ -70,39 +73,37 @@ TAO_DDS_DCPSInfo_i::handle_timeout(const ACE_Time_Value& /*now*/,
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, this->lock_, 0);
 
   if (arg == this) {
-    if ( !CORBA::is_nil(this->dispatchingOrb_.in())){
-      if (this->dispatchingOrb_->work_pending())
-      {
+    if (dispatchingOrb_) {
+      if (dispatchingOrb_->work_pending()) {
         // Ten microseconds
-        ACE_Time_Value small(0,10);
-        this->dispatchingOrb_->perform_work(small);
+        ACE_Time_Value smallval(0, 10);
+        dispatchingOrb_->perform_work(smallval);
       }
     }
-  }
-  else {
-  // NOTE: This is a purposefully naive approach to addressing defunct
-  // associations.  In the future, it may be worthwhile to introduce a
-  // callback model to fix the heinous runtime cost below:
-  for (DCPS_IR_Domain_Map::const_iterator dom(this->domains_.begin());
-       dom != this->domains_.end(); ++dom) {
+  } else {
+    // NOTE: This is a purposefully naive approach to addressing defunct
+    // associations.  In the future, it may be worthwhile to introduce a
+    // callback model to fix the heinous runtime cost below:
+    for (DCPS_IR_Domain_Map::const_iterator dom(this->domains_.begin());
+         dom != this->domains_.end(); ++dom) {
 
-    const DCPS_IR_Participant_Map& participants(dom->second->participants());
-    for (DCPS_IR_Participant_Map::const_iterator part(participants.begin());
-         part != participants.end(); ++part) {
+      const DCPS_IR_Participant_Map& participants(dom->second->participants());
+      for (DCPS_IR_Participant_Map::const_iterator part(participants.begin());
+           part != participants.end(); ++part) {
 
-      const DCPS_IR_Subscription_Map& subscriptions(part->second->subscriptions());
-      for (DCPS_IR_Subscription_Map::const_iterator sub(subscriptions.begin());
-           sub != subscriptions.end(); ++sub) {
-        sub->second->reevaluate_defunct_associations();
-      }
+        const DCPS_IR_Subscription_Map& subscriptions(part->second->subscriptions());
+        for (DCPS_IR_Subscription_Map::const_iterator sub(subscriptions.begin());
+             sub != subscriptions.end(); ++sub) {
+          sub->second->reevaluate_defunct_associations();
+        }
 
-      const DCPS_IR_Publication_Map& publications(part->second->publications());
-      for (DCPS_IR_Publication_Map::const_iterator pub(publications.begin());
-           pub != publications.end(); ++pub) {
-        pub->second->reevaluate_defunct_associations();
+        const DCPS_IR_Publication_Map& publications(part->second->publications());
+        for (DCPS_IR_Publication_Map::const_iterator pub(publications.begin());
+             pub != publications.end(); ++pub) {
+          pub->second->reevaluate_defunct_associations();
+        }
       }
     }
-  }
   }
 
   return 0;
@@ -641,25 +642,28 @@ void TAO_DDS_DCPSInfo_i::remove_publication(
   }
 
   // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = where->second->participant(participantId);
-
-  if (0 == partPtr) {
+  DCPS_IR_Participant* const partPtr = where->second->participant(participantId);
+  if (!partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
+  const bool in_cleanup =
+#ifdef DDS_HAS_MINIMUM_BIT
+    false;
+#else
+    in_cleanup_all_built_in_topics_;
+#endif
+
   if (partPtr->remove_publication(publicationId) != 0) {
-    where->second->remove_dead_participants();
+    where->second->remove_dead_participants(in_cleanup);
 
     // throw exception because the publication was not removed!
     throw OpenDDS::DCPS::Invalid_Publication();
   }
 
-  where->second->remove_dead_participants();
+  where->second->remove_dead_participants(in_cleanup);
 
-  if (this->um_
-      && (partPtr->isOwner() == true)
-      && (partPtr->isBitPublisher() == false)) {
+  if (um_ && partPtr->isOwner() && !partPtr->isBitPublisher()) {
     Update::IdPath path(domainId, participantId, publicationId);
     this->um_->destroy(path, Update::Actor, Update::DataWriter);
 
@@ -970,10 +974,8 @@ void TAO_DDS_DCPSInfo_i::remove_subscription(
   }
 
   // Grab the participant.
-  DCPS_IR_Participant* partPtr
-  = where->second->participant(participantId);
-
-  if (0 == partPtr) {
+  DCPS_IR_Participant* const partPtr = where->second->participant(participantId);
+  if (!partPtr) {
     throw OpenDDS::DCPS::Invalid_Participant();
   }
 
@@ -982,11 +984,15 @@ void TAO_DDS_DCPSInfo_i::remove_subscription(
     throw OpenDDS::DCPS::Invalid_Subscription();
   }
 
-  where->second->remove_dead_participants();
+  where->second->remove_dead_participants(
+#ifdef DDS_HAS_MINIMUM_BIT
+    false
+#else
+    in_cleanup_all_built_in_topics_
+#endif
+    );
 
-  if (this->um_
-      && (partPtr->isOwner() == true)
-      && (partPtr->isBitPublisher() == false)) {
+  if (um_ && partPtr->isOwner() && !partPtr->isBitPublisher()) {
     Update::IdPath path(domainId, participantId, subscriptionId);
     this->um_->destroy(path, Update::Actor, Update::DataReader);
 
@@ -1451,9 +1457,8 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     throw OpenDDS::DCPS::Invalid_Domain();
   }
 
-  DCPS_IR_Participant* participant = where->second->participant(participantId);
-
-  if (participant == 0) {
+  DCPS_IR_Participant_rch participant = where->second->participant_rch(participantId);
+  if (!participant) {
     OpenDDS::DCPS::RepoIdConverter converter(participantId);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: (bool)TAO_DDS_DCPSInfo_i::remove_domain_participant: ")
@@ -1465,8 +1470,7 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
 
   // Determine if we should propagate this event;  we need to cache this
   // result as the participant will be gone by the time we use the result.
-  bool sendUpdate = (participant->isOwner() == true)
-                    && (participant->isBitPublisher() == false);
+  bool sendUpdate = participant->isOwner() && !participant->isBitPublisher();
 
   CORBA::Boolean dont_notify_lost = 0;
   int status = where->second->remove_participant(participantId, dont_notify_lost);
@@ -1494,10 +1498,17 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     }
   }
 
-  if (where->second->participants().empty()) {
+  if (where->second->participants().empty()
+#ifndef DDS_HAS_MINIMUM_BIT
+    && !(participant->isOwner() && participant->isBitPublisher() && in_cleanup_all_built_in_topics_)
+    // If this is false, we're running as part of cleanup_all_built_in_topics
+    // and we can't remove the domain because we would invalid the iterator
+    // we're using in cleanup_all_built_in_topics. cleanup_all_built_in_topics
+    // will clear the domains once it's done.
+#endif
+    ) {
     domains_.erase(where);
   }
-
 #ifndef DDS_HAS_MINIMUM_BIT
   else if (where->second->useBIT() &&
            where->second->participants().size() == 1) {
@@ -1505,8 +1516,17 @@ void TAO_DDS_DCPSInfo_i::remove_domain_participant(
     // It can be removed now since no user participants exist in this domain,
     // but it has to be removed on the Service Participant's reactor thread
     // in order to make the locking work properly in delete_participant().
-    const ACE_Event_Handler_var eh = new BIT_Cleanup_Handler(this, domainId);
+    BIT_Cleanup_Handler* eh_impl = new BIT_Cleanup_Handler(this, domainId);
+    const ACE_Event_Handler_var eh = eh_impl;
     TheServiceParticipant->reactor()->notify(eh.handler());
+
+    // Wait for that to be finished
+    using OpenDDS::DCPS::CvStatus_NoTimeout;
+    OpenDDS::DCPS::CvStatus status = CvStatus_NoTimeout;
+    OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+    while (status == CvStatus_NoTimeout && !eh_impl->done_) {
+      status = eh_impl->cv_.wait(thread_status_manager);
+    }
   }
 #endif
 }
@@ -1518,13 +1538,12 @@ int TAO_DDS_DCPSInfo_i::BIT_Cleanup_Handler::handle_exception(ACE_HANDLE)
 
   const DCPS_IR_Domain_Map::iterator where = parent_->domains_.find(domain_);
 
-  if (where == parent_->domains_.end()) {
-    return 0;
-  }
-
-  if (where->second->participants().size() == 1) {
+  if (where != parent_->domains_.end() && where->second->participants().size() == 1) {
     where->second->cleanup_built_in_topics();
   }
+
+  done_ = true;
+  cv_.notify_all();
 
   return 0;
 }
@@ -2473,6 +2492,32 @@ TAO_DDS_DCPSInfo_i::dump_to_string()
 #endif // !defined (OPENDDS_INFOREPO_REDUCED_FOOTPRINT)
   return CORBA::string_dup(dump.c_str());
 
+}
+
+void TAO_DDS_DCPSInfo_i::cleanup_all_built_in_topics()
+{
+#ifndef DDS_HAS_MINIMUM_BIT
+  DCPS_IR_Domain_Map copy;
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+    if (domains_.empty() || in_cleanup_all_built_in_topics_) {
+      return;
+    }
+    copy = domains_;
+    in_cleanup_all_built_in_topics_ = true;
+  }
+
+  for (DCPS_IR_Domain_Map::iterator it = copy.begin(); it != copy.end(); ++it) {
+    it->second->cleanup_built_in_topics();
+  }
+
+  {
+    ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, lock_);
+    in_cleanup_all_built_in_topics_ = false;
+    copy.clear();
+    domains_.clear();
+  }
+#endif
 }
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

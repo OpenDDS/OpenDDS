@@ -7,15 +7,15 @@
 #include "tests/Utils/ExceptionStreams.h"
 
 template <class DT, class DT_seq, class DR, class DR_ptr, class DR_var>
-int read (::DDS::DataReader_ptr reader, DT& foo)
+int read(::DDS::DataReader_ptr reader, DT& foo)
 {
   try
   {
     DR_var foo_dr
       = DR::_narrow(reader);
-    if (CORBA::is_nil (foo_dr.in ()))
+    if (CORBA::is_nil(foo_dr.in()))
     {
-      ACE_ERROR ((LM_ERROR,
+      ACE_ERROR((LM_ERROR,
         ACE_TEXT("(%P|%t) DataReaderListenerImpl::read - _narrow failed.\n")));
       throw BadReaderException() ;
     }
@@ -31,57 +31,59 @@ int read (::DDS::DataReader_ptr reader, DT& foo)
     }
     else if (status == ::DDS::RETCODE_NO_DATA)
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::reader received ::DDS::RETCODE_NO_DATA!\n")),
         -1);
     }
     else
     {
-      ACE_ERROR_RETURN ((LM_ERROR,
+      ACE_ERROR_RETURN((LM_ERROR,
         ACE_TEXT("(%P|%t) ERROR: DataReaderListenerImpl::read status==%d\n"), status),
         -1);
     }
   }
   catch (const CORBA::Exception& ex)
   {
-    ex._tao_print_exception ("(%P|%t) DataReaderListenerImpl::read - ");
+    ex._tao_print_exception("(%P|%t) DataReaderListenerImpl::read - ");
     return -1;
   }
 
   return 0;
 }
 
-DataReaderListenerImpl::DataReaderListenerImpl( int expected)
- : samples_( 0),
-   expected_( expected),
-   condition_( this->lock_)
+DataReaderListenerImpl::DataReaderListenerImpl(int expected)
+ : samples_(0),
+   expected_(expected),
+   condition_(lock_)
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) DataReaderListenerImpl::DataReaderListenerImpl\n")
   ));
 }
 
-DataReaderListenerImpl::~DataReaderListenerImpl (void)
+DataReaderListenerImpl::~DataReaderListenerImpl()
 {
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) DataReaderListenerImpl::~DataReaderListenerImpl ")
     ACE_TEXT("after %d samples\n"),
-    this->samples_
+    samples_
   ));
 }
 
 void
 DataReaderListenerImpl::waitForCompletion()
 {
-  ACE_GUARD (ACE_SYNCH_MUTEX, g, this->lock_);
+  ACE_GUARD(ACE_SYNCH_MUTEX, g, lock_);
   std::cout << "Subscriber waiting for complete signal" << std::endl;
-  this->condition_.wait();
+  while (samples_ < expected_) {
+    condition_.wait();
+  }
   std::cout << "Subscriber Got complete signal" << std::endl;
 }
 
-void DataReaderListenerImpl::on_requested_deadline_missed (
-    ::DDS::DataReader_ptr reader,
-    const ::DDS::RequestedDeadlineMissedStatus & status
+void DataReaderListenerImpl::on_requested_deadline_missed(
+  ::DDS::DataReader_ptr reader,
+  const ::DDS::RequestedDeadlineMissedStatus& status
 )
 {
   ACE_UNUSED_ARG(reader);
@@ -92,9 +94,9 @@ void DataReaderListenerImpl::on_requested_deadline_missed (
   ));
 }
 
-void DataReaderListenerImpl::on_requested_incompatible_qos (
+void DataReaderListenerImpl::on_requested_incompatible_qos(
   ::DDS::DataReader_ptr reader,
-  const ::DDS::RequestedIncompatibleQosStatus & status
+  const ::DDS::RequestedIncompatibleQosStatus& status
 )
 {
   ACE_UNUSED_ARG(reader);
@@ -105,9 +107,9 @@ void DataReaderListenerImpl::on_requested_incompatible_qos (
   ));
 }
 
-void DataReaderListenerImpl::on_liveliness_changed (
+void DataReaderListenerImpl::on_liveliness_changed(
   ::DDS::DataReader_ptr reader,
-  const ::DDS::LivelinessChangedStatus & status
+  const ::DDS::LivelinessChangedStatus& status
 )
 {
   ACE_UNUSED_ARG(reader);
@@ -118,9 +120,9 @@ void DataReaderListenerImpl::on_liveliness_changed (
   ));
 }
 
-void DataReaderListenerImpl::on_subscription_matched (
+void DataReaderListenerImpl::on_subscription_matched(
   ::DDS::DataReader_ptr reader,
-  const ::DDS::SubscriptionMatchedStatus & status
+  const ::DDS::SubscriptionMatchedStatus& status
 )
 {
   ACE_UNUSED_ARG(reader) ;
@@ -153,7 +155,7 @@ void DataReaderListenerImpl::on_data_available(
       ::Xyz::FooNoKeySeq,
       ::Xyz::FooNoKeyDataReader,
       ::Xyz::FooNoKeyDataReader_ptr,
-      ::Xyz::FooNoKeyDataReader_var> (reader, foo);
+      ::Xyz::FooNoKeyDataReader_var>(reader, foo);
 
   if (ret != 0)
   {
@@ -164,13 +166,13 @@ void DataReaderListenerImpl::on_data_available(
   } else {
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) DataReaderListenerImpl::on_data_available sample %d\n"),
-      this->samples_
+      samples_
     ));
   }
 
-  if( ++this->samples_ >= this->expected_) {
+  if (++samples_ >= expected_) {
     std::cout << "Subscriber signaling complete" << std::endl;
-    this->condition_.signal();
+    condition_.signal();
   }
 }
 

@@ -15,9 +15,8 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 
 #include "dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h"
-#include "dds/DCPS/RTPS/BaseMessageTypes.h"
 #include "dds/DCPS/RTPS/MessageTypes.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include "dds/DCPS/RTPS/GuidGenerator.h"
 
 #include "dds/DCPS/Service_Participant.h"
@@ -25,6 +24,8 @@
 #include "dds/DCPS/DisjointSequence.h"
 #include "dds/DCPS/SendStateDataSampleList.h"
 #include "dds/DCPS/DataSampleElement.h"
+
+#include <dds/OpenddsDcpsExtTypeSupportImpl.h>
 
 #include <tao/Exception.h>
 
@@ -69,7 +70,7 @@ struct SimpleTC: TransportClient {
   using TransportClient::send;
   using TransportClient::connection_info;
 
-  const RepoId& get_repo_id() const { return local_id_; }
+  RepoId get_repo_id() const { return local_id_; }
   DDS::DomainId_t domain_id() const { return 0; }
   bool check_transport_qos(const TransportInst&) { return true; }
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
@@ -101,7 +102,7 @@ struct SimpleDataReader: SimpleTC, TransportReceiveListener {
     }
     if (sample.header_.sequence_ == 6) { // reassembled from DATA_FRAG
       if (sample.header_.message_length_ != 3 * 1024
-          || sample.sample_->total_length() != 3 * 1024) {
+          || sample.data_length() != 3 * 1024) {
         ACE_ERROR((LM_ERROR, "ERROR: unexpected reassembled sample length\n"));
       }
       if (have_frag_) {
@@ -718,13 +719,7 @@ void make_blob(const ACE_INET_Addr& part1_addr, ACE_Message_Block& mb_locator)
 {
   LocatorSeq part1_locators;
   part1_locators.length(1);
-  part1_locators[0].kind =
-#ifdef ACE_HAS_IPV6
-    (part1_addr.get_type() == AF_INET6) ? LOCATOR_KIND_UDPv6 :
-#endif
-      LOCATOR_KIND_UDPv4;
-  part1_locators[0].port = part1_addr.get_port_number();
-  address_to_bytes(part1_locators[0].address, part1_addr);
+  address_to_locator(part1_locators[0], part1_addr);
   size_t size = 0;
   serialized_size(blob_encoding, size, part1_locators);
   mb_locator.init(size + 1);
@@ -747,12 +742,12 @@ bool blob_to_addr(const TransportBLOB& blob, ACE_INET_Addr& addr)
                "ERROR: couldn't deserialize Locators from participant 2\n"));
     return false;
   }
-  if (locators[0].kind == LOCATOR_KIND_UDPv6) {
+  if (locators[0].kind == OpenDDS::RTPS::LOCATOR_KIND_UDPv6) {
 #ifdef ACE_HAS_IPV6
     addr.set_type(AF_INET6);
 #endif
     addr.set_address(reinterpret_cast<const char*>(locators[0].address), 16, 0 /*encode*/);
-  } else if (locators[0].kind == LOCATOR_KIND_UDPv4) {
+  } else if (locators[0].kind == OpenDDS::RTPS::LOCATOR_KIND_UDPv4) {
     addr.set_type(AF_INET);
     addr.set_address(reinterpret_cast<const char*>(locators[0].address) + 12,
                      4, 0 /*network order*/);
@@ -832,9 +827,7 @@ bool run_test()
     //need to map address to IPV6
     LocatorSeq locators;
     locators.length(1);
-    locators[0].kind = address_to_kind(part2_addr);
-    locators[0].port = part2_addr.get_port_number();
-    address_to_bytes(locators[0].address, part2_addr);
+    address_to_locator(locators[0], part2_addr);
     locator_to_address(part2_addr, locators[0], tmp.get_type() != AF_INET);
   }
 #endif
@@ -999,10 +992,9 @@ bool run_test()
 
 int ACE_TMAIN(int /*argc*/, ACE_TCHAR* /*argv*/[])
 {
-  try
-  {
-    ::DDS::DomainParticipantFactory_var dpf =
-      TheServiceParticipant->get_domain_participant_factory();
+  DDS::DomainParticipantFactory_var dpf;
+  try {
+    dpf = TheServiceParticipant->get_domain_participant_factory();
   }
   catch (const CORBA::BAD_PARAM& ex)
   {

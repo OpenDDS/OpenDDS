@@ -48,6 +48,7 @@ protected:
   size_t expected_match_count_{};
   size_t match_count_{};
   size_t expected_sample_count_{};
+  size_t expected_per_writer_sample_count_{};
   size_t sample_count_{};
   Builder::DataReader* datareader_{};
   DataDataReader_var data_dr_;

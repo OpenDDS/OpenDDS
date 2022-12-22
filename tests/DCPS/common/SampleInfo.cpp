@@ -98,53 +98,62 @@ void PrintSampleInfo(const ::DDS::SampleInfo& si)
 
 bool SampleInfoMatches(const ::DDS::SampleInfo& si1, const ::DDS::SampleInfo& si2)
 {
+  bool match = true;
+
   if (si1.sample_state != si2.sample_state)
   {
-    ACE_OS::fprintf (stderr, "sample_state is different\n");
-    return false;
+    ACE_OS::fprintf(stderr, "sample_state is different\n");
+    match = false;
   }
 
   if (si1.view_state != si2.view_state)
   {
-    ACE_OS::fprintf (stderr, "view_state is different\n");
-    return false;
+    ACE_OS::fprintf(stderr, "view_state is different\n");
+    match = false;
   }
 
   if (si1.instance_state != si2.instance_state)
   {
-    ACE_OS::fprintf (stderr, "instance_state is different\n");
-    return false;
+    ACE_OS::fprintf(stderr, "instance_state is different\n");
+    match = false;
   }
 
   if (si1.disposed_generation_count != si2.disposed_generation_count)
   {
-    ACE_OS::fprintf (stderr, "disposed_generation_count is different\n");
-    return false;
+    ACE_OS::fprintf(stderr, "disposed_generation_count is different\n");
+    match = false;
   }
 
   if (si1.no_writers_generation_count != si2.no_writers_generation_count)
   {
-    ACE_OS::fprintf (stderr, "no_writers_generation_count is different\n");
-    return false;
+    ACE_OS::fprintf(stderr, "no_writers_generation_count is different\n");
+    match = false;
   }
 
   if (si1.sample_rank != si2.sample_rank)
   {
     ACE_OS::printf("sample_rank is different\n");
-    return false;
+    match = false;
   }
 
   if (si1.generation_rank != si2.generation_rank)
   {
-    ACE_OS::fprintf (stderr, "generation_rank is different\n");
-    return false;
+    ACE_OS::fprintf(stderr, "generation_rank is different\n");
+    match = false;
   }
 
   if (si1.absolute_generation_rank != si2.absolute_generation_rank)
   {
-    ACE_OS::fprintf (stderr, "generation_rank is different\n");
-    return false;
+    ACE_OS::fprintf(stderr, "generation_rank is different\n");
+    match = false;
   }
 
-  return true;
+  if (!match) {
+    ACE_OS::fprintf(stderr, "Expected:\n");
+    PrintSampleInfo(si2);
+    ACE_OS::fprintf(stderr, "is not the same as actual:\n");
+    PrintSampleInfo(si1);
+  }
+
+  return match;
 }

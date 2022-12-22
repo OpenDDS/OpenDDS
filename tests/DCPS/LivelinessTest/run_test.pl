@@ -35,7 +35,8 @@ $test->enable_console_logging();
 
 my $common_parameters = $app_bit_conf
     . " -w $num_readers -m $multiple_instance"
-    . " -l $num_unlively_periods -i $num_samples_per_reader";
+    . " -l $num_unlively_periods -i $num_samples_per_reader"
+    . " -DCPSDebugLevel 1";
 $test->process('lt', 'LivelinessTest', $common_parameters);
 $test->start_process('lt', "-t $use_take");
 

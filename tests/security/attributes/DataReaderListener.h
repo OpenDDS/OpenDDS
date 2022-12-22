@@ -64,6 +64,7 @@ public:
 private:
   typedef std::set<CORBA::Long> Counts;
 
+  ACE_Thread_Mutex mutex_;
   const Args& args_;
   long num_reads_;
   Counts counts_;

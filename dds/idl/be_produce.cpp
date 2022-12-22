@@ -329,6 +329,12 @@ BE_produce()
         continue;
       }
 
+      if (be_global->language_mapping() == BE_GlobalData::LANGMAP_SP_CXX &&
+          base_name.substr(0, 4) == "tao/" &&
+          base_name.substr(base_name.size() - 3) == "Seq") {
+        continue; // with Safety Profile C++, skip include of tao/*SeqC.h
+      }
+
       string stb_inc = base_name + "C.h";
       if (stb_inc != "tao/orbC.h") {
         be_global->add_include(stb_inc.c_str(), out_stream);

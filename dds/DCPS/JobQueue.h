@@ -10,6 +10,7 @@
 
 #include "RcEventHandler.h"
 #include "PoolAllocator.h"
+#include "dcps_export.h"
 
 #include <ace/Reactor.h>
 #include <ace/Thread_Mutex.h>
@@ -20,19 +21,16 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class JobQueue : public RcEventHandler {
+class OpenDDS_Dcps_Export JobQueue : public virtual RcEventHandler {
 public:
-  class Job : public RcObject {
+  class Job : public virtual RcObject {
   public:
     virtual ~Job() { }
     virtual void execute() = 0;
   };
   typedef RcHandle<Job> JobPtr;
 
-  explicit JobQueue(ACE_Reactor* reactor)
-  {
-    this->reactor(reactor);
-  }
+  explicit JobQueue(ACE_Reactor* reactor);
 
   void enqueue(JobPtr job)
   {
@@ -50,28 +48,11 @@ private:
   typedef OPENDDS_VECTOR(JobPtr) Queue;
   Queue job_queue_;
 
-  int handle_exception(ACE_HANDLE /*fd*/)
-  {
-    Queue q;
-
-    ACE_Reverse_Lock<ACE_Thread_Mutex> rev_lock(mutex_);
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, -1);
-    q.swap(job_queue_);
-    for (Queue::const_iterator pos = q.begin(), limit = q.end(); pos != limit; ++pos) {
-      ACE_GUARD_RETURN(ACE_Reverse_Lock<ACE_Thread_Mutex>, rev_guard, rev_lock, -1);
-      (*pos)->execute();
-    }
-
-    if (!job_queue_.empty()) {
-      guard.release();
-      reactor()->notify(this);
-    }
-
-    return 0;
-  }
+  int handle_exception(ACE_HANDLE /*fd*/);
 };
 
 typedef RcHandle<JobQueue> JobQueue_rch;
+typedef WeakRcHandle<JobQueue> JobQueue_wrch;
 
 } // namespace DCPS
 } // namespace OpenDDS

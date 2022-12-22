@@ -3,6 +3,7 @@
 #include "mutable_typesTypeSupportImpl.h"
 #include "mutable_types2TypeSupportImpl.h"
 #include "keyonlyTypeSupportImpl.h"
+#include "../../../Utils/DataView.h"
 
 #include <dds/DCPS/Serializer.h>
 #include <dds/DCPS/SafetyProfileStreams.h>
@@ -124,115 +125,6 @@ template<typename TypeA, typename TypeB>
     return ::testing::AssertionFailure() << a_expr << " != " << b_expr;
   }
   return ::testing::AssertionSuccess();
-}
-
-typedef std::vector<char> DataVec;
-
-struct DataView {
-  DataView()
-  : data(0)
-  , size(0)
-  {
-  }
-
-  template <size_t array_size>
-  DataView(const unsigned char (&array)[array_size])
-  : data(reinterpret_cast<const char*>(&array[0]))
-  , size(array_size)
-  {
-  }
-
-  DataView(const ACE_Message_Block& mb)
-  : data(mb.base())
-  , size(mb.length())
-  {
-  }
-
-  DataView(const unsigned char* const array, const size_t array_size)
-  : data(reinterpret_cast<const char*>(array))
-  , size(array_size)
-  {
-  }
-
-  DataView(const DataVec& data_vec)
-  : data(data_vec.size() ? &data_vec[0] : 0)
-  , size(data_vec.size())
-  {
-  }
-
-  void copy_to(DataVec& data_vec)
-  {
-    data_vec.reserve(data_vec.size() + size);
-    for (size_t i = 0; i < size; ++i) {
-      data_vec.push_back(data[i]);
-    }
-  }
-
-  const char* data;
-  size_t size;
-};
-
-bool operator==(const DataView& a, const DataView& b)
-{
-  return a.size == b.size ? !std::memcmp(a.data, b.data, a.size) : false;
-}
-
-::testing::AssertionResult assert_DataView(
-  const char* a_expr, const char* b_expr,
-  const DataView& a, const DataView& b)
-{
-  if (a == b) {
-    return ::testing::AssertionSuccess();
-  }
-
-  std::string a_line;
-  // Use c_str so that it can cast to std::string on Safety Profile
-  std::stringstream a_strm(to_hex_dds_string(a.data, a.size, '\n', 8).c_str());
-  std::string b_line;
-  std::stringstream b_strm(to_hex_dds_string(b.data, b.size, '\n', 8).c_str());
-  std::stringstream result;
-  bool got_a = true;
-  bool got_b = true;
-  while (got_a || got_b) {
-    std::stringstream line;
-    line.width(16);
-    line << std::left;
-    if (got_a) {
-      if (std::getline(a_strm, a_line, '\n')) {
-        line << a_line;
-      } else {
-        got_a = false;
-        line << "(END OF LEFT)";
-      }
-    } else {
-      line << ' ';
-    }
-    line << ' ';
-    line.width(16);
-    line << std::left;
-    if (got_b) {
-      if (std::getline(b_strm, b_line, '\n')) {
-        line << b_line;
-      } else {
-        got_b = false;
-        line << "(END OF RIGHT)";
-      }
-    } else {
-      line << ' ';
-    }
-    if ((got_a || got_b) && a_line != b_line) {
-      line << " <- This line is different";
-    }
-    const std::string line_str = line.str();
-    if (line_str.find_first_not_of(" ") != std::string::npos) {
-      result << line_str << std::endl;
-    }
-  }
-  return ::testing::AssertionFailure()
-    << a_expr << " (size " << a.size << ") isn't the same as "
-    << b_expr << " (size " << b.size << ").\n"
-    << a_expr << " is on the left, " << b_expr << " is on the right:\n"
-    << result.str();
 }
 
 ::testing::AssertionResult assert_SerializedSizeBound(
@@ -1989,7 +1881,7 @@ template<typename Type>
 void key_only_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2050,9 +1942,8 @@ template<typename Type>
 void key_only_union_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
-  const bool include_unkeyed =
-    field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
+  const bool include_unkeyed = field_filter == FieldFilter_All;
 
   if (include_unkeyed) {
     value.default_value(0x74181);
@@ -2104,7 +1995,7 @@ template<typename Type>
 void key_only_complex_set_base_values(Type& value,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2133,9 +2024,7 @@ void key_only_complex_set_base_values(Type& value,
     key_only_set_base_values(
       value.keyed_struct_seq_value[0], field_filter, true);
     */
-  }
 
-  if (include_unkeyed) { // TODO(iguessthislldo): See IDL Def
     key_only_union_set_base_values(
       value.unkeyed_union_value, field_filter, false);
     key_only_union_set_base_values(
@@ -2147,9 +2036,7 @@ void key_only_complex_set_base_values(Type& value,
     key_only_union_set_base_values(
       value.unkeyed_union_seq_value[0], field_filter, false);
     */
-  }
 
-  if (include_possible_keyed) {
     key_only_union_set_base_values(
       value.keyed_union_value, field_filter, true);
     key_only_union_set_base_values(
@@ -2212,7 +2099,7 @@ void key_only_tests_struct_expect_values_equal(
   const TypeA& a, const TypeB& b,
   FieldFilter field_filter, bool keyed)
 {
-  if (!(field_filter == FieldFilter_KeyOnly && !keyed)) {
+  if ((field_filter != FieldFilter_KeyOnly) || keyed) {
     EXPECT_EQ(a.long_value, b.long_value);
     expect_arrays_are_equal(a.long_array_value, b.long_array_value);
     /* TODO(iguessthislldo): See IDL Def
@@ -2340,7 +2227,7 @@ template<typename TypeA, typename TypeB>
 void key_only_tests_complex_expect_values_equal(const TypeA& a, const TypeB& b,
   FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
   const FieldFilter child =
@@ -2453,7 +2340,7 @@ const unsigned char key_only_non_keys_expected_base[] = {
 void build_expected_basic_struct(
   DataVec& expected, FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
 
@@ -2493,7 +2380,7 @@ const unsigned char key_only_union_non_keys_expected_base[] = {
 
 void build_expected_union(DataVec& expected, FieldFilter field_filter, bool keyed)
 {
-  const bool include_possible_keyed = field_filter == FieldFilter_All || keyed;
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed = field_filter == FieldFilter_All;
 
   DataView keys;
@@ -2526,7 +2413,7 @@ void build_expected<KeyedUnion>(DataVec& expected, FieldFilter field_filter)
 void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, bool keyed)
 {
   DataVec all_contents;
-  const bool include_possible_keyed = !(field_filter == FieldFilter_KeyOnly && !keyed);
+  const bool include_possible_keyed = (field_filter != FieldFilter_KeyOnly) || keyed;
   const bool include_unkeyed =
     field_filter == FieldFilter_All || (!keyed && field_filter == FieldFilter_NestedKeyOnly);
   const FieldFilter nested_field_filter =
@@ -2552,23 +2439,17 @@ void build_expected_complex_struct(DataVec& expected, FieldFilter field_filter, 
       DataView(array_contents).copy_to(all_contents);
     }
     // TODO(iguessthislldo): keyed_struct_seq_value would go here
-  }
 
-  if (include_unkeyed) {
-    const FieldFilter unkeyed_union_field_filter =
-      keyed ? nested_field_filter : FieldFilter_All;
-    build_expected_union(all_contents, unkeyed_union_field_filter, false);
+    build_expected_union(all_contents, nested_field_filter, false);
     {
       DataVec array_contents;
-      build_expected_union(array_contents, unkeyed_union_field_filter, false);
-      build_expected_union(array_contents, unkeyed_union_field_filter, false);
+      build_expected_union(array_contents, nested_field_filter, false);
+      build_expected_union(array_contents, nested_field_filter, false);
       serialize_u32(all_contents, array_contents.size());
       DataView(array_contents).copy_to(all_contents);
     }
     // TODO(iguessthislldo): unkeyed_union_seq_value would go here
-  }
 
-  if (include_possible_keyed) {
     build_expected_union(all_contents, nested_field_filter, true);
     {
       DataVec array_contents;

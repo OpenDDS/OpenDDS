@@ -64,7 +64,7 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
-  virtual ICE::Endpoint* get_ice_endpoint() = 0;
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() = 0;
 };
 
 typedef RcHandle<DataReaderCallbacks> DataReaderCallbacks_rch;

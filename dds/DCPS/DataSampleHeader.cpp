@@ -583,10 +583,10 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
       ret += ", ";
     }
 
-    ret += "Publication: " + OPENDDS_STRING(GuidConverter(value.publication_id_));
+    ret += "Publication: " + LogGuid(value.publication_id_).conv_;
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
     if (value.group_coherent_) {
-      ret += ", Publisher: " + OPENDDS_STRING(GuidConverter(value.publisher_id_));
+      ret += ", Publisher: " + LogGuid(value.publisher_id_).conv_;
     }
 #endif
 
@@ -596,7 +596,7 @@ OPENDDS_STRING to_string(const DataSampleHeader& value)
       ret += to_dds_string(len);
       ret += "): [";
       for (CORBA::ULong i(0); i < len; ++i) {
-        ret += OPENDDS_STRING(GuidConverter(value.content_filter_entries_[i])) + ' ';
+        ret += LogGuid(value.content_filter_entries_[i]).conv_ + ' ';
       }
       ret += ']';
     }
@@ -695,6 +695,8 @@ DataSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
   rds.header_ = *this;
   return true;
 }
+
+DataSampleHeader::MaybeGuard::NoOpLock DataSampleHeader::MaybeGuard::non_lock;
 
 } // namespace DCPS
 } // namespace OpenDDS

@@ -5,9 +5,6 @@
 // ============================================================================
 /**
  *  @file   SampleInfo.h
- *
- *
- *
  */
 
 #include "dds/DdsDcpsInfrastructureC.h"

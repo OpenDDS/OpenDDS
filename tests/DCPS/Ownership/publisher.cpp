@@ -29,7 +29,7 @@ DDS::Duration_t deadline = {DDS::DURATION_INFINITE_SEC,
 DDS::Duration_t liveliness = {DDS::DURATION_INFINITE_SEC,
                               DDS::DURATION_INFINITE_NSEC};
 ACE_Time_Value dds_delay(1);
-ACE_Time_Value reset_delay(ACE_Time_Value::zero);
+ACE_Time_Value reset_delay; // default is zero
 int ownership_strength = 0;
 int reset_ownership_strength = -1;
 ACE_CString ownership_dw_id = "OwnershipDataWriter";

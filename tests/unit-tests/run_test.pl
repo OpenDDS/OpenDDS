@@ -15,8 +15,10 @@ use FileHandle;
 use Cwd;
 use strict;
 
+my $opts = join(' ', @ARGV);
+
 my $test = new PerlDDS::TestFramework();
-$test->process("UnitTests", "UnitTests", "");
+$test->process("UnitTests", "UnitTests", $opts);
 $test->start_process("UnitTests");
 my $retcode = $test->finish(60);
 if ($retcode != 0) {

@@ -7,16 +7,14 @@
 
 #include "ParameterListConverter.h"
 
-#include "BaseMessageUtils.h"
-#ifdef OPENDDS_SECURITY
-#  include "SecurityHelpers.h"
-#endif
+#include "MessageUtils.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/DCPS_Utils.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/NetworkResource.h>
 
 #include <cstring>
 
@@ -30,18 +28,6 @@ using DCPS::operator!=;
 #endif
 
 namespace {
-
-  void add_param(ParameterList& param_list, const Parameter& param)
-  {
-    const CORBA::ULong length = param_list.length();
-    // Grow by factor of 2 when length is a power of 2 in order to prevent every call to length(+1)
-    // allocating a new buffer & copying previous results. The maximum is kept when length is reduced.
-    if (length && !(length & (length - 1))) {
-      param_list.length(2 * length);
-    }
-    param_list.length(length + 1);
-    param_list[length] = param;
-  }
 
   void extract_type_info_param(const Parameter& param, XTypes::TypeInformation& type_info)
   {
@@ -65,10 +51,10 @@ namespace {
     }
 
     param.type_information(seq);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
-  void add_param_locator_seq(ParameterList& param_list,
+  void push_back_locator_seq(ParameterList& param_list,
                              const DCPS::LocatorSeq& locator_seq,
                              const ParameterId_t pid)
   {
@@ -77,17 +63,17 @@ namespace {
       Parameter param;
       param.locator(locator_seq[i]);
       param._d(pid);
-      add_param(param_list, param);
+      DCPS::push_back(param_list, param);
     }
   }
 
-  void add_param_rtps_locator(ParameterList& param_list,
+  void push_back_rtps_locator(ParameterList& param_list,
                               const DCPS::TransportLocator& dcps_locator,
                               bool map /*map IPV4 to IPV6 addr*/)
   {
     // Convert the tls blob to an RTPS locator seq
     DCPS::LocatorSeq locators;
-    DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
+    const DDS::ReturnCode_t result = blob_to_locators(dcps_locator.data, locators);
     if (result == DDS::RETCODE_OK) {
       const CORBA::ULong locators_len = locators.length();
       for (CORBA::ULong i = 0; i < locators_len; ++i) {
@@ -101,48 +87,32 @@ namespace {
           } else {
             param._d(PID_UNICAST_LOCATOR);
           }
-          add_param(param_list, param);
+          DCPS::push_back(param_list, param);
         }
       }
     } else {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: add_param_rtps_locator - ")
+      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: push_back_rtps_locator - ")
                            ACE_TEXT("Unable to convert dcps_rtps ")
                            ACE_TEXT("TransportLocator blob to LocatorSeq\n")));
     }
   }
 
-  void add_param_dcps_locator(ParameterList& param_list,
+  void push_back_dcps_locator(ParameterList& param_list,
                               const DCPS::TransportLocator& dcps_locator)
   {
     Parameter param;
     param.opendds_locator(dcps_locator);
     param._d(PID_OPENDDS_LOCATOR);
-    add_param(param_list, param);
-  }
-
-  void append_locator(DCPS::LocatorSeq& list, const DCPS::Locator_t& locator)
-  {
-    const CORBA::ULong length = list.length();
-    list.length(length + 1);
-    list[length] = locator;
-  }
-
-  void append_locator(DCPS::TransportLocatorSeq& list,
-                      const DCPS::TransportLocator& locator)
-  {
-    const CORBA::ULong length = list.length();
-    list.length(length + 1);
-    list[length] = locator;
+    DCPS::push_back(param_list, param);
   }
 
   void append_locators_if_present(DCPS::TransportLocatorSeq& list,
                                   const DCPS::LocatorSeq& rtps_udp_locators)
   {
     if (rtps_udp_locators.length()) {
-      const CORBA::ULong length = list.length();
-      list.length(length + 1);
-      list[length].transport_type = "rtps_udp";
-      locators_to_blob(rtps_udp_locators, list[length].data);
+      DCPS::TransportLocator& tl = list[DCPS::grow(list) - 1];
+      tl.transport_type = "rtps_udp";
+      locators_to_blob(rtps_udp_locators, tl.data);
     }
   }
 
@@ -152,14 +122,6 @@ namespace {
     locator_address_only,
     locator_port_only
   };
-
-  void append_associated_writer(DCPS::DiscoveredReaderData& reader_data,
-                                const Parameter& param)
-  {
-    const CORBA::ULong len = reader_data.readerProxy.associatedWriters.length();
-    reader_data.readerProxy.associatedWriters.length(len + 1);
-    reader_data.readerProxy.associatedWriters[len] = param.guid();
-  }
 
   bool not_default(const DDS::UserDataQosPolicy& qos)
   {
@@ -324,7 +286,7 @@ namespace {
 
     unsigned char field_mask = 0x00;
 
-    CORBA::ULong length = param_list.length();
+    const CORBA::ULong length = param_list.length();
     for (CORBA::ULong i = 0; i < length; ++i) {
       const Parameter& param = param_list[i];
       switch (param._d()) {
@@ -373,7 +335,7 @@ bool to_param_list(const DDS::ParticipantBuiltinTopicData& pbtd,
   if (not_default(pbtd.user_data)) {
     Parameter param_ud;
     param_ud.user_data(pbtd.user_data);
-    add_param(param_list, param_ud);
+    DCPS::push_back(param_list, param_ud);
   }
 
   return true;
@@ -384,7 +346,7 @@ bool from_param_list(const ParameterList& param_list,
 {
   pbtd.user_data.value.length(0);
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -409,25 +371,25 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicData& pbtd,
 
   Parameter param_it;
   param_it.identity_token(pbtd.identity_token);
-  add_param(param_list, param_it);
+  DCPS::push_back(param_list, param_it);
 
   Parameter param_pt;
   param_pt.permissions_token(pbtd.permissions_token);
-  add_param(param_list, param_pt);
+  DCPS::push_back(param_list, param_pt);
 
   if (not_default(pbtd.property)) {
     Parameter param_p;
     param_p.property(pbtd.property);
-    add_param(param_list, param_p);
+    DCPS::push_back(param_list, param_p);
   }
 
   Parameter param_psi;
   param_psi.participant_security_info(pbtd.security_info);
-  add_param(param_list, param_psi);
+  DCPS::push_back(param_list, param_psi);
 
   Parameter param_ebe;
   param_ebe.extended_builtin_endpoints(pbtd.extended_builtin_endpoints);
-  add_param(param_list, param_ebe);
+  DCPS::push_back(param_list, param_ebe);
 
   return true;
 }
@@ -441,7 +403,7 @@ bool from_param_list(const ParameterList& param_list,
   pbtd.security_info.participant_security_attributes = 0;
   pbtd.security_info.plugin_participant_security_attributes = 0;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -477,7 +439,7 @@ bool to_param_list(const DDS::Security::ParticipantBuiltinTopicDataSecure& pbtds
 
   Parameter param_ist;
   param_ist.identity_status_token(pbtds.identity_status_token);
-  add_param(param_list, param_ist);
+  DCPS::push_back(param_list, param_ist);
 
   return true;
 }
@@ -488,7 +450,7 @@ bool from_param_list(const ParameterList& param_list,
   if (!from_param_list(param_list, pbtds.base))
     return false;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -512,35 +474,35 @@ bool to_param_list(const ParticipantProxy_t& proxy,
 {
   Parameter beq_param;
   beq_param.builtinEndpointQos(proxy.builtinEndpointQos);
-  add_param(param_list, beq_param);
+  DCPS::push_back(param_list, beq_param);
 
   Parameter pd_param;
   pd_param.domainId(proxy.domainId);
-  add_param(param_list, pd_param);
+  DCPS::push_back(param_list, pd_param);
 
   Parameter pv_param;
   pv_param.version(proxy.protocolVersion);
-  add_param(param_list, pv_param);
+  DCPS::push_back(param_list, pv_param);
 
   Parameter gp_param;
   gp_param.guid(DCPS::make_part_guid(proxy.guidPrefix));
   gp_param._d(PID_PARTICIPANT_GUID);
-  add_param(param_list, gp_param);
+  DCPS::push_back(param_list, gp_param);
 
   Parameter vid_param;
   vid_param.vendor(proxy.vendorId);
-  add_param(param_list, vid_param);
+  DCPS::push_back(param_list, vid_param);
 
   if (proxy.expectsInlineQos) {
     Parameter eiq_param; // Default is false
     eiq_param.expects_inline_qos(proxy.expectsInlineQos);
-    add_param(param_list, eiq_param);
+    DCPS::push_back(param_list, eiq_param);
   }
 
   Parameter abe_param;
   abe_param.participant_builtin_endpoints(
     proxy.availableBuiltinEndpoints);
-  add_param(param_list, abe_param);
+  DCPS::push_back(param_list, abe_param);
 
   // Interoperability note:
   // For interoperability with other DDS implemenations, we'll encode the
@@ -549,56 +511,56 @@ bool to_param_list(const ParticipantProxy_t& proxy,
   Parameter be_param;
   be_param.builtin_endpoints(
     proxy.availableBuiltinEndpoints);
-  add_param(param_list, be_param);
+  DCPS::push_back(param_list, be_param);
 
 #ifdef OPENDDS_SECURITY
   Parameter ebe_param;
   ebe_param.extended_builtin_endpoints(
     proxy.availableExtendedBuiltinEndpoints);
-  add_param(param_list, ebe_param);
+  DCPS::push_back(param_list, ebe_param);
 #endif
 
   // Each locator
-  add_param_locator_seq(
+  push_back_locator_seq(
       param_list,
       proxy.metatrafficUnicastLocatorList,
       PID_METATRAFFIC_UNICAST_LOCATOR);
 
-  add_param_locator_seq(
+  push_back_locator_seq(
       param_list,
       proxy.metatrafficMulticastLocatorList,
       PID_METATRAFFIC_MULTICAST_LOCATOR);
 
-  add_param_locator_seq(
+  push_back_locator_seq(
       param_list,
       proxy.defaultUnicastLocatorList,
       PID_DEFAULT_UNICAST_LOCATOR);
 
-  add_param_locator_seq(
+  push_back_locator_seq(
       param_list,
       proxy.defaultMulticastLocatorList,
       PID_DEFAULT_MULTICAST_LOCATOR);
 
   Parameter ml_param;
   ml_param.count(proxy.manualLivelinessCount);
-  add_param(param_list, ml_param);
+  DCPS::push_back(param_list, ml_param);
 
   if (not_default(proxy.property)) {
     Parameter param_p;
     param_p.property(proxy.property);
-    add_param(param_list, param_p);
+    DCPS::push_back(param_list, param_p);
   }
 
   if (not_default(proxy.opendds_participant_flags)) {
     Parameter param_opf;
     param_opf.participant_flags(proxy.opendds_participant_flags);
-    add_param(param_list, param_opf);
+    DCPS::push_back(param_list, param_opf);
   }
 
   if (proxy.opendds_rtps_relay_application_participant) {
     Parameter param;
     param.opendds_rtps_relay_application_participant(proxy.opendds_rtps_relay_application_participant);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   return true;
@@ -616,7 +578,7 @@ bool from_param_list(const ParameterList& param_list,
   proxy.opendds_participant_flags.bits = 0;
   proxy.opendds_rtps_relay_application_participant = false;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -660,22 +622,22 @@ bool from_param_list(const ParameterList& param_list,
         break;
 #endif
       case PID_METATRAFFIC_UNICAST_LOCATOR:
-        append_locator(
+        DCPS::push_back(
             proxy.metatrafficUnicastLocatorList,
             param.locator());
         break;
       case PID_METATRAFFIC_MULTICAST_LOCATOR:
-        append_locator(
+        DCPS::push_back(
             proxy.metatrafficMulticastLocatorList,
             param.locator());
         break;
       case PID_DEFAULT_UNICAST_LOCATOR:
-        append_locator(
+        DCPS::push_back(
             proxy.defaultUnicastLocatorList,
             param.locator());
         break;
       case PID_DEFAULT_MULTICAST_LOCATOR:
-        append_locator(
+        DCPS::push_back(
             proxy.defaultMulticastLocatorList,
             param.locator());
         break;
@@ -716,7 +678,7 @@ bool to_param_list(const Duration_t& duration,
       (duration.fraction != 0)) {
     Parameter ld_param;
     ld_param.duration(duration);
-    add_param(param_list, ld_param);
+    DCPS::push_back(param_list, ld_param);
   }
 
   return true;
@@ -729,7 +691,7 @@ bool from_param_list(const ParameterList& param_list,
   duration.seconds = 100;
   duration.fraction = 0;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -776,13 +738,10 @@ bool from_param_list(const ParameterList& param_list,
 bool to_param_list(const OpenDDS::Security::SPDPdiscoveredParticipantData& participant_data,
                    ParameterList& param_list)
 {
-
   if (participant_data.dataKind == OpenDDS::Security::DPDK_SECURE) {
     to_param_list(participant_data.ddsParticipantDataSecure, param_list);
-
   } else if (participant_data.dataKind == OpenDDS::Security::DPDK_ENHANCED) {
     to_param_list(participant_data.ddsParticipantDataSecure.base, param_list);
-
   } else {
     to_param_list(participant_data.ddsParticipantDataSecure.base.base, param_list);
   }
@@ -827,14 +786,15 @@ bool from_param_list(const ParameterList& param_list,
 
 // OpenDDS::DCPS::DiscoveredWriterData
 
-void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids, bool reader)
+void add_DataRepresentationQos(ParameterList& param_list, const DDS::DataRepresentationIdSeq& ids)
 {
   DDS::DataRepresentationQosPolicy dr_qos;
-  dr_qos.value = DCPS::get_effective_data_rep_qos(ids, reader);
+  dr_qos.value = ids;
+  DCPS::set_reader_effective_data_rep_qos(dr_qos.value);
   if (dr_qos.value.length() != 1 || dr_qos.value[0] != DDS::XCDR_DATA_REPRESENTATION) {
     Parameter param;
     param.representation(dr_qos);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 }
 
@@ -850,48 +810,48 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     Parameter param;
     param.string_data(writer_data.ddsPublicationData.topic_name);
     param._d(PID_TOPIC_NAME);
-    add_param(param_list, param);
-  }
-
-  if (use_xtypes) {
-    add_type_info_param(param_list, type_info);
+    DCPS::push_back(param_list, param);
   }
 
   {
     Parameter param;
     param.string_data(writer_data.ddsPublicationData.type_name);
     param._d(PID_TYPE_NAME);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
+  }
+
+  if (use_xtypes) {
+    add_type_info_param(param_list, type_info);
   }
 
   if (not_default(writer_data.ddsPublicationData.durability)) {
     Parameter param;
     param.durability(writer_data.ddsPublicationData.durability);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.durability_service)) {
     Parameter param;
     param.durability_service(writer_data.ddsPublicationData.durability_service);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.deadline)) {
     Parameter param;
     param.deadline(writer_data.ddsPublicationData.deadline);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.latency_budget)) {
     Parameter param;
     param.latency_budget(writer_data.ddsPublicationData.latency_budget);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.liveliness)) {
     Parameter param;
     param.liveliness(writer_data.ddsPublicationData.liveliness);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   // Interoperability note:
@@ -908,61 +868,61 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     }
 
     param.reliability(reliability);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.lifespan)) {
     Parameter param;
     param.lifespan(writer_data.ddsPublicationData.lifespan);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.user_data)) {
     Parameter param;
     param.user_data(writer_data.ddsPublicationData.user_data);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.ownership)) {
     Parameter param;
     param.ownership(writer_data.ddsPublicationData.ownership);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.ownership_strength)) {
     Parameter param;
     param.ownership_strength(writer_data.ddsPublicationData.ownership_strength);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.destination_order)) {
     Parameter param;
     param.destination_order(writer_data.ddsPublicationData.destination_order);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.presentation)) {
     Parameter param;
     param.presentation(writer_data.ddsPublicationData.presentation);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.partition)) {
     Parameter param;
     param.partition(writer_data.ddsPublicationData.partition);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.topic_data)) {
     Parameter param;
     param.topic_data(writer_data.ddsPublicationData.topic_data);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(writer_data.ddsPublicationData.group_data)) {
     Parameter param;
     param.group_data(writer_data.ddsPublicationData.group_data);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   add_DataRepresentationQos(param_list, writer_data.ddsPublicationData.representation.value);
@@ -971,9 +931,9 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     Parameter param;
     param.guid(writer_data.writerProxy.remoteWriterGuid);
     param._d(PID_ENDPOINT_GUID);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
-  CORBA::ULong locator_len = writer_data.writerProxy.allLocators.length();
+  const CORBA::ULong locator_len = writer_data.writerProxy.allLocators.length();
 
   // Serialize from allLocators, rather than the unicastLocatorList
   // and multicastLocatorList.  This allows OpenDDS transports to be
@@ -984,16 +944,15 @@ bool to_param_list(const DCPS::DiscoveredWriterData& writer_data,
     // If this is an rtps udp transport
     if (!std::strcmp(tl.transport_type, "rtps_udp")) {
       // Append the locator's deserialized locator and an RTPS PID
-      add_param_rtps_locator(param_list, tl, map);
+      push_back_rtps_locator(param_list, tl, map);
       // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID
-      add_param_dcps_locator(param_list, tl);
-      if (!std::strcmp(tl.transport_type, "multicast")) {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) to_param_list(dwd) - ")
-                   ACE_TEXT("Multicast transport with RTPS ")
-                   ACE_TEXT("discovery has known issues")));
+      push_back_dcps_locator(param_list, tl);
+      if (!std::strcmp(tl.transport_type, "multicast")
+          && DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: ParameterListConverter::to_param_list(dwd): "
+                   "Multicast transport with RTPS discovery has known issues\n"));
       }
     }
   }
@@ -1049,7 +1008,7 @@ bool from_param_list(const ParameterList& param_list,
   writer_data.ddsPublicationData.representation.value.length(1);
   writer_data.ddsPublicationData.representation.value[0] = DDS::XCDR_DATA_REPRESENTATION;
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -1134,17 +1093,17 @@ bool from_param_list(const ParameterList& param_list,
         writer_data.writerProxy.remoteWriterGuid = param.guid();
         break;
       case PID_UNICAST_LOCATOR:
-        append_locator(rtps_udp_locators, param.locator());
+        DCPS::push_back(rtps_udp_locators, param.locator());
         break;
       case PID_MULTICAST_LOCATOR:
-        append_locator(rtps_udp_locators, param.locator());
+        DCPS::push_back(rtps_udp_locators, param.locator());
         break;
       case PID_OPENDDS_LOCATOR:
         // Append the rtps_udp_locators, if any, first, to preserve order
         append_locators_if_present(writer_data.writerProxy.allLocators,
                                    rtps_udp_locators);
         rtps_udp_locators.length(0);
-        append_locator(writer_data.writerProxy.allLocators,
+        DCPS::push_back(writer_data.writerProxy.allLocators,
                        param.opendds_locator());
         break;
       case PID_SENTINEL:
@@ -1182,7 +1141,7 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     Parameter param;
     param.string_data(reader_data.ddsSubscriptionData.topic_name);
     param._d(PID_TOPIC_NAME);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (use_xtypes) {
@@ -1193,31 +1152,31 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     Parameter param;
     param.string_data(reader_data.ddsSubscriptionData.type_name);
     param._d(PID_TYPE_NAME);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.durability)) {
     Parameter param;
     param.durability(reader_data.ddsSubscriptionData.durability);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.deadline)) {
     Parameter param;
     param.deadline(reader_data.ddsSubscriptionData.deadline);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.latency_budget)) {
     Parameter param;
     param.latency_budget(reader_data.ddsSubscriptionData.latency_budget);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.liveliness)) {
     Parameter param;
     param.liveliness(reader_data.ddsSubscriptionData.liveliness);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   // Interoperability note:
@@ -1235,70 +1194,70 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     }
 
     param.reliability(reliability);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.ownership)) {
     Parameter param;
     param.ownership(reader_data.ddsSubscriptionData.ownership);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.destination_order)) {
     Parameter param;
     param.destination_order(reader_data.ddsSubscriptionData.destination_order);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.user_data)) {
     Parameter param;
     param.user_data(reader_data.ddsSubscriptionData.user_data);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.time_based_filter)) {
     Parameter param;
     param.time_based_filter(reader_data.ddsSubscriptionData.time_based_filter);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.presentation)) {
     Parameter param;
     param.presentation(reader_data.ddsSubscriptionData.presentation);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.partition)) {
     Parameter param;
     param.partition(reader_data.ddsSubscriptionData.partition);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.topic_data)) {
     Parameter param;
     param.topic_data(reader_data.ddsSubscriptionData.topic_data);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.ddsSubscriptionData.group_data)) {
     Parameter param;
     param.group_data(reader_data.ddsSubscriptionData.group_data);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
-  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value, true);
+  add_DataRepresentationQos(param_list, reader_data.ddsSubscriptionData.representation.value);
 
   if (not_default(reader_data.ddsSubscriptionData.type_consistency)) {
     Parameter param;
     param.type_consistency(reader_data.ddsSubscriptionData.type_consistency);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   {
     Parameter param;
     param.guid(reader_data.readerProxy.remoteReaderGuid);
     param._d(PID_ENDPOINT_GUID);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   if (not_default(reader_data.contentFilterProperty)) {
@@ -1308,11 +1267,11 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
       cfprop_copy.filterClassName = "DDSSQL";
     }
     param.content_filter_property(cfprop_copy);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
 
   CORBA::ULong i;
-  CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
+  const CORBA::ULong locator_len = reader_data.readerProxy.allLocators.length();
   // Serialize from allLocators, rather than the unicastLocatorList
   // and multicastLocatorList.  This allows OpenDDS transports to be
   // serialized in the proper order using custom PIDs.
@@ -1322,27 +1281,25 @@ bool to_param_list(const DCPS::DiscoveredReaderData& reader_data,
     // If this is an rtps udp transport
     if (!std::strcmp(tl.transport_type, "rtps_udp")) {
       // Append the locator's deserialized locator and an RTPS PID
-      add_param_rtps_locator(param_list, tl, map);
+      push_back_rtps_locator(param_list, tl, map);
       // Otherwise, this is an OpenDDS, custom transport
     } else {
       // Append the blob and a custom PID
-      add_param_dcps_locator(param_list, tl);
-      if (!std::strcmp(tl.transport_type, "multicast")) {
-        ACE_DEBUG((LM_WARNING,
-                   ACE_TEXT("(%P|%t) to_param_list(drd) - ")
-                   ACE_TEXT("Multicast transport with RTPS ")
-                   ACE_TEXT("discovery has known issues")));
+      push_back_dcps_locator(param_list, tl);
+      if (!std::strcmp(tl.transport_type, "multicast")
+          && DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: ParameterListConverter::to_param_list(drd): "
+                   "Multicast transport with RTPS discovery has known issues\n"));
       }
     }
   }
 
-  CORBA::ULong num_associations =
-    reader_data.readerProxy.associatedWriters.length();
+  const CORBA::ULong num_associations = reader_data.readerProxy.associatedWriters.length();
   for (i = 0; i < num_associations; ++i) {
     Parameter param;
     param.guid(reader_data.readerProxy.associatedWriters[i]);
     param._d(PID_OPENDDS_ASSOCIATED_WRITER);
-    add_param(param_list, param);
+    DCPS::push_back(param_list, param);
   }
   return true;
 }
@@ -1395,7 +1352,7 @@ bool from_param_list(const ParameterList& param_list,
   reader_data.contentFilterProperty.filterExpression = "";
   reader_data.contentFilterProperty.expressionParameters.length(0);
 
-  CORBA::ULong length = param_list.length();
+  const CORBA::ULong length = param_list.length();
   for (CORBA::ULong i = 0; i < length; ++i) {
     const Parameter& param = param_list[i];
     switch (param._d()) {
@@ -1475,10 +1432,10 @@ bool from_param_list(const ParameterList& param_list,
         reader_data.readerProxy.remoteReaderGuid = param.guid();
         break;
       case PID_UNICAST_LOCATOR:
-        append_locator(rtps_udp_locators, param.locator());
+        DCPS::push_back(rtps_udp_locators, param.locator());
         break;
       case PID_MULTICAST_LOCATOR:
-        append_locator(rtps_udp_locators, param.locator());
+        DCPS::push_back(rtps_udp_locators, param.locator());
         break;
       case PID_CONTENT_FILTER_PROPERTY:
         reader_data.contentFilterProperty = param.content_filter_property();
@@ -1488,11 +1445,11 @@ bool from_param_list(const ParameterList& param_list,
         append_locators_if_present(reader_data.readerProxy.allLocators,
                                    rtps_udp_locators);
         rtps_udp_locators.length(0);
-        append_locator(reader_data.readerProxy.allLocators,
+        DCPS::push_back(reader_data.readerProxy.allLocators,
                        param.opendds_locator());
         break;
       case PID_OPENDDS_ASSOCIATED_WRITER:
-        append_associated_writer(reader_data, param);
+        DCPS::push_back(reader_data.readerProxy.associatedWriters, param.guid());
         break;
       case PID_SENTINEL:
       case PID_PAD:
@@ -1522,7 +1479,7 @@ bool to_param_list(const DDS::Security::EndpointSecurityInfo& info,
 {
   Parameter param;
   param.endpoint_security_info(info);
-  add_param(param_list, param);
+  DCPS::push_back(param_list, param);
   return true;
 }
 
@@ -1554,7 +1511,7 @@ bool to_param_list(const DDS::Security::DataTags& tags,
 {
   Parameter param;
   param.data_tags(tags);
-  add_param(param_list, param);
+  DCPS::push_back(param_list, param);
   return true;
 }
 
@@ -1600,8 +1557,8 @@ bool from_param_list(const ParameterList& param_list,
                      XTypes::TypeInformation& type_info)
 {
   bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
-               from_param_list(param_list, wrapper.security_info) &&
-               from_param_list(param_list, wrapper.data_tags);
+    from_param_list(param_list, wrapper.security_info) &&
+    from_param_list(param_list, wrapper.data_tags);
 
   return result;
 }
@@ -1626,8 +1583,8 @@ bool from_param_list(const ParameterList& param_list,
                      XTypes::TypeInformation& type_info)
 {
   bool result = from_param_list(param_list, wrapper.data, use_xtypes, type_info) &&
-               from_param_list(param_list, wrapper.security_info) &&
-               from_param_list(param_list, wrapper.data_tags);
+    from_param_list(param_list, wrapper.security_info) &&
+    from_param_list(param_list, wrapper.data_tags);
 
   return result;
 }
@@ -1645,22 +1602,20 @@ bool to_param_list(const ICE::AgentInfoMap& ai_map,
 
     Parameter param_general;
     param_general.ice_general(ice_general);
-    add_param(param_list, param_general);
+    DCPS::push_back(param_list, param_general);
 
     for (ICE::AgentInfo::CandidatesType::const_iterator pos = agent_info.candidates.begin(),
            limit = agent_info.candidates.end(); pos != limit; ++pos) {
       IceCandidate_t ice_candidate;
       ice_candidate.key = map_pos->first.c_str();
-      ice_candidate.locator.kind = address_to_kind(pos->address);
-      address_to_bytes(ice_candidate.locator.address, pos->address);
-      ice_candidate.locator.port = pos->address.get_port_number();
+      address_to_locator(ice_candidate.locator, pos->address);
       ice_candidate.foundation = pos->foundation.c_str();
       ice_candidate.priority = pos->priority;
       ice_candidate.type = pos->type;
 
       Parameter param;
       param.ice_candidate(ice_candidate);
-      add_param(param_list, param);
+      DCPS::push_back(param_list, param);
     }
   }
 

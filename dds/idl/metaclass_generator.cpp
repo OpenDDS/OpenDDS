@@ -40,6 +40,11 @@ namespace {
     }
     bool activate_;
   };
+
+  OpenDDS::DCPS::String canonical_name(Identifier* id)
+  {
+    return dds_generator::to_string(id, EscapeContext_StripEscapes);
+  }
 }
 
 bool
@@ -54,7 +59,7 @@ metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   be_global->header_ << decl_prefix << size_decl << ";\n";
   be_global->impl_ << array_decl << " = {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
-    be_global->impl_ << "  \"" << contents[i]->local_name()->get_string()
+    be_global->impl_ << "  \"" << canonical_name(contents[i]->local_name())
       << ((i < contents.size() - 1) ? "\",\n" : "\"\n");
   }
   be_global->impl_ << "};\n";
@@ -66,7 +71,7 @@ namespace {
 
   void
   delegateToNested(const std::string& fieldName, AST_Field* field,
-    const std::string& firstArg, bool skip = false)
+    const std::string& firstArg)
   {
     const size_t n = fieldName.size() + 1 /* 1 for the dot */;
     const std::string fieldType = scoped(field->field_type()->name());
@@ -75,23 +80,15 @@ namespace {
       << ") == 0) {\n"
       "      return getMetaStruct<" << fieldType << ">().getValue("
       << firstArg << ", field + " << n << ");\n"
-      "    }" << (skip ? "" : "\n");
-    if (skip) {
-      be_global->impl_ << " else {\n"
-        "      if (!gen_skip_over(" << firstArg << ", static_cast<" << fieldType
-        << "*>(0))) {\n"
-        "        throw std::runtime_error(\"Field '" << fieldName <<
-        "' could not be skipped\");\n"
-        "      }\n"
-        "    }\n";
-    }
+      "    }\n";
   }
 
   void
-  gen_field_getValue(AST_Field* field)
+  gen_field_getValueByMemberId(AST_Field* field)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const Classification cls = classify(field->field_type());
+    const OpenDDS::XTypes::MemberId id = be_global->get_id(field);
     const std::string fieldName = field->local_name()->get_string();
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
@@ -109,13 +106,43 @@ namespace {
       }
       const std::string string_to_ptr = use_cxx11 ? "" : ".in()";
       be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+        "    if (" << id << " == memberId) {\n"
+        "      return " + prefix + "typed." + fieldName
+        + (cls & CL_STRING ? string_to_ptr : "") + suffix + ";\n"
+        "    }\n";
+    }
+  }
+
+  void
+  gen_field_getValue(AST_Field* field)
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const Classification cls = classify(field->field_type());
+    const std::string fieldName = field->local_name()->get_string();
+    const std::string idl_name = canonical_name(field->local_name());
+    if (cls & CL_SCALAR) {
+      std::string prefix, suffix;
+      if (cls & CL_ENUM) {
+        AST_Type* enum_type = resolveActualType(field->field_type());
+        prefix = "gen_" +
+          dds_generator::scoped_helper(enum_type->name(), "_")
+          + "_names[";
+        if (use_cxx11) {
+          prefix += "static_cast<int>(";
+        }
+        suffix = use_cxx11 ? "())]" : "]";
+      } else if (use_cxx11) {
+        suffix += "()";
+      }
+      const std::string string_to_ptr = use_cxx11 ? "" : ".in()";
+      be_global->impl_ <<
+        "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
         "      return " + prefix + "typed." + fieldName
         + (cls & CL_STRING ? string_to_ptr : "") + suffix + ";\n"
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
-      delegateToNested(fieldName, field,
+      delegateToNested(idl_name, field,
                        "&typed." + std::string(use_cxx11 ? "_" : "") + fieldName);
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     }
@@ -127,18 +154,19 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
+    const std::string idl_name = canonical_name(field->local_name());
     if (cls & CL_SCALAR) {
       be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+        "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
         "      return make_field_cmp(&T::" << (use_cxx11 ? "_" : "")
         << fieldName << ", next);\n"
         "    }\n";
       be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     } else if (cls & CL_STRUCTURE) {
-      size_t n = fieldName.size() + 1 /* 1 for the dot */;
+      const size_t n = idl_name.size() + 1 /* 1 for the dot */;
       std::string fieldType = scoped(field->field_type()->name());
       be_global->impl_ <<
-        "    if (std::strncmp(field, \"" << fieldName << ".\", " << n <<
+        "    if (std::strncmp(field, \"" << idl_name << ".\", " << n <<
         ") == 0) {\n"
         "      return make_struct_cmp(&T::" << (use_cxx11 ? "_" : "")
         << fieldName <<
@@ -151,7 +179,7 @@ namespace {
   void
   print_field_name(AST_Field* field)
   {
-    be_global->impl_ << '"' << field->local_name()->get_string() << '"' << ", ";
+    be_global->impl_ << '"' << canonical_name(field->local_name()) << '"' << ", ";
   }
 
   void
@@ -159,8 +187,9 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* fieldName = field->local_name()->get_string();
+    const std::string idl_name = canonical_name(field->local_name());
     be_global->impl_ <<
-      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n"
+      "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
       "      return &static_cast<const T*>(stru)->" << (use_cxx11 ? "_" : "")
       << fieldName << ";\n"
       "    }\n";
@@ -233,8 +262,9 @@ namespace {
     Classification cls = classify(field->field_type());
     if (!(cls & CL_SCALAR)) return;
     const char* fieldName = field->local_name()->get_string();
+    const std::string idl_name = canonical_name(field->local_name());
     be_global->impl_ <<
-      "    if (std::strcmp(field, \"" << fieldName << "\") == 0) {\n";
+      "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n";
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
     if (!use_cxx11 && (cls & CL_STRING)) {
       be_global->impl_ << // ACE_OS::strcmp has overloads for narrow & wide
@@ -366,7 +396,7 @@ namespace {
         "  {\n"
         "    static const std::pair<std::string, ACE_CDR::ULong> name_to_id_pairs[] = {\n";
       for (size_t i = 0; i < fields.size(); ++i) {
-        be_global->impl_ << "      std::make_pair(\"" << fields[i]->local_name()->get_string() << "\", " <<
+        be_global->impl_ << "      std::make_pair(\"" << canonical_name(fields[i]->local_name()) << "\", " <<
           be_global->get_id(fields[i]) << "),\n";
       }
       be_global->impl_ <<
@@ -382,9 +412,19 @@ namespace {
         "  }\n\n";
     }
     be_global->impl_ <<
+      "  Value getValue(const void* stru, DDS::MemberId memberId) const\n"
+      "  {\n"
+      "    ACE_UNUSED_ARG(memberId);\n"
+      "    const" << clazz << "& typed = *static_cast<const" << clazz << "*>(stru);\n"
+      "    ACE_UNUSED_ARG(typed);\n";
+    std::for_each(fields.begin(), fields.end(), gen_field_getValueByMemberId);
+    be_global->impl_ <<
+      "    " << "throw std::runtime_error(\"Member not found or its type is not supported (in struct" + clazz + ")\");\n"
+      "  }\n\n";
+    be_global->impl_ <<
       "  Value getValue(const void* stru, const char* field) const\n"
       "  {\n"
-      "    const " << clazz << "& typed = *static_cast<const " << clazz << "*>(stru);\n"
+      "    const" << clazz << "& typed = *static_cast<const" << clazz << "*>(stru);\n"
       "    ACE_UNUSED_ARG(typed);\n";
     std::for_each(fields.begin(), fields.end(), gen_field_getValue);
     be_global->impl_ <<
@@ -674,7 +714,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 
 static std::string
 func(const std::string&, const std::string&, AST_Type* br_type, const std::string&,
-  bool, Intro&, const std::string&, bool)
+  bool, Intro&, const std::string&)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;

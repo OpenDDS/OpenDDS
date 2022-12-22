@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -20,6 +18,8 @@
 #include "Replayer.h"
 #include "ConditionVariable.h"
 #include "TimeTypes.h"
+#include "GuidUtils.h"
+#include "SporadicTask.h"
 #include "XTypes/TypeLookupService.h"
 #include "transport/framework/TransportImpl_rch.h"
 #include "security/framework/SecurityConfig_rch.h"
@@ -29,8 +29,8 @@
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
-#include "GuidUtils.h"
 #include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDynamicDataC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
@@ -39,9 +39,9 @@
 #include <ace/Thread_Mutex.h>
 #include <ace/Recursive_Thread_Mutex.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -53,7 +53,7 @@ class SubscriberImpl;
 class DataWriterImpl;
 class DomainParticipantFactoryImpl;
 class Monitor;
-
+class BitSubscriber;
 
 class RecorderImpl;
 class ReplayerImpl;
@@ -153,6 +153,8 @@ public:
     DDS::Subscriber_ptr s);
 
   virtual DDS::Subscriber_ptr get_builtin_subscriber();
+
+  RcHandle<DCPS::BitSubscriber> get_builtin_subscriber_proxy();
 
   virtual DDS::Topic_ptr create_topic(
     const char *           topic_name,
@@ -330,9 +332,10 @@ public:
   GUID_t get_repoid(DDS::InstanceHandle_t id) const;
 
   /**
-   *  Check if the topic is used by any datareader or datawriter.
+   * Check to see if the Participant has any entities left in it.
+   * leftover_entities will be set with a description of what is left.
    */
-  bool is_clean() const;
+  bool is_clean(String* leftover_entities = 0) const;
 
   /**
    * This is used to retrieve the listener for a certain status change.
@@ -399,8 +402,14 @@ public:
   XTypes::TypeLookupService_rch get_type_lookup_service() { return type_lookup_service_; }
 
 #if defined(OPENDDS_SECURITY)
-  void set_security_config(const Security::SecurityConfig_rch& config);
-
+  Security::SecurityConfig_rch get_security_config() const
+  {
+    return security_config_;
+  }
+  DDS::Security::PermissionsHandle permissions_handle() const
+  {
+    return perm_handle_;
+  }
   DDS::Security::ParticipantCryptoHandle crypto_handle() const
   {
     return part_crypto_handle_;
@@ -410,8 +419,12 @@ public:
   bool prepare_to_delete_datawriters();
   bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
-private:
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::ReturnCode_t get_dynamic_type(
+    DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key);
+#endif
 
+private:
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
   bool validate_subscriber_qos(DDS::SubscriberQos & subscriber_qos);
 
@@ -526,7 +539,7 @@ private:
   bool shutdown_complete_;
 
   /// The built in topic subscriber.
-  DDS::Subscriber_var bit_subscriber_;
+  RcHandle<BitSubscriber> bit_subscriber_;
 
   /// Get instances handles from DomainParticipantFactory (use handle_protector_)
   InstanceHandleGenerator& participant_handles_;
@@ -563,20 +576,23 @@ private:
   /// Protect the replayers collection.
   ACE_Recursive_Thread_Mutex replayers_protector_;
 
-  class LivelinessTimer : public ACE_Event_Handler {
+  class LivelinessTimer : public virtual RcObject {
   public:
     LivelinessTimer(DomainParticipantImpl& impl, DDS::LivelinessQosPolicyKind kind);
     virtual ~LivelinessTimer();
     void add_adjust(OpenDDS::DCPS::DataWriterImpl* writer);
     void remove_adjust();
-    int handle_timeout(const ACE_Time_Value &tv, const void * /* arg */);
+    void execute(const MonotonicTimePoint& now);
     virtual void dispatch(const MonotonicTimePoint& tv) = 0;
+    virtual void cancel() = 0;
 
   protected:
     DomainParticipantImpl& impl_;
     const DDS::LivelinessQosPolicyKind kind_;
 
     TimeDuration interval () const { return interval_; }
+
+    virtual void schedule(const TimeDuration& interval) = 0;
 
   private:
     TimeDuration interval_;
@@ -590,15 +606,41 @@ private:
   public:
     AutomaticLivelinessTimer(DomainParticipantImpl& impl);
     virtual void dispatch(const MonotonicTimePoint& tv);
+
+    void cancel()
+    {
+      impl_.automatic_liveliness_task_->cancel();
+    }
+
+  private:
+    void schedule(const TimeDuration& interval)
+    {
+      impl_.automatic_liveliness_task_->schedule(interval);
+    }
   };
-  AutomaticLivelinessTimer automatic_liveliness_timer_;
+  RcHandle<AutomaticLivelinessTimer> automatic_liveliness_timer_;
+  typedef PmfSporadicTask<AutomaticLivelinessTimer> AutomaticLivelinessTask;
+  RcHandle<AutomaticLivelinessTask> automatic_liveliness_task_;
 
   class ParticipantLivelinessTimer : public LivelinessTimer {
   public:
     ParticipantLivelinessTimer(DomainParticipantImpl& impl);
     virtual void dispatch(const MonotonicTimePoint& tv);
+
+    void cancel()
+    {
+      impl_.participant_liveliness_task_->cancel();
+    }
+
+  private:
+    void schedule(const TimeDuration& interval)
+    {
+      impl_.participant_liveliness_task_->schedule(interval);
+    }
   };
-  ParticipantLivelinessTimer participant_liveliness_timer_;
+  RcHandle<ParticipantLivelinessTimer> participant_liveliness_timer_;
+  typedef PmfSporadicTask<ParticipantLivelinessTimer> ParticipantLivelinessTask;
+  RcHandle<ParticipantLivelinessTask> participant_liveliness_task_;
 
   TimeDuration liveliness_check_interval(DDS::LivelinessQosPolicyKind kind);
   bool participant_liveliness_activity_after(const MonotonicTimePoint& tv);

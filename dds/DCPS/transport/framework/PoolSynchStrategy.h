@@ -31,7 +31,7 @@ public:
   virtual ThreadSynch* create_synch_object(
     ThreadSynchResource* synch_resource,
     long                 priority,
-    int                  scheduler);
+    long                 scheduler);
 
   virtual int open(void*);
   virtual int svc();

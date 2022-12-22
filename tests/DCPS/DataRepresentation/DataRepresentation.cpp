@@ -21,9 +21,6 @@
 #  include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #  ifdef OPENDDS_SAFETY_PROFILE
 #    include <dds/DCPS/StaticDiscovery.h>
-#  else
-#    include <dds/DCPS/InfoRepoDiscovery/InfoRepoDiscovery.h>
-#    include <dds/DCPS/transport/tcp/Tcp.h>
 #  endif
 #endif
 
@@ -52,7 +49,7 @@ public:
 private:
   typedef typename OpenDDS::DCPS::DDSTraits<Type> Traits;
   typedef typename Traits::TypeSupportType::_var_type TypeSupportVar;
-  typedef typename Traits::TypeSupportTypeImpl TypeSupportImpl;
+  typedef typename Traits::TypeSupportImplType TypeSupportImpl;
   TypeSupportVar type_support_;
   DDS::DomainParticipant* participant_;
 };
@@ -397,6 +394,8 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
   while (!reader_done && !writer_done) {
     DDS::ReturnCode_t rc = ws->wait(conditions, max_wait_time);
     if (rc != DDS::RETCODE_OK) {
+      ws->detach_condition(reader_condition);
+      ws->detach_condition(writer_condition);
       ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: wait failed: %C\n"), retcode_to_string(rc)));
       return check_match_error;
     }
@@ -407,11 +406,15 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
         DDS::PublicationMatchedStatus writer_match;
         rc = writer->get_publication_matched_status(writer_match);
         if (rc != DDS::RETCODE_OK) {
+          ws->detach_condition(reader_condition);
+          ws->detach_condition(writer_condition);
           ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: get_publication_matched_status failed: %C\n"),
             retcode_to_string(rc)));
           return check_match_error;
         }
         if (expected_match != writer_match.total_count_change) {
+          ws->detach_condition(reader_condition);
+          ws->detach_condition(writer_condition);
           ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: publication match %d != %d\n"),
             expected_match, writer_match.total_count));
           unexpected_result = true;
@@ -420,6 +423,8 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
         DDS::OfferedIncompatibleQosStatus writer_qos_fail;
         rc = writer->get_offered_incompatible_qos_status(writer_qos_fail);
         if (rc != DDS::RETCODE_OK) {
+          ws->detach_condition(reader_condition);
+          ws->detach_condition(writer_condition);
           ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: get_offered_incompatible_qos_status failed: %C\n"),
             retcode_to_string(rc)));
           return check_match_error;
@@ -438,6 +443,8 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
         DDS::SubscriptionMatchedStatus reader_match;
         rc = reader->get_subscription_matched_status(reader_match);
         if (rc != DDS::RETCODE_OK) {
+          ws->detach_condition(reader_condition);
+          ws->detach_condition(writer_condition);
           ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: get_subscription_matched_status failed: %C\n"),
             retcode_to_string(rc)));
           return check_match_error;
@@ -451,6 +458,8 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
         DDS::RequestedIncompatibleQosStatus reader_qos_fail;
         rc = reader->get_requested_incompatible_qos_status(reader_qos_fail);
         if (rc != DDS::RETCODE_OK) {
+          ws->detach_condition(reader_condition);
+          ws->detach_condition(writer_condition);
           ACE_ERROR((LM_ERROR, ACE_TEXT("%N:%l check_match() ERROR: get_requested_incompatible_qos_status failed: %C\n"),
             retcode_to_string(rc)));
           return check_match_error;
@@ -467,9 +476,13 @@ Test::CheckMatchResult Test::check_match(DDS::DataReader* reader, DDS::DataWrite
       }
     }
     if (unexpected_result) {
+      ws->detach_condition(reader_condition);
+      ws->detach_condition(writer_condition);
       return check_match_unexpected;
     }
   }
+  ws->detach_condition(reader_condition);
+  ws->detach_condition(writer_condition);
   return check_match_expected;
 }
 

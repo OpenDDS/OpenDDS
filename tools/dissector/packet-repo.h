@@ -1,33 +1,22 @@
-// -*- C++ -*-
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_DISSECTOR_PACKET_REPO_H_
+#define OPENDDS_DISSECTOR_PACKET_REPO_H_
 
-#ifndef _PACKET_REPO_H_
-#define _PACKET_REPO_H_
+#include "ws_common.h"
+#include "dissector_export.h"
+#include "giop_base.h"
 
-extern "C" {
+#include <dds/DCPS/Definitions.h>
 
-#include "ws_config.h"
+#include <ace/Synch.h>
+#include <ace/Hash_Map_Manager.h>
 
 #include <glib.h>
 #include <gmodule.h>
-
-#include <epan/packet.h>
-#include <epan/dissectors/packet-giop.h>
-} // extern "C"
-
-#include "dds/DCPS/Definitions.h"
-#include "dissector_export.h"
-#include "giop_base.h"
-#include "ws_common.h"
-
-#include "ace/Synch.h"
-#include "ace/Hash_Map_Manager.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -149,4 +138,4 @@ namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif //  _PACKET_REPO_H_
+#endif

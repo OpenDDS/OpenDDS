@@ -16,7 +16,8 @@ namespace OpenDDS {
 namespace DCPS {
 
 MulticastReceiveStrategy::MulticastReceiveStrategy(MulticastDataLink* link)
-  : link_(link)
+  : TransportReceiveStrategy<>(link->config())
+  , link_(link)
 {
 }
 
@@ -30,6 +31,8 @@ MulticastReceiveStrategy::get_handle() const
 int
 MulticastReceiveStrategy::handle_input(ACE_HANDLE fd)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   const int result = this->handle_dds_input(fd);
   if (result >= 0 && this->pdu_remaining()) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastReceiveStrategy[%@]::handle_input "

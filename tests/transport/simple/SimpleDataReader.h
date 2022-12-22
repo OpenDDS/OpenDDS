@@ -31,7 +31,7 @@ class SimpleDataReader
     // Implementing TransportClient
     bool check_transport_qos(const OpenDDS::DCPS::TransportInst&)
       { return true; }
-    const OpenDDS::DCPS::RepoId& get_repo_id() const
+    OpenDDS::DCPS::RepoId get_repo_id() const
       { return sub_id_; }
     DDS::DomainId_t domain_id() const
       { return 0; }
@@ -54,6 +54,7 @@ class SimpleDataReader
 
   private:
 
+    mutable ACE_Thread_Mutex mutex_;
     const OpenDDS::DCPS::RepoId& sub_id_;
     int num_messages_expected_;
     int num_messages_received_;

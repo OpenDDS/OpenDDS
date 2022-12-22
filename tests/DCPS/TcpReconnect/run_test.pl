@@ -37,9 +37,9 @@ if ($test->flag('thread_per')) {
 # stub parameters
 #
 my $stubPubSideHost  = "localhost";
-my $stubPubSidePort = PerlACE::random_port();;
+my $stubPubSidePort = PerlACE::random_port();
 my $stubSubSideHost = "localhost";
-my $stubSubSidePort = PerlACE::random_port();;
+my $stubSubSidePort = PerlACE::random_port();
 my $stubKillDelay = 4;
 my $stubKillCount = 2;
 
@@ -95,9 +95,6 @@ $test->process("subscriber", "subscriber", $sub_opts);
 
 $test->start_process("subscriber");
 $test->start_process("publisher");
-
-# ignore this issue that is already being tracked in redmine
-$test->ignore_error("(Redmine Issue# 1446)");
 
 # Ignore normal disconnect/reconnect messages
 $test->ignore_error("TcpConnection::active_reconnect_i error Connection refused");

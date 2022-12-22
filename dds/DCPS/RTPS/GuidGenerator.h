@@ -46,12 +46,15 @@ public:
 
   /// override the MAC address to use a specific network interface
   /// instead of just the first (non-loopback) interface
-  int interfaceName(const char* interface);
+  int interfaceName(const char* nic);
 
   /// populate a GUID container with a unique ID. This will increment
   /// the counter, and use a lock (if compiled with MT ACE) while
   /// doing so.
   void populate(DCPS::GUID_t& container);
+
+  // In a test case, for just examining the counter, pass false. Otherwise exclude the parameter.
+  ACE_UINT16 getCount(bool doIncrement = true);
 
 private:
   enum {NODE_ID_SIZE = 6};
@@ -59,8 +62,6 @@ private:
   /// Borrowed from ACE::UUID_Node, definition of the
   /// MAC address holder type
   typedef unsigned char Node_ID[NODE_ID_SIZE];
-
-  ACE_UINT16 getCount();
 
   Node_ID node_id_;
   pid_t pid_;

@@ -3,6 +3,7 @@
  * Currently IS_AUTOID_HASH is not implemented so that should always return false.
  ***/
 #include "ExtensibilityTypeSupportImpl.h"
+#include "ZeroEnumTypeSupportImpl.h"
 
 #include <dds/DCPS/XTypes/TypeObject.h>
 
@@ -83,6 +84,34 @@ TEST(TestDefault, flags_match)
 
   EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_union_default_nested_xtag>()]
             .minimal.union_type.union_flags, IS_APPENDABLE | IS_NESTED);
+}
+
+TEST(TestDefault, FinalEnum)
+{
+  TypeMap type_map = getMinimalTypeMap<extensibility_FinalEnum_xtag>();
+  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_FinalEnum_xtag>()].minimal.enumerated_type.enum_flags,
+            IS_FINAL);
+}
+
+TEST(TestDefault, AppendableEnum)
+{
+  TypeMap type_map = getMinimalTypeMap<extensibility_AppendableEnum_xtag>();
+  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_AppendableEnum_xtag>()].minimal.enumerated_type.enum_flags,
+            IS_APPENDABLE);
+}
+
+TEST(TestDefault, DefaultEnum)
+{
+  TypeMap type_map = getMinimalTypeMap<extensibility_DefaultEnum_xtag>();
+  EXPECT_EQ(type_map[getMinimalTypeIdentifier<extensibility_DefaultEnum_xtag>()].minimal.enumerated_type.enum_flags,
+            IS_APPENDABLE);
+}
+
+TEST(TestDefault, ZeroEnumDefaultEnum)
+{
+  TypeMap type_map = getMinimalTypeMap<ZeroEnum_DefaultEnum_xtag>();
+  EXPECT_EQ(type_map[getMinimalTypeIdentifier<ZeroEnum_DefaultEnum_xtag>()].minimal.enumerated_type.enum_flags,
+            0);
 }
 
 int main(int argc, char* argv[])

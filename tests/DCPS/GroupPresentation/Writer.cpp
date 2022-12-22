@@ -96,7 +96,7 @@ Writer::svc()
         ACE_OS::exit(-1);
     }
 
-    ::DDS::ReturnCode_t ret = this->publisher_->begin_coherent_changes ();
+    ::DDS::ReturnCode_t ret = publisher_->begin_coherent_changes();
     if (ret != ::DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
@@ -114,7 +114,7 @@ Writer::svc()
     message.text       = CORBA::string_dup("Worst. Movie. Ever.");
 
     for (int i = 0; i < num_messages; i++) {
-      message.count      = this->next_count ();
+      message.count      = next_count();
       DDS::ReturnCode_t error = message_dw->write(message, handle);
 
       if (error != DDS::RETCODE_OK) {
@@ -127,10 +127,10 @@ Writer::svc()
         }
       }
 
-      ACE_OS::sleep (1);
+      ACE_OS::sleep(1);
     }
 
-    ret = this->publisher_->end_coherent_changes ();
+    ret = publisher_->end_coherent_changes();
     if (ret != ::DDS::RETCODE_OK) {
       ACE_ERROR((LM_ERROR,
                    ACE_TEXT("%N:%l: svc()")
@@ -160,8 +160,8 @@ Writer::get_timeout_writes() const
 
 
 int
-Writer::next_count ()
+Writer::next_count()
 {
   ++ count;
-  return count.value ();
+  return count.value();
 }

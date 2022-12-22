@@ -14,7 +14,6 @@
   * [Qt](#qt)
   * [Wireshark](#wireshark)
   * [RapidJSON](#rapidjson)
-  * [Boost](#boost)
   * [Xerces](#xerces)
   * [OpenSSL](#openssl)
   * [Python](#python)
@@ -177,12 +176,6 @@ manually.**
 RapidJSON is also available as package, at least in Debian-based Linux
 distributions.
 
-### Boost
-
-Boost, as of writing, is just an optional dependency of the
-[ishapes](../examples/DCPS/ishapes) RTPS demo and only if C++11 is not
-available.
-
 ### Xerces
 
 Apache Xerces ("Xerces 3 C++" specifically) is used for parsing QoS XML and
@@ -191,7 +184,7 @@ security XML configuration files.
 ### OpenSSL
 
 OpenSSL is used for DDS Security for verifying security configurations and
-encryption and decryption. Version 1.0 and version 1.1 are supported.
+encryption and decryption. Versions 1.0, 1.1 and 3.0 (3.0.1 or later) are supported.
 
 ### Python
 

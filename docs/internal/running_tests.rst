@@ -25,7 +25,6 @@ Running
 .. note:: Make sure :envvar:`ACE_ROOT` and :envvar:`DDS_ROOT` are set, which can be done by running ``source setenv.sh`` on Linux and macOS or ``call setenv.cmd`` on Windows.
 
 OpenDDS' main suite of tests is ran by the :ghfile:`tests/auto_run_tests.pl` Perl script that reads lists of tests from files and selectively runs based on how the script has been configured.
-By default it configures itself, but it can be configured manually.
 
 For Unixes (Linux, macOS, BSDs, etc)
 ------------------------------------
@@ -51,13 +50,15 @@ Manual configuration is done by passing ``-Config``, ``-Exclude``, and test list
 
 To manually configure what tests to run:
 
-* See the ``--list-configs`` or ``--show-configs`` options to see the existing configurations used by the tests.
+* See the ``--list-all-configs`` or ``--show-all-configs`` options to see the existing configurations used by all test list files.
+* See the ``--list-configs`` or ``--show-configs`` options to see the existing configurations used by specific test list files.
 * See the test list files for the tests themselves:
 
   * :ghfile:`tests/dcps_tests.lst`
 
     * This is included by default.
       Use ``--no-dcps`` to exclude this list.
+    * If ``--no-auto-config`` was passed, then ``--dcps`` will have to be passed to include this.
 
   * :ghfile:`tests/security/security_tests.lst`
 
@@ -76,6 +77,16 @@ To manually configure what tests to run:
 * Passing ``-Exclude RTPS`` will exclude all tests that have ``RTPS`` in the entry.
   This option matches using RegEx, so a test with ``SUPER_DUPER_RTPS`` will also be excluded.
   It also ignores inverse entries, so it will not exclude a test with ``!SUPER_DUPER_RTPS``.
+* There are ``-Config`` options that are added automatically if ``--no-auto-config`` wasn't passed:
+
+  * ``-Config RTPS``
+  * ``-Config GH_ACTIONS`` if running on :ref:`GitHub Actions <github-actions-art>`
+  * These are based on the OS ``auto_run_tests.pl`` is running under:
+
+    * ``-Config Win32``
+    * ``-Config macOS``
+    * ``-Config Linux``
+
 * Assuming they were built, CMake tests are ran if ``--cmake`` is passed.
   This uses CTest, which is a system that is separate from the one previously described.
 * See ``--help`` for all the available options.

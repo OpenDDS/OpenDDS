@@ -33,6 +33,10 @@ sub convert {
   my($error)      = undef;
   my($fh)         = new FileHandle();
 
+  if ($releasedir =~ m@/\.git@) {
+    return (1, undef);
+  }
+
   if (opendir($fh, $releasedir)) {
     foreach my $file (grep(!/^\.\.?$/, readdir($fh))) {
       my($full) = "$releasedir/$file";

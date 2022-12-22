@@ -40,9 +40,13 @@ const int MAX_READERS_TO_RESEND = 5;
  * @c with the STL generic algorithms.  It is meant for iteration
  * @c over the "send samples" in a @c SendStateDataSampleList.
  */
-class OpenDDS_Dcps_Export SendStateDataSampleListIterator
-  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement> {
+class OpenDDS_Dcps_Export SendStateDataSampleListIterator {
 public:
+  typedef std::bidirectional_iterator_tag iterator_category;
+  typedef DataSampleElement value_type;
+  typedef std::ptrdiff_t difference_type;
+  typedef value_type* pointer;
+  typedef value_type& reference;
 
   /// Default constructor required by ForwardIterator concept
   SendStateDataSampleListIterator() {}
@@ -92,9 +96,11 @@ private:
  * @c with the STL generic algorithms.  It is meant for iteration
  * @c over the "send samples" in a @c SendStateDataSampleList.
  */
-class OpenDDS_Dcps_Export SendStateDataSampleListConstIterator
-  : public std::iterator<std::bidirectional_iterator_tag, DataSampleElement> {
+class OpenDDS_Dcps_Export SendStateDataSampleListConstIterator {
 public:
+  typedef std::bidirectional_iterator_tag iterator_category;
+  typedef const DataSampleElement value_type;
+  typedef std::ptrdiff_t difference_type;
   typedef const DataSampleElement* pointer;
   typedef const DataSampleElement& reference;
 

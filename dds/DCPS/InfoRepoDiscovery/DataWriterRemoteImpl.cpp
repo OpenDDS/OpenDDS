@@ -6,7 +6,9 @@
  */
 
 #include "DataWriterRemoteImpl.h"
+
 #include "dds/DCPS/DataWriterCallbacks.h"
+#include "dds/DCPS/debug.h"
 #include "dds/DCPS/GuidConverter.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -36,12 +38,12 @@ DataWriterRemoteImpl::add_association(const RepoId& yourId,
                                       bool active)
 {
   if (DCPS_debug_level) {
-    GuidConverter writer_converter(yourId);
-    GuidConverter reader_converter(reader.readerId);
+    LogGuid writer_log(yourId);
+    LogGuid reader_log(reader.readerId);
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataWriterRemoteImpl::add_association - ")
                ACE_TEXT("local %C remote %C\n"),
-               std::string(writer_converter).c_str(),
-               std::string(reader_converter).c_str()));
+               writer_log.c_str(),
+               reader_log.c_str()));
   }
 
   // the local copy of parent_ is necessary to prevent race condition

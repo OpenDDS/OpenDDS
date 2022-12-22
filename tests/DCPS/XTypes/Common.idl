@@ -1,0 +1,38 @@
+@topic
+struct ControlStruct {
+  @key long key_field;
+};
+
+@topic
+struct PlainCdrStruct {
+  @key long key_field;
+  long value_field;
+};
+
+enum UnionDisc {
+  E_KEY,
+  E_OCTET_FIELD,
+  E_ADDITIONAL_FIELD
+};
+
+enum ModifiedUnionDisc {
+  E_KEY_MODIFIED,
+  E_OCTET_FIELD_MODIFIED,
+  E_ADDITIONAL_FIELD_MODIFIED
+};
+
+typedef string<20> str20;
+typedef string<64> str64;
+
+// Dependencies
+@appendable
+struct NestedStruct {
+  long additional_field;
+};
+
+// No XTypes test
+@topic
+@appendable
+struct AppendableStructNoXTypes {
+  @key long key_field;
+};

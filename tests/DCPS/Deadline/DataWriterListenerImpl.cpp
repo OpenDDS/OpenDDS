@@ -28,8 +28,9 @@ bool DataWriterListenerImpl::wait_matched(long count, const OpenDDS::DCPS::TimeD
     return false;
   }
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + max_wait;
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (count != matched_) {
-    switch (matched_condition_.wait_until(deadline)) {
+    switch (matched_condition_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_NoTimeout:
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataWriterListenerImpl::wait_matched: %d\n"), matched_));
       break;

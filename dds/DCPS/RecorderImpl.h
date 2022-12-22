@@ -13,13 +13,14 @@
 #include "Definitions.h"
 #include "DataReaderCallbacks.h"
 #include "Recorder.h"
-#include "RemoveAssociationSweeper.h"
 #include "EntityImpl.h"
 #include "TopicImpl.h"
 #include "OwnershipManager.h"
-#include "transport/framework/ReceivedDataSample.h"
-#include "transport/framework/TransportReceiveListener.h"
+
 #include "transport/framework/TransportClient.h"
+#include "transport/framework/TransportDefs.h"
+#include "transport/framework/TransportReceiveListener.h"
+#include "transport/framework/ReceivedDataSample.h"
 
 #include <dds/DdsDcpsTopicC.h>
 #include <dds/DdsDcpsSubscriptionExtC.h>
@@ -71,7 +72,7 @@ public:
 
   // Implement TransportClient
   virtual bool check_transport_qos(const TransportInst& inst);
-  virtual const RepoId& get_repo_id() const;
+  virtual RepoId get_repo_id() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
 
@@ -95,6 +96,10 @@ public:
   virtual void signal_liveliness(const RepoId& remote_participant);
 
   void remove_all_associations();
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  void add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti);
+#endif
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
   // implement Recoder
@@ -137,11 +142,10 @@ public:
                                      const RepoId& /*readerid*/,
                                      const RepoId& /*writerid*/);
 
-  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
 
 protected:
   virtual void remove_associations_i(const WriterIdSeq& writers, bool callback);
-  void remove_publication(const PublicationId& pub_id);
 
 private:
 
@@ -151,7 +155,14 @@ private:
   void lookup_instance_handles(const WriterIdSeq&      ids,
                                DDS::InstanceHandleSeq& hdls);
 
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::DynamicData_ptr get_dynamic_data(const RawDataSample& sample);
+#endif
+  void check_encap(bool b) { check_encap_ = b; }
+  bool check_encap() const { return check_encap_; }
+
   DDS::DataReaderQos qos_;
+  DDS::DataReaderQos passed_qos_;
 
   /// lock protecting sample container as well as statuses.
   ACE_Recursive_Thread_Mutex sample_lock_;
@@ -167,15 +178,12 @@ private:
 
   DDS::SubscriberQos subqos_;
 
-  friend class RemoveAssociationSweeper<RecorderImpl>;
-
   friend class ::DDS_TEST; //allows tests to get at private data
 
   DDS::TopicDescription_var topic_desc_;
   DDS::StatusMask listener_mask_;
   RecorderListener_rch listener_;
   DDS::DomainId_t domain_id_;
-  RcHandle<RemoveAssociationSweeper<RecorderImpl> > remove_association_sweeper_;
 
   ACE_Recursive_Thread_Mutex publication_handle_lock_;
 
@@ -196,6 +204,14 @@ private:
 
   /// RW lock for reading/writing publications.
   ACE_RW_Thread_Mutex writers_lock_;
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  typedef OPENDDS_MAP(PublicationId, DDS::DynamicType_var) DynamicTypeByPubId;
+  DynamicTypeByPubId dt_map_;
+#endif
+  bool check_encap_;
+
+  TransportMessageBlockAllocator mb_alloc_;
 };
 
 

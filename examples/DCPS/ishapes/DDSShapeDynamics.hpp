@@ -3,9 +3,21 @@
 
 #include "ShapeTypeTypeSupportC.h"
 #include <ShapeDynamics.hpp>
+
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtCore/QRect>
 #include <QtGui/QtGui>
 #include <Shape.hpp>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 #define CN 9
 
@@ -32,7 +44,7 @@ public:
   virtual ~DDSShapeDynamics();
 
 public:
-  void setShape(shared_ptr<Shape> shape) {
+  void setShape(std::shared_ptr<Shape> shape) {
     shape_ = shape;
   }
 
@@ -40,7 +52,7 @@ public:
 private:
   DDSShapeDynamics(const DDSShapeDynamics& orig);
 
-  shared_ptr<Shape> shape_;
+  std::shared_ptr<Shape> shape_;
   int x0_;
   int y0_;
   org::omg::dds::demo::ShapeTypeDataReader_var shapeReader_;

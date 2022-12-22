@@ -14,6 +14,11 @@
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/ConfigUtils.h"
 #include "dds/DCPS/DCPS_Utils.h"
+#include "dds/DCPS/BuiltInTopicUtils.h"
+
+#include "dds/DCPS/transport/framework/TransportRegistry.h"
+#include "dds/DCPS/transport/framework/TransportType.h"
+#include "dds/DCPS/transport/framework/TransportType_rch.h"
 
 #include "tao/ORB_Core.h"
 #include "tao/BiDir_GIOP/BiDirGIOP.h"
@@ -24,7 +29,6 @@
 #include "dds/DCPS/BuiltInTopicUtils.h"
 #include "dds/DCPS/Marked_Default_Qos.h"
 
-#include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportExceptions.h"
 
 #include "dds/DCPS/transport/tcp/TcpInst.h"
@@ -206,6 +210,7 @@ namespace
 DCPSInfo_var
 InfoRepoDiscovery::get_dcps_info()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (CORBA::is_nil(this->info_.in())) {
 
     if (!orb_) {
@@ -254,6 +259,7 @@ InfoRepoDiscovery::get_dcps_info()
 std::string
 InfoRepoDiscovery::get_stringified_dcps_info_ior()
 {
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   return this->ior_;
 }
 
@@ -261,6 +267,7 @@ TransportConfig_rch
 InfoRepoDiscovery::bit_config()
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
+  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
   if (bit_config_.is_nil()) {
     const std::string cfg_name = TransportRegistry::DEFAULT_INST_PREFIX +
                                  std::string("_BITTransportConfig_") + key();
@@ -299,19 +306,19 @@ InfoRepoDiscovery::bit_config()
 #endif
 }
 
-DDS::Subscriber_ptr
+RcHandle<BitSubscriber>
 InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 {
 #if defined (DDS_HAS_MINIMUM_BIT)
   ACE_UNUSED_ARG(participant);
-  return 0;
+  return RcHandle<BitSubscriber>();
 #else
   if (!TheServiceParticipant->get_BIT()) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   if (create_bit_topics(participant) != DDS::RETCODE_OK) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   DDS::Subscriber_var bit_subscriber =
@@ -325,7 +332,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
   } catch (const Transport::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during transport initialization\n"));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   // DataReaders
@@ -355,6 +362,7 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
 
       DataReaderListener_var failover = new FailoverListener(key());
       pbit_dr->set_listener(failover, DEFAULT_STATUS_MASK);
+      // No need to invoke the listener.
     }
 
     DDS::DataReaderQos dr_qos;
@@ -391,15 +399,15 @@ InfoRepoDiscovery::init_bit(DomainParticipantImpl* participant)
         ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) InfoRepoDiscovery::init_bit")
                    ACE_TEXT(" - Error <%C> enabling subscriber\n"), retcode_to_string(ret)));
       }
-      return 0;
+      return RcHandle<BitSubscriber>();
     }
 
   } catch (const CORBA::Exception&) {
     ACE_ERROR((LM_ERROR, "(%P|%t) InfoRepoDiscovery::init_bit, "
                          "exception during DataReader initialization\n"));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
-  return bit_subscriber._retn();
+  return make_rch<BitSubscriber>(bit_subscriber);
 #endif
 }
 
@@ -815,10 +823,11 @@ InfoRepoDiscovery::removeDataReaderRemote(const RepoId& subscriptionId)
       remote_reference_to_servant<DataReaderRemoteImpl>(drr->second.in(), orb_);
     impl->detach_parent();
     deactivate_remote_object(drr->second.in(), orb_);
-  }
-  catch (::CORBA::BAD_INV_ORDER&){
+  } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
+  } catch (const CORBA::OBJECT_NOT_EXIST&) {
+    // Same for CORBA::OBJECT_NOT_EXIST
   }
 
   dataReaderMap_.erase(drr);
@@ -840,10 +849,11 @@ InfoRepoDiscovery::removeDataWriterRemote(const RepoId& publicationId)
       remote_reference_to_servant<DataWriterRemoteImpl>(dwr->second.in(), orb_);
     impl->detach_parent();
     deactivate_remote_object(dwr->second.in(), orb_);
-  }
-  catch (::CORBA::BAD_INV_ORDER&){
+  } catch (const CORBA::BAD_INV_ORDER&) {
     // The orb may throw ::CORBA::BAD_INV_ORDER when is has been shutdown.
     // Ignore it anyway.
+  } catch (const CORBA::OBJECT_NOT_EXIST&) {
+    // Same for CORBA::OBJECT_NOT_EXIST
   }
 
   dataWriterMap_.erase(dwr);
@@ -984,7 +994,11 @@ void
 InfoRepoDiscovery::OrbRunner::shutdown()
 {
   orb_->shutdown();
-  wait();
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
+  {
+    ThreadStatusManager::Sleeper s(thread_status_manager);
+    wait();
+  }
   orb_->destroy();
 }
 
@@ -994,6 +1008,8 @@ ACE_Thread_Mutex InfoRepoDiscovery::mtx_orb_runner_;
 int
 InfoRepoDiscovery::OrbRunner::svc()
 {
+  ThreadStatusManager::Start s(TheServiceParticipant->get_thread_status_manager(), "OrbRunner");
+
   // this method was originally Service_Participant::svc()
   bool done = false;
 
@@ -1036,9 +1052,22 @@ InfoRepoDiscovery::OrbRunner::svc()
   return 0;
 }
 
+class InfoRepoType : public TransportType {
+public:
+  const char* name() { return "repository"; }
+
+  TransportInst_rch new_inst(const std::string&)
+  {
+    return TransportInst_rch();
+  }
+};
 
 InfoRepoDiscovery::StaticInitializer::StaticInitializer()
 {
+  TransportRegistry* registry = TheTransportRegistry;
+  if (!registry->register_type(make_rch<InfoRepoType>())) {
+    return;
+  }
   TheServiceParticipant->register_discovery_type("repository", new Config);
 }
 

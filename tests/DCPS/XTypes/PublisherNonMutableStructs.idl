@@ -1,0 +1,44 @@
+#include "Common.idl"
+
+// Final structures
+@topic
+@final
+struct FinalStructPub {
+  @key long key_field;
+};
+
+@topic
+@final
+struct ModifiedFinalStruct {
+  @key long key_field;
+  long additional_field;
+};
+
+// Appendable structures
+@topic
+@appendable
+struct BaseAppendableStruct {
+  @key long key_field;
+};
+
+@topic
+@appendable
+struct AdditionalPostfixFieldStruct {
+  @key long key_field;
+  long additional_field;
+};
+
+@topic
+@appendable
+struct AdditionalPrefixFieldStruct {
+  long additional_field;
+  @key long key_field;
+};
+
+// Dependencies
+@topic
+@appendable
+struct AppendableStructWithDependency {
+  @key long key_field;
+  NestedStruct additional_nested_struct;
+};

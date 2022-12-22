@@ -62,7 +62,7 @@ class DCPS_IR_Publication;
  * system's domain.
  */
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Domain
-: public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Domain>{
+: public OpenDDS::DCPS::RcObject {
 public:
   DCPS_IR_Domain(DDS::DomainId_t id, OpenDDS::DCPS::RepoIdGenerator& generator);
 
@@ -80,6 +80,8 @@ public:
   /// or DataReaderRemote.idl.
   int remove_participant(const OpenDDS::DCPS::RepoId& particpantId,
                          CORBA::Boolean    notify_lost);
+
+  DCPS_IR_Participant_rch participant_rch(const OpenDDS::DCPS::RepoId& id) const;
 
   /// Find the participant with the id.
   DCPS_IR_Participant* participant(const OpenDDS::DCPS::RepoId& id) const;
@@ -126,7 +128,7 @@ public:
   void add_dead_participant(DCPS_IR_Participant_rch participant);
 
   /// Remove any participants currently marked as dead
-  void remove_dead_participants();
+  void remove_dead_participants(bool part_of_cleanup = false);
 
   DDS::DomainId_t get_id();
 
@@ -173,7 +175,7 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
-  bool useBIT() const { return useBIT_; }
+  bool useBIT() const { return useBIT_.value(); }
 
 private:
   OpenDDS::DCPS::TopicStatus add_topic_i(OpenDDS::DCPS::RepoId& topicId,
@@ -237,7 +239,7 @@ private:
   IdToTopicMap idToTopicMap_;
 
   /// indicates if the BuiltIn Topics are enabled
-  bool useBIT_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, bool> useBIT_;
 
   ///@{
   /// Built-in Topic variables

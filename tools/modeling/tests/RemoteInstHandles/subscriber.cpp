@@ -22,11 +22,14 @@ ACE_Condition<ACE_SYNCH_MUTEX> condition(lock);
 class BitSubscriptionListener : public OpenDDS::Model::NullReaderListener {
 public:
   virtual void on_data_available(DDS::DataReader_ptr reader);
+  ACE_Thread_Mutex mutex_;
 };
 
 void
 BitSubscriptionListener::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
   std::cout << "sub got bit data" << std::endl;
   DDS::SubscriptionBuiltinTopicDataDataReader_var bit_reader_i =
         DDS::SubscriptionBuiltinTopicDataDataReader::_narrow(reader);
@@ -53,6 +56,7 @@ private:
   OpenDDS::Model::ReaderCondSync& rcs_;
   DDS::DomainParticipant_var reader_part_;
   DDS::BuiltinTopicKey_t subkey_;
+  ACE_Thread_Mutex mutex_;
 };
 
 // START OF EXISTING MESSENGER EXAMPLE LISTENER CODE
@@ -60,6 +64,8 @@ private:
 void
 ReaderListener::on_data_available(DDS::DataReader_ptr reader)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(mutex_);
+
   data1::MessageDataReader_var reader_i =
     data1::MessageDataReader::_narrow(reader);
 

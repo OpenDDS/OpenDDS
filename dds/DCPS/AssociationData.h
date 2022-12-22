@@ -8,10 +8,14 @@
 #ifndef OPENDDS_DCPS_ASSOCIATIONDATA_H
 #define OPENDDS_DCPS_ASSOCIATIONDATA_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "transport/framework/NetworkAddress.h"
+#include "GuidUtils.h"
+#include "NetworkResource.h"
+#include "Time_Helper.h"
 #include "transport/framework/TransportDefs.h"
-#include "ace/INET_Addr.h"
+
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/INET_Addr.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,6 +25,7 @@ namespace DCPS {
 struct AssociationData {
   RepoId               remote_id_;
   TransportLocatorSeq  remote_data_;
+  TransportLocator     discovery_locator_;
   MonotonicTime_t      participant_discovered_at_;
   ACE_CDR::ULong       remote_transport_context_;
   Priority             publication_transport_priority_;
@@ -28,6 +33,7 @@ struct AssociationData {
 
   AssociationData()
     : remote_id_(GUID_UNKNOWN)
+    , discovery_locator_()
     , participant_discovered_at_(monotonic_time_zero())
     , remote_transport_context_(0)
     , publication_transport_priority_(0)
@@ -38,18 +44,18 @@ struct AssociationData {
   static ACE_INET_Addr get_remote_address(const TransportBLOB& remote)
   {
     ACE_INET_Addr remote_address;
-    NetworkAddress network_order_address;
+    NetworkResource network_resource;
 
     // Get the remote address from the "blob" in the remote_info struct.
     ACE_InputCDR cdr((const char*)remote.get_buffer(),
                                   remote.length());
 
-    if ((cdr >> network_order_address) == 0) {
+    if ((cdr >> network_resource) == 0) {
       ACE_ERROR((LM_ERROR,
                  ACE_TEXT("(%P|%t) ERROR: AssociationData::get_remote_address")
-                 ACE_TEXT(" failed to de-serialize the NetworkAddress\n")));
+                 ACE_TEXT(" failed to de-serialize the NetworkResource\n")));
     } else {
-      network_order_address.to_addr(remote_address);
+      network_resource.to_addr(remote_address);
     }
 
     return remote_address;

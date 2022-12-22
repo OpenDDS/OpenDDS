@@ -17,7 +17,7 @@ TEST(EscapedNonKeywords, struct_topic_type)
   ACE_UNUSED_ARG(a_dw);
 
   the_module::the_structTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "the_module::the_struct");
+  EXPECT_STREQ(ts.name(), "the_module::the_struct");
 }
 
 TEST(EscapedNonKeywords, union_topic_type)
@@ -29,7 +29,7 @@ TEST(EscapedNonKeywords, union_topic_type)
   ACE_UNUSED_ARG(au_dw);
 
   the_module::the_unionTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "the_module::the_union");
+  EXPECT_STREQ(ts.name(), "the_module::the_union");
 }
 
 TEST(IdlKeywords, struct_topic_type)
@@ -41,7 +41,7 @@ TEST(IdlKeywords, struct_topic_type)
   ACE_UNUSED_ARG(b_dw);
 
   boolean::attributeTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "boolean::attribute");
+  EXPECT_STREQ(ts.name(), "boolean::attribute");
 }
 
 TEST(IdlKeywords, union_topic_type)
@@ -53,7 +53,7 @@ TEST(IdlKeywords, union_topic_type)
   ACE_UNUSED_ARG(bu_dw);
 
   boolean::primarykeyTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "boolean::primarykey");
+  EXPECT_STREQ(ts.name(), "boolean::primarykey");
 }
 
 TEST(CppKeywords, struct_topic_type)
@@ -65,7 +65,7 @@ TEST(CppKeywords, struct_topic_type)
   ACE_UNUSED_ARG(c_dw);
 
   _cxx_bool::classTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "bool::class");
+  EXPECT_STREQ(ts.name(), "bool::class");
 }
 
 TEST(CppKeywords, union_topic_type)
@@ -77,7 +77,7 @@ TEST(CppKeywords, union_topic_type)
   ACE_UNUSED_ARG(cu_dw);
 
   _cxx_bool::gotoTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "bool::goto");
+  EXPECT_STREQ(ts.name(), "bool::goto");
 }
 
 TEST(DoubleKeywords, struct_topic_type)
@@ -89,7 +89,7 @@ TEST(DoubleKeywords, struct_topic_type)
   ACE_UNUSED_ARG(d_dw);
 
   _cxx_case::structTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "case::struct");
+  EXPECT_STREQ(ts.name(), "case::struct");
 }
 
 TEST(DoubleKeywords, union_topic_type)
@@ -101,7 +101,7 @@ TEST(DoubleKeywords, union_topic_type)
   ACE_UNUSED_ARG(du_dw);
 
   _cxx_case::unionTypeSupportImpl ts;
-  EXPECT_STREQ(ts.default_type_name(), "case::union");
+  EXPECT_STREQ(ts.name(), "case::union");
 }
 
 int main(int argc, char* argv[])

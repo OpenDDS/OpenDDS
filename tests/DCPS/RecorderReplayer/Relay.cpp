@@ -246,7 +246,7 @@ int run_test(int argc, ACE_TCHAR *argv[]){
                           ACE_TEXT(" create_recorder failed!\n")),
                          -1);
       }
-
+      recorder->check_encap(false);
 
       // wait until the writer disconnnects
       if (recorder_listener->wait(wait_time) == -1) {

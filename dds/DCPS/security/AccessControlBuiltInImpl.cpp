@@ -98,14 +98,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
-  const SSL::Certificate& local_ca = local_access_credential_data->get_ca_cert();
-  const SSL::SignedDocument& local_gov = local_access_credential_data->get_governance_doc();
-
-  if (local_gov.verify_signature(local_ca)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Governance signature not verified");
+  if (!local_access_credential_data->verify(ex)) {
     return DDS::HANDLE_NIL;
   }
 
+  const SSL::SignedDocument& local_gov = local_access_credential_data->get_governance_doc();
   Governance::shared_ptr governance = DCPS::make_rch<Governance>();
 
   if (governance->load(local_gov)) {
@@ -119,13 +116,6 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (permissions->load(local_perm)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Invalid permission file");
     return DDS::HANDLE_NIL;
-  }
-
-  if (local_perm.verify_signature(local_ca)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_local_permissions: Permissions signature not verified");
-    return DDS::HANDLE_NIL;
-  } else if (DCPS::DCPS_debug_level) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) AccessControlBuiltInImpl::validate_local_permissions: Permissions document verified.\n")));
   }
 
   TokenReader tr(id_token);
@@ -142,7 +132,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   DDS::Security::PermissionsCredentialToken permissions_cred_token;
   TokenWriter pctWriter(permissions_cred_token, PermissionsCredentialTokenClassId);
 
-  pctWriter.add_property("dds.perm.cert", local_perm.get_original());
+  pctWriter.add_property("dds.perm.cert", local_perm.original());
 
   // Set and store the permissions token
   DDS::Security::PermissionsToken permissions_token;
@@ -198,14 +188,14 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
     return DDS::HANDLE_NIL;
   }
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, DDS::HANDLE_NIL);
+
   ACIdentityMap::iterator iter = local_identity_map_.find(local_identity_handle);
 
   if (iter == local_identity_map_.end()) {
     CommonUtilities::set_security_error(ex,-1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: No matching local identity handle present");
     return DDS::HANDLE_NIL;
   }
-
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, DDS::HANDLE_NIL);
 
   ACPermsMap::iterator piter = local_ac_perms_.find(iter->second);
 
@@ -216,19 +206,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   // permissions file
   TokenReader remote_perm_wrapper(remote_credential_token);
-  SSL::SignedDocument remote_perm_doc;
-
-  if (remote_perm_doc.deserialize(remote_perm_wrapper.get_bin_property_value("c.perm"))) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Failed to deserialize c.perm into signed-document");
-    return DDS::HANDLE_NIL;
-  }
-
-  Permissions::shared_ptr remote_permissions = DCPS::make_rch<Permissions>();
-
-  if (remote_permissions->load(remote_perm_doc)) {
-    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
-    return DDS::HANDLE_NIL;
-  }
+  SSL::SignedDocument remote_perm_doc(remote_perm_wrapper.get_bin_property_value("c.perm"));
 
   const LocalAccessCredentialData::shared_ptr& local_access_credential_data = piter->second.local_access_credential_data;
 
@@ -238,7 +216,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 
   local_ca.subject_name_to_str(ca_subject);
 
-  if (remote_perm_doc.verify_signature(local_ca)) {
+  if (!remote_perm_doc.verify(local_ca)) {
     CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions signature not verified");
     return DDS::HANDLE_NIL;
   }
@@ -247,6 +225,12 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   if (DCPS::DCPS_debug_level) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT(
       "(%P|%t) AccessControlBuiltInImpl::validate_remote_permissions: Remote permissions document verified.\n")));
+  }
+
+  Permissions::shared_ptr remote_permissions = DCPS::make_rch<Permissions>();
+  if (remote_permissions->load(remote_perm_doc)) {
+    CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::validate_remote_permissions: Invalid permission file");
+    return DDS::HANDLE_NIL;
   }
 
   //Extract and compare the remote subject name for validation
@@ -586,7 +570,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_register_instance(
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataWriter_ptr writer,
-  ::DDS::Security::DynamicData_ptr key,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
@@ -605,7 +589,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
 ::CORBA::Boolean AccessControlBuiltInImpl::check_local_datawriter_dispose_instance(
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataWriter_ptr writer,
-  ::DDS::Security::DynamicData_ptr key,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle) {
@@ -993,13 +977,11 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataReader_ptr reader,
   ::DDS::InstanceHandle_t publication_handle,
-  ::DDS::Security::DynamicData_ptr key,
-  ::DDS::InstanceHandle_t instance_handle,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle ||
-      DDS::HANDLE_NIL == publication_handle ||
-      DDS::HANDLE_NIL == instance_handle) {
+      DDS::HANDLE_NIL == publication_handle) {
     return CommonUtilities::set_security_error(ex, -1, 0, "AccessControlBuiltInImpl::check_remote_datawriter_register_instance: Invalid handle");
   }
   if (0 == reader) {
@@ -1016,7 +998,7 @@ AccessControlBuiltInImpl::~AccessControlBuiltInImpl()
   ::DDS::Security::PermissionsHandle permissions_handle,
   ::DDS::DataReader_ptr reader,
   ::DDS::InstanceHandle_t publication_handle,
-  ::DDS::Security::DynamicData_ptr key,
+  ::DDS::DynamicData_ptr key,
   ::DDS::Security::SecurityException & ex)
 {
   if (DDS::HANDLE_NIL == permissions_handle ||
@@ -1315,7 +1297,7 @@ AccessControlBuiltInImpl::RevokePermissionsTask_rch&
 AccessControlBuiltInImpl::make_task(RevokePermissionsTask_rch& task)
 {
   if (!task) {
-    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->interceptor(), DCPS::ref(*this));
+    task = DCPS::make_rch<RevokePermissionsTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), DCPS::ref(*this));
   }
   return task;
 }
@@ -1564,9 +1546,10 @@ void AccessControlBuiltInImpl::parse_class_id(
 
 }
 
-AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(DCPS::ReactorInterceptor_rch interceptor,
+AccessControlBuiltInImpl::RevokePermissionsTask::RevokePermissionsTask(const DCPS::TimeSource& time_source,
+                                                                       DCPS::ReactorInterceptor_rch interceptor,
                                                                        AccessControlBuiltInImpl& impl)
-  : SporadicTask(interceptor)
+  : SporadicTask(time_source, interceptor)
   , impl_(impl)
 { }
 
@@ -1720,6 +1703,19 @@ AccessControlBuiltInImpl::RevokePermissionsTask::execute(const DCPS::MonotonicTi
     const TimeDuration duration = std::min(TimeDuration(expiration_to_handle_.begin()->first - cur_utc_time), MAX_DURATION);
     schedule(duration);
   }
+}
+
+SSL::SubjectName
+AccessControlBuiltInImpl::get_subject_name(DDS::Security::PermissionsHandle permissions_handle) const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, handle_mutex_, SSL::SubjectName());
+
+  ACPermsMap::const_iterator pos = local_ac_perms_.find(permissions_handle);
+  if (pos != local_ac_perms_.end()) {
+    return pos->second.subject;
+  }
+
+  return SSL::SubjectName();
 }
 
 } // namespace Security

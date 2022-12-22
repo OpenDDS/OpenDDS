@@ -83,12 +83,7 @@ DataLink::send_start_i()
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     strategy->send_start();
@@ -100,8 +95,7 @@ DataLink::send(TransportQueueElement* element)
 {
   DBG_ENTRY_LVL("DataLink","send",6);
 
-  if (element->is_request_ack() &&
-      this->handle_send_request_ack(element)) {
+  if (element->is_request_ack() && handle_send_request_ack(element)) {
     return;
   }
 
@@ -128,12 +122,7 @@ DataLink::send_i(TransportQueueElement* element, bool relink)
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (strategy) {
     strategy->send(element, relink);
@@ -161,12 +150,7 @@ DataLink::send_stop_i(RepoId repoId)
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     strategy->send_stop(repoId);
@@ -193,12 +177,7 @@ DataLink::remove_sample(const DataSampleElement* sample)
     }
   }
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     return strategy->remove_sample(sample);
@@ -215,12 +194,7 @@ DataLink::remove_all_msgs(const RepoId& pub_id)
   // This one is easy.  Simply delegate to our TransportSendStrategy
   // data member.
 
-  TransportSendStrategy_rch strategy;
-  {
-    GuardType guard(this->strategy_lock_);
-
-    strategy = this->send_strategy_;
-  }
+  TransportSendStrategy_rch strategy = get_send_strategy();
 
   if (!strategy.is_nil()) {
     strategy->remove_all_msgs(pub_id);
@@ -304,7 +278,10 @@ ACE_INLINE
 void
 DataLink::terminate_send()
 {
-  this->send_strategy_->terminate_send(false);
+  TransportSendStrategy_rch strategy = get_send_strategy();
+  if (strategy) {
+    strategy->terminate_send(false);
+  }
 }
 
 ACE_INLINE
@@ -317,11 +294,11 @@ DataLink::remove_listener(const RepoId& local_id)
     if (pos != send_listeners_.end()) {
       send_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
-        GuidConverter converter(local_id);
+        LogGuid logger(local_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::remove_listener: ")
                    ACE_TEXT("removed %C from send_listeners\n"),
-                   OPENDDS_STRING(converter).c_str()));
+                   logger.c_str()));
       }
       return;
     }
@@ -331,11 +308,11 @@ DataLink::remove_listener(const RepoId& local_id)
     if (pos != recv_listeners_.end()) {
       recv_listeners_.erase(pos);
       if (Transport_debug_level > 5) {
-        GuidConverter converter(local_id);
+        LogGuid logger(local_id);
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataLink::remove_listener: ")
                    ACE_TEXT("removed %C from recv_listeners\n"),
-                   OPENDDS_STRING(converter).c_str()));
+                   logger.c_str()));
       }
       return;
     }
@@ -390,6 +367,14 @@ ACE_INLINE
 void
 DataLink::send_final_acks (const RepoId& /*readerid*/)
 {
+}
+
+ACE_INLINE
+TransportSendStrategy_rch
+DataLink::get_send_strategy()
+{
+  GuardType guard(strategy_lock_);
+  return send_strategy_;
 }
 
 }

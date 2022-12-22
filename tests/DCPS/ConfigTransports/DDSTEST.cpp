@@ -30,6 +30,8 @@ bool
       return false;
     }
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, tc->lock_, false);
+
   OPENDDS_STRING supported;
   for (OpenDDS::DCPS::TransportClient::ImplsType::const_iterator it = tc->impls_.begin(),
           end = tc->impls_.end();
@@ -38,7 +40,7 @@ bool
       OpenDDS::DCPS::TransportImpl_rch impl = it->lock();
       if (impl)
         {
-          supported += impl->config().name();
+          supported += impl->config()->name();
           if (++it != end)
             {
               supported += ", ";
@@ -56,7 +58,7 @@ bool
     {
 
       OpenDDS::DCPS::TransportImpl_rch impl = it->lock();
-      if (impl && impl->config().name() == name)
+      if (impl && impl->config()->name() == name)
         {
 //          ACE_DEBUG((LM_DEBUG,
 //                     ACE_TEXT("(%P|%t) Yes. Transport '%C' is supported.\n"),
@@ -89,6 +91,8 @@ bool
                        false);
     }
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, tc->lock_, false);
+
   if (tc->links_.map().size() == 0)
     {
       ACE_ERROR_RETURN((LM_ERROR,
@@ -102,7 +106,7 @@ bool
           end = tc->links_.map().end(); iter != end;)
     {
       const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
-      negotiated += datalink->impl().config().name();
+      negotiated += datalink->impl()->config()->name();
       if (++iter != end)
         {
           negotiated += ", ";
@@ -120,7 +124,7 @@ bool
 
       const OpenDDS::DCPS::DataLink_rch& datalink = iter->second;
 
-      if (datalink->impl().config().name() == name)
+      if (datalink->impl()->config()->name() == name)
         {
 //          ACE_DEBUG((LM_DEBUG,
 //                     ACE_TEXT("(%P|%t) Yes. Transport '%C' was negotiated.\n"),

@@ -7,8 +7,12 @@
 #include "debug.h"
 
 #include <ace/Message_Block.h>
+#include <ace/OS_NS_string.h>
+#include <ace/Log_Msg.h>
 
 #include <algorithm>
+
+#include <cstring>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -896,16 +900,25 @@ Serializer::align_cont_w()
 }
 
 ACE_INLINE
+bool Serializer::skip_delimiter()
+{
+  if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
+    return skip(uint32_cdr_size);
+  }
+  return true;
+}
+
+ACE_INLINE
 bool Serializer::read_delimiter(size_t& size)
 {
   if (encoding().xcdr_version() == Encoding::XCDR_VERSION_2) {
     ACE_CDR::ULong dheader;
-    if (!(*this >> dheader)) {
-      return false;
+    if (*this >> dheader) {
+      size = dheader;
+      return true;
     }
-    size = dheader;
   }
-  return true;
+  return false;
 }
 
 ACE_INLINE
@@ -1037,7 +1050,7 @@ operator<<(Serializer& s, const ACE_CDR::Char* x)
   if (x != 0) {
     // Include the null termination in the serialized data.
     const ACE_CDR::ULong stringlen =
-      1 + static_cast<ACE_CDR::ULong>(ACE_OS::strlen(x));
+      1 + static_cast<ACE_CDR::ULong>(std::strlen(x));
     s << stringlen;
     s.buffer_write(reinterpret_cast<const char*>(x), stringlen, false);
 
@@ -1732,6 +1745,20 @@ ACE_INLINE
 void Serializer::set_construction_status(ConstructionStatus cs)
 {
   construction_status_ = cs;
+}
+
+ACE_INLINE
+Serializer::RdState Serializer::rdstate() const
+{
+  RdState state(align_rshift_, rpos_);
+  return state;
+}
+
+ACE_INLINE
+void Serializer::rdstate(const RdState& state)
+{
+  align_rshift_ = state.align_rshift;
+  rpos_ = state.rpos;
 }
 
 } // namespace DCPS

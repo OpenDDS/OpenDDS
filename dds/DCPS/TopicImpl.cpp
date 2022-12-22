@@ -62,7 +62,7 @@ DDS::ReturnCode_t TopicImpl::set_qos(const DDS::TopicQos& qos_arg)
       return DDS::RETCODE_OK;
 
     // for the not changeable qos, it can be changed before enable
-    if (!Qos_Helper::changeable(qos_, qos) && enabled_ == true) {
+    if (!Qos_Helper::changeable(qos_, qos) && enabled_) {
       return DDS::RETCODE_IMMUTABLE_POLICY;
 
     } else {
@@ -116,6 +116,7 @@ TopicImpl::get_listener()
 DDS::ReturnCode_t
 TopicImpl::get_inconsistent_topic_status(DDS::InconsistentTopicStatus& a_status)
 {
+  ACE_Guard<ACE_Thread_Mutex> g(status_mutex_);
   set_status_changed_flag(DDS::INCONSISTENT_TOPIC_STATUS, false);
   a_status = inconsistent_topic_status_;
   inconsistent_topic_status_.total_count_change = 0;
@@ -176,7 +177,7 @@ TopicImpl::get_id() const
 DDS::InstanceHandle_t
 TopicImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(id_, participant_);
+  return get_entity_instance_handle(id_, rchandle_from(participant_));
 }
 
 const char*
@@ -201,6 +202,7 @@ TopicImpl::transport_config(const TransportConfig_rch&)
 void
 TopicImpl::inconsistent_topic(int count)
 {
+  ACE_Guard<ACE_Thread_Mutex> status_guard(status_mutex_);
   inconsistent_topic_status_.total_count_change += count - inconsistent_topic_status_.total_count;
   inconsistent_topic_status_.total_count = count;
 
@@ -216,8 +218,12 @@ TopicImpl::inconsistent_topic(int count)
     }
   }
   if (listener) {
-    listener->on_inconsistent_topic(this, inconsistent_topic_status_);
+    const DDS::InconsistentTopicStatus status = inconsistent_topic_status_;
     inconsistent_topic_status_.total_count_change = 0;
+    status_guard.release();
+    listener->on_inconsistent_topic(this, status);
+  } else {
+    status_guard.release();
   }
 
   notify_status_condition();
@@ -235,6 +241,10 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
     return true;
   }
   if (qos_ids.length() == 0) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TopicImpl::check_data_representation: "
+        "representation qos is blank.\n"));
+    }
     return false;
   }
   //Data Writer will only use the 1st QoS declared
@@ -253,6 +263,11 @@ bool TopicImpl::check_data_representation(const DDS::DataRepresentationIdSeq& qo
         }
       }
     }
+  }
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: TopicImpl::check_data_representation: "
+      "none of the data representation QoS: %C is allowed by the "
+      "topic type IDL annotations: %C\n", repr_seq_to_string(qos_ids, is_data_writer).c_str(), repr_seq_to_string(type_allowed_reprs).c_str()));
   }
   return false;
 }

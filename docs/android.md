@@ -63,9 +63,8 @@ To build the core OpenDDS native libraries for Android you will need:
  - [Android Native Development Kit (NDK)](https://developer.android.com/ndk/)
    r18 or higher. [Building with the NDK directly](#using-the-ndk-directly)
    requires NDK r19 or higher. You can download it separately from android.com
-   or using the SDK Manager that comes with Android Studio. If you download the
-   NDK using the SDK Manager, this is located in
-   `$SDK/ndk-bundle`.
+   or using the SDK Manager that comes with Android Studio. If you downloaded
+   the NDK using the SDK Manager, then it is located at `$SDK/ndk-bundle`.
  - Some knowledge about OpenDDS and Android development will be assumed, but
    more OpenDDS knowledge will be assumed than Android knowledge.
  - Windows users should see ["Building on Windows"](#building-on-windows) for
@@ -76,7 +75,7 @@ additional requirements listed in their own sections.
 
 The [\"Using OpenDDS in a Android App\"
 section](#using-opendds-in-a-android-app) assumes the use of Android Studio,
-but the will also work when just using the Android SDK if tweaked.
+but it will also work when just using the Android SDK if tweaked.
 
 ## Building on Windows
 
@@ -111,8 +110,8 @@ software:
     section. You will also need to pass it to the configure script build for
     Android when that comes.
 
-Finally all paths being passed to GNU make must not contain spaces because of a
-ACE's gnuace make scripts don't those paths handle correctly on Windows. This
+Finally, all paths being passed to GNU Make must not contain spaces because
+ACE's gnuace make scripts don't handle those paths correctly on Windows. This
 means the NDK, toolchain, MSYS2, JDK, OpenDDS source, OpenDDS host tools, etc.
 must not contain any spaces in their paths.
 
@@ -130,10 +129,7 @@ OpenDDS for Android can be built in two ways:
 [using a standalone toolchain](using-the-ndk-directly).
 
 Using the NDK directly is recommended by Google and means that toolchains don't
-have to be generated for each target architecture. Generating an standalone
-toolchain is only required if you [if you want to use OpenDDS Security with
-min. API 27 or before](#xerces). Otherwise it's recommended to use the NDK
-directly.
+have to be generated for each target architecture.
 
 ### Using the NDK Directly
 
@@ -142,9 +138,9 @@ directly.
 OpenDDS can be configured and built with the Android NDK using the following
 commands.
 
-**NOTE**: If you need to configure OpenDDS with any optional dependencies the
-[relevant sections](#openddss-optional-dependencies) before configuring and
-building OpenDDS.
+**NOTE**: If you need to configure OpenDDS with any optional dependencies then
+read the [relevant sections](#openddss-optional-dependencies) before
+configuring and building OpenDDS.
 
 ```Shell
 ./configure --doc-group3 --target=android --macros=android_abi=$ABI --macros=android_api=$MIN_API --macros=android_ndk=$NDK
@@ -173,9 +169,9 @@ The `--arch` argument for `make_standalone_toolchain.py` and
 `--macros=ANDROID_ABI=<ARCH>` argument for the configure script must match
 according to [this table](#abi-table).
 
-**NOTE**: If you need to configure OpenDDS with any optional dependencies the
-[relevant sections](#openddss-optional-dependencies) before configuring and
-building OpenDDS.
+**NOTE**: If you need to configure OpenDDS with any optional dependencies then
+read the [relevant sections](#openddss-optional-dependencies) before
+configuring and building OpenDDS.
 
 ```Shell
 ./configure --target=android --macros=ANDROID_ABI=$ABI
@@ -239,9 +235,9 @@ toolchain.
 
 #### `android_target_api`
 
-The Android API being targeted by an application.
-Location of Android SDK, as [`$SDK`](#variables). This is only required if
-enabling OpenDDS to use Android Java APIs.
+The Android API being targeted by an application. This is the same as
+[`$TARGET_API`](#variables). This is only required if enabling OpenDDS to use
+Android Java APIs.
 
 ### Host Tools
 
@@ -428,10 +424,13 @@ the basic list of library file for OpenDDS are as follows:
   - Core OpenDDS library and its dependencies:
 
     - If not already included because of a separate C++ NDK project, you must
-      include the Clang C++ Standard Library. This is located at
-      `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so` where
-      `$ABI_PREFIX` is an identifier for the architecture and can be found in
-      the [ABI/architecture table](#abi-table).
+      include the Clang C++ Standard Library. This is located at:
+      - Standalone toolchain:
+        `$TOOLCHAIN/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so`
+      - NDK:
+        `$NDK/toolchains/llvm/prebuilt/$HOST_PLATFORM/sysroot/usr/lib/$ABI_PREFIX/libc++_shared.so`
+      - `$ABI_PREFIX` is an identifier for the architecture whose possible
+        values can be found in the [ABI/architecture table](#abi-table).
 
     - `$ACE_ROOT/lib/libACE.so`
     - `$ACE_ROOT/lib/libTAO.so`

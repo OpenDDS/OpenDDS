@@ -5,3 +5,5 @@
 /repoctl
 /dcpsinfo_dump
 /RtpsRelay
+/inspect
+/opendds_mwc.pl*

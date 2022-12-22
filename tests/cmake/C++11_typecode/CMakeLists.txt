@@ -18,7 +18,7 @@ set(dst ${CMAKE_CURRENT_BINARY_DIR})
 # IDL Library
 set(idl "${target_prefix}idl")
 add_library(${idl})
-OPENDDS_TARGET_SOURCES(${idl} "${src}/typecode.idl" OPENDDS_IDL_OPTIONS "-Lc++11" SUPPRESS_ANYS OFF)
+OPENDDS_TARGET_SOURCES(${idl} PUBLIC "${src}/typecode.idl" OPENDDS_IDL_OPTIONS "-Lc++11" SUPPRESS_ANYS OFF)
 target_link_libraries(${idl} PUBLIC OpenDDS::Dcps)
 set_target_properties(${idl} PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${dst}/Idl"

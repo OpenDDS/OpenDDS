@@ -1,6 +1,7 @@
 #include "LocalDiscovery.h"
 
 #include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 
 LocalDiscovery::LocalDiscovery()
   : Discovery("LocalDiscovery")
@@ -19,9 +20,9 @@ GUID_t LocalDiscovery::make_guid(EntityId_t eid)
   return guid;
 }
 
-DDS::Subscriber* LocalDiscovery::init_bit(DomainParticipantImpl*)
+RcHandle<BitSubscriber> LocalDiscovery::init_bit(DomainParticipantImpl*)
 {
-  return 0;
+  return RcHandle<BitSubscriber>();
 }
 
 void LocalDiscovery::fini_bit(DomainParticipantImpl*)

@@ -115,7 +115,7 @@ void StaticEndpointManager::init_bit()
 
       // pos represents a remote.
       // Populate data.
-      DDS::PublicationBuiltinTopicData data;
+      DDS::PublicationBuiltinTopicData data = DDS::PublicationBuiltinTopicData();
 
       data.key = key;
       OPENDDS_STRING topic_name = writer.topic_name;
@@ -161,7 +161,7 @@ void StaticEndpointManager::init_bit()
 
       // pos represents a remote.
       // Populate data.
-      DDS::SubscriptionBuiltinTopicData data;
+      DDS::SubscriptionBuiltinTopicData data = DDS::SubscriptionBuiltinTopicData();
 
       data.key = key;
       OPENDDS_STRING topic_name = reader.topic_name;
@@ -339,7 +339,7 @@ StaticEndpointManager::add_publication_i(const RepoId& writerid,
     ra.exprParams = 0;
 #else
     const ReaderAssociation ra =
-      {reader.trans_info, 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
+      {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
 #endif
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
@@ -411,7 +411,7 @@ StaticEndpointManager::add_subscription_i(const RepoId& readerid,
 
     DDS::OctetSeq type_info;
     const WriterAssociation wa = {
-      writer.trans_info, 0, writerid, writer.publisher_qos, writer.qos, type_info, {0, 0}
+      writer.trans_info, TransportLocator(), 0, writerid, writer.publisher_qos, writer.qos, type_info, {0, 0}
     };
     DataReaderCallbacks_rch sl = sub.subscription_.lock();
     if (sl) {
@@ -505,7 +505,7 @@ StaticEndpointManager::reader_exists(const RepoId& readerid, const RepoId& write
     DataWriterCallbacks_rch dwr = lp_pos->second.publication_.lock();
     if (dwr) {
       const ReaderAssociation ra =
-        {reader_pos->second.trans_info, 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
+        {reader_pos->second.trans_info, TransportLocator(), 0, readerid, reader_pos->second.subscriber_qos, reader_pos->second.qos,
          "", "", DDS::StringSeq(), DDS::OctetSeq(), {0, 0}};
       dwr->add_association(writerid, ra, true);
     }
@@ -541,7 +541,7 @@ StaticEndpointManager::writer_exists(const RepoId& writerid, const RepoId& reade
     DataReaderCallbacks_rch drr = ls_pos->second.subscription_.lock();
     if (drr) {
       const WriterAssociation wa =
-        {writer_pos->second.trans_info, 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
+        {writer_pos->second.trans_info, TransportLocator(), 0, writerid, writer_pos->second.publisher_qos, writer_pos->second.qos, DDS::OctetSeq(), {0,0}};
       drr->add_association(readerid, wa, false);
     }
   }
@@ -599,15 +599,16 @@ StaticEndpointManager::sub_bit()
 void StaticEndpointManager::type_lookup_init(ReactorInterceptor_rch reactor_interceptor)
 {
   if (!type_lookup_reply_deadline_processor_) {
-    type_lookup_reply_deadline_processor_ = DCPS::make_rch<StaticEndpointManagerSporadic>(
-      reactor_interceptor, ref(*this), &StaticEndpointManager::remove_expired_endpoints);
+    type_lookup_reply_deadline_processor_ =
+      DCPS::make_rch<StaticEndpointManagerSporadic>(TheServiceParticipant->time_source(), reactor_interceptor,
+                                                    rchandle_from(this), &StaticEndpointManager::remove_expired_endpoints);
   }
 }
 
 void StaticEndpointManager::type_lookup_fini()
 {
   if (type_lookup_reply_deadline_processor_) {
-    type_lookup_reply_deadline_processor_->cancel_and_wait();
+    type_lookup_reply_deadline_processor_->cancel();
     type_lookup_reply_deadline_processor_.reset();
   }
 }
@@ -837,10 +838,9 @@ void StaticEndpointManager::update_publication_locators(
   LocalPublicationIter iter = local_publications_.find(publicationId);
   if (iter != local_publications_.end()) {
     if (DCPS_debug_level > 3) {
-      const GuidConverter conv(publicationId);
       ACE_DEBUG((LM_INFO,
         ACE_TEXT("(%P|%t) StaticEndpointManager::update_publication_locators - updating locators for %C\n"),
-        OPENDDS_STRING(conv).c_str()));
+        LogGuid(publicationId).c_str()));
     }
     iter->second.trans_info_ = transInfo;
     write_publication_data(publicationId, iter->second);
@@ -924,10 +924,9 @@ void StaticEndpointManager::update_subscription_locators(
   LocalSubscriptionIter iter = local_subscriptions_.find(subscriptionId);
   if (iter != local_subscriptions_.end()) {
     if (DCPS_debug_level > 3) {
-      const GuidConverter conv(subscriptionId);
       ACE_DEBUG((LM_INFO,
         ACE_TEXT("(%P|%t) StaticEndpointManager::update_subscription_locators updating locators for %C\n"),
-        OPENDDS_STRING(conv).c_str()));
+        LogGuid(subscriptionId).c_str()));
     }
     iter->second.trans_info_ = transInfo;
     write_subscription_data(subscriptionId, iter->second);
@@ -1044,79 +1043,6 @@ void StaticEndpointManager::match(const GUID_t& writer, const GUID_t& reader)
       LogGuid(writer).c_str(), LogGuid(reader).c_str()));
   }
 
-  // 1. collect type info about the writer, which may be local or discovered
-  XTypes::TypeInformation* writer_type_info = 0;
-
-  const LocalPublicationIter lpi = local_publications_.find(writer);
-  DiscoveredPublicationIter dpi;
-  bool writer_local = false;
-  if (lpi != local_publications_.end()) {
-    writer_local = true;
-    writer_type_info = &lpi->second.type_info_;
-  } else if ((dpi = discovered_publications_.find(writer))
-             != discovered_publications_.end()) {
-    writer_type_info = &dpi->second.type_info_;
-  } else {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Undiscovered Writer\n"));
-    }
-    return; // Possible and ok, since lock is released
-  }
-
-  // 2. collect type info about the reader, which may be local or discovered
-  XTypes::TypeInformation* reader_type_info = 0;
-
-  const LocalSubscriptionIter lsi = local_subscriptions_.find(reader);
-  DiscoveredSubscriptionIter dsi;
-  bool reader_local = false;
-  if (lsi != local_subscriptions_.end()) {
-    reader_local = true;
-    reader_type_info = &lsi->second.type_info_;
-  } else if ((dsi = discovered_subscriptions_.find(reader))
-             != discovered_subscriptions_.end()) {
-    reader_type_info = &dsi->second.type_info_;
-  } else {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Undiscovered Reader\n"));
-    }
-    return; // Possible and ok, since lock is released
-  }
-
-  MatchingData md;
-
-  // if the type object is not in cache, send RPC request
-  md.writer = writer;
-  md.reader = reader;
-  md.time_added_to_map = MonotonicTimePoint::now();
-
-  if ((writer_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE) &&
-      (reader_type_info->minimal.typeid_with_size.type_id.kind() != XTypes::TK_NONE)) {
-    if (!writer_local && reader_local) {
-      if (type_lookup_service_ &&
-          !type_lookup_service_->type_object_in_cache(
-            writer_type_info->minimal.typeid_with_size.type_id)) {
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Remote Writer\n"));
-        }
-        bool is_discovery_protected = false;
-        save_matching_data_and_get_typeobjects(
-          writer_type_info, md, MatchingPair(writer, reader), writer, is_discovery_protected);
-        return;
-      }
-    } else if (!reader_local && writer_local) {
-      if (type_lookup_service_ && !type_lookup_service_->type_object_in_cache(
-          reader_type_info->minimal.typeid_with_size.type_id)) {
-        if (DCPS_debug_level >= 4) {
-          ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match: Remote Reader\n"));
-        }
-        bool is_discovery_protected = false;
-        save_matching_data_and_get_typeobjects(
-          reader_type_info, md, MatchingPair(writer, reader), reader, is_discovery_protected);
-        return;
-      }
-    }
-  }
-
   match_continue(writer, reader);
 }
 
@@ -1133,7 +1059,7 @@ void StaticEndpointManager::remove_expired_endpoints(
       if (DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::remove_expired_endpoints: "
           "clean up pending pair w: %C r: %C\n",
-          LogGuid(iter->second.writer).c_str(), LogGuid(iter->second.reader).c_str()));
+          LogGuid(iter->first.writer_).c_str(), LogGuid(iter->first.reader_).c_str()));
       }
       matching_data_buffer_.erase(iter++);
     } else {
@@ -1154,34 +1080,6 @@ void StaticEndpointManager::remove_expired_endpoints(
     } else {
       ++it;
     }
-  }
-}
-
-/// This assumes that lock_ is being held
-void StaticEndpointManager::match_continue(SequenceNumber rpc_sequence_number)
-{
-  if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match_continue: rpc seq: %q\n",
-      rpc_sequence_number.getValue()));
-  }
-
-  MatchingDataIter it;
-  for (it = matching_data_buffer_.begin(); it != matching_data_buffer_.end(); ++it) {
-    if (DCPS_debug_level >= 4) {
-      ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::match_continue: matches %q?\n",
-        it->second.rpc_sequence_number.getValue()));
-    }
-    if (it->second.rpc_sequence_number == rpc_sequence_number) {
-      const GUID_t& reader = it->second.reader;
-      const GUID_t& writer = it->second.writer;
-      matching_data_buffer_.erase(MatchingPair(writer, reader));
-      return match_continue(writer, reader);
-    }
-  }
-  if (DCPS_debug_level) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) StaticEndpointManager::match_continue: "
-      " rpc seq: %q: No data found in matching data buffer\n",
-      rpc_sequence_number.getValue()));
   }
 }
 
@@ -1353,10 +1251,10 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     const XTypes::TypeIdentifier& reader_type_id = reader_type_info->minimal.typeid_with_size.type_id;
     if (writer_type_id.kind() != XTypes::TK_NONE && reader_type_id.kind() != XTypes::TK_NONE) {
       if (!writer_local || !reader_local) {
-        const DDS::DataRepresentationIdSeq repIds =
-          get_effective_data_rep_qos(tempDwQos.representation.value, false);
         Encoding::Kind encoding_kind;
-        if (repr_to_encoding_kind(repIds[0], encoding_kind) && encoding_kind == Encoding::KIND_XCDR1) {
+        if (tempDwQos.representation.value.length() > 0 &&
+            repr_to_encoding_kind(tempDwQos.representation.value[0], encoding_kind) &&
+            encoding_kind == Encoding::KIND_XCDR1) {
           const XTypes::TypeFlag extensibility_mask = XTypes::IS_APPENDABLE;
           if (type_lookup_service_->extensibility(extensibility_mask, writer_type_id)) {
             if (DCPS_debug_level) {
@@ -1475,7 +1373,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     DDS::OctetSeq octet_seq_type_info_reader;
     XTypes::serialize_type_info(*reader_type_info, octet_seq_type_info_reader);
     const ReaderAssociation ra = {
-      *rTls, rTransportContext, reader, *subQos, *drQos,
+      *rTls, TransportLocator(), rTransportContext, reader, *subQos, *drQos,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
       cfProp->filterClassName, cfProp->filterExpression,
 #else
@@ -1489,7 +1387,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     DDS::OctetSeq octet_seq_type_info_writer;
     XTypes::serialize_type_info(*writer_type_info, octet_seq_type_info_writer);
     const WriterAssociation wa = {
-      *wTls, wTransportContext, writer, *pubQos, *dwQos,
+      *wTls, TransportLocator(), wTransportContext, writer, *pubQos, *dwQos,
       octet_seq_type_info_writer,
       writer_participant_discovered_at
     };
@@ -1500,8 +1398,8 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
     if (call_writer) {
       if (DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) StaticEndpointManager::match_continue - ")
-          ACE_TEXT("adding writer %C association for reader %C\n"), OPENDDS_STRING(GuidConverter(writer)).c_str(),
-          OPENDDS_STRING(GuidConverter(reader)).c_str()));
+          ACE_TEXT("adding writer %C association for reader %C\n"), LogGuid(writer).c_str(),
+          LogGuid(reader).c_str()));
       }
       DataWriterCallbacks_rch dwr_lock = dwr.lock();
       if (dwr_lock) {
@@ -1521,7 +1419,7 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       if (DCPS_debug_level > 3) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) StaticEndpointManager::match_continue - ")
           ACE_TEXT("adding reader %C association for writer %C\n"),
-          OPENDDS_STRING(GuidConverter(reader)).c_str(), OPENDDS_STRING(GuidConverter(writer)).c_str()));
+          LogGuid(reader).c_str(), LogGuid(writer).c_str()));
       }
       DataReaderCallbacks_rch drr_lock = drr.lock();
       if (drr_lock) {
@@ -1592,53 +1490,6 @@ void StaticEndpointManager::match_continue(const GUID_t& writer, const GUID_t& r
       }
     }
   }
-}
-
-void StaticEndpointManager::save_matching_data_and_get_typeobjects(
-  const XTypes::TypeInformation* type_info,
-  MatchingData& md, const MatchingPair& mp,
-  const GUID_t& remote_id,
-  bool is_discovery_protected)
-{
-  const SequenceNumber seqnum = ++type_lookup_service_sequence_number_;
-  if (DCPS_debug_level >= 4) {
-    ACE_DEBUG((LM_DEBUG,
-      "(%P|%t) StaticEndpointManager::save_matching_data_and_get_typeobjects: "
-      "remote: %C seq: %q\n", LogGuid(remote_id).c_str(), seqnum.getValue()));
-  }
-  md.rpc_sequence_number = seqnum;
-  MatchingDataIter md_it = matching_data_buffer_.find(mp);
-  if (md_it != matching_data_buffer_.end()) {
-    md_it->second = md;
-  } else {
-    matching_data_buffer_.insert(std::make_pair(mp, md));
-  }
-  // Store an entry for the first request
-  TypeIdOrigSeqNumber orig_req_data;
-  std::memcpy(orig_req_data.participant, remote_id.guidPrefix, sizeof(GuidPrefix_t));
-  orig_req_data.type_id = type_info->minimal.typeid_with_size.type_id;
-  orig_req_data.seq_number = md.rpc_sequence_number;
-  orig_req_data.secure = false;
-  orig_req_data.time_started = md.time_added_to_map;
-  orig_seq_numbers_.insert(std::make_pair(md.rpc_sequence_number, orig_req_data));
-
-  XTypes::TypeIdentifierSeq type_ids;
-  if (type_info->minimal.dependent_typeid_count == -1 ||
-      type_info->minimal.dependent_typeids.length() < (CORBA::ULong)type_info->minimal.dependent_typeid_count) {
-    type_ids.append(type_info->minimal.typeid_with_size.type_id);
-
-    // Get dependencies of topic type
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, false);
-  } else {
-    type_ids.length(type_info->minimal.dependent_typeid_count + 1);
-    type_ids[0] = type_info->minimal.typeid_with_size.type_id;
-    for (unsigned i = 1; i <= (unsigned)type_info->minimal.dependent_typeid_count; ++i) {
-      type_ids[i] = type_info->minimal.dependent_typeids[i - 1].type_id;
-    }
-    // Get TypeObjects of topic type and all of its dependencies
-    send_type_lookup_request(type_ids, remote_id, is_discovery_protected, true);
-  }
-  type_lookup_reply_deadline_processor_->schedule(max_type_lookup_service_reply_period_);
 }
 
 GUID_t StaticEndpointManager::make_topic_guid()
@@ -1838,16 +1689,12 @@ namespace {
   {
     // Value can be a comma-separated list
     const char* start = value.c_str();
-    char buffer[128];
-    std::memset(buffer, 0, sizeof(buffer));
     while (const char* next_comma = std::strchr(start, ',')) {
-      // Copy into temp buffer, won't have null
-      std::strncpy(buffer, start, next_comma - start);
-      // Append null
-      buffer[next_comma - start] = '\0';
+      const size_t size = next_comma - start;
+      const OPENDDS_STRING temp(start, size);
       // Add to QOS
       x.name.length(x.name.length() + 1);
-      x.name[x.name.length() - 1] = static_cast<const char*>(buffer);
+      x.name[x.name.length() - 1] = temp.c_str();
       // Advance pointer
       start = next_comma + 1;
     }
@@ -2856,7 +2703,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datareaderqos.user_data.value[0] = entity_id.entityKey[0];
       datareaderqos.user_data.value[1] = entity_id.entityKey[1];
       datareaderqos.user_data.value[2] = entity_id.entityKey[2];
-
+      set_reader_effective_data_rep_qos(datareaderqos.representation.value);
       if (!registry.reader_map.insert(std::make_pair(id,
             EndpointRegistry::Reader(topic_name, datareaderqos, subscriberqos, config_name, trans_info))).second) {
         ACE_ERROR_RETURN((LM_ERROR,
@@ -2872,6 +2719,14 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
       datawriterqos.user_data.value[0] = entity_id.entityKey[0];
       datawriterqos.user_data.value[1] = entity_id.entityKey[1];
       datawriterqos.user_data.value[2] = entity_id.entityKey[2];
+      bool encapsulated_only = false;
+      for (CORBA::ULong i = 0; i < trans_info.length(); ++i) {
+        if (0 == std::strcmp(trans_info[i].transport_type, "rtps_udp")) {
+          encapsulated_only = true;
+          break;
+        }
+      }
+      set_writer_effective_data_rep_qos(datawriterqos.representation.value, encapsulated_only);
 
       if (!registry.writer_map.insert(std::make_pair(id,
             EndpointRegistry::Writer(topic_name, datawriterqos, publisherqos, config_name, trans_info))).second) {
@@ -2950,17 +2805,17 @@ void StaticDiscovery::pre_reader(DataReaderImpl* reader)
 
 StaticDiscovery_rch StaticDiscovery::instance_(make_rch<StaticDiscovery>(Discovery::DEFAULT_STATIC));
 
-DDS::Subscriber_ptr StaticDiscovery::init_bit(DomainParticipantImpl* participant)
+RcHandle<BitSubscriber> StaticDiscovery::init_bit(DomainParticipantImpl* participant)
 {
   DDS::Subscriber_var bit_subscriber;
 #ifndef DDS_HAS_MINIMUM_BIT
   if (!TheServiceParticipant->get_BIT()) {
     get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   if (create_bit_topics(participant) != DDS::RETCODE_OK) {
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   bit_subscriber =
@@ -2971,7 +2826,7 @@ DDS::Subscriber_ptr StaticDiscovery::init_bit(DomainParticipantImpl* participant
   if (sub == 0) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
                ACE_TEXT(" - Could not cast Subscriber to SubscriberImpl\n")));
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 
   DDS::DataReaderQos dr_qos;
@@ -3024,13 +2879,13 @@ DDS::Subscriber_ptr StaticDiscovery::init_bit(DomainParticipantImpl* participant
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) PeerDiscovery::init_bit")
                  ACE_TEXT(" - Error %d enabling subscriber\n"), ret));
     }
-    return 0;
+    return RcHandle<BitSubscriber>();
   }
 #endif /* DDS_HAS_MINIMUM_BIT */
 
   get_part(participant->get_domain_id(), participant->get_id())->init_bit(bit_subscriber);
 
-  return bit_subscriber._retn();
+  return make_rch<BitSubscriber>(bit_subscriber);
 }
 
 void StaticDiscovery::fini_bit(DCPS::DomainParticipantImpl* participant)
@@ -3328,9 +3183,8 @@ void StaticParticipant::remove_discovered_participant(DiscoveredParticipantIter&
     }
 #endif /* DDS_HAS_MINIMUM_BIT */
     if (DCPS_debug_level > 3) {
-      GuidConverter conv(iter->first);
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) LocalParticipant::remove_discovered_participant")
-                 ACE_TEXT(" - erasing %C (%B)\n"), OPENDDS_STRING(conv).c_str(), participants_.size()));
+                 ACE_TEXT(" - erasing %C (%B)\n"), LogGuid(iter->first).c_str(), participants_.size()));
     }
 
     remove_discovered_participant_i(iter);

@@ -40,6 +40,7 @@ module Xyz {
   typedef short ArrayOfShorts[5];
 
   typedef short ArrayOfShorts2[3];
+  typedef short TwoDimArrayOfShorts2[3][4];
   typedef short MultiDimArrayOfShorts[2][3][4];
 
   struct StructOfMultiDimArrayOfShorts {
@@ -70,6 +71,9 @@ module Xyz {
   typedef sequence<unsigned short,3> UShortSeq;
 
   typedef sequence<ArrayOfShorts> ArrayOfShortsSeq;
+
+  typedef sequence<TwoDimArrayOfShorts2> TwoDimArrayOfShorts2Seq;
+  typedef sequence<MultiDimArray> MultiDimArraySeq;
 
   // +12
   typedef sequence<short> ShortSeq;
@@ -109,6 +113,12 @@ module Xyz {
 
   typedef char MyChar;
   typedef sequence<MyChar, 5> AMyCharSeq;
+
+  // Test for https://github.com/objectcomputing/OpenDDS/issues/3268
+  @topic
+  struct OnlyAMyCharSeq {
+    AMyCharSeq only_member;
+  };
 
   typedef string<100> BoundedString;
   typedef sequence<BoundedString> UnboundedSeqOfBoundedString;

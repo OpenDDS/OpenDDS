@@ -9,8 +9,12 @@
 #include <ace/Log_Msg.h>
 #include <openssl/err.h>
 
-#define OPENDDS_SSL_LOG_ERR(MSG)                                  \
-  ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: '%C' %C\n"), \
-             ERR_reason_error_string(ERR_get_error()), (MSG)))
+#define OPENDDS_SSL_LOG_ERR(MSG)                                    \
+  for (unsigned long e = ERR_get_error(); e != 0; e = ERR_get_error()) { \
+    char buf[256];                                                      \
+    ERR_error_string(e, buf);                                           \
+    ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: %C: %C\n"),        \
+               (MSG), buf));                                            \
+  }
 
 #endif

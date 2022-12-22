@@ -1,0 +1,47 @@
+tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11 STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl default_tcp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl thread_per: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl default_udp: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_MESSENGER !GH_ACTIONS
+tests/DCPS/Messenger/run_test.pl multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl default_multicast: !DCPS_MIN !NO_MCAST !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl shmem: !DCPS_MIN !NO_SHMEM !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl nobits: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl stack: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl ipv6: IPV6 !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_unicast: !DCPS_MIN RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_disc: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_disc_tcp: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_disc_tcp thread_per: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_disc_tcp_udp: !DCPS_MIN !NO_MCAST RTPS !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_disc_half_sec_pub: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_disc_half_sec_sub: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_test.pl rtps_disc_sec: !DCPS_MIN !NO_MCAST RTPS !DDS_NO_OWNERSHIP_PROFILE !GH_ACTIONS STATIC_MESSENGER
+
+tests/DCPS/Messenger/run_corbaloc_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+tests/DCPS/Messenger/run_corbaloc_test.pl host_port_only: !DCPS_MIN !OPENDDS_SAFETY_PROFILE !DDS_NO_OWNERSHIP_PROFILE STATIC_MESSENGER
+
+tests/DCPS/Compiler/idl_test1_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
+tests/DCPS/Compiler/idl_test3_main/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
+tests/DCPS/Compiler/C++11/idl_test1_main/run_test.pl: !DCPS_MIN CXX11 STATIC_COMPILER
+tests/DCPS/Compiler/C++11/idl_test3_main/run_test.pl: !DCPS_MIN CXX11 STATIC_COMPILER
+tests/DCPS/Compiler/key_annotation/run_test.pl: !DCPS_MIN STATIC_COMPILER2
+tests/DCPS/Compiler/is_topic_type/run_test.pl: !DCPS_MIN STATIC_COMPILER
+tests/DCPS/Compiler/vread_vwrite/run_test.pl: !DCPS_MIN RAPIDJSON CXX11 STATIC_COMPILER2
+tests/DCPS/Compiler/TryConstruct/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/TryConstruct/C++11/run_test.pl: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/typeobject_hash_consistency/run_test.pl: !DCPS_MIN !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/xcdr/run_test.pl: !DCPS_MIN STATIC_COMPILER2
+tests/DCPS/Compiler/XtypesExtensibility/run_test.pl: !DCPS_MIN STATIC_COMPILER2
+tests/DCPS/Compiler/keywords/run_test.pl classic: !DCPS_MIN STATIC_COMPILER2
+tests/DCPS/Compiler/keywords/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER2
+tests/DCPS/Compiler/explicit_ints/run_test.pl classic: !DCPS_MIN STATIC_COMPILER
+tests/DCPS/Compiler/explicit_ints/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
+tests/DCPS/Compiler/char_literals/run_test.pl classic: !DCPS_MIN STATIC_COMPILER
+tests/DCPS/Compiler/char_literals/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE STATIC_COMPILER
+
+tests/unit-tests/run_test.pl: !DCPS_MIN !NO_UNIT_TESTS STATIC_UNIT_TESTS
+
+tests/security/attributes/run_test.pl FullMsgEncrypt: STATIC_SECURITY

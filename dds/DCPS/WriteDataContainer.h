@@ -119,7 +119,7 @@ typedef OPENDDS_MAP(DDS::InstanceHandle_t, PublicationInstance_rch)
  *           we do not deadlock; and, 2) we incur the cost of
  *           obtaining the lock only once.
  */
-class OpenDDS_Dcps_Export WriteDataContainer : public RcObject {
+class OpenDDS_Dcps_Export WriteDataContainer : public virtual RcObject {
 public:
 
   friend class DataWriterImpl;
@@ -343,9 +343,13 @@ public:
                                     bool deadline_is_infinite,
                                     const SequenceNumber& sequence);
 
-  bool sequence_acknowledged(const SequenceNumber sequence);
+  bool sequence_acknowledged(const SequenceNumber& sequence);
 
 private:
+
+  DDS::ReturnCode_t remove_instance(PublicationInstance_rch instance,
+                                    Message_Block_Ptr& registered_sample,
+                                    bool dup_registered_sample);
 
   // A class, normally provided by an unit test, that needs access to
   // private methods/members.
@@ -407,11 +411,26 @@ private:
    */
   void wakeup_blocking_writers (DataSampleElement* stale);
 
+  void add_reader_acks(const RepoId& reader, const SequenceNumber& base);
+  void remove_reader_acks(const RepoId& reader);
+
 private:
 
   void log_send_state_lists (OPENDDS_STRING description);
 
-  DisjointSequence acked_sequences_;
+#ifdef ACE_HAS_CPP11
+  typedef OPENDDS_UNORDERED_MAP(RepoId, DisjointSequence) AckedSequenceMap;
+#else
+  typedef OPENDDS_MAP_CMP(RepoId, DisjointSequence, GUID_tKeyLessThan) AckedSequenceMap;
+#endif
+  AckedSequenceMap acked_sequences_;
+  SequenceNumber cached_cumulative_ack_;
+  bool cached_cumulative_ack_valid_;
+
+  SequenceNumber get_cumulative_ack();
+  SequenceNumber get_last_ack();
+  void update_acked(const SequenceNumber& seq, const RepoId& id = GUID_UNKNOWN);
+  bool sequence_acknowledged_i(const SequenceNumber& sequence);
 
   /// List of data that has not been sent yet.
   SendStateDataSampleList   unsent_data_;
@@ -557,8 +576,8 @@ private:
   void cancel_deadline(const PublicationInstance_rch& instance);
 };
 
-} /// namespace OpenDDS
 } /// namespace DCPS
+} /// namespace OpenDDS
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

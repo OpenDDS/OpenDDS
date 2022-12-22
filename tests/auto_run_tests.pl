@@ -14,84 +14,35 @@ use lib "$ACE_ROOT/bin";
 use lib "$DDS_ROOT/bin";
 use PerlDDS::Run_Test;
 
+use lib "$DDS_ROOT/tools/scripts/modules/";
+use command_utils qw//;
+
 use Getopt::Long;
-use Cwd;
-use POSIX qw(SIGINT);
-use File::Temp qw(tempfile);
 
 use constant windows => $^O eq "MSWin32";
+
+my $gh_actions = ($ENV{GITHUB_ACTIONS} // "") eq "true";
+
+my %os_configs = (
+    MSWin32 => 'Win32',
+    darwin => 'macOS',
+    linux => 'Linux',
+);
 
 sub cd {
     my $dir = shift;
     chdir($dir) or die "auto_run_tests.pl: Error: Cannot chdir to $dir: $!";
 }
 
+my $dry_run = 0;
+
 sub run_command {
-    my $what = shift;
-    my $command = shift;
-    my %args = (
-        capture_stdout => undef,
-        verbose => undef,
-        dry_run => undef,
-        @_,
+    my $test_name = shift;
+    return command_utils::run_command(@_,
+        name => $test_name,
+        script_name => 'auto_run_tests.pl',
+        dry_run => $dry_run,
     );
-    my $capture_stdout = $args{capture_stdout};
-    my $verbose = $args{verbose} // $args{dry_run};
-    my $dry_run = $args{dry_run};
-
-    if ($verbose) {
-        my $cwd = getcwd();
-        print "In \"$cwd\" ", $dry_run ? "would run" : "running", ":\n    $command\n";
-        return (0, 0) if ($dry_run);
-    }
-
-    my $saved_stdout;
-    my $tmp_fd;
-    my $tmp_path;
-
-    if (defined($capture_stdout)) {
-        ($tmp_fd, $tmp_path) = File::Temp::tempfile(UNLINK => 1);
-        open($saved_stdout, '>&', STDOUT);
-        open(STDOUT, '>&', $tmp_fd);
-    }
-
-    my $failed = system($command) ? 1 : 0;
-    my $system_status = $?;
-    my $system_error = $!;
-    my $ran = $system_status != -1;
-
-    if (defined($capture_stdout)) {
-        open(STDOUT, '>&', $saved_stdout);
-        close($tmp_fd);
-    }
-
-    my $exit_status = 0;
-    if ($failed) {
-        $exit_status = $system_status >> 8;
-        my $signal = $system_status & 127;
-        die("auto_run_tests.pl: \"$what\" was interrupted") if ($signal == SIGINT);
-        my $coredump = $system_status & 128;
-        my $error_message;
-        if (!$ran) {
-            $error_message = "failed to run: $system_error";
-        }
-        elsif ($signal) {
-            $error_message = sprintf("exited on signal %d", ($signal));
-            $error_message .= " and created coredump" if ($coredump);
-        }
-        else {
-            $error_message = sprintf("returned with status %d", $exit_status);
-        }
-        print STDERR "auto_run_tests.pl: Error: \"$what\" $error_message\n";
-    }
-
-    if (defined($capture_stdout) && $ran) {
-        open($tmp_fd, $tmp_path);
-        ${$capture_stdout} = do { local $/; <$tmp_fd> };
-        close($tmp_fd);
-    }
-
-    return ($failed, $exit_status);
 }
 
 sub mark_test_start {
@@ -115,8 +66,8 @@ sub run_test {
     my $command = shift;
 
     my $start_time = time();
-    my ($failed, $exit_status) = run_command($name, $command, @_);
-    mark_test_finish($name, time() - $start_time, $exit_status);
+    my $failed = run_command($name, $command, @_);
+    mark_test_finish($name, time() - $start_time, $failed);
     exit(1) if ($failed && $stop_on_fail);
 }
 
@@ -164,7 +115,10 @@ sub print_help {
         "<list_file> can be a path or - to use stdin.\n" .
         "\n" .
         "Options:\n" .
-        "    --help | -h              Display this help\n";
+        "    --help | -h              Display this help\n" .
+        "    --no-auto-config         Don't set common options by default. This includes\n" .
+        "                             the RTPS and per-OS configs and the default test\n" .
+        "                             lists below.\n";
 
     my $indent = 29;
     foreach my $list (@builtin_test_lists) {
@@ -178,6 +132,9 @@ sub print_help {
     print
         "    --cmake                  Run CMake Tests\n" .
         "                             Not included by default\n" .
+        "    --cmake-cmd <cmd>        CMake command that is used internally\n" .
+        "                             Tests still have to be built before hand\n" .
+        "                             Default is `cmake`\n" .
         "    --cmake-build-dir <path> Path to the CMake tests binary directory\n" .
         "                             Default is \$DDS_ROOT/tests/cmake/build\n" .
         "    --cmake-build-cfg <cfg>  CMake build configuration, like the one passed to\n" .
@@ -205,9 +162,12 @@ sub print_help {
         "    --dry-run | -z           Do everything except run the tests\n" .
         "    --show-configs           Print possible values for -Config and -Excludes\n" .
         "                             broken down by list file\n" .
+        "    --show-all-configs       Same as --show-configs, but for all list files\n" .
         "    --list-configs           Print combined set of the configs from the list\n" .
         "                             files\n" .
+        "    --list-all-configs       Same as --list-configs, but for all list files\n" .
         "    --list-tests             List all the tests that would run\n" .
+        "    --list-all-tests         Same as --list-tests, but for all list files\n" .
         "    --stop-on-fail | -x      Stop on any failure\n";
 
     exit(0);
@@ -217,12 +177,16 @@ my $cmake_tests = "$DDS_ROOT/tests/cmake";
 
 # Parse Options
 my $help = 0;
+my $auto_config = 1;
 my $sandbox = '';
-my $dry_run = 0;
 my $show_configs = 0;
+my $show_all_configs = 0;
 my $list_configs = 0;
+my $list_all_configs = 0;
 my $list_tests = 0;
+my $list_all_tests = 0;
 my $cmake = 0;
+my $cmake_cmd = 'cmake';
 my $cmake_build_dir = "$cmake_tests/build";
 my $cmake_build_cfg = windows ? 'Debug' : undef;
 my $ctest = 'ctest';
@@ -232,13 +196,18 @@ my $ctest_args = '';
 my $python = windows ? 'python' : 'python3';
 my %opts = (
     'help|h' => \$help,
+    'auto-config!' => \$auto_config,
     'sandbox|s=s' => \$sandbox,
     'dry-run|z' => \$dry_run,
     'show-configs' => \$show_configs,
+    'show-all-configs' => \$show_all_configs,
     'list-configs' => \$list_configs,
+    'list-all-configs' => \$list_all_configs,
     'list-tests' => \$list_tests,
+    'list-all-tests' => \$list_all_tests,
     'stop-on-fail|x' => \$stop_on_fail,
     'cmake' => \$cmake,
+    'cmake-cmd=s' => \$cmake_cmd,
     'cmake-build-dir=s' => \$cmake_build_dir,
     'cmake-build-cfg=s' => \$cmake_build_cfg,
     'ctest=s' => \$ctest,
@@ -267,14 +236,30 @@ for my $list (@builtin_test_lists) {
             $files_passed ? 0 : $list->{default};
     }
 }
+my $query_all = $show_all_configs || $list_all_configs || $list_all_tests;
+$show_configs |= $show_all_configs;
+$list_configs |= $list_all_configs;
+$list_tests |= $list_all_tests;
 my $query = $show_configs || $list_configs || $list_tests;
 
 # Determine what test list files to use
 my @file_list = ();
-foreach my $list (@builtin_test_lists) {
-    push(@file_list, "$DDS_ROOT/$list->{file}") if ($query || $list->{enabled});
+if ($auto_config) {
+    foreach my $list (@builtin_test_lists) {
+        push(@file_list, "$DDS_ROOT/$list->{file}") if ($query_all || $list->{enabled});
+    }
 }
 push(@file_list, @ARGV);
+
+if ($auto_config) {
+    die("auto_run_tests.pl: Error: unknown perl OS: $^O") if (!exists($os_configs{$^O}));
+    push(@PerlACE::ConfigList::Configs, $os_configs{$^O});
+
+    push(@PerlACE::ConfigList::Configs, "RTPS");
+    if ($gh_actions) {
+        push(@PerlACE::ConfigList::Configs, 'GH_ACTIONS');
+    }
+}
 
 if ($show_configs) {
     foreach my $test_list (@file_list) {
@@ -374,41 +359,54 @@ foreach my $test_lst (@file_list) {
             $cmd = $subdir.$cmd if ($progNoArgs !~ /\.pl$/);
         }
 
-        run_test($test, $cmd, dry_run => $dry_run);
+        run_test($test, $cmd);
     }
 }
 
 if ($cmake) {
+    my $fake_name = "Run CMake Tests";
+    if (!$list_tests) {
+        mark_test_start($fake_name);
+    }
+
     cd($cmake_build_dir);
 
-    my $fake_name = "Run CMake Tests";
-    mark_test_start($fake_name) unless ($list_tests);
-    my @cmd = ("$ctest");
-    if ($dry_run || $list_tests) {
-        push(@cmd, "--show-only");
-    } else {
-        push(@cmd, "--no-compress-output -T Test");
-    }
-    if ($ctest_args) {
-        push(@cmd, $ctest_args);
-    }
-    if ($ctest_args !~ /--build-config/ && defined($cmake_build_cfg)) {
-        push(@cmd, "--build-config $cmake_build_cfg");
-    }
+    my $process_name;
+    my $process_func;
+    my @process_cmd = (
+        $python,
+        "$cmake_tests/ctest-to-auto-run-tests.py",
+        '--cmake', $cmake_cmd,
+        $cmake_tests, '.'
+    );
+    my $art_output = 'art-output';
     if ($list_tests) {
-        run_command($fake_name, join(' ', @cmd));
-    } else {
-        run_test($fake_name,  join(' ', @cmd), verbose => 1);
+        $process_name = "List CMake Tests";
+        $process_func = \&run_command;
+        push(@process_cmd, '--list');
+    }
+    else {
+        my @run_test_cmd = ($ctest, '--no-compress-output', '-T', 'Test');
+        if ($ctest_args) {
+            push(@run_test_cmd, $ctest_args);
+        }
+        if ($ctest_args !~ /--build-config/ && defined($cmake_build_cfg)) {
+            push(@run_test_cmd, "--build-config", $cmake_build_cfg);
+        }
+        run_test($fake_name, \@run_test_cmd, verbose => 1);
+        $process_name = "Process CMake Test Results";
+        $process_func = \&run_test;
+        push(@process_cmd, '--art-output', $art_output);
+        mark_test_start($process_name);
+    }
+    $process_func->($process_name, \@process_cmd);
 
-        $fake_name = "Process CMake Test Results";
-        mark_test_start($fake_name);
-        my $tests = "$DDS_ROOT/tests/cmake";
-        my $output = "";
-        run_test($fake_name, "$python $tests/ctest-to-auto-run-tests.py $tests .",
-            dry_run => $dry_run,
-            verbose => 1,
-            capture_stdout => \$output);
-        print($output);
+    if (!$list_tests) {
+        open(my $fh, $art_output) or die("Couldn't open $art_output: $!");
+        while(<$fh>){
+            print($_);
+        }
+        close($fh);
     }
 }
 

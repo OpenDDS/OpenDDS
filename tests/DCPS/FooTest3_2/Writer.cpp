@@ -149,7 +149,7 @@ Writer::svc ()
 
   if (check_data_dropped_ == 1 && writer_servant_->data_dropped_count_ > 0)
   {
-    while (writer_servant_->data_delivered_count_ + writer_servant_->data_dropped_count_
+    while (writer_servant_->data_delivered_count_.value() + writer_servant_->data_dropped_count_.value()
     < num_writes_per_thread_ * num_thread_to_write_)
     {
       ACE_OS::sleep (1);
@@ -157,7 +157,7 @@ Writer::svc ()
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Writer::svc data_delivered_count=%d data_dropped_count=%d\n"),
-      writer_servant_->data_delivered_count_, writer_servant_->data_dropped_count_));
+      writer_servant_->data_delivered_count_.value(), writer_servant_->data_dropped_count_.value()));
   }
 
   while (true) {

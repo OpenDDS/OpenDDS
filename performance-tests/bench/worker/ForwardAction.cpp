@@ -11,7 +11,19 @@ const ACE_Time_Value ZERO(0, 0);
 
 namespace Bench {
 
-ForwardAction::ForwardAction(ACE_Proactor& proactor) : proactor_(proactor), started_(false), stopped_(false), prevent_copy_(false), force_copy_(false), copy_threshold_(0), queue_first_(0), queue_last_(0) {
+ForwardAction::ForwardAction(ACE_Proactor& proactor)
+: proactor_(proactor)
+, started_(false)
+, stopped_(false)
+, id_()
+, data_id_()
+, prevent_copy_(false)
+, force_copy_(false)
+, copy_threshold_(0)
+, queue_first_(0)
+, queue_last_(0)
+, instance_(0)
+{
 }
 
 bool ForwardAction::init(const ActionConfig& config, ActionReport& report,

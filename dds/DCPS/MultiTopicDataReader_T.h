@@ -105,14 +105,18 @@ private:
 
   struct SampleWithInfo {
     SampleWithInfo(const OPENDDS_STRING& topic, const DDS::SampleInfo& sampinfo)
-      : sample_(),
-        view_(sampinfo.view_state) {
+      : sample_()
+      , view_(sampinfo.view_state)
+    {
       info_[topic] = sampinfo.instance_handle;
     }
-    void combine(const SampleWithInfo& other) {
+
+    void combine(const SampleWithInfo& other)
+    {
       info_.insert(other.info_.begin(), other.info_.end());
       if (other.view_ == DDS::NEW_VIEW_STATE) view_ = DDS::NEW_VIEW_STATE;
     }
+
     Sample sample_;
     DDS::ViewStateKind view_;
     OPENDDS_MAP(OPENDDS_STRING/*topicName*/, DDS::InstanceHandle_t) info_;
@@ -124,27 +128,28 @@ private:
   // Given a QueryPlan that describes how to treat 'incoming' data from a
   // certain topic (with MetaStruct 'meta'), assign its relevant fields to
   // the corresponding fields of 'resulting'.
-  void assign_fields(void* incoming, Sample& resulting, const QueryPlan& qp,
+  void assign_fields(Sample& resulting, void* incoming, const QueryPlan& qp,
                      const MetaStruct& meta);
 
   // Process all joins (recursively) in the QueryPlan 'qp'.
-  void process_joins(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
-                     SampleVec starting, const TopicSet& seen,
-                     const QueryPlan& qp);
+  DDS::ReturnCode_t process_joins(OPENDDS_MAP(TopicSet, SampleVec)& partial_results,
+                                  SampleVec starting, const TopicSet& seen,
+                                  const QueryPlan& qp);
 
   // Starting with a 'prototype' sample, fill a 'resulting' vector with all
   // data from 'other_dr' (with MetaStruct 'other_meta') such that all key
   // fields named in 'key_names' match the values in 'key_data'.  The struct
   // pointed-to by 'key_data' is of the type used by the 'other_dr'.
-  void join(SampleVec& resulting, const SampleWithInfo& prototype,
-            const std::vector<OPENDDS_STRING>& key_names, const void* key_data,
-            DDS::DataReader_ptr other_dr, const MetaStruct& other_meta);
+  bool join(SampleVec& resulting, const SampleWithInfo& prototype,
+            const std::vector<OPENDDS_STRING>& key_names,
+            const void* key_data, DDS::DataReader_ptr other_dr,
+            const MetaStruct& other_meta);
 
   // When no common keys are found, natural join devolves to a cross-join where
   // each instance in the joined-to-topic (qp) is combined with the results so
   // far (partialResults).
-  void cross_join(OPENDDS_MAP(TopicSet, SampleVec)& partialResults,
-                  const TopicSet& seen, const QueryPlan& qp);
+  DDS::ReturnCode_t cross_join(OPENDDS_MAP(TopicSet, SampleVec)& partial_results,
+                               const TopicSet& seen, const QueryPlan& qp);
 
   // Combine two vectors of data, 'resulting' and 'other', with the results of
   // the combination going into 'resulting'.  Use the keys in 'key_names' to
@@ -156,26 +161,28 @@ private:
 
   // Helper for combine(), similar to assign_fields but instead of coming from
   // a differently-typed struct in a void*, the data comes from an existing
-  // Sample, 'source'.  Each field projeted from any of the topics in
+  // Sample, 'source'.  Each field projected from any of the topics in
   // 'other_topics' is copied from 'source' to 'target'.
   void assign_resulting_fields(Sample& target, const Sample& source,
                                const TopicSet& other_topics);
 
   struct GenericData {
     explicit GenericData(const MetaStruct& meta, bool doAlloc = true)
-      : meta_(meta), ptr_(doAlloc ? meta.allocate() : NULL) {}
+      : meta_(meta), ptr_(doAlloc ? meta.allocate() : 0) {}
     ~GenericData() { meta_.deallocate(ptr_); }
+
     const MetaStruct& meta_;
     void* ptr_;
   };
 
   struct Contains { // predicate for std::find_if()
-    const OPENDDS_STRING& look_for_;
-    explicit Contains(const OPENDDS_STRING& s) : look_for_(s) {}
-    bool operator()(const std::pair<const std::set<OPENDDS_STRING>, SampleVec>& e)
-      const {
-      return e.first.count(look_for_);
+    explicit Contains(const OPENDDS_STRING& s) : look_for_topic_(s) {}
+    bool operator()(const std::pair<const std::set<OPENDDS_STRING>, SampleVec>& e) const
+    {
+      return e.first.count(look_for_topic_);
     }
+
+    const OPENDDS_STRING& look_for_topic_;
   };
 
   typename TypedDataReader::Interface::_var_type typed_reader_;

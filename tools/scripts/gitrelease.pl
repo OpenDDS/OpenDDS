@@ -8,17 +8,26 @@ use Cwd;
 use File::Basename;
 use File::stat;
 use File::Temp qw/tempdir/;
-use File::Path qw/make_path/;
+use File::Path qw/make_path remove_tree/;
+use File::Copy qw/copy/;
+use File::Find qw/find/;
 use Getopt::Long;
 use JSON::PP;
+use Storable qw/dclone/;
 
 use LWP::UserAgent;
-use Net::FTP::File;
+use Net::SFTP::Foreign;
 use Time::Piece;
 use Pithub;
 
-use lib dirname (__FILE__) . "/modules";
+use FindBin;
+use lib "$FindBin::RealBin/modules";
 use ConvertFiles;
+use version_utils;
+use command_utils;
+use ChangeDir;
+
+my $zero_version = parse_version("0.0.0");
 
 my $base_name_prefix = "OpenDDS-";
 my $default_github_user = "objectcomputing";
@@ -26,13 +35,20 @@ my $default_remote = "origin";
 my $default_branch = "master";
 my $release_branch_prefix = "branch-";
 my $repo_name = "OpenDDS";
-my $default_download_url = "https://download.ociweb.com/OpenDDS";
+my $oci_download = "https://download.objectcomputing.com";
+my $default_download_url = "$oci_download/OpenDDS";
 my $ace_tao_filename = "ACE+TAO-2.2a_with_latest_patches_NO_makefiles.tar.gz";
-my $ace_tao_url = "https://download.ociweb.com/TAO-2.2a/$ace_tao_filename";
+my $ace_tao_url = "$oci_download/TAO-2.2a/$ace_tao_filename";
 my $ace_root = "ACE_wrappers";
 my $git_name_prefix = "DDS-";
 my $default_post_release_metadata = "dev";
 my $workspace_info_filename = "info.json";
+my $default_sftp_base_dir = "";
+my $sftp_downloads_path = "downloads/OpenDDS";
+my $sftp_previous_releases_path = 'previous-releases/';
+my $rtd_url_base = 'https://readthedocs.org/api/v3/';
+my $rtd_project_url = "${rtd_url_base}projects/opendds/";
+my $json_mime = 'application/json';
 
 $ENV{TZ} = "UTC";
 Time::Piece::_tzset;
@@ -101,7 +117,7 @@ sub insert_news_template($$) {
 
 sub get_version_line {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
   my $line = "This is OpenDDS version ";
   if ($post_release) {
     $line .= "$settings->{next_version} (NOT A RELEASE)";
@@ -150,11 +166,13 @@ sub help {
     "  --branch=NAME          Valid git branch for cloning (default: ${default_branch})\n" .
     "  --github-user=NAME     User or organization name for github updates\n" .
     "                         (default: ${default_github_user})\n" .
-    "  --download-url=URL     URL to verify FTP uploads\n" .
+    "  --download-url=URL     URL to verify SFTP uploads\n" .
     "                         (default: ${default_download_url})\n" .
     "  --mock                 Enable mock release-specific checks and fake the\n" .
     "                         Doxygen and Devguide steps if they're not being\n" .
     "                         skipped.\n" .
+    "  --mock-with-doxygen    Same as --mock, but with real Doxygen steps if they're\n" .
+    "                         not being skipped\n" .
     "  --micro                Do a patch/micro level release. Requires --branch.\n" .
     "                         (default is no)\n" .
     "                         The difference from a regular release is that anything\n" .
@@ -170,23 +188,33 @@ sub help {
     "  --skip-doxygen         Skip getting ACE/TAO and generating and including the\n" .
     "                         doxygen docs\n" .
     "  --skip-website         Skip updating the website\n" .
-    "  --skip-ftp             Skip the FTP upload\n" .
-    "  --ftp-active           Use an active FTP connection. (default is passive)\n" .
+    "  --skip-sftp            Skip the SFTP upload\n" .
+    "  --sftp-base-dir        Change to this directory before file operations.\n".
+    "                         (default: \"$default_sftp_base_dir\")\n" .
+    "  --skip-github [1|0]    Skip anything having to do with GitHub\n" .
+    "                         GitHub is used to determine if the release is the\n" .
+    "                         highest version and if --skip-github 1 is passed it will\n" .
+    "                         be assumed it's always the highest version. Passing 0\n" .
+    "                         forces it to consider this to be a update to an earlier\n" .
+    "                         micro series.\n" .
+    "  --upload-shapes-demo   Check GitHub for a finished shapes demo build workflow\n" .
+    "                         run. Then download, repackage, and upload the results\n" .
+    "                         to the download server.\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
     "                         GitHub.\n" .
-    "  FTP_USERNAME           FTP Username\n" .
-    "  FTP_PASSWD             FTP Password\n" .
-    "  FTP_HOST               FTP Server Address\n" .
+    # When this is ready also remove fixed skip on RTD step
+    # "  READ_THE_DOCS_TOKEN    Access token for Read the Docs Admin\n" .
+    "  SFTP_USERNAME          SFTP Username\n" .
+    "  SFTP_HOST              SFTP Server Address\n" .
     "\n" .
     "Step Expressions\n" .
-    "  The STEPS argument accepts a specific notation for what steps to run.\n" .
-    "  They work like a bit map, with subexpressions enabling or disabling a step.\n" .
-    "  Later subexpressions can overrule earlier ones and the initial list of\n" .
-    "  steps the expression is modifying are all disabled at the beginning unless\n" .
-    "  the first subexpression is negative (starts with ^), then it starts with all\n" .
-    "  steps enabled.\n" .
+    "  The STEPS argument accepts a specific notation for what steps to run. They\n" .
+    "  work like a bitmap, with subexpressions enabling or disabling steps. Later\n" .
+    "  subexpressions can overrule earlier ones. The initial list of steps are all\n" .
+    "  disabled at the beginning unless the first subexpression is negative (starts\n" .
+    "  with ^), then it starts with all steps enabled.\n" .
     "\n" .
     "  If that doesn't make sense, here are some examples:\n" .
     "    5\n" .
@@ -202,7 +230,7 @@ sub help {
     "    ^5-7\n" .
     "      Do all steps except 5, 6, and 7\n" .
     "\n" .
-    "  Finally you can combine subexpressions by delimiting them by commas:\n" .
+    "  Finally you can combine subexpressions by delimiting them with commas:\n" .
     "    1,2,3\n" .
     "      Do steps 1, 2, and 3\n" .
     "    ^5-,10\n" .
@@ -236,7 +264,8 @@ sub news_contents_excerpt($) {
     if (/^## Version $version of OpenDDS/) {
       $saw_version = 1;
       next;
-    } elsif (/^##[^#]/ && $saw_version) { # Until we come to the next h2
+    }
+    elsif (/^##[^#]/ && $saw_version) { # Until we come to the next h2
       last;
     }
     if ($saw_version) {
@@ -248,7 +277,7 @@ sub news_contents_excerpt($) {
     }
   }
   close $news;
-  return join("",@lines);
+  return join("", @lines);
 }
 
 sub email_announce_contents {
@@ -272,31 +301,10 @@ sub email_announce_contents {
   return $result;
 }
 
-# Run command, returns 0 if there was an error
-sub run_command ($;$) {
-  my $command = shift;
-  my $ignore_failure = shift;
-  if (!defined $ignore_failure) {
-      $ignore_failure = 0;
-  }
-
-  print "$command\n";
-  if (system ($command)) {
-      if (!$ignore_failure) {
-        my $error_message;
-        if ($? == -1) {
-            $error_message = "Failed to Run: $!";
-        } elsif ($? & 127) {
-            $error_message = sprintf ("Exited on Signal %d, %s coredump",
-              ($? & 127),  ($? & 128) ? 'with' : 'without');
-        } else {
-            $error_message = sprintf ("Returned %d", $? >> 8);
-        }
-        print STDERR "Command \"$command\" $error_message\n";
-      }
-      return $ignore_failure;
-  }
-  return 1;
+sub run_command {
+  return !command_utils::run_command(@_,
+    script_name => 'gitrelease.pl',
+  );
 }
 
 sub yes_no {
@@ -306,9 +314,11 @@ sub yes_no {
     chomp;
     if ($_ eq "n") {
       return 0;
-    } elsif ($_ eq "y") {
+    }
+    elsif ($_ eq "y") {
       return 1;
-    } else {
+    }
+    else {
       print "Please answer y or n. ";
     }
   }
@@ -323,25 +333,40 @@ sub touch_file {
   }
 
   if (not -f $path) {
-    open(my $fh, '>', $path) or die "Couldn't open file $path: $!\nStopped";
+    open(my $fh, '>', $path) or die "Couldn't open file $path: $!";
   }
   else {
     my $t = time();
-    utime($t, $t, ($path,)) || die "Couldn't touch file $path: $!\nStopped";
+    utime($t, $t, $path) || die "Couldn't touch file $path: $!";
   }
+}
+
+my %dummy_release_files = ();
+
+sub create_dummy_release_file {
+  my $path = shift();
+
+  my $filename = basename($path);
+  print "Creating dummy $filename because of mock release\n";
+  $dummy_release_files{$filename} = 1;
+  open(my $fh, '>', $path) or die "Couldn't open file $path: $!";
+  print $fh "This is a dummy file because the release was mocked\n";
+  close($fh);
 }
 
 sub new_pithub {
   my $settings = shift();
+
+  return undef if ($settings->{skip_github});
 
   if (!defined($settings->{github_token})) {
     die("GITHUB_TOKEN must be defined");
   }
 
   return Pithub->new(
-      user => $settings->{github_user},
-      repo => $settings->{github_repo},
-      token => $settings->{github_token},
+    user => $settings->{github_user},
+    repo => $settings->{github_repo},
+    token => $settings->{github_token},
   );
 }
 
@@ -361,19 +386,39 @@ sub write_json_file {
   my $what = shift();
 
   open my $f, '>', $path or die("Can't open JSON file $path: $!");
-  print $f encode_json($what);
+  # Writes indented, space-separated JSON in a reproducible order
+  print $f JSON::PP->new->pretty->canonical->encode($what);
   close $f;
 }
 
-sub read_workspace_info {
-  my $settings = shift();
+sub expand_releases {
+  my $releases = shift();
+  for my $release (@{$releases}) {
+    $release->{version} = parse_version($release->{version});
+  }
+  return $releases;
+}
 
-  return read_json_file($settings->{workspace_info_file_path})
+sub compress_releases {
+  my $releases = shift();
+
+  # Make a copy and replace the parsed version hashes with the version strings
+  my @copy = @{dclone($releases)};
+  for my $release (@copy) {
+    $release->{version} = $release->{version}->{string};
+  }
+  return \@copy;
+}
+
+sub write_releases {
+  my $path = shift();
+  my $releases_ref = shift();
+
+  write_json_file($path, compress_releases($releases_ref));
 }
 
 sub write_workspace_info {
   my $settings = shift();
-  my $what = shift();
 
   write_json_file($settings->{workspace_info_file_path}, {
     mock => $settings->{mock},
@@ -381,6 +426,7 @@ sub write_workspace_info {
     version => $settings->{version},
     next_version => $settings->{next_version},
     is_highest_version => $settings->{is_highest_version},
+    force_not_highest_version => $settings->{force_not_highest_version},
     release_occurred => $settings->{release_occurred},
   });
 }
@@ -410,27 +456,35 @@ sub check_workspace {
   }
 
   if (-f $settings->{workspace_info_file_path}) {
-    my $info = read_workspace_info($settings);
+    my $info = read_json_file($settings->{workspace_info_file_path});
 
     my $invalid = 0;
     $invalid |= compare_workspace_info($settings, $info, 'mock');
     $invalid |= compare_workspace_info($settings, $info, 'micro');
     $invalid |= compare_workspace_info($settings, $info, 'version');
     $invalid |= compare_workspace_info($settings, $info, 'next_version');
+    $invalid |= compare_workspace_info($settings, $info, 'force_not_highest_version');
     if ($invalid) {
       die("Inconsistent with existing workspace, see above for details");
     }
 
+    $settings->{is_highest_version} = $info->{is_highest_version};
+    if ($info->{force_not_highest_version} && $info->{is_highest_version}) {
+      die("force_not_highest_version and is_highest_version can't both be true");
+    }
     if ($info->{release_occurred}) {
       print("Release occurred flag set, assuming $info->{version} was released!\n");
     }
-
-    $settings->{is_highest_version} = $info->{is_highest_version};
     $settings->{release_occurred} = $info->{release_occurred};
   }
   else {
-    my @releases = get_releases($settings);
-    $settings->{is_highest_version} = is_highest_release($settings, \@releases);
+    my $previous_releases = get_releases($settings);
+    $settings->{is_highest_version} = scalar(@{$previous_releases}) == 0 ||
+      version_greater_equal($settings->{parsed_version},
+        $previous_releases->[0]->{version});
+    if ($settings->{force_not_highest_version}) {
+      $settings->{is_highest_version} = 0;
+    }
     $settings->{release_occurred} = 0;
     write_workspace_info($settings);
   }
@@ -441,18 +495,52 @@ sub download {
   my %args = @_;
 
   my $agent = LWP::UserAgent->new();
+  if ($args{curl_user_agent}) {
+    $agent->agent('curl/7.71.0');
+  }
 
-  my %get_args = ();
+  my @header = ();
+  my $req_content = undef;
+
+  if (exists($args{token})) {
+    push(@header, Authorization => "Token $args{token}");
+  }
+
+  if (exists($args{req_json_ref})) {
+    $args{req_content_ref} = [$json_mime, JSON::PP::encode_json($args{req_json_ref})];
+  }
+  if (exists($args{req_content_ref})) {
+    push(@header, 'Content-Type' => $args{req_content_ref}->[0]);
+    $req_content = $args{req_content_ref}->[1];
+  }
+
+  my $method = $args{method} // 'GET';
+  my $request = HTTP::Request->new($method, $url, \@header, $req_content);
+
   my $to = "";
+  my $content_file = undef;
   if (exists($args{save_path})) {
-    $get_args{':content_file'} = $args{save_path};
+    $content_file = $args{save_path};
     $to = " to \"$args{save_path}\"";
   }
 
-  print("Downloading $url$to...\n");
-  my $response = $agent->get($url, %get_args);
+  print("Downloading ($method) $url$to...\n");
+  if ($args{debug}) {
+    print($request->as_string());
+  }
+  my $response = $agent->request($request, $content_file);
+  if ($args{debug}) {
+    print($response->as_string());
+  }
+  if (exists($args{response_ref})) {
+    ${$args{response_ref}} = $response;
+  }
   if (!$response->is_success()) {
     print STDERR "ERROR: ", $response->status_line(), "\n";
+    print STDERR "CONTENT TYPE: ", $response->content_type(), "\n";
+    print STDERR "CONTENT ", "=" x 72, "\n", $response->content(),
+      "\nEND CONTENT ", "=" x 68, "\n";
+
     return 0;
   }
 
@@ -460,11 +548,26 @@ sub download {
     ${$args{content_ref}} = $response->decoded_content();
   }
 
+  if (exists($args{res_json_ref})) {
+    if ($response->content_type() ne $json_mime) {
+      print STDERR "ERROR: Expected $json_mime response, not ", $response->content_type(), "\n";
+      print STDERR "CONTENT ", "=" x 72, "\n", $response->content(),
+        "\nEND CONTENT ", "=" x 68, "\n";
+      return 0;
+    }
+    ${$args{res_json_ref}} = JSON::PP::decode_json($response->content());
+  }
+
   return 1;
 }
 
 sub get_current_branch {
-  open(my $fh, "git rev-parse --abbrev-ref HEAD|") or die "git: $!";
+  my %args = @_;
+  my $opts = '';
+  if (!$args{get_hash}) {
+    $opts .= ' --abbrev-ref ';
+  }
+  open(my $fh, "git rev-parse${opts} HEAD|") or die "git: $!";
   my $branch_name;
   for my $line (<$fh>) {
     chomp($line);
@@ -477,7 +580,382 @@ sub get_current_branch {
   return $branch_name;
 }
 
-############################################################################
+sub create_archive {
+  my $src_dir = shift();
+  my $arc = shift();
+  my %args = @_;
+  my $exclude = $args{exclude};
+
+  my $arc_name = basename($arc);
+  my $src_dir_parent = dirname($src_dir);
+  my $src_dir_name = basename($src_dir);
+
+  print("  Creating archive $arc_name from $src_dir...\n");
+
+  my $chdir = ChangeDir->new($src_dir_parent);
+
+  my $cmd;
+  if ($arc_name =~ /\.tar\.gz$/) {
+    $cmd = ['tar', '--create', '--use-compress-program', 'gzip -9'];
+    if (defined($exclude)) {
+      for my $e (@{$exclude}) {
+        my $copy = "$src_dir_name/$e";
+        push(@{$cmd}, '--exclude', $copy);
+      }
+    }
+    push(@{$cmd}, '--file', $arc, $src_dir_name);
+  }
+  elsif ($arc_name =~ /\.zip$/) {
+    $cmd = ['zip', '--quiet', '-9', '--recurse-paths', $arc, $src_dir_name];
+    if (defined($exclude)) {
+      push(@{$cmd}, '--exclude');
+      for my $e (@{$exclude}) {
+        my $copy = "./$src_dir_name/$e";
+        if (-e $copy && -d $copy) {
+          $copy .= '/';
+        }
+        push(@{$cmd}, $copy);
+      }
+    }
+  }
+  else {
+    die("Can't guess archive type from name: $arc_name");
+  }
+
+  return run_command($cmd);
+}
+
+sub verify_archive {
+  my $src_dir = shift();
+  my $arc = shift();
+  my %args = @_;
+  my $exclude = $args{exclude};
+  my $remedy_verify = $args{remedy_verify};
+  my $zip_file_contents = $args{zip_file_contents};
+  my $files_differ_ref = $args{files_differ};
+
+  my $arc_name = basename($arc);
+  print("  Verifying that archive $arc_name matches $src_dir...\n");
+
+  my $missing_src_dir = !-d $src_dir;
+  print STDERR ("ERROR: verify_archive: $src_dir for $arc doesn't exist\n")
+    if ($missing_src_dir && $remedy_verify);
+  my $missing_arc = !-f $arc;
+  print STDERR ("ERROR: verify_archive: $arc doesn't exist\n")
+    if ($missing_arc && $remedy_verify);
+  # Rest of the function should probably not use remedy_verify to better inform
+  # the user why an archive is being recreated.
+  return 0 if ($missing_src_dir || $missing_arc);
+
+  my $src_dir_parent = dirname($src_dir);
+  my $src_dir_name = basename($src_dir);
+  my $chdir = ChangeDir->new($src_dir_parent);
+
+  my $same_existing_files = 1;
+  my @archive_array;
+
+  if ($arc_name =~ /\.tar\.gz$/) {
+    # This compares the files in the archive to the source directory
+    $same_existing_files = 0
+      if (!run_command(['tar', '--compare', '--file', $arc, $src_dir_name]));
+
+    my $listing;
+    run_command(['tar', '--list', '--file', $arc, $src_dir_name],
+      capture => {stdout => \$listing}, autodie => 1);
+    @archive_array = split("\n", $listing);
+  }
+  elsif ($arc_name =~ /\.zip$/) {
+    # This is just a simple integrity check
+    run_command(['unzip', '-t', "$arc"], capture => {stdout => undef}) or return 0;
+
+    # This compares the files in the archive to the source directory
+    my $listing;
+    run_command(['zipinfo', '-1', $arc], capture => {stdout => \$listing}, autodie => 1);
+    @archive_array = split("\n", $listing);
+    for my $path (@archive_array) {
+      if ($path =~ /\/$/) {
+        if (!-d $path) {
+          print STDERR ("verify_archive: $arc has deleted dir $path\n");
+          $same_existing_files = 0;
+        }
+      }
+      elsif (-f $path) {
+        if ($zip_file_contents && !run_command("unzip -p $arc $path | diff --brief $path -")) {
+          $same_existing_files = 0
+        }
+      }
+      else {
+        print STDERR ("verify_archive: $arc has deleted file $path\n");
+        $same_existing_files = 0;
+      }
+    }
+  }
+  else {
+    die("Can't guess archive type from name: $arc_name");
+  }
+
+  my %excluded;
+  if (defined($exclude)) {
+    for my $e (@{$exclude}) {
+      $excluded{"$src_dir_name/$e"} = undef;
+    }
+  }
+
+  # The previous checks checked that the existing files from the archive
+  # matched, this checks for files that should or shouldn't be in the archive.
+  my $missing_success = 1;
+  my %archive_hash;
+  for my $path (@archive_array) {
+    $path =~ s/\/$//;
+    $archive_hash{$path} = undef;
+  }
+  find(sub {
+    my $path = $File::Find::name;
+    my $is_excluded = exists($excluded{$path});
+    if (exists($archive_hash{$path})) {
+      if ($is_excluded) {
+        print STDERR ("$path should've been excluded from $arc_name\n");
+        $missing_success = 0;
+      }
+    }
+    elsif (!$is_excluded) {
+      print STDERR ("$path could not be found in $arc_name\n");
+      $missing_success = 0;
+    }
+  }, $src_dir_name);
+
+  my $files_same = $same_existing_files && $missing_success;
+  if ($files_differ_ref) {
+    ${$files_differ_ref} = !$files_same;
+  }
+  return $files_same;
+}
+
+sub extract_archive {
+  my $arc = shift();
+  my $dst_dir = shift();
+
+  my $arc_name = basename($arc);
+  my $chdir = ChangeDir->new($dst_dir);
+
+  my $cmd;
+  if ($arc_name =~ /\.zip$/) {
+    $cmd = ['unzip', $arc];
+  }
+  else {
+    die("Can't guess archive type from name: $arc_name");
+  }
+
+  return run_command($cmd);
+}
+
+sub sftp_missing {
+  my $settings = shift();
+  my $sub_dir = shift();
+
+  my $url = "$settings->{download_url}/";
+  if ($url !~ /^https?:\/\//) {
+    $url = "http://$url";
+  }
+
+  my $content;
+  if (!download($url, content_ref => \$content)) {
+    die("Couldn't get SFTP contents from $url");
+  }
+
+  my @missing;
+  for my $file (@_) {
+    if ($content !~ /$file/) {
+      push(@missing, $file);
+    }
+  }
+
+  return @missing;
+}
+
+sub new_sftp {
+  my $settings = shift();
+
+  my $sftp = Net::SFTP::Foreign->new(
+    host => $settings->{sftp_host},
+    user => $settings->{sftp_user},
+    autodie => 1,
+  );
+
+  $sftp->setcwd($settings->{sftp_base_dir});
+  $sftp->setcwd($sftp_downloads_path);
+
+  return $sftp;
+}
+
+sub get_actions_url {
+  my $settings = shift();
+
+  my $ph = $settings->{pithub};
+  return "/repos/$ph->{user}/$ph->{repo}/actions";
+}
+
+sub is_shapes_workflow_path {
+  my $path = shift();
+  return $path =~ /ishapes/;
+}
+
+sub trigger_shapes_run {
+  my $settings = shift();
+
+  # https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event
+  my $result = $settings->{pithub}->request(
+    method => 'POST',
+    path => get_actions_url($settings) . "/workflows/ishapes.yml/dispatches",
+    data => {
+      ref => $settings->{git_tag},
+    },
+  );
+
+  if (!$result->success()) {
+    die("Failed to trigger shapes demo, HTTP status code: " . $result->code());
+  }
+}
+
+sub get_last_shapes_run {
+  my $settings = shift();
+
+  my $result = $settings->{pithub}->request(
+    method => 'GET',
+    path => get_actions_url($settings) . '/runs',
+    params => {
+      branch => $settings->{git_tag},
+    },
+  );
+  for my $run (@{$result->content->{workflow_runs}}) {
+    if (is_shapes_workflow_path($run->{path})) {
+      print("Last workflow run for $settings->{git_tag} was $run->{html_url}\n");
+      return $run;
+    }
+  }
+
+  return undef;
+}
+
+sub upload_shapes_demo {
+  my $settings = shift();
+
+  my $ws_subdir = "$settings->{workspace}/shapes-demo";
+  if (-d $ws_subdir) {
+    remove_tree($ws_subdir);
+  }
+  mkdir($ws_subdir) or die ("mkdir failed: $!");
+
+  my $ph = $settings->{pithub};
+  my $actions_url = get_actions_url($settings);
+
+  # Get the last successful shapes run
+  my $run = get_last_shapes_run($settings);
+  if (!defined($run)) {
+    die("No shapes demo run found!");
+  }
+  if ($run->{status} ne 'completed') {
+    print("It's listed as not finished, run this again when it finishes successfully.\n");
+    exit(0);
+  }
+  if ($run->{conclusion} ne 'success') {
+    die("Conclusion is listed as: $run->{conclusion}\n",
+      "Try rerunning the specfic job that failed?\n");
+  }
+
+  # Get the artifacts from that run
+  my $result = $ph->request(
+    method => 'GET',
+    path => "$actions_url/runs/$run->{id}/artifacts",
+  );
+  my @artifacts;
+  for my $artifact (@{$result->content->{'artifacts'}}) {
+    print("FOUND ID: $artifact->{id} NAME: $artifact->{name}\n");
+    my $filename = "$artifact->{name}.zip";
+    push(@artifacts, {
+      id => $artifact->{id},
+      name => $artifact->{name},
+      filename => $filename,
+      path => "$ws_subdir/$filename",
+    });
+  }
+  for my $artifact (@artifacts) {
+    print("Getting $artifact->{filename}...\n");
+    $result = $ph->request(
+      method => 'GET',
+      path => "$actions_url/artifacts/$artifact->{id}/zip",
+    );
+    open(my $fd, '>', $artifact->{path}) or die ("Could not open $artifact->{path}: $!");
+    binmode($fd);
+    print $fd $result->raw_content();
+    close($fd);
+  }
+
+  # Prepare and archive demo files
+  my $base_name = "ShapesDemo-${base_name_prefix}$settings->{version}-";
+  my @to_upload = ();
+  for my $artifact (@artifacts) {
+    my $os_name;
+    if ($artifact->{name} =~ /^(.*)_artifact$/) {
+      $os_name = $1;
+    }
+    else {
+      die("Unexpected artifact name: $artifact->{name}");
+    }
+    my $dir_name = $base_name . $os_name;
+    my $dir_path = "$ws_subdir/$dir_name";
+    mkdir($dir_path) or die ("mkdir failed: $!");
+
+    print("Unzipping $artifact->{filename} to $dir_name...\n");
+    extract_archive($artifact->{path}, $dir_path) or die("Extract artifact failed");
+
+    my $ishapes_src = 'examples/DCPS/ishapes';
+    my @files = (
+      "$ishapes_src/SHAPESDEMO_README",
+    );
+    for my $file (@files) {
+      my $filename = basename($file);
+      copy($file, "$dir_path/$filename") or die("copy $filename failed: $!");
+    }
+
+    print("Archiving $dir_name...\n");
+    my $arc_ext;
+    if ($os_name =~ /windows/i) {
+      $arc_ext = '.zip';
+    }
+    elsif ($os_name =~ /linux/i) {
+      $arc_ext = '.tar.gz';
+      # Make sure the executable has the exec bit
+      chmod(0755, "$dir_path/ishapes") or die("Failed to chmod ishapes: $!");
+    }
+    else {
+      die("Can't derive archive type from artifact name: $os_name (new OS?)");
+    }
+    my $arc = $dir_path . $arc_ext;
+    push(@to_upload, $arc);
+    create_archive($dir_path, $arc) or die("Failed to create demo archive $arc");
+  }
+
+  my $sftp = new_sftp($settings);
+  my $dest_dir = 'ShapesDemo';
+  $sftp->mkpath($dest_dir);
+  $sftp->setcwd($dest_dir);
+
+  # Delete old files
+  foreach my $file (map {$_->{filename}} @{$sftp->ls()}) {
+    if ($file =~ /^ShapesDemo-/) {
+      print("deleting $file\n");
+      $sftp->remove($file);
+    }
+  }
+
+  # Upload new ones
+  foreach my $upload (@to_upload) {
+    my $name = basename($upload);
+    print("putting $name\n");
+    $sftp->put($upload, $name);
+  }
+}
 
 my $step_subexpr_re = qr/(\^?)(\d*)(-?)(\d*)/;
 my $step_expr_re = qr/^${step_subexpr_re}(,${step_subexpr_re})*$/;
@@ -517,7 +995,8 @@ sub parse_step_expr {
       if ($x > $no_steps) {
         die "$x is greater than the total number of steps, $no_steps";
       }
-    } else {
+    }
+    else {
       $x = 1;
     }
 
@@ -532,9 +1011,11 @@ sub parse_step_expr {
       if ($x > $y) {
         die "Invalid range in steps: $x-$y";
       }
-    } elsif ($range) {
+    }
+    elsif ($range) {
       $y = $no_steps;
-    } else {
+    }
+    else {
       $y = $x;
     }
 
@@ -552,133 +1033,31 @@ sub parse_step_expr {
   return @steps;
 }
 
-sub parse_version {
-  my $version = shift;
-  my %result = ();
-  my $field = qr/0|[1-9]\d*/;
-  my $metafield = qr/(?:$field|\d*[a-zA-Z-][0-9a-zA-Z-]*)/;
-  if ($version =~ /^($field)\.($field)(?:\.($field))?(?:-($metafield(?:\.$metafield)*))?$/) {
-    $result{major} = $1;
-    $result{minor} = $2;
-    $result{micro} = $3 || "0";
-    $result{metadata} = $4 || "";
-    my $metadata_maybe = $result{metadata} ? "-$result{metadata}" : "";
-
-    $result{series_string} = "$result{major}.$result{minor}";
-    $result{release_string} = "$result{series_string}.$result{micro}";
-    $result{string} = "$result{release_string}$metadata_maybe";
-    if ($result{micro} eq "0") {
-      $result{tag_string} = $result{series_string};
-    } else {
-      $result{tag_string} = $result{release_string};
-    }
-
-    # For Version Comparison
-    my @metadata_fields = split(/\./, $result{metadata});
-    $result{metadata_fields} = \@metadata_fields;
-  }
-  return %result;
-}
-
-my %zero_version = parse_version("0.0.0");
-
-# Compare Versions According To Semver
-sub version_greater_equal {
-  my $left = shift();
-  my $right = shift();
-
-  # Compare X.Y.Z fields
-  if ($left->{major} > $right->{major}) {
-    return 1;
-  }
-  elsif ($left->{major} < $right->{major}) {
-    return 0;
-  }
-  if ($left->{minor} > $right->{minor}) {
-    return 1;
-  }
-  elsif ($left->{minor} < $right->{minor}) {
-    return 0;
-  }
-  if ($left->{micro} > $right->{micro}) {
-    return 1;
-  }
-  elsif ($left->{micro} < $right->{micro}) {
-    return 0;
-  }
-
-  # If they are equal in the normal fields, compare the metadata fields, which
-  # are the dot-delimited fields after "-". See
-  # https://semver.org/#spec-item-11 for an explanation.
-  my @lfields = @{$left->{metadata_fields}};
-  my @rfields = @{$right->{metadata_fields}};
-  my $llen = scalar(@lfields);
-  my $rlen = scalar(@rfields);
-  return 1 if ($llen == 0 && $rlen > 0);
-  return 0 if ($llen > 0 && $rlen == 0);
-  my $mlen = $llen > $rlen ? $llen : $rlen;
-  for (my $i = 0; $i < $mlen; $i += 1) {
-    my $morel = $i < $llen;
-    my $morer = $i < $rlen;
-    return 1 if ($morel && !$morer);
-    return 0 if (!$morel && $morer);
-    my $li = $lfields[$i];
-    my $lnum = $li =~ /^\d+$/ ? 1 : 0;
-    my $ri = $rfields[$i];
-    my $rnum = $ri =~ /^\d+$/ ? 1 : 0;
-    return 1 if (!$lnum && $rnum);
-    return 0 if ($lnum && !$rnum);
-    if ($lnum) {
-      return 1 if $li > $ri;
-      return 0 if $li < $ri;
-    }
-    else {
-      return 1 if $li gt $ri;
-      return 0 if $li lt $ri;
-    }
-  }
-  return 1;
-}
-
-sub version_not_equal {
-  my $left = shift();
-  my $right = shift();
-  return $left->{string} ne $right->{string};
-}
-
-sub version_greater {
-  my $left = shift();
-  my $right = shift();
-  return version_greater_equal($left, $right) && version_not_equal($left, $right);
-}
-
-sub version_lesser {
-  my $left = shift();
-  my $right = shift();
-  return !version_greater_equal($left, $right);
-}
-
-sub version_cmp {
-  my $left = shift();
-  my $right = shift();
-
-  return 0 if $left->{string} eq $right->{string};
-  return version_lesser($left, $right) ? -1 : 1;
-}
-
 sub parse_release_tag {
   my $tag = shift();
 
-  my %parsed = ();
+  my $parsed;
   if ($tag =~ /^DDS-(.*)$/) {
-    %parsed = parse_version($1) if $1;
-    $parsed{tag_name} = $tag if %parsed;
+    $parsed = parse_version($1) if $1;
+    $parsed->{tag_name} = $tag if $parsed;
   }
-  return %parsed;
+  if (!$parsed) {
+    die("Invalid release tag name: $tag");
+  }
+  return $parsed;
 }
 
 sub get_releases {
   my $settings = shift();
+
+  if (!defined($settings->{pithub})) {
+    return [{
+      version => $zero_version,
+      published_at => '2001-09-09T01:46:40',
+      html_url => 'https://opendds.org',
+      assets => [],
+    }];
+  }
 
   my $release_list = $settings->{pithub}->repos->releases->list();
   unless ($release_list->success) {
@@ -686,27 +1065,36 @@ sub get_releases {
   }
 
   my @releases = ();
-  while (my $row = $release_list->next) {
-    my $tag = $row->{tag_name};
-    my %parsed = parse_release_tag($tag);
-    if (!%parsed) {
-      die("Invalid release tag name: $tag");
+  while (my $release = $release_list->next) {
+    next if $release->{prerelease};
+    my $parsed = parse_release_tag($release->{tag_name});
+    my @assets = ();
+    for my $asset (@{$release->{assets}}) {
+      if ($asset->{name} !~ /tar\.gz|zip$/) {
+        next;
+      }
+      push(@assets, {
+        name => $asset->{name},
+        browser_download_url => $asset->{browser_download_url},
+      });
     }
-    push(@releases, \%parsed);
+    # Sort by reverse name to put zip files first for the website
+    @assets = sort { $b->{name} cmp $a->{name} } @assets;
+    push(@releases, {
+      version => $parsed,
+      published_at => $release->{published_at},
+      html_url => $release->{html_url},
+      assets => \@assets,
+    });
   }
 
-  return sort { version_cmp($a, $b) } @releases;
-}
-
-sub is_highest_release {
-  my $settings = shift();
-  my $releases_ref = shift();
-
-  return scalar(@{$releases_ref}) == 0 ? 1 :
-    version_greater_equal($settings->{parsed_version}, $releases_ref->[-1]);
+  my @sorted = sort { version_cmp($b->{version}, $a->{version}) } @releases;
+  return \@sorted;
 }
 
 ############################################################################
+# Start of Release Steps
+
 sub verify_git_remote {
   my $result = 0;
   my $settings = shift();
@@ -722,7 +1110,8 @@ sub verify_git_remote {
   close(GITREMOTE);
   if ($url eq $settings->{git_url}) {
     $result = 1;
-  } else {
+  }
+  else {
     $settings->{alt_url} = $url;
   }
   return $result;
@@ -738,8 +1127,12 @@ sub message_git_remote {
 }
 
 ############################################################################
+
 sub verify_git_status_clean {
-  my ($settings, $strict) = @_;
+  my $settings = shift();
+  my $step_options = shift() // {};
+  my $strict = $step_options->{strict} // 0;
+  my $unclean_ref = $step_options->{unclean};
   my $clean = 1;
   my $status = open(GITSTATUS, 'git status -s|');
   my $modified = $settings->{modified};
@@ -756,22 +1149,28 @@ sub verify_git_status_clean {
   }
   close(GITSTATUS);
 
-  $settings->{unclean} = $unclean;
+  if ($unclean_ref) {
+    ${$unclean_ref} = $unclean;
+  }
+  else {
+    $settings->{unclean} = $unclean;
+  }
   return $clean;
 }
 
 sub remedy_git_status_clean {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
+  my $changelog = shift() // 1;
   my $version = $settings->{version};
 
   if (!run_command("git --no-pager diff HEAD")) {
     return 0;
   }
   return 0 if (!yes_no("Would you like to add and commit these changes?"));
-  if (!$post_release) {
-    system("git add docs/history/ChangeLog-$version") == 0
-      or die "Could not execute: git add docs/history/ChangeLog-$version";
+  if (!$post_release && $changelog) {
+    system("git add $settings->{changelog}") == 0
+      or die "Could not execute: git add $settings->{changelog}";
   }
   system("git add -u") == 0 or die "Could not execute: git add -u";
   my $message;
@@ -789,7 +1188,8 @@ sub remedy_git_status_clean {
 
 sub verify_update_version_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $step_options = shift() // {};
+  my $post_release = $step_options->{post_release} // 0;
 
   my $correct = 0;
   my $line = quotemeta(get_version_line($settings, $post_release));
@@ -812,7 +1212,7 @@ sub message_update_version_file {
 
 sub remedy_update_version_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
 
   print "  >> Updating VERSION.txt file\n";
 
@@ -837,24 +1237,25 @@ sub remedy_update_version_file {
 }
 
 ############################################################################
+
 sub find_previous_tag {
   my $settings = shift();
   my $remote = $settings->{remote};
   my $release_version = $settings->{parsed_version};
   my $prev_version_tag = "";
-  my %prev_version = %zero_version;
+  my $prev_version = $zero_version;
 
   open(GITTAG, "git tag --list |") or die "Opening $!";
   while (<GITTAG>) {
     chomp;
     next unless /^$git_name_prefix([\d\.]*)$/;
     my $version = $1;
-    my %tag_version = parse_version($version);
+    my $tag_version = parse_version($version);
     # If this is less than the release version, but the largest seen yet
-    if (version_lesser(\%tag_version, $release_version) &&
-        version_greater(\%tag_version, \%prev_version)) {
+    if (version_lesser($tag_version, $release_version) &&
+        version_greater($tag_version, $prev_version)) {
       $prev_version_tag = $_;
-      %prev_version = %tag_version;
+      $prev_version = $tag_version;
     }
   }
   close(GITTAG);
@@ -906,9 +1307,11 @@ sub format_comment {
     my $next_line = shift @comment_lines;
     if (!$next_line) {
       $result .= "\n";
-    } elsif (length($next_line) < 65) {
+    }
+    elsif (length($next_line) < 65) {
       $result .= "          $next_line\n";
-    } else {
+    }
+    else {
       # Break next line into words
       my @comment_words = split(/\s+/, $next_line);
       while (scalar(@comment_words) > 0) {
@@ -969,18 +1372,24 @@ sub remedy_changelog {
         $changed = 1;
       }
       $commit = $_;
-    } elsif (/^Merge: *(.*)/) {
+    }
+    elsif (/^Merge: *(.*)/) {
       # Ignore
-    } elsif (/^Author: *(.*)/) {
+    }
+    elsif (/^Author: *(.*)/) {
       $author = $1;
       $author =~ s/</ </;
-    } elsif (/^Date: *([0-9]+)/) {
+    }
+    elsif (/^Date: *([0-9]+)/) {
       $date = POSIX::strftime($timefmt, gmtime($1));
-    } elsif (/^ +(.*) */) {
+    }
+    elsif (/^ +(.*) */) {
       $comment .= "$1\n";
-    } elsif (/^[AMD]\s+(.*) *$/) {
+    }
+    elsif (/^[AMD]\s+(.*) *$/) {
       $file_mod_list .= "        * $1:\n";
-    } elsif (/^[CR][0-9]*\s+(.*) *$/) {
+    }
+    elsif (/^[CR][0-9]*\s+(.*) *$/) {
       $file_mod_list .= "        * $1:\n";
     }
   }
@@ -1005,8 +1414,10 @@ EOF
   close(GITLOG);
   close(CHANGELOG);
 
-  return $changed;
+  # If doing a mock release, it's okay for the changelog to be empty.
+  return $settings->{mock} ? 1 : $changed;
 }
+
 ############################################################################
 
 # This section deals with the AUTHORS file
@@ -1018,8 +1429,8 @@ my @global_authors = ();
 
 sub search_authors {
   my @authors = @{shift()};
-  my $email = shift || 0;
-  my $name = shift || 0;
+  my $email = shift() // 0;
+  my $name = shift() // 0;
 
   foreach my $author (@authors) {
     if ($email) {
@@ -1043,6 +1454,8 @@ sub name_key ($) {
 }
 
 sub get_authors {
+  return \@global_authors if (@global_authors) ;
+
   my @authors = ();
 
   open(CHANGELOG, "git shortlog -se |") or die "Opening $!";
@@ -1076,7 +1489,7 @@ sub get_authors {
         }
       }
 
-      # Prefer Actual Emails to Github Accounts
+      # Prefer Actual Emails to GitHub Accounts
       my $name_quote = quotemeta($name);
       my $author = search_authors(\@authors, 0, qr/${name_quote}/);
       if (defined $author) {
@@ -1093,24 +1506,32 @@ sub get_authors {
   }
   close (CHANGELOG);
 
-  # Replace Github Account emails with url to their profiles
+  # Replace GitHub Account emails with url to their profiles
   foreach my $author (@authors) {
     if ($author->{email} =~ /$github_email_re/) {
       $author->{email} = "https://github.com/$1";
     }
   }
 
-  return sort { name_key($a->{name}) cmp name_key($b->{name}) } @authors;
+  @global_authors = sort { name_key($a->{name}) cmp name_key($b->{name}) } @authors;
+  return \@global_authors;
+}
+
+sub author_lines {
+  my @lines;
+  foreach my $author (@{get_authors()}) {
+    push(@lines, "$author->{name} <$author->{email}>");
+  }
+  return \@lines;
 }
 
 sub verify_authors {
   my $settings = shift();
-  @global_authors = get_authors() if (!@global_authors);
 
   my $tmp_authors_path = "$settings->{workspace}/temp_authors";
   open(my $file, '>', $tmp_authors_path) or die ("Could not open $tmp_authors_path: $!");
-  foreach my $author (@global_authors) {
-    print $file "$author->{name} <$author->{email}>\n";
+  foreach my $line (@{author_lines()}) {
+    print $file "$line\n";
   }
   close($file);
 
@@ -1120,7 +1541,8 @@ sub verify_authors {
     print("$command\n");
     print "Authors needs ammending:\n$diff";
     return 0;
-  } else {
+  }
+  else {
     return 1;
   }
 }
@@ -1132,14 +1554,15 @@ sub message_authors {
 
 sub remedy_authors {
   open(my $authors, '>', "AUTHORS") or die "Opening $!";
-  foreach my $author (@global_authors) {
-    print $authors "$author->{name} <$author->{email}>\n";
+  foreach my $line (@{author_lines()}) {
+    print $authors "$line\n";
   }
   close $authors;
   return 1;
 }
 
 ############################################################################
+
 sub verify_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
@@ -1153,7 +1576,7 @@ sub verify_news_file_section {
   }
   close(NEWS);
 
-  return ($has_version);
+  return $has_version;
 }
 
 sub message_news_file_section {
@@ -1165,13 +1588,18 @@ sub message_news_file_section {
 sub remedy_news_file_section {
   my $settings = shift();
   my $version = $settings->{version};
-  print "  >> Adding $version section to NEWS.md\n";
-  print "  !! Manual update to NEWS.md needed\n";
+  print "  >> Adding $version section template to NEWS.md\n";
+  # If doing a mock release, the template is okay.
+  my $ok = $settings->{mock};
+  if (!$ok) {
+    print "  !! Manual update to NEWS.md needed\n";
+  }
   insert_news_template($settings, 0);
-  return 0;
+  return $ok;
 }
 
 ############################################################################
+
 sub verify_update_news_file {
   my $settings = shift();
   my $version = $settings->{version};
@@ -1180,18 +1608,21 @@ sub verify_update_news_file {
   my $has_version = 0;
   my $corrected_features = 1;
   my $corrected_fixes = 1;
+  my $real_release = !$settings->{mock};
   while (<NEWS>) {
     if ($_ =~ /^## Version $metaversion of OpenDDS/) {
       $has_version = 1;
-    } elsif ($_ =~ /TODO: Add your features here/) {
+    }
+    elsif ($real_release && $_ =~ /TODO: Add your features here/) {
       $corrected_features = 0;
-    } elsif ($_ =~ /TODO: Add your fixes here/) {
+    }
+    elsif ($real_release && $_ =~ /TODO: Add your fixes here/) {
       $corrected_fixes = 0;
     }
   }
   close(NEWS);
 
-  return ($has_version && $corrected_features && $corrected_fixes);
+  return $has_version && $corrected_features && $corrected_fixes;
 }
 
 sub message_update_news_file {
@@ -1245,9 +1676,10 @@ sub remedy_news_timestamp {
 
 sub verify_update_version_h_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $step_options = shift() // 0;
+  my $post_release = $step_options->{post_release} // 0;
 
-  if (!$post_release && verify_update_version_h_file($settings, 1)) {
+  if (!$post_release && verify_update_version_h_file($settings, {post_release => 1})) {
     die "ERROR: Version.h already indicates that the post release was done!";
   }
 
@@ -1268,15 +1700,20 @@ sub verify_update_version_h_file {
   while (<VERSION_H>) {
     if ($_ =~ /^#define OPENDDS_MAJOR_VERSION $parsed_version->{major}$/) {
       ++$matched_major;
-    } elsif ($_ =~ /^#define OPENDDS_MINOR_VERSION $parsed_version->{minor}$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_MINOR_VERSION $parsed_version->{minor}$/) {
       ++$matched_minor;
-    } elsif ($_ =~ /^#define OPENDDS_MICRO_VERSION $parsed_version->{micro}$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_MICRO_VERSION $parsed_version->{micro}$/) {
       ++$matched_micro;
-    } elsif ($_ =~ /^#define OPENDDS_VERSION_METADATA "$metadata"$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_VERSION_METADATA "$metadata"$/) {
       ++$matched_metadata;
-    } elsif ($_ =~ /^#define OPENDDS_IS_RELEASE $release$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_IS_RELEASE $release$/) {
       ++$matched_release;
-    } elsif ($_ =~ /^#define OPENDDS_VERSION "$metaversion"$/) {
+    }
+    elsif ($_ =~ /^#define OPENDDS_VERSION "$metaversion"$/) {
       ++$matched_version;
     }
   }
@@ -1297,7 +1734,7 @@ sub message_update_version_h_file {
 
 sub remedy_update_version_h_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
 
   my $parsed_version = $post_release ?
     $settings->{parsed_next_version} : $settings->{parsed_version};
@@ -1359,10 +1796,13 @@ sub remedy_update_version_h_file {
     $corrected_release == 1 &&
     $corrected_version == 1;
 }
+
 ############################################################################
+
 sub verify_update_prf_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $step_options = shift() // {};
+  my $post_release = $step_options->{post_release} // 0;
 
   my $line = quotemeta(get_version_line($settings, $post_release));
   my $metaversion = quotemeta($post_release ?
@@ -1390,7 +1830,7 @@ sub message_update_prf_file {
 
 sub remedy_update_prf_file {
   my $settings = shift();
-  my $post_release = shift() || 0;
+  my $post_release = shift() // 0;
 
   my $version = $post_release ?
     $settings->{next_version} : $settings->{version};
@@ -1420,7 +1860,9 @@ sub remedy_update_prf_file {
 
   return (($corrected_header == 1) && ($corrected_version == 1));
 }
+
 ############################################################################
+
 sub message_commit_git_changes {
   my $settings = shift();
   return "The working directory is not clean:\n" . $settings->{unclean} .
@@ -1474,6 +1916,7 @@ sub remedy_git_changes_pushed {
 }
 
 ############################################################################
+
 sub verify_git_tag {
   my $settings = shift();
   my $found = 0;
@@ -1519,6 +1962,10 @@ sub verify_create_release_branch {
     }
   }
   close GIT;
+  if (!$settings->{skip_github} && !$found && verify_push_release_branch($settings)) {
+    print("$settings->{release_branch} not here, but already pushed\n");
+    return 1;
+  }
   return $found;
 }
 
@@ -1536,14 +1983,15 @@ sub remedy_create_release_branch {
 
 sub verify_push_release_branch {
   my $settings = shift();
-  my $branch = quotemeta($settings->{release_branch});
-  my $remote = quotemeta($settings->{remote});
+
+  my $find = get_current_branch(get_hash => 1) . "\trefs/heads/$settings->{release_branch}";
   my $found;
-  open(GIT, "git branch -r |") or die "Opening $!";
+  open(GIT, "git ls-remote --heads $settings->{remote} |") or die "Opening $!";
   while (<GIT>) {
     chomp;
-    if (/$remote\/$branch/) {
+    if ($_ eq $find) {
       $found = 1;
+      last;
     }
   }
   close GIT;
@@ -1561,12 +2009,31 @@ sub remedy_push_release_branch {
 }
 
 ############################################################################
-sub verify_clone_tag {
+
+sub release_archive_values {
+  my $which = shift();
   my $settings = shift();
+
+  my $worktree = $settings->{"${which}_worktree"};
+  my $arc_name = $settings->{"${which}_src"};
+  return (
+    $worktree,
+    $arc_name,
+    "$settings->{workspace}/$arc_name",
+    "$worktree/ChangeLog",
+    (($which eq 'zip') ? 1 : 0),
+  );
+}
+
+sub release_archive_worktree_verify {
+  my $which = shift();
+  my $settings = shift();
+
+  my ($worktree, $arc_name, $arc_path, $cl, $crlf) = release_archive_values($which, $settings);
+
   my $correct = 0;
-  if (-d $settings->{clone_dir}) {
-    my $curdir = getcwd;
-    chdir $settings->{clone_dir};
+  if (-d $worktree) {
+    my $chdir = ChangeDir->new($worktree);
     # Using git describe for compatibility with older versions of git
     open(GIT_DESCRIBE, "git describe --tags |") or die "git describe --tags $!";
     while (<GIT_DESCRIBE>) {
@@ -1576,161 +2043,159 @@ sub verify_clone_tag {
       }
     }
     close GIT_DESCRIBE;
-    chdir $curdir;
+
+    $correct = 0 if (!-f $cl);
+
+    my $check_file = "$worktree/VERSION.txt";
+    if (-f $check_file) {
+      open(my $fd, $check_file) or die("Couldn't open $check_file: $!");
+      my $line = <$fd>;
+      my $found_crlf = (($line =~ /\r\n/) ? 1 : 0);
+      close($fd);
+      if ($found_crlf != $crlf) {
+        print STDERR ('ERROR: unexpected ', $found_crlf ? 'DOS' : 'UNIX',
+          " line endings in $check_file\n");
+        $correct = 0;
+      }
+    }
+    else {
+      $correct = 0;
+    }
+
+    my $unclean;
+    if (!verify_git_status_clean($settings, {strict => 1, unclean => \$unclean})) {
+      print STDERR ("ERROR: This release archive work tree $worktree is not clean:\n" .
+        "${unclean}Undo these changes so the archives will match the tag as committed\n");
+      die("stopped so we don't regenerate the archive");
+    }
   }
   return $correct;
 }
 
-sub message_clone_tag {
+sub release_archive_worktree_message {
+  my $which = shift();
   my $settings = shift();
-  if (-d $settings->{clone_dir}) {
-    return "Directory $settings->{clone_dir} did not clone tag $settings->{git_tag}\n";
-  } else {
-    return "Could not see directory $settings->{clone_dir}\n";
+
+  my ($worktree, $arc_name, $arc_path, $cl, $crlf) = release_archive_values($which, $settings);
+
+  my $message = "$worktree ";
+  if (-d $worktree) {
+    $message .= "is either invalid and needs to be recreated";
   }
+  else {
+    $message .= "needs to be created";
+  }
+  return $message;
 }
 
-sub remedy_clone_tag {
+sub release_archive_worktree_remedy {
+  my $which = shift();
   my $settings = shift();
 
-  if (!run_command("git worktree add $settings->{clone_dir} $settings->{git_tag}")) {
-    print "Couldn't create temporary website worktree!\n";
-    return 0;
+  my ($worktree, $arc_name, $arc_path, $cl, $crlf) = release_archive_values($which, $settings);
+
+  if (-d $worktree) {
+    run_command("git worktree remove --force $worktree", autodie => 1);
   }
+
+  my $crlf_insert = '';
+  if ($crlf) {
+    $crlf_insert = "-c core.autocrlf=true ";
+  }
+  run_command("git ${crlf_insert}worktree add $worktree $settings->{git_tag}", autodie => 1);
+  if ($crlf) {
+    my $chdir = ChangeDir->new($worktree);
+    run_command("git config --local extensions.worktreeConfig true", autodie => 1);
+    run_command("git config --worktree core.autocrlf true", autodie => 1);
+  }
+  copy("$worktree/$settings->{changelog}", $cl) or die("copy $cl failed: $!");
 
   return 1;
 }
-############################################################################
-sub verify_move_changelog {
-  my $settings = shift();
-  my $target = $settings->{clone_dir} . "/ChangeLog";
-  return -f $settings->{clone_dir} . "/ChangeLog";
-}
-
-sub message_move_changelog {
-  my $settings = shift();
-  my $src = $settings->{clone_dir} . "/" . $settings->{changelog};
-  my $target = $settings->{clone_dir} . "/ChangeLog";
-  return "ChangeLog must be moved from $src to $target";
-}
-
-sub remedy_move_changelog {
-  my $settings = shift();
-  my $src = $settings->{clone_dir} . "/" . $settings->{changelog};
-  my $target = $settings->{clone_dir} . "/ChangeLog";
-  rename($src, $target);
-  print "Changelog moved\n";
-  return 1;
-}
 
 ############################################################################
-sub verify_tgz_source {
+
+my $exclude_from_release_arc = [
+  '.git',
+  'docs/doxygen_ace_tao_generated_links.h',
+];
+
+sub release_archive_verify {
+  my $which = shift();
   my $settings = shift();
-  my $file = "$settings->{workspace}/$settings->{tgz_src}";
-  my $good = 0;
-  if (-f $file) {
-    # Check if it is in the right format
-    my $basename = basename($settings->{clone_dir});
-    open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
-    my $target = join("/", $basename, 'VERSION.txt');
-    while (<TGZ>) {
-      if (/$target/) {
-        $good = 1;
-        last;
-      }
-    }
-    close TGZ;
+  my $step_options = shift() // {};
+
+  my ($worktree, $arc_name, $arc_path, $cl, $crlf) = release_archive_values($which, $settings);
+  my $differ_key = "release_archive_files_differ_prompt_$which";
+
+  my $files_differ = 0;
+  my $result = verify_archive($worktree, $arc_path,
+    exclude => $exclude_from_release_arc,
+    remedy_verify => $step_options->{remedy_verify},
+    files_differ => \$files_differ);
+  if ($files_differ && !exists($settings->{$differ_key})) {
+    $settings->{$differ_key} = 1;
   }
-  return $good;
+  return $result;
 }
 
-sub message_tgz_source {
+sub release_archive_message {
+  my $which = shift();
   my $settings = shift();
-  my $file = "$settings->{workspace}/$settings->{tgz_src}";
-  if (!-f $file) {
-    return "Could not find file $file";
-  } else {
-    return "File $file is not in the right format";
+
+  my ($worktree, $arc_name, $arc_path, $cl, $crlf) = release_archive_values($which, $settings);
+
+  my $message = "$arc_name ";
+  if (-f $arc_path) {
+    $message .= "is either invalid or doesn't match $worktree and needs to be recreated";
   }
-}
-
-sub remedy_tgz_source {
-  my $settings = shift();
-  my $tempdir = tempdir(CLEANUP => 1);
-  my $file = "$settings->{workspace}/$settings->{tgz_src}";
-  my $tfile = join("/", $tempdir, $settings->{tgz_src});
-  my $curdir = getcwd;
-  my $result = 0;
-  my $basename = basename($settings->{clone_dir});
-
-  print "Copying $settings->{clone_dir} to $tempdir ($result)\n";
-  $result = $result || system("cp -aR $settings->{clone_dir} $tempdir");
-
-  chdir($tempdir);
-  print "Removing git-specific directories ($result)\n";
-  $result = $result || system("find . -name '.git*' | xargs rm -rf");
-  print "Creating tar file ($result)\n";
-  $result = $result || system("tar -cf $settings->{tar_src} $basename");
-  print "Gzipping file $settings->{tar_src} ($result)\n";
-  $result = $result || system("gzip -9 $settings->{tar_src}");
-  chdir($curdir);
-
-  print "Move gzip file ($result)\n";
-  $result = $result || system("mv $tfile $file");
-
-  return !$result;
-}
-############################################################################
-sub verify_zip_source {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{zip_src});
-  return (-f $file);
-}
-
-sub message_zip_source {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{zip_src});
-  return "Could not find file $file";
-}
-
-sub remedy_zip_source {
-  my $settings = shift();
-  my $tempdir = tempdir(CLEANUP => 1);
-  my $file = join("/", $settings->{workspace}, $settings->{zip_src});
-  my $tfile = join("/", $tempdir, $settings->{zip_src});
-  my $curdir = getcwd;
-  my $result = 0;
-
-  print "Copying $settings->{clone_dir} to $tempdir ($result)\n";
-  $result = $result || system("cp -aR $settings->{clone_dir} $tempdir");
-
-  chdir($tempdir);
-  print "Removing git-specific directories ($result)\n";
-  $result = $result || system("find . -name '.git*' | xargs rm -rf");
-  print "Converting source files to Windows line endings ($result)\n";
-  my $converter = new ConvertFiles();
-  my ($stat, $error) = $converter->convert(".");
-  if (!$stat) {
-    print $error;
-    $result = 1;
+  else {
+    $message .= "needs to be created";
   }
-  print "Creating file $settings->{zip_src} ($result)\n";
-  $result = $result || system("zip $settings->{zip_src} -9 -qq -r . -x '.git*'");
-  chdir($curdir);
-
-  print "Move zip file ($result)\n";
-  $result = $result || system("mv $tfile $file");
-
-  return !$result;
+  return $message;
 }
+
+sub release_archive_remedy {
+  my $which = shift();
+  my $settings = shift();
+
+  my ($worktree, $arc_name, $arc_path, $cl, $crlf) = release_archive_values($which, $settings);
+  my $differ_key = "release_archive_files_differ_prompt_$which";
+
+  if ($settings->{$differ_key}) {
+    exit(0) if (!yes_no("$arc_name will be recreated becuase of source directory changes, Continue?"));
+    $settings->{$differ_key} = 0;
+  }
+  return create_archive($worktree, $arc_path, exclude => $exclude_from_release_arc);
+}
+
 ############################################################################
+
+sub checksum_common {
+  my $type = shift();
+  my $verify = shift();
+  my $settings = shift();
+  my $step_options = shift() // {};
+
+  my $chdir = ChangeDir->new($settings->{workspace});
+  my $checksum_file = $settings->{"${type}_src"};
+
+  my @cmd = ("${type}sum");
+  my $capture = {};
+  if ($verify) {
+    return 0 unless (-f $checksum_file);
+    push(@cmd, '--check', $step_options->{remedy_verify} ? '--quiet' : '--status', $checksum_file);
+  }
+  else {
+    push(@cmd, get_source_release_files($settings));
+    $capture->{stdout} = $checksum_file;
+  }
+
+  return run_command(\@cmd, capture => $capture);
+}
+
 sub verify_md5_checksum {
-  my $settings = shift();
-  my $orig_dir = getcwd();
-  chdir($settings->{workspace});
-  my $status = run_command("md5sum --check --quiet $settings->{md5_src}");
-  chdir($orig_dir);
-  return $status;
+  return checksum_common('md5', 1, @_);
 }
 
 sub message_md5_checksum {
@@ -1738,14 +2203,23 @@ sub message_md5_checksum {
 }
 
 sub remedy_md5_checksum {
-  my $settings = shift();
-  print "Creating file $settings->{md5_src}\n";
-  my $orig_dir = getcwd();
-  chdir($settings->{workspace});
-  my $status = run_command("md5sum $settings->{tgz_src} $settings->{zip_src} > $settings->{md5_src}");
-  chdir($orig_dir);
-  return $status;
+  return checksum_common('md5', 0, @_);
 }
+
+############################################################################
+
+sub verify_sha256_checksum {
+  return checksum_common('sha256', 1, @_);
+}
+
+sub message_sha256_checksum {
+  return "Generate the sha256 checksum file";
+}
+
+sub remedy_sha256_checksum {
+  return checksum_common('sha256', 0, @_);
+}
+
 ############################################################################
 
 sub verify_download_ace_tao {
@@ -1763,7 +2237,7 @@ sub remedy_download_ace_tao {
 
   my $archive = "$settings->{workspace}/$ace_tao_filename";
 
-  if ($settings->{mock}) {
+  if ($settings->{dummy_doxygen}) {
     print "Touch $archive because of mock release\n";
     touch_file($archive);
     return 1;
@@ -1793,7 +2267,7 @@ sub message_extract_ace_tao {
 sub remedy_extract_ace_tao {
   my $settings = shift();
 
-  if ($settings->{mock}) {
+  if ($settings->{dummy_doxygen}) {
     my $file = ace_tao_sanity_file($settings);
     print "Touch $file because of mock release\n";
     touch_file($file);
@@ -1809,7 +2283,7 @@ sub remedy_extract_ace_tao {
 
 sub doxygen_sanity_file {
   my $settings = shift();
-  return "$settings->{clone_dir}/html/dds/index.html";
+  return "$settings->{doxygen_inner_dir}/index.html";
 }
 
 sub verify_gen_doxygen {
@@ -1819,100 +2293,67 @@ sub verify_gen_doxygen {
 
 sub message_gen_doxygen {
   my $settings = shift();
-  return "Doxygen documentation needs generating in dir $settings->{clone_dir}\n";
+  return "Doxygen documentation needs generating in dir $settings->{doxygen_dir}\n";
 }
 
 sub remedy_gen_doxygen {
   my $settings = shift();
 
-  if ($settings->{mock}) {
+  if ($settings->{dummy_doxygen}) {
     my $file = doxygen_sanity_file($settings);
     print "Touch $file because of mock release\n";
     touch_file($file);
     return 1;
   }
 
-  my $curdir = getcwd;
-  $ENV{DDS_ROOT} = $settings->{clone_dir};
+  my $dox_dir = $settings->{doxygen_dir};
+  mkdir($dox_dir) if (!-d $dox_dir);
+  $ENV{DDS_ROOT} = $settings->{tgz_worktree};
   $ENV{ACE_ROOT} = $settings->{ace_root};
-  chdir($ENV{DDS_ROOT});
-  my $result = run_command("$ENV{DDS_ROOT}/tools/scripts/generate_combined_doxygen.pl . -is_release");
-  chdir($curdir);
-  return $result;
-}
+  run_command(["./tools/scripts/generate_combined_doxygen.pl", $dox_dir, '-is_release'],
+    chdir => $ENV{DDS_ROOT}, autodie => 1);
 
-############################################################################
-
-sub verify_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tgz_dox});
-  my $good = 0;
-  if (-f $file) {
-    open(TGZ, "gzip -c -d $file | tar -tvf - |") or die "Opening $!";
-    my $target = "html/dds/index.html";
-    while (<TGZ>) {
-      if (/$target/) {
-        $good = 1;
-        last;
-      }
-    }
-    close TGZ;
-  }
-  return $good;
-}
-
-sub message_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tgz_dox});
-  return "Could not find file $file";
-}
-
-sub remedy_tgz_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{tar_dox});
-  my $curdir = getcwd;
-  chdir($settings->{clone_dir});
-  print "Creating file $settings->{tar_dox}\n";
-  my $result = system("tar -cf ../$settings->{tar_dox} html");
-  if (!$result) {
-    print "Gzipping file $settings->{tar_dox}\n";
-    $result = system("gzip -9 ../$settings->{tar_dox}");
-  }
-  chdir($curdir);
-  return !$result;
-}
-
-############################################################################
-
-sub verify_zip_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{zip_dox});
-  return (-f $file);
-}
-
-sub message_zip_doxygen {
-  my $settings = shift();
-  my $file = join("/", $settings->{workspace}, $settings->{zip_dox});
-  return "Could not find file $file";
-}
-
-sub remedy_zip_doxygen {
-  my $settings = shift();
-  my $curdir = getcwd;
-  print "Converting doxygen files to Windows line endings\n";
+  print "Converting doxygen files to Windows line endings...\n";
   my $converter = new ConvertFiles();
-  my ($stat, $error) = $converter->convert($settings->{clone_dir} . "/html");
+  my ($stat, $error) = $converter->convert($dox_dir);
   if (!$stat) {
     print $error;
     return 0;
   }
 
-  chdir("$settings->{clone_dir}/html");
-  my $file = "../../$settings->{zip_dox}";
-  print "Creating file $settings->{zip_dox}\n";
-  my $result = system("zip $file -9 -qq -r dds");
-  chdir($curdir);
-  return !$result;
+  return 1;
+}
+
+############################################################################
+
+sub dox_values {
+  my $settings = shift();
+  return ($settings->{doxygen_inner_dir}, "$settings->{workspace}/$settings->{zip_dox}");
+}
+
+sub verify_zip_doxygen {
+  my $settings = shift();
+  my $step_options = shift() // {};
+  return verify_archive(dox_values($settings), remedy_verify => $step_options->{remedy_verify});
+}
+
+sub message_zip_doxygen {
+  my $settings = shift();
+
+  my ($dox_dir, $dox_zip) = dox_values($settings);
+  my $message = "$settings->{zip_dox} ";
+  if (-f $dox_zip) {
+    $message .= "is either invalid or doesn't match source directory and needs to be recreated";
+  }
+  else {
+    $message .= "needs to be created";
+  }
+  return $message;
+}
+
+sub remedy_zip_doxygen {
+  my $settings = shift();
+  return create_archive(dox_values($settings));
 }
 
 ############################################################################
@@ -1935,10 +2376,8 @@ sub remedy_devguide {
   my $lat = "$settings->{workspace}/$settings->{devguide_lat}";
 
   if ($settings->{mock}) {
-    print "Touch $ver because of mock release\n";
-    touch_file($ver);
-    print "Touch $lat because of mock release\n";
-    touch_file($lat);
+    create_dummy_release_file($ver);
+    create_dummy_release_file($lat);
     return 1;
   }
 
@@ -1951,70 +2390,87 @@ sub remedy_devguide {
 
 ############################################################################
 
-sub get_release_files {
+sub get_mime_type {
+  my $filename = shift();
+
+  # Official IANA list: https://www.iana.org/assignments/media-types/media-types.xhtml
+  if ($filename =~ /\.gz$/) {
+    return 'application/gzip';
+  }
+  elsif ($filename =~ /\.zip$/) {
+    return 'application/zip';
+  }
+  elsif ($filename =~ /\.pdf$/) {
+    return 'application/pdf';
+  }
+  elsif ($filename =~ /\.(md5|sha256)$/) {
+    return 'text/plain';
+  }
+  else {
+    die("ERROR: can't determine the MIME type of ${filename}");
+  }
+}
+
+sub get_source_release_files {
   my $settings = shift();
-  my @files = (
-      $settings->{tgz_src},
-      $settings->{zip_src},
-      $settings->{md5_src},
+
+  return (
+    $settings->{tgz_src},
+    $settings->{zip_src},
   );
+}
+
+sub get_github_release_files {
+  my $settings = shift();
+
+  my @files = get_source_release_files($settings);
+
+  push(@files, $settings->{md5_src}, $settings->{sha256_src});
   if (!$settings->{skip_devguide}) {
     push(@files, $settings->{devguide_ver});
-    push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
   }
-  if (!$settings->{skip_doxygen}) {
-    push(@files, $settings->{tgz_dox});
-    push(@files, $settings->{zip_dox});
-  }
+
   return @files;
 }
 
-my $PRIOR_RELEASE_PATH = 'previous-releases/';
-
-sub verify_ftp_upload {
+sub get_sftp_release_files {
   my $settings = shift();
 
-  my $url = "$settings->{download_url}/";
-  $url .= $PRIOR_RELEASE_PATH if (!$settings->{is_highest_version});
-  my $content;
-  if (!download($url, content_ref => \$content)) {
-    print "Could not get current release files from $url";
-    return 0;
+  my @files = get_github_release_files($settings);
+
+  if (!$settings->{skip_devguide}) {
+    push(@files, $settings->{devguide_lat}) if ($settings->{is_highest_version});
+  }
+  if (!$settings->{skip_doxygen}) {
+    push(@files, $settings->{zip_dox});
   }
 
-  foreach my $file (get_release_files($settings)) {
-    if ($content !~ /$file/) {
-      print "$file not found in $url\n";
-      return 0;
-    }
-  }
-  return 1;
+  return @files;
 }
 
-sub message_ftp_upload {
-  return "Release needs to be uploaded to ftp site";
-}
-
-sub remedy_ftp_upload {
+sub verify_sftp_upload {
   my $settings = shift();
-  my $FTP_DIR = "downloads/OpenDDS";
 
-  # login to ftp server and setup binary file transfers
-  my $ftp = Net::FTP->new(
-    $settings->{ftp_host},
-    Debug => 0,
-    Port => $settings->{ftp_port},
-    Passive => !$settings->{ftp_active},
-  ) or die "Cannot connect to $settings->{ftp_host}: $@";
-  $ftp->login($settings->{ftp_user}, $settings->{ftp_password})
-    or die "Cannot login ", $ftp->message();
-  $ftp->cwd($FTP_DIR)
-    or die "Cannot change dir to $FTP_DIR ", $ftp->message();
-  my @current_release_files = $ftp->ls()
-    or die "Cannot ls() $FTP_DIR ", $ftp->message();
-  $ftp->binary();
+  my $sub_dir = "";
+  $sub_dir = $sftp_previous_releases_path if (!$settings->{is_highest_version});
+  my @missing = sftp_missing($settings, $sub_dir, get_sftp_release_files($settings));
+  for my $file (@missing) {
+    print "$file not found\n";
+  }
+  return scalar(@missing) ? 0 : 1;
+}
 
-  my @new_release_files = get_release_files($settings);
+sub message_sftp_upload {
+  return "Release needs to be uploaded to SFTP site";
+}
+
+sub remedy_sftp_upload {
+  my $settings = shift();
+
+  my $sftp = new_sftp($settings);
+
+  my @current_release_files = map {$_->{filename}} @{$sftp->ls()};
+  my @new_release_files = get_sftp_release_files($settings);
 
   if ($settings->{is_highest_version}) {
     # Identify Old Versioned Release Files Using the New Ones
@@ -2041,14 +2497,13 @@ sub remedy_ftp_upload {
       foreach my $file_info (@release_file_re) {
         if ($file =~ $file_info->{re}) {
           if ($file_info->{versioned}) {
-            my $new_path = $PRIOR_RELEASE_PATH . $file;
+            my $new_path = $sftp_previous_releases_path . $file;
             print "moving $file to $new_path\n";
-            $ftp->rename($file, $new_path)
-              or die "Could not rename $file to $new_path: " . $ftp->message();
+            $sftp->rename($file, $new_path);
           }
           else {
             print "deleting $file\n";
-            $ftp->delete($file) or die "Could not delete $file: " . $ftp->message();
+            $sftp->remove($file);
           }
           last;
         }
@@ -2056,32 +2511,32 @@ sub remedy_ftp_upload {
     }
   }
   else {
-    print "Not highest version release, cd-ing to $PRIOR_RELEASE_PATH\n";
-    $ftp->cwd($PRIOR_RELEASE_PATH)
-      or die "Cannot change dir to $PRIOR_RELEASE_PATH ", $ftp->message();
+    print "Not highest version release, cd-ing to $sftp_previous_releases_path\n";
+    $sftp->setcwd($sftp_previous_releases_path);
   }
 
   # upload new release files
   foreach my $file (@new_release_files) {
     print "uploading $file\n";
     my $local_file = join("/", $settings->{workspace}, $file);
-    $ftp->put($local_file, $file) or die "Failed to upload $file: " . $ftp->message();
+    $sftp->put($local_file, $file);
   }
 
-  $ftp->quit();
   return 1;
 }
 
 ############################################################################
+
 sub verify_github_upload {
   my $settings = shift();
   my $verified = 0;
 
   my $release_list = $settings->{pithub}->repos->releases->list();
-  unless ( $release_list->success ) {
+  unless ($release_list->success) {
     printf "error accessing github: %s\n", $release_list->response->status_line;
-  } else {
-    while ( my $row = $release_list->next ) {
+  }
+  else {
+    while (my $row = $release_list->next) {
       if ($row->{tag_name} eq $settings->{git_tag}){
         #printf "%d\t[%s]\n",$row->{id},$row->{tag_name};
         $verified = 1;
@@ -2101,39 +2556,66 @@ sub remedy_github_upload {
 
   my $rc = 1;
 
+  # Try to do as much as possible before creating the release. If there's a
+  # fatal issue while uploading the release assets, then the release has to be
+  # manually deleted on GitHub before this step can be run again.
+  my @assets = get_github_release_files($settings);
+  my %asset_details;
+  for my $filename (@assets) {
+    open(my $fh, "$settings->{workspace}/$filename") or die("Can't open \"$filename\": $?");
+    binmode($fh);
+    my $size = stat($fh)->size;
+    my $data;
+    if ($size == 0 && !exists($dummy_release_files{$filename})) {
+      die("$filename is empty and is not supposed to be!");
+    }
+    else {
+      read $fh, $data, $size or die("Can't read \"$filename\": $?");
+    }
+    close($fh);
+
+    $asset_details{$filename} = {
+      content_type => get_mime_type($filename),
+      data => $data,
+    };
+  }
+
   my $releases = $settings->{pithub}->repos->releases;
   my $text =
     "**Download $settings->{zip_src} (Windows) or $settings->{tgz_src} (Linux/macOS) " .
       "instead of \"Source code (zip)\" or \"Source code (tar.gz)\".**\n\n" .
     news_contents_excerpt($settings->{version});
   my $release = $releases->create(
-      data => {
-          name => 'OpenDDS ' . $settings->{version},
-          tag_name => $settings->{git_tag},
-          body => $text
-      }
+    data => {
+      name => "OpenDDS $settings->{version}",
+      tag_name => $settings->{git_tag},
+      body => $text,
+    },
   );
-  unless ( $release->success ) {
-    printf "error accessing github: %s\n", $release->response->status_line;
+  unless ($release->success) {
+    print STDERR "error accessing github: $release->response->status_line\n";
     $rc = 0;
-  } else {
-    for my $f ($settings->{tgz_src},
-               $settings->{zip_src}) {
-      my $p = "$settings->{workspace}/$f";
-      open(my $fh, $p) or die "Can't open";
-      binmode $fh;
-      my $size = stat($fh)->size;
-      my $data;
-      read $fh, $data, $size or die "Can't read";
-      my $mime = ($f =~ /\.gz$/) ? 'application/gzip' : 'application/x-zip-compressed';
-      my $asset = $releases->assets->create(
+  }
+  else {
+    my $fail_msg = "\nThe release on GitHub has to be deleted manually before trying to verify\n" .
+      "or remedy this step again";
+    for my $filename (@assets) {
+      print("Upload $filename\n");
+      my $asset;
+      my $asset_detail = $asset_details{$filename};
+      eval {
+        $asset = $releases->assets->create(
           release_id => $release->content->{id},
-          name => $f,
-          content_type => $mime,
-          data => $data
-      );
-      unless ( $asset->success ) {
-        printf "error accessing github: %s\n", $asset->response->status_line;
+          name => $filename,
+          content_type => $asset_detail->{content_type},
+          data => $asset_detail->{data}
+        );
+      };
+      if ($@) {
+        die("Issue with \$releases->assets->create:", $@, $fail_msg);
+      }
+      unless ($asset->success) {
+        print STDERR "error accessing github: $asset->response->status_line$fail_msg\n";
         $rc = 0;
       }
     }
@@ -2142,23 +2624,32 @@ sub remedy_github_upload {
 }
 
 ############################################################################
+
+my $website_releases_json = '_data/releases.json';
+
 sub verify_website_release {
   # verify there are no differences between website-next-release branch and gh-pages branch
   my $settings = shift();
   my $remote = $settings->{remote};
   my $status;
 
-  # fetch remote branches so we have up to date versions
-  if ($status && !run_command("git fetch $remote website-next-release")) {
-    print STDERR "Couldn't fetch website-next-release!\n";
-    return 0;
+  if ($status && !run_command("git add $website_releases_json")) {
+    print STDERR "Couldn't git add!\n";
+    $status = 0;
   }
-  if ($status && !run_command("git fetch $remote gh-pages")) {
-    print STDERR "Couldn't fetch gh-pages!\n";
-    return 0;
+  if ($status && !remedy_git_status_clean($settings, 0, 0)) {
+    print STDERR "Couldn't commit release list!\n";
+    $status = 0;
   }
 
-  $status = open(GITDIFF, 'git diff ' . $remote  . '/website-next-release ' . $remote . '/gh-pages|');
+  # fetch remote branches so we have up to date versions
+  run_command("git fetch $remote website-next-release") or
+    die("Couldn't fetch website-next-release!");
+  run_command("git fetch $remote gh-pages") or
+    die("Couldn't fetch gh-pages!");
+
+  open(GITDIFF, "git diff $remote/website-next-release $remote/gh-pages|") or
+    die("Couldn't run git diff");
   my $delta = "";
   while (<GITDIFF>) {
     if (/^...(.*)/) {
@@ -2166,15 +2657,28 @@ sub verify_website_release {
     }
   }
   close(GITDIFF);
-  # return 1 to pass
-  # return 0 to fail
-  return (length($delta) == 0) ? 1 : 0;
+  my $has_merged = length($delta) == 0;
+
+  # See if the release we're doing is on the website
+  open(my $git_show, "git show $remote/gh-pages:$website_releases_json|") or
+    die("Couldn't run git show $website_releases_json");
+  my $has_release = 0;
+  for my $r (@{decode_json(do { local $/; <$git_show> })}) {
+    if ($r->{version} eq $settings->{version}) {
+      $has_release = 1;
+      last;
+    }
+  }
+  close($git_show);
+
+  return $has_merged && $has_release;
 }
 
 sub message_website_release {
   my $settings = shift();
   my $remote = $settings->{remote};
-  return "$remote/website-next-release branch needs to merge into $remote/gh-pages branch";
+  return "$remote/website-next-release branch needs to merge into\n" .
+    "  $remote/gh-pages branch or release list needs to be updated";
 }
 
 sub remedy_website_release {
@@ -2185,7 +2689,7 @@ sub remedy_website_release {
   my $rm_worktree = 0;
   my $status = 1;
 
-  if (!run_command("git worktree add $worktree gh-pages")) {
+  if (!-d $worktree && !run_command("git worktree add $worktree gh-pages")) {
     print STDERR
       "Couldn't create temporary website worktree!\n";
     $status = 0;
@@ -2193,6 +2697,31 @@ sub remedy_website_release {
   $rm_worktree = 1;
   my $prev_dir = getcwd;
   chdir $worktree;
+
+  # Merge releases with the same major and minor versions, keeping one with the
+  # highest micro version.
+  my $releases = get_releases($settings);
+  my $latest_ver = $releases->[0]->{version};
+  my $major = $latest_ver->{major} + 1;
+  my $minor = $latest_ver->{minor};
+  for my $release (@{$releases}) {
+    my $v = $release->{version};
+    $release->{latest_in_series} =
+      ($v->{major} != $major || $v->{minor} != $minor) ? 1 : 0;
+    if ($release->{latest_in_series}) {
+      $major = $v->{major};
+      $minor = $v->{minor};
+    }
+  }
+  write_releases($website_releases_json, $releases);
+  if ($status && !run_command("git add $website_releases_json")) {
+    print STDERR "Couldn't git add!\n";
+    $status = 0;
+  }
+  if ($status && !remedy_git_status_clean($settings, 0, 0)) {
+    print STDERR "Couldn't commit release list!\n";
+    $status = 0;
+  }
 
   # Get the two branches merged with each other
   if ($status && !run_command("git pull")) {
@@ -2244,16 +2773,114 @@ sub remedy_website_release {
 }
 
 ############################################################################
+
+sub rtd_api {
+  my $settings = shift();
+  my $method = shift();
+  my $suburl = shift();
+  my %args = @_;
+
+  if (!defined($settings->{read_the_docs_token})) {
+    die("READ_THE_DOCS_TOKEN must be defined");
+  }
+
+  my $response;
+  return 0 unless(download(
+    $rtd_project_url . $suburl,
+    method => $method,
+    curl_user_agent => 1, # Read the Docs gives back a weird error without this
+    token => $settings->{read_the_docs_token},
+    response_ref => \$response,
+    @_,
+  ));
+
+  if (exists($args{expected_status}) && $response->code() != $args{expected_status}) {
+    print STDERR "ERROR: Expected HTTP Status $args{expected_code}, got ", $response->code(), "\n";
+    return 0;
+  }
+
+  return 1;
+}
+
+sub rtd_api_version {
+  my $settings = shift();
+  my $method = shift();
+
+  my $name = lc($settings->{git_tag});
+  return rtd_api($settings, $method, "versions/$name/", @_);
+}
+
+sub verify_rtd_activate {
+  my $settings = shift();
+
+  my $version_info;
+  die("Failed to get version info") unless(rtd_api_version(
+    $settings, 'GET',
+    res_json_ref => \$version_info,
+  ));
+  return $version_info->{active} && !$version_info->{hidden};
+}
+
+sub message_rtd_activate {
+  my $settings = shift();
+  return "Read the docs version for the new release has to be activated";
+}
+
+sub remedy_rtd_activate {
+  my $settings = shift();
+
+  die("Failed to set read the docs version to active") unless(rtd_api_version(
+    $settings, 'PATCH',
+    req_json_ref => {
+      active => $JSON::PP::true,
+      hidden => $JSON::PP::false,
+    },
+    expect_status => 204,
+  ));
+  return 1;
+}
+
+############################################################################
+
+sub verify_trigger_shapes_demo_build {
+  my $settings = shift();
+
+  my $run = get_last_shapes_run($settings);
+  if (!defined($run)) {
+    print("No shapes demo build runs for $settings->{git_tag} found\n");
+    return 0;
+  }
+  return 1;
+}
+
+sub message_trigger_shapes_demo_build {
+  my $settings = shift();
+  return "Shapes demo GitHub Action workflow has to be trigged";
+}
+
+sub remedy_trigger_shapes_demo_build {
+  my $settings = shift();
+
+  trigger_shapes_run($settings);
+
+  print("Giving GitHub time to process...\n");
+  sleep(5);
+
+  return 1;
+}
+
+############################################################################
+
 sub verify_email_list {
   # Can't verify
   my $settings = shift;
-  print 'Email this text to dds-release-announce@ociweb.com' . "\n\n" .
+  print 'Email this text to announce the release' . "\n\n" .
     email_announce_contents($settings);
   return 1;
 }
 
 sub message_email_dds_release_announce {
-  return 'Email needs to be sent to dds-release-announce@ociweb.com';
+  return 'Emails are needed to announce the release';
 }
 
 sub remedy_email_dds_release_announce {
@@ -2261,6 +2888,7 @@ sub remedy_email_dds_release_announce {
 }
 
 ############################################################################
+
 sub verify_news_template_file_section {
   my $settings = shift();
   my $next_version = quotemeta($settings->{parsed_next_version}->{release_string});
@@ -2275,7 +2903,7 @@ sub verify_news_template_file_section {
   }
   close(NEWS);
 
-  return ($has_news_template);
+  return $has_news_template;
 }
 
 sub message_news_template_file_section {
@@ -2322,15 +2950,19 @@ my $branch = $default_branch;
 my $github_user = $default_github_user;
 my $download_url = $default_download_url;
 my $mock = 0;
+my $mock_with_doxygen = 0;
 my $micro = 0;
 my $next_version = "";
 my $metadata = $default_post_release_metadata;
 my $skip_devguide = 0;
 my $skip_doxygen = 0;
 my $skip_website = 0;
-my $skip_ftp = 0;
-my $ftp_active = 0;
-my $ftp_port = 0;
+my $skip_sftp = 0;
+my $skip_github = undef;
+my $force_not_highest_version = 0;
+my $sftp_base_dir = $default_sftp_base_dir;
+my $upload_shapes_demo = 0;
+my $write_authors = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2344,15 +2976,18 @@ GetOptions(
   'github-user=s' => \$github_user,
   'download-url=s' => \$download_url,
   'mock' => \$mock,
+  'mock-with-doxygen' => \$mock_with_doxygen,
   'micro' => \$micro,
   'next-version=s' => \$next_version,
   'metadata=s' => \$metadata,
   'skip-devguide' => \$skip_devguide,
   'skip-doxygen' => \$skip_doxygen ,
   'skip-website' => \$skip_website ,
-  'skip-ftp' => \$skip_ftp,
-  'ftp-active' => \$ftp_active,
-  'ftp-port=s' => \$ftp_port,
+  'skip-sftp' => \$skip_sftp,
+  'sftp-base-dir=s' => \$sftp_base_dir,
+  'skip-github=i' => \$skip_github,
+  'upload-shapes-demo' => \$upload_shapes_demo,
+  'write-authors' => \$write_authors,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2365,16 +3000,27 @@ if ($print_list_all) {
   $ignore_args = 1;
 }
 
+if ($write_authors) {
+  $ignore_args = 1;
+}
+
+$mock = 1 if ($mock_with_doxygen);
+
+if (defined($skip_github)) {
+  $force_not_highest_version = $skip_github ? 0 : 1;
+  $skip_github = 1;
+}
+
 my $workspace = "";
-my %parsed_version = ();
-my %parsed_next_version = ();
+my $parsed_version;
+my $parsed_next_version;
 my $version = "";
 my $base_name = "";
 my $release_branch = "";
 
 if ($ignore_args) {
-  %parsed_version = %zero_version;
-  %parsed_next_version = %zero_version;
+  $parsed_version = $zero_version;
+  $parsed_next_version = $zero_version;
 }
 else {
   if (scalar(@ARGV) != 2) {
@@ -2387,7 +3033,6 @@ else {
     }
     $skip_devguide = 1;
     $skip_doxygen = 1;
-    $skip_website = 1;
   }
 
   $download_url = remove_end_slash($download_url);
@@ -2399,91 +3044,97 @@ else {
   }
 
   # Process VERSION Argument
-  %parsed_version = parse_version($ARGV[1] || "");
-  if (%parsed_version) {
-    $version = $parsed_version{string};
+  $parsed_version = parse_version($ARGV[1] || "");
+  if ($parsed_version) {
+    $version = $parsed_version->{string};
     print("Version to release is $version\n");
-    $base_name = "${base_name_prefix}$parsed_version{tag_string}";
+    $base_name = "${base_name_prefix}$parsed_version->{tag_string}";
     if (!$micro) {
       $release_branch =
-        "${release_branch_prefix}${git_name_prefix}$parsed_version{series_string}";
-      if ($parsed_version{micro} != 0) {
+        "${release_branch_prefix}${git_name_prefix}$parsed_version->{series_string}";
+      if ($parsed_version->{micro} != 0) {
         exit(0) if (!yes_no(
           "Version looks like a micro release, but --micro wasn't passed! Continue?"));
       }
     }
-    elsif ($parsed_version{micro} == 0) {
+    elsif ($parsed_version->{micro} == 0) {
       exit(0) if (!yes_no(
         "Version looks like a major or minor release, but --micro was passed! Continue?"));
     }
     if (!$next_version) {
-      my $next_minor = int($parsed_version{minor}) + ($micro ? 0 : 1);
-      my $next_micro = $micro ? (int($parsed_version{micro}) + 1) : 0;
-      $next_version = sprintf("%s.%d.%d", $parsed_version{major}, $next_minor, $next_micro);
+      my $next_minor = int($parsed_version->{minor}) + ($micro ? 0 : 1);
+      my $next_micro = $micro ? (int($parsed_version->{micro}) + 1) : 0;
+      $next_version = sprintf("%s.%d.%d", $parsed_version->{major}, $next_minor, $next_micro);
     }
     $next_version .= "-${metadata}";
-    %parsed_next_version = parse_version($next_version);
-    if (!%parsed_next_version) {
+    $parsed_next_version = parse_version($next_version);
+    if (!$parsed_next_version) {
       arg_error("Invalid next version: $next_version");
     }
-    $next_version = $parsed_next_version{string};
+    $next_version = $parsed_next_version->{string};
     print("Next after this version is going to be $next_version\n");
   }
   else {
     arg_error("Invalid version: $version");
   }
 
-  if (!$skip_ftp) {
-    die("FTP_USERNAME, FTP_PASSWD, FTP_HOST need to be defined")
-      if (!(defined($ENV{FTP_USERNAME}) && defined($ENV{FTP_PASSWD}) && defined($ENV{FTP_HOST})));
+  if (!$skip_sftp) {
+    die("SFTP_USERNAME, SFTP_HOST need to be defined")
+      if (!(defined($ENV{SFTP_USERNAME}) && defined($ENV{SFTP_HOST})));
   }
 }
 
 my $release_timestamp = POSIX::strftime($release_timestamp_fmt, gmtime);
 $release_timestamp =~ s/  / /g; # Single digit days of the month result in an extra space
 
+my $doxygen_dir = "$workspace/doxygen";
+my $doxygen_inner_dir = "$doxygen_dir/html/dds";
+my $this_changelog = "docs/history/ChangeLog-$version";
 my %global_settings = (
-    list         => $print_list,
-    list_all     => $print_list_all,
-    remedy       => $remedy,
-    force        => $force,
-    micro        => $micro,
-    remote       => $remote,
-    branch       => $branch,
+    list => $print_list,
+    list_all => $print_list_all,
+    remedy => $remedy,
+    force => $force,
+    micro => $micro,
+    remote => $remote,
+    branch => $branch,
     release_branch => $release_branch,
-    github_user  => $github_user,
-    version      => $version,
-    parsed_version => \%parsed_version,
+    github_user => $github_user,
+    version => $version,
+    parsed_version => $parsed_version,
     next_version => $next_version,
-    parsed_next_version => \%parsed_next_version,
-    base_name    => $base_name,
-    git_tag      => "${git_name_prefix}$parsed_version{tag_string}",
-    clone_dir    => join("/", $workspace, ${base_name}),
-    tar_src      => "${base_name}.tar",
-    tgz_src      => "${base_name}.tar.gz",
-    zip_src      => "${base_name}.zip",
-    md5_src      => "${base_name}.md5",
-    tar_dox      => "${base_name}-doxygen.tar",
-    tgz_dox      => "${base_name}-doxygen.tar.gz",
-    zip_dox      => "${base_name}-doxygen.zip",
-    devguide_ver => "${base_name_prefix}$parsed_version{series_string}.pdf",
+    parsed_next_version => $parsed_next_version,
+    base_name => $base_name,
+    git_tag => "${git_name_prefix}$parsed_version->{tag_string}",
+    tgz_worktree => "$workspace/tgz/${base_name}",
+    zip_worktree => "$workspace/zip/${base_name}",
+    doxygen_dir => $doxygen_dir,
+    doxygen_inner_dir => $doxygen_inner_dir,
+    tar_src => "${base_name}.tar",
+    tgz_src => "${base_name}.tar.gz",
+    zip_src => "${base_name}.zip",
+    md5_src => "${base_name}.md5",
+    sha256_src => "${base_name}.sha256",
+    zip_dox => "${base_name}-doxygen.zip",
+    devguide_ver => "${base_name_prefix}$parsed_version->{series_string}.pdf",
     devguide_lat => "${base_name_prefix}latest.pdf",
-    timestamp    => $release_timestamp,
-    git_url      => "git\@github.com:${github_user}/${repo_name}.git",
-    github_repo  => $repo_name,
+    timestamp => $release_timestamp,
+    git_url => "git\@github.com:${github_user}/${repo_name}.git",
+    github_repo => $repo_name,
     github_token => $ENV{GITHUB_TOKEN},
-    ftp_user     => $ENV{FTP_USERNAME},
-    ftp_password => $ENV{FTP_PASSWD},
-    ftp_host     => $ENV{FTP_HOST},
-    changelog    => "docs/history/ChangeLog-$version",
-    modified     => {
+    read_the_docs_token => $ENV{READ_THE_DOCS_TOKEN},
+    sftp_user => $ENV{SFTP_USERNAME},
+    sftp_host => $ENV{SFTP_HOST},
+    sftp_base_dir => $sftp_base_dir,
+    changelog => $this_changelog,
+    modified => {
         "NEWS.md" => 1,
         "PROBLEM-REPORT-FORM" => 1,
         "VERSION.txt" => 1,
         "dds/Version.h" => 1,
-        "docs/history/ChangeLog-$version" => 1,
+        $this_changelog => 1,
     },
-    skip_ftp => $skip_ftp,
+    skip_sftp => $skip_sftp,
     skip_devguide => $skip_devguide,
     skip_doxygen => $skip_doxygen,
     skip_website => $skip_website,
@@ -2491,9 +3142,10 @@ my %global_settings = (
     workspace_info_file_path => "$workspace/$workspace_info_filename",
     download_url => $download_url,
     ace_root => "$workspace/$ace_root",
-    ftp_active => $ftp_active,
-    ftp_port => $ftp_port,
     mock => $mock,
+    dummy_doxygen => $mock && !$mock_with_doxygen,
+    skip_github => $skip_github,
+    force_not_highest_version => $force_not_highest_version,
 );
 
 if (!$ignore_args) {
@@ -2502,11 +3154,11 @@ if (!$ignore_args) {
   check_workspace(\%global_settings);
 
   if ($mock) {
-    if ($github_user eq $default_github_user) {
+    if (!$skip_github && $github_user eq $default_github_user) {
       die("--github-user can't be left to default when using --mock!");
     }
 
-    if (!$skip_ftp && $download_url eq $default_download_url) {
+    if (!$skip_sftp && $download_url eq $default_download_url) {
       die("--download-url can't be left to default when using --mock!");
     }
   }
@@ -2520,199 +3172,211 @@ if (!$ignore_args) {
 
 my @release_steps = (
   {
-    name    => 'Update VERSION.txt File',
-    verify  => sub{verify_update_version_file(@_)},
+    name => 'Update VERSION.txt File',
+    verify => sub{verify_update_version_file(@_)},
     message => sub{message_update_version_file(@_)},
-    remedy  => sub{remedy_update_version_file(@_)},
+    remedy => sub{remedy_update_version_file(@_)},
     can_force => 1,
   },
   {
-    name    => 'Update Version.h File',
-    verify  => sub{verify_update_version_h_file(@_)},
+    name => 'Update Version.h File',
+    verify => sub{verify_update_version_h_file(@_)},
     message => sub{message_update_version_h_file(@_)},
-    remedy  => sub{remedy_update_version_h_file(@_)},
+    remedy => sub{remedy_update_version_h_file(@_)},
     can_force => 1,
   },
   {
-    name    => 'Update PROBLEM-REPORT-FORM File',
-    verify  => sub{verify_update_prf_file(@_)},
+    name => 'Update PROBLEM-REPORT-FORM File',
+    verify => sub{verify_update_prf_file(@_)},
     message => sub{message_update_prf_file(@_)},
-    remedy  => sub{remedy_update_prf_file(@_)},
+    remedy => sub{remedy_update_prf_file(@_)},
     can_force => 1,
   },
   {
-    name    => 'Verify Remote',
-    verify  => sub{verify_git_remote(@_)},
-    message => sub{message_git_remote(@_)},
-  },
-  {
-    name    => 'Create ChangeLog File',
-    verify  => sub{verify_changelog(@_)},
+    name => 'Create ChangeLog File',
+    verify => sub{verify_changelog(@_)},
     message => sub{message_changelog(@_)},
-    remedy  => sub{remedy_changelog(@_)},
+    remedy => sub{remedy_changelog(@_)},
     can_force => 1,
   },
   {
-    name    => 'Update AUTHORS File',
-    verify  => sub{verify_authors(@_)},
+    name => 'Update AUTHORS File',
+    verify => sub{verify_authors(@_)},
     message => sub{message_authors(@_)},
-    remedy  => sub{remedy_authors(@_)},
+    remedy => sub{remedy_authors(@_)},
     can_force => 1,
   },
   {
-    name    => 'Add NEWS File Section',
-    verify  => sub{verify_news_file_section(@_)},
+    name => 'Add NEWS File Section',
+    verify => sub{verify_news_file_section(@_)},
     message => sub{message_news_file_section(@_)},
-    remedy  => sub{remedy_news_file_section(@_)},
+    remedy => sub{remedy_news_file_section(@_)},
     can_force => 1,
   },
   {
-    name    => 'Update NEWS File Section',
-    verify  => sub{verify_update_news_file(@_)},
+    name => 'Update NEWS File Section',
+    verify => sub{verify_update_news_file(@_)},
     message => sub{message_update_news_file(@_)},
     can_force => 1,
   },
   {
-    name    => 'Update NEWS File Section Timestamp',
-    verify  => sub{verify_news_timestamp(@_)},
+    name => 'Update NEWS File Section Timestamp',
+    verify => sub{verify_news_timestamp(@_)},
     message => sub{message_news_timestamp(@_)},
-    remedy  => sub{remedy_news_timestamp(@_)},
+    remedy => sub{remedy_news_timestamp(@_)},
     can_force => 1,
   },
   {
-    name    => 'Commit Release Changes',
-    verify  => sub{verify_git_status_clean(@_, 1)},
+    name => 'Commit Release Changes',
+    verify => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_git_status_clean($settings, {%{$step_options}, strict => 1});
+    },
     message => sub{message_commit_git_changes(@_)},
-    remedy  => sub{remedy_git_status_clean(@_)}
+    remedy => sub{remedy_git_status_clean(@_)},
   },
   {
-    name    => 'Create Tag',
-    verify  => sub{verify_git_tag(@_)},
+    name => 'Create Tag',
+    verify => sub{verify_git_tag(@_)},
     message => sub{message_git_tag(@_)},
-    remedy  => sub{remedy_git_tag(@_)}
+    remedy => sub{remedy_git_tag(@_)},
   },
   {
-    name    => 'Push Release Changes',
+    name => 'Verify Remote',
+    verify => sub{verify_git_remote(@_)},
+    message => sub{message_git_remote(@_)},
+    skip => $global_settings{skip_github},
+  },
+  {
+    name => 'Push Release Changes',
     prereqs => ['Verify Remote'],
-    verify  => sub{verify_git_changes_pushed(@_, 1)},
+    verify => sub{verify_git_changes_pushed(@_)},
     message => sub{message_git_changes_pushed(@_)},
-    remedy  => sub{remedy_git_changes_pushed(@_)}
+    remedy => sub{remedy_git_changes_pushed(@_)},
+    skip => $global_settings{skip_github},
   },
   {
-    name    => 'Create Release Branch',
-    verify  => sub{verify_create_release_branch(@_)},
+    name => 'Create Release Branch',
+    verify => sub{verify_create_release_branch(@_)},
     message => sub{message_create_release_branch(@_)},
-    remedy  => sub{remedy_create_release_branch(@_)},
-    skip    => !$global_settings{release_branch},
+    remedy => sub{remedy_create_release_branch(@_)},
+    skip => !$global_settings{release_branch},
   },
   {
-    name    => 'Push Release Branch',
+    name => 'Push Release Branch',
     prereqs => ['Create Release Branch', 'Verify Remote'],
-    verify  => sub{verify_push_release_branch(@_)},
+    verify => sub{verify_push_release_branch(@_)},
     message => sub{message_push_release_branch(@_)},
-    remedy  => sub{remedy_push_release_branch(@_)},
-    skip    => !$global_settings{release_branch},
+    remedy => sub{remedy_push_release_branch(@_)},
+    skip => !$global_settings{release_branch} || $global_settings{skip_github},
   },
   {
-    name    => 'Clone Tag',
-    prereqs => ['Verify Remote'],
-    verify  => sub{verify_clone_tag(@_)},
-    message => sub{message_clone_tag(@_)},
-    remedy  => sub{remedy_clone_tag(@_)}
+    name => 'Create Unix Release Worktree',
+    prereqs => ['Create Tag'],
+    verify => sub{release_archive_worktree_verify('tgz', @_)},
+    message => sub{release_archive_worktree_message('tgz', @_)},
+    remedy => sub{release_archive_worktree_remedy('tgz', @_)},
   },
   {
-    name    => 'Move ChangeLog File',
-    verify  => sub{verify_move_changelog(@_)},
-    message => sub{message_move_changelog(@_)},
-    remedy  => sub{remedy_move_changelog(@_)}
+    name => 'Create Unix Release Archive',
+    prereqs => ['Create Unix Release Worktree'],
+    verify => sub{release_archive_verify('tgz', @_)},
+    message => sub{release_archive_message('tgz', @_)},
+    remedy => sub{release_archive_remedy('tgz', @_)},
   },
   {
-    name    => 'Create Unix Release Archive',
-    verify  => sub{verify_tgz_source(@_)},
-    message => sub{message_tgz_source(@_)},
-    remedy  => sub{remedy_tgz_source(@_)}
+    name => 'Create Windows Release Worktree',
+    prereqs => ['Create Tag'],
+    verify => sub{release_archive_worktree_verify('zip', @_)},
+    message => sub{release_archive_worktree_message('zip', @_)},
+    remedy => sub{release_archive_worktree_remedy('zip', @_)},
   },
   {
-    name    => 'Create Windows Release Archive',
-    verify  => sub{verify_zip_source(@_)},
-    message => sub{message_zip_source(@_)},
-    remedy  => sub{remedy_zip_source(@_)}
+    name => 'Create Windows Release Archive',
+    prereqs => ['Create Windows Release Worktree'],
+    verify => sub{release_archive_verify('zip', @_)},
+    message => sub{release_archive_message('zip', @_)},
+    remedy => sub{release_archive_remedy('zip', @_)},
   },
   {
-    name    => 'Create MD5 Checksum File',
+    name => 'Create MD5 Checksum File',
     prereqs => [
       'Create Unix Release Archive',
       'Create Windows Release Archive',
     ],
-    verify  => sub{verify_md5_checksum(@_)},
+    verify => sub{verify_md5_checksum(@_)},
     message => sub{message_md5_checksum(@_)},
-    remedy  => sub{remedy_md5_checksum(@_)},
+    remedy => sub{remedy_md5_checksum(@_)},
   },
   {
-    name    => 'Download OCI ACE/TAO',
-    verify  => sub{verify_download_ace_tao(@_)},
+    name => 'Create sha256 Checksum File',
+    prereqs => [
+      'Create Unix Release Archive',
+      'Create Windows Release Archive',
+    ],
+    verify => sub{verify_sha256_checksum(@_)},
+    message => sub{message_sha256_checksum(@_)},
+    remedy => sub{remedy_sha256_checksum(@_)},
+  },
+  {
+    name => 'Download OCI ACE/TAO',
+    verify => sub{verify_download_ace_tao(@_)},
     message => sub{message_download_ace_tao(@_)},
-    remedy  => sub{remedy_download_ace_tao(@_)},
-    skip    => $global_settings{skip_doxygen},
+    remedy => sub{remedy_download_ace_tao(@_)},
+    skip => $global_settings{skip_doxygen},
   },
   {
-    name    => 'Extract OCI ACE/TAO',
+    name => 'Extract OCI ACE/TAO',
     prereqs => ['Download OCI ACE/TAO'],
-    verify  => sub{verify_extract_ace_tao(@_)},
+    verify => sub{verify_extract_ace_tao(@_)},
     message => sub{message_extract_ace_tao(@_)},
-    remedy  => sub{remedy_extract_ace_tao(@_)},
-    skip    => $global_settings{skip_doxygen},
+    remedy => sub{remedy_extract_ace_tao(@_)},
+    skip => $global_settings{skip_doxygen},
   },
   {
-    name    => 'Generate Doxygen',
-    prereqs => ['Extract OCI ACE/TAO'],
-    verify  => sub{verify_gen_doxygen(@_)},
+    name => 'Generate Doxygen',
+    prereqs => ['Extract OCI ACE/TAO', 'Create Unix Release Worktree'],
+    verify => sub{verify_gen_doxygen(@_)},
     message => sub{message_gen_doxygen(@_)},
-    remedy  => sub{remedy_gen_doxygen(@_)},
-    skip    => $global_settings{skip_doxygen},
+    remedy => sub{remedy_gen_doxygen(@_)},
+    skip => $global_settings{skip_doxygen},
   },
   {
-    name    => 'Create Unix Doxygen Archive',
+    name => 'Create Doxygen Archive',
     prereqs => ['Generate Doxygen'],
-    verify  => sub{verify_tgz_doxygen(@_)},
-    message => sub{message_tgz_doxygen(@_)},
-    remedy  => sub{remedy_tgz_doxygen(@_)},
-    skip    => $global_settings{skip_doxygen},
-  },
-  {
-    name    => 'Create Windows Doxygen Archive',
-    prereqs => ['Generate Doxygen'],
-    verify  => sub{verify_zip_doxygen(@_)},
+    verify => sub{verify_zip_doxygen(@_)},
     message => sub{message_zip_doxygen(@_)},
-    remedy  => sub{remedy_zip_doxygen(@_)},
-    skip    => $global_settings{skip_doxygen},
+    remedy => sub{remedy_zip_doxygen(@_)},
+    skip => $global_settings{skip_doxygen},
   },
   {
-    name    => 'Download Devguide',
-    verify  => sub{verify_devguide(@_)},
+    name => 'Download Devguide',
+    verify => sub{verify_devguide(@_)},
     message => sub{message_devguide(@_)},
-    remedy  => sub{remedy_devguide(@_)},
-    skip    => $global_settings{skip_devguide},
+    remedy => sub{remedy_devguide(@_)},
+    skip => $global_settings{skip_devguide},
   },
   {
-    name    => 'Upload to FTP Site',
-    verify  => sub{verify_ftp_upload(@_)},
-    message => sub{message_ftp_upload(@_)},
-    remedy  => sub{remedy_ftp_upload(@_)},
-    skip    => $global_settings{skip_ftp},
+    name => 'Upload to SFTP Site',
+    verify => sub{verify_sftp_upload(@_)},
+    message => sub{message_sftp_upload(@_)},
+    remedy => sub{remedy_sftp_upload(@_)},
+    skip => $global_settings{skip_sftp},
   },
   {
-    name    => 'Upload to GitHub',
-    verify  => sub{verify_github_upload(@_)},
+    name => 'Upload to GitHub',
+    verify => sub{verify_github_upload(@_)},
     message => sub{message_github_upload(@_)},
-    remedy  => sub{remedy_github_upload(@_)},
+    remedy => sub{remedy_github_upload(@_)},
+    skip => $global_settings{skip_github},
   },
   {
-    name    => 'Release Website',
-    verify  => sub{verify_website_release(@_)},
+    name => 'Release Website',
+    verify => sub{verify_website_release(@_)},
     message => sub{message_website_release(@_)},
-    remedy  => sub{remedy_website_release(@_)},
-    skip    => $global_settings{skip_website},
+    remedy => sub{remedy_website_release(@_)},
+    skip => $global_settings{skip_website} || $global_settings{skip_github},
   },
   {
     name => 'Record that the Release Occurred',
@@ -2721,56 +3385,90 @@ my @release_steps = (
     remedy => sub{remedy_release_occurred_flag(@_)},
   },
   {
-    name    => 'Update NEWS for Post-Release',
-    verify  => sub{verify_news_template_file_section(@_)},
+    name => 'Update NEWS for Post-Release',
+    verify => sub{verify_news_template_file_section(@_)},
     message => sub{message_news_template_file_section(@_)},
-    remedy  => sub{remedy_news_template_file_section(@_)},
+    remedy => sub{remedy_news_template_file_section(@_)},
     post_release => 1,
   },
   {
-    name    => 'Update VERSION.txt for Post-Release',
-    verify  => sub{verify_update_version_file(@_, 1)},
+    name => 'Update VERSION.txt for Post-Release',
+    verify => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_update_version_file($settings, {%{$step_options}, post_release => 1});
+    },
     message => sub{message_update_version_file(@_)},
-    remedy  => sub{remedy_update_version_file(@_, 1)},
+    remedy => sub{remedy_update_version_file(@_, 1)},
     can_force => 1,
     post_release => 1,
   },
   {
-    name    => 'Update Version.h for Post-Release',
-    verify  => sub{verify_update_version_h_file(@_, 1)},
+    name => 'Update Version.h for Post-Release',
+    verify => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_update_version_h_file($settings, {%{$step_options}, post_release => 1});
+    },
     message => sub{message_update_version_h_file(@_)},
-    remedy  => sub{remedy_update_version_h_file(@_, 1)},
+    remedy => sub{remedy_update_version_h_file(@_, 1)},
     can_force => 1,
     post_release => 1,
   },
   {
-    name    => 'Update PROBLEM-REPORT-FORM for Post-Release',
-    verify  => sub{verify_update_prf_file(@_, 1)},
+    name => 'Update PROBLEM-REPORT-FORM for Post-Release',
+    verify => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      return verify_update_prf_file($settings, {%{$step_options}, post_release => 1});
+    },
     message => sub{message_update_prf_file(@_, 1)},
-    remedy  => sub{remedy_update_prf_file(@_, 1)},
+    remedy => sub{remedy_update_prf_file(@_, 1)},
     can_force => 1,
     post_release => 1,
   },
   {
-    name    => 'Commit Post-Release Changes',
-    verify  => sub{verify_git_status_clean(@_, 1)},
+    name => 'Commit Post-Release Changes',
+    verify => sub{
+      my $settings = shift();
+      my $step_options = shift();
+      verify_git_status_clean($settings, {%{$step_options}, strict => 1});
+    },
     message => sub{message_commit_git_changes(@_)},
-    remedy  => sub{remedy_git_status_clean(@_, 1)},
+    remedy => sub{remedy_git_status_clean(@_, 1)},
     post_release => 1,
   },
   {
-    name    => 'Push Post-Release Changes',
+    name => 'Push Post-Release Changes',
     prereqs => ['Verify Remote'],
-    verify  => sub{verify_git_changes_pushed(@_, 1)},
+    verify => sub{verify_git_changes_pushed(@_)},
     message => sub{message_git_changes_pushed(@_)},
-    remedy  => sub{remedy_git_changes_pushed(@_, 0)},
+    remedy => sub{remedy_git_changes_pushed(@_, 0)},
     post_release => 1,
+    skip => $global_settings{skip_github},
   },
   {
-    name    => 'Email DDS-Release-Announce list',
-    verify  => sub{verify_email_list(@_)},
+    name => 'Activate Version on Read the Docs',
+    verify => sub{verify_rtd_activate(@_)},
+    message => sub{message_rtd_activate(@_)},
+    remedy => sub{remedy_rtd_activate(@_)},
+    post_release => 1,
+    can_force => 1,
+    skip => 1, # When this is ready, also uncomment READ_THE_DOCS_TOKEN in help
+  },
+  {
+    name => 'Trigger Shapes Demo Build',
+    verify => sub{verify_trigger_shapes_demo_build(@_)},
+    message => sub{message_trigger_shapes_demo_build(@_)},
+    remedy => sub{remedy_trigger_shapes_demo_build(@_)},
+    post_release => 1,
+    skip => $global_settings{skip_github},
+  },
+  {
+    name => 'Email DDS-Release-Announce list',
+    verify => sub{verify_email_list(@_)},
     message => sub{message_email_dds_release_announce(@_)},
-    remedy  => sub{remedy_email_dds_release_announce(@_)},
+    remedy => sub{remedy_email_dds_release_announce(@_)},
     post_release => 1,
   },
 );
@@ -2820,9 +3518,11 @@ sub run_step {
   my $settings = shift();
   my $release_steps = shift();
   my $step_number = shift();
-  my $run_count_ref = shift();
-  my $skip_count_ref = shift();
-  my $fail_count_ref = shift();
+  my %args = @_;
+  my $run_count_ref = $args{counts}->{run};
+  my $skip_count_ref = $args{counts}->{skip};
+  my $fail_count_ref = $args{counts}->{failk};
+  my $prereq_of = $args{prereq_of};
 
   my $step = $release_steps->[$step_number-1];
   my $title = $step->{name};
@@ -2833,6 +3533,9 @@ sub run_step {
     return;
   }
 
+  if ($prereq_of) {
+    print(" A prereq. of \"$prereq_of\" is ");
+  }
   print "$step_number: $title\n";
   return if $settings->{list};
 
@@ -2841,12 +3544,12 @@ sub run_step {
   # Check Prerequisite Steps
   if ($step->{prereqs}) {
     foreach my $prereq_name (@{$step->{prereqs}}) {
-      run_step($settings, $release_steps, get_step_by_name($prereq_name));
+      run_step($settings, $release_steps, get_step_by_name($prereq_name), prereq_of => $title);
     }
   }
 
   # Run the verification
-  if (!$step->{verify}($settings)) {
+  if (!$step->{verify}($settings, {remedy_verify => 0})) {
     # Failed
     print "$divider\n";
     print "  " . $step->{message}($settings) . "\n";
@@ -2859,9 +3562,11 @@ sub run_step {
       if (!$step->{remedy}($settings)) {
         print "  !!!! Remediation did not complete\n";
       # Reverify
-      } elsif (!$step->{verify}($settings)) {
+      }
+      elsif (!$step->{verify}($settings, {remedy_verify => 1})) {
         print "  !!!! Remediation did not pass verification\n";
-      } else {
+      }
+      else {
         print "  Done!\n";
         $remedied = 1;
       }
@@ -2900,12 +3605,23 @@ sub run_step {
     print "$divider\n";
   }
 
-  print "  Step $step_number \"$title\" is OK!\n";
+  my $prereq_insert = '';
+  if ($prereq_of) {
+    $prereq_insert = "Prereq. of \"$prereq_of\", ";
+  }
+  print " $prereq_insert Step $step_number \"$title\" is OK!\n";
 
   $step->{verified} = 1;
 }
 
-if ($ignore_args || ($workspace && %parsed_version)) {
+my $alt = $upload_shapes_demo || $write_authors;
+if ($upload_shapes_demo) {
+  upload_shapes_demo(\%global_settings);
+}
+elsif ($write_authors) {
+  remedy_authors(\%global_settings);
+}
+elsif (!$alt && ($ignore_args || ($workspace && $parsed_version))) {
   my @steps_to_do;
   my $no_steps = scalar(@release_steps);
   if ($step_expr) {
@@ -2920,7 +3636,7 @@ if ($ignore_args || ($workspace && %parsed_version)) {
   my $fail_count = 0;
   foreach my $step_number (@steps_to_do) {
     run_step(\%global_settings, \@release_steps, $step_number,
-      \$run_count, \$skip_count, \$fail_count);
+      counts => {run => \$run_count, skip => \$skip_count, fail => \$fail_count});
   }
 
   print("Ran: $run_count\n") if ($run_count);
@@ -2929,7 +3645,7 @@ if ($ignore_args || ($workspace && %parsed_version)) {
 }
 else {
   $status = 1;
-  print STDERR "ERROR: Invalid Arguments, see --help for Valid Usage\n";
+  print STDERR "ERROR: Invalid arguments, see --help for valid usage\n";
 }
 
 exit $status;

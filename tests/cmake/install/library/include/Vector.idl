@@ -1,0 +1,9 @@
+#ifndef OPENDDS_INSTALL_LIBRARY_SUBDIR_VECTOR_IDL
+#define OPENDDS_INSTALL_LIBRARY_SUBDIR_VECTOR_IDL
+
+struct Vector {
+  double x;
+  double y;
+};
+
+#endif

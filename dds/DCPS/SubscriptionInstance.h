@@ -33,7 +33,7 @@ class DataReaderImpl;
   * @brief Struct that has information about an instance and the instance
   *        sample list.
   */
-class OpenDDS_Dcps_Export SubscriptionInstance : public RcObject {
+class OpenDDS_Dcps_Export SubscriptionInstance : public virtual RcObject {
 public:
   SubscriptionInstance(DataReaderImpl* reader,
                        const DDS::DataReaderQos& qos,
@@ -43,6 +43,8 @@ public:
 
   ~SubscriptionInstance();
 
+  bool matches(CORBA::ULong sample_states, CORBA::ULong view_states, CORBA::ULong instance_states) const;
+
   /// Instance state for this instance
   const InstanceState_rch instance_state_;
 
@@ -51,6 +53,10 @@ public:
 
   /// Data sample(s) in this instance
   ReceivedDataElementList rcvd_samples_;
+
+  CORBA::ULong read_sample_count_;
+  CORBA::ULong not_read_sample_count_;
+  CORBA::ULong sample_states_;
 
   /// ReceivedDataElementList strategy
   unique_ptr<ReceivedDataStrategy> rcvd_strategy_;
@@ -64,7 +70,7 @@ public:
 
   MonotonicTimePoint cur_sample_tv_;
 
-  long deadline_timer_id_;
+  MonotonicTimePoint deadline_;
 
   MonotonicTimePoint last_accepted_;
 };

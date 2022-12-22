@@ -35,8 +35,9 @@ bool DataReaderListenerImpl::wait_matched(int count, const OpenDDS::DCPS::TimeDu
     return false;
   }
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + max_wait;
+  ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (count != matched_) {
-    switch (matched_cv_.wait_until(deadline)) {
+    switch (matched_cv_.wait_until(deadline, thread_status_manager)) {
     case CvStatus_NoTimeout:
       ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_matched: %d\n"), matched_));
       break;
@@ -74,8 +75,9 @@ int DataReaderListenerImpl::wait_all_received() const
     return 1;
   }
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received\n")));
+  OpenDDS::DCPS::ThreadStatusManager& thread_status_manager = TheServiceParticipant->get_thread_status_manager();
   while (received_ < Domain::n_msg) {
-    received_cv_.wait();
+    received_cv_.wait(thread_status_manager);
   }
   ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) DataReaderListenerImpl::wait_all_received returns\n")));
   return 0;

@@ -5,7 +5,6 @@
  * See: http://www.opendds.org/license.html
  */
 
-#include "Tcp_pch.h"
 #include "TcpConnection.h"
 #include "TcpTransport.h"
 #include "TcpInst.h"
@@ -35,7 +34,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 OpenDDS::DCPS::TcpConnection::TcpConnection()
   : is_connector_(false)
-  , tcp_config_(0)
+  , tcp_config_()
   , reconnect_state_(INIT_STATE)
   , transport_priority_(0)  // TRANSPORT_PRIORITY.value default value - 0.
   , shutdown_(false)
@@ -51,11 +50,11 @@ OpenDDS::DCPS::TcpConnection::TcpConnection()
 
 OpenDDS::DCPS::TcpConnection::TcpConnection(const ACE_INET_Addr& remote_address,
                                             Priority priority,
-                                            const TcpInst& config)
+                                            const TcpInst_rch& config)
   : is_connector_(true)
   , remote_address_(remote_address)
-  , local_address_(config.local_address())
-  , tcp_config_(&config)
+  , local_address_(config->local_address())
+  , tcp_config_(config)
   , reconnect_state_(INIT_STATE)
   , transport_priority_(priority)
   , shutdown_(false)
@@ -83,7 +82,7 @@ OpenDDS::DCPS::TcpConnection::set_datalink(const OpenDDS::DCPS::TcpDataLink_rch&
 
   link_ = link;
   if (link_) {
-    impl_ = TcpTransport_rch(static_cast<TcpTransport*>(&link_->impl()), inc_count());
+    impl_ = dynamic_rchandle_cast<TcpTransport>(link_->impl());
   } else {
     impl_.reset();
   }
@@ -135,15 +134,18 @@ OpenDDS::DCPS::TcpConnection::active_open()
   VDBG((LM_DEBUG, "(%P|%t) DBG:   active_open(%C->%C)\n",
         LogAddr(local_address_).c_str(), LogAddr(remote_address_).c_str()));
 
-  TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
+  RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
 
-  if (on_active_connection_established() != -1 && transport.connect_tcp_datalink(*link_, rchandle_from(this)) != -1)
-    return 0;
+  if (transport) {
+    if (on_active_connection_established() != -1 && transport->connect_tcp_datalink(*link_, rchandle_from(this)) != -1) {
+      return 0;
+    }
 
-  const bool is_loop(local_address_ == remote_address_);
-  const PriorityKey key(transport_priority_, remote_address_,
+    const bool is_loop(local_address_ == remote_address_);
+    const PriorityKey key(transport_priority_, remote_address_,
                       is_loop, true /* active */);
-  transport.async_connect_failed(key);
+    transport->async_connect_failed(key);
+  }
   return -1;
 }
 
@@ -181,10 +183,17 @@ OpenDDS::DCPS::TcpConnection::passive_open(void* arg)
 
   // Keep a "copy" of the reference to TcpInst object
   // for ourselves.
-  tcp_config_ = &transport->config();
-  local_address_ = tcp_config_->local_address();
+  TcpInst_rch cfg = transport->config();
+  if (!cfg) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "((%P|%t)) NOTICE: TcpConnection::open() - Invalid Transport Instance.\n"));
+    }
+    return -1;
+  }
+  tcp_config_ = cfg;
+  local_address_ = cfg->local_address();
 
-  set_sock_options(tcp_config_);
+  set_sock_options(cfg);
 
   // We expect that the active side of the connection (the remote side
   // in this case) will supply its listening ACE_INET_Addr as the first
@@ -244,8 +253,8 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
     if (passive_setup_buffer_.length() >= hlen + sizeof(nprio)) {
 
       const std::string bufstr(passive_setup_buffer_.rd_ptr());
-      const NetworkAddress network_order_address(bufstr);
-      network_order_address.to_addr(remote_address_);
+      const NetworkResource network_resource(bufstr);
+      network_resource.to_addr(remote_address_);
 
       ACE_OS::memcpy(&nprio, passive_setup_buffer_.rd_ptr() + hlen, sizeof(nprio));
       transport_priority_ = ntohl(nprio);
@@ -258,7 +267,7 @@ OpenDDS::DCPS::TcpConnection::handle_setup_input(ACE_HANDLE /*h*/)
             LogAddr(remote_address_).c_str(), LogAddr(local_address_).c_str(),
             transport_priority_, reconnect_state_string()));
       if (DCPS_debug_level > 9) {
-        network_order_address.dump();
+        network_resource.dump();
       }
 
       // remove from reactor, normal recv strategy setup will add us back
@@ -283,6 +292,8 @@ OpenDDS::DCPS::TcpConnection::handle_input(ACE_HANDLE fd)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_input",6);
 
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   if (passive_setup_) {
     return handle_setup_input(fd);
   }
@@ -298,6 +309,9 @@ int
 OpenDDS::DCPS::TcpConnection::handle_output(ACE_HANDLE)
 {
   DBG_ENTRY_LVL("TcpConnection","handle_output",6);
+
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   TcpSendStrategy_rch send_strategy = this->send_strategy();
   if (send_strategy) {
     if (DCPS_debug_level > 9) {
@@ -328,7 +342,8 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
 
   ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::close, reconnect_state_=%C\n", reconnect_state_string()));
 
-  if (this->reconnect_state_ == ACTIVE_RECONNECTING_STATE) {
+  TcpInst_rch cfg = tcp_config_.lock();
+  if (cfg && reconnect_state_ == ACTIVE_RECONNECTING_STATE) {
     // This would be called when using ACE_Connector to initiate an async connect and
     // the network stack detects the destination is unreachable before timeout.
     if (DCPS_debug_level >= 1) {
@@ -336,20 +351,22 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
         config_name().c_str(), LogAddr(remote_address_).c_str()));
     }
 
-    if (this->conn_retry_counter_ >= this->tcp_config_->conn_retry_attempts_) {
-      this->handle_stop_reconnecting();
+    if (conn_retry_counter_ >= cfg->conn_retry_attempts_) {
+      handle_stop_reconnecting();
     } else {
-      TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
-      transport.connector_.close();
-
-      this->reconnect_state_ = ACTIVE_WAITING_STATE;
+      TcpTransport_rch transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+      if (transport) {
+        transport->connector_.close();
+        reconnect_state_ = ACTIVE_WAITING_STATE;
+      }
     }
   } else {
-    TcpSendStrategy_rch send_strategy = this->send_strategy();
-    if (send_strategy)
-      send_strategy->terminate_send();
+    TcpSendStrategy_rch ss = send_strategy();
+    if (ss) {
+      ss->terminate_send();
+    }
 
-    this->disconnect();
+    disconnect();
   }
 
   return 0;
@@ -358,12 +375,16 @@ OpenDDS::DCPS::TcpConnection::close(u_long)
 const std::string&
 OpenDDS::DCPS::TcpConnection::config_name() const
 {
-  return impl_->config().name();
+  static const std::string null_name("(couldn't get name)");
+  TcpInst_rch cfg = tcp_config_.lock();
+  return cfg ? cfg->name() : null_name;
 }
 
 int
 OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   DBG_ENTRY_LVL("TcpConnection","handle_close",6);
 
   if (DCPS_debug_level >= 1) {
@@ -408,7 +429,7 @@ OpenDDS::DCPS::TcpConnection::handle_close(ACE_HANDLE, ACE_Reactor_Mask)
 }
 
 void
-OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst* tcp_config)
+OpenDDS::DCPS::TcpConnection::set_sock_options(const TcpInst_rch& tcp_config)
 {
 #if defined (ACE_DEFAULT_MAX_SOCKET_BUFSIZ)
   int snd_size = ACE_DEFAULT_MAX_SOCKET_BUFSIZ;
@@ -465,14 +486,21 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
   DirectPriorityMapper mapper(this->transport_priority_);
   this->link_->set_dscp_codepoint(mapper.codepoint(), this->peer());
 
-  set_sock_options(tcp_config_);
+  TcpInst_rch cfg = tcp_config_.lock();
+  if (!cfg) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "((%P|%t)) NOTICE: TcpConnection::on_active_connection_established() - Invalid Transport Instance.\n"));
+    }
+    return -1;
+  }
+  set_sock_options(cfg);
 
   // In order to complete the connection establishment from the active
   // side, we need to tell the remote side about our public address.
   // It will use that as an "identifier" of sorts.  To the other
   // (passive) side, our local_address that we send here will be known
   // as the remote_address.
-  const std::string address = tcp_config_->get_public_address();
+  const std::string address = cfg->get_public_address();
 
   if (DCPS_debug_level >= 2) {
     ACE_DEBUG((LM_DEBUG,
@@ -485,37 +513,39 @@ OpenDDS::DCPS::TcpConnection::on_active_connection_established()
 
   ACE_UINT32 nlen = htonl(len);
 
-  if (this->peer().send_n(&nlen,
-                          sizeof(ACE_UINT32)) == -1) {
-    // TBD later - Anything we are supposed to do to close the connection.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
-                      "Unable to send address string length to "
-                      "the passive side to complete the active connection "
-                      "establishment.\n"),
-                     -1);
+  if (this->peer().send_n(&nlen, sizeof(ACE_UINT32)) == -1) {
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_WARNING,
+                 "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
+                 "Unable to send address string length to "
+                 "the passive side to complete the active connection "
+                 "establishment.\n"));
+    }
+    return -1;
   }
 
   if (this->peer().send_n(address.c_str(), len)  == -1) {
-    // TBD later - Anything we are supposed to do to close the connection.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
-                      "Unable to send our address to "
-                      "the passive side to complete the active connection "
-                      "establishment.\n"),
-                     -1);
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_WARNING,
+                 "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
+                 "Unable to send our address to "
+                 "the passive side to complete the active connection "
+                 "establishment.\n"));
+    }
+    return -1;
   }
 
   ACE_UINT32 npriority = htonl(this->transport_priority_);
 
   if (this->peer().send_n(&npriority, sizeof(ACE_UINT32)) == -1) {
-    // TBD later - Anything we are supposed to do to close the connection.
-    ACE_ERROR_RETURN((LM_ERROR,
-                      "(%P|%t) ERROR: TcpConnection::on_active_connection_established: "
-                      "Unable to send publication priority to "
-                      "the passive side to complete the active connection "
-                      "establishment.\n"),
-                     -1);
+    if (DCPS_debug_level >= 2) {
+      ACE_DEBUG((LM_WARNING,
+                 "(%P|%t) WARNING: TcpConnection::on_active_connection_established: "
+                 "Unable to send publication priority to "
+                 "the passive side to complete the active connection "
+                 "establishment.\n"));
+    }
+    return -1;
   }
 
   return 0;
@@ -529,20 +559,26 @@ OpenDDS::DCPS::TcpConnection::passive_reconnect_i()
 {
   DBG_ENTRY_LVL("TcpConnection","passive_reconnect_i",6);
 
-  if (this->shutdown_)
+  if (this->shutdown_) {
     return;
+  }
+
+  TcpInst_rch cfg = tcp_config_.lock();
+  if (!cfg) {
+    return;
+  }
 
   if (this->reconnect_state_ == INIT_STATE) {
     // Mark the connection lost since the recv/send just failed.
     // this->connected_ = false;
 
-    if (this->tcp_config_->passive_reconnect_duration_ == 0)
+    if (cfg->passive_reconnect_duration_ == 0)
       return;
 
     this->reconnect_state_ = PASSIVE_WAITING_STATE;
     this->link_->notify(DataLink::DISCONNECTED);
 
-    TimeDuration delay = TimeDuration::from_msec(tcp_config_->passive_reconnect_duration_);
+    TimeDuration delay = TimeDuration::from_msec(cfg->passive_reconnect_duration_);
     this->reactor()->schedule_timer(this, 0, delay.value(), TimeDuration::zero_value.value());
   }
 }
@@ -562,19 +598,26 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 {
   DBG_ENTRY_LVL("TcpConnection","active_reconnect_i",6);
 
-  if (this->link_->is_release_pending())
+  if (this->link_->is_release_pending()) {
     return;
+  }
 
-  if (this->shutdown_)
+  if (this->shutdown_) {
     return;
+  }
 
-  if (this->conn_retry_counter_ < this->tcp_config_->conn_retry_attempts_ ) {
+  TcpInst_rch cfg = tcp_config_.lock();
+  if (!cfg) {
+    return;
+  }
+
+  if (this->conn_retry_counter_ < cfg->conn_retry_attempts_ ) {
     this->reconnect_state_ = ACTIVE_RECONNECTING_STATE;
     if (this->conn_retry_counter_ == 0)
       this->link_->notify(DataLink::DISCONNECTED);
 
-    double retry_delay_msec = this->tcp_config_->conn_retry_initial_delay_;
-    retry_delay_msec *= std::pow(this->tcp_config_->conn_retry_backoff_multiplier_, this->conn_retry_counter_);
+    double retry_delay_msec = cfg->conn_retry_initial_delay_;
+    retry_delay_msec *= std::pow(cfg->conn_retry_backoff_multiplier_, this->conn_retry_counter_);
 
     if (DCPS_debug_level >= 1) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
@@ -583,19 +626,22 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
             reconnect_state_string(), this->conn_retry_counter_, retry_delay_msec));
     }
 
-    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
     ACE_Time_Value timeout;
     timeout.msec(static_cast<int>(retry_delay_msec));
 
     TcpConnection* pconn = this;
-    int ret;
+    int ret = -1;
+    errno = ENODEV;
     {
-      ACE_Reverse_Lock<LockType> rev_lock(this->reconnect_lock_);
-      ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
-      // We need to temporarily release the lock here because the connect could occasionally be synchronous
-      // if the source and destination are on the same host. When the call become synchronous, active_reconnect_open()
-      // would be called and try to acquired the lock in the same thread.
-      ret = transport.connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
+      RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+      if (transport) {
+        ACE_Reverse_Lock<LockType> rev_lock(this->reconnect_lock_);
+        ACE_Guard<ACE_Reverse_Lock<LockType> > guard(rev_lock);
+        // We need to temporarily release the lock here because the connect could occasionally be synchronous
+        // if the source and destination are on the same host. When the call become synchronous, active_reconnect_open()
+        // would be called and try to acquired the lock in the same thread.
+        ret = transport->connector_.connect(pconn, this->remote_address_,  ACE_Synch_Options::asynch);
+      }
     }
 
     if (ret == -1 && errno != EWOULDBLOCK)
@@ -609,8 +655,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
           ACE_DEBUG((LM_DEBUG, "(%P|%t) DBG:   TcpConnection::"
                                "active_reconnect_i() socket operation is already in progress, wait another second to initiate the connect\n"));
         }
-      }
-      else {
+      } else {
         ACE_ERROR((LM_ERROR, "(%P|%t) TcpConnection::active_reconnect_i error %m.\n"));
       }
       this->reconnect_state_ = ACTIVE_WAITING_STATE;
@@ -618,8 +663,7 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 
     this->reactor()->schedule_timer(this, 0, timeout);
     this->conn_retry_counter_ ++;
-  }
-  else {
+  } else {
     this->handle_stop_reconnecting();
   }
 }
@@ -627,11 +671,13 @@ OpenDDS::DCPS::TcpConnection::active_reconnect_i()
 void
 OpenDDS::DCPS::TcpConnection::notify_connection_lost()
 {
-  if (this->link_) {
-    this->link_->notify(DataLink::LOST);
+  if (link_) {
+    link_->drop_pending_request_acks();
+    link_->notify(DataLink::LOST);
     TcpSendStrategy_rch send_strategy = link_->send_strategy();
-    if (send_strategy)
+    if (send_strategy) {
       send_strategy->terminate_send();
+    }
   }
 }
 
@@ -640,11 +686,11 @@ OpenDDS::DCPS::TcpConnection::handle_stop_reconnecting()
 {
   this->reconnect_state_ = LOST_STATE;
   notify_connection_lost();
-  if (this->tcp_config_->conn_retry_attempts_ > 0) {
+  TcpInst_rch cfg = tcp_config_.lock();
+  if (cfg && cfg->conn_retry_attempts_ > 0) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) we tried and failed to re-establish connection on transport: %C to %C.\n",
       config_name().c_str(), LogAddr(remote_address_).c_str()));
-  }
-  else {
+  } else {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) we did not try to re-establish connection on transport: %C to %C.\n",
       config_name().c_str(), LogAddr(remote_address_).c_str()));
   }
@@ -656,8 +702,10 @@ int
 OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
                                              const void *)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   DBG_ENTRY_LVL("TcpConnection","handle_timeout",6);
-  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, this->reconnect_state_=%C\n",reconnect_state_string() ));
+  ACE_DEBUG((LM_DEBUG, "(%P|%t) TcpConnection::handle_timeout, this->reconnect_state_ = %C\n", reconnect_state_string()));
   GuardType guard(this->reconnect_lock_);
 
   switch (this->reconnect_state_) {
@@ -686,21 +734,25 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
       config_name().c_str(), LogAddr(remote_address_).c_str()));
 
     // build key and remove from service
-    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
-
     const bool is_loop(local_address_ == remote_address_);
     const PriorityKey key(transport_priority_, remote_address_,
                           is_loop, true /* active */);
 
-    transport.async_connect_failed(key);
+    RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+    if (transport) {
+      transport->async_connect_failed(key);
     }
-
     break;
+  }
   case ACTIVE_RECONNECTING_STATE: {
     // we get the timeout before the network stack reports the destination is unreachable
     // cancel the async connect operation and retry it.
-    TcpTransport& transport = static_cast<TcpTransport&>(link_->impl());
-    transport.connector_.cancel(this);
+    {
+      RcHandle<TcpTransport> transport = dynamic_rchandle_cast<TcpTransport>(link_->impl());
+      if (transport) {
+        transport->connector_.cancel(this);
+      }
+    }
     this->active_reconnect_i();
     break;
   }
@@ -712,7 +764,7 @@ OpenDDS::DCPS::TcpConnection::handle_timeout(const ACE_Time_Value &,
   default :
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: TcpConnection::handle_timeout, ")
-               ACE_TEXT(" unknown state or it should not be in state=%d\n"),
+               ACE_TEXT(" unknown state or it should not be in state = %d\n"),
                reconnect_state_));
     break;
   }
@@ -849,12 +901,12 @@ OpenDDS::DCPS::TcpConnection::relink_from_recv(bool do_suspend)
     send_strategy->suspend_send();
 }
 
-bool
+void
 OpenDDS::DCPS::TcpConnection::tear_link()
 {
   DBG_ENTRY_LVL("TcpConnection","tear_link",6);
 
-  return this->link_->release_resources();
+  return link_->release_resources();
 }
 
 void

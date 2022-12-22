@@ -20,15 +20,26 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
   data_sample->previous_data_sample_ = 0;
   data_sample->next_data_sample_ = 0;
 
-  ++size_ ;
+  ++size_;
+
+#ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
+  if (!data_sample->coherent_change_)
+#endif
+  {
+    if (data_sample->sample_state_ == DDS::NOT_READ_SAMPLE_STATE) {
+      increment_not_read_count();
+    } else {
+      increment_read_count();
+    }
+  }
 
   if (!head_) {
     // First sample in the list.
-    head_ = tail_ = data_sample ;
+    head_ = tail_ = data_sample;
 
   } else {
     // Add to existing list.
-    tail_->next_data_sample_ = data_sample ;
+    tail_->next_data_sample_ = data_sample;
     data_sample->previous_data_sample_ = tail_;
     tail_ = data_sample;
   }
@@ -39,31 +50,27 @@ OpenDDS::DCPS::ReceivedDataElementList::add(ReceivedDataElement *data_sample)
 }
 
 ACE_INLINE
-OpenDDS::DCPS::ReceivedDataElement *
+OpenDDS::DCPS::ReceivedDataElement*
 OpenDDS::DCPS::ReceivedDataElementList::remove_head()
 {
   if (!size_) {
-    return 0 ;
+    return 0;
   }
 
-  OpenDDS::DCPS::ReceivedDataElement *ptr = head_ ;
-
-  remove(head_) ;
-
-  return ptr ;
+  OpenDDS::DCPS::ReceivedDataElement *ptr = head_;
+  remove(head_);
+  return ptr;
 }
 
 ACE_INLINE
-OpenDDS::DCPS::ReceivedDataElement *
+OpenDDS::DCPS::ReceivedDataElement*
 OpenDDS::DCPS::ReceivedDataElementList::remove_tail()
 {
   if (!size_) {
-    return 0 ;
+    return 0;
   }
 
-  OpenDDS::DCPS::ReceivedDataElement *ptr = tail_ ;
-
-  remove(tail_) ;
-
-  return ptr ;
+  OpenDDS::DCPS::ReceivedDataElement* ptr = tail_;
+  remove(tail_);
+  return ptr;
 }

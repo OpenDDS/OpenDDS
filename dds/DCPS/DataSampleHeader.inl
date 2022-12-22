@@ -121,6 +121,7 @@ OpenDDS::DCPS::DataSampleHeader::clear_flag(DataSampleHeaderFlag flag,
     return;
   }
 
+  MaybeGuard g(buffer->locking_strategy());
   base[FLAGS_OFFSET] &= ~mask_flag(flag);
 }
 
@@ -139,6 +140,7 @@ OpenDDS::DCPS::DataSampleHeader::set_flag(DataSampleHeaderFlag flag,
     return;
   }
 
+  MaybeGuard g(buffer->locking_strategy());
   base[FLAGS_OFFSET] |= mask_flag(flag);
 }
 
@@ -156,7 +158,7 @@ OpenDDS::DCPS::DataSampleHeader::test_flag(DataSampleHeaderFlag flag,
                       ACE_TEXT("ACE_Message_Block too short (missing flags octet).\n")), false);
   }
 
-  // Test flag bit.
+  MaybeGuard g(const_cast<ACE_Message_Block*>(buffer)->locking_strategy());
   return base[FLAGS_OFFSET] & mask_flag(flag);
 }
 

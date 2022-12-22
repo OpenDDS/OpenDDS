@@ -61,6 +61,11 @@ std::string dds_generator::get_tag_name(const std::string& base_name, bool neste
   return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
 }
 
+std::string dds_generator::get_xtag_name(UTL_ScopedName* name)
+{
+  return scoped_helper(name, "_") + "_xtag";
+}
+
 string dds_generator::to_string(Identifier* id, EscapeContext ec)
 {
   string str = id->get_string();

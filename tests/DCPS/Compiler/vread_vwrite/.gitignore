@@ -1,0 +1,14 @@
+VreadVwriteTest
+VreadVwriteTestC.cpp
+VreadVwriteTestC.h
+VreadVwriteTestC.inl
+VreadVwriteTestS.cpp
+VreadVwriteTestS.h
+VreadVwriteTestTypeSupport.idl
+VreadVwriteTestTypeSupportC.cpp
+VreadVwriteTestTypeSupportC.h
+VreadVwriteTestTypeSupportC.inl
+VreadVwriteTestTypeSupportImpl.cpp
+VreadVwriteTestTypeSupportImpl.h
+VreadVwriteTestTypeSupportS.cpp
+VreadVwriteTestTypeSupportS.h

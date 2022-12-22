@@ -17,6 +17,8 @@
 #include "Comparator_T.h"
 #include "RcObject.h"
 
+#include <dds/DdsDynamicDataC.h>
+
 #include <string>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -85,7 +87,7 @@ struct OpenDDS_Dcps_Export Value {
   bool conversion_preferred_;
 };
 
-class OpenDDS_Dcps_Export FilterEvaluator : public RcObject {
+class OpenDDS_Dcps_Export FilterEvaluator : public virtual RcObject {
 public:
 
   struct AstNodeWrapper;
@@ -121,7 +123,7 @@ public:
    */
   bool eval(ACE_Message_Block* serializedSample, bool swap_bytes,
             bool cdr_encap, const MetaStruct& meta,
-            const DDS::StringSeq& params, DCPS::Extensibility exten) const
+            const DDS::StringSeq& params, Extensibility exten) const
   {
     SerializedForEval data(serializedSample, meta, params,
                            swap_bytes, cdr_encap, exten);
@@ -161,13 +163,13 @@ private:
 
   struct SerializedForEval : DataForEval {
     SerializedForEval(ACE_Message_Block* data, const MetaStruct& meta,
-                      const DDS::StringSeq& params, bool swap, bool cdr, DCPS::Extensibility exten)
+                      const DDS::StringSeq& params, bool swap, bool cdr, Extensibility exten)
       : DataForEval(meta, params), serialized_(data), swap_(swap), cdr_(cdr), exten_(exten) {}
     Value lookup(const char* field) const;
     ACE_Message_Block* serialized_;
     bool swap_, cdr_;
     mutable OPENDDS_MAP(OPENDDS_STRING, Value) cache_;
-    DCPS::Extensibility exten_;
+    Extensibility exten_;
   };
 
   bool eval_i(DataForEval& data) const;
@@ -185,6 +187,7 @@ class OpenDDS_Dcps_Export MetaStruct {
 public:
   virtual ~MetaStruct();
 
+  virtual Value getValue(const void* stru, DDS::MemberId memberId) const = 0;
   virtual Value getValue(const void* stru, const char* fieldSpec) const = 0;
   virtual Value getValue(Serializer& ser, const char* fieldSpec) const = 0;
 

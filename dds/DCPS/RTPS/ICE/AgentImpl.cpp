@@ -7,10 +7,11 @@
 
 #include "AgentImpl.h"
 
-#include "dds/DCPS/Service_Participant.h"
-#include "dds/DCPS/TimeTypes.h"
 #include "Task.h"
 #include "EndpointManager.h"
+
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/TimeTypes.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -42,7 +43,7 @@ void AgentImpl::enqueue(const DCPS::MonotonicTimePoint& a_release_time,
 {
   if (tasks_.empty() || a_release_time < tasks_.top().release_time_) {
     const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), a_release_time);
-    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - MonotonicTimePoint::now()));
+    execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - MonotonicTimePoint::now()));
   }
   tasks_.push(Item(a_release_time, wtask));
 }
@@ -54,6 +55,8 @@ bool AgentImpl::reactor_is_shut_down() const
 
 int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 {
+  DCPS::ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   const MonotonicTimePoint now(a_now);
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, 0);
   check_invariants();
@@ -77,22 +80,25 @@ int AgentImpl::handle_timeout(const ACE_Time_Value& a_now, const void* /*act*/)
 
   if (!tasks_.empty()) {
     const MonotonicTimePoint release = std::max(last_execute_ + ICE::Configuration::instance()->T_a(), tasks_.top().release_time_);
-    execute_or_enqueue(new ScheduleTimerCommand(reactor(), this, release - now));
+    execute_or_enqueue(DCPS::make_rch<ScheduleTimerCommand>(reactor(), this, release - now));
   }
 
   return 0;
 }
 
-AgentImpl::AgentImpl() :
-  ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner()),
-  unfreeze_(false),
-  ncm_listener_added_(false),
-  remote_peer_reflexive_counter_(0)
-  {
-    TheServiceParticipant->set_shutdown_listener(this);
-  }
+AgentImpl::AgentImpl()
+  : DCPS::InternalDataReaderListener<DCPS::NetworkInterfaceAddress>(TheServiceParticipant->job_queue())
+  , ReactorInterceptor(TheServiceParticipant->reactor(), TheServiceParticipant->reactor_owner())
+  , unfreeze_(false)
+  , reader_(DCPS::make_rch<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >(true, DCPS::rchandle_from(this)))
+  , reader_added_(false)
+  , remote_peer_reflexive_counter_(0)
+{
+  // Bind the lifetime of this to the service participant.
+  TheServiceParticipant->set_shutdown_listener(DCPS::static_rchandle_cast<ShutdownListener>(rchandle_from(this)));
+}
 
-void AgentImpl::add_endpoint(Endpoint* a_endpoint)
+void AgentImpl::add_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
@@ -104,17 +110,13 @@ void AgentImpl::add_endpoint(Endpoint* a_endpoint)
 
   check_invariants();
 
-  if (!endpoint_managers_.empty() && !ncm_listener_added_) {
-    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-    ncm_listener_added_ = true;
-    guard.release();
-    if (ncm) {
-      ncm->add_listener(*this);
-    }
+  if (!endpoint_managers_.empty() && !reader_added_) {
+    TheServiceParticipant->network_interface_address_topic()->connect(reader_);
+    reader_added_ = true;
   }
 }
 
-void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
+void AgentImpl::remove_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
@@ -129,17 +131,13 @@ void AgentImpl::remove_endpoint(Endpoint* a_endpoint)
 
   check_invariants();
 
-  if (endpoint_managers_.empty() && ncm_listener_added_) {
-    DCPS::NetworkConfigMonitor_rch ncm = TheServiceParticipant->network_config_monitor();
-    ncm_listener_added_ = false;
-    guard.release();
-    if (ncm) {
-      ncm->remove_listener(*this);
-    }
+  if (endpoint_managers_.empty() && reader_added_) {
+    TheServiceParticipant->network_interface_address_topic()->disconnect(reader_);
+    reader_added_ = false;
   }
 }
 
-AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
+AgentInfo AgentImpl::get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoint) const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, AgentInfo());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
@@ -147,9 +145,9 @@ AgentInfo AgentImpl::get_local_agent_info(Endpoint* a_endpoint) const
   return pos->second->agent_info();
 }
 
-void AgentImpl::add_local_agent_info_listener(Endpoint* a_endpoint,
+void AgentImpl::add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                               const DCPS::RepoId& a_local_guid,
-                                              AgentInfoListener* a_agent_info_listener)
+                                              DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
@@ -157,7 +155,7 @@ void AgentImpl::add_local_agent_info_listener(Endpoint* a_endpoint,
   pos->second->add_agent_info_listener(a_local_guid, a_agent_info_listener);
 }
 
-void AgentImpl::remove_local_agent_info_listener(Endpoint* a_endpoint,
+void AgentImpl::remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                                  const DCPS::RepoId& a_local_guid)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
@@ -166,7 +164,7 @@ void AgentImpl::remove_local_agent_info_listener(Endpoint* a_endpoint,
   pos->second->remove_agent_info_listener(a_local_guid);
 }
 
-void  AgentImpl::start_ice(Endpoint* a_endpoint,
+void  AgentImpl::start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                            const DCPS::RepoId& a_local_guid,
                            const DCPS::RepoId& a_remote_guid,
                            const AgentInfo& a_remote_agent_info)
@@ -179,7 +177,7 @@ void  AgentImpl::start_ice(Endpoint* a_endpoint,
   check_invariants();
 }
 
-void AgentImpl::stop_ice(Endpoint* a_endpoint,
+void AgentImpl::stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                          const DCPS::RepoId& a_local_guid,
                          const DCPS::RepoId& a_remote_guid)
 {
@@ -191,7 +189,7 @@ void AgentImpl::stop_ice(Endpoint* a_endpoint,
   check_invariants();
 }
 
-ACE_INET_Addr  AgentImpl::get_address(Endpoint* a_endpoint,
+ACE_INET_Addr  AgentImpl::get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                                       const DCPS::RepoId& a_local_guid,
                                       const DCPS::RepoId& a_remote_guid) const
 {
@@ -202,7 +200,7 @@ ACE_INET_Addr  AgentImpl::get_address(Endpoint* a_endpoint,
 }
 
 // Receive a STUN message.
-void  AgentImpl::receive(Endpoint* a_endpoint,
+void  AgentImpl::receive(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                          const ACE_INET_Addr& a_local_address,
                          const ACE_INET_Addr& a_remote_address,
                          const STUN::Message& a_message)
@@ -260,25 +258,18 @@ void AgentImpl::notify_shutdown()
   shutdown();
 }
 
-void AgentImpl::network_change() const
+void AgentImpl::on_data_available(DCPS::RcHandle<DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress> >)
 {
+  DCPS::InternalDataReader<DCPS::NetworkInterfaceAddress>::SampleSequence samples;
+  DCPS::InternalSampleInfoSequence infos;
+  reader_->take(samples, infos);
+
+  // FUTURE: This polls the endpoints.  The endpoints should just publish the change.
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   for (EndpointManagerMapType::const_iterator pos = endpoint_managers_.begin(),
          limit = endpoint_managers_.end(); pos != limit; ++pos) {
     pos->second->network_change();
   }
-}
-
-void AgentImpl::add_address(const DCPS::NetworkInterface&,
-                            const ACE_INET_Addr&)
-{
-  network_change();
-}
-
-void AgentImpl::remove_address(const DCPS::NetworkInterface&,
-                               const ACE_INET_Addr&)
-{
-  network_change();
 }
 
 void AgentImpl::process_deferred()

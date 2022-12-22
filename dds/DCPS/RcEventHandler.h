@@ -20,14 +20,13 @@ namespace DCPS {
 /// Templated Reference counted handle to a pointer.
 /// A non-DDS specific helper class.
 class RcEventHandler
-  : public ACE_Event_Handler
+  : public virtual ACE_Event_Handler
   , public virtual RcObject {
 public:
 
   RcEventHandler()
   {
     this->reference_counting_policy().value(ACE_Event_Handler::Reference_Counting_Policy::ENABLED);
-
   }
 
   ACE_Event_Handler::Reference_Count add_reference()

@@ -15,14 +15,19 @@
 
 #include "tests/DCPS/FooType5/FooDefTypeSupportImpl.h"
 
+#include "tests/Utils/WaitForSample.h"
+
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/Qos_Helper.h>
 #include <dds/DCPS/PublisherImpl.h>
+#include <dds/DCPS/WaitSet.h>
 #include <dds/DCPS/transport/framework/EntryExit.h>
 
 #include <ace/Arg_Shifter.h>
 
+enum Subscriber_State { READY, DONE };
 
 ::DDS::DomainParticipantFactory_var dpf;
 ::DDS::DomainParticipant_var participant;
@@ -44,7 +49,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
     //  -i num_samples_per_instance (defaults to 1)
     //  -m num_instances_per_writer (defaults to 1)
     //  -v verbose transport debug
-    //  -o directory of synch files used to coordinate publisher and subscriber
+    //  -o directory of synch file used to coordinate publisher and subscriber
     //     defaults to current directory
     const ACE_TCHAR *currentArg = 0;
 
@@ -59,10 +64,7 @@ int parse_args(int argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-o"))) != 0) {
       synch_file_dir = currentArg;
-      pub_ready_filename = synch_file_dir + pub_ready_filename;
       pub_finished_filename = synch_file_dir + pub_finished_filename;
-      sub_ready_filename = synch_file_dir + sub_ready_filename;
-      sub_finished_filename = synch_file_dir + sub_finished_filename;
 
       arg_shifter.consume_arg ();
     } else {
@@ -164,6 +166,42 @@ void shutdown()
   TheServiceParticipant->shutdown();
 }
 
+void wait_for_subscriber(Subscriber_State state)
+{
+    // ensure the associations are fully established before writing.
+    DDS::WaitSet_var ws = new DDS::WaitSet;
+    DDS::ConditionSeq conditions;
+    DDS::PublicationMatchedStatus matches = { 0, 0, 0, 0, 0 };
+    DDS::Duration_t timeout = { DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC };
+
+    for (int ctr = 0; ctr < 2; ++ctr) {
+      DDS::StatusCondition_var condition = datawriter[ctr]->get_statuscondition();
+      condition->set_enabled_statuses(DDS::PUBLICATION_MATCHED_STATUS);
+
+      ws->attach_condition(condition);
+
+      if (ws->wait(conditions, timeout) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: wait failed!\n")));
+        ACE_OS::exit(-1);
+      }
+
+      if (datawriter[ctr]->get_publication_matched_status(matches) != DDS::RETCODE_OK) {
+        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status failed!\n")));
+        ACE_OS::exit(-1);
+      } else {
+        if (state == READY && matches.current_count == 0) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status READY but current_count is 0\n")));
+          ACE_OS::exit(-1);
+        } else if (state == DONE && matches.current_count == 1) {
+          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: get_publication_matched_status DONE but current_count is not 0\n")));
+          ACE_OS::exit(-1);
+        }
+      }
+
+      ws->detach_condition(condition);
+    }
+}
+
 
 int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 {
@@ -179,32 +217,16 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
     init();
 
-    // Indicate that the publisher is ready
-    FILE* writers_ready = ACE_OS::fopen(pub_ready_filename.c_str(), ACE_TEXT("w"));
-    if (writers_ready == 0) {
-      ACE_ERROR((LM_ERROR,
-        ACE_TEXT("(%P|%t) ERROR: Unable to create publisher ready file\n")));
-    }
-
-    // Wait for the subscriber to be ready.
-    const ACE_Time_Value small_time(0, 250000);
-    FILE* readers_ready = 0;
-    do {
-      ACE_OS::sleep(small_time);
-      readers_ready = ACE_OS::fopen(sub_ready_filename.c_str(), ACE_TEXT("r"));
-    } while (!readers_ready);
-
-    if (writers_ready) ACE_OS::fclose(writers_ready);
-    if (readers_ready) ACE_OS::fclose(readers_ready);
-
-    // ensure the associations are fully established before writing.
-    ACE_OS::sleep(3);
+    // wait for subscrier ready
+    wait_for_subscriber(READY);
 
     {  // Extra scope for VC6
       for (int i = 0; i < num_datawriters; ++i) {
         writers[i]->start();
       }
     }
+
+    const ACE_Time_Value small_time(0, 250000);
 
     int timeout_writes = 0;
     bool writers_finished = false;
@@ -227,27 +249,15 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     FILE* writers_completed = ACE_OS::fopen(pub_finished_filename.c_str(), ACE_TEXT("w"));
     if (writers_completed == 0) {
       ACE_ERROR((LM_ERROR,
-                 ACE_TEXT("(%P|%t) ERROR: Unable to i publisher completed file\n")));
+                 ACE_TEXT("(%P|%t) ERROR: Unable to write publisher completed file\n")));
     } else {
       ACE_OS::fprintf(writers_completed, "%d\n", timeout_writes);
     }
 
-    // Wait for the subscriber to finish.
-    FILE* readers_completed = 0;
-    do {
-      ACE_OS::sleep(small_time);
-      readers_completed = ACE_OS::fopen(sub_finished_filename.c_str(), ACE_TEXT("r"));
-    } while (!readers_completed);
-
     if (writers_completed) ACE_OS::fclose(writers_completed);
-    if (readers_completed) ACE_OS::fclose(readers_completed);
 
-    {  // Extra scope for VC6
-      for (int i = 0; i < num_datawriters; ++i) {
-        writers[i]->end();
-        delete writers[i];
-      }
-    }
+    // wait for subscriber finish
+    wait_for_subscriber(DONE);
 
   } catch (const TestException&) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) TestException caught in main(). ")));

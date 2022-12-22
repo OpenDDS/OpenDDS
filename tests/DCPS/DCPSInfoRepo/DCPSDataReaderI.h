@@ -53,7 +53,7 @@ public:
   DDS::DomainId_t domainId_;
   ::OpenDDS::DCPS::RepoId participantId_;
 
-  OpenDDS::ICE::Endpoint* get_ice_endpoint() { return 0; }
+  OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint> get_ice_endpoint() { return OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>(); }
 
 private:
   DiscReceivedCalls received_;

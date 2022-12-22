@@ -5,7 +5,7 @@
 #ifndef OPENDDS_DCPS_RTPS_TYPE_LOOKUP_H
 #define OPENDDS_DCPS_RTPS_TYPE_LOOKUP_H
 
-#include "BaseMessageTypes.h"
+#include "MessageTypes.h"
 #include "RtpsRpcTypeSupportImpl.h"
 
 #include <dds/DCPS/XTypes/TypeObject.h>

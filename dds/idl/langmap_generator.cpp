@@ -436,7 +436,7 @@ struct GeneratorBase
 
   static std::string generateCopyCtor(const std::string&, const std::string& name, AST_Type* field_type,
                                       const std::string&, bool, Intro&,
-                                      const std::string&, bool)
+                                      const std::string&)
   {
     std::stringstream ss;
     AST_Type* actual_field_type = resolveActualType(field_type);
@@ -463,7 +463,7 @@ struct GeneratorBase
 
   static std::string generateAssign(const std::string&, const std::string& name, AST_Type* field_type,
                                     const std::string&, bool, Intro&,
-                                    const std::string&, bool)
+                                    const std::string&)
   {
     std::stringstream ss;
     AST_Type* actual_field_type = resolveActualType(field_type);
@@ -490,7 +490,7 @@ struct GeneratorBase
 
   static std::string generateEqual(const std::string&, const std::string& name, AST_Type* field_type,
                                    const std::string&, bool, Intro&,
-                                   const std::string&, bool)
+                                   const std::string&)
   {
     std::stringstream ss;
 
@@ -518,7 +518,7 @@ struct GeneratorBase
 
   static std::string generateReset(const std::string&, const std::string& name, AST_Type* field_type,
                                    const std::string&, bool, Intro&,
-                                   const std::string&, bool)
+                                   const std::string&)
   {
     std::stringstream ss;
 
@@ -1120,7 +1120,7 @@ struct SafetyProfileGenerator : GeneratorBase
     primtype_[AST_PredefinedType::PT_long] = "CORBA::Long";
     primtype_[AST_PredefinedType::PT_ulong] = "CORBA::ULong";
     primtype_[AST_PredefinedType::PT_longlong] = "CORBA::LongLong";
-    primtype_[AST_PredefinedType::PT_ulonglong] = "CORBA::UnsignedLongLong";
+    primtype_[AST_PredefinedType::PT_ulonglong] = "CORBA::ULongLong";
     primtype_[AST_PredefinedType::PT_short] = "CORBA::Short";
     primtype_[AST_PredefinedType::PT_ushort] = "CORBA::UShort";
 #if OPENDDS_HAS_EXPLICIT_INTS
@@ -1421,6 +1421,25 @@ struct Cxx11Generator : GeneratorBase
   bool scoped_enum() { return true; }
   std::string enum_base() { return " : uint32_t"; }
 
+  void gen_union_pragma_pre()
+  {
+    // Older versions of gcc will complain because it appears that a primitive
+    // default constructor is not called for anonymous unions.
+    be_global->lang_header_ <<
+      "#if defined(__GNUC__) && !defined(__clang__)\n"
+      "#  pragma GCC diagnostic push\n"
+      "#  pragma GCC diagnostic ignored \"-Wmaybe-uninitialized\"\n"
+      "#endif\n";
+  }
+
+  void gen_union_pragma_post()
+  {
+    be_global->lang_header_ <<
+      "#if defined(__GNUC__) && !defined(__clang__)\n"
+      "#  pragma GCC diagnostic pop\n"
+      "#endif\n\n";
+  }
+
   void struct_decls(UTL_ScopedName* name, AST_Type::SIZE_TYPE, const char*)
   {
     be_global->lang_header_ <<
@@ -1634,35 +1653,35 @@ struct Cxx11Generator : GeneratorBase
 
   static std::string union_copy(const std::string&, const std::string& name, AST_Type*,
                                 const std::string&, bool, Intro&,
-                                const std::string&, bool)
+                                const std::string&)
   {
     return "    _" + name + " = rhs._" + name + ";\n";
   }
 
   static std::string union_move(const std::string&, const std::string& name, AST_Type*,
                                 const std::string&, bool, Intro&,
-                                const std::string&, bool)
+                                const std::string&)
   {
     return "    _" + name + " = std::move(rhs._" + name + ");\n";
   }
 
   static std::string union_assign(const std::string&, const std::string& name, AST_Type*,
                                   const std::string&, bool, Intro&,
-                                  const std::string&, bool)
+                                  const std::string&)
   {
     return "    " + name + "(rhs._" + name + ");\n";
   }
 
   static std::string union_move_assign(const std::string&, const std::string& name, AST_Type*,
                                        const std::string&, bool, Intro&,
-                                       const std::string&, bool)
+                                       const std::string&)
   {
     return "    " + name + "(std::move(rhs._" + name + "));\n";
   }
 
   static std::string union_activate(const std::string&, const std::string& name, AST_Type* type,
                                     const std::string&, bool, Intro&,
-                                    const std::string&, bool)
+                                    const std::string&)
   {
     AST_Type* actual_field_type = resolveActualType(type);
     const std::string lang_field_type = generator_->map_type(type);
@@ -1675,7 +1694,7 @@ struct Cxx11Generator : GeneratorBase
 
   static std::string union_reset(const std::string&, const std::string& name, AST_Type* type,
                                  const std::string&, bool, Intro&,
-                                 const std::string&, bool)
+                                 const std::string&)
   {
     AST_Type* actual_field_type = resolveActualType(type);
     const std::string lang_field_type = generator_->map_type(type);
@@ -1699,6 +1718,7 @@ struct Cxx11Generator : GeneratorBase
     const std::string d_type = generator_->map_type(discriminator);
     const std::string defVal = generateDefaultValue(u);
 
+    gen_union_pragma_pre();
     gen_common_strunion_pre(nm);
 
     be_global->lang_header_ <<
@@ -1731,6 +1751,7 @@ struct Cxx11Generator : GeneratorBase
       "  void _reset();\n";
 
     gen_common_strunion_post(nm);
+    gen_union_pragma_post();
 
     const ScopedNamespaceGuard namespacesCpp(name, be_global->impl_);
     be_global->impl_ <<

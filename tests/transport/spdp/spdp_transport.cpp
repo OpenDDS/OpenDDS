@@ -5,11 +5,9 @@
 #include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include <dds/DCPS/transport/framework/NetworkAddress.h>
-
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
 #include <dds/DCPS/RTPS/GuidGenerator.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
+#include <dds/DCPS/RTPS/MessageParser.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/RtpsDiscovery.h>
 #include <dds/DCPS/RTPS/ParameterListConverter.h>
@@ -17,6 +15,7 @@
 
 #include <dds/DCPS/LogAddr.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/NetworkResource.h>
 
 #include <ace/Configuration.h>
 #include <ace/Reactor.h>
@@ -62,7 +61,8 @@ public:
     ACE_GUARD(ACE_Thread_Mutex, g, spdp_->lock_);
     Spdp::DiscoveredParticipantIter iter = spdp_->participants_.find(guid_);
     if (iter != spdp_->participants_.end()) {
-      spdp_->remove_discovered_participant(iter);
+      spdp_->purge_discovered_participant(iter);
+      spdp_->participants_.erase(iter);
     }
   }
 
@@ -257,13 +257,15 @@ void to_locator(const ACE_INET_Addr& addr, Locator_t& locator)
 {
 #ifdef ACE_HAS_IPV6
   if (addr.get_type() == AF_INET6) {
-    locator.kind = LOCATOR_KIND_UDPv6;
+    locator.kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv6;
+    locator.port = addr.get_port_number();
     struct sockaddr_in6* in6 = static_cast<struct sockaddr_in6*>(addr.get_addr());
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address), &in6->sin6_addr, 16);
   } else
 #endif
   {
-    locator.kind = LOCATOR_KIND_UDPv4;
+    locator.kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
+    locator.port = addr.get_port_number();
     struct sockaddr_in* sa = static_cast<struct sockaddr_in*>(addr.get_addr());
     std::memset(locator.address, 0, 12);
     ACE_OS::memcpy(reinterpret_cast<unsigned char*>(locator.address) + 12, &sa->sin_addr, 4);
@@ -274,7 +276,6 @@ bool run_test()
 {
   // Create and initialize RtpsDiscovery
   RtpsDiscovery rd("test");
-  rd.config()->use_ncm(false);
   const ACE_INET_Addr local_addr(u_short(7575), "0.0.0.0");
   rd.config()->spdp_local_address(local_addr);
   const DDS::DomainId_t domain = 0;
@@ -282,8 +283,8 @@ bool run_test()
   RepoId id = rd.generate_participant_guid();
   const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd, OpenDDS::XTypes::TypeLookupService_rch()));
 
-  const DDS::Subscriber_var sVar;
-  spdp->init_bit(sVar);
+  RcHandle<BitSubscriber> bit_subscriber = make_rch<BitSubscriber>();
+  spdp->init_bit(bit_subscriber);
   reactor_wait();
 
   // Check if the port override worked.
@@ -347,7 +348,7 @@ bool run_test()
   OpenDDS::DCPS::LocatorSeq nonEmptyList(1);
   nonEmptyList.length(1);
   nonEmptyList[0].port = 12345;
-  nonEmptyList[0].kind = LOCATOR_KIND_UDPv4;
+  nonEmptyList[0].kind = OpenDDS::RTPS::LOCATOR_KIND_UDPv4;
   std::memset(nonEmptyList[0].address, 0, 12);
   nonEmptyList[0].address[12] = 127;
   nonEmptyList[0].address[13] = 0;
@@ -367,9 +368,11 @@ bool run_test()
     return false;
   }
 
-  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count);
-  unicastLocators.length(addr_count);
-  for (size_t i = 0; i < addr_count; ++i) {
+  const ACE_CDR::ULong addr_count_ulong = static_cast<ACE_CDR::ULong>(addr_count);
+  OpenDDS::DCPS::LocatorSeq unicastLocators(addr_count_ulong);
+  unicastLocators.length(addr_count_ulong);
+  for (ACE_CDR::ULong i = 0; i < addr_count_ulong; ++i) {
+    addr_array[i].set_port_number(12345);
     if (DCPS_debug_level) {
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) spdp_transport.cpp:run_test() addr_array[%d]: %C\n"), i, LogAddr(addr_array[i]).c_str()));
     }
@@ -530,9 +533,9 @@ bool run_test()
 
 int ACE_TMAIN(int, ACE_TCHAR*[])
 {
+  DDS::DomainParticipantFactory_var dpf;
   try {
-    ::DDS::DomainParticipantFactory_var dpf =
-        TheServiceParticipant->get_domain_participant_factory();
+    dpf = TheServiceParticipant->get_domain_participant_factory();
     set_DCPS_debug_level(1);
   } catch (const CORBA::BAD_PARAM& ex) {
     ex._tao_print_exception("Exception caught in spdp_transport.cpp:");

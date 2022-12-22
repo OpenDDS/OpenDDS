@@ -9,6 +9,7 @@
 #define OPENDDS_DCPS_TIME_HELPER_H
 
 #include <dds/DdsDcpsCoreC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
 
 #include <ace/OS_NS_sys_time.h>
 
@@ -98,6 +99,9 @@ bool operator>=(const DDS::Time_t& t1, const DDS::Time_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const DDS::Time_t& t1, const DDS::Time_t& t2);
+
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Time_t operator-(const DDS::Time_t& t1, const DDS::Duration_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
 DDS::Duration_t operator-(const MonotonicTime_t& t1, const MonotonicTime_t& t2);

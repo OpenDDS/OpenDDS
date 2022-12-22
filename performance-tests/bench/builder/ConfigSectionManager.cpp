@@ -8,7 +8,7 @@
 
 namespace Builder {
 
-ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq)
+ConfigSectionManager::ConfigSectionManager(const std::string& name, const ConfigSectionSeq& seq)
 {
   ACE_Configuration_Heap ach;
   ach.open();
@@ -40,7 +40,7 @@ ConfigSectionManager::ConfigSectionManager(const ConfigSectionSeq& seq)
       }
     }
   }
-  TheServiceParticipant->load_configuration(ach, ACE_TEXT(""));
+  TheServiceParticipant->load_configuration(ach, ACE_TEXT_CHAR_TO_TCHAR(name.c_str()));
 }
 
 }

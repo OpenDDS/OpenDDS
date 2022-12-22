@@ -26,43 +26,61 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor : public RcEventHandler, public NetworkConfigMonitor {
+class OpenDDS_Dcps_Export LinuxNetworkConfigMonitor
+  : public virtual RcEventHandler
+  , public virtual NetworkConfigMonitor
+{
 public:
   explicit LinuxNetworkConfigMonitor(ReactorInterceptor_rch interceptor);
   bool open();
   bool close();
 
 private:
-  class RegisterHandler : public ReactorInterceptor::Command {
+  class OpenHandler : public ReactorInterceptor::Command {
   public:
-    RegisterHandler(LinuxNetworkConfigMonitor* lncm)
+    OpenHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
+      , condition_(mutex_)
+      , done_(false)
+      , retval_(false)
     {}
+
+    bool wait() const;
 
   private:
-    void execute()
-    {
-      if (reactor()->register_handler(lncm_, READ_MASK) != 0) {
-        ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not register for input: %m\n")));
-      }
-    }
+    void execute();
 
-    LinuxNetworkConfigMonitor* lncm_;
+    WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
+    mutable ACE_Thread_Mutex mutex_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
+    bool done_;
+    bool retval_;
   };
 
-  class RemoveHandler : public ReactorInterceptor::Command {
+  bool open_i();
+
+  class CloseHandler : public ReactorInterceptor::Command {
   public:
-    RemoveHandler(LinuxNetworkConfigMonitor* lncm)
+    CloseHandler(WeakRcHandle<LinuxNetworkConfigMonitor> lncm)
       : lncm_(lncm)
+      , condition_(mutex_)
+      , done_(false)
+      , retval_(false)
     {}
 
-    void execute()
-    {
-      reactor()->remove_handler(lncm_, READ_MASK);
-    }
+    bool wait() const;
 
-    LinuxNetworkConfigMonitor* lncm_;
+  private:
+    void execute();
+
+    WeakRcHandle<LinuxNetworkConfigMonitor> lncm_;
+    mutable ACE_Thread_Mutex mutex_;
+    mutable ConditionVariable<ACE_Thread_Mutex> condition_;
+    bool done_;
+    bool retval_;
   };
+
+  bool close_i();
 
   ACE_HANDLE get_handle() const;
   int handle_input(ACE_HANDLE);
@@ -70,7 +88,26 @@ private:
   void process_message(const nlmsghdr* header);
 
   ACE_SOCK_Netlink socket_;
+  ACE_Thread_Mutex socket_mutex_;
   ReactorInterceptor_wrch interceptor_;
+
+  struct NetworkInterface {
+    OPENDDS_STRING name;
+    bool can_multicast;
+
+    NetworkInterface()
+      : can_multicast(false)
+    {}
+
+    NetworkInterface(const OPENDDS_STRING& a_name,
+                     bool a_can_multicast)
+      : name(a_name)
+      , can_multicast(a_can_multicast)
+    {}
+  };
+
+  typedef OPENDDS_MAP(int, NetworkInterface) NetworkInterfaceMap;
+  NetworkInterfaceMap network_interface_map_;
 };
 
 } // DCPS

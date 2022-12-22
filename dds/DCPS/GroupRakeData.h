@@ -37,7 +37,9 @@ public:
   /// Returns false if the sample will definitely not be part of the
   /// resulting dataset, however if this returns true it still may be
   /// excluded (due to sorting and max_samples).
-  bool insert_sample(ReceivedDataElement* sample, SubscriptionInstance_rch i,
+  bool insert_sample(ReceivedDataElement* sample,
+                     ReceivedDataElementList* rdel,
+                     SubscriptionInstance_rch i,
                      size_t index_in_instance);
 
   void get_datareaders (DDS::DataReaderSeq & readers);

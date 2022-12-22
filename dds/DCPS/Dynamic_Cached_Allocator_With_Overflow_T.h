@@ -9,13 +9,13 @@
 #define OPENDDS_DCPS_DYNAMIC_CACHED_ALLOCATOR_WITH_OVERFLOW_T_H
 
 #include "debug.h"
-#include "ace/Malloc_Allocator.h"
-#include "ace/Malloc_T.h"
-#include "ace/Free_List.h"
-#include "ace/Guard_T.h"
-#include "ace/Atomic_Op_T.h"
-
 #include "PoolAllocationBase.h"
+
+#include <ace/Atomic_Op.h>
+#include <ace/Free_List.h>
+#include <ace/Guard_T.h>
+#include <ace/Malloc_Allocator.h>
+#include <ace/Malloc_T.h>
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 # pragma once

@@ -1,39 +1,27 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include <ace/Get_Opt.h>
+#include "ParticipantLocationListenerImpl.h"
+
+#include <MessengerTypeSupportImpl.h>
+#include <tests/Utils/StatusMatching.h>
 
 #include <dds/DCPS/Marked_Default_Qos.h>
 #include <dds/DCPS/PublisherImpl.h>
 #include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/BuiltInTopicUtils.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
 #include <dds/DCPS/transport/framework/TransportRegistry.h>
-
-#include "dds/DCPS/StaticIncludes.h"
-
 #ifdef ACE_AS_STATIC_LIBS
-# ifndef OPENDDS_SAFETY_PROFILE
-#include <dds/DCPS/RTPS/RtpsDiscovery.h>
-#  ifdef OPENDDS_SECURITY
-#  include "dds/DCPS/security/BuiltInPlugins.h"
-#  endif
-# endif
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/RTPS/RtpsDiscovery.h>
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#  include <dds/DCPS/security/BuiltInPlugins.h>
 #endif
-
-#include "MessengerTypeSupportImpl.h"
-
-#include <dds/DCPS/BuiltInTopicUtils.h>
-#include "ParticipantLocationListenerImpl.h"
-
-#include "tests/Utils/StatusMatching.h"
-
-#ifdef OPENDDS_SECURITY
 #include <dds/DCPS/security/framework/Properties.h>
+
+#include <ace/Get_Opt.h>
 
 // common
 const char auth_ca_file_from_tests[] = "security/certs/identity/identity_ca_cert.pem";
@@ -48,8 +36,6 @@ const char pub_permissions_file[] = "file:./permissions_publisher_signed.p7s";
 const char sub_id_cert_file_from_tests[] = "security/certs/identity/test_participant_03_cert.pem";
 const char sub_id_key_file_from_tests[] = "security/certs/identity/test_participant_03_private_key.pem";
 const char sub_permissions_file[] = "file:./permissions_subscriber_signed.p7s";
-
-#endif
 
 bool no_ice = false;
 bool ipv6 = false;
@@ -267,6 +253,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
       ACE_OS::exit(EXIT_FAILURE);
     }
+    // No need to call on_data_available since subscriber doesn't exist.
 
     // Create Subscriber DomainParticipant
     std::cout << "Starting subscriber" << std::endl;
@@ -369,6 +356,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
                  OpenDDS::DCPS::BUILT_IN_PARTICIPANT_LOCATION_TOPIC));
       ACE_OS::exit(EXIT_FAILURE);
     }
+
+    // Call on_data_available in case there are samples which are waiting
+    sub_listener->on_data_available(sub_loc_dr);
 
     while (participants_done != 2) {
       participants_done_cond.wait();

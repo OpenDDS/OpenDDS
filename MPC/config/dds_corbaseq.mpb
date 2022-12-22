@@ -1,3 +1,0 @@
-feature(!no_opendds_safety_profile) {
-   after += OpenDDS_CorbaSeq
-}

@@ -49,13 +49,13 @@ class OpenDDS_Tcp_Export TcpTransport
 {
 public:
 
-  explicit TcpTransport(TcpInst& inst);
+  explicit TcpTransport(const TcpInst_rch& inst);
   virtual ~TcpTransport();
 
   int fresh_link(TcpConnection_rch connection);
 
   virtual void unbind_link(DataLink* link);
-  TcpInst& config() const;
+  TcpInst_rch config() const;
 
 private:
   virtual AcceptConnectResult connect_datalink(const RemoteTransport& remote,
@@ -71,7 +71,9 @@ private:
                                             bool disassociate,
                                             bool association_failed);
 
-  virtual bool configure_i(TcpInst& config);
+  virtual bool configure_i(const TcpInst_rch& config);
+
+  virtual void client_stop(const RepoId& local_id);
 
   virtual void shutdown_i();
 

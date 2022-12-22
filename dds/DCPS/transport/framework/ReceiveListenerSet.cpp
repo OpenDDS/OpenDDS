@@ -35,21 +35,21 @@ ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
   TransportReceiveListener_wrch listener;
 
   if (find(map_, local_id, listener) == -1) {
-    GuidConverter converter(local_id);
+    LogGuid logger(local_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
                ACE_TEXT("could not find local %C.\n"),
-               OPENDDS_STRING(converter).c_str()));
+               logger.c_str()));
 
     return false;
   }
 
   if (!listener) {
-    GuidConverter converter(local_id);
+    LogGuid logger(local_id);
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ReceiveListenerSet::exist: ")
                ACE_TEXT("listener for local %C is nil.\n"),
-               OPENDDS_STRING(converter).c_str()));
+               logger.c_str()));
 
     return false;
   }
@@ -111,7 +111,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
     TransportReceiveListener_rch listener = handles[i].lock();
     if (!listener)
       continue;
-    if (i < handles.size() - 1 && sample.sample_) {
+    if (i < handles.size() - 1 && sample.has_data()) {
       // demarshal (in data_received()) updates the rd_ptr() of any of
       // the message blocks in the chain, so give it a duplicated chain.
       ReceivedDataSample rds(sample);

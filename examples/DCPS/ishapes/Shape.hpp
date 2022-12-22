@@ -1,20 +1,24 @@
 #ifndef _SHAPE_HPP
 #define _SHAPE_HPP
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtCore/QRect>
 #include <QtGui/QPen>
 #include <QtGui/QBrush>
 
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include "ace/config-all.h"
 
-#if defined (ACE_HAS_CPP11)
-# include <memory>
-using std::shared_ptr;
-#else
-# include <boost/shared_ptr.hpp>
-using boost::shared_ptr;
-#endif /* ACE_HAS_CPP11 */
-
+#include <memory>
 
 class Shape {
 public:

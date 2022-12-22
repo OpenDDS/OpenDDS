@@ -51,7 +51,7 @@ class Writer : public ACE_Task_Base {
     bool verbose_;
 
     /// Completion indicator.
-    bool done_;
+    ACE_Atomic_Op<ACE_Thread_Mutex, bool> done_;
 
     /// Count of messages sent by this publication.
     int messages_;

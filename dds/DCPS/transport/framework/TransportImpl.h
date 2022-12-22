@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,25 +6,29 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTIMPL_H
 
-#include "dds/DCPS/dcps_export.h"
-#include "dds/DCPS/RcObject.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DdsDcpsSubscriptionC.h"
-#include "dds/DdsDcpsPublicationC.h"
-#include "dds/DCPS/PoolAllocator.h"
 #include "TransportDefs.h"
+#include "TransportInst_rch.h"
 #include "TransportInst.h"
-#include "dds/DCPS/ReactorTask.h"
-#include "dds/DCPS/ReactorTask_rch.h"
 #include "DataLinkCleanupTask.h"
-#include "dds/DCPS/PoolAllocator.h"
-#include "dds/DCPS/DiscoveryListener.h"
 
-#if defined(OPENDDS_SECURITY)
-#include "dds/DdsSecurityCoreC.h"
+#include <dds/DCPS/dcps_export.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/ReactorTask.h>
+#include <dds/DCPS/ReactorTask_rch.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/DiscoveryListener.h>
+#include <dds/DCPS/EventDispatcher.h>
+#include <dds/DCPS/AtomicBool.h>
+
+#include <dds/OpenddsDcpsExtC.h>
+#include <dds/DdsDcpsSubscriptionC.h>
+#include <dds/DdsDcpsPublicationC.h>
+#ifdef OPENDDS_SECURITY
+#  include <dds/DdsSecurityCoreC.h>
 #endif
 
-#include "ace/Synch_Traits.h"
+#include <ace/Synch_Traits.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -59,7 +61,7 @@ typedef WeakRcHandle<TransportClient> TransportClient_wrch;
 *     but has a references via smart pointer then the reference should be freed;
 *     if this object has ownership of task objects then the tasks should be closed.
 */
-class OpenDDS_Dcps_Export TransportImpl : public RcObject {
+class OpenDDS_Dcps_Export TransportImpl : public virtual RcObject {
 public:
 
   virtual ~TransportImpl();
@@ -74,7 +76,7 @@ public:
 
   /// Expose the configuration information so others can see what
   /// we can do.
-  TransportInst& config() const;
+  TransportInst_rch config() const;
 
   /// Called by our connection_info() method to allow the concrete
   /// TransportImpl subclass to do the dirty work since it really
@@ -105,7 +107,11 @@ public:
   virtual void update_locators(const RepoId& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
-  virtual void get_and_reset_relay_message_counts(RelayMessageCounts& /*counts*/) {}
+  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+                                     TransportLocator& /*locators*/) {}
+
+  virtual void rtps_relay_address_change() {}
+  virtual void append_transport_statistics(TransportStatisticsSequence& /*seq*/) {}
 
   /// Interface to the transport's reactor for scheduling timers.
   ACE_Reactor_Timer_Interface* timer() const;
@@ -142,6 +148,7 @@ public:
   struct RemoteTransport {
     RepoId repo_id_;
     TransportBLOB blob_;
+    TransportBLOB discovery_blob_;
     MonotonicTime_t participant_discovered_at_;
     ACE_CDR::ULong context_;
     Priority publication_transport_priority_;
@@ -162,13 +169,20 @@ public:
     DataLink_rch link_;
   };
 
-  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return WeakRcHandle<ICE::Endpoint>(); }
   virtual void rtps_relay_only_now(bool /*flag*/) {}
   virtual void use_rtps_relay_now(bool /*flag*/) {}
   virtual void use_ice_now(bool /*flag*/) {}
 
+  /// Accessor to obtain a "copy" of the reference to the reactor task.
+  /// Caller is responsible for the "copy" of the reference that is
+  /// returned.
+  ReactorTask_rch reactor_task();
+
+  EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
+
 protected:
-  TransportImpl(TransportInst& config);
+  TransportImpl(TransportInst_rch config);
 
   bool open();
 
@@ -209,11 +223,6 @@ protected:
   /// concrete TransportImpl subclass a chance to do something when
   /// the shutdown "event" occurs.
   virtual void shutdown_i() = 0;
-
-  /// Accessor to obtain a "copy" of the reference to the reactor task.
-  /// Caller is responsible for the "copy" of the reference that is
-  /// returned.
-  ReactorTask_rch reactor_task();
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;
@@ -285,22 +294,34 @@ public:
 
   /// A reference to the TransportInst
   /// object that was supplied to us during our configure() method.
-  TransportInst& config_;
+  WeakRcHandle<TransportInst> config_;
 
   /// The reactor (task) object - may not even be used if the concrete
   /// subclass (of TransportImpl) doesn't require a reactor.
   ReactorTask_rch reactor_task_;
 
+  struct DoClear : EventBase {
+    explicit DoClear(RcHandle<DataLink> link) : link_(link) {}
+    void handle_event()
+    {
+      DataLink_rch link = link_.lock();
+      if (link) {
+        link->clear_associations();
+      }
+    }
+    WeakRcHandle<DataLink> link_;
+  };
+
   /// smart ptr to the associated DL cleanup task
-  DataLinkCleanupTask dl_clean_task_;
+  EventDispatcher_rch event_dispatcher_;
 
   /// Monitor object for this entity
   unique_ptr<Monitor> monitor_;
 
 protected:
   /// Id of the last link established.
-  std::size_t last_link_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> is_shut_down_;
+  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> last_link_;
+  AtomicBool is_shut_down_;
 };
 
 } // namespace DCPS

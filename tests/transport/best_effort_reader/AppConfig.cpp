@@ -5,7 +5,7 @@
 #include "dds/DCPS/transport/rtps_udp/RtpsUdpInst.h"
 #include "dds/DCPS/RepoIdBuilder.h"
 #include "dds/DCPS/GuidConverter.h"
-#include "dds/DCPS/RTPS/BaseMessageUtils.h"
+#include "dds/DCPS/RTPS/MessageUtils.h"
 #include <ace/Basic_Types.h>
 #include <ace/Get_Opt.h>
 #ifdef ACE_AS_STATIC_LIBS
@@ -74,7 +74,7 @@ bool AppConfig::configureTransport(){
     }
     rtpsUdp->datalink_release_delay_ = 0;
     ACE_INET_Addr addr(port, ACE_TEXT_ALWAYS_CHAR(host.c_str()));
-    rtpsUdp->local_address(addr);
+    rtpsUdp->local_address(OpenDDS::DCPS::NetworkAddress(addr));
 
     OpenDDS::DCPS::TransportConfig_rch cfg = TheTransportRegistry->create_config("cfg");
     cfg->instances_.push_back(transpt);
@@ -99,8 +99,8 @@ OpenDDS::DCPS::RepoId AppConfig::createID(long participantId, long key, CORBA::O
 }
 
 void AppConfig::to_cerr(const OpenDDS::DCPS::RepoId& remote, const OpenDDS::DCPS::RepoId& local, const std::string& txt) const {
-  std::cerr << OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(remote)) << " <- "
-            << OPENDDS_STRING(OpenDDS::DCPS::GuidConverter(local)) << " " << txt << std::endl;
+  std::cerr << OpenDDS::DCPS::LogGuid(remote).conv_ << " <- "
+            << OpenDDS::DCPS::LogGuid(local).conv_ << " " << txt << std::endl;
 }
 
 void AppConfig::cleanup() {

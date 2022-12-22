@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -8,14 +6,16 @@
 #ifndef OPENDDS_DCPS_PUBLISHER_IMPL_H
 #define OPENDDS_DCPS_PUBLISHER_IMPL_H
 
-#include "dds/DdsDcpsInfoUtilsC.h"
 #include "EntityImpl.h"
 #include "DataWriterImpl.h"
-#include "ace/Reverse_Lock_T.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <dds/DdsDcpsInfoUtilsC.h>
+
+#include <ace/Reverse_Lock_T.h>
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -112,11 +112,12 @@ public:
 
   ACE_Recursive_Thread_Mutex& get_pi_lock() { return pi_lock_; }
 
-  /** This method is not defined in the IDL and is defined for
-  *  internal use.
-  *  Check if there is any datawriter associated with this publisher.
-  */
-  bool is_clean() const;
+  /**
+   * This method is not defined in the IDL and is defined for
+   * internal use.
+   * Check if there is any datawriter associated with this publisher.
+   */
+  bool is_clean(String* leftover_entities = 0) const;
 
   /** This method is called when the datawriter created by this
   * publisher was enabled.

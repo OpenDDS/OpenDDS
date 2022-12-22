@@ -18,8 +18,7 @@
 #include <dds/DCPS/DisjointSequence.h>
 #include <dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.h>
 #include <dds/DCPS/RTPS/MessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageTypes.h>
-#include <dds/DCPS/RTPS/BaseMessageUtils.h>
+#include <dds/DCPS/RTPS/MessageUtils.h>
 #include <dds/DCPS/transport/framework/ReceivedDataSample.h>
 #include <dds/DCPS/transport/framework/TransportSendListener.h>
 
@@ -146,6 +145,7 @@ RtpsSampleHeader::init(ACE_Message_Block& mb)
   if (valid_) {
 
     frag_ = (kind == DATA_FRAG);
+    data_ = (kind == DATA);
 
     // serialized_size_ is # of bytes of submessage we have read from "mb"
     serialized_size_ = starting_length - mb.total_length();
@@ -259,16 +259,14 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
       // the MD5 hash of a >16 byte key, so we must limit this to Built-in
       // endpoints which are assumed to use GUIDs as keys.
       if ((rtps.writerId.entityKind & 0xC0) == 0xC0 // Only Built-in endpoints
-          && (rtps.smHeader.flags & FLAG_Q) && !rds.sample_) {
+          && (rtps.smHeader.flags & FLAG_Q) && !rds.has_data()) {
         for (CORBA::ULong i = 0; i < rtps.inlineQos.length(); ++i) {
           if (rtps.inlineQos[i]._d() == PID_KEY_HASH) {
-            rds.sample_.reset(new ACE_Message_Block(20));
             // CDR_BE encapsulation scheme (endianness is not used for key hash)
-            rds.sample_->copy("\x00\x00\x00\x00", 4);
+            rds.replace("\x00\x00\x00\x00", EncapsulationHeader::serialized_size);
             const CORBA::Octet* data = rtps.inlineQos[i].key_hash().value;
-            rds.sample_->copy(reinterpret_cast<const char*>(data), 16);
-            opendds.message_length_ =
-              static_cast<ACE_UINT32>(rds.sample_->length());
+            rds.append(reinterpret_cast<const char*>(data), sizeof(DDS::OctetArray16));
+            opendds.message_length_ = EncapsulationHeader::serialized_size + sizeof(DDS::OctetArray16);
             opendds.key_fields_only_ = true;
             if (Transport_debug_level) {
               ACE_DEBUG((LM_DEBUG,
@@ -279,8 +277,8 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
           }
         }
       } else {
-      // FUTURE: Handle the case of D = 0 and K = 0
-      // used for Coherent Sets in PRESENTATION QoS (see 8.7.5)
+        // FUTURE: Handle the case of D = 0 and K = 0
+        // used for Coherent Sets in PRESENTATION QoS (see 8.7.5)
         if (Transport_debug_level) {
           ACE_DEBUG((LM_WARNING,
                      "(%P|%t) RtpsSampleHeader::into_received_data_sample() - "
@@ -327,7 +325,7 @@ RtpsSampleHeader::into_received_data_sample(ReceivedDataSample& rds)
 
 bool RtpsSampleHeader::payload_byte_order(const ReceivedDataSample& rds)
 {
-  return rds.sample_->rd_ptr()[1] & RTPS::FLAG_E;
+  return rds.peek(1) & RTPS::FLAG_E;
 }
 
 namespace {
@@ -341,8 +339,7 @@ namespace {
       {INFO_TS, flags, INFO_TS_SZ},
       {static_cast<ACE_UINT32>(st.sec), DCPS::nanoseconds_to_uint32_fractional_seconds(st.nanosec)}
     };
-    const CORBA::ULong i = subm.length();
-    subm.length(i + 1);
+    const CORBA::ULong i = DCPS::grow(subm) - 1;
     subm[i].info_ts_sm(ts);
   }
 }
@@ -368,8 +365,8 @@ RtpsSampleHeader::populate_data_sample_submessages(
     idest.smHeader.submessageLength = INFO_DST_SZ;
     std::memcpy(idest.guidPrefix, dsle.get_sub_id(0).guidPrefix,
                 sizeof(GuidPrefix_t));
-    subm.length(i + 1);
-    subm[i++].info_dst_sm(idest);
+    i = DCPS::grow(subm);
+    subm[i - 1].info_dst_sm(idest);
   } else {
     //Not durability resend, but could have inline gaps
     for (CORBA::ULong x = 0; x < i; ++x) {
@@ -381,8 +378,8 @@ RtpsSampleHeader::populate_data_sample_submessages(
         idest.smHeader.submessageLength = INFO_DST_SZ;
         std::memcpy(idest.guidPrefix, GUIDPREFIX_UNKNOWN,
                     sizeof(GuidPrefix_t));
-        subm.length(i + 1);
-        subm[i++].info_dst_sm(idest);
+        i = DCPS::grow(subm);
+        subm[i - 1].info_dst_sm(idest);
         break;
       }
     }
@@ -420,8 +417,8 @@ RtpsSampleHeader::populate_data_sample_submessages(
     data.smHeader.flags |= FLAG_Q;
   }
 
-  subm.length(i + 1);
-  subm[i].data_sm(data);
+  i = DCPS::grow(subm);
+  subm[i - 1].data_sm(data);
 }
 
 namespace {
@@ -435,9 +432,7 @@ namespace {
     std::memcpy(kh.value, data->rd_ptr() + offset, sizeof(GUID_t));
     RTPS::Parameter p;
     p.key_hash(kh);
-    const CORBA::ULong i = plist.length();
-    plist.length(i + 1);
-    plist[i] = p;
+    DCPS::push_back(plist, p);
   }
 }
 
@@ -452,7 +447,6 @@ RtpsSampleHeader::populate_data_control_submessages(
   const DataSampleHeader& header = tsce.header();
   const ACE_CDR::Octet flags = header.byte_order_;
   add_timestamp(subm, flags, header);
-  CORBA::ULong i = subm.length();
 
   static const CORBA::Octet BUILT_IN_WRITER = 0xC2;
 
@@ -471,8 +465,7 @@ RtpsSampleHeader::populate_data_control_submessages(
     // We have decided to send a DATA Submessage containing the key and an
     // inlineQoS StatusInfo of zero.
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    const int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len + 1);
+    const int qos_len = DCPS::grow(data.inlineQos) - 1;
     data.inlineQos[qos_len].status_info(STATUS_INFO_REGISTER);
     break;
   }
@@ -488,8 +481,7 @@ RtpsSampleHeader::populate_data_control_submessages(
   }
   case DISPOSE_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    const int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len + 1);
+    const int qos_len = DCPS::grow(data.inlineQos) - 1;
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE);
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
       add_key_hash(data.inlineQos, tsce.msg_payload());
@@ -498,8 +490,7 @@ RtpsSampleHeader::populate_data_control_submessages(
   }
   case DISPOSE_UNREGISTER_INSTANCE: {
     data.smHeader.flags |= FLAG_K_IN_DATA;
-    const int qos_len = data.inlineQos.length();
-    data.inlineQos.length(qos_len + 1);
+    const int qos_len = DCPS::grow(data.inlineQos) - 1;
     data.inlineQos[qos_len].status_info(STATUS_INFO_DISPOSE_UNREGISTER);
     if (header.publication_id_.entityId.entityKind == BUILT_IN_WRITER) {
       add_key_hash(data.inlineQos, tsce.msg_payload());
@@ -526,15 +517,14 @@ RtpsSampleHeader::populate_data_control_submessages(
     data.smHeader.flags |= FLAG_Q;
   }
 
-  subm.length(i + 1);
-  subm[i].data_sm(data);
+  CORBA::ULong idx = DCPS::grow(subm) - 1;
+  subm[idx].data_sm(data);
 }
 
 #define PROCESS_INLINE_QOS(QOS_NAME, DEFAULT_QOS, WRITER_QOS) \
   if (WRITER_QOS.QOS_NAME != DEFAULT_QOS.QOS_NAME) {          \
-    const int qos_len = plist.length();                       \
-    plist.length(qos_len + 1);                                \
-    plist[qos_len].QOS_NAME(WRITER_QOS.QOS_NAME);             \
+    const int idx = DCPS::grow(plist) - 1;                    \
+    plist[idx].QOS_NAME(WRITER_QOS.QOS_NAME);                 \
   }
 
 void
@@ -546,10 +536,9 @@ RtpsSampleHeader::populate_inline_qos(
 
   // Always include topic name (per the spec)
   {
-    const int qos_len = plist.length();
-    plist.length(qos_len + 1);
-    plist[qos_len].string_data(qos_data.topic_name.c_str());
-    plist[qos_len]._d(PID_TOPIC_NAME);
+    const int idx = DCPS::grow(plist) - 1;
+    plist[idx].string_data(qos_data.topic_name.c_str());
+    plist[idx]._d(PID_TOPIC_NAME);
   }
 
   // Conditionally include other QoS inline when the differ from the
@@ -570,8 +559,7 @@ RtpsSampleHeader::populate_inline_qos(
 #endif
   PROCESS_INLINE_QOS(liveliness, default_dw_qos, qos_data.dw_qos);
   if (qos_data.dw_qos.reliability != default_dw_qos.reliability) {
-    const int qos_len = plist.length();
-    plist.length(qos_len + 1);
+    const int idx = DCPS::grow(plist) - 1;
 
     ReliabilityQosPolicyRtps reliability;
     reliability.max_blocking_time = qos_data.dw_qos.reliability.max_blocking_time;
@@ -582,7 +570,7 @@ RtpsSampleHeader::populate_inline_qos(
       reliability.kind.value = RTPS::RELIABLE;
     }
 
-    plist[qos_len].reliability(reliability);
+    plist[idx].reliability(reliability);
   }
   PROCESS_INLINE_QOS(transport_priority, default_dw_qos, qos_data.dw_qos);
   PROCESS_INLINE_QOS(lifespan, default_dw_qos, qos_data.dw_qos);

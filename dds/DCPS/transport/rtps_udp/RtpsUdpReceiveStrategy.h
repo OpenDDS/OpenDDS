@@ -17,8 +17,8 @@
 #include "dds/DCPS/RTPS/RtpsCoreC.h"
 #include "dds/DCPS/RTPS/ICE/Ice.h"
 #include "dds/DCPS/RcEventHandler.h"
+#include "dds/DCPS/NetworkAddress.h"
 
-#include "ace/INET_Addr.h"
 #include "ace/SOCK_Dgram.h"
 
 #include <cstring>
@@ -39,10 +39,14 @@ class ReceivedDataSample;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpReceiveStrategy
   : public TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader>,
-    public RcEventHandler
+    public virtual RcEventHandler
 {
 public:
-  explicit RtpsUdpReceiveStrategy(RtpsUdpDataLink* link, const GuidPrefix_t& local_prefix);
+  static const size_t BUFFER_COUNT = 1u;
+
+  RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
+                         const GuidPrefix_t& local_prefix,
+                         ThreadStatusManager& thread_status_manager);
 
   virtual int handle_input(ACE_HANDLE fd);
 
@@ -52,7 +56,7 @@ public:
   /// Returns true if the bitmap was changed.
   bool remove_frags_from_bitmap(CORBA::Long bitmap[], CORBA::ULong num_bits,
                                 const SequenceNumber& base,
-                                const RepoId& pub_id);
+                                const RepoId& pub_id, ACE_CDR::ULong& samples_requested);
 
   /// Remove any saved fragments.  We do not expect to receive any more
   /// fragments with sequence numbers in "range" from publication "pub_id".
@@ -74,7 +78,10 @@ public:
                                       int n,
                                       const ACE_SOCK_Dgram& socket,
                                       ACE_INET_Addr& remote_address,
-                                      ICE::Endpoint* endpoint,
+#ifdef OPENDDS_SECURITY
+                                      DCPS::RcHandle<ICE::Agent> agent,
+                                      DCPS::WeakRcHandle<ICE::Endpoint> endpoint,
+#endif
                                       RtpsUdpTransport& tport,
                                       bool& stop);
 
@@ -95,11 +102,9 @@ private:
   virtual void deliver_sample(ReceivedDataSample& sample,
                               const ACE_INET_Addr& remote_address);
 
-  virtual void finish_message();
-
   void deliver_sample_i(ReceivedDataSample& sample,
                         const RTPS::Submessage& submessage,
-                        const ACE_INET_Addr& remote_addr);
+                        const NetworkAddress& remote_addr);
 
   virtual int start_i();
   virtual void stop_i();
@@ -112,17 +117,19 @@ private:
   virtual bool reassemble_i(ReceivedDataSample& data, RtpsSampleHeader& rsh);
 
 #ifdef OPENDDS_SECURITY
-  void sec_submsg_to_octets(DDS::OctetSeq& encoded,
+  bool sec_submsg_to_octets(DDS::OctetSeq& encoded,
                             const RTPS::Submessage& postfix);
 
   void deliver_from_secure(const RTPS::Submessage& submessage,
-                           const ACE_INET_Addr& remote_addr);
+                           const NetworkAddress& remote_addr);
 
   bool decode_payload(ReceivedDataSample& sample,
                       const RTPS::DataSubmessage& submessage);
 #endif
 
   bool check_encoded(const EntityId_t& sender);
+
+  typedef TransportReceiveStrategy<RtpsTransportHeader, RtpsSampleHeader> BaseReceiveStrategy;
 
   RtpsUdpDataLink* link_;
   SequenceNumber last_received_;
@@ -162,6 +169,7 @@ private:
   };
 
   MessageReceiver receiver_;
+  ThreadStatusManager& thread_status_manager_;
   ACE_INET_Addr remote_address_;
   RTPS::Message message_;
 

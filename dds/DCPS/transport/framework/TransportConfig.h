@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class OpenDDS_Dcps_Export TransportConfig : public RcObject {
+class OpenDDS_Dcps_Export TransportConfig : public virtual RcObject {
 public:
 
   static const unsigned long DEFAULT_PASSIVE_CONNECT_DURATION = 60000;
@@ -36,7 +36,6 @@ public:
   InstancesType instances_;
 
   bool swap_bytes_;
-  bool cdr_encapsulation_;
 
   /// The time period in milliseconds for the acceptor side
   /// of a connection to wait for the connection.

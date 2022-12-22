@@ -1,0 +1,15 @@
+project: dcpsexe, dcps_test, googletest, rapidjson {
+
+  exename = *
+
+  requires += no_opendds_safety_profile
+  avoids += no_cxx11
+
+  Idl_Files {
+    VreadVwriteTest.idl
+  }
+
+  TypeSupport_Files {
+    VreadVwriteTest.idl
+  }
+}

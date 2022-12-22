@@ -22,7 +22,7 @@ class ThreadSynchResource;
 
 //MJM: Some class documentation here would be extremely helpful.
 class OpenDDS_Dcps_Export ThreadSynchStrategy
-  : public RcObject
+  : public virtual RcObject
 {
 public:
 
@@ -31,7 +31,7 @@ public:
   virtual ThreadSynch* create_synch_object(
     ThreadSynchResource* synch_resource,
     long                 priority,
-    int                  scheduler) = 0;
+    long                 scheduler) = 0;
 
 protected:
 

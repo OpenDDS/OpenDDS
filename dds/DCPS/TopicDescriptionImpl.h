@@ -102,31 +102,34 @@ public:
   TopicDescriptionPtr(Topic* topic=0)
     : topic_(topic)
   {
-    if (topic_)
+    if (topic_) {
       topic_->add_entity_ref();
+    }
   }
 
   ~TopicDescriptionPtr()
   {
-    if (topic_)
+    if (topic_) {
       topic_->remove_entity_ref();
+    }
   }
 
   TopicDescriptionPtr(const TopicDescriptionPtr& other)
     : topic_(other.topic_)
   {
-    if (topic_)
+    if (topic_) {
       topic_->add_entity_ref();
+    }
   }
 
-  TopicDescriptionPtr& operator = (Topic* other)
+  TopicDescriptionPtr& operator=(Topic* other)
   {
     TopicDescriptionPtr tmp(other);
     std::swap(this->topic_, tmp.topic_);
     return *this;
   }
 
-  TopicDescriptionPtr& operator = (const TopicDescriptionPtr& other)
+  TopicDescriptionPtr& operator=(const TopicDescriptionPtr& other)
   {
     TopicDescriptionPtr tmp(other);
     std::swap(this->topic_, tmp.topic_);

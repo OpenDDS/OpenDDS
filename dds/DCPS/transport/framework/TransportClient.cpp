@@ -17,6 +17,7 @@
 #include <dds/DCPS/SendStateDataSampleList.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/RTPS/ICE/Ice.h>
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 
@@ -47,10 +48,10 @@ TransportClient::TransportClient()
 TransportClient::~TransportClient()
 {
   if (Transport_debug_level > 5) {
-    GuidConverter converter(repo_id_);
+    LogGuid logger(repo_id_);
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TransportClient::~TransportClient: %C\n"),
-               OPENDDS_STRING(converter).c_str()));
+               logger.c_str()));
   }
 
   stop_associating();
@@ -59,7 +60,7 @@ TransportClient::~TransportClient()
 
   for (PrevPendingMap::iterator it = prev_pending_.begin(); it != prev_pending_.end(); ++it) {
     for (size_t i = 0; i < impls_.size(); ++i) {
-      RcHandle<TransportImpl> impl = impls_[i].lock();
+      TransportImpl_rch impl = impls_[i].lock();
       if (impl) {
         impl->stop_accepting_or_connecting(it->second->client_, it->second->data_.remote_id_, false, false);
       }
@@ -126,7 +127,6 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
 {
   config_ = tc;
   swap_bytes_ = tc->swap_bytes_;
-  cdr_encapsulation_ = tc->cdr_encapsulation_;
   reliable_ = reliable;
   durable_ = durable;
   unsigned long duration = tc->passive_connect_duration_;
@@ -182,9 +182,8 @@ TransportClient::populate_connection_info()
     if (check_transport_qos(*inst)) {
       TransportImpl_rch impl = inst->impl();
       if (impl) {
-        const CORBA::ULong len = conn_info_.length();
-        conn_info_.length(len + 1);
-        impl->connection_info(conn_info_[len], CONNINFO_ALL);
+        const CORBA::ULong idx = DCPS::grow(conn_info_) - 1;
+        impl->connection_info(conn_info_[idx], CONNINFO_ALL);
       }
     }
   }
@@ -199,25 +198,27 @@ TransportClient::populate_connection_info()
 bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
+  RepoId repo_id = get_repo_id();
+
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
-  repo_id_ = get_repo_id();
+  repo_id_ = repo_id;
 
   if (impls_.empty()) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(repo_id_);
-      GuidConverter reader_converter(data.remote_id_);
+      LogGuid writer_log(repo_id_);
+      LogGuid reader_log(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C no available impls\n"),
-                 OPENDDS_STRING(writer_converter).c_str(),
-                 OPENDDS_STRING(reader_converter).c_str()));
+                 writer_log.c_str(),
+                 reader_log.c_str()));
     }
     return false;
   }
 
   bool all_impls_shut_down = true;
   for (size_t i = 0; i < impls_.size(); ++i) {
-    RcHandle<TransportImpl> impl = impls_[i].lock();
+    TransportImpl_rch impl = impls_[i].lock();
     if (impl && !impl->is_shut_down()) {
       all_impls_shut_down = false;
       break;
@@ -226,12 +227,12 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (all_impls_shut_down) {
     if (DCPS_debug_level) {
-      GuidConverter writer_converter(repo_id_);
-      GuidConverter reader_converter(data.remote_id_);
+      LogGuid writer_log(repo_id_);
+      LogGuid reader_log(data.remote_id_);
       ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
                  ACE_TEXT("local %C remote %C all available impls previously shutdown\n"),
-                 OPENDDS_STRING(writer_converter).c_str(),
-                 OPENDDS_STRING(reader_converter).c_str()));
+                 writer_log.c_str(),
+                 reader_log.c_str()));
     }
     return false;
   }
@@ -242,14 +243,24 @@ TransportClient::associate(const AssociationData& data, bool active)
 
   if (iter == pending_.end()) {
     RepoId remote_copy(data.remote_id_);
-    iter = pending_.insert(std::make_pair(remote_copy, make_rch<PendingAssoc>(this))).first;
+    PendingAssoc_rch pa = make_rch<PendingAssoc>(rchandle_from(this));
+    pa->active_ = active;
+    pa->impls_.clear();
+    pa->blob_index_ = 0;
+    pa->data_ = data;
+    pa->attribs_.local_id_ = repo_id_;
+    pa->attribs_.priority_ = get_priority_value(data);
+    pa->attribs_.local_reliable_ = reliable_;
+    pa->attribs_.local_durable_ = durable_;
+    pa->attribs_.max_sn_ = get_max_sn();
+    iter = pending_.insert(std::make_pair(remote_copy, pa)).first;
 
-    GuidConverter tc_assoc(repo_id_);
-    GuidConverter remote_new(data.remote_id_);
+    LogGuid tc_assoc_log(repo_id_);
+    LogGuid remote_log(data.remote_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::associate added PendingAssoc "
               "between %C and remote %C\n",
-              OPENDDS_STRING(tc_assoc).c_str(),
-              OPENDDS_STRING(remote_new).c_str()), 0);
+              tc_assoc_log.c_str(),
+              remote_log.c_str()), 0);
   } else {
 
     ACE_ERROR((LM_ERROR,
@@ -261,17 +272,9 @@ TransportClient::associate(const AssociationData& data, bool active)
   }
 
   PendingAssoc_rch pend = iter->second;
-  pend->active_ = active;
-  pend->impls_.clear();
-  pend->blob_index_ = 0;
-  pend->data_ = data;
-  pend->attribs_.local_id_ = repo_id_;
-  pend->attribs_.priority_ = get_priority_value(data);
-  pend->attribs_.local_reliable_ = reliable_;
-  pend->attribs_.local_durable_ = durable_;
-  pend->attribs_.max_sn_ = get_max_sn();
 
   if (active) {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
     pend->impls_.reserve(impls_.size());
     std::reverse_copy(impls_.begin(), impls_.end(),
                       std::back_inserter(pend->impls_));
@@ -282,26 +285,37 @@ TransportClient::associate(const AssociationData& data, bool active)
 
     // call accept_datalink for each impl / blob pair of the same type
     for (size_t i = 0; i < impls_.size(); ++i) {
-      RcHandle<TransportImpl> impl = impls_[i].lock();
-      pend->impls_.push_back(impl);
+      // Release the PendingAssoc object's mutex_ since the nested for-loop does not access
+      // the PendingAssoc object directly and the functions called by the nested loop can
+      // lead to a PendingAssoc object's mutex_ being acquired, which will cause deadlock if
+      // it is not released here.
+      TransportImpl::ConnectionAttribs attribs;
+      TransportImpl_rch impl = impls_[i].lock();
+      {
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, pend_guard, pend->mutex_, false);
+        pend->impls_.push_back(impl);
+        attribs = pend->attribs_;
+      }
       const OPENDDS_STRING type = impl->transport_type();
 
       for (CORBA::ULong j = 0; j < data.remote_data_.length(); ++j) {
         if (data.remote_data_[j].transport_type.in() == type) {
           const TransportImpl::RemoteTransport remote = {
-            data.remote_id_, data.remote_data_[j].data, data.participant_discovered_at_, data.remote_transport_context_,
+            data.remote_id_, data.remote_data_[j].data, data.discovery_locator_.data, data.participant_discovered_at_, data.remote_transport_context_,
             data.publication_transport_priority_,
             data.remote_reliable_, data.remote_durable_};
 
           TransportImpl::AcceptConnectResult res;
           {
-            // This thread acquired lock_ at the beginning of this method.  Calling accept_datalink might require getting the lock for the transport's reactor.
-            // If the current thread is not an event handler for the transport's reactor, e.g., the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
-            // Event handlers in the transport reactor may call passive_connection which calls use_datalink which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
+            // This thread acquired lock_ at the beginning of this method.
+            // Calling accept_datalink might require getting the lock for the transport's reactor.
+            // If the current thread is not an event handler for the transport's reactor, e.g.,
+            // the ORB's thread, then the order of acquired locks will be lock_ -> transport reactor lock.
+            // Event handlers in the transport reactor may call passive_connection which calls use_datalink
+            // which acquires lock_.  The locking order in this case is transport reactor lock -> lock_.
             // To avoid deadlock, we must reverse the lock.
-            TransportImpl::ConnectionAttribs attribs = pend->attribs_;
             RcHandle<TransportClient> client = rchandle_from(this);
-            ACE_GUARD_RETURN(Reverse_Lock_t, unlock_guard, reverse_lock_, false);
+            ACE_GUARD_RETURN(Reverse_Lock_t, rev_tc_guard, reverse_lock_, false);
             res = impl->accept_datalink(remote, attribs, client);
           }
 
@@ -351,6 +365,8 @@ int
 TransportClient::PendingAssoc::handle_timeout(const ACE_Time_Value&,
                                               const void* arg)
 {
+  ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
+
   RcHandle<TransportClient> client;
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -373,24 +389,24 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
 {
   if (!guard.locked()) {
     //don't own the lock_ so can't release it...shouldn't happen
-    GuidConverter local(repo_id_);
-    GuidConverter remote_conv(remote.repo_id_);
+    LogGuid local_log(repo_id_);
+    LogGuid remote_log(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i ")
                         ACE_TEXT("between local %C and remote %C unsuccessful because ")
                         ACE_TEXT("guard was not locked\n"),
-                        OPENDDS_STRING(local).c_str(),
-                        OPENDDS_STRING(remote_conv).c_str()), 0);
+                        local_log.c_str(),
+                        remote_log.c_str()), 0);
     return false;
   }
 
   {
     //can't call connect while holding lock due to possible reactor deadlock
-    GuidConverter local(repo_id_);
-    GuidConverter remote_conv(remote.repo_id_);
+    LogGuid local_log(repo_id_);
+    LogGuid remote_log(remote.repo_id_);
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                         "attempt to connect_datalink between local %C and remote %C\n",
-                        OPENDDS_STRING(local).c_str(),
-                        OPENDDS_STRING(remote_conv).c_str()), 0);
+                        local_log.c_str(),
+                        remote_log.c_str()), 0);
     {
       TransportImpl::ConnectionAttribs attribs = attribs_;
       RcHandle<TransportClient> client = rchandle_from(this);
@@ -399,23 +415,23 @@ TransportClient::initiate_connect_i(TransportImpl::AcceptConnectResult& result,
     }
     if (!result.success_) {
       if (DCPS_debug_level) {
-        GuidConverter writer_converter(repo_id_);
-        GuidConverter reader_converter(remote.repo_id_);
-        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::associate - ")
+        LogGuid writer_log(repo_id_);
+        LogGuid reader_log(remote.repo_id_);
+        ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) TransportClient::initiate_connect_i - ")
                    ACE_TEXT("connect_datalink between local %C remote %C not successful\n"),
-                   OPENDDS_STRING(writer_converter).c_str(),
-                   OPENDDS_STRING(reader_converter).c_str()));
+                   writer_log.c_str(),
+                   reader_log.c_str()));
       }
       return false;
     }
   }
 
-  GuidConverter local(repo_id_);
-  GuidConverter remote_conv(remote.repo_id_);
+  LogGuid local_log(repo_id_);
+  LogGuid remote_log(remote.repo_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::initiate_connect_i - "
                       "connection between local %C and remote %C initiation successful\n",
-                      OPENDDS_STRING(local).c_str(),
-                      OPENDDS_STRING(remote_conv).c_str()), 0);
+                      local_log.c_str(),
+                      remote_log.c_str()), 0);
   return true;
 }
 
@@ -423,47 +439,51 @@ bool
 TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
                                                 Guard& guard)
 {
-  GuidConverter local(tc->repo_id_);
-  GuidConverter remote(data_.remote_id_);
+  LogGuid local_log(tc->repo_id_);
+  LogGuid remote_log(data_.remote_id_);
   VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                       "between %C and remote %C\n",
-                      OPENDDS_STRING(local).c_str(),
-                      OPENDDS_STRING(remote).c_str()), 0);
+                      local_log.c_str(),
+                      remote_log.c_str()), 0);
   // find the next impl / blob entry that have matching types
   while (!impls_.empty()) {
-    RcHandle<TransportImpl> impl = impls_.back().lock();
+    TransportImpl_rch impl = impls_.back().lock();
     if (!impl) {
+      impls_.pop_back();
       continue;
     }
     const OPENDDS_STRING type = impl->transport_type();
 
     for (; blob_index_ < data_.remote_data_.length(); ++blob_index_) {
       if (data_.remote_data_[blob_index_].transport_type.in() == type) {
-        const TransportImpl::RemoteTransport remote = {
-          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.participant_discovered_at_, data_.remote_transport_context_,
-          data_.publication_transport_priority_,
-          data_.remote_reliable_, data_.remote_durable_};
+        const TransportImpl::RemoteTransport remote_transport = {
+          data_.remote_id_, data_.remote_data_[blob_index_].data, data_.discovery_locator_.data,
+          data_.participant_discovered_at_, data_.remote_transport_context_,
+          data_.publication_transport_priority_, data_.remote_reliable_, data_.remote_durable_};
 
         TransportImpl::AcceptConnectResult res;
-        GuidConverter tmp_local(tc->repo_id_);
-        GuidConverter tmp_remote(data_.remote_id_);
-        if (!tc->initiate_connect_i(res, impl, remote, attribs_, guard)) {
+        bool ret;
+        {
+          // Release the PendingAssoc object's mutex_ since initiate_connect_i doesn't need it.
+          Reverse_Lock_t rev_mutex(mutex_);
+          ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_mutex, false);
+          ret = tc->initiate_connect_i(res, impl, remote_transport, attribs_, guard);
+        }
+        if (!ret) {
           //tc init connect returned false there is no PendingAssoc left in map because use_datalink_i finished elsewhere
           //so don't do anything further with pend and return success or failure up to tc's associate
           if (res.success_ ) {
-            GuidConverter local(tc->repo_id_);
-            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, ACE_TEXT("(%P|%t) PendingAssoc::initiate_connect - ")
                                 ACE_TEXT("between %C and remote %C success\n"),
-                                OPENDDS_STRING(local).c_str(),
-                                OPENDDS_STRING(remote).c_str()), 0);
+                                local_log.c_str(),
+                                remote_log.c_str()), 0);
             return true;
           }
 
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::initiate_connect - "
                               "between %C and remote %C unsuccessful\n",
-                              OPENDDS_STRING(tmp_local).c_str(),
-                              OPENDDS_STRING(tmp_remote).c_str()), 0);
+                              local_log.c_str(),
+                              remote_log.c_str()), 0);
         }
 
         if (res.success_) {
@@ -472,24 +492,25 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 
           if (!res.link_.is_nil()) {
 
-            tc->use_datalink_i(data_.remote_id_, res.link_, guard);
+            {
+              // use_datalink_i calls PendingAssoc::reset_client which needs the PendingAssoc's mutex_.
+              Reverse_Lock_t rev_mutex(mutex_);
+              ACE_GUARD_RETURN(Reverse_Lock_t, rev_pend_guard, rev_mutex, false);
+              tc->use_datalink_i(data_.remote_id_, res.link_, guard);
+            }
           } else {
-            GuidConverter local(tc->repo_id_);
-            GuidConverter remote(data_.remote_id_);
             VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                                 "resulting link from initiate_connect_i (local: %C to remote: %C) was nil\n",
-                                OPENDDS_STRING(local).c_str(),
-                                OPENDDS_STRING(remote).c_str()), 0);
+                                local_log.c_str(),
+                                remote_log.c_str()), 0);
           }
 
           return true;
         } else {
-          GuidConverter local(tc->repo_id_);
-          GuidConverter remote(data_.remote_id_);
           VDBG_LVL((LM_DEBUG, "(%P|%t) PendingAssoc::intiate_connect - "
                               "result of initiate_connect_i (local: %C to remote: %C) was not success\n",
-                              OPENDDS_STRING(local).c_str(),
-                              OPENDDS_STRING(remote).c_str()), 0);
+                              local_log.c_str(),
+                              remote_log.c_str()), 0);
         }
       }
     }
@@ -522,12 +543,12 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   // Does changing this from a reference to a local affect anything going forward?
   RepoId remote_id(remote_id_ref);
 
-  GuidConverter peerId_conv(remote_id);
+  LogGuid peerId_log(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
             "TransportClient(%@) using datalink[%@] from %C\n",
             this,
             link.in(),
-            OPENDDS_STRING(peerId_conv).c_str()), 0);
+            peerId_log.c_str()), 0);
 
   PendingMap::iterator iter = pending_.find(remote_id);
 
@@ -536,11 +557,12 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                         "TransportClient(%@) using datalink[%@] did not find Pending Association to remote %C\n",
                         this,
                         link.in(),
-                        OPENDDS_STRING(peerId_conv).c_str()), 0);
+                        peerId_log.c_str()), 0);
     return;
   }
 
   PendingAssoc_rch pend = iter->second;
+  ACE_GUARD(ACE_Thread_Mutex, pend_guard, pend->mutex_);
   const int active_flag = pend->active_ ? ASSOC_ACTIVE : 0;
   bool ok = false;
 
@@ -551,7 +573,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
                           "TransportClient(%@) using datalink[%@] link is nil, since this is active side, initiate_connect to remote %C\n",
                           this,
                           link.in(),
-                          OPENDDS_STRING(peerId_conv).c_str()), 0);
+                          peerId_log.c_str()), 0);
       return;
     }
 
@@ -559,13 +581,13 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
               "TransportClient(%@) using datalink[%@] link is nil, since this is passive side, connection to remote %C timed out\n",
               this,
               link.in(),
-              OPENDDS_STRING(peerId_conv).c_str()), 0);
+              peerId_log.c_str()), 0);
   } else { // link is ready to use
     VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
               "TransportClient(%@) about to add_link[%@] to remote: %C\n",
               this,
               link.in(),
-              OPENDDS_STRING(peerId_conv).c_str()), 0);
+              peerId_log.c_str()), 0);
 
     add_link(link, remote_id);
     ok = true;
@@ -573,17 +595,19 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 
   // either link is valid or assoc failed, clean up pending object
   for (size_t i = 0; i < pend->impls_.size(); ++i) {
-    RcHandle<TransportImpl> impl = pend->impls_[i].lock();
+    TransportImpl_rch impl = pend->impls_[i].lock();
     if (impl) {
       impl->stop_accepting_or_connecting(*this, pend->data_.remote_id_, false, !ok);
     }
   }
 
-  iter->second->reset_client();
+  pend_guard.release();
+  pend->reset_client();
   pending_assoc_timer_->cancel_timer(pend);
   prev_pending_.insert(std::make_pair(iter->first, iter->second));
   pending_.erase(iter);
 
+  // Release TransportClient's lock as we're done updating its data.
   guard.release();
 
   transport_assoc_done(active_flag | (ok ? ASSOC_OK : 0), remote_id);
@@ -610,6 +634,16 @@ TransportClient::stop_associating()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   for (PendingMap::iterator it = pending_.begin(); it != pending_.end(); ++it) {
+    {
+      // The transport impl may have resource for a pending connection.
+      ACE_Guard<ACE_Thread_Mutex> guard(it->second->mutex_);
+      for (size_t i = 0; i < it->second->impls_.size(); ++i) {
+        TransportImpl_rch impl = it->second->impls_[i].lock();
+        if (impl) {
+          impl->stop_accepting_or_connecting(*this, it->second->data_.remote_id_, true, true);
+        }
+      }
+    }
     it->second->reset_client();
     pending_assoc_timer_->cancel_timer(it->second);
     prev_pending_.insert(std::make_pair(it->first, it->second));
@@ -628,6 +662,16 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
     for (CORBA::ULong i = 0; i < length; ++i) {
       PendingMap::iterator iter = pending_.find(repos[i]);
       if (iter != pending_.end()) {
+        {
+          // The transport impl may have resource for a pending connection.
+          ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
+          for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+            TransportImpl_rch impl = iter->second->impls_[i].lock();
+            if (impl) {
+              impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+            }
+          }
+        }
         iter->second->reset_client();
         pending_assoc_timer_->cancel_timer(iter->second);
         prev_pending_.insert(std::make_pair(iter->first, iter->second));
@@ -646,21 +690,24 @@ TransportClient::send_final_acks()
 void
 TransportClient::disassociate(const RepoId& peerId)
 {
-  GuidConverter peerId_conv(peerId);
+  LogGuid peerId_log(peerId);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::disassociate "
             "TransportClient(%@) disassociating from %C\n",
             this,
-            OPENDDS_STRING(peerId_conv).c_str()), 5);
+            peerId_log.c_str()), 5);
 
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
   PendingMap::iterator iter = pending_.find(peerId);
   if (iter != pending_.end()) {
-    // The transport impl may have resource for a pending connection.
-    for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
-      RcHandle<TransportImpl> impl = iter->second->impls_[i].lock();
-      if (impl) {
-        impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+    {
+      // The transport impl may have resource for a pending connection.
+      ACE_Guard<ACE_Thread_Mutex> guard(iter->second->mutex_);
+      for (size_t i = 0; i < iter->second->impls_.size(); ++i) {
+        TransportImpl_rch impl = iter->second->impls_[i].lock();
+        if (impl) {
+          impl->stop_accepting_or_connecting(*this, iter->second->data_.remote_id_, true, true);
+        }
       }
     }
     iter->second->reset_client();
@@ -674,11 +721,11 @@ TransportClient::disassociate(const RepoId& peerId)
 
   if (found == data_link_index_.end()) {
     if (DCPS_debug_level > 4) {
-      const GuidConverter converter(peerId);
+      const LogGuid log(peerId);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: ")
                  ACE_TEXT("no link for remote peer %C\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 log.c_str()));
     }
 
     return;
@@ -711,10 +758,10 @@ TransportClient::disassociate(const RepoId& peerId)
     links_.remove_link(link);
 
     if (DCPS_debug_level > 4) {
-      GuidConverter converter(repo_id_);
+      LogGuid logger(repo_id_);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::disassociate: calling remove_listener %C on link[%@]\n"),
-                 OPENDDS_STRING(converter).c_str(),
+                 logger.c_str(),
                  link.in()));
     }
     // Datalink is no longer used for any remote peer by this TransportClient
@@ -731,7 +778,7 @@ void TransportClient::transport_stop()
   guard.release();
 
   for (size_t i = 0; i < impls.size(); ++i) {
-    const RcHandle<TransportImpl> impl = impls[i].lock();
+    const TransportImpl_rch impl = impls[i].lock();
     if (impl) {
       impl->client_stop(repo_id);
     }
@@ -749,7 +796,7 @@ TransportClient::register_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = pos->lock();
+    TransportImpl_rch impl = pos->lock();
     if (impl) {
       impl->register_for_reader(participant, writerid, readerid, locators, listener);
     }
@@ -765,7 +812,7 @@ TransportClient::unregister_for_reader(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = pos->lock();
+    TransportImpl_rch impl = pos->lock();
     if (impl) {
       impl->unregister_for_reader(participant, writerid, readerid);
     }
@@ -783,7 +830,7 @@ TransportClient::register_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = pos->lock();
+    TransportImpl_rch impl = pos->lock();
     if (impl) {
       impl->register_for_writer(participant, readerid, writerid, locators, listener);
     }
@@ -799,7 +846,7 @@ TransportClient::unregister_for_writer(const RepoId& participant,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = pos->lock();
+    TransportImpl_rch impl = pos->lock();
     if (impl) {
       impl->unregister_for_writer(participant, readerid, writerid);
     }
@@ -814,32 +861,32 @@ TransportClient::update_locators(const RepoId& remote,
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = pos->lock();
+    TransportImpl_rch impl = pos->lock();
     if (impl) {
       impl->update_locators(remote, locators);
     }
   }
 }
 
-ICE::Endpoint*
+WeakRcHandle<ICE::Endpoint>
 TransportClient::get_ice_endpoint()
 {
   // The one-to-many relationship with impls implies that this should
   // return a set of endpoints instead of a single endpoint or null.
   // For now, we will assume a single impl.
 
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, 0);
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, WeakRcHandle<ICE::Endpoint>());
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
        pos != limit;
        ++pos) {
-    RcHandle<TransportImpl> impl = pos->lock();
+    TransportImpl_rch impl = pos->lock();
     if (impl) {
-      ICE::Endpoint* endpoint = impl->get_ice_endpoint();
+      WeakRcHandle<ICE::Endpoint> endpoint = impl->get_ice_endpoint();
       if (endpoint) { return endpoint; }
     }
   }
 
-  return 0;
+  return WeakRcHandle<ICE::Endpoint>();
 }
 
 bool
@@ -851,12 +898,12 @@ TransportClient::send_response(const RepoId& peer,
 
   if (found == data_link_index_.end()) {
     if (DCPS_debug_level > 4) {
-      GuidConverter converter(peer);
+      LogGuid logger(peer);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) TransportClient::send_response: ")
                  ACE_TEXT("no link for publication %C, ")
                  ACE_TEXT("not sending response.\n"),
-                 OPENDDS_STRING(converter).c_str()));
+                 logger.c_str()));
     }
 
     return false;
@@ -939,12 +986,12 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
         //       associated with any remote subscriber ids" case.
 
         if (DCPS_debug_level > 4) {
-          GuidConverter converter(cur->get_pub_id());
+          LogGuid logger(cur->get_pub_id());
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) TransportClient::send_i: ")
                      ACE_TEXT("no links for publication %C, ")
                      ACE_TEXT("not sending element %@ for transaction: %d.\n"),
-                     OPENDDS_STRING(converter).c_str(),
+                     logger.c_str(),
                      cur,
                      cur->transaction_id()));
         }
@@ -994,6 +1041,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
           }
 
           if (!subset.in()) {
+            guard.release();
             VDBG((LM_DEBUG, "(%P|%t) DBG: filtered-out of all DataLinks.\n"));
             // similar to the "if (pub_links.is_nil())" case above, no links
             cur->get_send_listener()->data_delivered(cur);
@@ -1009,7 +1057,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
           pub_links = subset;
         }
 
-  #endif // OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  #endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
 
         // This will do several things, including adding to the membership
         // of the send_links set.  Any DataLinks added to the send_links
@@ -1127,13 +1175,17 @@ bool TransportClient::pending_association_with(const GUID_t& remote) const
 
 void TransportClient::data_acked(const GUID_t& remote)
 {
-  ACE_Guard<ACE_Thread_Mutex> guard(lock_);
-  if (!guard.locked()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
-      "lock failed\n"));
-    return;
+  TransportSendListener_rch send_listener;
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(lock_);
+    if (!guard.locked()) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: TransportClient::data_acked: "
+        "lock failed\n"));
+      return;
+    }
+    send_listener = get_send_listener();
   }
-  get_send_listener()->data_acked(remote);
+  send_listener->data_acked(remote);
 }
 
 bool TransportClient::is_leading(const GUID_t& reader_id) const

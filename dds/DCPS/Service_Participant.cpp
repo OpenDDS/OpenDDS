@@ -1,14 +1,13 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
+#include <DCPS/DdsDcps_pch.h> //Only the _pch include should start with DCPS/
 
 #include "Service_Participant.h"
 
+#include "Logging.h"
 #include "WaitSet.h"
 #include "transport/framework/TransportRegistry.h"
 #include "debug.h"
@@ -19,10 +18,12 @@
 #include "RecorderImpl.h"
 #include "ReplayerImpl.h"
 #include "LinuxNetworkConfigMonitor.h"
+#include "DefaultNetworkConfigMonitor.h"
 #include "StaticDiscovery.h"
+#include "ThreadStatusManager.h"
 #include "../Version.h"
-#if defined(OPENDDS_SECURITY)
-#include "security/framework/SecurityRegistry.h"
+#ifdef OPENDDS_SECURITY
+#  include "security/framework/SecurityRegistry.h"
 #endif
 
 #include <ace/config.h>
@@ -38,13 +39,14 @@
 #include <ace/Malloc_Allocator.h>
 #include <ace/OS_NS_unistd.h>
 #include <ace/Version.h>
+#include <ace/Configuration.h>
+#include <ace/OS_NS_sys_utsname.h>
 
 #include <cstring>
-
 #ifdef OPENDDS_SAFETY_PROFILE
-#include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
+#  include <stdio.h> // <cstdio> after FaceCTS bug 623 is fixed
 #else
-#include <fstream>
+#  include <fstream>
 #endif
 
 #if !defined (__ACE_INLINE__)
@@ -168,63 +170,94 @@ static bool got_bidir_giop = false;
 static bool got_thread_status_interval = false;
 static bool got_monitor = false;
 static bool got_type_object_encoding = false;
+static bool got_log_level = false;
 
 Service_Participant::Service_Participant()
   :
 #ifndef OPENDDS_SAFETY_PROFILE
-    ORB_argv_(false /*substitute_env_args*/),
+  ORB_argv_(false /*substitute_env_args*/),
 #endif
-    reactor_task_(false),
-    defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD),
-    n_chunks_(DEFAULT_NUM_CHUNKS),
-    association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER),
-    liveliness_factor_(80),
-    bit_transport_port_(0),
-    bit_enabled_(
+  time_source_()
+  , reactor_task_(false)
+  , defaultDiscovery_(DDS_DEFAULT_DISCOVERY_METHOD)
+  , n_chunks_(DEFAULT_NUM_CHUNKS)
+  , association_chunk_multiplier_(DEFAULT_CHUNK_MULTIPLIER)
+  , liveliness_factor_(80)
+  , bit_transport_port_(0)
+  , bit_enabled_(
 #ifdef DDS_HAS_MINIMUM_BIT
       false
 #else
       true
 #endif
-    ),
-#if defined(OPENDDS_SECURITY)
-    security_enabled_(false),
+    )
+#ifdef OPENDDS_SECURITY
+  , security_enabled_(false)
 #endif
-    bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC),
-    global_transport_config_(ACE_TEXT("")),
-    monitor_factory_(0),
-    federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION),
-    federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS),
-    federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER),
-    federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS),
+  , bit_lookup_duration_msec_(BIT_LOOKUP_DURATION_MSEC)
+  , global_transport_config_(ACE_TEXT(""))
+  , monitor_factory_(0)
+  , federation_recovery_duration_(DEFAULT_FEDERATION_RECOVERY_DURATION)
+  , federation_initial_backoff_seconds_(DEFAULT_FEDERATION_INITIAL_BACKOFF_SECONDS)
+  , federation_backoff_multiplier_(DEFAULT_FEDERATION_BACKOFF_MULTIPLIER)
+  , federation_liveliness_(DEFAULT_FEDERATION_LIVELINESS)
 #if OPENDDS_POOL_ALLOCATOR
-    pool_size_(1024*1024*16),
-    pool_granularity_(8),
+  , pool_size_(1024 * 1024 * 16)
+  , pool_granularity_(8)
 #endif
-    scheduler_(-1),
-    priority_min_(0),
-    priority_max_(0),
-    publisher_content_filter_(true),
+  , scheduler_(-1)
+  , priority_min_(0)
+  , priority_max_(0)
+  , publisher_content_filter_(true)
 #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
-    persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR),
+  , persistent_data_dir_(DEFAULT_PERSISTENT_DATA_DIR)
 #endif
-    bidir_giop_(true),
-    monitor_enabled_(false),
-    shut_down_(false),
-    shutdown_listener_(0),
-    default_configuration_file_(ACE_TEXT("")),
-    type_object_encoding_(Encoding_Normal)
+  , bidir_giop_(true)
+  , monitor_enabled_(false)
+  , shut_down_(false)
+  , default_configuration_file_(ACE_TEXT(""))
+  , type_object_encoding_(Encoding_Normal)
+  , network_interface_address_topic_(make_rch<InternalTopic<NetworkInterfaceAddress> >())
+  , printer_value_writer_indent_(4)
 {
   initialize();
 }
 
 Service_Participant::~Service_Participant()
 {
-  shutdown();
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::~Service_Participant\n"));
+  }
 
-  if (DCPS_debug_level > 0) {
-    ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Service_Participant::~Service_Participant()\n"));
+  {
+    ACE_GUARD(ACE_Thread_Mutex, guard, factory_lock_);
+    if (dp_factory_servant_) {
+      const size_t count = dp_factory_servant_->participant_count();
+      if (count > 0 && log_level >= LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+          "There are %B remaining domain participant(s). "
+          "It is recommended to delete them before shutdown.\n",
+          count));
+      }
+
+      const DDS::ReturnCode_t cleanup_status = dp_factory_servant_->delete_all_participants();
+      if (cleanup_status) {
+        if (log_level >= LogLevel::Warning) {
+          ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+            "delete_all_participants returned %C\n",
+            retcode_to_string(cleanup_status)));
+        }
+      }
+    }
+  }
+
+  const DDS::ReturnCode_t shutdown_status = shutdown();
+  if (shutdown_status != DDS::RETCODE_OK && shutdown_status != DDS::RETCODE_ALREADY_DELETED) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: Service_Participant::~Service_Participant: "
+        "shutdown returned %C\n",
+        retcode_to_string(shutdown_status)));
+    }
   }
 }
 
@@ -235,6 +268,12 @@ Service_Participant::instance()
   // from being created.
 
   return ACE_Singleton<Service_Participant, ACE_SYNCH_MUTEX>::instance();
+}
+
+const TimeSource&
+Service_Participant::time_source() const
+{
+  return time_source_;
 }
 
 ACE_Reactor_Timer_Interface*
@@ -261,34 +300,64 @@ Service_Participant::interceptor() const
   return reactor_task_.interceptor();
 }
 
-void
-Service_Participant::shutdown()
+JobQueue_rch
+Service_Participant::job_queue() const
 {
-  // When we are already shutdown just let the shutdown be a noop
+  return job_queue_;
+}
+
+DDS::ReturnCode_t Service_Participant::shutdown()
+{
+  if (DCPS_debug_level >= 1) {
+    ACE_DEBUG((LM_DEBUG, "(%P|%t) Service_Participant::shutdown\n"));
+  }
+
   if (shut_down_) {
-    return;
+    return DDS::RETCODE_ALREADY_DELETED;
+  }
+
+  if (monitor_factory_) {
+    monitor_factory_->deinitialize();
+    monitor_factory_ = 0;
+  }
+
+  {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
+    if (dp_factory_servant_) {
+      const size_t count = dp_factory_servant_->participant_count();
+      if (count > 0) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: Service_Participant::shutdown: "
+            "there are %B domain participant(s) that must be deleted before shutdown can occur\n",
+            count));
+        }
+        return DDS::RETCODE_PRECONDITION_NOT_MET;
+      }
+    }
   }
 
   if (shutdown_listener_) {
     shutdown_listener_->notify_shutdown();
   }
 
-  shut_down_ = true;
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
   try {
     TransportRegistry::instance()->release();
     {
-      ACE_GUARD(TAO_SYNCH_MUTEX, guard, this->factory_lock_);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, DDS::RETCODE_OUT_OF_RESOURCES);
 
-      if (dp_factory_servant_)
-        dp_factory_servant_->cleanup();
+      shut_down_ = true;
+
       dp_factory_servant_.reset();
 
       domainRepoMap_.clear();
 
       {
-        ACE_GUARD(ACE_Thread_Mutex, guard, network_config_monitor_lock_);
+        ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_,
+          DDS::RETCODE_OUT_OF_RESOURCES);
         if (network_config_monitor_) {
           network_config_monitor_->close();
+          network_config_monitor_->disconnect(network_interface_address_topic_);
           network_config_monitor_.reset();
         }
       }
@@ -299,21 +368,25 @@ Service_Participant::shutdown()
 
       discoveryMap_.clear();
 
-  #ifndef OPENDDS_NO_PERSISTENCE_PROFILE
+#ifndef OPENDDS_NO_PERSISTENCE_PROFILE
       transient_data_cache_.reset();
       persistent_data_cache_.reset();
-  #endif
+#endif
 
       discovery_types_.clear();
-      monitor_factory_ = 0;
     }
     TransportRegistry::close();
-#if defined(OPENDDS_SECURITY)
+#ifdef OPENDDS_SECURITY
     OpenDDS::Security::SecurityRegistry::close();
 #endif
   } catch (const CORBA::Exception& ex) {
-    ex._tao_print_exception("ERROR: Service_Participant::shutdown");
+    if (log_level >= LogLevel::Error) {
+      ex._tao_print_exception("ERROR: Service_Participant::shutdown");
+    }
+    rc = DDS::RETCODE_ERROR;
   }
+
+  return rc;
 }
 
 #ifdef ACE_USES_WCHAR
@@ -332,12 +405,10 @@ Service_Participant::get_domain_participant_factory(int &argc,
                                                     ACE_TCHAR *argv[])
 {
   if (!dp_factory_servant_) {
-    ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                     guard,
-                     this->factory_lock_,
-                     DDS::DomainParticipantFactory::_nil());
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
     shut_down_ = false;
+
     if (!dp_factory_servant_) {
       // This used to be a call to ORB_init().  Since the ORB is now managed
       // by InfoRepoDiscovery, just save the -ORB* args for later use.
@@ -427,16 +498,28 @@ Service_Participant::get_domain_participant_factory(int &argc,
           }
         }
       }
-
 #if OPENDDS_POOL_ALLOCATOR
       // For non-FACE tests, configure pool
       configure_pool();
 #endif
 
-      if (DCPS_debug_level > 0) {
-        ACE_DEBUG((LM_NOTICE,
-                   "(%P|%t) NOTICE: Service_Participant::get_domain_participant_factory - "
-                   "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
+      if (log_level >= LogLevel::Info) {
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "This is OpenDDS " OPENDDS_VERSION " using ACE " ACE_VERSION "\n"));
+
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "log_level: %C DCPS_debug_level: %u\n", log_level.get_as_string(), DCPS_debug_level));
+
+        ACE_utsname uname;
+        if (ACE_OS::uname(&uname) != -1) {
+          ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+            "machine: %C, %C platform: %C, %C, %C\n",
+            uname.nodename, uname.machine, uname.sysname, uname.release, uname.version));
+        }
+
+        ACE_DEBUG((LM_INFO, "(%P|%t) Service_Participant::get_domain_participant_factory: "
+          "compiler: %C version %d.%d.%d\n",
+          ACE::compiler_name(), ACE::compiler_major_version(), ACE::compiler_minor_version(), ACE::compiler_beta_version()));
       }
 
       // Establish the default scheduling mechanism and
@@ -452,8 +535,11 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       dp_factory_servant_ = make_rch<DomainParticipantFactoryImpl>();
 
-      reactor_task_.open_reactor_task(
-        0, thread_status_interval_, &thread_status_manager_, "Service_Participant");
+      reactor_task_.open_reactor_task(0,
+                                      &thread_status_manager_,
+                                      "Service_Participant");
+
+      job_queue_ = make_rch<JobQueue>(reactor_task_.get_reactor());
 
       if (this->monitor_enabled_) {
 #if !defined(ACE_AS_STATIC_LIBS)
@@ -484,18 +570,85 @@ Service_Participant::get_domain_participant_factory(int &argc,
 
       this->monitor_.reset(this->monitor_factory_->create_sp_monitor(this));
     }
+
+#if defined OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Service_Participant::get_domain_participant_factory: Creating LinuxNetworkConfigMonitor\n"));
+    }
+    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
+#elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Service_Participant::get_domain_participant_factory: Creating NetworkConfigModifier\n"));
+    }
+    network_config_monitor_ = make_rch<NetworkConfigModifier>();
+#else
+    if (DCPS_debug_level >= 1) {
+      ACE_DEBUG((LM_DEBUG,
+                 "(%P|%t) Service_Participant::get_domain_participant_factory: Creating DefaultNetworkConfigMonitor\n"));
+    }
+    network_config_monitor_ = make_rch<DefaultNetworkConfigMonitor>();
+#endif
+
+    network_config_monitor_->connect(network_interface_address_topic_);
+    if (!network_config_monitor_->open()) {
+      bool open_failed = false;
+#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
+      if (DCPS_debug_level >= 1) {
+        ACE_DEBUG((LM_DEBUG,
+                   "(%P|%t) Service_Participant::get_domain_participant_factory: Creating NetworkConfigModifier\n"));
+      }
+      network_config_monitor_->disconnect(network_interface_address_topic_);
+      network_config_monitor_ = make_rch<NetworkConfigModifier>();
+      network_config_monitor_->connect(network_interface_address_topic_);
+      if (!network_config_monitor_->open()) {
+        open_failed = true;
+      }
+#else
+      open_failed = true;
+#endif
+      if (open_failed) {
+        if (log_level >= LogLevel::Error) {
+          ACE_ERROR((LM_ERROR,
+                     "(%P|%t) ERROR: Service_Participant::get_domain_participant_factory: Could not open network config monitor\n"));
+        }
+        network_config_monitor_->close();
+        network_config_monitor_->disconnect(network_interface_address_topic_);
+        network_config_monitor_.reset();
+      }
+    }
   }
 
   return DDS::DomainParticipantFactory::_duplicate(dp_factory_servant_.in());
 }
 
-int
-Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
+int Service_Participant::parse_args(int& argc, ACE_TCHAR* argv[])
 {
-  ACE_Arg_Shifter arg_shifter(argc, argv);
+  // Process logging options first, so they are in effect if we need to log
+  // while processing other options.
+  ACE_Arg_Shifter log_arg_shifter(argc, argv);
+  while (log_arg_shifter.is_anything_left()) {
+    const ACE_TCHAR* currentArg = 0;
 
+    if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
+      set_log_file_name(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      log_arg_shifter.consume_arg();
+      got_log_fname = true;
+
+    } else if ((currentArg = log_arg_shifter.get_the_parameter(ACE_TEXT("-ORBVerboseLogging"))) != 0) {
+      set_log_verbose(ACE_OS::atoi(currentArg));
+      log_arg_shifter.consume_arg();
+      got_log_verbose = true;
+
+    } else {
+      log_arg_shifter.ignore_arg();
+    }
+  }
+
+  ACE_Arg_Shifter arg_shifter(argc, argv);
   while (arg_shifter.is_anything_left()) {
-    const ACE_TCHAR *currentArg = 0;
+    const ACE_TCHAR* currentArg = 0;
 
     if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDebugLevel"))) != 0) {
       set_DCPS_debug_level(ACE_OS::atoi(currentArg));
@@ -596,7 +749,7 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       got_bidir_giop = true;
 
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSThreadStatusInterval"))) != 0) {
-      thread_status_interval_ = TimeDuration(ACE_OS::atoi(currentArg));
+      thread_status_manager_.thread_status_interval(TimeDuration(ACE_OS::atoi(currentArg)));
       arg_shifter.consume_arg();
       got_thread_status_interval = true;
 
@@ -616,24 +769,16 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       this->federation_liveliness_ = ACE_OS::atoi(currentArg);
       arg_shifter.consume_arg();
 
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ORBLogFile"))) != 0) {
-      set_log_file_name(ACE_TEXT_ALWAYS_CHAR(currentArg));
-      arg_shifter.consume_arg();
-      got_log_fname = true;
-
-    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-ORBVerboseLogging"))) != 0) {
-      set_log_verbose(ACE_OS::atoi(currentArg));
-      arg_shifter.consume_arg();
-      got_log_verbose = true;
-
     } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSDefaultAddress"))) != 0) {
-      if (default_address_.set(u_short(0), currentArg)) {
+      ACE_INET_Addr addr;
+      if (addr.set(u_short(0), currentArg)) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::parse_args: ")
                           ACE_TEXT("failed to parse default address %C\n"),
                           currentArg),
                          -1);
       }
+      default_address_ = NetworkAddress(addr);
       arg_shifter.consume_arg();
       got_default_address = true;
 
@@ -670,11 +815,15 @@ Service_Participant::parse_args(int &argc, ACE_TCHAR *argv[])
       arg_shifter.consume_arg();
       got_type_object_encoding = true;
 
+    } else if ((currentArg = arg_shifter.get_the_parameter(ACE_TEXT("-DCPSLogLevel"))) != 0) {
+      log_level.set_from_string(ACE_TEXT_ALWAYS_CHAR(currentArg));
+      arg_shifter.consume_arg();
+      got_log_level = true;
+
     } else {
       arg_shifter.ignore_arg();
     }
   }
-
   // Indicates successful parsing of the command line
   return 0;
 }
@@ -1071,11 +1220,10 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
               repoList.push_back(std::make_pair(disc_iter->second, id));
 
               if (DCPS_debug_level > 0) {
-                GuidConverter converter(id);
                 ACE_DEBUG((LM_DEBUG,
                            ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                            ACE_TEXT("participant %C attached to Repo[ %C].\n"),
-                           OPENDDS_STRING(converter).c_str(),
+                           LogGuid(id).c_str(),
                            key.c_str()));
               }
 
@@ -1093,12 +1241,11 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
   // Make all of the remote calls after releasing the lock.
   for (unsigned int index = 0; index < repoList.size(); ++index) {
     if (DCPS_debug_level > 0) {
-      GuidConverter converter(repoList[ index].second);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) Service_Participant::set_repo_domain: ")
                  ACE_TEXT("(%d of %d) attaching domain %d participant %C to Repo[ %C].\n"),
                  (1+index), repoList.size(), domain,
-                 OPENDDS_STRING(converter).c_str(),
+                 LogGuid(repoList[ index].second).c_str(),
                  key.c_str()));
     }
 
@@ -1445,16 +1592,17 @@ Service_Participant::register_discovery_type(const char* section_name,
 int
 Service_Participant::load_configuration()
 {
+  ACE_Configuration_Heap cf;
   int status = 0;
 
-  if ((status = this->cf_.open()) != 0)
+  if ((status = cf.open()) != 0)
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_configuration ")
                       ACE_TEXT("open() returned %d\n"),
                       status),
                      -1);
 
-  ACE_Ini_ImpExp import(this->cf_);
+  ACE_Ini_ImpExp import(cf);
   status = import.import_config(config_fname.c_str());
 
   if (status != 0) {
@@ -1464,8 +1612,9 @@ Service_Participant::load_configuration()
                       status),
                      -1);
   } else {
-    status = this->load_configuration(this->cf_, config_fname.c_str());
+    status = this->load_configuration(cf, config_fname.c_str());
   }
+
   return status;
 }
 
@@ -1479,9 +1628,7 @@ Service_Participant::load_configuration(
   // for config templates before loading any config information.
   ACE_TString section_name;
 
-  int status = 0;
-
-  status = this->load_common_configuration(config, filename);
+  int status = this->load_common_configuration(config, filename);
 
   if (status != 0) {
     ACE_ERROR_RETURN((LM_ERROR,
@@ -1719,6 +1866,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSBit"), this->bit_enabled_, int)
     }
 
+    GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSLogBits"), log_bits, bool);
+
 #if defined(OPENDDS_SECURITY)
     if (got_security_flag) {
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSSecurity")));
@@ -1813,8 +1962,8 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSThreadStatusInterval")));
     } else {
       int interval = 0;
-      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int)
-      thread_status_interval_ = TimeDuration(interval);
+      GET_CONFIG_VALUE(cf, sect, ACE_TEXT("DCPSThreadStatusInterval"), interval, int);
+      thread_status_manager_.thread_status_interval(TimeDuration(interval));
     }
 
     ACE_Configuration::VALUETYPE type;
@@ -1845,14 +1994,16 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
     } else {
       ACE_TString default_address_str;
       GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("DCPSDefaultAddress"), default_address_str);
+      ACE_INET_Addr addr;
       if (!default_address_str.empty() &&
-          default_address_.set(u_short(0), default_address_str.c_str())) {
+          addr.set(u_short(0), default_address_str.c_str())) {
         ACE_ERROR_RETURN((LM_ERROR,
                           ACE_TEXT("(%P|%t) ERROR: Service_Participant::load_common_configuration: ")
                           ACE_TEXT("failed to parse default address %C\n"),
                           default_address_str.c_str()),
                          -1);
       }
+      default_address_ = NetworkAddress(addr);
     }
 
     if (got_monitor) {
@@ -1868,6 +2019,16 @@ Service_Participant::load_common_configuration(ACE_Configuration_Heap& cf,
       GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSTypeObjectEncoding"), str);
       if (!str.empty()) {
         type_object_encoding(str.c_str());
+      }
+    }
+
+    if (got_log_level) {
+      ACE_DEBUG((LM_NOTICE, message, ACE_TEXT("DCPSLogLevel")));
+    } else {
+      String str;
+      GET_CONFIG_STRING_VALUE(cf, sect, ACE_TEXT("DCPSLogLevel"), str);
+      if (!str.empty()) {
+        log_level.set_from_string(str.c_str());
       }
     }
 
@@ -2467,7 +2628,7 @@ Service_Participant::load_discovery_templates(ACE_Configuration_Heap& cf)
 }
 
 int Service_Participant::parse_domain_range(const OPENDDS_STRING& range, int& start, int& end) {
-  std::size_t dash_pos = range.find("-", 0);
+  const std::size_t dash_pos = range.find("-", 0);
 
   if (dash_pos == std::string::npos || dash_pos == range.length() - 1) {
     start = end = -1;
@@ -2658,10 +2819,7 @@ Service_Participant::get_data_durability_cache(
 
   if (kind == DDS::TRANSIENT_DURABILITY_QOS) {
     {
-      ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                       guard,
-                       this->factory_lock_,
-                       0);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
       if (!this->transient_data_cache_) {
         this->transient_data_cache_.reset(new DataDurabilityCache(kind));
@@ -2672,10 +2830,7 @@ Service_Participant::get_data_durability_cache(
 
   } else if (kind == DDS::PERSISTENT_DURABILITY_QOS) {
     {
-      ACE_GUARD_RETURN(TAO_SYNCH_MUTEX,
-                       guard,
-                       this->factory_lock_,
-                       0);
+      ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, factory_lock_, 0);
 
       try {
         if (!this->persistent_data_cache_) {
@@ -2712,7 +2867,7 @@ Service_Participant::add_discovery(Discovery_rch discovery)
 }
 
 void
-Service_Participant::set_shutdown_listener(ShutdownListener* listener)
+Service_Participant::set_shutdown_listener(RcHandle<ShutdownListener> listener)
 {
   shutdown_listener_ = listener;
 }
@@ -2761,7 +2916,6 @@ Service_Participant::create_replayer(DDS::DomainParticipant_ptr participant,
                                      const DDS::DataWriterQos& datawriter_qos,
                                      const ReplayerListener_rch& a_listener)
 {
-  ACE_DEBUG((LM_DEBUG, "Service_Participant::create_replayer\n"));
   DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
   if (participant_servant)
     return participant_servant->create_replayer(a_topic, publisher_qos, datawriter_qos, a_listener, 0);
@@ -2801,21 +2955,9 @@ void Service_Participant::default_configuration_file(const ACE_TCHAR* path)
   default_configuration_file_ = path;
 }
 
-TimeDuration
-Service_Participant::get_thread_status_interval()
+ThreadStatusManager& Service_Participant::get_thread_status_manager()
 {
-  return thread_status_interval_;
-}
-
-void
-Service_Participant::set_thread_status_interval(TimeDuration interval)
-{
-  thread_status_interval_ = interval;
-}
-
-ThreadStatusManager* Service_Participant::get_thread_status_manager()
-{
-  return &thread_status_manager_;
+  return thread_status_manager_;
 }
 
 ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()
@@ -2823,56 +2965,10 @@ ACE_Thread_Mutex& Service_Participant::get_static_xtypes_lock()
   return xtypes_lock_;
 }
 
-NetworkConfigMonitor_rch Service_Participant::network_config_monitor()
-{
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, network_config_monitor_lock_, NetworkConfigMonitor_rch());
-
-  if (!network_config_monitor_) {
-#ifdef OPENDDS_LINUX_NETWORK_CONFIG_MONITOR
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Service_Participant::network_config_monitor(). Creating LinuxNetworkConfigMonitor\n"));
-    }
-    network_config_monitor_ = make_rch<LinuxNetworkConfigMonitor>(reactor_task_.interceptor());
-#elif defined(OPENDDS_NETWORK_CONFIG_MODIFIER)
-    if (DCPS_debug_level > 0) {
-      ACE_DEBUG((LM_DEBUG,
-               "(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n"));
-    }
-    network_config_monitor_ = make_rch<NetworkConfigModifier>();
-#endif
-    if (network_config_monitor_) {
-      if (!network_config_monitor_->open()) {
-        bool open_failed = false;
-#ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
-        if (DCPS_debug_level > 0) {
-          ACE_DEBUG((LM_DEBUG,
-            ACE_TEXT("(%P|%t) Service_Participant::network_config_monitor(). Creating NetworkConfigModifier\n")));
-        }
-        network_config_monitor_ = make_rch<NetworkConfigModifier>();
-        if (network_config_monitor_ && !network_config_monitor_->open()) {
-          open_failed = true;
-        }
-#else
-        open_failed = true;
-#endif
-        if (open_failed) {
-          ACE_ERROR((LM_ERROR,
-            ACE_TEXT("(%P|%t) ERROR: Service_Participant::network_config_monitor could not open network config monitor\n")));
-          network_config_monitor_->close();
-          network_config_monitor_.reset();
-        }
-      }
-    }
-  }
-
-  return network_config_monitor_;
-}
-
 #ifdef OPENDDS_NETWORK_CONFIG_MODIFIER
 NetworkConfigModifier* Service_Participant::network_config_modifier()
 {
-  return dynamic_cast<NetworkConfigModifier*>(network_config_monitor().get());
+  return dynamic_cast<NetworkConfigModifier*>(network_config_monitor_.get());
 }
 #endif
 
@@ -2898,6 +2994,44 @@ void
 Service_Participant::bit_autopurge_disposed_samples_delay(const DDS::Duration_t& duration)
 {
   bit_autopurge_disposed_samples_delay_ = duration;
+}
+
+XTypes::TypeInformation
+Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant,
+                                          const DDS::BuiltinTopicKey_t& key) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_info(key);
+    }
+  }
+
+  return XTypes::TypeInformation();
+}
+
+#ifndef OPENDDS_SAFETY_PROFILE
+DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
+  DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
+{
+  return dynamic_cast<DomainParticipantImpl*>(participant)->get_dynamic_type(type, key);
+}
+#endif
+
+XTypes::TypeObject
+Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,
+                                     const XTypes::TypeIdentifier& ti) const
+{
+  DomainParticipantImpl* participant_servant = dynamic_cast<DomainParticipantImpl*>(participant);
+  if (participant_servant) {
+    XTypes::TypeLookupService_rch tls = participant_servant->get_type_lookup_service();
+    if (tls) {
+      return tls->get_type_object(ti);
+    }
+  }
+
+  return XTypes::TypeObject();
 }
 
 void

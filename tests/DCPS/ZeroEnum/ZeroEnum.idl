@@ -1,0 +1,32 @@
+/*
+ *
+ *
+ * Distributed under the OpenDDS License.
+ * See: http://www.opendds.org/license.html
+ */
+
+module ZeroEnum {
+
+  const long HELLO_WORLD_DOMAIN = 111;
+
+  // Actors
+  const string MAIN = "MAIN";
+  const string LISTENER = "LISTENER";
+
+  // Conditions
+  const string ON_RECORDER_MATCHED = "ON_RECORDER_MATCHED";
+  const string ON_SAMPLE_DATA_RECEIVED = "ON_SAMPLE_DATA_RECEIVED";
+
+  enum MyEnum {
+    E1,
+    E2
+  };
+
+  @topic
+  struct Message {
+    string value;
+    MyEnum my_enum;
+  };
+
+  const string MESSAGE_TOPIC_NAME = "Message";
+};

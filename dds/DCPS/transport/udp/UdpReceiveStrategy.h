@@ -24,7 +24,7 @@ class UdpDataLink;
 
 class OpenDDS_Udp_Export UdpReceiveStrategy
   : public TransportReceiveStrategy<>,
-    public RcEventHandler
+    public virtual RcEventHandler
 {
 public:
   explicit UdpReceiveStrategy(UdpDataLink* link);

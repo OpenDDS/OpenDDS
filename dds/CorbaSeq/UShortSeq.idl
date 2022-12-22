@@ -30,4 +30,4 @@ module CORBA
   typedef sequence<unsigned short> UShortSeq;
 };
 
-#endif /* OPENDDS_CORBA_U_SHORT_SEQ_IDL */
+#endif

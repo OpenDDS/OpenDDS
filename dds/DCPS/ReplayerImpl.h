@@ -101,7 +101,7 @@ public:
 
   // Implement TransportClient
   virtual bool check_transport_qos(const TransportInst& inst);
-  virtual const RepoId& get_repo_id() const;
+  virtual RepoId get_repo_id() const;
   DDS::DomainId_t domain_id() const { return this->domain_id_; }
   virtual CORBA::Long get_priority_value(const AssociationData& data) const;
   SequenceNumber get_max_sn() const { return sequence_number_; }
@@ -154,7 +154,7 @@ public:
                                      const RepoId& writerid,
                                      const RepoId& readerid);
 
-  virtual ICE::Endpoint* get_ice_endpoint() { return 0; }
+  virtual DCPS::WeakRcHandle<ICE::Endpoint> get_ice_endpoint() { return DCPS::WeakRcHandle<ICE::Endpoint>(); }
 
   DDS::ReturnCode_t enable();
 
@@ -191,6 +191,9 @@ private:
 
   /// The qos policy list of this datawriter.
   DDS::DataWriterQos qos_;
+  /// The qos policy passed in by the user.
+  /// Differs from qos_ because representation has been interpreted.
+  DDS::DataWriterQos passed_qos_;
 
   /// The participant servant which creats the publisher that
   /// creates this datawriter.

@@ -30,7 +30,7 @@ private:
 
   // Discovery implementation:
 
-  DDS::Subscriber* init_bit(DomainParticipantImpl* participant);
+  RcHandle<BitSubscriber> init_bit(DomainParticipantImpl* participant);
 
   void fini_bit(DomainParticipantImpl* participant);
 

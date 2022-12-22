@@ -12,11 +12,12 @@
 #include "TcpTransport.h"
 
 #include <dds/DCPS/LogAddr.h>
-#include "dds/DCPS/transport/framework/NetworkAddress.h"
-#include "dds/DCPS/transport/framework/TransportInst.h"
-#include "dds/DCPS/SafetyProfileStreams.h"
-#include "ace/INET_Addr.h"
-#include "ace/SString.h"
+#include <dds/DCPS/NetworkResource.h>
+#include <dds/DCPS/transport/framework/TransportInst.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+
+#include <ace/INET_Addr.h>
+#include <ace/SString.h>
 
 #include <string>
 
@@ -31,6 +32,10 @@ namespace DCPS {
 class OpenDDS_Tcp_Export TcpInst
   : public TransportInst {
 public:
+
+  static const int DEFAULT_PASSIVE_RECONNECT_DURATION = 2000;
+  static const int DEFAULT_ACTIVE_CONN_TIMEOUT_PERIOD = 5000;
+
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
 

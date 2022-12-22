@@ -1,0 +1,23 @@
+project(*Publisher) : dcpsexe, dcps_test, dcps_transports_for_test {
+  exename = publisher
+
+  TypeSupport_Files {
+    HelloWorld.idl
+  }
+
+  Source_Files {
+    publisher.cpp
+  }
+}
+
+project(*Subscriber) : dcpsexe, dcps_test, dcps_transports_for_test {
+  exename = subscriber
+  after += *Publisher
+  TypeSupport_Files {
+    HelloWorld.idl
+  }
+
+  Source_Files {
+    subscriber.cpp
+  }
+}

@@ -1,14 +1,26 @@
 #ifndef _SQUARE_HPP
 #define _SQUARE_HPP
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtGui/QtGui>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <Shape.hpp>
 #include <ShapeDynamics.hpp>
 
 class Square : public Shape {
 public:
     Square(const QRect& bounds,
-           shared_ptr<ShapeDynamics> dynamics,
+           std::shared_ptr<ShapeDynamics> dynamics,
            const QPen& pen,
            const QBrush& brush,
            bool targeted = false);
@@ -23,7 +35,7 @@ private:
     Square& operator=(const Square&);
 
 private:
-    shared_ptr<ShapeDynamics> dynamics_;
+    std::shared_ptr<ShapeDynamics> dynamics_;
 
 };
 
