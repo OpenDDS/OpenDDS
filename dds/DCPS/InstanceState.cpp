@@ -25,7 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-InstanceState::InstanceState(DataReaderImpl* reader,
+InstanceState::InstanceState(const DataReaderImpl_rch& reader,
                              ACE_Recursive_Thread_Mutex& lock,
                              DDS::InstanceHandle_t handle)
   : ReactorInterceptor(TheServiceParticipant->reactor(),
@@ -38,7 +38,7 @@ InstanceState::InstanceState(DataReaderImpl* reader,
     empty_(true),
     release_pending_(false),
     release_timer_id_(-1),
-    reader_(*reader),
+    reader_(reader),
     handle_(handle),
     owner_(GUID_UNKNOWN),
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
