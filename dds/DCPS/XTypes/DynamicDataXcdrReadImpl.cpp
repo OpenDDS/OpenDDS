@@ -1646,7 +1646,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, Member
         return false;
       }
       DDS::TypeDescriptor_var etd;
-      if (td->element_type()->get_descriptor(etd) != DDS::RETCODE_OK) {
+      if (get_base_type(td->element_type())->get_descriptor(etd) != DDS::RETCODE_OK) {
         return false;
       }
       const LBound bit_bound = etd->bound()[0];
@@ -2855,7 +2855,7 @@ bool print_struct(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
         member_base_type_descriptor->kind() == TK_ARRAY) {
       DDS::TypeDescriptor_var td;
-      if (member_base_type_descriptor->element_type()->get_descriptor(td) != DDS::RETCODE_OK) {
+      if (get_base_type(member_base_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
         return false;
       }
       DCPS::String ele_type_name = td->name();
@@ -2928,7 +2928,7 @@ bool print_union(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Strin
       if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
           member_base_type_descriptor->kind() == TK_ARRAY) {
         DDS::TypeDescriptor_var td;
-        if (member_base_type_descriptor->element_type()->get_descriptor(td) != DDS::RETCODE_OK) {
+        if (get_base_type(member_base_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
           return false;
         }
         DCPS::String ele_type_name = td->name();
@@ -3231,7 +3231,8 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     type_string += "[" + DCPS::to_dds_string(seq_length) + "] =\n";
     for (ACE_CDR::ULong i = 0; i < seq_length; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
-      if (!print_member(temp_dd, type_string, indent, member_type_descriptor->element_type(), i)) {
+      if (!print_member(temp_dd, type_string, indent,
+                        get_base_type(member_type_descriptor->element_type()), i)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read sequence member\n"));
         }
@@ -3252,7 +3253,8 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     type_string += "[" + DCPS::to_dds_string(bound) + "] =\n";
     for (ACE_CDR::ULong i = 0; i < bound; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
-      if (!print_member(temp_dd, type_string, indent, member_type_descriptor->element_type(), i)) {
+      if (!print_member(temp_dd, type_string, indent,
+                        get_base_type(member_type_descriptor->element_type()), i)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read array member\n"));
         }
