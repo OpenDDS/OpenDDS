@@ -237,7 +237,25 @@ void write_additional_postfix_field_struct(const DataWriter_var& dw, bool dynami
     const ReturnCode_t ret = typed_dw->write(apfs, HANDLE_NIL);
     check_rc(ret, "write_additional_postfix_field_struct returned ");
   } else {
-    // TODO:
+    AdditionalPostfixFieldStructTypeSupport_var ts = new AdditionalPostfixFieldStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, key_value);
+    if (!check_rc(ret, "write_additional_postfix_field_struct: set key_field returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(1, APPENDABLE_STRUCT_AF);
+    if (!check_rc(ret, "write_additional_postfix_field_struct: set additional_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_additional_postfix_field_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_additional_postfix_field_struct: write dynamic data returned ");
   }
 }
 
@@ -249,14 +267,32 @@ void write_modified_mutable_struct(const DataWriter_var& dw, bool dynamic)
   if (!dynamic) {
     ModifiedMutableStructDataWriter_var typed_dw = ModifiedMutableStructDataWriter::_narrow(dw);
 
-    ModifiedMutableStruct ams;
-    ams.key_field = key_value;
-    ams.additional_field = MUTABLE_STRUCT_AF;
+    ModifiedMutableStruct mms;
+    mms.key_field = key_value;
+    mms.additional_field = MUTABLE_STRUCT_AF;
 
-    const ReturnCode_t ret = typed_dw->write(ams, HANDLE_NIL);
+    const ReturnCode_t ret = typed_dw->write(mms, HANDLE_NIL);
     check_rc(ret, "write_modified_mutable_struct returned ");
   } else {
-    // TODO:
+    ModifiedMutableStructTypeSupport_var ts = new ModifiedMutableStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(2, MUTABLE_STRUCT_AF);
+    if (!check_rc(ret, "write_modified_mutable_struct: set additional_field returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(1, key_value);
+    if (!check_rc(ret, "write_modified_mutable_struct: set key_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_modified_mutable_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_modified_mutable_struct: write dynamic data returned ");
   }
 }
 
@@ -274,7 +310,21 @@ void write_mutable_base_struct(const DataWriter_var& dw, bool dynamic)
     const ReturnCode_t ret = typed_dw->write(mbs, HANDLE_NIL);
     check_rc(ret, "write_mutable_base_struct returned ");
   } else {
-    // TODO:
+    MutableBaseStructTypeSupport_var ts = new MutableBaseStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(1, key_value);
+    if (!check_rc(ret, "write_mutable_base_struct: set key_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_mutable_base_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_mutable_base_struct: write dynamic data returned ");
   }
 }
 
@@ -292,7 +342,25 @@ void write_modified_mutable_union(const DataWriter_var& dw, bool dynamic)
     const ReturnCode_t ret = typed_dw->write(mmu, HANDLE_NIL);
     check_rc(ret, "write_modified_mutable_union returned ");
   } else {
-    // TODO:
+    ModifiedMutableUnionTypeSupport_var ts = new ModifiedMutableUnionTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(XTypes::DISCRIMINATOR_ID, UnionDisc::E_KEY);
+    if (!check_rc(ret, "write_modified_mutable_union: set discriminator returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(6, key_value);
+    if (!check_rc(ret, "write_modified_mutable_union: set key_field returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_modified_mutable_union: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_modified_mutable_union: write dynamic data returned ");
   }
 }
 
@@ -310,7 +378,21 @@ void write_trim64_struct(const DataWriter_var& dw, bool dynamic)
     const ReturnCode_t ret = typed_dw->write(tcs, HANDLE_NIL);
     check_rc(ret, "write_trim64_struct returned ");
   } else {
-    // TODO:
+    Trim64StructTypeSupport_var ts = new Trim64StructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, STRING_26.c_str());
+    if (!check_rc(ret, "write_trim64_struct: set trim_string returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_trim64_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_trim64_struct: write dynamic data returned ");
   }
 }
 
@@ -329,7 +411,34 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw, bool dyna
     const ReturnCode_t ret = typed_dw->write(as, HANDLE_NIL);
     check_rc(ret, "write_appendable_struct_with_dependency returned ");
   } else {
-    // TODO:
+    AppendableStructWithDependencyTypeSupport_var ts = new AppendableStructWithDependencyTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(0, key_value);
+    if (!check_rc(ret, "write_appendable_struct_with_dependency: set key_field returned ")) {
+      return;
+    }
+
+    NestedStructTypeSupport_var nested_ts = new NestedStructTypeSupportImpl();
+    DDS::DynamicType_var nested_dt = nested_ts->get_type();
+    DDS::DynamicData_var nested_data = DDS::DynamicDataFactor::get_instance()->create_data(nested_dt);
+    ret = nested_data->set_int32_value(0, NESTED_STRUCT_AF);
+    if (!check_rc(ret, "write_appendable_struct_with_dependency: set additional_nested_struct.additional_field returned ")) {
+      return;
+    }
+
+    ret = data->set_complex_value(1, nested_data);
+    if (!check_rc(ret, "write_appendable_struct_with_dependency: set additional_nested_struct returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_appendable_struct_with_dependency: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_appendable_struct_with_dependency: write dynamic data returned ");
   }
 }
 
@@ -347,7 +456,25 @@ void write_modified_name_mutable_struct(const DataWriter_var& dw, bool dynamic)
     const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
     check_rc(ret, "write_modified_name_mutable_struct returned ");
   } else {
-    // TODO:
+    ModifiedNameMutableStructTypeSupport_var ts = new ModifiedNameMutableStructTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(1, key_value);
+    if (!check_rc(ret, "write_modified_name_mutable_struct: set key_field_modified returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(2, MUTABLE_STRUCT_AF);
+    if (!check_rc(ret, "write_modified_name_mutable_struct: set additional_field_modified returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_modified_name_mutable_struct: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_modified_name_mutable_struct: write dynamic data returned ");
   }
 }
 
@@ -364,7 +491,25 @@ void write_modified_name_mutable_union(const DataWriter_var& dw, bool dynamic)
     const ReturnCode_t ret = typed_dw->write(sample, HANDLE_NIL);
     check_rc(ret, "write_modified_name_mutable_union returned ");
   } else {
-    // TODO:
+    ModifiedNameMutableUnionTypeSupport_var ts = new ModifiedNameMutableUnionTypeSupportImpl();
+    DDS::DynamicType_var dt = ts->get_type();
+    DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
+    DDS::ReturnCode_t ret = data->set_int32_value(XTypes::DISCRIMINATOR_ID, UnionDisc::E_KEY);
+    if (!check_rc(ret, "write_modified_name_mutable_union: set discriminator returned ")) {
+      return;
+    }
+    ret = data->set_int32_value(6, key_value);
+    if (!check_rc(ret, "write_modified_name_mutable_union: set key_field_modified returned ")) {
+      return;
+    }
+
+    DDS::DynamicDataWriter_var ddw = DDS::DynamicDataWriter::_narrow(dw);
+    if (!ddw) {
+      ACE_ERROR((LM_ERROR, "ERROR: write_modified_name_mutable_union: _narrow failed\n"));
+      return;
+    }
+    ret =  ddw->write(data, DDS::HANDLE_NIL);
+    check_rc(ret, "write_modified_name_mutable_union: write dynamic data returned ");
   }
 }
 

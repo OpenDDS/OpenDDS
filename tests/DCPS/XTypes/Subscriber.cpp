@@ -200,7 +200,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string topic_name = "";
   std::string registered_type_name = "";
   bool dynamic = false;
-  bool skip_read = false;
 
   // Default properties of type consistency enforcement Qos currently supported
   bool disallow_type_coercion = false;
@@ -254,9 +253,6 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       force_type_validation = true;
     } else if (arg == ACE_TEXT("--dynamic-ts")) {
       dynamic = true;
-    // TODO: Remove when dynamic writing is working
-    } else if (arg == ACE_TEXT("--skip-read")) {
-      skip_read = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -433,7 +429,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     return 1;
   }
 
-  if (!expect_inconsistent_topic && !expect_incompatible_qos && !skip_read) {
+  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
     if (type == "PlainCdrStruct") {
       failed = (read_plain_cdr_struct(dr) != RETCODE_OK);
     } else if (type == "AppendableStruct") {

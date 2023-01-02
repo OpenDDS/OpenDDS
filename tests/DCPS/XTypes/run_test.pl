@@ -17,6 +17,11 @@ my $verbose = 0;
 my $test_name = "";
 my $dynamic_writers = 0;
 my $dynamic_readers = 0;
+
+# dynamic-writers and dynamic-readers options only enable testing dynamic writers
+# and dynamic readers on test cases that support it (not all test cases do).
+# Each test case that supports it needs to specify a support_dynamic_writer and/or
+# a support_dynamic_reader parameter, depending on the types of dynamic tests it supports.
 GetOptions(
   "secure" => \$secure,
   "tcp" => \$tcp,
@@ -108,11 +113,13 @@ if ($secure) {
       reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct",
       expect_inconsistent_topic => 0, key_val => 1,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
+      support_dynamic_writer => 1, support_dynamic_reader => 1
     },
     "FinalStructMatch" => {
       reader_type => "FinalStructSub", writer_type => "FinalStructPub",
       expect_inconsistent_topic => 0, topic => "FinalStructT", key_val => 2,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
+      support_dynamic_writer => 1, support_dynamic_reader => 1
     },
     "FinalStructNoMatch" => {
       reader_type => "FinalStructSub", writer_type => "ModifiedFinalStruct",
@@ -337,8 +344,9 @@ sub run_test {
   if ($v->{r_reg_type}) {
     push(@reader_args, "--reg-type $v->{r_reg_type}");
   }
-  push(@reader_args, '--dynamic-ts') if ($dynamic_readers);
-  #  push(@reader_args, '--skip-read') if ($dynamic_writers);
+  if ($dynamic_readers and $v->{support_dynamic_reader}) {
+    push(@reader_args, '--dynamic-ts')
+  }
 
   push(@reader_args, @test_args);
   $test->process("reader_$test_name_param", './subscriber', join(' ', @reader_args));
@@ -348,7 +356,9 @@ sub run_test {
   if ($v->{w_reg_type}) {
     push(@writer_args, "--reg-type $v->{w_reg_type}");
   }
-  push(@writer_args, '--dynamic-ts') if ($dynamic_writers);
+  if ($dynamic_writers and $v->{support_dynamic_writer}) {
+    push(@writer_args, '--dynamic-ts');
+  }
 
   push(@writer_args, @test_args);
   $test->process("writer_$test_name_param", './publisher', join(' ', @writer_args));
