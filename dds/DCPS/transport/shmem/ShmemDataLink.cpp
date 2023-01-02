@@ -31,7 +31,7 @@ namespace {
   const Encoding encoding_unaligned_native(Encoding::KIND_UNALIGNED_CDR);
 }
 
-ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
+ShmemDataLink::ShmemDataLink(const RcHandle<ShmemTransport>& transport)
   : DataLink(transport,
              0,     // priority
              false, // is_loopback,
@@ -39,7 +39,7 @@ ShmemDataLink::ShmemDataLink(ShmemTransport& transport)
   , send_strategy_(make_rch<ShmemSendStrategy>(this))
   , recv_strategy_(make_rch<ShmemReceiveStrategy>(this))
   , peer_alloc_(0)
-  , reactor_task_(transport.reactor_task())
+  , reactor_task_(transport->reactor_task())
 {
 }
 
@@ -102,7 +102,8 @@ ShmemDataLink::open(const std::string& peer_address)
 
   assoc_resends_task_ = make_rch<SmPeriodicTask>(reactor_task_->interceptor(),
     ref(*this), &ShmemDataLink::resend_association_msgs);
-  assoc_resends_task_->enable(false, config().association_resend_period());
+  ShmemInst_rch cfg = config();
+  assoc_resends_task_->enable(false, cfg ? cfg->association_resend_period() : TimeDuration(0, ShmemInst::DEFAULT_ASSOCIATION_RESEND_PERIOD_USEC));
 
   return true;
 }
@@ -122,8 +123,8 @@ int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& loca
   send_association_msg(local_sub, remote_pub);
   // Resend until we get a response.
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
-  assoc_resends_.insert(std::pair<GuidPair, size_t>(GuidPair(local_sub, remote_pub),
-    config().association_resend_max_count()));
+  ShmemInst_rch cfg = config();
+  assoc_resends_.insert(std::pair<GuidPair, size_t>(GuidPair(local_sub, remote_pub), cfg ? cfg->association_resend_max_count() : ShmemInst::DEFAULT_ASSOCIATION_RESEND_MAX_COUNT));
   return result;
 }
 
@@ -230,10 +231,10 @@ ShmemDataLink::stop_i()
   }
 }
 
-ShmemTransport&
-ShmemDataLink::impl() const
+RcHandle<ShmemTransport>
+ShmemDataLink::transport() const
 {
-  return static_cast<ShmemTransport&>(DataLink::impl());
+  return dynamic_rchandle_cast<ShmemTransport>(impl());
 }
 
 ShmemAllocator*
@@ -246,19 +247,23 @@ ShmemDataLink::peer_allocator()
 ShmemAllocator*
 ShmemDataLink::local_allocator()
 {
-  return impl().alloc();
+  ShmemAllocator* result = 0;
+  OPENDDS_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), alloc(), result);
+  return result;
 }
 
 std::string
 ShmemDataLink::local_address()
 {
-  return impl().address();
+  std::string result;
+  OPENDDS_TEST_AND_CALL_ASSIGN(ShmemTransport_rch, transport(), address(), result);
+  return result;
 }
 
 void
 ShmemDataLink::signal_semaphore()
 {
-  return impl().signal_semaphore();
+  OPENDDS_TEST_AND_CALL(ShmemTransport_rch, transport(), signal_semaphore());
 }
 
 pid_t
@@ -267,9 +272,10 @@ ShmemDataLink::peer_pid()
   return std::atoi(peer_address_.c_str() + peer_address_.find('-') + 1);
 }
 
-ShmemInst& ShmemDataLink::config() const
+ShmemInst_rch
+ShmemDataLink::config() const
 {
-  return static_cast<ShmemTransport&>(impl()).config();
+  return dynamic_rchandle_cast<ShmemInst>(transport()->config());
 }
 
 } // namespace DCPS

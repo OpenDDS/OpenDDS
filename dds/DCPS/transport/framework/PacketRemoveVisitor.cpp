@@ -8,7 +8,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 #include "PacketRemoveVisitor.h"
 #include "TransportRetainedElement.h"
-#include "ace/Message_Block.h"
+
+#include <ace/Message_Block.h>
 
 #if !defined (__ACE_INLINE__)
 #include "PacketRemoveVisitor.inl"
@@ -454,7 +455,8 @@ PacketRemoveVisitor::visit_element_ref(TransportQueueElement*& element)
           "Release the original_blocks.\n"));
 
     // Release the chain of original blocks.
-    original_blocks->release();
+    Message_Block_Deleter deleter;
+    deleter(original_blocks);
 
     VDBG((LM_DEBUG, "(%P|%t) DBG:   "
           "Tell original element that data_dropped().\n"));

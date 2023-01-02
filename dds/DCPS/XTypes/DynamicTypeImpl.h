@@ -160,6 +160,17 @@ public:
     return complete_tm_;
   }
 
+  void set_preset_type_info(const TypeInformation& type_info)
+  {
+    preset_type_info_ = type_info;
+    preset_type_info_set_ = true;
+  }
+
+  const TypeInformation* get_preset_type_info() const
+  {
+    return preset_type_info_set_ ? &preset_type_info_ : 0;
+  }
+
 private:
   DynamicTypeMembersByNameImpl member_by_name_;
   DynamicTypeMembersByIdImpl member_by_id_;
@@ -171,6 +182,8 @@ private:
   TypeMap minimal_tm_;
   TypeIdentifier complete_ti_;
   TypeMap complete_tm_;
+  bool preset_type_info_set_;
+  TypeInformation preset_type_info_;
 };
 
 OpenDDS_Dcps_Export DDS::DynamicType_var get_base_type(DDS::DynamicType_ptr type);

@@ -176,7 +176,7 @@ DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(publication_id_, participant.get());
+  return get_entity_instance_handle(publication_id_, participant);
 }
 
 DDS::InstanceHandle_t
@@ -1495,7 +1495,6 @@ DataWriterImpl::enable()
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_support_->add_types(type_lookup_service);
-  type_support_->populate_dependencies(type_lookup_service);
 
   const RepoId publication_id =
     disco->add_publication(this->domain_id_,
@@ -2906,7 +2905,7 @@ DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::Instanc
   if (it == instance_handles_to_values_.end()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
-  sample = it->second;
+  sample = it->second->copy(Sample::Mutable);
   return DDS::RETCODE_OK;
 }
 

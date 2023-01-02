@@ -1820,7 +1820,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
       OpenDDS::DCPS::SubscriptionInstance_rch instance =
         OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
-          this,
+          rchandle_from(this),
           qos_,
           ref(instances_lock_),
           handle, owns_handle);
@@ -2111,7 +2111,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (! ptr->coherent_change_) {
 #endif
-    RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
+    RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant();
     if (!sub || get_deleted())
       return;
 
@@ -2139,6 +2139,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         if (!is_bit()) {
           set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+          sub.reset();
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
           listener->on_data_available(this);
         } else {

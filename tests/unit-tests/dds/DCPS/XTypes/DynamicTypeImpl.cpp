@@ -393,7 +393,7 @@ TEST_F(dds_DCPS_XTypes_DynamicTypeImpl, CompleteToDynamicType_MyUnion)
   XTypes::DynamicTypeMemberImpl* disc_expected_dtm = new XTypes::DynamicTypeMemberImpl();
   DDS::DynamicTypeMember_var disc_expected_dtm_var = disc_expected_dtm;
   DDS::MemberDescriptor_var disc_expected_md = new XTypes::MemberDescriptorImpl();
-  disc_expected_md->name("_d");
+  disc_expected_md->name("discriminator");
   disc_expected_md->id(OpenDDS::XTypes::DISCRIMINATOR_ID);
   disc_expected_md->index(OpenDDS::XTypes::DISCRIMINATOR_ID);
   disc_expected_md->try_construct_kind(DDS::DISCARD);

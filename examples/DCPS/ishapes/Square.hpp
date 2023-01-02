@@ -1,7 +1,19 @@
 #ifndef _SQUARE_HPP
 #define _SQUARE_HPP
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtGui/QtGui>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
+
 #include <Shape.hpp>
 #include <ShapeDynamics.hpp>
 

@@ -295,7 +295,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
       const PublicationId& writer_id = writer.writerId;
-      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos));
+      RcHandle<WriterInfo> info ( make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos));
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       writers_.insert(
         // This insertion is idempotent.
@@ -949,7 +949,7 @@ RecorderImpl::enable()
 DDS::InstanceHandle_t
 RecorderImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(subscription_id_, participant_servant_);
+  return get_entity_instance_handle(subscription_id_, rchandle_from(participant_servant_));
 }
 
 void

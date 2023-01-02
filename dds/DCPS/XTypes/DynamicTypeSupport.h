@@ -150,7 +150,7 @@ public:
   DDS::ReturnCode_t write_w_timestamp(DDS::DynamicData_ptr instance_data,
     DDS::InstanceHandle_t handle, const DDS::Time_t& source_timestamp)
   {
-    const DynamicSample sample(instance_data, DCPS::Sample::KeyOnly);
+    const DynamicSample sample(instance_data, DCPS::Sample::Full);
     return DataWriterImpl::write_w_timestamp(sample, handle, source_timestamp);
   }
 
@@ -173,7 +173,9 @@ public:
     DCPS::Sample_rch sample;
     const DDS::ReturnCode_t rc = DataWriterImpl::get_key_value(sample, handle);
     if (sample) {
-      key_holder = sample->get_dynamic_data(0);
+      CORBA::release(key_holder);
+      DDS::DynamicData_var result = sample->get_dynamic_data(0);
+      key_holder = result._retn();
     }
     return rc;
   }
@@ -280,7 +282,14 @@ void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample
 
 namespace XTypes {
 
-class OpenDDS_Dcps_Export DynamicDataReaderImpl
+#if defined _MSC_VER && _MSC_VER < 1700
+#define OPENDDS_MAYBE_EXPORT
+#else
+#define OPENDDS_MAYBE_EXPORT OpenDDS_Dcps_Export
+#endif
+
+class OPENDDS_MAYBE_EXPORT DynamicDataReaderImpl
+#undef OPENDDS_MAYBE_EXPORT
   : public DCPS::DataReaderImpl_T<DynamicSample>
 {
 public:
@@ -289,13 +298,25 @@ public:
   DDS::ReturnCode_t read_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
   {
     DynamicSample ds(dyn);
-    return Base::read_next_sample(ds, si);
+    const DDS::ReturnCode_t rc = Base::read_next_sample(ds, si);
+    if (rc == DDS::RETCODE_OK) {
+      CORBA::release(dyn);
+      DDS::DynamicData_var result = ds.get_dynamic_data(0);
+      dyn = result._retn();
+    }
+    return rc;
   }
 
   DDS::ReturnCode_t take_next_sample(DDS::DynamicData*& dyn, DDS::SampleInfo& si)
   {
     DynamicSample ds(dyn);
-    return Base::take_next_sample(ds, si);
+    const DDS::ReturnCode_t rc = Base::take_next_sample(ds, si);
+    if (rc == DDS::RETCODE_OK) {
+      CORBA::release(dyn);
+      DDS::DynamicData_var result = ds.get_dynamic_data(0);
+      dyn = result._retn();
+    }
+    return rc;
   }
 
   DDS::InstanceHandle_t lookup_instance(DDS::DynamicData* dyn)
@@ -307,7 +328,13 @@ public:
   DDS::ReturnCode_t get_key_value(DDS::DynamicData*& dyn, DDS::InstanceHandle_t ih)
   {
     DynamicSample ds(dyn);
-    return Base::get_key_value(ds, ih);
+    const DDS::ReturnCode_t rc = Base::get_key_value(ds, ih);
+    if (rc == DDS::RETCODE_OK) {
+      CORBA::release(dyn);
+      DDS::DynamicData_var result = ds.get_dynamic_data(0);
+      dyn = result._retn();
+    }
+    return rc;
   }
 
   void install_type_support(DCPS::TypeSupportImpl*);
@@ -382,6 +409,13 @@ public:
   const OpenDDS::XTypes::TypeMap& getMinimalTypeMap() const;
   const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;
   const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;
+
+  const OpenDDS::XTypes::TypeInformation* preset_type_info() const;
+
+  DynamicType_ptr get_type()
+  {
+    return DynamicType::_duplicate(type_);
+  }
 
 #  ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   const OpenDDS::DCPS::MetaStruct& getMetaStructForType()

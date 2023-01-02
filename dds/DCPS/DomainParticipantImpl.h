@@ -30,7 +30,7 @@
 #include <dds/DdsDcpsDomainC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsInfrastructureC.h>
-#include <dds/DdsDynamicTypeSupportC.h>
+#include <dds/DdsDynamicDataC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
 #  include <dds/DdsDcpsCoreTypeSupportC.h>
 #endif
@@ -419,8 +419,12 @@ public:
   bool prepare_to_delete_datawriters();
   bool set_wait_pending_deadline(const MonotonicTimePoint& deadline);
 
-private:
+#ifndef OPENDDS_SAFETY_PROFILE
+  DDS::ReturnCode_t get_dynamic_type(
+    DDS::DynamicType_var& type, const DDS::BuiltinTopicKey_t& key);
+#endif
 
+private:
   bool validate_publisher_qos(DDS::PublisherQos & publisher_qos);
   bool validate_subscriber_qos(DDS::SubscriberQos & subscriber_qos);
 

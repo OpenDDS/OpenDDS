@@ -8,11 +8,22 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
-#include "ui_Monitor.h"
 #include "GvOptions.h"
 #include "NodeOptions.h"
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
+#include "ui_Monitor.h"
 #include <QtWidgets/QScrollArea>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 // context menu items
 #define EXPAND_ACTION "Expand All"

@@ -533,6 +533,15 @@ if(OPENDDS_FOUND)
       message(STATUS "${_target} -> ${_target_location}")
     endforeach()
   endif()
+
+  ## ACE provides (or uses) many deprecated functions.
+  ## For now, we'll silence the warnings.
+  if(MSVC)
+    target_compile_options(ACE::ACE INTERFACE /wd4996)
+    target_compile_definitions(ACE::ACE INTERFACE
+                               _CRT_SECURE_NO_WARNINGS
+                               _WINSOCK_DEPRECATED_NO_WARNINGS)
+  endif()
 endif()
 
 function(opendds_get_library_var_prefix scoped_name var_prefix_var)

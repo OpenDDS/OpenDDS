@@ -21,7 +21,6 @@
 #include <dds/DCPS/MultiTask.h>
 #include <dds/DCPS/MulticastManager.h>
 #include <dds/DCPS/JobQueue.h>
-#include <dds/DCPS/NetworkConfigMonitor.h>
 #include <dds/DCPS/BuiltInTopicDataReaderImpls.h>
 #include <dds/DCPS/security/framework/SecurityConfig_rch.h>
 #ifdef OPENDDS_SECURITY
@@ -32,6 +31,7 @@
 #include <dds/DCPS/TimeTypes.h>
 #include <dds/DCPS/transport/framework/TransportStatistics.h>
 #include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/Discovery.h>
 
 #include <dds/DdsDcpsInfrastructureC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -341,6 +341,13 @@ public:
   RcHandle<DCPS::TransportInst> sedp_transport_inst() const
   {
     return sedp_->transport_inst();
+  }
+
+  void request_remote_complete_type_objects(
+    const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
+    DCPS::TypeObjReqCond& cond)
+  {
+    sedp_->request_remote_complete_type_objects(remote_entity, remote_type_info, cond);
   }
 
 protected:

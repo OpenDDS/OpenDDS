@@ -37,7 +37,7 @@ UdpInst::UdpInst(const std::string& name)
 TransportImpl_rch
 UdpInst::new_impl()
 {
-  return make_rch<UdpTransport>(ref(*this));
+  return make_rch<UdpTransport>(rchandle_from(this));
 }
 
 int
@@ -46,7 +46,8 @@ UdpInst::load(ACE_Configuration_Heap& cf,
 {
   TransportInst::load(cf, sect); // delegate to parent
 
-  ACE_TString local_address_s;
+  // Explicitly initialize this string to stop gcc 11 from issuing a warning.
+  ACE_TString local_address_s(ACE_TEXT(""));
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("local_address"),
                            local_address_s);
 

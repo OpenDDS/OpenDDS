@@ -40,7 +40,7 @@ namespace DCPS {
 class WriterInfo;
 class EndHistoricSamplesMissedSweeper;
 
-class OpenDDS_Dcps_Export WriterInfoListener
+class OpenDDS_Dcps_Export WriterInfoListener: public virtual RcObject
 {
 public:
   WriterInfoListener();
@@ -72,6 +72,8 @@ public:
   virtual void writer_removed(WriterInfo& info);
 };
 
+typedef RcHandle<WriterInfoListener> WriterInfoListener_rch;
+
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 enum Coherent_State {
   NOT_COMPLETED_YET,
@@ -88,7 +90,7 @@ public:
   enum WriterState { NOT_SET, ALIVE, DEAD };
   enum TimerState { NO_TIMER = -1 };
 
-  WriterInfo(WriterInfoListener* reader,
+  WriterInfo(const WriterInfoListener_rch& reader,
              const PublicationId& writer_id,
              const DDS::DataWriterQos& writer_qos);
 
@@ -229,7 +231,7 @@ private:
   WriterState state_;
 
   /// The DataReader owning this WriterInfo
-  WriterInfoListener* reader_;
+  WeakRcHandle<WriterInfoListener> reader_;
 
   /// DCPSInfoRepo ID of the DataWriter
   PublicationId writer_id_;
@@ -271,9 +273,11 @@ WriterInfo::received_activity(const MonotonicTimePoint& when)
   last_liveliness_activity_time_ = when;
 
   if (state_ != ALIVE) { // NOT_SET || DEAD
-    WriterInfoListener* reader = reader_;
+    RcHandle<WriterInfoListener> reader = reader_.lock();
     guard.release();
-    reader->writer_became_alive(*this, when);
+    if (reader) {
+      reader->writer_became_alive(*this, when);
+    }
   }
 }
 

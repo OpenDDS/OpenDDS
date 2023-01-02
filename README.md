@@ -114,25 +114,25 @@ first -- the `configure` script will download it for you.
 
 There are three distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI ACE/TAO 2.2a patch 24 or later
+* OCI ACE/TAO 2.2a patch 26 or later
   * This will be automatically downloaded by default when using the configure
     script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE 6.5.18 / TAO 2.5.18 or later in the ACE 6.x / TAO 2.x series
+* DOC Group ACE 6.5.19 / TAO 2.5.19 or later in the ACE 6.x / TAO 2.x series
   * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
     * `--ace-github-latest` to use the `ace6tao2` branch of ACE/TAO as is. This
       also downloads the `master` branch of MPC as is.
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_18
-* DOC Group ACE 7.0.8 / TAO 3.0.8 or later in the ACE 7.x / TAO 3.x series.
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_19
+* DOC Group ACE 7.0.11 / TAO 3.0.11 or later in the ACE 7.x / TAO 3.x series.
   This distribution requires a C++11 capable compiler
   * When using the configure script, DOC Group ACE/TAO can be downloaded using:
     * `--doc-group3` for the latest release
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_8
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_11
 
 The TAO Developer's Guide book can be requested for free from
 https://objectcomputing.com/products/tao/tao-developers-guide and the CORBA Programmers

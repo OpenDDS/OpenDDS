@@ -215,7 +215,7 @@ void DataReaderImpl::init(
 
   domain_id_ = participant->get_domain_id();
 
-  subscriber_servant_ = *subscriber;
+  subscriber_servant_ = rchandle_from(subscriber);
 
   if (subscriber->get_qos(this->subqos_) != ::DDS::RETCODE_OK) {
     ACE_DEBUG((LM_WARNING,
@@ -228,7 +228,7 @@ DDS::InstanceHandle_t
 DataReaderImpl::get_instance_handle()
 {
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(subscription_id_, participant.get());
+  return get_entity_instance_handle(subscription_id_, participant);
 }
 
 void
@@ -272,7 +272,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
     const PublicationId& writer_id = writer.writerId;
-    WriterInfo_rch info = make_rch<WriterInfo>(static_cast<WriterInfoListener*>(this), writer_id, writer.writerQos);
+    WriterInfo_rch info = make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
         WriterMapType::value_type(
@@ -1250,7 +1250,7 @@ DataReaderImpl::enable()
 
     XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
     typesupport->add_types(type_lookup_service);
-    typesupport->populate_dependencies(type_lookup_service);
+
     install_type_support(typesupport);
 
     const RepoId subscription_id =
@@ -1412,8 +1412,9 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 
     // This adds the reader to the set/list of readers with data.
     RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-    if (subscriber)
+    if (subscriber) {
       subscriber->data_received(this);
+    }
 
     // Only gather statistics about real samples, not registration data, etc.
     if (header.message_id_ == SAMPLE_DATA) {
@@ -1674,7 +1675,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
 RcHandle<EntityImpl>
 DataReaderImpl::parent() const
 {
-  return this->subscriber_servant_.lock();
+  return subscriber_servant_.lock();
 }
 
 bool
@@ -2790,9 +2791,10 @@ void DataReaderImpl::post_read_or_take()
 {
   set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
   RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-  if (subscriber)
+  if (subscriber) {
     subscriber->set_status_changed_flag(
       DDS::DATA_ON_READERS_STATUS, false);
+  }
 }
 
 ACE_Reactor_Timer_Interface*
@@ -3006,8 +3008,9 @@ void
 DataReaderImpl::coherent_changes_completed(DataReaderImpl* reader)
 {
   RcHandle<SubscriberImpl> subscriber = get_subscriber_servant();
-  if (!subscriber)
+  if (!subscriber) {
     return;
+  }
 
   subscriber->set_status_changed_flag(::DDS::DATA_ON_READERS_STATUS, true);
   this->set_status_changed_flag(::DDS::DATA_AVAILABLE_STATUS, true);
@@ -3231,8 +3234,13 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
     }
   }
   TransportClient::add_link(link, peer);
-  TransportImpl& impl = link->impl();
-  OPENDDS_STRING type = impl.transport_type();
+  OPENDDS_STRING type;
+  {
+    TransportImpl_rch impl = link->impl();
+    if (impl) {
+      type = impl->transport_type();
+    }
+  }
 
   if (type == "rtps_udp" || type == "multicast") {
     resume_sample_processing(peer);

@@ -6,6 +6,8 @@
 
 #include "DynamicTypeMemberImpl.h"
 
+#include <dds/DCPS/debug.h>
+
 #include <dds/DdsDcpsInfrastructureC.h>
 
 #include <stdexcept>
@@ -16,6 +18,7 @@ namespace OpenDDS {
 namespace XTypes {
 
 DynamicTypeImpl::DynamicTypeImpl()
+  : preset_type_info_set_(false)
 {}
 
 DynamicTypeImpl::~DynamicTypeImpl()
@@ -68,12 +71,18 @@ DDS::ReturnCode_t DynamicTypeImpl::get_all_members_by_name(DDS::DynamicTypeMembe
 DDS::ReturnCode_t DynamicTypeImpl::get_member(DDS::DynamicTypeMember_ptr& member, MemberId id)
 {
   const DynamicTypeMembersByIdImpl::const_iterator pos = member_by_id_.find(id);
-  if (pos != member_by_id_.end()) {
-    DDS::DynamicTypeMember_var member_v(member);
-    member = DDS::DynamicTypeMember::_duplicate(pos->second);
-    return DDS::RETCODE_OK;
+  if (pos == member_by_id_.end()) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      CORBA::String_var name = descriptor_->name();
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicTypeImpl::get_member: "
+        "type %C doesn't have a member with id %d\n", name.in(), id));
+    }
+    return DDS::RETCODE_BAD_PARAMETER;
   }
-  return DDS::RETCODE_ERROR;
+
+  DDS::DynamicTypeMember_var member_v(member);
+  member = DDS::DynamicTypeMember::_duplicate(pos->second);
+  return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t DynamicTypeImpl::get_all_members(DDS::DynamicTypeMembersById_ptr& member)

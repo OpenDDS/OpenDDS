@@ -52,7 +52,9 @@ size_t DynamicSample::serialized_size(const Encoding& enc) const
     }
     return 0;
   }
-  return DCPS::serialized_size(enc, *ddi);
+  return key_only()
+    ? DCPS::serialized_size(enc, DCPS::KeyOnly<const DynamicDataImpl>(*ddi))
+    : DCPS::serialized_size(enc, *ddi);
 }
 
 bool DynamicSample::serialize(Serializer& ser) const
@@ -65,7 +67,9 @@ bool DynamicSample::serialize(Serializer& ser) const
     }
     return false;
   }
-  return ser << *ddi;
+  return key_only()
+    ? ser << DCPS::KeyOnly<const DynamicDataImpl>(*ddi)
+    : ser << *ddi;
 }
 
 bool DynamicSample::deserialize(Serializer& ser)
@@ -87,15 +91,23 @@ bool DynamicSample::deserialize(Serializer& ser)
   mb->wr_ptr(len);
 
   const DDS::DynamicType_var type = data_->type();
-  data_ = new DynamicDataXcdrReadImpl(mb.get(), ser.encoding(), type);
+  data_ = new DynamicDataXcdrReadImpl(mb.get(), ser.encoding(), type, extent_);
   return true;
 }
 
 bool DynamicSample::compare(const Sample& other) const
 {
-  ACE_UNUSED_ARG(other);
-  // TODO
-  return false;
+  const DynamicSample* const other_same_kind = dynamic_cast<const DynamicSample*>(&other);
+  OPENDDS_ASSERT(other_same_kind);
+  bool is_less_than = false;
+  DDS::ReturnCode_t rc = key_less_than(is_less_than, data_, other_same_kind->data_);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicSample::compare: "
+        "key_less_than returned %C\n", retcode_to_string(rc)));
+    }
+  }
+  return is_less_than;
 }
 
 void DynamicDataReaderImpl::install_type_support(TypeSupportImpl* ts)
@@ -333,6 +345,12 @@ const TypeMap& DynamicTypeSupport::getCompleteTypeMap() const
 {
   DynamicTypeImpl* const dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
   return dti->get_complete_type_map();
+}
+
+const OpenDDS::XTypes::TypeInformation* DynamicTypeSupport::preset_type_info() const
+{
+  DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
+  return dti->get_preset_type_info();
 }
 
 DynamicTypeSupport_ptr DynamicTypeSupport::_duplicate(DynamicTypeSupport_ptr obj)

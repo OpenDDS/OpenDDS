@@ -270,8 +270,8 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
   if (dr_servant) { // for MultiTopic this will be false
     const char* reason = " (ERROR: unknown reason)";
     DDS::ReturnCode_t rc = DDS::RETCODE_OK;
-    DDS::Subscriber_var dr_subscriber(dr_servant->get_subscriber());
-    if (dr_subscriber.in() != this) {
+    RcHandle<SubscriberImpl> dr_subscriber = dr_servant->get_subscriber_servant();
+    if (dr_subscriber.get() != this) {
       reason = "doesn't belong to this subscriber.";
       rc = DDS::RETCODE_PRECONDITION_NOT_MET;
     } else if (dr_servant->has_zero_copies()) {
@@ -282,12 +282,12 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
       rc = DDS::RETCODE_PRECONDITION_NOT_MET;
     }
     if (rc != DDS::RETCODE_OK) {
-      if (DCPS_debug_level) {
+      if (log_level >= LogLevel::Notice) {
         DDS::TopicDescription_var topic = a_datareader->get_topicdescription();
         CORBA::String_var topic_name = topic->get_name();
-        ACE_DEBUG((LM_WARNING, "(%P|%t) WARNING SubscriberImpl::delete_datareader: "
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: SubscriberImpl::delete_datareader: "
           "on reader %C (topic \"%C\") will return \"%C\" because it %C\n",
-          LogGuid(dr_servant->get_repo_id()).c_str(), topic_name.in(),
+          LogGuid(dr_servant->get_id()).c_str(), topic_name.in(),
           retcode_to_string(rc), reason));
       }
       return rc;

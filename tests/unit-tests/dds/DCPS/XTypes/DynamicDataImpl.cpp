@@ -6,6 +6,7 @@
 
 #include <dds/DCPS/XTypes/TypeLookupService.h>
 #include <dds/DCPS/XTypes/DynamicTypeImpl.h>
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 #include <dds/DCPS/XTypes/DynamicDataImpl.h>
 
 using namespace OpenDDS;
@@ -202,7 +203,7 @@ void verify_int32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   // Write a member that isn't selected by the existing discriminator.
   ret = data.set_uint32_value(2, CORBA::ULong(10));
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   // Rewrite the selected member.
   ret = data.set_int32_value(1, CORBA::Long(11));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
@@ -258,9 +259,7 @@ void verify_default_int32_union_mutable(DDS::DynamicType_var dt)
 void verify_uint32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_uint32_value(2, CORBA::ULong(11));
+  DDS::ReturnCode_t ret = data.set_uint32_value(2, CORBA::ULong(11));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -271,7 +270,7 @@ void verify_uint32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT8);
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_value(1, CORBA::Long(10));
-  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint32_value(2, CORBA::ULong(11));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -279,38 +278,25 @@ void verify_uint32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_uint32_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
+    DDS::ReturnCode_t ret = data.set_uint32_value(2, CORBA::ULong(11));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x10, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x01, // +8=12 discriminator
-      0x20,0x00,0x00,0x02, 0x00,0x00,0x00,0x00 // +8=20 uint_32
+      0x20,0x00,0x00,0x02, 0x00,0x00,0x00,0x0b // +8=20 uint_32
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the UInt32 member. Expect failure since default discriminator
-    // will select the Int32 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_uint32_value(2, CORBA::ULong(11));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_int8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT8);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_int8_value(3, CORBA::Int8(0x7f));
+  DDS::ReturnCode_t ret = data.set_int8_value(3, CORBA::Int8(0x7f));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -318,10 +304,8 @@ void verify_int8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT8);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(1, CORBA::Long(10));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int8_value(3, CORBA::Int8(12));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -329,37 +313,26 @@ void verify_int8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_int8_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the Int8 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT8);
+    DDS::ReturnCode_t ret = data.set_int8_value(3, CORBA::Int8(-3));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0d, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x02, // +8=12 discriminator
-      0x00,0x00,0x00,0x03, 0x00 // +5=17 int_8
+      0x00,0x00,0x00,0x03, 0xfd // +5=17 int_8
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the Int8 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int8_value(3, CORBA::Int8(-3));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_uint8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT8);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_uint8_value(4, CORBA::UInt8(0xff));
+  DDS::ReturnCode_t ret = data.set_uint8_value(4, CORBA::UInt8(0xff));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -370,7 +343,7 @@ void verify_uint8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint32_value(2, CORBA::ULong(10));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint8_value(4, CORBA::UInt8(0xaa));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -378,37 +351,26 @@ void verify_uint8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_uint8_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the UInt8 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT8);
+    DDS::ReturnCode_t ret = data.set_uint8_value(4, CORBA::UInt8(3));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0d, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x03, // +8=12 discriminator
-      0x00,0x00,0x00,0x04, 0x00 // +5=17 uint_8
+      0x00,0x00,0x00,0x04, 0x03 // +5=17 uint_8
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the UInt8 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_uint8_value(4, CORBA::UInt8(3));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_int16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_int16_value(5, CORBA::Short(9));
+  DDS::ReturnCode_t ret = data.set_int16_value(5, CORBA::Short(9));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -419,7 +381,7 @@ void verify_int16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint32_value(2, CORBA::ULong(10));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int16_value(5, CORBA::Short(100));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -427,37 +389,26 @@ void verify_int16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_int16_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the Int16 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
+    DDS::ReturnCode_t ret = data.set_int16_value(5, CORBA::Short(123));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0e, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x04, // +8=12 discriminator
-      0x10,0x00,0x00,0x05, 0x00,0x00 // +6=18 int_16
+      0x10,0x00,0x00,0x05, 0x00,0x7b // +6=18 int_16
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the Int16 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int16_value(5, CORBA::Short(123));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_uint16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT16);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_uint16_value(6, CORBA::UShort(5));
+  DDS::ReturnCode_t ret = data.set_uint16_value(6, CORBA::UShort(5));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -468,7 +419,7 @@ void verify_uint16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT64);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint64_value(8, CORBA::ULongLong(222));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint16_value(6, CORBA::UShort(99));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -476,37 +427,26 @@ void verify_uint16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_uint16_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the UInt16 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT16);
+    DDS::ReturnCode_t ret = data.set_uint16_value(6, CORBA::UShort(121));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0e, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x05, // +8=12 discriminator
-      0x10,0x00,0x00,0x06, 0x00,0x00 // +6=18 uint_16
+      0x10,0x00,0x00,0x06, 0x00,0x79 // +6=18 uint_16
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the UInt16 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_uint16_value(6, CORBA::UShort(121));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_int64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT64);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_int64_value(7, CORBA::LongLong(0xfe));
+  DDS::ReturnCode_t ret =  data.set_int64_value(7, CORBA::LongLong(0xfe));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -517,7 +457,7 @@ void verify_int64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int64_value(7, CORBA::LongLong(0xbb));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -525,37 +465,26 @@ void verify_int64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_int64_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the Int64 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT64);
+    DDS::ReturnCode_t ret = data.set_int64_value(7, CORBA::LongLong(3456));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x14, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x06, // +8=12 discriminator
-      0x30,0x00,0x00,0x07, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 // +12=24 int_64
+      0x30,0x00,0x00,0x07, 0x00,0x00,0x00,0x00,0x00,0x00,0x0d,0x80 // +12=24 int_64
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the Int64 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int64_value(7, CORBA::LongLong(3456));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_uint64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT64);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_uint64_value(8, CORBA::ULongLong(0xff));
+  DDS::ReturnCode_t ret = data.set_uint64_value(8, CORBA::ULongLong(0xff));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -566,7 +495,7 @@ void verify_uint64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint64_value(8, CORBA::ULongLong(0xcd));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -574,37 +503,26 @@ void verify_uint64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_uint64_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the UInt64 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT64);
+    DDS::ReturnCode_t ret = data.set_uint64_value(8, CORBA::ULongLong(3456));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x14, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x07, // +8=12 discriminator
-      0x30,0x00,0x00,0x08, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 // +12=24 uint_64
+      0x30,0x00,0x00,0x08, 0x00,0x00,0x00,0x00,0x00,0x00,0x0d,0x80 // +12=24 uint_64
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the UInt64 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_uint64_value(8, CORBA::ULongLong(3456));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_float32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_float32_value(9, CORBA::Float(1.0f));
+  DDS::ReturnCode_t ret = data.set_float32_value(9, CORBA::Float(1.0f));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -615,45 +533,15 @@ void verify_float32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_float32_value(9, CORBA::Float(2.0f));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-}
-
-void verify_default_float32_union_mutable(DDS::DynamicType_var dt)
-{
-  {
-    // Only set the discriminator.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x10, // +4=4 dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x08, // +8=12 discriminator
-      0x20,0x00,0x00,0x09, 0x00,0x00,0x00,0x00 // +8=20 float_32
-    };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the Float32 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_float32_value(9, CORBA::Float(3.0f));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_float64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_float64_value(10, CORBA::Double(1.0));
+  DDS::ReturnCode_t ret = data.set_float64_value(10, CORBA::Double(1.0));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -664,45 +552,15 @@ void verify_float64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_CHAR8);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_char8_value(12, CORBA::Char('a'));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_float64_value(10, CORBA::Double(2.0));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-}
-
-void verify_default_float64_union_mutable(DDS::DynamicType_var dt)
-{
-  {
-    // Only set the discriminator.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x14, // +4=4 dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x09, // +8=12 discriminator
-      0x30,0x00,0x00,0x0a, 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00 // +12=24 float_64
-    };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the Float64 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_float64_value(10, CORBA::Double(3.0));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_char8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_CHAR8);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_char8_value(12, CORBA::Char('a'));
+  DDS::ReturnCode_t ret = data.set_char8_value(12, CORBA::Char('a'));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -713,7 +571,7 @@ void verify_char8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(1, CORBA::Long(22));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_char8_value(12, CORBA::Char('b'));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -721,28 +579,19 @@ void verify_char8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_char8_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the Char8 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_CHAR8);
+    DDS::ReturnCode_t ret = data.set_char8_value(12, CORBA::Char('d'));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0d, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0b, // +8=12 discriminator
-      0x00,0x00,0x00,0x0c, '\0' // +5=17 char_8
+      0x00,0x00,0x00,0x0c, 'd' // +5=17 char_8
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the Char8 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_char8_value(12, CORBA::Char('d'));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
   }
 }
 
@@ -750,9 +599,7 @@ void verify_default_char8_union_mutable(DDS::DynamicType_var dt)
 void verify_char16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_CHAR16);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_char16_value(13, CORBA::WChar(0x0061));
+  DDS::ReturnCode_t ret = data.set_char16_value(13, CORBA::WChar(0x0061));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -763,7 +610,7 @@ void verify_char16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_int16_value(5, CORBA::Short(34));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_char16_value(13, CORBA::WChar(0x0062));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -771,28 +618,19 @@ void verify_char16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_char16_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the Char16 member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_CHAR16);
+    DDS::ReturnCode_t ret = data.set_char16_value(13, CORBA::WChar(0x0063));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0e, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0c, // +8=12 discriminator
-      0x10,0x00,0x00,0x0d, 0x00,0x00 // +6=18 char_16
+      0x10,0x00,0x00,0x0d, 0x00,0x63 // +6=18 char_16
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the Char16 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_char16_value(13, CORBA::WChar(0x0063));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
   }
 }
 #endif
@@ -800,11 +638,7 @@ void verify_default_char16_union_mutable(DDS::DynamicType_var dt)
 void verify_byte_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BYTE);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_int32_value(1, CORBA::Long(0xff));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
-  ret = data.set_byte_value(14, CORBA::Octet(0xff));
+  DDS::ReturnCode_t ret = data.set_byte_value(14, CORBA::Octet(0xff));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -815,7 +649,7 @@ void verify_byte_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_int16_value(5, CORBA::Short(34));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_byte_value(14, CORBA::Octet(0xab));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -823,39 +657,26 @@ void verify_byte_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_byte_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the Byte member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BYTE);
+    DDS::ReturnCode_t ret = data.set_byte_value(14, CORBA::Octet(0xaa));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0d, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0d, // +8=12 discriminator
-      0x00,0x00,0x00,0x0e, 0x00 // +5=17 byte_
+      0x00,0x00,0x00,0x0e, 0xaa // +5=17 byte_
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the Byte member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_byte_value(14, CORBA::Octet(0xaa));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
   }
 }
 
 void verify_bool_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BOOL);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_uint32_value(2, CORBA::ULong(0xff));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
-  ret = data.set_boolean_value(15, CORBA::Boolean(true));
+  DDS::ReturnCode_t ret = data.set_boolean_value(15, CORBA::Boolean(true));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -866,47 +687,35 @@ void verify_bool_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint16_value(6, CORBA::UShort(56));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_boolean_value(15, CORBA::Boolean(false));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
 
 void verify_default_bool_union_mutable(DDS::DynamicType_var dt)
 {
+
   {
-    // Only set the discriminator.
+    // Only set the Boolean member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BOOL);
+    DDS::ReturnCode_t ret = data.set_boolean_value(15, CORBA::Boolean(true));
     EXPECT_EQ(ret, DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x0d, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0e, // +8=12 discriminator
-      0x00,0x00,0x00,0x0f, 0x00 // +5=17 bool_
+      0x00,0x00,0x00,0x0f, 0x01 // +5=17 bool_
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
-  {
-    // Only set the Boolean member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_boolean_value(15, CORBA::Boolean(true));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 void verify_string_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_STRING8);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_uint32_value(2, CORBA::ULong(0xff));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
-  ret = data.set_string_value(16, "abc");
+  DDS::ReturnCode_t ret = data.set_string_value(16, "abc");
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -917,48 +726,16 @@ void verify_string_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint16_value(6, CORBA::UShort(56));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_string_value(16, "def");
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-}
-
-void verify_default_string_union_mutable(DDS::DynamicType_var dt)
-{
-  {
-    // Only set the discriminator.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_STRING8);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x15, // +4=4 dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0f, // +8=12 discriminator
-      0x40,0x00,0x00,0x10, 0x00,0x00,0x00,0x05, 0x00,0x00,0x00,0x01,'\0' // +13=25 str
-    };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the String8 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_string_value(16, "hello");
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 
 #ifdef DDS_HAS_WCHAR
 void verify_wstring_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_STRING16);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_int32_value(1, CORBA::Long(1234));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
-  ret = data.set_wstring_value(17, L"abc");
+  DDS::ReturnCode_t ret = data.set_wstring_value(17, L"abc");
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -969,48 +746,16 @@ void verify_wstring_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint32_value(2, CORBA::UInt32(4321));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_wstring_value(17, L"def");
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-}
-
-void verify_default_wstring_union_mutable(DDS::DynamicType_var dt)
-{
-  {
-    // Only set the discriminator.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_STRING16);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x10, // +4=4 dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x10, // +8=12 discriminator
-      0x20,0x00,0x00,0x11, 0x00,0x00,0x00,0x00 // +8=20 wstr
-    };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the String16 member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_wstring_value(17, L"hello");
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
-  }
 }
 #endif
 
 void verify_enum_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
-  DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, CORBA::Long(17));
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
-  ret = data.set_char8_value(12, CORBA::Char('a'));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
-  ret = data.set_int32_value(18, CORBA::Long(9));
+  DDS::ReturnCode_t ret = data.set_int32_value(18, CORBA::Long(9));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   {
     ACE_Message_Block buffer(64);
@@ -1021,7 +766,7 @@ void verify_enum_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret = data.set_uint32_value(2, CORBA::UInt32(4321));
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(18, CORBA::Long(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
@@ -1029,28 +774,18 @@ void verify_enum_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 void verify_default_enum_union_mutable(DDS::DynamicType_var dt)
 {
   {
-    // Only set the discriminator.
+    // Only set the SomeEnum member.
     XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, CORBA::Long(17));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(data.set_int32_value(18, CORBA::Long(6)), DDS::RETCODE_OK);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x10, // +4=4 dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x11, // +8=12 discriminator
-      0x20,0x00,0x00,0x12, 0x00,0x00,0x00,0x00 // +8=20 my_enum
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0a, // +8=12 discriminator
+      0x20,0x00,0x00,0x12, 0x00,0x00,0x00,0x06 // +8=20 my_enum
     };
     ACE_Message_Block buffer(64);
     DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
-  {
-    // Only set the SomeEnum member.
-    XTypes::DynamicDataImpl data(dt);
-    DDS::ReturnCode_t ret = data.set_int32_value(18, CORBA::Long(6));
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_FALSE(ser << data);
   }
 }
 
@@ -1366,7 +1101,7 @@ void verify_array_struct_default(DDS::DynamicType_var type, const DataView& expe
 }
 
 /////////////////////////// Mutable tests ///////////////////////////
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
@@ -1402,7 +1137,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStruct)
   verify_single_value_struct<MutableSingleValueStruct>(dt, single_value_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStructDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStructDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueStruct_xtag>();
@@ -1439,7 +1174,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToStructDefault)
   verify_default_single_value_struct<MutableSingleValueStruct>(dt, default_single_value);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
@@ -1587,7 +1322,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
   {
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x10, // +4=4 dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x11, // +8=12 discriminator
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0a, // +8=12 discriminator
       0x20,0x00,0x00,0x12, 0x00,0x00,0x00,0x09 // +8=20 my_enum
     };
     verify_enum_union(dt, expected_cdr);
@@ -1596,7 +1331,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnion)
 
 // TODO: Add a test case for optional members
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSingleValueUnion_xtag>();
@@ -1618,20 +1353,16 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToUnionDefault)
   verify_default_uint16_union_mutable(dt);
   verify_default_int64_union_mutable(dt);
   verify_default_uint64_union_mutable(dt);
-  verify_default_float32_union_mutable(dt);
-  verify_default_float64_union_mutable(dt);
   verify_default_char8_union_mutable(dt);
 #ifdef DDS_HAS_WCHAR
   verify_default_char16_union_mutable(dt);
 #endif
   verify_default_byte_union_mutable(dt);
   verify_default_bool_union_mutable(dt);
-  verify_default_string_union_mutable(dt);
-  verify_default_wstring_union_mutable(dt);
   verify_default_enum_union_mutable(dt);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
@@ -1667,7 +1398,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStruct)
   verify_sequence_value_struct<MutableSequenceStruct>(dt, sequence_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceStruct_xtag>();
@@ -1702,17 +1433,17 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
   verify_sequence_value_struct_default<MutableSequenceStruct>(dt, sequence_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
 {
   // TODO: Write to union with members are sequence of basic types
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceUnionDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceUnionDefault)
 {
   // TODO: Sequence members of a union take default value.
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
@@ -1732,7 +1463,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
   verify_array_struct(dt, expected_cdr);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
@@ -1752,7 +1483,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArrayDefault)
   verify_array_struct_default(dt, expected_cdr);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableStruct_xtag>();
@@ -1794,12 +1525,10 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
   ret = dtm->get_descriptor(md);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   DDS::DynamicData_var inner_dd = new XTypes::DynamicDataImpl(md->type());
-  ret = inner_dd->set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = inner_dd->set_int32_value(0, 10);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = inner_dd->set_char8_value(2, 'a');
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = inner_dd->set_uint32_value(1, 0xffffffff);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_complex_value(3, inner_dd);
@@ -1849,7 +1578,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
 }
 
 /////////////////////////// Appendable tests ///////////////////////////
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableSingleValueStruct_xtag>();
@@ -1884,7 +1613,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
   verify_single_value_struct<AppendableSingleValueStruct>(dt, single_value_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
@@ -1959,8 +1688,6 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
   ret = dtm->get_descriptor(md);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   DDS::DynamicData_var inner_dd = new XTypes::DynamicDataImpl(md->type());
-  ret = inner_dd->set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = inner_dd->set_uint32_value(1, 0xffffffff);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_complex_value(3, inner_dd);
@@ -1977,7 +1704,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
 }
 
 /////////////////////////// Final tests ///////////////////////////
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
@@ -2011,7 +1738,7 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
   verify_single_value_struct<FinalSingleValueStruct>(dt, single_value_struct);
 }
 
-TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalStruct_xtag>();
   const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalStruct_xtag>();
@@ -2085,8 +1812,6 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
   ret = dtm->get_descriptor(md);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   DDS::DynamicData_var inner_dd = new XTypes::DynamicDataImpl(md->type());
-  ret = inner_dd->set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = inner_dd->set_uint32_value(1, 0xffffffff);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_complex_value(3, inner_dd);
@@ -2100,5 +1825,251 @@ TEST(DDS_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
   DCPS::Serializer ser(&buffer, xcdr2);
   ASSERT_TRUE(ser << data);
   EXPECT_PRED_FORMAT2(assert_DataView, final_struct, buffer);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+  static const ACE_CDR::Int8 expected_value = 42;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int8_value(4, expected_value));
+
+  static const DCPS::Encoding xcdr2_noswap(DCPS::Encoding::KIND_XCDR2);
+  static const size_t expected_size = 1u;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_noswap, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_noswap);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  static const unsigned char expected_buffer[] = {expected_value};
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+  static const ACE_CDR::Short expected_value = 42;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_value(2, expected_value));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const size_t expected_size = 6u;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  static const unsigned char expected_buffer[] =
+    {2, 0, 0, 0, // DHEADER
+     expected_value & 0xff, (expected_value >> 8) & 0xff
+    };
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 3));
+  DDS::MemberDescriptor_var md;
+  ASSERT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var inner = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  ASSERT_EQ(DDS::RETCODE_OK, data.set_complex_value(3, inner));
+
+  const XTypes::MemberId id_disc = inner->get_member_id_by_name("discriminator");
+  EXPECT_NE(id_disc, XTypes::MEMBER_ID_INVALID);
+  static const SomeEnum expected_value = E_UINT64;
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int32_value(id_disc, expected_value));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const unsigned char expected_buffer[] =
+    {8, 0, 0, 0, // DHEADER
+     3, 0, 0, 0x20, // EMHEADER1 for 'inner'
+     expected_value & 0xff, 0, 0, 0
+    };
+  static const size_t expected_size = sizeof expected_buffer;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, MutableArray_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 2));
+  DDS::MemberDescriptor_var md;
+  ASSERT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var inner = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  ASSERT_EQ(DDS::RETCODE_OK, data.set_complex_value(2, inner));
+
+  const XTypes::MemberId id0 = inner->get_member_id_at_index(0u);
+  EXPECT_NE(id0, XTypes::MEMBER_ID_INVALID);
+  static const ACE_CDR::Int8 expected_values[] = {9, 23};
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int8_value(id0, expected_values[0]));
+  const XTypes::MemberId id1 = inner->get_member_id_at_index(1u);
+  EXPECT_NE(id0, XTypes::MEMBER_ID_INVALID);
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int8_value(id1, expected_values[1]));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const unsigned char expected_buffer[] =
+    {6, 0, 0, 0, // DHEADER
+     2, 0, 0, 0x10, // EMHEADER1 for 'int_8a'
+     static_cast<unsigned char>(expected_values[0]), static_cast<unsigned char>(expected_values[1])
+    };
+  static const size_t expected_size = sizeof expected_buffer;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Nested_WriteKeyOnly)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalNestedStructOuter_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalNestedStructOuter_xtag>();
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+  XTypes::DynamicDataImpl data(dt);
+
+  DDS::DynamicTypeMember_var dtm;
+  ASSERT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 1));
+  DDS::MemberDescriptor_var md;
+  ASSERT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var inner = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+  ASSERT_EQ(DDS::RETCODE_OK, data.set_complex_value(1, inner));
+
+  const XTypes::MemberId id = inner->get_member_id_by_name("l");
+  EXPECT_NE(id, XTypes::MEMBER_ID_INVALID);
+  static const ACE_CDR::Long expected_value = 99;
+  EXPECT_EQ(DDS::RETCODE_OK, inner->set_int32_value(id, expected_value));
+
+  static const DCPS::Encoding xcdr2_le(DCPS::Encoding::KIND_XCDR2, DCPS::ENDIAN_LITTLE);
+  static const unsigned char expected_buffer[] =
+    {4, 0, 0, 0, // DHEADER for 'inner'
+     expected_value & 0xff, 0, 0, 0
+    };
+  static const size_t expected_size = sizeof expected_buffer;
+  EXPECT_EQ(expected_size, DCPS::serialized_size(xcdr2_le, DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data)));
+
+  ACE_Message_Block buffer(expected_size);
+  DCPS::Serializer ser(&buffer, xcdr2_le);
+  EXPECT_TRUE(ser << DCPS::KeyOnly<const XTypes::DynamicDataImpl>(data));
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_buffer, buffer);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Union_Defaults)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_NE(it, type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  XTypes::DynamicDataImpl data(dt);
+  // default state is Discriminator = E_INT32 (0) and member Id 1 (int_32) is selected with value 0
+  EXPECT_EQ(2u, data.get_item_count());
+
+  const DDS::MemberId memb0 = data.get_member_id_at_index(0);
+  EXPECT_NE(OpenDDS::XTypes::MEMBER_ID_INVALID, memb0);
+  DDS::DynamicTypeMember_var member0;
+  EXPECT_EQ(DDS::RETCODE_OK, dt->get_member(member0, memb0));
+  DDS::MemberDescriptor_var desc0;
+  EXPECT_EQ(DDS::RETCODE_OK, member0->get_descriptor(desc0));
+  EXPECT_EQ(OpenDDS::XTypes::TK_ENUM, desc0->type()->get_kind());
+  ACE_CDR::Long val0;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(val0, memb0));
+  EXPECT_EQ(0, val0);
+
+  const DDS::MemberId memb1 = data.get_member_id_at_index(1);
+  EXPECT_NE(OpenDDS::XTypes::MEMBER_ID_INVALID, memb1);
+  DDS::DynamicTypeMember_var member1;
+  EXPECT_EQ(DDS::RETCODE_OK, dt->get_member(member1, memb1));
+  DDS::MemberDescriptor_var desc1;
+  EXPECT_EQ(DDS::RETCODE_OK, member1->get_descriptor(desc1));
+  EXPECT_EQ(OpenDDS::XTypes::TK_INT32, desc1->type()->get_kind());
+  ACE_CDR::Long val1;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(val1, memb1));
+  EXPECT_EQ(0, val1);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Union_Setter)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_NE(it, type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  XTypes::DynamicDataImpl data(dt);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(18, 1)); // select member with ID 18 = my_enum
+  // this changes the discriminator's value to the first lowest positive possible value
+  ACE_CDR::Long disc;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(disc, XTypes::DISCRIMINATOR_ID));
+  EXPECT_EQ(static_cast<int>(DynamicDataImpl::E_FLOAT128), disc);
+
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_value(5, 2)); // select member with ID 5 = int_16
+  // this changes the discriminator's value to the case label E_INT16 = 4
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(disc, XTypes::DISCRIMINATOR_ID));
+  EXPECT_EQ(static_cast<int>(DynamicDataImpl::E_INT16), disc);
 }
 #endif // OPENDDS_SAFETY_PROFILE
