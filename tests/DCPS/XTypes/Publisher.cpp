@@ -5,6 +5,7 @@
 #include "CommonTypeSupportImpl.h"
 
 #include <dds/DCPS/DCPS_Utils.h>
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
 
 bool check_rc(DDS::ReturnCode_t ret, const char* what)
 {
@@ -345,7 +346,7 @@ void write_modified_mutable_union(const DataWriter_var& dw, bool dynamic)
     ModifiedMutableUnionTypeSupport_var ts = new ModifiedMutableUnionTypeSupportImpl();
     DDS::DynamicType_var dt = ts->get_type();
     DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
-    DDS::ReturnCode_t ret = data->set_int32_value(XTypes::DISCRIMINATOR_ID, UnionDisc::E_KEY);
+    DDS::ReturnCode_t ret = data->set_int32_value(OpenDDS::XTypes::DISCRIMINATOR_ID, UnionDisc::E_KEY);
     if (!check_rc(ret, "write_modified_mutable_union: set discriminator returned ")) {
       return;
     }
@@ -381,7 +382,7 @@ void write_trim64_struct(const DataWriter_var& dw, bool dynamic)
     Trim64StructTypeSupport_var ts = new Trim64StructTypeSupportImpl();
     DDS::DynamicType_var dt = ts->get_type();
     DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
-    DDS::ReturnCode_t ret = data->set_int32_value(0, STRING_26.c_str());
+    DDS::ReturnCode_t ret = data->set_string_value(0, STRING_26.c_str());
     if (!check_rc(ret, "write_trim64_struct: set trim_string returned ")) {
       return;
     }
@@ -419,9 +420,21 @@ void write_appendable_struct_with_dependency(const DataWriter_var& dw, bool dyna
       return;
     }
 
-    NestedStructTypeSupport_var nested_ts = new NestedStructTypeSupportImpl();
-    DDS::DynamicType_var nested_dt = nested_ts->get_type();
-    DDS::DynamicData_var nested_data = DDS::DynamicDataFactor::get_instance()->create_data(nested_dt);
+    //    NestedStructTypeSupport_var nested_ts = new NestedStructTypeSupportImpl();
+    //    DDS::DynamicType_var nested_dt = nested_ts->get_type();
+    //    DDS::DynamicData_var nested_data = DDS::DynamicDataFactory::get_instance()->create_data(nested_dt);
+    DDS::DynamicTypeMember_var dtm;
+    ret = dt->get_member(dtm, 1);
+    if (!check_rc(ret, "write_appendable_struct_with_dependency: get_member returned ")) {
+      return;
+    }
+    DDS::MemberDescriptor_var md;
+    ret = dtm->get_descriptor(md);
+    if (!check_rc(ret, "write_appendable_struct_with_dependency: get_descriptor returned ")) {
+      return;
+    }
+    DDS::DynamicData_var nested_data = DDS::DynamicDataFactory::get_instance()->create_data(md->type());
+
     ret = nested_data->set_int32_value(0, NESTED_STRUCT_AF);
     if (!check_rc(ret, "write_appendable_struct_with_dependency: set additional_nested_struct.additional_field returned ")) {
       return;
@@ -494,7 +507,7 @@ void write_modified_name_mutable_union(const DataWriter_var& dw, bool dynamic)
     ModifiedNameMutableUnionTypeSupport_var ts = new ModifiedNameMutableUnionTypeSupportImpl();
     DDS::DynamicType_var dt = ts->get_type();
     DDS::DynamicData_var data = DDS::DynamicDataFactory::get_instance()->create_data(dt);
-    DDS::ReturnCode_t ret = data->set_int32_value(XTypes::DISCRIMINATOR_ID, UnionDisc::E_KEY);
+    DDS::ReturnCode_t ret = data->set_int32_value(OpenDDS::XTypes::DISCRIMINATOR_ID, UnionDisc::E_KEY);
     if (!check_rc(ret, "write_modified_name_mutable_union: set discriminator returned ")) {
       return;
     }
