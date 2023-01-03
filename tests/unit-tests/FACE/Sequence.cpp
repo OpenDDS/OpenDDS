@@ -290,7 +290,7 @@ TEST(FACE_Sequence, maintest)
   const S1_var& s1vc = s1v;
   EXPECT_TRUE(s1vc[1] == 1);
 
-#if !defined __SUNPRO_CC && (!defined _MSC_VER || _MSC_VER >= 1500) && \
+#if (!defined _MSC_VER || _MSC_VER >= 1500) && \
    (!defined __GNUC__ || __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC__MINOR__ > 1))
   S4_var s4v = new S4;
   s4v->length(2);

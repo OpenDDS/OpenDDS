@@ -71,11 +71,7 @@ public:
     : ptr_(p)
   {}
 
-#ifndef __SUNPRO_CC
   typedef rv<unique_ptr>& rv_reference;
-#else
-  typedef unique_ptr& rv_reference;
-#endif
 
   unique_ptr(rv_reference other)
     : ptr_(other.release())

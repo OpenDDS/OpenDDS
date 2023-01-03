@@ -156,8 +156,6 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   ::DDS::TopicQos new_topic_qos = default_topic_qos;
   new_topic_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
 
-  //The SunOS compiler had problem resolving operator in a namespace.
-  //To resolve the compilation errors, the operator is called explicitly.
   TEST_CHECK (! (new_topic_qos == default_topic_qos));
 
   participant_->set_default_topic_qos(new_topic_qos);
