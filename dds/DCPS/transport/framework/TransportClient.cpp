@@ -960,7 +960,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     }
     DataLinkSet send_links;
 
-    while (true) {
+    while (cur != 0) {
       // VERY IMPORTANT NOTE:
       //
       // We have to be very careful in how we deal with the current
