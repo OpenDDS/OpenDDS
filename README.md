@@ -221,5 +221,6 @@ file in this directory.
 
 ## Quick Start with Docker
 
-See [`docs/docker.md`](docs/docker.md) for how to use the pre-built docker
-image.
+See the [Docker Quick
+Start](https://opendds.org/quickstart/GettingStartedDocker.html) for
+how to use the pre-built docker image.
