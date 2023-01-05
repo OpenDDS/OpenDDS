@@ -71,9 +71,6 @@
     </uptodate>
 
     <!-- gmake or make or vcbuild or devenv -->
-    <condition property="make.executable" value="gmake">
-        <os name="SunOS"/>
-    </condition>
     <condition property="make.executable" value="make">
         <os family="unix"/>
     </condition>

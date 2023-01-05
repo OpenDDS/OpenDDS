@@ -138,7 +138,7 @@ public:
   // UpdateProcessor<> methods.
   //
   // "using" directive to fix "Hides the virtual function in virtual base" warning on
-  // SunOS compiler.
+  // various compilers.
   using UpdateProcessor<OwnerUpdate>::processUpdateQos2;
   using UpdateProcessor<TopicUpdate>::processUpdateQos2;
   using UpdateProcessor<ParticipantUpdate>::processUpdateQos2;

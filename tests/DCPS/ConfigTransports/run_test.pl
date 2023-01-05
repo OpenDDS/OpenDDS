@@ -41,7 +41,7 @@ my $qos = {
 ##                  transport configuration is applied.
 ##          none        - no transport configuration is bound to an entity;
 ##          participant - the named configuration is bound to domain participant;
-##          pubsub      - the named configuration is bound to publisher/sunscriber;
+##          pubsub      - the named configuration is bound to publisher/subscriber;
 ##          rw          - the named configuration is bound to reader/writer. Note
 ##                      that for this to really take effect, autoenable QoS must be
 ##                      set to 'false'.

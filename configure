@@ -73,12 +73,6 @@ my %platforminfo =
                 'compilers' => ['clang++'],
                 'libpath' => 'DYLD_LIBRARY_PATH',
                },
-   'solaris' => {
-                 'compilers' => ['CC', 'g++'],
-                 'libpath' => 'LD_LIBRARY_PATH',
-                 'aceplatform' => 'sunos5_$COMP', # $COMP = sunc++ or g++
-                 'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
-                },
    'linux' => {
                'compilers' => ['g++', 'clang', 'clang++'],
                'libpath' => 'LD_LIBRARY_PATH',
@@ -182,7 +176,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     '<hidden>force-clone-submodules', 'Get submodules as if this wasn\'t a git repo',
    ],
    ['Build platform and compiler:',
-    'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
+    'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
@@ -936,7 +930,7 @@ if (!$ace_src || !$tao_src) {
       my $err = 1;
       my $ddsroot = getcwd;
       if (!$is_windows) {
-        $err = run_command([($^O eq 'solaris' ? 'g' : '') . 'tar', 'xzf', "$ddsroot/$file"]);
+        $err = run_command(['tar', 'xzf', "$ddsroot/$file"]);
       }
       else {
         # Try Archive::Zip
@@ -1270,7 +1264,7 @@ sub write_platform_macros {
     my $plat = $opts{$buildEnv{'build'}};
     if ($pi->{'aceplatform'}) {
       $plat = $pi->{'aceplatform'};
-      $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
+      $plat =~ s/\$COMP/'g++'/e;
       $plat =~ s/\$NONSTDCOMP/($opts{'compiler'} =~ m!clang!) ? 'clang' : ''/e;
       $plat =~ s/_$//;
     }
@@ -2613,7 +2607,7 @@ else { # does not require cloned builds
 
 print "Completed configuring OpenDDS, next ";
 if (!$is_windows || ($cross_compile && !$cloned_build)) {
-  print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
+  print "run '", (($^O eq 'freebsd') ? 'g' : ''), "make'";
 }
 elsif ($cloned_build) {
   print "compile build\\host\\host_tools.sln\n",
