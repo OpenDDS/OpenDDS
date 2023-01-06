@@ -22,6 +22,11 @@ namespace DDS {
 }
 
 namespace OpenDDS {
+  namespace DCPS {
+    class DataReaderImpl;
+    class ReceivedDataElement;
+  }
+
   namespace XTypes {
     struct DynamicSequenceAdapter {
       explicit DynamicSequenceAdapter(DDS::DynamicDataSeq& seq)
