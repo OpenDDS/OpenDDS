@@ -110,4 +110,5 @@ bool DynamicSample::compare(const Sample& other) const
 
 }
 }
+OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #endif
