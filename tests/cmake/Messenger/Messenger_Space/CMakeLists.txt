@@ -44,7 +44,7 @@ OPENDDS_TARGET_SOURCES(${publisher} "${dst}/Messenger.idl")
 
 foreach(t ${all_targets})
   # Using explicit scope here is a regression test for
-  # https://github.com/objectcomputing/OpenDDS/issues/1336
+  # https://github.com/OpenDDS/OpenDDS/issues/1336
   # See https://cmake.org/cmake/help/latest/policy/CMP0023.html
   target_link_libraries(${t} PUBLIC OpenDDS::OpenDDS)
 

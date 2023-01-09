@@ -579,7 +579,7 @@ bool run_multitopic_test(const Publisher_var& pub, const Subscriber_var& sub)
     }
 
     // Check return get_key_value
-    // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
+    // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
     {
       Resulting resulting_value;
       ReturnCode_t rc = res_dr->get_key_value(resulting_value, HANDLE_NIL);

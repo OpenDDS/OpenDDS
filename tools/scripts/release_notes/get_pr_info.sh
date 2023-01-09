@@ -44,7 +44,7 @@ then
   exit 1
 fi
 
-repo=objectcomputing/OpenDDS
+repo=OpenDDS/OpenDDS
 
 if [ -n "$since" ]
 then

@@ -214,7 +214,7 @@ Reader::start1 ()
 
               PrintSampleInfo(si[0]);
 
-              // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
+              // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
               status = foo_dr->get_key_value(key_holder, ::DDS::HANDLE_NIL) ;
               TEST_CHECK(status == ::DDS::RETCODE_BAD_PARAMETER);
 
@@ -262,7 +262,7 @@ Reader::start1 ()
 
       PrintSampleInfo(si[0]);
 
-      // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
+      // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
       status = foo_dr->get_key_value(key_holder, ::DDS::HANDLE_NIL) ;
       TEST_CHECK(status == ::DDS::RETCODE_BAD_PARAMETER);
 
@@ -303,7 +303,7 @@ Reader::start1 ()
 
               PrintSampleInfo(si[0]);
 
-              // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
+              // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
               status = foo_dr->get_key_value(key_holder, ::DDS::HANDLE_NIL) ;
               TEST_CHECK(status == ::DDS::RETCODE_BAD_PARAMETER);
 
