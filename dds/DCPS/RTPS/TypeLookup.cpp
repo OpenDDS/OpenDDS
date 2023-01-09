@@ -180,7 +180,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size_delimiter(encoding, size);
   primitive_serialized_size(encoding, size, uni._d());
   switch (uni._d()) {
-  case 0:
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
     serialized_size(encoding, size, uni.result());
     break;
   }
@@ -200,7 +200,7 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_Result& uni)
   }
 
   switch (uni._d()) {
-  case 0:
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
     return strm << uni.result();
   }
 
@@ -220,7 +220,7 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Result& uni)
   }
 
   switch (return_code) {
-    case 0: {
+    case OpenDDS::XTypes::DDS_RETCODE_OK: {
       XTypes::TypeLookup_getTypes_Out result;
       const bool status = strm >> result;
       uni.result(result);
@@ -416,7 +416,7 @@ void serialized_size(const Encoding& encoding, size_t& size,
   primitive_serialized_size(encoding, size, uni._d());
 
   switch (uni._d()) {
-  case 0:
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
     serialized_size(encoding, size, uni.result());
     break;
   }
@@ -436,7 +436,7 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_R
   }
 
   switch (uni._d()) {
-  case 0:
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
     return strm << uni.result();
   }
 
@@ -456,7 +456,7 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result&
   }
 
   switch (return_code) {
-    case 0: {
+    case OpenDDS::XTypes::DDS_RETCODE_OK: {
       XTypes::TypeLookup_getTypeDependencies_Out result;
       const bool status = strm >> result;
       uni.result(result);
