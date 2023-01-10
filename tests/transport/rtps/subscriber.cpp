@@ -40,7 +40,7 @@ class SimpleDataReader : public TransportReceiveListener, public TransportClient
 {
 public:
 
-  explicit SimpleDataReader(const RepoId& sub_id)
+  explicit SimpleDataReader(const GUID_t& sub_id)
     : done_(false)
     , sub_id_(sub_id)
     , pub_id_(GUID_UNKNOWN)
@@ -191,7 +191,7 @@ public:
   // Implementing TransportClient
   bool check_transport_qos(const TransportInst&)
     { return true; }
-  RepoId get_repo_id() const
+  GUID_t get_guid() const
     { return sub_id_; }
   DDS::DomainId_t domain_id() const
     { return 0; }
@@ -202,8 +202,8 @@ public:
   using TransportClient::disassociate;
 
   bool done_;
-  const RepoId sub_id_;
-  RepoId pub_id_;
+  const GUID_t sub_id_;
+  GUID_t pub_id_;
   SequenceNumber seq_;
   int control_msg_count_;
 };

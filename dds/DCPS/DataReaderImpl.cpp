@@ -232,7 +232,7 @@ DataReaderImpl::get_instance_handle()
 }
 
 void
-DataReaderImpl::add_association(const RepoId& yourId,
+DataReaderImpl::add_association(const GUID_t& yourId,
     const WriterAssociation& writer,
     bool active)
 {
@@ -271,7 +271,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
 
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-    const PublicationId& writer_id = writer.writerId;
+    const GUID_t& writer_id = writer.writerId;
     WriterInfo_rch info = make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos);
     std::pair<WriterMapType::iterator, bool> bpair = writers_.insert(
         // This insertion is idempotent.
@@ -312,7 +312,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
         ACE_DEBUG((LM_DEBUG,
             ACE_TEXT("(%P|%t) DataReaderImpl::add_association: ")
             ACE_TEXT("reader %C is associated with writer %C.\n"),
-            LogGuid(get_repo_id()).c_str(),
+            LogGuid(get_guid()).c_str(),
             LogGuid(writer_id).c_str()));
       }
     }
@@ -350,7 +350,7 @@ DataReaderImpl::add_association(const RepoId& yourId,
 }
 
 void
-DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
+DataReaderImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
 {
   if (!(flags & ASSOC_OK)) {
     if (DCPS_debug_level) {
@@ -368,7 +368,7 @@ DataReaderImpl::transport_assoc_done(int flags, const RepoId& remote_id)
       ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::transport_assoc_done: ")
           ACE_TEXT("starting/resetting liveliness timer for reader %C\n"),
-          LogGuid(get_repo_id()).c_str()));
+          LogGuid(get_guid()).c_str()));
     }
     // this call will start the timer if it is not already set
     liveliness_timer_->check_liveliness();
@@ -468,7 +468,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
         ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations: ")
         ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
         is_bit_,
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         LogGuid(writers[0]).c_str(),
         writers.length()));
   }
@@ -481,7 +481,7 @@ DataReaderImpl::remove_associations(const WriterIdSeq& writers,
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
       for (CORBA::ULong i = 0; i < wr_len; i++) {
-        const PublicationId writer_id = writers[i];
+        const GUID_t writer_id = writers[i];
         {
           ACE_Guard<ACE_Recursive_Thread_Mutex> guard(statistics_lock_);
           statistics_.erase(writer_id);
@@ -508,7 +508,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
         ACE_TEXT("(%P|%t) DataReaderImpl::remove_associations_i: ")
         ACE_TEXT("bit %d local %C remote %C num remotes %d\n"),
         is_bit_,
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         LogGuid(writers[0]).c_str(),
         writers.length()));
   }
@@ -535,7 +535,7 @@ DataReaderImpl::remove_associations_i(const WriterIdSeq& writers,
     ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, this->writers_lock_);
 
     for (CORBA::ULong i = 0; i < wr_len; i++) {
-      const PublicationId writer_id = writers[i];
+      const GUID_t writer_id = writers[i];
 
       WriterMapType::iterator it = this->writers_.find(writer_id);
 
@@ -710,14 +710,14 @@ DataReaderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-DataReaderImpl::signal_liveliness(const RepoId& remote_participant)
+DataReaderImpl::signal_liveliness(const GUID_t& remote_participant)
 {
-  RepoId prefix = remote_participant;
+  GUID_t prefix = remote_participant;
   prefix.entityId = EntityId_t();
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->sample_lock_);
 
-  typedef std::pair<RepoId, WriterInfo_rch> RepoWriterPair;
+  typedef std::pair<GUID_t, WriterInfo_rch> RepoWriterPair;
   typedef OPENDDS_VECTOR(RepoWriterPair) WriterSet;
   WriterSet writers;
 
@@ -1253,7 +1253,7 @@ DataReaderImpl::enable()
 
     install_type_support(typesupport);
 
-    const RepoId subscription_id =
+    const GUID_t subscription_id =
       disco->add_subscription(domain_id_,
         dp_id_,
         topic_servant_->get_id(),
@@ -1292,7 +1292,7 @@ DataReaderImpl::enable()
     if (DCPS_debug_level >= 2) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) DataReaderImpl::enable: "
         "got GUID %C, subscribed to topic name \"%C\" type \"%C\"\n",
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         topic_servant_->topic_name(), topic_servant_->type_name()));
     }
   }
@@ -1342,7 +1342,7 @@ DataReaderImpl::writer_activity(const DataSampleHeader& header)
       ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::writer_activity: ")
           ACE_TEXT("reader %C is not associated with writer %C.\n"),
-          LogGuid(get_repo_id()).c_str(),
+          LogGuid(get_guid()).c_str(),
           LogGuid(header.publication_id_).c_str()));
     }
   }
@@ -1389,7 +1389,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
         ACE_TEXT("%C received sample: %C.\n"),
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         to_string(sample.header_).c_str()));
   }
 
@@ -1437,7 +1437,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) DataReaderImpl::data_received: reader %C writer %C ")
           ACE_TEXT("instance %d is_new_instance %d filtered %d\n"),
-          LogGuid(get_repo_id()).c_str(),
+          LogGuid(get_guid()).c_str(),
           LogGuid(header.publication_id_).c_str(),
           instance ? instance->instance_handle_ : 0,
           is_new_instance, filtered));
@@ -1487,7 +1487,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
             ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::data_received() - ")
             ACE_TEXT(" subscription %C failed to find ")
             ACE_TEXT(" publication data for %C!\n"),
-            LogGuid(get_repo_id()).c_str(),
+            LogGuid(get_guid()).c_str(),
             LogGuid(sample.header_.publication_id_).c_str()));
         return;
       }
@@ -1509,7 +1509,7 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::data_received: ")
                  ACE_TEXT("reader %C got datawriter liveliness from writer %C\n"),
-                 LogGuid(get_repo_id()).c_str(),
+                 LogGuid(get_guid()).c_str(),
                  LogGuid(sample.header_.publication_id_).c_str()));
     }
     this->writer_activity(sample.header_);
@@ -1625,16 +1625,16 @@ DataReaderImpl::data_received(const ReceivedDataSample& sample)
   break;
 
   case END_HISTORIC_SAMPLES: {
-    if (sample.header_.message_length_ >= sizeof(RepoId)) {
+    if (sample.header_.message_length_ >= sizeof(GUID_t)) {
       Message_Block_Ptr payload(sample.data(&mb_alloc_));
       Serializer ser(payload.get(), Encoding::KIND_UNALIGNED_CDR);
-      RepoId readerId = GUID_UNKNOWN;
+      GUID_t readerId = GUID_UNKNOWN;
       if (!(ser >> readerId)) {
         ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DataReaderImpl::data_received ")
             ACE_TEXT("deserialization reader failed.\n")));
         return;
       }
-      const RepoId repo_id(get_repo_id());
+      const GUID_t repo_id(get_guid());
       if (readerId != GUID_UNKNOWN && readerId != repo_id) {
         break; // not our message
       }
@@ -1849,7 +1849,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
                  ACE_TEXT(" canceling timer for reader %C.\n"),
-                 LogGuid(data_reader->get_repo_id()).c_str()));
+                 LogGuid(data_reader->get_guid()).c_str()));
     }
 
     // called from add_associations and there is already a timer
@@ -1914,7 +1914,7 @@ DataReaderImpl::LivelinessTimer::check_liveliness_i(bool cancel,
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::LivelinessTimer::check_liveliness_i: ")
         ACE_TEXT("reader %C has %d live writers; from_reactor=%d\n"),
-        LogGuid(data_reader->get_repo_id()).c_str(),
+        LogGuid(data_reader->get_guid()).c_str(),
         alive_writers,
         !cancel));
   }
@@ -2020,13 +2020,13 @@ std::ostream& OpenDDS::DCPS::WriterStats::raw_data(std::ostream& str) const
 void
 DataReaderImpl::writer_removed(WriterInfo& info)
 {
-  const PublicationId info_writer_id = info.writer_id();
+  const GUID_t info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::writer_removed: ")
         ACE_TEXT("reader %C from writer %C.\n"),
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         LogGuid(info_writer_id).c_str()));
   }
 
@@ -2079,12 +2079,12 @@ DataReaderImpl::writer_removed(WriterInfo& info)
 void
 DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& /* when */)
 {
-  const PublicationId info_writer_id = info.writer_id();
+  const GUID_t info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_alive: ")
                ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-               LogGuid(get_repo_id()).c_str(),
+               LogGuid(get_guid()).c_str(),
                LogGuid(info_writer_id).c_str(),
                info.get_state_str()));
   }
@@ -2149,12 +2149,12 @@ DataReaderImpl::writer_became_alive(WriterInfo& info, const MonotonicTimePoint& 
 void
 DataReaderImpl::writer_became_dead(WriterInfo& info)
 {
-  const PublicationId info_writer_id = info.writer_id();
+  const GUID_t info_writer_id = info.writer_id();
 
   if (DCPS_debug_level >= 5) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl::writer_became_dead: ")
                ACE_TEXT("reader %C from writer %C previous state %C.\n"),
-               LogGuid(get_repo_id()).c_str(),
+               LogGuid(get_guid()).c_str(),
                LogGuid(info_writer_id).c_str(),
                info.get_state_str()));
   }
@@ -2229,7 +2229,7 @@ DataReaderImpl::writer_became_dead(WriterInfo& info)
 }
 
 void
-DataReaderImpl::instances_liveliness_update(const PublicationId& writer,
+DataReaderImpl::instances_liveliness_update(const GUID_t& writer,
                                             DDS::InstanceHandle_t publication_handle)
 {
   // sample_lock_ must be held.
@@ -2326,12 +2326,12 @@ void DataReaderImpl::process_latency(const ReceivedDataSample& sample)
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::process_latency() - ")
         ACE_TEXT("reader %C is not associated with writer %C (late sample?).\n"),
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         LogGuid(sample.header_.publication_id_).c_str()));
   }
 }
 
-void DataReaderImpl::notify_latency(PublicationId writer)
+void DataReaderImpl::notify_latency(GUID_t writer)
 {
   // Narrow to DDS::DCPS::DataReaderListener. If a DDS::DataReaderListener
   // is given to this DataReader then narrow() fails.
@@ -2443,7 +2443,7 @@ DataReaderImpl::get_next_handle(const DDS::BuiltinTopicKey_t& key)
     return DDS::HANDLE_NIL;
 
   if (is_bit()) {
-    const RepoId id = bit_key_to_repo_id(key);
+    const GUID_t id = bit_key_to_guid(key);
     return participant->assign_handle(id);
 
   } else {
@@ -2625,7 +2625,7 @@ DataReaderImpl::filter_sample(const DataSampleHeader& header)
 
 bool
 DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instance,
-  const PublicationId& pubid)
+  const GUID_t& pubid)
 {
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   if (this->is_exclusive_ownership_) {
@@ -2641,7 +2641,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                    ACE_TEXT("reader %C is not associated with writer %C.\n"),
-                   LogGuid(get_repo_id()).c_str(),
+                   LogGuid(get_guid()).c_str(),
                    LogGuid(pubid).c_str()));
       }
       return true;
@@ -2666,7 +2666,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
           ACE_DEBUG((LM_DEBUG,
                      ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                      ACE_TEXT("reader %C writer %C is not elected as owner %C\n"),
-                     LogGuid(get_repo_id()).c_str(),
+                     LogGuid(get_guid()).c_str(),
                      LogGuid(pubid).c_str(),
                      LogGuid(instance->instance_state_->get_owner()).c_str()));
         }
@@ -2678,7 +2678,7 @@ DataReaderImpl::ownership_filter_instance(const SubscriptionInstance_rch& instan
         ACE_DEBUG((LM_DEBUG,
                    ACE_TEXT("(%P|%t) DataReaderImpl::ownership_filter_instance: ")
                    ACE_TEXT("reader %C writer %C is not owner %C\n"),
-                   LogGuid(get_repo_id()).c_str(),
+                   LogGuid(get_guid()).c_str(),
                    LogGuid(pubid).c_str(),
                    LogGuid(instance->instance_state_->get_owner()).c_str()));
       }
@@ -2763,14 +2763,14 @@ void DataReaderImpl::notify_liveliness_change()
     ACE_Guard<ACE_Thread_Mutex> g(listener_mutex_);
     OPENDDS_STRING output_str;
     output_str += "subscription ";
-    output_str += LogGuid(get_repo_id()).conv_;
+    output_str += LogGuid(get_guid()).conv_;
     output_str += ", listener at: 0x";
     output_str += to_dds_string(this->listener_.in());
 
     for (WriterMapType::iterator current = this->writers_.begin();
          current != this->writers_.end();
          ++current) {
-      const RepoId id = current->first;
+      const GUID_t id = current->first;
       output_str += "\n\tNOTIFY: writer[ ";
       output_str += LogGuid(id).conv_;
       output_str += "] == ";
@@ -2803,13 +2803,13 @@ DataReaderImpl::get_reactor()
   return this->reactor_;
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 DataReaderImpl::get_topic_id()
 {
   return topic_id_;
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 DataReaderImpl::get_dp_id()
 {
   return dp_id_;
@@ -2843,7 +2843,7 @@ DataReaderImpl::get_writer_states(WriterStatePairVec& writer_states)
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 void
-DataReaderImpl::update_ownership_strength(const PublicationId& pub_id,
+DataReaderImpl::update_ownership_strength(const GUID_t& pub_id,
     const CORBA::Long& ownership_strength)
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex,
@@ -2858,7 +2858,7 @@ DataReaderImpl::update_ownership_strength(const PublicationId& pub_id,
           ACE_DEBUG((LM_DEBUG,
               ACE_TEXT("(%P|%t) DataReaderImpl::update_ownership_strength - ")
               ACE_TEXT("local %C update remote %C strength from %d to %d\n"),
-              LogGuid(get_repo_id()).c_str(),
+              LogGuid(get_guid()).c_str(),
               LogGuid(pub_id).c_str(),
               iter->second->writer_qos_ownership_strength(), ownership_strength));
         }
@@ -2877,8 +2877,8 @@ bool DataReaderImpl::verify_coherent_changes_completion(WriterInfo* writer)
   Coherent_State state = COMPLETED;
   bool accept_here = true;
 
-  const PublicationId writer_id = writer->writer_id();
-  const RepoId publisher_id = writer->publisher_id();
+  const GUID_t writer_id = writer->writer_id();
+  const GUID_t publisher_id = writer->publisher_id();
 
   if (subqos_.presentation.access_scope != ::DDS::INSTANCE_PRESENTATION_QOS &&
       subqos_.presentation.coherent_access) {
@@ -2908,14 +2908,14 @@ bool DataReaderImpl::verify_coherent_changes_completion(WriterInfo* writer)
 }
 
 
-void DataReaderImpl::accept_coherent(const PublicationId& writer_id,
-    const RepoId& publisher_id)
+void DataReaderImpl::accept_coherent(const GUID_t& writer_id,
+    const GUID_t& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::accept_coherent()")
         ACE_TEXT(" reader %C writer %C publisher %C\n"),
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         LogGuid(writer_id).c_str(),
         LogGuid(publisher_id).c_str()));
   }
@@ -2935,14 +2935,14 @@ void DataReaderImpl::accept_coherent(const PublicationId& writer_id,
 }
 
 
-void DataReaderImpl::reject_coherent(const PublicationId& writer_id,
-    const RepoId& publisher_id)
+void DataReaderImpl::reject_coherent(const GUID_t& writer_id,
+    const GUID_t& publisher_id)
 {
   if (::OpenDDS::DCPS::DCPS_debug_level > 0) {
     ACE_DEBUG((LM_DEBUG,
         ACE_TEXT("(%P|%t) DataReaderImpl::reject_coherent()")
         ACE_TEXT(" reader %C writer %C publisher %C\n"),
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         LogGuid(writer_id).c_str(),
         LogGuid(publisher_id).c_str()));
   }
@@ -2964,8 +2964,8 @@ void DataReaderImpl::reject_coherent(const PublicationId& writer_id,
 }
 
 
-void DataReaderImpl::reset_coherent_info(const PublicationId& writer_id,
-    const RepoId& publisher_id)
+void DataReaderImpl::reset_coherent_info(const GUID_t& writer_id,
+    const GUID_t& publisher_id)
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -2981,7 +2981,7 @@ void DataReaderImpl::reset_coherent_info(const PublicationId& writer_id,
 
 
 void
-DataReaderImpl::coherent_change_received(const RepoId& publisher_id, Coherent_State& result)
+DataReaderImpl::coherent_change_received(const GUID_t& publisher_id, Coherent_State& result)
 {
   ACE_READ_GUARD(ACE_RW_Thread_Mutex, read_guard, this->writers_lock_);
 
@@ -3168,7 +3168,7 @@ DataReaderImpl::reset_ownership(::DDS::InstanceHandle_t instance)
 }
 
 void
-DataReaderImpl::resume_sample_processing(const PublicationId& pub_id)
+DataReaderImpl::resume_sample_processing(const GUID_t& pub_id)
 {
   WriterInfo_rch info;
   {
@@ -3220,7 +3220,7 @@ void DataReaderImpl::deliver_historic(OPENDDS_MAP(SequenceNumber, ReceivedDataSa
 }
 
 void
-DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
+DataReaderImpl::add_link(const DataLink_rch& link, const GUID_t& peer)
 {
   if (this->qos_.durability.kind > DDS::VOLATILE_DURABILITY_QOS) {
 
@@ -3248,9 +3248,9 @@ DataReaderImpl::add_link(const DataLink_rch& link, const RepoId& peer)
 }
 
 void
-DataReaderImpl::register_for_writer(const RepoId& participant,
-                                    const RepoId& readerid,
-                                    const RepoId& writerid,
+DataReaderImpl::register_for_writer(const GUID_t& participant,
+                                    const GUID_t& readerid,
+                                    const GUID_t& writerid,
                                     const TransportLocatorSeq& locators,
                                     DiscoveryListener* listener)
 {
@@ -3258,15 +3258,15 @@ DataReaderImpl::register_for_writer(const RepoId& participant,
 }
 
 void
-DataReaderImpl::unregister_for_writer(const RepoId& participant,
-                                      const RepoId& readerid,
-                                      const RepoId& writerid)
+DataReaderImpl::unregister_for_writer(const GUID_t& participant,
+                                      const GUID_t& readerid,
+                                      const GUID_t& writerid)
 {
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }
 
 void
-DataReaderImpl::update_locators(const RepoId& writerId,
+DataReaderImpl::update_locators(const GUID_t& writerId,
                                 const TransportLocatorSeq& locators)
 {
   {
@@ -3370,7 +3370,7 @@ void DataReaderImpl::accept_sample_processing(const SubscriptionInstance_rch& in
         ACE_TEXT("(%P|%t) WARNING: DataReaderImpl::accept_sample_processing - ")
         ACE_TEXT("subscription %C failed to find ")
         ACE_TEXT("publication data for %C.\n"),
-        LogGuid(get_repo_id()).c_str(),
+        LogGuid(get_guid()).c_str(),
         LogGuid(header.publication_id_).c_str()));
     }
   }
@@ -3435,7 +3435,7 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
 
   WriterInfo* const info =
     const_cast<WriterInfo*>(reinterpret_cast<const WriterInfo*>(arg));
-  const PublicationId pub_id = info->writer_id();
+  const GUID_t pub_id = info->writer_id();
 
   {
     ACE_Guard<ACE_Thread_Mutex> guard(this->mutex_);
@@ -3448,7 +3448,7 @@ int EndHistoricSamplesMissedSweeper::handle_timeout(
 
   if (DCPS_debug_level >= 1) {
     ACE_DEBUG((LM_INFO, "(%P|%t) EndHistoricSamplesMissedSweeper::handle_timeout reader: %C waiting on writer: %C\n",
-               LogGuid(reader->get_repo_id()).c_str(),
+               LogGuid(reader->get_guid()).c_str(),
                LogGuid(pub_id).c_str()));
   }
 
@@ -3481,11 +3481,11 @@ void DataReaderImpl::transport_discovery_change()
 {
   populate_connection_info();
   const TransportLocatorSeq& trans_conf_info = connection_info();
-  const RepoId dp_id_copy = dp_id_;
+  const GUID_t dp_id_copy = dp_id_;
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   disco->update_subscription_locators(domain_id_,
                                       dp_id_copy,
-                                      get_repo_id(),
+                                      get_guid(),
                                       trans_conf_info);
 }
 

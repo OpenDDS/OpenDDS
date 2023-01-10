@@ -59,7 +59,7 @@ public:
   explicit RtpsDiscovery(const RepoKey& key);
   ~RtpsDiscovery();
 
-  virtual OpenDDS::DCPS::RepoId generate_participant_guid();
+  virtual OpenDDS::DCPS::GUID_t generate_participant_guid();
 
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
@@ -77,7 +77,7 @@ public:
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls,
-    const OpenDDS::DCPS::RepoId& guid,
+    const OpenDDS::DCPS::GUID_t& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
     DDS::Security::ParticipantCryptoHandle part_crypto)
@@ -87,7 +87,7 @@ public:
   virtual bool supports_liveliness() const { return true; }
 
   virtual void signal_liveliness(const DDS::DomainId_t domain_id,
-                                 const OpenDDS::DCPS::RepoId& part_id,
+                                 const OpenDDS::DCPS::GUID_t& part_id,
                                  DDS::LivelinessQosPolicyKind kind);
 
   // configuration parameters:
@@ -178,19 +178,19 @@ public:
 
 #ifdef OPENDDS_SECURITY
   DDS::Security::ParticipantCryptoHandle get_crypto_handle(DDS::DomainId_t domain,
-                                                           const DCPS::RepoId& local_participant,
-                                                           const DCPS::RepoId& remote_participant = GUID_UNKNOWN) const;
+                                                           const DCPS::GUID_t& local_participant,
+                                                           const DCPS::GUID_t& remote_participant = GUID_UNKNOWN) const;
 #endif
 
   u_short get_spdp_port(DDS::DomainId_t domain,
-                        const DCPS::RepoId& local_participant) const;
+                        const DCPS::GUID_t& local_participant) const;
   u_short get_sedp_port(DDS::DomainId_t domain,
-                        const DCPS::RepoId& local_participant) const;
+                        const DCPS::GUID_t& local_participant) const;
 #ifdef ACE_HAS_IPV6
   u_short get_ipv6_spdp_port(DDS::DomainId_t domain,
-                             const DCPS::RepoId& local_participant) const;
+                             const DCPS::GUID_t& local_participant) const;
   u_short get_ipv6_sedp_port(DDS::DomainId_t domain,
-                             const DCPS::RepoId& local_participant) const;
+                             const DCPS::GUID_t& local_participant) const;
 #endif
   void spdp_rtps_relay_address(const ACE_INET_Addr& address);
   void sedp_rtps_relay_address(const ACE_INET_Addr& address);
@@ -198,7 +198,7 @@ public:
   void sedp_stun_server_address(const ACE_INET_Addr& address);
 
   void append_transport_statistics(DDS::DomainId_t domain,
-                                   const DCPS::RepoId& local_participant,
+                                   const DCPS::GUID_t& local_participant,
                                    DCPS::TransportStatisticsSequence& seq);
 
   RcHandle<DCPS::BitSubscriber> init_bit(DCPS::DomainParticipantImpl* participant);

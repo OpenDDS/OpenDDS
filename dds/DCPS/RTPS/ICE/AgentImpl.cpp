@@ -146,7 +146,7 @@ AgentInfo AgentImpl::get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoin
 }
 
 void AgentImpl::add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                              const DCPS::RepoId& a_local_guid,
+                                              const DCPS::GUID_t& a_local_guid,
                                               DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
@@ -156,7 +156,7 @@ void AgentImpl::add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_end
 }
 
 void AgentImpl::remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                                 const DCPS::RepoId& a_local_guid)
+                                                 const DCPS::GUID_t& a_local_guid)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);
@@ -165,8 +165,8 @@ void AgentImpl::remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_
 }
 
 void  AgentImpl::start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                           const DCPS::RepoId& a_local_guid,
-                           const DCPS::RepoId& a_remote_guid,
+                           const DCPS::GUID_t& a_local_guid,
+                           const DCPS::GUID_t& a_remote_guid,
                            const AgentInfo& a_remote_agent_info)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
@@ -178,8 +178,8 @@ void  AgentImpl::start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
 }
 
 void AgentImpl::stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                         const DCPS::RepoId& a_local_guid,
-                         const DCPS::RepoId& a_remote_guid)
+                         const DCPS::GUID_t& a_local_guid,
+                         const DCPS::GUID_t& a_remote_guid)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, mutex);
   check_invariants();
@@ -190,8 +190,8 @@ void AgentImpl::stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
 }
 
 ACE_INET_Addr  AgentImpl::get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                      const DCPS::RepoId& a_local_guid,
-                                      const DCPS::RepoId& a_remote_guid) const
+                                      const DCPS::GUID_t& a_local_guid,
+                                      const DCPS::GUID_t& a_remote_guid) const
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, mutex, ACE_INET_Addr());
   EndpointManagerMapType::const_iterator pos = endpoint_managers_.find(a_endpoint);

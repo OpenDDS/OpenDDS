@@ -168,7 +168,7 @@ TopicImpl::enable()
   return this->set_enabled();
 }
 
-RepoId
+GUID_t
 TopicImpl::get_id() const
 {
   return id_;

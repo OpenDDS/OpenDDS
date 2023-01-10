@@ -32,7 +32,7 @@ public:
     { received_.received(DiscReceivedCalls::ENABLE_SPECIFIC); return ::DDS::RETCODE_OK;};
 
   virtual void add_association (
-      const ::OpenDDS::DCPS::RepoId& yourId,
+      const ::OpenDDS::DCPS::GUID_t& yourId,
       const OpenDDS::DCPS::WriterAssociation& writer,
       bool active);
 
@@ -43,7 +43,7 @@ public:
   virtual void update_incompatible_qos (
       const OpenDDS::DCPS::IncompatibleQosStatus & status);
 
-  virtual void signal_liveliness(const OpenDDS::DCPS::RepoId& /*remote_participant*/) { }
+  virtual void signal_liveliness(const OpenDDS::DCPS::GUID_t& /*remote_participant*/) { }
 
   DiscReceivedCalls& received()
     {
@@ -51,7 +51,7 @@ public:
     }
   OpenDDS::DCPS::Discovery* disco_;
   DDS::DomainId_t domainId_;
-  ::OpenDDS::DCPS::RepoId participantId_;
+  ::OpenDDS::DCPS::GUID_t participantId_;
 
   OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint> get_ice_endpoint() { return OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>(); }
 

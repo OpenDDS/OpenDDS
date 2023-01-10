@@ -382,7 +382,7 @@ RtpsUdpSendStrategy::security_config() const
 }
 
 void
-RtpsUdpSendStrategy::encode_payload(const RepoId& pub_id,
+RtpsUdpSendStrategy::encode_payload(const GUID_t& pub_id,
                                     Message_Block_Ptr& payload,
                                     RTPS::SubmessageSeq& submessages)
 {
@@ -645,10 +645,10 @@ RtpsUdpSendStrategy::encode_submessages(const ACE_Message_Block* plain,
   RTPS::MessageParser parser(*plain);
   bool ok = parser.parseHeader();
 
-  RepoId sender = GUID_UNKNOWN;
+  GUID_t sender = GUID_UNKNOWN;
   assign(sender.guidPrefix, link_->local_prefix());
 
-  RepoId receiver = GUID_UNKNOWN;
+  GUID_t receiver = GUID_UNKNOWN;
 
   OPENDDS_VECTOR(Chunk) replacements;
 

@@ -209,7 +209,7 @@ DataWriterImpl::get_builtin_subscriber_proxy() const
 }
 
 void
-DataWriterImpl::add_association(const RepoId& yourId,
+DataWriterImpl::add_association(const GUID_t& yourId,
                                 const ReaderAssociation& reader,
                                 bool active)
 {
@@ -245,7 +245,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
-               LogGuid(get_repo_id()).c_str(),
+               LogGuid(get_guid()).c_str(),
                qos_.transport_priority.value));
   }
 
@@ -276,7 +276,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
 }
 
 void
-DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
+DataWriterImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "transport_assoc_done", 6);
 
@@ -367,7 +367,7 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 }
 
 void
-DataWriterImpl::association_complete_i(const RepoId& remote_id)
+DataWriterImpl::association_complete_i(const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
@@ -681,7 +681,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   }
 }
 
-void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
+void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "replay_durable_data_for", 6);
 
@@ -819,9 +819,9 @@ void DataWriterImpl::remove_all_associations()
 }
 
 void
-DataWriterImpl::register_for_reader(const RepoId& participant,
-                                    const RepoId& writerid,
-                                    const RepoId& readerid,
+DataWriterImpl::register_for_reader(const GUID_t& participant,
+                                    const GUID_t& writerid,
+                                    const GUID_t& readerid,
                                     const TransportLocatorSeq& locators,
                                     DiscoveryListener* listener)
 {
@@ -829,15 +829,15 @@ DataWriterImpl::register_for_reader(const RepoId& participant,
 }
 
 void
-DataWriterImpl::unregister_for_reader(const RepoId& participant,
-                                      const RepoId& writerid,
-                                      const RepoId& readerid)
+DataWriterImpl::unregister_for_reader(const GUID_t& participant,
+                                      const GUID_t& writerid,
+                                      const GUID_t& readerid)
 {
   TransportClient::unregister_for_reader(participant, writerid, readerid);
 }
 
 void
-DataWriterImpl::update_locators(const RepoId& readerId,
+DataWriterImpl::update_locators(const GUID_t& readerId,
                                 const TransportLocatorSeq& locators)
 {
   {
@@ -888,7 +888,7 @@ DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-DataWriterImpl::update_subscription_params(const RepoId& readerId,
+DataWriterImpl::update_subscription_params(const GUID_t& readerId,
                                            const DDS::StringSeq& params)
 {
 #ifdef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1496,7 +1496,7 @@ DataWriterImpl::enable()
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_support_->add_types(type_lookup_service);
 
-  const RepoId publication_id =
+  const GUID_t publication_id =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
@@ -2054,7 +2054,7 @@ DataWriterImpl::unregister_all()
   data_container_->unregister_all();
 }
 
-RepoId
+GUID_t
 DataWriterImpl::get_dp_id()
 {
   return dp_id_;
@@ -2811,8 +2811,8 @@ void DataWriterImpl::transport_discovery_change()
   const TransportLocatorSeq& trans_conf_info = connection_info();
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-  const RepoId dp_id_copy = dp_id_;
-  const RepoId publication_id_copy = publication_id_;
+  const GUID_t dp_id_copy = dp_id_;
+  const GUID_t publication_id_copy = publication_id_;
   const int domain_id = domain_id_;
   guard.release();
 
@@ -3195,7 +3195,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
     handle = registered_handle;
   }
 
-  // list of reader RepoIds that should not get data
+  // list of reader GUID_ts that should not get data
   GUIDSeq_var filter_out;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (TheServiceParticipant->publisher_content_filter()) {

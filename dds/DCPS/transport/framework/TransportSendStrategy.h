@@ -84,14 +84,14 @@ public:
 
   /// Invoked after one or more send() invocations from a particular
   /// TransportClient.
-  void send_stop(RepoId repoId);
+  void send_stop(GUID_t repoId);
 
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
   RemoveResult remove_sample(const DataSampleElement* sample);
 
-  void remove_all_msgs(const RepoId& pub_id);
+  void remove_all_msgs(const GUID_t& pub_id);
 
   /// Called by our ThreadSynch object when we should be able to
   /// start sending any partial packet bytes and/or compose a new
@@ -327,7 +327,7 @@ public:
   SendMode mode() const;
 protected:
   /// Implement framework chain visitations to remove a sample.
-  virtual RemoveResult do_remove_sample(const RepoId& pub_id,
+  virtual RemoveResult do_remove_sample(const GUID_t& pub_id,
     const TransportQueueElement::MatchCriteria& criteria, bool remove_all = false);
 
 private:

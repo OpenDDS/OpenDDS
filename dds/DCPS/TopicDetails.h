@@ -32,7 +32,7 @@ namespace OpenDDS {
       {}
 
       void init(const OPENDDS_STRING& name,
-                const DCPS::RepoId& topic_id) {
+                const DCPS::GUID_t& topic_id) {
         name_ = name;
         topic_id_ = topic_id;
       }
@@ -65,12 +65,12 @@ namespace OpenDDS {
         local_qos_ = qos;
       }
 
-      void add_local_publication(const DCPS::RepoId& guid)
+      void add_local_publication(const DCPS::GUID_t& guid)
       {
         local_publications_.insert(guid);
       }
 
-      void remove_local_publication(const DCPS::RepoId& guid)
+      void remove_local_publication(const DCPS::GUID_t& guid)
       {
         local_publications_.erase(guid);
       }
@@ -80,12 +80,12 @@ namespace OpenDDS {
         return local_publications_;
       }
 
-      void add_local_subscription(const DCPS::RepoId& guid)
+      void add_local_subscription(const DCPS::GUID_t& guid)
       {
         local_subscriptions_.insert(guid);
       }
 
-      void remove_local_subscription(const DCPS::RepoId& guid)
+      void remove_local_subscription(const DCPS::GUID_t& guid)
       {
         local_subscriptions_.erase(guid);
       }
@@ -95,12 +95,12 @@ namespace OpenDDS {
         return local_subscriptions_;
       }
 
-      void add_discovered_publication(const DCPS::RepoId& guid)
+      void add_discovered_publication(const DCPS::GUID_t& guid)
       {
         discovered_publications_.insert(guid);
       }
 
-      void remove_discovered_publication(const DCPS::RepoId& guid)
+      void remove_discovered_publication(const DCPS::GUID_t& guid)
       {
         discovered_publications_.erase(guid);
       }
@@ -110,12 +110,12 @@ namespace OpenDDS {
         return discovered_publications_;
       }
 
-      void add_discovered_subscription(const DCPS::RepoId& guid)
+      void add_discovered_subscription(const DCPS::GUID_t& guid)
       {
         discovered_subscriptions_.insert(guid);
       }
 
-      void remove_discovered_subscription(const DCPS::RepoId& guid)
+      void remove_discovered_subscription(const DCPS::GUID_t& guid)
       {
         discovered_subscriptions_.erase(guid);
       }
@@ -133,7 +133,7 @@ namespace OpenDDS {
 
       const OPENDDS_STRING local_data_type_name() const { return local_data_type_name_; }
       const DDS::TopicQos local_qos() const { return local_qos_; }
-      const DCPS::RepoId& topic_id() const { return topic_id_; }
+      const DCPS::GUID_t& topic_id() const { return topic_id_; }
       bool has_dcps_key() const { return has_dcps_key_; }
       bool local_is_set() const { return topic_callbacks_; }
 
@@ -150,7 +150,7 @@ namespace OpenDDS {
       OPENDDS_STRING name_;
       OPENDDS_STRING local_data_type_name_;
       DDS::TopicQos local_qos_;
-      DCPS::RepoId topic_id_;
+      DCPS::GUID_t topic_id_;
       bool has_dcps_key_;
       TopicCallbacks* topic_callbacks_;
 

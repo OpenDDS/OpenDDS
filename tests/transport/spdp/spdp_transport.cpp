@@ -280,7 +280,7 @@ bool run_test()
   rd.config()->spdp_local_address(local_addr);
   const DDS::DomainId_t domain = 0;
   const DDS::DomainParticipantQos qos = TheServiceParticipant->initial_DomainParticipantQos();
-  RepoId id = rd.generate_participant_guid();
+  GUID_t id = rd.generate_participant_guid();
   const RcHandle<Spdp> spdp(make_rch<Spdp>(domain, ref(id), qos, &rd, OpenDDS::XTypes::TypeLookupService_rch()));
 
   RcHandle<BitSubscriber> bit_subscriber = make_rch<BitSubscriber>();

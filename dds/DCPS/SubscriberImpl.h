@@ -137,18 +137,18 @@ public:
 
   /// @}
 
-  typedef OPENDDS_VECTOR(RepoId) SubscriptionIdVec;
+  typedef OPENDDS_VECTOR(GUID_t) SubscriptionIdVec;
   /// Populates a std::vector with the SubscriptionIds (GUIDs)
   /// of this Subscriber's Data Readers
   void get_subscription_ids(SubscriptionIdVec& subs);
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
-  void update_ownership_strength (const PublicationId& pub_id,
+  void update_ownership_strength (const GUID_t& pub_id,
                                   const CORBA::Long& ownership_strength);
 #endif
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
-  void coherent_change_received(const RepoId& publisher_id,
+  void coherent_change_received(const GUID_t& publisher_id,
                                 DataReaderImpl* reader,
                                 Coherent_State& group_state);
 #endif
@@ -173,7 +173,7 @@ private:
   typedef OPENDDS_SET(DataReaderImpl_rch) DataReaderSet;
 
   /// DataReader id to qos map.
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::DataReaderQos, GUID_tKeyLessThan) DrIdToQosMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::DataReaderQos, GUID_tKeyLessThan) DrIdToQosMap;
 
   DDS::InstanceHandle_t        handle_;
 
@@ -196,7 +196,7 @@ private:
   WeakRcHandle<DomainParticipantImpl> participant_;
 
   DDS::DomainId_t              domain_id_;
-  RepoId                       dp_id_;
+  GUID_t                       dp_id_;
 
   /// Bound (or initial reservation) of raw latency buffers.
   unsigned int raw_latency_buffer_size_;

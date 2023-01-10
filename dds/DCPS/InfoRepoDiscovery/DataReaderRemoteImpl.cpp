@@ -33,7 +33,7 @@ DataReaderRemoteImpl::detach_parent()
 }
 
 void
-DataReaderRemoteImpl::add_association(const RepoId& yourId,
+DataReaderRemoteImpl::add_association(const GUID_t& yourId,
                                       const WriterAssociation& writer,
                                       bool active)
 {

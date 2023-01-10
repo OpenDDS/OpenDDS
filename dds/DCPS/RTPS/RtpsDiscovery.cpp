@@ -818,10 +818,10 @@ RtpsDiscovery::Config::discovery_config(ACE_Configuration_Heap& cf)
 }
 
 // Participant operations:
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 RtpsDiscovery::generate_participant_guid()
 {
-  OpenDDS::DCPS::RepoId id = GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t id = GUID_UNKNOWN;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, id);
   const OPENDDS_STRING guid_interface = config_->guid_interface();
   if (!guid_interface.empty()) {
@@ -843,7 +843,7 @@ RtpsDiscovery::add_domain_participant(DDS::DomainId_t domain,
                                       const DDS::DomainParticipantQos& qos,
                                       XTypes::TypeLookupService_rch tls)
 {
-  DCPS::AddDomainStatus ads = {OpenDDS::DCPS::RepoId(), false /*federated*/};
+  DCPS::AddDomainStatus ads = {OpenDDS::DCPS::GUID_t(), false /*federated*/};
   {
     ACE_GUARD_RETURN(ACE_Thread_Mutex, g, lock_, ads);
     const OPENDDS_STRING guid_interface = config_->guid_interface();
@@ -879,7 +879,7 @@ RtpsDiscovery::add_domain_participant_secure(
   DDS::DomainId_t domain,
   const DDS::DomainParticipantQos& qos,
   XTypes::TypeLookupService_rch tls,
-  const OpenDDS::DCPS::RepoId& guid,
+  const OpenDDS::DCPS::GUID_t& guid,
   DDS::Security::IdentityHandle id,
   DDS::Security::PermissionsHandle perm,
   DDS::Security::ParticipantCryptoHandle part_crypto)
@@ -903,7 +903,7 @@ RtpsDiscovery::add_domain_participant_secure(
 
 void
 RtpsDiscovery::signal_liveliness(const DDS::DomainId_t domain_id,
-                                 const OpenDDS::DCPS::RepoId& part_id,
+                                 const OpenDDS::DCPS::GUID_t& part_id,
                                  DDS::LivelinessQosPolicyKind kind)
 {
   get_part(domain_id, part_id)->signal_liveliness(kind);
@@ -966,8 +966,8 @@ RtpsDiscovery::use_ice_now(bool after)
 #ifdef OPENDDS_SECURITY
 DDS::Security::ParticipantCryptoHandle
 RtpsDiscovery::get_crypto_handle(DDS::DomainId_t domain,
-                                 const DCPS::RepoId& local_participant,
-                                 const DCPS::RepoId& remote_participant) const
+                                 const DCPS::GUID_t& local_participant,
+                                 const DCPS::GUID_t& remote_participant) const
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
@@ -990,7 +990,7 @@ RtpsDiscovery::StaticInitializer::StaticInitializer()
 
 u_short
 RtpsDiscovery::get_spdp_port(DDS::DomainId_t domain,
-                             const DCPS::RepoId& local_participant) const
+                             const DCPS::GUID_t& local_participant) const
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
@@ -1002,7 +1002,7 @@ RtpsDiscovery::get_spdp_port(DDS::DomainId_t domain,
 
 u_short
 RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
-                             const DCPS::RepoId& local_participant) const
+                             const DCPS::GUID_t& local_participant) const
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
@@ -1016,7 +1016,7 @@ RtpsDiscovery::get_sedp_port(DDS::DomainId_t domain,
 
 u_short
 RtpsDiscovery::get_ipv6_spdp_port(DDS::DomainId_t domain,
-                                  const DCPS::RepoId& local_participant) const
+                                  const DCPS::GUID_t& local_participant) const
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
@@ -1028,7 +1028,7 @@ RtpsDiscovery::get_ipv6_spdp_port(DDS::DomainId_t domain,
 
 u_short
 RtpsDiscovery::get_ipv6_sedp_port(DDS::DomainId_t domain,
-                                  const DCPS::RepoId& local_participant) const
+                                  const DCPS::GUID_t& local_participant) const
 {
   ParticipantHandle p = get_part(domain, local_participant);
   if (p) {
@@ -1100,7 +1100,7 @@ RtpsDiscovery::sedp_stun_server_address(const ACE_INET_Addr& address)
 
 void
 RtpsDiscovery::append_transport_statistics(DDS::DomainId_t domain,
-                                           const DCPS::RepoId& local_participant,
+                                           const DCPS::GUID_t& local_participant,
                                            DCPS::TransportStatisticsSequence& seq)
 {
   ParticipantHandle p = get_part(domain, local_participant);

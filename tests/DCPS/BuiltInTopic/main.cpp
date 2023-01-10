@@ -214,7 +214,7 @@ void test_bit_participant ()
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
-      TEST_CHECK(OpenDDS::DCPS::bit_key_to_repo_id(part_data[0].key) == participant_servant->get_id());
+      TEST_CHECK(OpenDDS::DCPS::bit_key_to_guid(part_data[0].key) == participant_servant->get_id());
     }
   catch (...)
     {
@@ -259,7 +259,7 @@ void test_bit_topic ()
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
-      TEST_CHECK(OpenDDS::DCPS::bit_key_to_repo_id(topic_data[0].key) == topic_servant->get_id());
+      TEST_CHECK(OpenDDS::DCPS::bit_key_to_guid(topic_data[0].key) == topic_servant->get_id());
 
       topic_servant->get_qos (topic_qos);
 
@@ -325,11 +325,11 @@ void test_bit_publication ()
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
-      TEST_CHECK(OpenDDS::DCPS::bit_key_to_repo_id(the_pub_data.key) == datawriter_servant->get_repo_id());
+      TEST_CHECK(OpenDDS::DCPS::bit_key_to_guid(the_pub_data.key) == datawriter_servant->get_guid());
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
-      TEST_CHECK(OpenDDS::DCPS::bit_key_to_repo_id(the_pub_data.participant_key) == participant_servant->get_id());
+      TEST_CHECK(OpenDDS::DCPS::bit_key_to_guid(the_pub_data.participant_key) == participant_servant->get_id());
 
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
@@ -396,11 +396,11 @@ void test_bit_subscription ()
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
-      TEST_CHECK(OpenDDS::DCPS::bit_key_to_repo_id(the_sub_data.key) == datareader_servant->get_repo_id());
+      TEST_CHECK(OpenDDS::DCPS::bit_key_to_guid(the_sub_data.key) == datareader_servant->get_guid());
 
       // BuiltinTopicKey_t is initialized from its corresponding RepoId.
       // This test verifies that the conversion was done correctly.
-      TEST_CHECK(OpenDDS::DCPS::bit_key_to_repo_id(the_sub_data.participant_key) == participant_servant->get_id());
+      TEST_CHECK(OpenDDS::DCPS::bit_key_to_guid(the_sub_data.participant_key) == participant_servant->get_id());
 
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);

@@ -70,7 +70,7 @@ public:
   *  internal use.
   *  Return the id given by discovery.
   */
-  RepoId get_id() const;
+  GUID_t get_id() const;
 
   // OpenDDS extension which doesn't duplicate the string to prevent
   // the runtime costs of making a copy
@@ -103,7 +103,7 @@ private:
   DDS::TopicListener_var       listener_;
 
   /// The id given by discovery.
-  RepoId                       id_;
+  GUID_t                       id_;
 
   /// Mutex to protect status info
   ACE_Thread_Mutex             status_mutex_;

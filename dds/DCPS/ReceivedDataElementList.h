@@ -92,7 +92,7 @@ public:
 #endif
   }
 
-  PublicationId pub_;
+  GUID_t pub_;
 
   /**
    * Data sample received, could only be the key fields in case we received
@@ -118,7 +118,7 @@ public:
   bool group_coherent_;
 
   /// Publisher id represent group identifier.
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
 #endif
 
   /// Do we contain valid data

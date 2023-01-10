@@ -47,7 +47,7 @@ size_t CoherentChangeControl::get_max_serialized_size()
     sz += sizeof(this->publisher_id_);
     sz += sizeof (ACE_UINT32);
     sz += this->group_coherent_samples_.size () *
-          (sizeof(PublicationId) + sizeof(this->coherent_samples_));
+          (sizeof(GUID_t) + sizeof(this->coherent_samples_));
   }
 
   return sz;

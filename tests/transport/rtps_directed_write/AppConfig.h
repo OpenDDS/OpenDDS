@@ -15,10 +15,10 @@ public:
   AppConfig(int argc, ACE_TCHAR *argv[], bool setLocalAddress = false);
   ~AppConfig();
 
-  const OpenDDS::DCPS::RepoId& getPubWtrId() const { return pubWtrId; }
+  const OpenDDS::DCPS::GUID_t& getPubWtrId() const { return pubWtrId; }
 
   size_t nReaders() const { return sizeof subRdrId / sizeof subRdrId[0]; }
-  const OpenDDS::DCPS::RepoId& getSubRdrId(int i) const { return subRdrId[i]; }
+  const OpenDDS::DCPS::GUID_t& getSubRdrId(int i) const { return subRdrId[i]; }
 
   ACE_INET_Addr getHostAddress() const;
   const OpenDDS::DCPS::TimeDuration& getHeartbeatPeriod() const;
@@ -26,7 +26,7 @@ public:
   bool readersReliable() const { return reliableReaders; }
 
 private:
-  OpenDDS::DCPS::RepoId createID(long participantId, long key, CORBA::Octet kind);
+  OpenDDS::DCPS::GUID_t createID(long participantId, long key, CORBA::Octet kind);
   void cleanup();
 
   DDS::DomainParticipantFactory_var dpf;
@@ -35,6 +35,6 @@ private:
   bool reliableReaders;
   OpenDDS::DCPS::TransportInst_rch transportInst;
   OpenDDS::DCPS::RtpsUdpInst* rtpsInst;
-  OpenDDS::DCPS::RepoId pubWtrId;
-  OpenDDS::DCPS::RepoId subRdrId[2];
+  OpenDDS::DCPS::GUID_t pubWtrId;
+  OpenDDS::DCPS::GUID_t subRdrId[2];
 };

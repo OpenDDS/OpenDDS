@@ -46,7 +46,7 @@ public:
   WriterInfoListener();
   virtual ~WriterInfoListener();
 
-  RepoId subscription_id_;
+  GUID_t subscription_id_;
 
   /// The time interval for checking liveliness.
   /// TBD: Should this be initialized with
@@ -91,7 +91,7 @@ public:
   enum TimerState { NO_TIMER = -1 };
 
   WriterInfo(const WriterInfoListener_rch& reader,
-             const PublicationId& writer_id,
+             const GUID_t& writer_id,
              const DDS::DataWriterQos& writer_qos);
 
   /// check to see if this writer is alive (called by handle_timeout).
@@ -129,7 +129,7 @@ public:
     handle_ = handle;
   };
 
-  PublicationId writer_id() const
+  GUID_t writer_id() const
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return writer_id_;
@@ -181,14 +181,14 @@ public:
   void reset_coherent_info();
   void set_group_info(const CoherentChangeControl& info);
   void add_coherent_samples(const SequenceNumber& seq);
-  void coherent_change(bool group_coherent, const RepoId& publisher_id);
+  void coherent_change(bool group_coherent, const GUID_t& publisher_id);
 
   bool group_coherent() const {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return group_coherent_;
   }
 
-  RepoId publisher_id() const {
+  GUID_t publisher_id() const {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
     return publisher_id_;
   }
@@ -234,7 +234,7 @@ private:
   WeakRcHandle<WriterInfoListener> reader_;
 
   /// DCPSInfoRepo ID of the DataWriter
-  PublicationId writer_id_;
+  GUID_t writer_id_;
 
   /// Writer qos
   DDS::DataWriterQos writer_qos_;
@@ -256,7 +256,7 @@ private:
   /// Data to support GROUP access scope.
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   bool group_coherent_;
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
   DisjointSequence coherent_sample_sequence_;
   WriterCoherentSample writer_coherent_samples_;
   GroupCoherentSamples group_coherent_samples_;

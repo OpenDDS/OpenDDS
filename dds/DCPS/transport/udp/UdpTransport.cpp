@@ -147,7 +147,7 @@ UdpTransport::accept_datalink(const RemoteTransport& remote,
 
 void
 UdpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                           const RepoId& remote_id,
+                                           const GUID_t& remote_id,
                                            bool /*disassociate*/,
                                            bool /*association_failed*/)
 {
@@ -337,7 +337,7 @@ UdpTransport::passive_connection(const ACE_INET_Addr& remote_address,
                                                   tmp.at(i));
         if (tmp_iter != pend->second.end()) {
           TransportClient_wrch pend_client = tmp.at(i).first;
-          RepoId remote_repo = tmp.at(i).second;
+          GUID_t remote_repo = tmp.at(i).second;
           guard.release();
           TransportClient_rch client = pend_client.lock();
           if (client)

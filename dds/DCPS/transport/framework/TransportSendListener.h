@@ -57,7 +57,7 @@ public:
 
   virtual void remove_associations(const ReaderIdSeq& subids, bool notify) = 0;
 
-  virtual void replay_durable_data_for(const RepoId&) {}
+  virtual void replay_durable_data_for(const GUID_t&) {}
 
   /// Hook for the listener to override a normal control message with
   /// customized messages to different DataLinks.

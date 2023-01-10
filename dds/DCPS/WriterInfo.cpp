@@ -54,7 +54,7 @@ WriterInfoListener::writer_removed(WriterInfo&)
 }
 
 WriterInfo::WriterInfo(const WriterInfoListener_rch& reader,
-                       const PublicationId& writer_id,
+                       const GUID_t& writer_id,
                        const ::DDS::DataWriterQos& writer_qos)
   : last_liveliness_activity_time_(MonotonicTimePoint::now())
   , historic_samples_timer_(NO_TIMER)
@@ -177,7 +177,7 @@ WriterInfo::add_coherent_samples(const SequenceNumber& seq)
 }
 
 void
-WriterInfo::coherent_change(bool group_coherent, const RepoId& publisher_id)
+WriterInfo::coherent_change(bool group_coherent, const GUID_t& publisher_id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   group_coherent_ = group_coherent;

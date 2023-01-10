@@ -294,7 +294,7 @@ TcpTransport::accept_datalink(const RemoteTransport& remote,
 
 void
 TcpTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                           const RepoId& remote_id,
+                                           const GUID_t& remote_id,
                                            bool /*disassociate*/,
                                            bool /*association_failed*/)
 {
@@ -386,7 +386,7 @@ TcpTransport::configure_i(const TcpInst_rch& config)
 }
 
 void
-TcpTransport::client_stop(const RepoId& local_id)
+TcpTransport::client_stop(const GUID_t& local_id)
 {
   GuardType guard(links_lock_);
 

@@ -52,24 +52,24 @@ public:
   AgentInfo get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoint) const;
 
   void add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                     const DCPS::RepoId& a_local_guid,
+                                     const DCPS::GUID_t& a_local_guid,
                                      DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener);
 
   void remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                        const DCPS::RepoId& a_local_guid);
+                                        const DCPS::GUID_t& a_local_guid);
 
   void start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                 const DCPS::RepoId& a_local_guid,
-                 const DCPS::RepoId& a_remote_guid,
+                 const DCPS::GUID_t& a_local_guid,
+                 const DCPS::GUID_t& a_remote_guid,
                  const AgentInfo& a_remote_agent_info);
 
   void stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                const DCPS::RepoId& a_local_guid,
-                const DCPS::RepoId& a_remote_guid);
+                const DCPS::GUID_t& a_local_guid,
+                const DCPS::GUID_t& a_remote_guid);
 
   ACE_INET_Addr get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                            const DCPS::RepoId& a_local_guid,
-                            const DCPS::RepoId& a_remote_guid) const;
+                            const DCPS::GUID_t& a_local_guid,
+                            const DCPS::GUID_t& a_remote_guid) const;
 
   void receive(DCPS::WeakRcHandle<Endpoint> a_endpoint,
                const ACE_INET_Addr& a_local_address,

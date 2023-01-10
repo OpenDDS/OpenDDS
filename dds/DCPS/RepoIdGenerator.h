@@ -114,8 +114,8 @@ public:
 
   virtual ~RepoIdGenerator();
 
-  /// Obtain the next RepoId value.
-  RepoId next(bool builtin = false);
+  /// Obtain the next GUID_t value.
+  GUID_t next(bool builtin = false);
 
   /**
    * Set the minimum of the last key (or participant) value used.

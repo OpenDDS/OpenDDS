@@ -718,7 +718,7 @@ DomainParticipantImpl::find_topic(
       first_time = false;
     }
 
-    RepoId topic_id;
+    GUID_t topic_id;
     CORBA::String_var type_name;
     DDS::TopicQos_var qos;
 
@@ -1235,7 +1235,7 @@ DomainParticipantImpl::ignore_participant(
     return DDS::RETCODE_NOT_ENABLED;
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   HandleMap::const_iterator location = this->ignored_participants_.find(ignoreId);
 
   if (location == this->ignored_participants_.end()) {
@@ -1294,7 +1294,7 @@ DomainParticipantImpl::ignore_topic(
     return DDS::RETCODE_NOT_ENABLED;
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   HandleMap::const_iterator location = this->ignored_topics_.find(ignoreId);
 
   if (location == this->ignored_topics_.end()) {
@@ -1352,7 +1352,7 @@ DomainParticipantImpl::ignore_publication(
                handle));
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   if (!disco->ignore_publication(domain_id_,
                                  dp_id_,
@@ -1394,7 +1394,7 @@ DomainParticipantImpl::ignore_subscription(
                handle));
   }
 
-  RepoId ignoreId = get_repoid(handle);
+  GUID_t ignoreId = get_repoid(handle);
   Discovery_rch disco = TheServiceParticipant->get_discovery(domain_id_);
   if (!disco->ignore_subscription(domain_id_,
                                   dp_id_,
@@ -1819,7 +1819,7 @@ DomainParticipantImpl::enable()
   return DDS::RETCODE_OK;
 }
 
-RepoId
+GUID_t
 DomainParticipantImpl::get_id() const
 {
   return dp_id_;
@@ -2106,7 +2106,7 @@ DomainParticipantImpl::ownership_manager()
 }
 
 void
-DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
+DomainParticipantImpl::update_ownership_strength (const GUID_t& pub_id,
                                                   const CORBA::Long& ownership_strength)
 {
   ACE_GUARD(ACE_Recursive_Thread_Mutex,
@@ -2124,14 +2124,14 @@ DomainParticipantImpl::update_ownership_strength (const PublicationId& pub_id,
 
 #endif // OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 
-DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const RepoId& base) :
+DomainParticipantImpl::RepoIdSequence::RepoIdSequence(const GUID_t& base) :
   base_(base),
   serial_(0),
   builder_(base_)
 {
 }
 
-RepoId
+GUID_t
 DomainParticipantImpl::RepoIdSequence::next()
 {
   builder_.entityKey(++serial_);
@@ -2634,7 +2634,7 @@ DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
   }
 
   const XTypes::TypeIdentifier& ctid = ti.complete.typeid_with_size.type_id;
-  const GUID_t entity = bit_key_to_repo_id(key);
+  const GUID_t entity = bit_key_to_guid(key);
   if (!type_lookup_service_->has_complete(ctid)) {
     // We don't have it, try to asking the remote for the complete
     // TypeObjects.

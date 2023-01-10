@@ -17,7 +17,7 @@ class SimpleDataWriter
 {
   public:
 
-    explicit SimpleDataWriter(const OpenDDS::DCPS::RepoId& pub_id);
+    explicit SimpleDataWriter(const OpenDDS::DCPS::GUID_t& pub_id);
     virtual ~SimpleDataWriter();
 
     void init(const OpenDDS::DCPS::AssociationData& subscription);
@@ -51,13 +51,13 @@ class SimpleDataWriter
     // Implementing TransportClient
     bool check_transport_qos(const OpenDDS::DCPS::TransportInst&)
       { return true; }
-    OpenDDS::DCPS::RepoId get_repo_id() const
+    OpenDDS::DCPS::GUID_t get_guid() const
       { return pub_id_; }
     DDS::DomainId_t domain_id() const
       { return 0; }
     CORBA::Long get_priority_value(const OpenDDS::DCPS::AssociationData&) const
       { return 0; }
-    void transport_assoc_done(int flags, const OpenDDS::DCPS::RepoId& remote);
+    void transport_assoc_done(int flags, const OpenDDS::DCPS::GUID_t& remote);
 
     bool associated() const
     {
@@ -73,7 +73,7 @@ class SimpleDataWriter
   protected:
 
     mutable ACE_Thread_Mutex mutex_;
-    const OpenDDS::DCPS::RepoId& pub_id_;
+    const OpenDDS::DCPS::GUID_t& pub_id_;
     int num_messages_sent_;
     int num_messages_delivered_;
     bool associated_;
@@ -82,7 +82,7 @@ class SimpleDataWriter
 class DDS_TEST : public SimpleDataWriter
 {
 public:
-    explicit DDS_TEST(const OpenDDS::DCPS::RepoId& pub_id);
+    explicit DDS_TEST(const OpenDDS::DCPS::GUID_t& pub_id);
     virtual int run(int num_msgs, int msg_size);
 
     static void cleanup(OpenDDS::DCPS::DataSampleElementAllocator& alloc,

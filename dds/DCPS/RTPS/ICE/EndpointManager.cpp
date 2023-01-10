@@ -48,8 +48,8 @@ EndpointManager::EndpointManager(AgentImpl* a_agent_impl, DCPS::WeakRcHandle<End
   }
 }
 
-void EndpointManager::start_ice(const DCPS::RepoId& a_local_guid,
-                                const DCPS::RepoId& a_remote_guid,
+void EndpointManager::start_ice(const DCPS::GUID_t& a_local_guid,
+                                const DCPS::GUID_t& a_remote_guid,
                                 const AgentInfo& a_remote_agent_info)
 {
   // Check for username collision.
@@ -113,8 +113,8 @@ void EndpointManager::start_ice(const DCPS::RepoId& a_local_guid,
   username_checklist->add_guids(guids);
 }
 
-void EndpointManager::stop_ice(const DCPS::RepoId& a_local_guid,
-                               const DCPS::RepoId& a_remote_guid)
+void EndpointManager::stop_ice(const DCPS::GUID_t& a_local_guid,
+                               const DCPS::GUID_t& a_remote_guid)
 {
   GuidPair guidp(a_local_guid, a_remote_guid);
 
@@ -126,8 +126,8 @@ void EndpointManager::stop_ice(const DCPS::RepoId& a_local_guid,
   }
 }
 
-ACE_INET_Addr EndpointManager::get_address(const DCPS::RepoId& a_local_guid,
-                                           const DCPS::RepoId& a_remote_guid) const
+ACE_INET_Addr EndpointManager::get_address(const DCPS::GUID_t& a_local_guid,
+                                           const DCPS::GUID_t& a_remote_guid) const
 {
   GuidPair guidp(a_local_guid, a_remote_guid);
   GuidPairToChecklistType::const_iterator pos = guid_pair_to_checklist_.find(guidp);

@@ -139,10 +139,10 @@ public:
   void use_rtps_relay_now(bool flag);
   void use_ice_now(bool flag);
 
-  virtual void update_locators(const RepoId& /*remote_id*/,
+  virtual void update_locators(const GUID_t& /*remote_id*/,
                                const TransportLocatorSeq& /*locators*/) {}
 
-  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+  virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/) {}
 
   virtual void rtps_relay_address_change() {}

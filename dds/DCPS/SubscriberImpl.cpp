@@ -346,7 +346,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
         return ::DDS::RETCODE_ERROR;
       }
       if (DCPS_debug_level > 0) {
-        RepoId id = dr_servant->get_repo_id();
+        GUID_t id = dr_servant->get_guid();
         ACE_ERROR((LM_ERROR,
                   ACE_TEXT("(%P|%t) ERROR: ")
                   ACE_TEXT("SubscriberImpl::delete_datareader: ")
@@ -370,7 +370,7 @@ SubscriberImpl::delete_datareader(::DDS::DataReader_ptr a_datareader)
     this->monitor_->report();
   }
 
-  const RepoId subscription_id = dr_servant->get_repo_id();
+  const GUID_t subscription_id = dr_servant->get_guid();
   Discovery_rch disco = TheServiceParticipant->get_discovery(this->domain_id_);
   if (!disco->remove_subscription(this->domain_id_,
                                   this->dp_id_,
@@ -648,7 +648,7 @@ SubscriberImpl::set_qos(
           DataReaderImpl_rch reader = iter->second;
           reader->set_subscriber_qos (qos);
           DDS::DataReaderQos qos = reader->qos_;
-          RepoId id = reader->get_repo_id();
+          GUID_t id = reader->get_guid();
           std::pair<DrIdToQosMap::iterator, bool> pair
             = idToQosMap.insert(DrIdToQosMap::value_type(id, qos));
 
@@ -1008,13 +1008,13 @@ SubscriberImpl::get_subscription_ids(SubscriptionIdVec& subs)
   for (DataReaderMap::iterator iter = datareader_map_.begin();
        iter != datareader_map_.end();
        ++iter) {
-    subs.push_back(iter->second->get_repo_id());
+    subs.push_back(iter->second->get_guid());
   }
 }
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
 void
-SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
+SubscriberImpl::update_ownership_strength (const GUID_t& pub_id,
                                            const CORBA::Long&   ownership_strength)
 {
   ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
@@ -1035,7 +1035,7 @@ SubscriberImpl::update_ownership_strength (const PublicationId& pub_id,
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
-SubscriberImpl::coherent_change_received (const RepoId& publisher_id,
+SubscriberImpl::coherent_change_received (const GUID_t& publisher_id,
                                           DataReaderImpl* reader,
                                           Coherent_State& group_state)
 {
@@ -1063,7 +1063,7 @@ SubscriberImpl::coherent_change_received (const RepoId& publisher_id,
     }
   }
 
-  PublicationId writerId = GUID_UNKNOWN;
+  GUID_t writerId = GUID_UNKNOWN;
   for (DataReaderSet::const_iterator iter = localdrs.begin();
        iter != localdrs.end(); ++iter) {
     if (group_state == COMPLETED) {

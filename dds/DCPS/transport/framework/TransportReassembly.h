@@ -27,10 +27,10 @@ namespace DCPS {
 // A FragKey represents the identifier for an original (pre-fragmentation)
 // message.  Since DataSampleHeader sequence numbers are distinct for each
 // "publication" (DataWriter), the partially-received messages need to be
-// stored in a structure that's keyed off of both the PublicationId and the
+// stored in a structure that's keyed off of both the GUID_t and the
 // SequenceNumber.
 struct FragKey {
-  FragKey(const PublicationId& pubId, const SequenceNumber& dataSampleSeq);
+  FragKey(const GUID_t& pubId, const SequenceNumber& dataSampleSeq);
 
   bool operator<(const FragKey& rhs) const
   {
@@ -50,7 +50,7 @@ struct FragKey {
   }
 
   static GUID_tKeyLessThan compare_;
-  PublicationId publication_;
+  GUID_t publication_;
   SequenceNumber data_sample_seq_;
 };
 
@@ -78,15 +78,15 @@ public:
   void data_unavailable(const SequenceRange& transportSeqDropped);
 
   void data_unavailable(const SequenceNumber& dataSampleSeq,
-                        const RepoId& pub_id);
+                        const GUID_t& pub_id);
 
   /// Clears out "completed" sequence numbers in order to allow resends for
   /// new associations to the same (given) publication id
-  void clear_completed(const RepoId& pub_id);
+  void clear_completed(const GUID_t& pub_id);
 
   /// Returns true if this object is storing fragments for the given
   /// DataSampleHeader sequence number from the given publication.
-  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id) const
+  bool has_frags(const SequenceNumber& seq, const GUID_t& pub_id) const
   {
     ACE_UINT32 total_frags;
     return has_frags(seq, pub_id, total_frags);
@@ -94,12 +94,12 @@ public:
 
   /// Returns true if this object is storing fragments for the given
   /// DataSampleHeader sequence number from the given publication.
-  bool has_frags(const SequenceNumber& seq, const RepoId& pub_id, ACE_UINT32& total_frags) const;
+  bool has_frags(const SequenceNumber& seq, const GUID_t& pub_id, ACE_UINT32& total_frags) const;
 
   /// Populates bitmap for missing fragment sequence numbers and set numBits
   /// for the given message sequence and publisher ID.
   /// @returns the base fragment sequence number for bit zero in the bitmap
-  CORBA::ULong get_gaps(const SequenceNumber& msg_seq, const RepoId& pub_id,
+  CORBA::ULong get_gaps(const SequenceNumber& msg_seq, const GUID_t& pub_id,
                         CORBA::Long bitmap[], CORBA::ULong length,
                         CORBA::ULong& numBits) const;
 
@@ -177,7 +177,7 @@ private:
   typedef OPENDDS_LIST(ElementType) ExpirationQueue;
   ExpirationQueue expiration_queue_;
 
-  typedef OPENDDS_MAP_CMP(PublicationId, DisjointSequence, GUID_tKeyLessThan) CompletedMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DisjointSequence, GUID_tKeyLessThan) CompletedMap;
   CompletedMap completed_;
 
   TimeDuration timeout_;

@@ -33,7 +33,7 @@ DataWriterRemoteImpl::detach_parent()
 }
 
 void
-DataWriterRemoteImpl::add_association(const RepoId& yourId,
+DataWriterRemoteImpl::add_association(const GUID_t& yourId,
                                       const ReaderAssociation& reader,
                                       bool active)
 {
@@ -76,7 +76,7 @@ DataWriterRemoteImpl::update_incompatible_qos(
 }
 
 void
-DataWriterRemoteImpl::update_subscription_params(const RepoId& readerId,
+DataWriterRemoteImpl::update_subscription_params(const GUID_t& readerId,
                                                  const DDS::StringSeq& params)
 {
   // the local copy of parent_ is necessary to prevent race condition

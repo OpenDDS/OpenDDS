@@ -259,7 +259,7 @@ OpenDDS_Dcps_Export
 void intersect(const GuidSet& a, const GuidSet& b, GuidSet& result);
 
 OpenDDS_Dcps_Export inline
-DDS::BuiltinTopicKey_t repo_id_to_bit_key(const GUID_t& guid)
+DDS::BuiltinTopicKey_t guid_to_bit_key(const GUID_t& guid)
 {
   DDS::BuiltinTopicKey_t key;
   std::memcpy(key.value, &guid, sizeof(key.value));
@@ -267,7 +267,7 @@ DDS::BuiltinTopicKey_t repo_id_to_bit_key(const GUID_t& guid)
 }
 
 OpenDDS_Dcps_Export inline
-GUID_t bit_key_to_repo_id(const DDS::BuiltinTopicKey_t& key)
+GUID_t bit_key_to_guid(const DDS::BuiltinTopicKey_t& key)
 {
   GUID_t id;
   std::memcpy(&id, key.value, sizeof(id));
