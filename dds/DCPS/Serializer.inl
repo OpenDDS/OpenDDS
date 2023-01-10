@@ -1720,7 +1720,7 @@ void serialized_size_list_end_parameter_id(
   if (encoding.xcdr_version() == Encoding::XCDR_VERSION_1) {
     /*
      * TODO(iguessthislldo): See how DDSXTY14-23 is resolved.
-     * https://github.com/objectcomputing/OpenDDS/pull/1722#discussion_r447165924
+     * https://github.com/OpenDDS/OpenDDS/pull/1722#discussion_r447165924
      */
     encoding.align(size, xcdr1_pid_alignment);
     size += uint16_cdr_size * 2;
