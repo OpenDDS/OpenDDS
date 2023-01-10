@@ -42,6 +42,7 @@ sub run_command {
         name => $test_name,
         script_name => 'auto_run_tests.pl',
         dry_run => $dry_run,
+        verbose => $dry_run,
     );
 }
 
@@ -215,9 +216,6 @@ my %opts = (
     'python=s' => \$python,
 );
 foreach my $list (@builtin_test_lists) {
-    if (!exists($list->{default})) {
-        $list->{default} = 0;
-    }
     $list->{option} = undef;
     my $opt = "$list->{name}!";
     $opts{$opt} = \$list->{option};
@@ -231,9 +229,10 @@ elsif ($help) {
 }
 my $files_passed = scalar(@ARGV);
 for my $list (@builtin_test_lists) {
+    my $default = exists($list->{default}) ? $auto_config && $list->{default} : 0;
     if (!exists($list->{enabled})) {
         $list->{enabled} = defined($list->{option}) ? $list->{option} :
-            $files_passed ? 0 : $list->{default};
+            $files_passed ? 0 : $default;
     }
 }
 my $query_all = $show_all_configs || $list_all_configs || $list_all_tests;
@@ -244,10 +243,8 @@ my $query = $show_configs || $list_configs || $list_tests;
 
 # Determine what test list files to use
 my @file_list = ();
-if ($auto_config) {
-    foreach my $list (@builtin_test_lists) {
-        push(@file_list, "$DDS_ROOT/$list->{file}") if ($query_all || $list->{enabled});
-    }
+foreach my $list (@builtin_test_lists) {
+    push(@file_list, "$DDS_ROOT/$list->{file}") if ($query_all || $list->{enabled});
 }
 push(@file_list, @ARGV);
 
@@ -258,6 +255,27 @@ if ($auto_config) {
     push(@PerlACE::ConfigList::Configs, "RTPS");
     if ($gh_actions) {
         push(@PerlACE::ConfigList::Configs, 'GH_ACTIONS');
+    }
+}
+
+# ConfigList can't properly handle entries with duplicate commands
+foreach my $test_list (@file_list) {
+    my $config_list = new PerlACE::ConfigList;
+    $config_list->load($test_list);
+    my %entry_count;
+    for my $entry (@{$config_list->{ENTRIES}}) {
+        if (exists($entry_count{$entry})) {
+            $entry_count{$entry} += 1;
+        }
+        else {
+            $entry_count{$entry} = 1;
+        }
+    }
+    for my $entry (keys(%entry_count)) {
+        my $count = $entry_count{$entry};
+        if ($count > 1) {
+            print STDERR ("WARNING: \"$entry\" in \"$test_list\" is duplicated $count times\n");
+        }
     }
 }
 
@@ -292,7 +310,6 @@ if (!$list_tests) {
 }
 
 foreach my $test_lst (@file_list) {
-
     my $config_list = new PerlACE::ConfigList;
     $config_list->load($test_lst);
 

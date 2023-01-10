@@ -90,3 +90,8 @@ To manually configure what tests to run:
 * Assuming they were built, CMake tests are ran if ``--cmake`` is passed.
   This uses CTest, which is a system that is separate from the one previously described.
 * See ``--help`` for all the available options.
+
+.. note:: For those editing and creating test list files:
+  The ``ConfigList`` code in ACE can't properly handle mutiple test list entries with the same command.
+  It will run all those entries if the last one will run, even if based on the configs only one entry should run.
+  ``auto_run_tests.pl`` will warn about this if it's using a test list file that has this problem.
