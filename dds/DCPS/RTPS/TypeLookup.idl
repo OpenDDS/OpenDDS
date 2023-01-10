@@ -69,7 +69,7 @@ module OpenDDS {
         TypeLookup_getTypeDependencies_In getTypeDependencies;
     };
 
-    @RPCRequestType
+    @RPCRequestType @final
     struct TypeLookup_Request {
       DDS::RPC::RequestHeader header;
       TypeLookup_Call data;
@@ -83,7 +83,7 @@ module OpenDDS {
         TypeLookup_getTypeDependencies_Result getTypeDependencies;
     };
 
-    @RPCReplyType
+    @RPCReplyType @final
     struct TypeLookup_Reply {
       DDS::RPC::ReplyHeader header;
       TypeLookup_Return return;
