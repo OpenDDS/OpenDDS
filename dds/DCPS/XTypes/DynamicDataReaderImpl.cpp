@@ -37,15 +37,6 @@ namespace DCPS {
     return DDS::RETCODE_UNSUPPORTED;
   }
 #endif
-
-  template <>
-  void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample& sample)
-  {
-    XTypes::DynamicDataReaderImpl* const self = dynamic_cast<XTypes::DynamicDataReaderImpl*>(this);
-    if (self) {
-      self->imbue_type(sample);
-    }
-  }
 }
 
 namespace XTypes {

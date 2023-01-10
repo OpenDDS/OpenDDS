@@ -109,6 +109,16 @@ namespace XTypes {
     using Base::get_key_value;
   };
 }
+namespace DCPS {
+  template <> inline
+  void DataReaderImpl_T<XTypes::DynamicSample>::dynamic_hook(XTypes::DynamicSample& sample)
+  {
+    XTypes::DynamicDataReaderImpl* const self = dynamic_cast<XTypes::DynamicDataReaderImpl*>(this);
+    if (self) {
+      self->imbue_type(sample);
+    }
+  }
+}
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 #endif
