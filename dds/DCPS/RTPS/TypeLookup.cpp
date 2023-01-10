@@ -4,6 +4,7 @@
  */
 
 #include "TypeLookup.h"
+
 #include "RtpsRpcTypeSupportImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -474,10 +475,10 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size_delimiter(encoding, size);
   primitive_serialized_size(encoding, size, uni._d());
   switch (uni._d()) {
-  case 25318099:
+  case XTypes::TypeLookup_getTypes_HashId:
     serialized_size(encoding, size, uni.getTypes());
     break;
-  case 95091505:
+  case XTypes::TypeLookup_getDependencies_HashId:
     serialized_size(encoding, size, uni.getTypeDependencies());
     break;
   }
@@ -496,9 +497,9 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_Call& uni)
   }
 
   switch (uni._d()) {
-  case 25318099:
+  case XTypes::TypeLookup_getTypes_HashId:
     return strm << uni.getTypes();
-  case 95091505:
+  case XTypes::TypeLookup_getDependencies_HashId:
     return strm << uni.getTypeDependencies();
   }
 
@@ -518,13 +519,13 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_Call& uni)
   }
 
   switch (kind) {
-    case 25318099: {
+    case XTypes::TypeLookup_getTypes_HashId: {
       XTypes::TypeLookup_getTypes_In types;
       const bool status = strm >> types;
       uni.getTypes(types);
       return status;
     }
-    case 95091505: {
+    case XTypes::TypeLookup_getDependencies_HashId: {
       XTypes::TypeLookup_getTypeDependencies_In typeDependencies;
       const bool status = strm >> typeDependencies;
       uni.getTypeDependencies(typeDependencies);
@@ -561,10 +562,10 @@ void serialized_size(const Encoding& encoding, size_t& size,
   primitive_serialized_size(encoding, size, uni._d());
 
   switch (uni._d()) {
-  case 25318099:
+  case XTypes::TypeLookup_getTypes_HashId:
     serialized_size(encoding, size, uni.getType());
     break;
-  case 95091505:
+  case XTypes::TypeLookup_getDependencies_HashId:
     serialized_size(encoding, size, uni.getTypeDependencies());
     break;
   }
@@ -583,9 +584,9 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_Return& uni)
   }
 
   switch (uni._d()) {
-  case 25318099:
+  case XTypes::TypeLookup_getTypes_HashId:
     return strm << uni.getType();
-  case 95091505:
+  case XTypes::TypeLookup_getDependencies_HashId:
     return strm << uni.getTypeDependencies();
   }
 
@@ -605,13 +606,13 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_Return& uni)
   }
 
   switch (kind) {
-    case 25318099: {
+    case XTypes::TypeLookup_getTypes_HashId: {
       XTypes::TypeLookup_getTypes_Result type;
       const bool status = strm >> type;
       uni.getType(type);
       return status;
     }
-    case 95091505: {
+    case XTypes::TypeLookup_getDependencies_HashId: {
       XTypes::TypeLookup_getTypeDependencies_Result typeDependencies;
       const bool status = strm >> typeDependencies;
       uni.getTypeDependencies(typeDependencies);
