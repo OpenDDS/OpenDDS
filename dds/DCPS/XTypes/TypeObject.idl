@@ -3,6 +3,9 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL
+#define OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL
+
 #include <dds/DdsDcpsInfrastructure.idl>
 #include <dds/DdsDcpsGuid.idl>
 
@@ -1037,3 +1040,4 @@ module OpenDDS {
   }; // namespace XTypes
 }; // namespace OpenDDS
 
+#endif /* OPENDDS_DCPS_XTYPES_TYPEOBJECT_IDL */

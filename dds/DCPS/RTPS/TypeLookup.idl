@@ -3,8 +3,13 @@
  * See: http://www.opendds.org/license.html
  */
 
+#ifndef OPENDDS_DCPS_RTPS_TYPELOOKUP_IDL
+#define OPENDDS_DCPS_RTPS_TYPELOOKUP_IDL
+
 #include <dds/DCPS/XTypes/TypeObject.idl>
 #include <dds/DCPS/RTPS/RtpsRpc.idl>
+
+@annotation RPCRequestType {};
 
 module OpenDDS {
   module XTypes {
@@ -85,3 +90,4 @@ module OpenDDS {
   }; // namespace XTypes
 }; // namespace OpenDDS
 
+#endif /* OPENDDS_DCPS_RTPS_TYPELOOKUP_IDL */
