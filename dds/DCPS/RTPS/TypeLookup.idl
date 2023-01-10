@@ -10,6 +10,7 @@
 #include <dds/DCPS/RTPS/RtpsRpc.idl>
 
 @annotation RPCRequestType {};
+@annotation RPCReplyType {};
 
 module OpenDDS {
   module XTypes {
@@ -82,7 +83,7 @@ module OpenDDS {
         TypeLookup_getTypeDependencies_Result getTypeDependencies;
     };
 
-    @RPCRequestType
+    @RPCReplyType
     struct TypeLookup_Reply {
       DDS::RPC::ReplyHeader header;
       TypeLookup_Return return;
