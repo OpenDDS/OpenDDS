@@ -3622,7 +3622,7 @@ bool Sedp::TypeLookupRequestWriter::send_type_lookup_request(
   const XTypes::TypeIdentifierSeq& type_ids,
   const DCPS::RepoId& reader,
   const DCPS::SequenceNumber& rpc_sequence,
-  CORBA::ULong tl_kind)
+  CORBA::Long tl_kind)
 {
   if (DCPS::DCPS_debug_level >= 8) {
     ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::TypeLookupRequestWriter::send_type_lookup_request: "
@@ -3874,7 +3874,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
   }
 
   bool success;
-  const ACE_CDR::ULong kind = static_cast<ACE_CDR::ULong>(type_lookup_reply._cxx_return._d());
+  const ACE_CDR::Long kind = type_lookup_reply._cxx_return._d();
   switch (kind) {
   case XTypes::TypeLookup_getTypes_HashId:
     success = process_get_types_reply(type_lookup_reply);
@@ -3886,7 +3886,7 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
     if (DCPS::DCPS_debug_level) {
       ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: "
         "Sedp::TypeLookupReplyReader::process_type_lookup_reply - "
-        "reply kind is %u\n", kind));
+        "reply kind is %d\n", kind));
     }
     return false;
   }
