@@ -20,7 +20,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  template <>
+  template <> OpenDDS_Dcps_Export
   DDS::ReturnCode_t
   DataReaderImpl_T<XTypes::DynamicSample>::read_generic(GenericBundle& gen,
                                                         DDS::SampleStateMask sample_states,
@@ -28,7 +28,7 @@ namespace DCPS {
                                                         DDS::InstanceStateMask instance_states,
                                                         bool adjust_ref_count);
 
-  template <>
+  template <> OpenDDS_Dcps_Export
   DDS::ReturnCode_t
   DataReaderImpl_T<XTypes::DynamicSample>::take(AbstractSamples& samples,
                                                 DDS::SampleStateMask sample_states,
