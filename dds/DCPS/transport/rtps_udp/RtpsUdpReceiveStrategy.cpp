@@ -308,7 +308,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
 #ifdef OPENDDS_SECURITY
 namespace {
-  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
+  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::GUID_t& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
@@ -597,7 +597,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     link_->filterBestEffortReaders(sample, readers_selected_, readers_withheld_);
 
     if (data.readerId != ENTITYID_UNKNOWN) {
-      RepoId reader;
+      GUID_t reader;
       std::memcpy(reader.guidPrefix, link_->local_prefix(),
                   sizeof(GuidPrefix_t));
       reader.entityId = data.readerId;
@@ -761,7 +761,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
     return;
   }
 
-  const RepoId peer = make_id(receiver_.source_guid_prefix_, ENTITYID_PARTICIPANT);
+  const GUID_t peer = make_id(receiver_.source_guid_prefix_, ENTITYID_PARTICIPANT);
   const ParticipantCryptoHandle peer_pch = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
@@ -1097,14 +1097,14 @@ RtpsUdpReceiveStrategy::end_transport_header_processing()
 }
 
 const ReceivedDataSample*
-RtpsUdpReceiveStrategy::withhold_data_from(const RepoId& sub_id)
+RtpsUdpReceiveStrategy::withhold_data_from(const GUID_t& sub_id)
 {
   readers_withheld_.insert(sub_id);
   return recvd_sample_;
 }
 
 void
-RtpsUdpReceiveStrategy::do_not_withhold_data_from(const RepoId& sub_id)
+RtpsUdpReceiveStrategy::do_not_withhold_data_from(const GUID_t& sub_id)
 {
   readers_selected_.insert(sub_id);
 }
@@ -1158,7 +1158,7 @@ bool
 RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
                                                  CORBA::ULong num_bits,
                                                  const SequenceNumber& base,
-                                                 const RepoId& pub_id,
+                                                 const GUID_t& pub_id,
                                                  ACE_CDR::ULong& cumulative_bits_added)
 {
   bool modified = false;
@@ -1194,7 +1194,7 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
 
 void
 RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
-                                         const RepoId& pub_id)
+                                         const GUID_t& pub_id)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
     reassembly_.data_unavailable(sn, pub_id);
@@ -1202,14 +1202,14 @@ RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
 }
 
 void
-RtpsUdpReceiveStrategy::clear_completed_fragments(const RepoId& pub_id)
+RtpsUdpReceiveStrategy::clear_completed_fragments(const GUID_t& pub_id)
 {
   reassembly_.clear_completed(pub_id);
 }
 
 bool
 RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
-                                      const RepoId& pub_id,
+                                      const GUID_t& pub_id,
                                       FragmentInfo* frag_info)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {

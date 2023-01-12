@@ -46,9 +46,9 @@ const Encoding encoding(Encoding::KIND_XCDR1, OpenDDS::DCPS::ENDIAN_LITTLE);
 const Encoding& blob_encoding = get_locators_encoding();
 
 struct SimpleTC: TransportClient {
-  explicit SimpleTC(const RepoId& local) : local_id_(local), mutex_(), cond_(mutex_) {}
+  explicit SimpleTC(const GUID_t& local) : local_id_(local), mutex_(), cond_(mutex_) {}
 
-  void transport_assoc_done(int flags, const RepoId& remote) {
+  void transport_assoc_done(int flags, const GUID_t& remote) {
     if (!(flags & ASSOC_OK)) {
       return;
     }
@@ -57,7 +57,7 @@ struct SimpleTC: TransportClient {
     cond_.broadcast();
   }
 
-  void wait_for_assoc(const RepoId& remote) {
+  void wait_for_assoc(const GUID_t& remote) {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     while (associated_.find(remote) == associated_.end()) {
       cond_.wait(mutex_);
@@ -70,12 +70,12 @@ struct SimpleTC: TransportClient {
   using TransportClient::send;
   using TransportClient::connection_info;
 
-  RepoId get_repo_id() const { return local_id_; }
+  GUID_t get_guid() const { return local_id_; }
   DDS::DomainId_t domain_id() const { return 0; }
   bool check_transport_qos(const TransportInst&) { return true; }
   CORBA::Long get_priority_value(const AssociationData&) const { return 0; }
 
-  RepoId local_id_;
+  GUID_t local_id_;
   RepoIdSet associated_;
   ACE_Thread_Mutex mutex_;
   ACE_Condition<ACE_Thread_Mutex> cond_;
@@ -83,7 +83,7 @@ struct SimpleTC: TransportClient {
 
 
 struct SimpleDataReader: SimpleTC, TransportReceiveListener {
-  explicit SimpleDataReader(const RepoId& sub_id)
+  explicit SimpleDataReader(const GUID_t& sub_id)
     : SimpleTC(sub_id), have_frag_(false) {
 
       // The reference count is explicited incremented to avoid been explcitly deleted
@@ -135,7 +135,7 @@ public:
 
 
 struct SimpleDataWriter: SimpleTC, TransportSendListener {
-  explicit SimpleDataWriter(const RepoId& pub_id)
+  explicit SimpleDataWriter(const GUID_t& pub_id)
     : SimpleTC(pub_id)
     , dsle_(pub_id, this, OpenDDS::DCPS::PublicationInstance_rch())
   {
@@ -319,7 +319,7 @@ struct TestParticipant: ACE_Event_Handler {
 
   bool send_hb(const OpenDDS::DCPS::EntityId_t& writer,
                const SequenceNumber_t& firstSN, const SequenceNumber_t& lastSN,
-               const ACE_INET_Addr& send_to, const RepoId& reader = GUID_UNKNOWN)
+               const ACE_INET_Addr& send_to, const GUID_t& reader = GUID_UNKNOWN)
   {
     const Message_Block_Ptr mb(buildHeartbeat(writer, hdr_,
                                               std::make_pair(firstSN, lastSN),

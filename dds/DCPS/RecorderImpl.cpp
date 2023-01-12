@@ -161,7 +161,7 @@ bool RecorderImpl::check_transport_qos(const TransportInst& ti)
   return true;
 }
 
-RepoId RecorderImpl::get_repo_id() const
+GUID_t RecorderImpl::get_guid() const
 {
   return subscription_id_;
 }
@@ -231,7 +231,7 @@ void RecorderImpl::notify_subscription_lost(const WriterIdSeq&)
 
 #ifndef OPENDDS_SAFETY_PROFILE
 void
-RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes::TypeIdentifier& ti)
+RecorderImpl::add_to_dynamic_type_map(const GUID_t& pub_id, const XTypes::TypeIdentifier& ti)
 {
   XTypes::TypeLookupService_rch tls = participant_servant_->get_type_lookup_service();
   DDS::DynamicType_var dt = tls->type_identifier_to_dynamic(ti, pub_id);
@@ -245,7 +245,7 @@ RecorderImpl::add_to_dynamic_type_map(const PublicationId& pub_id, const XTypes:
 #endif
 
 void
-RecorderImpl::add_association(const RepoId&            yourId,
+RecorderImpl::add_association(const GUID_t&            yourId,
                               const WriterAssociation& writer,
                               bool                     active)
 {
@@ -294,7 +294,7 @@ RecorderImpl::add_association(const RepoId&            yourId,
     {
       ACE_WRITE_GUARD(ACE_RW_Thread_Mutex, write_guard, writers_lock_);
 
-      const PublicationId& writer_id = writer.writerId;
+      const GUID_t& writer_id = writer.writerId;
       RcHandle<WriterInfo> info ( make_rch<WriterInfo>(rchandle_from<WriterInfoListener>(this), writer_id, writer.writerQos));
       /*std::pair<WriterMapType::iterator, bool> bpair =*/
       writers_.insert(
@@ -545,7 +545,7 @@ RecorderImpl::remove_associations_i(const WriterIdSeq& writers,
     wr_len = writers.length();
 
     for (CORBA::ULong i = 0; i < wr_len; i++) {
-      PublicationId writer_id = writers[i];
+      GUID_t writer_id = writers[i];
 
 #ifndef OPENDDS_SAFETY_PROFILE
       if (dt_map_.erase(writer_id) == 0) {
@@ -725,14 +725,14 @@ RecorderImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-RecorderImpl::signal_liveliness(const RepoId& remote_participant)
+RecorderImpl::signal_liveliness(const GUID_t& remote_participant)
 {
-  RepoId prefix = remote_participant;
+  GUID_t prefix = remote_participant;
   prefix.entityId = EntityId_t();
 
   ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
 
-  typedef std::pair<RepoId, RcHandle<WriterInfo> > WriterSetElement;
+  typedef std::pair<GUID_t, RcHandle<WriterInfo> > WriterSetElement;
   typedef OPENDDS_VECTOR(WriterSetElement) WriterSet;
   WriterSet writers;
 
@@ -953,9 +953,9 @@ RecorderImpl::get_instance_handle()
 }
 
 void
-RecorderImpl::register_for_writer(const RepoId& participant,
-                                  const RepoId& readerid,
-                                  const RepoId& writerid,
+RecorderImpl::register_for_writer(const GUID_t& participant,
+                                  const GUID_t& readerid,
+                                  const GUID_t& writerid,
                                   const TransportLocatorSeq& locators,
                                   DiscoveryListener* listener)
 {
@@ -963,9 +963,9 @@ RecorderImpl::register_for_writer(const RepoId& participant,
 }
 
 void
-RecorderImpl::unregister_for_writer(const RepoId& participant,
-                                    const RepoId& readerid,
-                                    const RepoId& writerid)
+RecorderImpl::unregister_for_writer(const GUID_t& participant,
+                                    const GUID_t& readerid,
+                                    const GUID_t& writerid)
 {
   TransportClient::unregister_for_writer(participant, readerid, writerid);
 }

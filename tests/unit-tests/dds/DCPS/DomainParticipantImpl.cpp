@@ -7,12 +7,12 @@
 #include <string.h>
 
 typedef OpenDDS::DCPS::DomainParticipantImpl::RepoIdSequence RepoIdSequence;
-typedef OpenDDS::DCPS::RepoId RepoId;
+typedef OpenDDS::DCPS::GUID_t GUID_t;
 
 namespace {
   namespace Factory {
-    RepoId not_default_repo_id() {
-      RepoId result;
+    GUID_t not_default_repo_id() {
+      GUID_t result;
       int i = 1;
       result.guidPrefix[ 0] =  i += 2;
       result.guidPrefix[ 1] =  i += 2;
@@ -34,7 +34,7 @@ namespace {
     }
   };
 
-  long entityKey(const RepoId& id) {
+  long entityKey(const GUID_t& id) {
     long result = (((id.entityId.entityKey[0]  << 8) |
                      id.entityId.entityKey[1]) << 8) |
                      id.entityId.entityKey[2];
@@ -45,7 +45,7 @@ namespace {
 TEST(dds_DCPS_DomainParticipantImpl, maintest)
 {
   { // First sequence should be 1
-    RepoId repoId;
+    GUID_t repoId;
     memset(&repoId, 0, sizeof(repoId));
     RepoIdSequence seq(repoId);
     EXPECT_TRUE(entityKey(seq.next()) == 1);
@@ -54,12 +54,12 @@ TEST(dds_DCPS_DomainParticipantImpl, maintest)
     EXPECT_TRUE(entityKey(seq.next()) == 3);
     EXPECT_TRUE(entityKey(seq.next()) == 4);
   }
-  { // Should preserve RepoId structure
-    RepoId repoId = Factory::not_default_repo_id();
+  { // Should preserve GUID_t structure
+    GUID_t repoId = Factory::not_default_repo_id();
     RepoIdSequence seq(repoId);
 
     {
-      RepoId result = seq.next();
+      GUID_t result = seq.next();
       EXPECT_TRUE(!memcmp(repoId.guidPrefix,
                           result.guidPrefix,
                           sizeof repoId.guidPrefix));
@@ -67,7 +67,7 @@ TEST(dds_DCPS_DomainParticipantImpl, maintest)
       EXPECT_TRUE(repoId.entityId.entityKind == result.entityId.entityKind);
     }
     {
-      RepoId result = seq.next();
+      GUID_t result = seq.next();
       EXPECT_TRUE(!memcmp(repoId.guidPrefix,
                           result.guidPrefix,
                           sizeof repoId.guidPrefix));
@@ -75,7 +75,7 @@ TEST(dds_DCPS_DomainParticipantImpl, maintest)
       EXPECT_TRUE(repoId.entityId.entityKind == result.entityId.entityKind);
     }
     {
-      RepoId result = seq.next();
+      GUID_t result = seq.next();
       EXPECT_TRUE(!memcmp(repoId.guidPrefix,
                           result.guidPrefix,
                           sizeof repoId.guidPrefix));

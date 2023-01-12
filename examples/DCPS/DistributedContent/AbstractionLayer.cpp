@@ -117,7 +117,7 @@ AbstractionLayer::init_DDS(int& argc, ACE_TCHAR *argv[])
   }
 
   // Get the repo id for the subscription
-  ::OpenDDS::DCPS::RepoId ignore_id = dr_servant->get_repo_id ();
+  ::OpenDDS::DCPS::GUID_t ignore_id = dr_servant->get_guid ();
   // Get the instance handle for the subscription
   ::DDS::InstanceHandle_t handle = dp_servant->lookup_handle(ignore_id);
 

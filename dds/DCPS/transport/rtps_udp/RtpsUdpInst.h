@@ -138,10 +138,10 @@ public:
   NetworkAddress stun_server_address() const;
   ///}
 
-  void update_locators(const RepoId& remote_id,
+  void update_locators(const GUID_t& remote_id,
                        const TransportLocatorSeq& locators);
 
-  void get_last_recv_locator(const RepoId& /*remote_id*/,
+  void get_last_recv_locator(const GUID_t& /*remote_id*/,
                              TransportLocator& /*locators*/);
 
   void rtps_relay_address_change();
@@ -158,7 +158,7 @@ private:
   friend class RTPS::Sedp;
   friend class RtpsUdpTransport;
   TransportReceiveListener_rch opendds_discovery_default_listener_;
-  RepoId opendds_discovery_guid_;
+  GUID_t opendds_discovery_guid_;
 
   NetworkAddress multicast_group_address_;
   NetworkAddress local_address_;

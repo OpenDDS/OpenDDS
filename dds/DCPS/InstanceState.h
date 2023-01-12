@@ -15,7 +15,6 @@
 #include "GuidUtils.h"
 #include "PoolAllocator.h"
 #include "ReactorInterceptor.h"
-#include "RepoIdTypes.h"
 #include "TimeTypes.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -78,20 +77,20 @@ public:
   /// This flag is used by concrete DataReader to determine whether
   /// it should notify listener. If state is not changed, the dispose
   /// message is ignored.
-  bool dispose_was_received(const PublicationId& writer_id);
+  bool dispose_was_received(const GUID_t& writer_id);
 
   /// UNREGISTER message received for this instance.
   /// Return flag indicates whether the instance state was changed.
   /// This flag is used by concrete DataReader to determine whether
   /// it should notify listener. If state is not changed, the unregister
   /// message is ignored.
-  bool unregister_was_received(const PublicationId& writer_id);
+  bool unregister_was_received(const GUID_t& writer_id);
 
   /// Data sample received for this instance.
-  void data_was_received(const PublicationId& writer_id);
+  void data_was_received(const GUID_t& writer_id);
 
   /// LIVELINESS message received for this DataWriter.
-  void lively(const PublicationId& writer_id);
+  void lively(const GUID_t& writer_id);
 
   /// A read or take operation has been performed on this instance.
   void accessed();
@@ -119,7 +118,7 @@ public:
   void release();
 
   /// Returns true if the writer is a writer of this instance.
-  bool writes_instance(const PublicationId& writer_id) const
+  bool writes_instance(const GUID_t& writer_id) const
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, lock_, false);
     return writers_.count(writer_id);
@@ -131,12 +130,12 @@ public:
   virtual int handle_timeout(const ACE_Time_Value& current_time,
                              const void* arg);
 
-  void set_owner (const PublicationId& owner);
-  PublicationId get_owner ();
+  void set_owner (const GUID_t& owner);
+  GUID_t get_owner ();
   bool is_exclusive () const;
   bool registered();
   void registered (bool flag);
-  bool is_last (const PublicationId& pub);
+  bool is_last (const GUID_t& pub);
 
   bool no_writer () const;
 
@@ -222,7 +221,7 @@ private:
   DDS::InstanceHandle_t handle_;
 
   RepoIdSet writers_;
-  PublicationId owner_;
+  GUID_t owner_;
   bool exclusive_;
   /// registered with participant so it can be called back as
   /// the owner is updated.

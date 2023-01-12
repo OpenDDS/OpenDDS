@@ -23,7 +23,7 @@ OpenDDS::DCPS::TransportControlElement::data_delivered()
 }
 
 ACE_INLINE
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 OpenDDS::DCPS::TransportControlElement::publication_id() const
 {
   return GUID_UNKNOWN;

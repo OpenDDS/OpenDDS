@@ -118,7 +118,7 @@ ShmemTransport::accept_datalink(const RemoteTransport& remote,
 }
 
 void
-ShmemTransport::stop_accepting_or_connecting(const TransportClient_wrch&, const RepoId&, bool, bool)
+ShmemTransport::stop_accepting_or_connecting(const TransportClient_wrch&, const GUID_t&, bool, bool)
 {
   // no-op: accept and connect either complete or fail immediately
 }

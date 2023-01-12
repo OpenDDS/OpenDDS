@@ -43,7 +43,7 @@ protected:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id,
+                                            const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed);
 

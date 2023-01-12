@@ -48,7 +48,7 @@ MulticastTransport::config() const
 }
 
 MulticastDataLink_rch
-MulticastTransport::make_datalink(const RepoId& local_id,
+MulticastTransport::make_datalink(const GUID_t& local_id,
                                   Priority priority,
                                   bool active)
 {
@@ -284,7 +284,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
 void
 MulticastTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                                 const RepoId& remote_id,
+                                                 const GUID_t& remote_id,
                                                  bool /*disassociate*/,
                                                  bool /*association_failed*/)
 {
@@ -351,7 +351,7 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
                                                   tmp.at(i));
         if (tmp_iter != pend->second.end()) {
           TransportClient_wrch pend_client = tmp.at(i).first;
-          RepoId remote_repo = tmp.at(i).second;
+          GUID_t remote_repo = tmp.at(i).second;
           guard.release();
           TransportClient_rch client = pend_client.lock();
           if (client) {
@@ -432,7 +432,7 @@ MulticastTransport::release_datalink(DataLink* /*link*/)
   // until the transport is shut down.
 }
 
-void MulticastTransport::client_stop(const RepoId& localId)
+void MulticastTransport::client_stop(const GUID_t& localId)
 {
   GuardThreadType guard_links(this->links_lock_);
   const MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(localId).federationId() << 32

@@ -23,7 +23,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 struct AssociationData {
-  RepoId               remote_id_;
+  GUID_t               remote_id_;
   TransportLocatorSeq  remote_data_;
   TransportLocator     discovery_locator_;
   MonotonicTime_t      participant_discovered_at_;

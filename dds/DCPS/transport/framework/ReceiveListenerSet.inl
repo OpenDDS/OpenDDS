@@ -41,7 +41,7 @@ ReceiveListenerSet::operator=(const ReceiveListenerSet& rhs)
 
 
 ACE_INLINE int
-ReceiveListenerSet::insert(RepoId subscriber_id,
+ReceiveListenerSet::insert(GUID_t subscriber_id,
                            const TransportReceiveListener_wrch& listener)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "insert", 6);
@@ -61,7 +61,7 @@ ReceiveListenerSet::insert(RepoId subscriber_id,
 
 
 ACE_INLINE int
-ReceiveListenerSet::remove(RepoId subscriber_id)
+ReceiveListenerSet::remove(GUID_t subscriber_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "remove", 6);
   GuardType guard(this->lock_);

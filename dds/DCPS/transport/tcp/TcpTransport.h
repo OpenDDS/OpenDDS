@@ -67,13 +67,13 @@ private:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id,
+                                            const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed);
 
   virtual bool configure_i(const TcpInst_rch& config);
 
-  virtual void client_stop(const RepoId& local_id);
+  virtual void client_stop(const GUID_t& local_id);
 
   virtual void shutdown_i();
 

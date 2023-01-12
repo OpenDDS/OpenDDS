@@ -34,7 +34,7 @@ class DDS_TEST
 public:
   static void set_part_bit_subscriber(OpenDDS::DCPS::Discovery_rch disc,
                                       DDS::DomainId_t domain,
-                                      OpenDDS::DCPS::RepoId partId,
+                                      OpenDDS::DCPS::GUID_t partId,
                                       OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::BitSubscriber> bit_subscriber)
   {
     OpenDDS::RTPS::RtpsDiscovery* rtpsDisc = dynamic_cast<OpenDDS::RTPS::RtpsDiscovery*>(disc.in());
@@ -89,9 +89,9 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   CORBA::Long domain = 9;
 
-  OpenDDS::DCPS::RepoId pubPartId = OpenDDS::DCPS::GUID_UNKNOWN;
-  OpenDDS::DCPS::RepoId pubTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
-  OpenDDS::DCPS::RepoId pubId = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t pubPartId = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t pubTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t pubId = OpenDDS::DCPS::GUID_UNKNOWN;
   OpenDDS::DCPS::RcHandle<TAO_DDS_DCPSDataWriter_i> dwImpl(OpenDDS::DCPS::make_rch<TAO_DDS_DCPSDataWriter_i>());
 
   DDS::DomainParticipantFactory_var dpf = TheServiceParticipant->get_domain_participant_factory();
@@ -122,7 +122,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
   if (use_rtps) { // check that topic/type name string bounds are enforced
     const std::string longname(300, 'a');
-    OpenDDS::DCPS::RepoId topicId;
+    OpenDDS::DCPS::GUID_t topicId;
     const bool key = false;
     OpenDDS::DCPS::TopicStatus ts =
       disc->assert_topic(topicId, domain, pubPartId,
@@ -239,7 +239,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
     }
 
   // add an inconsistent topic
-  OpenDDS::DCPS::RepoId topicId2;
+  OpenDDS::DCPS::GUID_t topicId2;
   const char* tnameIncompatible = "MYtopic";
   const char* dnameIncompatible = "MYnewdataname";
   ::DDS::TopicQos_var topicQosIncompatible = new ::DDS::TopicQos;
@@ -266,9 +266,9 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
       failed = true;
     }
 
-  OpenDDS::DCPS::RepoId subPartId = OpenDDS::DCPS::GUID_UNKNOWN;
-  OpenDDS::DCPS::RepoId subTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
-  OpenDDS::DCPS::RepoId subId = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t subPartId = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t subTopicId = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t subId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataReader_i drImpl;
   if (use_rtps)
     drImpl.disco_ = disc.in();
@@ -371,7 +371,7 @@ bool pubsub(OpenDDS::DCPS::Discovery_rch disc, CORBA::ORB_var orb)
 
 
   // incompatible QOS
-  OpenDDS::DCPS::RepoId pubIncQosId = OpenDDS::DCPS::GUID_UNKNOWN;
+  OpenDDS::DCPS::GUID_t pubIncQosId = OpenDDS::DCPS::GUID_UNKNOWN;
   TAO_DDS_DCPSDataWriter_i dwIncQosImpl;
 
   // Add publication

@@ -1281,8 +1281,8 @@ private:
         }
 
         DDS::Security::SecurityException ex;
-        const RepoId local_participant = make_id(get_repo_id(), ENTITYID_PARTICIPANT);
-        const RepoId remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const GUID_t local_participant = make_id(get_guid(), ENTITYID_PARTICIPANT);
+        const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
         XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
@@ -1299,8 +1299,8 @@ private:
       } else if (is_dispose_msg) {
 
         DDS::Security::SecurityException ex;
-        const RepoId local_participant = make_id(get_repo_id(), ENTITYID_PARTICIPANT);
-        const RepoId remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const GUID_t local_participant = make_id(get_guid(), ENTITYID_PARTICIPANT);
+        const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
         XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
@@ -1544,7 +1544,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
     }
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")
                ACE_TEXT("will return no data reading sub %C because:\n  %C\n"),
-               LogGuid(get_repo_id()).c_str(), msg.c_str()));
+               LogGuid(get_guid()).c_str(), msg.c_str()));
   }
 
   results.copy_to_user();

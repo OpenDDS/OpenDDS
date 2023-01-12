@@ -151,13 +151,13 @@ namespace OpenDDS
       proto_tree_add_uint (tree, fieldId, tvb_, ofs, len, domain_id);
     }
 
-    const RepoId *
+    const GUID_t *
     GIOP_Base::add_repo_id (int fieldId, proto_tree *subtree)
     {
       proto_tree *tree = subtree != 0 ? subtree : this->tree_;
-      guint len = 16; // size of RepoId
-      const RepoId *rid =
-        reinterpret_cast<const RepoId *>(tvb_get_ptr(tvb_, *offset_, len));
+      guint len = 16; // size of GUID_t
+      const GUID_t *rid =
+        reinterpret_cast<const GUID_t *>(tvb_get_ptr(tvb_, *offset_, len));
       proto_tree_add_bytes_format_value
         ( tree, fieldId, tvb_, *offset_, len,
           reinterpret_cast<const guint8*>(rid),

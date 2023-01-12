@@ -40,17 +40,17 @@ class Manager;
 
 } // namespace Update
 
-typedef std::map<OpenDDS::DCPS::RepoId,
+typedef std::map<OpenDDS::DCPS::GUID_t,
                  OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Subscription>,
                  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Subscription_Map;
-typedef std::map<OpenDDS::DCPS::RepoId,
+typedef std::map<OpenDDS::DCPS::GUID_t,
                  OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Publication>,
                  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Publication_Map;
-typedef std::map<OpenDDS::DCPS::RepoId,
+typedef std::map<OpenDDS::DCPS::GUID_t,
                  DCPS_IR_Topic*,
                  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Topic_Map;
 
-typedef ACE_Unbounded_Set<OpenDDS::DCPS::RepoId> TAO_DDS_RepoId_Set;
+typedef ACE_Unbounded_Set<OpenDDS::DCPS::GUID_t> TAO_DDS_RepoId_Set;
 
 /**
  * @class DCPS_IR_Participant
@@ -67,7 +67,7 @@ public:
   enum { OWNER_NONE};
 
   DCPS_IR_Participant(const TAO_DDS_DCPSFederationId& federationId,
-                      OpenDDS::DCPS::RepoId id,
+                      OpenDDS::DCPS::GUID_t id,
                       DCPS_IR_Domain* domain,
                       DDS::DomainParticipantQos qos,
                       Update::Manager* um,
@@ -99,13 +99,13 @@ public:
   int add_publication(OpenDDS::DCPS::unique_ptr<DCPS_IR_Publication> pub);
 
   /// Return the publication object.
-  int find_publication_reference(OpenDDS::DCPS::RepoId pubId,
+  int find_publication_reference(OpenDDS::DCPS::GUID_t pubId,
                                  DCPS_IR_Publication*& pub);
 
   /// Removes the publication with the id
   /// Deletes the publication object if returns successful
   /// Returns 0 if successful
-  int remove_publication(OpenDDS::DCPS::RepoId pubId);
+  int remove_publication(OpenDDS::DCPS::GUID_t pubId);
 
   /// Add a subscription
   /// This takes ownership of the memory pointed to by aub
@@ -113,13 +113,13 @@ public:
   int add_subscription(OpenDDS::DCPS::unique_ptr<DCPS_IR_Subscription> sub);
 
   /// Return the subscription object.
-  int find_subscription_reference(OpenDDS::DCPS::RepoId subId,
+  int find_subscription_reference(OpenDDS::DCPS::GUID_t subId,
                                   DCPS_IR_Subscription*& sub);
 
   /// Removes the subscription with the id
   /// Deletes the subscription object if returns successful
   /// Returns 0 if successful
-  int remove_subscription(OpenDDS::DCPS::RepoId subId);
+  int remove_subscription(OpenDDS::DCPS::GUID_t subId);
 
   /// Add a topic
   /// Returns 0 if added, 1 if already exists, -1 other failure
@@ -128,13 +128,13 @@ public:
   /// Remove a topic reference
   /// Does not change or take ownership of topic
   /// Returns 0 if successful
-  int remove_topic_reference(OpenDDS::DCPS::RepoId topicId,
+  int remove_topic_reference(OpenDDS::DCPS::GUID_t topicId,
                              DCPS_IR_Topic*& topic);
 
   /// Find topic reference with id
   /// Does NOT give ownership of memory
   /// Returns 0 if successful
-  int find_topic_reference(OpenDDS::DCPS::RepoId topicId,
+  int find_topic_reference(OpenDDS::DCPS::GUID_t topicId,
                            DCPS_IR_Topic*& topic);
 
   /// Removes all topics, publications and
@@ -148,19 +148,19 @@ public:
   ///  domain's list of dead participants for removal
   void mark_dead();
 
-  OpenDDS::DCPS::RepoId get_id();
+  OpenDDS::DCPS::GUID_t get_id();
 
   CORBA::Boolean is_alive();
   void set_alive(CORBA::Boolean alive);
 
   /// Ignore the participant with the id
-  void ignore_participant(OpenDDS::DCPS::RepoId id);
+  void ignore_participant(OpenDDS::DCPS::GUID_t id);
   /// Ignore the topic with the id
-  void ignore_topic(OpenDDS::DCPS::RepoId id);
+  void ignore_topic(OpenDDS::DCPS::GUID_t id);
   /// Ignore the publication with the id
-  void ignore_publication(OpenDDS::DCPS::RepoId id);
+  void ignore_publication(OpenDDS::DCPS::GUID_t id);
   /// Ignore the subscription with the id
-  void ignore_subscription(OpenDDS::DCPS::RepoId id);
+  void ignore_subscription(OpenDDS::DCPS::GUID_t id);
 
   /// Return pointer to the participant qos
   /// Participant retains ownership
@@ -175,10 +175,10 @@ public:
 
   ///@{
   /// Test if an entity is ignored by this participant.
-  CORBA::Boolean is_participant_ignored(OpenDDS::DCPS::RepoId id);
-  CORBA::Boolean is_topic_ignored(OpenDDS::DCPS::RepoId id);
-  CORBA::Boolean is_publication_ignored(OpenDDS::DCPS::RepoId id);
-  CORBA::Boolean is_subscription_ignored(OpenDDS::DCPS::RepoId id);
+  CORBA::Boolean is_participant_ignored(OpenDDS::DCPS::GUID_t id);
+  CORBA::Boolean is_topic_ignored(OpenDDS::DCPS::GUID_t id);
+  CORBA::Boolean is_publication_ignored(OpenDDS::DCPS::GUID_t id);
+  CORBA::Boolean is_subscription_ignored(OpenDDS::DCPS::GUID_t id);
   ///@}
 
   DDS::InstanceHandle_t get_handle();
@@ -188,9 +188,9 @@ public:
 
   ///@{
   /// Next Entity Id value in sequence.
-  OpenDDS::DCPS::RepoId get_next_topic_id(bool builtin);
-  OpenDDS::DCPS::RepoId get_next_publication_id(bool builtin);
-  OpenDDS::DCPS::RepoId get_next_subscription_id(bool builtin);
+  OpenDDS::DCPS::GUID_t get_next_topic_id(bool builtin);
+  OpenDDS::DCPS::GUID_t get_next_publication_id(bool builtin);
+  OpenDDS::DCPS::GUID_t get_next_subscription_id(bool builtin);
   ///@}
 
   ///@{
@@ -212,7 +212,7 @@ public:
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
 private:
-  OpenDDS::DCPS::RepoId id_;
+  OpenDDS::DCPS::GUID_t id_;
   DCPS_IR_Domain* domain_;
   DDS::DomainParticipantQos qos_;
   CORBA::Boolean aliveStatus_;

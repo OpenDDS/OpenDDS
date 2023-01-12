@@ -67,12 +67,12 @@ public:
 
   virtual CORBA::Boolean attach_participant(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId);
+    const OpenDDS::DCPS::GUID_t& participantId);
 
   virtual OpenDDS::DCPS::TopicStatus assert_topic(
-    OpenDDS::DCPS::RepoId_out topicId,
+    OpenDDS::DCPS::GUID_t_out topicId,
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::GUID_t& participantId,
     const char * topicName,
     const char * dataTypeName,
     const DDS::TopicQos & qos,
@@ -95,9 +95,9 @@ public:
    * add a Topic and obtain a newly generated Id value will return an Id
    * value greater than the Id value of the current one.
    */
-  bool add_topic(const OpenDDS::DCPS::RepoId& topicId,
+  bool add_topic(const OpenDDS::DCPS::GUID_t& topicId,
                  DDS::DomainId_t domainId,
-                 const OpenDDS::DCPS::RepoId& participantId,
+                 const OpenDDS::DCPS::GUID_t& participantId,
                  const char* topicName,
                  const char* dataTypeName,
                  const DDS::TopicQos& qos);
@@ -107,17 +107,17 @@ public:
     const char * topicName,
     CORBA::String_out dataTypeName,
     DDS::TopicQos_out qos,
-    OpenDDS::DCPS::RepoId_out topicId);
+    OpenDDS::DCPS::GUID_t_out topicId);
 
   virtual OpenDDS::DCPS::TopicStatus remove_topic(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& topicId);
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& topicId);
 
-  virtual OpenDDS::DCPS::RepoId add_publication(
+  virtual OpenDDS::DCPS::GUID_t add_publication(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& topicId,
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& topicId,
     OpenDDS::DCPS::DataWriterRemote_ptr publication,
     const DDS::DataWriterQos & qos,
     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
@@ -146,9 +146,9 @@ public:
    * current one.
    */
   bool add_publication(DDS::DomainId_t domainId,
-                       const OpenDDS::DCPS::RepoId& participantId,
-                       const OpenDDS::DCPS::RepoId& topicId,
-                       const OpenDDS::DCPS::RepoId& pubId,
+                       const OpenDDS::DCPS::GUID_t& participantId,
+                       const OpenDDS::DCPS::GUID_t& topicId,
+                       const OpenDDS::DCPS::GUID_t& pubId,
                        const char* pub_str,
                        const DDS::DataWriterQos & qos,
                        const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
@@ -159,13 +159,13 @@ public:
 
   virtual void remove_publication(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& publicationId);
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& publicationId);
 
-  virtual OpenDDS::DCPS::RepoId add_subscription(
+  virtual OpenDDS::DCPS::GUID_t add_subscription(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& topicId,
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& topicId,
     OpenDDS::DCPS::DataReaderRemote_ptr subscription,
     const DDS::DataReaderQos & qos,
     const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
@@ -197,9 +197,9 @@ public:
    * current one.
    */
   bool add_subscription(DDS::DomainId_t domainId,
-                        const OpenDDS::DCPS::RepoId& participantId,
-                        const OpenDDS::DCPS::RepoId& topicId,
-                        const OpenDDS::DCPS::RepoId& subId,
+                        const OpenDDS::DCPS::GUID_t& participantId,
+                        const OpenDDS::DCPS::GUID_t& topicId,
+                        const OpenDDS::DCPS::GUID_t& subId,
                         const char* sub_str,
                         const DDS::DataReaderQos & qos,
                         const OpenDDS::DCPS::TransportLocatorSeq & transInfo,
@@ -213,8 +213,8 @@ public:
 
   virtual void remove_subscription(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& subscriptionId);
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& subscriptionId);
 
   virtual OpenDDS::DCPS::AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
@@ -236,12 +236,12 @@ public:
    * current one.
    */
   bool add_domain_participant(DDS::DomainId_t domainId
-                              , const OpenDDS::DCPS::RepoId& participantId
+                              , const OpenDDS::DCPS::GUID_t& participantId
                               , const DDS::DomainParticipantQos & qos);
 
   virtual void remove_domain_participant(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId);
+    const OpenDDS::DCPS::GUID_t& participantId);
 
   bool remove_by_owner(
     DDS::DomainId_t domain,
@@ -249,98 +249,98 @@ public:
 
   virtual void disassociate_participant(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id);
+    const OpenDDS::DCPS::GUID_t& local_id,
+    const OpenDDS::DCPS::GUID_t& remote_id);
 
   virtual void disassociate_subscription(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id);
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& local_id,
+    const OpenDDS::DCPS::GUID_t& remote_id);
 
   virtual void disassociate_publication(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& local_id,
-    const OpenDDS::DCPS::RepoId& remote_id);
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& local_id,
+    const OpenDDS::DCPS::GUID_t& remote_id);
 
   virtual void ignore_domain_participant(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId);
+    const OpenDDS::DCPS::GUID_t& myParticipantId,
+    const OpenDDS::DCPS::GUID_t& ignoreId);
 
   virtual void ignore_topic(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId);
+    const OpenDDS::DCPS::GUID_t& myParticipantId,
+    const OpenDDS::DCPS::GUID_t& ignoreId);
 
   virtual void ignore_subscription(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId);
+    const OpenDDS::DCPS::GUID_t& myParticipantId,
+    const OpenDDS::DCPS::GUID_t& ignoreId);
 
   virtual void ignore_publication(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& myParticipantId,
-    const OpenDDS::DCPS::RepoId& ignoreId);
+    const OpenDDS::DCPS::GUID_t& myParticipantId,
+    const OpenDDS::DCPS::GUID_t& ignoreId);
 
   virtual CORBA::Boolean update_publication_qos(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& partId,
-    const OpenDDS::DCPS::RepoId& dwId,
+    const OpenDDS::DCPS::GUID_t& partId,
+    const OpenDDS::DCPS::GUID_t& dwId,
     const DDS::DataWriterQos & qos,
     const DDS::PublisherQos & publisherQos);
 
   /// Entry for federation updates of DataWriterQos values.
   void update_publication_qos(
     DDS::DomainId_t            domainId,
-    const OpenDDS::DCPS::RepoId& partId,
-    const OpenDDS::DCPS::RepoId& dwId,
+    const OpenDDS::DCPS::GUID_t& partId,
+    const OpenDDS::DCPS::GUID_t& dwId,
     const DDS::DataWriterQos&  qos);
 
   /// Entry for federation updates of PublisherQos values.
   void update_publication_qos(
     DDS::DomainId_t            domainId,
-    const OpenDDS::DCPS::RepoId& partId,
-    const OpenDDS::DCPS::RepoId& dwId,
+    const OpenDDS::DCPS::GUID_t& partId,
+    const OpenDDS::DCPS::GUID_t& dwId,
     const DDS::PublisherQos&   qos);
 
   virtual CORBA::Boolean update_subscription_qos(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& partId,
-    const OpenDDS::DCPS::RepoId& drId,
+    const OpenDDS::DCPS::GUID_t& partId,
+    const OpenDDS::DCPS::GUID_t& drId,
     const DDS::DataReaderQos & qos,
     const DDS::SubscriberQos & subscriberQos);
 
   /// Entry for federation updates of DataReaderQos values.
   void update_subscription_qos(
     DDS::DomainId_t            domainId,
-    const OpenDDS::DCPS::RepoId& partId,
-    const OpenDDS::DCPS::RepoId& drId,
+    const OpenDDS::DCPS::GUID_t& partId,
+    const OpenDDS::DCPS::GUID_t& drId,
     const DDS::DataReaderQos&  qos);
 
   /// Entry for federation updates of SubscriberQos values.
   void update_subscription_qos(
     DDS::DomainId_t            domainId,
-    const OpenDDS::DCPS::RepoId& partId,
-    const OpenDDS::DCPS::RepoId& drId,
+    const OpenDDS::DCPS::GUID_t& partId,
+    const OpenDDS::DCPS::GUID_t& drId,
     const DDS::SubscriberQos&  qos);
 
   virtual ::CORBA::Boolean update_subscription_params(
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
-    const OpenDDS::DCPS::RepoId& subscriptionId,
+    const OpenDDS::DCPS::GUID_t& participantId,
+    const OpenDDS::DCPS::GUID_t& subscriptionId,
     const DDS::StringSeq& params);
 
   virtual CORBA::Boolean update_topic_qos(
-    const OpenDDS::DCPS::RepoId& topicId,
+    const OpenDDS::DCPS::GUID_t& topicId,
     DDS::DomainId_t domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::GUID_t& participantId,
     const DDS::TopicQos & qos);
 
   virtual CORBA::Boolean update_domain_participant_qos(
     DDS::DomainId_t domain,
-    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::GUID_t& participantId,
     const DDS::DomainParticipantQos & qos);
 
   /// Cause the entire repository to exit.
@@ -376,7 +376,7 @@ public:
    */
   bool changeOwnership(
     DDS::DomainId_t              domainId,
-    const OpenDDS::DCPS::RepoId& participantId,
+    const OpenDDS::DCPS::GUID_t& participantId,
     long                           sender,
     long                           owner);
 

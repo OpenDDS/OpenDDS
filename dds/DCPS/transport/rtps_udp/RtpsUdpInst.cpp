@@ -284,7 +284,7 @@ RtpsUdpInst::get_blob(const TransportLocatorSeq& trans_info) const
 }
 
 void
-RtpsUdpInst::update_locators(const RepoId& remote_id,
+RtpsUdpInst::update_locators(const GUID_t& remote_id,
                              const TransportLocatorSeq& locators)
 {
   TransportImpl_rch imp = impl();
@@ -295,7 +295,7 @@ RtpsUdpInst::update_locators(const RepoId& remote_id,
 }
 
 void
-RtpsUdpInst::get_last_recv_locator(const RepoId& remote_id,
+RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
                                    TransportLocator& locator)
 {
   TransportImpl_rch imp = impl();

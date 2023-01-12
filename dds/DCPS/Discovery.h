@@ -101,9 +101,9 @@ public:
 
   virtual bool attach_participant(
     DDS::DomainId_t domainId,
-    const RepoId& participantId) = 0;
+    const GUID_t& participantId) = 0;
 
-  virtual OpenDDS::DCPS::RepoId generate_participant_guid() = 0;
+  virtual OpenDDS::DCPS::GUID_t generate_participant_guid() = 0;
 
   virtual AddDomainStatus add_domain_participant(
     DDS::DomainId_t domain,
@@ -115,7 +115,7 @@ public:
     DDS::DomainId_t domain,
     const DDS::DomainParticipantQos& qos,
     XTypes::TypeLookupService_rch tls,
-    const OpenDDS::DCPS::RepoId& guid,
+    const OpenDDS::DCPS::GUID_t& guid,
     DDS::Security::IdentityHandle id,
     DDS::Security::PermissionsHandle perm,
     DDS::Security::ParticipantCryptoHandle part_crypto) = 0;
@@ -123,25 +123,25 @@ public:
 
   virtual bool remove_domain_participant(
     DDS::DomainId_t domainId,
-    const RepoId& participantId) = 0;
+    const GUID_t& participantId) = 0;
 
   virtual bool ignore_domain_participant(
     DDS::DomainId_t domainId,
-    const RepoId& myParticipantId,
-    const RepoId& ignoreId) = 0;
+    const GUID_t& myParticipantId,
+    const GUID_t& ignoreId) = 0;
 
   virtual bool update_domain_participant_qos(
     DDS::DomainId_t domain,
-    const RepoId& participantId,
+    const GUID_t& participantId,
     const DDS::DomainParticipantQos& qos) = 0;
 
 
   // Topic operations:
 
   virtual TopicStatus assert_topic(
-    RepoId_out topicId,
+    GUID_t_out topicId,
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
+    const GUID_t& participantId,
     const char* topicName,
     const char* dataTypeName,
     const DDS::TopicQos& qos,
@@ -150,26 +150,26 @@ public:
 
   virtual TopicStatus find_topic(
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
+    const GUID_t& participantId,
     const char* topicName,
     CORBA::String_out dataTypeName,
     DDS::TopicQos_out qos,
-    RepoId_out topicId) = 0;
+    GUID_t_out topicId) = 0;
 
   virtual TopicStatus remove_topic(
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
-    const RepoId& topicId) = 0;
+    const GUID_t& participantId,
+    const GUID_t& topicId) = 0;
 
   virtual bool ignore_topic(
     DDS::DomainId_t domainId,
-    const RepoId& myParticipantId,
-    const RepoId& ignoreId) = 0;
+    const GUID_t& myParticipantId,
+    const GUID_t& ignoreId) = 0;
 
   virtual bool update_topic_qos(
-    const RepoId& topicId,
+    const GUID_t& topicId,
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
+    const GUID_t& participantId,
     const DDS::TopicQos& qos) = 0;
 
 
@@ -182,10 +182,10 @@ public:
   /// for the publication pointer, so it requires that
   /// the publication pointer remain valid until
   /// remove_publication is called.
-  virtual RepoId add_publication(
+  virtual GUID_t add_publication(
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
-    const RepoId& topicId,
+    const GUID_t& participantId,
+    const GUID_t& topicId,
     DataWriterCallbacks_rch publication,
     const DDS::DataWriterQos& qos,
     const TransportLocatorSeq& transInfo,
@@ -194,25 +194,25 @@ public:
 
   virtual bool remove_publication(
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
-    const RepoId& publicationId) = 0;
+    const GUID_t& participantId,
+    const GUID_t& publicationId) = 0;
 
   virtual bool ignore_publication(
     DDS::DomainId_t domainId,
-    const RepoId& myParticipantId,
-    const RepoId& ignoreId) = 0;
+    const GUID_t& myParticipantId,
+    const GUID_t& ignoreId) = 0;
 
   virtual bool update_publication_qos(
     DDS::DomainId_t domainId,
-    const RepoId& partId,
-    const RepoId& dwId,
+    const GUID_t& partId,
+    const GUID_t& dwId,
     const DDS::DataWriterQos& qos,
     const DDS::PublisherQos& publisherQos) = 0;
 
   virtual void update_publication_locators(
     DDS::DomainId_t domainId,
-    const RepoId& partId,
-    const RepoId& dwId,
+    const GUID_t& partId,
+    const GUID_t& dwId,
     const TransportLocatorSeq& transInfo);
 
   // Subscription operations:
@@ -224,10 +224,10 @@ public:
   /// for the subscription pointer, so it requires that
   /// the subscription pointer remain valid until
   /// remove_subscription is called.
-  virtual RepoId add_subscription(
+  virtual GUID_t add_subscription(
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
-    const RepoId& topicId,
+    const GUID_t& participantId,
+    const GUID_t& topicId,
     DataReaderCallbacks_rch subscription,
     const DDS::DataReaderQos& qos,
     const TransportLocatorSeq& transInfo,
@@ -239,31 +239,31 @@ public:
 
   virtual bool remove_subscription(
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
-    const RepoId& subscriptionId) = 0;
+    const GUID_t& participantId,
+    const GUID_t& subscriptionId) = 0;
 
   virtual bool ignore_subscription(
     DDS::DomainId_t domainId,
-    const RepoId& myParticipantId,
-    const RepoId& ignoreId) = 0;
+    const GUID_t& myParticipantId,
+    const GUID_t& ignoreId) = 0;
 
   virtual bool update_subscription_qos(
     DDS::DomainId_t domainId,
-    const RepoId& partId,
-    const RepoId& drId,
+    const GUID_t& partId,
+    const GUID_t& drId,
     const DDS::DataReaderQos& qos,
     const DDS::SubscriberQos& subscriberQos) = 0;
 
   virtual bool update_subscription_params(
     DDS::DomainId_t domainId,
-    const RepoId& participantId,
-    const RepoId& subscriptionId,
+    const GUID_t& participantId,
+    const GUID_t& subscriptionId,
     const DDS::StringSeq& params) = 0;
 
   virtual void update_subscription_locators(
     DDS::DomainId_t domainId,
-    const RepoId& partId,
-    const RepoId& drId,
+    const GUID_t& partId,
+    const GUID_t& drId,
     const TransportLocatorSeq& transInfo);
 
   // Managing reader/writer associations:
@@ -271,7 +271,7 @@ public:
   virtual bool supports_liveliness() const { return false; }
 
   virtual void signal_liveliness(const DDS::DomainId_t /*domain_id*/,
-                                 const RepoId& /*part_id*/,
+                                 const GUID_t& /*part_id*/,
                                  DDS::LivelinessQosPolicyKind /*kind*/) { }
 
   virtual void request_remote_complete_type_objects(

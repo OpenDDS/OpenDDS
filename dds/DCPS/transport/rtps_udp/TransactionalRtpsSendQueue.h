@@ -45,13 +45,13 @@ public:
   void end_transaction(MetaSubmessageVec& vec);
 
   /// Mark all queued submessage with the given source and destination as ignored.
-  void ignore(const RepoId& local, const RepoId& remote);
+  void ignore(const GUID_t& local, const GUID_t& remote);
 
   /// Mark all queued submessage with the given destination (dst_guid_) as ignored.
-  void ignore_remote(const RepoId& id);
+  void ignore_remote(const GUID_t& id);
 
   /// Mark all queued submessage with the given source (src_guid_) as ignored.
-  void ignore_local(const RepoId& id);
+  void ignore_local(const GUID_t& id);
 
 private:
 

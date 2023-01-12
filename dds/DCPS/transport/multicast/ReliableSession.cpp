@@ -163,7 +163,7 @@ ReliableSession::deliver_held_data()
 }
 
 void
-ReliableSession::release_remote(const RepoId& remote)
+ReliableSession::release_remote(const GUID_t& remote)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, held_lock_);
   if (!held_.empty()) {

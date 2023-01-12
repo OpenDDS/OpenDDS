@@ -61,7 +61,7 @@ OpenDDS::DCPS::DataLinkSet::remove_link(const DataLink_rch& link)
 }
 
 OpenDDS::DCPS::DataLinkSet_rch
-OpenDDS::DCPS::DataLinkSet::select_links(const RepoId* remoteIds,
+OpenDDS::DCPS::DataLinkSet::select_links(const GUID_t* remoteIds,
                                          const CORBA::ULong num_targets)
 {
   DBG_ENTRY_LVL("DataLinkSet","select_links",6);

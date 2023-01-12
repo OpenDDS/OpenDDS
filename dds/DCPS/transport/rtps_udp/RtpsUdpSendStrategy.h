@@ -55,7 +55,7 @@ public:
   void append_submessages(const RTPS::SubmessageSeq& submessages);
 
 #if defined(OPENDDS_SECURITY)
-  void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
+  void encode_payload(const GUID_t& pub_id, Message_Block_Ptr& payload,
                       RTPS::SubmessageSeq& submessages);
 #endif
 

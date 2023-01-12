@@ -22,7 +22,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-DCPS_IR_Topic::DCPS_IR_Topic(const OpenDDS::DCPS::RepoId& id,
+DCPS_IR_Topic::DCPS_IR_Topic(const OpenDDS::DCPS::GUID_t& id,
                              const DDS::TopicQos& qos,
                              DCPS_IR_Domain* domain,
                              DCPS_IR_Participant* creator,
@@ -217,12 +217,12 @@ int DCPS_IR_Topic::remove_subscription_reference(DCPS_IR_Subscription* subscript
   return status;
 }
 
-OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_id() const
+OpenDDS::DCPS::GUID_t DCPS_IR_Topic::get_id() const
 {
   return id_;
 }
 
-OpenDDS::DCPS::RepoId DCPS_IR_Topic::get_participant_id() const
+OpenDDS::DCPS::GUID_t DCPS_IR_Topic::get_participant_id() const
 {
   return participant_->get_id();
 }

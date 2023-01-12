@@ -15,7 +15,6 @@
 #include "InstanceState.h"
 #include "dds/DdsDcpsInfrastructureC.h"
 #include "PoolAllocator.h"
-#include "RepoIdTypes.h"
 #include "RcObject.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
@@ -49,7 +48,7 @@ public:
   typedef OPENDDS_MAP(OPENDDS_STRING, InstanceMap) TypeInstanceMap;
 
   struct WriterInfo {
-    WriterInfo(const PublicationId& pub_id,
+    WriterInfo(const GUID_t& pub_id,
                const CORBA::Long& ownership_strength)
       : pub_id_(pub_id)
       , ownership_strength_(ownership_strength)
@@ -60,7 +59,7 @@ public:
       , ownership_strength_(0)
     {}
 
-    PublicationId pub_id_;
+    GUID_t pub_id_;
     CORBA::Long ownership_strength_;
   };
 
@@ -113,7 +112,7 @@ public:
   /**
   * Remove a writer from all instances ownership collection.
   */
-  void remove_writer(const PublicationId& pub_id);
+  void remove_writer(const GUID_t& pub_id);
 
   /**
   * Remove all writers that write to the specified instance.
@@ -125,19 +124,19 @@ public:
   * Return true if it's the owner writer removed.
   */
   bool remove_writer(const DDS::InstanceHandle_t& instance_handle,
-                     const PublicationId& pub_id);
+                     const GUID_t& pub_id);
 
   /**
   * Return true if the provide writer is the owner of the instance.
   */
   bool is_owner(const DDS::InstanceHandle_t& instance_handle,
-                const PublicationId& pub_id);
+                const GUID_t& pub_id);
 
   /**
   * Determine if the provided publication can be the owner.
   */
   bool select_owner(const DDS::InstanceHandle_t& instance_handle,
-                    const PublicationId& pub_id,
+                    const GUID_t& pub_id,
                     const CORBA::Long& ownership_strength,
                     InstanceState_rch instance_state);
 
@@ -151,25 +150,25 @@ public:
   /**
   * Update the ownership strength of a publication.
   */
-  void update_ownership_strength(const PublicationId& pub_id,
+  void update_ownership_strength(const GUID_t& pub_id,
                                  const CORBA::Long& ownership_strength);
 
 private:
 
   bool remove_writer(const DDS::InstanceHandle_t& instance_handle,
                      OwnershipWriterInfos& infos,
-                     const PublicationId& pub_id);
+                     const GUID_t& pub_id);
 
   void remove_owner(const DDS::InstanceHandle_t& instance_handle,
                     OwnershipWriterInfos& infos,
                     bool sort);
 
   void remove_candidate(OwnershipWriterInfos& infos,
-                        const PublicationId& pub_id);
+                        const GUID_t& pub_id);
 
   void broadcast_new_owner(const DDS::InstanceHandle_t& instance_handle,
                            OwnershipWriterInfos& infos,
-                           const PublicationId& owner);
+                           const GUID_t& owner);
 
   ACE_Thread_Mutex instance_lock_;
   TypeInstanceMap type_instance_map_;

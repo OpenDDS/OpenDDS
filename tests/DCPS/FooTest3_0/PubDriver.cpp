@@ -362,7 +362,7 @@ PubDriver::end()
 void
 PubDriver::run()
 {
-  OpenDDS::DCPS::PublicationId pub_id = datawriter_servant_->get_repo_id ();
+  OpenDDS::DCPS::GUID_t pub_id = datawriter_servant_->get_guid ();
   std::stringstream buffer;
 
   buffer << to_string(pub_id);

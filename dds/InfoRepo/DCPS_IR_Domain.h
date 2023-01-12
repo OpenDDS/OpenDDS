@@ -44,7 +44,7 @@ class DCPS_IR_Participant;
 typedef OpenDDS::DCPS::RcHandle<DCPS_IR_Participant> DCPS_IR_Participant_rch;
 typedef std::set<DCPS_IR_Participant_rch > DCPS_IR_Participant_Set;
 
-typedef std::map<OpenDDS::DCPS::RepoId,
+typedef std::map<OpenDDS::DCPS::GUID_t,
                  DCPS_IR_Participant_rch ,
                  OpenDDS::DCPS::GUID_tKeyLessThan> DCPS_IR_Participant_Map;
 
@@ -78,24 +78,24 @@ public:
   /// The notify_lost parameter is passed to the remove_associations()
   /// See the comments of remove_associations() in DataWriterRemote.idl
   /// or DataReaderRemote.idl.
-  int remove_participant(const OpenDDS::DCPS::RepoId& particpantId,
+  int remove_participant(const OpenDDS::DCPS::GUID_t& particpantId,
                          CORBA::Boolean    notify_lost);
 
-  DCPS_IR_Participant_rch participant_rch(const OpenDDS::DCPS::RepoId& id) const;
+  DCPS_IR_Participant_rch participant_rch(const OpenDDS::DCPS::GUID_t& id) const;
 
   /// Find the participant with the id.
-  DCPS_IR_Participant* participant(const OpenDDS::DCPS::RepoId& id) const;
+  DCPS_IR_Participant* participant(const OpenDDS::DCPS::GUID_t& id) const;
 
   ///@{
   /// Add a topic to the domain
   /// Returns OpenDDS::DCPS::CREATED if successful
-  OpenDDS::DCPS::TopicStatus add_topic(OpenDDS::DCPS::RepoId_out topicId,
+  OpenDDS::DCPS::TopicStatus add_topic(OpenDDS::DCPS::GUID_t_out topicId,
                                        const char * topicName,
                                        const char * dataTypeName,
                                        const DDS::TopicQos & qos,
                                        DCPS_IR_Participant* participantPtr);
 
-  OpenDDS::DCPS::TopicStatus force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
+  OpenDDS::DCPS::TopicStatus force_add_topic(const OpenDDS::DCPS::GUID_t& topicId,
                                              const char* topicName,
                                              const char* dataTypeName,
                                              const DDS::TopicQos & qos,
@@ -109,7 +109,7 @@ public:
                                         DCPS_IR_Topic*& topic);
 
   /// Find a topic object reference using the topic Id value.
-  DCPS_IR_Topic* find_topic(const OpenDDS::DCPS::RepoId& id);
+  DCPS_IR_Topic* find_topic(const OpenDDS::DCPS::GUID_t& id);
 
   /// Remove the topic
   /// The topic has been deleted if returns successful
@@ -120,7 +120,7 @@ public:
   /// Remove the topic from the id to topic map.
   /// This method should only be called by the DCPS_IR_Topic
   /// when deleting the topic.
-  void remove_topic_id_mapping(const OpenDDS::DCPS::RepoId& topicId);
+  void remove_topic_id_mapping(const OpenDDS::DCPS::GUID_t& topicId);
 
   /// Mark a participant as being unresponsive (dead) and
   ///  schedule it to be removed next time
@@ -133,7 +133,7 @@ public:
   DDS::DomainId_t get_id();
 
   /// Next Entity Id value in sequence.
-  OpenDDS::DCPS::RepoId get_next_participant_id();
+  OpenDDS::DCPS::GUID_t get_next_participant_id();
 
   /// Ensure no conflicts with sequence values from persistent storage.
   void last_participant_key(long key);
@@ -178,7 +178,7 @@ public:
   bool useBIT() const { return useBIT_.value(); }
 
 private:
-  OpenDDS::DCPS::TopicStatus add_topic_i(OpenDDS::DCPS::RepoId& topicId,
+  OpenDDS::DCPS::TopicStatus add_topic_i(OpenDDS::DCPS::GUID_t& topicId,
                                          const char * topicName,
                                          const char * dataTypeName,
                                          const DDS::TopicQos & qos,
@@ -230,8 +230,8 @@ private:
   /// all the topics
   DCPS_IR_Topic_Description_Set topicDescriptions_;
 
-  /// Mapping from RepoId values to Topic object references.
-  typedef std::map<OpenDDS::DCPS::RepoId,
+  /// Mapping from GUID_t values to Topic object references.
+  typedef std::map<OpenDDS::DCPS::GUID_t,
                    OpenDDS::DCPS::container_supported_unique_ptr<DCPS_IR_Topic>,
                    OpenDDS::DCPS::GUID_tKeyLessThan> IdToTopicMap;
 

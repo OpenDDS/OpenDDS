@@ -173,7 +173,7 @@ WriteDataContainer::~WriteDataContainer()
 }
 
 void
-WriteDataContainer::add_reader_acks(const RepoId& reader, const SequenceNumber& base)
+WriteDataContainer::add_reader_acks(const GUID_t& reader, const SequenceNumber& base)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
 
@@ -188,7 +188,7 @@ WriteDataContainer::add_reader_acks(const RepoId& reader, const SequenceNumber& 
 }
 
 void
-WriteDataContainer::remove_reader_acks(const RepoId& reader)
+WriteDataContainer::remove_reader_acks(const GUID_t& reader)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(wfa_lock_);
 
@@ -242,7 +242,7 @@ WriteDataContainer::get_last_ack()
 }
 
 void
-WriteDataContainer::update_acked(const SequenceNumber& seq, const RepoId& id)
+WriteDataContainer::update_acked(const SequenceNumber& seq, const GUID_t& id)
 {
   bool do_notify = false;
   if (id == GUID_UNKNOWN) {
@@ -323,7 +323,7 @@ WriteDataContainer::enqueue(
 }
 
 DDS::ReturnCode_t
-WriteDataContainer::reenqueue_all(const RepoId& reader_id,
+WriteDataContainer::reenqueue_all(const GUID_t& reader_id,
                                   const DDS::LifespanQosPolicy& lifespan
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                                   ,
@@ -1369,7 +1369,7 @@ WriteDataContainer::get_handle_instance(DDS::InstanceHandle_t handle)
 void
 WriteDataContainer::copy_and_prepend(SendStateDataSampleList& list,
                                      const SendStateDataSampleList& appended,
-                                     const RepoId& reader_id,
+                                     const GUID_t& reader_id,
                                      const DDS::LifespanQosPolicy& lifespan,
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
                                      const OPENDDS_STRING& filterClassName,

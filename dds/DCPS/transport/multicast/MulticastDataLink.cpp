@@ -255,8 +255,8 @@ MulticastDataLink::reassemble(ReceivedDataSample& data,
 }
 
 int
-MulticastDataLink::make_reservation(const RepoId& rpi,
-                                    const RepoId& lsi,
+MulticastDataLink::make_reservation(const GUID_t& rpi,
+                                    const GUID_t& lsi,
                                     const TransportReceiveListener_wrch& trl,
                                     bool reliable)
 {
@@ -280,8 +280,8 @@ MulticastDataLink::make_reservation(const RepoId& rpi,
 }
 
 void
-MulticastDataLink::release_reservations_i(const RepoId& remote_id,
-                                          const RepoId& local_id)
+MulticastDataLink::release_reservations_i(const GUID_t& remote_id,
+                                          const GUID_t& local_id)
 {
   const MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote_id).federationId() << 32
     | RepoIdConverter(remote_id).participantId();
@@ -375,7 +375,7 @@ MulticastDataLink::ready_to_deliver(const ReceivedDataSample& data)
 }
 
 void
-MulticastDataLink::release_remote_i(const RepoId& remote)
+MulticastDataLink::release_remote_i(const GUID_t& remote)
 {
   ACE_GUARD(ACE_SYNCH_RECURSIVE_MUTEX, guard, session_lock_);
   MulticastPeer remote_source = (ACE_INT64)RepoIdConverter(remote).federationId() << 32
@@ -458,7 +458,7 @@ MulticastDataLink::stop_i()
 }
 
 void
-MulticastDataLink::client_stop(const RepoId& localId)
+MulticastDataLink::client_stop(const GUID_t& localId)
 {
   if (send_buffer_) {
     send_buffer_->retain_all(localId);

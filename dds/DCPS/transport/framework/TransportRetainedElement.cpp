@@ -28,7 +28,7 @@ OpenDDS::DCPS::TransportRetainedElement::release_element(
   delete this;
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 OpenDDS::DCPS::TransportRetainedElement::publication_id() const
 {
   DBG_ENTRY_LVL("TransportRetainedElement", "publication_id", 6);

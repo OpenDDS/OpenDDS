@@ -94,10 +94,10 @@ public:
 
   class OpenDDS_Dcps_Export RepoIdSequence {
   public:
-    explicit RepoIdSequence(const RepoId& base);
-    RepoId next();
+    explicit RepoIdSequence(const GUID_t& base);
+    GUID_t next();
   private:
-    RepoId base_;          // will be combined with serial to produce next
+    GUID_t base_;          // will be combined with serial to produce next
     long serial_;          // will be incremented each time
     GuidBuilder builder_;  // used to modify base
   };
@@ -286,7 +286,7 @@ public:
   /**
    *  Return the id given by discovery.
    */
-  RepoId get_id() const;
+  GUID_t get_id() const;
 
   /**
    * Return a unique string based on repo ID.
@@ -345,9 +345,9 @@ public:
    */
   DDS::DomainParticipantListener_ptr listener_for(DDS::StatusKind kind);
 
-  typedef OPENDDS_VECTOR(RepoId) TopicIdVec;
+  typedef OPENDDS_VECTOR(GUID_t) TopicIdVec;
   /**
-   * Populates an std::vector with the RepoId of the topics this
+   * Populates an std::vector with the GUID_t of the topics this
    * participant has created/found.
    */
   void get_topic_ids(TopicIdVec& topics);
@@ -363,7 +363,7 @@ public:
    * Called upon receiving new BIT publication data to
    * update the ownership strength of a publication.
    */
-  void update_ownership_strength(const PublicationId& pub_id,
+  void update_ownership_strength(const GUID_t& pub_id,
                                  const CORBA::Long&   ownership_strength);
 
 #endif
@@ -489,7 +489,7 @@ private:
   /// The id of the domain that creates this participant.
   const DDS::DomainId_t domain_id_;
   /// This participant id given by discovery.
-  RepoId dp_id_;
+  GUID_t dp_id_;
 
   /// Whether this DomainParticipant is attached to a federated
   /// repository.
@@ -508,7 +508,7 @@ private:
 
   typedef std::pair<DDS::InstanceHandle_t, unsigned int> HandleWithCounter;
   typedef OPENDDS_MAP_CMP(GUID_t, HandleWithCounter, GUID_tKeyLessThan) CountedHandleMap;
-  typedef OPENDDS_MAP(DDS::InstanceHandle_t, RepoId) RepoIdMap;
+  typedef OPENDDS_MAP(DDS::InstanceHandle_t, GUID_t) RepoIdMap;
 
   /// Instance handles assigned which are mapped to GUIDs (use handle_protector_)
   CountedHandleMap handles_;

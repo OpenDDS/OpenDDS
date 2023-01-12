@@ -30,7 +30,7 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, A
       throw std::string("reader associate() failed");
     }
     id_seqN_[AppConfig::writerId[i]] = 0;
-    config.to_cerr(ad.remote_id_, get_repo_id(), "associated");
+    config.to_cerr(ad.remote_id_, get_guid(), "associated");
   }
   std::cerr << "Reader" << (index+1) << " associated with " << id_seqN_.size() << " writer(s)\n" << std::endl;
 }
@@ -38,7 +38,7 @@ SimpleDataReader::SimpleDataReader(const AppConfig& ac, const int readerIndex, A
 SimpleDataReader::~SimpleDataReader() {
   for (int i = index; i < 3; ++i) {
     disassociate(AppConfig::writerId[i]);
-    config.to_cerr(AppConfig::writerId[i], get_repo_id(), "disassociated");
+    config.to_cerr(AppConfig::writerId[i], get_guid(), "disassociated");
   }
 }
 
@@ -60,7 +60,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
 
   if (data.key == 99) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("%C received terminating sample\n"),
-      LogGuid(get_repo_id()).c_str()));
+      LogGuid(get_guid()).c_str()));
     done_ = true;
     return;
   }
@@ -71,7 +71,7 @@ void SimpleDataReader::data_received(const ReceivedDataSample& sample)
   ACE_INT64 seqN = sample.header_.sequence_.getValue();
 
   std::ostringstream oss;
-  oss << '(' << atv.usec() << " usec) data_received by " << LogGuid(get_repo_id()).conv_
+  oss << '(' << atv.usec() << " usec) data_received by " << LogGuid(get_guid()).conv_
     << "\n    Writer " << LogGuid(sample.header_.publication_id_).conv_ << " seq#" << seqN
     << " key:" << data.key << " value:"  << data.value << "\n\n";
 

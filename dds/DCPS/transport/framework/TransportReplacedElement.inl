@@ -29,7 +29,7 @@ OpenDDS::DCPS::TransportReplacedElement::TransportReplacedElement
 }
 
 ACE_INLINE
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 OpenDDS::DCPS::TransportReplacedElement::publication_id() const
 {
   DBG_ENTRY_LVL("TransportReplacedElement", "publication_id", 6);

@@ -71,14 +71,14 @@ public:
 
   bool reassemble(ReceivedDataSample& data, const TransportHeader& header);
 
-  int make_reservation(const RepoId& remote_publication_id,
-                       const RepoId& local_subscription_id,
+  int make_reservation(const GUID_t& remote_publication_id,
+                       const GUID_t& local_subscription_id,
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
-  void release_reservations_i(const RepoId& remote_id,
-                              const RepoId& local_id);
+  void release_reservations_i(const GUID_t& remote_id,
+                              const GUID_t& local_id);
 
-  void client_stop(const RepoId& localId);
+  void client_stop(const GUID_t& localId);
 
 private:
 
@@ -105,7 +105,7 @@ private:
   void syn_received_no_session(MulticastPeer source, const Message_Block_Ptr& data,
                                bool swap_bytes);
 
-  void release_remote_i(const RepoId& remote);
+  void release_remote_i(const GUID_t& remote);
   RepoIdSet readers_selected_, readers_withheld_;
   bool ready_to_deliver(const ReceivedDataSample& data);
 };
