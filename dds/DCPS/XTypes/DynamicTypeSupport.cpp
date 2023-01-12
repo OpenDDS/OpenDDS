@@ -104,13 +104,12 @@ namespace OpenDDS {
       void assign(void*, const char*, const void*, const char*, const MetaStruct&) const
       {
       }
-#endif
 
-      bool compare(const void* /*lhs*/, const void* /*rhs*/, const char* /*field*/) const
+      bool compare(const void*, const void*, const char*) const
       {
-        //TODO
         return false;
       }
+#endif
     };
 
     template <>

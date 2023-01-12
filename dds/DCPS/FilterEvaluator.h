@@ -197,13 +197,13 @@ public:
   ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec) const
   { return create_qc_comparator(fieldSpec, ComparatorBase::Ptr()); }
 
-  virtual bool compare(const void* lhs, const void* rhs,
-                       const char* fieldSpec) const = 0;
-
   virtual bool isDcpsKey(const char* field) const = 0;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;
+
+  virtual bool compare(const void* lhs, const void* rhs,
+                       const char* fieldSpec) const = 0;
 
   virtual const char** getFieldNames() const = 0;
 

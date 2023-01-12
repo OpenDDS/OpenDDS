@@ -491,7 +491,6 @@ namespace {
     be_global->impl_ <<
       "    " << exception <<
       "  }\n"
-      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
       "  bool compare(const void* lhs, const void* rhs, const char* field) "
       "const\n"
       "  {\n"
@@ -504,6 +503,7 @@ namespace {
     be_global->impl_ <<
       "    " << exception <<
       "  }\n"
+      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
       "};\n\n"
       "template<>\n"
       << decl << "\n"
