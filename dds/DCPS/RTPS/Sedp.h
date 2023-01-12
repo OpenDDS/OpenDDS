@@ -1034,7 +1034,7 @@ private:
       const XTypes::TypeIdentifierSeq& type_ids,
       const DCPS::RepoId& reader,
       const DCPS::SequenceNumber& rpc_sequence,
-      CORBA::ULong tl_kind);
+      CORBA::Long tl_kind);
 
   protected:
     virtual bool deferrable() const

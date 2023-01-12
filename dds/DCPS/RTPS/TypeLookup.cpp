@@ -5,6 +5,8 @@
 
 #include "TypeLookup.h"
 
+#include "RtpsRpcTypeSupportImpl.h"
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -177,10 +179,10 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeLookup_getTypes_Result& uni)
 {
   serialized_size_delimiter(encoding, size);
-  primitive_serialized_size(encoding, size, uni.return_code);
-  switch (uni.return_code) {
-  case 0:
-    serialized_size(encoding, size, uni.result);
+  primitive_serialized_size(encoding, size, uni._d());
+  switch (uni._d()) {
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
+    serialized_size(encoding, size, uni.result());
     break;
   }
 }
@@ -194,13 +196,13 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypes_Result& uni)
     return false;
   }
 
-  if (!(strm << uni.return_code)) {
+  if (!(strm << uni._d())) {
     return false;
   }
 
-  switch (uni.return_code) {
-  case 0:
-    return strm << uni.result;
+  switch (uni._d()) {
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
+    return strm << uni.result();
   }
 
   return true;
@@ -213,13 +215,18 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypes_Result& uni)
     return false;
   }
 
-  if (!(strm >> uni.return_code)) {
+  CORBA::Long return_code = 0;
+  if (!(strm >> return_code)) {
     return false;
   }
 
-  switch (uni.return_code) {
-  case 0:
-    return strm >> uni.result;
+  switch (return_code) {
+    case OpenDDS::XTypes::DDS_RETCODE_OK: {
+      XTypes::TypeLookup_getTypes_Out result;
+      const bool status = strm >> result;
+      uni.result(result);
+      return status;
+    }
   }
 
   return true;
@@ -407,11 +414,11 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeLookup_getTypeDependencies_Result& uni)
 {
   serialized_size_delimiter(encoding, size);
-  primitive_serialized_size(encoding, size, uni.return_code);
+  primitive_serialized_size(encoding, size, uni._d());
 
-  switch (uni.return_code) {
-  case 0:
-    serialized_size(encoding, size, uni.result);
+  switch (uni._d()) {
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
+    serialized_size(encoding, size, uni.result());
     break;
   }
 }
@@ -425,13 +432,13 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_getTypeDependencies_R
     return false;
   }
 
-  if (!(strm << uni.return_code)) {
+  if (!(strm << uni._d())) {
     return false;
   }
 
-  switch (uni.return_code) {
-  case 0:
-    return strm << uni.result;
+  switch (uni._d()) {
+  case OpenDDS::XTypes::DDS_RETCODE_OK:
+    return strm << uni.result();
   }
 
   return true;
@@ -444,13 +451,18 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_getTypeDependencies_Result&
     return false;
   }
 
-  if (!(strm >> uni.return_code)) {
+  CORBA::Long return_code = 0;
+  if (!(strm >> return_code)) {
     return false;
   }
 
-  switch (uni.return_code) {
-  case 0:
-    return strm >> uni.result;
+  switch (return_code) {
+    case OpenDDS::XTypes::DDS_RETCODE_OK: {
+      XTypes::TypeLookup_getTypeDependencies_Out result;
+      const bool status = strm >> result;
+      uni.result(result);
+      return status;
+    }
   }
 
   return true;
@@ -461,13 +473,13 @@ void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeLookup_Call& uni)
 {
   serialized_size_delimiter(encoding, size);
-  primitive_serialized_size(encoding, size, uni.kind);
-  switch (uni.kind) {
-  case 25318099:
-    serialized_size(encoding, size, uni.getTypes);
+  primitive_serialized_size(encoding, size, uni._d());
+  switch (uni._d()) {
+  case XTypes::TypeLookup_getTypes_HashId:
+    serialized_size(encoding, size, uni.getTypes());
     break;
-  case 95091505:
-    serialized_size(encoding, size, uni.getTypeDependencies);
+  case XTypes::TypeLookup_getDependencies_HashId:
+    serialized_size(encoding, size, uni.getTypeDependencies());
     break;
   }
 }
@@ -480,15 +492,15 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_Call& uni)
     return false;
   }
 
-  if (!(strm << uni.kind)) {
+  if (!(strm << uni._d())) {
     return false;
   }
 
-  switch (uni.kind) {
-  case 25318099:
-    return strm << uni.getTypes;
-  case 95091505:
-    return strm << uni.getTypeDependencies;
+  switch (uni._d()) {
+  case XTypes::TypeLookup_getTypes_HashId:
+    return strm << uni.getTypes();
+  case XTypes::TypeLookup_getDependencies_HashId:
+    return strm << uni.getTypeDependencies();
   }
 
   return true;
@@ -501,20 +513,28 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_Call& uni)
     return false;
   }
 
-  if (!(strm >> uni.kind)) {
+  CORBA::Long kind = 0;
+  if (!(strm >> kind)) {
     return false;
   }
 
-  switch (uni.kind) {
-  case 25318099:
-    return strm >> uni.getTypes;
-  case 95091505:
-    return strm >> uni.getTypeDependencies;
+  switch (kind) {
+    case XTypes::TypeLookup_getTypes_HashId: {
+      XTypes::TypeLookup_getTypes_In types;
+      const bool status = strm >> types;
+      uni.getTypes(types);
+      return status;
+    }
+    case XTypes::TypeLookup_getDependencies_HashId: {
+      XTypes::TypeLookup_getTypeDependencies_In typeDependencies;
+      const bool status = strm >> typeDependencies;
+      uni.getTypeDependencies(typeDependencies);
+      return status;
+    }
   }
 
   return true;
 }
-
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeLookup_Request& stru)
@@ -535,19 +555,18 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_Request& stru)
     && (strm >> stru.data);
 }
 
-
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeLookup_Return& uni)
 {
   serialized_size_delimiter(encoding, size);
-  primitive_serialized_size(encoding, size, uni.kind);
+  primitive_serialized_size(encoding, size, uni._d());
 
-  switch (uni.kind) {
-  case 25318099:
-    serialized_size(encoding, size, uni.getType);
+  switch (uni._d()) {
+  case XTypes::TypeLookup_getTypes_HashId:
+    serialized_size(encoding, size, uni.getType());
     break;
-  case 95091505:
-    serialized_size(encoding, size, uni.getTypeDependencies);
+  case XTypes::TypeLookup_getDependencies_HashId:
+    serialized_size(encoding, size, uni.getTypeDependencies());
     break;
   }
 }
@@ -560,15 +579,15 @@ bool operator<<(Serializer& strm, const XTypes::TypeLookup_Return& uni)
     return false;
   }
 
-  if (!(strm << uni.kind)) {
+  if (!(strm << uni._d())) {
     return false;
   }
 
-  switch (uni.kind) {
-  case 25318099:
-    return strm << uni.getType;
-  case 95091505:
-    return strm << uni.getTypeDependencies;
+  switch (uni._d()) {
+  case XTypes::TypeLookup_getTypes_HashId:
+    return strm << uni.getType();
+  case XTypes::TypeLookup_getDependencies_HashId:
+    return strm << uni.getTypeDependencies();
   }
 
   return true;
@@ -581,20 +600,28 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_Return& uni)
     return false;
   }
 
-  if (!(strm >> uni.kind)) {
+  CORBA::Long kind = 0;
+  if (!(strm >> kind)) {
     return false;
   }
 
-  switch (uni.kind) {
-  case 25318099:
-    return strm >> uni.getType;
-  case 95091505:
-    return strm >> uni.getTypeDependencies;
+  switch (kind) {
+    case XTypes::TypeLookup_getTypes_HashId: {
+      XTypes::TypeLookup_getTypes_Result type;
+      const bool status = strm >> type;
+      uni.getType(type);
+      return status;
+    }
+    case XTypes::TypeLookup_getDependencies_HashId: {
+      XTypes::TypeLookup_getTypeDependencies_Result typeDependencies;
+      const bool status = strm >> typeDependencies;
+      uni.getTypeDependencies(typeDependencies);
+      return status;
+    }
   }
 
   return true;
 }
-
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeLookup_Reply& stru)
@@ -614,7 +641,6 @@ bool operator>>(Serializer& strm, XTypes::TypeLookup_Reply& stru)
   return (strm >> stru.header)
     && (strm >> stru._cxx_return);
 }
-
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::OctetSeq32& seq)

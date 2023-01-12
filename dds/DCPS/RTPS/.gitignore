@@ -49,3 +49,7 @@
 /RtpsRpcS.h
 /RtpsRpcTypeSupportImpl.cpp
 /RtpsRpcTypeSupportImpl.h
+/TypeLookupC.cpp
+/TypeLookupC.h
+/TypeLookupC.inl
+/TypeLookupS.h
