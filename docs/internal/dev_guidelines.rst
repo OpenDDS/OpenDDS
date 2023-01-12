@@ -12,7 +12,7 @@ At one point an automated re-formatter was run on the codebase, migrating from t
 Repository
 **********
 
-The repository is hosted on Github at `objectcomputing/OpenDDS <https://github.com/objectcomputing/OpenDDS>`_ and is open for pull requests.
+The repository is hosted on Github at `OpenDDS/OpenDDS <https://github.com/OpenDDS/OpenDDS>`_ and is open for pull requests.
 
 ***********************
 Automated Build Systems

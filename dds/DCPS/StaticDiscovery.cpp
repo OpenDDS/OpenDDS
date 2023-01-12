@@ -328,19 +328,8 @@ StaticEndpointManager::add_publication_i(const GUID_t& writerid,
     const GUID_t& readerid = *pos;
     const EndpointRegistry::Reader& reader = registry_.reader_map.find(readerid)->second;
 
-#ifdef __SUNPRO_CC
-    ReaderAssociation ra;
-    ra.readerTransInfo = reader.trans_info;
-    ra.readerId = readerid;
-    ra.subQos = reader.subscriber_qos;
-    ra.readerQos = reader.qos;
-    ra.filterClassName = "";
-    ra.filterExpression = "";
-    ra.exprParams = 0;
-#else
     const ReaderAssociation ra =
       {reader.trans_info, TransportLocator(), 0, readerid, reader.subscriber_qos, reader.qos, "", "", 0, 0, {0, 0}};
-#endif
     DataWriterCallbacks_rch pl = pub.publication_.lock();
     if (pl) {
       pl->add_association(writerid, ra, true);
@@ -2491,11 +2480,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
                             -1);
         }
       } else if (name == "participant") {
-#ifdef __SUNPRO_CC
-        int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
-#else
         const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
-#endif
         if (value.size() != HEX_DIGITS_IN_PARTICIPANT || static_cast<size_t>(count) != HEX_DIGITS_IN_PARTICIPANT) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")
@@ -2509,11 +2494,7 @@ StaticDiscovery::parse_endpoints(ACE_Configuration_Heap& cf)
         }
         participant_specified = true;
       } else if (name == "entity") {
-#ifdef __SUNPRO_CC
-        int count = 0; std::count_if(value.begin(), value.end(), isxdigit, count);
-#else
         const OPENDDS_STRING::difference_type count = std::count_if(value.begin(), value.end(), isxdigit);
-#endif
         if (value.size() != HEX_DIGITS_IN_ENTITY || static_cast<size_t>(count) != HEX_DIGITS_IN_ENTITY) {
           ACE_ERROR_RETURN((LM_ERROR,
                             ACE_TEXT("(%P|%t) ERROR: StaticDiscovery::parse_endpoints ")

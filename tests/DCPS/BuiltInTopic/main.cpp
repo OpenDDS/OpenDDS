@@ -266,8 +266,6 @@ void test_bit_topic ()
       TEST_CHECK (ACE_OS::strcmp (topic_data[0].name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (topic_data[0].type_name.in (), TEST_TOPIC_TYPE) == 0);
 
-      //The SunOS compiler had problem resolving operator in a namespace.
-      //To resolve the compilation errors, the operator is called explicitly.
       TEST_CHECK (topic_data[0].durability == topic_qos.durability);
       TEST_CHECK (topic_data[0].deadline == topic_qos.deadline);
       TEST_CHECK (topic_data[0].latency_budget == topic_qos.latency_budget);
@@ -334,8 +332,6 @@ void test_bit_publication ()
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_pub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
 
-      //The SunOS compiler had problem resolving operator in a namespace.
-      //To resolve the compilation errors, the operator is called explicitly.
       TEST_CHECK (the_pub_data.durability == dw_qos.durability);
       TEST_CHECK (the_pub_data.deadline == dw_qos.deadline);
       TEST_CHECK (the_pub_data.latency_budget == dw_qos.latency_budget);
@@ -405,8 +401,6 @@ void test_bit_subscription ()
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.topic_name.in (), TEST_TOPIC) == 0);
       TEST_CHECK (ACE_OS::strcmp (the_sub_data.type_name.in (), TEST_TOPIC_TYPE) == 0);
 
-      //The SunOS compiler had problem resolving operator in a namespace.
-      //To resolve the compilation errors, the operator is called explicitly.
       TEST_CHECK (the_sub_data.durability == dr_qos.durability);
       TEST_CHECK (the_sub_data.deadline == dr_qos.deadline);
       TEST_CHECK (the_sub_data.latency_budget == dr_qos.latency_budget);

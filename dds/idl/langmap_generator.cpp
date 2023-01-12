@@ -757,9 +757,6 @@ struct GeneratorBase
       be_global->impl_ <<
         "  for (int i = 0; i < " << total.str() << "; ++i) {\n"
         "    begin[i]."
-#ifdef __SUNPRO_CC
-        << elem_type << "::"
-#endif
         "~" << elem_last << "();\n"
         "  }\n";
     }

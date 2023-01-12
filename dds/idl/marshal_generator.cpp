@@ -1765,7 +1765,7 @@ namespace {
     }
     if (n > 1) {
       // subsequent elements may need padding relative to prior element
-      // TODO(iguessthislldo): https://github.com/objectcomputing/OpenDDS/pull/1668#discussion_r432521888
+      // TODO(iguessthislldo): https://github.com/OpenDDS/OpenDDS/pull/1668#discussion_r432521888
       const size_t prev_size = size;
       idl_max_serialized_size(encoding, size, type);
       size += (n - 2) * (size - prev_size);

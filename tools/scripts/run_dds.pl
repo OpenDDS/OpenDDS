@@ -406,11 +406,6 @@ sub collectionCommand {
     $^O =~ /VMS/ && do {
       return undef;
     };
-    $^O =~ /solaris/ && do {
-      return "vmstat 1"  if $type eq "system";
-      return undef       if $type eq "network";
-      return "top -bd 1" if $type eq "process"; # This still may not work.
-    };
 
     # Handle generic Unix types here.  Assume they have modern command
     # forms.  If not, add a stanza to handle them specifically above.
@@ -433,11 +428,6 @@ sub collectionFilter {
     $^O =~ /MSWin32/ && do { last OSSWITCH; };
     $^O =~ /cygwin/  && do { last OSSWITCH; };
     $^O =~ /VMS/     && do { last OSSWITCH; };
-    $^O =~ /solaris/ && do {
-      if(    $type eq 'process') { return &defaultFilter(); }
-      elsif( $type eq 'system')  { return &defaultFilter(); }
-      elsif( $type eq 'network') { return &defaultFilter(); }
-    };
   }
 
   # All other system types.

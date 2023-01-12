@@ -156,8 +156,6 @@ PubDriver::initialize(int& argc, ACE_TCHAR *argv[])
   ::DDS::TopicQos new_topic_qos = default_topic_qos;
   new_topic_qos.reliability.kind  = ::DDS::RELIABLE_RELIABILITY_QOS;
 
-  //The SunOS compiler had problem resolving operator in a namespace.
-  //To resolve the compilation errors, the operator is called explicitly.
   TEST_CHECK (! (new_topic_qos == default_topic_qos));
 
   participant_->set_default_topic_qos(new_topic_qos);
@@ -489,7 +487,7 @@ PubDriver::register_test ()
   TEST_CHECK(key_holder.sample_sequence == foo1.sample_sequence);
   TEST_CHECK(key_holder.writer_id == foo1.writer_id);
 
-  // Regression Test for https://github.com/objectcomputing/OpenDDS/issues/592
+  // Regression Test for https://github.com/OpenDDS/OpenDDS/issues/592
   ret = foo_datawriter_->get_key_value(key_holder, ::DDS::HANDLE_NIL);
   TEST_CHECK(ret == ::DDS::RETCODE_BAD_PARAMETER);
 

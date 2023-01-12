@@ -18,7 +18,7 @@ These are scripts for grabbing and formatting information for the release notes.
 
 ### Usage
 
-`get_pr_info.sh` will always get a list of merged PRs into master on objectcomputing/OpenDDS.
+`get_pr_info.sh` will always get a list of merged PRs into master on OpenDDS/OpenDDS.
 The main thing to be concerned with is how far back this list should go, but the script will try to pick this automatically:
 
 - With no extra files in directory the script will pick the time of the last major release.

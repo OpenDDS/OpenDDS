@@ -56,7 +56,7 @@ Other documentation can be found in [`docs` directory](docs).
 
 For commercial support, please see https://opendds.org/support.html.
 
-Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/objectcomputing/OpenDDS/discussions) or the [mailing list](http://opendds.org/support.html).
+Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/OpenDDS/OpenDDS/discussions) or the [mailing list](https://opendds.org/support.html).
 
 If you wish to file a bug report:
 
@@ -173,7 +173,7 @@ Linux family:
 * Red Hat EL 8.0 (x86\_64)
 * Fedora 24 and 31 (x86\_64)
 * Debian 9.4 (i686)
-* Ubuntu 18.04 LTS (x86\_64)
+* Ubuntu 22.04 LTS (x86\_64)
 * openSUSE 42.1 (x86\_64)
 * Yocto 2.5.3 (ARMv8)
 
@@ -184,16 +184,15 @@ Windows family:
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
-* VxWorks 6.9 and 7 (see below)
+* VxWorks 6.9, 7, 21.03 (see below)
 * [Linux on Raspberry Pi](https://opendds.org/quickstart/GettingStartedPi.html)
 * [Android 9.0 "Pie" (API Level 28) NDK r18b](docs/android.md)
 
-We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
+We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
 system and performance tests (but not the entire regression test suite).
 Please contact sales@objectcomputing.com or opendds-main@lists.sourceforge.net
 for more information on support for ACE, TAO, and OpenDDS on VxWorks.
-OCI's packages for ACE, TAO, and OpenDDS can be obtained on the [Wind River
-Marketplace](https://marketplace.windriver.com/index.php?partners&on=details&id=33).
+Download VxWorks RPM packages for ACE, TAO, and OpenDDS [here](https://objectcomputing.com/products/opendds/vxworks).
 
 ### Compilers
 
