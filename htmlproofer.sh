@@ -4,7 +4,7 @@ site_dir="${site_dir:-_site}"
 # from that address at the same time. Use --url-swap to replace the URLs with
 # just an absolute path.
 url_swap_list=() # Format is REGEX:REPLACE_STRING
-if grep -RI --quiet 'href="/pages/objectcomputing/OpenDDS/' "$site_dir"
+if grep -RI --quiet 'href="/pages/OpenDDS/OpenDDS/' "$site_dir"
 then
   url_swap_list+=(
     '^https?\:\/\/github\.com\/pages\/objectcomputing\/OpenDDS:'
