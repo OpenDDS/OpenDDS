@@ -35,6 +35,12 @@ namespace OpenDDS {
     }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    static ComparatorBase::Ptr make_nested_cmp(const std::string& field, ComparatorBase::Ptr inner,
+                                               ComparatorBase::Ptr next);
+
+    static ComparatorBase::Ptr make_dynamic_cmp(const std::string& field,
+                                                ComparatorBase::Ptr next = ComparatorBase::Ptr());
+
     template <>
     struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
       typedef XTypes::DynamicSample T;
@@ -84,10 +90,11 @@ namespace OpenDDS {
         return v;
       }
 
-      ComparatorBase::Ptr create_qc_comparator(const char* /*field*/, ComparatorBase::Ptr /*next*/) const
+      ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
       {
-        //TODO
-        return ComparatorBase::Ptr();
+        const char* const dot = std::strchr(field, '.');
+        return dot ? make_nested_cmp(std::string(field, dot - field), make_dynamic_cmp(dot + 1), next)
+          : make_dynamic_cmp(field, next);
       }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
@@ -119,6 +126,87 @@ namespace OpenDDS {
       static const MetaStructImpl<XTypes::DynamicSample> m;
       return m;
     }
+
+    /// Dynamic version of FieldComparator in Comparator_T.h
+    struct DynamicComparator : ComparatorBase {
+      DynamicComparator(const std::string& field, Ptr next)
+        : ComparatorBase(next)
+        , field_(field)
+      {}
+
+      int cmp(void* lhs, void* rhs) const
+      {
+        const XTypes::DynamicSample& left = *static_cast<XTypes::DynamicSample*>(lhs);
+        const XTypes::DynamicSample& right = *static_cast<XTypes::DynamicSample*>(rhs);
+        const DDS::DynamicData_var l(left.dynamic_data()), r(right.dynamic_data());
+        const DDS::MemberId id = l->get_member_id_by_name(field_.c_str());
+        int result;
+        if (XTypes::compare_members(result, l, r, id) != DDS::RETCODE_OK) {
+          return 1; // warning already logged
+        }
+        return result;
+      }
+
+      bool less(void* lhs, void* rhs) const
+      {
+        return cmp(lhs, rhs) < 0;
+      }
+
+      bool equal(void* lhs, void* rhs) const
+      {
+        return cmp(lhs, rhs) == 0;
+      }
+
+      const std::string field_;
+    };
+
+    ComparatorBase::Ptr make_dynamic_cmp(const std::string& field, ComparatorBase::Ptr next)
+    {
+      return make_rch<DynamicComparator>(field, next);
+    }
+
+    /// Dynamic version of StructComparator in Comparator_T.h
+    struct NestedComparator : ComparatorBase {
+      NestedComparator(const std::string& field, Ptr inner, Ptr next)
+        : ComparatorBase(next)
+        , field_(field)
+        , inner_(inner)
+      {}
+
+      XTypes::DynamicSample get_nested(void* outer) const
+      {
+        const XTypes::DynamicSample& outer_typed = *static_cast<XTypes::DynamicSample*>(outer);
+        const DDS::DynamicData_var outer_dd = outer_typed.dynamic_data();
+        DDS::DynamicData_var inner_dd;
+        const DDS::MemberId id = outer_dd->get_member_id_by_name(field_.c_str());
+        if (outer_dd->get_complex_value(inner_dd, id) != DDS::RETCODE_OK) {
+          return XTypes::DynamicSample();
+        }
+        return XTypes::DynamicSample(inner_dd);
+      }
+
+      bool less(void* lhs, void* rhs) const
+      {
+        XTypes::DynamicSample left(get_nested(lhs)), right(get_nested(rhs));
+        return inner_->less(&left, &right);
+      }
+
+      bool equal(void* lhs, void* rhs) const
+      {
+        XTypes::DynamicSample left(get_nested(lhs)), right(get_nested(rhs));
+        return inner_->equal(&left, &right);
+      }
+
+      const std::string field_;
+      const Ptr inner_;
+    };
+
+    ComparatorBase::Ptr make_nested_cmp(const std::string& field, ComparatorBase::Ptr inner,
+                                        ComparatorBase::Ptr next)
+    {
+      return make_rch<NestedComparator>(field, inner, next);
+    }
+
 #endif
 
   }

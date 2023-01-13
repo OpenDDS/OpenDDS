@@ -77,6 +77,8 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t less_than(
   bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_less_than(
   bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b);
+OpenDDS_Dcps_Export DDS::ReturnCode_t compare_members(
+  int& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, DDS::MemberId id);
 
 OpenDDS_Dcps_Export bool is_int(DDS::TypeKind tk);
 OpenDDS_Dcps_Export bool is_uint(DDS::TypeKind tk);

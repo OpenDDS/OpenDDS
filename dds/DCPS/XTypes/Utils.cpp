@@ -710,6 +710,11 @@ DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::Dynam
   return less_than(result, a, b, Filter_Keys);
 }
 
+DDS::ReturnCode_t compare_members(int& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, DDS::MemberId id)
+{
+  return member_compare(result, a, id, b, id);
+}
+
 bool is_int(DDS::TypeKind tk)
 {
   switch (tk) {
