@@ -14,6 +14,7 @@
 #include "AstNodeWrapper.h"
 #include "Definitions.h"
 #include "SafetyProfileStreams.h"
+#include "TypeSupportImpl.h"
 
 #include <ace/ACE.h>
 
@@ -83,11 +84,11 @@ public:
     std::for_each(children_.begin(), children_.end(), deleteChild);
   }
 
-  virtual bool has_non_key_fields(const MetaStruct& meta) const
+  virtual bool has_non_key_fields(const TypeSupportImpl& ts) const
   {
     for (OPENDDS_VECTOR(EvalNode*)::const_iterator i = children_.begin(); i != children_.end(); ++i) {
       EvalNode* child = *i;
-      if (child->has_non_key_fields(meta)) {
+      if (child->has_non_key_fields(ts)) {
         return true;
       }
     }
@@ -155,15 +156,15 @@ FilterEvaluator::~FilterEvaluator()
   delete filter_root_;
 }
 
-bool FilterEvaluator::has_non_key_fields(const MetaStruct& meta) const
+bool FilterEvaluator::has_non_key_fields(const TypeSupportImpl& ts) const
 {
   for (OPENDDS_VECTOR(OPENDDS_STRING)::const_iterator i = order_bys_.begin(); i != order_bys_.end(); ++i) {
-    if (!meta.isDcpsKey(i->c_str())) {
+    if (!ts.is_dcps_key(i->c_str())) {
       return true;
     }
   }
 
-  return filter_root_->has_non_key_fields(meta);
+  return filter_root_->has_non_key_fields(ts);
 }
 
 namespace {
@@ -180,9 +181,9 @@ namespace {
       return data.lookup(fieldName_.c_str());
     }
 
-    bool has_non_key_fields(const MetaStruct& meta) const
+    bool has_non_key_fields(const TypeSupportImpl& ts) const
     {
-      return !meta.isDcpsKey(fieldName_.c_str());
+      return !ts.is_dcps_key(fieldName_.c_str());
     }
 
     OPENDDS_STRING fieldName_;

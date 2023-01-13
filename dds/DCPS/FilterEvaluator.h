@@ -27,6 +27,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 class MetaStruct;
+class TypeSupportImpl;
 
 template<typename T>
 const MetaStruct& getMetaStruct();
@@ -106,7 +107,7 @@ public:
 
   size_t number_parameters() const { return number_parameters_; }
 
-  bool has_non_key_fields(const MetaStruct& meta) const;
+  bool has_non_key_fields(const TypeSupportImpl& ts) const;
 
   /**
    * Returns true if the unserialized sample matches the filter.
@@ -196,8 +197,6 @@ public:
 
   ComparatorBase::Ptr create_qc_comparator(const char* fieldSpec) const
   { return create_qc_comparator(fieldSpec, ComparatorBase::Ptr()); }
-
-  virtual bool isDcpsKey(const char* field) const = 0;
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
   virtual size_t numDcpsKeys() const = 0;

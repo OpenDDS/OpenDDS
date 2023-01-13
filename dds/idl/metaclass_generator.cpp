@@ -280,33 +280,6 @@ namespace {
     be_global->impl_ << "    }\n";
   }
 
-  void
-  gen_isDcpsKey_i(const char* key)
-  {
-    be_global->impl_ <<
-      "    if (!ACE_OS::strcmp(field, \"" <<  key << "\")) {\n"
-      "      return true;\n"
-      "    }\n";
-  }
-
-  void
-  gen_isDcpsKey(IDL_GlobalData::DCPS_Data_Type_Info* info)
-  {
-    IDL_GlobalData::DCPS_Key_List::CONST_ITERATOR i(info->key_list_);
-    for (ACE_TString* key = 0; i.next(key); i.advance()) {
-      gen_isDcpsKey_i(ACE_TEXT_ALWAYS_CHAR(key->c_str()));
-    }
-  }
-
-  void
-  gen_isDcpsKey(TopicKeys& keys)
-  {
-    TopicKeys::Iterator finished = keys.end();
-    for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-      gen_isDcpsKey_i(i.path().c_str());
-    }
-  }
-
   bool
   generate_metaclass(AST_Decl* node, UTL_ScopedName* name,
     const std::vector<AST_Field*>& fields, bool& first_struct_,
@@ -344,18 +317,20 @@ namespace {
     size_t key_count = 0;
     IDL_GlobalData::DCPS_Data_Type_Info* info = 0;
     const bool is_topic_type = be_global->is_topic_type(node);
-    TopicKeys keys;
     if (struct_node) {
       info = idl_global->is_dcps_type(name);
       if (is_topic_type) {
-        keys = TopicKeys(struct_node);
-        key_count = keys.count();
+        key_count = TopicKeys(struct_node).count();
       } else if (info) {
         key_count = info->key_list_.size();
       }
     } else { // Union
       key_count = be_global->union_discriminator_is_key(union_node) ? 1 : 0;
     }
+
+    const std::string exception =
+      "throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
+      "found or its type is not supported (in struct" + clazz + ")\");\n";
 
     be_global->impl_ <<
       "template<>\n"
@@ -365,32 +340,8 @@ namespace {
       "  void* allocate() const { return new T; }\n\n"
       "  void deallocate(void* stru) const { delete static_cast<T*>(stru); }\n\n"
       "  size_t numDcpsKeys() const { return " << key_count << "; }\n\n"
-      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n"
-      "  bool isDcpsKey(const char* field) const\n"
-      "  {\n";
-    {
-      /* TODO: Unions are not handled here because we don't know how queries
-       * should work with unions or how this would work if they did. Maybe
-       * create a separate has_key method like be_global has, since the key
-       * would always be the union discriminator?
-       */
-      if (struct_node && key_count) {
-        if (info) {
-          gen_isDcpsKey(info);
-        } else {
-          gen_isDcpsKey(keys);
-        }
-      } else {
-        be_global->impl_ << "    ACE_UNUSED_ARG(field);\n";
-      }
-    }
-    const std::string exception =
-      "throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-      "found or its type is not supported (in struct" + clazz + ")\");\n";
-    be_global->impl_ <<
-      "    return false;\n"
-      "  }\n\n";
-    if (struct_node) {
+      "#endif /* OPENDDS_NO_MULTI_TOPIC */\n\n";
+    if (struct_node && be_global->extensibility(struct_node) == extensibilitykind_mutable) {
       be_global->impl_ <<
         "  ACE_CDR::ULong map_name_to_id(const char* field) const\n"
         "  {\n"

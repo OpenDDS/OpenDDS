@@ -53,18 +53,6 @@ namespace OpenDDS {
       size_t numDcpsKeys() const { return 0; }
 #endif /* OPENDDS_NO_MULTI_TOPIC */
 
-      bool isDcpsKey(const char* /*field*/) const
-      {
-        //TODO
-        return false;
-      }
-
-      ACE_CDR::ULong map_name_to_id(const char* /*field*/) const
-      {
-        //TODO
-        return 0;
-      }
-
       Value getValue(const void* stru, DDS::MemberId /*memberId*/) const
       {
         const T& typed = *static_cast<const T*>(stru);
@@ -236,6 +224,11 @@ namespace DDS {
     return count;
   }
 
+  bool DynamicTypeSupport::is_dcps_key(const char* field) const
+  {
+    return OpenDDS::XTypes::is_key(type_, field);
+  }
+
   Extensibility DynamicTypeSupport::base_extensibility() const
   {
     Extensibility ext = OpenDDS::DCPS::FINAL;
@@ -307,6 +300,13 @@ namespace DDS {
     DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
     return dti->get_preset_type_info();
   }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  const OpenDDS::DCPS::MetaStruct& DynamicTypeSupport::getMetaStructForType()
+  {
+    return getMetaStruct<OpenDDS::XTypes::DynamicSample>();
+  }
+#endif
 
   DynamicTypeSupport_ptr DynamicTypeSupport::_duplicate(DynamicTypeSupport_ptr obj)
   {

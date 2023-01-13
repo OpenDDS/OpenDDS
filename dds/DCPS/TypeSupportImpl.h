@@ -105,6 +105,8 @@ public:
 #endif
 
   virtual size_t key_count() const = 0;
+  virtual bool is_dcps_key(const char* fieldname) const = 0;
+
   bool has_dcps_key()
   {
     return key_count();
@@ -170,6 +172,11 @@ public:
   size_t key_count() const
   {
     return TraitsType::key_count();
+  }
+
+  bool is_dcps_key(const char* fieldname) const
+  {
+    return TraitsType::is_key(fieldname);
   }
 
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)

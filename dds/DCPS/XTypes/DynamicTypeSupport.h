@@ -60,10 +60,7 @@ namespace OpenDDS {
       typedef DDS::DynamicDataReader DataReaderType;
       typedef XTypes::DynamicSample::KeyLessThan LessThanType;
       typedef DCPS::KeyOnly<const XTypes::DynamicSample> KeyOnlyType;
-
       static const char* type_name() { return "Dynamic"; } // used for logging
-      static bool gen_has_key() { return false; }
-      static size_t key_count() { return 0; }
     };
 
     template <>
@@ -107,6 +104,7 @@ namespace DDS {
     }
 
     size_t key_count() const;
+    bool is_dcps_key(const char* field) const;
 
     void representations_allowed_by_type(DataRepresentationIdSeq& seq);
 
@@ -143,12 +141,7 @@ namespace DDS {
     }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-    const OpenDDS::DCPS::MetaStruct& getMetaStructForType()
-    {
-      OPENDDS_ASSERT(false);
-      const OpenDDS::DCPS::MetaStruct* const ms = 0;
-      return *ms;
-    }
+    const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
 #endif
 
     CORBA::Boolean _is_a(const char* type_id)

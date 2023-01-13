@@ -2282,14 +2282,14 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
 
   if (filterClassName == "DDSSQL" ||
       filterClassName == "OPENDDSSQL") {
-    const MetaStruct& meta = type_support_->getMetaStructForType();
-    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
+    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(*type_support_)) {
       return true;
     }
     try {
       return !evaluator.eval(elt.get_sample()->cont(),
                              elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                             elt.get_header().cdr_encapsulation_, meta,
+                             elt.get_header().cdr_encapsulation_,
+                             type_support_->getMetaStructForType(),
                              expression_params, type_support_->base_extensibility());
     } catch (const std::runtime_error&) {
       // if the eval fails, the throws will do the logging

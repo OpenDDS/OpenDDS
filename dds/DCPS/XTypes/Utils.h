@@ -71,6 +71,7 @@ enum Filter {
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_values(
   DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter);
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths);
+OpenDDS_Dcps_Export bool is_key(DDS::DynamicType_ptr type, const char* field);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t less_than(
