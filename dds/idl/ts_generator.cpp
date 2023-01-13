@@ -230,7 +230,8 @@ bool ts_generator::generate_ts(AST_Decl* node, UTL_ScopedName* name)
     "namespace OpenDDS {\n"
     "namespace DCPS {\n"
     "bool DDSTraits<" << cxx_name << ">::is_key(const char* field)\n"
-    "{\n";
+    "{\n"
+    "  ACE_UNUSED_ARG(field);\n";
   if (struct_node && key_count) {
     if (info) {
       gen_isDcpsKey(info);
