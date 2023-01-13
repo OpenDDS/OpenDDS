@@ -3,12 +3,12 @@ title: OpenDDS
 email: info@opendds.org
 description: OpenDDS is an open source C++ implementation of the Object Management Group (OMG) Data Distribution Service (DDS). OpenDDS also supports Java bindings through JNI.
 twitter_username: OpenDDS
-github_repo: objectcomputing/OpenDDS
+github_repo: OpenDDS/OpenDDS
 
 theme: minima
 
 # github-metadata
-repository: objectcomputing/OpenDDS
+repository: OpenDDS/OpenDDS
 plugins: ['jekyll-github-metadata', 'jekyll-redirect-from']
 
 liquid:
