@@ -13,6 +13,7 @@
 #include "TopicDescriptionImpl.h"
 #include "FilterEvaluator.h"
 #include "PoolAllocator.h"
+#include "TypeSupportImpl.h"
 
 #if !defined (ACE_LACKS_PRAGMA_ONCE)
 #pragma once
