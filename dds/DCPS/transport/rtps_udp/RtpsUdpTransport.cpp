@@ -1048,12 +1048,11 @@ RtpsUdpTransport::relay_stun_task(const DCPS::MonotonicTimePoint& /*now*/)
       !equal_guid_prefixes(local_prefix_, GUIDPREFIX_UNKNOWN)) {
     process_relay_sra(relay_srsm_.send(relay_address, ICE::Configuration::instance()->server_reflexive_indication_count(), local_prefix_));
     ice_endpoint_->send(relay_address, relay_srsm_.message());
-    {
-      ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
-      relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
-      relay_stun_task_->schedule(relay_stun_task_falloff_.get());
-    }
   }
+
+  ACE_Guard<ThreadLockType> guard(relay_stun_task_falloff_mutex_);
+  relay_stun_task_falloff_.advance(ICE::Configuration::instance()->server_reflexive_address_period());
+  relay_stun_task_->schedule(relay_stun_task_falloff_.get());
 }
 
 void
