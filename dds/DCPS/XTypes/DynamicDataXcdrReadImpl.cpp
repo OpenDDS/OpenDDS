@@ -11,6 +11,7 @@
 #  include "DynamicTypeMemberImpl.h"
 
 #  include <dds/DCPS/debug.h>
+#  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/SafetyProfileStreams.h>
 #  include <dds/DCPS/ValueHelper.h>
 
