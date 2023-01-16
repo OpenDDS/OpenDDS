@@ -64,9 +64,10 @@ namespace OpenDDS {
         return getValueImpl(dd, field);
       }
 
-      Value getValue(Serializer& strm, const char* field) const
+      Value getValue(Serializer& strm, const char* field, const TypeSupportImpl* ts) const
       {
-        const DDS::DynamicData_var dd = 0;/*TODO new XTypes::DynamicDataXcdrReadImpl(strm, type);*/
+        DDS::DynamicType_var type = ts->get_type();
+        const DDS::DynamicData_var dd = new XTypes::DynamicDataXcdrReadImpl(strm, type);
         return getValueImpl(dd, field);
       }
 
@@ -310,7 +311,7 @@ namespace DDS {
   }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  const OpenDDS::DCPS::MetaStruct& DynamicTypeSupport::getMetaStructForType()
+  const OpenDDS::DCPS::MetaStruct& DynamicTypeSupport::getMetaStructForType() const
   {
     return getMetaStruct<OpenDDS::XTypes::DynamicSample>();
   }

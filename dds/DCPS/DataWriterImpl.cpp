@@ -2286,11 +2286,8 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
       return true;
     }
     try {
-      return !evaluator.eval(elt.get_sample()->cont(),
-                             elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                             elt.get_header().cdr_encapsulation_,
-                             type_support_->getMetaStructForType(),
-                             expression_params, type_support_->base_extensibility());
+      return !evaluator.eval(elt.get_sample()->cont(), encoding_mode_.encoding(),
+                             *type_support_, expression_params);
     } catch (const std::runtime_error&) {
       // if the eval fails, the throws will do the logging
       // return false here so that the sample is not filtered

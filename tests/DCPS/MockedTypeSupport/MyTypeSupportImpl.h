@@ -61,7 +61,7 @@ public:
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
 #endif
 
   size_t key_count() const { return 0; }

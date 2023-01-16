@@ -82,7 +82,7 @@ public:
   virtual ~TypeSupportImpl();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const MetaStruct& getMetaStructForType() = 0;
+  virtual const MetaStruct& getMetaStructForType() const = 0;
 #endif
 
   virtual DDS::ReturnCode_t register_type(DDS::DomainParticipant_ptr participant,
@@ -98,7 +98,13 @@ public:
   virtual char* get_type_name();
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  virtual DDS::DynamicType_ptr get_type()
+  virtual DDS::DynamicType_ptr get_type() const
+  {
+    return DDS::DynamicType::_duplicate(type_);
+  }
+
+  // IDL local interface uses non-const memebers
+  DDS::DynamicType_ptr get_type()
   {
     return DDS::DynamicType::_duplicate(type_);
   }

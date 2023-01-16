@@ -141,7 +141,7 @@ namespace DDS {
     }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-    const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+    const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
 #endif
 
     CORBA::Boolean _is_a(const char* type_id)
