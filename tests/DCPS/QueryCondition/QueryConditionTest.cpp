@@ -30,6 +30,85 @@ using namespace Messenger;
 const Duration_t max_wait_time = {3, 0};
 bool dynamic = false;
 
+void copy(Message& out, DynamicData* in, const SampleInfo& info)
+{
+  if (info.valid_data) {
+    in->get_int32_value(out.key, in->get_member_id_by_name("key"));
+    in->get_int32_value(out.iteration, in->get_member_id_by_name("iteration"));
+    in->get_string_value(out.name.inout(), in->get_member_id_by_name("name"));
+    DynamicData_var nested;
+    in->get_complex_value(nested, in->get_member_id_by_name("nest"));
+    nested->get_int32_value(reinterpret_cast<ACE_CDR::Long&>(out.nest.value),
+                            nested->get_member_id_by_name("value"));
+  }
+}
+
+void copy(MessageSeq& out, const DynamicDataSeq& in, const SampleInfoSeq& infos)
+{
+  out.length(in.length());
+  for (unsigned int i = 0; i < in.length(); ++i) {
+    copy(out[i], in[i], infos[i]);
+  }
+}
+
+/// Provide a common API for both Plain Language Binding and Dynamic Language Binding
+struct Readers
+{
+  explicit Readers(DDS::DataReader* dr)
+    : msg_reader_(dynamic ? 0 : MessageDataReader::_narrow(dr))
+    , dyn_reader_(dynamic ? DynamicDataReader::_narrow(dr) : 0)
+  {}
+
+  void reset()
+  {
+    msg_reader_ = 0;
+    dyn_reader_ = 0;
+  }
+
+  DDS::ReturnCode_t read(DDS::ReadCondition* cond)
+  {
+    DDS::SampleInfoSeq infoseq;
+    if (dynamic) {
+      DynamicDataSeq data;
+      return dyn_reader_->read_w_condition(data, infoseq, LENGTH_UNLIMITED, cond);
+    }
+
+    MessageSeq data;
+    return msg_reader_->read_w_condition(data, infoseq, LENGTH_UNLIMITED, cond);
+  }
+
+  DDS::ReturnCode_t take(MessageSeq& data, DDS::SampleInfoSeq& info, DDS::ReadCondition* cond)
+  {
+    if (dynamic) {
+      DynamicDataSeq dyn_data;
+      const DDS::ReturnCode_t ret = dyn_reader_->take_w_condition(dyn_data, info, LENGTH_UNLIMITED, cond);
+      if (ret == RETCODE_OK) {
+        copy(data, dyn_data, info);
+      }
+      return ret;
+    }
+
+    return msg_reader_->take_w_condition(data, info, LENGTH_UNLIMITED, cond);
+  }
+
+  DDS::ReturnCode_t take_next_sample(Message& data, DDS::SampleInfo& info)
+  {
+    if (dynamic) {
+      DynamicData_var dyn;
+      const DDS::ReturnCode_t ret = dyn_reader_->take_next_sample(dyn, info);
+      if (ret == RETCODE_OK) {
+        copy(data, dyn, info);
+      }
+      return ret;
+    }
+
+    return msg_reader_->take_next_sample(data, info);
+  }
+
+  MessageDataReader_var msg_reader_;
+  DynamicDataReader_var dyn_reader_;
+};
+
 class MessengerListener
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener>
 {
@@ -66,10 +145,8 @@ public:
       return;
     }
 
-    MessageDataReader_var mdr = MessageDataReader::_narrow(reader);
-    MessageSeq data;
-    SampleInfoSeq infoseq;
-    ReturnCode_t rc = mdr->read_w_condition(data, infoseq, LENGTH_UNLIMITED, rc_);
+    Readers readers(reader);
+    const ReturnCode_t rc = readers.read(rc_);
     if (rc != RETCODE_OK && rc != RETCODE_NO_DATA) {
       cerr << "ERROR: read_w_condition failed: " << retcode_to_string(rc) << endl;
     }
@@ -169,17 +246,27 @@ bool complex_test_setup(const MessageTypeSupport_var& ts, const Publisher_var& p
     return false;
   }
 
+  DDS::Topic_var reader_topic = topic;
+  DDS::DomainParticipant_var sub_participant = sub->get_participant();
+  if (sub_participant != dp) {
+    reader_topic = sub_participant->create_topic(topicName, typeName, TOPIC_QOS_DEFAULT, 0, 0);
+    if (!topic) {
+      cerr << "ERROR: complex_test_setup: create_topic for reader failed" << endl;
+      return false;
+    }
+  }
+
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dr_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
-  dr1 = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
+  dr1 = sub->create_datareader(reader_topic, dr_qos, 0, DEFAULT_STATUS_MASK);
   if (!dr1) {
     cerr << "ERROR: complex_test_setup: 1st create_datareader failed" << endl;
     return false;
   }
-  dr2 = sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
+  dr2 = sub->create_datareader(reader_topic, dr_qos, 0, DEFAULT_STATUS_MASK);
   if (!dr2) {
     cerr << "ERROR: complex_test_setup: 2nd create_datareader failed" << endl;
     return false;
@@ -258,27 +345,6 @@ bool complex_test_cleanup(const Publisher_var& pub, const Subscriber_var& sub,
   return test_cleanup(pub, sub, dw, dr1, true);
 }
 
-void copy(Message& out, DynamicData* in, const SampleInfo& info)
-{
-  if (info.valid_data) {
-    in->get_int32_value(out.key, in->get_member_id_by_name("key"));
-    in->get_int32_value(out.iteration, in->get_member_id_by_name("iteration"));
-    in->get_string_value(out.name.inout(), in->get_member_id_by_name("name"));
-    DynamicData_var nested;
-    in->get_complex_value(nested, in->get_member_id_by_name("nest"));
-    nested->get_int32_value(reinterpret_cast<ACE_CDR::Long&>(out.nest.value),
-                            nested->get_member_id_by_name("value"));
-  }
-}
-
-void copy(MessageSeq& out, const DynamicDataSeq& in, const SampleInfoSeq& infos)
-{
-  out.length(in.length());
-  for (unsigned int i = 0; i < in.length(); ++i) {
-    copy(out[i], in[i], infos[i]);
-  }
-}
-
 bool waitForSample(const DataReader_var& dr)
 {
   ReadCondition_var dr_rc = dr->create_readcondition(ANY_SAMPLE_STATE,
@@ -335,19 +401,10 @@ bool run_filtering_test(const MessageTypeSupport_var& ts, const Publisher_var& p
   }
   ws->detach_condition(dr_qc);
 
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
-  DynamicDataReader_var dyn_reader = DynamicDataReader::_narrow(dr);
+  Readers readers(dr);
   MessageSeq data;
   SampleInfoSeq infoseq;
-  if (dyn_reader) {
-    DynamicDataSeq dyn_data;
-    ret = dyn_reader->take_w_condition(dyn_data, infoseq, LENGTH_UNLIMITED, dr_qc);
-    if (ret == RETCODE_OK) {
-      copy(data, dyn_data, infoseq);
-    }
-  } else {
-    ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
-  }
+  ret = readers.take(data, infoseq, dr_qc);
   if (ret != RETCODE_NO_DATA) {
     cerr << "ERROR: expected no data, but take_w_condition(qc) returned: "
       << retcode_to_string(ret) << endl;
@@ -355,15 +412,7 @@ bool run_filtering_test(const MessageTypeSupport_var& ts, const Publisher_var& p
   }
 
   SampleInfo info;
-  if (dyn_reader) {
-    DynamicData_var dyn;
-    ret = dyn_reader->take_next_sample(dyn, info);
-    if (ret == RETCODE_OK) {
-      copy(sample, dyn, info);
-    }
-  } else {
-    ret = mdr->take_next_sample(sample, info);
-  }
+  ret = readers.take_next_sample(sample, info);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: take_next_sample() failed: " << retcode_to_string(ret) << endl;
     return false;
@@ -385,15 +434,7 @@ bool run_filtering_test(const MessageTypeSupport_var& ts, const Publisher_var& p
   }
   ws->detach_condition(dr_qc);
 
-  if (dyn_reader) {
-    DynamicDataSeq dyn_data;
-    ret = dyn_reader->take_w_condition(dyn_data, infoseq, LENGTH_UNLIMITED, dr_qc);
-    if (ret == RETCODE_OK) {
-      copy(data, dyn_data, infoseq);
-    }
-  } else {
-    ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
-  }
+  ret = readers.take(data, infoseq, dr_qc);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: take_w_condition(qc) failed: " << retcode_to_string(ret) << endl;
     return false;
@@ -444,19 +485,18 @@ bool run_complex_filtering_test(const MessageTypeSupport_var& ts, const Publishe
   MessengerListener* ml2p = new MessengerListener(dr_qc2);
   DDS::DataReaderListener_var ml2 = ml2p;
 
-  MessageDataReader_var mdr1 = MessageDataReader::_narrow(dr1);
-  MessageDataReader_var mdr2 = MessageDataReader::_narrow(dr2);
-  mdr1->set_listener(ml1, DDS::DATA_AVAILABLE_STATUS);
-  mdr2->set_listener(ml2, DDS::DATA_AVAILABLE_STATUS);
+  dr1->set_listener(ml1, DDS::DATA_AVAILABLE_STATUS);
+  dr2->set_listener(ml2, DDS::DATA_AVAILABLE_STATUS);
   // No need to call on_data_available since samples are written later.
+  Readers readers1(dr1), readers2(dr2);
   MessageSeq data;
   SampleInfoSeq infoseq;
-  ReturnCode_t ret = mdr1->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc1);
+  ReturnCode_t ret = readers1.take(data, infoseq, dr_qc1);
   if (ret != RETCODE_NO_DATA) {
     cerr << "ERROR: take_w_condition(qc1): expected no data but got: " << retcode_to_string(ret) << endl;
     return false;
   }
-  ret = mdr2->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc2);
+  ret = readers2.take(data, infoseq, dr_qc2);
   if (ret != RETCODE_NO_DATA) {
     cerr << "ERROR: take_w_condition(qc2): expected no data but got: " << retcode_to_string(ret) << endl;
     return false;
@@ -511,11 +551,11 @@ bool run_complex_filtering_test(const MessageTypeSupport_var& ts, const Publishe
   }
 
   ml1p->disable();
-  mdr1->set_listener(0, 0);
+  dr1->set_listener(0, 0);
   ml2p->disable();
-  mdr2->set_listener(0, 0);
-  mdr1 = 0;
-  mdr2 = 0;
+  dr2->set_listener(0, 0);
+  readers1.reset();
+  readers2.reset();
 
   ret = dr1->delete_readcondition(dr_qc1);
   if (ret != RETCODE_OK) {
@@ -577,8 +617,6 @@ bool run_sorting_test(const MessageTypeSupport_var& ts, const Publisher_var& pub
   }
   WaitSet_var ws = new WaitSet;
   ws->attach_condition(dr_qc);
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
-  DynamicDataReader_var dyn_reader = DynamicDataReader::_narrow(dr);
   Duration_t five_seconds = {5, 0};
   bool passed = true, done = false;
   if (sub->delete_datareader(dr) != DDS::RETCODE_PRECONDITION_NOT_MET) {
@@ -587,6 +625,7 @@ bool run_sorting_test(const MessageTypeSupport_var& ts, const Publisher_var& pub
     passed = false;
     done = true;
   }
+  Readers readers(dr);
   while (!done) {
     ConditionSeq active;
     ret = ws->wait(active, five_seconds);
@@ -600,15 +639,7 @@ bool run_sorting_test(const MessageTypeSupport_var& ts, const Publisher_var& pub
     cout << "wait returned" << endl;
     MessageSeq data;
     SampleInfoSeq info;
-    if (dyn_reader) {
-      DynamicDataSeq dyn_data;
-      ret = dyn_reader->take_w_condition(dyn_data, info, LENGTH_UNLIMITED, dr_qc);
-      if (ret == RETCODE_OK) {
-        copy(data, dyn_data, info);
-      }
-    } else {
-      ret = mdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_qc);
-    }
+    ret = readers.take(data, info, dr_qc);
     if (ret == RETCODE_NO_DATA) {
       // fall-through
     } else if (ret != RETCODE_OK) {
@@ -640,12 +671,7 @@ bool run_sorting_test(const MessageTypeSupport_var& ts, const Publisher_var& pub
 
   MessageSeq data;
   SampleInfoSeq info;
-  if (dyn_reader) {
-    DynamicDataSeq dyn;
-    ret = dyn_reader->take_w_condition(dyn, info, LENGTH_UNLIMITED, dr_qc);
-  } else {
-    ret = mdr->take_w_condition(data, info, LENGTH_UNLIMITED, dr_qc);
-  }
+  ret = readers.take(data, info, dr_qc);
   if (ret != RETCODE_NO_DATA) {
     cerr << "WARNING: there is still data in the reader\n";
   }
@@ -739,10 +765,10 @@ bool run_change_parameter_test(const MessageTypeSupport_var& ts, const Publisher
   }
   ws->detach_condition(dr_qc);
 
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  Readers readers(dr);
   MessageSeq data;
   SampleInfoSeq infoseq;
-  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  ret = readers.take(data, infoseq, dr_qc);
   if (ret != RETCODE_NO_DATA) {
     cerr << "ERROR: take_w_condition(qc) shouldn't have returned data" << endl;
     return false;
@@ -793,7 +819,7 @@ bool run_change_parameter_test(const MessageTypeSupport_var& ts, const Publisher
   }
   ws->detach_condition(dr_qc);
 
-  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  ret = readers.take(data, infoseq, dr_qc);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: take_w_condition(qc) should have returned data" << endl;
     return false;
@@ -863,10 +889,10 @@ bool run_single_dispose_filter_test(const MessageTypeSupport_var& ts, const Publ
   ws->detach_condition(dr_qc);
 
   // Read the Number of Invalid Messages Taken
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  Readers readers(dr);
   MessageSeq data;
   SampleInfoSeq infoseq;
-  ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED, dr_qc);
+  ret = readers.take(data, infoseq, dr_qc);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: take_w_condition failed: "
       << retcode_to_string(ret) << endl;
@@ -973,11 +999,9 @@ int run_test(int argc, ACE_TCHAR* argv[])
   bool passed = true;
   passed &= run_sorting_test(ts, pub, sub);
   passed &= run_filtering_test(ts, pub, sub);
-  if (!dynamic) {//TODO
-    passed &= run_change_parameter_test(ts, pub, sub);
-    passed &= run_complex_filtering_test(ts, pub, sub);
-    passed &= run_dispose_filter_tests(ts, pub, sub);
-  }
+  passed &= run_change_parameter_test(ts, pub, sub);
+  passed &= run_complex_filtering_test(ts, pub, sub);
+  passed &= run_dispose_filter_tests(ts, pub, sub);
 
   pub = 0;
   ts = 0;

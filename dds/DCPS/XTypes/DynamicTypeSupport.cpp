@@ -11,6 +11,7 @@
 #include "DynamicDataImpl.h"
 #include "DynamicDataReaderImpl.h"
 #include "DynamicDataWriterImpl.h"
+#include "DynamicDataXcdrReadImpl.h"
 #include "DynamicTypeImpl.h"
 #include "Utils.h"
 
@@ -43,7 +44,59 @@ namespace OpenDDS {
 
     template <>
     struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
-      typedef XTypes::DynamicSample T;
+
+      Value getValue(const void* stru, DDS::MemberId memberId) const
+      {
+        const XTypes::DynamicSample& typed = *static_cast<const XTypes::DynamicSample*>(stru);
+        const DDS::DynamicData_var dd = typed.dynamic_data();
+        XTypes::DynamicDataBase* const ddb = dynamic_cast<XTypes::DynamicDataBase*>(dd.in());
+        Value v(0);
+        if (ddb) {
+          ddb->get_simple_value(v, memberId);
+        }
+        return v;
+      }
+
+      Value getValue(const void* stru, const char* field) const
+      {
+        const XTypes::DynamicSample& typed = *static_cast<const XTypes::DynamicSample*>(stru);
+        const DDS::DynamicData_var dd = typed.dynamic_data();
+        return getValueImpl(dd, field);
+      }
+
+      Value getValue(Serializer& strm, const char* field) const
+      {
+        const DDS::DynamicData_var dd = 0;/*TODO new XTypes::DynamicDataXcdrReadImpl(strm, type);*/
+        return getValueImpl(dd, field);
+      }
+
+      static Value getValueImpl(const DDS::DynamicData_var& dd, const char* field)
+      {
+        const char* const dot = std::strchr(field, '.');
+        if (dot) {
+          const String local(field, dot - field);
+          const DDS::MemberId id = dd->get_member_id_by_name(local.c_str());
+          DDS::DynamicData_var nested;
+          if (dd->get_complex_value(nested, id) != DDS::RETCODE_OK) {
+            return Value(0);
+          }
+          return getValueImpl(nested, dot + 1);
+        }
+        const DDS::MemberId id = dd->get_member_id_by_name(field);
+        XTypes::DynamicDataBase* const ddb = dynamic_cast<XTypes::DynamicDataBase*>(dd.in());
+        Value v(0);
+        if (ddb) {
+          ddb->get_simple_value(v, id);
+        }
+        return v;
+      }
+
+      ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
+      {
+        const char* const dot = std::strchr(field, '.');
+        return dot ? make_nested_cmp(String(field, dot - field), make_dynamic_cmp(dot + 1), next)
+          : make_dynamic_cmp(field, next);
+      }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
       void* allocate() const { return 0; }
@@ -51,59 +104,14 @@ namespace OpenDDS {
       void deallocate(void*) const {}
 
       size_t numDcpsKeys() const { return 0; }
-#endif /* OPENDDS_NO_MULTI_TOPIC */
 
-      Value getValue(const void* stru, DDS::MemberId /*memberId*/) const
-      {
-        const T& typed = *static_cast<const T*>(stru);
-        ACE_UNUSED_ARG(typed);
-        Value v(0);
-        //TODO
-        return v;
-      }
+      const char** getFieldNames() const { return 0; }
 
-      Value getValue(const void* stru, const char* /*field*/) const
-      {
-        const T& typed = *static_cast<const T*>(stru);
-        ACE_UNUSED_ARG(typed);
-        Value v(0);
-        //TODO
-        return v;
-      }
+      const void* getRawField(const void*, const char*) const { return 0; }
 
-      Value getValue(Serializer& /*strm*/, const char* /*field*/) const
-      {
-        Value v(0);
-        //TODO
-        return v;
-      }
+      void assign(void*, const char*, const void*, const char*, const MetaStruct&) const {}
 
-      ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
-      {
-        const char* const dot = std::strchr(field, '.');
-        return dot ? make_nested_cmp(std::string(field, dot - field), make_dynamic_cmp(dot + 1), next)
-          : make_dynamic_cmp(field, next);
-      }
-
-#ifndef OPENDDS_NO_MULTI_TOPIC
-      const char** getFieldNames() const
-      {
-        return 0;
-      }
-
-      const void* getRawField(const void*, const char*) const
-      {
-        return 0;
-      }
-
-      void assign(void*, const char*, const void*, const char*, const MetaStruct&) const
-      {
-      }
-
-      bool compare(const void*, const void*, const char*) const
-      {
-        return false;
-      }
+      bool compare(const void*, const void*, const char*) const { return false; }
 #endif
     };
 
