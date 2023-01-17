@@ -97,7 +97,7 @@ size_t takeSamples(const DataReader_var& dr, F filter)
   return count;
 }
 
-DynamicData_var copy(KeyOnly<const Message&> sample, DDS::TypeSupport* ts)
+DynamicData_var copy(const KeyOnly<const Message>& sample, DDS::TypeSupport* ts)
 {
   DynamicType_var type = ts->get_type();
   DynamicData_var dd = DynamicDataFactory::get_instance()->create_data(type);
@@ -107,7 +107,7 @@ DynamicData_var copy(KeyOnly<const Message&> sample, DDS::TypeSupport* ts)
 
 DynamicData_var copy(const Message& sample, DDS::TypeSupport* ts)
 {
-  DynamicData_var dd = copy(KeyOnly<const Message&>(sample), ts);
+  DynamicData_var dd = copy(KeyOnly<const Message>(sample), ts);
   dd->set_uint64_value(dd->get_member_id_by_name("ull"), sample.ull);
   return dd;
 }
@@ -139,7 +139,7 @@ struct Writers {
     if (msg_writer_) {
       return msg_writer_->dispose(sample, ih);
     }
-    DynamicData_var dyn = copy(KeyOnly<const Message&>(sample), type_support_);
+    DynamicData_var dyn = copy(KeyOnly<const Message>(sample), type_support_);
     return dyn_writer_->dispose(dyn, ih);
   }
 
