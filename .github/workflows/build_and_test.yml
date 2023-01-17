@@ -8898,7 +8898,7 @@ jobs:
       id: runvcpkg
       uses: lukka/run-vcpkg@v10
       with:
-        vcpkgGitCommitId: f14984af3738e69f197bf0e647a8dca12de92996
+        vcpkgGitCommitId: 688ece714204fb5e9ad790ad9ad6d9f571d2b032
         runVcpkgInstall: true
     - name: checkout WinFlexBison
       if: steps.cache-artifact.outputs.cache-hit != 'true'
