@@ -52,8 +52,7 @@ void copy(MessageSeq& out, const DynamicDataSeq& in, const SampleInfoSeq& infos)
 }
 
 /// Provide a common API for both Plain Language Binding and Dynamic Language Binding
-struct Readers
-{
+struct Readers {
   explicit Readers(DDS::DataReader* dr)
     : msg_reader_(dynamic ? 0 : MessageDataReader::_narrow(dr))
     , dyn_reader_(dynamic ? DynamicDataReader::_narrow(dr) : 0)
@@ -1017,20 +1016,18 @@ int run_test(int argc, ACE_TCHAR* argv[])
 }
 
 
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int ret = 1;
-  try
-  {
+  try {
     ret = run_test(argc, argv);
-  }
-  catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM& ex) {
     ex._tao_print_exception("Exception caught in QueryConditionTest.cpp:");
     return 1;
   }
 
   // cleanup
-  TheServiceParticipant->shutdown ();
+  TheServiceParticipant->shutdown();
   ACE_Thread_Manager::instance()->wait();
   return ret;
 }
