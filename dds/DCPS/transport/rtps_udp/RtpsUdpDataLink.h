@@ -245,6 +245,7 @@ public:
   bool requires_inline_qos(const GUIDSeq_var& peers);
 
   EventDispatcher_rch event_dispatcher() { return event_dispatcher_; }
+  RcHandle<JobQueue> get_job_queue() const { return job_queue_; }
 
 private:
   void on_data_available(RcHandle<InternalDataReader<NetworkInterfaceAddress> > reader);

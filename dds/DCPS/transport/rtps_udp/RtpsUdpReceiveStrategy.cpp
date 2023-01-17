@@ -978,50 +978,58 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ACE_Reactor* reactor = link_->get_reactor();
-  if (reactor == 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("NULL reactor reference!\n")),
-                     -1);
-  }
-
-  if (reactor->register_handler(link_->unicast_socket().get_handle(), this,
-                                ACE_Event_Handler::READ_MASK) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for unicast ")
-                      ACE_TEXT("socket %d\n"),
-                      link_->unicast_socket().get_handle()),
-                     -1);
-  }
-
-#ifdef ACE_HAS_IPV6
-  if (reactor->register_handler(link_->ipv6_unicast_socket().get_handle(), this,
-                                ACE_Event_Handler::READ_MASK) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for unicast ")
-                      ACE_TEXT("socket %d\n"),
-                      link_->unicast_socket().get_handle()),
-                     -1);
-  }
-#endif
-
+  link_->get_job_queue()->enqueue(make_rch<RURSJob>(rchandle_from(this), &RtpsUdpReceiveStrategy::register_handlers));
   return 0;
 }
 
 void
-RtpsUdpReceiveStrategy::stop_i()
+RtpsUdpReceiveStrategy::register_handlers()
 {
   ACE_Reactor* reactor = link_->get_reactor();
   if (reactor == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("RtpsUdpReceiveStrategy::stop_i: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::register_handlers: ")
+               ACE_TEXT("NULL reactor reference!\n")));
+  }
+
+  if (reactor->register_handler(link_->unicast_socket().get_handle(), this,
+                                ACE_Event_Handler::READ_MASK) != 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::register_handlers: ")
+               ACE_TEXT("failed to register handler for unicast ")
+               ACE_TEXT("socket %d\n"),
+               link_->unicast_socket().get_handle()));
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (reactor->register_handler(link_->ipv6_unicast_socket().get_handle(), this,
+                                ACE_Event_Handler::READ_MASK) != 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::register_handlers: ")
+               ACE_TEXT("failed to register handler for unicast ")
+               ACE_TEXT("socket %d\n"),
+               link_->unicast_socket().get_handle()));
+  }
+#endif
+}
+
+void
+RtpsUdpReceiveStrategy::stop_i()
+{
+  link_->get_job_queue()->enqueue(make_rch<RURSJob>(rchandle_from(this), &RtpsUdpReceiveStrategy::remove_handlers));
+}
+
+void
+RtpsUdpReceiveStrategy::remove_handlers()
+{
+  ACE_Reactor* reactor = link_->get_reactor();
+  if (reactor == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::remove_handlers: ")
                ACE_TEXT("NULL reactor reference!\n")));
     return;
   }

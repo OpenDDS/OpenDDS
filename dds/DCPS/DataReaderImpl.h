@@ -1053,7 +1053,7 @@ protected:
   EncodingKinds decoding_modes_;
 
 public:
-  class OpenDDS_Dcps_Export OnDataOnReaders : public JobQueue::Job {
+  class OpenDDS_Dcps_Export OnDataOnReaders : public Job {
   public:
     OnDataOnReaders(WeakRcHandle<SubscriberImpl> subscriber,
                     DDS::SubscriberListener_var sub_listener,
@@ -1077,7 +1077,7 @@ public:
     const bool set_reader_status_;
   };
 
-  class OpenDDS_Dcps_Export OnDataAvailable : public JobQueue::Job {
+  class OpenDDS_Dcps_Export OnDataAvailable : public Job {
   public:
     OnDataAvailable(DDS::DataReaderListener_var listener,
                     WeakRcHandle<DataReaderImpl> data_reader,
