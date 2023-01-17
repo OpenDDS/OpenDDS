@@ -97,11 +97,17 @@ size_t takeSamples(const DataReader_var& dr, F filter)
   return count;
 }
 
-DynamicData_var copy(const Message& sample, DDS::TypeSupport* ts)
+DynamicData_var copy(KeyOnly<const Message&> sample, DDS::TypeSupport* ts)
 {
   DynamicType_var type = ts->get_type();
   DynamicData_var dd = DynamicDataFactory::get_instance()->create_data(type);
-  dd->set_int32_value(dd->get_member_id_by_name("key"), sample.key);
+  dd->set_int32_value(dd->get_member_id_by_name("key"), sample.value.key);
+  return dd;
+}
+
+DynamicData_var copy(const Message& sample, DDS::TypeSupport* ts)
+{
+  DynamicData_var dd = copy(KeyOnly<const Message&>(sample), ts);
   dd->set_uint64_value(dd->get_member_id_by_name("ull"), sample.ull);
   return dd;
 }
@@ -126,6 +132,15 @@ struct Writers {
     }
     DynamicData_var dyn = copy(sample, type_support_);
     return dyn_writer_->write(dyn, ih);
+  }
+
+  ReturnCode_t dispose(const Message& sample, InstanceHandle_t ih = HANDLE_NIL)
+  {
+    if (msg_writer_) {
+      return msg_writer_->dispose(sample, ih);
+    }
+    DynamicData_var dyn = copy(KeyOnly<const Message&>(sample), type_support_);
+    return dyn_writer_->dispose(dyn, ih);
   }
 
   MessageDataWriter_var msg_writer_;
@@ -352,10 +367,10 @@ bool run_unsignedlonglong_test(const MessageTypeSupport_var& ts, const Publisher
     return false;
   }
 
-  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Writers writers(dw);
   Message sample = {0, INT64_LITERAL_SUFFIX(1485441228338)};
   for (; sample.key < 3; ++sample.key, ++sample.ull) {
-    if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+    if (writers.write(sample) != RETCODE_OK) return false;
   }
 
   if (!Utils::waitForSample(dr)) return false;
@@ -437,22 +452,18 @@ bool run_single_dispose_filter_test(const MessageTypeSupport_var& ts, const Publ
   }
 
   // Write Sample with Valid Data
-  if (dynamic == DynamicWriter) {
-    //TODO
-  } else {
-    MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
-    Message sample;
-    sample.key = 0;
-    sample.ull = 0;
-    ret = mdw->write(sample, HANDLE_NIL);
-    if (ret != RETCODE_OK) {
-      cerr << "ERROR: run_single_dispose_filter_test: write failed" << endl;
-      return false;
-    }
-
-    // Create Dispose Sample with Invalid Data by Disposing the instance
-    mdw->dispose(sample, HANDLE_NIL);
+  Writers writers(dw);
+  Message sample;
+  sample.key = 0;
+  sample.ull = 0;
+  ret = writers.write(sample);
+  if (ret != RETCODE_OK) {
+    cerr << "ERROR: run_single_dispose_filter_test: write failed" << endl;
+    return false;
   }
+
+  // Create Dispose Sample with Invalid Data by Disposing the instance
+  writers.dispose(sample);
 
   // Wait for samples matching the filter from the disposed instance
   ReadCondition_var disposed_condition = dr->create_readcondition(
@@ -559,7 +570,7 @@ void register_dynamic(DDS::TypeSupport* ts, DDS::DomainParticipant* dp)
 int run_test(int argc, ACE_TCHAR* argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
-  
+
   ACE_Argv_Type_Converter conv(argc, argv);
   char** const argva = conv.get_ASCII_argv();
   for (int i = 1; i < argc; ++i) {
@@ -601,10 +612,8 @@ int run_test(int argc, ACE_TCHAR* argv[])
 
   bool passed = true;
   passed &= run_filtering_test(ts, pub, sub, sub2);
-  if (dynamic == DynamicNone) { //TODO
-    passed &= run_unsignedlonglong_test(ts, pub, sub);
-    passed &= run_dispose_filter_tests(ts, pub, sub);
-  }
+  passed &= run_unsignedlonglong_test(ts, pub, sub);
+  passed &= run_dispose_filter_tests(ts, pub, sub);
 
   dp1->delete_contained_entities();
   dpf->delete_participant(dp1);
@@ -612,7 +621,6 @@ int run_test(int argc, ACE_TCHAR* argv[])
   dpf->delete_participant(dp2);
   return passed ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
 
 int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
