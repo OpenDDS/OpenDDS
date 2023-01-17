@@ -149,10 +149,7 @@ OpenDDS::DCPS::TransportImpl_rch
 OpenDDS::DCPS::TransportInst::get_impl()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
-  if (!shutting_down_) {
-    return impl_;
-  }
-  return TransportImpl_rch();
+  return impl_;
 }
 
 void
