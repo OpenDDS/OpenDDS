@@ -287,7 +287,7 @@ void
 RtpsUdpInst::update_locators(const GUID_t& remote_id,
                              const TransportLocatorSeq& locators)
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_or_create_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->update_locators(remote_id, locators);
@@ -298,7 +298,7 @@ void
 RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
                                    TransportLocator& locator)
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_or_create_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->get_last_recv_locator(remote_id, locator);
@@ -308,7 +308,7 @@ RtpsUdpInst::get_last_recv_locator(const GUID_t& remote_id,
 void
 RtpsUdpInst::rtps_relay_address_change()
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->rtps_relay_address_change();
@@ -318,7 +318,7 @@ RtpsUdpInst::rtps_relay_address_change()
 void
 RtpsUdpInst::append_transport_statistics(TransportStatisticsSequence& seq)
 {
-  TransportImpl_rch imp = impl();
+  TransportImpl_rch imp = get_or_create_impl();
   if (imp) {
     RtpsUdpTransport_rch rtps_impl = static_rchandle_cast<RtpsUdpTransport>(imp);
     rtps_impl->append_transport_statistics(seq);
