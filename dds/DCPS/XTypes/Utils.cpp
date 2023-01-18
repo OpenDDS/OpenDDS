@@ -333,28 +333,6 @@ namespace {
     return tk == TK_ARRAY || tk == TK_SEQUENCE;
   }
 
-  DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& type,
-    DDS::DynamicData_ptr data, DDS::MemberId id)
-  {
-    DDS::DynamicType_var data_type = data->type();
-    if (sequence_like(data_type->get_kind())) {
-      DDS::TypeDescriptor_var td;
-      DDS::ReturnCode_t rc = data_type->get_descriptor(td);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
-      type = get_base_type(td->element_type());
-    } else {
-      DDS::MemberDescriptor_var md;
-      DDS::ReturnCode_t rc = data->get_descriptor(md, id);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
-      type = get_base_type(md->type());
-    }
-    return DDS::RETCODE_OK;
-  }
-
   DDS::ReturnCode_t member_compare(int& result,
     DDS::DynamicData_ptr a_data, DDS::MemberId a_id,
     DDS::DynamicData_ptr b_data, DDS::MemberId b_id)
@@ -710,6 +688,28 @@ DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::Dynam
   return less_than(result, a, b, Filter_Keys);
 }
 
+DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& type,
+  DDS::DynamicData_ptr data, DDS::MemberId id)
+{
+  DDS::DynamicType_var data_type = data->type();
+  if (sequence_like(data_type->get_kind())) {
+    DDS::TypeDescriptor_var td;
+    DDS::ReturnCode_t rc = data_type->get_descriptor(td);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    type = get_base_type(td->element_type());
+  } else {
+    DDS::MemberDescriptor_var md;
+    DDS::ReturnCode_t rc = data->get_descriptor(md, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    type = get_base_type(md->type());
+  }
+  return DDS::RETCODE_OK;
+}
+
 bool is_int(DDS::TypeKind tk)
 {
   switch (tk) {
@@ -775,6 +775,22 @@ DDS::ReturnCode_t get_uint_value(
   return rc;
 }
 
+DDS::ReturnCode_t set_uint_value(
+  DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind, CORBA::UInt64 value)
+{
+  switch (kind) {
+  case TK_UINT8:
+    return src->set_uint8_value(id, value);
+  case TK_UINT16:
+    return src->set_uint16_value(id, value);
+  case TK_UINT32:
+    return src->set_uint32_value(id, value);
+  case TK_UINT64:
+    return src->set_uint64_value(id, value);
+  }
+  return DDS::RETCODE_BAD_PARAMETER;
+}
+
 DDS::ReturnCode_t get_int_value(
   CORBA::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
 {
@@ -812,6 +828,22 @@ DDS::ReturnCode_t get_int_value(
     break;
   }
   return rc;
+}
+
+DDS::ReturnCode_t set_int_value(
+  DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind, CORBA::Int64 value)
+{
+  switch (kind) {
+  case TK_INT8:
+    return src->set_int8_value(id, value);
+  case TK_INT16:
+    return src->set_int16_value(id, value);
+  case TK_INT32:
+    return src->set_int32_value(id, value);
+  case TK_INT64:
+    return src->set_int64_value(id, value);
+  }
+  return DDS::RETCODE_BAD_PARAMETER;
 }
 
 DDS::ReturnCode_t bitmask_bound(
@@ -917,6 +949,38 @@ DDS::ReturnCode_t get_enum_value(
   }
   value = static_cast<CORBA::Int32>(v);
   return rc;
+}
+
+DDS::ReturnCode_t set_enum_value(
+  DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id, CORBA::Int32 value)
+{
+  DDS::TypeKind bound_kind;
+  const DDS::ReturnCode_t rc = enum_bound(type, bound_kind);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return set_int_value(src, id, bound_kind, value);
+}
+
+DDS::ReturnCode_t set_enum_value(
+  DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id, const char* enumeral_name)
+{
+  DDS::DynamicTypeMember_var dtm;
+  DDS::ReturnCode_t rc = type->get_member_by_name(dtm, enumeral_name);
+  if (rc != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: set_enum_value: "
+        "No such enumeral named \"%C\"\n",
+        enumeral_name));
+    }
+    return rc;
+  }
+  DDS::MemberDescriptor_var md;
+  rc = dtm->get_descriptor(md);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  return set_enum_value(type, src, id, md->index());
 }
 
 } // namespace XTypes
