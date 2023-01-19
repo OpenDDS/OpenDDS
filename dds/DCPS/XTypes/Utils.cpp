@@ -180,6 +180,40 @@ DDS::ReturnCode_t MemberPath::get_member_from_data(
   return DDS::RETCODE_OK;
 }
 
+DDS::ReturnCode_t MemberNamePath::resolve(DDS::DynamicType_ptr type, MemberPath& member_path) const
+{
+  if (member_names.empty()) {
+    return DDS::RETCODE_ILLEGAL_OPERATION;
+  }
+
+  DDS::DynamicType_var current_type = get_base_type(type);
+  if (!current_type) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  for (MemberNameVec::const_iterator it = member_names.begin(); it != member_names.end(); ++it) {
+    DDS::DynamicTypeMember_var dtm;
+    DDS::ReturnCode_t rc = current_type->get_member_by_name(dtm, it->c_str());
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    member_path.id(dtm->get_id());
+
+    DDS::MemberDescriptor_var md;
+    rc = dtm->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    DDS::DynamicType_var next = get_base_type(md->type());
+    if (!next) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    current_type = next;
+  }
+
+  return DDS::RETCODE_OK;
+}
+
 namespace {
   DDS::ReturnCode_t get_values_i(DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter,
     const MemberPath& base_path)

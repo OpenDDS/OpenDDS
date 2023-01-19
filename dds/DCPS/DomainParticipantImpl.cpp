@@ -34,6 +34,7 @@
 #  include "security/framework/SecurityConfig.h"
 #  include "security/framework/Properties.h"
 #endif
+#include "XTypes/Utils.h"
 
 #include <dds/DdsDcpsGuidC.h>
 #ifndef DDS_HAS_MINIMUM_BIT
@@ -2664,9 +2665,8 @@ DDS::ReturnCode_t DomainParticipantImpl::get_dynamic_type(
     }
   }
 
-  DDS::TypeDescriptor_var td;
   DDS::DynamicType_var got_type = type_lookup_service_->type_identifier_to_dynamic(ctid, entity);
-  if (!got_type || got_type->get_descriptor(td) != DDS::RETCODE_OK || !td) {
+  if (!XTypes::dynamic_type_is_valid(got_type)) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DomainParticipantImpl::get_dynamic_type: "
         "Got an invalid DynamicType\n"));

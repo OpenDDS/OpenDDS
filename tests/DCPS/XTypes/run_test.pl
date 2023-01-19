@@ -309,6 +309,7 @@ sub run_test {
 
   my $v = $_[0];
   my $test_name_param = $_[1];
+  print("run_test($test_name_param)\n");
 
   if ($v->{topic}) {
     push(@test_args, "--topic $v->{topic}");
@@ -338,7 +339,6 @@ sub run_test {
     push(@reader_args, "--reg-type $v->{r_reg_type}");
   }
   push(@reader_args, '--dynamic-ts') if ($dynamic_readers);
-  push(@reader_args, '--skip-read') if ($dynamic_writers);
 
   push(@reader_args, @test_args);
   $test->process("reader_$test_name_param", './subscriber', join(' ', @reader_args));
@@ -354,8 +354,11 @@ sub run_test {
   $test->process("writer_$test_name_param", './publisher', join(' ', @writer_args));
   $test->start_process("writer_$test_name_param");
 
-  $status |= $test->wait_kill("reader_$test_name_param", 30);
-  $status |= $test->wait_kill("writer_$test_name_param", 30);
+  my $this_status = 0;
+  $this_status |= $test->wait_kill("reader_$test_name_param", 30);
+  $this_status |= $test->wait_kill("writer_$test_name_param", 30);
+  print("run_test($test_name_param) ", $this_status ? "failed" : "passed", "\n");
+  $status |= $this_status;
 }
 
 if ($test_name eq '') {
