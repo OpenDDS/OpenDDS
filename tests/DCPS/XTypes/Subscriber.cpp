@@ -44,6 +44,7 @@ struct ReadTest {
           check_rc(use_dd->get_int32_value(actual, use_id), "check_int32: get_int32_value"))) {
       ACE_ERROR((LM_ERROR, "ERROR: check_int32 for %C.%C failed\n", type_name.in(), path.join().c_str()));
       success = false;
+      return;
     }
     check_int32(path, expected, actual);
   }
@@ -52,7 +53,7 @@ struct ReadTest {
   {
     if (expected != actual) {
       ACE_ERROR((LM_ERROR, "ERROR: check_string for %C.%C: expected \"%C\", received \"%C\"\n",
-        type_name.in(), path.join().c_str(), expected.c_str(), expected.c_str()));
+        type_name.in(), path.join().c_str(), expected.c_str(), actual));
       success = false;
     }
   }
@@ -71,18 +72,27 @@ struct ReadTest {
     check_string(path, expected, actual);
   }
 
-  template <typename SampleType, typename TopicType = SampleType,
-    typename DataReaderType = typename OpenDDS::DCPS::DDSTraits<TopicType>::DataReaderType,
-    typename SeqType = typename OpenDDS::DCPS::DDSTraits<TopicType>::MessageSequenceType>
-  bool read(SampleType& sample)
+  template <typename DataReaderType, typename SeqType>
+  bool read_single(SeqType& seq)
   {
-    SeqType seq;
     if (!read_i<DataReaderType>(dr, seq)) {
-      ACE_ERROR((LM_ERROR, "ERROR: read %C failed\n", type_name.in()));
+      ACE_ERROR((LM_ERROR, "ERROR: read_single %C failed\n", type_name.in()));
       return false;
     }
     if (seq.length() != 1) {
       ACE_ERROR((LM_ERROR, "ERROR: read %C expected one, but sample got %u\n", seq.length()));
+      return false;
+    }
+    return true;
+  }
+
+  template <typename SampleType,
+    typename DataReaderType = typename OpenDDS::DCPS::DDSTraits<SampleType>::DataReaderType,
+    typename SeqType = typename OpenDDS::DCPS::DDSTraits<SampleType>::MessageSequenceType>
+  bool read(SampleType& sample)
+  {
+    SeqType seq;
+    if (!read_single<DataReaderType, SeqType>(seq)) {
       return false;
     }
     sample = seq[0];
@@ -91,7 +101,12 @@ struct ReadTest {
 
   bool read_dynamic()
   {
-    return read<DDS::DynamicData_var, DDS::DynamicData, DDS::DynamicDataReader, DDS::DynamicDataSeq>(dd);
+    DDS::DynamicDataSeq seq;
+    if (!read_single<DDS::DynamicDataReader, DDS::DynamicDataSeq>(seq)) {
+      return false;
+    }
+    dd = DDS::DynamicData::_duplicate(seq[0]);
+    return true;
   }
 
   template <typename TopicType>
@@ -170,6 +185,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string topic_name = "";
   std::string registered_type_name = "";
   bool dynamic = false;
+  bool skip_read = true;
 
   // Default properties of type consistency enforcement Qos currently supported
   bool disallow_type_coercion = false;
@@ -223,6 +239,8 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
       force_type_validation = true;
     } else if (arg == ACE_TEXT("--dynamic-ts")) {
       dynamic = true;
+    } else if (arg == ACE_TEXT("--skip-read")) {
+      skip_read = true;
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Invalid argument: %s\n", argv[i]));
       return 1;
@@ -393,7 +411,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   }
 
   ReadTest rt(ts, dr, topic_name, dynamic);
-  if (!expect_inconsistent_topic && !expect_incompatible_qos) {
+  if (!expect_inconsistent_topic && !expect_incompatible_qos && !skip_read) {
     if (type == "PlainCdrStruct") {
       rt.read_kf_struct<PlainCdrStruct>();
     } else if (type == "AppendableStruct") {

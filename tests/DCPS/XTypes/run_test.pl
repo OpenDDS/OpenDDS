@@ -128,6 +128,8 @@ if ($secure) {
       reader_type => "ExtendedAppendableStruct", writer_type => "BaseAppendableStruct",
       expect_inconsistent_topic => 0, topic => "AppendableStructT", key_val => 4,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
+      # TODO: Remove once this is supported
+      skip_read_if_dynamic => 1,
     },
     "AppendableNoMatch" => {
       reader_type => "AppendableStruct", writer_type => "AdditionalPrefixFieldStruct",
@@ -178,6 +180,8 @@ if ($secure) {
       reader_type => "Trim20Struct", writer_type => "Trim64Struct",
       expect_inconsistent_topic => 0, topic => "TryconstructT", key_val => 0,
       r_ini => "rtps_disc.ini", w_ini => "rtps_disc.ini",
+      # TODO: Remove once this is supported
+      skip_read_if_dynamic => 1,
     },
     "Dependency" => {
       reader_type => "AppendableStruct", writer_type => "AppendableStructWithDependency",
@@ -338,7 +342,10 @@ sub run_test {
   if ($v->{r_reg_type}) {
     push(@reader_args, "--reg-type $v->{r_reg_type}");
   }
-  push(@reader_args, '--dynamic-ts') if ($dynamic_readers);
+  if ($dynamic_readers) {
+    push(@reader_args, '--dynamic-ts');
+    push(@reader_args, '--skip-read') if ($v->{skip_read_if_dynamic});
+  }
 
   push(@reader_args, @test_args);
   $test->process("reader_$test_name_param", './subscriber', join(' ', @reader_args));

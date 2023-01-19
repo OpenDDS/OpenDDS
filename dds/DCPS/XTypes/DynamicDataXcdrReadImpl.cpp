@@ -43,6 +43,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+using DCPS::log_level;
+using DCPS::LogLevel;
+
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   : chain_(0)
   , encoding_(DCPS::Encoding::KIND_XCDR2)
@@ -678,12 +681,21 @@ bool DynamicDataXcdrReadImpl::read_value(ValueType& value, TypeKind tk)
   case TK_BOOLEAN:
   case TK_STRING8:
   case TK_STRING16:
-    return strm_ >> value;
+    if (strm_ >> value) {
+      return true;
+    }
+    break;
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_value: "
+                 "Calling on an unexpected element type %C\n", typekind_to_string(tk)));
+    }
+    return false;
   }
 
-  if (DCPS::DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::read_value -")
-               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_value: "
+               "failed to deserialize element type %C\n", typekind_to_string(tk)));
   }
   return false;
 }
@@ -1600,22 +1612,27 @@ bool DynamicDataXcdrReadImpl::read_values(SequenceType& value, TypeKind elem_tk)
   case TK_BOOLEAN:
   case TK_STRING8:
   case TK_STRING16:
-    {
-      return strm_ >> value;
+    if (strm_ >> value) {
+      return true;
     }
+    break;
   case TK_ENUM:
   case TK_BITMASK:
-    {
-      if (!strm_.skip_delimiter()) {
-        return false;
-      }
-      return strm_ >> value;
+    if (strm_.skip_delimiter() && strm_ >> value) {
+      return true;
     }
+    break;
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_values: "
+                 "Calling on an unexpected element type %C\n", typekind_to_string(elem_tk)));
+    }
+    return false;
   }
 
-  if (DCPS::DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::read_values -")
-               ACE_TEXT(" Calling on an unexpected element type %C\n"), typekind_to_string(elem_tk)));
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_values: "
+               "failed to deserialize element type %C\n", typekind_to_string(elem_tk)));
   }
   return false;
 }
