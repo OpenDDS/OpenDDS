@@ -556,7 +556,7 @@ private:
   DCPS::RcHandle<SpdpTransport> tport_;
 
 #ifdef OPENDDS_SECURITY
-  class SendStun : public DCPS::JobQueue::Job {
+  class SendStun : public DCPS::Job {
   public:
     SendStun(const DCPS::RcHandle<SpdpTransport>& tport,
              const ACE_INET_Addr& address,
@@ -573,7 +573,7 @@ private:
   };
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  class IceConnect : public DCPS::JobQueue::Job {
+  class IceConnect : public DCPS::Job {
   public:
     IceConnect(DCPS::RcHandle<Spdp> spdp,
                const ICE::GuidSetType& guids,
