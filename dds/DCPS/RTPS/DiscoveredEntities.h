@@ -70,6 +70,7 @@ struct DiscoveredParticipant {
 #endif
   {
 #ifdef OPENDDS_SECURITY
+    pdata_.dataKind = Security::DPDK_NONE;
     security_info_.participant_security_attributes = 0;
     security_info_.plugin_participant_security_attributes = 0;
 #endif
@@ -192,6 +193,11 @@ struct DiscoveredParticipant {
   DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
   DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints_;
   bool participant_tokens_sent_;
+
+  bool has_security_data() const
+  {
+    return pdata_.dataKind == Security::DPDK_ENHANCED || pdata_.dataKind == Security::DPDK_SECURE;
+  }
 #endif
 };
 
