@@ -15,10 +15,18 @@ struct TestKey {
   TestKey(const GUID_t& from, const GUID_t& to) : from_(from), to_(to) {}
   TestKey(const TestKey& val) : from_(val.from_), to_(val.to_) {}
   bool operator<(const TestKey& rhs) const {
-    return std::memcmp(static_cast<const void*>(&from_), static_cast<const void*>(&rhs.from_), 2 * sizeof (GUID_t)) < 0;
+    const int from_comp = std::memcmp(static_cast<const void*>(&from_), static_cast<const void*>(&rhs.from_), sizeof (GUID_t));
+    if (from_comp < 0) {
+      return true;
+    } else if (from_comp == 0) {
+      return std::memcmp(static_cast<const void*>(&to_), static_cast<const void*>(&rhs.to_), sizeof (GUID_t)) < 0;
+    }
+    return false;
   }
   bool operator==(const TestKey& rhs) const {
-    return std::memcmp(static_cast<const void*>(&from_), static_cast<const void*>(&rhs.from_), 2 * sizeof (GUID_t)) == 0;
+    const int from_comp = std::memcmp(static_cast<const void*>(&from_), static_cast<const void*>(&rhs.from_), sizeof (GUID_t));
+    const int to_comp = std::memcmp(static_cast<const void*>(&to_), static_cast<const void*>(&rhs.to_), sizeof (GUID_t));
+    return from_comp == 0 && to_comp == 0;
   }
   void get_contained_guids(RepoIdSet& set) const {
     set.clear();
