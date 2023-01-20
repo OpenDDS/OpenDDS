@@ -97,7 +97,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(DataSampleElement* sample)
 }
 
 ACE_INLINE OpenDDS::DCPS::SendControlStatus
-OpenDDS::DCPS::DataLinkSet::send_control(RepoId                           pub_id,
+OpenDDS::DCPS::DataLinkSet::send_control(GUID_t                           pub_id,
                                          const TransportSendListener_rch& listener,
                                          const DataSampleHeader&          header,
                                          Message_Block_Ptr                msg)
@@ -139,7 +139,7 @@ OpenDDS::DCPS::DataLinkSet::send_control(RepoId                           pub_id
 
 ACE_INLINE void
 OpenDDS::DCPS::DataLinkSet::send_response(
-  RepoId pub_id,
+  GUID_t pub_id,
   const DataSampleHeader& header,
   Message_Block_Ptr response)
 {
@@ -182,7 +182,7 @@ OpenDDS::DCPS::DataLinkSet::remove_sample(const DataSampleElement* sample)
 }
 
 ACE_INLINE bool
-OpenDDS::DCPS::DataLinkSet::remove_all_msgs(const RepoId& pub_id)
+OpenDDS::DCPS::DataLinkSet::remove_all_msgs(const GUID_t& pub_id)
 {
   DBG_ENTRY_LVL("DataLinkSet", "remove_all_msgs", 6);
   MapType map_copy;
@@ -236,7 +236,7 @@ OpenDDS::DCPS::DataLinkSet::send_start(DataLinkSet* in)
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send_stop(RepoId repoId)
+OpenDDS::DCPS::DataLinkSet::send_stop(GUID_t repoId)
 {
   DBG_ENTRY_LVL("DataLinkSet","send_stop",6);
   // Iterate over our map_ and tell each DataLink about the send_stop() event.
@@ -270,7 +270,7 @@ OpenDDS::DCPS::DataLinkSet::copy_map_to(MapType& target)
 }
 
 ACE_INLINE void
-OpenDDS::DCPS::DataLinkSet::send_final_acks(const RepoId& readerid)
+OpenDDS::DCPS::DataLinkSet::send_final_acks(const GUID_t& readerid)
 {
   MapType map_copy;
   {

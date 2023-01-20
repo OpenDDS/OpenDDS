@@ -46,18 +46,18 @@ public:
   void send_control(DataSampleElement* sample);
 
   /// Send control message to each DataLink in the set.
-  SendControlStatus send_control(RepoId                           pub_id,
+  SendControlStatus send_control(GUID_t                           pub_id,
                                  const TransportSendListener_rch& listener,
                                  const DataSampleHeader&          header,
                                  Message_Block_Ptr                msg);
 
-  void send_response(RepoId sub_id,
+  void send_response(GUID_t sub_id,
                      const DataSampleHeader& header,
                      Message_Block_Ptr response);
 
   bool remove_sample(const DataSampleElement* sample);
 
-  bool remove_all_msgs(const RepoId& pub_id);
+  bool remove_all_msgs(const GUID_t& pub_id);
 
   /// Calls send_start() on the links in link_set and also adds
   /// the links from link_set to *this.
@@ -65,14 +65,14 @@ public:
 
   /// Calls send_stop() on the links with ID repoId and then
   /// clears the set.
-  void send_stop(RepoId repoId);
+  void send_stop(GUID_t repoId);
 
-  DataLinkSet_rch select_links(const RepoId* remoteIds,
+  DataLinkSet_rch select_links(const GUID_t* remoteIds,
                                const CORBA::ULong num_targets);
 
   bool empty();
 
-  void send_final_acks(const RepoId& readerid);
+  void send_final_acks(const GUID_t& readerid);
 
   typedef ACE_SYNCH_MUTEX     LockType;
   typedef ACE_Guard<LockType> GuardType;

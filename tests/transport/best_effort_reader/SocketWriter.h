@@ -16,19 +16,19 @@
 
 class SocketWriter {
 public:
-  SocketWriter(const OpenDDS::DCPS::RepoId& id, const ACE_INET_Addr& destination);
+  SocketWriter(const OpenDDS::DCPS::GUID_t& id, const ACE_INET_Addr& destination);
 
   void addDestination(const ACE_INET_Addr& dest);
   bool write(CORBA::ULong seqN, const TestMsg& msg) const;
-  bool write(CORBA::ULong seqN, const TestMsg& msg, const OpenDDS::DCPS::RepoId& directedWrite) const;
+  bool write(CORBA::ULong seqN, const TestMsg& msg, const OpenDDS::DCPS::GUID_t& directedWrite) const;
   bool writeHeartbeat(CORBA::ULong seqN, CORBA::Long heartbeatCount,
-                      const OpenDDS::DCPS::RepoId& reader = OpenDDS::DCPS::GUID_UNKNOWN) const;
+                      const OpenDDS::DCPS::GUID_t& reader = OpenDDS::DCPS::GUID_UNKNOWN) const;
 
 private:
   static const double NTP_FRACTIONAL; // NTP fractional (2^-32) sec per microsec
   static const CORBA::Octet DE  = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E;
   static const CORBA::Octet DEQ = OpenDDS::RTPS::FLAG_D | OpenDDS::RTPS::FLAG_E | OpenDDS::RTPS::FLAG_Q;
-  static OpenDDS::RTPS::Header header(OpenDDS::DCPS::RepoId id);
+  static OpenDDS::RTPS::Header header(OpenDDS::DCPS::GUID_t id);
   static const OpenDDS::DCPS::Encoding encoding;
   static const OpenDDS::DCPS::EncapsulationHeader encap;
 
@@ -47,7 +47,7 @@ private:
 
   bool send(const ACE_Message_Block& mb) const;
 
-  const OpenDDS::DCPS::RepoId id_;
+  const OpenDDS::DCPS::GUID_t id_;
   const OpenDDS::RTPS::Header hdr_;
   ACE_INET_Addr local_addr_;
   ACE_SOCK_Dgram socket_;

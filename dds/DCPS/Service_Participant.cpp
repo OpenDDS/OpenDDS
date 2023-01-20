@@ -1161,7 +1161,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                                      Discovery::RepoKey key,
                                      bool attach_participant)
 {
-  typedef std::pair<Discovery_rch, RepoId> DiscRepoPair;
+  typedef std::pair<Discovery_rch, GUID_t> DiscRepoPair;
   OPENDDS_VECTOR(DiscRepoPair) repoList;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
@@ -1216,7 +1216,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
             try {
               // Attach each DomainParticipant in this domain to this
               // repository.
-              RepoId id = (*current)->get_id();
+              GUID_t id = (*current)->get_id();
               repoList.push_back(std::make_pair(disc_iter->second, id));
 
               if (DCPS_debug_level > 0) {

@@ -72,7 +72,7 @@ public:
   /**
    *  Find the bit key for a given repo id.
    */
-  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::RepoId&     id,
+  virtual DDS::ReturnCode_t repoid_to_bit_key(const DCPS::GUID_t&     id,
                                               DDS::BuiltinTopicKey_t& key) = 0;
 #endif
 

@@ -18,7 +18,7 @@ namespace DCPS {
 struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
   MetaSubmessage()
     : src_guid_(GUID_UNKNOWN), dst_guid_(GUID_UNKNOWN), ignore_(false) {}
-  MetaSubmessage(const RepoId& src, const RepoId& dst)
+  MetaSubmessage(const GUID_t& src, const GUID_t& dst)
     : src_guid_(src), dst_guid_(dst), ignore_(false) {}
 
   void reset_destination()
@@ -26,8 +26,8 @@ struct OpenDDS_Rtps_Udp_Export MetaSubmessage {
     dst_guid_ = GUID_UNKNOWN;
   }
 
-  RepoId src_guid_;
-  RepoId dst_guid_;
+  GUID_t src_guid_;
+  GUID_t dst_guid_;
   RTPS::Submessage sm_;
   bool ignore_;
 };

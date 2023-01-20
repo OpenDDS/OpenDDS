@@ -32,7 +32,7 @@ enum SpecificQos {
 };
 
 typedef DDS::DomainId_t DomainIdType;
-typedef OpenDDS::DCPS::RepoId           IdType; // Federation scope identifier type.
+typedef OpenDDS::DCPS::GUID_t           IdType; // Federation scope identifier type.
 typedef std::pair <size_t, char*>       BinSeq;
 typedef std::pair <SpecificQos, BinSeq> QosSeq;
 typedef long PartIdType;

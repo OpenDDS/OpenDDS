@@ -149,7 +149,7 @@ TransportClient::enable_transport_using_config(bool reliable, bool durable,
     TransportInst_rch inst = tc->instances_[i];
 
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->impl();
+      TransportImpl_rch impl = inst->get_or_create_impl();
 
       if (impl) {
         impls_.push_back(impl);
@@ -180,7 +180,7 @@ TransportClient::populate_connection_info()
   for (size_t i = 0; i < n; ++i) {
     TransportInst_rch inst = config_->instances_[i];
     if (check_transport_qos(*inst)) {
-      TransportImpl_rch impl = inst->impl();
+      TransportImpl_rch impl = inst->get_or_create_impl();
       if (impl) {
         const CORBA::ULong idx = DCPS::grow(conn_info_) - 1;
         impl->connection_info(conn_info_[idx], CONNINFO_ALL);
@@ -198,7 +198,7 @@ TransportClient::populate_connection_info()
 bool
 TransportClient::associate(const AssociationData& data, bool active)
 {
-  RepoId repo_id = get_repo_id();
+  GUID_t repo_id = get_guid();
 
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
 
@@ -242,7 +242,7 @@ TransportClient::associate(const AssociationData& data, bool active)
   PendingMap::iterator iter = pending_.find(data.remote_id_);
 
   if (iter == pending_.end()) {
-    RepoId remote_copy(data.remote_id_);
+    GUID_t remote_copy(data.remote_id_);
     PendingAssoc_rch pa = make_rch<PendingAssoc>(rchandle_from(this));
     pa->active_ = active;
     pa->impls_.clear();
@@ -523,7 +523,7 @@ TransportClient::PendingAssoc::initiate_connect(TransportClient* tc,
 }
 
 void
-TransportClient::use_datalink(const RepoId& remote_id,
+TransportClient::use_datalink(const GUID_t& remote_id,
                               const DataLink_rch& link)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
@@ -532,7 +532,7 @@ TransportClient::use_datalink(const RepoId& remote_id,
 }
 
 void
-TransportClient::use_datalink_i(const RepoId& remote_id_ref,
+TransportClient::use_datalink_i(const GUID_t& remote_id_ref,
                                 const DataLink_rch& link,
                                 Guard& guard)
 {
@@ -541,7 +541,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
   // reference location is deleted (i.e. in stop_accepting_or_connecting
   // if use_datalink_i was called from passive_connection)
   // Does changing this from a reference to a local affect anything going forward?
-  RepoId remote_id(remote_id_ref);
+  GUID_t remote_id(remote_id_ref);
 
   LogGuid peerId_log(remote_id);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::use_datalink_i "
@@ -614,7 +614,7 @@ TransportClient::use_datalink_i(const RepoId& remote_id_ref,
 }
 
 void
-TransportClient::add_link(const DataLink_rch& link, const RepoId& peer)
+TransportClient::add_link(const DataLink_rch& link, const GUID_t& peer)
 {
   links_.insert_link(link);
   data_link_index_[peer] = link;
@@ -684,11 +684,11 @@ TransportClient::stop_associating(const GUID_t* repos, CORBA::ULong length)
 void
 TransportClient::send_final_acks()
 {
-  links_.send_final_acks(get_repo_id());
+  links_.send_final_acks(get_guid());
 }
 
 void
-TransportClient::disassociate(const RepoId& peerId)
+TransportClient::disassociate(const GUID_t& peerId)
 {
   LogGuid peerId_log(peerId);
   VDBG_LVL((LM_DEBUG, "(%P|%t) TransportClient::disassociate "
@@ -774,7 +774,7 @@ void TransportClient::transport_stop()
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   const ImplsType impls = impls_;
-  const RepoId repo_id = repo_id_;
+  const GUID_t repo_id = repo_id_;
   guard.release();
 
   for (size_t i = 0; i < impls.size(); ++i) {
@@ -786,9 +786,9 @@ void TransportClient::transport_stop()
 }
 
 void
-TransportClient::register_for_reader(const RepoId& participant,
-                                     const RepoId& writerid,
-                                     const RepoId& readerid,
+TransportClient::register_for_reader(const GUID_t& participant,
+                                     const GUID_t& writerid,
+                                     const GUID_t& readerid,
                                      const TransportLocatorSeq& locators,
                                      OpenDDS::DCPS::DiscoveryListener* listener)
 {
@@ -804,9 +804,9 @@ TransportClient::register_for_reader(const RepoId& participant,
 }
 
 void
-TransportClient::unregister_for_reader(const RepoId& participant,
-                                       const RepoId& writerid,
-                                       const RepoId& readerid)
+TransportClient::unregister_for_reader(const GUID_t& participant,
+                                       const GUID_t& writerid,
+                                       const GUID_t& readerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
@@ -820,9 +820,9 @@ TransportClient::unregister_for_reader(const RepoId& participant,
 }
 
 void
-TransportClient::register_for_writer(const RepoId& participant,
-                                     const RepoId& readerid,
-                                     const RepoId& writerid,
+TransportClient::register_for_writer(const GUID_t& participant,
+                                     const GUID_t& readerid,
+                                     const GUID_t& writerid,
                                      const TransportLocatorSeq& locators,
                                      DiscoveryListener* listener)
 {
@@ -838,9 +838,9 @@ TransportClient::register_for_writer(const RepoId& participant,
 }
 
 void
-TransportClient::unregister_for_writer(const RepoId& participant,
-                                       const RepoId& readerid,
-                                       const RepoId& writerid)
+TransportClient::unregister_for_writer(const GUID_t& participant,
+                                       const GUID_t& readerid,
+                                       const GUID_t& writerid)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
   for (ImplsType::iterator pos = impls_.begin(), limit = impls_.end();
@@ -854,7 +854,7 @@ TransportClient::unregister_for_writer(const RepoId& participant,
 }
 
 void
-TransportClient::update_locators(const RepoId& remote,
+TransportClient::update_locators(const GUID_t& remote,
                                  const TransportLocatorSeq& locators)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
@@ -890,7 +890,7 @@ TransportClient::get_ice_endpoint()
 }
 
 bool
-TransportClient::send_response(const RepoId& peer,
+TransportClient::send_response(const GUID_t& peer,
                                const DataSampleHeader& header,
                                Message_Block_Ptr payload)
 {
@@ -929,7 +929,7 @@ SendControlStatus
 TransportClient::send_w_control(SendStateDataSampleList send_list,
                                 const DataSampleHeader& header,
                                 Message_Block_Ptr msg,
-                                const RepoId& destination)
+                                const GUID_t& destination)
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, send_transaction_guard,
                    send_transaction_lock_, SEND_CONTROL_ERROR);
@@ -1087,7 +1087,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
     // The reason that the send_links_ set is cleared is because we continually
     // reuse the same send_links_ object over and over for each call to this
     // send method.
-    RepoId pub_id = repo_id();
+    GUID_t pub_id = repo_id();
     send_links.send_stop(pub_id);
     if (transaction_id != 0) {
       expected_transaction_id_ = max_transaction_id_seen_ + 1;
@@ -1118,7 +1118,7 @@ TransportClient::send_control(const DataSampleHeader& header,
 SendControlStatus
 TransportClient::send_control_to(const DataSampleHeader& header,
                                  Message_Block_Ptr msg,
-                                 const RepoId& destination)
+                                 const GUID_t& destination)
 {
   DataLinkSet singular;
   {
@@ -1190,7 +1190,7 @@ void TransportClient::data_acked(const GUID_t& remote)
 
 bool TransportClient::is_leading(const GUID_t& reader_id) const
 {
-  return links_.is_leading(get_repo_id(), reader_id);
+  return links_.is_leading(get_guid(), reader_id);
 }
 
 

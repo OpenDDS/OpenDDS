@@ -44,7 +44,7 @@ protected:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id,
+                                            const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed);
 
@@ -58,7 +58,7 @@ protected:
 
   virtual std::string transport_type() const { return "multicast"; }
 
-  void client_stop(const RepoId& localId);
+  void client_stop(const GUID_t& localId);
 
 private:
 
@@ -68,7 +68,7 @@ private:
   typedef ACE_Thread_Mutex         ThreadLockType;
   typedef ACE_Guard<ThreadLockType>     GuardThreadType;
 
-  MulticastDataLink_rch make_datalink(const RepoId& local_id,
+  MulticastDataLink_rch make_datalink(const GUID_t& local_id,
                                       Priority priority,
                                       bool active);
 

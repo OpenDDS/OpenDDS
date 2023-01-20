@@ -41,7 +41,7 @@ typedef ACE_Unbounded_Set<DCPS_IR_Subscription*> DCPS_IR_Subscription_Set;
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Publication
 : public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Publication> {
 public:
-  DCPS_IR_Publication(const OpenDDS::DCPS::RepoId& id,
+  DCPS_IR_Publication(const OpenDDS::DCPS::GUID_t& id,
                       DCPS_IR_Participant* participant,
                       DCPS_IR_Topic* topic,
                       OpenDDS::DCPS::DataWriterRemote_ptr writer,
@@ -86,14 +86,14 @@ public:
   int remove_associations(CORBA::Boolean notify_lost);
 
   /// Remove any subscriptions whose participant has the id
-  void disassociate_participant(OpenDDS::DCPS::RepoId id,
+  void disassociate_participant(OpenDDS::DCPS::GUID_t id,
                                 bool reassociate = false);
 
   /// Remove any subscriptions whose topic has the id
-  void disassociate_topic(OpenDDS::DCPS::RepoId id);
+  void disassociate_topic(OpenDDS::DCPS::GUID_t id);
 
   /// Remove any subscriptions with the id
-  void disassociate_subscription(OpenDDS::DCPS::RepoId id,
+  void disassociate_subscription(OpenDDS::DCPS::GUID_t id,
                                  bool reassociate = false);
 
   /// Notify the writer of incompatible qos status
@@ -103,9 +103,9 @@ public:
   /// Check that none of the ids given are ones that
   ///  this publication should ignore.
   /// returns 1 if one of these ids is an ignored id
-  CORBA::Boolean is_subscription_ignored(OpenDDS::DCPS::RepoId partId,
-                                         OpenDDS::DCPS::RepoId topicId,
-                                         OpenDDS::DCPS::RepoId subId);
+  CORBA::Boolean is_subscription_ignored(OpenDDS::DCPS::GUID_t partId,
+                                         OpenDDS::DCPS::GUID_t topicId,
+                                         OpenDDS::DCPS::GUID_t subId);
 
   /// Return pointer to the DataWriter qos
   /// Publication retains ownership
@@ -134,9 +134,9 @@ public:
   /// Publication retains ownership
   OpenDDS::DCPS::IncompatibleQosStatus* get_incompatibleQosStatus();
 
-  OpenDDS::DCPS::RepoId get_id();
-  OpenDDS::DCPS::RepoId get_topic_id();
-  OpenDDS::DCPS::RepoId get_participant_id();
+  OpenDDS::DCPS::GUID_t get_id();
+  OpenDDS::DCPS::GUID_t get_topic_id();
+  OpenDDS::DCPS::GUID_t get_participant_id();
 
   DCPS_IR_Topic* get_topic();
   DCPS_IR_Topic_Description* get_topic_description();
@@ -166,7 +166,7 @@ public:
   // the new association will be added.
   bool reevaluate_association(DCPS_IR_Subscription* subscription);
 
-  void update_expr_params(OpenDDS::DCPS::RepoId readerId,
+  void update_expr_params(OpenDDS::DCPS::GUID_t readerId,
                           const DDS::StringSeq& params);
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
@@ -175,7 +175,7 @@ public:
 
 private:
 
-  OpenDDS::DCPS::RepoId id_;
+  OpenDDS::DCPS::GUID_t id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;
   DDS::InstanceHandle_t handle_;

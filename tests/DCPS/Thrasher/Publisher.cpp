@@ -68,7 +68,7 @@ Publisher::Publisher(const long domain_id, std::size_t samples_per_thread, bool 
     }
     OpenDDS::DCPS::DataWriterImpl* wi = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dw_.in());
     if (wi) {
-      ACE_DEBUG((LM_INFO, (pfx_ + "  writer id: %C\n").c_str(), OpenDDS::DCPS::LogGuid(wi->get_repo_id()).c_str()));
+      ACE_DEBUG((LM_INFO, (pfx_ + "  writer id: %C\n").c_str(), OpenDDS::DCPS::LogGuid(wi->get_guid()).c_str()));
     } else {
       throw std::runtime_error("dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(dw_.in()) failed!\n");
     }
@@ -97,9 +97,9 @@ int Publisher::publish()
   OpenDDS::DCPS::DataWriterImpl* p = dynamic_cast<OpenDDS::DCPS::DataWriterImpl*>(writer_.in());
   OPENDDS_ASSERT(p);
   if (!durable_) {
-    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_repo_id()).c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
     Utils::wait_match(dw_, 1);
-    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_repo_id()).c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
   }
 
   // Intentionally inefficient to stress various pathways related to publication:
@@ -120,9 +120,9 @@ int Publisher::publish()
   }
 
   if (durable_) {
-    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_repo_id()).c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "->wait_match() before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
     Utils::wait_match(dw_, 1);
-    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_repo_id()).c_str()));
+    ACE_DEBUG((LM_INFO, (pfx_ + "<-match found! before write for %C\n").c_str(), OpenDDS::DCPS::LogGuid(p->get_guid()).c_str()));
   }
 
   DDS::Duration_t interval = {DDS::DURATION_INFINITE_SEC, DDS::DURATION_INFINITE_NSEC};

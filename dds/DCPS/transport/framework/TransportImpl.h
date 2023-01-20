@@ -84,30 +84,30 @@ public:
   /// TransportLocator object.
   virtual bool connection_info_i(TransportLocator& local_info, ConnectionInfoFlags flags) const = 0;
 
-  virtual void register_for_reader(const RepoId& /*participant*/,
-                                   const RepoId& /*writerid*/,
-                                   const RepoId& /*readerid*/,
+  virtual void register_for_reader(const GUID_t& /*participant*/,
+                                   const GUID_t& /*writerid*/,
+                                   const GUID_t& /*readerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    OpenDDS::DCPS::DiscoveryListener* /*listener*/) { }
 
-  virtual void unregister_for_reader(const RepoId& /*participant*/,
-                                     const RepoId& /*writerid*/,
-                                     const RepoId& /*readerid*/) { }
+  virtual void unregister_for_reader(const GUID_t& /*participant*/,
+                                     const GUID_t& /*writerid*/,
+                                     const GUID_t& /*readerid*/) { }
 
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
+  virtual void register_for_writer(const GUID_t& /*participant*/,
+                                   const GUID_t& /*readerid*/,
+                                   const GUID_t& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/) { }
 
-  virtual void unregister_for_writer(const RepoId& /*participant*/,
-                                     const RepoId& /*readerid*/,
-                                     const RepoId& /*writerid*/) { }
+  virtual void unregister_for_writer(const GUID_t& /*participant*/,
+                                     const GUID_t& /*readerid*/,
+                                     const GUID_t& /*writerid*/) { }
 
-  virtual void update_locators(const RepoId& /*remote*/,
+  virtual void update_locators(const GUID_t& /*remote*/,
                                const TransportLocatorSeq& /*locators*/) { }
 
-  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+  virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/) {}
 
   virtual void rtps_relay_address_change() {}
@@ -131,7 +131,7 @@ public:
   void report();
 
   struct ConnectionAttribs {
-    RepoId local_id_;
+    GUID_t local_id_;
     Priority priority_;
     bool local_reliable_, local_durable_;
     SequenceNumber max_sn_;
@@ -146,7 +146,7 @@ public:
   };
 
   struct RemoteTransport {
-    RepoId repo_id_;
+    GUID_t repo_id_;
     TransportBLOB blob_;
     TransportBLOB discovery_blob_;
     MonotonicTime_t participant_discovered_at_;
@@ -214,7 +214,7 @@ protected:
   /// The TransportClient* passed in to accept or connect is not
   /// valid after this method is called.
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id,
+                                            const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed) = 0;
 
@@ -255,9 +255,9 @@ private:
   /// any other threads while we perform this release.
   virtual void release_datalink(DataLink* link) = 0;
 
-  virtual void client_stop(const RepoId&) {}
+  virtual void client_stop(const GUID_t&) {}
 
-  DataLink* find_connect_i(const RepoId& local_id,
+  DataLink* find_connect_i(const GUID_t& local_id,
                            const AssociationData& remote_association,
                            const ConnectionAttribs& attribs,
                            bool active, bool connect);

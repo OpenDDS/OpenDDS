@@ -49,9 +49,9 @@ int ignore ()
       // the USER_DATA to find the Built-In Topic InstanceHandle_t
       // value for an entity (e.g. a DomainParticipant) but this
       // test knows everything and can use the discovery RepoID.
-      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::GUID_t part_id = participant_servant->get_id ();
       //SHH one of these should be the subscriber participant and the other should be the publisher participant.
-      ::OpenDDS::DCPS::RepoId ignore_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::GUID_t ignore_id = participant_servant->get_id ();
 
       std::stringstream participantBuffer;
 
@@ -87,8 +87,8 @@ int ignore ()
 
   case IGNORE_TOPIC:
     {
-      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::OpenDDS::DCPS::RepoId ignore_id = topic_servant->get_id ();
+      ::OpenDDS::DCPS::GUID_t part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::GUID_t ignore_id = topic_servant->get_id ();
 
       std::stringstream participantBuffer;
       participantBuffer << ::OpenDDS::DCPS::to_string(part_id);
@@ -121,8 +121,8 @@ int ignore ()
     break;
   case IGNORE_PUBLICATION:
     {
-      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::OpenDDS::DCPS::RepoId ignore_id = datawriter_servant->get_repo_id();
+      ::OpenDDS::DCPS::GUID_t part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::GUID_t ignore_id = datawriter_servant->get_guid();
 
       std::stringstream participantBuffer;
       participantBuffer << ::OpenDDS::DCPS::to_string(part_id);
@@ -155,8 +155,8 @@ int ignore ()
     break;
   case IGNORE_SUBSCRIPTION:
     {
-      ::OpenDDS::DCPS::RepoId part_id = participant_servant->get_id ();
-      ::OpenDDS::DCPS::RepoId ignore_id = datareader_servant->get_repo_id ();
+      ::OpenDDS::DCPS::GUID_t part_id = participant_servant->get_id ();
+      ::OpenDDS::DCPS::GUID_t ignore_id = datareader_servant->get_guid ();
 
       std::stringstream participantBuffer;
       participantBuffer << ::OpenDDS::DCPS::to_string(part_id);

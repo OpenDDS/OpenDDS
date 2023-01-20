@@ -35,7 +35,7 @@ public:
 
   virtual ~DataWriterRemoteImpl();
 
-  virtual void add_association(const RepoId& yourId,
+  virtual void add_association(const GUID_t& yourId,
                                const ReaderAssociation& readers,
                                bool active);
 
@@ -44,7 +44,7 @@ public:
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void update_subscription_params(const RepoId& readerId,
+  virtual void update_subscription_params(const GUID_t& readerId,
                                           const DDS::StringSeq& exprParams);
 
   void detach_parent();

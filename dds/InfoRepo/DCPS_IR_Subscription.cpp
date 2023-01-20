@@ -22,7 +22,7 @@
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
-DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
+DCPS_IR_Subscription::DCPS_IR_Subscription(const OpenDDS::DCPS::GUID_t& id,
                                            DCPS_IR_Participant* participant,
                                            DCPS_IR_Topic* topic,
                                            OpenDDS::DCPS::DataReaderRemote_ptr reader,
@@ -233,7 +233,7 @@ int DCPS_IR_Subscription::remove_associations(CORBA::Boolean notify_lost)
   return status;
 }
 
-void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::RepoId id,
+void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::GUID_t id,
                                                     bool reassociate)
 {
   DCPS_IR_Publication* pub = 0;
@@ -309,7 +309,7 @@ void DCPS_IR_Subscription::disassociate_participant(OpenDDS::DCPS::RepoId id,
   }
 }
 
-void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::RepoId id)
+void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::GUID_t id)
 {
   DCPS_IR_Publication* pub = 0;
   size_t numAssociations = associations_.size();
@@ -373,7 +373,7 @@ void DCPS_IR_Subscription::disassociate_topic(OpenDDS::DCPS::RepoId id)
   }
 }
 
-void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::RepoId id,
+void DCPS_IR_Subscription::disassociate_publication(OpenDDS::DCPS::GUID_t id,
                                                     bool reassociate)
 {
   DCPS_IR_Publication* pub = 0;
@@ -464,9 +464,9 @@ void DCPS_IR_Subscription::update_incompatible_qos()
   }
 }
 
-CORBA::Boolean DCPS_IR_Subscription::is_publication_ignored(OpenDDS::DCPS::RepoId partId,
-                                                            OpenDDS::DCPS::RepoId topicId,
-                                                            OpenDDS::DCPS::RepoId pubId)
+CORBA::Boolean DCPS_IR_Subscription::is_publication_ignored(OpenDDS::DCPS::GUID_t partId,
+                                                            OpenDDS::DCPS::GUID_t topicId,
+                                                            OpenDDS::DCPS::GUID_t pubId)
 {
   CORBA::Boolean ignored = (participant_->is_participant_ignored(partId) ||
                             participant_->is_topic_ignored(topicId) ||
@@ -665,17 +665,17 @@ DCPS_IR_Subscription::reevaluate_association(DCPS_IR_Publication* publication)
   return false;
 }
 
-OpenDDS::DCPS::RepoId DCPS_IR_Subscription::get_id()
+OpenDDS::DCPS::GUID_t DCPS_IR_Subscription::get_id()
 {
   return id_;
 }
 
-OpenDDS::DCPS::RepoId DCPS_IR_Subscription::get_topic_id()
+OpenDDS::DCPS::GUID_t DCPS_IR_Subscription::get_topic_id()
 {
   return topic_->get_id();
 }
 
-OpenDDS::DCPS::RepoId DCPS_IR_Subscription::get_participant_id()
+OpenDDS::DCPS::GUID_t DCPS_IR_Subscription::get_participant_id()
 {
   return participant_->get_id();
 }

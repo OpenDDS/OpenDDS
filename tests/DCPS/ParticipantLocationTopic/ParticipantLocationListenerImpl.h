@@ -60,7 +60,7 @@ public:
 
   bool check(bool print_results = true);
 
-  typedef std::map<OpenDDS::DCPS::RepoId, unsigned long, OpenDDS::DCPS::GUID_tKeyLessThan> LocationMapType;
+  typedef std::map<OpenDDS::DCPS::GUID_t, unsigned long, OpenDDS::DCPS::GUID_tKeyLessThan> LocationMapType;
   LocationMapType location_map;
 
 private:

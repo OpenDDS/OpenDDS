@@ -14,7 +14,6 @@
 #include "GuidUtils.h"
 #include "Serializer.h"
 #include "SequenceNumber.h"
-#include "RepoIdTypes.h"
 #include "PoolAllocator.h"
 #include <dds/DdsDcpsInfoUtilsC.h>
 
@@ -39,14 +38,14 @@ struct WriterCoherentSample {
   SequenceNumber last_sample_;
 };
 
-typedef OPENDDS_MAP_CMP(PublicationId, WriterCoherentSample, GUID_tKeyLessThan) GroupCoherentSamples;
+typedef OPENDDS_MAP_CMP(GUID_t, WriterCoherentSample, GUID_tKeyLessThan) GroupCoherentSamples;
 
 /// End Coherent Change message.
 struct OpenDDS_Dcps_Export CoherentChangeControl {
 
   WriterCoherentSample  coherent_samples_;
   bool                  group_coherent_;
-  RepoId                publisher_id_;
+  GUID_t                publisher_id_;
   GroupCoherentSamples  group_coherent_samples_;
 
   CoherentChangeControl();

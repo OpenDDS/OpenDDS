@@ -18,8 +18,8 @@ namespace {
 
 class CoherentFilter : public OpenDDS::DCPS::ReceivedDataFilter {
 public:
-  CoherentFilter(const OpenDDS::DCPS::PublicationId& writer,
-                 const OpenDDS::DCPS::RepoId& publisher)
+  CoherentFilter(const OpenDDS::DCPS::GUID_t& writer,
+                 const OpenDDS::DCPS::GUID_t& publisher)
   : writer_(writer),
     publisher_(publisher),
     group_coherent_(publisher_ != ::OpenDDS::DCPS::GUID_UNKNOWN)
@@ -38,15 +38,15 @@ public:
 
 private:
 
-  const OpenDDS::DCPS::PublicationId& writer_;
-  const OpenDDS::DCPS::RepoId& publisher_;
+  const OpenDDS::DCPS::GUID_t& writer_;
+  const OpenDDS::DCPS::GUID_t& publisher_;
   bool group_coherent_;
 };
 
 class AcceptCoherent : public OpenDDS::DCPS::ReceivedDataOperation {
 public:
-  AcceptCoherent(const OpenDDS::DCPS::PublicationId& writer,
-                 const OpenDDS::DCPS::RepoId& publisher,
+  AcceptCoherent(const OpenDDS::DCPS::GUID_t& writer,
+                 const OpenDDS::DCPS::GUID_t& publisher,
                  OpenDDS::DCPS::ReceivedDataElementList* rdel)
     : writer_(writer)
     , publisher_(publisher)
@@ -72,8 +72,8 @@ public:
 
 private:
 
-  const OpenDDS::DCPS::PublicationId& writer_;
-  const OpenDDS::DCPS::RepoId& publisher_;
+  const OpenDDS::DCPS::GUID_t& writer_;
+  const OpenDDS::DCPS::GUID_t& publisher_;
   OpenDDS::DCPS::ReceivedDataElementList* rdel_;
   bool group_coherent_;
 
@@ -104,8 +104,8 @@ ReceivedDataStrategy::add(ReceivedDataElement* data_sample)
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
 void
-ReceivedDataStrategy::accept_coherent(const PublicationId& writer,
-                                      const RepoId& publisher)
+ReceivedDataStrategy::accept_coherent(const GUID_t& writer,
+                                      const GUID_t& publisher)
 {
   CoherentFilter filter(writer, publisher);
   AcceptCoherent operation(writer, publisher, &rcvd_samples_);
@@ -113,8 +113,8 @@ ReceivedDataStrategy::accept_coherent(const PublicationId& writer,
 }
 
 void
-ReceivedDataStrategy::reject_coherent(const PublicationId& writer,
-                                      const RepoId& publisher)
+ReceivedDataStrategy::reject_coherent(const GUID_t& writer,
+                                      const GUID_t& publisher)
 {
   CoherentFilter filter(writer, publisher);
   this->rcvd_samples_.remove(filter, true);

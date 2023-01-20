@@ -332,14 +332,14 @@ Discovery::Config::~Config()
 }
 
 void Discovery::update_publication_locators(DDS::DomainId_t,
-                                            const RepoId&,
-                                            const RepoId&,
+                                            const GUID_t&,
+                                            const GUID_t&,
                                             const TransportLocatorSeq&)
 {}
 
 void Discovery::update_subscription_locators(DDS::DomainId_t,
-                                             const RepoId&,
-                                             const RepoId&,
+                                             const GUID_t&,
+                                             const GUID_t&,
                                              const TransportLocatorSeq&)
 {}
 

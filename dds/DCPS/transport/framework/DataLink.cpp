@@ -108,12 +108,12 @@ DataLink::impl() const
 }
 
 bool
-DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
+DataLink::add_on_start_callback(const TransportClient_wrch& client, const GUID_t& remote)
 {
   const DataLink_rch link(this, inc_count());
 
   TransportClient_rch client_lock = client.lock();
-  const RepoId client_id = client_lock ? client_lock->get_repo_id() : GUID_UNKNOWN;
+  const GUID_t client_id = client_lock ? client_lock->get_guid() : GUID_UNKNOWN;
 
   GuardType guard(strategy_lock_);
 
@@ -143,7 +143,7 @@ DataLink::add_on_start_callback(const TransportClient_wrch& client, const RepoId
 }
 
 void
-DataLink::remove_startup_callbacks(const RepoId& local, const RepoId& remote)
+DataLink::remove_startup_callbacks(const GUID_t& local, const GUID_t& remote)
 {
   GuardType guard(strategy_lock_);
 
@@ -170,11 +170,11 @@ DataLink::remove_startup_callbacks(const RepoId& local, const RepoId& remote)
 }
 
 void
-DataLink::remove_on_start_callback(const TransportClient_wrch& client, const RepoId& remote)
+DataLink::remove_on_start_callback(const TransportClient_wrch& client, const GUID_t& remote)
 {
   TransportClient_rch client_lock = client.lock();
   if (client_lock) {
-    const RepoId id = client_lock->get_repo_id();
+    const GUID_t id = client_lock->get_guid();
 
     GuardType guard(strategy_lock_);
     OnStartCallbackMap::iterator it = on_start_callbacks_.find(remote);
@@ -202,7 +202,7 @@ DataLink::invoke_on_start_callbacks(bool success)
       break;
     }
 
-    RepoId remote = GUID_UNKNOWN;
+    GUID_t remote = GUID_UNKNOWN;
     TransportClient_wrch client;
     OnStartCallbackMap::iterator it = on_start_callbacks_.begin();
     if (it != on_start_callbacks_.end()) {
@@ -228,7 +228,7 @@ DataLink::invoke_on_start_callbacks(bool success)
 }
 
 void
-DataLink::invoke_on_start_callbacks(const RepoId& local, const RepoId& remote, bool success)
+DataLink::invoke_on_start_callbacks(const GUID_t& local, const GUID_t& remote, bool success)
 {
   const DataLink_rch link(success ? this : 0, inc_count());
 
@@ -392,8 +392,8 @@ DataLink::resume_send()
 }
 
 int
-DataLink::make_reservation(const RepoId& remote_subscription_id,
-                           const RepoId& local_publication_id,
+DataLink::make_reservation(const GUID_t& remote_subscription_id,
+                           const GUID_t& local_publication_id,
                            const TransportSendListener_wrch& send_listener,
                            bool reliable)
 {
@@ -433,8 +433,8 @@ DataLink::make_reservation(const RepoId& remote_subscription_id,
 }
 
 int
-DataLink::make_reservation(const RepoId& remote_publication_id,
-                           const RepoId& local_subscription_id,
+DataLink::make_reservation(const GUID_t& remote_publication_id,
+                           const GUID_t& local_subscription_id,
                            const TransportReceiveListener_wrch& receive_listener,
                            bool reliable)
 {
@@ -484,7 +484,7 @@ void set_to_seq(const RepoIdSet& rids, Seq& seq)
 }
 
 GUIDSeq*
-DataLink::peer_ids(const RepoId& local_id) const
+DataLink::peer_ids(const GUID_t& local_id) const
 {
   GuardType guard(pub_sub_maps_lock_);
 
@@ -506,7 +506,7 @@ DataLink::peer_ids(const RepoId& local_id) const
 /// with a simultaneous call (in another thread) to one of this
 /// DataLink's make_reservation() methods.
 void
-DataLink::release_reservations(RepoId remote_id, RepoId local_id,
+DataLink::release_reservations(GUID_t remote_id, GUID_t local_id,
                                DataLinkSetMap& released_locals)
 {
   DBG_ENTRY_LVL("DataLink", "release_reservations", 6);
@@ -672,7 +672,7 @@ DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message
 
   send_response_listener_.track_message();
 
-  RepoId senderId(header.publication_id_);
+  GUID_t senderId(header.publication_id_);
   send_start();
   send(elem);
   send_stop(senderId);
@@ -685,7 +685,7 @@ DataLink::send_control(const DataSampleHeader& header, Message_Block_Ptr message
 /// that sent the sample.
 int
 DataLink::data_received(ReceivedDataSample& sample,
-                        const RepoId& readerId /* = GUID_UNKNOWN */)
+                        const GUID_t& readerId /* = GUID_UNKNOWN */)
 {
   data_received_i(sample, readerId, RepoIdSet(), ReceiveListenerSet::SET_EXCLUDED);
   return 0;
@@ -699,13 +699,13 @@ DataLink::data_received_include(ReceivedDataSample& sample, const RepoIdSet& inc
 
 void
 DataLink::data_received_i(ReceivedDataSample& sample,
-                          const RepoId& readerId,
+                          const GUID_t& readerId,
                           const RepoIdSet& incl_excl,
                           ReceiveListenerSet::ConstrainReceiveSet constrain)
 {
   DBG_ENTRY_LVL("DataLink", "data_received_i", 6);
   // Which remote publication sent this message?
-  const RepoId& publication_id = sample.header_.publication_id_;
+  const GUID_t& publication_id = sample.header_.publication_id_;
 
   // Locate the set of TransportReceiveListeners associated with this
   // DataLink that are interested in hearing about any samples received
@@ -1007,14 +1007,14 @@ DataLink::release_resources()
 }
 
 bool
-DataLink::is_target(const RepoId& remote_id)
+DataLink::is_target(const GUID_t& remote_id)
 {
   GuardType guard(this->pub_sub_maps_lock_);
   return assoc_by_remote_.count(remote_id);
 }
 
 GUIDSeq*
-DataLink::target_intersection(const RepoId& pub_id, const GUIDSeq& in,
+DataLink::target_intersection(const GUID_t& pub_id, const GUIDSeq& in,
                               size_t& n_subs)
 {
   GUIDSeq_var res;
@@ -1233,7 +1233,7 @@ DataLink::network_change() const
 }
 
 void
-DataLink::replay_durable_data(const RepoId& local_pub_id, const RepoId& remote_sub_id) const
+DataLink::replay_durable_data(const GUID_t& local_pub_id, const GUID_t& remote_sub_id) const
 {
   GuidConverter local(local_pub_id);
   GuidConverter remote(remote_sub_id);

@@ -308,7 +308,7 @@ RtpsUdpReceiveStrategy::receive_bytes_helper(iovec iov[],
 
 #ifdef OPENDDS_SECURITY
 namespace {
-  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::RepoId& peer, bool& stop)
+  ssize_t recv_err(const char* msg, const ACE_INET_Addr& remote, const DCPS::GUID_t& peer, bool& stop)
   {
     if (security_debug.encdec_warn) {
       ACE_ERROR((LM_WARNING, "(%P|%t) {encdec_warn} RtpsUdpReceiveStrategy::receive_bytes - "
@@ -597,7 +597,7 @@ RtpsUdpReceiveStrategy::deliver_sample_i(ReceivedDataSample& sample,
     link_->filterBestEffortReaders(sample, readers_selected_, readers_withheld_);
 
     if (data.readerId != ENTITYID_UNKNOWN) {
-      RepoId reader;
+      GUID_t reader;
       std::memcpy(reader.guidPrefix, link_->local_prefix(),
                   sizeof(GuidPrefix_t));
       reader.entityId = data.readerId;
@@ -761,7 +761,7 @@ RtpsUdpReceiveStrategy::deliver_from_secure(const RTPS::Submessage& submessage,
     return;
   }
 
-  const RepoId peer = make_id(receiver_.source_guid_prefix_, ENTITYID_PARTICIPANT);
+  const GUID_t peer = make_id(receiver_.source_guid_prefix_, ENTITYID_PARTICIPANT);
   const ParticipantCryptoHandle peer_pch = link_->handle_registry()->get_remote_participant_crypto_handle(peer);
 
   DDS::OctetSeq encoded_submsg, plain_submsg;
@@ -978,50 +978,58 @@ bool RtpsUdpReceiveStrategy::decode_payload(ReceivedDataSample& sample,
 int
 RtpsUdpReceiveStrategy::start_i()
 {
-  ACE_Reactor* reactor = link_->get_reactor();
-  if (reactor == 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("NULL reactor reference!\n")),
-                     -1);
-  }
-
-  if (reactor->register_handler(link_->unicast_socket().get_handle(), this,
-                                ACE_Event_Handler::READ_MASK) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for unicast ")
-                      ACE_TEXT("socket %d\n"),
-                      link_->unicast_socket().get_handle()),
-                     -1);
-  }
-
-#ifdef ACE_HAS_IPV6
-  if (reactor->register_handler(link_->ipv6_unicast_socket().get_handle(), this,
-                                ACE_Event_Handler::READ_MASK) != 0) {
-    ACE_ERROR_RETURN((LM_ERROR,
-                      ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("RtpsUdpReceiveStrategy::start_i: ")
-                      ACE_TEXT("failed to register handler for unicast ")
-                      ACE_TEXT("socket %d\n"),
-                      link_->unicast_socket().get_handle()),
-                     -1);
-  }
-#endif
-
+  link_->get_job_queue()->enqueue(make_rch<RURSJob>(rchandle_from(this), &RtpsUdpReceiveStrategy::register_handlers));
   return 0;
 }
 
 void
-RtpsUdpReceiveStrategy::stop_i()
+RtpsUdpReceiveStrategy::register_handlers()
 {
   ACE_Reactor* reactor = link_->get_reactor();
   if (reactor == 0) {
     ACE_ERROR((LM_ERROR,
                ACE_TEXT("(%P|%t) ERROR: ")
-               ACE_TEXT("RtpsUdpReceiveStrategy::stop_i: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::register_handlers: ")
+               ACE_TEXT("NULL reactor reference!\n")));
+  }
+
+  if (reactor->register_handler(link_->unicast_socket().get_handle(), this,
+                                ACE_Event_Handler::READ_MASK) != 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::register_handlers: ")
+               ACE_TEXT("failed to register handler for unicast ")
+               ACE_TEXT("socket %d\n"),
+               link_->unicast_socket().get_handle()));
+  }
+
+#ifdef ACE_HAS_IPV6
+  if (reactor->register_handler(link_->ipv6_unicast_socket().get_handle(), this,
+                                ACE_Event_Handler::READ_MASK) != 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::register_handlers: ")
+               ACE_TEXT("failed to register handler for unicast ")
+               ACE_TEXT("socket %d\n"),
+               link_->unicast_socket().get_handle()));
+  }
+#endif
+}
+
+void
+RtpsUdpReceiveStrategy::stop_i()
+{
+  link_->get_job_queue()->enqueue(make_rch<RURSJob>(rchandle_from(this), &RtpsUdpReceiveStrategy::remove_handlers));
+}
+
+void
+RtpsUdpReceiveStrategy::remove_handlers()
+{
+  ACE_Reactor* reactor = link_->get_reactor();
+  if (reactor == 0) {
+    ACE_ERROR((LM_ERROR,
+               ACE_TEXT("(%P|%t) ERROR: ")
+               ACE_TEXT("RtpsUdpReceiveStrategy::remove_handlers: ")
                ACE_TEXT("NULL reactor reference!\n")));
     return;
   }
@@ -1097,14 +1105,14 @@ RtpsUdpReceiveStrategy::end_transport_header_processing()
 }
 
 const ReceivedDataSample*
-RtpsUdpReceiveStrategy::withhold_data_from(const RepoId& sub_id)
+RtpsUdpReceiveStrategy::withhold_data_from(const GUID_t& sub_id)
 {
   readers_withheld_.insert(sub_id);
   return recvd_sample_;
 }
 
 void
-RtpsUdpReceiveStrategy::do_not_withhold_data_from(const RepoId& sub_id)
+RtpsUdpReceiveStrategy::do_not_withhold_data_from(const GUID_t& sub_id)
 {
   readers_selected_.insert(sub_id);
 }
@@ -1158,7 +1166,7 @@ bool
 RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
                                                  CORBA::ULong num_bits,
                                                  const SequenceNumber& base,
-                                                 const RepoId& pub_id,
+                                                 const GUID_t& pub_id,
                                                  ACE_CDR::ULong& cumulative_bits_added)
 {
   bool modified = false;
@@ -1194,7 +1202,7 @@ RtpsUdpReceiveStrategy::remove_frags_from_bitmap(CORBA::Long bitmap[],
 
 void
 RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
-                                         const RepoId& pub_id)
+                                         const GUID_t& pub_id)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {
     reassembly_.data_unavailable(sn, pub_id);
@@ -1202,14 +1210,14 @@ RtpsUdpReceiveStrategy::remove_fragments(const SequenceRange& range,
 }
 
 void
-RtpsUdpReceiveStrategy::clear_completed_fragments(const RepoId& pub_id)
+RtpsUdpReceiveStrategy::clear_completed_fragments(const GUID_t& pub_id)
 {
   reassembly_.clear_completed(pub_id);
 }
 
 bool
 RtpsUdpReceiveStrategy::has_fragments(const SequenceRange& range,
-                                      const RepoId& pub_id,
+                                      const GUID_t& pub_id,
                                       FragmentInfo* frag_info)
 {
   for (SequenceNumber sn = range.first; sn <= range.second; ++sn) {

@@ -53,7 +53,7 @@ DCPS_IR_Domain::participants() const
   return this->participants_;
 }
 
-DCPS_IR_Participant_rch DCPS_IR_Domain::participant_rch(const OpenDDS::DCPS::RepoId& id) const
+DCPS_IR_Participant_rch DCPS_IR_Domain::participant_rch(const OpenDDS::DCPS::GUID_t& id) const
 {
   DCPS_IR_Participant_Map::const_iterator where = participants_.find(id);
 
@@ -66,7 +66,7 @@ DCPS_IR_Participant_rch DCPS_IR_Domain::participant_rch(const OpenDDS::DCPS::Rep
 }
 
 
-DCPS_IR_Participant* DCPS_IR_Domain::participant(const OpenDDS::DCPS::RepoId& id) const
+DCPS_IR_Participant* DCPS_IR_Domain::participant(const OpenDDS::DCPS::GUID_t& id) const
 {
   DCPS_IR_Participant_rch p = participant_rch(id);
   return p ? p.in() : 0;
@@ -74,7 +74,7 @@ DCPS_IR_Participant* DCPS_IR_Domain::participant(const OpenDDS::DCPS::RepoId& id
 
 int DCPS_IR_Domain::add_participant(DCPS_IR_Participant_rch participant)
 {
-  OpenDDS::DCPS::RepoId participantId = participant->get_id();
+  OpenDDS::DCPS::GUID_t participantId = participant->get_id();
   OpenDDS::DCPS::RepoIdConverter converter(participantId);
 
   DCPS_IR_Participant_Map::iterator where
@@ -112,7 +112,7 @@ int DCPS_IR_Domain::add_participant(DCPS_IR_Participant_rch participant)
   return 0;
 }
 
-int DCPS_IR_Domain::remove_participant(const OpenDDS::DCPS::RepoId& participantId,
+int DCPS_IR_Domain::remove_participant(const OpenDDS::DCPS::GUID_t& participantId,
                                        CORBA::Boolean notify_lost)
 {
   DCPS_IR_Participant_Map::iterator where
@@ -153,7 +153,7 @@ int DCPS_IR_Domain::remove_participant(const OpenDDS::DCPS::RepoId& participantI
   }
 }
 
-OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out topicId,
+OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::GUID_t_out topicId,
                                                      const char * topicName,
                                                      const char * dataTypeName,
                                                      const DDS::TopicQos & qos,
@@ -162,7 +162,7 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
   topicId = OpenDDS::DCPS::GUID_UNKNOWN;
 
   bool isBIT = OpenDDS::DCPS::topicIsBIT(topicName, dataTypeName);
-  OpenDDS::DCPS::RepoId new_topic_id = participantPtr->get_next_topic_id(isBIT);
+  OpenDDS::DCPS::GUID_t new_topic_id = participantPtr->get_next_topic_id(isBIT);
   OpenDDS::DCPS::TopicStatus status = add_topic_i(new_topic_id, topicName
                                                   , dataTypeName
                                                   , qos, participantPtr, isBIT);
@@ -175,13 +175,13 @@ OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic(OpenDDS::DCPS::RepoId_out t
 }
 
 OpenDDS::DCPS::TopicStatus
-DCPS_IR_Domain::force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
+DCPS_IR_Domain::force_add_topic(const OpenDDS::DCPS::GUID_t& topicId,
                                 const char* topicName,
                                 const char* dataTypeName,
                                 const DDS::TopicQos & qos,
                                 DCPS_IR_Participant* participantPtr)
 {
-  OpenDDS::DCPS::RepoId topic_id = topicId;
+  OpenDDS::DCPS::GUID_t topic_id = topicId;
   bool isBIT = OpenDDS::DCPS::topicIsBIT(topicName, dataTypeName);
   OpenDDS::DCPS::TopicStatus status = add_topic_i(topic_id, topicName
                                                   , dataTypeName
@@ -190,7 +190,7 @@ DCPS_IR_Domain::force_add_topic(const OpenDDS::DCPS::RepoId& topicId,
   return status;
 }
 
-OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::RepoId& topicId,
+OpenDDS::DCPS::TopicStatus DCPS_IR_Domain::add_topic_i(OpenDDS::DCPS::GUID_t& topicId,
                                                        const char * topicName,
                                                        const char * dataTypeName,
                                                        const DDS::TopicQos & qos,
@@ -337,7 +337,7 @@ DCPS_IR_Domain::find_topic(const char* topicName, DCPS_IR_Topic*& topic)
     topic = which->second->get_first_topic();
 
     if (OpenDDS::DCPS::DCPS_debug_level > 0) {
-      OpenDDS::DCPS::RepoId topicId = topic->get_id();
+      OpenDDS::DCPS::GUID_t topicId = topic->get_id();
       OpenDDS::DCPS::RepoIdConverter converter(topicId);
       ACE_DEBUG((LM_DEBUG,
                  ACE_TEXT("(%P|%t) DCPS_IR_Domain::find_topic: ")
@@ -355,7 +355,7 @@ DCPS_IR_Domain::find_topic(const char* topicName, DCPS_IR_Topic*& topic)
 }
 
 DCPS_IR_Topic*
-DCPS_IR_Domain::find_topic(const OpenDDS::DCPS::RepoId& id)
+DCPS_IR_Domain::find_topic(const OpenDDS::DCPS::GUID_t& id)
 {
   IdToTopicMap::const_iterator location = this->idToTopicMap_.find(id);
 
@@ -1008,7 +1008,7 @@ DDS::DomainId_t DCPS_IR_Domain::get_id()
   return id_;
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 DCPS_IR_Domain::get_next_participant_id()
 {
   return this->participantIdGenerator_.next();
@@ -1029,7 +1029,7 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
       const DDS::DomainParticipantQos* participantQos = participant->get_qos();
 
       DDS::ParticipantBuiltinTopicData data;
-      data.key = repo_id_to_bit_key(participant->get_id());
+      data.key = guid_to_bit_key(participant->get_id());
       data.user_data = participantQos->user_data;
 
       DDS::InstanceHandle_t handle = bitParticipantDataWriter_->register_instance(data);
@@ -1039,7 +1039,7 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
       if (OpenDDS::DCPS::DCPS_debug_level > 0) {
         ACE_DEBUG((LM_DEBUG,
                    "(%P|%t) DCPS_IR_Domain::publish_participant_bit: %C, handle %d.\n",
-                   OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
+                   OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_guid(data.key)).c_str(), handle));
       }
 
       bitParticipantDataWriter_->write(data, handle);
@@ -1070,7 +1070,7 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::TopicBuiltinTopicData data;
-        data.key = repo_id_to_bit_key(topic->get_id());
+        data.key = guid_to_bit_key(topic->get_id());
         data.name = name;
         data.type_name = type;
         data.durability = topicQos->durability;
@@ -1095,7 +1095,7 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DCPS_IR_Domain::publish_topic_bit: %C, handle %d.\n",
-                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
+                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_guid(data.key)).c_str(), handle));
         }
 
         bitTopicDataWriter_->write(data, handle);
@@ -1135,8 +1135,8 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::SubscriptionBuiltinTopicData data;
-        data.key = repo_id_to_bit_key(subscription->get_id());
-        data.participant_key = repo_id_to_bit_key(subscription->get_participant_id());
+        data.key = guid_to_bit_key(subscription->get_id());
+        data.participant_key = guid_to_bit_key(subscription->get_participant_id());
         data.topic_name = name;
         data.type_name = type;
         data.durability = readerQos->durability;
@@ -1161,7 +1161,7 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DCPS_IR_Domain::publish_subscription_bit: %C, handle %d.\n",
-                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
+                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_guid(data.key)).c_str(), handle));
         }
 
         bitSubscriptionDataWriter_->write(data,
@@ -1209,8 +1209,8 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
         const DDS::TopicQos* topicQos = topic->get_topic_qos();
 
         DDS::PublicationBuiltinTopicData data;
-        data.key = repo_id_to_bit_key(publication->get_id());
-        data.participant_key = repo_id_to_bit_key(publication->get_participant_id());
+        data.key = guid_to_bit_key(publication->get_id());
+        data.participant_key = guid_to_bit_key(publication->get_participant_id());
         data.topic_name = desc->get_name();
         data.type_name = desc->get_dataTypeName();
         data.durability = writerQos->durability;
@@ -1237,7 +1237,7 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
         if (OpenDDS::DCPS::DCPS_debug_level > 0) {
           ACE_DEBUG((LM_DEBUG,
                      "(%P|%t) DCPS_IR_Domain::publish_publication_bit: %C, handle %d.\n",
-                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_repo_id(data.key)).c_str(), handle));
+                     OpenDDS::DCPS::LogGuid(OpenDDS::DCPS::bit_key_to_guid(data.key)).c_str(), handle));
         }
 
         DDS::ReturnCode_t status = bitPublicationDataWriter_->write(data, handle);
@@ -1460,7 +1460,7 @@ void DCPS_IR_Domain::dispose_publication_bit(DCPS_IR_Publication* publication)
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 }
 
-void DCPS_IR_Domain::remove_topic_id_mapping(const OpenDDS::DCPS::RepoId& topicId)
+void DCPS_IR_Domain::remove_topic_id_mapping(const OpenDDS::DCPS::GUID_t& topicId)
 {
   IdToTopicMap::iterator map_entry = this->idToTopicMap_.find(topicId);
   if (map_entry != this->idToTopicMap_.end())

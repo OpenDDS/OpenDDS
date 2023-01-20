@@ -26,7 +26,7 @@ ReceiveListenerSet::~ReceiveListenerSet()
 }
 
 bool
-ReceiveListenerSet::exist(const RepoId& local_id, bool& last)
+ReceiveListenerSet::exist(const GUID_t& local_id, bool& last)
 {
   GuardType guard(this->lock_);
 
@@ -70,7 +70,7 @@ ReceiveListenerSet::get_keys(ReaderIdSeq & ids)
 }
 
 bool
-ReceiveListenerSet::exist(const RepoId& local_id)
+ReceiveListenerSet::exist(const GUID_t& local_id)
 {
   GuardType guard(this->lock_);
   return map_.count(local_id) > 0;
@@ -124,7 +124,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
 
 void
 ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
-                                  const RepoId& readerId)
+                                  const GUID_t& readerId)
 {
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received(sample, readerId)", 6);
   TransportReceiveListener_wrch h;

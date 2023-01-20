@@ -44,10 +44,10 @@ public:
   void disable_relay_stun_task();
 #endif
 
-  virtual void update_locators(const RepoId& /*remote*/,
+  virtual void update_locators(const GUID_t& /*remote*/,
                                const TransportLocatorSeq& /*locators*/);
 
-  virtual void get_last_recv_locator(const RepoId& /*remote_id*/,
+  virtual void get_last_recv_locator(const GUID_t& /*remote_id*/,
                                      TransportLocator& /*locators*/);
 
   void rtps_relay_address_change();
@@ -63,35 +63,35 @@ private:
                                               const TransportClient_rch& client);
 
   virtual void stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                            const RepoId& remote_id,
+                                            const GUID_t& remote_id,
                                             bool disassociate,
                                             bool association_failed);
 
   bool configure_i(const RtpsUdpInst_rch& config);
 
-  void client_stop(const RepoId& localId);
+  void client_stop(const GUID_t& localId);
 
   virtual void shutdown_i();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
+  virtual void register_for_reader(const GUID_t& participant,
+                                   const GUID_t& writerid,
+                                   const GUID_t& readerid,
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
-  virtual void unregister_for_reader(const RepoId& participant,
-                                     const RepoId& writerid,
-                                     const RepoId& readerid);
+  virtual void unregister_for_reader(const GUID_t& participant,
+                                     const GUID_t& writerid,
+                                     const GUID_t& readerid);
 
-  virtual void register_for_writer(const RepoId& /*participant*/,
-                                   const RepoId& /*readerid*/,
-                                   const RepoId& /*writerid*/,
+  virtual void register_for_writer(const GUID_t& /*participant*/,
+                                   const GUID_t& /*readerid*/,
+                                   const GUID_t& /*writerid*/,
                                    const TransportLocatorSeq& /*locators*/,
                                    DiscoveryListener* /*listener*/);
 
-  virtual void unregister_for_writer(const RepoId& /*participant*/,
-                                     const RepoId& /*readerid*/,
-                                     const RepoId& /*writerid*/);
+  virtual void unregister_for_writer(const GUID_t& /*participant*/,
+                                     const GUID_t& /*readerid*/,
+                                     const GUID_t& /*writerid*/);
 
   virtual bool connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const;
 
@@ -107,8 +107,8 @@ private:
 
   RtpsUdpDataLink_rch make_datalink(const GuidPrefix_t& local_prefix);
 
-  bool use_datalink(const RepoId& local_id,
-                    const RepoId& remote_id,
+  bool use_datalink(const GUID_t& local_id,
+                    const GUID_t& remote_id,
                     const TransportBLOB& remote_data,
                     const TransportBLOB& discovery_locator,
                     const MonotonicTime_t& participant_discovered_at,
@@ -150,11 +150,9 @@ private:
 
   JobQueue_rch job_queue_;
 
-#if defined(OPENDDS_SECURITY)
-  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
-#endif
-
 #ifdef OPENDDS_SECURITY
+
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
   ConnectionRecords deferred_connection_records_;
@@ -186,10 +184,13 @@ private:
   ThreadLockType relay_stun_task_falloff_mutex_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
 
-  mutable ACE_Thread_Mutex relay_stun_mutex_;
-
   void start_ice();
   void stop_ice();
+
+  typedef PmfJob<RtpsUdpTransport> RUTJob;
+
+  void register_handlers();
+  void remove_handlers();
 
   RcHandle<ICE::Agent> ice_agent_;
 #endif

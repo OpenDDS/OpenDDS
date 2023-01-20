@@ -184,7 +184,7 @@ void run_sample_list_test()
   SendStateDataSampleList list;
   TEST_CHECK(list.begin() == list.end());
 
-  OpenDDS::DCPS::RepoId repoId(GUID_UNKNOWN);
+  OpenDDS::DCPS::GUID_t repoId(GUID_UNKNOWN);
   DataSampleElement* sample[3];
   ssize_t i;
   for (i = 0; i < 3; i++) {
@@ -264,7 +264,7 @@ void run_next_sample_test(ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleElement* middle = 0;
 
-  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // GUID_ts are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder;
 
@@ -272,7 +272,7 @@ void run_next_sample_test(ssize_t size)
   builder.entityKey(0);
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
-  OpenDDS::DCPS::RepoId repoId(builder);
+  OpenDDS::DCPS::GUID_t repoId(builder);
 
   for (ssize_t i = 0; i < size; i++) {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
@@ -333,7 +333,7 @@ void run_next_send_sample_test(ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleElement* middle = 0;
 
-  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // GUID_ts are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder;
 
@@ -341,7 +341,7 @@ void run_next_send_sample_test(ssize_t size)
   builder.entityKey(0);
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
-  OpenDDS::DCPS::RepoId repoId(builder);
+  OpenDDS::DCPS::GUID_t repoId(builder);
 
   for (ssize_t i = 0; i < pub_id_middle; i++) {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);
@@ -411,7 +411,7 @@ void run_next_instance_sample_test(ssize_t size)
   ssize_t pub_id_middle = size/2;
   DataSampleElement* middle = 0;
 
-  // RepoIds are conventionally created and managed by the DCPSInfoRepo. Those
+  // GUID_ts are conventionally created and managed by the DCPSInfoRepo. Those
   // generated here are for the sole purpose of verifying internal behavior.
   OpenDDS::DCPS::RepoIdBuilder builder;
 
@@ -419,7 +419,7 @@ void run_next_instance_sample_test(ssize_t size)
   builder.entityKey(0);
   builder.entityKind(OpenDDS::DCPS::ENTITYKIND_USER_WRITER_WITH_KEY);
 
-  OpenDDS::DCPS::RepoId repoId(builder);
+  OpenDDS::DCPS::GUID_t repoId(builder);
 
   for (ssize_t i = 0; i < size; i++) {
     repoId.entityId.entityKey[2] = static_cast<CORBA::Octet>(i);

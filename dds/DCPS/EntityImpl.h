@@ -51,7 +51,7 @@ public:
 
   virtual DDS::DomainId_t get_domain_id() { return DOMAIN_UNKNOWN; }
 
-  virtual RepoId get_id() const { return GUID_UNKNOWN; }
+  virtual GUID_t get_id() const { return GUID_UNKNOWN; }
 
   void set_status_changed_flag(DDS::StatusKind status,
                                bool status_changed_flag);

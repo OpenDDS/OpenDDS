@@ -17,8 +17,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-FragKey::FragKey(const PublicationId& pubId,
-                                      const SequenceNumber& dataSampleSeq)
+FragKey::FragKey(const GUID_t& pubId,
+                 const SequenceNumber& dataSampleSeq)
   : publication_(pubId)
   , data_sample_seq_(dataSampleSeq)
 {
@@ -183,7 +183,7 @@ TransportReassembly::insert(FragRangeList& flist,
 
 bool
 TransportReassembly::has_frags(const SequenceNumber& seq,
-                               const RepoId& pub_id,
+                               const GUID_t& pub_id,
                                ACE_UINT32& total_frags) const
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -196,14 +196,14 @@ TransportReassembly::has_frags(const SequenceNumber& seq,
 }
 
 void
-TransportReassembly::clear_completed(const RepoId& pub_id)
+TransportReassembly::clear_completed(const GUID_t& pub_id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   completed_.erase(pub_id);
 }
 
 CORBA::ULong
-TransportReassembly::get_gaps(const SequenceNumber& seq, const RepoId& pub_id,
+TransportReassembly::get_gaps(const SequenceNumber& seq, const GUID_t& pub_id,
                               CORBA::Long bitmap[], CORBA::ULong length,
                               CORBA::ULong& numBits) const
 {
@@ -421,7 +421,7 @@ TransportReassembly::data_unavailable(const SequenceRange& dropped)
 
 void
 TransportReassembly::data_unavailable(const SequenceNumber& dataSampleSeq,
-                                      const RepoId& pub_id)
+                                      const GUID_t& pub_id)
 {
   ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
   if (fragments_.erase(FragKey(pub_id, dataSampleSeq)) &&

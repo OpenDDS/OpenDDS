@@ -29,20 +29,20 @@ TransportCustomizedElement::TransportCustomizedElement(
 }
 
 ACE_INLINE
-RepoId TransportCustomizedElement::publication_id() const
+GUID_t TransportCustomizedElement::publication_id() const
 {
   DBG_ENTRY_LVL("TransportCustomizedElement", "publication_id", 6);
   return publication_id_;
 }
 
 ACE_INLINE
-void TransportCustomizedElement::set_publication_id(const RepoId& id)
+void TransportCustomizedElement::set_publication_id(const GUID_t& id)
 {
   publication_id_ = id;
 }
 
 ACE_INLINE
-RepoId TransportCustomizedElement::subscription_id() const
+GUID_t TransportCustomizedElement::subscription_id() const
 {
   if (subscription_id_ != GUID_UNKNOWN) {
     return subscription_id_;
@@ -53,7 +53,7 @@ RepoId TransportCustomizedElement::subscription_id() const
 }
 
 ACE_INLINE
-void TransportCustomizedElement::set_subscription_id(const RepoId& id)
+void TransportCustomizedElement::set_subscription_id(const GUID_t& id)
 {
   subscription_id_ = id;
 }

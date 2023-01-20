@@ -24,7 +24,7 @@ RawDataSample::RawDataSample(const DataSampleHeader& header,
                              MessageId mid,
                              ACE_INT32 sec,
                              ACE_UINT32 nano_sec,
-                             PublicationId pid,
+                             GUID_t pid,
                              bool byte_order,
                              ACE_Message_Block* blk,
                              Encoding::Kind encoding_kind)
