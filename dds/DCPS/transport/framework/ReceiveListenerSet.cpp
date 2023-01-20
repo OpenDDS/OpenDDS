@@ -28,7 +28,7 @@ ReceiveListenerSet::~ReceiveListenerSet()
 bool
 ReceiveListenerSet::exist(const GUID_t& local_id, bool& last)
 {
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
   last = true;
 
@@ -61,7 +61,7 @@ ReceiveListenerSet::exist(const GUID_t& local_id, bool& last)
 void
 ReceiveListenerSet::get_keys(ReaderIdSeq & ids)
 {
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
 
   for (MapType::iterator iter = map_.begin();
        iter != map_.end(); ++ iter) {
@@ -72,15 +72,15 @@ ReceiveListenerSet::get_keys(ReaderIdSeq & ids)
 bool
 ReceiveListenerSet::exist(const GUID_t& local_id)
 {
-  GuardType guard(this->lock_);
+  GuardType guard(lock_);
   return map_.count(local_id) > 0;
 }
 
 void
 ReceiveListenerSet::clear()
 {
-  GuardType guard(this->lock_);
-  this->map_.clear();
+  GuardType guard(lock_);
+  map_.clear();
 }
 
 void
@@ -91,7 +91,8 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received", 6);
   OPENDDS_VECTOR(TransportReceiveListener_wrch) handles;
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
+    handles.reserve(map_.size());
     for (MapType::iterator itr = map_.begin(); itr != map_.end(); ++itr) {
       if (constrain == ReceiveListenerSet::SET_EXCLUDED) {
         if (itr->second && incl_excl.count(itr->first) == 0) {
@@ -129,7 +130,7 @@ ReceiveListenerSet::data_received(const ReceivedDataSample& sample,
   DBG_ENTRY_LVL("ReceiveListenerSet", "data_received(sample, readerId)", 6);
   TransportReceiveListener_wrch h;
   {
-    GuardType guard(this->lock_);
+    GuardType guard(lock_);
     MapType::iterator itr = map_.find(readerId);
     if (itr != map_.end() && itr->second) {
       h = itr->second;
