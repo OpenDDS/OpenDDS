@@ -30,6 +30,7 @@
 namespace {
 
 const int num_messages = 100;
+const bool best_effort = ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT") != 0 && std::strtol(ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT"), 0, 10) != 0;
 
 } // namespace
 
@@ -60,7 +61,7 @@ TestCase::init_datareader(
 {
   ACE_DEBUG((LM_DEBUG, ACE_TEXT("%N:%l: INFO: TestCase::init_datareader\n")));
 
-  if (ACE_OS::getenv("OPENDDS_TEST_BEST_EFFORT") == 0) {
+  if (!best_effort) {
     qos.reliability.kind = DDS::RELIABLE_RELIABILITY_QOS;
   }
   qos.liveliness.lease_duration.sec = 1;
@@ -134,6 +135,12 @@ TestCase::test()
     } while (read != num_expected && (OpenDDS::DCPS::MonotonicTimePoint::now() - start < timeout));
 
     ws->detach_condition(rc);
+
+    // Only check the number read if the transport is reliable
+    if (!best_effort && read < num_expected) {
+      ACE_ERROR_RETURN((LM_ERROR, "ERROR: timeout exceeded\n"), -1);
+    }
+
   }
 
   // This test verifies associations formed between subscribers and
@@ -176,7 +183,8 @@ TestCase::test()
                         ACE_TEXT(" ERROR: unknown instance state: %d\n"),
                         si.instance_state), -1);
           }
-        } else {
+        } else if (!best_effort) {
+          // We can only be sure there will be something to read if the transport is reliable
           ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("%N:%l: take_next_sample()")
                       ACE_TEXT(" ERROR: unexpected status: %d\n"),
