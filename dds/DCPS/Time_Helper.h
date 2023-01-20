@@ -110,6 +110,9 @@ ACE_INLINE OpenDDS_Dcps_Export
 bool operator<(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
 
 ACE_INLINE OpenDDS_Dcps_Export
+bool operator==(const MonotonicTime_t& t1, const MonotonicTime_t& t2);
+
+ACE_INLINE OpenDDS_Dcps_Export
 ACE_UINT32 uint32_fractional_seconds_to_nanoseconds(ACE_UINT32 fraction);
 
 ACE_INLINE OpenDDS_Dcps_Export
