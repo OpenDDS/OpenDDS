@@ -85,185 +85,117 @@ public:
   }
 };
 
-void write_plain_cdr_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_kf_vf_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field", key_value);
     d.set_int32("value_field", 1);
   } else {
-    PlainCdrStruct sample;
+    TopicType sample;
     sample.key_field = key_value;
     sample.value_field = 1;
     write_sample(ts, dw, sample);
   }
 }
 
-void write_final_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_kf_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field", key_value);
   } else {
-    FinalStructPub sample;
+    TopicType sample;
     sample.key_field = key_value;
     write_sample(ts, dw, sample);
   }
 }
 
-void write_modified_final_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_kf_af_struct(
+  const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic, AdditionalFieldValue afv)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field", key_value);
-    d.set_int32("additional_field", FINAL_STRUCT_AF);
+    d.set_int32("additional_field", afv);
   } else {
-    ModifiedFinalStruct sample;
+    TopicType sample;
     sample.key_field = key_value;
-    sample.additional_field = FINAL_STRUCT_AF;
+    sample.additional_field = afv;
     write_sample(ts, dw, sample);
   }
 }
 
-void write_appendable_struct_no_xtypes(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_union(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field", key_value);
   } else {
-    AppendableStructNoXTypes sample;
-    sample.key_field = key_value;
-    write_sample(ts, dw, sample);
-  }
-}
-
-void write_additional_prefix_field_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
-{
-  if (dynamic) {
-    DynamicWriter d(ts, dw);
-    d.set_int32("key_field", key_value);
-    d.set_int32("additional_field", APPENDABLE_STRUCT_AF);
-  } else {
-    AdditionalPrefixFieldStruct sample;
-    sample.key_field = key_value;
-    sample.additional_field = APPENDABLE_STRUCT_AF;
-    write_sample(ts, dw, sample);
-  }
-}
-
-void write_base_appendable_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
-{
-  if (dynamic) {
-    DynamicWriter d(ts, dw);
-    d.set_int32("key_field", key_value);
-  } else {
-    BaseAppendableStruct sample;
-    sample.key_field = key_value;
-    write_sample(ts, dw, sample);
-  }
-}
-
-void write_additional_postfix_field_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
-{
-  AdditionalPostfixFieldStructDataWriter_var typed_dw = AdditionalPostfixFieldStructDataWriter::_narrow(dw);
-
-  if (dynamic) {
-    DynamicWriter d(ts, dw);
-    d.set_int32("key_field", key_value);
-    d.set_int32("additional_field", APPENDABLE_STRUCT_AF);
-  } else {
-    AdditionalPostfixFieldStruct sample;
-    sample.key_field = key_value;
-    sample.additional_field = APPENDABLE_STRUCT_AF;
-    write_sample(ts, dw, sample);
-  }
-}
-
-void write_modified_mutable_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
-{
-  if (dynamic) {
-    DynamicWriter d(ts, dw);
-    d.set_int32("key_field", key_value);
-    d.set_int32("additional_field", MUTABLE_STRUCT_AF);
-  } else {
-    ModifiedMutableStruct sample;
-    sample.key_field = key_value;
-    sample.additional_field = MUTABLE_STRUCT_AF;
-    write_sample(ts, dw, sample);
-  }
-}
-
-void write_mutable_base_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
-{
-  if (dynamic) {
-    DynamicWriter d(ts, dw);
-    d.set_int32("key_field", key_value);
-  } else {
-    MutableBaseStruct sample;
-    sample.key_field = key_value;
-    write_sample(ts, dw, sample);
-  }
-}
-
-void write_modified_mutable_union(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
-{
-  if (dynamic) {
-    DynamicWriter d(ts, dw);
-    d.set_int32("key_field", key_value);
-  } else {
-    ModifiedMutableUnion sample;
+    TopicType sample;
     sample.key_field(key_value);
     write_sample(ts, dw, sample);
   }
 }
 
-void write_trim64_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_trim_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_string("trim_string", STRING_26);
   } else {
-    Trim64Struct sample;
+    TopicType sample;
     sample.trim_string = STRING_26.c_str();
     write_sample(ts, dw, sample);
   }
 }
 
-void write_appendable_struct_with_dependency(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_struct_with_dependency(
+  const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field", key_value);
-    d.set_int32(MemberNamePath("additional_nested_struct").add("additional_field"), NESTED_STRUCT_AF);
+    d.set_int32(
+      MemberNamePath("additional_nested_struct").add("additional_field"), NESTED_STRUCT_AF);
   } else {
-    AppendableStructWithDependency sample;
+    TopicType sample;
     sample.key_field = key_value;
     sample.additional_nested_struct.additional_field = NESTED_STRUCT_AF;
     write_sample(ts, dw, sample);
   }
 }
 
-void write_modified_name_mutable_struct(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_modified_name_struct(
+  const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic, AdditionalFieldValue afv)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field_modified", key_value);
-    d.set_int32("additional_field_modified", MUTABLE_STRUCT_AF);
+    d.set_int32("additional_field_modified", afv);
   } else {
-    ModifiedNameMutableStruct sample;
+    TopicType sample;
     sample.key_field_modified = key_value;
-    sample.additional_field_modified = MUTABLE_STRUCT_AF;
+    sample.additional_field_modified = afv;
     write_sample(ts, dw, sample);
   }
 }
 
-void write_modified_name_mutable_union(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
+template <typename TopicType>
+void write_modified_name_union(const TypeSupport_var& ts, const DataWriter_var& dw, bool dynamic)
 {
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field_modified", key_value);
   } else {
-    ModifiedNameMutableUnion sample;
+    TopicType sample;
     sample.key_field_modified(key_value);
     write_sample(ts, dw, sample);
   }
@@ -504,33 +436,33 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (!expect_inconsistent_topic && !expect_incompatible_qos) {
     if (type == "PlainCdrStruct") {
-      write_plain_cdr_struct(ts, dw, dynamic);
+      write_kf_vf_struct<PlainCdrStruct>(ts, dw, dynamic);
     } else if (type == "FinalStructPub") {
-      write_final_struct(ts, dw, dynamic);
+      write_kf_struct<FinalStructPub>(ts, dw, dynamic);
     } else if (type == "ModifiedFinalStruct") {
-      write_modified_final_struct(ts, dw, dynamic);
+      write_kf_af_struct<ModifiedFinalStruct>(ts, dw, dynamic, FINAL_STRUCT_AF);
     } else if (type == "BaseAppendableStruct") {
-      write_base_appendable_struct(ts, dw, dynamic);
+      write_kf_struct<BaseAppendableStruct>(ts, dw, dynamic);
     } else if (type == "AppendableStructNoXTypes") {
-      write_appendable_struct_no_xtypes(ts, dw, dynamic);
+      write_kf_struct<AppendableStructNoXTypes>(ts, dw, dynamic);
     } else if (type == "AdditionalPrefixFieldStruct") {
-      write_additional_prefix_field_struct(ts, dw, dynamic);
+      write_kf_af_struct<AdditionalPrefixFieldStruct>(ts, dw, dynamic, APPENDABLE_STRUCT_AF);
     } else if (type == "AdditionalPostfixFieldStruct") {
-      write_additional_postfix_field_struct(ts, dw, dynamic);
+      write_kf_af_struct<AdditionalPostfixFieldStruct>(ts, dw, dynamic, APPENDABLE_STRUCT_AF);
     } else if (type == "ModifiedMutableStruct") {
-      write_modified_mutable_struct(ts, dw, dynamic);
+      write_kf_af_struct<ModifiedMutableStruct>(ts, dw, dynamic, MUTABLE_STRUCT_AF);
     } else if (type == "ModifiedMutableUnion") {
-      write_modified_mutable_union(ts, dw, dynamic);
+      write_union<ModifiedMutableUnion>(ts, dw, dynamic);
     } else if (type == "Trim64Struct") {
-      write_trim64_struct(ts, dw, dynamic);
+      write_trim_struct<Trim64Struct>(ts, dw, dynamic);
     } else if (type == "AppendableStructWithDependency") {
-      write_appendable_struct_with_dependency(ts, dw, dynamic);
+      write_struct_with_dependency<AppendableStructWithDependency>(ts, dw, dynamic);
     } else if (type == "ModifiedNameMutableStruct") {
-      write_modified_name_mutable_struct(ts, dw, dynamic);
+      write_modified_name_struct<ModifiedNameMutableStruct>(ts, dw, dynamic, MUTABLE_STRUCT_AF);
     } else if (type == "ModifiedNameMutableUnion") {
-      write_modified_name_mutable_union(ts, dw, dynamic);
+      write_modified_name_union<ModifiedNameMutableUnion>(ts, dw, dynamic);
     } else if (type == "MutableBaseStruct") {
-      write_mutable_base_struct(ts, dw, dynamic);
+      write_kf_struct<MutableBaseStruct>(ts, dw, dynamic);
     }
   }
   ACE_DEBUG((LM_DEBUG, "Writer waiting for ack at %T\n"));

@@ -142,20 +142,13 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t less_than(
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_less_than(
   bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b);
 
-OpenDDS_Dcps_Export DDS::ReturnCode_t get_member_type(
-  DDS::DynamicType_var& type, DDS::DynamicData_ptr data, DDS::MemberId id);
-
 OpenDDS_Dcps_Export bool is_int(DDS::TypeKind tk);
 OpenDDS_Dcps_Export bool is_uint(DDS::TypeKind tk);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_uint_value(
   CORBA::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind);
-OpenDDS_Dcps_Export DDS::ReturnCode_t set_uint_value(
-  DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, CORBA::UInt64 value);
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_int_value(
   CORBA::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind);
-OpenDDS_Dcps_Export DDS::ReturnCode_t set_int_value(
-  DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, CORBA::Int64 value);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t bitmask_bound(
   DDS::DynamicType_ptr type, CORBA::UInt64& bound_max, DDS::TypeKind& bound_kind);
@@ -163,45 +156,8 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t get_bitmask_value(
   CORBA::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind);
-
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_enum_value(
   CORBA::Int32& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id);
-inline DDS::ReturnCode_t get_enum_value(
-  CORBA::Int32& value, DDS::DynamicData_ptr src, DDS::MemberId id)
-{
-  DDS::DynamicType_var type;
-  const DDS::ReturnCode_t rc = get_member_type(type, src, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
-  }
-  return get_enum_value(value, type, src, id);
-}
-
-OpenDDS_Dcps_Export DDS::ReturnCode_t set_enum_value(
-  DDS::DynamicType_ptr type, DDS::DynamicData_ptr dest, DDS::MemberId id, CORBA::Int32 value);
-inline DDS::ReturnCode_t set_enum_value(
-  DDS::DynamicData_ptr dest, DDS::MemberId id, CORBA::Int32 value)
-{
-  DDS::DynamicType_var type;
-  const DDS::ReturnCode_t rc = get_member_type(type, dest, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
-  }
-  return set_enum_value(type, dest, id, value);
-}
-
-OpenDDS_Dcps_Export DDS::ReturnCode_t set_enum_value(
-  DDS::DynamicType_ptr type, DDS::DynamicData_ptr dest, DDS::MemberId id, const char* enumeral_name);
-inline DDS::ReturnCode_t set_enum_value(
-  DDS::DynamicData_ptr dest, DDS::MemberId id, const char* enumeral_name)
-{
-  DDS::DynamicType_var type;
-  const DDS::ReturnCode_t rc = get_member_type(type, dest, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
-  }
-  return set_enum_value(type, dest, id, enumeral_name);
-}
 
 } // namespace XTypes
 } // namespace OpenDDS

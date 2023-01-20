@@ -185,7 +185,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
   std::string topic_name = "";
   std::string registered_type_name = "";
   bool dynamic = false;
-  bool skip_read = true;
+  bool skip_read = false;
 
   // Default properties of type consistency enforcement Qos currently supported
   bool disallow_type_coercion = false;
