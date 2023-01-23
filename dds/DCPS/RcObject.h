@@ -31,10 +31,18 @@ namespace DCPS {
   class OpenDDS_Dcps_Export WeakObject : public PoolAllocationBase
   {
   public:
+
+#ifdef ACE_HAS_CPP11
+    typedef std::atomic<long> AtomicCountType;
+#define GET_ATOMIC_COUNT_VALUE(v) v
+#else
+    typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> AtomicCountType;
+#define GET_ATOMIC_COUNT_VALUE(v) v.value()
+#endif
+
     WeakObject(RcObject* ptr)
       : ptr_(ptr)
       , ref_count_(1)
-      , expired_(false)
     {
     }
 
@@ -55,13 +63,12 @@ namespace DCPS {
     }
 
     RcObject* lock();
-    bool set_expire();
+    bool check_expire(AtomicCountType& count);
 
   private:
-    ACE_SYNCH_MUTEX mx_;
-    RcObject* const ptr_;
+    mutable ACE_SYNCH_MUTEX mx_;
+    RcObject* ptr_;
     long ref_count_;
-    bool expired_;
   };
 
   class OpenDDS_Dcps_Export RcObject : public PoolAllocationBase {
@@ -79,8 +86,7 @@ namespace DCPS {
 
     virtual void _remove_ref()
     {
-      const long new_count = --ref_count_;
-      if (new_count == 0 && weak_object_->set_expire()) {
+      if (weak_object_->check_expire(ref_count_)) {
         delete this;
       }
     }
@@ -88,11 +94,7 @@ namespace DCPS {
     /// This accessor is purely for debugging purposes
     long ref_count() const
     {
-#ifdef ACE_HAS_CPP11
-      return ref_count_;
-#else
-      return ref_count_.value();
-#endif
+      return GET_ATOMIC_COUNT_VALUE(ref_count_);
     }
 
     WeakObject* _get_weak_object() const
@@ -108,12 +110,8 @@ namespace DCPS {
     {}
 
   private:
-#ifdef ACE_HAS_CPP11
-    std::atomic<long> ref_count_;
-#else
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
-#endif
-    WeakObject*  weak_object_;
+    WeakObject::AtomicCountType ref_count_;
+    WeakObject* weak_object_;
 
     RcObject(const RcObject&);
     RcObject& operator=(const RcObject&);
@@ -122,20 +120,21 @@ namespace DCPS {
   inline RcObject* WeakObject::lock()
   {
     ACE_Guard<ACE_SYNCH_MUTEX> guard(mx_);
-    if (!expired_) {
+    if (ptr_) {
       ptr_->_add_ref();
-      return ptr_;
     }
-    return 0;
+    return ptr_;
   }
 
-  inline bool WeakObject::set_expire()
+  inline bool WeakObject::check_expire(WeakObject::AtomicCountType& count)
   {
     ACE_Guard<ACE_SYNCH_MUTEX> guard(mx_);
-    if (!expired_ && ptr_->ref_count() == 0) {
-      expired_ = true;
+    const long new_count = --count;
+    if (new_count == 0 && ptr_) {
+      ptr_ = 0;
+      return true;
     }
-    return expired_;
+    return false;
   }
 
   template <typename T>
