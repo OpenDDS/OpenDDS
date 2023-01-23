@@ -66,16 +66,79 @@ bool waitForPublicationMatched(const DataWriter_var& dw, const int count = 1)
   return false;
 }
 
-template <typename F>
-size_t takeSamples(const DataReader_var& dr, F filter)
+void copy(Message& out, DynamicData* in, const SampleInfo& info)
 {
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  if (info.valid_data) {
+    in->get_int32_value(out.key, in->get_member_id_by_name("key"));
+    in->get_uint64_value(out.ull, in->get_member_id_by_name("ull"));
+  }
+}
+
+void copy(MessageSeq& out, const DynamicDataSeq& in, const SampleInfoSeq& infos)
+{
+  out.length(in.length());
+  for (unsigned int i = 0; i < in.length(); ++i) {
+    copy(out[i], in[i], infos[i]);
+  }
+}
+
+struct Readers {
+  explicit Readers(DDS::DataReader* dr)
+    : msg_reader_(dynamic == DynamicReader ? 0 : MessageDataReader::_narrow(dr))
+    , dyn_reader_(dynamic == DynamicReader ? DynamicDataReader::_narrow(dr) : 0)
+    , reader_address_(msg_reader_ ? msg_reader_.in() : static_cast<void*>(dyn_reader_.in()))
+  {}
+
+  void reset()
+  {
+    msg_reader_ = 0;
+    dyn_reader_ = 0;
+  }
+
+  template <typename F>
+  size_t takeSamples(F filter);
+
+  DDS::ReturnCode_t take(MessageSeq& data, DDS::SampleInfoSeq& info)
+  {
+    if (dyn_reader_) {
+      DynamicDataSeq dyn_data;
+      const DDS::ReturnCode_t ret = dyn_reader_->take(dyn_data, info, LENGTH_UNLIMITED, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+      if (ret == RETCODE_OK) {
+        copy(data, dyn_data, info);
+      }
+      return ret;
+    }
+
+    return msg_reader_->take(data, info, LENGTH_UNLIMITED, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  }
+
+  DDS::ReturnCode_t take(MessageSeq& data, DDS::SampleInfoSeq& info, DDS::ReadCondition* cond)
+  {
+    if (dyn_reader_) {
+      DynamicDataSeq dyn_data;
+      const DDS::ReturnCode_t ret = dyn_reader_->take_w_condition(dyn_data, info, LENGTH_UNLIMITED, cond);
+      if (ret == RETCODE_OK) {
+        copy(data, dyn_data, info);
+      }
+      return ret;
+    }
+
+    return msg_reader_->take_w_condition(data, info, LENGTH_UNLIMITED, cond);
+  }
+
+  MessageDataReader_var msg_reader_;
+  DynamicDataReader_var dyn_reader_;
+  void* reader_address_;
+};
+
+template <typename F>
+size_t Readers::takeSamples(F filter)
+{
   size_t count(0);
   while (true) {
     MessageSeq data;
     SampleInfoSeq infoseq;
-    ReturnCode_t ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
-      ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    const ReturnCode_t ret = take(data, infoseq);
     if (ret == RETCODE_NO_DATA) {
       break;
     }
@@ -86,7 +149,7 @@ size_t takeSamples(const DataReader_var& dr, F filter)
     for (CORBA::ULong i(0); i < data.length(); ++i) {
       if (infoseq[i].valid_data) {
         ++count;
-        cout << dr << " received data with key == " << data[i].key << endl;
+        cout << reader_address_ << " received data with key == " << data[i].key << endl;
         if (!filter(data[i].key)) {
           cout << "ERROR: data should be filtered" << endl;
           return 0;
@@ -207,10 +270,11 @@ bool run_filtering_test(const MessageTypeSupport_var& ts,
 
   // read durable data from dr
   if (!Utils::waitForSample(dr)) return false;
+  Readers readers(dr);
 #ifdef ACE_HAS_CPP11
-  if (takeSamples(dr, [](ACE_CDR::Long i){ return i > 98; }) != 1) {
+  if (readers.takeSamples([](ACE_CDR::Long i){ return i > 98; }) != 1) {
 #else
-  if (takeSamples(dr, bind2nd(greater<CORBA::Long>(), 98)) != 1) {
+  if (readers.takeSamples(bind2nd(greater<CORBA::Long>(), 98)) != 1) {
 #endif
     cout << "ERROR: take() should have returned a valid durable sample (99)"
          << endl;
@@ -264,17 +328,17 @@ bool run_filtering_test(const MessageTypeSupport_var& ts,
   if (!Utils::waitForSample(dr)) return false;
 
 #ifdef ACE_HAS_CPP11
-  size_t taken = takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 1));
+  size_t taken = readers.takeSamples([](ACE_CDR::Long i){ return i > 1; });
 #else
-  size_t taken = takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+  size_t taken = readers.takeSamples(bind2nd(greater<CORBA::Long>(), 1));
 #endif
   if (taken == 1) {
     cout << "INFO: partial read on DataReader \"dr\"\n";
     if (!Utils::waitForSample(dr)) return false;
 #ifdef ACE_HAS_CPP11
-    taken += takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 1));
+    taken += readers.takeSamples([](ACE_CDR::Long i){ return i > 1; });
 #else
-    taken += takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+    taken += readers.takeSamples(bind2nd(greater<CORBA::Long>(), 1));
 #endif
   }
 
@@ -285,10 +349,11 @@ bool run_filtering_test(const MessageTypeSupport_var& ts,
 
   if (!Utils::waitForSample(sub2_dr2)) return false;
 
+  Readers readers2(sub2_dr2);
 #ifdef ACE_HAS_CPP11
-  if (takeSamples(sub2_dr2, bind(greater<CORBA::Long>(), placeholders::_1, 2)) != 1) {
+  if (readers2.takeSamples([](ACE_CDR::Long i){ return i > 2; }) != 1) {
 #else
-  if (takeSamples(sub2_dr2, bind2nd(greater<CORBA::Long>(), 2)) != 1) {
+  if (readers2.takeSamples(bind2nd(greater<CORBA::Long>(), 2)) != 1) {
 #endif
     cout << "ERROR: take() should have returned one valid sample" << endl;
     return false;
@@ -299,6 +364,7 @@ bool run_filtering_test(const MessageTypeSupport_var& ts,
     return false;
   }
   dr2 = DataReader::_nil();
+  readers2.reset();
 
   sample.key = 0; // no DataLink receives this sample
   if (writers.write(sample) != RETCODE_OK) return false;
@@ -331,6 +397,7 @@ bool run_filtering_test(const MessageTypeSupport_var& ts,
     return false;
   }
   dr = DataReader::_nil();
+  readers.reset();
 
   if (sub2->delete_datareader(sub2_dr) != RETCODE_OK) {
     cout << "ERROR: delete_datareader(sub2_dr)" << endl;
@@ -374,13 +441,12 @@ bool run_unsignedlonglong_test(const MessageTypeSupport_var& ts, const Publisher
   }
 
   if (!Utils::waitForSample(dr)) return false;
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  Readers readers(dr);
   size_t count(0);
   while (true) {
     MessageSeq data;
     SampleInfoSeq infoseq;
-    ReturnCode_t ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
-                                 ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    const ReturnCode_t ret = readers.take(data, infoseq);
     if (ret == RETCODE_NO_DATA) {
       break;
     }
@@ -489,15 +555,13 @@ bool run_single_dispose_filter_test(const MessageTypeSupport_var& ts, const Publ
   ws->detach_condition(disposed_condition);
 
   // Read the Number of Invalid Messages Taken
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  Readers readers(dr);
   MessageSeq data;
   SampleInfoSeq infoseq;
   if (expect_dispose) {
-    ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED,
-      disposed_condition);
+    ret = readers.take(data, infoseq, disposed_condition);
   } else {
-    ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
-      ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+    ret = readers.take(data, infoseq);
   }
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: take failed" << endl;
@@ -629,10 +693,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
     ret = run_test(argc, argv);
   } catch (const CORBA::BAD_PARAM& ex) {
     ex._tao_print_exception("Exception caught in ContentFilteredTopicTest.cpp:");
-    return 1;
+    return EXIT_FAILURE;
   } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
+    ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Transport::MiscProblem caught.\n"), EXIT_FAILURE);
   }
 
   // cleanup
