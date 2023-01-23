@@ -64,7 +64,7 @@ void LinuxNetworkConfigMonitor::OpenHandler::execute()
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   retval_ = lncm->open_i();
   done_ = true;
-  condition_.notify_one();
+  condition_.notify_all();
 }
 
 bool LinuxNetworkConfigMonitor::open_i()
@@ -171,7 +171,7 @@ void LinuxNetworkConfigMonitor::CloseHandler::execute()
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
   retval_ = lncm->close_i();
   done_ = true;
-  condition_.notify_one();
+  condition_.notify_all();
 }
 
 bool LinuxNetworkConfigMonitor::close_i()
