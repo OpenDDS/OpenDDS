@@ -1973,6 +1973,7 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 void
 DataReaderImpl::state_updated(DDS::InstanceHandle_t handle)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   state_updated_i(handle);
 }
 
