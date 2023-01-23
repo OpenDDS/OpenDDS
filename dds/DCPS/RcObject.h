@@ -30,7 +30,6 @@ namespace DCPS {
     WeakObject(RcObject* ptr)
       : ptr_(ptr)
       , ref_count_(1)
-      , expired_(false)
     {
     }
 
@@ -54,10 +53,9 @@ namespace DCPS {
     bool check_expire(Atomic<long>& count);
 
   private:
-    ACE_SYNCH_MUTEX mx_;
-    RcObject* const ptr_;
+    mutable ACE_SYNCH_MUTEX mx_;
+    RcObject* ptr_;
     long ref_count_;
-    bool expired_;
   };
 
   class OpenDDS_Dcps_Export RcObject : public PoolAllocationBase {
