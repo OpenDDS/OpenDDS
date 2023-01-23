@@ -9,7 +9,6 @@
 #include <dds/DCPS/XTypes/Utils.h>
 
 using OpenDDS::DCPS::retcode_to_string;
-using OpenDDS::XTypes::MemberNamePath;
 
 template <typename Sample,
   typename DataWriter = typename OpenDDS::DCPS::DDSTraits<Sample>::DataWriterType >
@@ -31,7 +30,9 @@ class DynamicWriter {
 public:
   const TypeSupport_var& ts;
   const DataWriter_var& dw;
+#ifndef OPENDDS_SAFETY_PROFILE
   DynamicData_var dd;
+#endif
   bool success;
 
   DynamicWriter(const TypeSupport_var& ts, const DataWriter_var& dw)
@@ -39,49 +40,72 @@ public:
     , dw(dw)
     , success(true)
   {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_ERROR((LM_ERROR, "ERROR: Can't use DynamicData on Safety Profile!\n"));
+    success = false;
+#else
     DDS::DynamicType_var dt = ts->get_type();
     if (OpenDDS::XTypes::dynamic_type_is_valid(dt)) {
       dd = DDS::DynamicDataFactory::get_instance()->create_data(dt);
     } else {
       ACE_ERROR((LM_ERROR, "ERROR: Got invalid DynamicType from DynamicTypeSupport!\n"));
     }
+#endif
   }
 
-  void set_int32(const MemberNamePath& path, CORBA::Int32 value)
+  void set_int32(const std::string& path, CORBA::Int32 value)
   {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_UNUSED_ARG(path);
+    ACE_UNUSED_ARG(value);
+#else
     if (!dd) {
       success = false;
       return;
     }
     DDS::DynamicData_var use_dd;
     DDS::MemberId use_id;
-    if (check_rc(path.get_member_from_data(dd, use_dd, use_id), "set_int32: get_member_from_data")) {
+    OpenDDS::XTypes::MemberPath member_path;
+    DDS::DynamicType_var dt = ts->get_type();
+    if (check_rc(member_path.resolve_string_path(dt, path), "set_int32: resolve_string_path") &&
+        check_rc(member_path.get_member_from_data(dd, use_dd, use_id), "set_int32: get_member_from_data")) {
       success &= check_rc(use_dd->set_int32_value(use_id, value), "set_int32: set_int32_value");
     } else {
       success = false;
     }
+#endif
   }
 
-  void set_string(const MemberNamePath& path, const std::string& value)
+  void set_string(const std::string& path, const std::string& value)
   {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_UNUSED_ARG(path);
+    ACE_UNUSED_ARG(value);
+#else
     if (!dd) {
       success = false;
       return;
     }
     DDS::DynamicData_var use_dd;
     DDS::MemberId use_id;
-    if (check_rc(path.get_member_from_data(dd, use_dd, use_id), "set_string: get_member_from_data")) {
+    OpenDDS::XTypes::MemberPath member_path;
+    DDS::DynamicType_var dt = ts->get_type();
+    if (check_rc(member_path.resolve_string_path(dt, path), "set_string: resolve_string_path") &&
+        check_rc(member_path.get_member_from_data(dd, use_dd, use_id), "set_string: get_member_from_data")) {
       success &= check_rc(use_dd->set_string_value(use_id, value.c_str()), "set_string: set_string_value");
     } else {
       success = false;
     }
+#endif
   }
 
   ~DynamicWriter()
   {
+#ifndef OPENDDS_SAFETY_PROFILE
     if (success) {
       write_sample<DynamicData_var, DynamicDataWriter>(ts, dw, dd);
     }
+#endif
   }
 };
 
@@ -162,8 +186,7 @@ void write_struct_with_dependency(
   if (dynamic) {
     DynamicWriter d(ts, dw);
     d.set_int32("key_field", key_value);
-    d.set_int32(
-      MemberNamePath("additional_nested_struct").add("additional_field"), NESTED_STRUCT_AF);
+    d.set_int32("additional_nested_struct.additional_field", NESTED_STRUCT_AF);
   } else {
     TopicType sample;
     sample.key_field = key_value;

@@ -4,14 +4,14 @@
 
 #include <dds/DCPS/DCPS_Utils.h>
 
-using OpenDDS::XTypes::MemberNamePath;
-
 struct ReadTest {
   DDS::TypeSupport* ts;
   DDS::DataReader* dr;
   const std::string& topic_name;
   bool dynamic;
+#ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicData_var dd;
+#endif
   CORBA::String_var type_name;
   bool success;
 
@@ -20,56 +20,76 @@ struct ReadTest {
     , dr(dr)
     , topic_name(topic_name)
     , dynamic(dynamic)
+#ifndef OPENDDS_SAFETY_PROFILE
     , dd(0)
+#endif
     , type_name(ts->get_type_name())
     , success(true)
   {
   }
 
-  void check_int32(const MemberNamePath& path, CORBA::Int32 expected, CORBA::Int32 actual)
+  void check_int32(const std::string& path, CORBA::Int32 expected, CORBA::Int32 actual)
   {
     if (expected != actual) {
       ACE_ERROR((LM_ERROR, "ERROR: check_int32 for %C.%C: expected %d, received %d\n",
-        type_name.in(), path.join().c_str(), expected, actual));
+        type_name.in(), path.c_str(), expected, actual));
       success = false;
     }
   }
 
-  void check_int32(const MemberNamePath& path, CORBA::Int32 expected)
+  void check_int32(const std::string& path, CORBA::Int32 expected)
   {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_UNUSED_ARG(path);
+    ACE_UNUSED_ARG(expected);
+    success = false;
+#else
     DDS::DynamicData_var use_dd;
     DDS::MemberId use_id;
     CORBA::Int32 actual;
-    if (!(dd && check_rc(path.get_member_from_data(dd, use_dd, use_id), "check_int32: get_member_from_data") &&
-          check_rc(use_dd->get_int32_value(actual, use_id), "check_int32: get_int32_value"))) {
-      ACE_ERROR((LM_ERROR, "ERROR: check_int32 for %C.%C failed\n", type_name.in(), path.join().c_str()));
+    OpenDDS::XTypes::MemberPath member_path;
+    DDS::DynamicType_var dt = ts->get_type();
+    if (!(dd && check_rc(member_path.resolve_string_path(dt, path), "check_int32: resolve_string_path") &&
+        check_rc(member_path.get_member_from_data(dd, use_dd, use_id), "check_int32: get_member_from_data") &&
+        check_rc(use_dd->get_int32_value(actual, use_id), "check_int32: get_int32_value"))) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_int32 for %C.%C failed\n", type_name.in(), path.c_str()));
       success = false;
       return;
     }
     check_int32(path, expected, actual);
+#endif
   }
 
-  void check_string(const MemberNamePath& path, const std::string& expected, const char* actual)
+  void check_string(const std::string& path, const std::string& expected, const char* actual)
   {
     if (expected != actual) {
       ACE_ERROR((LM_ERROR, "ERROR: check_string for %C.%C: expected \"%C\", received \"%C\"\n",
-        type_name.in(), path.join().c_str(), expected.c_str(), actual));
+        type_name.in(), path.c_str(), expected.c_str(), actual));
       success = false;
     }
   }
 
-  void check_string(const MemberNamePath& path, const std::string& expected)
+  void check_string(const std::string& path, const std::string& expected)
   {
+#ifdef OPENDDS_SAFETY_PROFILE
+    ACE_UNUSED_ARG(path);
+    ACE_UNUSED_ARG(expected);
+    success = false;
+#else
     DDS::DynamicData_var use_dd;
     DDS::MemberId use_id;
     CORBA::String_var actual;
-    if (!(dd && check_rc(path.get_member_from_data(dd, use_dd, use_id), "check_string: get_member_from_data") &&
-          check_rc(use_dd->get_string_value(actual, use_id), "check_string: get_string_value"))) {
-      ACE_ERROR((LM_ERROR, "ERROR: check_string for %C.%C failed\n", type_name.in(), path.join().c_str()));
+    OpenDDS::XTypes::MemberPath member_path;
+    DDS::DynamicType_var dt = ts->get_type();
+    if (!(dd && check_rc(member_path.resolve_string_path(dt, path), "check_string: resolve_string_path") &&
+        check_rc(member_path.get_member_from_data(dd, use_dd, use_id), "check_string: get_member_from_data") &&
+        check_rc(use_dd->get_string_value(actual, use_id), "check_int32: get_int32_value"))) {
+      ACE_ERROR((LM_ERROR, "ERROR: check_string for %C.%C failed\n", type_name.in(), path.c_str()));
       success = false;
       return;
     }
     check_string(path, expected, actual);
+#endif
   }
 
   template <typename DataReaderType, typename SeqType>
@@ -86,13 +106,13 @@ struct ReadTest {
     return true;
   }
 
-  template <typename SampleType,
-    typename DataReaderType = typename OpenDDS::DCPS::DDSTraits<SampleType>::DataReaderType,
-    typename SeqType = typename OpenDDS::DCPS::DDSTraits<SampleType>::MessageSequenceType>
+  template <typename SampleType>
   bool read(SampleType& sample)
   {
+    typedef typename OpenDDS::DCPS::DDSTraits<SampleType> Traits;
+    typedef typename Traits::MessageSequenceType SeqType;
     SeqType seq;
-    if (!read_single<DataReaderType, SeqType>(seq)) {
+    if (!read_single<typename Traits::DataReaderType, SeqType>(seq)) {
       return false;
     }
     sample = seq[0];
@@ -101,12 +121,17 @@ struct ReadTest {
 
   bool read_dynamic()
   {
+#ifdef OPENDDS_SAFETY_PROFILE
+    success = false;
+    return false;
+#else
     DDS::DynamicDataSeq seq;
     if (!read_single<DDS::DynamicDataReader, DDS::DynamicDataSeq>(seq)) {
       return false;
     }
     dd = DDS::DynamicData::_duplicate(seq[0]);
     return true;
+#endif
   }
 
   template <typename TopicType>

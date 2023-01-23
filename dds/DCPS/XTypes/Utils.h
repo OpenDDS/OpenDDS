@@ -27,7 +27,57 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t max_extensibility(
   DDS::DynamicType_ptr type, DCPS::Extensibility& ext);
 OpenDDS_Dcps_Export DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext);
 
-/*
+/**
+ * Iterate over parts of a member name path that can be the name of a
+ * field inside a function or an array element nested multiple levels inside a
+ * type.
+ *
+ * Examples:
+ *   "member_a"
+ *   "member_b[2]"
+ *   "member_b[2].x"
+ *   "[2]" (If the DynamicData is indexed or keyed)
+ */
+class OpenDDS_Dcps_Export MemberPathParser {
+public:
+  size_t pos;
+  size_t left;
+  const char* path;
+  bool error;
+  bool in_subscript;
+  DCPS::String subpath;
+
+  MemberPathParser(const char* path)
+    : pos(0)
+    , left(path ? std::strlen(path) : 0)
+    , path(left > 0 ? path : 0)
+    , error(false)
+    , in_subscript(false)
+  {
+  }
+
+  MemberPathParser(const DCPS::String& path)
+    : pos(0)
+    , left(path.size())
+    , path(left > 0 ? path.c_str() : 0)
+    , error(false)
+    , in_subscript(false)
+  {
+  }
+
+  bool consume(size_t by);
+
+  /**
+   * Put the next member name or subscript value in subpath and which kind in
+   * in_subscript. Returns false when the end of the path is reached or there
+   * was an error in which case error is set to true.
+   */
+  bool get_next_subpath(); bool
+
+  get_index(CORBA::UInt32& index);
+};
+
+/**
  * Provides access to a specific member using MemberIds that may be nested
  * inside a DynamicType or DynamicData.
  */
@@ -54,6 +104,9 @@ public:
 
   size_t level() const { return ids.size(); }
 
+  DDS::ReturnCode_t resolve_string_path(
+    DDS::DynamicType_ptr type, const DCPS::String &path);
+
   DDS::ReturnCode_t get_member_from_type(
     DDS::DynamicType_ptr type, DDS::DynamicTypeMember_var& member);
 
@@ -66,64 +119,6 @@ public:
     DDS::DynamicData_ptr data, DDS::DynamicData_var& container, DDS::MemberId& member_id);
 };
 typedef OPENDDS_VECTOR(MemberPath) MemberPathVec;
-
-class OpenDDS_Dcps_Export MemberNamePath {
-public:
-  typedef OPENDDS_VECTOR(DCPS::String) MemberNameVec;
-  MemberNameVec member_names;
-
-  MemberNamePath()
-  {
-  }
-
-  MemberNamePath(const char* member_name)
-  {
-    add(member_name);
-  }
-
-  MemberNamePath& add(const DCPS::String& member_name)
-  {
-    member_names.push_back(member_name);
-    return *this;
-  }
-
-  DCPS::String join() const
-  {
-    DCPS::String result;
-    for (MemberNameVec::const_iterator it = member_names.begin(); it != member_names.end(); ++it) {
-      if (it != member_names.begin()) {
-        result += ".";
-      }
-      result += *it;
-    }
-    return result;
-  }
-
-  DDS::ReturnCode_t resolve(DDS::DynamicType_ptr type, MemberPath& member_path) const;
-
-  DDS::ReturnCode_t get_member_from_type(
-    DDS::DynamicType_ptr type, DDS::DynamicTypeMember_var& member) const
-  {
-    MemberPath member_path;
-    const DDS::ReturnCode_t rc = resolve(type, member_path);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-    return member_path.get_member_from_type(type, member);
-  }
-
-  DDS::ReturnCode_t get_member_from_data(
-    DDS::DynamicData_ptr data, DDS::DynamicData_var& container, DDS::MemberId& member_id) const
-  {
-    DDS::DynamicType_var type = data->type();
-    MemberPath member_path;
-    const DDS::ReturnCode_t rc = resolve(type, member_path);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-    return member_path.get_member_from_data(data, container, member_id);
-  }
-};
 
 enum Filter {
   Filter_All,
