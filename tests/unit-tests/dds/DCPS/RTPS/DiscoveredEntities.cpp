@@ -9,6 +9,7 @@
 #include <gmock/gmock.h>
 
 #include <dds/DCPS/RTPS/DiscoveredEntities.h>
+#include <dds/DCPS/Time_Helper.h>
 
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
@@ -44,6 +45,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_ctor)
 
   {
     ParticipantData_t p;
+    std::memset(p.participantProxy.guidPrefix, 0, sizeof(p.participantProxy.guidPrefix));
     p.participantProxy.guidPrefix[0] = 83;
     SequenceNumber seq(84);
     TimeDuration resend_period(85);
@@ -59,20 +61,20 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_ctor)
     std::memcpy(&guid, uut.location_data_.guid, sizeof(guid));
     EXPECT_EQ(guid, make_part_guid(p.participantProxy.guidPrefix));
 
-    EXPECT_EQ(uut.location_data_.location, 0);
-    EXPECT_EQ(uut.location_data_.change_mask, 0);
+    EXPECT_EQ(uut.location_data_.location, 0u);
+    EXPECT_EQ(uut.location_data_.change_mask, 0u);
     EXPECT_EQ(uut.location_data_.local_timestamp.sec, 0);
-    EXPECT_EQ(uut.location_data_.local_timestamp.nanosec, 0);
+    EXPECT_EQ(uut.location_data_.local_timestamp.nanosec, 0u);
     EXPECT_EQ(uut.location_data_.ice_timestamp.sec, 0);
-    EXPECT_EQ(uut.location_data_.ice_timestamp.nanosec, 0);
+    EXPECT_EQ(uut.location_data_.ice_timestamp.nanosec, 0u);
     EXPECT_EQ(uut.location_data_.relay_timestamp.sec, 0);
-    EXPECT_EQ(uut.location_data_.relay_timestamp.nanosec, 0);
+    EXPECT_EQ(uut.location_data_.relay_timestamp.nanosec, 0u);
     EXPECT_EQ(uut.location_data_.local6_timestamp.sec, 0);
-    EXPECT_EQ(uut.location_data_.local6_timestamp.nanosec, 0);
+    EXPECT_EQ(uut.location_data_.local6_timestamp.nanosec, 0u);
     EXPECT_EQ(uut.location_data_.ice6_timestamp.sec, 0);
-    EXPECT_EQ(uut.location_data_.ice6_timestamp.nanosec, 0);
+    EXPECT_EQ(uut.location_data_.ice6_timestamp.nanosec, 0u);
     EXPECT_EQ(uut.location_data_.relay6_timestamp.sec, 0);
-    EXPECT_EQ(uut.location_data_.relay6_timestamp.nanosec, 0);
+    EXPECT_EQ(uut.location_data_.relay6_timestamp.nanosec, 0u);
 
 #ifdef OPENDDS_SECURITY
     EXPECT_EQ(uut.have_spdp_info_, false);
@@ -103,7 +105,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredSubscription_ctor)
 
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
-    EXPECT_EQ(uut.transport_context_, 0);
+    EXPECT_EQ(uut.transport_context_, 0u);
 #ifdef OPENDDS_SECURITY
     EXPECT_EQ(uut.have_ice_agent_info_, false);
     // Can't compare IDL defined type.
@@ -111,7 +113,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredSubscription_ctor)
     EXPECT_EQ(uut.security_attribs_.is_key_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_payload_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_submessage_protected, 0);
-    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0);
+    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0u);
 #endif
     EXPECT_STREQ(uut.get_topic_name(), "");
     EXPECT_STREQ(uut.get_type_name(), "");
@@ -127,7 +129,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredSubscription_ctor)
     //EXPECT_EQ(uut.reader_data_, r);
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
-    EXPECT_EQ(uut.transport_context_, 0);
+    EXPECT_EQ(uut.transport_context_, 0u);
 #ifdef OPENDDS_SECURITY
     // Can't compare IDL defined type.
     //EXPECT_EQ(uut.security_attribs_, DDS::Security::EndpointSecurityAttributes());
@@ -137,7 +139,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredSubscription_ctor)
     EXPECT_EQ(uut.security_attribs_.is_key_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_payload_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_submessage_protected, 0);
-    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0);
+    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0u);
 #endif
     EXPECT_STREQ(uut.get_topic_name(), "a topic");
     EXPECT_STREQ(uut.get_type_name(), "a type");
@@ -151,7 +153,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredPublication_ctor)
 
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
-    EXPECT_EQ(uut.transport_context_, 0);
+    EXPECT_EQ(uut.transport_context_, 0u);
 #ifdef OPENDDS_SECURITY
     EXPECT_EQ(uut.have_ice_agent_info_, false);
     // Can't compare IDL defined type.
@@ -159,7 +161,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredPublication_ctor)
     EXPECT_EQ(uut.security_attribs_.is_key_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_payload_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_submessage_protected, 0);
-    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0);
+    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0u);
 #endif
     EXPECT_STREQ(uut.get_topic_name(), "");
     EXPECT_STREQ(uut.get_type_name(), "");
@@ -175,7 +177,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredPublication_ctor)
     //EXPECT_EQ(uut.reader_data_, r);
     EXPECT_EQ(uut.bit_ih_, DDS::HANDLE_NIL);
     EXPECT_EQ(uut.participant_discovered_at_, monotonic_time_zero());
-    EXPECT_EQ(uut.transport_context_, 0);
+    EXPECT_EQ(uut.transport_context_, 0u);
 #ifdef OPENDDS_SECURITY
     // Can't compare IDL defined type.
     //EXPECT_EQ(uut.security_attribs_, DDS::Security::EndpointSecurityAttributes());
@@ -185,7 +187,7 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredPublication_ctor)
     EXPECT_EQ(uut.security_attribs_.is_key_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_payload_protected, 0);
     EXPECT_EQ(uut.security_attribs_.is_submessage_protected, 0);
-    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0);
+    EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0u);
 #endif
     EXPECT_STREQ(uut.get_topic_name(), "a topic");
     EXPECT_STREQ(uut.get_type_name(), "a type");
