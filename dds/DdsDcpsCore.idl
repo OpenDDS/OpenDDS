@@ -27,7 +27,7 @@
 #pragma DCPS_SUPPORT_ZERO_COPY_READ
 
 module DDS {
-  // Typedefs that fulfil XTypes 1.3 Table 43
+  // XTypes 1.3 Table 43
   typedef octet Byte;
   typedef boolean _Boolean;
   typedef int8 _Int8;
@@ -43,6 +43,7 @@ module DDS {
   typedef long double Float128;
   typedef char Char8;
   typedef wchar Char16;
+  // These are not part of the table, but make sense to also have.
   typedef string String8;
   typedef wstring String16;
 

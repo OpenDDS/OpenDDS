@@ -81,7 +81,8 @@ public:
   enum stream_enum_t {
     STREAM_H, STREAM_CPP, STREAM_IDL, STREAM_ITL,
     STREAM_FACETS_H, STREAM_FACETS_CPP,
-    STREAM_LANG_H
+    STREAM_LANG_H,
+    STREAM_COUNT
   };
 
   void reset_includes();
