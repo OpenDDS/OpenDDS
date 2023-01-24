@@ -1577,6 +1577,62 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
   EXPECT_PRED_FORMAT2(assert_DataView, mutable_struct, buffer);
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteRecursiveStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_Node_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_Node_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  // Top-level node contains 1 child node.
+  unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x30, // Dheader of top level node
+    //////// value
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xff, // value
+    //////// children
+    0x40,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x20, // Nextint of children
+    0x00,0x00,0x00,0x1c, // Dheader of children
+    0x00,0x00,0x00,0x01, // length of children
+    0x00,0x00,0x00,0x14, // Dheader of the child Node
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xee, // value
+    0x30,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x04, // Dheader of children
+    0x00,0x00,0x00,0x00  // length of children
+  };
+
+  XTypes::DynamicDataImpl data(dt);
+  // value
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(0, 0xff));
+
+  // Top-level children
+  DDS::DynamicTypeMember_var dtm;
+  EXPECT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 1));
+  DDS::MemberDescriptor_var md;
+  EXPECT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var children_dd = new XTypes::DynamicDataImpl(md->type());
+  DDS::DynamicData_var child_dd = new XTypes::DynamicDataImpl(dt);
+  EXPECT_EQ(DDS::RETCODE_OK, child_dd->set_int32_value(0, 0xee));
+
+  DDS::MemberId id = children_dd->get_member_id_at_index(0);
+  EXPECT_EQ(id, DDS::MemberId(0));
+  EXPECT_EQ(DDS::RETCODE_OK, children_dd->set_complex_value(id, child_dd));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_complex_value(1, children_dd));
+
+  {
+    ACE_Message_Block buffer(128);
+    DCPS::Serialier ser(&buffer, xcdr2);
+    ASSERT_TRUE(ser << data);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+}
+
 /////////////////////////// Appendable tests ///////////////////////////
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
 {
