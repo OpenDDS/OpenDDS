@@ -291,6 +291,12 @@ Sedp::Sedp(const GUID_t& participant_id, Spdp& owner, ACE_Thread_Mutex& lock)
   , type_lookup_service_sequence_number_(0)
   , use_xtypes_(true)
   , use_xtypes_complete_(false)
+  , local_participant_automatic_liveliness_sn_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , local_participant_manual_liveliness_sn_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+#ifdef OPENDDS_SECURITY
+  , local_participant_automatic_liveliness_sn_secure_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+  , local_participant_manual_liveliness_sn_secure_(DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN())
+#endif
 #ifdef OPENDDS_SECURITY
   , permissions_handle_(DDS::HANDLE_NIL)
   , crypto_handle_(DDS::HANDLE_NIL)
@@ -3036,14 +3042,14 @@ Sedp::signal_liveliness_unsecure(DDS::LivelinessQosPolicyKind kind)
   case DDS::AUTOMATIC_LIVELINESS_QOS: {
     const GUID_t guid = make_id(participant_id_,
       PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
-    write_participant_message_data(guid, local_participant_messages_[guid], GUID_UNKNOWN);
+    write_participant_message_data(guid, local_participant_automatic_liveliness_sn_, GUID_UNKNOWN);
     break;
   }
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS: {
     const GUID_t guid = make_id(participant_id_,
       PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
-    write_participant_message_data(guid, local_participant_messages_[guid], GUID_UNKNOWN);
+    write_participant_message_data(guid, local_participant_manual_liveliness_sn_, GUID_UNKNOWN);
     break;
   }
 
@@ -3089,14 +3095,14 @@ Sedp::signal_liveliness_secure(DDS::LivelinessQosPolicyKind kind)
   case DDS::AUTOMATIC_LIVELINESS_QOS: {
     const GUID_t guid = make_id(participant_id_,
       PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
-    write_participant_message_data_secure(guid, local_participant_messages_secure_[guid], GUID_UNKNOWN);
+    write_participant_message_data_secure(guid, local_participant_automatic_liveliness_sn_secure_, GUID_UNKNOWN);
     break;
   }
 
   case DDS::MANUAL_BY_PARTICIPANT_LIVELINESS_QOS: {
     const GUID_t guid = make_id(participant_id_,
       PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
-    write_participant_message_data_secure(guid, local_participant_messages_secure_[guid], GUID_UNKNOWN);
+    write_participant_message_data_secure(guid, local_participant_manual_liveliness_sn_secure_, GUID_UNKNOWN);
     break;
   }
 
@@ -4709,10 +4715,18 @@ Sedp::write_durable_participant_message_data(const GUID_t& reader)
     return;
   }
 
-  LocalParticipantMessageIter part, end = local_participant_messages_.end();
-  for (part = local_participant_messages_.begin(); part != end; ++part) {
-    write_participant_message_data(part->first, part->second, reader);
+  if (local_participant_automatic_liveliness_sn_ != DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    const GUID_t guid = make_id(participant_id_,
+                                PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
+    write_participant_message_data(guid, local_participant_automatic_liveliness_sn_, reader);
   }
+
+  if (local_participant_manual_liveliness_sn_ != DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    const GUID_t guid = make_id(participant_id_,
+                                PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
+    write_participant_message_data(guid, local_participant_manual_liveliness_sn_, reader);
+  }
+
   participant_message_writer_->end_historic_samples(reader);
 }
 
@@ -4724,10 +4738,18 @@ Sedp::write_durable_participant_message_data_secure(const GUID_t& reader)
     return;
   }
 
-  LocalParticipantMessageIter part, end = local_participant_messages_secure_.end();
-  for (part = local_participant_messages_secure_.begin(); part != end; ++part) {
-    write_participant_message_data_secure(part->first, part->second, reader);
+  if (local_participant_automatic_liveliness_sn_secure_ != DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    const GUID_t guid = make_id(participant_id_,
+                                PARTICIPANT_MESSAGE_DATA_KIND_AUTOMATIC_LIVELINESS_UPDATE);
+    write_participant_message_data_secure(guid, local_participant_automatic_liveliness_sn_secure_, reader);
   }
+
+  if (local_participant_manual_liveliness_sn_secure_ != DCPS::SequenceNumber::SEQUENCENUMBER_UNKNOWN()) {
+    const GUID_t guid = make_id(participant_id_,
+                                PARTICIPANT_MESSAGE_DATA_KIND_MANUAL_LIVELINESS_UPDATE);
+    write_participant_message_data_secure(guid, local_participant_manual_liveliness_sn_secure_, reader);
+  }
+
   participant_message_secure_writer_->end_historic_samples(reader);
 }
 
@@ -5086,7 +5108,7 @@ Sedp::write_subscription_data_secure(
 DDS::ReturnCode_t
 Sedp::write_participant_message_data(
   const GUID_t& rid,
-  LocalParticipantMessage& pm,
+  DCPS::SequenceNumber& sn,
   const GUID_t& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER)) {
@@ -5099,7 +5121,7 @@ Sedp::write_participant_message_data(
   notify_liveliness(pmd);
   if (spdp_.associated() && (reader != GUID_UNKNOWN ||
                              !associated_participants_.empty())) {
-    result = participant_message_writer_->write_participant_message(pmd, reader, pm.sequence_);
+    result = participant_message_writer_->write_participant_message(pmd, reader, sn);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_participant_message_data - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
@@ -5111,7 +5133,7 @@ Sedp::write_participant_message_data(
 DDS::ReturnCode_t
 Sedp::write_participant_message_data_secure(
   const GUID_t& rid,
-  LocalParticipantMessage& pm,
+  DCPS::SequenceNumber& sn,
   const GUID_t& reader)
 {
   if (!(spdp_.available_builtin_endpoints() & DDS::Security::BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER)) {
@@ -5123,7 +5145,7 @@ Sedp::write_participant_message_data_secure(
                              !associated_participants_.empty())) {
     ParticipantMessageData pmd;
     pmd.participantGuid = rid;
-    result = participant_message_secure_writer_->write_participant_message(pmd, reader, pm.sequence_);
+    result = participant_message_secure_writer_->write_participant_message(pmd, reader, sn);
   } else if (DCPS::DCPS_debug_level > 3) {
     ACE_DEBUG((LM_INFO, ACE_TEXT("(%P|%t) Sedp::write_participant_message_data_secure - ")
                ACE_TEXT("not currently associated, dropping msg.\n")));
