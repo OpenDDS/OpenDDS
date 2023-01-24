@@ -93,7 +93,7 @@ if ($secure) {
   %all_test_params = (
     "PlainCdr" => {
       reader_type => "PlainCdrStruct", writer_type => "PlainCdrStruct",
-      topic => 'PlainCdr', expect_inconsistent_topic => 0,
+      topic => 'PlainCdr',
     },
     "FinalStructMatch" => {
       reader_type => "FinalStructSub", writer_type => "FinalStructPub",
@@ -258,11 +258,11 @@ if ($secure) {
 }
 
 my %valid_params = ( # 1 = Required, 0 = Optional
-  'topic', => 1, 'reader_type' => 1, 'writer_type' => 1,
-  'ini' => 0, skip_read_if_dynamic => 0,
-  'r_reg_type' => 0, 'r_ini' => 0, 'reader_args' => 0,
-  'w_reg_type' => 0, 'w_ini' => 0, 'writer_args' => 0,
-  'expect_inconsistent_topic' => 0, 'expect_incompatible_qos' => 0,
+  topic => 1, reader_type => 1, writer_type => 1,
+  ini => 0, skip_read_if_dynamic => 0,
+  r_reg_type => 0, r_ini => 0, reader_args => 0,
+  w_reg_type => 0, w_ini => 0, writer_args => 0,
+  expect_inconsistent_topic => 0, expect_incompatible_qos => 0,
 );
 my $key_val = 100;
 for my $test_name (keys(%all_test_params)) {

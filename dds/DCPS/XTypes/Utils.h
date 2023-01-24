@@ -74,9 +74,9 @@ public:
    * in_subscript. Returns false when the end of the path is reached or there
    * was an error in which case error is set to true.
    */
-  bool get_next_subpath(); bool
+  bool get_next_subpath();
 
-  get_index(CORBA::UInt32& index);
+  bool get_index(CORBA::UInt32 &index);
 };
 
 /**
