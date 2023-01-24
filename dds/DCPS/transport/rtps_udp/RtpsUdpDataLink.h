@@ -109,6 +109,7 @@ public:
   RtpsUdpInst_rch config() const;
 
   ACE_Reactor* get_reactor();
+  ReactorInterceptor_rch get_reactor_interceptor() const;
   bool reactor_is_shut_down();
 
   ACE_SOCK_Dgram& unicast_socket();

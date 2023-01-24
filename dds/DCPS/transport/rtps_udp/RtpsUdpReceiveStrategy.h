@@ -107,10 +107,7 @@ private:
                         const NetworkAddress& remote_addr);
 
   virtual int start_i();
-  void register_handlers();
   virtual void stop_i();
-  void remove_handlers();
-  typedef PmfJob<RtpsUdpReceiveStrategy> RURSJob;
 
   virtual bool check_header(const RtpsTransportHeader& header);
 

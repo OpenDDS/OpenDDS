@@ -187,11 +187,6 @@ private:
   void start_ice();
   void stop_ice();
 
-  typedef PmfJob<RtpsUdpTransport> RUTJob;
-
-  void register_handlers();
-  void remove_handlers();
-
   RcHandle<ICE::Agent> ice_agent_;
 #endif
 
