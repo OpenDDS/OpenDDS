@@ -9,6 +9,7 @@
 #  include <atomic>
 #else
 #  include <ace/Atomic_Op.h>
+#  include <ace/Thread_Mutex.h>
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -21,10 +22,10 @@ template <typename T>
 using Atomic = std::atomic<T>;
 #else
 template <typename T>
-class Atomic : public ACE_Atomic_Op<ACE_SYNCH_MUTEX, T>
+class Atomic : public ACE_Atomic_Op<ACE_Thread_Mutex, T>
 {
 public:
-  typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, T> Base;
+  typedef ACE_Atomic_Op<ACE_Thread_Mutex, T> Base;
   Atomic() : Base() {}
   explicit Atomic(T desired) : Base(desired) {}
   inline operator T() const { return Base::value(); }
