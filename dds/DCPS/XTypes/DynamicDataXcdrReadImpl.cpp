@@ -688,14 +688,14 @@ bool DynamicDataXcdrReadImpl::read_value(ValueType& value, TypeKind tk)
   default:
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_value: "
-                 "Calling on an unexpected element type %C\n", typekind_to_string(tk)));
+                 "Calling on an unexpected type %C\n", typekind_to_string(tk)));
     }
     return false;
   }
 
   if (log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_value: "
-               "failed to deserialize element type %C\n", typekind_to_string(tk)));
+               "failed to deserialize type %C\n", typekind_to_string(tk)));
   }
   return false;
 }
