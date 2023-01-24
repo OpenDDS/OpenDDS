@@ -58,9 +58,7 @@ namespace {
     {
       barrier_.wait();
       for (size_t i = 0; i < test_size_; ++i) {
-        {
-          rch_vec_[i].reset();
-        }
+        rch_vec_[i].reset();
         barrier_.wait();
       }
     }
