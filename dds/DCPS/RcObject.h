@@ -9,17 +9,12 @@
 #include "dds/Versioned_Namespace.h"
 
 #include "dcps_export.h"
+#include "Atomic.h"
 #include "PoolAllocationBase.h"
 #include "RcHandle_T.h"
 
 #include <ace/Guard_T.h>
 #include <ace/Synch_Traits.h>
-
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -31,14 +26,6 @@ namespace DCPS {
   class OpenDDS_Dcps_Export WeakObject : public PoolAllocationBase
   {
   public:
-
-#ifdef ACE_HAS_CPP11
-    typedef std::atomic<long> AtomicCountType;
-#define GET_ATOMIC_COUNT_VALUE(v) v
-#else
-    typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> AtomicCountType;
-#define GET_ATOMIC_COUNT_VALUE(v) v.value()
-#endif
 
     WeakObject(RcObject* ptr)
       : ptr_(ptr)
@@ -63,7 +50,7 @@ namespace DCPS {
     }
 
     RcObject* lock();
-    bool check_expire(AtomicCountType& count);
+    bool check_expire(Atomic<long>& count);
 
   private:
     mutable ACE_SYNCH_MUTEX mx_;
@@ -94,7 +81,7 @@ namespace DCPS {
     /// This accessor is purely for debugging purposes
     long ref_count() const
     {
-      return GET_ATOMIC_COUNT_VALUE(ref_count_);
+      return ref_count_;
     }
 
     WeakObject* _get_weak_object() const
@@ -110,7 +97,7 @@ namespace DCPS {
     {}
 
   private:
-    WeakObject::AtomicCountType ref_count_;
+    Atomic<long> ref_count_;
     WeakObject* weak_object_;
 
     RcObject(const RcObject&);
@@ -126,7 +113,7 @@ namespace DCPS {
     return ptr_;
   }
 
-  inline bool WeakObject::check_expire(WeakObject::AtomicCountType& count)
+  inline bool WeakObject::check_expire(Atomic<long>& count)
   {
     ACE_Guard<ACE_SYNCH_MUTEX> guard(mx_);
     const long new_count = --count;
