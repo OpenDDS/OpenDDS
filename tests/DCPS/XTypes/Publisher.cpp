@@ -10,20 +10,26 @@
 
 using OpenDDS::DCPS::retcode_to_string;
 
-template <typename Sample,
-  typename DataWriter = typename OpenDDS::DCPS::DDSTraits<Sample>::DataWriterType >
-void write_sample(const TypeSupport_var& ts, const DataWriter_var& dw, const Sample& sample)
+template <typename Sample, typename DataWriterVar>
+void write_sample_i(const TypeSupport_var& ts, const DataWriterVar& dw, const Sample& sample)
 {
-  typename DataWriter::_var_type typed_dw = DataWriter::_narrow(dw);
   CORBA::String_var name = ts->get_type_name();
-  if (!typed_dw) {
-    ACE_ERROR((LM_ERROR, "ERROR: type_dw for %C was null\n", name.in()));
+  if (!dw) {
+    ACE_ERROR((LM_ERROR, "ERROR: typed DataWriter for %C was null\n", name.in()));
     return;
   }
-  check_rc(typed_dw->write(sample, HANDLE_NIL), std::string("write for ") + name.in() + " failed");
+  check_rc(dw->write(sample, HANDLE_NIL), std::string("write for ") + name.in() + " failed");
   if (verbose) {
     ACE_DEBUG((LM_DEBUG, "writer: {}\n", name.in()));
   }
+}
+
+template <typename Sample>
+void write_sample(const TypeSupport_var& ts, const DataWriter_var& dw, const Sample& sample)
+{
+  typedef typename OpenDDS::DCPS::DDSTraits<Sample>::DataWriterType DataWriter;
+  typename DataWriter::_var_type typed_dw = DataWriter::_narrow(dw);
+  write_sample_i(ts, typed_dw, sample);
 }
 
 class DynamicWriter {
@@ -103,7 +109,8 @@ public:
   {
 #ifndef OPENDDS_SAFETY_PROFILE
     if (success) {
-      write_sample<DynamicData_var, DynamicDataWriter>(ts, dw, dd);
+      DynamicDataWriter::_var_type typed_dw = DynamicDataWriter::_narrow(dw);
+      write_sample_i(ts, typed_dw, dd);
     }
 #endif
   }
