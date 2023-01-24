@@ -17,18 +17,18 @@ namespace OpenDDS {
 namespace DCPS {
 
 #ifdef ACE_HAS_CPP11
-    template <typename T>
-    using Atomic = std::atomic<T>;
+template <typename T>
+using Atomic = std::atomic<T>;
 #else
-    template <typename T>
-    class Atomic : public ACE_Atomic_Op<ACE_SYNCH_MUTEX, T>
-    {
-    public:
-      typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, T> Base;
-      Atomic() : Base() {}
-      Atomic(T desired) : Base(desired) {}
-      inline operator T() const { return Base::value(); }
-    };
+template <typename T>
+class Atomic : public ACE_Atomic_Op<ACE_SYNCH_MUTEX, T>
+{
+public:
+  typedef ACE_Atomic_Op<ACE_SYNCH_MUTEX, T> Base;
+  Atomic() : Base() {}
+  Atomic(T desired) : Base(desired) {}
+  inline operator T() const { return Base::value(); }
+};
 #endif
 
 } // DCPS
