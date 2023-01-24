@@ -100,7 +100,8 @@ struct ReadTest {
       return false;
     }
     if (seq.length() != 1) {
-      ACE_ERROR((LM_ERROR, "ERROR: read %C expected one, but sample got %u\n", seq.length()));
+      ACE_ERROR((LM_ERROR, "ERROR: read_single %C expected one, but sample got %u\n",
+        type_name.in(), seq.length()));
       return false;
     }
     return true;
@@ -129,6 +130,8 @@ struct ReadTest {
     if (!read_single<DDS::DynamicDataReader, DDS::DynamicDataSeq>(seq)) {
       return false;
     }
+    // TODO: the duplicate shouldn't be required, but a direct assignment isn't
+    // incrementing the reference count.
     dd = DDS::DynamicData::_duplicate(seq[0]);
     return true;
 #endif

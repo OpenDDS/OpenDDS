@@ -1,4 +1,5 @@
 #include <dds/DCPS/Serializer.h>
+#include <dds/DCPS/debug.h>
 
 #include <gtest/gtest.h>
 

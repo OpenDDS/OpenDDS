@@ -20,7 +20,7 @@ void write_sample_i(const TypeSupport_var& ts, const DataWriterVar& dw, const Sa
   }
   check_rc(dw->write(sample, HANDLE_NIL), std::string("write for ") + name.in() + " failed");
   if (verbose) {
-    ACE_DEBUG((LM_DEBUG, "writer: {}\n", name.in()));
+    ACE_DEBUG((LM_DEBUG, "writer: %C\n", name.in()));
   }
 }
 
