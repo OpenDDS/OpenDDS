@@ -882,11 +882,6 @@ namespace OpenDDS {
     return inst;
   }
 
-  Extensibility get_max_extensibility()
-  {
-    return MarshalTraitsType::max_extensibility_level();
-  }
-
   void set_instance_state_i(DDS::InstanceHandle_t instance,
                             DDS::InstanceHandle_t publication_handle,
                             DDS::InstanceStateKind state,
@@ -939,7 +934,7 @@ namespace OpenDDS {
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
         return;
       }
 
@@ -1110,7 +1105,7 @@ protected:
         return message_holder;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
         return message_holder;
       }
 

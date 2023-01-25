@@ -703,8 +703,6 @@ protected:
   /// Setup deserialization options
   DDS::ReturnCode_t setup_deserialization();
 
-  virtual Extensibility get_max_extensibility() = 0;
-
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
   void post_read_or_take();
@@ -786,7 +784,8 @@ protected:
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
-  RepoId topic_id_;
+  TypeSupportImpl* type_support_;
+  GUID_t topic_id_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   bool is_exclusive_ownership_;
@@ -810,7 +809,6 @@ protected:
 
   DDS::SubscriberQos subqos_;
 
-protected:
   virtual void add_link(const DataLink_rch& link, const RepoId& peer);
 
 private:
