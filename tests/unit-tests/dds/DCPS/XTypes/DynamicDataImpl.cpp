@@ -201,12 +201,46 @@ void verify_int32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   // A new discriminator value doesn't select the existing member.
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
-  // Write a member that isn't selected by the existing discriminator.
-  ret = data.set_uint32_value(2, CORBA::ULong(10));
+  // Change the selected member, then channge it back to the original member.
+  ret = data.set_uint32_value(2, CORBA::ULong(100));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  // Rewrite the selected member.
-  ret = data.set_int32_value(1, CORBA::Long(11));
+  ret = data.set_int32_value(1, CORBA::Long(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
+  {
+    // Check that the serialized data is still correct, i.e., discriminator value
+    // was updated correctly from the above two calls.
+    ACE_Message_Block buffer(64);
+    DCPS::Serializer ser(&buffer, xcdr2);
+    ASSERT_TRUE(ser << data);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+}
+
+void verify_int32s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::Int32Seq int32s;
+  int32s.length(3);
+  int32s[0] = 3;
+  int32s[1] = 4;
+  int32s[2] = 5;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_values(1, int32s));
+  {
+    ACE_Message_Block buffer(128);
+    DCPS::Serializer ser(&buffer, xcdr2);
+    ASSERT_TRUE(ser << data);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32));
+  DDS::UInt32Seq uint32s;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint32_values(2, uint32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_values(1, int32s));
+  {
+    ACE_Message_Block buffer(128);
+    DCPS::Serializer ser(&buffer, xcdr2);
+    ASSERT_TRUE(ser << data);
+    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  }
 }
 
 void verify_default_int32_union_mutable(DDS::DynamicType_var dt)
@@ -341,7 +375,7 @@ void verify_uint8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::ULong(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint8_value(4, CORBA::UInt8(0xaa));
@@ -379,7 +413,7 @@ void verify_int16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::ULong(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int16_value(5, CORBA::Short(100));
@@ -417,7 +451,7 @@ void verify_uint16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint64_value(8, CORBA::ULongLong(222));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint16_value(6, CORBA::UShort(99));
@@ -455,7 +489,7 @@ void verify_int64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int64_value(7, CORBA::LongLong(0xbb));
@@ -493,7 +527,7 @@ void verify_uint64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint64_value(8, CORBA::ULongLong(0xcd));
@@ -531,7 +565,7 @@ void verify_float32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_float32_value(9, CORBA::Float(2.0f));
@@ -550,7 +584,7 @@ void verify_float64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_CHAR8);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_char8_value(12, CORBA::Char('a'));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_float64_value(10, CORBA::Double(2.0));
@@ -569,7 +603,7 @@ void verify_char8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_value(1, CORBA::Long(22));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_char8_value(12, CORBA::Char('b'));
@@ -608,7 +642,7 @@ void verify_char16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int16_value(5, CORBA::Short(34));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_char16_value(13, CORBA::WChar(0x0062));
@@ -647,7 +681,7 @@ void verify_byte_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int16_value(5, CORBA::Short(34));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_byte_value(14, CORBA::Octet(0xab));
@@ -685,7 +719,7 @@ void verify_bool_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint16_value(6, CORBA::UShort(56));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_boolean_value(15, CORBA::Boolean(false));
@@ -724,7 +758,7 @@ void verify_string_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint16_value(6, CORBA::UShort(56));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_string_value(16, "def");
@@ -744,7 +778,7 @@ void verify_wstring_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::UInt32(4321));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_wstring_value(17, L"def");
@@ -764,7 +798,7 @@ void verify_enum_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::UInt32(4321));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(18, CORBA::Long(10));
@@ -852,13 +886,13 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
   DDS::ReturnCode_t ret = data.set_int32_values(0, my_enums);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int32_values(2, my_enums);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 
   /// int_32s
   DDS::Int32Seq int_32s;
   set_sequences(int_32s, input.int_32s);
   ret = data.set_int32_values(3, int_32s);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_values(1, int_32s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
@@ -1436,6 +1470,23 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
 {
   // TODO: Write to union with members are sequence of basic types
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x20, // Dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // discriminator
+      0x40,0,0,1, 0,0,0,16, 0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5 // int_32s
+    };
+    verify_int32s_union(dt, expected_cdr);
+  }
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceUnionDefault)
@@ -1588,23 +1639,31 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteRecursiveStruct)
   tls.add(type_map.begin(), type_map.end());
   DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
 
-  // Top-level node contains 1 child node.
+  // Top-level node contains 2 child nodes, each is a leaf.
   unsigned char expected_cdr[] = {
-    0x00,0x00,0x00,0x30, // Dheader of top level node
+    0x00,0x00,0x00,0x48, // Dheader of top level node
     //////// value
     0x20,0x00,0x00,0x00, // Emheader of value
     0x00,0x00,0x00,0xff, // value
     //////// children
     0x40,0x00,0x00,0x01, // Emheader of children
-    0x00,0x00,0x00,0x20, // Nextint of children
-    0x00,0x00,0x00,0x1c, // Dheader of children
-    0x00,0x00,0x00,0x01, // length of children
-    0x00,0x00,0x00,0x14, // Dheader of the child Node
+    0x00,0x00,0x00,0x38, // Nextint of children
+    0x00,0x00,0x00,0x34, // Dheader of children
+    0x00,0x00,0x00,0x02, // length of children
+    /////////////// 1st child
+    0x00,0x00,0x00,0x14, // Dheader
     0x20,0x00,0x00,0x00, // Emheader of value
     0x00,0x00,0x00,0xee, // value
     0x30,0x00,0x00,0x01, // Emheader of children
     0x00,0x00,0x00,0x04, // Dheader of children
-    0x00,0x00,0x00,0x00  // length of children
+    0x00,0x00,0x00,0x00, // length of children
+    /////////////// 2nd child
+    0x00,0x00,0x00,0x14, // Dheader
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xdd, // value
+    0x30,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x04, // Dheader of children
+    0x00,0x00,0x00,0x00, // length of children
   };
 
   XTypes::DynamicDataImpl data(dt);
@@ -1617,17 +1676,23 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteRecursiveStruct)
   DDS::MemberDescriptor_var md;
   EXPECT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
   DDS::DynamicData_var children_dd = new XTypes::DynamicDataImpl(md->type());
-  DDS::DynamicData_var child_dd = new XTypes::DynamicDataImpl(dt);
-  EXPECT_EQ(DDS::RETCODE_OK, child_dd->set_int32_value(0, 0xee));
-
+  //   First child
+  DDS::DynamicData_var child1_dd = new XTypes::DynamicDataImpl(dt);
+  EXPECT_EQ(DDS::RETCODE_OK, child1_dd->set_int32_value(0, 0xee));
   DDS::MemberId id = children_dd->get_member_id_at_index(0);
   EXPECT_EQ(id, DDS::MemberId(0));
-  EXPECT_EQ(DDS::RETCODE_OK, children_dd->set_complex_value(id, child_dd));
+  EXPECT_EQ(DDS::RETCODE_OK, children_dd->set_complex_value(id, child1_dd));
+  //   Second child
+  DDS::DynamicData_var child2_dd = new XTypes::DynamicDataImpl(dt);
+  EXPECT_EQ(DDS::RETCODE_OK, child2_dd->set_int32_value(0, 0xdd));
+  id = children_dd->get_member_id_at_index(1);
+  EXPECT_EQ(id, DDS::MemberId(1));
+  EXPECT_EQ(DDS::RETCODE_OK, children_dd->set_complex_value(id, child2_dd));
   EXPECT_EQ(DDS::RETCODE_OK, data.set_complex_value(1, children_dd));
 
   {
     ACE_Message_Block buffer(128);
-    DCPS::Serialier ser(&buffer, xcdr2);
+    DCPS::Serializer ser(&buffer, xcdr2);
     ASSERT_TRUE(ser << data);
     EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
   }
@@ -1667,6 +1732,196 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +10=82 wstr
   };
   verify_single_value_struct<AppendableSingleValueStruct>(dt, single_value_struct);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x0a // int_32
+    };
+    verify_int32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x0b // uint_32
+    };
+    verify_uint32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x02, // discriminator
+      0x7f // int_8
+    };
+    verify_int8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x03, // discriminator
+      0xff // uint_8
+    };
+    verify_uint8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x09 // int_16
+    };
+    verify_int16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x05 // uint_16
+    };
+    verify_uint16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x06, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe // int_64
+    };
+    verify_int64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x07, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// uint_64
+    };
+    verify_uint64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x08, // discriminator
+      0x3f,0x80,0x00,0x00 // float_32
+    };
+    verify_float32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x09, // discriminator
+      0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64
+    };
+    verify_float64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0b, // discriminator
+      'a' // char_8
+    };
+    verify_char8_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x61 // char_16
+    };
+    verify_char16_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    verify_byte_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    verify_bool_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    verify_string_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    // Serialization of wide string doesn't include termination NUL
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0e, // dheader
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x06, 0x00,0x61,0x00,0x62,0x00,0x63 // wstr
+    };
+    verify_wstring_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x0a, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    verify_enum_union(dt, expected_cdr);
+  }
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteSequenceToStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0xd6, // dheader
+    0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // uint_32s
+    0,0,0,3, 12,13,14,(0), // int_8s
+    0,0,0,2, 15,16,(0),(0), // uint_8s
+    0,0,0,2, 0,1,0,2, // int_16s
+    0,0,0,3, 0,3,0,4,0,5,(0),(0), // uint_16s
+    0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // int_64s
+    0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // float_32s
+    0,0,0,1, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // float_64s
+    0,0,0,2, 'a','b',(0),(0), // char_8s
+    0,0,0,3, 0,0x63,0,0x64,0,0x65,(0),(0), // char_16s
+    0,0,0,2, 0xee,0xff,(0),(0), // byte_s
+    0,0,0,1, 1,(0),(0),(0), // bool_s
+    0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // str_s
+    0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // wstr_s
+  };
+  verify_sequence_value_struct<AppendableSequenceStruct>(dt, expected_cdr);
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
@@ -1792,6 +2047,178 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +10=78 wstr
   };
   verify_single_value_struct<FinalSingleValueStruct>(dt, single_value_struct);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x0a // int_32
+    };
+    verify_int32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x0b // uint_32
+    };
+    verify_uint32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x02, // discriminator
+      0x7f // int_8
+    };
+    verify_int8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x03, // discriminator
+      0xff // uint_8
+    };
+    verify_uint8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x09 // int_16
+    };
+    verify_int16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x05 // uint_16
+    };
+    verify_uint16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe // int_64
+    };
+    verify_int64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x07, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// uint_64
+    };
+    verify_uint64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // discriminator
+      0x3f,0x80,0x00,0x00 // float_32
+    };
+    verify_float32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x09, // discriminator
+      0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64
+    };
+    verify_float64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0b, // discriminator
+      'a' // char_8
+    };
+    verify_char8_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x61 // char_16
+    };
+    verify_char16_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    verify_byte_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    verify_bool_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    verify_string_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    // Serialization of wide string doesn't include termination NUL
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x06, 0x00,0x61,0x00,0x62,0x00,0x63 // wstr
+    };
+    verify_wstring_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0a, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    verify_enum_union(dt, expected_cdr);
+  }
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteSequenceToStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char expected_cdr[] = {
+    0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // uint_32s
+    0,0,0,3, 12,13,14,(0), // int_8s
+    0,0,0,2, 15,16,(0),(0), // uint_8s
+    0,0,0,2, 0,1,0,2, // int_16s
+    0,0,0,3, 0,3,0,4,0,5,(0),(0), // uint_16s
+    0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // int_64s
+    0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // float_32s
+    0,0,0,1, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // float_64s
+    0,0,0,2, 'a','b',(0),(0), // char_8s
+    0,0,0,3, 0,0x63,0,0x64,0,0x65,(0),(0), // char_16s
+    0,0,0,2, 0xee,0xff,(0),(0), // byte_s
+    0,0,0,1, 1,(0),(0),(0), // bool_s
+    0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // str_s
+    0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // wstr_s
+  };
+  verify_sequence_value_struct<FinalSequenceStruct>(dt, expected_cdr);
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
