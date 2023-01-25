@@ -1,6 +1,8 @@
 #ifndef FS_SIGNAL_H
 #define FS_SIGNAL_H
 
+#include <dds/DCPS/PoolAllocator.h>
+
 class FileSystemSignal {
   public:
     FileSystemSignal(int id);
@@ -10,7 +12,7 @@ class FileSystemSignal {
 
   private:
     int _id;
-    char _file_name[24];
+    OpenDDS::DCPS::String _file_name;
 
     bool exists();
 };

@@ -132,7 +132,7 @@ struct ReadTest {
     }
     // TODO: the duplicate shouldn't be required, but a direct assignment isn't
     // incrementing the reference count.
-    // http://bugzilla.dre.vanderbilt.edu/show_bug.cgi?id=3942
+    // https://github.com/DOCGroup/ACE_TAO/issues/2037
     dd = DDS::DynamicData::_duplicate(seq[0]);
     return true;
 #endif
