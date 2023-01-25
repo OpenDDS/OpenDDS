@@ -62,16 +62,12 @@ namespace OpenDDS {
       typedef DCPS::KeyOnly<const XTypes::DynamicSample> KeyOnlyType;
 
       static const char* type_name() { return "Dynamic"; } // used for logging
-      static bool gen_has_key() { return false; }
-      static size_t key_count() { return 0; }
     };
 
     template <>
     struct MarshalTraits<XTypes::DynamicSample> {
       static bool to_message_block(ACE_Message_Block&, const XTypes::DynamicSample&) { return false; }
       static bool from_message_block(XTypes::DynamicSample&, const ACE_Message_Block&) { return false; }
-      static Extensibility extensibility() { return APPENDABLE; }
-      static Extensibility max_extensibility_level() { return APPENDABLE; }
     };
 
     bool operator>>(Serializer& strm, XTypes::DynamicSample& sample);
