@@ -12,6 +12,7 @@
 #include <dds/DCPS/Definitions.h>
 
 #include <openssl/pem.h>
+#include <openssl/x509.h>
 
 #include <cstring>
 #include <sstream>
@@ -90,6 +91,38 @@ bool SignedDocument::load(const std::string& uri, DDS::Security::SecurityExcepti
 
   return true;
 }
+
+class StackOfX509 {
+public:
+  StackOfX509()
+    : certs_(sk_X509_new_null())
+  {}
+
+  ~StackOfX509()
+  {
+    if (certs_) {
+      sk_X509_free(certs_);
+    }
+  }
+
+  STACK_OF(X509)* certs() const { return certs_; }
+  operator bool() const {return certs_;}
+
+  bool push(const Certificate& certificate)
+  {
+    if (sk_X509_push(certs_, certificate.x509()) != 1) {
+      OPENDDS_SSL_LOG_ERR("sk_X509_push failed");
+      return false;
+    }
+
+    return true;
+  }
+
+private:
+  // No copy.
+  StackOfX509(const StackOfX509&);
+  STACK_OF(X509)* certs_;
+};
 
 class X509Store {
 public:
@@ -197,13 +230,14 @@ public:
 
   operator bool() const { return doc_; }
 
-  bool verify(STACK_OF(X509)* certs,
-              const X509Store& store,
+  bool verify(const StackOfX509* certs,
+              const X509Store* store,
               const Bio& indata,
               const Bio& outdata,
               int flags)
   {
-    if (PKCS7_verify(doc_, certs, store.store(), indata.bio(), outdata.bio(), flags) != 1) {
+    if (PKCS7_verify(doc_, certs ? certs->certs() : 0, store ? store->store() : 0,
+                     indata.bio(), outdata.bio(), flags) != 1) {
       OPENDDS_SSL_LOG_ERR("SMIME_read_PKCS7 failed");
       return false;
     }
@@ -222,12 +256,12 @@ bool SignedDocument::verify(const Certificate& ca)
   content_.clear();
   verified_ = false;
 
-  X509Store store;
-  if (!store) {
+  StackOfX509 certs;
+  if (!certs) {
     return false;
   }
 
-  if (!store.add_cert(ca)) {
+  if (!certs.push(ca)) {
     return false;
   }
 
@@ -252,7 +286,7 @@ bool SignedDocument::verify(const Certificate& ca)
     return false;
   }
 
-  if (!doc.verify(0, store, bcont, content, PKCS7_TEXT)) {
+  if (!doc.verify(&certs, 0, bcont, content, PKCS7_TEXT | PKCS7_NOVERIFY | PKCS7_NOINTERN)) {
     return false;
   }
 

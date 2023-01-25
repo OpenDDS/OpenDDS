@@ -30,11 +30,11 @@ public:
   typedef RcHandle<InternalDataReader<T> > InternalDataReader_rch;
 
   InternalDataReaderListener()
-    : job_(make_rch<Job>(rchandle_from(this)))
+    : job_(make_rch<ListenerJob>(rchandle_from(this)))
   {}
 
   explicit InternalDataReaderListener(JobQueue_rch job_queue)
-    : job_(make_rch<Job>(rchandle_from(this)))
+    : job_(make_rch<ListenerJob>(rchandle_from(this)))
     , job_queue_(job_queue)
   {}
 
@@ -62,9 +62,9 @@ public:
   /// @}
 
 private:
-  class Job : public JobQueue::Job {
+  class ListenerJob : public Job {
   public:
-    explicit Job(RcHandle<InternalDataReaderListener> listener)
+    explicit ListenerJob(RcHandle<InternalDataReaderListener> listener)
       : listener_(listener)
     {}
 
@@ -80,7 +80,7 @@ private:
     WeakRcHandle<InternalDataReaderListener> listener_;
   };
 
-  JobQueue::JobPtr job_;
+  JobPtr job_;
   JobQueue_wrch job_queue_;
   typedef WeakRcHandle<InternalDataReader<T> > Reader;
   typedef OPENDDS_SET(Reader) ReaderSet;

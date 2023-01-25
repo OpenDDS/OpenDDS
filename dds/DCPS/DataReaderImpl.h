@@ -703,8 +703,6 @@ protected:
   /// Setup deserialization options
   DDS::ReturnCode_t setup_deserialization();
 
-  virtual Extensibility get_max_extensibility() = 0;
-
   RcHandle<SubscriberImpl> get_subscriber_servant();
 
   void post_read_or_take();
@@ -786,6 +784,7 @@ protected:
 
   WeakRcHandle<DomainParticipantImpl> participant_servant_;
   TopicDescriptionPtr<TopicImpl> topic_servant_;
+  TypeSupportImpl* type_support_;
   GUID_t topic_id_;
 
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
@@ -810,7 +809,6 @@ protected:
 
   DDS::SubscriberQos subqos_;
 
-protected:
   virtual void add_link(const DataLink_rch& link, const GUID_t& peer);
 
 private:
@@ -1053,7 +1051,7 @@ protected:
   EncodingKinds decoding_modes_;
 
 public:
-  class OpenDDS_Dcps_Export OnDataOnReaders : public JobQueue::Job {
+  class OpenDDS_Dcps_Export OnDataOnReaders : public Job {
   public:
     OnDataOnReaders(WeakRcHandle<SubscriberImpl> subscriber,
                     DDS::SubscriberListener_var sub_listener,
@@ -1077,7 +1075,7 @@ public:
     const bool set_reader_status_;
   };
 
-  class OpenDDS_Dcps_Export OnDataAvailable : public JobQueue::Job {
+  class OpenDDS_Dcps_Export OnDataAvailable : public Job {
   public:
     OnDataAvailable(DDS::DataReaderListener_var listener,
                     WeakRcHandle<DataReaderImpl> data_reader,

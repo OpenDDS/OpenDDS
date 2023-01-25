@@ -22,7 +22,7 @@ namespace DCPS {
 typedef std::pair<bool, ConnectionRecord> ActionConnectionRecord;
 typedef OPENDDS_VECTOR(ActionConnectionRecord) ConnectionRecords;
 
-class OpenDDS_Dcps_Export WriteConnectionRecords : public DCPS::JobQueue::Job {
+class OpenDDS_Dcps_Export WriteConnectionRecords : public DCPS::Job {
  public:
   WriteConnectionRecords(WeakRcHandle<BitSubscriber> bit_sub,
                          const ConnectionRecords& records)

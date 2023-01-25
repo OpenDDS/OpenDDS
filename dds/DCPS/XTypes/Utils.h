@@ -11,9 +11,17 @@
 
 #  include <dds/DdsDynamicDataC.h>
 
+#  include <cstring>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
+
+inline bool dynamic_type_is_valid(DDS::DynamicType_ptr type)
+{
+  DDS::TypeDescriptor_var td;
+  return type && type->get_descriptor(td) == DDS::RETCODE_OK && td;
+}
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t extensibility(
   DDS::DynamicType_ptr type, DCPS::Extensibility& ext);
@@ -21,7 +29,57 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t max_extensibility(
   DDS::DynamicType_ptr type, DCPS::Extensibility& ext);
 OpenDDS_Dcps_Export DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext);
 
-/*
+/**
+ * Iterate over parts of a member name path that can be the name of a
+ * field inside a function or an array element nested multiple levels inside a
+ * type.
+ *
+ * Examples:
+ *   "member_a"
+ *   "member_b[2]"
+ *   "member_b[2].x"
+ *   "[2]" (If the DynamicData is indexed or keyed)
+ */
+class OpenDDS_Dcps_Export MemberPathParser {
+public:
+  size_t pos;
+  size_t left;
+  const char* path;
+  bool error;
+  bool in_subscript;
+  DCPS::String subpath;
+
+  MemberPathParser(const char* path)
+    : pos(0)
+    , left(path ? std::strlen(path) : 0)
+    , path(left > 0 ? path : 0)
+    , error(false)
+    , in_subscript(false)
+  {
+  }
+
+  MemberPathParser(const DCPS::String& path)
+    : pos(0)
+    , left(path.size())
+    , path(left > 0 ? path.c_str() : 0)
+    , error(false)
+    , in_subscript(false)
+  {
+  }
+
+  bool consume(size_t by);
+
+  /**
+   * Put the next member name or subscript value in subpath and which kind in
+   * in_subscript. Returns false when the end of the path is reached or there
+   * was an error in which case error is set to true.
+   */
+  bool get_next_subpath();
+
+  bool get_index(CORBA::UInt32 &index);
+};
+
+/**
  * Provides access to a specific member using MemberIds that may be nested
  * inside a DynamicType or DynamicData.
  */
@@ -47,6 +105,9 @@ public:
   }
 
   size_t level() const { return ids.size(); }
+
+  DDS::ReturnCode_t resolve_string_path(
+    DDS::DynamicType_ptr type, const DCPS::String &path);
 
   DDS::ReturnCode_t get_member_from_type(
     DDS::DynamicType_ptr type, DDS::DynamicTypeMember_var& member);

@@ -72,6 +72,20 @@ enum Extensibility {
   MUTABLE
 };
 
+inline const char* ext_to_string(Extensibility ext)
+{
+  switch (ext) {
+  case FINAL:
+    return "final";
+  case APPENDABLE:
+    return "appendable";
+  case MUTABLE:
+    return "mutable";
+  default:
+    return "invalid";
+  }
+}
+
 const size_t boolean_cdr_size = 1;
 const size_t byte_cdr_size = 1;
 const size_t int8_cdr_size = 1;

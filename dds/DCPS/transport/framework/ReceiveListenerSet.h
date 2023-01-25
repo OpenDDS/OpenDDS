@@ -73,7 +73,7 @@ private:
   /// This lock will protect the map.
   mutable LockType lock_;
 
-  MapType  map_;
+  MapType map_;
 };
 
 } // namespace DCPS

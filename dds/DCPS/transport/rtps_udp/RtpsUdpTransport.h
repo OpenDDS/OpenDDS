@@ -150,11 +150,9 @@ private:
 
   JobQueue_rch job_queue_;
 
-#if defined(OPENDDS_SECURITY)
-  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
-#endif
-
 #ifdef OPENDDS_SECURITY
+
+  DDS::Security::ParticipantCryptoHandle local_crypto_handle_;
 
 #ifndef DDS_HAS_MINIMUM_BIT
   ConnectionRecords deferred_connection_records_;
@@ -186,10 +184,13 @@ private:
   ThreadLockType relay_stun_task_falloff_mutex_;
   ICE::ServerReflexiveStateMachine relay_srsm_;
 
-  mutable ACE_Thread_Mutex relay_stun_mutex_;
-
   void start_ice();
   void stop_ice();
+
+  typedef PmfJob<RtpsUdpTransport> RUTJob;
+
+  void register_handlers();
+  void remove_handlers();
 
   RcHandle<ICE::Agent> ice_agent_;
 #endif

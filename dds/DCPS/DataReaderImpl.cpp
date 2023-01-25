@@ -64,6 +64,7 @@ DataReaderImpl::DataReaderImpl()
   , qos_(TheServiceParticipant->initial_DataReaderQos())
   , reverse_sample_lock_(sample_lock_)
   , topic_servant_(0)
+  , type_support_(0)
   , topic_id_(GUID_UNKNOWN)
 #ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   , is_exclusive_ownership_(false)
@@ -181,22 +182,23 @@ DataReaderImpl::cleanup()
 }
 
 void DataReaderImpl::init(
-    TopicDescriptionImpl* a_topic_desc,
+    TopicDescriptionImpl* topic_desc,
     const DDS::DataReaderQos &qos,
-    DDS::DataReaderListener_ptr a_listener,
+    DDS::DataReaderListener_ptr listener,
     const DDS::StatusMask & mask,
     DomainParticipantImpl* participant,
     SubscriberImpl* subscriber)
 {
-  topic_desc_ = DDS::TopicDescription::_duplicate(a_topic_desc);
-  if (TopicImpl* a_topic = dynamic_cast<TopicImpl*>(a_topic_desc)) {
-    topic_servant_ = a_topic;
-    topic_id_ = a_topic->get_id();
+  topic_desc_ = DDS::TopicDescription::_duplicate(topic_desc);
+  if (TopicImpl* topic = dynamic_cast<TopicImpl*>(topic_desc)) {
+    topic_servant_ = topic;
+    type_support_ = dynamic_cast<TypeSupportImpl*>(topic->get_type_support());
+    topic_id_ = topic->get_id();
   }
 
 #ifndef DDS_HAS_MINIMUM_BIT
-  CORBA::String_var topic_name = a_topic_desc->get_name();
-  CORBA::String_var topic_type_name = a_topic_desc->get_type_name();
+  CORBA::String_var topic_name = topic_desc->get_name();
+  CORBA::String_var topic_type_name = topic_desc->get_type_name();
   is_bit_ = topicIsBIT(topic_name, topic_type_name);
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
@@ -207,7 +209,7 @@ void DataReaderImpl::init(
   is_exclusive_ownership_ = this->qos_.ownership.kind == ::DDS::EXCLUSIVE_OWNERSHIP_QOS;
 #endif
 
-  set_listener(a_listener, mask);
+  set_listener(listener, mask);
 
   // Only store the participant pointer, since it is our "grand"
   // parent, we will exist as long as it does
@@ -1973,6 +1975,7 @@ DataReaderImpl::release_instance(DDS::InstanceHandle_t handle)
 void
 DataReaderImpl::state_updated(DDS::InstanceHandle_t handle)
 {
+  ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, sample_lock_);
   state_updated_i(handle);
 }
 
@@ -3292,7 +3295,7 @@ DDS::ReturnCode_t DataReaderImpl::setup_deserialization()
   for (CORBA::ULong i = 0; i < qos_.representation.value.length(); ++i) {
     Encoding::Kind encoding_kind;
     if (repr_to_encoding_kind(qos_.representation.value[i], encoding_kind)) {
-      if (encoding_kind == Encoding::KIND_XCDR1 && get_max_extensibility() == MUTABLE) {
+      if (encoding_kind == Encoding::KIND_XCDR1 && type_support_->max_extensibility() == MUTABLE) {
         xcdr1_mutable = true;
       } else if (encoding_kind == Encoding::KIND_UNALIGNED_CDR && cdr_encapsulation()) {
         illegal_unaligned = true;

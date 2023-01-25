@@ -540,4 +540,211 @@ TEST_F(dds_DCPS_XTypes_Utils, less_than)
   ASSERT_FALSE(is_less_than);
 }
 
+TEST_F(dds_DCPS_XTypes_Utils, MemberPathParser)
+{
+
+  {
+    MemberPathParser mpp("");
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  // Invalid paths at start
+  {
+    MemberPathParser mpp(".");
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("[.");
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("[[");
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("[]");
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  // Invalid paths after member name
+  {
+    MemberPathParser mpp("m.");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("m", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("m[.");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("m", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("m[[");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("m", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("m[]");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("m", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_TRUE(mpp.error);
+  }
+
+  // Valid paths
+  {
+    MemberPathParser mpp("eins");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("eins", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("eins.zwei");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("eins", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("zwei", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("eins.zwei.drei");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("eins", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("zwei", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("drei", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("eins[1]");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("eins", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("1", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("eins[1].zwei[2][2]");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("eins", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("1", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("zwei", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("2", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("2", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("eins[1].zwei[2][2].drei[3][3][3]");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("eins", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("1", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("zwei", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("2", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("2", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("drei", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("3", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("3", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("3", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("[1]");
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("1", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+
+  {
+    MemberPathParser mpp("[1].nested[22].more_nested[-14]");
+    CORBA::UInt32 index;
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("1", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_index(index));
+    ASSERT_EQ(CORBA::UInt32(1), index);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("nested", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("22", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_index(index));
+    ASSERT_EQ(CORBA::UInt32(22), index);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("more_nested", mpp.subpath.c_str());
+    ASSERT_FALSE(mpp.in_subscript);
+    ASSERT_TRUE(mpp.get_next_subpath());
+    ASSERT_STREQ("-14", mpp.subpath.c_str());
+    ASSERT_TRUE(mpp.in_subscript);
+    ASSERT_FALSE(mpp.get_index(index)); // Could be a valid key to a map, but isn't a valid index.
+    ASSERT_FALSE(mpp.get_next_subpath());
+    ASSERT_FALSE(mpp.error);
+  }
+}
+
 #endif // OPENDDS_SAFETY_PROFILE

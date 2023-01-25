@@ -6,13 +6,14 @@
 #ifndef OPENDDS_DCPS_RTPS_SEDP_H
 #define OPENDDS_DCPS_RTPS_SEDP_H
 
+#include "AssociationRecord.h"
+#include "DiscoveredEntities.h"
 #include "TypeLookup.h"
 #include "MessageTypes.h"
 #include "MessageUtils.h"
 #ifdef OPENDDS_SECURITY
 #  include "ParameterListConverter.h"
 #endif
-#include "ICE/Ice.h"
 #include "RtpsRpcTypeSupportImpl.h"
 #include "RtpsCoreTypeSupportImpl.h"
 #ifdef OPENDDS_SECURITY
@@ -69,31 +70,9 @@ namespace RTPS {
 using DCPS::RepoIdSet;
 using DCPS::AtomicBool;
 
-#ifdef OPENDDS_SECURITY
-enum AuthState {
-  AUTH_STATE_HANDSHAKE,
-  AUTH_STATE_AUTHENTICATED,
-  AUTH_STATE_UNAUTHENTICATED
-};
-
-enum HandshakeState {
-  HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST, //!< Requester should call begin_handshake_request
-  HANDSHAKE_STATE_BEGIN_HANDSHAKE_REPLY, //!< Replier should call begin_handshake_reply
-  HANDSHAKE_STATE_PROCESS_HANDSHAKE, //!< Requester and replier should call process handshake
-  HANDSHAKE_STATE_DONE //!< Handshake concluded or timed out
-};
-#endif
-
 class RtpsDiscovery;
 class Spdp;
-class Sedp;
 class WaitForAcks;
-
-#ifdef OPENDDS_SECURITY
-typedef Security::SPDPdiscoveredParticipantData ParticipantData_t;
-#else
-typedef SPDPdiscoveredParticipantData ParticipantData_t;
-#endif
 
 #ifdef OPENDDS_SECURITY
 typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::DatareaderCryptoTokenSeq, GUID_tKeyLessThan)
@@ -107,397 +86,7 @@ inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
 }
 #endif
 
-const int AC_EMPTY = 0;
-const int AC_REMOTE_RELIABLE = 1 << 0;
-const int AC_REMOTE_DURABLE = 1 << 1;
-const int AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE = 1 << 2;
-const int AC_SEND_LOCAL_TOKEN = 1 << 3;
-const int AC_LOCAL_TOKENS_SENT = 1 << 4;
-
-class BuiltinAssociationRecord {
-public:
-  BuiltinAssociationRecord(DCPS::TransportClient_rch transport_client,
-                           const GUID_t& remote_id,
-                           int flags)
-    : transport_client_(transport_client)
-    , remote_id_(remote_id)
-    , flags_(flags)
-  {}
-
-  const GUID_t local_id() const
-  {
-    return transport_client_->get_guid();
-  }
-
-  const GUID_t& remote_id() const
-  {
-    // FUTURE: Remove this and just store the entity id.
-    return remote_id_;
-  }
-
-  bool remote_reliable() const
-  {
-    return flags_ & AC_REMOTE_RELIABLE;
-  }
-
-  bool remote_durable() const
-  {
-    return flags_ & AC_REMOTE_DURABLE;
-  }
-
-  bool generate_remote_matched_crypto_handle() const
-  {
-    return flags_ & AC_GENERATE_REMOTE_MATCHED_CRYPTO_HANDLE;
-  }
-
-  bool send_local_token() const
-  {
-    return flags_ & AC_SEND_LOCAL_TOKEN;
-  }
-
-  void local_tokens_sent(bool flag)
-  {
-    if (flag) {
-      flags_ |= AC_LOCAL_TOKENS_SENT;
-    } else {
-      flags_ &= ~AC_LOCAL_TOKENS_SENT;
-    }
-  }
-
-  bool local_tokens_sent() const
-  {
-    return flags_ & AC_LOCAL_TOKENS_SENT;
-  }
-
-  const DCPS::TransportClient_rch transport_client_;
-
-private:
-  const GUID_t remote_id_;
-  int flags_;
-};
-
-class WriterAssociationRecord : public DCPS::RcObject {
-public:
-  WriterAssociationRecord(DCPS::DataWriterCallbacks_wrch callbacks,
-                          const GUID_t& writer_id,
-                          const DCPS::ReaderAssociation& reader_association)
-    : callbacks_(callbacks)
-    , writer_id_(writer_id)
-    , reader_association_(reader_association)
-  {}
-
-  const GUID_t& writer_id() const { return writer_id_; }
-  const GUID_t& reader_id() const { return reader_association_.readerId; }
-
-  const DCPS::DataWriterCallbacks_wrch callbacks_;
-  const GUID_t writer_id_;
-  const DCPS::ReaderAssociation reader_association_;
-};
-typedef RcHandle<WriterAssociationRecord> WriterAssociationRecord_rch;
-
-class ReaderAssociationRecord : public DCPS::RcObject {
-public:
-  ReaderAssociationRecord(DCPS::DataReaderCallbacks_wrch callbacks,
-                          const GUID_t& reader_id,
-                          const DCPS::WriterAssociation& writer_association)
-    : callbacks_(callbacks)
-    , reader_id_(reader_id)
-    , writer_association_(writer_association)
-  {}
-
-  const GUID_t& reader_id() const { return reader_id_; }
-  const GUID_t& writer_id() const { return writer_association_.writerId; }
-
-  const DCPS::DataReaderCallbacks_wrch callbacks_;
-  const GUID_t reader_id_;
-  const DCPS::WriterAssociation writer_association_;
-};
-typedef RcHandle<ReaderAssociationRecord> ReaderAssociationRecord_rch;
-
-struct DiscoveredParticipant {
-
-  DiscoveredParticipant()
-    : location_ih_(DDS::HANDLE_NIL)
-    , bit_ih_(DDS::HANDLE_NIL)
-    , seq_reset_count_(0)
-#ifdef OPENDDS_SECURITY
-    , have_spdp_info_(false)
-    , have_sedp_info_(false)
-    , have_auth_req_msg_(false)
-    , have_handshake_msg_(false)
-    , handshake_resend_falloff_(TimeDuration::zero_value)
-    , auth_state_(AUTH_STATE_HANDSHAKE)
-    , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
-    , is_requester_(false)
-    , auth_req_sequence_number_(0)
-    , handshake_sequence_number_(0)
-    , identity_handle_(DDS::HANDLE_NIL)
-    , handshake_handle_(DDS::HANDLE_NIL)
-    , permissions_handle_(DDS::HANDLE_NIL)
-    , extended_builtin_endpoints_(0)
-    , participant_tokens_sent_(false)
-#endif
-  {
-#ifdef OPENDDS_SECURITY
-    security_info_.participant_security_attributes = 0;
-    security_info_.plugin_participant_security_attributes = 0;
-#endif
-  }
-
-  DiscoveredParticipant(const ParticipantData_t& p,
-                        const SequenceNumber& seq,
-                        const TimeDuration& resend_period)
-    : pdata_(p)
-    , location_ih_(DDS::HANDLE_NIL)
-    , bit_ih_(DDS::HANDLE_NIL)
-    , max_seq_(seq)
-    , seq_reset_count_(0)
-#ifdef OPENDDS_SECURITY
-    , have_spdp_info_(false)
-    , have_sedp_info_(false)
-    , have_auth_req_msg_(false)
-    , have_handshake_msg_(false)
-    , handshake_resend_falloff_(resend_period)
-    , auth_state_(AUTH_STATE_HANDSHAKE)
-    , handshake_state_(HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST)
-    , is_requester_(false)
-    , auth_req_sequence_number_(0)
-    , handshake_sequence_number_(0)
-    , identity_handle_(DDS::HANDLE_NIL)
-    , handshake_handle_(DDS::HANDLE_NIL)
-    , permissions_handle_(DDS::HANDLE_NIL)
-    , extended_builtin_endpoints_(0)
-    , participant_tokens_sent_(false)
-#endif
-  {
-    const GUID_t guid = DCPS::make_part_guid(p.participantProxy.guidPrefix);
-    assign(location_data_.guid, guid);
-    location_data_.location = 0;
-    location_data_.change_mask = 0;
-    location_data_.local_timestamp.sec = 0;
-    location_data_.local_timestamp.nanosec = 0;
-    location_data_.ice_timestamp.sec = 0;
-    location_data_.ice_timestamp.nanosec = 0;
-    location_data_.relay_timestamp.sec = 0;
-    location_data_.relay_timestamp.nanosec = 0;
-    location_data_.local6_timestamp.sec = 0;
-    location_data_.local6_timestamp.nanosec = 0;
-    location_data_.ice6_timestamp.sec = 0;
-    location_data_.ice6_timestamp.nanosec = 0;
-    location_data_.relay6_timestamp.sec = 0;
-    location_data_.relay6_timestamp.nanosec = 0;
-
-#ifdef OPENDDS_SECURITY
-    security_info_.participant_security_attributes = 0;
-    security_info_.plugin_participant_security_attributes = 0;
-#else
-    ACE_UNUSED_ARG(resend_period);
-#endif
-  }
-
-  ParticipantData_t pdata_;
-
-  struct LocationUpdate {
-    DCPS::ParticipantLocation mask_;
-    ACE_INET_Addr from_;
-    SystemTimePoint timestamp_;
-    LocationUpdate() {}
-    LocationUpdate(DCPS::ParticipantLocation mask,
-      const ACE_INET_Addr& from,
-      const SystemTimePoint& timestamp)
-      : mask_(mask), from_(from), timestamp_(timestamp) {}
-  };
-  typedef OPENDDS_VECTOR(LocationUpdate) LocationUpdateList;
-  LocationUpdateList location_updates_;
-  DCPS::ParticipantLocationBuiltinTopicData location_data_;
-  DDS::InstanceHandle_t location_ih_;
-
-  ACE_INET_Addr last_recv_address_;
-  MonotonicTimePoint discovered_at_;
-  MonotonicTimePoint lease_expiration_;
-  DDS::InstanceHandle_t bit_ih_;
-  SequenceNumber max_seq_;
-  ACE_UINT16 seq_reset_count_;
-  typedef OPENDDS_LIST(BuiltinAssociationRecord) BuiltinAssociationRecords;
-  BuiltinAssociationRecords builtin_pending_records_;
-  BuiltinAssociationRecords builtin_associated_records_;
-  typedef OPENDDS_LIST(WriterAssociationRecord_rch) WriterAssociationRecords;
-  WriterAssociationRecords writer_pending_records_;
-  WriterAssociationRecords writer_associated_records_;
-  typedef OPENDDS_LIST(ReaderAssociationRecord_rch) ReaderAssociationRecords;
-  ReaderAssociationRecords reader_pending_records_;
-  ReaderAssociationRecords reader_associated_records_;
-#ifdef OPENDDS_SECURITY
-  bool have_spdp_info_;
-  ICE::AgentInfo spdp_info_;
-  bool have_sedp_info_;
-  ICE::AgentInfo sedp_info_;
-  bool have_auth_req_msg_;
-  DDS::Security::ParticipantStatelessMessage auth_req_msg_;
-  bool have_handshake_msg_;
-  DDS::Security::ParticipantStatelessMessage handshake_msg_;
-  DCPS::FibonacciSequence<TimeDuration> handshake_resend_falloff_;
-  MonotonicTimePoint stateless_msg_deadline_;
-
-  MonotonicTimePoint handshake_deadline_;
-  AuthState auth_state_;
-  HandshakeState handshake_state_;
-  bool is_requester_;
-  CORBA::LongLong auth_req_sequence_number_;
-  CORBA::LongLong handshake_sequence_number_;
-
-  DDS::Security::IdentityToken identity_token_;
-  DDS::Security::PermissionsToken permissions_token_;
-  DDS::Security::PropertyQosPolicy property_qos_;
-  DDS::Security::ParticipantSecurityInfo security_info_;
-  DDS::Security::IdentityStatusToken identity_status_token_;
-  DDS::Security::IdentityHandle identity_handle_;
-  DDS::Security::HandshakeHandle handshake_handle_;
-  DDS::Security::AuthRequestMessageToken local_auth_request_token_;
-  DDS::Security::AuthRequestMessageToken remote_auth_request_token_;
-  DDS::Security::AuthenticatedPeerCredentialToken authenticated_peer_credential_token_;
-  DDS::Security::SharedSecretHandle_var shared_secret_handle_;
-  DDS::Security::PermissionsHandle permissions_handle_;
-  DDS::Security::ParticipantCryptoTokenSeq crypto_tokens_;
-  DDS::Security::ExtendedBuiltinEndpointSet_t extended_builtin_endpoints_;
-  bool participant_tokens_sent_;
-#endif
-};
-
 class Sedp : public virtual DCPS::RcEventHandler {
-private:
-  struct DiscoveredSubscription : PoolAllocationBase {
-    DiscoveredSubscription()
-    : bit_ih_(DDS::HANDLE_NIL)
-    , participant_discovered_at_(DCPS::monotonic_time_zero())
-    , transport_context_(0)
-#ifdef OPENDDS_SECURITY
-    , have_ice_agent_info_(false)
-#endif
-    {
-#ifdef OPENDDS_SECURITY
-      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
-      security_attribs_.is_key_protected = 0;
-      security_attribs_.is_payload_protected = 0;
-      security_attribs_.is_submessage_protected = 0;
-      security_attribs_.plugin_endpoint_attributes = 0;
-#endif
-    }
-
-    explicit DiscoveredSubscription(const DCPS::DiscoveredReaderData& r)
-    : reader_data_(r)
-    , bit_ih_(DDS::HANDLE_NIL)
-    , participant_discovered_at_(DCPS::monotonic_time_zero())
-    , transport_context_(0)
-#ifdef OPENDDS_SECURITY
-    , security_attribs_(DDS::Security::EndpointSecurityAttributes())
-    , have_ice_agent_info_(false)
-#endif
-    {
-#ifdef OPENDDS_SECURITY
-      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
-      security_attribs_.is_key_protected = 0;
-      security_attribs_.is_payload_protected = 0;
-      security_attribs_.is_submessage_protected = 0;
-      security_attribs_.plugin_endpoint_attributes = 0;
-#endif
-    }
-
-    RepoIdSet matched_endpoints_;
-    DCPS::DiscoveredReaderData reader_data_;
-    DDS::InstanceHandle_t bit_ih_;
-    DCPS::MonotonicTime_t participant_discovered_at_;
-    ACE_CDR::ULong transport_context_;
-    XTypes::TypeInformation type_info_;
-
-#ifdef OPENDDS_SECURITY
-    DDS::Security::EndpointSecurityAttributes security_attribs_;
-    bool have_ice_agent_info_;
-    ICE::AgentInfo ice_agent_info_;
-#endif
-
-    const char* get_topic_name() const
-    {
-      return reader_data_.ddsSubscriptionData.topic_name;
-    }
-
-    const char* get_type_name() const
-    {
-      return reader_data_.ddsSubscriptionData.type_name;
-    }
-  };
-
-  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredSubscription,
-                          GUID_tKeyLessThan) DiscoveredSubscriptionMap;
-
-  typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
-
-  struct DiscoveredPublication : PoolAllocationBase {
-    DiscoveredPublication()
-    : bit_ih_(DDS::HANDLE_NIL)
-    , participant_discovered_at_(DCPS::monotonic_time_zero())
-    , transport_context_(0)
-#ifdef OPENDDS_SECURITY
-    , have_ice_agent_info_(false)
-#endif
-    {
-#ifdef OPENDDS_SECURITY
-      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
-      security_attribs_.is_key_protected = 0;
-      security_attribs_.is_payload_protected = 0;
-      security_attribs_.is_submessage_protected = 0;
-      security_attribs_.plugin_endpoint_attributes = 0;
-#endif
-    }
-
-    explicit DiscoveredPublication(const DCPS::DiscoveredWriterData& w)
-    : writer_data_(w)
-    , bit_ih_(DDS::HANDLE_NIL)
-    , participant_discovered_at_(DCPS::monotonic_time_zero())
-    , transport_context_(0)
-#ifdef OPENDDS_SECURITY
-    , have_ice_agent_info_(false)
-#endif
-    {
-#ifdef OPENDDS_SECURITY
-      security_attribs_.base = DDS::Security::TopicSecurityAttributes();
-      security_attribs_.is_key_protected = 0;
-      security_attribs_.is_payload_protected = 0;
-      security_attribs_.is_submessage_protected = 0;
-      security_attribs_.plugin_endpoint_attributes = 0;
-#endif
-    }
-
-    RepoIdSet matched_endpoints_;
-    DCPS::DiscoveredWriterData writer_data_;
-    DDS::InstanceHandle_t bit_ih_;
-    DCPS::MonotonicTime_t participant_discovered_at_;
-    ACE_CDR::ULong transport_context_;
-    XTypes::TypeInformation type_info_;
-
-#ifdef OPENDDS_SECURITY
-    DDS::Security::EndpointSecurityAttributes security_attribs_;
-    bool have_ice_agent_info_;
-    ICE::AgentInfo ice_agent_info_;
-#endif
-
-    const char* get_topic_name() const
-    {
-      return writer_data_.ddsPublicationData.topic_name;
-    }
-
-    const char* get_type_name() const
-    {
-      return writer_data_.ddsPublicationData.type_name;
-    }
-  };
-
-  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredPublication,
-                          GUID_tKeyLessThan) DiscoveredPublicationMap;
-  typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
-
-  void populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl);
-
 public:
   Sedp(const DCPS::GUID_t& participant_id,
        Spdp& owner,
@@ -689,6 +278,16 @@ public:
     DCPS::TypeObjReqCond& cond);
 
 private:
+  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredSubscription,
+                          GUID_tKeyLessThan) DiscoveredSubscriptionMap;
+  typedef DiscoveredSubscriptionMap::iterator DiscoveredSubscriptionIter;
+
+  typedef OPENDDS_MAP_CMP(GUID_t, DiscoveredPublication,
+                          GUID_tKeyLessThan) DiscoveredPublicationMap;
+  typedef DiscoveredPublicationMap::iterator DiscoveredPublicationIter;
+
+  void populate_origination_locator(const GUID_t& id, DCPS::TransportLocator& tl);
+
   bool remote_knows_about_local_i(const GUID_t& local, const GUID_t& remote) const;
 #ifdef OPENDDS_SECURITY
   bool remote_is_authenticated_i(const GUID_t& local, const GUID_t& remote, const DiscoveredParticipant& participant) const;

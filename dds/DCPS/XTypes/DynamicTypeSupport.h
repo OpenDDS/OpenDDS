@@ -67,8 +67,6 @@ namespace OpenDDS {
     struct MarshalTraits<XTypes::DynamicSample> {
       static bool to_message_block(ACE_Message_Block&, const XTypes::DynamicSample&) { return false; }
       static bool from_message_block(XTypes::DynamicSample&, const ACE_Message_Block&) { return false; }
-      static Extensibility extensibility() { return APPENDABLE; }
-      static Extensibility max_extensibility_level() { return APPENDABLE; }
     };
 
     bool operator>>(Serializer& strm, XTypes::DynamicSample& sample);
