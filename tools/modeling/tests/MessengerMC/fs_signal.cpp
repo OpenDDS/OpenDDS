@@ -8,7 +8,7 @@
 
 FileSystemSignal::FileSystemSignal(int id)
 : _id(id)
-, _file_name("fs_signal_" + to_dds_string(id)
+, _file_name("fs_signal_" + OpenDDS::DCPS::to_dds_string(id))
 {
 }
 
