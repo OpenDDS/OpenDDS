@@ -132,12 +132,15 @@ enum Filter {
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_values(
   DDS::DynamicType_ptr type, MemberPathVec& paths, Filter filter);
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_keys(DDS::DynamicType_ptr type, MemberPathVec& paths);
+OpenDDS_Dcps_Export bool is_key(DDS::DynamicType_ptr type, const char* field);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t less_than(
   bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, Filter filter);
 OpenDDS_Dcps_Export DDS::ReturnCode_t key_less_than(
   bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b);
+OpenDDS_Dcps_Export DDS::ReturnCode_t compare_members(
+  int& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, DDS::MemberId id);
 
 OpenDDS_Dcps_Export bool is_int(DDS::TypeKind tk);
 OpenDDS_Dcps_Export bool is_uint(DDS::TypeKind tk);

@@ -475,6 +475,25 @@ DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count)
   return rc;
 }
 
+bool is_key(DDS::DynamicType_ptr type, const char* field)
+{
+  MemberPathVec paths;
+  if (get_keys(type, paths) != DDS::RETCODE_OK) {
+    return false;
+  }
+  for (size_t i = 0; i < paths.size(); ++i) {
+    DDS::DynamicTypeMember_var m;
+    if (paths[i].get_member_from_type(type, m) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const CORBA::String_var name = m->get_name();
+    if (0 == std::strcmp(name, field)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 namespace {
   template <typename T>
   void cmp(int& result, T a, T b)
@@ -868,6 +887,11 @@ DDS::ReturnCode_t less_than(
 DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b)
 {
   return less_than(result, a, b, Filter_Keys);
+}
+
+DDS::ReturnCode_t compare_members(int& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, DDS::MemberId id)
+{
+  return member_compare(result, a, id, b, id);
 }
 
 bool is_int(DDS::TypeKind tk)

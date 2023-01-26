@@ -707,8 +707,10 @@ namespace OpenDDS {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_, false);
 
-    const bool filter_has_non_key_fields =
-      evaluator.has_non_key_fields(getMetaStruct<MessageType>());
+    TopicDescriptionPtr<TopicImpl> topic(topic_servant_);
+    TypeSupport* const ts = topic->get_type_support();
+    TypeSupportImpl* const type_support = dynamic_cast<TypeSupportImpl*>(ts);
+    const bool filter_has_non_key_fields = type_support ? evaluator.has_non_key_fields(*type_support) : true;
 
     const HandleSet& matches = lookup_matching_instances(sample_states, view_states, instance_states);
     for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {

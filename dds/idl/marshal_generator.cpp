@@ -3363,7 +3363,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   RtpsFieldCustomizer rtpsCustom(cpp_name);
 
   be_global->impl_ <<
-    "  Value getValue(Serializer& strm, const char* field) const\n"
+    "  Value getValue(Serializer& strm, const char* field, const TypeSupportImpl* = 0) const\n"
     "  {\n"
     "    const Encoding& encoding = strm.encoding();\n"
     "    ACE_UNUSED_ARG(encoding);\n";

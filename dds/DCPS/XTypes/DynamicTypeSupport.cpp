@@ -11,6 +11,7 @@
 #include "DynamicDataImpl.h"
 #include "DynamicDataReaderImpl.h"
 #include "DynamicDataWriterImpl.h"
+#include "DynamicDataXcdrReadImpl.h"
 #include "DynamicTypeImpl.h"
 #include "Utils.h"
 
@@ -35,9 +36,68 @@ namespace OpenDDS {
     }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+    static ComparatorBase::Ptr make_nested_cmp(const std::string& field, ComparatorBase::Ptr inner,
+                                               ComparatorBase::Ptr next);
+
+    static ComparatorBase::Ptr make_dynamic_cmp(const std::string& field,
+                                                ComparatorBase::Ptr next = ComparatorBase::Ptr());
+
     template <>
     struct MetaStructImpl<XTypes::DynamicSample> : MetaStruct {
-      typedef XTypes::DynamicSample T;
+
+      Value getValue(const void* stru, DDS::MemberId memberId) const
+      {
+        const XTypes::DynamicSample& typed = *static_cast<const XTypes::DynamicSample*>(stru);
+        const DDS::DynamicData_var dd = typed.dynamic_data();
+        XTypes::DynamicDataBase* const ddb = dynamic_cast<XTypes::DynamicDataBase*>(dd.in());
+        Value v(0);
+        if (ddb) {
+          ddb->get_simple_value(v, memberId);
+        }
+        return v;
+      }
+
+      Value getValue(const void* stru, const char* field) const
+      {
+        const XTypes::DynamicSample& typed = *static_cast<const XTypes::DynamicSample*>(stru);
+        const DDS::DynamicData_var dd = typed.dynamic_data();
+        return getValueImpl(dd, field);
+      }
+
+      Value getValue(Serializer& strm, const char* field, const TypeSupportImpl* ts) const
+      {
+        DDS::DynamicType_var type = ts->get_type();
+        const DDS::DynamicData_var dd = new XTypes::DynamicDataXcdrReadImpl(strm, type);
+        return getValueImpl(dd, field);
+      }
+
+      static Value getValueImpl(const DDS::DynamicData_var& dd, const char* field)
+      {
+        const char* const dot = std::strchr(field, '.');
+        if (dot) {
+          const String local(field, dot - field);
+          const DDS::MemberId id = dd->get_member_id_by_name(local.c_str());
+          DDS::DynamicData_var nested;
+          if (dd->get_complex_value(nested, id) != DDS::RETCODE_OK) {
+            return Value(0);
+          }
+          return getValueImpl(nested, dot + 1);
+        }
+        const DDS::MemberId id = dd->get_member_id_by_name(field);
+        XTypes::DynamicDataBase* const ddb = dynamic_cast<XTypes::DynamicDataBase*>(dd.in());
+        Value v(0);
+        if (ddb) {
+          ddb->get_simple_value(v, id);
+        }
+        return v;
+      }
+
+      ComparatorBase::Ptr create_qc_comparator(const char* field, ComparatorBase::Ptr next) const
+      {
+        const char* const dot = std::strchr(field, '.');
+        return dot ? make_nested_cmp(String(field, dot - field), make_dynamic_cmp(dot + 1), next)
+          : make_dynamic_cmp(field, next);
+      }
 
 #ifndef OPENDDS_NO_MULTI_TOPIC
       void* allocate() const { return 0; }
@@ -45,72 +105,15 @@ namespace OpenDDS {
       void deallocate(void*) const {}
 
       size_t numDcpsKeys() const { return 0; }
-#endif /* OPENDDS_NO_MULTI_TOPIC */
 
-      bool isDcpsKey(const char* /*field*/) const
-      {
-        //TODO
-        return false;
-      }
+      const char** getFieldNames() const { return 0; }
 
-      ACE_CDR::ULong map_name_to_id(const char* /*field*/) const
-      {
-        //TODO
-        return 0;
-      }
+      const void* getRawField(const void*, const char*) const { return 0; }
 
-      Value getValue(const void* stru, DDS::MemberId /*memberId*/) const
-      {
-        const T& typed = *static_cast<const T*>(stru);
-        ACE_UNUSED_ARG(typed);
-        Value v(0);
-        //TODO
-        return v;
-      }
+      void assign(void*, const char*, const void*, const char*, const MetaStruct&) const {}
 
-      Value getValue(const void* stru, const char* /*field*/) const
-      {
-        const T& typed = *static_cast<const T*>(stru);
-        ACE_UNUSED_ARG(typed);
-        Value v(0);
-        //TODO
-        return v;
-      }
-
-      Value getValue(Serializer& /*strm*/, const char* /*field*/) const
-      {
-        Value v(0);
-        //TODO
-        return v;
-      }
-
-      ComparatorBase::Ptr create_qc_comparator(const char* /*field*/, ComparatorBase::Ptr /*next*/) const
-      {
-        //TODO
-        return ComparatorBase::Ptr();
-      }
-
-#ifndef OPENDDS_NO_MULTI_TOPIC
-      const char** getFieldNames() const
-      {
-        return 0;
-      }
-
-      const void* getRawField(const void*, const char*) const
-      {
-        return 0;
-      }
-
-      void assign(void*, const char*, const void*, const char*, const MetaStruct&) const
-      {
-      }
+      bool compare(const void*, const void*, const char*) const { return false; }
 #endif
-
-      bool compare(const void* /*lhs*/, const void* /*rhs*/, const char* /*field*/) const
-      {
-        //TODO
-        return false;
-      }
     };
 
     template <>
@@ -120,6 +123,87 @@ namespace OpenDDS {
       static const MetaStructImpl<XTypes::DynamicSample> m;
       return m;
     }
+
+    /// Dynamic version of FieldComparator in Comparator_T.h
+    struct DynamicComparator : ComparatorBase {
+      DynamicComparator(const std::string& field, Ptr next)
+        : ComparatorBase(next)
+        , field_(field)
+      {}
+
+      int cmp(void* lhs, void* rhs) const
+      {
+        const XTypes::DynamicSample& left = *static_cast<XTypes::DynamicSample*>(lhs);
+        const XTypes::DynamicSample& right = *static_cast<XTypes::DynamicSample*>(rhs);
+        const DDS::DynamicData_var l(left.dynamic_data()), r(right.dynamic_data());
+        const DDS::MemberId id = l->get_member_id_by_name(field_.c_str());
+        int result;
+        if (XTypes::compare_members(result, l, r, id) != DDS::RETCODE_OK) {
+          return 1; // warning already logged
+        }
+        return result;
+      }
+
+      bool less(void* lhs, void* rhs) const
+      {
+        return cmp(lhs, rhs) < 0;
+      }
+
+      bool equal(void* lhs, void* rhs) const
+      {
+        return cmp(lhs, rhs) == 0;
+      }
+
+      const std::string field_;
+    };
+
+    ComparatorBase::Ptr make_dynamic_cmp(const std::string& field, ComparatorBase::Ptr next)
+    {
+      return make_rch<DynamicComparator>(field, next);
+    }
+
+    /// Dynamic version of StructComparator in Comparator_T.h
+    struct NestedComparator : ComparatorBase {
+      NestedComparator(const std::string& field, Ptr inner, Ptr next)
+        : ComparatorBase(next)
+        , field_(field)
+        , inner_(inner)
+      {}
+
+      XTypes::DynamicSample get_nested(void* outer) const
+      {
+        const XTypes::DynamicSample& outer_typed = *static_cast<XTypes::DynamicSample*>(outer);
+        const DDS::DynamicData_var outer_dd = outer_typed.dynamic_data();
+        DDS::DynamicData_var inner_dd;
+        const DDS::MemberId id = outer_dd->get_member_id_by_name(field_.c_str());
+        if (outer_dd->get_complex_value(inner_dd, id) != DDS::RETCODE_OK) {
+          return XTypes::DynamicSample();
+        }
+        return XTypes::DynamicSample(inner_dd);
+      }
+
+      bool less(void* lhs, void* rhs) const
+      {
+        XTypes::DynamicSample left(get_nested(lhs)), right(get_nested(rhs));
+        return inner_->less(&left, &right);
+      }
+
+      bool equal(void* lhs, void* rhs) const
+      {
+        XTypes::DynamicSample left(get_nested(lhs)), right(get_nested(rhs));
+        return inner_->equal(&left, &right);
+      }
+
+      const std::string field_;
+      const Ptr inner_;
+    };
+
+    ComparatorBase::Ptr make_nested_cmp(const std::string& field, ComparatorBase::Ptr inner,
+                                        ComparatorBase::Ptr next)
+    {
+      return make_rch<NestedComparator>(field, inner, next);
+    }
+
 #endif
 
   }
@@ -147,6 +231,11 @@ namespace DDS {
         name(), retcode_to_string(rc)));
     }
     return count;
+  }
+
+  bool DynamicTypeSupport::is_dcps_key(const char* field) const
+  {
+    return OpenDDS::XTypes::is_key(type_, field);
   }
 
   Extensibility DynamicTypeSupport::base_extensibility() const
@@ -220,6 +309,13 @@ namespace DDS {
     DynamicTypeImpl* dti = dynamic_cast<DynamicTypeImpl*>(type_.in());
     return dti->get_preset_type_info();
   }
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  const OpenDDS::DCPS::MetaStruct& DynamicTypeSupport::getMetaStructForType() const
+  {
+    return getMetaStruct<OpenDDS::XTypes::DynamicSample>();
+  }
+#endif
 
   DynamicTypeSupport_ptr DynamicTypeSupport::_duplicate(DynamicTypeSupport_ptr obj)
   {

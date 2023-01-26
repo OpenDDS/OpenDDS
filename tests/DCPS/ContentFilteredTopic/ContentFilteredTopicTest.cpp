@@ -4,9 +4,13 @@
 #include "dds/DCPS/Marked_Default_Qos.h"
 #include "dds/DCPS/PublisherImpl.h"
 #include "dds/DCPS/SubscriberImpl.h"
+#include "dds/DCPS/Registered_Data_Types.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
+
+#include <dds/DCPS/XTypes/DynamicDataFactory.h>
+#include <dds/DCPS/XTypes/DynamicTypeSupport.h>
 
 #include "dds/DCPS/StaticIncludes.h"
 #ifdef ACE_AS_STATIC_LIBS
@@ -17,6 +21,8 @@
 #include "MessengerTypeSupportImpl.h"
 
 #include "tests/Utils/WaitForSample.h"
+
+#include <ace/Argv_Type_Converter.h>
 
 #include <cstdlib>
 #include <functional>
@@ -32,6 +38,12 @@ using namespace std;
 using namespace DDS;
 using namespace OpenDDS::DCPS;
 using namespace Messenger;
+
+enum DynamicConfig {
+  DynamicNone,
+  DynamicWriter,
+  DynamicReader,
+} dynamic = DynamicNone;
 
 bool waitForPublicationMatched(const DataWriter_var& dw, const int count = 1)
 {
@@ -54,16 +66,79 @@ bool waitForPublicationMatched(const DataWriter_var& dw, const int count = 1)
   return false;
 }
 
-template <typename F>
-size_t takeSamples(const DataReader_var& dr, F filter)
+void copy(Message& out, DynamicData* in, const SampleInfo& info)
 {
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  if (info.valid_data) {
+    in->get_int32_value(out.key, in->get_member_id_by_name("key"));
+    in->get_uint64_value(out.ull, in->get_member_id_by_name("ull"));
+  }
+}
+
+void copy(MessageSeq& out, const DynamicDataSeq& in, const SampleInfoSeq& infos)
+{
+  out.length(in.length());
+  for (unsigned int i = 0; i < in.length(); ++i) {
+    copy(out[i], in[i], infos[i]);
+  }
+}
+
+struct Readers {
+  explicit Readers(DDS::DataReader* dr)
+    : msg_reader_(dynamic == DynamicReader ? 0 : MessageDataReader::_narrow(dr))
+    , dyn_reader_(dynamic == DynamicReader ? DynamicDataReader::_narrow(dr) : 0)
+    , reader_address_(msg_reader_ ? msg_reader_.in() : static_cast<void*>(dyn_reader_.in()))
+  {}
+
+  void reset()
+  {
+    msg_reader_ = 0;
+    dyn_reader_ = 0;
+  }
+
+  template <typename F>
+  size_t takeSamples(F filter);
+
+  DDS::ReturnCode_t take(MessageSeq& data, DDS::SampleInfoSeq& info)
+  {
+    if (dyn_reader_) {
+      DynamicDataSeq dyn_data;
+      const DDS::ReturnCode_t ret = dyn_reader_->take(dyn_data, info, LENGTH_UNLIMITED, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+      if (ret == RETCODE_OK) {
+        copy(data, dyn_data, info);
+      }
+      return ret;
+    }
+
+    return msg_reader_->take(data, info, LENGTH_UNLIMITED, ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+  }
+
+  DDS::ReturnCode_t take(MessageSeq& data, DDS::SampleInfoSeq& info, DDS::ReadCondition* cond)
+  {
+    if (dyn_reader_) {
+      DynamicDataSeq dyn_data;
+      const DDS::ReturnCode_t ret = dyn_reader_->take_w_condition(dyn_data, info, LENGTH_UNLIMITED, cond);
+      if (ret == RETCODE_OK) {
+        copy(data, dyn_data, info);
+      }
+      return ret;
+    }
+
+    return msg_reader_->take_w_condition(data, info, LENGTH_UNLIMITED, cond);
+  }
+
+  MessageDataReader_var msg_reader_;
+  DynamicDataReader_var dyn_reader_;
+  void* reader_address_;
+};
+
+template <typename F>
+size_t Readers::takeSamples(F filter)
+{
   size_t count(0);
   while (true) {
     MessageSeq data;
     SampleInfoSeq infoseq;
-    ReturnCode_t ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
-      ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    const ReturnCode_t ret = take(data, infoseq);
     if (ret == RETCODE_NO_DATA) {
       break;
     }
@@ -74,7 +149,7 @@ size_t takeSamples(const DataReader_var& dr, F filter)
     for (CORBA::ULong i(0); i < data.length(); ++i) {
       if (infoseq[i].valid_data) {
         ++count;
-        cout << dr << " received data with key == " << data[i].key << endl;
+        cout << reader_address_ << " received data with key == " << data[i].key << endl;
         if (!filter(data[i].key)) {
           cout << "ERROR: data should be filtered" << endl;
           return 0;
@@ -85,30 +160,77 @@ size_t takeSamples(const DataReader_var& dr, F filter)
   return count;
 }
 
-bool run_filtering_test(const DomainParticipant_var& dp,
-  const MessageTypeSupport_var& ts, const Publisher_var& pub,
-  const Subscriber_var& sub, const Subscriber_var& sub2)
+DynamicData_var copy(const KeyOnly<const Message>& sample, DDS::TypeSupport* ts)
+{
+  DynamicType_var type = ts->get_type();
+  DynamicData_var dd = DynamicDataFactory::get_instance()->create_data(type);
+  dd->set_int32_value(dd->get_member_id_by_name("key"), sample.value.key);
+  return dd;
+}
+
+DynamicData_var copy(const Message& sample, DDS::TypeSupport* ts)
+{
+  DynamicData_var dd = copy(KeyOnly<const Message>(sample), ts);
+  dd->set_uint64_value(dd->get_member_id_by_name("ull"), sample.ull);
+  return dd;
+}
+
+struct Writers {
+  explicit Writers(DataWriter* dw)
+    : msg_writer_(dynamic == DynamicWriter ? 0 : MessageDataWriter::_narrow(dw))
+    , dyn_writer_(dynamic == DynamicWriter ? DynamicDataWriter::_narrow(dw) : 0)
+  {
+    if (dyn_writer_) {
+      Topic_var topic = dyn_writer_->get_topic();
+      CORBA::String_var type = topic->get_type_name();
+      DomainParticipant_var participant = topic->get_participant();
+      type_support_ = Registered_Data_Types->lookup(participant, type);
+    }
+  }
+
+  ReturnCode_t write(const Message& sample, InstanceHandle_t ih = HANDLE_NIL)
+  {
+    if (msg_writer_) {
+      return msg_writer_->write(sample, ih);
+    }
+    DynamicData_var dyn = copy(sample, type_support_);
+    return dyn_writer_->write(dyn, ih);
+  }
+
+  ReturnCode_t dispose(const Message& sample, InstanceHandle_t ih = HANDLE_NIL)
+  {
+    if (msg_writer_) {
+      return msg_writer_->dispose(sample, ih);
+    }
+    DynamicData_var dyn = copy(KeyOnly<const Message>(sample), type_support_);
+    return dyn_writer_->dispose(dyn, ih);
+  }
+
+  MessageDataWriter_var msg_writer_;
+  DynamicDataWriter_var dyn_writer_;
+  DDS::TypeSupport_var type_support_;
+};
+
+bool run_filtering_test(const MessageTypeSupport_var& ts,
+  const Publisher_var& pub, const Subscriber_var& sub, const Subscriber_var& sub2)
 {
   CORBA::String_var type_name = ts->get_type_name();
-  Topic_var topic = dp->create_topic("MyTopic", type_name,
-                                     TOPIC_QOS_DEFAULT, 0,
-                                     DEFAULT_STATUS_MASK);
+  DomainParticipant_var dp_pub = pub->get_participant();
+  Topic_var topic_pub = dp_pub->create_topic("MyTopic", type_name, TOPIC_QOS_DEFAULT, 0, 0);
 
   DataWriterQos dw_qos;
   pub->get_default_datawriter_qos(dw_qos);
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-  DataWriter_var dw =
-    pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
-  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  DataWriter_var dw = pub->create_datawriter(topic_pub, dw_qos, 0, 0);
   Message sample = {0, 0};
-  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false; // durable, filtered
+  Writers writers(dw);
+  if (writers.write(sample) != RETCODE_OK) return false; // durable, filtered
   sample.key = 99;
-  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false; // durable, not filtered
+  if (writers.write(sample) != RETCODE_OK) return false; // durable, not filtered
 
-  DataWriter_var dw2 =
-    pub->create_datawriter(topic, dw_qos, 0, DEFAULT_STATUS_MASK);
+  DataWriter_var dw2 = pub->create_datawriter(topic_pub, dw_qos, 0, 0);
 
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
@@ -116,29 +238,31 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   DataReaderQos dr_qos_durable = dr_qos;
   dr_qos_durable.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-  ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
-    "MyTopic-Filtered", topic, "key > 1", StringSeq());
+
+  DomainParticipant_var dp_sub = sub->get_participant();
+  Topic_var topic_sub = dp_sub->create_topic("MyTopic", type_name, TOPIC_QOS_DEFAULT, 0, 0);
+
+  ContentFilteredTopic_var cft = dp_sub->create_contentfilteredtopic(
+    "MyTopic-Filtered", topic_sub, "key > 1", StringSeq());
   if (!cft) {
     cout << "ERROR: creating cft failed" << endl;
     return false;
   }
-  DataReader_var dr =
-    sub->create_datareader(cft, dr_qos_durable, 0, DEFAULT_STATUS_MASK);
+  DataReader_var dr = sub->create_datareader(cft, dr_qos_durable, 0, 0);
   TopicDescription_var td = dr->get_topicdescription();
   ContentFilteredTopic_var cft_from_td = ContentFilteredTopic::_narrow(td);
   if (!cft_from_td) {
     cout << "ERROR: get_topicdescription() did not return the CFT\n";
     return false;
   }
-  DataReader_var dr2 =
-    sub->create_datareader(topic, dr_qos, 0, DEFAULT_STATUS_MASK);
+  DataReader_var dr2 = sub->create_datareader(topic_sub, dr_qos, 0, 0);
 
   DataReader_var sub2_dr =
     sub2->create_datareader(cft, dr_qos, 0, DEFAULT_STATUS_MASK);
   DDS::StringSeq mytopicfiltered2_params(1);
   mytopicfiltered2_params.length(1);
-  ContentFilteredTopic_var cft2 = dp->create_contentfilteredtopic(
-    "MyTopic-Filtered2", topic, "key > %0", mytopicfiltered2_params);
+  ContentFilteredTopic_var cft2 = dp_sub->create_contentfilteredtopic(
+    "MyTopic-Filtered2", topic_sub, "key > %0", mytopicfiltered2_params);
   DataReader_var sub2_dr2 =
     sub2->create_datareader(cft2, dr_qos, 0, DEFAULT_STATUS_MASK);
 
@@ -146,10 +270,11 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   // read durable data from dr
   if (!Utils::waitForSample(dr)) return false;
+  Readers readers(dr);
 #ifdef ACE_HAS_CPP11
-  if (takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 98)) != 1) {
+  if (readers.takeSamples([](ACE_CDR::Long i){ return i > 98; }) != 1) {
 #else
-  if (takeSamples(dr, bind2nd(greater<CORBA::Long>(), 98)) != 1) {
+  if (readers.takeSamples(bind2nd(greater<CORBA::Long>(), 98)) != 1) {
 #endif
     cout << "ERROR: take() should have returned a valid durable sample (99)"
          << endl;
@@ -159,8 +284,8 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   // Create a cft where the parameter sequence doesn't match the size
   DDS::StringSeq paramssize(2);
   paramssize.length(2);
-  ContentFilteredTopic_var cft3 = dp->create_contentfilteredtopic(
-    "MyTopic-Filtered3", topic, "key > %0", paramssize);
+  ContentFilteredTopic_var cft3 = dp_sub->create_contentfilteredtopic(
+    "MyTopic-Filtered3", topic_sub, "key > %0", paramssize);
   if (cft3) {
     cout << "ERROR: creating cft3 with invalid parameter size should fail"
          << endl;
@@ -197,23 +322,23 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   }
 
   for (sample.key = 1; sample.key < 4; ++sample.key) {
-    if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+    if (writers.write(sample) != RETCODE_OK) return false;
   }
 
   if (!Utils::waitForSample(dr)) return false;
 
 #ifdef ACE_HAS_CPP11
-  size_t taken = takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 1));
+  size_t taken = readers.takeSamples([](ACE_CDR::Long i){ return i > 1; });
 #else
-  size_t taken = takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+  size_t taken = readers.takeSamples(bind2nd(greater<CORBA::Long>(), 1));
 #endif
   if (taken == 1) {
     cout << "INFO: partial read on DataReader \"dr\"\n";
     if (!Utils::waitForSample(dr)) return false;
 #ifdef ACE_HAS_CPP11
-    taken += takeSamples(dr, bind(greater<CORBA::Long>(), placeholders::_1, 1));
+    taken += readers.takeSamples([](ACE_CDR::Long i){ return i > 1; });
 #else
-    taken += takeSamples(dr, bind2nd(greater<CORBA::Long>(), 1));
+    taken += readers.takeSamples(bind2nd(greater<CORBA::Long>(), 1));
 #endif
   }
 
@@ -224,10 +349,11 @@ bool run_filtering_test(const DomainParticipant_var& dp,
 
   if (!Utils::waitForSample(sub2_dr2)) return false;
 
+  Readers readers2(sub2_dr2);
 #ifdef ACE_HAS_CPP11
-  if (takeSamples(sub2_dr2, bind(greater<CORBA::Long>(), placeholders::_1, 2)) != 1) {
+  if (readers2.takeSamples([](ACE_CDR::Long i){ return i > 2; }) != 1) {
 #else
-  if (takeSamples(sub2_dr2, bind2nd(greater<CORBA::Long>(), 2)) != 1) {
+  if (readers2.takeSamples(bind2nd(greater<CORBA::Long>(), 2)) != 1) {
 #endif
     cout << "ERROR: take() should have returned one valid sample" << endl;
     return false;
@@ -238,12 +364,13 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
   dr2 = DataReader::_nil();
+  readers2.reset();
 
   sample.key = 0; // no DataLink receives this sample
-  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+  if (writers.write(sample) != RETCODE_OK) return false;
 
   Duration_t wfa = {60 /*seconds*/, 0 /*nanoseconds*/};
-  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
+  if (dw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
     cout << "ERROR: wait_for_acknowledgments 1" << endl;
     return false;
   }
@@ -252,14 +379,14 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   // make sure the sub2 datalink's two readers have different "latest"
   // sequence numbers, and the sub datalink needs no customization.
   sample.key = 2;
-  if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+  if (writers.write(sample) != RETCODE_OK) return false;
 
-  if (mdw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
+  if (dw->wait_for_acknowledgments(wfa) != RETCODE_OK) {
     cout << "ERROR: wait_for_acknowledgments 2" << endl;
     return false;
   }
 
-  if (dp->delete_contentfilteredtopic(cft) != RETCODE_PRECONDITION_NOT_MET) {
+  if (dp_sub->delete_contentfilteredtopic(cft) != RETCODE_PRECONDITION_NOT_MET) {
     cout << "ERROR: delete_contentfilteredtopic should return "
       "RETCODE_PRECONDITION_NOT_MET when datareader still exists" << endl;
     return false;
@@ -270,6 +397,7 @@ bool run_filtering_test(const DomainParticipant_var& dp,
     return false;
   }
   dr = DataReader::_nil();
+  readers.reset();
 
   if (sub2->delete_datareader(sub2_dr) != RETCODE_OK) {
     cout << "ERROR: delete_datareader(sub2_dr)" << endl;
@@ -277,28 +405,28 @@ bool run_filtering_test(const DomainParticipant_var& dp,
   }
   sub2_dr = DataReader::_nil();
 
-  if (dp->delete_contentfilteredtopic(cft) != RETCODE_OK) {
+  if (dp_sub->delete_contentfilteredtopic(cft) != RETCODE_OK) {
     cout << "ERROR: delete_contentfilteredtopic" << endl;
     return false;
   }
   return true;
 }
 
-bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
-  const MessageTypeSupport_var& ts, const Publisher_var& pub, const Subscriber_var& sub)
+bool run_unsignedlonglong_test(const MessageTypeSupport_var& ts, const Publisher_var& pub, const Subscriber_var& sub)
 {
   CORBA::String_var type_name = ts->get_type_name();
-  Topic_var topic = dp->create_topic("MyTopic2", type_name,
-                                     TOPIC_QOS_DEFAULT, 0,
-                                     DEFAULT_STATUS_MASK);
-  DataWriter_var dw =
-    pub->create_datawriter(topic, DATAWRITER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+  DomainParticipant_var dp_pub = pub->get_participant();
+  Topic_var topic_pub = dp_pub->create_topic("MyTopic2", type_name, TOPIC_QOS_DEFAULT, 0, 0);
+  DataWriter_var dw = pub->create_datawriter(topic_pub, DATAWRITER_QOS_DEFAULT, 0, 0);
+
+  DomainParticipant_var dp_sub = sub->get_participant();
+  Topic_var topic_sub = dp_sub->create_topic("MyTopic2", type_name, TOPIC_QOS_DEFAULT, 0, 0);
 
   DDS::StringSeq params(1);
   params.length(1);
   params[0] = "1485441228338";
-  ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
-    "MyTopic2-Filtered", topic, "ull > %0 AND ull < 1485441228340", params);
+  ContentFilteredTopic_var cft = dp_sub->create_contentfilteredtopic(
+    "MyTopic2-Filtered", topic_sub, "ull > %0 AND ull < 1485441228340", params);
   DataReader_var dr =
     sub->create_datareader(cft, DATAREADER_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
 
@@ -306,20 +434,19 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
     return false;
   }
 
-  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Writers writers(dw);
   Message sample = {0, INT64_LITERAL_SUFFIX(1485441228338)};
   for (; sample.key < 3; ++sample.key, ++sample.ull) {
-    if (mdw->write(sample, HANDLE_NIL) != RETCODE_OK) return false;
+    if (writers.write(sample) != RETCODE_OK) return false;
   }
 
   if (!Utils::waitForSample(dr)) return false;
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  Readers readers(dr);
   size_t count(0);
   while (true) {
     MessageSeq data;
     SampleInfoSeq infoseq;
-    ReturnCode_t ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
-                                 ANY_SAMPLE_STATE, ANY_VIEW_STATE, ANY_INSTANCE_STATE);
+    const ReturnCode_t ret = readers.take(data, infoseq);
     if (ret == RETCODE_NO_DATA) {
       break;
     }
@@ -349,24 +476,23 @@ bool run_unsignedlonglong_test(const DomainParticipant_var& dp,
  * NOTE: There is a test almost exactly like this in the QueryConditon test to
  * test the same situation with QueryConditions.
  */
-bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
-  const MessageTypeSupport_var& ts, const Publisher_var& pub,
-  const Subscriber_var& sub,
-  const char* filter, bool expect_dispose)
+bool run_single_dispose_filter_test(const MessageTypeSupport_var& ts, const Publisher_var& pub,
+  const Subscriber_var& sub, const char* filter, bool expect_dispose)
 {
   Duration_t max_wait_time = {3, 0}; // 3 sec
   ReturnCode_t ret;
 
   // Create Topic
   CORBA::String_var type_name = ts->get_type_name();
-  Topic_var topic = dp->create_topic(
-    "Messenger Topic", type_name,
-    TOPIC_QOS_DEFAULT, 0, DEFAULT_STATUS_MASK);
+  DomainParticipant_var dp_pub = pub->get_participant();
+  Topic_var topic_pub = dp_pub->create_topic("Messenger Topic", type_name, TOPIC_QOS_DEFAULT, 0, 0);
 
   // Create ContentFilteredTopic
-  ContentFilteredTopic_var cft = dp->create_contentfilteredtopic(
+  DomainParticipant_var dp_sub = sub->get_participant();
+  Topic_var topic_sub = dp_sub->create_topic("Messenger Topic", type_name, TOPIC_QOS_DEFAULT, 0, 0);
+  ContentFilteredTopic_var cft = dp_sub->create_contentfilteredtopic(
     expect_dispose ? "Safe Filtered Messenger Topic" : "Unsafe Filtered Messenger Topic",
-    topic, filter, StringSeq());
+    topic_sub, filter, StringSeq());
   if (!cft) {
     cerr << "ERROR: run_single_dispose_filter_test: creating ContentFilteredTopic failed" << endl;
     return false;
@@ -378,34 +504,32 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   dw_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dw_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
   dw_qos.durability.kind = TRANSIENT_LOCAL_DURABILITY_QOS;
-  DataWriter_var dw = pub->create_datawriter(
-    topic, dw_qos, 0, DEFAULT_STATUS_MASK);
+  DataWriter_var dw = pub->create_datawriter(topic_pub, dw_qos, 0, 0);
 
   // Create Reader
   DataReaderQos dr_qos;
   sub->get_default_datareader_qos(dr_qos);
   dr_qos.history.kind = KEEP_ALL_HISTORY_QOS;
   dr_qos.reliability.kind = RELIABLE_RELIABILITY_QOS;
-  DataReader_var dr = sub->create_datareader(
-    cft, dr_qos, 0, DEFAULT_STATUS_MASK);
+  DataReader_var dr = sub->create_datareader(cft, dr_qos, 0, 0);
 
   if (waitForPublicationMatched(dw)) {
     return false;
   }
 
   // Write Sample with Valid Data
-  MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
+  Writers writers(dw);
   Message sample;
   sample.key = 0;
   sample.ull = 0;
-  ret = mdw->write(sample, HANDLE_NIL);
+  ret = writers.write(sample);
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: write failed" << endl;
     return false;
   }
 
   // Create Dispose Sample with Invalid Data by Disposing the instance
-  mdw->dispose(sample, HANDLE_NIL);
+  writers.dispose(sample);
 
   // Wait for samples matching the filter from the disposed instance
   ReadCondition_var disposed_condition = dr->create_readcondition(
@@ -431,15 +555,13 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   ws->detach_condition(disposed_condition);
 
   // Read the Number of Invalid Messages Taken
-  MessageDataReader_var mdr = MessageDataReader::_narrow(dr);
+  Readers readers(dr);
   MessageSeq data;
   SampleInfoSeq infoseq;
   if (expect_dispose) {
-    ret = mdr->take_w_condition(data, infoseq, LENGTH_UNLIMITED,
-      disposed_condition);
+    ret = readers.take(data, infoseq, disposed_condition);
   } else {
-    ret = mdr->take(data, infoseq, LENGTH_UNLIMITED,
-      ANY_SAMPLE_STATE, ANY_VIEW_STATE, ALIVE_INSTANCE_STATE);
+    ret = readers.take(data, infoseq);
   }
   if (ret != RETCODE_OK) {
     cerr << "ERROR: run_single_dispose_filter_test: take failed" << endl;
@@ -471,20 +593,19 @@ bool run_single_dispose_filter_test(const DomainParticipant_var& dp,
   dr->delete_readcondition(disposed_condition);
   sub->delete_datareader(dr);
   pub->delete_datawriter(dw);
-  dp->delete_contentfilteredtopic(cft);
-  dp->delete_topic(topic);
+  dp_sub->delete_contentfilteredtopic(cft);
+  dp_sub->delete_topic(topic_sub);
+  dp_pub->delete_topic(topic_pub);
   return true;
 }
 
-bool run_dispose_filter_tests(const DomainParticipant_var& dp,
-  const MessageTypeSupport_var& ts, const Publisher_var& pub,
-  const Subscriber_var& sub)
+bool run_dispose_filter_tests(const MessageTypeSupport_var& ts, const Publisher_var& pub, const Subscriber_var& sub)
 {
   /*
    * Run a "Safe" Filter that just references a key.
    * Assert a normal message and a dispose message are in the results.
    */
-  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0", true)) {
+  if (!run_single_dispose_filter_test(ts, pub, sub, "key >= 0", true)) {
     cerr << "ERROR: run_dispose_filter_tests: safe filter test failed!" << endl;
     return false;
   }
@@ -494,7 +615,7 @@ bool run_dispose_filter_tests(const DomainParticipant_var& dp,
    * Assert that there is a normal field in the results and the instance
    * is not disposed.
    */
-  if (!run_single_dispose_filter_test(dp, ts, pub, sub, "key >= 0 AND ull >= 0", false)) {
+  if (!run_single_dispose_filter_test(ts, pub, sub, "key >= 0 AND ull >= 0", false)) {
     cerr << "ERROR: run_dispose_filter_tests: unsafe filter test failed!" << endl;
     return false;
   }
@@ -502,57 +623,79 @@ bool run_dispose_filter_tests(const DomainParticipant_var& dp,
   return true;
 }
 
-int run_test(int argc, ACE_TCHAR *argv[])
+void register_dynamic(DDS::TypeSupport* ts, DDS::DomainParticipant* dp)
+{
+  DDS::DynamicType_var dt = ts->get_type();
+  DDS::TypeSupport_var dts = new DDS::DynamicTypeSupport(dt);
+  CORBA::String_var type_name = ts->get_type_name();
+  dts->register_type(dp, type_name);
+}
+
+int run_test(int argc, ACE_TCHAR* argv[])
 {
   DomainParticipantFactory_var dpf = TheParticipantFactoryWithArgs(argc, argv);
 
-  DomainParticipant_var dp =
-    dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0,
-                            DEFAULT_STATUS_MASK);
+  ACE_Argv_Type_Converter conv(argc, argv);
+  char** const argva = conv.get_ASCII_argv();
+  for (int i = 1; i < argc; ++i) {
+    if (0 == std::strcmp("-dynamic-writer", argva[i])) {
+      dynamic = DynamicWriter;
+      break;
+    }
+    if (0 == std::strcmp("-dynamic-reader", argva[i])) {
+      dynamic = DynamicReader;
+      break;
+    }
+  }
+
+  DomainParticipant_var dp1 = dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0, 0);
+
   MessageTypeSupport_var ts = new MessageTypeSupportImpl;
-  ts->register_type(dp, "");
+  if (dynamic == DynamicWriter) {
+    register_dynamic(ts, dp1);
+  } else {
+    ts->register_type(dp1, "");
+  }
 
-  Publisher_var pub = dp->create_publisher(PUBLISHER_QOS_DEFAULT, 0,
-                                           DEFAULT_STATUS_MASK);
-
+  Publisher_var pub = dp1->create_publisher(PUBLISHER_QOS_DEFAULT, 0, 0);
   TransportRegistry::instance()->bind_config("c1", pub);
 
-  Subscriber_var sub = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-                                             DEFAULT_STATUS_MASK);
+  DomainParticipant_var dp2 = dpf->create_participant(23, PARTICIPANT_QOS_DEFAULT, 0, 0);
 
+  if (dynamic == DynamicReader) {
+    register_dynamic(ts, dp2);
+  } else {
+    ts->register_type(dp2, "");
+  }
+
+  Subscriber_var sub = dp2->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, 0);
   TransportRegistry::instance()->bind_config("c2", sub);
 
-  Subscriber_var sub2 = dp->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0,
-                                              DEFAULT_STATUS_MASK);
-
+  Subscriber_var sub2 = dp2->create_subscriber(SUBSCRIBER_QOS_DEFAULT, 0, 0);
   TransportRegistry::instance()->bind_config("c3", sub2);
 
   bool passed = true;
-  passed &= run_filtering_test(dp, ts, pub, sub, sub2);
-  passed &= run_unsignedlonglong_test(dp, ts, pub, sub);
-  passed &= run_dispose_filter_tests(dp, ts, pub, sub);
+  passed &= run_filtering_test(ts, pub, sub, sub2);
+  passed &= run_unsignedlonglong_test(ts, pub, sub);
+  passed &= run_dispose_filter_tests(ts, pub, sub);
 
-  dp->delete_contained_entities();
-  dpf->delete_participant(dp);
+  dp1->delete_contained_entities();
+  dpf->delete_participant(dp1);
+  dp2->delete_contained_entities();
+  dpf->delete_participant(dp2);
   return passed ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-
-int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
+int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 {
   int ret = EXIT_FAILURE;
-  try
-  {
+  try {
     ret = run_test(argc, argv);
-  }
-  catch (const CORBA::BAD_PARAM& ex) {
+  } catch (const CORBA::BAD_PARAM& ex) {
     ex._tao_print_exception("Exception caught in ContentFilteredTopicTest.cpp:");
-    return 1;
-  }
-  catch (const OpenDDS::DCPS::Transport::MiscProblem&)
-  {
-    ACE_ERROR_RETURN((LM_ERROR,
-      ACE_TEXT("(%P|%t) Transport::MiscProblem caught.\n")), -1);
+    return EXIT_FAILURE;
+  } catch (const OpenDDS::DCPS::Transport::MiscProblem&) {
+    ACE_ERROR_RETURN((LM_ERROR, "(%P|%t) Transport::MiscProblem caught.\n"), EXIT_FAILURE);
   }
 
   // cleanup

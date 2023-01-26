@@ -61,10 +61,11 @@ public:
 #endif
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType();
+  virtual const OpenDDS::DCPS::MetaStruct& getMetaStructForType() const;
 #endif
 
   size_t key_count() const { return 0; }
+  bool is_dcps_key(const char*) const { return false; }
 
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq);
 
