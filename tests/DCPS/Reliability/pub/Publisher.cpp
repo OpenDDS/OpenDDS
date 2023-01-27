@@ -1,20 +1,21 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "Boilerplate.h"
-#include <dds/DCPS/Service_Participant.h>
+
 #include <model/Sync.h>
+
+#include <dds/DCPS/Service_Participant.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+#include <dds/DCPS/StaticIncludes.h>
+#ifdef ACE_AS_STATIC_LIBS
+#  include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
+#endif
+
 #include <stdexcept>
 #include <iostream>
-
-#include "dds/DCPS/StaticIncludes.h"
-#ifdef ACE_AS_STATIC_LIBS
-#include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
-#endif
 
 using namespace examples::boilerplate;
 
@@ -61,12 +62,10 @@ ACE_TMAIN(int argc, ACE_TCHAR *argv[])
       // Initialize samples
       Reliability::Message message;
 
-      char number[20];
-
-      for (int i = 0; i<msg_count; ++i) {
+      for (int i = 0; i < msg_count; ++i) {
         // Prepare next sample
-        sprintf(number, "foo %d", i);
-        message.id = CORBA::string_dup(number);
+        const OpenDDS::DCPS::String number = "foo " + OpenDDS::DCPS::to_dds_string(i);
+        message.id = CORBA::string_dup(number.c_str());
         message.name = "foo";
         message.count = (long)i;
         message.expected = msg_count;

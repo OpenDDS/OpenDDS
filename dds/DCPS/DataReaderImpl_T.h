@@ -707,8 +707,10 @@ namespace OpenDDS {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_, false);
 
-    const bool filter_has_non_key_fields =
-      evaluator.has_non_key_fields(getMetaStruct<MessageType>());
+    TopicDescriptionPtr<TopicImpl> topic(topic_servant_);
+    TypeSupport* const ts = topic->get_type_support();
+    TypeSupportImpl* const type_support = dynamic_cast<TypeSupportImpl*>(ts);
+    const bool filter_has_non_key_fields = type_support ? evaluator.has_non_key_fields(*type_support) : true;
 
     const HandleSet& matches = lookup_matching_instances(sample_states, view_states, instance_states);
     for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {
@@ -882,11 +884,6 @@ namespace OpenDDS {
     return inst;
   }
 
-  Extensibility get_max_extensibility()
-  {
-    return MarshalTraitsType::max_extensibility_level();
-  }
-
   void set_instance_state_i(DDS::InstanceHandle_t instance,
                             DDS::InstanceHandle_t publication_handle,
                             DDS::InstanceStateKind state,
@@ -939,7 +936,7 @@ namespace OpenDDS {
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
         return;
       }
 
@@ -1110,7 +1107,7 @@ protected:
         return message_holder;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
         return message_holder;
       }
 

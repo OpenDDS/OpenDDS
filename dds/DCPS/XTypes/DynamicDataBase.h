@@ -16,6 +16,11 @@
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace DCPS {
+  struct Value;
+}
+
 namespace XTypes {
 
 class DynamicDataBase : public virtual DCPS::LocalObject<DDS::DynamicData> {
@@ -29,6 +34,10 @@ public:
   static bool has_explicit_keys(DDS::DynamicType* dt);
   static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);
   static DCPS::Sample::Extent nested(DCPS::Sample::Extent ext);
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+  virtual DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id) = 0;
+#endif
 
 protected:
   /// Verify that a given type is primitive or string or wstring.

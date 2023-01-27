@@ -12,6 +12,7 @@
 
 #  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/DCPS_Utils.h>
+#  include <dds/DCPS/SafetyProfileStreams.h>
 
 #  include <algorithm>
 
@@ -107,6 +108,165 @@ DCPS::Extensibility dds_to_opendds_ext(DDS::ExtensibilityKind ext)
   }
   OPENDDS_ASSERT(false);
   return DCPS::FINAL;
+}
+
+bool MemberPathParser::consume(size_t by)
+{
+  if (by > left) {
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) Warning: MemberPathParser::consume: "
+        "at pos %B with %B left trying to increment by %B\n", pos, left, by));
+    }
+    error = true;
+    return false;
+  }
+  pos += by;
+  left -= by;
+  path += by;
+  return true;
+}
+
+bool MemberPathParser::get_next_subpath()
+{
+  if (!path) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPathParser::get_next_subpath: "
+        "empty or null path\n"));
+    }
+    error = true;
+    return false;
+  }
+
+  // See if we're in a nested member or subscript and move past the '.' or '[' if we are.
+  in_subscript = left > 0 ? path[0] == '[' : false;
+  const bool nested_member = left > 0 ? path[0] == '.' : false;
+  if (nested_member && pos == 0) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPathParser::get_next_subpath: "
+        "at pos 0 found unexpected '.'\n"));
+    }
+    error = true;
+    return false;
+  }
+  if (nested_member || in_subscript) {
+    consume(1);
+  }
+
+  size_t i = 0; // Char count to consume
+  size_t got = 0; // Char count to use for the result
+  char c = '\0';
+  bool scan = true;
+  for (; i < left && scan; ++i) {
+    c = path[i];
+    switch (c) {
+    case '.':
+    case '[':
+      if (in_subscript) {
+        if (log_level >= LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPathParser::get_next_subpath: "
+            "at pos %B unexpected '%c' in a subscript\n", pos + i, c));
+        }
+        error = true;
+        return false;
+      }
+      --i; // Don't consume, leave for next iteration
+      // fallthrough
+    case ']':
+      scan = false;
+      break;
+
+    default:
+      ++got;
+    }
+  }
+
+  if (in_subscript && c != ']') {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPathParser::get_next_subpath: "
+        "at pos %B expected to find a ']' to end subscript\n", pos + i));
+    }
+    error = true;
+    return false;
+  }
+
+  if (got == 0) {
+    if (in_subscript || nested_member) {
+      if (log_level >= LogLevel::Notice) {
+        const char* const expected = in_subscript ? "index or key" : "member name";
+        if (c) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPathParser::get_next_subpath: "
+            "at pos %B expected to find %C before '%c'\n", pos + i, expected, c));
+        } else {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPathParser::get_next_subpath: "
+            "at pos %B expected to find %C before the end of the path\n", pos + i, expected));
+        }
+      }
+      error = true;
+    }
+    return false;
+  }
+
+  subpath.assign(path, got);
+  return consume(i);
+}
+
+bool MemberPathParser::get_index(CORBA::UInt32& index)
+{
+  if (!in_subscript || subpath.empty() ||
+      subpath.find_first_not_of("0123456789") != DCPS::String::npos) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPathParser::get_index: "
+        "\"%C\" is not a valid subscript index\n", subpath.c_str()));
+
+    }
+    return false;
+  }
+  return DCPS::convertToInteger(subpath, index);
+}
+
+DDS::ReturnCode_t MemberPath::resolve_string_path(DDS::DynamicType_ptr type, const DCPS::String& path)
+{
+  DDS::DynamicType_var current_type = get_base_type(type);
+  if (!current_type) {
+    return DDS::RETCODE_BAD_PARAMETER;
+  }
+
+  MemberPathParser parser(path);
+  while (parser.get_next_subpath()) {
+    if (parser.in_subscript) {
+      if (log_level >= LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPath::resolve_string_path: "
+          "given \"%C\", which contains subscripts and these are currently not supported\n",
+          path.c_str()));
+      }
+      return DDS::RETCODE_UNSUPPORTED;
+    }
+    DDS::DynamicTypeMember_var dtm;
+    DDS::ReturnCode_t rc = current_type->get_member_by_name(dtm, parser.subpath.c_str());
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    id(dtm->get_id());
+
+    DDS::MemberDescriptor_var md;
+    rc = dtm->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    DDS::DynamicType_var next = get_base_type(md->type());
+    if (!next) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    current_type = next;
+  }
+
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: MemberPath::resolve_string_path: "
+      "parser failed to parse \"%C\"\n", path.c_str()));
+    return DDS::RETCODE_OK;
+  }
+
+  return DDS::RETCODE_BAD_PARAMETER;
 }
 
 DDS::ReturnCode_t MemberPath::get_member_from_type(
@@ -313,6 +473,25 @@ DDS::ReturnCode_t key_count(DDS::DynamicType_ptr type, size_t& count)
     count = paths.size();
   }
   return rc;
+}
+
+bool is_key(DDS::DynamicType_ptr type, const char* field)
+{
+  MemberPathVec paths;
+  if (get_keys(type, paths) != DDS::RETCODE_OK) {
+    return false;
+  }
+  for (size_t i = 0; i < paths.size(); ++i) {
+    DDS::DynamicTypeMember_var m;
+    if (paths[i].get_member_from_type(type, m) != DDS::RETCODE_OK) {
+      return false;
+    }
+    const CORBA::String_var name = m->get_name();
+    if (0 == std::strcmp(name, field)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 namespace {
@@ -708,6 +887,11 @@ DDS::ReturnCode_t less_than(
 DDS::ReturnCode_t key_less_than(bool& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b)
 {
   return less_than(result, a, b, Filter_Keys);
+}
+
+DDS::ReturnCode_t compare_members(int& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, DDS::MemberId id)
+{
+  return member_compare(result, a, id, b, id);
 }
 
 bool is_int(DDS::TypeKind tk)

@@ -267,13 +267,13 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
     }
   }
 
-  if (!OpenDDS::DCPS::DDSTraits<Xyz::AStruct>::gen_has_key()) {
+  if (!OpenDDS::DCPS::DDSTraits<Xyz::AStruct>::key_count()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("_dcps_has_key(Xyz::AStruct) returned false when expecting true.\n")
       ));
   }
 
-  if (OpenDDS::DCPS::DDSTraits<Xyz::StructContainingArrayOfAStructSeq>::gen_has_key()) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::StructContainingArrayOfAStructSeq>::key_count()) {
     ACE_ERROR((LM_ERROR,
       ACE_TEXT("_dcps_has_key(Xyz::StructContainingArrayOfAStructSeq) returned true when expecting false.\n")
       ));
@@ -319,7 +319,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   std::map<Xyz::Foo, Xyz::Foo*, Xyz::Foo_OpenDDS_KeyLessThan> foomap;
 
-  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::gen_has_key()) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::key_count()) {
     foomap[my_foo] = &my_foo;
     foomap[foo2] = &foo2;
     // foo2 and my_foo should have mapped to the same place

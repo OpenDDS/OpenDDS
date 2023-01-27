@@ -82,7 +82,7 @@ public:
   virtual ~TypeSupportImpl();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const MetaStruct& getMetaStructForType() = 0;
+  virtual const MetaStruct& getMetaStructForType() const = 0;
 #endif
 
   virtual DDS::ReturnCode_t register_type(DDS::DomainParticipant_ptr participant,
@@ -98,13 +98,21 @@ public:
   virtual char* get_type_name();
 
 #ifndef OPENDDS_SAFETY_PROFILE
-  virtual DDS::DynamicType_ptr get_type()
+  virtual DDS::DynamicType_ptr get_type() const
+  {
+    return DDS::DynamicType::_duplicate(type_);
+  }
+
+  // IDL local interface uses non-const memebers
+  DDS::DynamicType_ptr get_type()
   {
     return DDS::DynamicType::_duplicate(type_);
   }
 #endif
 
   virtual size_t key_count() const = 0;
+  virtual bool is_dcps_key(const char* fieldname) const = 0;
+
   bool has_dcps_key()
   {
     return key_count();
@@ -170,6 +178,11 @@ public:
   size_t key_count() const
   {
     return TraitsType::key_count();
+  }
+
+  bool is_dcps_key(const char* fieldname) const
+  {
+    return TraitsType::is_key(fieldname);
   }
 
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)

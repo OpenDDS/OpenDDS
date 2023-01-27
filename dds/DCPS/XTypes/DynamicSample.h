@@ -82,10 +82,9 @@ public:
   }
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  bool eval(DCPS::FilterEvaluator& /*evaluator*/, const DDS::StringSeq& /*params*/) const
+  bool eval(DCPS::FilterEvaluator& evaluator, const DDS::StringSeq& params) const
   {
-    //TODO
-    return false;
+    return evaluator.eval(*this, params);
   }
 #endif
 
