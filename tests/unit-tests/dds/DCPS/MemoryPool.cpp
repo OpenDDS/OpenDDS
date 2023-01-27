@@ -1,7 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "dds/DCPS/MemoryPool.h"
-#include "ace/Log_Msg.h"
+#include <dds/DCPS/MemoryPool.h>
+#include <dds/DCPS/SafetyProfileStreams.h>
+
+#include <ace/Log_Msg.h>
 
 #include <string.h>
 #include <iostream>
@@ -989,17 +991,15 @@ private:
     if (log) {
       printf("Pool ptr %zx end %zx\n", (size_t)pool.pool_ptr_,
              (size_t)pool_end);
-     }
+    }
 
     // Check all allocs in positional order and not overlapping
     alloc = reinterpret_cast<AllocHeader*>(pool.pool_ptr_);
     while (pool.includes(alloc)) {
       if (log) {
 
-        int smlr_index = -1;
-        int lrgr_index = -1;
-        char lrgr_buff[32];
-        char smlr_buff[32];
+        String smaller = "[  ]";
+        String larger = "[  ]";
 
         FreeHeader* free_header = alloc->is_free() ?
               reinterpret_cast<FreeHeader*>(alloc) : NULL;
@@ -1007,13 +1007,11 @@ private:
           FreeMap::const_iterator found;
           found = free_map.find(free_header->smaller_free(pool.pool_ptr_));
           if (found != free_map.end()) {
-            smlr_index = found->second;
-            sprintf(smlr_buff, "[%2d]", smlr_index);
+            smaller = "[" + to_dds_string(found->second) + "]";
           }
           found = free_map.find(free_header->larger_free(pool.pool_ptr_));
           if (found != free_map.end()) {
-            lrgr_index = found->second;
-            sprintf(lrgr_buff, "[%2d]", lrgr_index);
+            larger = "[" + to_dds_string(found->second) + "]";
           }
         }
         printf(
@@ -1023,8 +1021,8 @@ private:
             (alloc == pool.largest_free_ ? "FREE!" : "free ")  : "     ",
           (size_t)alloc,
           (size_t)alloc->ptr(),
-          lrgr_index >= 0 ? lrgr_buff : "[  ]",
-          smlr_index >= 0 ? smlr_buff : "[  ]",
+          larger.c_str(),
+          smaller.c_str(),
           alloc->size(),
           alloc->prev_size()
           );

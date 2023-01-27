@@ -42,7 +42,7 @@ CORBA::Exception::Exception (const CORBA::Exception &src)
 // responsible for releasing any storage owned by the exception.  It
 // can do this because it's got the local name and the id.
 
-#if TAO_VERSION_CODE < TAO_MAKE_VERSION_CODE(3,0,1)
+#if TAO_MAJOR_VERSION == 2
 CORBA::Exception::Exception (void)
   : id_ (),
     name_ ()

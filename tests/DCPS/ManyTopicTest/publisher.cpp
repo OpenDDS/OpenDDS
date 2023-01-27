@@ -156,7 +156,7 @@ void t2_init(T2::Foo2& foo, int)
 
 void t2_next(T2::Foo2& foo, int i)
 {
-  static char buff[20];
+  char buff[32];
   ACE_OS::snprintf(buff, sizeof buff, "message %d", i + 1);
   foo.text = (const char*) buff;
 }
@@ -168,7 +168,7 @@ void t3_init(T3::Foo3& foo, int)
 
 void t3_next(T3::Foo3& foo, int i)
 {
-  static char buff[20];
+  char buff[32];
   ACE_OS::snprintf(buff, sizeof buff, "message %d", i + 1);
   foo.c = 'A' + (i % 26);
   foo.text = (const char*) buff;
