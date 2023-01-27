@@ -188,6 +188,7 @@ private:
       relay_partitions[idx].relay_id(config_.relay_id());
       relay_partitions[idx].slot(static_cast<CORBA::ULong>(slot));
       relay_partitions[idx].partitions().assign(slots_[slot].begin(), slots_[slot].end());
+      ++idx;
     }
   }
 
