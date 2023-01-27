@@ -856,7 +856,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
-      if (!has_security_data(iter->second.pdata_.dataKind)) {
+      if (!iter->second.has_security_data()) {
         if (!participant_sec_attr_.allow_unauthenticated_participants) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")

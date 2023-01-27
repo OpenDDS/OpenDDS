@@ -74,18 +74,6 @@ class RtpsDiscovery;
 class Spdp;
 class WaitForAcks;
 
-#ifdef OPENDDS_SECURITY
-typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::DatareaderCryptoTokenSeq, GUID_tKeyLessThan)
-  DatareaderCryptoTokenSeqMap;
-typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::DatawriterCryptoTokenSeq, GUID_tKeyLessThan)
-  DatawriterCryptoTokenSeqMap;
-
-inline bool has_security_data(Security::DiscoveredParticipantDataKind kind)
-{
-  return kind == Security::DPDK_ENHANCED || kind == Security::DPDK_SECURE;
-}
-#endif
-
 class Sedp : public virtual DCPS::RcEventHandler {
 public:
   Sedp(const DCPS::GUID_t& participant_id,
@@ -390,7 +378,7 @@ private:
   typedef OPENDDS_MAP_CMP(GUID_t, String, GUID_tKeyLessThan) TopicNameMap;
 
   struct TypeIdOrigSeqNumber {
-    GuidPrefix_t participant; // Prefix of remote participant
+    GUID_t participant; // Guid of remote participant
     XTypes::TypeIdentifier type_id; // Remote type
     SequenceNumber seq_number; // Of the original request
     bool secure; // Communicate via secure endpoints or not
@@ -791,11 +779,11 @@ private:
 
     virtual ~TypeLookupReplyReader();
 
-    void get_continuation_point(const GuidPrefix_t& guid_prefix,
+    void get_continuation_point(const GUID_t& guid,
                                 const XTypes::TypeIdentifier& remote_ti,
                                 XTypes::OctetSeq32& cont_point) const;
 
-    void cleanup(const DCPS::GuidPrefix_t& guid_prefix, const XTypes::TypeIdentifier& ti);
+    void cleanup(const DCPS::GUID_t& guid, const XTypes::TypeIdentifier& ti);
 
   private:
     virtual void data_received_i(const DCPS::ReceivedDataSample& sample,
@@ -816,29 +804,14 @@ private:
     // and all dependencies received for that type so far.
     typedef OPENDDS_MAP(XTypes::TypeIdentifier, ContinuationPair) RemoteDependencies;
 
-    // NOTE(sonndinh): We can later replace this with GUID_t as the key of DependenciesMap.
-    struct GuidPrefixWrapper {
-      GuidPrefixWrapper(const GuidPrefix_t& prefix)
-      {
-        DCPS::assign(prefix_, prefix);
-      }
-
-      bool operator<(const GuidPrefixWrapper& other) const
-      {
-        return std::memcmp(&prefix_[0], &other.prefix_[0], sizeof(GuidPrefix_t)) < 0;
-      }
-
-      GuidPrefix_t prefix_;
-    };
-
     // Map from each remote participant to the data stored for its types.
-    typedef OPENDDS_MAP(GuidPrefixWrapper, RemoteDependencies) DependenciesMap;
+    typedef OPENDDS_MAP_CMP(GUID_t, RemoteDependencies, GUID_tKeyLessThan) DependenciesMap;
     DependenciesMap dependencies_;
   };
 
   typedef DCPS::RcHandle<TypeLookupReplyReader> TypeLookupReplyReader_rch;
 
-  void cleanup_type_lookup_data(const DCPS::GuidPrefix_t& guid_prefix,
+  void cleanup_type_lookup_data(const DCPS::GUID_t& guid,
                                 const XTypes::TypeIdentifier& ti,
                                 bool secure);
 
@@ -1332,7 +1305,11 @@ protected:
   DDS::Security::PermissionsHandle permissions_handle_;
   DDS::Security::ParticipantCryptoHandle crypto_handle_;
 
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::DatareaderCryptoTokenSeq, GUID_tKeyLessThan)
+    DatareaderCryptoTokenSeqMap;
   DatareaderCryptoTokenSeqMap pending_remote_reader_crypto_tokens_;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::Security::DatawriterCryptoTokenSeq, GUID_tKeyLessThan)
+    DatawriterCryptoTokenSeqMap;
   DatawriterCryptoTokenSeqMap pending_remote_writer_crypto_tokens_;
 
   SequenceNumber participant_secure_sequence_;

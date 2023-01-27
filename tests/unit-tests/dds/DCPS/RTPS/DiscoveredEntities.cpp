@@ -11,6 +11,10 @@
 #include <dds/DCPS/RTPS/DiscoveredEntities.h>
 #include <dds/DCPS/Time_Helper.h>
 
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/RTPS/RtpsSecurityC.h>
+#endif
+
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 
@@ -97,6 +101,18 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_ctor)
 #endif
   }
 }
+
+#ifdef OPENDDS_SECURITY
+TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredParticipant_has_security_data)
+{
+  DiscoveredParticipant uut;
+  EXPECT_FALSE(uut.has_security_data());
+  uut.pdata_.dataKind = OpenDDS::Security::DPDK_ENHANCED;
+  EXPECT_TRUE(uut.has_security_data());
+  uut.pdata_.dataKind = OpenDDS::Security::DPDK_SECURE;
+  EXPECT_TRUE(uut.has_security_data());
+}
+#endif
 
 TEST(dds_DCPS_RTPS_DiscoveredEntities, DiscoveredSubscription_ctor)
 {
