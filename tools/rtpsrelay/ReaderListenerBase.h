@@ -1,11 +1,11 @@
-#ifndef RTPSRELAY_LISTENER_BASE_H_
-#define RTPSRELAY_LISTENER_BASE_H_
+#ifndef RTPSRELAY_READER_LISTENER_BASE_H_
+#define RTPSRELAY_READER_LISTENER_BASE_H_
 
 #include <dds/DdsDcpsSubscriptionC.h>
 
 namespace RtpsRelay {
 
-class ListenerBase : public DDS::DataReaderListener {
+class ReaderListenerBase : public DDS::DataReaderListener {
 public:
 
 private:
@@ -26,4 +26,4 @@ private:
 
 }
 
-#endif // RTPSRELAY_LISTENER_BASE_H_
+#endif // RTPSRELAY_READER_LISTENER_BASE_H_

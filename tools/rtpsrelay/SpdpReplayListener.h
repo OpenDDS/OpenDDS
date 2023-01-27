@@ -1,13 +1,13 @@
 #ifndef RTPSRELAY_SPDP_REPLAY_LISTENER_H_
 #define RTPSRELAY_SPDP_REPLAY_LISTENER_H_
 
-#include "ListenerBase.h"
+#include "ReaderListenerBase.h"
 #include "RelayHandler.h"
 #include "RelayStatisticsReporter.h"
 
 namespace RtpsRelay {
 
-class SpdpReplayListener : public ListenerBase {
+class SpdpReplayListener : public ReaderListenerBase {
 public:
   SpdpReplayListener(SpdpHandler& spdp_handler,
     RelayStatisticsReporter& relay_statistics_reporter);
