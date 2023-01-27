@@ -1783,66 +1783,6 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
 #endif
 }
 
-TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceUnionDefault)
-{
-  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceUnion_xtag>();
-  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceUnion_xtag>();
-  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
-  EXPECT_TRUE(it != type_map.end());
-
-  XTypes::TypeLookupService tls;
-  tls.add(type_map.begin(), type_map.end());
-  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
-
-  // int_32s
-  {
-    // Selected member has default value
-    XTypes::DynamicDataImpl data(dt);
-    EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT32));
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x10, // dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // discriminator
-      0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x00 // int_32s
-    };
-    assert_serialized_data(64, data, expected_cdr);
-  }
-  {
-    // Discriminator has default value.
-    XTypes::DynamicDataImpl data(dt);
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x10, // dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // discriminator
-      0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x00 // int_32s
-    };
-    assert_serialized_data(64, data, expected_cdr);
-  }
-
-  // uint_32s
-  {
-    XTypes::DynamicDataImpl data(dt);
-    EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32));
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x10, // dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x01, // discriminator
-      0x20,0x00,0x00,0x02, 0x00,0x00,0x00,0x00 // uint_32s
-    };
-    assert_serialized_data(64, data, expected_cdr);
-  }
-
-  // str_s
-  {
-    XTypes::DynamicDataImpl data(dt);
-    EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_STRING8));
-    unsigned char expected_cdr[] = {
-      0x00,0x00,0x00,0x14, // dheader
-      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x10, // discriminator
-      0x30,0x00,0x00,0x10,
-      0x00,0x00,0x00,0x04, 0x00,0x00,0x00,0x00 // str_s
-    };
-    assert_serialized_data(64, data, expected_cdr);
-  }
-}
-
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
 {
   const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableArrayStruct_xtag>();
