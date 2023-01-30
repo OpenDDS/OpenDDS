@@ -374,4 +374,13 @@ struct MutableArrayStruct {
   ARRAY_MEMBERS
 };
 
+struct Node;
+typedef sequence<Node> NodeSeq;
+
+@mutable
+struct Node {
+  long value;
+  NodeSeq children;
+};
+
 #endif // OPENDDS_SAFETY_PROFILE
