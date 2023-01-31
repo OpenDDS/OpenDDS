@@ -14,6 +14,7 @@
 #pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include "Atomic.h"
 #include "ConditionImpl.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -45,7 +46,7 @@ public:
   static GuardCondition_ptr _narrow(CORBA::Object_ptr obj);
 
 private:
-  ACE_Atomic_Op<ACE_Thread_Mutex, CORBA::Boolean> trigger_value_;
+  OpenDDS::DCPS::Atomic<CORBA::Boolean> trigger_value_;
 };
 
 } // namespace DDS

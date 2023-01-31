@@ -1,20 +1,21 @@
 #include "../Idl/FaceMessage_TS.hpp"
 
+#include <tests/Utils/Safety.h>
+
+#include <dds/DCPS/Atomic.h>
 #ifdef ACE_AS_STATIC_LIBS
-# include "dds/DCPS/RTPS/RtpsDiscovery.h"
-# include "dds/DCPS/transport/rtps_udp/RtpsUdp.h"
+# include <dds/DCPS/RTPS/RtpsDiscovery.h>
+# include <dds/DCPS/transport/rtps_udp/RtpsUdp.h>
 #endif
 
-#include "ace/Atomic_Op.h"
-#include "ace/Log_Msg.h"
-#include "ace/OS_NS_unistd.h"
+#include <ace/Log_Msg.h>
+#include <ace/OS_NS_unistd.h>
 
 #include <cstring>
 
-#include "tests/Utils/Safety.h"
 
-ACE_Atomic_Op<ACE_Thread_Mutex, bool> callbackHappened = false;
-ACE_Atomic_Op<ACE_Thread_Mutex, int> callback_count = 0;
+OpenDDS::DCPS::Atomic<bool> callbackHappened(false);
+OpenDDS::DCPS::Atomic<int> callback_count(0);
 
 void callback(FACE::TRANSACTION_ID_TYPE,
               Messenger::Message& msg,
@@ -26,7 +27,7 @@ void callback(FACE::TRANSACTION_ID_TYPE,
   ++callback_count;
   ACE_DEBUG((LM_INFO, "In callback() (the %d time): %C\t%d\t"
              "message_type_id: %Ld\tmessage_size: %d\n",
-             callback_count.value(), msg.text.in(), msg.count,
+             callback_count.load(), msg.text.in(), msg.count,
              message_type_id, message_size));
   callbackHappened = true;
   return_code = FACE::RC_NO_ERROR;
@@ -82,9 +83,9 @@ int ACE_TMAIN(int argc, ACE_TCHAR* argv[])
 
   if (useCallback) {
     ACE_OS::sleep(5);
-    if (!callbackHappened.value() || callback_count != 1) {
+    if (!callbackHappened.load() || callback_count != 1) {
       ACE_ERROR((LM_ERROR, "ERROR: number callbacks seen incorrect (seen: %d "
-                 "expected: 1)\n", callback_count.value()));
+                 "expected: 1)\n", callback_count.load()));
       testPassed = false;
     }
     FACE::TS::Unregister_Callback(connId, status);

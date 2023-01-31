@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
+#include "Atomic.h"
 #include "Sample.h"
 #include "DataWriterCallbacks.h"
 #include "transport/framework/TransportSendListener.h"
@@ -422,8 +423,8 @@ public:
   void notify_publication_lost(const ReaderIdSeq& subids);
 
   /// Statistics counter.
-  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_dropped_count_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_delivered_count_;
+  Atomic<int> data_dropped_count_;
+  Atomic<int> data_delivered_count_;
 
   MessageTracker controlTracker;
 

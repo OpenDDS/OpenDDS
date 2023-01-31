@@ -5,6 +5,8 @@
 #  pragma once
 #endif /* ACE_LACKS_PRAGMA_ONCE */
 
+#include <dds/Versioned_Namespace.h>
+
 #ifdef ACE_HAS_CPP11
 #  include <atomic>
 #else
@@ -29,6 +31,7 @@ public:
   Atomic() : Base() {}
   explicit Atomic(T desired) : Base(desired) {}
   inline operator T() const { return Base::value(); }
+  inline T load() const { return Base::value(); }
 };
 #endif
 

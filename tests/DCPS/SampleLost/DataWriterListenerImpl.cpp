@@ -3,7 +3,7 @@
 #include "dds/DdsDcpsPublicationC.h"
 
 DataWriterListenerImpl::DataWriterListenerImpl (
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> & publication_matched)
+  OpenDDS::DCPS::Atomic<bool> & publication_matched)
   : publication_matched_ (publication_matched)
 {
 }

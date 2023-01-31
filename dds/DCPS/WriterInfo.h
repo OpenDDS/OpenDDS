@@ -9,23 +9,18 @@
 #ifndef OPENDDS_DCPS_WRITERINFO_H
 #define OPENDDS_DCPS_WRITERINFO_H
 
+#include "Atomic.h"
+#include "CoherentChangeControl.h"
+#include "ConditionVariable.h"
+#include "Definitions.h"
+#include "DisjointSequence.h"
 #include "PoolAllocator.h"
 #include "RcObject.h"
-#include "Definitions.h"
-#include "ConditionVariable.h"
-#include "CoherentChangeControl.h"
-#include "DisjointSequence.h"
 #include "TimeTypes.h"
 #include "transport/framework/ReceivedDataSample.h"
 
 #include <dds/DdsDcpsInfoUtilsC.h>
 #include <dds/DdsDcpsCoreC.h>
-
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Reactor;
@@ -243,11 +238,7 @@ private:
   DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
-#ifdef ACE_HAS_CPP11
-  std::atomic<uint32_t> coherent_samples_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, ACE_UINT32> coherent_samples_;
-#endif
+  Atomic<uint32_t> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;
