@@ -554,7 +554,7 @@ Serializer::read_string(ACE_CDR::Char*& dest,
   //       done here before the allocation even though it will be
   //       checked during the actual read as well.
   //
-  if (length <= current_->total_length()) {
+  if (current_ && length <= current_->total_length()) {
 
     dest = str_alloc(length - 1);
 
