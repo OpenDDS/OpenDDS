@@ -566,6 +566,11 @@ Serializer::read_string(ACE_CDR::Char*& dest,
       // Extract the string.
       //
       read_char_array(dest, length);
+
+      if (good_bit_ && dest[length - 1]) {
+        // If the last byte was not a 0 it's not a valid CDR string
+        good_bit_ = false;
+      }
     }
 
     if (!good_bit_) {
@@ -627,7 +632,7 @@ Serializer::read_string(ACE_CDR::WChar*& dest,
   //       checked during the actual read as well.
   //
   ACE_CDR::ULong length = 0;
-  if (bytecount <= current_->total_length()) {
+  if (current_ && bytecount <= current_->total_length()) {
     length = bytecount / char16_cdr_size;
     dest = str_alloc(length);
 
