@@ -6,8 +6,6 @@
 
 #include <dds/Versioned_Namespace.h>
 
-#include <ace/config.h>
-
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
