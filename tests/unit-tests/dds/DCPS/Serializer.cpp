@@ -730,3 +730,33 @@ TEST(serializer_test, Serializer_test_bad_string)
   ASSERT_FALSE(ser.good_bit());
   ASSERT_EQ(0, str);
 }
+
+TEST(serializer_test, Serializer_test_bad_wstring)
+{
+  Message_Block_Ptr amb(new ACE_Message_Block(4));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ACE_CDR::Octet x[] = {1, 0, 0, 0};
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::WChar* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
+
+TEST(serializer_test, Serializer_test_bad_string2)
+{
+  static const ACE_CDR::Octet x[] = {1, 0, 0, 0, 1};
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ACE_CDR::Char* str = 0; // since read_string fails, no need to deallocate
+  ASSERT_EQ(0u, ser.read_string(str));
+  ASSERT_FALSE(ser.good_bit());
+  ASSERT_EQ(0, str);
+}
