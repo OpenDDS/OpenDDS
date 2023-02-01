@@ -1,12 +1,13 @@
 # OpenDDS Releases
 
 ## Version 3.23.1 of OpenDDS
-OpenDDS 3.23.1 is currently in development, so this list might change.
+OpenDDS 3.23.1 was released on Feb 1 2023.
 
 ### Fixes:
 
 - Addressed a DDS Security issue where participants can sign their own permissions file if the same CA is used for both identity and permissions (#3992)
 - Addressed CVE-2023-23932, where untrusted sources can use invalid CDR strings in RTPS messages to crash OpenDDS applications (#4010, #4016, #4018)
+  - Thanks to Seulbae Kim (@squizz617) for discovering this.
 - Fixed an issue in `DynamicData::get_*_values` and `print_dynamic_data` (#3952)
 - Fixed a bug where `DynamicDataReader` wouldn't be able to read a topic type with final or mutable extensibility (#3993)
 - Fixed race conditions involving reference counted objects (#3999)

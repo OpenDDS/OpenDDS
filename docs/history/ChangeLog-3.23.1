@@ -1,0 +1,122 @@
+Wed Feb 01 20:11:03 UTC 2023  Fred Hornsey  <hornseyf@objectcomputing.com>
+        commit 1c0aae779773588f9a9d953dac6b313c73b686f8
+
+        * NEWS.md:
+
+          3.23.1 News Entry
+
+Wed Feb 01 13:41:59 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit bd875afe7df05c2bd2b806b4bcd46e2bfa502672
+
+        * dds/DCPS/Serializer.inl:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.cpp:
+
+          Merge pull request #4018 from mitza-oci/serializer
+
+          Serializer: detect some invalid CDR bounded strings
+          (cherry picked from commit
+          e4c4910cf6aaf9cdb2f2e699166dc0119c7708ff)
+
+Wed Feb 01 03:39:43 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 03393215e35da6864342f001fada7ccddf6cd0e8
+
+        * dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/RTPS/RtpsCoreTypeSupportImpl.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+
+          Merge pull request #4016 from mitza-oci/serializer
+
+          Serializer: detect other kinds of invalid CDR strings
+          (cherry picked from commit
+          d37f66c4035994800c87ab53999af174112d4450)
+
+Wed Jan 25 14:59:43 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 95cb9c8017e793906c6f34fbebb6ccf857cfe86d
+
+        * dds/DCPS/DataReaderImpl.cpp:
+        * dds/DCPS/DataReaderImpl.h:
+        * dds/DCPS/DataReaderImpl_T.h:
+        * dds/DCPS/DomainParticipantImpl.cpp:
+        * dds/DCPS/Serializer.cpp:
+        * dds/DCPS/Serializer.h:
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+        * dds/DCPS/XTypes/DynamicTypeSupport.h:
+        * dds/DCPS/XTypes/Utils.cpp:
+        * dds/DCPS/XTypes/Utils.h:
+        * tests/DCPS/XTypes/Common.h:
+        * tests/DCPS/XTypes/Publisher.cpp:
+        * tests/DCPS/XTypes/Subscriber.cpp:
+        * tests/DCPS/XTypes/run_test.pl:
+        * tests/dcps_tests.lst:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/XTypes/Utils.cpp:
+
+          Merge pull request #3993 from
+          iguessthislldo/igtd/xtypes-dynamic-data-test
+
+          Update XTypes Test to Use DynamicData
+
+          (cherry picked from commit
+          fd48b3e65922444cd88f492aad0e17e363c73559)
+
+          # Conflicts:
+          #       dds/DCPS/DataReaderImpl.h
+          #       dds/DCPS/XTypes/DynamicTypeSupport.h
+
+Tue Jan 03 17:10:56 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit fe4e3c024418dfddc83c79bf969c7ddcef3874c0
+
+        * dds/DCPS/XTypes/DynamicDataXcdrReadImpl.cpp:
+
+          Merge pull request #3952 from sonndinh/dynamicdata_getbasetype
+
+          Add missing calls to get_base_type to DynamicDataXcdrReadImpl
+
+          (cherry picked from commit
+          c0196a11745c93c1e206a4a92f5c4668488c0e64)
+
+Tue Jan 24 15:36:17 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit 2757ce9a77c05d1f86829a209156d2c5d135b519
+
+        * dds/DCPS/Atomic.h:
+        * dds/DCPS/LocalObject.h:
+        * dds/DCPS/RcHandle_T.h:
+        * dds/DCPS/RcObject.h:
+        * tests/stress-tests/dds/DCPS/RcObject.cpp:
+
+          Merge pull request #3999 from simpsont-oci/rcobject_stress_test
+
+          Add RcObject (et al.) Stress Test
+
+          (cherry picked from commit
+          2ebc9653177631afc61b5c35727055ebd81d2e79)
+
+Thu Jan 19 23:14:53 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+        commit af6888e5fb2d2e32378058fffa23c8117807897b
+
+        * dds/DCPS/security/SSL/SignedDocument.cpp:
+
+          Merge pull request #3992 from jrw972/opendds-756
+
+          Participants can sign their own permissions file if the same CA
+          is used for both identity and permissions
+
+          (cherry picked from commit
+          dc3e691f4a79ebc74f970ea734f223ad2e02d467)
+
+Tue Jan 31 15:05:34 UTC 2023  Adam Mitz  <mitza@objectcomputing.com>
+
+        * dds/DCPS/Serializer.cpp:
+        * tests/unit-tests/dds/DCPS/Serializer.cpp:
+
+          Merge pull request #4010 from mitza-oci/serializer
+
+          Serializer: detect certain kinds of invalid CDR strings
+          (cherry picked from commit
+          62aa46c90c28a68734b1f4fa39ada737b594a053)
+
+Local Variables:
+mode: change-log
+add-log-time-format: (lambda () (progn (setq tz (getenv "TZ")) (set-time-zone-rule "UTC") (setq time (format-time-string "%a %b %e %H:%M:%S %Z %Y" (current-time))) (set-time-zone-rule tz) time))
+indent-tabs-mode: nil
+End:
