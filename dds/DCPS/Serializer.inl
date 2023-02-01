@@ -1432,9 +1432,12 @@ operator>>(Serializer& s, String& x)
 {
   char* buf = 0;
   const size_t length = s.read_string(buf);
+  if (!s.good_bit()) {
+    return false;
+  }
   x.assign(buf, length);
   s.free_string(buf);
-  return s.good_bit();
+  return true;
 }
 
 ACE_INLINE bool
@@ -1456,9 +1459,12 @@ operator>>(Serializer& s, WString& x)
 {
   ACE_CDR::WChar* buf = 0;
   const size_t length = s.read_string(buf);
+  if (!s.good_bit()) {
+    return false;
+  }
   x.assign(buf, length);
   s.free_string(buf);
-  return s.good_bit();
+  return true;
 }
 
 ACE_INLINE bool

@@ -238,3 +238,22 @@ TEST(RtpsCoreTypeSupportImpl, Serializer_test_issue4105)
   ParameterList plist;
   ASSERT_FALSE(ser >> plist);
 }
+
+TEST(RtpsCoreTypeSupportImpl, Serializer_test_parameterlist)
+{
+  static const ACE_CDR::Octet x[] = {
+    0x14,0x40,0x0c,0x00, // PID, length
+    0x0d,0x00,0x00,0x00, // string length (invalid)
+    0x00,0x00,0x00,0x00, // string contents (invalid)
+    0x00,0x00,0x00,0x00,
+    0x01,0xa7,0x00,0x00, // PID, length
+  };
+  Message_Block_Ptr amb(new ACE_Message_Block(sizeof x));
+  const Encoding enc(Encoding::KIND_XCDR1, ENDIAN_LITTLE);
+  Serializer ser_w(amb.get(), enc);
+  ASSERT_TRUE(ser_w.write_octet_array(x, sizeof x));
+
+  Serializer ser(amb.get(), enc);
+  ParameterList plist;
+  ASSERT_FALSE(ser >> plist);
+}
