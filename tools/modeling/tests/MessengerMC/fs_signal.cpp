@@ -12,7 +12,7 @@ FileSystemSignal::FileSystemSignal(int id)
 }
 
 void FileSystemSignal::signal() {
-  std::ofstream ofs(_file_name);
+  std::ofstream ofs(_file_name.c_str());
   ofs << "hello" << std::endl;
 }
 
@@ -30,7 +30,7 @@ void FileSystemSignal::wait_forever() {
 }
 
 bool FileSystemSignal::exists() {
-  std::ifstream ifs(_file_name);
+  std::ifstream ifs(_file_name.c_str());
   return !!ifs;
 }
 

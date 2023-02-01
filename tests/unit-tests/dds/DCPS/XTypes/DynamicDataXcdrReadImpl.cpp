@@ -1368,6 +1368,89 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_SkipNestedMembers)
   EXPECT_EQ(expected.outer.s, s_val);
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Mutable_ReadRecursiveStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::Node_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::Node_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  // Top-level node contains 2 leaf nodes.
+  const unsigned char input_cdr[] = {
+    0x00,0x00,0x00,0x48, // Dheader of top level node
+    //////// value
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xff, // value
+    //////// children
+    0x40,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x38, // Nextint of children
+    0x00,0x00,0x00,0x34, // Dheader of children
+    0x00,0x00,0x00,0x02, // length of children
+    /////////////// 1st child
+    0x00,0x00,0x00,0x14, // Dheader
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xee, // value
+    0x30,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x04, // Dheader of children
+    0x00,0x00,0x00,0x00, // length of children
+    /////////////// 2nd child
+    0x00,0x00,0x00,0x14, // Dheader
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xdd, // value
+    0x30,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x04, // Dheader of children
+    0x00,0x00,0x00,0x00, // length of children
+  };
+  ACE_Message_Block msg(128);
+  msg.copy((const char*)input_cdr, sizeof(input_cdr));
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
+
+  ACE_CDR::Long val;
+  XTypes::MemberId id = data.get_member_id_at_index(0);
+  EXPECT_EQ(id, XTypes::MemberId(0));
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(val, id));
+  EXPECT_EQ(val, ACE_CDR::Long(0x000000ff));
+
+  id = data.get_member_id_at_index(1);
+  EXPECT_EQ(id, XTypes::MemberId(1));
+  DDS::DynamicData_var children_dd;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(children_dd, id));
+
+  // Child node 1
+  DDS::DynamicData_var child1_dd;
+  id = children_dd->get_member_id_at_index(0);
+  EXPECT_EQ(id, XTypes::MemberId(0));
+  EXPECT_EQ(DDS::RETCODE_OK, children_dd->get_complex_value(child1_dd, id));
+  id = child1_dd->get_member_id_at_index(0);
+  EXPECT_EQ(id, XTypes::MemberId(0));
+  EXPECT_EQ(DDS::RETCODE_OK, child1_dd->get_int32_value(val, id));
+  EXPECT_EQ(val, ACE_CDR::Long(0x000000ee));
+  id = child1_dd->get_member_id_at_index(1);
+  EXPECT_EQ(id, XTypes::MemberId(1));
+  DDS::DynamicData_var nested_children_dd;
+  EXPECT_EQ(DDS::RETCODE_OK, child1_dd->get_complex_value(nested_children_dd, id));
+  EXPECT_EQ(ACE_CDR::ULong(0), nested_children_dd->get_item_count());
+
+  // Child node 2
+  DDS::DynamicData_var child2_dd;
+  id = children_dd->get_member_id_at_index(1);
+  EXPECT_EQ(id, XTypes::MemberId(1));
+  EXPECT_EQ(DDS::RETCODE_OK, children_dd->get_complex_value(child2_dd, id));
+  id = child2_dd->get_member_id_at_index(0);
+  EXPECT_EQ(id, XTypes::MemberId(0));
+  EXPECT_EQ(DDS::RETCODE_OK, child2_dd->get_int32_value(val, id));
+  EXPECT_EQ(val, ACE_CDR::Long(0x000000dd));
+  id = child2_dd->get_member_id_at_index(1);
+  EXPECT_EQ(id, XTypes::MemberId(1));
+  nested_children_dd = 0;
+  EXPECT_EQ(DDS::RETCODE_OK, child2_dd->get_complex_value(nested_children_dd, id));
+  EXPECT_EQ(ACE_CDR::ULong(0), nested_children_dd->get_item_count());
+}
+
 /////////////////////////////// Appendable tests ////////////////////////////
 TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Appendable_ReadValueFromStruct)
 {

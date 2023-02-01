@@ -272,7 +272,57 @@ struct MutableStruct {
   @id(4) int8 i;
 };
 
-#define ARRAY_MEMBERS \
+// TODO: Add a long double sequence member
+#define SEQUENCE_VALUE_BRANCHES \
+  case E_INT32: \
+    @id(1) Int32Seq int_32s; \
+  case E_UINT32: \
+    @id(2) UInt32Seq uint_32s; \
+  case E_INT8: \
+    @id(3) Int8Seq int_8s; \
+  case E_UINT8: \
+    @id(4) UInt8Seq uint_8s; \
+  case E_INT16: \
+    @id(5) Int16Seq int_16s; \
+  case E_UINT16: \
+    @id(6) UInt16Seq uint_16s; \
+  case E_INT64: \
+    @id(7) Int64Seq int_64s; \
+  case E_UINT64: \
+    @id(8) UInt64Seq uint_64s; \
+  case E_FLOAT32: \
+    @id(9) Float32Seq float_32s; \
+  case E_FLOAT64: \
+    @id(10) Float64Seq float_64s; \
+  case E_CHAR8: \
+    @id(12) Char8Seq char_8s; \
+  case E_CHAR16: \
+    @id(13) Char16Seq char_16s; \
+  case E_BYTE: \
+    @id(14) ByteSeq byte_s; \
+  case E_BOOL: \
+    @id(15) BoolSeq bool_s; \
+  case E_STRING8: \
+    @id(16) StringSeq str_s; \
+  case E_STRING16: \
+    @id(17) WStringSeq wstr_s;
+
+@final
+union FinalSequenceUnion switch (SomeEnum) {
+  SEQUENCE_VALUE_BRANCHES
+};
+
+@appendable
+union AppendableSequenceUnion switch (SomeEnum) {
+  SEQUENCE_VALUE_BRANCHES
+};
+
+@mutable
+union MutableSequenceUnion switch (SomeEnum) {
+  SEQUENCE_VALUE_BRANCHES
+};
+
+#define ARRAY_MEMBERS     \
   @id(0) long int_32a[2]; \
   @id(1) unsigned long uint_32a[2]; \
   @id(2) @key int8 int_8a[2];
@@ -280,6 +330,15 @@ struct MutableStruct {
 @mutable
 struct MutableArrayStruct {
   ARRAY_MEMBERS
+};
+
+struct Node;
+typedef sequence<Node> NodeSeq;
+
+@mutable
+struct Node {
+  long value;
+  NodeSeq children;
 };
 
 }; // module DynamicDataImpl

@@ -71,5 +71,4 @@ for (my $pub = 0; $pub < $writer_process_count; $pub++) {
 }
 $test->start_process("subscriber");
 
-# ignore this issue that is already being tracked in redmine
 exit $test->finish(100) ? 1 : 0;

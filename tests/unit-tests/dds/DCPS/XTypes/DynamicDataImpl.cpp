@@ -40,6 +40,137 @@ void set_single_value_struct(StructType& a)
 #endif
 }
 
+void set_enum_sequence(DDS::Int32Seq& seq)
+{
+  seq.length(2);
+  seq[0] = E_UINT32;
+  seq[1] = E_INT8;
+}
+
+void set_int32_sequence(DDS::Int32Seq& seq)
+{
+  seq.length(3);
+  seq[0] = 3;
+  seq[1] = 4;
+  seq[2] = 5;
+}
+
+void set_uint32_sequence(DDS::UInt32Seq& seq)
+{
+  seq.length(2);
+  seq[0] = 10;
+  seq[1] = 11;
+}
+
+void set_int8_sequence(DDS::Int8Seq& seq)
+{
+  seq.length(3);
+  seq[0] = 12;
+  seq[1] = 13;
+  seq[2] = 14;
+}
+
+void set_uint8_sequence(DDS::UInt8Seq& seq)
+{
+  seq.length(2);
+  seq[0] = 15;
+  seq[1] = 16;
+}
+
+void set_int16_sequence(DDS::Int16Seq& seq)
+{
+  seq.length(2);
+  seq[0] = 1;
+  seq[1] = 2;
+}
+
+void set_uint16_sequence(DDS::UInt16Seq& seq)
+{
+  seq.length(3);
+  seq[0] = 3;
+  seq[1] = 4;
+  seq[2] = 5;
+}
+
+void set_int64_sequence(DDS::Int64Seq& seq)
+{
+  seq.length(2);
+  seq[0] = 0x7ffffffffffffffe;
+  seq[1] = 0x7fffffffffffffff;
+}
+
+void set_uint64_sequence(DDS::UInt64Seq& seq)
+{
+  seq.length(1);
+  seq[0] = 0xffffffffffffffff;
+}
+
+void set_float32_sequence(DDS::Float32Seq& seq)
+{
+  seq.length(1);
+  seq[0] = 1.0f;
+}
+
+void set_float64_sequence(DDS::Float64Seq& seq)
+{
+  seq.length(1);
+  seq[0] = 1.0;
+}
+
+void set_char8_sequence(DDS::CharSeq& seq)
+{
+  seq.length(2);
+  seq[0] = 'a';
+  seq[1] = 'b';
+}
+
+void set_byte_sequence(DDS::ByteSeq& seq)
+{
+  seq.length(2);
+  seq[0] = 0xee;
+  seq[1] = 0xff;
+}
+
+void set_bool_sequence(DDS::BooleanSeq& seq)
+{
+  seq.length(1);
+  seq[0] = true;
+}
+
+void set_string_sequence(DDS::StringSeq& seq)
+{
+  seq.length(1);
+  seq[0] = "abc";
+}
+
+void set_char16_sequence(DDS::WcharSeq& seq)
+{
+#ifdef DDS_HAS_WCHAR
+  seq.length(3);
+  seq[0] = 'c';
+  seq[1] = 'd';
+  seq[2] = 'e';
+#endif
+}
+
+void set_wstring_sequence(DDS::WstringSeq& seq)
+{
+#ifdef DDS_HAS_WCHAR
+  seq.length(2);
+  seq[0] = L"def";
+  seq[1] = L"ghi";
+#endif
+}
+
+void assert_serialized_data(size_t buff_size, XTypes::DynamicDataImpl& data,
+                            const DataView& expected_cdr, const DCPS::Encoding& encoding = xcdr2)
+{
+  ACE_Message_Block buffer(buff_size);
+  DCPS::Serializer ser(&buffer, encoding);
+  ASSERT_TRUE(ser << data);
+  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+}
+
 template<typename StructType>
 void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expected_cdr)
 {
@@ -105,12 +236,7 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 #endif
 
-  {
-    ACE_Message_Block buffer(512);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(512, data, expected_cdr);
 
   // Rewrite a member (of type short)
   const DDS::MemberId rewrite_id = 5;
@@ -129,13 +255,7 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_complex_value(rewrite_id, int16_dd);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-
-  {
-    ACE_Message_Block buffer(512);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(512, data, expected_cdr);
 }
 
 template<typename StructType>
@@ -177,12 +297,8 @@ void verify_default_single_value_struct(DDS::DynamicType_var type, const DataVie
   ret = data.set_wstring_value(18, input.wstr);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 #endif
-  {
-    ACE_Message_Block buffer(512);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+
+  assert_serialized_data(512, data, expected_cdr);
 }
 
 void verify_int32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
@@ -192,21 +308,20 @@ void verify_int32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(1, CORBA::Long(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   // A new discriminator value doesn't select the existing member.
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
-  // Write a member that isn't selected by the existing discriminator.
-  ret = data.set_uint32_value(2, CORBA::ULong(10));
+  // Change the selected member, then channge it back to the original member.
+  ret = data.set_uint32_value(2, CORBA::ULong(100));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  // Rewrite the selected member.
-  ret = data.set_int32_value(1, CORBA::Long(11));
+  ret = data.set_int32_value(1, CORBA::Long(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
+
+  // Check that the serialized data is still correct, i.e., discriminator value
+  // was updated correctly from the above two calls.
+  assert_serialized_data(64, data, expected_cdr);
 }
 
 void verify_default_int32_union_mutable(DDS::DynamicType_var dt)
@@ -221,10 +336,7 @@ void verify_default_int32_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // +8=12 discriminator
       0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x00 // +8=20 int_32
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
   {
     // Only set the Int32 member.
@@ -236,10 +348,7 @@ void verify_default_int32_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // +8=12 discriminator
       0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x0b // +8=20 int_32
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
   {
     // Doesn't set anything. Default discriminator value selects the Int32 member.
@@ -249,10 +358,7 @@ void verify_default_int32_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // +8=12 discriminator
       0x20,0x00,0x00,0x01, 0x00,0x00,0x00,0x00 // +8=20 int_32
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -261,12 +367,8 @@ void verify_uint32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_uint32_value(2, CORBA::ULong(11));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT8);
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_value(1, CORBA::Long(10));
@@ -286,10 +388,7 @@ void verify_default_uint32_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x01, // +8=12 discriminator
       0x20,0x00,0x00,0x02, 0x00,0x00,0x00,0x0b // +8=20 uint_32
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -298,12 +397,8 @@ void verify_int8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_int8_value(3, CORBA::Int8(0x7f));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(1, CORBA::Long(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int8_value(3, CORBA::Int8(12));
@@ -322,10 +417,7 @@ void verify_default_int8_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x02, // +8=12 discriminator
       0x00,0x00,0x00,0x03, 0xfd // +5=17 int_8
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -334,14 +426,10 @@ void verify_uint8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_uint8_value(4, CORBA::UInt8(0xff));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::ULong(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint8_value(4, CORBA::UInt8(0xaa));
@@ -360,10 +448,7 @@ void verify_default_uint8_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x03, // +8=12 discriminator
       0x00,0x00,0x00,0x04, 0x03 // +5=17 uint_8
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -372,14 +457,10 @@ void verify_int16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_int16_value(5, CORBA::Short(9));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::ULong(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int16_value(5, CORBA::Short(100));
@@ -398,10 +479,7 @@ void verify_default_int16_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x04, // +8=12 discriminator
       0x10,0x00,0x00,0x05, 0x00,0x7b // +6=18 int_16
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -410,14 +488,10 @@ void verify_uint16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_uint16_value(6, CORBA::UShort(5));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint64_value(8, CORBA::ULongLong(222));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint16_value(6, CORBA::UShort(99));
@@ -436,10 +510,7 @@ void verify_default_uint16_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x05, // +8=12 discriminator
       0x10,0x00,0x00,0x06, 0x00,0x79 // +6=18 uint_16
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -448,14 +519,10 @@ void verify_int64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret =  data.set_int64_value(7, CORBA::LongLong(0xfe));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int64_value(7, CORBA::LongLong(0xbb));
@@ -474,10 +541,7 @@ void verify_default_int64_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x06, // +8=12 discriminator
       0x30,0x00,0x00,0x07, 0x00,0x00,0x00,0x00,0x00,0x00,0x0d,0x80 // +12=24 int_64
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -486,14 +550,10 @@ void verify_uint64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_uint64_value(8, CORBA::ULongLong(0xff));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_uint64_value(8, CORBA::ULongLong(0xcd));
@@ -512,10 +572,7 @@ void verify_default_uint64_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x07, // +8=12 discriminator
       0x30,0x00,0x00,0x08, 0x00,0x00,0x00,0x00,0x00,0x00,0x0d,0x80 // +12=24 uint_64
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -524,14 +581,10 @@ void verify_float32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_float32_value(9, CORBA::Float(1.0f));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint8_value(4, CORBA::UInt8(7));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_float32_value(9, CORBA::Float(2.0f));
@@ -543,14 +596,10 @@ void verify_float64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_float64_value(10, CORBA::Double(1.0));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_CHAR8);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_char8_value(12, CORBA::Char('a'));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_float64_value(10, CORBA::Double(2.0));
@@ -562,14 +611,10 @@ void verify_char8_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_char8_value(12, CORBA::Char('a'));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_value(1, CORBA::Long(22));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_char8_value(12, CORBA::Char('b'));
@@ -588,10 +633,7 @@ void verify_default_char8_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0b, // +8=12 discriminator
       0x00,0x00,0x00,0x0c, 'd' // +5=17 char_8
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -601,14 +643,10 @@ void verify_char16_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_char16_value(13, CORBA::WChar(0x0061));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int16_value(5, CORBA::Short(34));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_char16_value(13, CORBA::WChar(0x0062));
@@ -627,10 +665,7 @@ void verify_default_char16_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0c, // +8=12 discriminator
       0x10,0x00,0x00,0x0d, 0x00,0x63 // +6=18 char_16
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 #endif
@@ -640,14 +675,10 @@ void verify_byte_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_byte_value(14, CORBA::Octet(0xff));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int16_value(5, CORBA::Short(34));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_byte_value(14, CORBA::Octet(0xab));
@@ -666,10 +697,7 @@ void verify_default_byte_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0d, // +8=12 discriminator
       0x00,0x00,0x00,0x0e, 0xaa // +5=17 byte_
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -678,14 +706,10 @@ void verify_bool_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_boolean_value(15, CORBA::Boolean(true));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint16_value(6, CORBA::UShort(56));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_boolean_value(15, CORBA::Boolean(false));
@@ -694,7 +718,6 @@ void verify_bool_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 
 void verify_default_bool_union_mutable(DDS::DynamicType_var dt)
 {
-
   {
     // Only set the Boolean member.
     XTypes::DynamicDataImpl data(dt);
@@ -705,10 +728,7 @@ void verify_default_bool_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0e, // +8=12 discriminator
       0x00,0x00,0x00,0x0f, 0x01 // +5=17 bool_
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
@@ -717,14 +737,10 @@ void verify_string_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_string_value(16, "abc");
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint16_value(6, CORBA::UShort(56));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_string_value(16, "def");
@@ -737,14 +753,10 @@ void verify_wstring_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_wstring_value(17, L"abc");
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::UInt32(4321));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_wstring_value(17, L"def");
@@ -757,14 +769,10 @@ void verify_enum_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_int32_value(18, CORBA::Long(9));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  {
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(64, data, expected_cdr);
+
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_uint32_value(2, CORBA::UInt32(4321));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(18, CORBA::Long(10));
@@ -782,89 +790,290 @@ void verify_default_enum_union_mutable(DDS::DynamicType_var dt)
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0a, // +8=12 discriminator
       0x20,0x00,0x00,0x12, 0x00,0x00,0x00,0x06 // +8=20 my_enum
     };
-    ACE_Message_Block buffer(64);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+    assert_serialized_data(64, data, expected_cdr);
   }
 }
 
-template<typename StructType>
-void set_sequence_value_struct(StructType& a)
+void verify_int32s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
-  a.my_enums.length(2);
-  a.my_enums[0] = E_UINT32; a.my_enums[1] = E_INT8;
-  a.int_32s.length(3);
-  a.int_32s[0] = 3; a.int_32s[1] = 4; a.int_32s[2] = 5;
-  a.uint_32s.length(2);
-  a.uint_32s[0] = 10; a.uint_32s[1] = 11;
-  a.int_8s.length(3);
-  a.int_8s[0] = 12; a.int_8s[1] = 13; a.int_8s[2] = 14;
-  a.uint_8s.length(2);
-  a.uint_8s[0] = 15; a.uint_8s[1] = 16;
-  a.int_16s.length(2);
-  a.int_16s[0] = 1; a.int_16s[1] = 2;
-  a.uint_16s.length(3);
-  a.uint_16s[0] = 3; a.uint_16s[1] = 4; a.uint_16s[2] = 5;
-  a.int_64s.length(2);
-  a.int_64s[0] = 0x7ffffffffffffffe; a.int_64s[1] = 0x7fffffffffffffff;
-  a.uint_64s.length(1);
-  a.uint_64s[0] = 0xffffffffffffffff;
-  a.float_32s.length(1);
-  a.float_32s[0] = 1.0f;
-  a.float_64s.length(1);
-  a.float_64s[0] = 1.0;
-  a.char_8s.length(2);
-  a.char_8s[0] = 'a'; a.char_8s[1] = 'b';
-  a.byte_s.length(2);
-  a.byte_s[0] = 0xee; a.byte_s[1] = 0xff;
-  a.bool_s.length(1);
-  a.bool_s[0] = 1;
-  a.str_s.length(1);
-  a.str_s[0] = "abc";
+  XTypes::DynamicDataImpl data(dt);
+  DDS::Int32Seq int32s;
+  set_int32_sequence(int32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_values(1, int32s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32));
+  DDS::UInt32Seq uint32s;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint32_values(2, uint32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_values(1, int32s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_uint32s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::UInt32Seq uint32s;
+  set_uint32_sequence(uint32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint32_values(2, uint32s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT8));
+  DDS::UInt8Seq uint8s;
+  set_uint8_sequence(uint8s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint8_values(4, uint8s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint32_values(2, uint32s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_int8s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::Int8Seq int8s;
+  set_int8_sequence(int8s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int8_values(3, int8s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT32));
+  DDS::UInt8Seq uint8s;
+  set_uint8_sequence(uint8s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint8_values(4, uint8s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int8_values(3, int8s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_uint8s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::UInt8Seq uint8s;
+  set_uint8_sequence(uint8s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint8_values(4, uint8s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32));
+  DDS::Float32Seq float32s;
+  set_float32_sequence(float32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_float32_values(9, float32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint8_values(4, uint8s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_int16s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::Int16Seq int16s;
+  set_int16_sequence(int16s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_values(5, int16s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT32));
+  DDS::Float32Seq float32s;
+  set_float32_sequence(float32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_float32_values(9, float32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_values(5, int16s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_uint16s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::UInt16Seq uint16s;
+  set_uint16_sequence(uint16s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint16_values(6, uint16s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_FLOAT64));
+  DDS::ByteSeq bytes;
+  set_byte_sequence(bytes);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_byte_values(14, bytes));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint16_values(6, uint16s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_int64s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::Int64Seq int64s;
+  set_int64_sequence(int64s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int64_values(7, int64s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT32));
+  DDS::BooleanSeq bools;
+  set_bool_sequence(bools);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_boolean_values(15, bools));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int64_values(7, int64s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_uint64s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::UInt64Seq uint64s;
+  set_uint64_sequence(uint64s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint64_values(8, uint64s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT32));
+  DDS::BooleanSeq bools;
+  set_bool_sequence(bools);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_boolean_values(15, bools));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint64_values(8, uint64s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_float32s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::Float32Seq float32s;
+  set_float32_sequence(float32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_float32_values(9, float32s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16));
+  DDS::Int16Seq int16s;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_values(5, int16s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_float32_values(9, float32s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_float64s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::Float64Seq float64s;
+  set_float64_sequence(float64s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_float64_values(10, float64s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16));
+  DDS::Int16Seq int16s;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_values(5, int16s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_float64_values(10, float64s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+void verify_char8s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::CharSeq char8s;
+  set_char8_sequence(char8s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_char8_values(12, char8s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BOOL));
+  DDS::Int16Seq int16s;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int16_values(5, int16s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_char8_values(12, char8s));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
 #ifdef DDS_HAS_WCHAR
-  a.char_16s.length(3);
-  a.char_16s[0] = 'c'; a.char_16s[1] = 'd'; a.char_16s[2] = 'e';
-  a.wstr_s.length(2);
-  a.wstr_s[0] = L"def"; a.wstr_s[1] = L"ghi";
+void verify_char16s_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::WcharSeq char16s;
+  set_char16_sequence(char16s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_char16_values(13, char16s));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BOOL));
+  DDS::Int32Seq int32s;
+  set_int32_sequence(int32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_values(1, int32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_char16_values(13, char16s));
+  assert_serialized_data(64, data, expected_cdr);
+}
 #endif
+
+void verify_bytes_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::ByteSeq bytes;
+  set_byte_sequence(bytes);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_byte_values(14, bytes));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_STRING8));
+  DDS::Int32Seq int32s;
+  set_int32_sequence(int32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_values(1, int32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_byte_values(14, bytes));
+  assert_serialized_data(64, data, expected_cdr);
 }
 
-template<typename SequenceTypeA, typename SequenceTypeB>
-void set_sequences(SequenceTypeA& target, const SequenceTypeB& source)
+void verify_bools_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
-  target.length(source.length());
-  for (unsigned i = 0; i < source.length(); ++i) {
-    target[i] = source[i];
-  }
+  XTypes::DynamicDataImpl data(dt);
+  DDS::BooleanSeq bools;
+  set_bool_sequence(bools);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_boolean_values(15, bools));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_STRING8));
+  DDS::Int32Seq int32s;
+  set_int32_sequence(int32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_values(1, int32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_boolean_values(15, bools));
+  assert_serialized_data(64, data, expected_cdr);
 }
+
+void verify_strings_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::StringSeq strings;
+  set_string_sequence(strings);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_string_values(16, strings));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BYTE));
+  DDS::UInt32Seq uint32s;
+  set_uint32_sequence(uint32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint32_values(2, uint32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_string_values(16, strings));
+  assert_serialized_data(64, data, expected_cdr);
+}
+
+#ifdef DDS_HAS_WCHAR
+void verify_wstrings_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
+{
+  XTypes::DynamicDataImpl data(dt);
+  DDS::WstringSeq wstrings;
+  set_wstring_sequence(wstrings);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_wstring_values(17, wstrings));
+  assert_serialized_data(64, data, expected_cdr);
+
+  EXPECT_EQ(DDS::RETCODE_ERROR, data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_BYTE));
+  DDS::UInt32Seq uint32s;
+  set_uint32_sequence(uint32s);
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_uint32_values(2, uint32s));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_wstring_values(17, wstrings));
+  assert_serialized_data(64, data, expected_cdr);
+}
+#endif
 
 template<typename StructType>
 void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& expected_cdr)
 {
-  StructType input;
-  set_sequence_value_struct(input);
   XTypes::DynamicDataImpl data(type);
 
   /// my_enums
   DDS::Int32Seq my_enums;
-  set_sequences(my_enums, input.my_enums);
+  set_enum_sequence(my_enums);
   DDS::ReturnCode_t ret = data.set_int32_values(0, my_enums);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int32_values(2, my_enums);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
 
   /// int_32s
   DDS::Int32Seq int_32s;
-  set_sequences(int_32s, input.int_32s);
+  set_int32_sequence(int_32s);
   ret = data.set_int32_values(3, int_32s);
-  EXPECT_NE(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_values(1, int_32s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// uint_32s
   DDS::UInt32Seq uint_32s;
-  set_sequences(uint_32s, input.uint_32s);
+  set_uint32_sequence(uint_32s);
   ret = data.set_uint32_values(4, uint_32s);
   EXPECT_NE(ret, DDS::RETCODE_OK);
   ret =  data.set_uint32_values(2, uint_32s);
@@ -872,97 +1081,93 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
 
   /// int_8s
   DDS::Int8Seq int_8s;
-  set_sequences(int_8s, input.int_8s);
+  set_int8_sequence(int_8s);
   ret = data.set_int8_values(3, int_8s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// uint_8s
   DDS::UInt8Seq uint_8s;
-  set_sequences(uint_8s, input.uint_8s);
+  set_uint8_sequence(uint_8s);
   ret = data.set_uint8_values(4, uint_8s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// int_16s
   DDS::Int16Seq int_16s;
-  set_sequences(int_16s, input.int_16s);
+  set_int16_sequence(int_16s);
   ret = data.set_int16_values(5, int_16s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// uint_16s
   DDS::UInt16Seq uint_16s;
-  set_sequences(uint_16s, input.uint_16s);
+  set_uint16_sequence(uint_16s);
   ret = data.set_uint16_values(6, uint_16s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// int_64s
   DDS::Int64Seq int_64s;
-  set_sequences(int_64s, input.int_64s);
+  set_int64_sequence(int_64s);
   ret = data.set_int64_values(7, int_64s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// uint_64s
   DDS::UInt64Seq uint_64s;
-  set_sequences(uint_64s, input.uint_64s);
+  set_uint64_sequence(uint_64s);
   ret = data.set_uint64_values(8, uint_64s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// float_32s
   DDS::Float32Seq float_32s;
-  set_sequences(float_32s, input.float_32s);
+  set_float32_sequence(float_32s);
   ret = data.set_float32_values(9, float_32s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// float_64s
   DDS::Float64Seq float_64s;
-  set_sequences(float_64s, input.float_64s);
+  set_float64_sequence(float_64s);
   ret = data.set_float64_values(10, float_64s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// char_8s
   DDS::CharSeq char_8s;
-  set_sequences(char_8s, input.char_8s);
+  set_char8_sequence(char_8s);
   ret = data.set_char8_values(12, char_8s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
 #ifdef DDS_HAS_WCHAR
   /// char_16s
   DDS::WcharSeq char_16s;
-  set_sequences(char_16s, input.char_16s);
+  set_char16_sequence(char_16s);
   ret = data.set_char16_values(13, char_16s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 #endif
 
   /// byte_s
   DDS::ByteSeq byte_s;
-  set_sequences(byte_s, input.byte_s);
+  set_byte_sequence(byte_s);
   ret = data.set_byte_values(14, byte_s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// bool_s
   DDS::BooleanSeq bool_s;
-  set_sequences(bool_s, input.bool_s);
+  set_bool_sequence(bool_s);
   ret = data.set_boolean_values(15, bool_s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
   /// str_s
   DDS::StringSeq str_s;
-  set_sequences(str_s, input.str_s);
+  set_string_sequence(str_s);
   ret = data.set_string_values(16, str_s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
 #ifdef DDS_HAS_WCHAR
   /// wstr_s
   DDS::WstringSeq wstr_s;
-  set_sequences(wstr_s, input.wstr_s);
+  set_wstring_sequence(wstr_s);
   ret = data.set_wstring_values(17, wstr_s);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 #endif
-  {
-    ACE_Message_Block buffer(512);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+
+  assert_serialized_data(512, data, expected_cdr);
 
   // Rewrite some members.
   {
@@ -1005,22 +1210,14 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
     ret = data.set_complex_value(2, uint32s_dd);
     EXPECT_EQ(ret, DDS::RETCODE_OK);
   }
-  {
-    ACE_Message_Block buffer(512);
-    DCPS::Serializer ser(&buffer, xcdr2);
-    ASSERT_TRUE(ser << data);
-    EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
-  }
+  assert_serialized_data(512, data, expected_cdr);
 }
 
 template<typename StructType>
 void verify_sequence_value_struct_default(DDS::DynamicType_var type, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(type);
-  ACE_Message_Block buffer(512);
-  DCPS::Serializer ser(&buffer, xcdr2);
-  ASSERT_TRUE(ser << data);
-  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  assert_serialized_data(512, data, expected_cdr);
 }
 
 void verify_array_struct(DDS::DynamicType_var type, const DataView& expected_cdr)
@@ -1084,20 +1281,14 @@ void verify_array_struct(DDS::DynamicType_var type, const DataView& expected_cdr
   ret = data.set_complex_value(2, int8arr_dd);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
-  ACE_Message_Block buffer(128);
-  DCPS::Serializer ser(&buffer, xcdr2);
-  ASSERT_TRUE(ser << data);
-  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  assert_serialized_data(128, data, expected_cdr);
 }
 
 void verify_array_struct_default(DDS::DynamicType_var type, const DataView& expected_cdr)
 {
   // All array members take default values.
   XTypes::DynamicDataImpl data(type);
-  ACE_Message_Block buffer(128);
-  DCPS::Serializer ser(&buffer, xcdr2);
-  ASSERT_TRUE(ser << data);
-  EXPECT_PRED_FORMAT2(assert_DataView, expected_cdr, buffer);
+  assert_serialized_data(128, data, expected_cdr);
 }
 
 /////////////////////////// Mutable tests ///////////////////////////
@@ -1435,12 +1626,161 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToStructDefault)
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceToUnion)
 {
-  // TODO: Write to union with members are sequence of basic types
-}
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_MutableSequenceUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_MutableSequenceUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
 
-TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteSequenceUnionDefault)
-{
-  // TODO: Sequence members of a union take default value.
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x20, // Dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // discriminator
+      0x40,0,0,1, 0,0,0,16, 0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5 // int_32s
+    };
+    verify_int32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x1c, // Dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x01, // discriminator
+      0x40,0,0,2, 0,0,0,12, 0,0,0,2, 0,0,0,10, 0,0,0,11 // uint_32s
+    };
+    verify_uint32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x17, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x02, // discriminator
+      0x40,0x00,0x00,0x03, 0x00,0x00,0x00,0x07,
+      0x00,0x00,0x00,0x03, 0x0c,0x0d,0x0e // int_8s
+    };
+    verify_int8s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x16, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x03, // discriminator
+      0x40,0x00,0x00,0x04, 0x00,0x00,0x00,0x06,
+      0x00,0x00,0x00,0x02, 0x0f,0x10 // uint_8s
+    };
+    verify_uint8s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x14, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x04, // discriminator
+      0x30,0x00,0x00,0x05, 0x00,0x00,0x00,0x02, 0x00,0x01,0x00,0x02 // int_16s
+    };
+    verify_int16s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x1a, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x05, // discriminator
+      0x40,0x00,0x00,0x06, 0x00,0x00,0x00,0x0a,
+      0x00,0x00,0x00,0x03, 0x00,0x03,0x00,0x04,0x00,0x05 // uint_16s
+    };
+    verify_uint16s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x24, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x06, // discriminator
+      0x40,0x00,0x00,0x07, 0x00,0x00,0x00,0x14, 0x00,0x00,0x00,0x02,
+      0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // int_64s
+    };
+    verify_int64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x1c, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x07, // discriminator
+      0x40,0x00,0x00,0x08, 0x00,0x00,0x00,0x0c,
+      0x00,0x00,0x00,0x01, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff // uint_64s
+    };
+    verify_uint64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x14, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x08, // discriminator
+      0x30,0x00,0x00,0x09, 0x00,0x00,0x00,0x01, 0x3f,0x80,0x00,0x00 // float_32s
+    };
+    verify_float32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x1c, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x09, // discriminator
+      0x40,0x00,0x00,0x0a, 0x00,0x00,0x00,0x0c,
+      0x00,0x00,0x00,0x01, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64s
+    };
+    verify_float64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x16, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0b, // discriminator
+      0x40,0x00,0x00,0x0c, 0x00,0x00,0x00,0x06,
+      0x00,0x00,0x00,0x02, 'a','b' // char_8s
+    };
+    verify_char8s_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x1a, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0c, // discriminator
+      0x40,0x00,0x00,0x0d, 0x00,0x00,0x00,0x0a,
+      0x00,0x00,0x00,0x03, 0x00,0x63,0x00,0x64,0x00,0x65 // char_16s
+    };
+    verify_char16s_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x16, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0d, // discriminator
+      0x40,0x00,0x00,0x0e, 0x00,0x00,0x00,0x06,
+      0x00,0x00,0x00,0x02, 0xee,0xff //  byte_s
+    };
+    verify_bytes_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x15, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0e, // discriminator
+      0x40,0x00,0x00,0x0f, 0x00,0x00,0x00,0x05,
+      0x00,0x00,0x00,0x01, 0x01 // bool_s
+    };
+    verify_bools_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x20, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x0f, // discriminator
+      0x40,0x00,0x00,0x10, 0x00,0x00,0x00,0x10,
+      0x00,0x00,0x00,0x0c, 0x00,0x00,0x00,0x01,
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str_s
+    };
+    verify_strings_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    // Serialization of wide string doesn't include termination NUL
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x2e, // dheader
+      0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x10, // discriminator
+      0x40,0,0,17, 0,0,0,30, 0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+      0,0,0,6, 0,0x67,0,0x68,0,0x69 // wstr_s
+    };
+    verify_wstrings_union(dt, expected_cdr);
+  }
+#endif
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteValueToArray)
@@ -1571,10 +1911,72 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteStructWithNestedMembers)
   ret = data.set_char8_value(0, 'a');
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
-  ACE_Message_Block buffer(128);
-  DCPS::Serializer ser(&buffer, xcdr2);
-  ASSERT_TRUE(ser << data);
-  EXPECT_PRED_FORMAT2(assert_DataView, mutable_struct, buffer);
+  assert_serialized_data(128, data, mutable_struct);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Mutable_WriteRecursiveStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_Node_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_Node_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  // Top-level node contains 2 child nodes, each is a leaf.
+  unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0x48, // Dheader of top level node
+    //////// value
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xff, // value
+    //////// children
+    0x40,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x38, // Nextint of children
+    0x00,0x00,0x00,0x34, // Dheader of children
+    0x00,0x00,0x00,0x02, // length of children
+    /////////////// 1st child
+    0x00,0x00,0x00,0x14, // Dheader
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xee, // value
+    0x30,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x04, // Dheader of children
+    0x00,0x00,0x00,0x00, // length of children
+    /////////////// 2nd child
+    0x00,0x00,0x00,0x14, // Dheader
+    0x20,0x00,0x00,0x00, // Emheader of value
+    0x00,0x00,0x00,0xdd, // value
+    0x30,0x00,0x00,0x01, // Emheader of children
+    0x00,0x00,0x00,0x04, // Dheader of children
+    0x00,0x00,0x00,0x00, // length of children
+  };
+
+  XTypes::DynamicDataImpl data(dt);
+  // value
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(0, 0xff));
+
+  // Top-level children
+  DDS::DynamicTypeMember_var dtm;
+  EXPECT_EQ(DDS::RETCODE_OK, dt->get_member(dtm, 1));
+  DDS::MemberDescriptor_var md;
+  EXPECT_EQ(DDS::RETCODE_OK, dtm->get_descriptor(md));
+  DDS::DynamicData_var children_dd = new XTypes::DynamicDataImpl(md->type());
+  //   First child
+  DDS::DynamicData_var child1_dd = new XTypes::DynamicDataImpl(dt);
+  EXPECT_EQ(DDS::RETCODE_OK, child1_dd->set_int32_value(0, 0xee));
+  DDS::MemberId id = children_dd->get_member_id_at_index(0);
+  EXPECT_EQ(id, DDS::MemberId(0));
+  EXPECT_EQ(DDS::RETCODE_OK, children_dd->set_complex_value(id, child1_dd));
+  //   Second child
+  DDS::DynamicData_var child2_dd = new XTypes::DynamicDataImpl(dt);
+  EXPECT_EQ(DDS::RETCODE_OK, child2_dd->set_int32_value(0, 0xdd));
+  id = children_dd->get_member_id_at_index(1);
+  EXPECT_EQ(id, DDS::MemberId(1));
+  EXPECT_EQ(DDS::RETCODE_OK, children_dd->set_complex_value(id, child2_dd));
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_complex_value(1, children_dd));
+
+  assert_serialized_data(128, data, expected_cdr);
 }
 
 /////////////////////////// Appendable tests ///////////////////////////
@@ -1611,6 +2013,345 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToStruct)
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +10=82 wstr
   };
   verify_single_value_struct<AppendableSingleValueStruct>(dt, single_value_struct);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteValueToUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x0a // int_32
+    };
+    verify_int32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x0b // uint_32
+    };
+    verify_uint32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x02, // discriminator
+      0x7f // int_8
+    };
+    verify_int8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x03, // discriminator
+      0xff // uint_8
+    };
+    verify_uint8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x09 // int_16
+    };
+    verify_int16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x05 // uint_16
+    };
+    verify_uint16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x06, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe // int_64
+    };
+    verify_int64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x07, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// uint_64
+    };
+    verify_uint64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x08, // discriminator
+      0x3f,0x80,0x00,0x00 // float_32
+    };
+    verify_float32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x09, // discriminator
+      0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64
+    };
+    verify_float64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0b, // discriminator
+      'a' // char_8
+    };
+    verify_char8_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // dheader
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x61 // char_16
+    };
+    verify_char16_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    verify_byte_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // dheader
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    verify_bool_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    verify_string_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    // Serialization of wide string doesn't include termination NUL
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0e, // dheader
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x06, 0x00,0x61,0x00,0x62,0x00,0x63 // wstr
+    };
+    verify_wstring_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // dheader
+      0x00,0x00,0x00,0x0a, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    verify_enum_union(dt, expected_cdr);
+  }
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteSequenceToStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char expected_cdr[] = {
+    0x00,0x00,0x00,0xd6, // dheader
+    0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // uint_32s
+    0,0,0,3, 12,13,14,(0), // int_8s
+    0,0,0,2, 15,16,(0),(0), // uint_8s
+    0,0,0,2, 0,1,0,2, // int_16s
+    0,0,0,3, 0,3,0,4,0,5,(0),(0), // uint_16s
+    0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // int_64s
+    0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // float_32s
+    0,0,0,1, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // float_64s
+    0,0,0,2, 'a','b',(0),(0), // char_8s
+    0,0,0,3, 0,0x63,0,0x64,0,0x65,(0),(0), // char_16s
+    0,0,0,2, 0xee,0xff,(0),(0), // byte_s
+    0,0,0,1, 1,(0),(0),(0), // bool_s
+    0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // str_s
+    0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // wstr_s
+  };
+  verify_sequence_value_struct<AppendableSequenceStruct>(dt, expected_cdr);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteSequenceToUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_AppendableSequenceUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_AppendableSequenceUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x14, // Dheader
+      0x00,0x00,0x00,0x00, // discriminator
+      0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5 // int_32s
+    };
+    verify_int32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x10, // Dheader
+      0x00,0x00,0x00,0x01, // discriminator
+      0,0,0,2, 0,0,0,10, 0,0,0,11 // uint_32s
+    };
+    verify_uint32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0b, // dheader
+      0x00,0x00,0x00,0x02, // discriminator
+      0x00,0x00,0x00,0x03, 0x0c,0x0d,0x0e // int_8s
+    };
+    verify_int8s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0a, // dheader
+      0x00,0x00,0x00,0x03, // discriminator
+      0x00,0x00,0x00,0x02, 0x0f,0x10 // uint_8s
+    };
+    verify_uint8s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x00,0x00,0x02, 0x00,0x01,0x00,0x02 // int_16s
+    };
+    verify_int16s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0e, // dheader
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x00,0x00,0x03, 0x00,0x03,0x00,0x04,0x00,0x05 // uint_16s
+    };
+    verify_uint16s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x18, // dheader
+      0x00,0x00,0x00,0x06, // discriminator
+      0x00,0x00,0x00,0x02,
+      0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // int_64s
+    };
+    verify_int64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x10, // dheader
+      0x00,0x00,0x00,0x07, // discriminator
+      0x00,0x00,0x00,0x01, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff // uint_64s
+    };
+    verify_uint64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // dheader
+      0x00,0x00,0x00,0x08, // discriminator
+      0x00,0x00,0x00,0x01, 0x3f,0x80,0x00,0x00 // float_32s
+    };
+    verify_float32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x10, // dheader
+      0x00,0x00,0x00,0x09, // discriminator
+      0x00,0x00,0x00,0x01, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64s
+    };
+    verify_float64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0a, // dheader
+      0x00,0x00,0x00,0x0b, // discriminator
+      0x00,0x00,0x00,0x02, 'a','b' // char_8s
+    };
+    verify_char8s_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0e, // dheader
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x00,0x00,0x03, 0x00,0x63,0x00,0x64,0x00,0x65 // char_16s
+    };
+    verify_char16s_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0a, // dheader
+      0x00,0x00,0x00,0x0d, // discriminator
+      0x00,0x00,0x00,0x02, 0xee,0xff //  byte_s
+    };
+    verify_bytes_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x09, // dheader
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x00,0x00,0x00,0x01, 0x01 // bool_s
+    };
+    verify_bools_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x14, // dheader
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x0c, 0x00,0x00,0x00,0x01,
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str_s
+    };
+    verify_strings_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    // Serialization of wide string doesn't include termination NUL
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x22, // dheader
+      0x00,0x00,0x00,0x10, // discriminator
+      0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+      0,0,0,6, 0,0x67,0,0x68,0,0x69 // wstr_s
+    };
+    verify_wstrings_union(dt, expected_cdr);
+  }
+#endif
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
@@ -1697,10 +2438,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Appendable_WriteStructWithNestedMembers)
   ret = data.set_int8_value(4, 0x11);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
-  ACE_Message_Block buffer(128);
-  DCPS::Serializer ser(&buffer, xcdr2);
-  ASSERT_TRUE(ser << data);
-  EXPECT_PRED_FORMAT2(assert_DataView, appendable_struct, buffer);
+  assert_serialized_data(128, data, appendable_struct);
 }
 
 /////////////////////////// Final tests ///////////////////////////
@@ -1736,6 +2474,311 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToStruct)
     0x00,0x00,0x00,0x06, 0,0x61,0,0x62,0,0x63 // +10=78 wstr
   };
   verify_single_value_struct<FinalSingleValueStruct>(dt, single_value_struct);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteValueToUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x00, // discriminator
+      0x00,0x00,0x00,0x0a // int_32
+    };
+    verify_int32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x01, // discriminator
+      0x00,0x00,0x00,0x0b // uint_32
+    };
+    verify_uint32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x02, // discriminator
+      0x7f // int_8
+    };
+    verify_int8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x03, // discriminator
+      0xff // uint_8
+    };
+    verify_uint8_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x09 // int_16
+    };
+    verify_int16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x05 // uint_16
+    };
+    verify_uint16_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xfe // int_64
+    };
+    verify_int64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x07, // discriminator
+      0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff// uint_64
+    };
+    verify_uint64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // discriminator
+      0x3f,0x80,0x00,0x00 // float_32
+    };
+    verify_float32_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x09, // discriminator
+      0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64
+    };
+    verify_float64_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0b, // discriminator
+      'a' // char_8
+    };
+    verify_char8_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x61 // char_16
+    };
+    verify_char16_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0d, // discriminator
+      0xff // byte_
+    };
+    verify_byte_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x01 // bool_
+    };
+    verify_bool_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str
+    };
+    verify_string_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    // Serialization of wide string doesn't include termination NUL
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x10, // discriminator
+      0x00,0x00,0x00,0x06, 0x00,0x61,0x00,0x62,0x00,0x63 // wstr
+    };
+    verify_wstring_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0a, // discriminator
+      0x00,0x00,0x00,0x09 // my_enum
+    };
+    verify_enum_union(dt, expected_cdr);
+  }
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteSequenceToStruct)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSequenceStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSequenceStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  unsigned char expected_cdr[] = {
+    0,0,0,12, 0,0,0,2, 0,0,0,1, 0,0,0,2, // my_enums
+    0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5, // int_32s
+    0,0,0,2, 0,0,0,10, 0,0,0,11, // uint_32s
+    0,0,0,3, 12,13,14,(0), // int_8s
+    0,0,0,2, 15,16,(0),(0), // uint_8s
+    0,0,0,2, 0,1,0,2, // int_16s
+    0,0,0,3, 0,3,0,4,0,5,(0),(0), // uint_16s
+    0,0,0,2, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe,
+    0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // int_64s
+    0,0,0,1, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff, // uint_64s
+    0,0,0,1, 0x3f,0x80,0x00,0x00, // float_32s
+    0,0,0,1, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00, // float_64s
+    0,0,0,2, 'a','b',(0),(0), // char_8s
+    0,0,0,3, 0,0x63,0,0x64,0,0x65,(0),(0), // char_16s
+    0,0,0,2, 0xee,0xff,(0),(0), // byte_s
+    0,0,0,1, 1,(0),(0),(0), // bool_s
+    0,0,0,12, 0,0,0,1, 0,0,0,4, 'a','b','c','\0', // str_s
+    0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+    0,0,0,6, 0,0x67,0,0x68,0,0x69 // wstr_s
+  };
+  verify_sequence_value_struct<FinalSequenceStruct>(dt, expected_cdr);
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteSequenceToUnion)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSequenceUnion_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSequenceUnion_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x00, // discriminator
+      0,0,0,3, 0,0,0,3, 0,0,0,4, 0,0,0,5 // int_32s
+    };
+    verify_int32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x01, // discriminator
+      0,0,0,2, 0,0,0,10, 0,0,0,11 // uint_32s
+    };
+    verify_uint32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x02, // discriminator
+      0x00,0x00,0x00,0x03, 0x0c,0x0d,0x0e // int_8s
+    };
+    verify_int8s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x03, // discriminator
+      0x00,0x00,0x00,0x02, 0x0f,0x10 // uint_8s
+    };
+    verify_uint8s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x04, // discriminator
+      0x00,0x00,0x00,0x02, 0x00,0x01,0x00,0x02 // int_16s
+    };
+    verify_int16s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x05, // discriminator
+      0x00,0x00,0x00,0x03, 0x00,0x03,0x00,0x04,0x00,0x05 // uint_16s
+    };
+    verify_uint16s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x06, // discriminator
+      0x00,0x00,0x00,0x02,
+      0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xfe, 0x7f,0xff,0xff,0xff,0xff,0xff,0xff,0xff // int_64s
+    };
+    verify_int64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x07, // discriminator
+      0x00,0x00,0x00,0x01, 0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xff // uint_64s
+    };
+    verify_uint64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x08, // discriminator
+      0x00,0x00,0x00,0x01, 0x3f,0x80,0x00,0x00 // float_32s
+    };
+    verify_float32s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x09, // discriminator
+      0x00,0x00,0x00,0x01, 0x3f,0xf0,0x00,0x00,0x00,0x00,0x00,0x00 // float_64s
+    };
+    verify_float64s_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0b, // discriminator
+      0x00,0x00,0x00,0x02, 'a','b' // char_8s
+    };
+    verify_char8s_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0c, // discriminator
+      0x00,0x00,0x00,0x03, 0x00,0x63,0x00,0x64,0x00,0x65 // char_16s
+    };
+    verify_char16s_union(dt, expected_cdr);
+  }
+#endif
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0d, // discriminator
+      0x00,0x00,0x00,0x02, 0xee,0xff //  byte_s
+    };
+    verify_bytes_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0e, // discriminator
+      0x00,0x00,0x00,0x01, 0x01 // bool_s
+    };
+    verify_bools_union(dt, expected_cdr);
+  }
+  {
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x0f, // discriminator
+      0x00,0x00,0x00,0x0c, 0x00,0x00,0x00,0x01,
+      0x00,0x00,0x00,0x04,'a','b','c','\0' // str_s
+    };
+    verify_strings_union(dt, expected_cdr);
+  }
+#ifdef DDS_HAS_WCHAR
+  {
+    // Serialization of wide string doesn't include termination NUL
+    unsigned char expected_cdr[] = {
+      0x00,0x00,0x00,0x10, // discriminator
+      0,0,0,26, 0,0,0,2, 0,0,0,6, 0,0x64,0,0x65,0,0x66,(0),(0),
+      0,0,0,6, 0,0x67,0,0x68,0,0x69 // wstr_s
+    };
+    verify_wstrings_union(dt, expected_cdr);
+  }
+#endif
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
@@ -1821,10 +2864,7 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteStructWithNestedMembers)
   ret = data.set_int8_value(4, 0x11);
   EXPECT_EQ(ret, DDS::RETCODE_OK);
 
-  ACE_Message_Block buffer(128);
-  DCPS::Serializer ser(&buffer, xcdr2);
-  ASSERT_TRUE(ser << data);
-  EXPECT_PRED_FORMAT2(assert_DataView, final_struct, buffer);
+  assert_serialized_data(128, data, final_struct);
 }
 
 TEST(dds_DCPS_XTypes_DynamicDataImpl, Final_WriteKeyOnly)
