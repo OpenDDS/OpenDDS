@@ -2,6 +2,22 @@
    {
       "assets" : [
          {
+            "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.23.1/OpenDDS-3.23.1.zip",
+            "name" : "OpenDDS-3.23.1.zip"
+         },
+         {
+            "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.23.1/OpenDDS-3.23.1.tar.gz",
+            "name" : "OpenDDS-3.23.1.tar.gz"
+         }
+      ],
+      "html_url" : "https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.23.1",
+      "latest_in_series" : 1,
+      "published_at" : "2023-02-01T20:40:51Z",
+      "version" : "3.23.1"
+   },
+   {
+      "assets" : [
+         {
             "browser_download_url" : "https://github.com/OpenDDS/OpenDDS/releases/download/DDS-3.23/OpenDDS-3.23.zip",
             "name" : "OpenDDS-3.23.zip"
          },
@@ -11,7 +27,7 @@
          }
       ],
       "html_url" : "https://github.com/OpenDDS/OpenDDS/releases/tag/DDS-3.23",
-      "latest_in_series" : 1,
+      "latest_in_series" : 0,
       "published_at" : "2022-12-21T19:06:46Z",
       "version" : "3.23.0"
    },
