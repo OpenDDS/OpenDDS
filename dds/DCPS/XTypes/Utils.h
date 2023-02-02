@@ -159,6 +159,9 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type, DDS:
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_enum_value(
   CORBA::Int32& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id);
 
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_enumerator_name(
+  DDS::String8_var& name, DDS::Int32 value, DDS::DynamicType_ptr type);
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

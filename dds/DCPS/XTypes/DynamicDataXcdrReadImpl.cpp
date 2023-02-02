@@ -2914,12 +2914,11 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, 
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char8_value);
   case TK_CHAR16:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char16_value);
+  case TK_ENUM:
   case TK_STRING8:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_string_value);
   case TK_STRING16:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_wstring_value);
-  case TK_ENUM:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_string_value);
   default:
     return DDS::RETCODE_UNSUPPORTED;
   }

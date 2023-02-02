@@ -1595,6 +1595,37 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
   return DDS::RETCODE_ERROR;
 }
 
+DDS::ReturnCode_t DynamicDataImpl::get_simple_value_enum(DCPS::Value& value,
+                                                         DDS::MemberId id) const
+{
+  DCPS::Value enumAsInteger(0);
+  DDS::ReturnCode_t ret = get_simple_value_primitive<DDS::Int32>(enumAsInteger, id);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::DynamicTypeMember_var dtm;
+  ret = type_->get_member(dtm, id);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::MemberDescriptor_var md;
+  ret = dtm->get_descriptor(md);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::String8_var str;
+  ret = get_enumerator_name(str, enumAsInteger.get<DDS::Int32>(), md->type());
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  value = str.in();
+  return DDS::RETCODE_OK;
+}
+
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::MemberId id)
 {
   DDS::DynamicTypeMember_var dtm;
@@ -1626,6 +1657,8 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::Mem
     return get_simple_value_primitive<CORBA::LongDouble>(value, id);
   case TK_STRING8:
     return get_simple_value_string(value, id);
+  case TK_ENUM:
+    return get_simple_value_enum(value, id);
   default:
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_simple_value:"
@@ -2239,8 +2272,33 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
 {
+  DDS::DynamicTypeMember_var dtm;
+  DDS::ReturnCode_t rc = type_->get_member(dtm, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  DDS::MemberDescriptor_var md;
+  rc = dtm->get_descriptor(md);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  if (md->type()->get_kind() == TK_ENUM) {
+    DDS::Int32 valAsInt;
+    rc = get_enum_value(valAsInt, md->type(), this, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    DDS::String8_var valAsStr;
+    rc = get_enumerator_name(valAsStr, valAsInt, md->type());
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    value = valAsStr._retn();
+    return DDS::RETCODE_OK;
+  }
+
   const char* orig = 0;
-  const DDS::ReturnCode_t rc = get_single_value(orig, id, TK_STRING8);
+  rc = get_single_value(orig, id, TK_STRING8);
   if (rc == DDS::RETCODE_OK) {
     value = CORBA::string_dup(orig);
   }

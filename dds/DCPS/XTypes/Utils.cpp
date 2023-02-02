@@ -1103,6 +1103,25 @@ DDS::ReturnCode_t get_enum_value(
   return rc;
 }
 
+DDS::ReturnCode_t get_enumerator_name(
+  DDS::String8_var& name, DDS::Int32 value, DDS::DynamicType_ptr type)
+{
+  DDS::DynamicTypeMember_var dtm;
+  DDS::ReturnCode_t rc = type->get_member(dtm, static_cast<DDS::MemberId>(value));
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+
+  DDS::MemberDescriptor_var md;
+  rc = dtm->get_descriptor(md);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+
+  name = md->name();
+  return DDS::RETCODE_OK;
+}
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

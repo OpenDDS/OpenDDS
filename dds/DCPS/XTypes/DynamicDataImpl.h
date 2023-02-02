@@ -241,6 +241,7 @@ private:
   template<typename ValueType>
   DDS::ReturnCode_t get_simple_value_primitive(DCPS::Value& value, DDS::MemberId id) const;
   DDS::ReturnCode_t get_simple_value_string(DCPS::Value& value, DDS::MemberId id) const;
+  DDS::ReturnCode_t get_simple_value_enum(DCPS::Value& value, DDS::MemberId id) const;
 #endif
 
   bool is_basic_type(TypeKind tk) const;
