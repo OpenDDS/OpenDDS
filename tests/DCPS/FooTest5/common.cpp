@@ -33,7 +33,7 @@ int using_shmem = 0;
 int sequence_length = 10;
 int no_key = 0;
 InstanceDataMap results;
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads = 0;
+OpenDDS::DCPS::Atomic<int> num_reads(0);
 long op_interval_ms = 0;
 long blocking_ms = 0;
 int mixed_trans = 0;

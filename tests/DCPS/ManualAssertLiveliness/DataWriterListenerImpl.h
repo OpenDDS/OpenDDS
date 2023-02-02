@@ -56,7 +56,7 @@ public:
 
   unsigned long num_liveliness_lost_callbacks() const
   {
-    return num_liveliness_lost_callbacks_.value();
+    return num_liveliness_lost_callbacks_;
   }
 
   void reset_liveliness_lost_callbacks()
@@ -65,7 +65,7 @@ public:
   }
 
 private:
-  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> num_liveliness_lost_callbacks_;
+  OpenDDS::DCPS::Atomic<unsigned long> num_liveliness_lost_callbacks_;
 };
 
 #endif /* DATAWRITER_LISTENER_IMPL  */

@@ -34,7 +34,7 @@ int read (::DDS::DataReader_ptr reader)
         num_reads++;
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) reader %X take foo.x = %f foo.y = %f, foo.data_source = %d, count = %d\n"),
-          reader, foo.x, foo.y, foo.data_source, num_reads.value()));
+          reader, foo.x, foo.y, foo.data_source, num_reads.load()));
         ACE_DEBUG((LM_DEBUG,
           ACE_TEXT("(%P|%t) SampleInfo.sample_rank = %d\n"), si.sample_rank));
 

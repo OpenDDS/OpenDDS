@@ -28,7 +28,7 @@ public:
 
 private:
   DataWriters& datawriters_;
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> timeout_writes_;
+  OpenDDS::DCPS::Atomic<int> timeout_writes_;
   const int my_pid_;
 };
 

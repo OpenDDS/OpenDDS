@@ -8,21 +8,22 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDSTRATEGY_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDSTRATEGY_H
 
+#include "BasicQueue_T.h"
+#include "ThreadSynchStrategy_rch.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
-#include "BasicQueue_T.h"
 #include "TransportImpl_rch.h"
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
-#include "ThreadSynchStrategy_rch.h"
 
 #include <dds/DCPS/dcps_export.h>
-#include <dds/DCPS/Definitions.h>
-#include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/PoolAllocator.h>
+#include "dds/DCPS/Atomic.h"
 #include <dds/DCPS/DataBlockLockPool.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/RcObject.h>
 
 #if defined(OPENDDS_SECURITY)
 #include <dds/DdsSecurityCoreC.h>
@@ -386,7 +387,7 @@ private:
   unsigned start_counter_;
 
   /// This mode determines how send() calls will be handled.
-  ACE_Atomic_Op<ACE_Thread_Mutex, SendMode> mode_;
+  Atomic<SendMode> mode_;
 
   /// This mode remembers the mode before send is suspended and is
   /// used after the send is resumed because the connection is

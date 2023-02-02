@@ -15,7 +15,7 @@
 
 #include "ace/OS_NS_unistd.h"
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
+OpenDDS::DCPS::Atomic<CORBA::Long> key(0);
 
 Writer::Writer(::DDS::DataWriter_ptr writer,
                int num_thread_to_write,
