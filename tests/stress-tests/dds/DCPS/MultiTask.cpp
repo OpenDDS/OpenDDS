@@ -9,15 +9,18 @@
 
 #include "TimingChecker.h"
 
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/MultiTask.h"
-#include "dds/DCPS/ReactorTask.h"
+#include <dds/DCPS/Atomic.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/MultiTask.h>
+#include <dds/DCPS/ReactorTask.h>
 
 #include "../../../DCPS/common/TestSupport.h"
 
 using namespace OpenDDS::DCPS;
 
-ACE_Atomic_Op<ACE_Thread_Mutex, unsigned int> total_count = 0;
+namespace {
+
+OpenDDS::DCPS::Atomic<unsigned int> total_count(0u);
 
 struct TestObj : public virtual RcObject
 {
@@ -32,7 +35,7 @@ struct TestObj : public virtual RcObject
   void execute(const MonotonicTimePoint&) {
     ACE_DEBUG((LM_DEBUG, "TestObj::execute() called at %T\n"));
     ++total_count;
-    if (do_enable_.value()) {
+    if (do_enable_) {
       multi_->enable(TimeDuration::from_msec(100)); // 0.1 seconds from now
     }
   }
@@ -40,7 +43,7 @@ struct TestObj : public virtual RcObject
   void set_do_enable(bool do_enable) { do_enable_ = do_enable; }
 
   RcHandle<Multi> multi_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> do_enable_;
+  OpenDDS::DCPS::Atomic<bool> do_enable_;
 };
 
 int
@@ -56,11 +59,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   RcHandle<TestObj> obj = make_rch<TestObj>(rchandle_from(&reactor_task));
   obj->multi_->enable(TimeDuration::from_msec(2000)); // 2.0 seconds
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 0);
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
+  EXPECT_EQ(total_count, 0);
   ACE_OS::sleep(5); // 5.0 seconds
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 2); // expect 2 executions within a 5.0 second interval when period is 2.0 seconds
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
+  EXPECT_EQ(total_count, 2); // expect 2 executions within a 5.0 second interval when period is 2.0 seconds
   obj->set_do_enable(true);
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000); // 2.0 seconds from now
   size_t enable_calls = 0;
@@ -72,7 +75,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   obj->set_do_enable(false);
   ACE_OS::sleep(ACE_Time_Value(0, 110000)); // sleep for 0.11 seconds to catch final "fast" executions
   ACE_DEBUG((LM_DEBUG, "enable_calls = %d\n", enable_calls));
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1)
   if (tight_timing) {
     TEST_CHECK(total_count == 22);
@@ -81,7 +84,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(total_count <= 22);
   }
   ACE_OS::sleep(5); // sleep for 5.0 more seconds, should fall back to 2.0 second default period
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1), 2 more from last slow period
   if (tight_timing) {
     TEST_CHECK(total_count == 24);

@@ -134,7 +134,7 @@ create_writer(const DDS::Publisher_var& pub, const char* topicName,
   return OpenDDS::DCPS::DDSTraits<MessageType>::DataWriterType::_narrow(dw);
 }
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
+OpenDDS::DCPS::Atomic<CORBA::Long> key(0);
 
 void t1_init(T1::Foo1& foo, int)
 {

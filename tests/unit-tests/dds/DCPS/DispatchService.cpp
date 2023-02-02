@@ -65,14 +65,14 @@ struct RecursiveTestObjTwo : public TestObjBase {
   void operator()()
   {
     increment_call_count();
-    const size_t scale = dispatch_scale_.value();
+    const size_t scale = dispatch_scale_;
     for (size_t i = 0; i < scale; ++i) {
       dispatcher_.dispatch(*this);
     }
   }
 
   OpenDDS::DCPS::DispatchService& dispatcher_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> dispatch_scale_;
+  OpenDDS::DCPS::Atomic<size_t> dispatch_scale_;
 };
 
 } // (anonymous) namespace

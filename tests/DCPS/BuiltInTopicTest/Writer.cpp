@@ -2,7 +2,8 @@
 //
 #include "Writer.h"
 #include "MessengerTypeSupportC.h"
-#include "tests/Utils/ExceptionStreams.h"
+
+#include <tests/Utils/ExceptionStreams.h>
 
 #include <ace/OS_NS_unistd.h>
 #include <ace/streams.h>
@@ -120,5 +121,5 @@ Writer::is_finished() const
 int
 Writer::get_timeout_writes() const
 {
-  return timeout_writes_.value();
+  return timeout_writes_;
 }

@@ -181,14 +181,14 @@ public:
 
 private:
   std::vector<std::string>& writers_;
-  static ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> thread_counter_;
+  static OpenDDS::DCPS::Atomic<int> thread_counter_;
   DDS::DomainParticipant_var participant_;
   DDS::Topic_var topic_;
   const bool& reliable_;
   int total_readers_;
 };
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> WriterTask::thread_counter_;
+OpenDDS::DCPS::Atomic<int> WriterTask::thread_counter_;
 
 ACE_Thread_Mutex readers_done_lock;
 ACE_Condition_Thread_Mutex readers_done_cond(readers_done_lock);

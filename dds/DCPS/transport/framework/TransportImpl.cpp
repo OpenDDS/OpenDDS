@@ -33,7 +33,6 @@ namespace DCPS {
 TransportImpl::TransportImpl(TransportInst& config)
   : config_(config)
   , event_dispatcher_(make_rch<ServiceEventDispatcher>(1))
-  , last_link_(0)
   , is_shut_down_(false)
 {
   DBG_ENTRY_LVL("TransportImpl", "TransportImpl", 6);

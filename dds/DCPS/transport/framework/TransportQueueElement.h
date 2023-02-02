@@ -10,17 +10,14 @@
 
 #include "dds/DCPS/dcps_export.h"
 
-#include "dds/DCPS/Cached_Allocator_With_Overflow_T.h"
-#include "dds/DCPS/Definitions.h"
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/PoolAllocationBase.h"
-#include "dds/DCPS/SequenceNumber.h"
+#include <dds/DCPS/Atomic.h>
+#include <dds/DCPS/Cached_Allocator_With_Overflow_T.h>
+#include <dds/DCPS/Definitions.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/PoolAllocationBase.h>
+#include <dds/DCPS/SequenceNumber.h>
+
 #include <utility>
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 
 ACE_BEGIN_VERSIONED_NAMESPACE_DECL
 class ACE_Message_Block;
@@ -206,11 +203,7 @@ private:
   friend class TransportCustomizedElement;
 
   /// Counts the number of outstanding sub-loans.
-#ifdef ACE_HAS_CPP11
-  std::atomic<unsigned long> sub_loan_count_;
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> sub_loan_count_;
-#endif
+  Atomic<unsigned long> sub_loan_count_;
 
   /// Flag flipped to true if any DataLink dropped the sample.
   bool dropped_;

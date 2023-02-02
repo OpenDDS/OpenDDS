@@ -1924,7 +1924,7 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
     }
   }
 
-  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_));
+  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_.load()));
 }
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)

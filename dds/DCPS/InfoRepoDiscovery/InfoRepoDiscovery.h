@@ -8,24 +8,20 @@
 #ifndef OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
 #define OPENDDS_DCPS_INFOREPODISCOVERY_INFOREPODISCOVERY_H
 
-#include "dds/DCPS/Discovery.h"
-#include "dds/DdsDcpsInfoUtilsC.h"
-#include "dds/DCPS/GuidUtils.h"
 #include "DataReaderRemoteC.h"
-#include "InfoC.h"
-#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
-#include "dds/DCPS/XTypes/TypeObject.h"
-#include "dds/DCPS/TypeSupportImpl.h"
-#include "ace/Task.h"
-
 #include "InfoRepoDiscovery_Export.h"
+#include "InfoC.h"
 
-#include "ace/Thread_Mutex.h"
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op_T.h>
-#endif /* ACE_HAS_CPP11 */
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DCPS/Atomic.h>
+#include <dds/DCPS/Discovery.h>
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/transport/framework/TransportConfig_rch.h>
+#include <dds/DCPS/XTypes/TypeObject.h>
+#include <dds/DCPS/TypeSupportImpl.h>
+
+#include <ace/Task.h>
+#include <ace/Thread_Mutex.h>
 
 #include <string>
 
@@ -250,11 +246,7 @@ private:
     void shutdown();
 
     CORBA::ORB_var orb_;
-#ifdef ACE_HAS_CPP11
-    std::atomic<unsigned long> use_count_;
-#else
-    ACE_Atomic_Op<ACE_Thread_Mutex, unsigned long> use_count_;
-#endif
+    Atomic<unsigned long> use_count_;
   private:
     OrbRunner(const OrbRunner&);
     OrbRunner& operator=(const OrbRunner&);

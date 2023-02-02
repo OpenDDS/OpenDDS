@@ -17,7 +17,9 @@
 
 using namespace OpenDDS::DCPS;
 
-ACE_Atomic_Op<ACE_Thread_Mutex, unsigned int> total_count = 0;
+namespace {
+
+OpenDDS::DCPS::Atomic<unsigned int> total_count(0u);
 
 struct TestObj : public virtual RcObject
 {
@@ -33,7 +35,7 @@ struct TestObj : public virtual RcObject
   void execute(const MonotonicTimePoint&) {
     ACE_DEBUG((LM_DEBUG, "TestObj::execute() called at %T\n"));
     ++total_count;
-    if (do_schedule_.value()) {
+    if (do_schedule_) {
       sporadic_->schedule(TimeDuration::from_msec(100)); // 0.1 seconds from now
     }
   }
@@ -41,7 +43,7 @@ struct TestObj : public virtual RcObject
   void set_do_schedule(bool do_schedule) { do_schedule_ = do_schedule; }
 
   RcHandle<Sporadic> sporadic_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> do_schedule_;
+  OpenDDS::DCPS::Atomic<bool> do_schedule_;
 };
 
 int
@@ -61,11 +63,11 @@ ACE_TMAIN(int, ACE_TCHAR*[])
 
   RcHandle<TestObj> obj = make_rch<TestObj>(time_source, rchandle_from(&reactor_task));
   obj->sporadic_->schedule(TimeDuration::from_msec(2000));
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 0);
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
+  EXPECT_EQ(total_count, 0);
   ACE_OS::sleep(5);
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
-  TEST_CHECK(total_count == 1);
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
+  EXPECT_EQ(total_count, 1);
   obj->set_do_schedule(true);
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000);
   size_t schedule_calls = 0;
@@ -77,7 +79,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
   obj->set_do_schedule(false);
   ACE_OS::sleep(ACE_Time_Value(0, 110000)); // sleep for 0.11 seconds to catch final "fast" executions
   ACE_DEBUG((LM_DEBUG, "schedule_calls = %d\n", schedule_calls));
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1)
   if (tight_timing) {
     TEST_CHECK(total_count == 21);
@@ -86,7 +88,7 @@ ACE_TMAIN(int, ACE_TCHAR*[])
     TEST_CHECK(total_count <= 21);
   }
   ACE_OS::sleep(2);
-  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.value()));
+  ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
   // No lingering enables / executions mean total count should be unchanged
   if (tight_timing) {
     TEST_CHECK(total_count == 21);

@@ -855,7 +855,7 @@ int DCPS_IR_Domain::init_built_in_topics_transport(bool persistent)
 int DCPS_IR_Domain::cleanup_built_in_topics()
 {
 #ifndef DDS_HAS_MINIMUM_BIT
-  if (useBIT_.value() && bitParticipant_) {
+  if (useBIT_ && bitParticipant_) {
     useBIT_ = false;
     using OpenDDS::DCPS::retcode_to_string;
 
@@ -1016,7 +1016,7 @@ void DCPS_IR_Domain::publish_participant_bit(DCPS_IR_Participant* participant)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value() && !participant->isBitPublisher()) {
+  if (useBIT_ && !participant->isBitPublisher()) {
     try {
       const DDS::DomainParticipantQos* participantQos = participant->get_qos();
 
@@ -1052,7 +1052,7 @@ void DCPS_IR_Domain::publish_topic_bit(DCPS_IR_Topic* topic)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value()) {
+  if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
       topic->get_topic_description();
     const char* name = desc->get_name();
@@ -1113,7 +1113,7 @@ void DCPS_IR_Domain::publish_subscription_bit(DCPS_IR_Subscription* subscription
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value()) {
+  if (useBIT_) {
     DCPS_IR_Topic_Description* desc =
       subscription->get_topic_description();
     const char* name = desc->get_name();
@@ -1180,7 +1180,7 @@ void DCPS_IR_Domain::publish_publication_bit(DCPS_IR_Publication* publication)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value()) {
+  if (useBIT_) {
 
     DCPS_IR_Topic_Description* desc =
       publication->get_topic_description();
@@ -1260,7 +1260,7 @@ void DCPS_IR_Domain::dispose_participant_bit(DCPS_IR_Participant* participant)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value()) {
+  if (useBIT_) {
     if (!participant->isBitPublisher()) {
       try {
         DDS::ParticipantBuiltinTopicData key_data;
@@ -1308,7 +1308,7 @@ void DCPS_IR_Domain::dispose_topic_bit(DCPS_IR_Topic* topic)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value()) {
+  if (useBIT_) {
     if (!topic->is_bit()) {
       try {
         DDS::TopicBuiltinTopicData key_data;
@@ -1358,7 +1358,7 @@ void DCPS_IR_Domain::dispose_subscription_bit(DCPS_IR_Subscription* subscription
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value()) {
+  if (useBIT_) {
     if (!subscription->is_bit()) {
       try {
         DDS::SubscriptionBuiltinTopicData key_data;
@@ -1408,7 +1408,7 @@ void DCPS_IR_Domain::dispose_publication_bit(DCPS_IR_Publication* publication)
 {
 #if !defined (DDS_HAS_MINIMUM_BIT)
 
-  if (useBIT_.value()) {
+  if (useBIT_) {
     if (!publication->is_bit()) {
       try {
         DDS::PublicationBuiltinTopicData key_data;
@@ -1470,7 +1470,7 @@ std::string DCPS_IR_Domain::dump_to_string(const std::string& prefix, int depth)
   std::ostringstream os;
   os << "DCPS_IR_Domain[" << id_ << "]";
   str += os.str();
-  if (useBIT_.value())
+  if (useBIT_)
     str += " BITS";
   str += "\n";
 

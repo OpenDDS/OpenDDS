@@ -9,22 +9,22 @@
 #define DCPS_IR_DOMAIN_H
 
 #include  "inforepo_export.h"
-#include /**/ "dds/DdsDcpsInfrastructureC.h"
-#include /**/ "dds/DCPS/InfoRepoDiscovery/InfoS.h"
 
-#include "dds/DCPS/RepoIdGenerator.h"
-
-#include /**/ "dds/DdsDcpsDomainC.h"
-#include /**/ "dds/DdsDcpsInfoUtilsC.h"
+#include <dds/DdsDcpsInfrastructureC.h>
+#include <dds/DdsDcpsDomainC.h>
+#include <dds/DdsDcpsInfoUtilsC.h>
+#include <dds/DCPS/InfoRepoDiscovery/InfoS.h>
+#include <dds/DCPS/AtomicBool.h>
+#include <dds/DCPS/RepoIdGenerator.h>
+#include <dds/DCPS/transport/framework/TransportConfig.h>
+#include <dds/DCPS/transport/tcp/TcpTransport.h>
+#include <dds/DCPS/transport/framework/TransportConfig_rch.h>
 
 #if !defined (DDS_HAS_MINIMUM_BIT)
-#include /**/ "dds/DdsDcpsCoreTypeSupportImpl.h"
+#include <dds/DdsDcpsCoreTypeSupportImpl.h>
 #endif // !defined (DDS_HAS_MINIMUM_BIT)
 
-#include "dds/DCPS/transport/framework/TransportConfig.h"
-#include "dds/DCPS/transport/tcp/TcpTransport.h"
-#include "dds/DCPS/transport/framework/TransportConfig_rch.h"
-#include /**/ "ace/Unbounded_Set.h"
+#include <ace/Unbounded_Set.h>
 
 #include <set>
 #include <map>
@@ -175,7 +175,7 @@ public:
 
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
-  bool useBIT() const { return useBIT_.value(); }
+  bool useBIT() const { return useBIT_; }
 
 private:
   OpenDDS::DCPS::TopicStatus add_topic_i(OpenDDS::DCPS::RepoId& topicId,
@@ -239,7 +239,7 @@ private:
   IdToTopicMap idToTopicMap_;
 
   /// indicates if the BuiltIn Topics are enabled
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool> useBIT_;
+  OpenDDS::DCPS::AtomicBool useBIT_;
 
   ///@{
   /// Built-in Topic variables

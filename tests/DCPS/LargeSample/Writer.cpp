@@ -122,5 +122,5 @@ void Writer::write(bool reliable, int num_messages, unsigned data_field_length_o
 int
 Writer::get_timeout_writes() const
 {
-  return timeout_writes_.value();
+  return timeout_writes_;
 }

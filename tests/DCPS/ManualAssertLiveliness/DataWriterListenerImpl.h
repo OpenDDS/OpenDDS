@@ -57,7 +57,7 @@ public:
 
   unsigned long num_liveliness_lost_callbacks() const
   {
-    return num_liveliness_lost_callbacks_.value();
+    return num_liveliness_lost_callbacks_;
   }
 
   void reset_liveliness_lost_callbacks()

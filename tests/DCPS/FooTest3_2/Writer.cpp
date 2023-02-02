@@ -12,7 +12,7 @@
 #include "tests/DCPS/common/TestSupport.h"
 
 const int default_key = 101010;
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
+OpenDDS::DCPS::Atomic<CORBA::Long> key(0);
 
 Writer::Writer(PubDriver* /*pubdriver*/,
                ::DDS::DataWriter_ptr writer,
@@ -149,7 +149,7 @@ Writer::svc ()
 
   if (check_data_dropped_ == 1 && writer_servant_->data_dropped_count_ > 0)
   {
-    while (writer_servant_->data_delivered_count_.value() + writer_servant_->data_dropped_count_.value()
+    while (writer_servant_->data_delivered_count_ + writer_servant_->data_dropped_count_
     < num_writes_per_thread_ * num_thread_to_write_)
     {
       ACE_OS::sleep (1);
@@ -157,7 +157,7 @@ Writer::svc ()
 
     ACE_DEBUG((LM_DEBUG,
       ACE_TEXT("(%P|%t) Writer::svc data_delivered_count=%d data_dropped_count=%d\n"),
-      writer_servant_->data_delivered_count_.value(), writer_servant_->data_dropped_count_.value()));
+      writer_servant_->data_delivered_count_.load(), writer_servant_->data_dropped_count_.load()));
   }
 
   while (true) {

@@ -17,8 +17,7 @@
 #ifdef OPENDDS_HAS_STD_UNIQUE_PTR
 #  include <memory>
 #else
-#  include "ace/Atomic_Op.h"
-#  include "ace/Synch_Traits.h"
+#  include "Atomic.h"
 #  ifdef ACE_HAS_CPP11
 #    include <utility>
 #  else
@@ -179,18 +178,18 @@ public:
   container_supported_unique_ptr(const container_supported_unique_ptr<U>& other)
     : ptr_(other.get())
   {
-    this->bump_up();
+    bump_up();
   }
 
   container_supported_unique_ptr(const container_supported_unique_ptr& b)
     : ptr_(b.ptr_)
   {
-    this->bump_up();
+    bump_up();
   }
 
   ~container_supported_unique_ptr()
   {
-    this->bump_down();
+    bump_down();
   }
 
   template <typename U>
@@ -231,30 +230,30 @@ public:
 
   void swap(container_supported_unique_ptr& rhs)
   {
-    T* t = this->ptr_;
-    this->ptr_ = rhs.ptr_;
+    T* t = ptr_;
+    ptr_ = rhs.ptr_;
     rhs.ptr_ = t;
   }
 
   T* operator->() const
   {
-    return this->ptr_;
+    return ptr_;
   }
 
   T& operator*() const
   {
-    return *this->ptr_;
+    return *ptr_;
   }
 
   T* get() const
   {
-    return this->ptr_;
+    return ptr_;
   }
 
   T* release()
   {
-    T* retval = this->ptr_;
-    this->ptr_ = 0;
+    T* retval = ptr_;
+    ptr_ = 0;
     return retval;
   }
 
@@ -282,16 +281,16 @@ private:
 
   void bump_up()
   {
-    if (this->ptr_ != 0) {
-      this->ptr_->_add_ref();
+    if (ptr_ != 0) {
+      ptr_->_add_ref();
     }
   }
 
   void bump_down()
   {
-    if (this->ptr_ != 0) {
-      this->ptr_->_remove_ref();
-      this->ptr_ = 0;
+    if (ptr_ != 0) {
+      ptr_->_remove_ref();
+      ptr_ = 0;
     }
   }
 
@@ -320,18 +319,20 @@ private:
   friend typename unique_ptr<U>::rv_reference move(container_supported_unique_ptr<U>& ptr);
 
   void _add_ref() {
-    ++this->ref_count_;
+    ++ref_count_;
   }
 
   void _remove_ref(){
-    const long new_count = --this->ref_count_;
+    const long new_count = --ref_count_;
 
     if (new_count == 0) {
       delete static_cast<T*>(this);
     }
   }
-  long ref_count() const { return ref_count_.value(); }
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, long> ref_count_;
+  long ref_count() const { return ref_count_; }
+
+private:
+  Atomic<long> ref_count_;
 };
 
 template <typename T>

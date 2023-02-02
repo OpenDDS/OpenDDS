@@ -3,11 +3,15 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include  "InstanceDataMap.h"
-#include  "ace/Time_Value.h"
-#include  "ace/SString.h"
-#include  "ace/Atomic_Op.h"
-#include  <string>
+#include "InstanceDataMap.h"
+
+#include <dds/DCPS/Atomic.h>
+
+#include <ace/Time_Value.h>
+#include <ace/SString.h>
+#include <ace/Atomic_Op.h>
+
+#include <string>
 
 const long  MY_DOMAIN = 111;
 extern const char* MY_TOPIC;
@@ -32,7 +36,7 @@ extern int using_shmem;
 extern int sequence_length;
 extern int no_key;
 extern InstanceDataMap results;
-extern ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> num_reads;
+extern OpenDDS::DCPS::Atomic<int> num_reads;
 extern long op_interval_ms;
 extern long blocking_ms;
 extern int mixed_trans;
