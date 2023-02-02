@@ -30,7 +30,7 @@ use ChangeDir;
 my $zero_version = parse_version("0.0.0");
 
 my $base_name_prefix = "OpenDDS-";
-my $default_github_user = "objectcomputing";
+my $default_github_user = "OpenDDS";
 my $default_remote = "origin";
 my $default_branch = "master";
 my $release_branch_prefix = "branch-";
@@ -132,7 +132,8 @@ sub usage {
   return
     "gitrelease.pl WORKSPACE VERSION [options]\n" .
     "gitrelease.pl --help | -h\n" .
-    "gitrelease.pl --list-all\n";
+    "gitrelease.pl --list-all\n" .
+    "gitrelease.pl --update-authors\n";
 }
 
 sub arg_error {
@@ -156,8 +157,9 @@ sub help {
     "  --help | -h            Print this message\n" .
     "  --list                 Just show step names that would run given the current\n" .
     "                         options. (default perform check)\n" .
-    "  --list-all             Same as --list, but show every step regardless of\n" .
-    "                         options.\n" .
+    "  --list-all             Same as --list, but show every step regardless of other\n" .
+    "                         options. This doesn't require the WORKSPACE or VERSION\n" .
+    "                         arguments\n" .
     "  --steps STEPS          Optional, Steps to perform, default is all\n" .
     "                         See \"Step Expressions\" Below for what it accepts.\n" .
     "  --remedy               Remediate problems where possible\n" .
@@ -199,7 +201,12 @@ sub help {
     "                         micro series.\n" .
     "  --upload-shapes-demo   Check GitHub for a finished shapes demo build workflow\n" .
     "                         run. Then download, repackage, and upload the results\n" .
-    "                         to the download server.\n" .
+    "                         to the download server. This doesn't run any steps,\n" .
+    "                         but still requires the WORKSPACE and VERSION arguments\n" .
+    "                         and accepts and uses other relevant options.\n" .
+    "  --update-authors       Just update the AUTHORS files like in a release.\n" .
+    "                         This doesn't run any release steps and doesn't require\n" .
+    "                         the WORKSPACE or VERSION arguments.\n" .
     "\n" .
     "Environment Variables:\n" .
     "  GITHUB_TOKEN           GitHub token with repo access to publish release on\n" .
@@ -307,6 +314,16 @@ sub run_command {
   );
 }
 
+sub die_with_stack_trace {
+  my $i = 1;
+  print STDERR ("ERROR: ", @_, " STACK TRACE:\n");
+  while (my @call_details = (caller($i++)) ){
+      print STDERR "ERROR: STACK TRACE[", $i - 2, "] " .
+        "$call_details[1]:$call_details[2] in function $call_details[3]\n";
+  }
+  die();
+}
+
 sub yes_no {
   my $message = shift;
   print("$message [y/n] ");
@@ -368,6 +385,23 @@ sub new_pithub {
     repo => $settings->{github_repo},
     token => $settings->{github_token},
   );
+}
+
+sub check_pithub_response {
+  my $response = shift();
+  my $extra_msg = shift();
+
+  unless ($response->is_success) {
+    die_with_stack_trace(
+      "HTTP issue while using PitHub: \"", $response->status_line(), "\"$extra_msg\n");
+  }
+}
+
+sub check_pithub_result {
+  my $result = shift();
+  my $extra_msg = shift() // '';
+
+  check_pithub_response($result->response, $extra_msg);
 }
 
 sub read_json_file {
@@ -804,30 +838,28 @@ sub trigger_shapes_run {
   my $settings = shift();
 
   # https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event
-  my $result = $settings->{pithub}->request(
+  my $response = $settings->{pithub}->request(
     method => 'POST',
     path => get_actions_url($settings) . "/workflows/ishapes.yml/dispatches",
     data => {
       ref => $settings->{git_tag},
     },
   );
-
-  if (!$result->success()) {
-    die("Failed to trigger shapes demo, HTTP status code: " . $result->code());
-  }
+  check_pithub_response($response);
 }
 
 sub get_last_shapes_run {
   my $settings = shift();
 
-  my $result = $settings->{pithub}->request(
+  my $response = $settings->{pithub}->request(
     method => 'GET',
     path => get_actions_url($settings) . '/runs',
     params => {
       branch => $settings->{git_tag},
     },
   );
-  for my $run (@{$result->content->{workflow_runs}}) {
+  check_pithub_response($response);
+  for my $run (@{$response->content->{workflow_runs}}) {
     if (is_shapes_workflow_path($run->{path})) {
       print("Last workflow run for $settings->{git_tag} was $run->{html_url}\n");
       return $run;
@@ -864,12 +896,13 @@ sub upload_shapes_demo {
   }
 
   # Get the artifacts from that run
-  my $result = $ph->request(
+  my $response = $ph->request(
     method => 'GET',
     path => "$actions_url/runs/$run->{id}/artifacts",
   );
+  check_pithub_response($response);
   my @artifacts;
-  for my $artifact (@{$result->content->{'artifacts'}}) {
+  for my $artifact (@{$response->content->{'artifacts'}}) {
     print("FOUND ID: $artifact->{id} NAME: $artifact->{name}\n");
     my $filename = "$artifact->{name}.zip";
     push(@artifacts, {
@@ -881,13 +914,14 @@ sub upload_shapes_demo {
   }
   for my $artifact (@artifacts) {
     print("Getting $artifact->{filename}...\n");
-    $result = $ph->request(
+    $response = $ph->request(
       method => 'GET',
       path => "$actions_url/artifacts/$artifact->{id}/zip",
     );
+    check_pithub_response($response);
     open(my $fd, '>', $artifact->{path}) or die ("Could not open $artifact->{path}: $!");
     binmode($fd);
-    print $fd $result->raw_content();
+    print $fd $response->raw_content();
     close($fd);
   }
 
@@ -1060,9 +1094,7 @@ sub get_releases {
   }
 
   my $release_list = $settings->{pithub}->repos->releases->list();
-  unless ($release_list->success) {
-    die("error accessing github: $release_list->response->status_line");
-  }
+  check_pithub_result($release_list);
 
   my @releases = ();
   while (my $release = $release_list->next) {
@@ -2532,16 +2564,12 @@ sub verify_github_upload {
   my $verified = 0;
 
   my $release_list = $settings->{pithub}->repos->releases->list();
-  unless ($release_list->success) {
-    printf "error accessing github: %s\n", $release_list->response->status_line;
-  }
-  else {
-    while (my $row = $release_list->next) {
-      if ($row->{tag_name} eq $settings->{git_tag}){
-        #printf "%d\t[%s]\n",$row->{id},$row->{tag_name};
-        $verified = 1;
-        last;
-      }
+  check_pithub_result($release_list);
+  while (my $row = $release_list->next) {
+    if ($row->{tag_name} eq $settings->{git_tag}){
+      #printf "%d\t[%s]\n",$row->{id},$row->{tag_name};
+      $verified = 1;
+      last;
     }
   }
   return $verified;
@@ -2592,33 +2620,26 @@ sub remedy_github_upload {
       body => $text,
     },
   );
-  unless ($release->success) {
-    print STDERR "error accessing github: $release->response->status_line\n";
-    $rc = 0;
-  }
-  else {
-    my $fail_msg = "\nThe release on GitHub has to be deleted manually before trying to verify\n" .
-      "or remedy this step again";
-    for my $filename (@assets) {
-      print("Upload $filename\n");
-      my $asset;
-      my $asset_detail = $asset_details{$filename};
-      eval {
-        $asset = $releases->assets->create(
-          release_id => $release->content->{id},
-          name => $filename,
-          content_type => $asset_detail->{content_type},
-          data => $asset_detail->{data}
-        );
-      };
-      if ($@) {
-        die("Issue with \$releases->assets->create:", $@, $fail_msg);
-      }
-      unless ($asset->success) {
-        print STDERR "error accessing github: $asset->response->status_line$fail_msg\n";
-        $rc = 0;
-      }
+  check_pithub_result($release);
+
+  my $fail_msg = "\nThe release on GitHub has to be deleted manually before trying to verify\n" .
+    "or remedy this step again";
+  for my $filename (@assets) {
+    print("Upload $filename\n");
+    my $asset;
+    my $asset_detail = $asset_details{$filename};
+    eval {
+      $asset = $releases->assets->create(
+        release_id => $release->content->{id},
+        name => $filename,
+        content_type => $asset_detail->{content_type},
+        data => $asset_detail->{data}
+      );
+    };
+    if ($@) {
+      die("Issue with \$releases->assets->create:", $@, $fail_msg);
     }
+    check_pithub_result($asset, $fail_msg);
   }
   return $rc;
 }
@@ -2936,7 +2957,6 @@ sub remedy_release_occurred_flag {
 ############################################################################
 
 my $status = 0;
-my $ignore_args = 0;
 
 # Process Optional Arguments
 my $print_help = 0;
@@ -2962,7 +2982,7 @@ my $skip_github = undef;
 my $force_not_highest_version = 0;
 my $sftp_base_dir = $default_sftp_base_dir;
 my $upload_shapes_demo = 0;
-my $write_authors = 0;
+my $update_authors = 0;
 
 GetOptions(
   'help' => \$print_help,
@@ -2987,7 +3007,7 @@ GetOptions(
   'sftp-base-dir=s' => \$sftp_base_dir,
   'skip-github=i' => \$skip_github,
   'upload-shapes-demo' => \$upload_shapes_demo,
-  'write-authors' => \$write_authors,
+  'update-authors' => \$update_authors,
 ) or arg_error("Invalid option");
 
 if ($print_help) {
@@ -2997,11 +3017,6 @@ if ($print_help) {
 
 if ($print_list_all) {
   $print_list = 1;
-  $ignore_args = 1;
-}
-
-if ($write_authors) {
-  $ignore_args = 1;
 }
 
 $mock = 1 if ($mock_with_doxygen);
@@ -3018,6 +3033,7 @@ my $version = "";
 my $base_name = "";
 my $release_branch = "";
 
+my $ignore_args = $update_authors || $print_list_all;
 if ($ignore_args) {
   $parsed_version = $zero_version;
   $parsed_next_version = $zero_version;
@@ -3462,7 +3478,7 @@ my @release_steps = (
     message => sub{message_trigger_shapes_demo_build(@_)},
     remedy => sub{remedy_trigger_shapes_demo_build(@_)},
     post_release => 1,
-    skip => $global_settings{skip_github},
+    skip => $global_settings{skip_github} || !$global_settings{is_highest_version},
   },
   {
     name => 'Email DDS-Release-Announce list',
@@ -3614,11 +3630,11 @@ sub run_step {
   $step->{verified} = 1;
 }
 
-my $alt = $upload_shapes_demo || $write_authors;
+my $alt = $upload_shapes_demo || $update_authors;
 if ($upload_shapes_demo) {
   upload_shapes_demo(\%global_settings);
 }
-elsif ($write_authors) {
+elsif ($update_authors) {
   remedy_authors(\%global_settings);
 }
 elsif (!$alt && ($ignore_args || ($workspace && $parsed_version))) {
