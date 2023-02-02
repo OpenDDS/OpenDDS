@@ -238,7 +238,7 @@ private:
   DDS::InstanceHandle_t handle_;
 
   /// Number of received coherent changes in active change set.
-  Atomic<uint32_t> coherent_samples_;
+  Atomic<ACE_UINT32> coherent_samples_;
 
   /// Is this writer evaluated for owner ?
   typedef OPENDDS_MAP(DDS::InstanceHandle_t, bool) OwnerEvaluateFlags;
