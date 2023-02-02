@@ -91,7 +91,7 @@ void addEnumerator(DynamicTypeImpl* dt, E kind, const char* name)
   MemberDescriptorImpl* md = new MemberDescriptorImpl;
   MemberDescriptor_var md_var = md;
   md->name(name);
-  md->id(static_cast<MemberId>(kind));
+  md->id(static_cast<DDS::MemberId>(kind));
   md->type(dt);
   md->index(static_cast<unsigned>(kind));
 
@@ -150,7 +150,7 @@ DynamicTypeMember_var memberForDurability()
   return memberDurabilityImpl;
 }
 
-DynamicTypeMember_var integerMember(TypeKind tk, const char* name, MemberId mid)
+DynamicTypeMember_var integerMember(DDS::TypeKind tk, const char* name, DDS::MemberId mid)
 {
   TypeDescriptor_var tdInt = new TypeDescriptorImpl;
   tdInt->kind(tk);
