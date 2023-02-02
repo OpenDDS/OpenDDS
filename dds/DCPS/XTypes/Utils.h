@@ -143,7 +143,14 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t compare_members(
   int& result, DDS::DynamicData_ptr a, DDS::DynamicData_ptr b, DDS::MemberId id);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_member_type(
-  DDS::DynamicType_var& type, DDS::DynamicData_ptr data, DDS::MemberId id);
+  DDS::DynamicType_var& member_type, DDS::DynamicType_ptr container_type, DDS::MemberId id);
+
+inline DDS::ReturnCode_t get_member_type(
+  DDS::DynamicType_var& member_type, DDS::DynamicData_ptr container, DDS::MemberId id)
+{
+  DDS::DynamicType_var container_type = container->type();
+  return get_member_type(member_type, container_type, id);
+}
 
 OpenDDS_Dcps_Export bool is_int(DDS::TypeKind tk);
 OpenDDS_Dcps_Export bool is_uint(DDS::TypeKind tk);
@@ -205,6 +212,8 @@ inline DDS::ReturnCode_t set_enum_value(
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_enumerator_name(
   DDS::String8_var& name, DDS::Int32 value, DDS::DynamicType_ptr type);
+OpenDDS_Dcps_Export DDS::ReturnCode_t get_enumerator_value(
+  DDS::Int32& value, const char* name, DDS::DynamicType_ptr type);
 
 } // namespace XTypes
 } // namespace OpenDDS

@@ -3112,4 +3112,46 @@ TEST(dds_DCPS_XTypes_DynamicDataImpl, Union_Setter)
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(disc, XTypes::DISCRIMINATOR_ID));
   EXPECT_EQ(static_cast<int>(DynamicDataImpl::E_INT16), disc);
 }
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, Enum_As_String)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_NE(it, type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  XTypes::DynamicDataImpl data(dt);
+  static const DDS::MemberId MID_my_enum = 0u;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_int32_value(MID_my_enum, static_cast<int>(E_UINT64)));
+
+  DDS::String8_var str;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_string_value(str, MID_my_enum));
+  EXPECT_STREQ("E_UINT64", str.in());
+}
+
+TEST(dds_DCPS_XTypes_DynamicDataImpl, String_As_Enum)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::DynamicDataImpl_FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_NE(it, type_map.end());
+
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  XTypes::DynamicDataImpl data(dt);
+  static const DDS::MemberId MID_my_enum = 0u;
+  EXPECT_EQ(DDS::RETCODE_OK, data.set_string_value(MID_my_enum, "E_UINT64"));
+
+  DDS::Int32 eval;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(eval, MID_my_enum));
+  EXPECT_EQ(static_cast<int>(E_UINT64), eval);
+}
 #endif // OPENDDS_SAFETY_PROFILE

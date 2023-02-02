@@ -179,6 +179,29 @@ bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
   return false;
 }
 
+
+bool DynamicDataBase::enum_string_helper(char*& strInOut, MemberId id)
+{
+  DDS::DynamicType_var mtype;
+  DDS::ReturnCode_t rc = get_member_type(mtype, type_, id);
+  if (rc != DDS::RETCODE_OK || mtype->get_kind() != TK_ENUM) {
+    return false;
+  }
+  DDS::Int32 valAsInt;
+  rc = get_enum_value(valAsInt, mtype, this, id);
+  if (rc != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::String8_var valAsStr;
+  rc = get_enumerator_name(valAsStr, valAsInt, mtype);
+  if (rc != DDS::RETCODE_OK) {
+    return false;
+  }
+  CORBA::string_free(strInOut);
+  strInOut = valAsStr._retn();
+  return true;
+}
+
 bool DynamicDataBase::check_member(
   DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
   const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk)

@@ -872,24 +872,28 @@ DDS::ReturnCode_t compare_members(int& result, DDS::DynamicData_ptr a, DDS::Dyna
   return member_compare(result, a, id, b, id);
 }
 
-DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& type,
-  DDS::DynamicData_ptr data, DDS::MemberId id)
+DDS::ReturnCode_t get_member_type(DDS::DynamicType_var& member_type,
+  DDS::DynamicType_ptr container_type, DDS::MemberId id)
 {
-  DDS::DynamicType_var data_type = data->type();
-  if (sequence_like(data_type->get_kind())) {
+  if (sequence_like(container_type->get_kind())) {
     DDS::TypeDescriptor_var td;
-    DDS::ReturnCode_t rc = data_type->get_descriptor(td);
+    DDS::ReturnCode_t rc = container_type->get_descriptor(td);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    type = get_base_type(td->element_type());
+    member_type = get_base_type(td->element_type());
   } else {
-    DDS::MemberDescriptor_var md;
-    DDS::ReturnCode_t rc = data->get_descriptor(md, id);
+    DDS::DynamicTypeMember_var dtm;
+    DDS::ReturnCode_t rc = container_type->get_member(dtm, id);
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    type = get_base_type(md->type());
+    DDS::MemberDescriptor_var md;
+    rc = dtm->get_descriptor(md);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    member_type = get_base_type(md->type());
   }
   return DDS::RETCODE_OK;
 }
@@ -964,11 +968,11 @@ DDS::ReturnCode_t set_uint_value(
 {
   switch (kind) {
   case TK_UINT8:
-    return src->set_uint8_value(id, value);
+    return src->set_uint8_value(id, static_cast<DDS::UInt8>(value));
   case TK_UINT16:
-    return src->set_uint16_value(id, value);
+    return src->set_uint16_value(id, static_cast<DDS::UInt16>(value));
   case TK_UINT32:
-    return src->set_uint32_value(id, value);
+    return src->set_uint32_value(id, static_cast<DDS::UInt32>(value));
   case TK_UINT64:
     return src->set_uint64_value(id, value);
   }
@@ -1019,11 +1023,11 @@ DDS::ReturnCode_t set_int_value(
 {
   switch (kind) {
   case TK_INT8:
-    return src->set_int8_value(id, value);
+    return src->set_int8_value(id, static_cast<DDS::Int8>(value));
   case TK_INT16:
-    return src->set_int16_value(id, value);
+    return src->set_int16_value(id, static_cast<DDS::Int16>(value));
   case TK_INT32:
-    return src->set_int32_value(id, value);
+    return src->set_int32_value(id, static_cast<DDS::Int32>(value));
   case TK_INT64:
     return src->set_int64_value(id, value);
   }
@@ -1151,6 +1155,25 @@ DDS::ReturnCode_t get_enumerator_name(
   }
 
   name = md->name();
+  return DDS::RETCODE_OK;
+}
+
+DDS::ReturnCode_t get_enumerator_value(
+  DDS::Int32& value, const char* name, DDS::DynamicType_ptr type)
+{
+  DDS::DynamicTypeMember_var dtm;
+  DDS::ReturnCode_t rc = type->get_member_by_name(dtm, name);
+  if (rc != DDS::RETCODE_OK) {
+     return rc;
+   }
+
+  DDS::MemberDescriptor_var md;
+  rc = dtm->get_descriptor(md);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+
+  value = static_cast<DDS::Int32>(md->id());
   return DDS::RETCODE_OK;
 }
 

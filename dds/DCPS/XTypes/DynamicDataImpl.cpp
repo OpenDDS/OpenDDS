@@ -1472,6 +1472,19 @@ DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Bo
 
 DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char* value)
 {
+  DDS::DynamicType_var mtype;
+  DDS::ReturnCode_t rc = get_member_type(mtype, type_, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  if (mtype->get_kind() == TK_ENUM) {
+    DDS::Int32 intValue;
+    rc = get_enumerator_value(intValue, value, mtype);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    return set_single_value<TK_INT32>(id, intValue);
+  }
   return set_single_value<TK_STRING8>(id, value);
 }
 
@@ -2272,34 +2285,14 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
 {
-  DDS::DynamicTypeMember_var dtm;
-  DDS::ReturnCode_t rc = type_->get_member(dtm, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
-  }
-  DDS::MemberDescriptor_var md;
-  rc = dtm->get_descriptor(md);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
-  }
-  if (md->type()->get_kind() == TK_ENUM) {
-    DDS::Int32 valAsInt;
-    rc = get_enum_value(valAsInt, md->type(), this, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-    DDS::String8_var valAsStr;
-    rc = get_enumerator_name(valAsStr, valAsInt, md->type());
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-    value = valAsStr._retn();
+  if (enum_string_helper(value, id)) {
     return DDS::RETCODE_OK;
   }
 
   const char* orig = 0;
-  rc = get_single_value(orig, id, TK_STRING8);
+  const DDS::ReturnCode_t rc = get_single_value(orig, id, TK_STRING8);
   if (rc == DDS::RETCODE_OK) {
+    CORBA::string_free(value);
     value = CORBA::string_dup(orig);
   }
   return rc;

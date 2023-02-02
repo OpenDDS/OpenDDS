@@ -35,7 +35,7 @@ DDS::DynamicData_var copy(const TBTD& sample, DDS::DynamicType* type)
   nested->get_complex_value(duration, nested->get_member_id_by_name("service_cleanup_delay"));
   duration->set_int32_value(duration->get_member_id_by_name("sec"), sample.durability_service.service_cleanup_delay.sec);
   duration->set_uint32_value(duration->get_member_id_by_name("nanosec"), sample.durability_service.service_cleanup_delay.nanosec);
-  
+
   nested->set_int32_value(nested->get_member_id_by_name("history_kind"), static_cast<ACE_CDR::Long>(sample.durability_service.history_kind));
   nested->set_int32_value(nested->get_member_id_by_name("history_depth"), sample.durability_service.history_depth);
   nested->set_int32_value(nested->get_member_id_by_name("max_samples"), sample.durability_service.max_samples);
