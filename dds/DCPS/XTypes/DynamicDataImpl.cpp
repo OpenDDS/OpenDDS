@@ -1617,20 +1617,14 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_enum(DCPS::Value& value,
     return ret;
   }
 
-  DDS::DynamicTypeMember_var dtm;
-  ret = type_->get_member(dtm, id);
-  if (ret != DDS::RETCODE_OK) {
-    return ret;
-  }
-
-  DDS::MemberDescriptor_var md;
-  ret = dtm->get_descriptor(md);
+  DDS::DynamicType_var mtype;
+  ret = get_member_type(mtype, type_, id);
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
 
   DDS::String8_var str;
-  ret = get_enumerator_name(str, enumAsInteger.get<DDS::Int32>(), md->type());
+  ret = get_enumerator_name(str, enumAsInteger.get<DDS::Int32>(), mtype);
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
