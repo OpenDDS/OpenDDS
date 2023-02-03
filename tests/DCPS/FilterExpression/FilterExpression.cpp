@@ -77,7 +77,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " => exception " << e.what() << std::endl;
     }
-#ifdef TEST_CDR_STATIC_FILTER
     try {
       Message_Block_Ptr amb(serialize(enc_xcdr2, sample));
       FilterEvaluator fe(input[i], false);
@@ -88,7 +87,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " =xcdr=> exception " << e.what() << std::endl;
     }
-#endif
     try {
       DDS::DynamicType_var dyntype = tsDynamic.get_type();
       DDS::DynamicData_var dynamic = copy(sample, dyntype);
