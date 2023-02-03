@@ -86,7 +86,7 @@ protected:
   OpenDDS::DCPS::TypeSupport_var type_support_;
 
   /// The number of entities using this topic
-  Atomic<uint32_t> entity_refs_;
+  Atomic<ACE_UINT32> entity_refs_;
 };
 
 template <typename Topic>
