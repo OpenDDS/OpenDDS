@@ -89,7 +89,7 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
 
 bool DynamicDataBase::is_type_supported(TypeKind tk, const char* func_name)
 {
-  if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
+  if (!is_basic(tk)) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::is_type_supported:"
                  " Called function %C on an unsupported type (%C)\n",
@@ -126,16 +126,10 @@ bool DynamicDataBase::is_primitive(TypeKind tk) const
 
 bool DynamicDataBase::is_basic(TypeKind tk) const
 {
-  if (is_primitive(tk)) {
+  if (is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16) {
     return true;
   }
-  switch (tk) {
-  case TK_STRING8:
-  case TK_STRING16:
-    return true;
-  default:
-    return false;
-  }
+  return false;
 }
 
 bool DynamicDataBase::is_complex(TypeKind tk) const
@@ -179,7 +173,7 @@ bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
   return false;
 }
 
-bool DynamicDataBase::check_member(
+DDS::ReturnCode_t DynamicDataBase::check_member(
   DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
   const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk)
 {
@@ -203,7 +197,6 @@ bool DynamicDataBase::check_member(
       }
     }
     break;
-
   case TK_BITMASK:
     {
       CORBA::UInt64 bound_max;
@@ -250,7 +243,7 @@ CORBA::ULong DynamicDataBase::bound_total(DDS::TypeDescriptor_var descriptor)
 DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
 {
   //FUTURE: non-zero defaults for union discriminators are not currently represented
-  // in the MemberDescriptors created by converting CompleteTypeObject to DyanmicType.
+  // in the MemberDescriptors created by converting CompleteTypeObject to DynamicType.
   // When they are supported, change disc_default below to a value derived from the
   // 'type' parameter.  Note that 64-bit discriminators are not represented in TypeObject.
   static const ACE_CDR::Long disc_default = 0;

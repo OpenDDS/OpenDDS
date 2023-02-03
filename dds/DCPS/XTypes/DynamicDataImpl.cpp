@@ -27,7 +27,6 @@ DynamicDataImpl::DynamicDataImpl(DDS::DynamicType_ptr type)
   : DynamicDataBase(type)
   , container_(type_, this)
 {
-  clear_all_values();
 }
 
 DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
@@ -186,6 +185,8 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
 
 DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
 {
+  // TODO(sonndinh): similar to clear_value(), this may also need to rewrite to consider
+  // all types.
   const TypeKind tk = type_->get_kind();
   switch (tk) {
   case TK_ARRAY:
@@ -204,7 +205,6 @@ DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
       }
       return DDS::RETCODE_OK;
     }
-    break;
   }
 
   if (tk == TK_UNION) {
@@ -259,6 +259,14 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
 {
   const TypeKind this_tk = type_->get_kind();
   DDS::DynamicType_var value_type;
+  // TODO(sonndinh): May need rewrite to consider all type kinds in here since each type
+  // can interpret members differently.
+  // Array and sequence (and map): members are elements.
+  // Struct and union: members are actual members.
+  // Bitmask: members are individual bits.
+  // Enum and primitive: there is no member, only the value of the type itself.
+  // String and wide string: members are characters.
+  // So we need to consider each type kind and clear its member's value appropriately.
   if (this_tk == TK_ARRAY) {
     DDS::TypeDescriptor_var descriptor;
     DDS::ReturnCode_t rc = type_->get_descriptor(descriptor);
@@ -492,6 +500,7 @@ bool DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& va
     return false;
   }
 
+  // TODO(sonndinh): This bitbound check can be removed since it's already done in check_member.
   if (member_type->get_kind() == enum_or_bitmask) {
     DDS::TypeDescriptor_var member_td;
     if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
@@ -1254,11 +1263,6 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
     return DDS::RETCODE_ERROR;
   }
 
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -1269,6 +1273,10 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
   // the unsigned integer representation or invalidate it. Similarly, when the unsigned
   // integer value is updated, either update the stored elements or invalidate them all.
   if (tk == enum_or_bitmask) {
+    DDS::TypeDescriptor_var descriptor;
+    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
     const CORBA::ULong bit_bound = descriptor->bound()[0];
     good = id == MEMBER_ID_INVALID && bit_bound >= lower && bit_bound <= upper &&
       insert_single(id, value);
@@ -2108,6 +2116,87 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_values(DDS::MemberId id, const DD
 #endif
 }
 
+template <TypeKind ValueTypeKind, typename ValueType>
+DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::MemberId id)
+{
+  if (!is_type_supported(ValueTypeKind, "get_single_value")) {
+    return DDS::RETCODE_ERROR;
+  }
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+
+  switch (tk) {
+  case ValueTypeKind: {
+    // The spec allows to read a primitive or enum from a DynamicData representing it
+    // using MEMBER_ID_INVALID.
+    if (!is_primitive(tk) || id != MEMBER_ID_INVALID) {
+      good = false;
+      break;
+    }
+    const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
+    if (it != single_map_.end()) {
+      value = it->second.get<ValueType>();
+    } else {
+      set_default_basic_value(value);
+    }
+    break;
+  }
+  case TK_ENUM: {
+    TypeKind treat_as_tk;
+    const DDS::ReturnCode_t rc = enum_bound(type_, treat_as_tk);
+    if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
+      good = false;
+      break;
+    }
+    const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
+    if (it != single_map_.end()) {
+      value = it->second.get<ValueType>();
+    } else {
+      CORBA::ULong enum_default_val;
+      if (!set_default_enum_value(type_, enum_default_val)) {
+        good = false;
+        break;
+      }
+      value = static_cast<ValueType>(enum_default_val);
+    }
+    break;
+  }
+  case TK_BITMASK: {
+    // Allow bitmask to be read as an unsigned integer.
+    CORBA::UInt64 bound_max;
+    TypeKind treat_as_tk;
+    const DDS::ReturnCode_t rc = bitmask_bound(type_, bound_max, treat_as_tk);
+    if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
+      good = false;
+      break;
+    }
+    const_single_iterator it = container_.single_map_.find(MEMBER_ID_INVALID);
+    if (it != single_map_.end()) {
+      value = it->second.get<ValueType>();
+    } else {
+      set_default_bitmask_value(value);
+    }
+    break;
+  }
+  case TK_STRUCTURE: {
+    DDS::MemberDescriptor_var md;
+    DDS::DynamicType_var member_type;
+    const DDS::ReturnCode_t rc = check_member(
+      md, member_type, "DynamicDataImpl::get_single_value", "get", id, ValueTypeKind);
+    if (rc != DDS::RETCODE_OK) {
+      good = false;
+      break;
+    }
+    // TODO(sonndinh): A single value can be gotten from single_map_ or complex_map_
+  }
+  case TK_UNION:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+  default:
+  }
+}
+
 template <typename Type>
 DDS::ReturnCode_t DynamicDataImpl::get_single_value(Type& value, DDS::MemberId id, DDS::TypeKind tk)
 {
@@ -2209,12 +2298,16 @@ DDS::ReturnCode_t DynamicDataImpl::get_char8_value(CORBA::Char& value, DDS::Memb
 
 DDS::ReturnCode_t DynamicDataImpl::get_char16_value(CORBA::WChar& value, DDS::MemberId id)
 {
+#ifdef DDS_HAS_WCHAR
   ACE_OutputCDR::from_wchar from(0);
   const DDS::ReturnCode_t rc = get_single_value(from, id, TK_CHAR16);
   if (rc == DDS::RETCODE_OK) {
     value = from.val_;
   }
   return rc;
+#else
+  return DDS::RETCODE_UNSUPPORTED;
+#endif
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_byte_value(CORBA::Octet& value, DDS::MemberId id)
@@ -2249,12 +2342,16 @@ DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId 
 
 DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::MemberId id)
 {
+#ifdef DDS_HAS_WCHAR
   const CORBA::WChar* orig = 0;
   const DDS::ReturnCode_t rc = get_single_value(orig, id, TK_STRING16);
   if (rc == DDS::RETCODE_OK) {
     value = CORBA::wstring_dup(orig);
   }
   return rc;
+#else
+  return DDS::RETCODE_UNSUPPORTED;
+#endif
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
@@ -3209,6 +3306,28 @@ void DynamicDataImpl::DataContainer::set_default_basic_value(const CORBA::WChar*
 }
 #endif
 
+bool DynamicDataImpl::DataContainer::set_default_enum_value(const DDS::DynamicType_var& enum_type,
+                                                            CORBA::ULong& value) const
+{
+  // Default enum value is the first enumerator.
+  DDS::DynamicTypeMember_var first_dtm;
+  if (enum_type->get_member_by_index(first_dtm, 0) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var first_md;
+  if (first_dtm->get_descriptor(first_md) != DDS::RETCODE_OK) {
+    return false;
+  }
+  value = first_md->id();
+  return true;
+}
+
+template<typename Type>
+void DynamicDataImpl::DataContainer::set_default_bitmask_value(Type& value) const
+{
+  value = 0;
+}
+
 void DynamicDataImpl::DataContainer::set_default_primitive_values(DDS::Int8Seq& collection) const
 {
   for (CORBA::ULong i = 0; i < collection.length(); ++i) {
@@ -3705,18 +3824,12 @@ template<typename ElementType, typename CollectionType>
 bool DynamicDataImpl::DataContainer::set_default_enum_values(CollectionType& collection,
   const DDS::DynamicType_var& enum_type) const
 {
-  // From Table 9, default enum value is the first enumerator.
-  DDS::DynamicTypeMember_var first_dtm;
-  if (enum_type->get_member_by_index(first_dtm, 0) != DDS::RETCODE_OK) {
+  CORBA::ULong value;
+  if (!set_default_enum_value(enum_type, value)) {
     return false;
   }
-  DDS::MemberDescriptor_var first_md;
-  if (first_dtm->get_descriptor(first_md) != DDS::RETCODE_OK) {
-    return false;
-  }
-
   for (CORBA::ULong i = 0; i < collection.length(); ++i) {
-    collection[i] = static_cast<ElementType>(first_md->id());
+    collection[i] = static_cast<ElementType>(value);
   }
   return true;
 }

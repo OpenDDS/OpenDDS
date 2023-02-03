@@ -540,6 +540,11 @@ private:
     void set_default_basic_value(const CORBA::WChar*& value) const;
 #endif
 
+    bool set_default_enum_value(const DDS::DynamicType_var& dt, CORBA::ULong& value) const;
+
+    template<typename Type>
+    void set_default_bitmask_value(Type& value) const;
+
     void set_default_primitive_values(DDS::Int8Seq& collection) const;
     void set_default_primitive_values(DDS::UInt8Seq& collection) const;
     void set_default_primitive_values(DDS::CharSeq& collection) const;

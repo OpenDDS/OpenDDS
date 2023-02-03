@@ -48,7 +48,7 @@ protected:
   bool is_complex(TypeKind tk) const;
   bool get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
 
-  bool check_member(DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
+  DDS::ReturnCode_t check_member(DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
     const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk = TK_NONE);
 
   static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);

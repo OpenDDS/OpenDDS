@@ -1167,11 +1167,6 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
 
   ScopedChainManager chain_manager(*this);
 
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -1182,6 +1177,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
     // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
     // a DynamicData object, and checking for MEMBER_ID_INVALID from the input is perhaps
     // unnecessary. So, we read the value immediately here.
+    DDS::TypeDescriptor_var descriptor;
+    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
     const LBound bit_bound = descriptor->bound()[0];
     good = bit_bound >= lower && bit_bound <= upper && read_value(value, ValueTypeKind);
   } else {
