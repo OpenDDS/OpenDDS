@@ -19,6 +19,7 @@
 #include <dds/DCPS/transport/framework/DataLink.h>
 
 #include <string>
+#include <map>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -28,19 +29,16 @@ namespace DCPS {
 class ReceivedDataSample;
 
 struct ShmemData {
-  int status_;
+  enum Status {
+    Free = 0,
+    InUse = 1,
+    RecvDone = 2,
+    EndOfAlloc = -1
+  };
+
+  Status status_;
   char transport_header_[TRANSPORT_HDR_SERIALIZED_SZ];
   ACE_Based_Pointer_Basic<char> payload_;
-};
-
-/**
- * values for ShmemData::status_
- */
-enum {
-  SHMEM_DATA_FREE = 0,
-  SHMEM_DATA_IN_USE = 1,
-  SHMEM_DATA_RECV_DONE = 2,
-  SHMEM_DATA_END_OF_ALLOC = -1
 };
 
 class OpenDDS_Shmem_Export ShmemDataLink
@@ -50,9 +48,6 @@ public:
   ShmemDataLink(const ShmemTransport_rch& transport);
 
   bool open(const std::string& peer_address);
-
-  int make_reservation(const GUID_t& remote_sub, const GUID_t& local_pub,
-    const TransportSendListener_wrch& send_listener, bool reliable);
 
   int make_reservation(const GUID_t& remote_pub,
                        const GUID_t& local_sub,
@@ -102,7 +97,8 @@ private:
 
     bool operator<(const GuidPair& other) const
     {
-      return GUID_tKeyLessThan()(local, other.local) && GUID_tKeyLessThan()(remote, other.remote);
+      return GUID_tKeyLessThan()(local, other.local) ||
+        (local == other.local && GUID_tKeyLessThan()(remote, other.remote));
     }
   };
   ACE_Thread_Mutex assoc_resends_mutex_;

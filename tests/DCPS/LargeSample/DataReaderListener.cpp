@@ -59,6 +59,7 @@ void DataReaderListenerImpl::on_data_available(DDS::DataReader_ptr reader)
                                                DDS::ANY_INSTANCE_STATE);
 
     if (error == DDS::RETCODE_OK) {
+      ACE_GUARD(ACE_Thread_Mutex, guard, lock_);
 
       for (unsigned int i = 0; i < messages.length(); ++i) {
         const DDS::SampleInfo& si = info[i];
@@ -187,6 +188,8 @@ void DataReaderListenerImpl::on_sample_lost(
 
 bool DataReaderListenerImpl::data_consistent() const
 {
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, false);
+
   bool valid_and_done = valid_;
   if (process_writers_.size() != writer_process_count_) {
     std::cout << "ERROR: expect to receive data from " << writer_process_count_
