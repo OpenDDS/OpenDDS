@@ -27,12 +27,12 @@ SerializedSizeBound DummyTypeSupport::key_only_serialized_size_bound(const Encod
 
 Extensibility DummyTypeSupport::base_extensibility() const
 {
-  return OpenDDS::DCPS::FINAL;
+  return OpenDDS::DCPS::APPENDABLE;
 }
 
 Extensibility DummyTypeSupport::max_extensibility() const
 {
-  return OpenDDS::DCPS::FINAL;
+  return OpenDDS::DCPS::APPENDABLE;
 }
 
 TypeIdentifier& DummyTypeSupport::getMinimalTypeIdentifier() const

@@ -99,7 +99,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " =dynamic=> exception " << e.what() << std::endl;
     }
-#ifdef TEST_CDR_DYNAMIC_FILTER
     try {
       Message_Block_Ptr amb(serialize(enc_xcdr2, sample));
       FilterEvaluator fe(input[i], false);
@@ -110,7 +109,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " =dynamic/xcdr=> exception " << e.what() << std::endl;
     }
-#endif
   }
   return pass;
 }
