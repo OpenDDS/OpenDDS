@@ -20,6 +20,13 @@ DynamicDataBase::DynamicDataBase(DDS::DynamicType_ptr type)
   : type_(get_base_type(type))
 {}
 
+DDS::DynamicData* DynamicDataBase::interface_from_this() const
+{
+  // Operations defined in IDL interfaces don't use pointer-to-const
+  // parameter types.
+  return const_cast<DynamicDataBase*>(this);
+}
+
 DDS::ReturnCode_t DynamicDataBase::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
 {
   DDS::DynamicTypeMember_var dtm;

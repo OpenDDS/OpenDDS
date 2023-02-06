@@ -1483,7 +1483,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    return set_single_value<TK_INT32>(id, intValue);
+    return set_enum_value(mtype, this, id, intValue);
   }
   return set_single_value<TK_STRING8>(id, value);
 }
@@ -1611,20 +1611,20 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value_enum(DCPS::Value& value,
                                                          DDS::MemberId id) const
 {
-  DCPS::Value enumAsInteger(0);
-  DDS::ReturnCode_t ret = get_simple_value_primitive<DDS::Int32>(enumAsInteger, id);
+  DDS::DynamicType_var mtype;
+  DDS::ReturnCode_t ret = get_member_type(mtype, type_, id);
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
 
-  DDS::DynamicType_var mtype;
-  ret = get_member_type(mtype, type_, id);
+  DDS::Int32 enumAsInteger;
+  ret = get_enum_value(enumAsInteger, mtype, interface_from_this(), id);
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
 
   DDS::String8_var str;
-  ret = get_enumerator_name(str, enumAsInteger.get<DDS::Int32>(), mtype);
+  ret = get_enumerator_name(str, enumAsInteger, mtype);
   if (ret != DDS::RETCODE_OK) {
     return ret;
   }
