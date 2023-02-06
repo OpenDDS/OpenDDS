@@ -64,6 +64,8 @@ template <size_t N, typename T>
 bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const DDS::StringSeq& params,
                 const TypeSupportImpl& tsStatic, const TypeSupportImpl& tsDynamic)
 {
+  ACE_UNUSED_ARG(tsStatic);
+  ACE_UNUSED_ARG(tsDynamic);
   using namespace OpenDDS::DCPS;
   static const Encoding enc_xcdr2(Encoding::KIND_XCDR2);
   bool pass = true;
