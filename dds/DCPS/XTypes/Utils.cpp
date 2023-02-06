@@ -1206,7 +1206,7 @@ DDS::ReturnCode_t set_enum_value(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return set_enum_value(type, src, id, md->index());
+  return set_enum_value(type, src, id, md->id());
 }
 
 } // namespace XTypes
