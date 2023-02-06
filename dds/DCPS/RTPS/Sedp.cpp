@@ -3921,14 +3921,14 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
             it->second.got_complete = true;
           }
 
-          if (it->first.non_match_cond_) {
-            it->first.non_match_cond_->done(DDS::RETCODE_OK);
+          if (it->first.non_match_cond) {
+            it->first.non_match_cond->done(DDS::RETCODE_OK);
             sedp_.matching_data_buffer_.erase(it);
             return true;
           } else if (it->second.got_minimal && it->second.got_complete) {
             // All remote type objects are obtained, continue the matching process
-            const GUID_t writer = it->first.writer_;
-            const GUID_t reader = it->first.reader_;
+            const GUID_t writer = it->first.writer();
+            const GUID_t reader = it->first.reader();
             sedp_.matching_data_buffer_.erase(it);
             sedp_.match_continue(writer, reader);
             return true;
@@ -6907,8 +6907,7 @@ void Sedp::match(const GUID_t& writer, const GUID_t& reader)
   if (request) {
     request_type_objects(
       reader_local ? writer_type_info : reader_type_info,
-      MatchingPair(writer, reader),
-      reader_local ? writer : reader,
+      MatchingPair(reader, writer, reader_local),
 #ifdef OPENDDS_SECURITY
       reader_local ?
         lsi->second.security_attribs_.base.is_discovery_protected :
@@ -6926,12 +6925,10 @@ void Sedp::request_remote_complete_type_objects(
   const GUID_t& remote_entity, const XTypes::TypeInformation& remote_type_info,
   DCPS::TypeObjReqCond& cond)
 {
-  MatchingPair mp(DCPS::GUID_UNKNOWN, DCPS::GUID_UNKNOWN, &cond);
   bool discovered = false;
   bool discovery_protected = false;
   DCPS::GuidConverter gc(remote_entity);
   if (gc.isWriter()) {
-    mp.writer_ = remote_entity;
     DiscoveredPublicationIter dpi = discovered_publications_.find(remote_entity);
     if (dpi != discovered_publications_.end()) {
       discovered = true;
@@ -6940,7 +6937,6 @@ void Sedp::request_remote_complete_type_objects(
 #endif
     }
   } else if (gc.isReader()) {
-    mp.reader_ = remote_entity;
     DiscoveredSubscriptionIter dsi = discovered_subscriptions_.find(remote_entity);
     if (dsi != discovered_subscriptions_.end()) {
       discovered = true;
@@ -6960,11 +6956,8 @@ void Sedp::request_remote_complete_type_objects(
     return;
   }
 
-  request_type_objects(
-    &remote_type_info,
-    mp, remote_entity,
-    discovery_protected,
-    false, true);
+  request_type_objects(&remote_type_info, MatchingPair(remote_entity, gc.isReader(), &cond),
+    discovery_protected, false, true);
 }
 
 bool Sedp::need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
@@ -6992,11 +6985,11 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
     if (now - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
       if (DCPS_debug_level >= 4) {
         ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::remove_expired_endpoints: "
-          "clean up pending pair w: %C r: %C\n",
-          LogGuid(iter->first.writer_).c_str(), LogGuid(iter->first.reader_).c_str()));
+          "clean up pending pair local: %C remote: %C\n",
+          LogGuid(iter->first.local).c_str(), LogGuid(iter->first.remote).c_str()));
       }
-      if (iter->first.non_match_cond_) {
-        iter->first.non_match_cond_->done(DDS::RETCODE_TIMEOUT);
+      if (iter->first.non_match_cond) {
+        iter->first.non_match_cond->done(DDS::RETCODE_TIMEOUT);
       }
       matching_data_buffer_.erase(iter++);
     } else {
@@ -7480,9 +7473,10 @@ void Sedp::match_continue(const GUID_t& writer, const GUID_t& reader)
 }
 
 void Sedp::request_type_objects(const XTypes::TypeInformation* type_info,
-  const MatchingPair& mp, const DCPS::GUID_t& remote_id, bool is_discovery_protected,
+  const MatchingPair& mp, bool is_discovery_protected,
   bool get_minimal, bool get_complete)
 {
+  OPENDDS_ASSERT(get_minimal || get_complete);
   MatchingData md;
   md.time_added_to_map = MonotonicTimePoint::now();
 
@@ -7508,18 +7502,18 @@ void Sedp::request_type_objects(const XTypes::TypeInformation* type_info,
   if (get_minimal) {
     if (DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::request_type_objects: minimal remote: %C seq: %q\n",
-        LogGuid(remote_id).c_str(), md.rpc_seqnum_minimal.getValue()));
+        LogGuid(mp.remote).c_str(), md.rpc_seqnum_minimal.getValue()));
     }
-    get_remote_type_objects(type_info->minimal, md, true, remote_id, is_discovery_protected);
+    get_remote_type_objects(type_info->minimal, md, true, mp.remote, is_discovery_protected);
   }
 
   // Send another sequence of requests for complete remote TypeObjects
   if (get_complete) {
     if (DCPS_debug_level >= 4) {
       ACE_DEBUG((LM_DEBUG, "(%P|%t) Sedp::request_type_objects: complete remote: %C seq: %q\n",
-        LogGuid(remote_id).c_str(), md.rpc_seqnum_complete.getValue()));
+        LogGuid(mp.remote).c_str(), md.rpc_seqnum_complete.getValue()));
     }
-    get_remote_type_objects(type_info->complete, md, false, remote_id, is_discovery_protected);
+    get_remote_type_objects(type_info->complete, md, false, mp.remote, is_discovery_protected);
   }
 }
 

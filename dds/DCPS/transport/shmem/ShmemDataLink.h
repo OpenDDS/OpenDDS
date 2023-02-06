@@ -85,22 +85,6 @@ private:
   ACE_Thread_Mutex peer_alloc_mutex_;
   ReactorTask_rch reactor_task_;
 
-  struct GuidPair {
-    const GUID_t local;
-    const GUID_t remote;
-
-    GuidPair(const GUID_t& local, const GUID_t& remote)
-    : local(local)
-    , remote(remote)
-    {
-    }
-
-    bool operator<(const GuidPair& other) const
-    {
-      return GUID_tKeyLessThan()(local, other.local) ||
-        (local == other.local && GUID_tKeyLessThan()(remote, other.remote));
-    }
-  };
   ACE_Thread_Mutex assoc_resends_mutex_;
   typedef std::map<GuidPair, size_t> AssocResends;
   AssocResends assoc_resends_;
