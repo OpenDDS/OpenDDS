@@ -26,6 +26,6 @@ TEST(dds_DCPS_RTPS_DiscoveredEntities, LocalEntity_ctor)
   EXPECT_EQ(uut.security_attribs_.is_submessage_protected, false);
   EXPECT_EQ(uut.security_attribs_.is_payload_protected, false);
   EXPECT_EQ(uut.security_attribs_.is_key_protected, false);
-  EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0);
+  EXPECT_EQ(uut.security_attribs_.plugin_endpoint_attributes, 0u);
 #endif
 }
