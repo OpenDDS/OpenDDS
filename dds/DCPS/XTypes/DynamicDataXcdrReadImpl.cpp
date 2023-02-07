@@ -1459,12 +1459,17 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_string_value(ACE_CDR::Char*& value, MemberId id)
 {
+  if (enum_string_helper(value, id)) {
+    return DDS::RETCODE_OK;
+  }
+  CORBA::string_free(value);
   return get_single_value<TK_STRING8>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_wstring_value(ACE_CDR::WChar*& value, MemberId id)
 {
 #ifdef DDS_HAS_WCHAR
+  CORBA::wstring_free(value);
   return get_single_value<TK_STRING16>(value, id);
 #else
   return DDS::RETCODE_UNSUPPORTED;
@@ -2914,12 +2919,11 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, 
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char8_value);
   case TK_CHAR16:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char16_value);
+  case TK_ENUM:
   case TK_STRING8:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_string_value);
   case TK_STRING16:
     return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_wstring_value);
-  case TK_ENUM:
-    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_string_value);
   default:
     return DDS::RETCODE_UNSUPPORTED;
   }

@@ -587,6 +587,7 @@ bool run_sorting_test(const MessageTypeSupport_var& ts, const Publisher_var& pub
   MessageDataWriter_var mdw = MessageDataWriter::_narrow(dw);
   Message sample;
   sample.key = 0;
+  sample.iteration = 0;
   sample.name = "data_X";
   sample.nest.value = B;
   for (int i(0); i < 20; ++i, ++sample.key) {

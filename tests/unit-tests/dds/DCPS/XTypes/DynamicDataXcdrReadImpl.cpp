@@ -3365,4 +3365,33 @@ TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Final_ImplicitNestedKeyOnly)
   EXPECT_EQ(0xeeff, val);
 }
 
+TEST(dds_DCPS_XTypes_DynamicDataXcdrReadImpl, Enum_As_String)
+{
+  const XTypes::TypeIdentifier& ti = DCPS::getCompleteTypeIdentifier<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap& type_map = DCPS::getCompleteTypeMap<DCPS::FinalSingleValueStruct_xtag>();
+  const XTypes::TypeMap::const_iterator it = type_map.find(ti);
+  EXPECT_TRUE(it != type_map.end());
+  XTypes::TypeLookupService tls;
+  tls.add(type_map.begin(), type_map.end());
+  DDS::DynamicType_var dt = tls.complete_to_dynamic(it->second.complete, DCPS::GUID_t());
+  EXPECT_TRUE(dt);
+
+  // xcdr2 object defined at the top of this file is ENDIAN_BIG
+  static const unsigned char single_value_struct_partial[] = {
+    0x00,0x00,0x00,static_cast<unsigned char>(E_UINT64),
+  };
+
+  ACE_Message_Block msg(sizeof single_value_struct_partial);
+  msg.copy(reinterpret_cast<const char*>(single_value_struct_partial), sizeof single_value_struct_partial);
+  XTypes::DynamicDataXcdrReadImpl data(&msg, xcdr2, dt);
+
+  static const DDS::MemberId MID_my_enum = 0u;
+  DDS::Int32 intVal;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(intVal, MID_my_enum));
+  EXPECT_EQ(intVal, static_cast<DDS::Int32>(E_UINT64));
+
+  DDS::String8_var strVal;
+  EXPECT_EQ(DDS::RETCODE_OK, data.get_string_value(strVal, MID_my_enum));
+  EXPECT_STREQ("E_UINT64", strVal.in());
+}
 #endif // OPENDDS_SAFETY_PROFILE
