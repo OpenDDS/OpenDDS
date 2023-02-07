@@ -65,10 +65,10 @@ TEST(dds_DCPS_SporadicTask, TimingChecker)
   RcHandle<TestObj> obj = make_rch<TestObj>(time_source, reactor_task.interceptor());
   obj->sporadic_->schedule(TimeDuration::from_msec(2000));
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
-  EXPECT_EQ(total_count, 0);
+  EXPECT_EQ(total_count, 0u);
   ACE_OS::sleep(5);
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
-  EXPECT_EQ(total_count, 1);
+  EXPECT_EQ(total_count, 1u);
   obj->set_do_schedule(true);
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + TimeDuration::from_msec(2000);
   size_t schedule_calls = 0;
@@ -83,19 +83,19 @@ TEST(dds_DCPS_SporadicTask, TimingChecker)
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
   // 1 from the slow period, 20 from the fast period (2.0 / 0.1)
   if (tight_timing) {
-    EXPECT_EQ(total_count, 21);
+    EXPECT_EQ(total_count, 21u);
   } else {
-    EXPECT_GE(total_count, 16);
-    EXPECT_LE(total_count, 21);
+    EXPECT_GE(total_count, 16u);
+    EXPECT_LE(total_count, 21u);
   }
   ACE_OS::sleep(2);
   ACE_DEBUG((LM_DEBUG, "total_count = %d\n", total_count.load()));
   // No lingering enables / executions mean total count should be unchanged
   if (tight_timing) {
-    EXPECT_EQ(total_count, 21);
+    EXPECT_EQ(total_count, 21u);
   } else {
-    EXPECT_GE(total_count, 16);
-    EXPECT_LE(total_count, 21);
+    EXPECT_GE(total_count, 16u);
+    EXPECT_LE(total_count, 21u);
   }
   obj->sporadic_->cancel();
 
