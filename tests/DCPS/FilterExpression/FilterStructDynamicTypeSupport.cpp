@@ -248,14 +248,49 @@ DynamicTypeMember_var memberForDurabilityService()
 
 DynamicType* DummyTypeSupport::get_type() const
 {
+  if (dt_) {
+    return DynamicType::_duplicate(dt_);
+  }
+
   TypeDescriptor_var td = new TypeDescriptorImpl;
   td->kind(TK_STRUCTURE);
   td->name("TBTD");
 
-  DynamicTypeImpl* dt = new DynamicTypeImpl;
-  dt->set_descriptor(td);
-  dt->insert_dynamic_member(memberForName());
-  dt->insert_dynamic_member(memberForDurability());
-  dt->insert_dynamic_member(memberForDurabilityService());
-  return dt;
+  DynamicTypeImpl* dtimpl = new DynamicTypeImpl;
+  dtimpl->set_descriptor(td);
+  dtimpl->insert_dynamic_member(memberForName());
+  dtimpl->insert_dynamic_member(memberForDurability());
+  dtimpl->insert_dynamic_member(memberForDurabilityService());
+  dt_ = dtimpl;
+  return DynamicType::_duplicate(dt_);
+}
+
+void clear_enum(DynamicType* t)
+{
+  const UInt32 n = t->get_member_count();
+  for (UInt32 i = 0; i < n; ++i) {
+    DynamicTypeMember_var dtm;
+    t->get_member_by_index(dtm, i);
+    MemberDescriptor_var md;
+    dtm->get_descriptor(md);
+    md->type(0);
+  }
+}
+
+DummyTypeSupport::~DummyTypeSupport()
+{
+  // Enum types contain reference count cycles
+  DynamicTypeMember_var dtm;
+  dt_->get_member_by_name(dtm, "durability");
+  MemberDescriptor_var md;
+  dtm->get_descriptor(md);
+  md->type()->get_member_by_name(dtm, "kind");
+  dtm->get_descriptor(md);
+  clear_enum(md->type());
+
+  dt_->get_member_by_name(dtm, "durability_service");
+  dtm->get_descriptor(md);
+  md->type()->get_member_by_name(dtm, "history_kind");
+  dtm->get_descriptor(md);
+  clear_enum(md->type());
 }
