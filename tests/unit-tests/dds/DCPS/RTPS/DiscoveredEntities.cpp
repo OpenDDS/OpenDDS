@@ -15,6 +15,10 @@
 #  include <dds/DCPS/RTPS/RtpsSecurityC.h>
 #endif
 
+#ifdef OPENDDS_SECURITY
+#  include <dds/DCPS/RTPS/RtpsSecurityC.h>
+#endif
+
 using namespace OpenDDS::DCPS;
 using namespace OpenDDS::RTPS;
 

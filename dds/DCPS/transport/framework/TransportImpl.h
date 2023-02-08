@@ -320,7 +320,6 @@ public:
 
 protected:
   /// Id of the last link established.
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> last_link_;
   AtomicBool is_shut_down_;
 };
 

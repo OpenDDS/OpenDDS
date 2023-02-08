@@ -74,7 +74,7 @@ struct RecursiveTestEventTwo : public TestEventBase {
   void handle_event()
   {
     increment_call_count();
-    const size_t scale = dispatch_scale_.value();
+    const size_t scale = dispatch_scale_;
     OpenDDS::DCPS::RcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher = dispatcher_.lock();
     if (dispatcher) {
       for (size_t i = 0; i < scale; ++i) {
@@ -84,7 +84,7 @@ struct RecursiveTestEventTwo : public TestEventBase {
   }
 
   OpenDDS::DCPS::WeakRcHandle<OpenDDS::DCPS::EventDispatcher> dispatcher_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> dispatch_scale_;
+  OpenDDS::DCPS::Atomic<size_t> dispatch_scale_;
 };
 
 } // (anonymous) namespace

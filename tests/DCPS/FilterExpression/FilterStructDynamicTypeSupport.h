@@ -3,6 +3,7 @@
 // FilterStruct.idl includes DdsDcpsInfrastructure.idl which doesn't have -Gxtypes-complete
 
 struct DummyTypeSupport : OpenDDS::DCPS::TypeSupportImpl {
+  ~DummyTypeSupport();
 
   // DDS::TypeSupport
   DDS::ReturnCode_t register_type(DDS::DomainParticipant*, const char*) { return DDS::RETCODE_UNSUPPORTED; }
@@ -31,5 +32,7 @@ struct DummyTypeSupport : OpenDDS::DCPS::TypeSupportImpl {
   const OpenDDS::XTypes::TypeMap& getMinimalTypeMap() const;
   const OpenDDS::XTypes::TypeIdentifier& getCompleteTypeIdentifier() const;
   const OpenDDS::XTypes::TypeMap& getCompleteTypeMap() const;
+
+  mutable DDS::DynamicType_var dt_;
 };
 

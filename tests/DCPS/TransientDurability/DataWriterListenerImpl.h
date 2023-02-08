@@ -19,7 +19,7 @@ class DataWriterListenerImpl
 public:
 
   DataWriterListenerImpl (
-    ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> & publication_matched);
+    OpenDDS::DCPS::Atomic<bool> & publication_matched);
 
   virtual void on_offered_deadline_missed (
       ::DDS::DataWriter_ptr writer,
@@ -55,7 +55,7 @@ protected:
 
 private:
 
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> & publication_matched_;
+  OpenDDS::DCPS::Atomic<bool> & publication_matched_;
 
 };
 
