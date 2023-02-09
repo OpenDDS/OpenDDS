@@ -165,7 +165,7 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t set_int_value(
   DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, CORBA::Int64 value);
 
 OpenDDS_Dcps_Export DDS::ReturnCode_t bitmask_bound(
-  DDS::DynamicType_ptr type, CORBA::UInt64& bound_max, DDS::TypeKind& bound_kind);
+  DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind);
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_bitmask_value(
   CORBA::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id);
 

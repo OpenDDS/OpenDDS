@@ -356,9 +356,8 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(
     break;
   case TK_BITMASK:
     {
-      CORBA::UInt64 bound_max;
       DDS::TypeKind bound_kind;
-      const DDS::ReturnCode_t rc = bitmask_bound(type, bound_max, bound_kind);
+      const DDS::ReturnCode_t rc = bitmask_bound(type, bound_kind);
       if (rc != DDS::RETCODE_OK) {
         return rc;
       }
