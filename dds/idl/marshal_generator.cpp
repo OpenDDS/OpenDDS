@@ -3423,7 +3423,7 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
           : getWrapper("val", field_type, WD_INPUT);
         std::string boundsCheck, transformPrefix, transformSuffix;
         if (fld_cls & CL_ENUM) {
-        const std::string enumName = dds_generator::scoped_helper(field_type->name(), "_");
+          const std::string enumName = dds_generator::scoped_helper(field_type->name(), "_");
           boundsCheck = "            if (val >= gen_" + enumName + "_names_size) {\n"
                         "              throw std::runtime_error(\"Enum value out of bounds\");\n"
                         "            }\n";
