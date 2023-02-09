@@ -209,7 +209,7 @@ bool DynamicDataBase::enum_string_helper(char*& strInOut, MemberId id)
   return true;
 }
 
-bool DynamicDataBase::check_member(
+DDS::ReturnCode_t DynamicDataBase::check_member(
   DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
   const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk)
 {
@@ -226,21 +226,16 @@ bool DynamicDataBase::check_member(
   TypeKind cmp_type_kind = type_kind;
   switch (type_kind) {
   case TK_ENUM:
-    {
-      rc = enum_bound(type, cmp_type_kind);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
+    rc = enum_bound(type, cmp_type_kind);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
     }
     break;
 
   case TK_BITMASK:
-    {
-      CORBA::UInt64 bound_max;
-      rc = bitmask_bound(type, bound_max, cmp_type_kind);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
+    rc = bitmask_bound(type, cmp_type_kind);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
     }
     break;
   }

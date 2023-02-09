@@ -1034,8 +1034,7 @@ DDS::ReturnCode_t set_int_value(
   return DDS::RETCODE_BAD_PARAMETER;
 }
 
-DDS::ReturnCode_t bitmask_bound(
-  DDS::DynamicType_ptr type, CORBA::UInt64& bound_max, DDS::TypeKind& bound_kind)
+DDS::ReturnCode_t bitmask_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind)
 {
   const DDS::TypeKind kind = type->get_kind();
   if (kind != TK_BITMASK) {
@@ -1070,16 +1069,14 @@ DDS::ReturnCode_t bitmask_bound(
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
-  bound_max = (1 << bound_size) - 1;
   return DDS::RETCODE_OK;
 }
 
 DDS::ReturnCode_t get_bitmask_value(
   CORBA::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
 {
-  CORBA::UInt64 bound_max;
   DDS::TypeKind bound_kind;
-  const DDS::ReturnCode_t rc = bitmask_bound(type, bound_max, bound_kind);
+  const DDS::ReturnCode_t rc = bitmask_bound(type, bound_kind);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
