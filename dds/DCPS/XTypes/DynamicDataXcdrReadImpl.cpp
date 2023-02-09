@@ -1380,11 +1380,6 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
 {
   ScopedChainManager chain_manager(*this);
 
-  DDS::TypeDescriptor_var descriptor;
-  if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
-  }
-
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
@@ -1394,6 +1389,10 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
     break;
   case TK_BITMASK:
     {
+      DDS::TypeDescriptor_var descriptor;
+      if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+        return DDS::RETCODE_ERROR;
+      }
       const LBound bit_bound = descriptor->bound()[0];
       ACE_CDR::ULong index;
       if (!get_index_from_id(id, index, bit_bound)) {
@@ -1417,7 +1416,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
         }
       } else if (bit_bound >= 9 && bit_bound <= 16) {
         good = get_boolean_from_bitmask<ACE_CDR::UInt16, TK_UINT16>(index, value);
-      } else if (bit_bound >= 17 && bit_bound <= 33) {
+      } else if (bit_bound >= 17 && bit_bound <= 32) {
         good = get_boolean_from_bitmask<ACE_CDR::UInt32, TK_UINT32>(index, value);
       } else {
         good = get_boolean_from_bitmask<ACE_CDR::UInt64, TK_UINT64>(index, value);

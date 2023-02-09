@@ -489,8 +489,7 @@ bool DynamicDataImpl::insert_complex(DDS::MemberId id, const DDS::DynamicData_va
 // Set a member with the given ID in a struct. The member must have type MemberTypeKind or
 // enum/bitmask. In the latter case, its bit bound must be in the range [lower, upper].
 template<TypeKind MemberTypeKind, typename MemberType>
-bool DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& value,
-                                          TypeKind enum_or_bitmask, LBound lower, LBound upper)
+bool DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& value)
 {
   DDS::MemberDescriptor_var md;
   DDS::DynamicType_var member_type;
@@ -499,19 +498,6 @@ bool DynamicDataImpl::set_value_to_struct(DDS::MemberId id, const MemberType& va
   if (rc != DDS::RETCODE_OK) {
     return false;
   }
-
-  // TODO(sonndinh): This bitbound check can be removed since it's already done in check_member.
-  if (member_type->get_kind() == enum_or_bitmask) {
-    DDS::TypeDescriptor_var member_td;
-    if (member_type->get_descriptor(member_td) != DDS::RETCODE_OK) {
-      return false;
-    }
-    const CORBA::ULong bit_bound = member_td->bound()[0];
-    if (bit_bound < lower || bit_bound > upper) {
-      return false;
-    }
-  }
-
   return insert_single(id, value);
 }
 
@@ -1286,7 +1272,7 @@ DDS::ReturnCode_t DynamicDataImpl::set_single_value(DDS::MemberId id, const Valu
       good = is_primitive(tk) && id == MEMBER_ID_INVALID && insert_single(id, value);
       break;
     case TK_STRUCTURE:
-      good = set_value_to_struct<ValueTypeKind>(id, value, enum_or_bitmask, lower, upper);
+      good = set_value_to_struct<ValueTypeKind>(id, value);
       break;
     case TK_UNION:
       good = set_value_to_union<ValueTypeKind>(id, value, enum_or_bitmask, lower, upper);
@@ -2101,7 +2087,6 @@ DDS::ReturnCode_t DynamicDataImpl::set_wstring_values(DDS::MemberId id, const DD
 #endif
 }
 
-// Group of functions to read a basic value represented by this DynamicData instance.
 bool DynamicDataImpl::read_basic_value(ACE_OutputCDR::from_int8& value)
 {
   return DDS::RETCODE_OK == get_int8_value(value.val_, MEMBER_ID_INVALID);
@@ -2196,7 +2181,6 @@ bool DynamicDataImpl::read_basic_value(const char*& value)
     }
     value = str._retn();
   } else {
-    // Return an empty string.
     value = "";
   }
   return true;
@@ -2225,7 +2209,6 @@ bool DynamicDataImpl::read_basic_value(const CORBA::WChar*& value)
 }
 #endif
 
-// Read a basic member from a containing type
 template<typename ValueType>
 bool DynamicDataImpl::read_basic_member(ValueType& value, DDS::MemberId id)
 {
@@ -2465,10 +2448,6 @@ DDS::ReturnCode_t DynamicDataImpl::get_single_value(ValueType& value, DDS::Membe
     good = false;
     break;
   default:
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_single_value:"
-                 " Getting value from an unsupported type %C\n", typekind_to_string(tk)));
-    }
     good = false;
     break;
   }
@@ -2546,27 +2525,90 @@ DDS::ReturnCode_t DynamicDataImpl::get_float128_value(CORBA::LongDouble& value, 
   return get_single_value<TK_FLOAT128>(value, id);
 }
 
-// TODO(sonndinh): Need a common function to read a char/wchar because they can be read
-// from a string/wstring.
+template<TypeKind CharKind, TypeKind StringKind, typename FromCharT, typename CharT>
+DDS::ReturnCode_t DynamicDataImpl::get_char_common(CharT& value, DDS::MemberId id)
+{
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+  switch (tk) {
+  case CharKind: {
+    if (id != MEMBER_ID_INVALID) {
+      good = false;
+      break;
+    }
+    const_single_iterator it = container_.single_map_.find(id);
+    if (it != container_.single_map_.end()) {
+      FromCharT from_char = it->second.get<FromCharT>();
+      value = from_char.val_;
+    } else {
+      FromCharT from_char('\0');
+      set_default_basic_value(from_char);
+      value = from_char.val_;
+    }
+    break;
+  }
+  case StringKind: {
+    FromCharT from_char('\0');
+    good = read_basic_member(from_char, id);
+    if (good) {
+      value = from_char.val_;
+    }
+    break;
+  }
+  case TK_STRUCTURE: {
+    FromCharT from_char('\0');
+    good = get_value_from_struct<CharKind>(from_char, id);
+    if (good) {
+      value = from_char.val_;
+    }
+    break;
+  }
+  case TK_UNION: {
+    FromCharT from_char('\0');
+    good = get_value_from_union<CharKind>(from_char, id);
+    if (good) {
+      value = from_char.val_;
+    }
+    break;
+  }
+  case TK_SEQUENCE:
+  case TK_ARRAY: {
+    FromCharT from_char('\0');
+    good = get_value_from_collection<CharKind>(from_char, id);
+    if (good) {
+      value = from_char.val_;
+    }
+    break;
+  }
+  case TK_MAP:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_char_common:"
+                 " Map is currently not supported\n"));
+    }
+    good = false;
+    break;
+  default:
+    good = false;
+    break;
+  }
+
+  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_char_common::"
+               " Failed to read a value of type %C from a DynamicData object of type %C\n",
+               typekind_to_string(CharKind), typekind_to_string(tk)));
+  }
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
+}
+
 DDS::ReturnCode_t DynamicDataImpl::get_char8_value(CORBA::Char& value, DDS::MemberId id)
 {
-  ACE_OutputCDR::from_char from(0);
-  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_CHAR8);
-  if (rc == DDS::RETCODE_OK) {
-    value = from.val_;
-  }
-  return rc;
+  return get_char_common<TK_CHAR8, TK_STRING8, ACE_OutputCDR::from_char>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_char16_value(CORBA::WChar& value, DDS::MemberId id)
 {
 #ifdef DDS_HAS_WCHAR
-  ACE_OutputCDR::from_wchar from(0);
-  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_CHAR16);
-  if (rc == DDS::RETCODE_OK) {
-    value = from.val_;
-  }
-  return rc;
+  return get_char_common<TK_CHAR16, TK_STRING16, ACE_OutputCDR::from_wchar>(value, id);
 #else
   return DDS::RETCODE_UNSUPPORTED;
 #endif
@@ -2582,15 +2624,115 @@ DDS::ReturnCode_t DynamicDataImpl::get_byte_value(CORBA::Octet& value, DDS::Memb
   return rc;
 }
 
-// TODO(sonndinh): Rewrite this since boolean can be read from bitmask as well.
+template<typename UIntType>
+bool DynamicDataImpl::get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value)
+{
+  UIntType bitmask;
+  if (!read_basic_value(bitmask)) {
+    return false;
+  }
+  value = ((1 << index) & bitmask) ? true : false;
+  return true;
+}
+
+template<>
+bool DynamicDataImpl::get_boolean_from_bitmask<CORBA::UInt8>(CORBA::ULong index, CORBA::Boolean& value)
+{
+  ACE_OutputCDR::from_int8 bitmask;
+  if (!read_basic_value(bitmask)) {
+    return false;
+  }
+  value = ((1 << index) & bitmask.val_) ? true : false;
+  return true;
+}
+
 DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS::MemberId id)
 {
-  ACE_OutputCDR::from_boolean from(0);
-  const DDS::ReturnCode_t rc = get_single_value(from, id, TK_BOOLEAN);
-  if (rc == DDS::RETCODE_OK) {
-    value = from.val_;
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+  switch (tk) {
+  case TK_BOOLEAN: {
+    if (id != MEMBER_ID_INVALID) {
+      good = false;
+      break;
+    }
+    const_single_iterator it = container_.single_map_.find(id);
+    if (it != container_.single_map_.end()) {
+      ACE_OutputCDR::from_boolean from_bool = it->second.get<ACE_OutputCDR::from_boolean>();
+      value = from_bool.val_;
+    } else {
+      ACE_OutputCDR:::from_boolean from_bool(false);
+      set_default_basic_value(from_bool);
+      value = from_bool.val_;
+    }
+    break;
   }
-  return rc;
+  case TK_BITMASK: {
+    DDS::TypeDescriptor_var descriptor;
+    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      good = false;
+      break;
+    }
+    const LBound bitbound = descriptor->bound()[0];
+    ACE_CDR::ULong index;
+    if (!get_index_from_id(id, index, bitbound)) {
+      good = false;
+      break;
+    }
+    if (bitbound >= 1 && bitbound <= 8) {
+      good = get_boolean_from_bitmask<CORBA::UInt8>(index, value);
+    } else if (bitbound >= 9 && bitbound <= 16) {
+      good = get_boolean_from_bitmask<CORBA::UShort>(index, value);
+    } else if (bitbound >= 17 && bitbound <= 32) {
+      good = get_boolean_from_bitmask<CORBA::ULong>(index, value);
+    } else {
+      good = get_boolean_from_bitmask<CORBA::ULongLong>(index, value);
+    }
+    break;
+  }
+  case TK_STRUCTURE: {
+    ACE_OutputCDR::from_boolean from_bool(false);
+    good = get_value_from_struct<TK_BOOLEAN>(from_bool, id);
+    if (good) {
+      value = from_bool.val_;
+    }
+    break;
+  }
+  case TK_UNION: {
+    ACE_OutputCDR::from_boolean from_bool(false);
+    good = get_value_from_union<TK_BOOLEAN>(from_bool, id);
+    if (good) {
+      value = from_bool.val_;
+    }
+    break;
+  }
+  case TK_SEQUENCE:
+  case TK_ARRAY: {
+    ACE_OutputCDR::from_boolean from_bool(false);
+    good = get_value_from_collection<TK_BOOLEAN>(from_bool, id);
+    if (good) {
+      value = from_bool.val_;
+    }
+    break;
+  }
+  case TK_MAP:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_boolean_value:"
+                 " Map is currently not supported\n"));
+    }
+    good = false;
+    break;
+  default:
+    good = false;
+    break;
+  }
+
+  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_boolean_value:"
+               " Failed to read a boolean value from a DynamicData object of type %C\n",
+               typekind_to_string(tk)));
+  }
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
@@ -2610,21 +2752,19 @@ DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::
 // TODO(sonndinh)
 DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
-  DDS::MemberDescriptor_var md;
-  DDS::DynamicType_var member_type;
-  const DDS::ReturnCode_t rc = check_member(
-    md, member_type, "DynamicDataImpl::get_complex_value", "get", id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
+  const TypeKind tk = type_->get_kind();
+  bool good = true;
+  switch (tk) {
+  case TK_STRUCTURE:
+  case TK_UNION:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+  default:
+    good = false;
+    break;
   }
-
-  DataContainer::const_complex_iterator it = container_.complex_map_.find(id);
-  if (it == container_.complex_map_.end()) {
-    return DDS::RETCODE_BAD_PARAMETER;
-  }
-  CORBA::release(value);
-  value = DDS::DynamicData::_duplicate(it->second);
-  return DDS::RETCODE_OK;
+  return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
 
 DDS::ReturnCode_t DynamicDataImpl::get_int32_values(DDS::Int32Seq& value, DDS::MemberId id)

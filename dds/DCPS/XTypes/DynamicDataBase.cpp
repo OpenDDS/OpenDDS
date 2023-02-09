@@ -211,8 +211,6 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
   bool invalid_tk = true;
   if (is_basic(cmp_type_kind)) {
     invalid_tk = cmp_type_kind != tk;
-  } else if (tk == TK_NONE) {
-    invalid_tk = !is_complex(type_kind);
   }
   if (invalid_tk) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
@@ -226,7 +224,6 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
-
   return DDS::RETCODE_OK;
 }
 

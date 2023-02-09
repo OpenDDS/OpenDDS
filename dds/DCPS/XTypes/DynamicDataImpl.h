@@ -245,9 +245,58 @@ private:
 
   bool is_basic_type(TypeKind tk) const;
 
+  /// Group of functions to read a basic value represented by this DynamicData instance
+  bool read_basic_value(ACE_OutputCDR::from_int8& value);
+  bool read_basic_value(ACE_OutputCDR::from_uint8& value);
+  bool read_basic_value(CORBA::Short& value);
+  bool read_basic_value(CORBA::UShort& value);
+  bool read_basic_value(CORBA::Long& value);
+  bool read_basic_value(CORBA::ULong& value);
+  bool read_basic_value(CORBA::LongLong& value);
+  bool read_basic_value(CORBA::ULongLong& value);
+  bool read_basic_value(CORBA::Float& value);
+  bool read_basic_value(CORBA::Double& value);
+  bool read_basic_value(CORBA::LongDouble& value);
+  bool read_basic_value(ACE_OutputCDR::from_char& value);
+  bool read_basic_value(ACE_OutputCDR::from_wchar& value);
+  bool read_basic_value(ACE_OutputCDR::from_octet& value);
+  bool read_basic_value(ACE_OutputCDR::from_boolean& value);
+  bool read_basic_value(const char*& value);
+#ifdef DDS_HAS_WCHAR
+  bool read_basic_value(const CORBA::WChar*& value);
+#endif
+
+  void cast_to_enum_value(ACE_OutputCDR::from_int8& dst, CORBA::Long src) const;
+  void cast_to_enum_value(CORBA::Short& dst, CORBA::Long src) const;
+  void cast_to_enum_value(CORBA::Long& dst, CORBA::Long src) const;
+
+  template<typename ValueType>
+  void cast_to_enum_value(ValueType& dst, CORBA::Long src) const;
+
+  /// Read a basic member from a containing type
+  template<typename ValueType>
+  bool read_basic_member(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_struct(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_union(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_collection(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind CharKind, TypeKind StringKind, typename FromCharT, typename CharT>
+  DDS::ReturnCode_t get_char_common(CharT& value, DDS::MemberId id);
+
+  template<typename UIntType>
+  bool get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
+
+  template<>
+  bool get_boolean_from_bitmask<CORBA::UInt8>(CORBA::ULong index, CORBA::Boolean& value);
+
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool set_value_to_struct(DDS::MemberId id, const MemberType& value,
-    TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  bool set_value_to_struct(DDS::MemberId id, const MemberType& value);
 
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_boolean& value) const;
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_octet& value) const;
