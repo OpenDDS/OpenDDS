@@ -227,12 +227,12 @@ DataLink::invoke_on_start_callbacks(bool success)
   }
 }
 
-void
-DataLink::invoke_on_start_callbacks(const GUID_t& local, const GUID_t& remote, bool success)
+bool DataLink::invoke_on_start_callbacks(const GUID_t& local, const GUID_t& remote, bool success)
 {
   const DataLink_rch link(success ? this : 0, inc_count());
 
   TransportClient_wrch client;
+  bool made_callback = false;
 
   {
     GuardType guard(strategy_lock_);
@@ -258,8 +258,11 @@ DataLink::invoke_on_start_callbacks(const GUID_t& local, const GUID_t& remote, b
     TransportClient_rch client_lock = client.lock();
     if (client_lock) {
       client_lock->use_datalink(remote, link);
+      made_callback = true;
     }
   }
+
+  return made_callback;
 }
 
 //Reactor invokes this after being notified in schedule_stop or cancel_release

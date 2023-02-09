@@ -1,15 +1,15 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "ShmemTransport.h"
+
 #include "ShmemInst.h"
 #include "ShmemSendStrategy.h"
 #include "ShmemReceiveStrategy.h"
 
+#include <dds/DCPS/debug.h>
 #include <dds/DCPS/AssociationData.h>
 #include <dds/DCPS/NetworkResource.h>
 #include <dds/DCPS/transport/framework/TransportExceptions.h>
@@ -28,7 +28,7 @@ namespace DCPS {
 ShmemTransport::ShmemTransport(const ShmemInst_rch& inst)
   : TransportImpl(inst)
 {
-  if (! (configure_i(inst) && open()) ) {
+  if (!(configure_i(inst) && open())) {
     throw Transport::UnableToCreate();
   }
 }
@@ -45,14 +45,18 @@ ShmemTransport::make_datalink(const std::string& remote_address)
   ShmemDataLink_rch link = make_rch<ShmemDataLink>(rchandle_from(this));
 
   if (!link->open(remote_address)) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::make_datalink: "
-      "failed to open DataLink!\n"));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::make_datalink: "
+        "failed to open DataLink!\n"));
+    }
     return ShmemDataLink_rch();
   }
 
   if (!links_.insert(ShmemDataLinkMap::value_type(remote_address, link)).second) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::make_datalink: "
-      "there is an existing link for %C!\n", remote_address.c_str()));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::make_datalink: "
+        "there is an existing link for %C!\n", remote_address.c_str()));
+    }
     return ShmemDataLink_rch();
   }
 
@@ -65,10 +69,12 @@ ShmemDataLink_rch ShmemTransport::get_or_make_datalink(
   const std::pair<std::string, std::string> key = blob_to_key(remote.blob_);
   ShmemInst_rch cfg = config();
   if (!cfg || key.first != cfg->hostname()) {
-    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::get_or_make_datalink: "
-               "%C link %C:%C not found, hostname %C.\n",
-               caller, key.first.c_str(), key.second.c_str(),
-               cfg ? cfg->hostname().c_str() : "(no config)"));
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::get_or_make_datalink: "
+                 "%C link %C:%C not found, hostname %C.\n",
+                 caller, key.first.c_str(), key.second.c_str(),
+                 cfg ? cfg->hostname().c_str() : "(no config)"));
+    }
     return ShmemDataLink_rch();
   }
 
@@ -106,10 +112,21 @@ ShmemTransport::accept_datalink(const RemoteTransport& remote,
 }
 
 void ShmemTransport::stop_accepting_or_connecting(
-  const TransportClient_wrch& /*client*/, const GUID_t& /*remote_id*/,
+  const TransportClient_wrch& client, const GUID_t& remote_id,
   bool /*disassociate*/, bool /*association_failed*/)
 {
-  // TODO: Remove any pending association message resends
+  ACE_GUARD(ACE_Thread_Mutex, links_guard, links_lock_);
+  ACE_GUARD(ACE_Thread_Mutex, pending_guard, pending_connections_lock_);
+  typedef PendConnMap::iterator Iter;
+  const std::pair<Iter, Iter> range = pending_connections_.equal_range(client);
+  for (Iter iter = range.first; iter != range.second; ++iter) {
+    ShmemDataLink_rch sdl = dynamic_rchandle_cast<ShmemDataLink>(iter->second);
+    TransportClient_rch tc = client.lock();
+    if (tc) {
+      sdl->stop_resend_association_msgs(tc->get_guid(), remote_id);
+    }
+  }
+  pending_connections_.erase(range.first, range.second);
 }
 
 bool
@@ -123,10 +140,11 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
 
 #ifdef OPENDDS_SHMEM_UNSUPPORTED
   ACE_UNUSED_ARG(config);
-  ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                    ACE_TEXT("ShmemTransport::configure_i: ")
-                    ACE_TEXT("no platform support for shared memory!\n")),
-                   false);
+  if (log_level >= LogLevel::Error) {
+    ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTransport::configure_i: "
+               "no platform support for shared memory!\n"));
+  }
+  return false;
 #else /* OPENDDS_SHMEM_UNSUPPORTED */
 
   ShmemAllocator::MEMORY_POOL_OPTIONS alloc_opts;
@@ -145,10 +163,11 @@ ShmemTransport::configure_i(const ShmemInst_rch& config)
 
   void* mem = alloc_->malloc(sizeof(ShmemSharedSemaphore));
   if (mem == 0) {
-    ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: ")
-                      ACE_TEXT("ShmemTrasport::configure_i: failed to allocate")
-                      ACE_TEXT(" space for semaphore in shared memory!\n")),
-                     false);
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: ShmemTrasport::configure_i: failed to allocate"
+                 " space for semaphore in shared memory!\n"));
+    }
+    return false;
   }
 
   ShmemSharedSemaphore* pSem = reinterpret_cast<ShmemSharedSemaphore*>(mem);

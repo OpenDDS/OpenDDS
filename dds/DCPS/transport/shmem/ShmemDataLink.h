@@ -19,7 +19,7 @@
 #include <dds/DCPS/transport/framework/DataLink.h>
 
 #include <string>
-#include <map>
+#include <set>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -55,6 +55,7 @@ public:
                        bool reliable);
 
   void request_ack_received(ReceivedDataSample& sample);
+  void stop_resend_association_msgs(const GUID_t& local, const GUID_t& remote);
 
   void control_received(ReceivedDataSample& sample);
 
@@ -86,7 +87,7 @@ private:
   ReactorTask_rch reactor_task_;
 
   ACE_Thread_Mutex assoc_resends_mutex_;
-  typedef std::map<GuidPair, size_t> AssocResends;
+  typedef std::set<GuidPair> AssocResends;
   AssocResends assoc_resends_;
   typedef PmfPeriodicTask<ShmemDataLink> SmPeriodicTask;
   DCPS::RcHandle<SmPeriodicTask> assoc_resends_task_;

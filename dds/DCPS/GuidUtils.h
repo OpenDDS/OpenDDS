@@ -55,7 +55,7 @@ const EntityId_t ENTITYID_TL_SVC_REPLY_READER = {{0x00, 0x03, 0x01}, 0xc4};
 ///@}
 
 /// Nil value for GUID.
-const GUID_t GUID_UNKNOWN = {{0}, {{0}, 0}};
+const GUID_t GUID_UNKNOWN = { {0}, {{0}, 0} };
 
 /**
  * Identifies the kinds of entities used in a GUID.
