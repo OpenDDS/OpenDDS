@@ -6,6 +6,7 @@
 namespace {
 
 const ACE_Time_Value ZERO(0, 0);
+const size_t DEFAULT_QUEUE_SIZE(10u);
 
 }
 
@@ -85,7 +86,7 @@ bool ForwardAction::init(const ActionConfig& config, ActionReport& report,
     copy_threshold_ = static_cast<size_t>(copy_threshold_prop->value.ull_prop());
   }
 
-  size_t queue_size = data_dws_.size() + 1;
+  size_t queue_size = std::max(data_dws_.size() + 1, DEFAULT_QUEUE_SIZE);
   auto queue_size_prop = get_property(config.params, "queue_size", Builder::PVK_ULL);
   if (queue_size_prop) {
     queue_size = static_cast<size_t>(queue_size_prop->value.ull_prop());
@@ -145,7 +146,7 @@ void ForwardAction::on_data(const Data& data)
       id_.low = mt_();
       data_id_ = data.id;
     }
-    bool use_queue = (force_copy_ || (data_dws_.size() > copy_threshold_ && !prevent_copy_));
+    const bool use_queue = (force_copy_ || (data_dws_.size() > copy_threshold_ && !prevent_copy_));
     if (use_queue) {
       bool queue_full = (((queue_last_ + 1) % data_queue_.size()) == queue_first_);
       while (queue_full && !stopped_) {
@@ -184,14 +185,24 @@ void ForwardAction::on_data(const Data& data)
 void ForwardAction::do_writes()
 {
   std::unique_lock<std::mutex> lock(mutex_);
+  OctetSeq temp_buffer;
+  std::vector<DataDataWriter_var> temp_dws = data_dws_;
   while (queue_first_ != queue_last_) {
-    Data& data = data_queue_[queue_first_];
+    // Copy what we need out of the queue so we can write without lock
+    temp_buffer.swap(data_queue_[queue_first_].buffer);
+    Data data(data_queue_[queue_first_]);
+    data.buffer.swap(temp_buffer);
+    queue_first_ = (queue_first_ + 1) % data_queue_.size();
+    lock.unlock();
+
+    // Modify and write before reaquiring lock
     data.hop_count += 1;
-    for (auto it = data_dws_.begin(); it != data_dws_.end(); ++it) {
+    for (auto it = temp_dws.begin(); it != temp_dws.end(); ++it) {
       data.sent_time = Builder::get_sys_time();
       (*it)->write(data, 0);
     }
-    queue_first_ = (queue_first_ + 1) % data_queue_.size();
+    data.buffer = OctetSeq(); // deallocate outside lock
+    lock.lock();
   }
   queue_not_full_.notify_all();
 }
