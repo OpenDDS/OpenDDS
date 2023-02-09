@@ -126,6 +126,9 @@ bool testEval() {
     sample.durability_service.history_depth = 15;
     sample.durability_service.service_cleanup_delay.sec = 0;
     sample.durability_service.service_cleanup_delay.nanosec = 10;
+    sample.durability_service.max_samples = 0;
+    sample.durability_service.max_instances = 0;
+    sample.durability_service.max_samples_per_instance = 0;
 
     DDS::StringSeq params;
     params.length(1);
