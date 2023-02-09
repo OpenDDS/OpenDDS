@@ -145,28 +145,38 @@ void ReceivedDataSample::replace(const char* data, size_t size)
   blocks_.push_back(MessageBlock(data, size));
 }
 
-ReceivedDataSample::MessageBlock::MessageBlock(size_t size)
-  : data_()
-  , rd_ptr_()
-  , wr_ptr_()
+ReceivedDataSample
+ReceivedDataSample::get_fragment_range(ReceivedDataSample::FragmentNumber start_frag, ReceivedDataSample::FragmentNumber end_frag)
 {
-  ACE_Allocator* const alloc = ACE_Allocator::instance();
-  ACE_NEW_MALLOC(data_,
-    (ACE_Data_Block*) alloc->malloc(sizeof(ACE_Data_Block)),
-    ACE_Data_Block(size, ACE_Message_Block::MB_DATA, 0, alloc, 0,
-                   0, alloc));
-}
+  ReceivedDataSample result;
+  result.header_ = header_;
 
-ReceivedDataSample::MessageBlock::MessageBlock(const char* data, size_t size)
-  : data_()
-  , rd_ptr_()
-  , wr_ptr_(size)
-{
-  ACE_Allocator* const alloc = ACE_Allocator::instance();
-  ACE_NEW_MALLOC(data_,
-    (ACE_Data_Block*) alloc->malloc(sizeof(ACE_Data_Block)),
-    ACE_Data_Block(size, ACE_Message_Block::MB_DATA, data, alloc, 0,
-                   ACE_Message_Block::DONT_DELETE, alloc));
+  const ACE_UINT16 fsize = header_.fragment_size_;
+  const size_t start_offset = start_frag * fsize;
+  const size_t end_offset = end_frag == INVALID_FRAGMENT ? std::numeric_limits<size_t>::max() : (end_frag + 1) * fsize - 1;
+
+  size_t current_offset = 0;
+
+  bool default_push = false;
+
+  for (OPENDDS_VECTOR(MessageBlock)::iterator it = blocks_.begin(); current_offset < end_offset && it != blocks_.end(); ++it) {
+    const size_t len = it->wr_ptr_ - it->rd_ptr_;
+    if (default_push) {
+      result.blocks_.push_back(*it);
+      if (end_offset < current_offset + len) {
+        result.blocks_.back().wr_ptr_ -= (current_offset + len - end_offset);
+      }
+    } else if (start_offset < current_offset + len) {
+      default_push = true;
+      result.blocks_.push_back(*it);
+      if (current_offset < start_offset) {
+        result.blocks_.back().rd_ptr_ += start_offset - current_offset;
+      }
+    }
+    current_offset += len;
+  }
+
+  return result;
 }
 
 }

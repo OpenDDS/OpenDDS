@@ -60,6 +60,9 @@ struct FragKey {
   OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
 #endif
 
+typedef SequenceNumber::Value FragmentNumber;
+typedef std::pair<FragmentNumber, FragmentNumber> FragmentRange;
+
 class OpenDDS_Dcps_Export TransportReassembly : public virtual RcObject {
 public:
   explicit TransportReassembly(const TimeDuration& timeout = TimeDuration(300));
@@ -70,12 +73,12 @@ public:
   bool reassemble(const SequenceNumber& transportSeq, bool firstFrag,
                   ReceivedDataSample& data, ACE_UINT32 total_frags = 0);
 
-  bool reassemble(const SequenceRange& seqRange, ReceivedDataSample& data, ACE_UINT32 total_frags = 0);
+  bool reassemble(const FragmentRange& fragRange, ReceivedDataSample& data, ACE_UINT32 total_frags = 0);
 
   /// Called by TransportReceiveStrategy to indicate that we can
   /// stop tracking partially-reassembled messages when we know the
   /// remaining fragments are not expected to arrive.
-  void data_unavailable(const SequenceRange& transportSeqDropped);
+  void data_unavailable(const FragmentRange& transportSeqDropped);
 
   void data_unavailable(const SequenceNumber& dataSampleSeq,
                         const GUID_t& pub_id);
@@ -105,61 +108,40 @@ public:
 
 private:
 
-  bool reassemble_i(const SequenceRange& seqRange, bool firstFrag,
+  bool reassemble_i(const FragmentRange& fragRange, bool firstFrag,
                     ReceivedDataSample& data, ACE_UINT32 total_frags);
 
-  // A FragRange represents a chunk of a partially-reassembled message.
-  // The transport_seq_ range is the range of transport sequence numbers
+  // A FragSample represents a chunk of a partially-reassembled message.
+  // The frag_range_ range is the range of transport sequence numbers
   // that were used to send the given chunk of data.
-  struct FragRange {
-    FragRange(const SequenceRange& seqRange,
+  struct FragSample {
+    FragSample(const FragmentRange& fragRange,
               const ReceivedDataSample& data);
 
-    SequenceRange transport_seq_;
+    FragmentRange frag_range_;
     ReceivedDataSample rec_ds_;
   };
 
-  // Each element of the FragRangeList represents one sent message
-  // (one DataSampleHeader before fragmentation).  The list must have at
-  // least one value in it.  If a FragRange in the list has a sample_ with
-  // a null ACE_Message_Block*, it's one that was data_unavailable().
-  typedef OPENDDS_LIST(FragRange) FragRangeList;
-  typedef OPENDDS_MAP(SequenceNumber::Value, FragRangeList::iterator) FragRangeIterMap;
-
   struct FragInfo {
-    FragInfo()
-      : have_first_(false), range_list_(), total_frags_(0) {}
-    FragInfo(bool hf, const FragRangeList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration)
-      : have_first_(hf), range_list_(rl), total_frags_(tf), expiration_(expiration)
-    {
-      for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
-        range_finder_[it->transport_seq_.second.getValue()] = it;
-      }
-    }
+    typedef OPENDDS_LIST(FragSample) FragSampleList;
+    typedef OPENDDS_MAP(FragmentNumber, FragSampleList::iterator) FragSampleListIterMap;
 
-    FragInfo(const FragInfo& val)
-    {
-      *this = val;
-    }
+    typedef OPENDDS_LIST(FragmentRange) FragGapList;
+    typedef OPENDDS_MAP(FragmentNumber, FragGapList::iterator) FragGapListIterMap;
 
-    FragInfo& operator=(const FragInfo& rhs)
-    {
-      if (this != &rhs) {
-        have_first_ = rhs.have_first_;
-        range_list_ = rhs.range_list_;
-        total_frags_ = rhs.total_frags_;
-        expiration_ = rhs.expiration_;
-        range_finder_.clear();
-        for (FragRangeList::iterator it = range_list_.begin(); it != range_list_.end(); ++it) {
-          range_finder_[it->transport_seq_.second.getValue()] = it;
-        }
-      }
-      return *this;
-    }
+    FragInfo();
+    FragInfo(bool hf, const FragSampleList& rl, ACE_UINT32 tf, const MonotonicTimePoint& expiration);
+    FragInfo(const FragInfo& val);
+
+    FragInfo& operator=(const FragInfo& rhs);
+
+    bool insert(const FragmentRange& fragRange, ReceivedDataSample& data);
 
     bool have_first_;
-    FragRangeList range_list_;
-    FragRangeIterMap range_finder_;
+    FragSampleList sample_list_;
+    FragSampleListIterMap sample_finder_;
+    FragGapList gap_list_;
+    FragGapListIterMap gap_finder_;
     ACE_UINT32 total_frags_;
     MonotonicTimePoint expiration_;
   };
@@ -183,11 +165,6 @@ private:
   TimeDuration timeout_;
 
   void check_expirations(const MonotonicTimePoint& now);
-
-  static bool insert(FragRangeList& flist,
-                     FragRangeIterMap& fri_map,
-                     const SequenceRange& seqRange,
-                     ReceivedDataSample& data);
 };
 
 typedef RcHandle<TransportReassembly> TransportReassembly_rch;

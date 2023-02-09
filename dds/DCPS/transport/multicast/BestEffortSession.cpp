@@ -29,7 +29,7 @@ BestEffortSession::check_header(const TransportHeader& header)
                ACE_TEXT("expected %q received %q\n"),
                this->expected_.getValue(), header.sequence_.getValue()), 2);
     if (header.sequence_ > this->expected_) {
-      SequenceRange range(this->expected_, header.sequence_.previous());
+      FragmentRange range(this->expected_.getValue(), header.sequence_.previous().getValue());
       this->reassembly_.data_unavailable(range);
     }
   }

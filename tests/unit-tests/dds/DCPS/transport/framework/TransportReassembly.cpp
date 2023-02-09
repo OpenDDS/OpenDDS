@@ -31,13 +31,16 @@ namespace {
   // Class handling assembly of samples with a messge block
   class Sample {
   public:
-    Sample(const GUID_t& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true)
-      : mb(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()))
-      , sample(*mb)
+    Sample(const GUID_t& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true, size_t size = 0)
+      : mb(new ACE_Message_Block(size == 0 ? DataSampleHeader::get_max_serialized_size() : size))
+      , sample()
     {
+      mb->wr_ptr(size == 0 ? DataSampleHeader::get_max_serialized_size() : size);
+      sample = ReceivedDataSample(*mb);
       sample.header_.publication_id_ = pub_id;
       sample.header_.sequence_ = msg_seq;
       sample.header_.more_fragments_ = more_fragments;
+      sample.header_.fragment_size_ = 1024;
     }
     Message_Block_Ptr mb;
     ReceivedDataSample sample;
@@ -84,240 +87,6 @@ namespace {
   CORBA::ULong Gaps::bm_length(BM_LENGTH);
 };
 
-void test_empty()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber seq(1);
-  GUID_t pub_id = create_pub_id();
-  EXPECT_TRUE(!tr.has_frags(seq, pub_id));
-  EXPECT_TRUE(0 == gaps.get(tr, seq, pub_id));
-}
-
-void test_insert_has_frag()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(4);
-  SequenceNumber frag_seq(1);
-  GUID_t pub_id = create_pub_id();
-  Sample data(pub_id, msg_seq);
-  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
-  EXPECT_TRUE(false == reassembled);
-  EXPECT_TRUE(tr.has_frags(msg_seq, pub_id));
-}
-
-void test_first_insert_has_no_gaps()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(18);
-  SequenceNumber frag_seq(1);
-  GUID_t pub_id = create_pub_id();
-  Sample data(pub_id, msg_seq);
-
-  EXPECT_TRUE(!tr.reassemble(frag_seq, true, data.sample));
-  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(tr.has_frags(msg_seq, pub_id));
-  EXPECT_TRUE(2 == base);             // Now expecting 2
-  EXPECT_TRUE(1 == gaps.result_bits); // Only one bit
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(3));    // No gap
-}
-
-void test_insert_gaps()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(9);
-  SequenceNumber frag_seq(4);
-  GUID_t pub_id = create_pub_id();
-  Sample data(pub_id, msg_seq);
-
-  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
-  EXPECT_TRUE(false == reassembled);
-
-  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(1 == base);             // Gap from 1-3
-  EXPECT_TRUE(3 == gaps.result_bits); // Only one bit
-  EXPECT_TRUE(gaps.check_gap(1));     // Gap
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(gaps.check_gap(3));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(4));    // No gap
-}
-
-void test_insert_one_then_gap()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(17);
-  SequenceNumber frag_seq1(1);
-  SequenceNumber frag_seq2(6);
-  GUID_t pub_id = create_pub_id();
-  Sample data(pub_id, msg_seq);
-
-  bool reassembled = tr.reassemble(frag_seq1, true, data.sample);
-  EXPECT_TRUE(false == reassembled);
-
-  reassembled = tr.reassemble(frag_seq2, true, data.sample);
-  EXPECT_TRUE(false == reassembled);
-
-  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(2 == base);             // Gap from 2-5
-  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(gaps.check_gap(3));     // Gap
-  EXPECT_TRUE(gaps.check_gap(4));     // Gap
-  EXPECT_TRUE(gaps.check_gap(5));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
-}
-
-void test_insert_one_then_split_gap()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(17);
-  GUID_t pub_id = create_pub_id();
-  Sample data(pub_id, msg_seq);
-
-  EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
-  EXPECT_TRUE(!tr.reassemble(6, true, data.sample)); // 1,6
-  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(2 == base);             // Gap from 2-5
-  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(gaps.check_gap(3));     // Gap
-  EXPECT_TRUE(gaps.check_gap(4));     // Gap
-  EXPECT_TRUE(gaps.check_gap(5));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
-
-  EXPECT_TRUE(!tr.reassemble(4, true, data.sample)); // 1,4,6
-  EXPECT_TRUE(!tr.reassemble(3, true, data.sample)); // 1,3-4,6
-  base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(2 == base);             // Gap at 2 and 5
-  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(3));    // No gap
-  EXPECT_TRUE(!gaps.check_gap(4));    // No gap
-  EXPECT_TRUE(gaps.check_gap(5));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
-}
-
-void test_fill_rtol()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(17);
-  GUID_t pub_id = create_pub_id();
-  Sample data(pub_id, msg_seq);
-
-  EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
-  EXPECT_TRUE(!tr.reassemble(6, true, data.sample)); // 1,6
-  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(2 == base);             // Gap from 2-5
-  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(gaps.check_gap(3));     // Gap
-  EXPECT_TRUE(gaps.check_gap(4));     // Gap
-  EXPECT_TRUE(gaps.check_gap(5));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
-
-  EXPECT_TRUE(!tr.reassemble(5, true, data.sample)); // 1,5-6
-  EXPECT_TRUE(!tr.reassemble(4, true, data.sample)); // 1,4-6
-  base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(2 == base);             // Gap from 2-3
-  EXPECT_TRUE(2 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(gaps.check_gap(3));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(4));    // No gap
-  EXPECT_TRUE(!gaps.check_gap(5));    // No gap
-  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
-
-  EXPECT_TRUE(!tr.reassemble(3, true, data.sample)); // 1,3-6
-  EXPECT_TRUE(!tr.reassemble(2, true, data.sample)); // 1-6
-  base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(7 == base);             // Gap from 2-3
-  EXPECT_TRUE(1 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(7));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(8));    // No gap
-}
-
-void test_fill_ltor()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(27);
-  GUID_t pub_id = create_pub_id();
-  Sample data(pub_id, msg_seq);
-
-  EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
-  EXPECT_TRUE(!tr.reassemble(6, true, data.sample)); // 1,6
-  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(2 == base);             // Gap from 2-5
-  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(2));     // Gap
-  EXPECT_TRUE(gaps.check_gap(3));     // Gap
-  EXPECT_TRUE(gaps.check_gap(4));     // Gap
-  EXPECT_TRUE(gaps.check_gap(5));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
-
-  EXPECT_TRUE(!tr.reassemble(2, true, data.sample)); // 1-2,6
-  EXPECT_TRUE(!tr.reassemble(3, true, data.sample)); // 1-3,6
-  base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(4 == base);             // Gap from 4-5
-  EXPECT_TRUE(2 == gaps.result_bits); // Number of bits
-  EXPECT_TRUE(gaps.check_gap(4));     // Gap
-  EXPECT_TRUE(gaps.check_gap(5));     // Gap
-  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
-
-  EXPECT_TRUE(!tr.reassemble(4, true, data.sample)); // 1-4,6
-  EXPECT_TRUE(!tr.reassemble(5, true, data.sample)); // 1-6
-  base = gaps.get(tr, msg_seq, pub_id);
-
-  EXPECT_TRUE(6 == base);
-  EXPECT_TRUE(256 == gaps.result_bits);
-  EXPECT_TRUE(gaps.check_gap(7));    // Gap
-  EXPECT_TRUE(gaps.check_gap(8));    // Gap
-}
-
-void test_fill_ooo()
-{
-  TransportReassembly tr;
-  Gaps gaps;
-  SequenceNumber msg_seq(3);
-  GUID_t pub_id = create_pub_id();
-  Sample data1(pub_id, msg_seq);
-  Sample data2(pub_id, msg_seq);
-  Sample data3(pub_id, msg_seq);
-  Sample data4(pub_id, msg_seq);
-  Sample data5(pub_id, msg_seq, false);
-  Sample data6(pub_id, msg_seq, false);
-  Sample data7(pub_id, msg_seq);
-  Sample data8(pub_id, msg_seq);
-  Sample data9(pub_id, msg_seq);
-  Sample data10(pub_id, msg_seq);
-
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(1, 63), data1.sample, 251)); // 1-63
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(1, 63), data2.sample, 251)); // 1-63
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(127, 189), data3.sample, 251)); // 1-63, 127-189
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(127, 189), data4.sample, 251)); // 1-63, 127-189
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(190, 251), data5.sample, 251)); // 1-63, 127-251
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(190, 251), data6.sample, 251)); // 1-63, 127-251
-  EXPECT_TRUE(tr.reassemble(SequenceRange(64, 126), data7.sample, 251)); // 1-251
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(1, 63), data8.sample, 251)); // 1-251
-  EXPECT_TRUE(!tr.reassemble(SequenceRange(64, 126), data9.sample, 251)); // 1-251
-}
-
 struct Fragments {
   Message_Block_Ptr head_;
   Message_Block_Ptr tail_;
@@ -352,7 +121,7 @@ bool check_reassembled(const ReceivedDataSample& rds)
   return true;
 }
 
-TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
+TEST(dds_DCPS_transport_framework_TransportReassembly, Main_Test)
 {
   DataSampleHeader dsh;
   const size_t N = 300;
@@ -735,7 +504,7 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       rds3.header_ = header2b;
       TransportReassembly tr;
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
-      tr.data_unavailable(SequenceRange(2, 2));
+      tr.data_unavailable(FragmentRange(2, 2));
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
     }
     {
@@ -745,7 +514,7 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       rds3.header_ = header2b;
       TransportReassembly tr;
       EXPECT_TRUE(!tr.reassemble(3, false, rds3));
-      tr.data_unavailable(SequenceRange(2, 2));
+      tr.data_unavailable(FragmentRange(2, 2));
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
     }
     {
@@ -755,7 +524,7 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       rds2.header_ = header2a;
       TransportReassembly tr;
       EXPECT_TRUE(!tr.reassemble(2, false, rds2));
-      tr.data_unavailable(SequenceRange(3, 3));
+      tr.data_unavailable(FragmentRange(3, 3));
       EXPECT_TRUE(!tr.reassemble(1, true, rds1));
     }
   }
@@ -828,10 +597,10 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       rds3.header_ = header2a;
       rds4.header_ = header2b;
       TransportReassembly tr;
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(1, 5), rds1));
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(6, 10), rds2));
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(11, 15), rds3));
-      EXPECT_TRUE(tr.reassemble(SequenceRange(16, 20), rds4));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(1, 5), rds1));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(6, 10), rds2));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(11, 15), rds3));
+      EXPECT_TRUE(tr.reassemble(FragmentRange(16, 20), rds4));
       EXPECT_EQ(rds4.data_length(), N);
       EXPECT_TRUE(check_reassembled(rds4));
     }
@@ -845,10 +614,10 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       rds3.header_ = header2a;
       rds4.header_ = header2b;
       TransportReassembly tr;
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(1, 5), rds1));
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(16, 20), rds4));
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(6, 10), rds2));
-      EXPECT_TRUE(tr.reassemble(SequenceRange(11, 15), rds3));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(1, 5), rds1));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(16, 20), rds4));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(6, 10), rds2));
+      EXPECT_TRUE(tr.reassemble(FragmentRange(11, 15), rds3));
       EXPECT_EQ(rds3.data_length(), N);
       EXPECT_TRUE(check_reassembled(rds3));
     }
@@ -862,10 +631,10 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
       rds3.header_ = header2a;
       rds4.header_ = header2b;
       TransportReassembly tr;
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(1, 5), rds1));
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(16, 20), rds4));
-      EXPECT_TRUE(!tr.reassemble(SequenceRange(11, 15), rds3));
-      EXPECT_TRUE(tr.reassemble(SequenceRange(6, 10), rds2));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(1, 5), rds1));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(16, 20), rds4));
+      EXPECT_TRUE(!tr.reassemble(FragmentRange(11, 15), rds3));
+      EXPECT_TRUE(tr.reassemble(FragmentRange(6, 10), rds2));
       EXPECT_EQ(rds2.data_length(), N);
       EXPECT_TRUE(check_reassembled(rds2));
     }
@@ -1004,15 +773,280 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, maintest)
     EXPECT_TRUE(reassembled.content_filter_);
     EXPECT_TRUE(reassembled.content_filter_entries_.length() == CF_ENTRIES);
   }
+}
 
-  test_empty();
-  test_insert_has_frag();
-  test_first_insert_has_no_gaps();
-  test_insert_gaps();
-  test_insert_one_then_gap();
-  test_insert_one_then_split_gap();
-  test_fill_rtol();
-  // TODO: This test prints an ERROR which hangs up auto_run_tests.pl.
-  //test_fill_ltor();
-  test_fill_ooo();
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Empty)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber seq(1);
+  GUID_t pub_id = create_pub_id();
+  EXPECT_TRUE(!tr.has_frags(seq, pub_id));
+  EXPECT_TRUE(0 == gaps.get(tr, seq, pub_id));
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Insert_Has_Frag)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(4);
+  SequenceNumber frag_seq(1);
+  GUID_t pub_id = create_pub_id();
+  Sample data(pub_id, msg_seq);
+  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
+  EXPECT_TRUE(false == reassembled);
+  EXPECT_TRUE(tr.has_frags(msg_seq, pub_id));
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_First_Insert_Has_No_Gaps)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(18);
+  SequenceNumber frag_seq(1);
+  GUID_t pub_id = create_pub_id();
+  Sample data(pub_id, msg_seq);
+
+  EXPECT_TRUE(!tr.reassemble(frag_seq, true, data.sample));
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(tr.has_frags(msg_seq, pub_id));
+  EXPECT_TRUE(2 == base);             // Now expecting 2
+  EXPECT_TRUE(1 == gaps.result_bits); // Only one bit
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(3));    // No gap
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Insert_Gaps)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(9);
+  SequenceNumber frag_seq(4);
+  GUID_t pub_id = create_pub_id();
+  Sample data(pub_id, msg_seq);
+
+  bool reassembled = tr.reassemble(frag_seq, true, data.sample);
+  EXPECT_TRUE(false == reassembled);
+
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(1 == base);             // Gap from 1-3
+  EXPECT_TRUE(3 == gaps.result_bits); // Only one bit
+  EXPECT_TRUE(gaps.check_gap(1));     // Gap
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(gaps.check_gap(3));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(4));    // No gap
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Insert_One_Then_Gap)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(17);
+  SequenceNumber frag_seq1(1);
+  SequenceNumber frag_seq2(6);
+  GUID_t pub_id = create_pub_id();
+  Sample data(pub_id, msg_seq);
+
+  bool reassembled = tr.reassemble(frag_seq1, true, data.sample);
+  EXPECT_TRUE(false == reassembled);
+
+  reassembled = tr.reassemble(frag_seq2, true, data.sample);
+  EXPECT_TRUE(false == reassembled);
+
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(2 == base);             // Gap from 2-5
+  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(gaps.check_gap(3));     // Gap
+  EXPECT_TRUE(gaps.check_gap(4));     // Gap
+  EXPECT_TRUE(gaps.check_gap(5));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Insert_One_Then_Split_Gap)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(17);
+  GUID_t pub_id = create_pub_id();
+  Sample data(pub_id, msg_seq);
+
+  EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
+  EXPECT_TRUE(!tr.reassemble(6, true, data.sample)); // 1,6
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(2 == base);             // Gap from 2-5
+  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(gaps.check_gap(3));     // Gap
+  EXPECT_TRUE(gaps.check_gap(4));     // Gap
+  EXPECT_TRUE(gaps.check_gap(5));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
+
+  EXPECT_TRUE(!tr.reassemble(4, true, data.sample)); // 1,4,6
+  EXPECT_TRUE(!tr.reassemble(3, true, data.sample)); // 1,3-4,6
+  base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(2 == base);             // Gap at 2 and 5
+  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(3));    // No gap
+  EXPECT_TRUE(!gaps.check_gap(4));    // No gap
+  EXPECT_TRUE(gaps.check_gap(5));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Fill_Right_To_Left)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(17);
+  GUID_t pub_id = create_pub_id();
+  Sample data(pub_id, msg_seq);
+
+  EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
+  EXPECT_TRUE(!tr.reassemble(6, true, data.sample)); // 1,6
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(2 == base);             // Gap from 2-5
+  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(gaps.check_gap(3));     // Gap
+  EXPECT_TRUE(gaps.check_gap(4));     // Gap
+  EXPECT_TRUE(gaps.check_gap(5));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
+
+  EXPECT_TRUE(!tr.reassemble(5, true, data.sample)); // 1,5-6
+  EXPECT_TRUE(!tr.reassemble(4, true, data.sample)); // 1,4-6
+  base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(2 == base);             // Gap from 2-3
+  EXPECT_TRUE(2 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(gaps.check_gap(3));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(4));    // No gap
+  EXPECT_TRUE(!gaps.check_gap(5));    // No gap
+  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
+
+  EXPECT_TRUE(!tr.reassemble(3, true, data.sample)); // 1,3-6
+  EXPECT_TRUE(!tr.reassemble(2, true, data.sample)); // 1-6
+  base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(7 == base);             // Gap from 2-3
+  EXPECT_TRUE(1 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(7));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(8));    // No gap
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Fill_Left_To_Right)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(27);
+  GUID_t pub_id = create_pub_id();
+  Sample data(pub_id, msg_seq);
+
+  EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
+  EXPECT_TRUE(!tr.reassemble(6, true, data.sample)); // 1,6
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(2 == base);             // Gap from 2-5
+  EXPECT_TRUE(4 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(2));     // Gap
+  EXPECT_TRUE(gaps.check_gap(3));     // Gap
+  EXPECT_TRUE(gaps.check_gap(4));     // Gap
+  EXPECT_TRUE(gaps.check_gap(5));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
+
+  EXPECT_TRUE(!tr.reassemble(2, true, data.sample)); // 1-2,6
+  EXPECT_TRUE(!tr.reassemble(3, true, data.sample)); // 1-3,6
+  base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(4 == base);             // Gap from 4-5
+  EXPECT_TRUE(2 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(4));     // Gap
+  EXPECT_TRUE(gaps.check_gap(5));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(6));    // No gap
+
+  EXPECT_TRUE(!tr.reassemble(4, true, data.sample)); // 1-4,6
+  EXPECT_TRUE(!tr.reassemble(5, true, data.sample)); // 1-6
+  base = gaps.get(tr, msg_seq, pub_id);
+
+  EXPECT_TRUE(7 == base);             // Gap from 2-3
+  EXPECT_TRUE(1 == gaps.result_bits); // Number of bits
+  EXPECT_TRUE(gaps.check_gap(7));     // Gap
+  EXPECT_TRUE(!gaps.check_gap(8));    // No gap
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Fill_Out_Of_Order)
+{
+  TransportReassembly tr;
+  Gaps gaps;
+  SequenceNumber msg_seq(3);
+  GUID_t pub_id = create_pub_id();
+  Sample data1(pub_id, msg_seq);
+  Sample data2(pub_id, msg_seq);
+  Sample data3(pub_id, msg_seq);
+  Sample data4(pub_id, msg_seq);
+  Sample data5(pub_id, msg_seq, false);
+  Sample data6(pub_id, msg_seq, false);
+  Sample data7(pub_id, msg_seq);
+  Sample data8(pub_id, msg_seq);
+  Sample data9(pub_id, msg_seq);
+  Sample data10(pub_id, msg_seq);
+
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(1, 63), data1.sample, 251)); // 1-63
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(1, 63), data2.sample, 251)); // 1-63
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(127, 189), data3.sample, 251)); // 1-63, 127-189
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(127, 189), data4.sample, 251)); // 1-63, 127-189
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(190, 251), data5.sample, 251)); // 1-63, 127-251
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(190, 251), data6.sample, 251)); // 1-63, 127-251
+  EXPECT_TRUE(tr.reassemble(FragmentRange(64, 126), data7.sample, 251)); // 1-251
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(1, 63), data8.sample, 251)); // 1-251
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(64, 126), data9.sample, 251)); // 1-251
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Fill_Overlapping_Inputs)
+{
+  TransportReassembly tr;
+  SequenceNumber msg_seq(2);
+  GUID_t pub_id = create_pub_id();
+  Sample data1(pub_id, msg_seq, true, 1024 * 3);
+  Sample data2(pub_id, msg_seq, false, 1024 * 3);
+  Sample data3(pub_id, msg_seq, true, 1024 * 6);
+
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(1, 3), data1.sample, 8)); // 1-3
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(6, 8), data2.sample, 8)); // 1-3, 6-8
+  EXPECT_TRUE(tr.reassemble(FragmentRange(2, 7), data3.sample, 8)); // 1-8
+
+  Gaps gaps;
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+  EXPECT_EQ(0u, base);
+  EXPECT_EQ(0u, gaps.result_bits);
+}
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Fill_Overlapping_Inputs_2)
+{
+  TransportReassembly tr;
+  SequenceNumber msg_seq(2);
+  GUID_t pub_id = create_pub_id();
+  Sample data1(pub_id, msg_seq, true, 1024 * 1);
+  Sample data2(pub_id, msg_seq, true, 1024 * 1);
+  Sample data3(pub_id, msg_seq, true, 1024 * 6);
+  Sample data4(pub_id, msg_seq, false, 1024 * 1);
+  Sample data5(pub_id, msg_seq, true, 1024 * 1);
+
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(3, 3), data1.sample, 8)); // 3-3
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(6, 6), data2.sample, 8)); // 3-3, 6-6
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(2, 7), data3.sample, 8)); // 2-7
+  EXPECT_TRUE(!tr.reassemble(FragmentRange(8, 8), data4.sample, 8)); // 2-8
+  EXPECT_TRUE(tr.reassemble(FragmentRange(1, 1), data5.sample, 8)); // 1-8
+
+  Gaps gaps;
+  CORBA::ULong base = gaps.get(tr, msg_seq, pub_id);
+  EXPECT_EQ(0u, base);
+  EXPECT_EQ(0u, gaps.result_bits);
 }

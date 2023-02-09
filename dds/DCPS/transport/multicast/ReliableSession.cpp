@@ -244,7 +244,8 @@ ReliableSession::expire_naks()
                                                lastSeq), dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
-      this->reassembly_.data_unavailable(dropped[i]);
+      const SequenceRange& sr = dropped[i];
+      reassembly_.data_unavailable(FragmentRange(sr.first.getValue(), sr.second.getValue()));
     }
 
     ACE_ERROR((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: ReliableSession::expire_naks: ")
@@ -612,7 +613,8 @@ ReliableSession::nakack_received(const Message_Block_Ptr& control)
   } else if (this->nak_sequence_.insert(SequenceRange(range_low, range_high), dropped)) {
 
     for (size_t i = 0; i < dropped.size(); ++i) {
-      this->reassembly_.data_unavailable(dropped[i]);
+      const SequenceRange& sr = dropped[i];
+      reassembly_.data_unavailable(FragmentRange(sr.first.getValue(), sr.second.getValue()));
     }
 
     if (DCPS_debug_level > 0) {
