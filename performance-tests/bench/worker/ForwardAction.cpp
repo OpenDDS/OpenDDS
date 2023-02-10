@@ -155,8 +155,11 @@ void ForwardAction::on_data(const Data& data)
       }
       data_queue_[queue_last_] = data;
       data_queue_[queue_last_].id = id_;
+      const bool do_schedule = queue_last_ == queue_first_;
       queue_last_ = (queue_last_ + 1) % data_queue_.size();
-      proactor_.schedule_timer(*handler_, nullptr, ZERO);
+      if (do_schedule) {
+        proactor_.schedule_timer(*handler_, nullptr, ZERO);
+      }
     } else {
       for (auto it = data_dws_.begin(); it != data_dws_.end(); ++it) {
 
@@ -190,10 +193,11 @@ void ForwardAction::do_writes()
   while (queue_first_ != queue_last_) {
     // Copy what we need out of the queue so we can write without lock
     temp_buffer.swap(data_queue_[queue_first_].buffer);
-    Data data(data_queue_[queue_first_]);
+    Data data = data_queue_[queue_first_];
     data.buffer.swap(temp_buffer);
     queue_first_ = (queue_first_ + 1) % data_queue_.size();
     lock.unlock();
+    queue_not_full_.notify_all();
 
     // Modify and write before reaquiring lock
     data.hop_count += 1;
@@ -204,7 +208,6 @@ void ForwardAction::do_writes()
     data.buffer = OctetSeq(); // deallocate outside lock
     lock.lock();
   }
-  queue_not_full_.notify_all();
 }
 
 }
