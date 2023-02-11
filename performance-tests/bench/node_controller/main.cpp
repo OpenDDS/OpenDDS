@@ -362,7 +362,7 @@ public:
       int index = 0;
       for (auto spawned_process_i : all_spawned_processes_) {
         auto& spawned_process = spawned_process_i.second;
-        pid_t pid = process_manager_->spawn(*spawned_proc_opts[index]);
+        const pid_t pid = process_manager_->spawn(*spawned_proc_opts[index]);
         if (log_handles[index] != ACE_INVALID_HANDLE) {
           ACE_OS::close(log_handles[index]);
         }
