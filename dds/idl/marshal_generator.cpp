@@ -3403,8 +3403,9 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
           "            " << cxx_type << " val;\n" <<
           "            if (!(strm >> " << val << ")) {\n"
           "              throw std::runtime_error(\"Field '" << field_name << "' could not be deserialized\");\n" <<
-          "            }\n"
-          "            return val;\n"
+          "            }\n" <<
+          boundsCheck <<
+          "            return " << transformPrefix << "val" << transformSuffix << ";\n"
           "          } else {\n"
           "            strm.skip(field_size);\n"
           "          }\n"
@@ -3487,7 +3488,8 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         "        throw std::runtime_error(\"Field '" + field_name + "' could "
         "not be deserialized\");\n"
         "      }\n"
-        "      return val;\n"
+        + boundsCheck +
+        "      return " + transformPrefix + "val" + transformSuffix + ";\n"
         "    } else {\n";
       if (fld_cls & CL_STRING) {
         expr +=
