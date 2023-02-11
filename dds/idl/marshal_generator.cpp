@@ -3421,13 +3421,23 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         const std::string cxx_type = to_cxx_type(field_type, size);
         const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
           : getWrapper("val", field_type, WD_INPUT);
+        std::string boundsCheck, transformPrefix, transformSuffix;
+        if (fld_cls & CL_ENUM) {
+          const std::string enumName = dds_generator::scoped_helper(field_type->name(), "_");
+          boundsCheck = "            if (val >= gen_" + enumName + "_names_size) {\n"
+                        "              throw std::runtime_error(\"Enum value out of bounds\");\n"
+                        "            }\n";
+          transformPrefix = "gen_" + enumName + "_names[";
+          transformSuffix = "]";
+        }
         cases <<
           "          if (field_id == member_id) {\n"
           "            " << cxx_type << " val;\n" <<
           "            if (!(strm >> " << val << ")) {\n"
           "              throw std::runtime_error(\"Field '" << field_name << "' could not be deserialized\");\n" <<
-          "            }\n"
-          "            return val;\n"
+          "            }\n" <<
+          boundsCheck <<
+          "            return " << transformPrefix << "val" << transformSuffix << ";\n"
           "          } else {\n"
           "            strm.skip(field_size);\n"
           "          }\n"
@@ -3494,6 +3504,15 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
       const std::string cxx_type = to_cxx_type(field_type, size);
       const std::string val = (fld_cls & CL_STRING) ? (use_cxx11 ? "val" : "val.out()")
           : getWrapper("val", field_type, WD_INPUT);
+      std::string boundsCheck, transformPrefix, transformSuffix;
+      if (fld_cls & CL_ENUM) {
+        const std::string enumName = dds_generator::scoped_helper(field_type->name(), "_");
+        boundsCheck = "      if (val >= gen_" + enumName + "_names_size) {\n"
+                      "        throw std::runtime_error(\"Enum value out of bounds\");\n"
+                      "      }\n";
+        transformPrefix = "gen_" + enumName + "_names[";
+        transformSuffix = "]";
+      }
       expr +=
         "    if (base_field == \"" + field_name + "\") {\n"
         "      " + cxx_type + " val;\n"
@@ -3501,7 +3520,8 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         "        throw std::runtime_error(\"Field '" + field_name + "' could "
         "not be deserialized\");\n"
         "      }\n"
-        "      return val;\n"
+        + boundsCheck +
+        "      return " + transformPrefix + "val" + transformSuffix + ";\n"
         "    } else {\n";
       if (fld_cls & CL_STRING) {
         expr +=

@@ -79,7 +79,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " => exception " << e.what() << std::endl;
     }
-#ifdef TEST_CDR_STATIC_FILTER
     try {
       Message_Block_Ptr amb(serialize(enc_xcdr2, sample));
       FilterEvaluator fe(input[i], false);
@@ -90,7 +89,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " =xcdr=> exception " << e.what() << std::endl;
     }
-#endif
     try {
       DDS::DynamicType_var dyntype = tsDynamic.get_type();
       DDS::DynamicData_var dynamic = copy(sample, dyntype);
@@ -103,7 +101,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " =dynamic=> exception " << e.what() << std::endl;
     }
-#ifdef TEST_CDR_DYNAMIC_FILTER
     try {
       Message_Block_Ptr amb(serialize(enc_xcdr2, sample));
       FilterEvaluator fe(input[i], false);
@@ -114,7 +111,6 @@ bool doEvalTest(const char* (&input)[N], bool expected, const T& sample, const D
       if (expected) pass = false;
       std::cout << input[i] << " =dynamic/xcdr=> exception " << e.what() << std::endl;
     }
-#endif
   }
   return pass;
 }
@@ -130,6 +126,9 @@ bool testEval() {
     sample.durability_service.history_depth = 15;
     sample.durability_service.service_cleanup_delay.sec = 0;
     sample.durability_service.service_cleanup_delay.nanosec = 10;
+    sample.durability_service.max_samples = 0;
+    sample.durability_service.max_instances = 0;
+    sample.durability_service.max_samples_per_instance = 0;
 
     DDS::StringSeq params;
     params.length(1);
