@@ -88,7 +88,7 @@ RST/Sphinx Usage
 * `One sentence per line should be perfered. <https://rhodesmill.org/brandon/2012/one-sentence-per-line/>`__
   This makes it easier to see what changed in a ``git diff`` or GitHub PR and easier to move sentences around in editors like Vim.
   It also avoids inconsistencies involving what the maximum line length is.
-  This might make it more annoying to read the documentation raw, but that's not the indented way to do so anyway.
+  This might make it more annoying to read the documentation raw, but that's not the intended way to do so anyway.
 
 GitHub Links
 ============
