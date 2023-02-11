@@ -40,6 +40,7 @@ protected:
   std::mutex mutex_;
   ACE_Proactor& proactor_;
   bool started_, stopped_;
+  bool write_task_active_;
   std::vector<std::shared_ptr<Registration> > registrations_;
   std::vector<DataDataWriter_var> data_dws_;
   std::mt19937_64 mt_;

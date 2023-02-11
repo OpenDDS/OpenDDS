@@ -16,6 +16,7 @@ ForwardAction::ForwardAction(ACE_Proactor& proactor)
 : proactor_(proactor)
 , started_(false)
 , stopped_(false)
+, write_task_active_(false)
 , id_()
 , data_id_()
 , prevent_copy_(false)
@@ -155,9 +156,9 @@ void ForwardAction::on_data(const Data& data)
       }
       data_queue_[queue_last_] = data;
       data_queue_[queue_last_].id = id_;
-      const bool do_schedule = queue_last_ == queue_first_;
       queue_last_ = (queue_last_ + 1) % data_queue_.size();
-      if (do_schedule) {
+      if (!write_task_active_) {
+        write_task_active_ = true;
         proactor_.schedule_timer(*handler_, nullptr, ZERO);
       }
     } else {
@@ -208,6 +209,7 @@ void ForwardAction::do_writes()
     data.buffer = OctetSeq(); // deallocate outside lock
     lock.lock();
   }
+  write_task_active_ = false;
 }
 
 }
