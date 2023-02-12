@@ -59,12 +59,20 @@ MessageBlock::~MessageBlock()
   }
 }
 
+void
+MessageBlock::swap(MessageBlock& rhs)
+{
+  std::swap(data_, rhs.data_);
+  std::swap(rd_ptr_, rhs.rd_ptr_);
+  std::swap(wr_ptr_, rhs.wr_ptr_);
+}
+
 MessageBlock&
 MessageBlock::operator=(const MessageBlock& rhs)
 {
   if (&rhs != this) {
     MessageBlock copy(rhs);
-    swap(*this, copy);
+    swap(copy);
   }
   return *this;
 }
@@ -81,16 +89,14 @@ MessageBlock::MessageBlock(MessageBlock&& rhs)
 MessageBlock&
 MessageBlock::operator=(MessageBlock&& rhs)
 {
-  swap(*this, rhs);
+  swap(rhs);
   return *this;
 }
 #endif
 
 void swap(MessageBlock& lhs, MessageBlock& rhs)
 {
-  std::swap(lhs.data_, rhs.data_);
-  std::swap(lhs.rd_ptr_, rhs.rd_ptr_);
-  std::swap(lhs.wr_ptr_, rhs.wr_ptr_);
+  lhs.swap(rhs);
 }
 
 } // DCPS

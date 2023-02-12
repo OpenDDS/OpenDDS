@@ -36,6 +36,8 @@ public:
   MessageBlock& operator=(MessageBlock&& rhs);
 #endif
 
+  void swap(MessageBlock& rhs);
+
   ACE_Data_Block* duplicate_data() const { return data_->duplicate(); }
 
   char* base() const { return data_->base(); }
