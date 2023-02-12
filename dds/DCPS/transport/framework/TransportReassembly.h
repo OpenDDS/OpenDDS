@@ -60,7 +60,6 @@ struct FragKey {
   OPENDDS_OOAT_CUSTOM_HASH(FragKey, OpenDDS_Dcps_Export, FragKeyHash);
 #endif
 
-typedef SequenceNumber::Value FragmentNumber;
 typedef std::pair<FragmentNumber, FragmentNumber> FragmentRange;
 
 class OpenDDS_Dcps_Export TransportReassembly : public virtual RcObject {

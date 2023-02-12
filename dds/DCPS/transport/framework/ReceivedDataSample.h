@@ -87,9 +87,6 @@ public:
   /// @param size number of bytes to use as the payload
   void replace(const char* data, size_t size);
 
-  typedef SequenceNumber::Value FragmentNumber;
-  static const FragmentNumber INVALID_FRAGMENT= -1;
-
   ReceivedDataSample get_fragment_range(FragmentNumber start_frag, FragmentNumber end_frag = INVALID_FRAGMENT);
 
 private:

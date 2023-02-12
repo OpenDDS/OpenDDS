@@ -16,7 +16,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-struct OpenDDS_Dcps_Export MessageBlock {
+class OpenDDS_Dcps_Export MessageBlock {
+public:
   /// construct a MessageBlock that references the existing amb's ACE_Data_Block
   explicit MessageBlock(const ACE_Message_Block& amb);
 
@@ -35,8 +36,24 @@ struct OpenDDS_Dcps_Export MessageBlock {
   MessageBlock& operator=(MessageBlock&& rhs);
 #endif
 
+  ACE_Data_Block* duplicate_data() const { return data_->duplicate(); }
+
+  char* base() const { return data_->base(); }
+
+  char* rd_ptr() const { return base() + rd_ptr_; }
+  void read(size_t diff) { rd_ptr_ += diff; }
+  void unread(size_t diff) { rd_ptr_ -= diff; }
+
+  char* wr_ptr() const { return base() + wr_ptr_; }
+  void write(size_t diff) { wr_ptr_ += diff; }
+  void unwrite(size_t diff) { wr_ptr_ -= diff; }
+
+  size_t len() const { return wr_ptr_ - rd_ptr_; }
+
+private:
   ACE_Data_Block* data_;
-  size_t rd_ptr_, wr_ptr_;
+  size_t rd_ptr_;
+  size_t wr_ptr_;
 };
 
 void swap(MessageBlock& lhs, MessageBlock& rhs);
