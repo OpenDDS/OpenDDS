@@ -261,9 +261,9 @@ private:
   bool read_basic_value(ACE_OutputCDR::from_wchar& value);
   bool read_basic_value(ACE_OutputCDR::from_octet& value);
   bool read_basic_value(ACE_OutputCDR::from_boolean& value);
-  bool read_basic_value(const char*& value);
+  bool read_basic_value(char*& value) const;
 #ifdef DDS_HAS_WCHAR
-  bool read_basic_value(const CORBA::WChar*& value);
+  bool read_basic_value(CORBA::WChar*& value) const;
 #endif
 
   void cast_to_enum_value(ACE_OutputCDR::from_int8& dst, CORBA::Long src) const;
@@ -275,7 +275,22 @@ private:
 
   /// Read a basic member from a containing type
   template<typename ValueType>
+  bool read_basic_in_single_map(ValueType& value, DDS::MemberId id);
+
+  template<typename ValueType>
+  bool read_basic_in_complex_map(ValueType& value, DDS::MemberId id);
+
+  template<typename ValueType>
   bool read_basic_member(ValueType& value, DDS::MemberId id);
+
+  template<typename ValueType>
+  bool get_value_from_self(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_enum(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_bitmask(ValueType& value, DDS::MemberId id);
 
   template<TypeKind ValueTypeKind, typename ValueType>
   bool get_value_from_struct(ValueType& value, DDS::MemberId id);
@@ -392,8 +407,8 @@ private:
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0, LBound upper = 0);
 
-  template <typename Type>
-  DDS::ReturnCode_t get_single_value(Type& value, DDS::MemberId id, DDS::TypeKind tk);
+  template<TypeKind ValueTypeKind, typename ValueType>
+  DDS::ReturnCode_t get_single_value(ValueType& value, DDS::MemberId id);
 
   // Contain data for an instance of a basic type.
   struct SingleValue {
@@ -420,7 +435,14 @@ private:
 
     ~SingleValue();
 
+    // Return a reference to the stored value. Mostly for serialization.
     template<typename T> const T& get() const;
+
+    // Return a duplication of the stored string/wstring.
+    // Used for the get_* interfaces of DynamicData.
+    // Caller is responsible for release the returned string.
+    char* get_string() const;
+    CORBA::WChar* get_wstring() const;
 
     TypeKind kind_;
     // Used for types that need ACE_OutputCDR disambiguators.
@@ -583,13 +605,20 @@ private:
     void set_default_basic_value(ACE_OutputCDR::from_char& value) const;
     void set_default_basic_value(ACE_OutputCDR::from_octet& value) const;
     void set_default_basic_value(const char*& value) const;
+    void set_default_basic_value(char*& value) const;
     void set_default_basic_value(ACE_OutputCDR::from_boolean& value) const;
 #ifdef DDS_HAS_WCHAR
     void set_default_basic_value(ACE_OutputCDR::from_wchar& value) const;
     void set_default_basic_value(const CORBA::WChar*& value) const;
+    void set_default_basic_value(CORBA::WChar*& value) const;
 #endif
 
-    bool set_default_enum_value(const DDS::DynamicType_var& dt, CORBA::ULong& value) const;
+    bool set_default_enum_value(const DDS::DynamicType_var& dt, CORBA::Long& value) const;
+
+    void set_default_bitmask_value(ACE_OutputCDR::from_uint8& value) const;
+    void set_default_bitmask_value(CORBA::UShort& value) const;
+    void set_default_bitmask_value(CORBA::ULong& value) const;
+    void set_default_bitmask_value(CORBA::ULongLong& value) const;
 
     template<typename Type>
     void set_default_bitmask_value(Type& value) const;
