@@ -17,7 +17,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+ReceivedDataSample::ReceivedDataSample()
+  : fragment_size_(0)
+{
+}
+
 ReceivedDataSample::ReceivedDataSample(const ACE_Message_Block& payload)
+  : fragment_size_(0)
 {
   const ACE_Message_Block* amb = &payload;
   do {
