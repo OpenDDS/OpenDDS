@@ -172,9 +172,6 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
   ACE_UINT32 lifespan_duration_nanosec_;  // Corresponding IDL is unsigned.
   //@}
 
-  /// Fragment size used by this sample
-  ACE_UINT32 fragment_size_;
-
   /// Identify the DataWriter that produced the sample data being
   /// sent.
   GUID_t publication_id_;

@@ -151,7 +151,7 @@ ReceivedDataSample::get_fragment_range(FragmentNumber start_frag, FragmentNumber
   ReceivedDataSample result;
   result.header_ = header_;
 
-  const size_t fsize = static_cast<size_t>(header_.fragment_size_);
+  const size_t fsize = static_cast<size_t>(fragment_size_);
   const size_t start_offset = start_frag * fsize;
   const size_t end_offset = end_frag == INVALID_FRAGMENT ? std::numeric_limits<size_t>::max() : (end_frag + 1) * fsize - 1;
 

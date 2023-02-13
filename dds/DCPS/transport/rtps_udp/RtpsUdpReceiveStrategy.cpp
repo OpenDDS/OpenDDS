@@ -1093,7 +1093,7 @@ bool RtpsUdpReceiveStrategy::reassemble_i(ReceivedDataSample& data, RtpsSampleHe
 {
   using namespace RTPS;
   receiver_.fill_header(data.header_); // set publication_id_.guidPrefix
-  data.header_.fragment_size_ = fragment_size_;
+  data.fragment_size_ = fragment_size_;
   if (link_->is_target(data.header_.publication_id_) && reassembly_.reassemble(frags_, data, total_frags_)) {
 
     // Reassembly was successful, replace DataFrag with Data.  This doesn't have

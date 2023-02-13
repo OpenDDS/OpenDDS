@@ -42,6 +42,9 @@ public:
   /// The demarshalled sample header.
   DataSampleHeader header_;
 
+  /// Fragment size used by this sample
+  ACE_UINT32 fragment_size_;
+
   /// true if at least one Data Block is stored (even if it has 0 useable bytes)
   bool has_data() const { return !blocks_.empty(); }
 
