@@ -40,7 +40,7 @@ namespace {
       sample.header_.publication_id_ = pub_id;
       sample.header_.sequence_ = msg_seq;
       sample.header_.more_fragments_ = more_fragments;
-      sample.header_.fragment_size_ = 1024;
+      sample.fragment_size_ = 1024;
     }
     Message_Block_Ptr mb;
     ReceivedDataSample sample;
