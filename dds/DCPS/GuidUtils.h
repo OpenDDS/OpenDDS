@@ -10,6 +10,7 @@
 #include "PoolAllocator.h"
 #include "Serializer.h"
 #include "Hash.h"
+#include "Util.h"
 
 #include <dds/DdsDcpsGuidC.h>
 #include <dds/DdsDcpsInfoUtilsC.h>
@@ -55,7 +56,7 @@ const EntityId_t ENTITYID_TL_SVC_REPLY_READER = {{0x00, 0x03, 0x01}, 0xc4};
 ///@}
 
 /// Nil value for GUID.
-const GUID_t GUID_UNKNOWN = { {0}, {{0}, 0} };
+const GUID_t GUID_UNKNOWN = { { 0 }, { { 0 }, 0 } };
 
 /**
  * Identifies the kinds of entities used in a GUID.
@@ -76,33 +77,15 @@ enum EntityKind {
   KIND_USER ///< For creating custom GUIDs for things that are not DDS entities (OpenDDS-specific)
 };
 
-template <typename T>
-inline int mem_cmp(const T& a, const T& b)
-{
-  return std::memcmp(&a, &b, sizeof(T));
-}
-
-template <typename T>
-inline bool mem_less(const T& a, const T& b)
-{
-  return mem_cmp(a, b) < 0;
-}
-
-template <typename T>
-inline bool mem_eq(const T& a, const T& b)
-{
-  return mem_cmp(a, b) == 0;
-}
-
 inline bool operator<(const GUID_t& lhs, const GUID_t& rhs)
 {
-  return mem_less(lhs, rhs);
+  return mem_cmp(lhs, rhs) < 0;
 }
 
 struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
   static bool entity_less(const EntityId_t& v1, const EntityId_t& v2)
   {
-    return mem_less(v1, v2);
+    return mem_cmp(v1, v2) < 0;
   }
 
   bool operator()(const GUID_t& v1, const GUID_t& v2) const
@@ -114,7 +97,7 @@ struct OpenDDS_Dcps_Export GUID_tKeyLessThan {
 struct OpenDDS_Dcps_Export EntityId_tKeyLessThan {
   bool operator()(const EntityId_t& v1, const EntityId_t& v2) const
   {
-    return mem_less(v1, v2);
+    return mem_cmp(v1, v2) < 0;
   }
 };
 
@@ -122,7 +105,7 @@ struct OpenDDS_Dcps_Export BuiltinTopicKey_tKeyLessThan {
   bool operator()(const DDS::BuiltinTopicKey_t& v1,
                   const DDS::BuiltinTopicKey_t& v2) const
   {
-    return mem_less(v1, v2);
+    return mem_cmp(v1, v2) < 0;
   }
 };
 
@@ -135,7 +118,7 @@ const size_t guid_cdr_size = 16;
 inline bool
 operator==(const GUID_t& lhs, const GUID_t& rhs)
 {
-  return mem_eq(lhs, rhs);
+  return mem_cmp(lhs, rhs) == 0;
 }
 
 inline bool
@@ -148,7 +131,7 @@ operator!=(const GUID_t& lhs, const GUID_t& rhs)
 OpenDDS_Dcps_Export inline
 bool equal_guid_prefixes(const GuidPrefix_t& lhs, const GuidPrefix_t& rhs)
 {
-  return mem_eq(lhs, rhs);
+  return mem_cmp(lhs, rhs) == 0;
 }
 
 OpenDDS_Dcps_Export inline
@@ -161,7 +144,7 @@ bool equal_guid_prefixes(const GUID_t& lhs, const GUID_t& rhs)
 inline bool
 operator==(const EntityId_t& lhs, const EntityId_t& rhs)
 {
-  return mem_eq(lhs, rhs);
+  return mem_cmp(lhs, rhs) == 0;
 }
 
 inline bool

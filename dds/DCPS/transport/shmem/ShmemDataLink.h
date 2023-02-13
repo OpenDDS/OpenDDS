@@ -36,7 +36,13 @@ struct ShmemData {
     EndOfAlloc = -1
   };
 
-  Status status_;
+  /*
+   * This is ACE_INT8 instead of Status to try to make the in-memory
+   * representation independent of compiler/implementation decisions. We can't
+   * guarantee that two processes running code built with different compilers
+   * can communicate over shmem, but we'll try to support it when possible.
+   */
+  ACE_INT8 status_;
   char transport_header_[TRANSPORT_HDR_SERIALIZED_SZ];
   ACE_Based_Pointer_Basic<char> payload_;
 };
