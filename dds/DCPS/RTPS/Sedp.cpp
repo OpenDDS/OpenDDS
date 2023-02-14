@@ -7568,7 +7568,7 @@ void Sedp::match_continue_security_enabled(
   const GUID_t& writer, const GUID_t& reader, bool call_writer, bool call_reader)
 {
   DDS::Security::CryptoKeyExchange_var keyexg = get_crypto_key_exchange();
-  if (call_reader) {
+  if (call_reader && !call_writer) {
     const DDS::Security::DatareaderCryptoHandle drch =
       get_handle_registry()->get_local_datareader_crypto_handle(reader);
     const DDS::Security::EndpointSecurityAttributes attribs =
@@ -7598,7 +7598,7 @@ void Sedp::match_continue_security_enabled(
     }
   }
 
-  if (call_writer) {
+  if (call_writer && !call_reader) {
     const DDS::Security::DatawriterCryptoHandle dwch =
       get_handle_registry()->get_local_datawriter_crypto_handle(writer);
     const DDS::Security::EndpointSecurityAttributes attribs =
