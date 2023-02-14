@@ -8,8 +8,19 @@
 #ifndef EDGE_H
 #define EDGE_H
 
+// Tell GCC to ignore implicitly declared copy methods as long as
+// Qt is not compliant.
+#ifdef __GNUC__
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
+
 #include <QtWidgets/QGraphicsTextItem>
 #include <QtGui/QPainter>
+
+#ifdef __GNUC__
+#  pragma GCC diagnostic pop
+#endif
 
 #include "Node.h"
 

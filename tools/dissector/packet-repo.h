@@ -30,7 +30,7 @@ namespace OpenDDS
       conversation_t *conv_;
       gulong          request_;
       char           *data_name_; // for pending topics
-      RepoId         *topic_id_; // for pending publications
+      GUID_t         *topic_id_; // for pending publications
       Pending  *next_;
 
       Pending ()
@@ -44,7 +44,7 @@ namespace OpenDDS
     };
 
     typedef ACE_Hash_Map_Manager <gulong, const char *, ACE_Null_Mutex> Known_Topics;
-    typedef ACE_Hash_Map_Manager <gulong, const RepoId *, ACE_Null_Mutex> Known_Publications;
+    typedef ACE_Hash_Map_Manager <gulong, const GUID_t *, ACE_Null_Mutex> Known_Publications;
 
     extern "C" {
       gboolean explicit_inforepo_callback (tvbuff_t *, packet_info *,
@@ -60,7 +60,7 @@ namespace OpenDDS
     class dissector_Export InfoRepo_Dissector : public GIOP_Base
     {
     public:
-      const char *topic_for_pub (const RepoId *);
+      const char *topic_for_pub (const GUID_t *);
 
       static InfoRepo_Dissector& instance ();
 
@@ -96,8 +96,8 @@ namespace OpenDDS
 #endif
     private:
       void add_pending (int request_id, const char *dataName);
-      void add_pending (int request_id, const RepoId *topic_id);
-      void map_pending (Pending &, const RepoId *);
+      void add_pending (int request_id, const GUID_t *topic_id);
+      void map_pending (Pending &, const GUID_t *);
       void discard_pending (Pending &);
 
       Pending           *pending_;

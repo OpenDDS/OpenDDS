@@ -133,10 +133,10 @@ protected:
   DDS::Subscriber_var create_subscriber();
   DDS::DataReader_var create_datareader();
 
-  DDS::DomainParticipant_var&
+  DDS::DomainParticipant_var
   get_participant() { return test_.get_participant(); }
 
-  DDS::Topic_var&
+  DDS::Topic_var
   get_topic() { return test_.get_topic(); }
 };
 

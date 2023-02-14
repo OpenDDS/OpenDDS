@@ -21,15 +21,41 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+class Job : public virtual RcObject {
+public:
+  virtual ~Job() { }
+  virtual void execute() = 0;
+};
+typedef RcHandle<Job> JobPtr;
+
+template <typename Delegate>
+class PmfJob : public Job {
+public:
+  typedef void (Delegate::*PMF)();
+
+  PmfJob(RcHandle<Delegate> delegate,
+         PMF function)
+    : delegate_(delegate)
+    , function_(function)
+  {}
+
+  virtual ~PmfJob() {}
+
+private:
+  WeakRcHandle<Delegate> delegate_;
+  PMF function_;
+
+  void execute()
+  {
+    RcHandle<Delegate> handle = delegate_.lock();
+    if (handle) {
+      ((*handle).*function_)();
+    }
+  }
+};
+
 class OpenDDS_Dcps_Export JobQueue : public virtual RcEventHandler {
 public:
-  class Job : public virtual RcObject {
-  public:
-    virtual ~Job() { }
-    virtual void execute() = 0;
-  };
-  typedef RcHandle<Job> JobPtr;
-
   explicit JobQueue(ACE_Reactor* reactor);
 
   void enqueue(JobPtr job)

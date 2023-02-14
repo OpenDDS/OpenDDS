@@ -44,7 +44,7 @@ class OpenDDS_InfoRepoLib_Export DCPS_IR_Topic
   : public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Topic>
 {
 public:
-  DCPS_IR_Topic(const OpenDDS::DCPS::RepoId& id,
+  DCPS_IR_Topic(const OpenDDS::DCPS::GUID_t& id,
                 const DDS::TopicQos& qos,
                 DCPS_IR_Domain* domain,
                 DCPS_IR_Participant* creator,
@@ -93,8 +93,8 @@ public:
   /// provided subscription.
   void reevaluate_associations(DCPS_IR_Subscription* subscription);
 
-  OpenDDS::DCPS::RepoId get_id() const;
-  OpenDDS::DCPS::RepoId get_participant_id() const;
+  OpenDDS::DCPS::GUID_t get_id() const;
+  OpenDDS::DCPS::GUID_t get_participant_id() const;
 
   /// Return pointer to the Topic Description
   /// Domain retains ownership
@@ -124,7 +124,7 @@ public:
   std::string dump_to_string(const std::string& prefix, int depth) const;
 
 private:
-  OpenDDS::DCPS::RepoId id_;
+  OpenDDS::DCPS::GUID_t id_;
   DDS::TopicQos qos_;
   DCPS_IR_Domain* domain_;
   DCPS_IR_Participant* participant_;

@@ -33,12 +33,6 @@ const double DEFAULT_SYN_BACKOFF(2.0);
 const long DEFAULT_SYN_INTERVAL(250);
 const long DEFAULT_SYN_TIMEOUT(30000);
 
-const size_t DEFAULT_NAK_DEPTH(32);
-const long DEFAULT_NAK_INTERVAL(500);
-const long DEFAULT_NAK_DELAY_INTERVALS(4);
-const long DEFAULT_NAK_MAX(3);
-const long DEFAULT_NAK_TIMEOUT(30000);
-
 const unsigned char DEFAULT_TTL(1);
 const bool DEFAULT_ASYNC_SEND(false);
 
@@ -88,7 +82,8 @@ MulticastInst::load(ACE_Configuration_Heap& cf,
   GET_CONFIG_VALUE(cf, sect, ACE_TEXT("port_offset"),
                    this->port_offset_, u_short)
 
-  ACE_TString group_address_s;
+  // Explicitly initialize this string to stop gcc 11 from issuing a warning.
+  ACE_TString group_address_s(ACE_TEXT(""));
   GET_CONFIG_TSTRING_VALUE(cf, sect, ACE_TEXT("group_address"),
                            group_address_s)
   if (group_address_s.is_empty()) {
@@ -147,7 +142,7 @@ MulticastInst::default_group_address(ACE_INET_Addr& group_address)
 TransportImpl_rch
 MulticastInst::new_impl()
 {
-  return make_rch<MulticastTransport>(ref(*this));
+  return make_rch<MulticastTransport>(rchandle_from(this));
 }
 
 OPENDDS_STRING

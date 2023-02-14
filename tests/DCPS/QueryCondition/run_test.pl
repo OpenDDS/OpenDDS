@@ -21,9 +21,13 @@ while (scalar @ARGV) {
     shift;
     $opts .= " -DCPSTransportDebugLevel 6 -DCPSDebugLevel 10";
   }
-  elsif ($ARGV[0] == 'rtps_disc') {
+  elsif ($ARGV[0] eq 'rtps_disc') {
     $is_rtps_disc = 1;
     $DCPScfg = "rtps_disc.ini";
+    shift;
+  }
+  elsif ($ARGV[0] eq 'dynamic') {
+    $opts .= ' -dynamic';
     shift;
   }
 }

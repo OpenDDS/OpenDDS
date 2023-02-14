@@ -10,7 +10,7 @@
 #  include "DynamicDataBase.h"
 
 #  include <dds/DCPS/FilterEvaluator.h>
-#  include <dds/DdsDcpsCoreTypeSupportImpl.h>
+#  include <dds/DCPS/Sample.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -21,15 +21,22 @@ class DynamicDataImpl;
 }
 
 namespace DCPS {
+OpenDDS_Dcps_Export
 bool serialized_size(const Encoding& encoding, size_t& size, const XTypes::DynamicDataImpl& data);
+OpenDDS_Dcps_Export
 bool operator<<(Serializer& ser, const XTypes::DynamicDataImpl& data);
+OpenDDS_Dcps_Export
+bool serialized_size(const Encoding& encoding, size_t& size, const KeyOnly<const XTypes::DynamicDataImpl>& data);
+OpenDDS_Dcps_Export
+bool operator<<(Serializer& ser, const KeyOnly<const XTypes::DynamicDataImpl>& data);
 }
 
 namespace XTypes {
 
 class OpenDDS_Dcps_Export DynamicDataImpl : public DynamicDataBase {
 public:
-  DynamicDataImpl(DDS::DynamicType_ptr type);
+  explicit DynamicDataImpl(DDS::DynamicType_ptr type);
+  DynamicDataImpl(const DynamicDataImpl& other);
 
   DDS::DynamicType_ptr type();
 
@@ -42,289 +49,184 @@ public:
 
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
-  DDS::ReturnCode_t clear_value(DDS::MemberId /*id*/);
-  DDS::DynamicData_ptr loan_value(DDS::MemberId /*id*/);
-  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr /*value*/);
+  DDS::ReturnCode_t clear_value(DDS::MemberId id);
+  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
+  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr value);
 
   DDS::DynamicData_ptr clone();
 
-  DDS::ReturnCode_t get_int32_value(CORBA::Long&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-  DDS::ReturnCode_t set_int32_value(DDS::MemberId id,
-                                    CORBA::Long value);
-
-  DDS::ReturnCode_t get_uint32_value(CORBA::ULong&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
-  DDS::ReturnCode_t set_uint32_value(DDS::MemberId id,
-                                     CORBA::ULong value);
-
-  DDS::ReturnCode_t get_int8_value(CORBA::Int8&,
-                                   DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int8_value(CORBA::Int8& value,
+                                   DDS::MemberId id);
   DDS::ReturnCode_t set_int8_value(DDS::MemberId id,
                                    CORBA::Int8 value);
 
-  DDS::ReturnCode_t get_uint8_value(CORBA::UInt8&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint8_value(CORBA::UInt8& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_uint8_value(DDS::MemberId id,
                                     CORBA::UInt8 value);
 
-  DDS::ReturnCode_t get_int16_value(CORBA::Short&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int16_value(CORBA::Short& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_int16_value(DDS::MemberId id,
                                     CORBA::Short value);
 
-  DDS::ReturnCode_t get_uint16_value(CORBA::UShort&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint16_value(CORBA::UShort& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_uint16_value(DDS::MemberId id,
                                      CORBA::UShort value);
 
-  DDS::ReturnCode_t get_int64_value(CORBA::LongLong&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int32_value(CORBA::Long& value,
+                                    DDS::MemberId id);
+  DDS::ReturnCode_t set_int32_value(DDS::MemberId id,
+                                    CORBA::Long value);
+
+  DDS::ReturnCode_t get_uint32_value(CORBA::ULong& value,
+                                     DDS::MemberId);
+  DDS::ReturnCode_t set_uint32_value(DDS::MemberId id,
+                                     CORBA::ULong value);
+
+  DDS::ReturnCode_t get_int64_value(CORBA::LongLong& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_int64_value(DDS::MemberId id,
                                     CORBA::LongLong value);
 
-  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint64_value(CORBA::ULongLong& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_value(DDS::MemberId id,
                                      CORBA::ULongLong value);
 
-  DDS::ReturnCode_t get_float32_value(CORBA::Float&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float32_value(CORBA::Float& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_float32_value(DDS::MemberId id,
                                       CORBA::Float value);
 
-  DDS::ReturnCode_t get_float64_value(CORBA::Double&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float64_value(CORBA::Double& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_float64_value(DDS::MemberId id,
                                       CORBA::Double value);
 
-  DDS::ReturnCode_t get_float128_value(CORBA::LongDouble&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float128_value(CORBA::LongDouble& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_float128_value(DDS::MemberId id,
                                        CORBA::LongDouble value);
 
-  DDS::ReturnCode_t get_char8_value(CORBA::Char&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char8_value(CORBA::Char& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_char8_value(DDS::MemberId id,
                                     CORBA::Char value);
 
-  DDS::ReturnCode_t get_char16_value(CORBA::WChar&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char16_value(CORBA::WChar& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_char16_value(DDS::MemberId id,
                                      CORBA::WChar value);
 
-  DDS::ReturnCode_t get_byte_value(CORBA::Octet&,
-                                   DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_byte_value(CORBA::Octet& value,
+                                   DDS::MemberId id);
   DDS::ReturnCode_t set_byte_value(DDS::MemberId id,
                                    CORBA::Octet value);
 
-  DDS::ReturnCode_t get_boolean_value(CORBA::Boolean&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_boolean_value(CORBA::Boolean& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_boolean_value(DDS::MemberId id,
                                       CORBA::Boolean value);
 
-  DDS::ReturnCode_t get_string_value(char*&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_string_value(char*& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_string_value(DDS::MemberId id,
                                      const char* value);
 
-  DDS::ReturnCode_t get_wstring_value(CORBA::WChar*&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_wstring_value(CORBA::WChar*& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_wstring_value(DDS::MemberId id,
                                       const CORBA::WChar* value);
 
-  DDS::ReturnCode_t get_complex_value(DDS::DynamicData_ptr&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_complex_value(DDS::DynamicData_ptr& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_complex_value(DDS::MemberId id,
                                       DDS::DynamicData_ptr value);
 
-  DDS::ReturnCode_t get_int32_values(DDS::Int32Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int32_values(DDS::Int32Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_int32_values(DDS::MemberId id,
                                      const DDS::Int32Seq& value);
 
-  DDS::ReturnCode_t get_uint32_values(DDS::UInt32Seq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint32_values(DDS::UInt32Seq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_uint32_values(DDS::MemberId id,
                                       const DDS::UInt32Seq& value);
 
-  DDS::ReturnCode_t get_int8_values(DDS::Int8Seq&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int8_values(DDS::Int8Seq& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_int8_values(DDS::MemberId id,
                                     const DDS::Int8Seq& value);
 
-  DDS::ReturnCode_t get_uint8_values(DDS::UInt8Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint8_values(DDS::UInt8Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_uint8_values(DDS::MemberId id,
                                      const DDS::UInt8Seq& value);
 
-  DDS::ReturnCode_t get_int16_values(DDS::Int16Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int16_values(DDS::Int16Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_int16_values(DDS::MemberId id,
                                      const DDS::Int16Seq& value);
 
-  DDS::ReturnCode_t get_uint16_values(DDS::UInt16Seq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint16_values(DDS::UInt16Seq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_uint16_values(DDS::MemberId id,
                                       const DDS::UInt16Seq& value);
 
-  DDS::ReturnCode_t get_int64_values(DDS::Int64Seq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_int64_values(DDS::Int64Seq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_int64_values(DDS::MemberId id,
                                      const DDS::Int64Seq& value);
 
-  DDS::ReturnCode_t get_uint64_values(DDS::UInt64Seq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_uint64_values(DDS::UInt64Seq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_uint64_values(DDS::MemberId id,
                                       const DDS::UInt64Seq& value);
 
-  DDS::ReturnCode_t get_float32_values(DDS::Float32Seq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float32_values(DDS::Float32Seq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_float32_values(DDS::MemberId id,
                                        const DDS::Float32Seq& value);
 
-  DDS::ReturnCode_t get_float64_values(DDS::Float64Seq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float64_values(DDS::Float64Seq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_float64_values(DDS::MemberId id,
                                        const DDS::Float64Seq& value);
 
-  DDS::ReturnCode_t get_float128_values(DDS::Float128Seq&,
-                                        DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_float128_values(DDS::Float128Seq& value,
+                                        DDS::MemberId id);
   DDS::ReturnCode_t set_float128_values(DDS::MemberId id,
                                         const DDS::Float128Seq& value);
 
-  DDS::ReturnCode_t get_char8_values(DDS::CharSeq&,
-                                     DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char8_values(DDS::CharSeq& value,
+                                     DDS::MemberId id);
   DDS::ReturnCode_t set_char8_values(DDS::MemberId id,
                                      const DDS::CharSeq& value);
 
-  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_char16_values(DDS::WcharSeq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_char16_values(DDS::MemberId id,
                                       const DDS::WcharSeq& value);
 
-  DDS::ReturnCode_t get_byte_values(DDS::ByteSeq&,
-                                    DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_byte_values(DDS::ByteSeq& value,
+                                    DDS::MemberId id);
   DDS::ReturnCode_t set_byte_values(DDS::MemberId id,
                                     const DDS::ByteSeq& value);
 
-  DDS::ReturnCode_t get_boolean_values(DDS::BooleanSeq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_boolean_values(DDS::BooleanSeq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_boolean_values(DDS::MemberId id,
                                        const DDS::BooleanSeq& value);
 
-  DDS::ReturnCode_t get_string_values(DDS::StringSeq&,
-                                      DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_string_values(DDS::StringSeq& value,
+                                      DDS::MemberId id);
   DDS::ReturnCode_t set_string_values(DDS::MemberId id,
                                       const DDS::StringSeq& value);
 
-  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq&,
-                                       DDS::MemberId)
-  {
-    return DDS::RETCODE_UNSUPPORTED;
-  }
+  DDS::ReturnCode_t get_wstring_values(DDS::WstringSeq& value,
+                                       DDS::MemberId id);
   DDS::ReturnCode_t set_wstring_values(DDS::MemberId id,
                                        const DDS::WstringSeq& value);
 
@@ -339,6 +241,7 @@ private:
   template<typename ValueType>
   DDS::ReturnCode_t get_simple_value_primitive(DCPS::Value& value, DDS::MemberId id) const;
   DDS::ReturnCode_t get_simple_value_string(DCPS::Value& value, DDS::MemberId id) const;
+  DDS::ReturnCode_t get_simple_value_enum(DCPS::Value& value, DDS::MemberId id) const;
 #endif
 
   bool is_basic_type(TypeKind tk) const;
@@ -386,14 +289,16 @@ private:
   bool read_discriminator(CORBA::Long& disc_val) const;
   DDS::MemberId find_selected_member() const;
   bool validate_discriminator(CORBA::Long disc_val, const DDS::MemberDescriptor_var& md) const;
-  bool find_selected_member_and_discriminator(DDS::MemberId& selected_id,
-    bool& has_disc, CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type) const;
-  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_ptr value);
-  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_ptr value,
+
+  bool set_complex_to_struct(DDS::MemberId id, DDS::DynamicData_var value);
+  bool set_complex_to_union(DDS::MemberId id, DDS::DynamicData_var value,
                             const DDS::TypeDescriptor_var& descriptor);
-  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_ptr value, TypeKind tk);
+  bool set_complex_to_collection(DDS::MemberId id, DDS::DynamicData_var value, TypeKind tk);
   bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
                                      DDS::MemberId id, TypeKind collection_tk) const;
+
+  DDS::ReturnCode_t clear_value_i(
+    DDS::MemberId id, DDS::DynamicType_ptr type, DDS::TypeKind treat_as);
 
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value);
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value);
@@ -403,7 +308,6 @@ private:
 #ifdef DDS_HAS_WCHAR
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_wchar& value);
 #endif
-
   template<typename SingleType>
   bool insert_single(DDS::MemberId id, const SingleType& value);
 
@@ -440,6 +344,9 @@ private:
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0, LBound upper = 0);
 
+  template <typename Type>
+  DDS::ReturnCode_t get_single_value(Type& value, DDS::MemberId id, DDS::TypeKind tk);
+
   // Contain data for an instance of a basic type.
   struct SingleValue {
     SingleValue(CORBA::Long int32);
@@ -461,6 +368,7 @@ private:
     SingleValue(ACE_OutputCDR::from_wchar from_wchar);
     SingleValue(const CORBA::WChar* wstr);
 #endif
+    SingleValue(const SingleValue& other);
 
     ~SingleValue();
 
@@ -490,6 +398,9 @@ private:
       const CORBA::WChar* wstr_;
 #endif
     };
+
+  private:
+    SingleValue& operator=(const SingleValue&); // = delete
   };
 
   struct SequenceValue {
@@ -513,6 +424,7 @@ private:
     SequenceValue(const DDS::WstringSeq& wstr_seq);
 #endif
 
+    SequenceValue(const SequenceValue& rhs);
     ~SequenceValue();
 
     template<typename T> const T& get() const;
@@ -542,6 +454,9 @@ private:
 #endif
 #undef SEQUENCE_VALUE_MEMBER
     };
+
+  private:
+    SequenceValue& operator=(const SequenceValue& rhs);
   };
 
   typedef OPENDDS_VECTOR(CORBA::ULong) IndexToIdMap;
@@ -556,6 +471,16 @@ private:
 
     DataContainer(const DDS::DynamicType_var& type, const DynamicDataImpl* data)
       : type_(type), data_(data) {}
+
+    DataContainer(const DataContainer& other, const DynamicDataImpl* data)
+      : single_map_(other.single_map_)
+      , sequence_map_(other.sequence_map_)
+      , complex_map_(other.complex_map_)
+      , type_(data->type_)
+      , data_(data)
+    {}
+
+    void clear();
 
     // Get the largest index of all elements in each map.
     // Call only for collection-like types (sequence, string, etc).
@@ -744,7 +669,7 @@ private:
     bool serialize_sequence_value(DCPS::Serializer& ser, const SequenceValue& sv) const;
     bool get_index_to_id_map(IndexToIdMap& index_to_id, CORBA::ULong bound) const;
     bool serialized_size_complex_member_i(const DCPS::Encoding& encoding, size_t& size,
-                                          DDS::MemberId id) const;
+                                          DDS::MemberId id, DCPS::Sample::Extent ext) const;
 
     template<typename SequenceType>
     bool serialized_size_nested_basic_sequences(const DCPS::Encoding& encoding, size_t& size,
@@ -754,7 +679,7 @@ private:
     bool serialized_size_nesting_basic_sequence(const DCPS::Encoding& encoding, size_t& size,
       const IndexToIdMap& index_to_id, SequenceType protoseq) const;
 
-    bool serialize_complex_member_i(DCPS::Serializer& ser, DDS::MemberId id) const;
+    bool serialize_complex_member_i(DCPS::Serializer& ser, DDS::MemberId id, DCPS::Sample::Extent ext) const;
 
     template<typename SequenceType>
     bool serialize_nested_basic_sequences(DCPS::Serializer& ser, const IndexToIdMap& index_to_id,
@@ -784,16 +709,17 @@ private:
     bool serialize_nesting_bitmask_sequence(DCPS::Serializer& ser, CORBA::ULong size,
                                             CORBA::ULong bound) const;
     bool serialized_size_complex_member(const DCPS::Encoding& encoding, size_t& size,
-                                        DDS::MemberId id, const DDS::DynamicType_var& elem_type) const;
+                                        DDS::MemberId id, const DDS::DynamicType_var& elem_type,
+                                        DCPS::Sample::Extent ext) const;
     bool serialized_size_complex_sequence(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const;
+      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool serialize_complex_sequence_i(DCPS::Serializer& ser, const IndexToIdMap& index_to_id,
-                                      const DDS::DynamicType_var& elem_type) const;
+                                      const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool serialize_complex_sequence(DCPS::Serializer& ser, CORBA::ULong size, CORBA::ULong bound,
-                                    const DDS::DynamicType_var& elem_type) const;
+                                    const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool get_index_to_id_from_complex(IndexToIdMap& index_to_id, CORBA::ULong bound) const;
-    bool serialized_size_sequence(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_sequence(DCPS::Serializer& ser) const;
+    bool serialized_size_sequence(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_sequence(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
     // Serialize array
     void serialized_size_primitive_array(const DCPS::Encoding& encoding, size_t& size,
@@ -868,11 +794,11 @@ private:
                                                const IndexToIdMap& index_to_id) const;
     bool serialize_nesting_bitmask_array(DCPS::Serializer& ser, CORBA::ULong length) const;
     bool serialized_size_complex_array(const DCPS::Encoding& encoding, size_t& size,
-      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type) const;
+      const IndexToIdMap& index_to_id, const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
     bool serialize_complex_array(DCPS::Serializer& ser, CORBA::ULong length,
-                                 const DDS::DynamicType_var& elem_type) const;
-    bool serialized_size_array(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_array(DCPS::Serializer& ser) const;
+                                 const DDS::DynamicType_var& elem_type, DCPS::Sample::Extent ext) const;
+    bool serialized_size_array(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_array(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
     bool serialized_size_primitive_member(const DCPS::Encoding& encoding, size_t& size,
                                           TypeKind member_tk) const;
@@ -891,15 +817,15 @@ private:
       DDS::ExtensibilityKind extensibility) const;
     bool serialized_size_complex_aggregated_member_xcdr2_default(const DCPS::Encoding& encoding,
       size_t& size, const DDS::DynamicType_var& member_type, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
+      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
     bool serialize_complex_aggregated_member_xcdr2_default(DCPS::Serializer& ser, DDS::MemberId id,
       const DDS::DynamicType_var& member_type, bool optional, bool must_understand,
-      DDS::ExtensibilityKind extensibility) const;
+      DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
     bool serialized_size_complex_aggregated_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       const_complex_iterator it, bool optional, DDS::ExtensibilityKind extensibility,
-      size_t& mutable_running_total) const;
+      size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
     bool serialize_complex_aggregated_member_xcdr2(DCPS::Serializer& ser, const_complex_iterator it,
-      bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
+      bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
     bool serialized_size_basic_struct_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       DDS::MemberId id, const DDS::DynamicType_var& member_type, bool optional,
       DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
@@ -927,15 +853,16 @@ private:
       TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
     bool serialized_size_sequence_struct_member_xcdr2(const DCPS::Encoding& encoding, size_t& size,
       DDS::MemberId id, TypeKind elem_tk, bool optional,
-      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total) const;
+      DDS::ExtensibilityKind extensibility, size_t& mutable_running_total, DCPS::Sample::Extent ext) const;
     bool serialize_sequence_struct_member_xcdr2(DCPS::Serializer& ser, DDS::MemberId id,
-      TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility) const;
-    bool serialized_size_structure_xcdr2(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_structure_xcdr2(DCPS::Serializer& ser) const;
-    bool serialized_size_structure_xcdr1(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_structure_xcdr1(DCPS::Serializer& ser) const;
-    bool serialized_size_structure(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_structure(DCPS::Serializer& ser) const;
+      TypeKind elem_tk, bool optional, bool must_understand, DDS::ExtensibilityKind extensibility, DCPS::Sample::Extent ext) const;
+    bool serialized_size_structure_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_structure_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_structure_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_structure_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_structure(const DCPS::Encoding& encoding, size_t& size,
+                                   DCPS::Sample::Extent ext) const;
+    bool serialize_structure(DCPS::Serializer& ser, DCPS::Sample::Extent) const;
 
     bool set_default_discriminator_value(CORBA::Long& value,
                                          const DDS::DynamicType_var& disc_type) const;
@@ -953,12 +880,13 @@ private:
                                          DDS::ExtensibilityKind extensibility) const;
     bool select_union_member(CORBA::Long disc_value, bool& found_selected_member,
                              DDS::MemberDescriptor_var& selected_md) const;
-    bool serialized_size_union_xcdr2(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_union_xcdr2(DCPS::Serializer& ser) const;
-    bool serialized_size_union_xcdr1(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_union_xcdr1(DCPS::Serializer& ser) const;
-    bool serialized_size_union(const DCPS::Encoding& encoding, size_t& size) const;
-    bool serialize_union(DCPS::Serializer& ser) const;
+    bool serialized_size_union_xcdr2(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_union_xcdr2(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_union_xcdr1(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+    bool serialize_union_xcdr1(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
+    bool serialized_size_union(const DCPS::Encoding& encoding, size_t& size,
+                               DCPS::Sample::Extent ext) const;
+    bool serialize_union(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
     // Internal data
     OPENDDS_MAP(DDS::MemberId, SingleValue) single_map_;
@@ -972,13 +900,27 @@ private:
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                           DataContainer::const_single_iterator it) const;
 
+  // Add a single value for any valid discriminator value that selects the given member
+  bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
+  bool insert_discriminator(ACE_CDR::Long value);
+  DDS::ReturnCode_t reset_union();
+
   DataContainer container_;
+
+  bool serialized_size_i(const DCPS::Encoding& encoding, size_t& size, DCPS::Sample::Extent ext) const;
+  bool serialize_i(DCPS::Serializer& ser, DCPS::Sample::Extent ext) const;
 
   friend OpenDDS_Dcps_Export
   bool DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DynamicDataImpl& data);
 
   friend OpenDDS_Dcps_Export
   bool DCPS::operator<<(DCPS::Serializer& ser, const DynamicDataImpl& data);
+
+  friend OpenDDS_Dcps_Export
+  bool DCPS::serialized_size(const DCPS::Encoding& encoding, size_t& size, const DCPS::KeyOnly<const DynamicDataImpl>& data);
+
+  friend OpenDDS_Dcps_Export
+  bool DCPS::operator<<(DCPS::Serializer& ser, const DCPS::KeyOnly<const DynamicDataImpl>& data);
 };
 
 } // namespace XTypes

@@ -13,11 +13,11 @@
 #include <ace/Atomic_Op_T.h>
 #include <ace/OS_NS_unistd.h>
 
-ACE_Atomic_Op<ACE_SYNCH_MUTEX, CORBA::Long> key(0);
+OpenDDS::DCPS::Atomic<CORBA::Long> key(0);
 
 template<class DT, class DW, class DW_var>
 DDS::ReturnCode_t write(int writer_id,
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int>& timeout_writes,
+  OpenDDS::DCPS::Atomic<int>& timeout_writes,
   DDS::DataWriter_ptr writer)
 {
   try {
@@ -110,5 +110,5 @@ bool Writer::is_finished() const
 
 int Writer::get_timeout_writes() const
 {
-  return timeout_writes_.value();
+  return timeout_writes_;
 }

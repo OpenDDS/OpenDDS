@@ -140,7 +140,6 @@ private:
   TimerQueueMap timer_queue_map_;
   TimerIdMap timer_id_map_;
   TimerId max_timer_id_;
-  ThreadStatusManager tsm_;
   ThreadPool pool_;
 };
 typedef RcHandle<DispatchService> DispatchService_rch;

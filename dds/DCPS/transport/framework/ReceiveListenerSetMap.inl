@@ -17,7 +17,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::ReceiveListenerSetMap()
 }
 
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet_rch
-OpenDDS::DCPS::ReceiveListenerSetMap::find(RepoId publisher_id) const
+OpenDDS::DCPS::ReceiveListenerSetMap::find(GUID_t publisher_id) const
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","find",6);
   ReceiveListenerSet_rch listener_set;
@@ -29,7 +29,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::find(RepoId publisher_id) const
 }
 
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet_rch
-OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
+OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(GUID_t publisher_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","find_or_create",6);
 
@@ -41,7 +41,7 @@ OpenDDS::DCPS::ReceiveListenerSetMap::find_or_create(RepoId publisher_id)
 }
 
 ACE_INLINE OpenDDS::DCPS::ReceiveListenerSet_rch
-OpenDDS::DCPS::ReceiveListenerSetMap::remove_set(RepoId publisher_id)
+OpenDDS::DCPS::ReceiveListenerSetMap::remove_set(GUID_t publisher_id)
 {
   DBG_ENTRY_LVL("ReceiveListenerSetMap","remove_set",6);
   ReceiveListenerSet_rch listener_set;

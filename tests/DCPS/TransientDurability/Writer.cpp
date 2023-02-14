@@ -104,7 +104,7 @@ Writer::end ()
 int
 Writer::get_timeout_writes () const
 {
-  return timeout_writes_.value ();
+  return timeout_writes_;
 }
 
 int

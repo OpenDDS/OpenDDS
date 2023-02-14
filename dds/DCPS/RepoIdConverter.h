@@ -66,7 +66,7 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export RepoIdConverter : public GuidConverter {
 public:
-  RepoIdConverter(const RepoId& repoId);
+  RepoIdConverter(const GUID_t& repoId);
 
   ~RepoIdConverter();
 

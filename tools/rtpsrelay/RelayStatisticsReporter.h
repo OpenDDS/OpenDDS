@@ -143,6 +143,78 @@ public:
     report(guard, now);
   }
 
+  //handler_statistics_sub_count
+  void handler_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.handler_statistics_sub_count() = count;
+    publish_relay_statistics_.handler_statistics_sub_count() = count;
+    report(guard, now);
+  }
+
+  //relay_statistics_sub_count
+  void relay_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_statistics_sub_count() = count;
+    publish_relay_statistics_.relay_statistics_sub_count() = count;
+    report(guard, now);
+  }
+
+  //participant_statistics_sub_count
+  void participant_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.participant_statistics_sub_count() = count;
+    publish_relay_statistics_.participant_statistics_sub_count() = count;
+    report(guard, now);
+  }
+
+  //relay_partitions_sub_count
+  void relay_partitions_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_partitions_sub_count() = count;
+    publish_relay_statistics_.relay_partitions_sub_count() = count;
+    report(guard, now);
+  }
+
+  //relay_participant_status_sub_count
+  void relay_participant_status_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_participant_status_sub_count() = count;
+    publish_relay_statistics_.relay_participant_status_sub_count() = count;
+    report(guard, now);
+  }
+
+  //spdp_replay_sub_count
+  void spdp_replay_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.spdp_replay_sub_count() = count;
+    publish_relay_statistics_.spdp_replay_sub_count() = count;
+    report(guard, now);
+  }
+
+  //relay_address_sub_count
+  void relay_address_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_address_sub_count() = count;
+    publish_relay_statistics_.relay_address_sub_count() = count;
+    report(guard, now);
+  }
+
+  //relay_status_sub_count
+  void relay_status_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.relay_status_sub_count() = count;
+    publish_relay_statistics_.relay_status_sub_count() = count;
+    report(guard, now);
+  }
+
   void relay_partitions_pub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);

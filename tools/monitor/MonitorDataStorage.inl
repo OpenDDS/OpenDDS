@@ -953,7 +953,7 @@ MonitorDataStorage::update<DDS::ParticipantBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+  const OpenDDS::DCPS::GUID_t id = OpenDDS::DCPS::bit_key_to_guid(data.key);
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
@@ -1028,7 +1028,7 @@ MonitorDataStorage::update<DDS::TopicBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+  const OpenDDS::DCPS::GUID_t id = OpenDDS::DCPS::bit_key_to_guid(data.key);
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
@@ -1112,7 +1112,7 @@ MonitorDataStorage::update<DDS::PublicationBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+  const OpenDDS::DCPS::GUID_t id = OpenDDS::DCPS::bit_key_to_guid(data.key);
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")
@@ -1194,7 +1194,7 @@ MonitorDataStorage::update<DDS::SubscriptionBuiltinTopicData>(
   //  };
 
   // Extract a GUID from the key.
-  const OpenDDS::DCPS::RepoId id = OpenDDS::DCPS::bit_key_to_repo_id(data.key);
+  const OpenDDS::DCPS::GUID_t id = OpenDDS::DCPS::bit_key_to_guid(data.key);
 
   ACE_DEBUG((LM_DEBUG,
     ACE_TEXT("(%P|%t) MonitorDataStorage::update() - ")

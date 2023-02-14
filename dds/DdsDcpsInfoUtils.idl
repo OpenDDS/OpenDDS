@@ -15,10 +15,6 @@ module OpenDDS
 {
   module DCPS
   {
-    // These are unique across a domain
-    // They are also the InstanceHandle_t in Sample_Info for built-in Topics
-    typedef GUID_t RepoId;
-
     struct MonotonicTime_t {
       long sec;
       unsigned long nanosec;
@@ -45,7 +41,7 @@ module OpenDDS
 
     // Information returned from call to add_domain_participant()
     struct AddDomainStatus {
-      RepoId  id;
+      GUID_t  id;
       boolean federated;
     };
 
@@ -66,7 +62,7 @@ module OpenDDS
       TransportLocatorSeq writerTransInfo;
       TransportLocator writerDiscInfo;
       unsigned long transportContext;
-      RepoId writerId;
+      GUID_t writerId;
       ::DDS::PublisherQos pubQos;
       ::DDS::DataWriterQos writerQos;
       ::DDS::OctetSeq serializedTypeInfo;
@@ -77,7 +73,7 @@ module OpenDDS
       TransportLocatorSeq readerTransInfo;
       TransportLocator readerDiscInfo;
       unsigned long transportContext;
-      RepoId readerId;
+      GUID_t readerId;
       ::DDS::SubscriberQos subQos;
       ::DDS::DataReaderQos readerQos;
       string filterClassName;
@@ -87,9 +83,9 @@ module OpenDDS
       MonotonicTime_t participantDiscoveredAt;
     };
 
-    typedef sequence<RepoId> WriterIdSeq;
+    typedef sequence<GUID_t> WriterIdSeq;
 
-    typedef sequence<RepoId> ReaderIdSeq;
+    typedef sequence<GUID_t> ReaderIdSeq;
 
     typedef string<256> String256;
 

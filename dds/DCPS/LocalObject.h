@@ -28,10 +28,12 @@ class LocalObjectBase
   , public virtual RcObject
 {
 public:
-  virtual void _add_ref() {
+  virtual void _add_ref()
+  {
     RcObject::_add_ref();
   }
-  virtual void _remove_ref() {
+  virtual void _remove_ref()
+  {
     RcObject::_remove_ref();
   }
   virtual CORBA::ULong _refcount_value() const {

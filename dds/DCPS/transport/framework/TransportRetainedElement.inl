@@ -12,7 +12,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 ACE_INLINE
 OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     ACE_Message_Block*                 message,
-    const RepoId&                      pubId
+    const GUID_t&                      pubId
 ) : TransportQueueElement(1),
     msg_(message),
     publication_id_(pubId),
@@ -25,7 +25,7 @@ OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
 ACE_INLINE
 OpenDDS::DCPS::TransportRetainedElement::TransportRetainedElement(
     const ACE_Message_Block*           message,
-    const RepoId&                      pubId,
+    const GUID_t&                      pubId,
     MessageBlockAllocator*             mb_allocator,
     DataBlockAllocator*                db_allocator
 ) : TransportQueueElement(1),

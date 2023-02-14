@@ -1161,7 +1161,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
                                      Discovery::RepoKey key,
                                      bool attach_participant)
 {
-  typedef std::pair<Discovery_rch, RepoId> DiscRepoPair;
+  typedef std::pair<Discovery_rch, GUID_t> DiscRepoPair;
   OPENDDS_VECTOR(DiscRepoPair) repoList;
   {
     ACE_GUARD(ACE_Recursive_Thread_Mutex, guard, this->maps_lock_);
@@ -1216,7 +1216,7 @@ Service_Participant::set_repo_domain(const DDS::DomainId_t domain,
             try {
               // Attach each DomainParticipant in this domain to this
               // repository.
-              RepoId id = (*current)->get_id();
+              GUID_t id = (*current)->get_id();
               repoList.push_back(std::make_pair(disc_iter->second, id));
 
               if (DCPS_debug_level > 0) {
@@ -3010,6 +3010,14 @@ Service_Participant::get_type_information(DDS::DomainParticipant_ptr participant
 
   return XTypes::TypeInformation();
 }
+
+#ifndef OPENDDS_SAFETY_PROFILE
+DDS::ReturnCode_t Service_Participant::get_dynamic_type(DDS::DynamicType_var& type,
+  DDS::DomainParticipant_ptr participant, const DDS::BuiltinTopicKey_t& key) const
+{
+  return dynamic_cast<DomainParticipantImpl*>(participant)->get_dynamic_type(type, key);
+}
+#endif
 
 XTypes::TypeObject
 Service_Participant::get_type_object(DDS::DomainParticipant_ptr participant,

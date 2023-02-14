@@ -36,6 +36,41 @@ LinuxNetworkConfigMonitor::LinuxNetworkConfigMonitor(ReactorInterceptor_rch inte
 
 bool LinuxNetworkConfigMonitor::open()
 {
+  ReactorInterceptor_rch interceptor = interceptor_.lock();
+  if (!interceptor) {
+    return false;
+  }
+
+  RcHandle<OpenHandler> oh = make_rch<OpenHandler>(rchandle_from(this));
+  interceptor->execute_or_enqueue(oh);
+  return oh->wait();
+}
+
+bool LinuxNetworkConfigMonitor::OpenHandler::wait() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  while (!done_) {
+    condition_.wait(TheServiceParticipant->get_thread_status_manager());
+  }
+  return retval_;
+}
+
+void LinuxNetworkConfigMonitor::OpenHandler::execute()
+{
+  RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
+  if (!lncm) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  retval_ = lncm->open_i();
+  done_ = true;
+  condition_.notify_all();
+}
+
+bool LinuxNetworkConfigMonitor::open_i()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
+
   // Listen to changes in links and IPV4 and IPV6 addresses.
   const pid_t pid = 0;
   ACE_Netlink_Addr addr;
@@ -43,12 +78,12 @@ bool LinuxNetworkConfigMonitor::open()
   if (socket_.open(addr, AF_NETLINK, NETLINK_ROUTE) != 0) {
 #ifdef ACE_ANDROID
     if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open: could not open socket"
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: LinuxNetworkConfigMonitor::open_i: could not open socket"
                  " this is expected for API30+\n"));
     }
 #else
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not open socket: %m\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not open socket: %m\n"));
     }
 #endif
     return false;
@@ -56,7 +91,7 @@ bool LinuxNetworkConfigMonitor::open()
 
   if (socket_.enable(ACE_NONBLOCK) != 0) {
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not set non-blocking: %m\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not set non-blocking: %m\n"));
     }
     return false;
   }
@@ -76,7 +111,7 @@ bool LinuxNetworkConfigMonitor::open()
 
   if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for links: %m\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not send request for links: %m\n"));
     }
     return false;
   }
@@ -92,16 +127,15 @@ bool LinuxNetworkConfigMonitor::open()
 
   if (socket_.send(&request, request.header.nlmsg_len, 0) != static_cast<ssize_t>(request.header.nlmsg_len)) {
     if (log_level >= LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open: could not send request for addresses: %m\n"));
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not send request for addresses: %m\n"));
     }
     return false;
   }
 
   read_messages();
 
-  ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (interceptor) {
-    interceptor->execute_or_enqueue(make_rch<RegisterHandler>(rchandle_from(this)));
+  if (reactor()->register_handler(this, READ_MASK) != 0) {
+    ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: LinuxNetworkConfigMonitor::open_i: could not register for input: %m\n")));
   }
 
   return true;
@@ -109,24 +143,51 @@ bool LinuxNetworkConfigMonitor::open()
 
 bool LinuxNetworkConfigMonitor::close()
 {
-  bool retval = true;
-
-  {
-    ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
-    if (socket_.close() != 0) {
-      if (log_level >= LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::close: could not close socket: %m\n"));
-      }
-      retval = false;
-    }
-  }
-
   ReactorInterceptor_rch interceptor = interceptor_.lock();
-  if (interceptor) {
-    interceptor->execute_or_enqueue(make_rch<RemoveHandler>(rchandle_from(this)));
+  if (!interceptor) {
+    return false;
   }
 
-  return retval;
+  RcHandle<CloseHandler> ch = make_rch<CloseHandler>(rchandle_from(this));
+  interceptor->execute_or_enqueue(ch);
+  return ch->wait();
+}
+
+bool LinuxNetworkConfigMonitor::CloseHandler::wait() const
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, mutex_, false);
+  while (!done_) {
+    condition_.wait(TheServiceParticipant->get_thread_status_manager());
+  }
+  return retval_;
+}
+
+void LinuxNetworkConfigMonitor::CloseHandler::execute()
+{
+  RcHandle<LinuxNetworkConfigMonitor> lncm = lncm_.lock();
+  if (!lncm) {
+    return;
+  }
+  ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+  retval_ = lncm->close_i();
+  done_ = true;
+  condition_.notify_all();
+}
+
+bool LinuxNetworkConfigMonitor::close_i()
+{
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, false);
+  reactor()->remove_handler(this, READ_MASK);
+
+  if (socket_.close() != 0) {
+    if (log_level >= LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: LinuxNetworkConfigMonitor::close_i: could not close socket: %m\n"));
+    }
+
+    return false;
+  }
+
+  return true;
 }
 
 ACE_HANDLE LinuxNetworkConfigMonitor::get_handle() const
@@ -138,6 +199,7 @@ int LinuxNetworkConfigMonitor::handle_input(ACE_HANDLE)
 {
   ThreadStatusManager::Event ev(TheServiceParticipant->get_thread_status_manager());
 
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, socket_mutex_, -1);
   read_messages();
   return 0;
 }
@@ -149,7 +211,6 @@ void LinuxNetworkConfigMonitor::read_messages()
   for (;;) {
     ssize_t buffer_length;
     {
-      ACE_GUARD(ACE_Thread_Mutex, g, socket_mutex_);
       if (socket_.get_handle() == -1) {
         return;
       }

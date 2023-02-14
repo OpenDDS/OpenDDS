@@ -6,6 +6,7 @@
 #ifndef OPENDDS_DCPS_DATAWRITERIMPL_H
 #define OPENDDS_DCPS_DATAWRITERIMPL_H
 
+#include "Atomic.h"
 #include "Sample.h"
 #include "DataWriterCallbacks.h"
 #include "transport/framework/TransportSendListener.h"
@@ -87,7 +88,7 @@ public:
   friend class WriteDataContainer;
   friend class PublisherImpl;
 
-  typedef OPENDDS_MAP_CMP(RepoId, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, SequenceNumber, GUID_tKeyLessThan) RepoIdToSequenceMap;
   typedef Dynamic_Cached_Allocator_With_Overflow<ACE_Thread_Mutex> DataAllocator;
 
   struct AckToken {
@@ -190,20 +191,20 @@ public:
 
   virtual DDS::ReturnCode_t enable();
 
-  virtual void add_association(const RepoId& yourId,
+  virtual void add_association(const GUID_t& yourId,
                                const ReaderAssociation& reader,
                                bool active);
 
-  virtual void transport_assoc_done(int flags, const RepoId& remote_id);
+  virtual void transport_assoc_done(int flags, const GUID_t& remote_id);
 
   virtual void remove_associations(const ReaderIdSeq & readers,
                                    bool callback);
 
-  virtual void replay_durable_data_for(const RepoId& remote_sub_id);
+  virtual void replay_durable_data_for(const GUID_t& remote_sub_id);
 
   virtual void update_incompatible_qos(const IncompatibleQosStatus& status);
 
-  virtual void update_subscription_params(const RepoId& readerId,
+  virtual void update_subscription_params(const GUID_t& readerId,
                                           const DDS::StringSeq& params);
 
   /**
@@ -265,7 +266,7 @@ public:
    * sample and finally tell the transport to send the sample.
    * \param filter_out can either be null (if the writer can't
    *        or won't evaluate the filters), or a list of
-   *        associated reader RepoIds that should NOT get the
+   *        associated reader GUID_ts that should NOT get the
    *        data sample due to content filtering.
    */
   DDS::ReturnCode_t write(Message_Block_Ptr sample,
@@ -310,7 +311,7 @@ public:
   /**
    * Accessor of the repository id of the domain participant.
    */
-  RepoId get_dp_id();
+  GUID_t get_dp_id();
 
   /**
    * Delegate to WriteDataContainer to unregister all instances.
@@ -404,17 +405,17 @@ public:
 
   void remove_all_associations();
 
-  virtual void register_for_reader(const RepoId& participant,
-                                   const RepoId& writerid,
-                                   const RepoId& readerid,
+  virtual void register_for_reader(const GUID_t& participant,
+                                   const GUID_t& writerid,
+                                   const GUID_t& readerid,
                                    const TransportLocatorSeq& locators,
                                    DiscoveryListener* listener);
 
-  virtual void unregister_for_reader(const RepoId& participant,
-                                     const RepoId& writerid,
-                                     const RepoId& readerid);
+  virtual void unregister_for_reader(const GUID_t& participant,
+                                     const GUID_t& writerid,
+                                     const GUID_t& readerid);
 
-  virtual void update_locators(const RepoId& remote,
+  virtual void update_locators(const GUID_t& remote,
                                const TransportLocatorSeq& locators);
 
   void notify_publication_disconnected(const ReaderIdSeq& subids);
@@ -422,8 +423,8 @@ public:
   void notify_publication_lost(const ReaderIdSeq& subids);
 
   /// Statistics counter.
-  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_dropped_count_;
-  ACE_Atomic_Op<ACE_Thread_Mutex, int> data_delivered_count_;
+  Atomic<int> data_dropped_count_;
+  Atomic<int> data_delivered_count_;
 
   MessageTracker controlTracker;
 
@@ -484,7 +485,7 @@ public:
 
   virtual WeakRcHandle<ICE::Endpoint> get_ice_endpoint();
 
-  RepoId get_repo_id() const
+  GUID_t get_guid() const
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
     return publication_id_;
@@ -516,7 +517,7 @@ public:
 
 protected:
 
-  void check_and_set_repo_id(const RepoId& id)
+  void check_and_set_repo_id(const GUID_t& id)
   {
     ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
     if (GUID_UNKNOWN == publication_id_) {
@@ -592,7 +593,7 @@ protected:
     ~ReaderInfo();
   };
 
-  typedef OPENDDS_MAP_CMP(RepoId, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, ReaderInfo, GUID_tKeyLessThan) RepoIdToReaderInfoMap;
   RepoIdToReaderInfoMap reader_info_;
 
   struct AckCustomization {
@@ -726,7 +727,7 @@ private:
   DDS::Security::ParticipantCryptoHandle get_crypto_handle() const;
 #endif
 
-  void association_complete_i(const RepoId& remote_id);
+  void association_complete_i(const GUID_t& remote_id);
 
   void return_handle(DDS::InstanceHandle_t handle);
 
@@ -757,7 +758,7 @@ private:
   /// The publisher servant which creates this datawriter.
   WeakRcHandle<PublisherImpl> publisher_servant_;
   /// The repository id of this datawriter/publication.
-  PublicationId publication_id_;
+  GUID_t publication_id_;
   /// The sequence number unique in DataWriter scope.
   SequenceNumber sequence_number_;
   /// Mutex for sequence_number_
@@ -774,7 +775,7 @@ private:
   /// and status changes.
   mutable ACE_Recursive_Thread_Mutex lock_;
 
-  typedef OPENDDS_MAP_CMP(RepoId, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
+  typedef OPENDDS_MAP_CMP(GUID_t, DDS::InstanceHandle_t, GUID_tKeyLessThan) RepoIdToHandleMap;
   RepoIdToHandleMap id_to_handle_map_;
 
   RepoIdSet readers_;
@@ -841,7 +842,7 @@ private:
   bool need_sequence_repair();
   bool need_sequence_repair_i() const;
 
-  DDS::ReturnCode_t send_end_historic_samples(const RepoId& readerId);
+  DDS::ReturnCode_t send_end_historic_samples(const GUID_t& readerId);
   DDS::ReturnCode_t send_request_ack();
 
   bool liveliness_asserted_;

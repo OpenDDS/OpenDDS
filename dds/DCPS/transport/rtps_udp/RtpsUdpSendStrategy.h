@@ -7,6 +7,7 @@
 #define OPENDDS_DCPS_TRANSPORT_RTPS_UDP_RTPSUDPSENDSTRATEGY_H
 
 #include "Rtps_Udp_Export.h"
+#include "RtpsUdpDataLink_rch.h"
 
 #include <dds/DCPS/NetworkAddress.h>
 #include <dds/DCPS/AtomicBool.h>
@@ -24,9 +25,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-class RtpsUdpDataLink;
 class RtpsUdpInst;
-typedef RcHandle<RtpsUdpDataLink> RtpsUdpDataLink_rch;
 
 class OpenDDS_Rtps_Udp_Export RtpsUdpSendStrategy
   : public TransportSendStrategy {
@@ -56,7 +55,7 @@ public:
   void append_submessages(const RTPS::SubmessageSeq& submessages);
 
 #if defined(OPENDDS_SECURITY)
-  void encode_payload(const RepoId& pub_id, Message_Block_Ptr& payload,
+  void encode_payload(const GUID_t& pub_id, Message_Block_Ptr& payload,
                       RTPS::SubmessageSeq& submessages);
 #endif
 

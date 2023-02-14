@@ -76,12 +76,7 @@ my $debugFile;
    $debugFile = PerlACE::LocalFile( $dFile) if $dFile;
 my $confFile  = PerlACE::LocalFile( "services.conf");
 
-my $iniFile;
-if ("solaris" eq $OSNAME) {
-  $iniFile   = PerlACE::LocalFile( "transport_$OSNAME.ini");
-} else {
-  $iniFile   = PerlACE::LocalFile( "transport.ini");
-}
+my $iniFile   = PerlACE::LocalFile( "transport.ini");
 
 # Clean out leftovers.
 unlink $repo_ior;

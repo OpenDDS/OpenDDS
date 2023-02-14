@@ -28,7 +28,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
-MulticastTransport::MulticastTransport(MulticastInst& inst)
+MulticastTransport::MulticastTransport(const MulticastInst_rch& inst)
   : TransportImpl(inst)
 {
   if (! (configure_i(inst) && open())) {
@@ -41,19 +41,20 @@ MulticastTransport::~MulticastTransport()
 }
 
 
-MulticastInst&
+MulticastInst_rch
 MulticastTransport::config() const
 {
-  return static_cast<MulticastInst&>(TransportImpl::config());
+  return dynamic_rchandle_cast<MulticastInst>(TransportImpl::config());
 }
 
 MulticastDataLink_rch
-MulticastTransport::make_datalink(const RepoId& local_id,
+MulticastTransport::make_datalink(const GUID_t& local_id,
                                   Priority priority,
                                   bool active)
 {
   RcHandle<MulticastSessionFactory> session_factory;
-  if (this->config().is_reliable()) {
+  MulticastInst_rch cfg = config();
+  if (cfg && cfg->is_reliable()) {
     session_factory = make_rch<ReliableSessionFactory>();
   } else {
     session_factory = make_rch<BestEffortSessionFactory>();
@@ -64,21 +65,21 @@ MulticastTransport::make_datalink(const RepoId& local_id,
 
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::make_datalink "
             "peers: local %#08x%08x priority %d active %d\n",
-            this->config().name().c_str(), (unsigned int)(local_peer >> 32), (unsigned int)local_peer,
+            cfg ? cfg->name().c_str() : "", (unsigned int)(local_peer >> 32), (unsigned int)local_peer,
             priority, active), 2);
 
-  MulticastDataLink_rch link(make_rch<MulticastDataLink>(ref(*this),
-                                   session_factory,
-                                   local_peer,
-                                   ref(config()),
-                                   reactor_task(),
-                                   active));
+  MulticastDataLink_rch link(make_rch<MulticastDataLink>(rchandle_from(this),
+                                                         session_factory,
+                                                         local_peer,
+                                                         ref(cfg),
+                                                         reactor_task(),
+                                                         active));
 
   // Join multicast group:
-  if (!link->join(this->config().group_address_)) {
+  if (!link->join(cfg->group_address_)) {
     ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MulticastTransport::make_datalink: ")
                ACE_TEXT("failed to join multicast group: %C!\n"),
-               LogAddr(this->config().group_address_, LogAddr::HostPort).c_str()));
+               LogAddr(cfg->group_address_, LogAddr::HostPort).c_str()));
     return MulticastDataLink_rch();
   }
 
@@ -89,12 +90,14 @@ MulticastSession_rch
 MulticastTransport::start_session(const MulticastDataLink_rch& link,
                                   MulticastPeer remote_peer, bool active)
 {
+  MulticastInst_rch cfg = config();
+
   if (link.is_nil()) {
     ACE_ERROR_RETURN((LM_ERROR,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")
                       ACE_TEXT("link is nil\n"),
-                      this->config().name().c_str()),
+                      cfg ? cfg->name().c_str() : ""),
                      MulticastSession_rch());
   }
 
@@ -105,7 +108,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")
                       ACE_TEXT("failed to create session for remote peer: %#08x%08x!\n"),
-                      this->config().name().c_str(),
+                      cfg ? cfg->name().c_str() : "",
                       (unsigned int)(remote_peer >> 32),
                       (unsigned int) remote_peer),
                      MulticastSession_rch());
@@ -118,7 +121,7 @@ MulticastTransport::start_session(const MulticastDataLink_rch& link,
                       ACE_TEXT("(%P|%t) ERROR: ")
                       ACE_TEXT("MulticastTransport[%C]::start_session: ")
                       ACE_TEXT("failed to start session for remote peer: %#08x%08x!\n"),
-                      this->config().name().c_str(),
+                      cfg ? cfg->name().c_str() : "",
                       (unsigned int)(remote_peer >> 32),
                       (unsigned int) remote_peer),
                      MulticastSession_rch());
@@ -148,8 +151,14 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
                                      const ConnectionAttribs& attribs,
                                      const TransportClient_rch& client)
 {
+  MulticastInst_rch cfg = config();
+
+  if (!cfg) {
+    return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+  }
+
   // Check that the remote reliability matches.
-  if (get_remote_reliability(remote) != this->config().is_reliable()) {
+  if (get_remote_reliability(remote) != cfg->is_reliable()) {
     return AcceptConnectResult();
   }
 
@@ -169,7 +178,7 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
   MulticastPeer remote_peer = (ACE_INT64)RepoIdConverter(remote.repo_id_).federationId() << 32
                             | RepoIdConverter(remote.repo_id_).participantId();
 
-  if (this->config().is_reliable()) {
+  if (cfg->is_reliable()) {
     link->add_on_start_callback(client, remote.repo_id_);
   }
 
@@ -185,7 +194,7 @@ MulticastTransport::connect_datalink(const RemoteTransport& remote,
     return AcceptConnectResult();
   }
 
-  if (config().is_reliable()) {
+  if (cfg->is_reliable()) {
     session->add_remote(attribs.local_id_, remote.repo_id_);
     if (remote_peer != local_peer) {
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
@@ -202,8 +211,14 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
                                     const ConnectionAttribs& attribs,
                                     const TransportClient_rch& client)
 {
+  MulticastInst_rch cfg = config();
+
+  if (!cfg) {
+    return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
+  }
+
   // Check that the remote reliability matches.
-  if (get_remote_reliability(remote) != this->config().is_reliable()) {
+  if (get_remote_reliability(remote) != cfg->is_reliable()) {
     return AcceptConnectResult();
   }
 
@@ -246,7 +261,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
   } else {
 
-    if (config().is_reliable()) {
+    if (cfg->is_reliable()) {
       pending_connections_[std::make_pair(remote_peer, local_peer)].
       push_back(std::make_pair(client, remote.repo_id_));
     }
@@ -259,7 +274,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
     if (!session) {
       return AcceptConnectResult(AcceptConnectResult::ACR_FAILED);
-    } else if (config().is_reliable()) {
+    } else if (cfg->is_reliable()) {
       return AcceptConnectResult(AcceptConnectResult::ACR_SUCCESS);
     } else {
       return AcceptConnectResult(link);
@@ -269,7 +284,7 @@ MulticastTransport::accept_datalink(const RemoteTransport& remote,
 
 void
 MulticastTransport::stop_accepting_or_connecting(const TransportClient_wrch& client,
-                                                 const RepoId& remote_id,
+                                                 const GUID_t& remote_id,
                                                  bool /*disassociate*/,
                                                  bool /*association_failed*/)
 {
@@ -300,9 +315,11 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
 {
   GuardThreadType guard(this->connections_lock_);
 
+  MulticastInst_rch cfg = config();
+
   VDBG_LVL((LM_DEBUG, "(%P|%t) MulticastTransport[%C]::passive_connection "
             "from remote peer %#08x%08x to local peer %#08x%08x\n",
-            this->config().name().c_str(),
+            cfg ? cfg->name().c_str() : "",
             (unsigned int) (remote_peer >> 32),
             (unsigned int) remote_peer,
             (unsigned int) (local_peer >> 32),
@@ -334,7 +351,7 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
                                                   tmp.at(i));
         if (tmp_iter != pend->second.end()) {
           TransportClient_wrch pend_client = tmp.at(i).first;
-          RepoId remote_repo = tmp.at(i).second;
+          GUID_t remote_repo = tmp.at(i).second;
           guard.release();
           TransportClient_rch client = pend_client.lock();
           if (client) {
@@ -348,22 +365,26 @@ MulticastTransport::passive_connection(MulticastPeer local_peer, MulticastPeer r
 }
 
 bool
-MulticastTransport::configure_i(MulticastInst& config)
+MulticastTransport::configure_i(const MulticastInst_rch& config)
 {
+  if (!config) {
+    return false;
+  }
+
   // Override with DCPSDefaultAddress.
-  if (config.local_address_.empty() &&
+  if (config->local_address_.empty() &&
       TheServiceParticipant->default_address().to_addr() != ACE_INET_Addr()) {
     char buffer[INET6_ADDRSTRLEN];
-    config.local_address_ = TheServiceParticipant->default_address().to_addr().get_host_addr(buffer, sizeof buffer);
+    config->local_address_ = TheServiceParticipant->default_address().to_addr().get_host_addr(buffer, sizeof buffer);
   }
 
-  if (!config.group_address_.is_multicast()) {
+  if (!config->group_address_.is_multicast()) {
     ACE_ERROR_RETURN((LM_ERROR, ACE_TEXT("(%P|%t) ERROR: MulticastTransport[%@]::configure_i: ")
                       ACE_TEXT("invalid configuration: address %C is not multicast.\n"),
-                      this, LogAddr::ip(this->config().group_address_).c_str()), false);
+                      this, LogAddr::ip(config->group_address_).c_str()), false);
   }
 
-  this->create_reactor_task(config.async_send_, "MulticastTransport" + config.name());
+  this->create_reactor_task(config->async_send_, "MulticastTransport" + config->name());
 
   return true;
 }
@@ -396,8 +417,12 @@ MulticastTransport::shutdown_i()
 bool
 MulticastTransport::connection_info_i(TransportLocator& info, ConnectionInfoFlags flags) const
 {
-  config().populate_locator(info, flags);
-  return true;
+  MulticastInst_rch cfg = config();
+  if (cfg) {
+    cfg->populate_locator(info, flags);
+    return true;
+  }
+  return false;
 }
 
 void
@@ -407,7 +432,7 @@ MulticastTransport::release_datalink(DataLink* /*link*/)
   // until the transport is shut down.
 }
 
-void MulticastTransport::client_stop(const RepoId& localId)
+void MulticastTransport::client_stop(const GUID_t& localId)
 {
   GuardThreadType guard_links(this->links_lock_);
   const MulticastPeer local_peer = (ACE_INT64)RepoIdConverter(localId).federationId() << 32

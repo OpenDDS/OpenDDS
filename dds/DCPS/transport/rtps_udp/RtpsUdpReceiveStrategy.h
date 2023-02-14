@@ -56,23 +56,23 @@ public:
   /// Returns true if the bitmap was changed.
   bool remove_frags_from_bitmap(CORBA::Long bitmap[], CORBA::ULong num_bits,
                                 const SequenceNumber& base,
-                                const RepoId& pub_id, ACE_CDR::ULong& samples_requested);
+                                const GUID_t& pub_id, ACE_CDR::ULong& samples_requested);
 
   /// Remove any saved fragments.  We do not expect to receive any more
   /// fragments with sequence numbers in "range" from publication "pub_id".
-  void remove_fragments(const SequenceRange& range, const RepoId& pub_id);
+  void remove_fragments(const SequenceRange& range, const GUID_t& pub_id);
 
   typedef std::pair<SequenceNumber, RTPS::FragmentNumberSet> SeqFragPair;
   typedef OPENDDS_VECTOR(SeqFragPair) FragmentInfo;
 
-  void clear_completed_fragments(const RepoId& pub_id);
-  bool has_fragments(const SequenceRange& range, const RepoId& pub_id, FragmentInfo* frag_info = 0);
+  void clear_completed_fragments(const GUID_t& pub_id);
+  bool has_fragments(const SequenceRange& range, const GUID_t& pub_id, FragmentInfo* frag_info = 0);
 
   /// Prevent delivery of the currently in-progress data sample to the
   /// subscription sub_id.  Returns pointer to the in-progress data so
   /// it can be stored for later delivery.
-  const ReceivedDataSample* withhold_data_from(const RepoId& sub_id);
-  void do_not_withhold_data_from(const RepoId& sub_id);
+  const ReceivedDataSample* withhold_data_from(const GUID_t& sub_id);
+  void do_not_withhold_data_from(const GUID_t& sub_id);
 
   static ssize_t receive_bytes_helper(iovec iov[],
                                       int n,

@@ -132,7 +132,7 @@ OpenDDS::DCPS::TransportInst::shutdown()
 }
 
 OpenDDS::DCPS::TransportImpl_rch
-OpenDDS::DCPS::TransportInst::impl()
+OpenDDS::DCPS::TransportInst::get_or_create_impl()
 {
   ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
   if (!impl_ && !shutting_down_) {
@@ -145,6 +145,13 @@ OpenDDS::DCPS::TransportInst::impl()
   return impl_;
 }
 
+OpenDDS::DCPS::TransportImpl_rch
+OpenDDS::DCPS::TransportInst::get_impl()
+{
+  ACE_GUARD_RETURN(ACE_SYNCH_MUTEX, g, lock_, TransportImpl_rch());
+  return impl_;
+}
+
 void
 OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, u_short port_number)
 {
@@ -154,13 +161,7 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
   const int BUFSIZE=1024;
   char result[BUFSIZE];
 
-#ifdef __SUNPRO_CC
-  int count = 0;
-  std::count(addr_str.begin(), addr_str.end(), ':', count);
-  if (count < 2) {
-#else
   if (std::count(addr_str.begin(), addr_str.end(), ':') < 2) {
-#endif
     OPENDDS_STRING::size_type pos = addr_str.find_last_of(":");
     ACE_OS::snprintf(result, BUFSIZE, "%.*s:%hu", static_cast<int>(pos), addr_str.c_str(), port_number);
   }
@@ -180,14 +181,14 @@ OpenDDS::DCPS::TransportInst::set_port_in_addr_string(OPENDDS_STRING& addr_str, 
 OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>
 OpenDDS::DCPS::TransportInst::get_ice_endpoint()
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
   return temp ? temp->get_ice_endpoint() : OpenDDS::DCPS::WeakRcHandle<OpenDDS::ICE::Endpoint>();
 }
 
 void
 OpenDDS::DCPS::TransportInst::rtps_relay_only_now(bool flag)
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
   if (temp) {
     temp->rtps_relay_only_now(flag);
   }
@@ -196,7 +197,7 @@ OpenDDS::DCPS::TransportInst::rtps_relay_only_now(bool flag)
 void
 OpenDDS::DCPS::TransportInst::use_rtps_relay_now(bool flag)
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
   if (temp) {
     temp->use_rtps_relay_now(flag);
   }
@@ -205,7 +206,7 @@ OpenDDS::DCPS::TransportInst::use_rtps_relay_now(bool flag)
 void
 OpenDDS::DCPS::TransportInst::use_ice_now(bool flag)
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
   if (temp) {
     temp->use_ice_now(flag);
   }
@@ -214,14 +215,14 @@ OpenDDS::DCPS::TransportInst::use_ice_now(bool flag)
 OpenDDS::DCPS::ReactorTask_rch
 OpenDDS::DCPS::TransportInst::reactor_task()
 {
-  const OpenDDS::DCPS::TransportImpl_rch temp = impl();
+  const OpenDDS::DCPS::TransportImpl_rch temp = get_or_create_impl();
   return temp ? temp->reactor_task() : OpenDDS::DCPS::ReactorTask_rch();
 }
 
 OpenDDS::DCPS::EventDispatcher_rch
 OpenDDS::DCPS::TransportInst::event_dispatcher()
 {
-  const TransportImpl_rch temp = impl();
+  const TransportImpl_rch temp = get_or_create_impl();
   return temp ? temp->event_dispatcher() : EventDispatcher_rch();
 }
 

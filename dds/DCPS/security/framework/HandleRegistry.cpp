@@ -44,7 +44,7 @@ HandleRegistry::~HandleRegistry()
 }
 
 void
-HandleRegistry::insert_local_datareader_crypto_handle(const DCPS::RepoId& id,
+HandleRegistry::insert_local_datareader_crypto_handle(const DCPS::GUID_t& id,
                                                       DDS::Security::DatareaderCryptoHandle handle,
                                                       const DDS::Security::EndpointSecurityAttributes& attributes)
 {
@@ -63,7 +63,7 @@ HandleRegistry::insert_local_datareader_crypto_handle(const DCPS::RepoId& id,
 }
 
 DDS::Security::DatareaderCryptoHandle
-HandleRegistry::get_local_datareader_crypto_handle(const DCPS::RepoId& id) const
+HandleRegistry::get_local_datareader_crypto_handle(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::HANDLE_NIL);
   DatareaderCryptoHandleMap::const_iterator pos = local_datareader_crypto_handles_.find(id);
@@ -74,7 +74,7 @@ HandleRegistry::get_local_datareader_crypto_handle(const DCPS::RepoId& id) const
 }
 
 const DDS::Security::EndpointSecurityAttributes&
-HandleRegistry::get_local_datareader_security_attributes(const DCPS::RepoId& id) const
+HandleRegistry::get_local_datareader_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatareaderCryptoHandleMap::const_iterator pos = local_datareader_crypto_handles_.find(id);
@@ -85,7 +85,7 @@ HandleRegistry::get_local_datareader_security_attributes(const DCPS::RepoId& id)
 }
 
 void
-HandleRegistry::erase_local_datareader_crypto_handle(const DCPS::RepoId& id)
+HandleRegistry::erase_local_datareader_crypto_handle(const DCPS::GUID_t& id)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   local_datareader_crypto_handles_.erase(id);
@@ -99,7 +99,7 @@ HandleRegistry::erase_local_datareader_crypto_handle(const DCPS::RepoId& id)
 }
 
 void
-HandleRegistry::insert_local_datawriter_crypto_handle(const DCPS::RepoId& id,
+HandleRegistry::insert_local_datawriter_crypto_handle(const DCPS::GUID_t& id,
                                                       DDS::Security::DatawriterCryptoHandle handle,
                                                       const DDS::Security::EndpointSecurityAttributes& attributes)
 {
@@ -118,7 +118,7 @@ HandleRegistry::insert_local_datawriter_crypto_handle(const DCPS::RepoId& id,
 }
 
 DDS::Security::DatawriterCryptoHandle
-HandleRegistry::get_local_datawriter_crypto_handle(const DCPS::RepoId& id) const
+HandleRegistry::get_local_datawriter_crypto_handle(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::HANDLE_NIL);
   DatawriterCryptoHandleMap::const_iterator pos = local_datawriter_crypto_handles_.find(id);
@@ -129,7 +129,7 @@ HandleRegistry::get_local_datawriter_crypto_handle(const DCPS::RepoId& id) const
 }
 
 const DDS::Security::EndpointSecurityAttributes&
-HandleRegistry::get_local_datawriter_security_attributes(const DCPS::RepoId& id) const
+HandleRegistry::get_local_datawriter_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatawriterCryptoHandleMap::const_iterator pos = local_datawriter_crypto_handles_.find(id);
@@ -140,7 +140,7 @@ HandleRegistry::get_local_datawriter_security_attributes(const DCPS::RepoId& id)
 }
 
 void
-HandleRegistry::erase_local_datawriter_crypto_handle(const DCPS::RepoId& id)
+HandleRegistry::erase_local_datawriter_crypto_handle(const DCPS::GUID_t& id)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   local_datawriter_crypto_handles_.erase(id);
@@ -154,7 +154,7 @@ HandleRegistry::erase_local_datawriter_crypto_handle(const DCPS::RepoId& id)
 }
 
 void
-HandleRegistry::insert_remote_participant_crypto_handle(const DCPS::RepoId& id,
+HandleRegistry::insert_remote_participant_crypto_handle(const DCPS::GUID_t& id,
                                                         DDS::Security::ParticipantCryptoHandle handle)
 {
   if (handle != DDS::HANDLE_NIL) {
@@ -172,7 +172,7 @@ HandleRegistry::insert_remote_participant_crypto_handle(const DCPS::RepoId& id,
 }
 
 DDS::Security::ParticipantCryptoHandle
-HandleRegistry::get_remote_participant_crypto_handle(const DCPS::RepoId& id) const
+HandleRegistry::get_remote_participant_crypto_handle(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::HANDLE_NIL);
   ParticipantCryptoHandleMap::const_iterator pos = remote_participant_crypto_handles_.find(id);
@@ -183,7 +183,7 @@ HandleRegistry::get_remote_participant_crypto_handle(const DCPS::RepoId& id) con
 }
 
 void
-HandleRegistry::erase_remote_participant_crypto_handle(const DCPS::RepoId& id)
+HandleRegistry::erase_remote_participant_crypto_handle(const DCPS::GUID_t& id)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   remote_participant_crypto_handles_.erase(id);
@@ -197,7 +197,7 @@ HandleRegistry::erase_remote_participant_crypto_handle(const DCPS::RepoId& id)
 }
 
 void
-HandleRegistry::insert_remote_participant_permissions_handle(const DCPS::RepoId& id,
+HandleRegistry::insert_remote_participant_permissions_handle(const DCPS::GUID_t& id,
                                                         DDS::Security::PermissionsHandle handle)
 {
   if (handle != DDS::HANDLE_NIL) {
@@ -215,7 +215,7 @@ HandleRegistry::insert_remote_participant_permissions_handle(const DCPS::RepoId&
 }
 
 DDS::Security::PermissionsHandle
-HandleRegistry::get_remote_participant_permissions_handle(const DCPS::RepoId& id) const
+HandleRegistry::get_remote_participant_permissions_handle(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::HANDLE_NIL);
   PermissionsHandleMap::const_iterator pos = remote_participant_permissions_handles_.find(id);
@@ -226,7 +226,7 @@ HandleRegistry::get_remote_participant_permissions_handle(const DCPS::RepoId& id
 }
 
 void
-HandleRegistry::erase_remote_participant_permissions_handle(const DCPS::RepoId& id)
+HandleRegistry::erase_remote_participant_permissions_handle(const DCPS::GUID_t& id)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   remote_participant_permissions_handles_.erase(id);
@@ -240,7 +240,7 @@ HandleRegistry::erase_remote_participant_permissions_handle(const DCPS::RepoId& 
 }
 
 void
-HandleRegistry::insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
+HandleRegistry::insert_remote_datareader_crypto_handle(const DCPS::GUID_t& id,
                                                        DDS::Security::DatareaderCryptoHandle handle,
                                                        const DDS::Security::EndpointSecurityAttributes& attributes)
 {
@@ -259,7 +259,7 @@ HandleRegistry::insert_remote_datareader_crypto_handle(const DCPS::RepoId& id,
 }
 
 DDS::Security::DatareaderCryptoHandle
-HandleRegistry::get_remote_datareader_crypto_handle(const DCPS::RepoId& id) const
+HandleRegistry::get_remote_datareader_crypto_handle(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::HANDLE_NIL);
   DatareaderCryptoHandleMap::const_iterator pos = remote_datareader_crypto_handles_.find(id);
@@ -270,7 +270,7 @@ HandleRegistry::get_remote_datareader_crypto_handle(const DCPS::RepoId& id) cons
 }
 
 const DDS::Security::EndpointSecurityAttributes&
-HandleRegistry::get_remote_datareader_security_attributes(const DCPS::RepoId& id) const
+HandleRegistry::get_remote_datareader_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatareaderCryptoHandleMap::const_iterator pos = remote_datareader_crypto_handles_.find(id);
@@ -281,7 +281,7 @@ HandleRegistry::get_remote_datareader_security_attributes(const DCPS::RepoId& id
 }
 
 HandleRegistry::DatareaderCryptoHandleList
-HandleRegistry::get_all_remote_datareaders(const DCPS::RepoId& prefix) const
+HandleRegistry::get_all_remote_datareaders(const DCPS::GUID_t& prefix) const
 {
   DatareaderCryptoHandleList retval;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, retval);
@@ -295,7 +295,7 @@ HandleRegistry::get_all_remote_datareaders(const DCPS::RepoId& prefix) const
 }
 
 void
-HandleRegistry::erase_remote_datareader_crypto_handle(const DCPS::RepoId& id)
+HandleRegistry::erase_remote_datareader_crypto_handle(const DCPS::GUID_t& id)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   remote_datareader_crypto_handles_.erase(id);
@@ -309,7 +309,7 @@ HandleRegistry::erase_remote_datareader_crypto_handle(const DCPS::RepoId& id)
 }
 
 void
-HandleRegistry::insert_remote_datawriter_crypto_handle(const DCPS::RepoId& id,
+HandleRegistry::insert_remote_datawriter_crypto_handle(const DCPS::GUID_t& id,
                                                        DDS::Security::DatawriterCryptoHandle handle,
                                                        const DDS::Security::EndpointSecurityAttributes& attributes)
 {
@@ -329,7 +329,7 @@ HandleRegistry::insert_remote_datawriter_crypto_handle(const DCPS::RepoId& id,
 }
 
 DDS::Security::DatawriterCryptoHandle
-HandleRegistry::get_remote_datawriter_crypto_handle(const DCPS::RepoId& id) const
+HandleRegistry::get_remote_datawriter_crypto_handle(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, DDS::HANDLE_NIL);
   DatawriterCryptoHandleMap::const_iterator pos = remote_datawriter_crypto_handles_.find(id);
@@ -340,7 +340,7 @@ HandleRegistry::get_remote_datawriter_crypto_handle(const DCPS::RepoId& id) cons
 }
 
 const DDS::Security::EndpointSecurityAttributes&
-HandleRegistry::get_remote_datawriter_security_attributes(const DCPS::RepoId& id) const
+HandleRegistry::get_remote_datawriter_security_attributes(const DCPS::GUID_t& id) const
 {
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, default_endpoint_security_attributes_);
   DatawriterCryptoHandleMap::const_iterator pos = remote_datawriter_crypto_handles_.find(id);
@@ -351,7 +351,7 @@ HandleRegistry::get_remote_datawriter_security_attributes(const DCPS::RepoId& id
 }
 
 HandleRegistry::DatawriterCryptoHandleList
-HandleRegistry::get_all_remote_datawriters(const DCPS::RepoId& prefix) const
+HandleRegistry::get_all_remote_datawriters(const DCPS::GUID_t& prefix) const
 {
   DatawriterCryptoHandleList retval;
   ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, mutex_, retval);
@@ -365,7 +365,7 @@ HandleRegistry::get_all_remote_datawriters(const DCPS::RepoId& prefix) const
 }
 
 void
-HandleRegistry::erase_remote_datawriter_crypto_handle(const DCPS::RepoId& id)
+HandleRegistry::erase_remote_datawriter_crypto_handle(const DCPS::GUID_t& id)
 {
   ACE_GUARD(ACE_Thread_Mutex, guard, mutex_);
   remote_datawriter_crypto_handles_.erase(id);

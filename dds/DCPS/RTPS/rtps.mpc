@@ -3,6 +3,8 @@ project(OpenDDS_Rtps): dcpslib, install, rtps_optional_safety, opendds_testing_f
   dynamicflags = OPENDDS_RTPS_BUILD_DLL
 
   IDL_Files {
+    commandflags += -St -Scdr
+    TypeLookup.idl
   }
 
   Source_Files {

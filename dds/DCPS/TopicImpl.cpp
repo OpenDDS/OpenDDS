@@ -168,7 +168,7 @@ TopicImpl::enable()
   return this->set_enabled();
 }
 
-RepoId
+GUID_t
 TopicImpl::get_id() const
 {
   return id_;
@@ -177,7 +177,7 @@ TopicImpl::get_id() const
 DDS::InstanceHandle_t
 TopicImpl::get_instance_handle()
 {
-  return get_entity_instance_handle(id_, participant_);
+  return get_entity_instance_handle(id_, rchandle_from(participant_));
 }
 
 const char*

@@ -36,14 +36,14 @@ OpenDDS::DCPS::TransportSendElement::release_element(bool dropped_by_transport)
   delete this;
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 OpenDDS::DCPS::TransportSendElement::publication_id() const
 {
   DBG_ENTRY_LVL("TransportSendElement", "publication_id", 6);
   return element_->get_pub_id();
 }
 
-OpenDDS::DCPS::RepoId
+OpenDDS::DCPS::GUID_t
 OpenDDS::DCPS::TransportSendElement::subscription_id() const
 {
   if (element_->get_num_subs() == 1) {

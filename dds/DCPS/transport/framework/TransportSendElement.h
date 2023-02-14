@@ -26,9 +26,9 @@ public:
   virtual ~TransportSendElement();
 
   /// Accessor for the publisher id.
-  virtual RepoId publication_id() const;
+  virtual GUID_t publication_id() const;
 
-  virtual RepoId subscription_id() const;
+  virtual GUID_t subscription_id() const;
 
   virtual ACE_Message_Block* duplicate_msg() const;
 

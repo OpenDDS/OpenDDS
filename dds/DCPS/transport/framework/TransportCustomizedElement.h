@@ -27,11 +27,11 @@ public:
 
   void set_fragment(TransportQueueElement* orig);
 
-  virtual RepoId publication_id() const;
-  void set_publication_id(const RepoId& id);
+  virtual GUID_t publication_id() const;
+  void set_publication_id(const GUID_t& id);
 
-  RepoId subscription_id() const;
-  void set_subscription_id(const RepoId& id);
+  GUID_t subscription_id() const;
+  void set_subscription_id(const GUID_t& id);
 
   SequenceNumber sequence() const;
   void set_sequence(const SequenceNumber& value);
@@ -65,8 +65,8 @@ private:
   TransportQueueElement* orig_;
   const TransportSendElement* original_send_element_;
   Message_Block_Ptr msg_;
-  RepoId publication_id_;
-  RepoId subscription_id_;
+  GUID_t publication_id_;
+  GUID_t subscription_id_;
   SequenceNumber sequence_;
   bool fragment_, exclusive_;
 };

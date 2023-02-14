@@ -28,7 +28,7 @@ typedef RcHandle<const Sample> ConstSample_rch;
  * from opendds_idl or a DynamicData. This is meant to be used by
  * DataReaderImpl and DataWriterImpl.
  */
-class OpenDDS_Dcps_Export Sample : public virtual RcObject {
+class OpenDDS_Dcps_Export Sample : public RcObject {
 public:
   enum Mutability {
     Mutable,
@@ -37,13 +37,21 @@ public:
 
   enum Extent {
     Full,
-    KeyOnly
+    KeyOnly,
+    NestedKeyOnly
   };
 
-  Sample(Mutability mutability, Extent extent)
-  : mutability_(mutability)
-  , extent_(extent)
+  Sample()
+    : mutability_(Mutable)
+    , extent_(Full)
   {
+  }
+
+  Sample(Mutability mutability, Extent extent)
+    : mutability_(mutability)
+    , extent_(extent)
+  {
+    OPENDDS_ASSERT(extent != NestedKeyOnly);
   }
 
   virtual ~Sample() {}
@@ -65,21 +73,25 @@ public:
   virtual bool to_message_block(ACE_Message_Block& mb) const = 0;
   virtual bool from_message_block(const ACE_Message_Block& mb) = 0;
   virtual Sample_rch copy(Mutability mutability, Extent extent) const = 0;
+
   Sample_rch copy(Mutability mutability) const
   {
     return copy(mutability, extent_);
   }
+
 #ifndef OPENDDS_SAFETY_PROFILE
   virtual DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr type) const = 0;
 #endif
+
   virtual const void* native_data() const = 0;
+
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
   virtual bool eval(FilterEvaluator& evaluator, const DDS::StringSeq& params) const = 0;
 #endif
 
 protected:
-  const Mutability mutability_;
-  const Extent extent_;
+  Mutability mutability_;
+  Extent extent_;
 };
 
 struct OpenDDS_Dcps_Export SampleRchCmp {
@@ -102,41 +114,41 @@ public:
 #endif
 
   explicit Sample_T(const NativeType& data, Extent extent = Full)
-  : Sample(ReadOnly, extent)
-  , owns_data_(false)
-  , data_(&data)
+    : Sample(ReadOnly, extent)
+    , owns_data_(false)
+    , data_(&data)
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  , dynamic_data_(0)
+    , dynamic_data_(0)
 #endif
   {
   }
 
   explicit Sample_T(const NativeType* data, Extent extent = Full)
-  : Sample(ReadOnly, extent)
-  , owns_data_(true)
-  , data_(data)
+    : Sample(ReadOnly, extent)
+    , owns_data_(true)
+    , data_(data)
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  , dynamic_data_(0)
+    , dynamic_data_(0)
 #endif
   {
   }
 
   explicit Sample_T(NativeType& data, Extent extent = Full)
-  : Sample(Mutable, extent)
-  , owns_data_(false)
-  , data_(&data)
+    : Sample(Mutable, extent)
+    , owns_data_(false)
+    , data_(&data)
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  , dynamic_data_(0)
+    , dynamic_data_(0)
 #endif
   {
   }
 
   explicit Sample_T(NativeType* data, Extent extent = Full)
-  : Sample(Mutable, extent)
-  , owns_data_(true)
-  , data_(data)
+    : Sample(Mutable, extent)
+    , owns_data_(true)
+    , data_(data)
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  , dynamic_data_(0)
+    , dynamic_data_(0)
 #endif
   {
   }

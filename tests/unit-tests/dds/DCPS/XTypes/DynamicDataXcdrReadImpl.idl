@@ -1,3 +1,5 @@
+#ifndef OPENDDS_SAFETY_PROFILE
+
 #include <tao/LongSeq.pidl>
 #include <tao/ULongSeq.pidl>
 #include <tao/Int8Seq.pidl>
@@ -134,13 +136,12 @@ typedef sequence<wstring> WStringSeq;
   @id(16) StringSeq str_s; \
   @id(17) WStringSeq wstr_s;
 
-
 @final
 struct FinalNestedStructInner {
   @id(0) long l;
 };
 
-// Reading single value from struct.
+// Read single value from struct.
 @mutable
 struct MutableSingleValueStruct {
   SINGLE_VALUE_MEMBERS
@@ -156,7 +157,7 @@ struct FinalSingleValueStruct {
   SINGLE_VALUE_MEMBERS
 };
 
-// Reading single value from union.
+// Read single value from union.
 @mutable
 union MutableSingleValueUnion switch (SomeEnum) {
   SINGLE_VALUE_BRANCHES
@@ -172,7 +173,7 @@ union FinalSingleValueUnion switch (SomeEnum) {
   SINGLE_VALUE_BRANCHES
 };
 
-// Reading single value from sequence and reading sequence from struct.
+// Read single value from sequence and reading sequence from struct.
 @mutable
 struct MutableSequenceStruct {
   SEQUENCE_VALUE_MEMBERS
@@ -202,7 +203,7 @@ struct MutableNestedStructInner {
 @final
 struct FinalNestedStructOuter {
   @id(0) long l;
-  @id(1) AppendableNestedStructInner inner;
+  @id(1) @key AppendableNestedStructInner inner;
   @id(2) short s;
 };
 
@@ -215,9 +216,9 @@ struct AppendableNestedStructOuter {
 
 @mutable
 struct MutableNestedStructOuter {
-  @id(0) octet o;
+  @id(0) @key octet o;
   @id(1) FinalNestedStructInner inner;
-  @id(2) boolean b;
+  @id(2) @key boolean b;
 };
 
 #define NESTED_UNION_BRANCHES \
@@ -279,7 +280,7 @@ struct AppendableStructXCDR1 {
 struct FinalStruct {
   @id(0) char c;
   @id(1) AppendableNestedStructOuter outer;
-  @id(2) short s;
+  @id(2) @key short s;
   @id(3) AppendableNestedUnionInner inner;
   @id(4) int8 i;
 };
@@ -287,7 +288,7 @@ struct FinalStruct {
 @appendable
 struct AppendableStruct {
   @id(0) char c;
-  @id(1) MutableNestedStructOuter outer;
+  @id(1) @key MutableNestedStructOuter outer;
   @id(2) short s;
   @id(3) MutableNestedUnionInner inner;
   @id(4) int8 i;
@@ -298,7 +299,7 @@ struct MutableStruct {
   @id(0) char c;
   @id(1) FinalNestedStructOuter outer;
   @id(2) short s;
-  @id(3) FinalNestedUnionInner inner;
+  @id(3) @key FinalNestedUnionInner inner;
   @id(4) int8 i;
 };
 
@@ -356,7 +357,7 @@ union MutableSequenceUnion switch (SomeEnum) {
 #define ARRAY_MEMBERS \
   @id(0) long int_32a[2]; \
   @id(1) unsigned long uint_32a[2]; \
-  @id(2) int8 int_8a[2];
+  @id(2) @key int8 int_8a[2];
 
 @final
 struct FinalArrayStruct {
@@ -372,3 +373,14 @@ struct AppendableArrayStruct {
 struct MutableArrayStruct {
   ARRAY_MEMBERS
 };
+
+struct Node;
+typedef sequence<Node> NodeSeq;
+
+@mutable
+struct Node {
+  long value;
+  NodeSeq children;
+};
+
+#endif // OPENDDS_SAFETY_PROFILE

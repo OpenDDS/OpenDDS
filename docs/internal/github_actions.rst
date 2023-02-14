@@ -197,25 +197,11 @@ Only Failing on CI
 
   * Multicast times out waiting for remote peer. Fails on ``test_u20_p1_j8_FM-1f`` and ``test_u20_p1_sec``.
 
-* tests/DCPS/StringKey/run_test.pl
-
-  * A timeout occurs during the writer writing.  Fails on ``test_u18_bsafe_js0_FM-1f``.
-
 * tests/DCPS/Thrasher/run_test.pl high/aggressive/medium XXXX XXXX
 
   * The more intense thrasher tests cause consistent failures due to the increased load from ASAN.
     GitHub Actions fails these tests very consistently compared to the scoreboard which is more intermittent.
     Fails on ``test_u20_p1_asan_sec``.
-
-* tests/stress-tests/dds/DCPS/run_test.pl
-
-  * This test fails due to only getting ``17 of the expected >=19 total_count``.
-    Fails on ``test_m10_i0_j_FM-1f`` and ``test_m10_o1d0_sec``.
-
-* tests/DCPS/StaticDiscoveryReconnect/run_test.pl
-
-  * This test fails due to ``<StaticDiscoveryTest> failed: No such file or directory``.
-    Fails on ``test_m10_i0_j_FM-1f`` and ``test_m10_o1d0_sec``.
 
 Failing Both CI and scoreboard
 ------------------------------

@@ -150,5 +150,4 @@ $test->process("subscriber", $sub_exe, $sub_opts);
 $test->start_process("subscriber");
 $test->start_process("publisher");
 
-# ignore this issue that is already being tracked in redmine
 exit $test->finish(120);

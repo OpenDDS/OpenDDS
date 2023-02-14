@@ -41,7 +41,7 @@ class DCPS_IR_Topic;
 class OpenDDS_InfoRepoLib_Export DCPS_IR_Subscription
 : public OpenDDS::DCPS::EnableContainerSupportedUniquePtr<DCPS_IR_Subscription> {
 public:
-  DCPS_IR_Subscription(const OpenDDS::DCPS::RepoId& id,
+  DCPS_IR_Subscription(const OpenDDS::DCPS::GUID_t& id,
                        DCPS_IR_Participant* participant,
                        DCPS_IR_Topic* topic,
                        OpenDDS::DCPS::DataReaderRemote_ptr reader,
@@ -89,14 +89,14 @@ public:
   int remove_associations(CORBA::Boolean notify_lost);
 
   /// Remove any publications whose participant has the id
-  void disassociate_participant(OpenDDS::DCPS::RepoId id,
+  void disassociate_participant(OpenDDS::DCPS::GUID_t id,
                                 bool reassociate = false);
 
   /// Remove any publications whose topic has the id
-  void disassociate_topic(OpenDDS::DCPS::RepoId id);
+  void disassociate_topic(OpenDDS::DCPS::GUID_t id);
 
   /// Remove any publications with id
-  void disassociate_publication(OpenDDS::DCPS::RepoId id,
+  void disassociate_publication(OpenDDS::DCPS::GUID_t id,
                                 bool reassociate = false);
 
   /// Notify the reader of incompatible qos status
@@ -106,9 +106,9 @@ public:
   /// Check that none of the ids given are ones that
   ///  this subscription should ignore.
   /// returns 1 if one of these ids is an ignored id
-  CORBA::Boolean is_publication_ignored(OpenDDS::DCPS::RepoId partId,
-                                        OpenDDS::DCPS::RepoId topicId,
-                                        OpenDDS::DCPS::RepoId pubId);
+  CORBA::Boolean is_publication_ignored(OpenDDS::DCPS::GUID_t partId,
+                                        OpenDDS::DCPS::GUID_t topicId,
+                                        OpenDDS::DCPS::GUID_t pubId);
 
   /// Return pointer to the DataReader qos
   /// Subscription retains ownership
@@ -153,9 +153,9 @@ public:
   /// Subscription retains ownership
   OpenDDS::DCPS::IncompatibleQosStatus* get_incompatibleQosStatus();
 
-  OpenDDS::DCPS::RepoId get_id();
-  OpenDDS::DCPS::RepoId get_topic_id();
-  OpenDDS::DCPS::RepoId get_participant_id();
+  OpenDDS::DCPS::GUID_t get_id();
+  OpenDDS::DCPS::GUID_t get_topic_id();
+  OpenDDS::DCPS::GUID_t get_participant_id();
 
   DCPS_IR_Topic_Description* get_topic_description();
 
@@ -183,7 +183,7 @@ public:
   const DDS::OctetSeq& get_serialized_type_info() const;
 
 private:
-  OpenDDS::DCPS::RepoId id_;
+  OpenDDS::DCPS::GUID_t id_;
   DCPS_IR_Participant* participant_;
   DCPS_IR_Topic* topic_;
   DDS::InstanceHandle_t handle_;

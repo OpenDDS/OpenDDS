@@ -36,10 +36,10 @@ Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32 priority, size_t q);
 
 struct OpenDDS_Rtps_Export GuidPair {
-  DCPS::RepoId local;
-  DCPS::RepoId remote;
+  DCPS::GUID_t local;
+  DCPS::GUID_t remote;
 
-  GuidPair(const DCPS::RepoId& a_local, const DCPS::RepoId& a_remote) : local(a_local), remote(a_remote) {}
+  GuidPair(const DCPS::GUID_t& a_local, const DCPS::GUID_t& a_remote) : local(a_local), remote(a_remote) {}
 
   bool operator<(const GuidPair& a_other) const
   {
@@ -70,9 +70,9 @@ public:
 class OpenDDS_Rtps_Export AgentInfoListener : public virtual DCPS::RcObject {
 public:
   virtual ~AgentInfoListener() {}
-  virtual void update_agent_info(const DCPS::RepoId& a_local_guid,
+  virtual void update_agent_info(const DCPS::GUID_t& a_local_guid,
                                  const AgentInfo& a_agent_info) = 0;
-  virtual void remove_agent_info(const DCPS::RepoId& a_local_guid) = 0;
+  virtual void remove_agent_info(const DCPS::GUID_t& a_local_guid) = 0;
 };
 
 class OpenDDS_Rtps_Export Configuration {
@@ -201,20 +201,20 @@ public:
   virtual void remove_endpoint(DCPS::WeakRcHandle<Endpoint> a_endpoint) = 0;
   virtual AgentInfo get_local_agent_info(DCPS::WeakRcHandle<Endpoint> a_endpoint) const = 0;
   virtual void add_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                             const DCPS::RepoId& a_local_guid,
+                                             const DCPS::GUID_t& a_local_guid,
                                              DCPS::WeakRcHandle<AgentInfoListener> a_agent_info_listener) = 0;
   virtual void remove_local_agent_info_listener(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                                const DCPS::RepoId& a_local_guid) = 0;
+                                                const DCPS::GUID_t& a_local_guid) = 0;
   virtual void start_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                         const DCPS::RepoId& a_local_guid,
-                         const DCPS::RepoId& a_remote_guid,
+                         const DCPS::GUID_t& a_local_guid,
+                         const DCPS::GUID_t& a_remote_guid,
                          const AgentInfo& a_remote_agent_info) = 0;
   virtual void stop_ice(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                        const DCPS::RepoId& a_local_guid,
-                        const DCPS::RepoId& a_remote_guid) = 0;
+                        const DCPS::GUID_t& a_local_guid,
+                        const DCPS::GUID_t& a_remote_guid) = 0;
   virtual ACE_INET_Addr get_address(DCPS::WeakRcHandle<Endpoint> a_endpoint,
-                                    const DCPS::RepoId& a_local_guid,
-                                    const DCPS::RepoId& a_remote_guid) const = 0;
+                                    const DCPS::GUID_t& a_local_guid,
+                                    const DCPS::GUID_t& a_remote_guid) const = 0;
 
   // Receive a STUN message.
   virtual void receive(DCPS::WeakRcHandle<Endpoint> a_endpoint,

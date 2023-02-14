@@ -33,7 +33,7 @@ public:
 private:
   DDS::DataWriter_var writer_;
   const Args args_;
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, int> finished_instances_;
+  OpenDDS::DCPS::Atomic<int> finished_instances_;
   DDS::GuardCondition_var guard_condition_;
 };
 

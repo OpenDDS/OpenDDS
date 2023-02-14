@@ -24,14 +24,14 @@ using namespace OpenDDS::DCPS;
 namespace {
   RepoIdGenerator gen(0, 17, OpenDDS::DCPS::KIND_PUBLISHER);
 
-  RepoId create_pub_id() {
+  GUID_t create_pub_id() {
     return gen.next();
   }
 
   // Class handling assembly of samples with a messge block
   class Sample {
   public:
-    Sample(const RepoId& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true)
+    Sample(const GUID_t& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true)
       : mb(new ACE_Message_Block(DataSampleHeader::get_max_serialized_size()))
       , sample(*mb)
     {
@@ -57,7 +57,7 @@ namespace {
     }
 
     // Get the gaps in a TransportReassembly instance
-    CORBA::ULong get(TransportReassembly& tr, const SequenceNumber& frag_seq, const RepoId& pub_id) {
+    CORBA::ULong get(TransportReassembly& tr, const SequenceNumber& frag_seq, const GUID_t& pub_id) {
       memset(&bitmap, 0, sizeof(bitmap));
       base = tr.get_gaps(frag_seq, pub_id, bitmap, bm_length, result_bits);
       return base;
@@ -89,7 +89,7 @@ void test_empty()
   TransportReassembly tr;
   Gaps gaps;
   SequenceNumber seq(1);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   EXPECT_TRUE(!tr.has_frags(seq, pub_id));
   EXPECT_TRUE(0 == gaps.get(tr, seq, pub_id));
 }
@@ -100,7 +100,7 @@ void test_insert_has_frag()
   Gaps gaps;
   SequenceNumber msg_seq(4);
   SequenceNumber frag_seq(1);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
   bool reassembled = tr.reassemble(frag_seq, true, data.sample);
   EXPECT_TRUE(false == reassembled);
@@ -113,7 +113,7 @@ void test_first_insert_has_no_gaps()
   Gaps gaps;
   SequenceNumber msg_seq(18);
   SequenceNumber frag_seq(1);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
   EXPECT_TRUE(!tr.reassemble(frag_seq, true, data.sample));
@@ -132,7 +132,7 @@ void test_insert_gaps()
   Gaps gaps;
   SequenceNumber msg_seq(9);
   SequenceNumber frag_seq(4);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
   bool reassembled = tr.reassemble(frag_seq, true, data.sample);
@@ -155,7 +155,7 @@ void test_insert_one_then_gap()
   SequenceNumber msg_seq(17);
   SequenceNumber frag_seq1(1);
   SequenceNumber frag_seq2(6);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
   bool reassembled = tr.reassemble(frag_seq1, true, data.sample);
@@ -180,7 +180,7 @@ void test_insert_one_then_split_gap()
   TransportReassembly tr;
   Gaps gaps;
   SequenceNumber msg_seq(17);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
   EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
@@ -213,7 +213,7 @@ void test_fill_rtol()
   TransportReassembly tr;
   Gaps gaps;
   SequenceNumber msg_seq(17);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
   EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
@@ -255,7 +255,7 @@ void test_fill_ltor()
   TransportReassembly tr;
   Gaps gaps;
   SequenceNumber msg_seq(27);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data(pub_id, msg_seq);
 
   EXPECT_TRUE(!tr.reassemble(1, true, data.sample)); // 1
@@ -295,7 +295,7 @@ void test_fill_ooo()
   TransportReassembly tr;
   Gaps gaps;
   SequenceNumber msg_seq(3);
-  RepoId pub_id = create_pub_id();
+  GUID_t pub_id = create_pub_id();
   Sample data1(pub_id, msg_seq);
   Sample data2(pub_id, msg_seq);
   Sample data3(pub_id, msg_seq);

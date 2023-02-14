@@ -1,7 +1,7 @@
 # OpenDDS Releases
 
-## Version 3.23.0 of OpenDDS
-OpenDDS 3.23.0 is currently in development, so this list might change.
+## Version 3.24.0 of OpenDDS
+OpenDDS 3.24.0 is currently in development, so this list might change.
 
 ### Additions:
 - TODO: Add your features here
@@ -11,6 +11,27 @@ OpenDDS 3.23.0 is currently in development, so this list might change.
 
 ### Notes:
 - TODO: Add your notes here
+
+## Version 3.23.0 of OpenDDS
+OpenDDS 3.23.0 was released on Dec 21 2022.
+
+### Additions:
+- DataRepresentationQosPolicy and TypeConsistencyEnforcementQosPolicy can be set through XML (#3763)
+- RTPS send queue performance improvements (#3794)
+- Cross-compiling improvements (#3853)
+- New support for DynamicDataWriter and enhanced support for DynamicDataReader (#3827, #3727, #3871, #3718, #3830, #3893, #3904, #3885, #3933, #3935)
+- New config option for RtpsDiscovery `SpdpRequestRandomPort` (#3903)
+- New `opendds_mwc.pl` Wrapper Script (#3821, #3913)
+- Improve support for loading signed documents (#3864)
+
+### Fixes:
+- Unauthenticated participant leads to invalid iterator (#3748)
+- Shmem Association race (#3549)
+- Shmem and tcp null pointer (#3779)
+- Submodule checkout on Windows (#3812)
+
+### Notes:
+- Docker images are built for release tags https://github.com/objectcomputing/OpenDDS/pkgs/container/opendds (#3776)
 
 ## Version 3.22.0 of OpenDDS
 OpenDDS 3.22.0 was released on Sep 16 2022.

@@ -56,7 +56,7 @@ Other documentation can be found in [`docs` directory](docs).
 
 For commercial support, please see https://opendds.org/support.html.
 
-Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/objectcomputing/OpenDDS/discussions) or the [mailing list](http://opendds.org/support.html).
+Questions concerning OpenDDS should be directed to [GitHub Discussions](https://github.com/OpenDDS/OpenDDS/discussions) or the [mailing list](https://opendds.org/support.html).
 
 If you wish to file a bug report:
 
@@ -114,25 +114,25 @@ first -- the `configure` script will download it for you.
 
 There are three distributions of ACE/TAO that can be used with OpenDDS:
 
-* OCI ACE/TAO 2.2a patch 24 or later
+* OCI ACE/TAO 2.2a patch 26 or later
   * This will be automatically downloaded by default when using the configure
     script.
   * Can be manually downloaded from:
     * http://download.objectcomputing.com/TAO-2.2a_patches/
-* DOC Group ACE 6.5.18 / TAO 2.5.18 or later in the ACE 6.x / TAO 2.x series
+* DOC Group ACE 6.5.19 / TAO 2.5.19 or later in the ACE 6.x / TAO 2.x series
   * When using the configure script, DOC Group ACE/TAO can be downloaded using
     one of these arguments:
     * `--doc-group` for the latest release
     * `--ace-github-latest` to use the `ace6tao2` branch of ACE/TAO as is. This
       also downloads the `master` branch of MPC as is.
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_18
-* DOC Group ACE 7.0.8 / TAO 3.0.8 or later in the ACE 7.x / TAO 3.x series.
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_19
+* DOC Group ACE 7.0.11 / TAO 3.0.11 or later in the ACE 7.x / TAO 3.x series.
   This distribution requires a C++11 capable compiler
   * When using the configure script, DOC Group ACE/TAO can be downloaded using:
     * `--doc-group3` for the latest release
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_8
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_11
 
 The TAO Developer's Guide book can be requested for free from
 https://objectcomputing.com/products/tao/tao-developers-guide and the CORBA Programmers
@@ -173,7 +173,7 @@ Linux family:
 * Red Hat EL 8.0 (x86\_64)
 * Fedora 24 and 31 (x86\_64)
 * Debian 9.4 (i686)
-* Ubuntu 18.04 LTS (x86\_64)
+* Ubuntu 22.04 LTS (x86\_64)
 * openSUSE 42.1 (x86\_64)
 * Yocto 2.5.3 (ARMv8)
 
@@ -184,16 +184,15 @@ Windows family:
 
 Embedded/Mobile/IoT:
 * LynxOS-178 (OpenDDS Safety Profile)
-* VxWorks 6.9 and 7 (see below)
+* VxWorks 6.9, 7, 21.03 (see below)
 * [Linux on Raspberry Pi](https://opendds.org/quickstart/GettingStartedPi.html)
 * [Android 9.0 "Pie" (API Level 28) NDK r18b](docs/android.md)
 
-We have built OpenDDS for VxWorks 6.9 and 7 and have run basic
+We have built OpenDDS for VxWorks 6.9, 7, and 21.03 and have run basic
 system and performance tests (but not the entire regression test suite).
 Please contact sales@objectcomputing.com or opendds-main@lists.sourceforge.net
 for more information on support for ACE, TAO, and OpenDDS on VxWorks.
-OCI's packages for ACE, TAO, and OpenDDS can be obtained on the [Wind River
-Marketplace](https://marketplace.windriver.com/index.php?partners&on=details&id=33).
+Download VxWorks RPM packages for ACE, TAO, and OpenDDS [here](https://objectcomputing.com/products/opendds/vxworks).
 
 ### Compilers
 
@@ -221,5 +220,6 @@ file in this directory.
 
 ## Quick Start with Docker
 
-See [`docs/docker.md`](docs/docker.md) for how to use the pre-built docker
-image.
+See the [Docker Quick
+Start](https://opendds.org/quickstart/GettingStartedDocker.html) for
+how to use the pre-built docker image.

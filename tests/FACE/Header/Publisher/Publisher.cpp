@@ -44,7 +44,7 @@ int ACE_TMAIN(int, ACE_TCHAR*[])
     std::cout << "ERROR: Failed to obtain DomainParticipantImpl." << std::endl;
     return static_cast<int>(FACE::INVALID_PARAM);
   }
-  const OpenDDS::DCPS::RepoId pub = dpi->get_repoid(typedWriter->get_instance_handle());
+  const OpenDDS::DCPS::GUID_t pub = dpi->get_repoid(typedWriter->get_instance_handle());
 
   for (; i < 10; ++i) {
     //Increment i by 2 for seq number (1 for initial ctl msg and 1 due to txn id start at 1 not 0 like seq numbers)

@@ -3,14 +3,14 @@
 
 #include "RelayStatisticsReporter.h"
 #include "GuidPartitionTable.h"
-#include "ListenerBase.h"
+#include "ReaderListenerBase.h"
 #include "RelayHandler.h"
 
 #include <dds/DCPS/DomainParticipantImpl.h>
 
 namespace RtpsRelay {
 
-class SubscriptionListener : public ListenerBase {
+class SubscriptionListener : public ReaderListenerBase {
 public:
   SubscriptionListener(const Config& config,
                        GuidAddrSet& guid_addr_set,

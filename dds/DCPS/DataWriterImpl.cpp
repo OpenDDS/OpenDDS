@@ -176,7 +176,7 @@ DDS::InstanceHandle_t
 DataWriterImpl::get_instance_handle()
 {
   const RcHandle<DomainParticipantImpl> participant = participant_servant_.lock();
-  return get_entity_instance_handle(publication_id_, participant.get());
+  return get_entity_instance_handle(publication_id_, participant);
 }
 
 DDS::InstanceHandle_t
@@ -209,7 +209,7 @@ DataWriterImpl::get_builtin_subscriber_proxy() const
 }
 
 void
-DataWriterImpl::add_association(const RepoId& yourId,
+DataWriterImpl::add_association(const GUID_t& yourId,
                                 const ReaderAssociation& reader,
                                 bool active)
 {
@@ -245,7 +245,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) DataWriterImpl::add_association(): ")
                ACE_TEXT("adding subscription to publication %C with priority %d.\n"),
-               LogGuid(get_repo_id()).c_str(),
+               LogGuid(get_guid()).c_str(),
                qos_.transport_priority.value));
   }
 
@@ -276,7 +276,7 @@ DataWriterImpl::add_association(const RepoId& yourId,
 }
 
 void
-DataWriterImpl::transport_assoc_done(int flags, const RepoId& remote_id)
+DataWriterImpl::transport_assoc_done(int flags, const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "transport_assoc_done", 6);
 
@@ -367,7 +367,7 @@ DataWriterImpl::ReaderInfo::~ReaderInfo()
 }
 
 void
-DataWriterImpl::association_complete_i(const RepoId& remote_id)
+DataWriterImpl::association_complete_i(const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "association_complete_i", 6);
 
@@ -681,7 +681,7 @@ DataWriterImpl::remove_associations(const ReaderIdSeq & readers,
   }
 }
 
-void DataWriterImpl::replay_durable_data_for(const RepoId& remote_id)
+void DataWriterImpl::replay_durable_data_for(const GUID_t& remote_id)
 {
   DBG_ENTRY_LVL("DataWriterImpl", "replay_durable_data_for", 6);
 
@@ -819,9 +819,9 @@ void DataWriterImpl::remove_all_associations()
 }
 
 void
-DataWriterImpl::register_for_reader(const RepoId& participant,
-                                    const RepoId& writerid,
-                                    const RepoId& readerid,
+DataWriterImpl::register_for_reader(const GUID_t& participant,
+                                    const GUID_t& writerid,
+                                    const GUID_t& readerid,
                                     const TransportLocatorSeq& locators,
                                     DiscoveryListener* listener)
 {
@@ -829,15 +829,15 @@ DataWriterImpl::register_for_reader(const RepoId& participant,
 }
 
 void
-DataWriterImpl::unregister_for_reader(const RepoId& participant,
-                                      const RepoId& writerid,
-                                      const RepoId& readerid)
+DataWriterImpl::unregister_for_reader(const GUID_t& participant,
+                                      const GUID_t& writerid,
+                                      const GUID_t& readerid)
 {
   TransportClient::unregister_for_reader(participant, writerid, readerid);
 }
 
 void
-DataWriterImpl::update_locators(const RepoId& readerId,
+DataWriterImpl::update_locators(const GUID_t& readerId,
                                 const TransportLocatorSeq& locators)
 {
   {
@@ -888,7 +888,7 @@ DataWriterImpl::update_incompatible_qos(const IncompatibleQosStatus& status)
 }
 
 void
-DataWriterImpl::update_subscription_params(const RepoId& readerId,
+DataWriterImpl::update_subscription_params(const GUID_t& readerId,
                                            const DDS::StringSeq& params)
 {
 #ifdef OPENDDS_NO_CONTENT_FILTERED_TOPIC
@@ -1495,9 +1495,8 @@ DataWriterImpl::enable()
 
   XTypes::TypeLookupService_rch type_lookup_service = participant->get_type_lookup_service();
   type_support_->add_types(type_lookup_service);
-  type_support_->populate_dependencies(type_lookup_service);
 
-  const RepoId publication_id =
+  const GUID_t publication_id =
     disco->add_publication(this->domain_id_,
                            this->dp_id_,
                            this->topic_servant_->get_id(),
@@ -2055,7 +2054,7 @@ DataWriterImpl::unregister_all()
   data_container_->unregister_all();
 }
 
-RepoId
+GUID_t
 DataWriterImpl::get_dp_id()
 {
   return dp_id_;
@@ -2283,15 +2282,12 @@ DataWriterImpl::filter_out(const DataSampleElement& elt,
 
   if (filterClassName == "DDSSQL" ||
       filterClassName == "OPENDDSSQL") {
-    const MetaStruct& meta = type_support_->getMetaStructForType();
-    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(meta)) {
+    if (!elt.get_header().valid_data() && evaluator.has_non_key_fields(*type_support_)) {
       return true;
     }
     try {
-      return !evaluator.eval(elt.get_sample()->cont(),
-                             elt.get_header().byte_order_ != ACE_CDR_BYTE_ORDER,
-                             elt.get_header().cdr_encapsulation_, meta,
-                             expression_params, type_support_->base_extensibility());
+      return !evaluator.eval(elt.get_sample()->cont(), encoding_mode_.encoding(),
+                             *type_support_, expression_params);
     } catch (const std::runtime_error&) {
       // if the eval fails, the throws will do the logging
       // return false here so that the sample is not filtered
@@ -2812,8 +2808,8 @@ void DataWriterImpl::transport_discovery_change()
   const TransportLocatorSeq& trans_conf_info = connection_info();
 
   ACE_Guard<ACE_Recursive_Thread_Mutex> guard(lock_);
-  const RepoId dp_id_copy = dp_id_;
-  const RepoId publication_id_copy = publication_id_;
+  const GUID_t dp_id_copy = dp_id_;
+  const GUID_t publication_id_copy = publication_id_;
   const int domain_id = domain_id_;
   guard.release();
 
@@ -2906,7 +2902,7 @@ DDS::ReturnCode_t DataWriterImpl::get_key_value(Sample_rch& sample, DDS::Instanc
   if (it == instance_handles_to_values_.end()) {
     return DDS::RETCODE_BAD_PARAMETER;
   }
-  sample = it->second;
+  sample = it->second->copy(Sample::Mutable);
   return DDS::RETCODE_OK;
 }
 
@@ -3196,7 +3192,7 @@ DDS::ReturnCode_t DataWriterImpl::write_w_timestamp(
     handle = registered_handle;
   }
 
-  // list of reader RepoIds that should not get data
+  // list of reader GUID_ts that should not get data
   GUIDSeq_var filter_out;
 #ifndef OPENDDS_NO_CONTENT_FILTERED_TOPIC
   if (TheServiceParticipant->publisher_content_filter()) {

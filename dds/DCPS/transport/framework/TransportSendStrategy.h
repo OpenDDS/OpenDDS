@@ -8,20 +8,22 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDSTRATEGY_H
 #define OPENDDS_DCPS_TRANSPORT_FRAMEWORK_TRANSPORTSENDSTRATEGY_H
 
+#include "BasicQueue_T.h"
+#include "ThreadSynchStrategy_rch.h"
 #include "ThreadSynchWorker.h"
 #include "TransportDefs.h"
-#include "BasicQueue_T.h"
+#include "TransportImpl_rch.h"
 #include "TransportHeader.h"
 #include "TransportReplacedElement.h"
 #include "TransportRetainedElement.h"
-#include "ThreadSynchStrategy_rch.h"
 
 #include <dds/DCPS/dcps_export.h>
-#include <dds/DCPS/Definitions.h>
-#include <dds/DCPS/RcObject.h>
-#include <dds/DCPS/PoolAllocator.h>
+#include "dds/DCPS/Atomic.h"
 #include <dds/DCPS/DataBlockLockPool.h>
+#include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Dynamic_Cached_Allocator_With_Overflow_T.h>
+#include <dds/DCPS/PoolAllocator.h>
+#include <dds/DCPS/RcObject.h>
 
 #if defined(OPENDDS_SECURITY)
 #include <dds/DdsSecurityCoreC.h>
@@ -83,14 +85,14 @@ public:
 
   /// Invoked after one or more send() invocations from a particular
   /// TransportClient.
-  void send_stop(RepoId repoId);
+  void send_stop(GUID_t repoId);
 
   /// Our DataLink has been requested by some particular
   /// TransportClient to remove the supplied sample
   /// (basically, an "unsend" attempt) from this strategy object.
   RemoveResult remove_sample(const DataSampleElement* sample);
 
-  void remove_all_msgs(const RepoId& pub_id);
+  void remove_all_msgs(const GUID_t& pub_id);
 
   /// Called by our ThreadSynch object when we should be able to
   /// start sending any partial packet bytes and/or compose a new
@@ -170,7 +172,7 @@ public:
 protected:
 
   TransportSendStrategy(std::size_t id,
-                        TransportImpl& transport,
+                        const TransportImpl_rch& transport,
                         ThreadSynchResource* synch_resource,
                         Priority priority,
                         const ThreadSynchStrategy_rch& thread_sync_strategy);
@@ -326,7 +328,7 @@ public:
   SendMode mode() const;
 protected:
   /// Implement framework chain visitations to remove a sample.
-  virtual RemoveResult do_remove_sample(const RepoId& pub_id,
+  virtual RemoveResult do_remove_sample(const GUID_t& pub_id,
     const TransportQueueElement::MatchCriteria& criteria, bool remove_all = false);
 
 private:
@@ -385,7 +387,7 @@ private:
   unsigned start_counter_;
 
   /// This mode determines how send() calls will be handled.
-  ACE_Atomic_Op<ACE_Thread_Mutex, SendMode> mode_;
+  Atomic<SendMode> mode_;
 
   /// This mode remembers the mode before send is suspended and is
   /// used after the send is resumed because the connection is
@@ -420,7 +422,7 @@ private:
   MessageBlockAllocator replaced_element_mb_allocator_;
   DataBlockAllocator replaced_element_db_allocator_;
 
-  TransportImpl& transport_;
+  WeakRcHandle<TransportImpl> transport_;
 
   bool graceful_disconnecting_;
 

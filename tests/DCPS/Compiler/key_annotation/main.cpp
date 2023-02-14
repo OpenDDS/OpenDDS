@@ -84,17 +84,15 @@ public:
 
   bool failed()
   {
-#ifndef OPENDDS_NO_MULTI_TOPIC
     for (Keys::const_iterator i = keys_.begin(); i != keys_.end(); ++i) {
-      if (!OpenDDS::DCPS::getMetaStruct<T>().isDcpsKey(i->c_str())) {
+      if (!OpenDDS::DCPS::DDSTraits<T>::is_key(i->c_str())) {
         const char* type_name = get_type_name<T>();
         ACE_ERROR((LM_ERROR, ACE_TEXT("ERROR: ")
-          ACE_TEXT("For getMetaStruct<%C>().isDcpsKey(), expected %C to be a key, but it wasn't"),
+          ACE_TEXT("For DDSTraits<%C>::is_key(), expected %C to be a key, but it wasn't"),
           type_name, i->c_str()));
         failed_ = true;
       }
     }
-#endif
     failed_ |= assert_key_count<T>(keys_.size());
     return failed_;
   }

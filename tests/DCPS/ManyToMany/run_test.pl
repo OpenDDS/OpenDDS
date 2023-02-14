@@ -286,6 +286,5 @@ for ($index = 0; $index < $sub_processes; ++$index) {
 # total expected duration
 my $wait_to_kill = $total_duration_msec / 1000 + 10;
 print "wait_to_kill=$wait_to_kill\n";
-# ignore this issue that is already being tracked in redmine
 $test->{wait_after_first_proc} = 10;
 exit $test->finish($wait_to_kill);

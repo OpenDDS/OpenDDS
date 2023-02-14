@@ -21,6 +21,7 @@ use File::Temp ();
 use FileHandle;
 use Cwd;
 use POSIX qw(strftime);
+use B qw/perlstring/;
 
 use FindBin;
 use lib "$FindBin::RealBin/tools/scripts/modules";
@@ -30,13 +31,20 @@ use ChangeDir;
 ## Version of OCI's TAO to download
 my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
-my $doc_tao2_version = '6.5.18';
-my $doc_tao3_version = '7.0.10';
+my $doc_tao2_version = '6.5.19';
+my $doc_tao3_version = '7.0.11';
 
 my $backup_timestamp = strftime "%Y-%m-%d-%H-%M-%S", localtime time;
 
 # save args before Getopt modifies them
 my @ARGS = @ARGV;
+
+my @default_configh = (
+  '#define ACE_DISABLE_MKTEMP',
+  '#define ACE_DISABLE_READDIR_R',
+  '#define ACE_DISABLE_TEMPNAM',
+  '#define TAO_HAS_UIOP 0',
+);
 
 sub perlOS_to_host {
   return 'win32' if $^O eq 'MSWin32';
@@ -65,12 +73,6 @@ my %platforminfo =
                 'compilers' => ['clang++'],
                 'libpath' => 'DYLD_LIBRARY_PATH',
                },
-   'solaris' => {
-                 'compilers' => ['CC', 'g++'],
-                 'libpath' => 'LD_LIBRARY_PATH',
-                 'aceplatform' => 'sunos5_$COMP', # $COMP = sunc++ or g++
-                 'aceconfig' => 'sunos$UNAMER', # $UNAMER = `uname -r`
-                },
    'linux' => {
                'compilers' => ['g++', 'clang', 'clang++'],
                'libpath' => 'LD_LIBRARY_PATH',
@@ -174,7 +176,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     '<hidden>force-clone-submodules', 'Get submodules as if this wasn\'t a git repo',
    ],
    ['Build platform and compiler:',
-    'host=s', 'Host (auto detect: linux, win32, solaris, macosx)',
+    'host=s', 'Host (auto detect: linux, win32, macosx)',
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
@@ -209,6 +211,8 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'doc-group3|doc_group3!', 'Use the DOC Group release of TAO 3.x (no)',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
     'force-ace-tao', 'Force configuration of ACE/TAO (no)',
+    'no-disable-deprecated', 'Turn off disabling deprecated interfaces when' .
+                             $argIndent . 'configuring ACE/TAO (no)',
    ],
    ['Advanced configuration:',
     'configh=s@', 'Extra text for config.h',
@@ -383,6 +387,7 @@ my %opts = %{parseArgs()};
 my $debug = exists $opts{'debug'} ? $opts{'debug'} : 1;
 my $backup = exists $opts{'backup'} ? $opts{'backup'} : 1;
 my $force_ace_tao = exists $opts{'force-ace-tao'} ? $opts{'force-ace-tao'} : 0;
+my $no_disable_deprecated = exists $opts{'no-disable-deprecated'} ? $opts{'no-disable-deprecated'} : 0;
 
 $opts{'host'} = perlOS_to_host() unless $opts{'host'};
 
@@ -925,7 +930,7 @@ if (!$ace_src || !$tao_src) {
       my $err = 1;
       my $ddsroot = getcwd;
       if (!$is_windows) {
-        $err = run_command([($^O eq 'solaris' ? 'g' : '') . 'tar', 'xzf', "$ddsroot/$file"]);
+        $err = run_command(['tar', 'xzf', "$ddsroot/$file"]);
       }
       else {
         # Try Archive::Zip
@@ -1041,9 +1046,14 @@ sub write_config_h {
   my %buildEnv = %{shift()};
   my $platform = $opts{$buildEnv{'build'}};
   my $pi = $platforminfo{$platform};
-  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} || exists $opts{'sanitize'});
+  $opts{'optimize'} = 0 if (!exists $opts{'optimize'} && !exists $opts{'sanitize'});
 
   my $CFGH = backup_and_open("$buildEnv{'ACE_ROOT'}/ace/config.h");
+  if (!$no_disable_deprecated) {
+    for my $line (@default_configh) {
+      print $CFGH "$line\n";
+    }
+  }
   if ($buildEnv{'build'} eq 'target') {
     for my $line (@{$opts{'configh'}}) {
       print $CFGH "$line\n";
@@ -1254,7 +1264,7 @@ sub write_platform_macros {
     my $plat = $opts{$buildEnv{'build'}};
     if ($pi->{'aceplatform'}) {
       $plat = $pi->{'aceplatform'};
-      $plat =~ s/\$COMP/($opts{'compiler'} =~ m!CC!) ? 'sunc++' : 'g++'/e;
+      $plat =~ s/\$COMP/'g++'/e;
       $plat =~ s/\$NONSTDCOMP/($opts{'compiler'} =~ m!clang!) ? 'clang' : ''/e;
       $plat =~ s/_$//;
     }
@@ -2064,6 +2074,29 @@ sub get_features {
   return %features;
 }
 
+sub write_opendds_mwc {
+  my $root = shift;
+  my $args = shift;
+
+  $args = join(', ', (map {perlstring($_)} @{$args}));
+
+  my $path = "$root/bin/opendds_mwc.pl";
+  my $fd = backup_and_open($path);
+  print $fd <<"EOF";
+#!/usr/bin/env perl
+if (!defined(\$ENV{ACE_ROOT}) || !defined(\$ENV{MPC_ROOT})) {
+  die("The enviroment needs to be setup.");
+}
+exec('perl', "\$ENV{ACE_ROOT}/bin/mwc.pl", $args, \@ARGV)
+  or die("Failed to exec mwc: \$!");
+EOF
+  $fd->close();
+  print "Wrote $path\n" if $opts{'verbose'};
+  dump_and_unlink($fd) if $opts{'dry-run'};
+
+  chmod(0775, $path);
+}
+
 my $buildtao;
 sub generate_workspace {
   my $buildEnv = shift;
@@ -2279,13 +2312,6 @@ EOT
   my $static = (($opts{'static'} && $is_windows) ||
     ($cross_compile && $buildEnv->{'build'} eq 'host' && $mpctype ne 'gnuace'));
 
-  my @mpcopts = ();
-  if (defined $opts{'mpcopts'}) {
-    for my $i (@{$opts{'mpcopts'}}) {
-      push(@mpcopts, split(/ /, $i));
-    }
-  }
-
   # We are not using CIAO or DAnCE, but MPC.cfg expands $CIAO_ROOT and
   # $DANCE_ROOT so leaving them empty/undefined would cause /MPC/config
   # to be on the include path for .mpb files.
@@ -2297,21 +2323,28 @@ EOT
   print "ENV: saving current environment\n" if $opts{'verbose'};
   mergeToEnv($buildEnv);
 
-  my @mwccmd = ('perl', "$ENV{'ACE_ROOT'}/bin/mwc.pl", '-type', "$mpctype");
+  my @mwc_common_args = ('-type', "$mpctype");
   if ($static) {
-    push(@mwccmd, '-static');
+    push(@mwc_common_args, '-static');
   }
-
-  my @mwcargs = ("$buildEnv->{'DDS_ROOT'}$slash$ws", @mpcopts);
-  if (!$buildtao && @features) {
-    for my $feature (@features) {
-      push(@mwcargs, '-features', ($feature =~ /=/ ? $feature : "$feature=1"));
+  if (defined $opts{'mpcopts'}) {
+    for my $i (@{$opts{'mpcopts'}}) {
+      push(@mwc_common_args, split(/ /, $i));
     }
   }
 
+  my @feature_opts = ();
+  if (!$buildtao && @features) {
+    push(@feature_opts, '-features', join(',', map {/=/ ? $_: "$_=1"} @features));
+  }
+
+  # Generate our own mwc wrapper script
+  write_opendds_mwc($buildEnv->{'DDS_ROOT'}, [@mwc_common_args, @feature_opts]);
+
+  my @mwc = ('perl', "$ENV{ACE_ROOT}/bin/mwc.pl");
   print 'Running MPC to generate ', ($mpctype eq 'gnuace' ? 'makefiles' :
                                      'project files'), ".\n";
-  if (run_command([@mwccmd, @mwcargs])) {
+  if (run_command([@mwc, @mwc_common_args, @feature_opts, "$buildEnv->{'DDS_ROOT'}$slash$ws"])) {
     die "ERROR: Error from MPC, stopped";
   }
   $buildEnv->{'mpctype'} = $mpctype;
@@ -2319,7 +2352,7 @@ EOT
   # If this is a target safety profile build
   if (defined $opts{'no-opendds-safety-profile'}) {
     # Generate ACE workspace separately, to exclude TAO
-    if (run_command([@mwccmd, "$buildEnv->{'ACE_ROOT'}/ace", @mpcopts])) {
+    if (run_command([@mwc, @mwc_common_args, "$buildEnv->{'ACE_ROOT'}/ace"])) {
       die "ERROR: Error from MPC, stopped";
     }
   }
@@ -2574,7 +2607,7 @@ else { # does not require cloned builds
 
 print "Completed configuring OpenDDS, next ";
 if (!$is_windows || ($cross_compile && !$cloned_build)) {
-  print "run '", (($^O eq 'solaris' || $^O eq 'freebsd') ? 'g' : ''), "make'";
+  print "run '", (($^O eq 'freebsd') ? 'g' : ''), "make'";
 }
 elsif ($cloned_build) {
   print "compile build\\host\\host_tools.sln\n",

@@ -7,6 +7,7 @@
 
 #include "RtpsUdpLoader.h"
 #include "RtpsUdpInst.h"
+#include "RtpsUdpDataLink.h"
 
 #include "dds/DCPS/transport/framework/TransportRegistry.h"
 #include "dds/DCPS/transport/framework/TransportType.h"

@@ -100,7 +100,7 @@ Running tests
      -l $DDS_ROOT/tools/modeling/tests/modeling_tests.lst
 
 ************************************************************************
-Source Projects (in repository https://github.com/objectcomputing/OpenDDS):
+Source Projects (in repository https://github.com/OpenDDS/OpenDDS):
 
   org.opendds.modeling.model    (at tools/modeling/plugins/org.opendds.modeling.model)
     - Segregated ecore metamodels and profile.

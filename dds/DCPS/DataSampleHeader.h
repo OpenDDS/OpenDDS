@@ -13,7 +13,6 @@
 #include "GuidUtils.h"
 #include "Message_Block_Ptr.h"
 #include "PoolAllocationBase.h"
-#include "RepoIdTypes.h"
 #include "SequenceNumber.h"
 
 #include <ace/Guard_T.h>
@@ -175,11 +174,11 @@ struct OpenDDS_Dcps_Export DataSampleHeader : public PoolAllocationBase {
 
   /// Identify the DataWriter that produced the sample data being
   /// sent.
-  PublicationId publication_id_;
+  GUID_t publication_id_;
 
   /// Id representing the coherent group.  Optional field that's only present if
   /// the flag for group_coherent_ is set.
-  RepoId publisher_id_;
+  GUID_t publisher_id_;
 
   /// Optional field present if the content_filter_ flag bit is set.
   /// Indicates which readers should not receive the data.

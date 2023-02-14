@@ -24,7 +24,7 @@ namespace DCPS {
 
 
 TransportSendControlElement::TransportSendControlElement(int initial_count,
-                                                         const RepoId& publisher_id,
+                                                         const GUID_t& publisher_id,
                                                          TransportSendListener* listener,
                                                          const DataSampleHeader& header,
                                                          Message_Block_Ptr msg_block)
@@ -116,7 +116,7 @@ TransportSendControlElement::release_element(bool dropped_by_transport)
   }
 }
 
-RepoId
+GUID_t
 TransportSendControlElement::publication_id() const
 {
   DBG_ENTRY_LVL("TransportSendControlElement", "publication_id", 6);
@@ -151,7 +151,7 @@ TransportSendControlElement::msg_payload() const
 }
 
 bool
-TransportSendControlElement::is_control(RepoId pub_id) const
+TransportSendControlElement::is_control(GUID_t pub_id) const
 {
   return (pub_id == publisher_id_);
 }

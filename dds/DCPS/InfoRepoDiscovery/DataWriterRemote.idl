@@ -21,7 +21,7 @@ module OpenDDS {
 
       // will tell transport and call on_publication_matched()
       oneway void add_association(
-        in RepoId yourId,
+        in GUID_t yourId,
         in ReaderAssociation reader,
         in boolean active);
 
@@ -44,7 +44,7 @@ module OpenDDS {
       // in CFT::set_expression_parameters() until each associated writer
       // is notified synchronously by this call.
       void update_subscription_params(
-        in RepoId readerId,
+        in GUID_t readerId,
         in ::DDS::StringSeq exprParams);
     };
   }; // module DDS

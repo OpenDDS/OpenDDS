@@ -72,10 +72,17 @@ class OpenDDS_Dcps_Export TypeSupportImpl
 public:
   TypeSupportImpl() {}
 
+#ifndef OPENDDS_SAFETY_PROFILE
+  explicit TypeSupportImpl(DDS::DynamicType_ptr type)
+  : type_(DDS::DynamicType::_duplicate(type))
+  {
+  }
+#endif
+
   virtual ~TypeSupportImpl();
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual const MetaStruct& getMetaStructForType() = 0;
+  virtual const MetaStruct& getMetaStructForType() const = 0;
 #endif
 
   virtual DDS::ReturnCode_t register_type(DDS::DomainParticipant_ptr participant,
@@ -90,7 +97,22 @@ public:
   /// that the caller must take ownership of.
   virtual char* get_type_name();
 
+#ifndef OPENDDS_SAFETY_PROFILE
+  virtual DDS::DynamicType_ptr get_type() const
+  {
+    return DDS::DynamicType::_duplicate(type_);
+  }
+
+  // IDL local interface uses non-const memebers
+  DDS::DynamicType_ptr get_type()
+  {
+    return DDS::DynamicType::_duplicate(type_);
+  }
+#endif
+
   virtual size_t key_count() const = 0;
+  virtual bool is_dcps_key(const char* fieldname) const = 0;
+
   bool has_dcps_key()
   {
     return key_count();
@@ -111,13 +133,18 @@ public:
   virtual const XTypes::TypeMap& getCompleteTypeMap() const = 0;
 
   void to_type_info(XTypes::TypeInformation& type_info) const;
+  virtual const XTypes::TypeInformation* preset_type_info() const
+  {
+    return 0;
+  }
 
   void add_types(const XTypes::TypeLookupService_rch& tls) const;
-  void populate_dependencies(const XTypes::TypeLookupService_rch& tls) const;
 
 protected:
 #ifndef OPENDDS_SAFETY_PROFILE
-  DDS::DynamicType_ptr get_type_from_type_lookup_service();
+  void get_type_from_type_lookup_service();
+
+  DDS::DynamicType_var type_;
 #endif
 
 private:
@@ -153,6 +180,11 @@ public:
     return TraitsType::key_count();
   }
 
+  bool is_dcps_key(const char* fieldname) const
+  {
+    return TraitsType::is_key(fieldname);
+  }
+
   void representations_allowed_by_type(DDS::DataRepresentationIdSeq& seq)
   {
     MarshalTraitsType::representations_allowed_by_type(seq);
@@ -181,7 +213,8 @@ public:
 #ifndef OPENDDS_SAFETY_PROFILE
   DDS::DynamicType_ptr get_type()
   {
-    return get_type_from_type_lookup_service();
+    get_type_from_type_lookup_service();
+    return TypeSupportImpl::get_type();
   }
 #endif
 };

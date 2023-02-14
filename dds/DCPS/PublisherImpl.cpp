@@ -27,7 +27,7 @@ namespace OpenDDS {
 namespace DCPS {
 
 PublisherImpl::PublisherImpl(DDS::InstanceHandle_t      handle,
-    RepoId                     id,
+    GUID_t                     id,
     const DDS::PublisherQos&   qos,
     DDS::PublisherListener_ptr a_listener,
     const DDS::StatusMask&     mask,
@@ -198,7 +198,7 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
             ACE_TEXT("(%P|%t) PublisherImpl::delete_datawriter: ")
             ACE_TEXT("the data writer %C doesn't ")
             ACE_TEXT("belong to this subscriber\n"),
-            LogGuid(dw_servant->get_repo_id()).c_str()));
+            LogGuid(dw_servant->get_guid()).c_str()));
       }
       return DDS::RETCODE_PRECONDITION_NOT_MET;
     }
@@ -213,14 +213,14 @@ PublisherImpl::delete_datawriter(DDS::DataWriter_ptr a_datawriter)
   // unregistering of instances.
   dw_servant->wait_pending();
 
-  RepoId publication_id  = GUID_UNKNOWN;
+  GUID_t publication_id  = GUID_UNKNOWN;
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,
         guard,
         this->pi_lock_,
         DDS::RETCODE_ERROR);
 
-    publication_id = dw_servant->get_repo_id();
+    publication_id = dw_servant->get_guid();
 
     PublicationMap::iterator it = publication_map_.find(publication_id);
 
@@ -383,7 +383,7 @@ DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
   }
 
   while (true) {
-    PublicationId pub_id = GUID_UNKNOWN;
+    GUID_t pub_id = GUID_UNKNOWN;
     DataWriterImpl_rch a_datawriter;
 
     {
@@ -396,7 +396,7 @@ DDS::ReturnCode_t PublisherImpl::delete_contained_entities()
         break;
       } else {
         a_datawriter = datawriter_map_.begin()->second;
-        pub_id = a_datawriter->get_repo_id();
+        pub_id = a_datawriter->get_guid();
       }
     }
 
@@ -450,7 +450,7 @@ PublisherImpl::set_qos(const DDS::PublisherQos & qos)
             iter != publication_map_.end();
             ++iter) {
           DDS::DataWriterQos qos = iter->second->qos_;
-          RepoId id = iter->second->get_repo_id();
+          GUID_t id = iter->second->get_guid();
           std::pair<DwIdToQosMap::iterator, bool> pair =
               idToQosMap.insert(DwIdToQosMap::value_type(id, qos));
 
@@ -707,7 +707,7 @@ PublisherImpl::end_coherent_changes()
 
       std::pair<GroupCoherentSamples::iterator, bool> pair =
           group_samples.insert(GroupCoherentSamples::value_type(
-              it->second->get_repo_id(),
+              it->second->get_guid(),
               WriterCoherentSample(it->second->coherent_samples_,
                   it->second->sequence_number_)));
 
@@ -911,7 +911,7 @@ PublisherImpl::writer_enabled(const char*     topic_name,
 
   datawriter_map_.insert(DataWriterMap::value_type(topic_name, writer));
 
-  const RepoId publication_id = writer->get_repo_id();
+  const GUID_t publication_id = writer->get_guid();
 
   std::pair<PublicationMap::iterator, bool> pair =
       publication_map_.insert(PublicationMap::value_type(publication_id, writer));

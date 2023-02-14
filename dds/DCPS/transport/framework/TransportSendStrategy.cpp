@@ -60,14 +60,14 @@ namespace {
 // just increases the ref count.
 TransportSendStrategy::TransportSendStrategy(
   std::size_t id,
-  TransportImpl& transport,
+  const TransportImpl_rch& transport,
   ThreadSynchResource* synch_resource,
   Priority priority,
   const ThreadSynchStrategy_rch& thread_sync_strategy)
   : ThreadSynchWorker(id),
-    max_samples_(transport.config().max_samples_per_packet_),
-    optimum_size_(transport.config().optimum_packet_size_),
-    max_size_(transport.config().max_packet_size_),
+    max_samples_(DEFAULT_CONFIG_MAX_SAMPLES_PER_PACKET),
+    optimum_size_(DEFAULT_CONFIG_OPTIMUM_PACKET_SIZE),
+    max_size_(DEFAULT_CONFIG_MAX_PACKET_SIZE),
     max_header_size_(0),
     header_block_(0),
     pkt_chain_(0),
@@ -84,6 +84,13 @@ TransportSendStrategy::TransportSendStrategy(
     send_buffer_(0)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","TransportSendStrategy",6);
+
+  TransportInst_rch cfg = transport->config();
+  if (cfg) {
+    max_samples_ = cfg->max_samples_per_packet_;
+    optimum_size_ = cfg->optimum_packet_size_;
+    max_size_ = cfg->max_packet_size_;
+  }
 
   // Create a ThreadSynch object just for us.
   DirectPriorityMapper mapper(priority);
@@ -132,7 +139,7 @@ TransportSendStrategy::perform_work()
   { // scope for the guard(lock_);
     GuardType guard(lock_);
 
-    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str(mode_.value())), 5);
+    VDBG_LVL((LM_DEBUG, "(%P|%t) DBG: perform_work mode: %C\n", mode_as_str(mode_)), 5);
 
     if (mode_ == MODE_TERMINATED) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
@@ -161,7 +168,7 @@ TransportSendStrategy::perform_work()
     if (mode_ != MODE_QUEUE && mode_ != MODE_SUSPEND) {
       VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                 "Entered perform_work() and mode_ is %C - just return "
-                "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str(mode_.value())), 5);
+                "WORK_OUTCOME_NO_MORE_TO_DO.\n", mode_as_str(mode_)), 5);
       return WORK_OUTCOME_NO_MORE_TO_DO;
     }
 
@@ -693,10 +700,15 @@ TransportSendStrategy::send_delayed_notifications(const TransportQueueElement::M
     }
   }
 
-  if (!found_element)
+  if (!found_element) {
     return false;
+  }
 
-  bool transport_shutdown = transport_.is_shut_down();
+  bool transport_shutdown = true;
+  TransportImpl_rch transport = transport_.lock();
+  if (transport) {
+    transport_shutdown = transport->is_shut_down();
+  }
 
   if (num_delayed_notifications == 1) {
     // optimization for the common case
@@ -980,7 +992,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
       if (mode_ == MODE_QUEUE || mode_ == MODE_SUSPEND) {
         VDBG_LVL((LM_DEBUG, "(%P|%t) DBG:   "
                   "mode_ == %C, so queue elem and leave.\n",
-                  mode_as_str(mode_.value())), 5);
+                  mode_as_str(mode_)), 5);
 
         queue_.put(element);
 
@@ -1209,7 +1221,7 @@ TransportSendStrategy::send(TransportQueueElement* element, bool relink)
 }
 
 void
-TransportSendStrategy::send_stop(RepoId /*repoId*/)
+TransportSendStrategy::send_stop(GUID_t /*repoId*/)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","send_stop",6);
   {
@@ -1261,7 +1273,7 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
       VDBG((LM_DEBUG, "(%P|%t) DBG:   "
             "But since we are in %C, we don't have to do "
             "anything more in this important send_stop().\n",
-            mode_as_str(mode_.value())));
+            mode_as_str(mode_)));
       // We don't do anything if we are in MODE_QUEUE.  Just leave.
       return;
     }
@@ -1300,7 +1312,7 @@ TransportSendStrategy::send_stop(RepoId /*repoId*/)
 }
 
 void
-TransportSendStrategy::remove_all_msgs(const RepoId& pub_id)
+TransportSendStrategy::remove_all_msgs(const GUID_t& pub_id)
 {
   DBG_ENTRY_LVL("TransportSendStrategy","remove_all_msgs",6);
 
@@ -1336,7 +1348,7 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
   // can stop calling rest datalinks to remove this sample if it's already released..
 
   const char* const payload = sample->get_sample()->cont()->rd_ptr();
-  RepoId pub_id = sample->get_pub_id();
+  GUID_t pub_id = sample->get_pub_id();
   const TransportQueueElement::MatchOnDataPayload modp(payload);
   if (send_delayed_notifications(&modp)) {
     return REMOVE_RELEASED;
@@ -1347,7 +1359,7 @@ TransportSendStrategy::remove_sample(const DataSampleElement* sample)
 }
 
 RemoveResult
-TransportSendStrategy::do_remove_sample(const RepoId&,
+TransportSendStrategy::do_remove_sample(const GUID_t&,
   const TransportQueueElement::MatchCriteria& criteria, bool remove_all)
 {
   DBG_ENTRY_LVL("TransportSendStrategy", "do_remove_sample", 6);
@@ -1493,7 +1505,10 @@ TransportSendStrategy::direct_send(bool do_relink)
                   "send_bytes"), 1);
 
         if (Transport_debug_level > 0) {
-          transport_.config().dump();
+          TransportImpl_rch transport = transport_.lock();
+          if (transport) {
+            transport->dump();
+          }
         }
       } else {
         VDBG((LM_DEBUG, "(%P|%t) DBG:   "
@@ -1505,7 +1520,7 @@ TransportSendStrategy::direct_send(bool do_relink)
                 "Now flip to MODE_SUSPEND before we try to reconnect.\n"), 5);
 
       if (mode_ != MODE_SUSPEND) {
-        mode_before_suspend_ = mode_.value();
+        mode_before_suspend_ = mode_;
         mode_ = MODE_SUSPEND;
       }
 
@@ -1919,7 +1934,7 @@ TransportSendStrategy::add_delayed_notification(TransportQueueElement* element)
     }
   }
 
-  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_.value()));
+  delayed_delivered_notification_queue_.push_back(std::make_pair(element, mode_.load()));
 }
 
 void TransportSendStrategy::deliver_ack_request(TransportQueueElement* element)

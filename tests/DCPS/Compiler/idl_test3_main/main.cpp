@@ -654,7 +654,7 @@ int ACE_TMAIN(int argc, ACE_TCHAR *argv[])
 
   std::map<Xyz::Foo, Xyz::Foo*, Xyz::Foo_OpenDDS_KeyLessThan> foomap;
 
-  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::gen_has_key()) {
+  if (OpenDDS::DCPS::DDSTraits<Xyz::Foo>::key_count()) {
     foomap[my_foo] = &my_foo;
     foomap[foo2] = &foo2;
 

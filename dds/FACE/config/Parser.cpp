@@ -22,7 +22,7 @@ namespace {
   const char* PUBLISHER_QOS_SECTION  = "publisherqos";
   const char* SUBSCRIBER_QOS_SECTION = "subscriberqos";
 
-  OpenDDS::DCPS::RepoId build_id(const ConnectionSettings& conn)
+  OpenDDS::DCPS::GUID_t build_id(const ConnectionSettings& conn)
   {
     unsigned char participant_key[6];
     participant_key[0] = (conn.participant_id_ >> 0) & 0xFF;
@@ -103,7 +103,7 @@ Parser::parse(const char* filename)
        pos != limit;
        ++pos) {
     const ConnectionSettings& conn = pos->second;
-    OpenDDS::DCPS::RepoId id = build_id(conn);
+    OpenDDS::DCPS::GUID_t id = build_id(conn);
 
     switch (conn.direction_) {
     case FACE::SOURCE:

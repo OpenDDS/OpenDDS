@@ -11,6 +11,7 @@
 #  include "DynamicTypeMemberImpl.h"
 
 #  include <dds/DCPS/debug.h>
+#  include <dds/DCPS/FilterEvaluator.h>
 #  include <dds/DCPS/SafetyProfileStreams.h>
 #  include <dds/DCPS/ValueHelper.h>
 
@@ -43,9 +44,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+using DCPS::log_level;
+using DCPS::LogLevel;
+
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
   : chain_(0)
   , encoding_(DCPS::Encoding::KIND_XCDR2)
+  , extent_(DCPS::Sample::Full)
   , reset_align_state_(false)
   , strm_(0, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
@@ -53,24 +58,28 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl()
 
 DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(ACE_Message_Block* chain,
                                                  const DCPS::Encoding& encoding,
-                                                 DDS::DynamicType_ptr type)
+                                                 DDS::DynamicType_ptr type,
+                                                 DCPS::Sample::Extent ext)
   : DynamicDataBase(type)
   , chain_(chain->duplicate())
   , encoding_(encoding)
+  , extent_(ext)
   , reset_align_state_(false)
   , strm_(chain_, encoding_)
   , item_count_(ITEM_COUNT_INVALID)
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
+    throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
   }
 }
 
-DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type)
+DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::DynamicType_ptr type,
+                                                 DCPS::Sample::Extent ext)
   : DynamicDataBase(type)
   , chain_(ser.current()->duplicate())
   , encoding_(ser.encoding())
+  , extent_(ext)
   , reset_align_state_(true)
   , align_state_(ser.rdstate())
   , strm_(chain_, encoding_)
@@ -78,7 +87,7 @@ DynamicDataXcdrReadImpl::DynamicDataXcdrReadImpl(DCPS::Serializer& ser, DDS::Dyn
 {
   if (encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_1 &&
       encoding_.xcdr_version() != DCPS::Encoding::XCDR_VERSION_2) {
-    throw std::runtime_error("DynamicData only supports XCDR1 and XCDR2 at this time");
+    throw std::runtime_error("DynamicDataXcdrReadImpl only supports XCDR1 and XCDR2");
   }
 
   strm_.rdstate(align_state_);
@@ -114,6 +123,7 @@ void DynamicDataXcdrReadImpl::copy(const DynamicDataXcdrReadImpl& other)
   ACE_Message_Block::release(chain_);
   chain_ = other.chain_->duplicate();
   encoding_ = other.encoding_;
+  extent_ = other.extent_;
   reset_align_state_ = other.reset_align_state_;
   align_state_ = other.align_state_;
   strm_ = other.strm_;
@@ -178,13 +188,21 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
   case TK_INT8:
   case TK_UINT8:
   case TK_CHAR8:
+#ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
+#endif
   case TK_ENUM:
-    // Value of enum or primitive types can be indicated by MEMBER_ID_INVALID Id
-    // (Section 7.5.2.11.1)
+    // Value of enum or primitive types can be indicated by Id MEMBER_ID_INVALID
+    // or by index 0 (Section 7.5.2.11.1).
+    if (index != 0 && DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_member_id_at_index:"
+                 " Received invalid index (%d) for type %C\n", index, typekind_to_string(tk)));
+    }
     return MEMBER_ID_INVALID;
   case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
   case TK_STRING16:
+#endif
   case TK_BITMASK:
   case TK_SEQUENCE:
   case TK_ARRAY:
@@ -209,6 +227,37 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
           return MEMBER_ID_INVALID;
         }
 
+        if (extent_ != DCPS::Sample::Full) {
+          const bool struct_has_explicit_keys = has_explicit_keys(type_);
+          if (struct_has_explicit_keys) {
+            // All and only explicit keys will be present in the binary stream.
+            // Index of the next member in the binary stream.
+            ACE_CDR::ULong curr_index = 0;
+            for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
+              DDS::DynamicTypeMember_var dtm;
+              if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+                return MEMBER_ID_INVALID;
+              }
+              DDS::MemberDescriptor_var md;
+              if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+                return MEMBER_ID_INVALID;
+              }
+              if (exclude_member(extent_, md->is_key(), struct_has_explicit_keys)) {
+                continue;
+              }
+              if (curr_index == index) {
+                return md->id();
+              }
+              ++curr_index;
+            }
+            // Should never reach here!
+            return MEMBER_ID_INVALID;
+          } else if (extent_ == DCPS::Sample::KeyOnly) {
+            return MEMBER_ID_INVALID;
+          }
+        }
+
+        // A Full sample or a NestedKeyOnly sample with no explicit key.
         if (!has_optional) {
           DDS::DynamicTypeMember_var member;
           if (type_->get_member_by_index(member, index) != DDS::RETCODE_OK) {
@@ -280,8 +329,28 @@ DDS::MemberId DynamicDataXcdrReadImpl::get_member_id_at_index(ACE_CDR::ULong ind
     }
   case TK_UNION:
     {
+      if (extent_ == DCPS::Sample::KeyOnly) {
+        DDS::DynamicTypeMember_var disc_dtm;
+        if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+          return MEMBER_ID_INVALID;
+        }
+        DDS::MemberDescriptor_var disc_md;
+        if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+          return MEMBER_ID_INVALID;
+        }
+        if (!disc_md->is_key()) {
+          // The sample is empty.
+          return MEMBER_ID_INVALID;
+        }
+      }
+
       if (index == 0) {
         return DISCRIMINATOR_ID;
+      }
+
+      if (extent_ != DCPS::Sample::Full) {
+        // KeyOnly or NestedKeyOnly sample can only contain discriminator.
+        return MEMBER_ID_INVALID;
       }
 
       // Get the Id of the selected member.
@@ -351,6 +420,30 @@ ACE_CDR::ULong DynamicDataXcdrReadImpl::get_item_count()
         return 0;
       }
 
+      if (extent_ != DCPS::Sample::Full) {
+        const bool struct_has_explicit_keys = has_explicit_keys(type_);
+        if (struct_has_explicit_keys) {
+          ACE_CDR::ULong num_explicit_keys = 0;
+          for (ACE_CDR::ULong i = 0; i < type_->get_member_count(); ++i) {
+            DDS::DynamicTypeMember_var dtm;
+            if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+              return 0;
+            }
+            DDS::MemberDescriptor_var md;
+            if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+              return 0;
+            }
+            if (md->is_key()) {
+              ++num_explicit_keys;
+            }
+          }
+          return num_explicit_keys;
+        } else if (extent_ == DCPS::Sample::KeyOnly) {
+          return 0;
+        }
+      }
+
+      // Full sample or NestedKeyOnly sample with no explicit key.
       if (!has_optional) {
         return type_->get_member_count();
       }
@@ -420,6 +513,23 @@ ACE_CDR::ULong DynamicDataXcdrReadImpl::get_item_count()
     }
   case TK_UNION:
     {
+      if (extent_ == DCPS::Sample::KeyOnly) {
+        DDS::DynamicTypeMember_var disc_dtm;
+        if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+          return 0;
+        }
+        DDS::MemberDescriptor_var disc_md;
+        if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+          return 0;
+        }
+        if (!disc_md->is_key()) {
+          return 0;
+        }
+      }
+      if (extent_ != DCPS::Sample::Full) {
+        return 1;
+      }
+
       const DDS::ExtensibilityKind ek = descriptor->extensibility_kind();
       if (ek == DDS::APPENDABLE || ek == DDS::MUTABLE) {
         if (!strm_.skip_delimiter()) {
@@ -548,7 +658,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::return_loaned_value(DDS::DynamicData_
 
 DDS::DynamicData_ptr DynamicDataXcdrReadImpl::clone()
 {
-  return new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_);
+  return new DynamicDataXcdrReadImpl(chain_, strm_.encoding(), type_, extent_);
 }
 
 template<typename ValueType>
@@ -572,21 +682,62 @@ bool DynamicDataXcdrReadImpl::read_value(ValueType& value, TypeKind tk)
   case TK_BOOLEAN:
   case TK_STRING8:
   case TK_STRING16:
-    return strm_ >> value;
+    if (strm_ >> value) {
+      return true;
+    }
+    break;
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_value: "
+                 "Calling on an unexpected type %C\n", typekind_to_string(tk)));
+    }
+    return false;
   }
 
-  if (DCPS::DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::read_value -")
-               ACE_TEXT(" Calling on an unexpected type %C\n"), typekind_to_string(tk)));
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_value: "
+               "failed to deserialize type %C\n", typekind_to_string(tk)));
   }
   return false;
 }
 
+// Check if a struct member with the given Id is excluded from a sample (in case of
+// KeyOnly or NestedKeyOnly serialization).
+bool DynamicDataXcdrReadImpl::exclude_struct_member(MemberId id, DDS::MemberDescriptor_var& md) const
+{
+  DDS::DynamicTypeMember_var dtm;
+  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_struct_member:"
+                 " Failed to get DynamicTypeMember for member with ID %d\n", id));
+
+    }
+    return false;
+  }
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_struct_member:"
+                 " Failed to get MemberDescriptor for member with ID %d\n", id));
+    }
+    return false;
+  }
+  return exclude_member(extent_, md->is_key(), has_explicit_keys(type_));
+}
+
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataXcdrReadImpl::get_value_from_struct(MemberType& value, MemberId id,
-                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
+  TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md;
+  if (exclude_struct_member(id, md)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_struct:"
+                 " Attempted to read an excluded member from a %C sample\n",
+                 extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
+    }
+    return false;
+  }
+
   if (get_from_struct_common_checks(md, id, MemberTypeKind)) {
     return skip_to_struct_member(md, id) && read_value(value, MemberTypeKind);
   }
@@ -694,10 +845,53 @@ DDS::MemberDescriptor* DynamicDataXcdrReadImpl::get_from_union_common_checks(Mem
   return md._retn();
 }
 
+bool DynamicDataXcdrReadImpl::exclude_union_member(MemberId id) const
+{
+  if (extent_ == DCPS::Sample::Full) {
+    return false;
+  }
+
+  if (id != DISCRIMINATOR_ID) {
+    return true;
+  }
+
+  if (extent_ == DCPS::Sample::KeyOnly) {
+    // Discriminator not marked as key is not included in a KeyOnly sample.
+    DDS::DynamicTypeMember_var disc_dtm;
+    if (type_->get_member(disc_dtm, DISCRIMINATOR_ID) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
+                   " Failed to get DynamicTypeMember for discriminator\n"));
+      }
+      return false;
+    }
+    DDS::MemberDescriptor_var disc_md;
+    if (disc_dtm->get_descriptor(disc_md) != DDS::RETCODE_OK) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::exclude_union_member:"
+                   " Failed to get MemberDescriptor for discriminator\n"));
+      }
+      return false;
+    }
+    if (!disc_md->is_key()) {
+      return true;
+    }
+  }
+  return false;
+}
+
 template<TypeKind MemberTypeKind, typename MemberType>
 bool DynamicDataXcdrReadImpl::get_value_from_union(MemberType& value, MemberId id,
-                                           TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                   TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
+  if (exclude_union_member(id)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_value_from_union::"
+                 " Reading an excluded member with Id %u\n", id));
+    }
+    return false;
+  }
+
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
@@ -901,7 +1095,7 @@ bool DynamicDataXcdrReadImpl::skip_to_map_element(MemberId id)
 
 template<TypeKind ElementTypeKind, typename ElementType>
 bool DynamicDataXcdrReadImpl::get_value_from_collection(ElementType& value, MemberId id, TypeKind collection_tk,
-                                                TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                        TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -965,7 +1159,7 @@ void DynamicDataXcdrReadImpl::setup_stream(ACE_Message_Block* chain)
 
 template<TypeKind ValueTypeKind, typename ValueType>
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, MemberId id,
-                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   if (!is_type_supported(ValueTypeKind, "get_single_value")) {
     return DDS::RETCODE_ERROR;
@@ -981,6 +1175,8 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_single_value(ValueType& value, Me
   const TypeKind tk = type_->get_kind();
   bool good = true;
 
+  // This is an extension to the XTypes spec where the value of a bitmask DynamicData
+  // can be read as a whole as a unsigned integer.
   if (tk == enum_or_bitmask) {
     // Per XTypes spec, the value of a DynamicData object of primitive type or TK_ENUM is
     // accessed with MEMBER_ID_INVALID Id. However, there is only a single value in such
@@ -1120,7 +1316,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_char_common(CharT& value, MemberI
   case TK_STRUCTURE:
     {
       ToCharT wrap(value);
-      good = get_value_from_struct<CharKind>(wrap, id);
+      good = get_value_from_struct<CharKind>(wrap, id, extent_);
       break;
     }
   case TK_UNION:
@@ -1232,7 +1428,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
   case TK_STRUCTURE:
     {
       ACE_InputCDR::to_boolean to_bool(value);
-      good = get_value_from_struct<TK_BOOLEAN>(to_bool, id);
+      good = get_value_from_struct<TK_BOOLEAN>(to_bool, id, extent_);
       break;
     }
   case TK_UNION:
@@ -1263,12 +1459,17 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_boolean_value(ACE_CDR::Boolean& v
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_string_value(ACE_CDR::Char*& value, MemberId id)
 {
+  if (enum_string_helper(value, id)) {
+    return DDS::RETCODE_OK;
+  }
+  CORBA::string_free(value);
   return get_single_value<TK_STRING8>(value, id);
 }
 
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_wstring_value(ACE_CDR::WChar*& value, MemberId id)
 {
 #ifdef DDS_HAS_WCHAR
+  CORBA::wstring_free(value);
   return get_single_value<TK_STRING16>(value, id);
 #else
   return DDS::RETCODE_UNSUPPORTED;
@@ -1290,21 +1491,17 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
   switch (tk) {
   case TK_STRUCTURE:
     {
-      DDS::DynamicTypeMember_var member;
-      if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-        if (DCPS::DCPS_debug_level >= 1) {
-          ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_complex_value -")
-                     ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
+      DDS::MemberDescriptor_var md;
+      if (exclude_struct_member(id, md)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
+                     " Attempted to read an excluded member from a %C struct sample\n",
+                     extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
         }
         good = false;
         break;
       }
 
-      DDS::MemberDescriptor_var md;
-      if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-        good = false;
-        break;
-      }
       if (!skip_to_struct_member(md, id)) {
         good = false;
       } else {
@@ -1312,13 +1509,23 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
         if (!member_type) {
           good = false;
         } else {
-          value = new DynamicDataXcdrReadImpl(strm_, member_type);
+          value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
         }
       }
       break;
     }
   case TK_UNION:
     {
+      if (exclude_union_member(id)) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_complex_value:"
+                     " Attempted to read an excluded member from a %C union sample\n",
+                     extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
+        }
+        good = false;
+        break;
+      }
+
       if (id == DISCRIMINATOR_ID) {
         if (descriptor->extensibility_kind() == DDS::APPENDABLE || descriptor->extensibility_kind() == DDS::MUTABLE) {
           if (!strm_.skip_delimiter()) {
@@ -1337,7 +1544,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
             break;
           }
         }
-        value = new DynamicDataXcdrReadImpl(strm_, disc_type);
+        value = new DynamicDataXcdrReadImpl(strm_, disc_type, nested(extent_));
         break;
       }
 
@@ -1360,7 +1567,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
       if (!member_type) {
         good = false;
       } else {
-        value = new DynamicDataXcdrReadImpl(strm_, member_type);
+        value = new DynamicDataXcdrReadImpl(strm_, member_type, nested(extent_));
       }
       break;
     }
@@ -1373,7 +1580,7 @@ DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_complex_value(DDS::DynamicData_pt
           (tk == TK_MAP && !skip_to_map_element(id))) {
         good = false;
       } else {
-        value = new DynamicDataXcdrReadImpl(strm_, descriptor->element_type());
+        value = new DynamicDataXcdrReadImpl(strm_, descriptor->element_type(), nested(extent_));
       }
       break;
     }
@@ -1411,31 +1618,45 @@ bool DynamicDataXcdrReadImpl::read_values(SequenceType& value, TypeKind elem_tk)
   case TK_BOOLEAN:
   case TK_STRING8:
   case TK_STRING16:
-    {
-      return strm_ >> value;
+    if (strm_ >> value) {
+      return true;
     }
+    break;
   case TK_ENUM:
   case TK_BITMASK:
-    {
-      if (!strm_.skip_delimiter()) {
-        return false;
-      }
-      return strm_ >> value;
+    if (strm_.skip_delimiter() && strm_ >> value) {
+      return true;
     }
+    break;
+  default:
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_values: "
+                 "Calling on an unexpected element type %C\n", typekind_to_string(elem_tk)));
+    }
+    return false;
   }
 
-  if (DCPS::DCPS_debug_level >= 1) {
-    ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::read_values -")
-               ACE_TEXT(" Calling on an unexpected element type %C\n"), typekind_to_string(elem_tk)));
+  if (log_level >= LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::read_values: "
+               "failed to deserialize element type %C\n", typekind_to_string(elem_tk)));
   }
   return false;
 }
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, MemberId id,
-                                             TypeKind enum_or_bitmask, LBound lower, LBound upper)
+  TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::MemberDescriptor_var md;
+  if (exclude_struct_member(id, md)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_struct:"
+                 " Attempted to read a member not included in a %C sample\n",
+                 extent_ == DCPS::Sample::KeyOnly ? "KeyOnly" : "NestedKeyOnly"));
+    }
+    return false;
+  }
+
   if (get_from_struct_common_checks(md, id, ElementTypeKind, true)) {
     return skip_to_struct_member(md, id) && read_values(value, ElementTypeKind);
   }
@@ -1448,7 +1669,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, Member
         return false;
       }
       DDS::TypeDescriptor_var etd;
-      if (td->element_type()->get_descriptor(etd) != DDS::RETCODE_OK) {
+      if (get_base_type(td->element_type())->get_descriptor(etd) != DDS::RETCODE_OK) {
         return false;
       }
       const LBound bit_bound = etd->bound()[0];
@@ -1462,8 +1683,24 @@ bool DynamicDataXcdrReadImpl::get_values_from_struct(SequenceType& value, Member
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberId id,
-                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
+  if (id == DISCRIMINATOR_ID) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
+                 " Attempted to read discriminator as a sequence\n"));
+    }
+    return false;
+  }
+
+  if (exclude_union_member(id)) {
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::get_values_from_union:"
+                 " Attempted to read an excluded member with Id %u\n", id));
+    }
+    return false;
+  }
+
   DDS::MemberDescriptor_var md = get_from_union_common_checks(id, "get_values_from_union");
   if (!md) {
     return false;
@@ -1533,7 +1770,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_union(SequenceType& value, MemberI
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_sequence(SequenceType& value, MemberId id,
-                                               TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                       TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1585,7 +1822,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_sequence(SequenceType& value, Memb
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_array(SequenceType& value, MemberId id,
-                                            TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                    TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1630,7 +1867,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_array(SequenceType& value, MemberI
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 bool DynamicDataXcdrReadImpl::get_values_from_map(SequenceType& value, MemberId id,
-                                          TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                  TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   DDS::TypeDescriptor_var descriptor;
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
@@ -1675,7 +1912,7 @@ bool DynamicDataXcdrReadImpl::get_values_from_map(SequenceType& value, MemberId 
 
 template<TypeKind ElementTypeKind, typename SequenceType>
 DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_sequence_values(SequenceType& value, MemberId id,
-                                                       TypeKind enum_or_bitmask, LBound lower, LBound upper)
+                                                               TypeKind enum_or_bitmask, LBound lower, LBound upper)
 {
   if (!is_type_supported(ElementTypeKind, "get_sequence_values")) {
     return DDS::RETCODE_ERROR;
@@ -1850,6 +2087,27 @@ bool DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* membe
     }
 
     for (ACE_CDR::ULong i = 0; i < member_desc->index(); ++i) {
+      DDS::DynamicTypeMember_var dtm;
+      if (type_->get_member_by_index(dtm, i) != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
+                     " Failed to get DynamicTypeMember for member at index %d\n", i));
+        }
+        return false;
+      }
+      DDS::MemberDescriptor_var md;
+      if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+        if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+          ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataXcdrReadImpl::skip_to_struct_member:"
+                     " Failed to get MemberDescriptor for member at index %d\n", i));
+        }
+        return false;
+      }
+      if (exclude_member(extent_, md->is_key(), has_explicit_keys(type_))) {
+        // This member is not present in the sample, don't need to do anything.
+        continue;
+      }
+
       ACE_CDR::ULong num_skipped;
       if (!skip_struct_member_at_index(i, num_skipped)) {
         if (DCPS::DCPS_debug_level >= 1) {
@@ -1942,24 +2200,9 @@ bool DynamicDataXcdrReadImpl::skip_to_struct_member(DDS::MemberDescriptor* membe
   }
 }
 
-bool DynamicDataXcdrReadImpl::get_from_struct_common_checks(DDS::MemberDescriptor_var& md, MemberId id, TypeKind kind, bool is_sequence)
+bool DynamicDataXcdrReadImpl::get_from_struct_common_checks(const DDS::MemberDescriptor_var& md,
+  MemberId id, TypeKind kind, bool is_sequence)
 {
-  DDS::DynamicTypeMember_var member;
-  if (type_->get_member(member, id) != DDS::RETCODE_OK) {
-    if (DCPS::DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_from_struct_common_checks -")
-                 ACE_TEXT(" Failed to get DynamicTypeMember for member with ID %d\n"), id));
-    }
-    return false;
-  }
-
-  if (member->get_descriptor(md) != DDS::RETCODE_OK) {
-    if (DCPS::DCPS_debug_level >= 1) {
-      ACE_ERROR((LM_ERROR, ACE_TEXT("(%P|%t) DynamicDataXcdrReadImpl::get_from_struct_common_checks -")
-                 ACE_TEXT(" Failed to get member descriptor for member with ID %d\n"), id));
-    }
-    return false;
-  }
   const DDS::DynamicType_ptr member_dt = md->type();
   if (!member_dt) {
     if (DCPS::DCPS_debug_level >= 1) {
@@ -2596,6 +2839,97 @@ bool DynamicDataXcdrReadImpl::check_xcdr1_mutable_i(DDS::DynamicType_ptr dt, Dyn
   return true;
 }
 
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+namespace {
+  template <typename T>
+  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
+                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(T&, DDS::MemberId))
+  {
+    T v;
+    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
+    if (ret == DDS::RETCODE_OK) {
+      value = v;
+    }
+    return ret;
+  }
+
+  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
+                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(char*&, DDS::MemberId))
+  {
+    CORBA::String_var v;
+    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
+    if (ret == DDS::RETCODE_OK) {
+      value = v.in();
+    }
+    return ret;
+  }
+
+  DDS::ReturnCode_t get_some_value(DCPS::Value& value, DDS::MemberId id, DynamicDataXcdrReadImpl& dyn,
+                                   DDS::ReturnCode_t (DynamicDataXcdrReadImpl::* pmf)(ACE_CDR::WChar*&, DDS::MemberId))
+  {
+    CORBA::WString_var v;
+    const DDS::ReturnCode_t ret = (dyn.*pmf)(v, id);
+    if (ret == DDS::RETCODE_OK) {
+      value = v.in();
+    }
+    return ret;
+  }
+}
+
+DDS::ReturnCode_t DynamicDataXcdrReadImpl::get_simple_value(DCPS::Value& value, DDS::MemberId id)
+{
+  DDS::DynamicTypeMember_var dtm;
+  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  DDS::MemberDescriptor_var md;
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    return DDS::RETCODE_ERROR;
+  }
+  DDS::DynamicType_var member_type = get_base_type(md->type());
+  const TypeKind member_kind = member_type->get_kind();
+  switch (member_kind) {
+  case TK_BOOLEAN:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_boolean_value);
+  case TK_BYTE:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_byte_value);
+  case TK_INT16:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int16_value);
+  case TK_INT32:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int32_value);
+  case TK_INT64:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int64_value);
+  case TK_UINT16:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint16_value);
+  case TK_UINT32:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint32_value);
+  case TK_UINT64:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint64_value);
+  case TK_FLOAT32:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float32_value);
+  case TK_FLOAT64:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float64_value);
+  case TK_FLOAT128:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_float128_value);
+  case TK_INT8:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_int8_value);
+  case TK_UINT8:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_uint8_value);
+  case TK_CHAR8:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char8_value);
+  case TK_CHAR16:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_char16_value);
+  case TK_ENUM:
+  case TK_STRING8:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_string_value);
+  case TK_STRING16:
+    return get_some_value(value, id, *this, &DynamicDataXcdrReadImpl::get_wstring_value);
+  default:
+    return DDS::RETCODE_UNSUPPORTED;
+  }
+}
+#endif
+
 #ifndef OPENDDS_SAFETY_PROFILE
 bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::String& indent,
                   DDS::DynamicType_ptr member_base_type, MemberId member_id);
@@ -2635,7 +2969,7 @@ bool print_struct(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
         member_base_type_descriptor->kind() == TK_ARRAY) {
       DDS::TypeDescriptor_var td;
-      if (member_base_type_descriptor->element_type()->get_descriptor(td) != DDS::RETCODE_OK) {
+      if (get_base_type(member_base_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
         return false;
       }
       DCPS::String ele_type_name = td->name();
@@ -2708,7 +3042,7 @@ bool print_union(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Strin
       if (member_base_type_descriptor->kind() == TK_SEQUENCE ||
           member_base_type_descriptor->kind() == TK_ARRAY) {
         DDS::TypeDescriptor_var td;
-        if (member_base_type_descriptor->element_type()->get_descriptor(td) != DDS::RETCODE_OK) {
+        if (get_base_type(member_base_type_descriptor->element_type())->get_descriptor(td) != DDS::RETCODE_OK) {
           return false;
         }
         DCPS::String ele_type_name = td->name();
@@ -3011,7 +3345,8 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     type_string += "[" + DCPS::to_dds_string(seq_length) + "] =\n";
     for (ACE_CDR::ULong i = 0; i < seq_length; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
-      if (!print_member(temp_dd, type_string, indent, member_type_descriptor->element_type(), i)) {
+      if (!print_member(temp_dd, type_string, indent,
+                        get_base_type(member_type_descriptor->element_type()), i)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read sequence member\n"));
         }
@@ -3032,7 +3367,8 @@ bool print_member(DDS::DynamicData_ptr dd, DCPS::String& type_string, DCPS::Stri
     type_string += "[" + DCPS::to_dds_string(bound) + "] =\n";
     for (ACE_CDR::ULong i = 0; i < bound; ++i) {
       type_string += indent + "[" + DCPS::to_dds_string(i) + "]";
-      if (!print_member(temp_dd, type_string, indent, member_type_descriptor->element_type(), i)) {
+      if (!print_member(temp_dd, type_string, indent,
+                        get_base_type(member_type_descriptor->element_type()), i)) {
         if (DCPS::log_level >= DCPS::LogLevel::Notice) {
           ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: print_member: failed to read array member\n"));
         }

@@ -168,7 +168,7 @@ DomainParticipantFactoryImpl::delete_participant(
   }
 
   const DDS::DomainId_t domain_id = the_servant->get_domain_id();
-  const RepoId dp_id = the_servant->get_id();
+  const GUID_t dp_id = the_servant->get_id();
 
   {
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex,

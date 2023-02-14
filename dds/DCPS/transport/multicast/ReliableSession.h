@@ -39,7 +39,7 @@ public:
   virtual bool ready_to_deliver(const TransportHeader& header,
                                 const ReceivedDataSample& data);
   void deliver_held_data();
-  virtual void release_remote(const RepoId& remote);
+  virtual void release_remote(const GUID_t& remote);
 
   virtual bool control_received(char submessage_id,
                                 const Message_Block_Ptr& control);

@@ -10,7 +10,6 @@
 #include "ParameterListConverter.h"
 #include "RtpsDiscovery.h"
 
-
 #include <dds/DCPS/Service_Participant.h>
 #include <dds/DCPS/GuidConverter.h>
 #include <dds/DCPS/GuidUtils.h>
@@ -38,7 +37,7 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
 namespace RTPS {
-using DCPS::RepoId;
+using DCPS::GUID_t;
 using DCPS::MonotonicTimePoint;
 using DCPS::TimeDuration;
 using DCPS::Serializer;
@@ -131,7 +130,7 @@ namespace {
 }
 
 void Spdp::init(DDS::DomainId_t /*domain*/,
-                DCPS::RepoId& guid,
+                DCPS::GUID_t& guid,
                 const DDS::DomainParticipantQos& qos,
                 XTypes::TypeLookupService_rch tls)
 {
@@ -215,7 +214,7 @@ void Spdp::init(DDS::DomainId_t /*domain*/,
 }
 
 Spdp::Spdp(DDS::DomainId_t domain,
-           RepoId& guid,
+           GUID_t& guid,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco,
            XTypes::TypeLookupService_rch tls)
@@ -260,7 +259,7 @@ Spdp::Spdp(DDS::DomainId_t domain,
 
 #ifdef OPENDDS_SECURITY
 Spdp::Spdp(DDS::DomainId_t domain,
-           const DCPS::RepoId& guid,
+           const DCPS::GUID_t& guid,
            const DDS::DomainParticipantQos& qos,
            RtpsDiscovery* disco,
            XTypes::TypeLookupService_rch tls,
@@ -396,7 +395,7 @@ Spdp::shutdown()
 #ifdef OPENDDS_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
-    const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
+    const GUID_t l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
     ice_agent_->remove_local_agent_info_listener(sedp_endpoint, l);
   }
 #endif
@@ -765,7 +764,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
     }
 #endif
 
-    partBitData(pdata).key = repo_id_to_bit_key(guid);
+    partBitData(pdata).key = guid_to_bit_key(guid);
 
     TimeDuration effective_lease(pdata.leaseDuration.seconds);
 
@@ -857,7 +856,7 @@ Spdp::handle_participant_data(DCPS::MessageId id,
 
 #ifdef OPENDDS_SECURITY
     if (is_security_enabled()) {
-      if (!has_security_data(iter->second.pdata_.dataKind)) {
+      if (!iter->second.has_security_data()) {
         if (!participant_sec_attr_.allow_unauthenticated_participants) {
           if (DCPS::security_debug.auth_debug) {
             ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_participant_data - ")
@@ -1139,7 +1138,7 @@ Spdp::match_unauthenticated(const DiscoveredParticipantIter& dp_iter)
 void
 Spdp::handle_auth_request(const DDS::Security::ParticipantStatelessMessage& msg)
 {
-  const RepoId guid = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+  const GUID_t guid = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_auth_request() - ")
@@ -1269,7 +1268,7 @@ DDS::OctetSeq Spdp::local_participant_data_as_octets() const
 }
 
 void
-Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp)
+Spdp::send_handshake_request(const DCPS::GUID_t& guid, DiscoveredParticipant& dp)
 {
   OPENDDS_ASSERT(dp.handshake_state_ == HANDSHAKE_STATE_BEGIN_HANDSHAKE_REQUEST);
 
@@ -1333,7 +1332,7 @@ Spdp::send_handshake_request(const DCPS::RepoId& guid, DiscoveredParticipant& dp
 void
 Spdp::attempt_authentication(const DiscoveredParticipantIter& iter, bool from_discovery)
 {
-  const DCPS::RepoId& guid = iter->first;
+  const DCPS::GUID_t& guid = iter->first;
   DiscoveredParticipant& dp = iter->second;
 
   if (DCPS::security_debug.auth_debug) {
@@ -1452,7 +1451,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   DDS::Security::SecurityException se = {"", 0, 0};
   Security::Authentication_var auth = security_config_->get_authentication();
 
-  const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+  const GUID_t src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} DEBUG: Spdp::handle_handshake_message() - ")
@@ -1514,7 +1513,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
 
   if (dp.handshake_state_ == HANDSHAKE_STATE_DONE && !dp.is_requester_) {
     // Remote is still sending a reply, so resend the final.
-    const RepoId reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
+    const GUID_t reader = make_id(iter->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
     if (sedp_->write_stateless_message(dp.handshake_msg_, reader) != DDS::RETCODE_OK) {
       if (DCPS::security_debug.auth_debug) {
         ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) {auth_debug} Spdp::handle_handshake_message() - ")
@@ -1660,6 +1659,7 @@ Spdp::handle_handshake_message(const DDS::Security::ParticipantStatelessMessage&
   case HANDSHAKE_STATE_PROCESS_HANDSHAKE: {
     DDS::Security::ParticipantStatelessMessage reply = DDS::Security::ParticipantStatelessMessage();
     reply.message_identity.source_guid = guid_;
+    reply.message_identity.sequence_number = 0;
     reply.message_class_id = DDS::Security::GMCLASSID_SECURITY_AUTH_HANDSHAKE;
     reply.related_message_identity = msg.message_identity;
     reply.destination_participant_guid = src_participant;
@@ -1819,7 +1819,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
     DiscoveredParticipantIter pit = participants_.find(pos->second);
     if (pit != participants_.end() &&
         pit->second.stateless_msg_deadline_ <= now) {
-      const RepoId reader = make_id(pit->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
+      const GUID_t reader = make_id(pit->first, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
       pit->second.stateless_msg_deadline_ = now + pit->second.handshake_resend_falloff_.get();
 
       // Send the auth req first to reset the remote if necessary.
@@ -1881,7 +1881,7 @@ Spdp::process_handshake_resends(const DCPS::MonotonicTimePoint& now)
 bool
 Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileMessageSecure& msg)
 {
-  const RepoId src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
+  const GUID_t src_participant = make_id(msg.message_identity.source_guid, DCPS::ENTITYID_PARTICIPANT);
 
   if (DCPS::security_debug.auth_debug) {
     ACE_DEBUG((LM_DEBUG,
@@ -1939,21 +1939,21 @@ Spdp::handle_participant_crypto_tokens(const DDS::Security::ParticipantVolatileM
 }
 
 DDS::ReturnCode_t
-Spdp::send_handshake_message(const DCPS::RepoId& guid,
+Spdp::send_handshake_message(const DCPS::GUID_t& guid,
                              DiscoveredParticipant& dp,
                              const DDS::Security::ParticipantStatelessMessage& msg)
 {
   dp.handshake_msg_ = msg;
   dp.handshake_msg_.message_identity.sequence_number = (++stateless_sequence_number_).getValue();
 
-  const DCPS::RepoId reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
+  const DCPS::GUID_t reader = make_id(guid, ENTITYID_P2P_BUILTIN_PARTICIPANT_STATELESS_READER);
   const DDS::ReturnCode_t retval = sedp_->write_stateless_message(dp.handshake_msg_, reader);
   dp.have_handshake_msg_ = true;
   dp.stateless_msg_deadline_ = schedule_handshake_resend(dp.handshake_resend_falloff_.get(), guid);
   return retval;
 }
 
-MonotonicTimePoint Spdp::schedule_handshake_resend(const TimeDuration& time, const RepoId& guid)
+MonotonicTimePoint Spdp::schedule_handshake_resend(const TimeDuration& time, const GUID_t& guid)
 {
   const MonotonicTimePoint deadline = MonotonicTimePoint::now() + time;
   handshake_resends_.insert(std::make_pair(deadline, guid));
@@ -1965,7 +1965,7 @@ MonotonicTimePoint Spdp::schedule_handshake_resend(const TimeDuration& time, con
 }
 
 bool
-Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& iter)
+Spdp::match_authenticated(const DCPS::GUID_t& guid, DiscoveredParticipantIter& iter)
 {
   if (iter->second.handshake_handle_ == DDS::HANDLE_NIL) {
     return true;
@@ -2133,14 +2133,14 @@ Spdp::match_authenticated(const DCPS::RepoId& guid, DiscoveredParticipantIter& i
   return true;
 }
 
-void Spdp::update_agent_info(const DCPS::RepoId&, const ICE::AgentInfo&)
+void Spdp::update_agent_info(const DCPS::GUID_t&, const ICE::AgentInfo&)
 {
   if (is_security_enabled()) {
     write_secure_updates();
   }
 }
 
-void Spdp::remove_agent_info(const DCPS::RepoId&)
+void Spdp::remove_agent_info(const DCPS::GUID_t&)
 {
   if (is_security_enabled()) {
     write_secure_updates();
@@ -2162,7 +2162,7 @@ Spdp::init_bit(DCPS::RcHandle<DCPS::BitSubscriber> bit_subscriber)
 #ifdef OPENDDS_SECURITY
   DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
   if (sedp_endpoint) {
-    const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
+    const GUID_t l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
     ice_agent_->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<AgentInfoListener>(rchandle_from(this)));
   }
 #endif
@@ -2472,7 +2472,9 @@ Spdp::SpdpTransport::~SpdpTransport()
 
   if (outer) {
     ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
-    dispose_unregister();
+    try {
+      dispose_unregister();
+    } catch (const CORBA::BAD_PARAM&) {}
     outer->eh_shutdown_ = true;
     outer->shutdown_cond_.notify_all();
   }
@@ -2796,7 +2798,7 @@ Spdp::append_transport_statistics(DCPS::TransportStatisticsSequence& seq)
 }
 
 void
-Spdp::SpdpTransport::write_i(const DCPS::RepoId& guid, const ACE_INET_Addr& local_address, WriteFlags flags)
+Spdp::SpdpTransport::write_i(const DCPS::GUID_t& guid, const ACE_INET_Addr& local_address, WriteFlags flags)
 {
   DCPS::RcHandle<Spdp> outer = outer_.lock();
   if (!outer) return;
@@ -3114,7 +3116,7 @@ Spdp::SpdpTransport::handle_input(ACE_HANDLE h)
           }
         } else {
           plist.length(1);
-          const RepoId guid = make_id(header.guidPrefix, ENTITYID_PARTICIPANT);
+          const GUID_t guid = make_id(header.guidPrefix, ENTITYID_PARTICIPANT);
           plist[0].guid(guid);
           plist[0]._d(PID_PARTICIPANT_GUID);
         }
@@ -3394,7 +3396,7 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
 
   if (fixed_port) {
     uni_port_ = local_addr.get_port_number();
-  } else {
+  } else if (!outer->config_->spdp_request_random_port()) {
     uni_port_ = port_common + outer->config_->d1() + (outer->config_->pg() * participant_id);
     local_addr.set_port_number(uni_port_);
   }
@@ -3417,6 +3419,13 @@ Spdp::SpdpTransport::open_unicast_socket(u_short port_common,
                  DCPS::LogAddr(local_addr).c_str(), ACE_TEXT("ACE_SOCK_Dgram::open")));
     }
     return false;
+  }
+
+  if (!fixed_port && outer->config_->spdp_request_random_port()) {
+    ACE_INET_Addr addr;
+    if (unicast_socket_.get_local_addr(addr) == 0) {
+      uni_port_ = addr.get_port_number();
+    }
   }
 
   if (DCPS::DCPS_debug_level > 3) {
@@ -3605,7 +3614,7 @@ void Spdp::SpdpTransport::on_data_available(DCPS::RcHandle<DCPS::InternalDataRea
 }
 
 bool
-Spdp::get_default_locators(const RepoId& part_id, DCPS::LocatorSeq& target,
+Spdp::get_default_locators(const GUID_t& part_id, DCPS::LocatorSeq& target,
                            bool& inlineQos)
 {
   DiscoveredParticipantIter part_iter = participants_.find(part_id);
@@ -3634,7 +3643,7 @@ Spdp::get_default_locators(const RepoId& part_id, DCPS::LocatorSeq& target,
 }
 
 bool
-Spdp::get_last_recv_locator(const RepoId& part_id, DCPS::LocatorSeq& target,
+Spdp::get_last_recv_locator(const GUID_t& part_id, DCPS::LocatorSeq& target,
                             bool& inlineQos)
 {
   DiscoveredParticipantIter pos = participants_.find(part_id);
@@ -3654,12 +3663,12 @@ Spdp::associated() const
 }
 
 bool
-Spdp::has_discovered_participant(const DCPS::RepoId& guid) const
+Spdp::has_discovered_participant(const DCPS::GUID_t& guid) const
 {
   return participants_.find(guid) != participants_.end();
 }
 
-ACE_CDR::ULong Spdp::get_participant_flags(const DCPS::RepoId& guid) const
+ACE_CDR::ULong Spdp::get_participant_flags(const DCPS::GUID_t& guid) const
 {
   const DiscoveredParticipantMap::const_iterator iter = participants_.find(guid);
   if (iter == participants_.end()) {
@@ -3754,7 +3763,7 @@ Spdp::process_lease_expirations(const DCPS::MonotonicTimePoint& now)
 
 #ifdef OPENDDS_SECURITY
 Spdp::ParticipantCryptoInfoPair
-Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
+Spdp::lookup_participant_crypto_info(const DCPS::GUID_t& id) const
 {
   ParticipantCryptoInfoPair result = ParticipantCryptoInfoPair(DDS::HANDLE_NIL, DDS::Security::SharedSecretHandle_var());
 
@@ -3767,9 +3776,9 @@ Spdp::lookup_participant_crypto_info(const DCPS::RepoId& id) const
 }
 
 void
-Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
+Spdp::send_participant_crypto_tokens(const DCPS::GUID_t& id)
 {
-  const DCPS::RepoId peer = make_id(id, ENTITYID_PARTICIPANT);
+  const DCPS::GUID_t peer = make_id(id, ENTITYID_PARTICIPANT);
   const DiscoveredParticipantIter iter = participants_.find(peer);
   if (iter == participants_.end()) {
     if (DCPS::DCPS_debug_level > 0) {
@@ -3784,9 +3793,9 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
   const DDS::Security::ParticipantCryptoTokenSeq& pcts = iter->second.crypto_tokens_;
 
   if (pcts.length() != 0) {
-    const DCPS::RepoId writer = make_id(guid_, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER);
+    const DCPS::GUID_t writer = make_id(guid_, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_WRITER);
 
-    const DCPS::RepoId reader = make_id(peer, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
+    const DCPS::GUID_t reader = make_id(peer, ENTITYID_P2P_BUILTIN_PARTICIPANT_VOLATILE_SECURE_READER);
 
     DDS::Security::ParticipantVolatileMessageSecure msg;
     msg.message_identity.source_guid = writer;
@@ -3809,7 +3818,7 @@ Spdp::send_participant_crypto_tokens(const DCPS::RepoId& id)
 }
 
 DDS::Security::PermissionsHandle
-Spdp::lookup_participant_permissions(const DCPS::RepoId& id) const
+Spdp::lookup_participant_permissions(const DCPS::GUID_t& id) const
 {
   DDS::Security::PermissionsHandle result = DDS::HANDLE_NIL;
 
@@ -3833,11 +3842,11 @@ AuthState Spdp::lookup_participant_auth_state(const GUID_t& id) const
 #endif
 
 #ifdef OPENDDS_SECURITY
-void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, RepoId r, BuiltinEndpointSet_t avail,
+void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, GUID_t r, BuiltinEndpointSet_t avail,
                      DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail,
                      const ICE::AgentInfo& agent_info)
 {
-  RepoId l = guid_;
+  GUID_t l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
@@ -3975,9 +3984,9 @@ void Spdp::start_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, RepoId r, Built
   }
 }
 
-void Spdp::stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId r, BuiltinEndpointSet_t avail,
+void Spdp::stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::GUID_t r, BuiltinEndpointSet_t avail,
                     DDS::Security::ExtendedBuiltinEndpointSet_t extended_avail) {
-  RepoId l = guid_;
+  GUID_t l = guid_;
 
   // See RTPS v2.1 section 8.5.5.1
   if (avail & DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) {
@@ -4116,7 +4125,7 @@ void Spdp::stop_ice(DCPS::WeakRcHandle<ICE::Endpoint> endpoint, DCPS::RepoId r, 
 }
 
 DDS::Security::ParticipantCryptoHandle
-Spdp::remote_crypto_handle(const DCPS::RepoId& remote_participant) const
+Spdp::remote_crypto_handle(const DCPS::GUID_t& remote_participant) const
 {
   return sedp_->get_handle_registry()->get_remote_participant_crypto_handle(remote_participant);
 }
@@ -4228,7 +4237,7 @@ void Spdp::SpdpTransport::send_directed(const DCPS::MonotonicTimePoint& /*now*/)
   ACE_GUARD(ACE_Thread_Mutex, g, outer->lock_);
 
   while (!directed_guids_.empty()) {
-    const DCPS::RepoId id = directed_guids_.front();
+    const DCPS::GUID_t id = directed_guids_.front();
     directed_guids_.pop_front();
 
     DiscoveredParticipantConstIter pos = outer->participants_.find(id);
@@ -4341,7 +4350,7 @@ void Spdp::purge_handshake_resends(DiscoveredParticipantIter iter)
 
 void Spdp::process_participant_ice(const ParameterList& plist,
                                    const ParticipantData_t& pdata,
-                                   const DCPS::RepoId& guid)
+                                   const DCPS::GUID_t& guid)
 {
   ICE::AgentInfoMap ai_map;
   if (!ParameterListConverter::from_param_list(plist, ai_map)) {
@@ -4415,13 +4424,13 @@ void Spdp::process_participant_ice(const ParameterList& plist,
 
 #endif
 
-const ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid) const
+const ParticipantData_t& Spdp::get_participant_data(const DCPS::GUID_t& guid) const
 {
   DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
   return iter->second.pdata_;
 }
 
-ParticipantData_t& Spdp::get_participant_data(const DCPS::RepoId& guid)
+ParticipantData_t& Spdp::get_participant_data(const DCPS::GUID_t& guid)
 {
   DiscoveredParticipantIter iter = participants_.find(make_part_guid(guid));
   return iter->second.pdata_;
@@ -4432,7 +4441,7 @@ DCPS::MonotonicTime_t Spdp::get_participant_discovered_at() const
   return participant_discovered_at_;
 }
 
-DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::RepoId& guid) const
+DCPS::MonotonicTime_t Spdp::get_participant_discovered_at(const DCPS::GUID_t& guid) const
 {
   const DiscoveredParticipantConstIter iter = participants_.find(make_part_guid(guid));
   return iter->second.discovered_at_.to_monotonic_time();
@@ -4539,7 +4548,7 @@ Spdp::use_ice_now(bool flag)
     DCPS::WeakRcHandle<ICE::Endpoint> sedp_endpoint = sedp_->get_ice_endpoint();
 
     if (sedp_endpoint) {
-      const RepoId l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
+      const GUID_t l = make_id(guid_, ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER);
       ice_agent_->add_local_agent_info_listener(sedp_endpoint, l, DCPS::static_rchandle_cast<ICE::AgentInfoListener>(DCPS::rchandle_from(this)));
     }
 

@@ -67,7 +67,9 @@ InfoRepo::InfoRepo(int argc, ACE_TCHAR *argv[])
 
 InfoRepo::~InfoRepo()
 {
-  this->finalize();
+  try {
+    this->finalize();
+  } catch (const OpenDDS::Federator::Incomplete&) {}
 }
 
 void

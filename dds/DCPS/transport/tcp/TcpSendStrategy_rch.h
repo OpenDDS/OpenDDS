@@ -8,8 +8,7 @@
 #ifndef OPENDDS_DCPS_TRANSPORT_TCP_TCPSENDSTRATEGY_RCH_H
 #define OPENDDS_DCPS_TRANSPORT_TCP_TCPSENDSTRATEGY_RCH_H
 
-#include "dds/DCPS/RcHandle_T.h"
-#include "dds/Versioned_Namespace.h"
+#include <dds/DCPS/RcHandle_T.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -25,4 +24,4 @@ typedef RcHandle<TcpSendStrategy> TcpSendStrategy_rch;
 
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 
-#endif /* OPENDDS_TCPSENDSTRATEGY_RCH_H */
+#endif /* OPENDDS_DCPS_TRANSPORT_TCP_TCPSENDSTRATEGY_RCH_H */

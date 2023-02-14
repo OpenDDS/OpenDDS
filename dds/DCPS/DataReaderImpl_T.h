@@ -63,6 +63,29 @@ namespace OpenDDS {
 
     typedef RcHandle<SharedInstanceMap> SharedInstanceMap_rch;
 
+    typedef typename TraitsType::DataReaderType Interface;
+
+    CORBA::Boolean _is_a(const char* type_id)
+    {
+      return Interface::_is_a(type_id);
+    }
+
+    const char* _interface_repository_id() const
+    {
+      return Interface::_interface_repository_id();
+    }
+
+    CORBA::Boolean marshal(TAO_OutputCDR&)
+    {
+      return false;
+    }
+
+    // work around "hides overloaded virtual" warnings when MessageType=DynamicSample
+    using Interface::read_next_sample;
+    using Interface::take_next_sample;
+    using Interface::lookup_instance;
+    using Interface::get_key_value;
+
     class MessageTypeWithAllocator
       : public MessageType
       , public EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>
@@ -79,6 +102,12 @@ namespace OpenDDS {
       }
 
       const MessageType* message() const { return this; }
+
+#ifndef OPENDDS_HAS_STD_UNIQUE_PTR
+      using EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>::_remove_ref;
+      using EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>::_add_ref;
+      using EnableContainerSupportedUniquePtr<MessageTypeWithAllocator>::ref_count;
+#endif
     };
 
     struct MessageTypeMemoryBlock {
@@ -88,16 +117,14 @@ namespace OpenDDS {
 
     typedef OpenDDS::DCPS::Cached_Allocator_With_Overflow<MessageTypeMemoryBlock, ACE_Thread_Mutex>  DataAllocator;
 
-    typedef typename TraitsType::DataReaderType Interface;
-
-    DataReaderImpl_T (void)
+    DataReaderImpl_T()
       : filter_delayed_sample_task_(make_rch<DRISporadicTask>(TheServiceParticipant->time_source(), TheServiceParticipant->interceptor(), rchandle_from(this), &DataReaderImpl_T::filter_delayed))
       , marshal_skip_serialize_(false)
     {
       initialize_lookup_maps();
     }
 
-    virtual ~DataReaderImpl_T (void)
+    virtual ~DataReaderImpl_T()
     {
       filter_delayed_sample_task_->cancel();
 
@@ -674,15 +701,16 @@ namespace OpenDDS {
   bool contains_sample_filtered(DDS::SampleStateMask sample_states,
                                 DDS::ViewStateMask view_states,
                                 DDS::InstanceStateMask instance_states,
-                                const OpenDDS::DCPS::FilterEvaluator& evaluator,
+                                const FilterEvaluator& evaluator,
                                 const DDS::StringSeq& params)
   {
-    using namespace OpenDDS::DCPS;
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, false);
     ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, instance_guard, instances_lock_, false);
 
-    const bool filter_has_non_key_fields =
-      evaluator.has_non_key_fields(getMetaStruct<MessageType>());
+    TopicDescriptionPtr<TopicImpl> topic(topic_servant_);
+    TypeSupport* const ts = topic->get_type_support();
+    TypeSupportImpl* const type_support = dynamic_cast<TypeSupportImpl*>(ts);
+    const bool filter_has_non_key_fields = type_support ? evaluator.has_non_key_fields(*type_support) : true;
 
     const HandleSet& matches = lookup_matching_instances(sample_states, view_states, instance_states);
     for (HandleSet::const_iterator it = matches.begin(), next = it; it != matches.end(); it = next) {
@@ -705,25 +733,21 @@ namespace OpenDDS {
     return false;
   }
 
-  DDS::ReturnCode_t read_generic(
-                                   OpenDDS::DCPS::DataReaderImpl::GenericBundle& gen,
-                                   DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
-                                   DDS::InstanceStateMask instance_states,
-                                   bool adjust_ref_count=false)
+  DDS::ReturnCode_t read_generic(GenericBundle& gen,
+                                 DDS::SampleStateMask sample_states,
+                                 DDS::ViewStateMask view_states,
+                                 DDS::InstanceStateMask instance_states,
+                                 bool adjust_ref_count = false)
   {
-
     MessageSequenceType data;
     DDS::ReturnCode_t rc;
-    ACE_GUARD_RETURN (ACE_Recursive_Thread_Mutex,
-                      guard,
-                      sample_lock_,
-                      DDS::RETCODE_ERROR);
     {
-      rc = read_i(data, gen.info_,
-                  DDS::LENGTH_UNLIMITED,
+      ACE_GUARD_RETURN(ACE_Recursive_Thread_Mutex, guard, sample_lock_, DDS::RETCODE_ERROR);
+      rc = read_i(data, gen.info_, DDS::LENGTH_UNLIMITED,
                   sample_states, view_states, instance_states, 0);
-      if (true == adjust_ref_count ) {
-        data.increment_references();
+      if (adjust_ref_count) {
+        typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(data);
+        received_data_p.increment_references();
       }
     }
     gen.samples_.reserve(data.length());
@@ -731,7 +755,6 @@ namespace OpenDDS {
       gen.samples_.push_back(&data[i]);
     }
     return rc;
-
   }
 
   DDS::InstanceHandle_t lookup_instance_generic(const void* data)
@@ -739,8 +762,7 @@ namespace OpenDDS {
     return lookup_instance(*static_cast<const MessageType*>(data));
   }
 
-  virtual DDS::ReturnCode_t take(
-                                 OpenDDS::DCPS::AbstractSamples& samples,
+  virtual DDS::ReturnCode_t take(AbstractSamples& samples,
                                  DDS::SampleStateMask sample_states, DDS::ViewStateMask view_states,
                                  DDS::InstanceStateMask instance_states)
   {
@@ -862,11 +884,6 @@ namespace OpenDDS {
     return inst;
   }
 
-  Extensibility get_max_extensibility()
-  {
-    return MarshalTraitsType::max_extensibility_level();
-  }
-
   void set_instance_state_i(DDS::InstanceHandle_t instance,
                             DDS::InstanceHandle_t publication_handle,
                             DDS::InstanceStateKind state,
@@ -919,7 +936,7 @@ namespace OpenDDS {
         return;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
         return;
       }
 
@@ -1056,6 +1073,7 @@ protected:
                                                 bool full_copy)
   {
     unique_ptr<MessageTypeWithAllocator> data(new (*data_allocator()) MessageTypeWithAllocator);
+    dynamic_hook(*data);
     RcHandle<MessageHolder> message_holder;
 
     Message_Block_Ptr payload(sample.data(&mb_alloc_));
@@ -1089,7 +1107,7 @@ protected:
         return message_holder;
       }
       Encoding encoding;
-      if (!encap.to_encoding(encoding, MarshalTraitsType::extensibility())) {
+      if (!encap.to_encoding(encoding, type_support_->base_extensibility())) {
         return message_holder;
       }
 
@@ -1234,6 +1252,10 @@ protected:
 
 private:
 
+  /// Available for specialization so that some types of MessageType can observe and
+  /// change the sample before dds_demarshal deserializes into it
+  void dynamic_hook(MessageType&) {}
+
   bool store_instance_data_check(unique_ptr<MessageTypeWithAllocator>& instance_data,
                                  DDS::InstanceHandle_t publication_handle,
                                  const OpenDDS::DCPS::DataSampleHeader& header,
@@ -1256,8 +1278,8 @@ private:
         }
 
         DDS::Security::SecurityException ex;
-        const RepoId local_participant = make_id(get_repo_id(), ENTITYID_PARTICIPANT);
-        const RepoId remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const GUID_t local_participant = make_id(get_guid(), ENTITYID_PARTICIPANT);
+        const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
         XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
@@ -1274,8 +1296,8 @@ private:
       } else if (is_dispose_msg) {
 
         DDS::Security::SecurityException ex;
-        const RepoId local_participant = make_id(get_repo_id(), ENTITYID_PARTICIPANT);
-        const RepoId remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
+        const GUID_t local_participant = make_id(get_guid(), ENTITYID_PARTICIPANT);
+        const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
         XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
@@ -1314,7 +1336,7 @@ private:
 #endif
 {
 
-  typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
+  typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (subqos_.presentation.access_scope == DDS::GROUP_PRESENTATION_QOS && !coherent_) {
@@ -1331,11 +1353,11 @@ private:
   }
 #endif
 
-  RakeResults<MessageSequenceType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                           a_condition,
+                                   a_condition,
 #endif
-                                           DDS_OPERATION_READ);
+                                   DDS_OPERATION_READ);
 
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_READ);
 
@@ -1401,7 +1423,7 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
   int)
 #endif
 {
-  typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
+  typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (subqos_.presentation.access_scope == DDS::GROUP_PRESENTATION_QOS && !coherent_) {
@@ -1418,11 +1440,11 @@ DDS::ReturnCode_t take_i(MessageSequenceType& received_data,
   }
 #endif
 
-  RakeResults<MessageSequenceType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                           a_condition,
+                                   a_condition,
 #endif
-                                           DDS_OPERATION_TAKE);
+                                   DDS_OPERATION_TAKE);
 
   const Observer_rch observer = get_observer(Observer::e_SAMPLE_TAKEN);
 
@@ -1485,13 +1507,13 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
   const SubscriptionInstance_rch inst = get_handle_instance(a_handle);
   if (!inst) return DDS::RETCODE_BAD_PARAMETER;
 
-  typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
+  typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
-  RakeResults<MessageSequenceType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                           a_condition,
+                                   a_condition,
 #endif
-                                           DDS_OPERATION_READ);
+                                   DDS_OPERATION_READ);
 
   const InstanceState_rch state_obj = inst->instance_state_;
   if (state_obj->match(view_states, instance_states)) {
@@ -1519,7 +1541,7 @@ DDS::ReturnCode_t read_instance_i(MessageSequenceType& received_data,
     }
     ACE_DEBUG((LM_DEBUG, ACE_TEXT("(%P|%t) DataReaderImpl_T::read_instance_i: ")
                ACE_TEXT("will return no data reading sub %C because:\n  %C\n"),
-               LogGuid(get_repo_id()).c_str(), msg.c_str()));
+               LogGuid(get_guid()).c_str(), msg.c_str()));
   }
 
   results.copy_to_user();
@@ -1552,13 +1574,13 @@ DDS::ReturnCode_t take_instance_i(MessageSequenceType& received_data,
   const SubscriptionInstance_rch inst = get_handle_instance(a_handle);
   if (!inst) return DDS::RETCODE_BAD_PARAMETER;
 
-  typename MessageSequenceType::PrivateMemberAccess received_data_p(received_data);
+  typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
-  RakeResults<MessageSequenceType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
+  RakeResults<MessageType> results(this, received_data, info_seq, max_samples, subqos_.presentation,
 #ifndef OPENDDS_NO_QUERY_CONDITION
-                                           a_condition,
+                                   a_condition,
 #endif
-                                           DDS_OPERATION_TAKE);
+                                   DDS_OPERATION_TAKE);
 
   const InstanceState_rch state_obj = inst->instance_state_;
   if (state_obj->match(view_states, instance_states)) {
@@ -1795,7 +1817,7 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
       }
       OpenDDS::DCPS::SubscriptionInstance_rch instance =
         OpenDDS::DCPS::make_rch<OpenDDS::DCPS::SubscriptionInstance>(
-          this,
+          rchandle_from(this),
           qos_,
           ref(instances_lock_),
           handle, owns_handle);
@@ -1827,10 +1849,8 @@ void store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_data,
 
         if (new_handle) {
           const std::pair<typename InstanceMap::iterator, bool> bpair =
-            inst->insert(typename InstanceMap::value_type(*instance_data,
-              handle));
-          if (bpair.second == false)
-          {
+            inst->insert(typename InstanceMap::value_type(*instance_data, handle));
+          if (!bpair.second) {
             if (DCPS_debug_level > 0) {
               ACE_ERROR ((LM_ERROR,
                           ACE_TEXT("(%P|%t) ")
@@ -2088,7 +2108,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
 #ifndef OPENDDS_NO_OBJECT_MODEL_PROFILE
   if (! ptr->coherent_change_) {
 #endif
-    RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant ();
+    RcHandle<OpenDDS::DCPS::SubscriberImpl> sub = get_subscriber_servant();
     if (!sub || get_deleted())
       return;
 
@@ -2116,6 +2136,7 @@ void finish_store_instance_data(unique_ptr<MessageTypeWithAllocator> instance_da
         if (!is_bit()) {
           set_status_changed_flag(DDS::DATA_AVAILABLE_STATUS, false);
           sub->set_status_changed_flag(DDS::DATA_ON_READERS_STATUS, false);
+          sub.reset();
           ACE_GUARD(typename DataReaderImpl::Reverse_Lock_t, unlock_guard, reverse_sample_lock_);
           listener->on_data_available(this);
         } else {
@@ -2159,7 +2180,7 @@ DDS::ReturnCode_t check_inputs(const char* method_name,
                                DDS::SampleInfoSeq& info_seq,
                                ::CORBA::Long max_samples)
 {
-  typename MessageSequenceType::PrivateMemberAccess received_data_p (received_data);
+  typename DDSTraits<MessageType>::MessageSequenceAdapterType received_data_p(received_data);
 
   // ---- start of preconditions common to read and take -----
   // SPEC ref v1.2 7.1.2.5.3.8 #1

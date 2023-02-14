@@ -551,8 +551,11 @@ public:
     , peer(0)
     , param_bld(0)
     , params(0)
+#else
+    , group(0)
 #endif
-    , pubkey(0), group(0), bignum_ctx(0)
+    , pubkey(0)
+    , bignum_ctx(0)
   {
     if (!keypair) {
       OPENDDS_SSL_LOG_ERR("EVP_PKEY_get0_EC_KEY failed");
@@ -684,6 +687,7 @@ public:
 private:
 #ifndef OPENSSL_V_3_0
   EC_Handle keypair;
+  const EC_GROUP* group;
 #else
   EVP_PKEY* keypair;
   EVP_PKEY_CTX* ec_ctx;
@@ -693,7 +697,6 @@ private:
   OSSL_PARAM* params;
 #endif
   EC_POINT* pubkey;
-  const EC_GROUP* group;
   BN_CTX* bignum_ctx;
 };
 
