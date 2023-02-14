@@ -42,6 +42,10 @@ class DataWriterImpl;
 class DataReaderImpl;
 class BitSubscriber;
 
+/**
+ * This is used by get_dynamic_type on the service participant to wait for a
+ * TypeObject request to complete.
+ */
 struct OpenDDS_Dcps_Export TypeObjReqCond {
   typedef ACE_Thread_Mutex LockType;
   LockType lock;

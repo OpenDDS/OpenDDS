@@ -1076,19 +1076,25 @@ protected:
 
   struct MatchingPair : public DCPS::GuidPair {
     bool local_is_reader;
-    DCPS::TypeObjReqCond* non_match_cond;
+    /**
+     * This is used by get_dynamic_type on the service participant to wait for a
+     * TypeObject request to complete. This is does not take ownership because
+     * it should only be on the stack as the request should complete or fail
+     * within the call to get_dynamic_type.
+     */
+    DCPS::TypeObjReqCond* type_obj_req_cond;
 
     MatchingPair(const GUID_t& reader, const GUID_t writer, bool reader_is_local)
       : GuidPair(reader_is_local ? reader : writer, reader_is_local ? writer : reader)
       , local_is_reader(reader_is_local)
-      , non_match_cond(0)
+      , type_obj_req_cond(0)
     {
     }
 
-    MatchingPair(const GUID_t& remote, bool remote_is_reader, DCPS::TypeObjReqCond* non_match_cond)
+    MatchingPair(const GUID_t& remote, bool remote_is_reader, DCPS::TypeObjReqCond* type_obj_req_cond)
       : GuidPair(GUID_UNKNOWN, remote)
       , local_is_reader(!remote_is_reader)
-      , non_match_cond(non_match_cond)
+      , type_obj_req_cond(type_obj_req_cond)
     {
     }
 
@@ -1105,7 +1111,7 @@ protected:
     bool operator<(const MatchingPair& other) const
     {
       const int pair_cmp = cmp(other);
-      return pair_cmp < 0 || (pair_cmp == 0 && non_match_cond < other.non_match_cond);
+      return pair_cmp < 0 || (pair_cmp == 0 && type_obj_req_cond < other.type_obj_req_cond);
     }
   };
 

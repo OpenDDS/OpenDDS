@@ -3921,8 +3921,8 @@ bool Sedp::TypeLookupReplyReader::process_type_lookup_reply(
             it->second.got_complete = true;
           }
 
-          if (it->first.non_match_cond) {
-            it->first.non_match_cond->done(DDS::RETCODE_OK);
+          if (it->first.type_obj_req_cond) {
+            it->first.type_obj_req_cond->done(DDS::RETCODE_OK);
             sedp_.matching_data_buffer_.erase(it);
             return true;
           } else if (it->second.got_minimal && it->second.got_complete) {
@@ -6988,8 +6988,8 @@ void Sedp::remove_expired_endpoints(const MonotonicTimePoint& /*now*/)
           "clean up pending pair local: %C remote: %C\n",
           LogGuid(iter->first.local).c_str(), LogGuid(iter->first.remote).c_str()));
       }
-      if (iter->first.non_match_cond) {
-        iter->first.non_match_cond->done(DDS::RETCODE_TIMEOUT);
+      if (iter->first.type_obj_req_cond) {
+        iter->first.type_obj_req_cond->done(DDS::RETCODE_TIMEOUT);
       }
       matching_data_buffer_.erase(iter++);
     } else {
