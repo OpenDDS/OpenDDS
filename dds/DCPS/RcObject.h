@@ -78,11 +78,6 @@ namespace DCPS {
       }
     }
 
-    virtual CORBA::ULong _refcount_value() const
-    {
-      return ref_count();
-    }
-
     long ref_count() const
     {
       return ref_count_;
