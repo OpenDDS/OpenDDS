@@ -147,7 +147,7 @@ GuidGenerator::interfaceName(const char* iface)
   // ifr.ifr_name is sized to IFNAMSIZ
   if (std::strlen(iface) >= sizeof(ifr.ifr_name)) {
     if (DCPS::log_level >= DCPS::LogLevel::Error) {
-      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR:: GuidGenerator::interfaceName: "
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidGenerator::interfaceName: "
         "Interface name %C exceeds max allowable length, must be < %d.\n",
         iface, IFNAMSIZ));
     }
