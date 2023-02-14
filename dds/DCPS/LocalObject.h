@@ -34,7 +34,7 @@ public:
   virtual void _remove_ref() {
     RcObject::_remove_ref();
   }
-  virtual CORBA::ULong _refcount_value() {
+  virtual CORBA::ULong _refcount_value() const {
     return RcObject::_refcount_value();
   }
 };
