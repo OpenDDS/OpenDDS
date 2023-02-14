@@ -87,7 +87,11 @@ namespace DCPS {
       }
     }
 
-    /// This accessor is purely for debugging purposes
+    virtual CORBA::ULong _refcount_value() const
+    {
+      return ref_count();
+    }
+
     long ref_count() const
     {
 #ifdef ACE_HAS_CPP11

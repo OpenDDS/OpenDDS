@@ -34,6 +34,9 @@ public:
   virtual void _remove_ref() {
     RcObject::_remove_ref();
   }
+  virtual CORBA::ULong _refcount_value() {
+    return RcObject::_refcount_value();
+  }
 };
 
 /// OpenDDS::DCPS::LocalObject resolves ambiguously-inherited members like
