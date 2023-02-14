@@ -36,7 +36,8 @@ public:
   {
     RcObject::_remove_ref();
   }
-  virtual CORBA::ULong _refcount_value() const {
+  virtual CORBA::ULong _refcount_value() const
+  {
     return static_cast<CORBA::ULong>(RcObject::ref_count());
   }
 };
