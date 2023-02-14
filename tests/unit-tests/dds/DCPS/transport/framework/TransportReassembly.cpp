@@ -1009,6 +1009,115 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Fill_Out_Of_Order)
   EXPECT_TRUE(!tr.reassemble(FragmentRange(64, 126), data9.sample, 251)); // 1-251
 }
 
+namespace {
+
+size_t fact(size_t val)
+{
+  return val < 2 ? 1 : val * fact(val - 1);
+}
+
+template <typename T>
+void swap(T* a, T* b)
+{
+  T temp = *a;
+  *a = *b;
+  *b = temp;
+}
+
+template <typename T>
+bool permute(T* list, size_t size, size_t state)
+{
+  if (size == 1) return true;
+  const size_t sub_size = fact(size - 1);
+  const size_t swap_index = state / sub_size;
+  const size_t mod = state % sub_size;
+  if (swap_index) {
+    swap(list, list + swap_index);
+  }
+  permute(list + 1, size - 1, mod);
+  return state + 1 == size * sub_size;
+}
+
+template <typename T>
+bool unpermute(T* list, size_t size, size_t state)
+{
+  if (size == 1) return true;
+  const size_t sub_size = fact(size - 1);
+  const size_t swap_index = state / sub_size;
+  const size_t mod = state % sub_size;
+  unpermute(list + 1, size - 1, mod);
+  if (swap_index) {
+    swap(list, list + swap_index);
+  }
+  return state + 1 == size * sub_size;
+}
+
+} // namespace
+
+TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Permutations)
+{
+  const SequenceNumber msg_seq(2);
+  const GUID_t pub_id = create_pub_id();
+  const bool debug_logging = false;
+  const size_t sample_count = 5;
+  const size_t fragments_per_sample = 3;
+  const size_t fragment_count = sample_count * fragments_per_sample;
+
+  std::vector<size_t> order_list(sample_count, 0);
+  for (size_t i = 0; i < sample_count; ++i) {
+    order_list[i] = sample_count - i - 1;
+  }
+
+  size_t state = 0;
+  bool stop = false;
+
+  while (!stop) {
+    permute(&order_list[0], sample_count, state);
+
+    if (debug_logging) {
+      std::cout << "permuted order_list[] = { ";
+      for (size_t i = 0; i < sample_count; ++i) {
+        if (i == 0) {
+          std::cout << order_list[i];
+        } else {
+          std::cout << ", " << order_list[i];
+        }
+      }
+      std::cout << " }" << std::endl;
+    }
+
+    std::vector<Sample> samples;
+    for (size_t i = 0; i < sample_count; ++i) {
+      if (debug_logging) {
+        const size_t sn = i;
+        const FragmentNumber fn1 = static_cast<FragmentNumber>(sn * fragments_per_sample + 1);
+        const FragmentNumber fn2 = static_cast<FragmentNumber>((sn + 1) * fragments_per_sample);
+        std::cout << " - Creating sample " << sn << " with fragments (" << fn1 << "-" << fn2 << ") and 'more_fragments' set to " << ((i + 1) != sample_count ? "true" : "false") << std::endl;
+      }
+      samples.push_back(Sample(pub_id, msg_seq, (i + 1) != sample_count, 1024 * fragments_per_sample));
+    }
+
+    TransportReassembly tr;
+
+    for (size_t i = 0; i < sample_count; ++i) {
+      const size_t sn = order_list[i];
+      const FragmentNumber fn1 = static_cast<FragmentNumber>(sn * fragments_per_sample + 1);
+      const FragmentNumber fn2 = static_cast<FragmentNumber>((sn + 1) * fragments_per_sample);
+      if (debug_logging) {
+        std::cout << " - Inserting fragments (" << fn1 << "-" << fn2 << ")" << std::endl;
+      }
+      if ((i + 1) != sample_count) {
+        EXPECT_FALSE(tr.reassemble(FragmentRange(fn1, fn2), samples[sn].sample, fragment_count));
+      } else {
+        EXPECT_TRUE(tr.reassemble(FragmentRange(fn1, fn2), samples[sn].sample, fragment_count));
+      }
+    }
+
+    stop = unpermute(&order_list[0], sample_count, state);
+    ++state;
+  }
+}
+
 TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Fill_Overlapping_Inputs)
 {
   TransportReassembly tr;
