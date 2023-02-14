@@ -17,7 +17,7 @@
 #include "dds/DCPS/transport/framework/ReceivedDataSample.h"
 #include "dds/DCPS/transport/framework/TransportReassembly.h"
 
-#include <string.h>
+#include <cstring>
 
 using namespace OpenDDS::DCPS;
 
@@ -29,12 +29,15 @@ namespace {
   }
 
   // Class handling assembly of samples with a messge block
-  class Sample {
+  class Sample : public virtual RcObject {
   public:
-    Sample(const GUID_t& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true, size_t size = 0)
+    Sample(const GUID_t& pub_id, const SequenceNumber& msg_seq, bool more_fragments = true, size_t size = 0, unsigned char fill = 0)
       : mb(new ACE_Message_Block(size == 0 ? DataSampleHeader::get_max_serialized_size() : size))
       , sample()
     {
+      if (fill != 0) {
+        std::memset(mb->wr_ptr(), fill, size == 0 ? DataSampleHeader::get_max_serialized_size() : size);
+      }
       mb->wr_ptr(size == 0 ? DataSampleHeader::get_max_serialized_size() : size);
       sample = ReceivedDataSample(*mb);
       sample.header_.publication_id_ = pub_id;
@@ -49,6 +52,7 @@ namespace {
   enum Constants {
     BM_LENGTH = 8
   };
+  typedef RcHandle<Sample> Sample_rch;
 
   class Gaps {
   public:
@@ -56,12 +60,12 @@ namespace {
     : result_bits(0)
     , base()
     {
-      memset(&bitmap, 0, sizeof(bitmap));
+      std::memset(&bitmap, 0, sizeof(bitmap));
     }
 
     // Get the gaps in a TransportReassembly instance
     CORBA::ULong get(TransportReassembly& tr, const SequenceNumber& frag_seq, const GUID_t& pub_id) {
-      memset(&bitmap, 0, sizeof(bitmap));
+      std::memset(&bitmap, 0, sizeof(bitmap));
       base = tr.get_gaps(frag_seq, pub_id, bitmap, bm_length, result_bits);
       return base;
     }
@@ -1086,7 +1090,10 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Permutations)
       std::cout << " }" << std::endl;
     }
 
-    std::vector<Sample> samples;
+#ifdef ACE_HAS_CPP11
+    uint32_t start_hash = 0;
+#endif
+    std::vector<Sample_rch> samples;
     for (size_t i = 0; i < sample_count; ++i) {
       if (debug_logging) {
         const size_t sn = i;
@@ -1094,7 +1101,14 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Permutations)
         const FragmentNumber fn2 = static_cast<FragmentNumber>((sn + 1) * fragments_per_sample);
         std::cout << " - Creating sample " << sn << " with fragments (" << fn1 << "-" << fn2 << ") and 'more_fragments' set to " << ((i + 1) != sample_count ? "true" : "false") << std::endl;
       }
-      samples.push_back(Sample(pub_id, msg_seq, (i + 1) != sample_count, 1024 * fragments_per_sample));
+      samples.push_back(make_rch<Sample>(pub_id, msg_seq, (i + 1) != sample_count, 1024 * fragments_per_sample, 'a' + i));
+      DDS::OctetSeq data = samples.back()->sample.copy_data();
+      ASSERT_EQ(data.length(), 1024 * fragments_per_sample);
+#ifdef ACE_HAS_CPP11
+      start_hash = one_at_a_time_hash(&data[0], 1024 * fragments_per_sample, start_hash);
+#endif
+      ASSERT_EQ(data[0], 'a' + i);
+      ASSERT_EQ(data[1023], 'a' + i);
     }
 
     TransportReassembly tr;
@@ -1107,9 +1121,24 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Permutations)
         std::cout << " - Inserting fragments (" << fn1 << "-" << fn2 << ")" << std::endl;
       }
       if ((i + 1) != sample_count) {
-        EXPECT_FALSE(tr.reassemble(FragmentRange(fn1, fn2), samples[sn].sample, fragment_count));
+        EXPECT_FALSE(tr.reassemble(FragmentRange(fn1, fn2), samples[sn]->sample, fragment_count));
       } else {
-        EXPECT_TRUE(tr.reassemble(FragmentRange(fn1, fn2), samples[sn].sample, fragment_count));
+        EXPECT_TRUE(tr.reassemble(FragmentRange(fn1, fn2), samples[sn]->sample, fragment_count));
+        DDS::OctetSeq data = samples[sn]->sample.copy_data();
+        ASSERT_EQ(data.length(), 1024 * fragment_count);
+#ifdef ACE_HAS_CPP11
+        uint32_t end_hash = 0;
+#endif
+        for (size_t i = 0; i < sample_count; ++i) {
+          ASSERT_EQ(data[i * 1024 * fragments_per_sample], 'a' + i);
+          ASSERT_EQ(data[(i + 1) * 1024 * fragments_per_sample - 1], 'a' + i);
+#ifdef ACE_HAS_CPP11
+          end_hash = one_at_a_time_hash(&data[i * 1024 * fragments_per_sample], 1024 * fragments_per_sample, end_hash);
+#endif
+        }
+#ifdef ACE_HAS_CPP11
+        ASSERT_EQ(end_hash, start_hash);
+#endif
       }
     }
 
