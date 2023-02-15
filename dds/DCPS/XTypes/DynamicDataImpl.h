@@ -979,6 +979,19 @@ private:
     const DynamicDataImpl* data_;
   };
 
+  // Copy a value of a basic member from single map to a DynamicData object.
+  bool move_single_to_complex(const DataContainer::const_single_iterator& it,
+                              DynamicDataImpl* data);
+
+  template<typename SequenceType>
+  void move_sequence_helper(const DataContainer::const_sequence_iterator& it,
+                            DynamicDataImpl* data);
+
+  // Copy values of a basic sequence member from sequence map to a DynamicData object.
+  bool move_sequence_to_complex(const DataContainer::const_sequence_iterator& it,
+                                DynamicDataImpl* data);
+  bool get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
+
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                           DataContainer::const_single_iterator it) const;
 

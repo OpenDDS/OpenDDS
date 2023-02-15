@@ -768,6 +768,204 @@ DynamicDataImpl::SingleValue::SingleValue(const SingleValue& other)
   }
 }
 
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int32Seq& int32_seq)
+  : elem_kind_(TK_INT32), active_(new(int32_seq_) DDS::Int32Seq(int32_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt32Seq& uint32_seq)
+  : elem_kind_(TK_UINT32), active_(new(uint32_seq_) DDS::UInt32Seq(uint32_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int8Seq& int8_seq)
+  : elem_kind_(TK_INT8), active_(new(int8_seq_) DDS::Int8Seq(int8_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt8Seq& uint8_seq)
+  : elem_kind_(TK_UINT8), active_(new(uint8_seq_) DDS::UInt8Seq(uint8_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int16Seq& int16_seq)
+  : elem_kind_(TK_INT16), active_(new(int16_seq_) DDS::Int16Seq(int16_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt16Seq& uint16_seq)
+  : elem_kind_(TK_UINT16), active_(new(uint16_seq_) DDS::UInt16Seq(uint16_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int64Seq& int64_seq)
+  : elem_kind_(TK_INT64), active_(new(int64_seq_) DDS::Int64Seq(int64_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt64Seq& uint64_seq)
+  : elem_kind_(TK_UINT64), active_(new(uint64_seq_) DDS::UInt64Seq(uint64_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Float32Seq& float32_seq)
+  : elem_kind_(TK_FLOAT32), active_(new(float32_seq_) DDS::Float32Seq(float32_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Float64Seq& float64_seq)
+  : elem_kind_(TK_FLOAT64), active_(new(float64_seq_) DDS::Float64Seq(float64_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Float128Seq& float128_seq)
+  : elem_kind_(TK_FLOAT128), active_(new(float128_seq_) DDS::Float128Seq(float128_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::CharSeq& char8_seq)
+  : elem_kind_(TK_CHAR8), active_(new(char8_seq_) DDS::CharSeq(char8_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::ByteSeq& byte_seq)
+  : elem_kind_(TK_BYTE), active_(new(byte_seq_) DDS::ByteSeq(byte_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::BooleanSeq& boolean_seq)
+  : elem_kind_(TK_BOOLEAN), active_(new(boolean_seq_) DDS::BooleanSeq(boolean_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::StringSeq& str_seq)
+  : elem_kind_(TK_STRING8), active_(new(string_seq_) DDS::StringSeq(str_seq))
+{}
+
+#ifdef DDS_HAS_WCHAR
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::WcharSeq& char16_seq)
+  : elem_kind_(TK_CHAR16), active_(new(char16_seq_) DDS::WcharSeq(char16_seq))
+{}
+
+DynamicDataImpl::SequenceValue::SequenceValue(const DDS::WstringSeq& wstr_seq)
+  : elem_kind_(TK_STRING16), active_(new(wstring_seq_) DDS::WstringSeq(wstr_seq))
+{}
+#endif
+
+DynamicDataImpl::SequenceValue::SequenceValue(const SequenceValue& rhs)
+  : elem_kind_(rhs.elem_kind_), active_(0)
+{
+#define SEQUENCE_VALUE_PLACEMENT_NEW(T, N)  active_ = new(N) DDS::T(reinterpret_cast<const DDS::T&>(rhs.N)); break;
+  switch (elem_kind_) {
+  case TK_INT32:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int32Seq, int32_seq_);
+  case TK_UINT32:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt32Seq, uint32_seq_);
+  case TK_INT8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int8Seq, int8_seq_);
+  case TK_UINT8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt8Seq, uint8_seq_);
+  case TK_INT16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int16Seq, int16_seq_);
+  case TK_UINT16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt16Seq, uint16_seq_);
+  case TK_INT64:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Int64Seq, int64_seq_);
+  case TK_UINT64:
+    SEQUENCE_VALUE_PLACEMENT_NEW(UInt64Seq, uint64_seq_);
+  case TK_FLOAT32:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Float32Seq, float32_seq_);
+  case TK_FLOAT64:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Float64Seq, float64_seq_);
+  case TK_FLOAT128:
+    SEQUENCE_VALUE_PLACEMENT_NEW(Float128Seq, float128_seq_);
+  case TK_CHAR8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(CharSeq, char8_seq_);
+  case TK_BYTE:
+    SEQUENCE_VALUE_PLACEMENT_NEW(ByteSeq, byte_seq_);
+  case TK_BOOLEAN:
+    SEQUENCE_VALUE_PLACEMENT_NEW(BooleanSeq, boolean_seq_);
+  case TK_STRING8:
+    SEQUENCE_VALUE_PLACEMENT_NEW(StringSeq, string_seq_);
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(WcharSeq, char16_seq_);
+  case TK_STRING16:
+    SEQUENCE_VALUE_PLACEMENT_NEW(WstringSeq, wstring_seq_);
+#endif
+  }
+#undef SEQUENCE_VALUE_PLACEMENT_NEW
+}
+
+DynamicDataImpl::SequenceValue::~SequenceValue()
+{
+#define SEQUENCE_VALUE_DESTRUCT(T) static_cast<DDS::T*>(active_)->~T(); break
+  switch (elem_kind_) {
+  case TK_INT32:
+    SEQUENCE_VALUE_DESTRUCT(Int32Seq);
+  case TK_UINT32:
+    SEQUENCE_VALUE_DESTRUCT(UInt32Seq);
+  case TK_INT8:
+    SEQUENCE_VALUE_DESTRUCT(Int8Seq);
+  case TK_UINT8:
+    SEQUENCE_VALUE_DESTRUCT(UInt8Seq);
+  case TK_INT16:
+    SEQUENCE_VALUE_DESTRUCT(Int16Seq);
+  case TK_UINT16:
+    SEQUENCE_VALUE_DESTRUCT(UInt16Seq);
+  case TK_INT64:
+    SEQUENCE_VALUE_DESTRUCT(Int64Seq);
+  case TK_UINT64:
+    SEQUENCE_VALUE_DESTRUCT(UInt64Seq);
+  case TK_FLOAT32:
+    SEQUENCE_VALUE_DESTRUCT(Float32Seq);
+  case TK_FLOAT64:
+    SEQUENCE_VALUE_DESTRUCT(Float64Seq);
+  case TK_FLOAT128:
+    SEQUENCE_VALUE_DESTRUCT(Float128Seq);
+  case TK_CHAR8:
+    SEQUENCE_VALUE_DESTRUCT(CharSeq);
+  case TK_BYTE:
+    SEQUENCE_VALUE_DESTRUCT(ByteSeq);
+  case TK_BOOLEAN:
+    SEQUENCE_VALUE_DESTRUCT(BooleanSeq);
+  case TK_STRING8:
+    SEQUENCE_VALUE_DESTRUCT(StringSeq);
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    SEQUENCE_VALUE_DESTRUCT(WcharSeq);
+  case TK_STRING16:
+    SEQUENCE_VALUE_DESTRUCT(WstringSeq);
+#endif
+  }
+  #undef SEQUENCE_VALUE_DESTRUCT
+}
+
+#define SEQUENCE_VALUE_GETTERS(T) return *static_cast<DDS::T*>(active_)
+template<> const DDS::Int32Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(Int32Seq); }
+template<> const DDS::UInt32Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(UInt32Seq); }
+template<> const DDS::Int8Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(Int8Seq); }
+template<> const DDS::UInt8Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(UInt8Seq); }
+template<> const DDS::Int16Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(Int16Seq); }
+template<> const DDS::UInt16Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(UInt16Seq); }
+template<> const DDS::Int64Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(Int64Seq); }
+template<> const DDS::UInt64Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(UInt64Seq); }
+template<> const DDS::Float32Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(Float32Seq); }
+template<> const DDS::Float64Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(Float64Seq); }
+template<> const DDS::Float128Seq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(Float128Seq); }
+template<> const DDS::CharSeq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(CharSeq); }
+template<> const DDS::ByteSeq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(ByteSeq); }
+template<> const DDS::BooleanSeq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(BooleanSeq); }
+template<> const DDS::StringSeq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(StringSeq); }
+#ifdef DDS_HAS_WCHAR
+template<> const DDS::WcharSeq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(WcharSeq); }
+template<> const DDS::WstringSeq& DynamicDataImpl::SequenceValue::get() const
+{ SEQUENCE_VALUE_GETTERS(WstringSeq); }
+#endif
+#undef SEQUENCE_VALUE_GETTERS
+
 bool DynamicDataImpl::read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                                          DataContainer::const_single_iterator it) const
 {
@@ -2849,6 +3047,324 @@ DDS::ReturnCode_t DynamicDataImpl::get_wstring_value(CORBA::WChar*& value, DDS::
 #endif
 }
 
+bool DynamicDataImpl::move_single_to_complex(const DataContainer::const_single_iterator& it,
+                                             DynamicDataImpl* data)
+{
+  DDS::DynamicType_var member_type = data->type();
+  switch (member_type->get_kind()) {
+  case TK_INT8: {
+    const ACE_OutputCDR::from_int8& value = it->second.get<ACE_OutputCDR::from_int8>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_UINT8: {
+    const ACE_OutputCDR::from_uint8& value = it->second.get<ACE_OutputCDR::from_uint8>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_INT16: {
+    const CORBA::Short value = it->second.get<CORBA::Short>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_UINT16: {
+    const CORBA::UShort value = it->second.get<CORBA::UShort>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_INT32: {
+    const CORBA::Long value = it->second.get<CORBA::Long>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_UINT32: {
+    const CORBA::ULong value = it->second.get<CORBA::ULong>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_INT64: {
+    const CORBA::LongLong value = it->second.get<CORBA::LongLong>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_UINT64: {
+    const CORBA::ULongLong value = it->second.get<CORBA::ULongLong>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_FLOAT32: {
+    const CORBA::Float value = it->second.get<CORBA::Float>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_FLOAT64: {
+    const CORBA::Double value = it->second.get<CORBA::Double>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_FLOAT128: {
+    const CORBA::LongDouble value = it->second.get<CORBA::LongDouble>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_CHAR8: {
+    const ACE_OutputCDR::from_char& value = it->second.get<ACE_OutputCDR::from_char>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    const ACE_OutputCDR::from_wchar& value = it->second.get<ACE_OutputCDR::from_wchar>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+#endif
+  case TK_BYTE: {
+    const ACE_OutputCDR::from_octet& value = it->second.get<ACE_OutputCDR::from_octet>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_BOOLEAN: {
+    const ACE_OutputCDR::from_boolean& value = it->second.get<ACE_OutputCDR::from_boolean>();
+    data->insert_single(MEMBER_ID_INVALID, value);
+    break;
+  }
+  case TK_STRING8: {
+    const char* str = it->second.get<const char*>();
+    const size_t len = ACE_OS::strlen(str);
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      DDS::MemberId id = get_member_id_at_index(i);
+      data->insert_single(id, str[i]);
+    }
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16: {
+    const CORBA::WChar* wstr = it->second.get<const CORBA::WChar*>();
+    const size_t len = ACE_OS::strlen(wstr);
+    for (CORBA::ULong i = 0; i < len; ++i) {
+      DDS::MemberId id = get_member_id_at_index(i);
+      data->insert_single(id, wstr[i]);
+    }
+    break;
+  }
+#endif
+  default:
+    return false;
+  }
+  return true;
+}
+
+template<typename SequenceType>
+void DynamicDataImpl::move_sequence_helper(const DataContainer::const_sequence_iterator& it,
+                                           DynamicDataImpl* data)
+{
+  const SequenceType& values = it->second.get<SequenceType>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    DDS::MemberId id = get_member_id_at_index(i);
+    data->insert_single(id, values[i]);
+  }
+}
+
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::Int8Seq>(const DataContainer::const_sequence_iterator& it,
+                                                         DynamicDataImpl* data)
+{
+  const DDS::Int8Seq& values = it->second.get<DDS::Int8Seq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    DDS::MemberId id = get_member_id_at_index(i);
+    data->insert_single(id, ACE_OutputCDR::from_int8(values[i]));
+  }
+}
+
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::UInt8Seq>(const DataContainer::const_sequence_iterator& it,
+                                                          DynamicDataImpl* data)
+{
+  const DDS::UInt8Seq& values = it->second.get<DDS::UInt8Seq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    DDS::MemberId id = get_member_id_at_index(i);
+    data->insert_single(id, ACE_OutputCDR::from_uint8(values[i]));
+  }
+}
+
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::CharSeq>(const DataContainer::const_sequence_iterator& it,
+                                                         DynamicDataImpl* data)
+{
+  const DDS::CharSeq& values = it->second.get<DDS::CharSeq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    DDS::MemberId id = get_member_id_at_index(i);
+    data->insert_single(id, ACE_OutputCDR::from_char(values[i]));
+  }
+}
+
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::ByteSeq>(const DataContainer::const_sequence_iterator& it,
+                                                         DynamicDataImpl* data)
+{
+  const DDS::ByteSeq& values = it->second.get<DDS::ByteSeq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    DDS::MemberId id = get_member_id_at_index(i);
+    data->insert_single(id, ACE_OutputCDR::from_octet(values[i]));
+  }
+}
+
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::BooleanSeq>(const DataContainer::const_sequence_iterator& it,
+                                                            DynamicDataImpl* data)
+{
+  const DDS::BooleanSeq& values = it->second.get<DDS::BooleanSeq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    DDS::MemberId id = get_member_id_at_index(i);
+    data->insert_single(id, ACE_OutputCDR::from_boolean(values[i]));
+  }
+}
+
+#ifdef DDS_HAS_WCHAR
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::WcharSeq>(const DataContainer::const_sequence_iterator& it,
+                                                          DynamicDataImpl* data)
+{
+  const DDS::WcharSeq& values = it->second.get<DDS::WcharSeq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    DDS::MemberId id = get_member_id_at_index(i);
+    data->insert_single(id, ACE_OutputCDR::from_wchar(values[i]));
+  }
+}
+#endif
+
+bool DynamicDataImpl::move_sequence_to_complex(const DataContainer::const_sequence_iterator& it,
+                                               DynamicDataImpl* data)
+{
+  DDS::DynamicType_var seq_type = data->type();
+  DDS::TypeDescriptor_var seq_td;
+  if (seq_type->get_descriptor(seq_td) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType_var elem_type = get_base_type(seq_td->element_type());
+
+  switch (elem_type->get_kind()) {
+  case TK_INT8: {
+    move_sequence_helper<DDS::Int8Seq>(it, data);
+    break;
+  }
+  case TK_UINT8: {
+    move_sequence_helper<DDS::UInt8Seq>(it, data);
+    break;
+  }
+  case TK_INT16: {
+    move_sequence_helper<DDS::Int16Seq>(it, data);
+    break;
+  }
+  case TK_UINT16: {
+    move_sequence_helper<DDS::UInt16Seq>(it, data);
+    break;
+  }
+  case TK_INT32: {
+    move_sequence_helper<DDS::Int32Seq>(it, data);
+    break;
+  }
+  case TK_UINT32: {
+    move_sequence_helper<DDS::UInt32Seq>(it, data);
+    break;
+  }
+  case TK_INT64: {
+    move_sequence_helper<DDS::Int64Seq>(it, data);
+    break;
+  }
+  case TK_UINT64: {
+    move_sequence_helper<DDS::UInt64Seq>(it, data);
+    break;
+  }
+  case TK_FLOAT32: {
+    move_sequence_helper<DDS::Float32Seq>(it, data);
+    break;
+  }
+  case TK_FLOAT64: {
+    move_sequence_helper<DDS::Float64Seq>(it, data);
+    break;
+  }
+  case TK_FLOAT128: {
+    move_sequence_helper<DDS::Float128Seq>(it, data);
+    break;
+  }
+  case TK_CHAR8: {
+    move_sequence_helper<DDS::CharSeq>(it, data);
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    move_sequence_helper<DDS::WcharSeq>(it, data);
+    break;
+  }
+#endif
+  case TK_BYTE: {
+    move_sequence_helper<DDS::ByteSeq>(it, data);
+    break;
+  }
+  case TK_BOOLEAN: {
+    move_sequence_helper<DDS::BooleanSeq>(it, data);
+    break;
+  }
+  case TK_STRING8: {
+    move_sequence_helper<DDS::StringSeq>(it, data);
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16: {
+    move_sequence_helper<DDS::WstringSeq>(it, data);
+    break;
+  }
+#endif
+  default:
+    return false;
+  }
+  return true;
+}
+
+bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  if (complex_it != container_.complex_map_.end()) {
+    value = DDS::DynamicData::_duplicate(complex_it->second);
+    return true;
+  }
+
+  DDS::DynamicTypeMember_var dtm;
+  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::MemberDescriptor_var md;
+  if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DDS::DynamicType_var member_type = get_base_type(md->type());
+  DynamicDataImpl* dd_impl = new DynamicDataImpl(member_type);
+  DDS::DynamicData_var dd_var = dd_impl;
+
+  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  DataContainer::const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
+  if (single_it != container_.single_map_.end()) {
+    if (!move_single_to_complex(single_it, dd_impl)) {
+      return false;
+    }
+  } else if (sequence_it != container_.sequence_map_.end()) {
+    if (!move_sequence_to_complex(sequence_it, dd_impl)) {
+      return false;
+    }
+  }
+  insert_complex(id, dd_var);
+  value = DDS::DynamicData::_duplicate(dd_var);
+  return true;
+}
+
+bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  // TODO:
+  
+}
+
 // TODO(sonndinh)
 DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
@@ -2856,7 +3372,11 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
   bool good = true;
   switch (tk) {
   case TK_STRUCTURE:
+    good = get_complex_from_struct(value, id);
+    break;
   case TK_UNION:
+    good = get_complex_from_union(value, id);
+    break;
   case TK_SEQUENCE:
   case TK_ARRAY:
   case TK_MAP:
@@ -2990,204 +3510,6 @@ bool DynamicDataImpl::is_basic_type(TypeKind tk) const
 {
   return is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16;
 }
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int32Seq& int32_seq)
-  : elem_kind_(TK_INT32), active_(new(int32_seq_) DDS::Int32Seq(int32_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt32Seq& uint32_seq)
-  : elem_kind_(TK_UINT32), active_(new(uint32_seq_) DDS::UInt32Seq(uint32_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int8Seq& int8_seq)
-  : elem_kind_(TK_INT8), active_(new(int8_seq_) DDS::Int8Seq(int8_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt8Seq& uint8_seq)
-  : elem_kind_(TK_UINT8), active_(new(uint8_seq_) DDS::UInt8Seq(uint8_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int16Seq& int16_seq)
-  : elem_kind_(TK_INT16), active_(new(int16_seq_) DDS::Int16Seq(int16_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt16Seq& uint16_seq)
-  : elem_kind_(TK_UINT16), active_(new(uint16_seq_) DDS::UInt16Seq(uint16_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Int64Seq& int64_seq)
-  : elem_kind_(TK_INT64), active_(new(int64_seq_) DDS::Int64Seq(int64_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::UInt64Seq& uint64_seq)
-  : elem_kind_(TK_UINT64), active_(new(uint64_seq_) DDS::UInt64Seq(uint64_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Float32Seq& float32_seq)
-  : elem_kind_(TK_FLOAT32), active_(new(float32_seq_) DDS::Float32Seq(float32_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Float64Seq& float64_seq)
-  : elem_kind_(TK_FLOAT64), active_(new(float64_seq_) DDS::Float64Seq(float64_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::Float128Seq& float128_seq)
-  : elem_kind_(TK_FLOAT128), active_(new(float128_seq_) DDS::Float128Seq(float128_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::CharSeq& char8_seq)
-  : elem_kind_(TK_CHAR8), active_(new(char8_seq_) DDS::CharSeq(char8_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::ByteSeq& byte_seq)
-  : elem_kind_(TK_BYTE), active_(new(byte_seq_) DDS::ByteSeq(byte_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::BooleanSeq& boolean_seq)
-  : elem_kind_(TK_BOOLEAN), active_(new(boolean_seq_) DDS::BooleanSeq(boolean_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::StringSeq& str_seq)
-  : elem_kind_(TK_STRING8), active_(new(string_seq_) DDS::StringSeq(str_seq))
-{}
-
-#ifdef DDS_HAS_WCHAR
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::WcharSeq& char16_seq)
-  : elem_kind_(TK_CHAR16), active_(new(char16_seq_) DDS::WcharSeq(char16_seq))
-{}
-
-DynamicDataImpl::SequenceValue::SequenceValue(const DDS::WstringSeq& wstr_seq)
-  : elem_kind_(TK_STRING16), active_(new(wstring_seq_) DDS::WstringSeq(wstr_seq))
-{}
-#endif
-
-DynamicDataImpl::SequenceValue::SequenceValue(const SequenceValue& rhs)
-  : elem_kind_(rhs.elem_kind_), active_(0)
-{
-#define SEQUENCE_VALUE_PLACEMENT_NEW(T, N)  active_ = new(N) DDS::T(reinterpret_cast<const DDS::T&>(rhs.N)); break;
-  switch (elem_kind_) {
-  case TK_INT32:
-    SEQUENCE_VALUE_PLACEMENT_NEW(Int32Seq, int32_seq_);
-  case TK_UINT32:
-    SEQUENCE_VALUE_PLACEMENT_NEW(UInt32Seq, uint32_seq_);
-  case TK_INT8:
-    SEQUENCE_VALUE_PLACEMENT_NEW(Int8Seq, int8_seq_);
-  case TK_UINT8:
-    SEQUENCE_VALUE_PLACEMENT_NEW(UInt8Seq, uint8_seq_);
-  case TK_INT16:
-    SEQUENCE_VALUE_PLACEMENT_NEW(Int16Seq, int16_seq_);
-  case TK_UINT16:
-    SEQUENCE_VALUE_PLACEMENT_NEW(UInt16Seq, uint16_seq_);
-  case TK_INT64:
-    SEQUENCE_VALUE_PLACEMENT_NEW(Int64Seq, int64_seq_);
-  case TK_UINT64:
-    SEQUENCE_VALUE_PLACEMENT_NEW(UInt64Seq, uint64_seq_);
-  case TK_FLOAT32:
-    SEQUENCE_VALUE_PLACEMENT_NEW(Float32Seq, float32_seq_);
-  case TK_FLOAT64:
-    SEQUENCE_VALUE_PLACEMENT_NEW(Float64Seq, float64_seq_);
-  case TK_FLOAT128:
-    SEQUENCE_VALUE_PLACEMENT_NEW(Float128Seq, float128_seq_);
-  case TK_CHAR8:
-    SEQUENCE_VALUE_PLACEMENT_NEW(CharSeq, char8_seq_);
-  case TK_BYTE:
-    SEQUENCE_VALUE_PLACEMENT_NEW(ByteSeq, byte_seq_);
-  case TK_BOOLEAN:
-    SEQUENCE_VALUE_PLACEMENT_NEW(BooleanSeq, boolean_seq_);
-  case TK_STRING8:
-    SEQUENCE_VALUE_PLACEMENT_NEW(StringSeq, string_seq_);
-#ifdef DDS_HAS_WCHAR
-  case TK_CHAR16:
-    SEQUENCE_VALUE_PLACEMENT_NEW(WcharSeq, char16_seq_);
-  case TK_STRING16:
-    SEQUENCE_VALUE_PLACEMENT_NEW(WstringSeq, wstring_seq_);
-#endif
-  }
-#undef SEQUENCE_VALUE_PLACEMENT_NEW
-}
-
-DynamicDataImpl::SequenceValue::~SequenceValue()
-{
-#define SEQUENCE_VALUE_DESTRUCT(T) static_cast<DDS::T*>(active_)->~T(); break
-  switch (elem_kind_) {
-  case TK_INT32:
-    SEQUENCE_VALUE_DESTRUCT(Int32Seq);
-  case TK_UINT32:
-    SEQUENCE_VALUE_DESTRUCT(UInt32Seq);
-  case TK_INT8:
-    SEQUENCE_VALUE_DESTRUCT(Int8Seq);
-  case TK_UINT8:
-    SEQUENCE_VALUE_DESTRUCT(UInt8Seq);
-  case TK_INT16:
-    SEQUENCE_VALUE_DESTRUCT(Int16Seq);
-  case TK_UINT16:
-    SEQUENCE_VALUE_DESTRUCT(UInt16Seq);
-  case TK_INT64:
-    SEQUENCE_VALUE_DESTRUCT(Int64Seq);
-  case TK_UINT64:
-    SEQUENCE_VALUE_DESTRUCT(UInt64Seq);
-  case TK_FLOAT32:
-    SEQUENCE_VALUE_DESTRUCT(Float32Seq);
-  case TK_FLOAT64:
-    SEQUENCE_VALUE_DESTRUCT(Float64Seq);
-  case TK_FLOAT128:
-    SEQUENCE_VALUE_DESTRUCT(Float128Seq);
-  case TK_CHAR8:
-    SEQUENCE_VALUE_DESTRUCT(CharSeq);
-  case TK_BYTE:
-    SEQUENCE_VALUE_DESTRUCT(ByteSeq);
-  case TK_BOOLEAN:
-    SEQUENCE_VALUE_DESTRUCT(BooleanSeq);
-  case TK_STRING8:
-    SEQUENCE_VALUE_DESTRUCT(StringSeq);
-#ifdef DDS_HAS_WCHAR
-  case TK_CHAR16:
-    SEQUENCE_VALUE_DESTRUCT(WcharSeq);
-  case TK_STRING16:
-    SEQUENCE_VALUE_DESTRUCT(WstringSeq);
-#endif
-  }
-  #undef SEQUENCE_VALUE_DESTRUCT
-}
-
-#define SEQUENCE_VALUE_GETTERS(T) return *static_cast<DDS::T*>(active_)
-template<> const DDS::Int32Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(Int32Seq); }
-template<> const DDS::UInt32Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(UInt32Seq); }
-template<> const DDS::Int8Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(Int8Seq); }
-template<> const DDS::UInt8Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(UInt8Seq); }
-template<> const DDS::Int16Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(Int16Seq); }
-template<> const DDS::UInt16Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(UInt16Seq); }
-template<> const DDS::Int64Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(Int64Seq); }
-template<> const DDS::UInt64Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(UInt64Seq); }
-template<> const DDS::Float32Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(Float32Seq); }
-template<> const DDS::Float64Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(Float64Seq); }
-template<> const DDS::Float128Seq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(Float128Seq); }
-template<> const DDS::CharSeq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(CharSeq); }
-template<> const DDS::ByteSeq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(ByteSeq); }
-template<> const DDS::BooleanSeq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(BooleanSeq); }
-template<> const DDS::StringSeq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(StringSeq); }
-#ifdef DDS_HAS_WCHAR
-template<> const DDS::WcharSeq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(WcharSeq); }
-template<> const DDS::WstringSeq& DynamicDataImpl::SequenceValue::get() const
-{ SEQUENCE_VALUE_GETTERS(WstringSeq); }
-#endif
-#undef SEQUENCE_VALUE_GETTERS
 
 void DynamicDataImpl::DataContainer::clear()
 {
