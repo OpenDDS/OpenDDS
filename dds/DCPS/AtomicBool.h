@@ -1,16 +1,10 @@
 #ifndef OPENDDS_DCPS_ATOMIC_BOOL_H
 #define OPENDDS_DCPS_ATOMIC_BOOL_H
 
+#include "Atomic.h"
 #include "SafeBool_T.h"
 
 #include <dds/Versioned_Namespace.h>
-
-#include <ace/config.h>
-#ifdef ACE_HAS_CPP11
-#  include <atomic>
-#else
-#  include <ace/Atomic_Op.h>
-#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -26,11 +20,7 @@ public:
 
   bool boolean_test() const
   {
-    return impl_
-#ifndef ACE_HAS_CPP11
-      .value()
-#endif
-      ;
+    return impl_;
   }
 
   AtomicBool& operator=(bool value)
@@ -40,12 +30,7 @@ public:
   }
 
 private:
-#ifdef ACE_HAS_CPP11
-  std::atomic<bool>
-#else
-  ACE_Atomic_Op<ACE_Thread_Mutex, bool>
-#endif
-    impl_;
+  Atomic<bool> impl_;
 };
 
 } // namespace DCPS

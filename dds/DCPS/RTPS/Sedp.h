@@ -8,6 +8,7 @@
 
 #include "AssociationRecord.h"
 #include "DiscoveredEntities.h"
+#include "LocalEntities.h"
 #include "TypeLookup.h"
 #include "MessageTypes.h"
 #include "MessageUtils.h"
@@ -314,56 +315,6 @@ private:
   void cleanup_secure_writer(const GUID_t& publicationId);
   void cleanup_secure_reader(const GUID_t& subscriptionId);
 #endif
-
-  struct LocalEndpoint {
-    LocalEndpoint()
-      : topic_id_(GUID_UNKNOWN)
-      , participant_discovered_at_(DCPS::monotonic_time_zero())
-      , transport_context_(0)
-      , sequence_(SequenceNumber::SEQUENCENUMBER_UNKNOWN())
-#ifdef OPENDDS_SECURITY
-      , have_ice_agent_info(false)
-    {
-      security_attribs_.base.is_read_protected = false;
-      security_attribs_.base.is_write_protected = false;
-      security_attribs_.base.is_discovery_protected = false;
-      security_attribs_.base.is_liveliness_protected = false;
-      security_attribs_.is_submessage_protected = false;
-      security_attribs_.is_payload_protected = false;
-      security_attribs_.is_key_protected = false;
-      security_attribs_.plugin_endpoint_attributes = 0;
-    }
-#else
-    {}
-#endif
-
-    GUID_t topic_id_;
-    DCPS::TransportLocatorSeq trans_info_;
-    DCPS::MonotonicTime_t participant_discovered_at_;
-    ACE_CDR::ULong transport_context_;
-    RepoIdSet matched_endpoints_;
-    SequenceNumber sequence_;
-    RepoIdSet remote_expectant_opendds_associations_;
-    XTypes::TypeInformation type_info_;
-#ifdef OPENDDS_SECURITY
-    bool have_ice_agent_info;
-    ICE::AgentInfo ice_agent_info;
-    DDS::Security::EndpointSecurityAttributes security_attribs_;
-#endif
-  };
-
-  struct LocalPublication : LocalEndpoint {
-    DCPS::DataWriterCallbacks_wrch publication_;
-    DDS::DataWriterQos qos_;
-    DDS::PublisherQos publisher_qos_;
-  };
-
-  struct LocalSubscription : LocalEndpoint {
-    DCPS::DataReaderCallbacks_wrch subscription_;
-    DDS::DataReaderQos qos_;
-    DDS::SubscriberQos subscriber_qos_;
-    DCPS::ContentFilterProperty_t filterProperties;
-  };
 
   typedef OPENDDS_MAP_CMP(GUID_t, LocalPublication,
                           GUID_tKeyLessThan) LocalPublicationMap;
@@ -832,17 +783,6 @@ private:
       const DCPS::GUID_t& subscription_id,
       const LocalSubscription& sub);
 
-  struct LocalParticipantMessage : LocalEndpoint {
-  };
-  typedef OPENDDS_MAP_CMP(DCPS::GUID_t, LocalParticipantMessage,
-    DCPS::GUID_tKeyLessThan) LocalParticipantMessageMap;
-  typedef LocalParticipantMessageMap::iterator LocalParticipantMessageIter;
-  typedef LocalParticipantMessageMap::const_iterator LocalParticipantMessageCIter;
-  LocalParticipantMessageMap local_participant_messages_;
-#ifdef OPENDDS_SECURITY
-  LocalParticipantMessageMap local_participant_messages_secure_;
-#endif
-
   void process_discovered_writer_data(DCPS::MessageId message_id,
                                       const DCPS::DiscoveredWriterData& wdata,
                                       const DCPS::GUID_t& guid,
@@ -980,11 +920,11 @@ private:
                                                      const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_participant_message_data(const DCPS::GUID_t& rid,
-                                                   LocalParticipantMessage& part,
+                                                   DCPS::SequenceNumber& sn,
                                                    const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_participant_message_data_secure(const DCPS::GUID_t& rid,
-                                                          LocalParticipantMessage& part,
+                                                          DCPS::SequenceNumber& sn,
                                                           const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
 #endif
 
@@ -1294,7 +1234,13 @@ protected:
   const bool use_xtypes_;
   const bool use_xtypes_complete_;
 
+  // These are the last sequence numbers sent for the various "liveliness" instances.
+  DCPS::SequenceNumber local_participant_automatic_liveliness_sn_;
+  DCPS::SequenceNumber local_participant_manual_liveliness_sn_;
 #ifdef OPENDDS_SECURITY
+  DCPS::SequenceNumber local_participant_automatic_liveliness_sn_secure_;
+  DCPS::SequenceNumber local_participant_manual_liveliness_sn_secure_;
+
   DDS::Security::ParticipantSecurityAttributes participant_sec_attr_;
 
   DDS::Security::AccessControl_var access_control_;

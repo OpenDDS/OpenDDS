@@ -14,6 +14,7 @@
 #include "TcpConnection.h"
 #include "TcpConnection_rch.h"
 
+#include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/ReactorTask_rch.h>
 #include <dds/DCPS/transport/framework/PriorityKey.h>
 #include <dds/DCPS/transport/framework/TransportImpl.h>
@@ -164,6 +165,7 @@ private:
   /// This protects the connections_ and the pending_connections_
   /// data members.
   LockType connections_lock_;
+  Atomic<size_t> last_link_;
 };
 
 } // namespace DCPS

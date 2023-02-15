@@ -50,7 +50,7 @@ public:
 
   virtual ~DataWriterListenerImpl (void);
 
-  ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> publication_matched_;
+  OpenDDS::DCPS::Atomic<bool> publication_matched_;
 
 };
 

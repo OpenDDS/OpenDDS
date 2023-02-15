@@ -125,7 +125,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
 
       // -------------------------------------------------------
 
-      ACE_Atomic_Op<ACE_SYNCH_MUTEX, bool> publication_matched;
+      OpenDDS::DCPS::Atomic<bool> publication_matched;
       ::DDS::DataWriterListener_var dwl (
           new DataWriterListenerImpl (publication_matched));
 
@@ -139,7 +139,7 @@ ACE_TMAIN (int argc, ACE_TCHAR *argv[]) {
       int const max_attempts = 50;
       int attempts;
       for (attempts = 1;
-           attempts != max_attempts && publication_matched.value () == false;
+           attempts != max_attempts && publication_matched == false;
            ++attempts)
       {
         ACE_OS::sleep (5);

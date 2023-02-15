@@ -36,6 +36,7 @@ namespace DCPS {
 TcpTransport::TcpTransport(const TcpInst_rch& inst)
   : TransportImpl(inst)
   , acceptor_(new TcpAcceptor(RcHandle<TcpTransport>(this, inc_count())))
+  , last_link_(0)
 {
   DBG_ENTRY_LVL("TcpTransport","TcpTransport",6);
 
@@ -690,13 +691,13 @@ TcpTransport::connect_tcp_datalink(TcpDataLink& link,
     ACE_DEBUG((LM_DEBUG,
                ACE_TEXT("(%P|%t) TcpTransport::connect_tcp_datalink() [%d] - ")
                ACE_TEXT("creating send strategy with priority %d.\n"),
-               last_link_.value(), link.transport_priority()));
+               last_link_.load(), link.transport_priority()));
   }
 
-  connection->id() = last_link_.value();
+  connection->id() = last_link_;
 
   TcpSendStrategy_rch send_strategy (
-    make_rch<TcpSendStrategy>(last_link_.value(), ref(link),
+    make_rch<TcpSendStrategy>(last_link_.load(), ref(link),
                              new TcpSynchResource(link,
                                                   cfg->max_output_pause_period_),
                              this->reactor_task(), link.transport_priority()));

@@ -16,7 +16,7 @@ void DataWriterListenerImpl::on_liveliness_lost(::DDS::DataWriter_ptr writer,
   ++num_liveliness_lost_callbacks_;
   ACE_DEBUG((LM_INFO,
               ACE_TEXT("(%P|%t) DataWriterListenerImpl::on_liveliness_lost %@ %d\n"),
-              writer, (int) num_liveliness_lost_callbacks_.value()));
+              writer, (int) num_liveliness_lost_callbacks_.load()));
   ACE_DEBUG((LM_INFO,
               ACE_TEXT("(%P|%t)    total_count=%d total_count_change=%d\n"),
               status.total_count, status.total_count_change));

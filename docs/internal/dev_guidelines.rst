@@ -161,11 +161,14 @@ Whitespace
 * Namespace scopes that span most or all of a file do not cause indentation of their contents.
 * Otherwise lines ending in ``{`` indicate that subsequent lines should be indented one more level until ``}``.
 * Continuation lines (when a statement spans more than one line) can either be indented one more level, or indented to nest "under" an ``(`` or similar punctuation.
-* Add space around binary operators and after commas: ``a + b``
+* Add space around binary operators and after commas: ``a + b, c``
 * Do not add space around parentheses for function calls, a properly formatted function call looks like ``func(arg1, arg2, arg3);``
 * Do not add space around brackets for indexing, instead it should look like: ``mymap[key]``
-* In general, do not add space :) Do not add extra spaces to make syntax elements (that span lines/statements) line up.
-  This only causes unnecessary changes in adjacent lines as the code evolves.
+* For code that includes multiple braces appearing together in the same expression (such as initializer lists), there are two approved styles:
+  * spaces between braces and their enclosed (non-empty) sub-expression: ``const GUID_t GUID_UNKNOWN = { { 0 }, { { 0 }, 0 } };`` or ``{ a + b, {} }``
+  * no such spaces: ``const GUID_t GUID_UNKNOWN = {{0}, {{0}, 0}};`` or ``{a + b, {}}``
+* Do not add extra spaces to make syntax elements (that span lines/statements) line up; this only causes unnecessary changes in adjacent lines as the code evolves.
+* In general, do not add extra spaces unless doing so is covered by the rules above.
 
 Language Usage
 ==============

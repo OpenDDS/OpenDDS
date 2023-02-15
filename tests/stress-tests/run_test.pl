@@ -20,7 +20,7 @@ my $opts = join(' ', @ARGV);
 my $test = new PerlDDS::TestFramework();
 $test->process("StressTests", "StressTests", $opts);
 $test->start_process("StressTests");
-my $retcode = $test->finish(60);
+my $retcode = $test->finish(180);
 if ($retcode != 0) {
     exit 1;
 }

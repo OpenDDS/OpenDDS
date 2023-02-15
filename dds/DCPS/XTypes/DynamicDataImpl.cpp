@@ -364,9 +364,8 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(
     break;
   case TK_BITMASK:
     {
-      CORBA::UInt64 bound_max;
       DDS::TypeKind bound_kind;
-      const DDS::ReturnCode_t rc = bitmask_bound(type, bound_max, bound_kind);
+      const DDS::ReturnCode_t rc = bitmask_bound(type, bound_kind);
       if (rc != DDS::RETCODE_OK) {
         return rc;
       }
@@ -1668,6 +1667,19 @@ DDS::ReturnCode_t DynamicDataImpl::set_boolean_value(DDS::MemberId id, CORBA::Bo
 
 DDS::ReturnCode_t DynamicDataImpl::set_string_value(DDS::MemberId id, const char* value)
 {
+  DDS::DynamicType_var mtype;
+  DDS::ReturnCode_t rc = get_member_type(mtype, type_, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
+  }
+  if (mtype->get_kind() == TK_ENUM) {
+    DDS::Int32 intValue;
+    rc = get_enumerator_value(intValue, value, mtype);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    return set_enum_value(mtype, this, id, intValue);
+  }
   return set_single_value<TK_STRING8>(id, value);
 }
 
@@ -1777,6 +1789,31 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value_string(DCPS::Value& value,
   return DDS::RETCODE_ERROR;
 }
 
+DDS::ReturnCode_t DynamicDataImpl::get_simple_value_enum(DCPS::Value& value,
+                                                         DDS::MemberId id) const
+{
+  DDS::DynamicType_var mtype;
+  DDS::ReturnCode_t ret = get_member_type(mtype, type_, id);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::Int32 enumAsInteger;
+  ret = get_enum_value(enumAsInteger, mtype, interface_from_this(), id);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  DDS::String8_var str;
+  ret = get_enumerator_name(str, enumAsInteger, mtype);
+  if (ret != DDS::RETCODE_OK) {
+    return ret;
+  }
+
+  value = str.in();
+  return DDS::RETCODE_OK;
+}
+
 DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::MemberId id)
 {
   DDS::DynamicTypeMember_var dtm;
@@ -1808,6 +1845,8 @@ DDS::ReturnCode_t DynamicDataImpl::get_simple_value(DCPS::Value& value, DDS::Mem
     return get_simple_value_primitive<CORBA::LongDouble>(value, id);
   case TK_STRING8:
     return get_simple_value_string(value, id);
+  case TK_ENUM:
+    return get_simple_value_enum(value, id);
   default:
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_simple_value:"
@@ -2540,7 +2579,7 @@ bool DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS::MemberId id)
   // Allow bitmask to be read as an unsigned integer.
   CORBA::UInt64 bound_max;
   TypeKind treat_as_tk;
-  const DDS::ReturnCode_t rc = bitmask_bound(type_, bound_max, treat_as_tk);
+  const DDS::ReturnCode_t rc = bitmask_bound(type_, treat_as_tk);
   if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
     return false;
   }
@@ -2688,7 +2727,7 @@ bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId 
     break;
   case TK_BITMASK: {
     CORBA::UInt64 bound_max;
-    if (bitmask_bound(elem_type, bound_max, treat_as_tk) != DDS::RETCODE_OK) {
+    if (bitmask_bound(elem_type, treat_as_tk) != DDS::RETCODE_OK) {
       return false;
     }
     break;
@@ -3035,6 +3074,10 @@ DDS::ReturnCode_t DynamicDataImpl::get_boolean_value(CORBA::Boolean& value, DDS:
 
 DDS::ReturnCode_t DynamicDataImpl::get_string_value(char*& value, DDS::MemberId id)
 {
+  if (enum_string_helper(value, id)) {
+    return DDS::RETCODE_OK;
+  }
+
   return get_single_value<TK_STRING8>(value, id);
 }
 

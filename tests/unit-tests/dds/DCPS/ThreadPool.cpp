@@ -5,9 +5,9 @@
  * See: http://www.opendds.org/license.html
  */
 
+#include <dds/DCPS/Atomic.h>
 #include <dds/DCPS/ThreadPool.h>
 
-#include <ace/Atomic_Op.h>
 #include <ace/OS_NS_unistd.h>
 
 #include <gtest/gtest.h>
@@ -17,7 +17,7 @@ namespace {
 ACE_THR_FUNC_RETURN inc_count(void* arg)
 {
   if (arg) {
-    ACE_Atomic_Op<ACE_Thread_Mutex, size_t>* count = reinterpret_cast<ACE_Atomic_Op<ACE_Thread_Mutex, size_t>*>(arg);
+    OpenDDS::DCPS::Atomic<size_t>* count = reinterpret_cast<OpenDDS::DCPS::Atomic<size_t>*>(arg);
     ++(*count);
   }
   return 0;
@@ -45,7 +45,7 @@ TEST(dds_DCPS_ThreadPool, NoArgConstructor)
 
 TEST(dds_DCPS_ThreadPool, ArgConstructorZero)
 {
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> count(0u);
+  OpenDDS::DCPS::Atomic<size_t> count(0u);
   {
     OpenDDS::DCPS::ThreadPool pool(0u, inc_count, &count);
   }
@@ -54,7 +54,7 @@ TEST(dds_DCPS_ThreadPool, ArgConstructorZero)
 
 TEST(dds_DCPS_ThreadPool, ArgConstructorOne)
 {
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> count(0u);
+  OpenDDS::DCPS::Atomic<size_t> count(0u);
   {
     OpenDDS::DCPS::ThreadPool pool(1u, inc_count, &count);
   }
@@ -63,7 +63,7 @@ TEST(dds_DCPS_ThreadPool, ArgConstructorOne)
 
 TEST(dds_DCPS_ThreadPool, ArgConstructorFour)
 {
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> count(0u);
+  OpenDDS::DCPS::Atomic<size_t> count(0u);
   {
     OpenDDS::DCPS::ThreadPool pool(4u, inc_count, &count);
   }
@@ -72,7 +72,7 @@ TEST(dds_DCPS_ThreadPool, ArgConstructorFour)
 
 TEST(dds_DCPS_ThreadPool, ArgConstructorSixteen)
 {
-  ACE_Atomic_Op<ACE_Thread_Mutex, size_t> count(0u);
+  OpenDDS::DCPS::Atomic<size_t> count(0u);
   {
     OpenDDS::DCPS::ThreadPool pool(16u, inc_count, &count);
   }
