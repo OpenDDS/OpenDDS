@@ -57,14 +57,14 @@ ShmemReceiveStrategy::read()
     current_data_ = reinterpret_cast<ShmemData*>(mem);
   }
 
-  for (ShmemData* start = 0; current_data_->status_ == SHMEM_DATA_FREE ||
-         current_data_->status_ == SHMEM_DATA_RECV_DONE; ++current_data_) {
+  for (ShmemData* start = 0; current_data_->status_ == ShmemData::Free ||
+         current_data_->status_ == ShmemData::RecvDone; ++current_data_) {
     if (!start) {
       start = current_data_;
     } else if (start == current_data_) {
       return; // none found => don't call handle_dds_input()
     }
-    if (current_data_[1].status_ == SHMEM_DATA_END_OF_ALLOC) {
+    if (current_data_[1].status_ == ShmemData::EndOfAlloc) {
       current_data_ = reinterpret_cast<ShmemData*>(mem) - 1; // incremented by the for loop
     }
   }
@@ -72,7 +72,7 @@ ShmemReceiveStrategy::read()
   VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::read link %@ "
         "reading at control block #%d\n",
         link_, current_data_ - reinterpret_cast<ShmemData*>(mem)));
-  // If we get this far, current_data_ points to the first SHMEM_DATA_IN_USE.
+  // If we get this far, current_data_ points to the first ShmemData::DataInUse.
   // handle_dds_input() will call our receive_bytes() to get the data.
   handle_dds_input(ACE_INVALID_HANDLE);
 }
@@ -90,8 +90,8 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
   // check that the writer's shared memory is still available
   ShmemAllocator* alloc = link_->peer_allocator();
   void* mem;
-  if (alloc == 0 || -1 == alloc->find(bound_name_.c_str(), mem)
-      || current_data_->status_ != SHMEM_DATA_IN_USE) {
+  if (!alloc || -1 == alloc->find(bound_name_.c_str(), mem) || !current_data_
+      || current_data_->status_ != ShmemData::InUse) {
     VDBG_LVL((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes closing\n"),
              1);
     gracefully_disconnected_ = true; // do not attempt reconnect via relink()
@@ -171,7 +171,7 @@ ShmemReceiveStrategy::receive_bytes(iovec iov[],
     partial_recv_ptr_ = 0;
     VDBG((LM_DEBUG, "(%P|%t) ShmemReceiveStrategy::receive_bytes "
           "receive done\n"));
-    current_data_->status_ = SHMEM_DATA_RECV_DONE;
+    current_data_->status_ = ShmemData::RecvDone;
   }
 
   return total;

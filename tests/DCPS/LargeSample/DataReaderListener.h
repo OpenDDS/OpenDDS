@@ -56,13 +56,15 @@ public:
 
   size_t num_samples() const
   {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, SIZE_MAX);
     return num_samples_;
   }
 
   bool data_consistent() const;
 
 private:
-  DDS::DataReader_var  reader_;
+  mutable ACE_Thread_Mutex lock_;
+  DDS::DataReader_var reader_;
   size_t num_samples_;
   typedef CORBA::Long ProcessId, WriterId, SampleId;
   typedef std::set<SampleId> Counts;

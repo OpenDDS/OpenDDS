@@ -1041,21 +1041,6 @@ void StaticEndpointManager::remove_expired_endpoints(
   ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   const MonotonicTimePoint now = MonotonicTimePoint::now();
 
-  MatchingDataIter end_iter = matching_data_buffer_.end();
-  for (MatchingDataIter iter = matching_data_buffer_.begin(); iter != end_iter; ) {
-    // Do not try to simplify increment: "associative container erase idiom"
-    if (now - iter->second.time_added_to_map >= max_type_lookup_service_reply_period_) {
-      if (DCPS_debug_level >= 4) {
-        ACE_DEBUG((LM_DEBUG, "(%P|%t) StaticEndpointManager::remove_expired_endpoints: "
-          "clean up pending pair w: %C r: %C\n",
-          LogGuid(iter->first.writer_).c_str(), LogGuid(iter->first.reader_).c_str()));
-      }
-      matching_data_buffer_.erase(iter++);
-    } else {
-      ++iter;
-    }
-  }
-
   // Clean up internal data used by getTypeDependencies
   for (OrigSeqNumberMap::iterator it = orig_seq_numbers_.begin(); it != orig_seq_numbers_.end();) {
     if (now - it->second.time_started >= max_type_lookup_service_reply_period_) {

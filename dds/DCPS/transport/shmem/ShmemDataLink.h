@@ -19,6 +19,7 @@
 #include <dds/DCPS/transport/framework/DataLink.h>
 
 #include <string>
+#include <set>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -28,19 +29,22 @@ namespace DCPS {
 class ReceivedDataSample;
 
 struct ShmemData {
-  int status_;
+  enum Status {
+    Free = 0,
+    InUse = 1,
+    RecvDone = 2,
+    EndOfAlloc = -1
+  };
+
+  /*
+   * This is ACE_INT8 instead of Status to try to make the in-memory
+   * representation independent of compiler/implementation decisions. We can't
+   * guarantee that two processes running code built with different compilers
+   * can communicate over shmem, but we'll try to support it when possible.
+   */
+  ACE_INT8 status_;
   char transport_header_[TRANSPORT_HDR_SERIALIZED_SZ];
   ACE_Based_Pointer_Basic<char> payload_;
-};
-
-/**
- * values for ShmemData::status_
- */
-enum {
-  SHMEM_DATA_FREE = 0,
-  SHMEM_DATA_IN_USE = 1,
-  SHMEM_DATA_RECV_DONE = 2,
-  SHMEM_DATA_END_OF_ALLOC = -1
 };
 
 class OpenDDS_Shmem_Export ShmemDataLink
@@ -51,15 +55,13 @@ public:
 
   bool open(const std::string& peer_address);
 
-  int make_reservation(const GUID_t& remote_sub, const GUID_t& local_pub,
-    const TransportSendListener_wrch& send_listener, bool reliable);
-
   int make_reservation(const GUID_t& remote_pub,
                        const GUID_t& local_sub,
                        const TransportReceiveListener_wrch& receive_listener,
                        bool reliable);
 
   void request_ack_received(ReceivedDataSample& sample);
+  void stop_resend_association_msgs(const GUID_t& local, const GUID_t& remote);
 
   void control_received(ReceivedDataSample& sample);
 
@@ -90,23 +92,8 @@ private:
   ACE_Thread_Mutex peer_alloc_mutex_;
   ReactorTask_rch reactor_task_;
 
-  struct GuidPair {
-    const GUID_t local;
-    const GUID_t remote;
-
-    GuidPair(const GUID_t& local, const GUID_t& remote)
-    : local(local)
-    , remote(remote)
-    {
-    }
-
-    bool operator<(const GuidPair& other) const
-    {
-      return GUID_tKeyLessThan()(local, other.local) && GUID_tKeyLessThan()(remote, other.remote);
-    }
-  };
   ACE_Thread_Mutex assoc_resends_mutex_;
-  typedef std::map<GuidPair, size_t> AssocResends;
+  typedef std::set<GuidPair> AssocResends;
   AssocResends assoc_resends_;
   typedef PmfPeriodicTask<ShmemDataLink> SmPeriodicTask;
   DCPS::RcHandle<SmPeriodicTask> assoc_resends_task_;
