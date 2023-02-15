@@ -1,13 +1,12 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
-#include <gtest/gtest.h>
+#include <dds/DCPS/debug.h>
+#include <dds/DCPS/RTPS/GuidGenerator.h>
 
-#include "dds/DCPS/RTPS/GuidGenerator.h"
+#include <gtest/gtest.h>
 
 using namespace OpenDDS::RTPS;
 using namespace OpenDDS::DCPS;
@@ -79,6 +78,9 @@ TEST(dds_DCPS_RTPS_GuidGenerator, getCount)
 
 TEST(dds_DCPS_RTPS_GuidGenerator, interfaceName)
 {
+  LogRestore restore;
+  log_level.set(LogLevel::None);
+
   // Test interfaceName shortcut
   GuidGenerator gen;
   int val1 = gen.interfaceName("Test_NotARealInterface");
