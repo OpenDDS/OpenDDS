@@ -60,12 +60,10 @@ protected:
   virtual std::string transport_type() const { return "shmem"; }
 
 private:
-
-  /// Create a new link (using make_datalink) and add it to the map
-  ShmemDataLink_rch add_datalink(const std::string& remote_address);
-
   /// Create the DataLink object and start it
   ShmemDataLink_rch make_datalink(const std::string& remote_address);
+
+  ShmemDataLink_rch get_or_make_datalink(const char* caller, const RemoteTransport& remote);
 
   std::pair<std::string, std::string> blob_to_key(const TransportBLOB& blob);
 

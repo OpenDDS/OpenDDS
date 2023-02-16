@@ -27,12 +27,12 @@ SerializedSizeBound DummyTypeSupport::key_only_serialized_size_bound(const Encod
 
 Extensibility DummyTypeSupport::base_extensibility() const
 {
-  return OpenDDS::DCPS::FINAL;
+  return OpenDDS::DCPS::APPENDABLE;
 }
 
 Extensibility DummyTypeSupport::max_extensibility() const
 {
-  return OpenDDS::DCPS::FINAL;
+  return OpenDDS::DCPS::APPENDABLE;
 }
 
 TypeIdentifier& DummyTypeSupport::getMinimalTypeIdentifier() const
@@ -132,6 +132,7 @@ DynamicTypeMember_var memberForDurability()
 {
   TypeDescriptor_var tdDurabilityQosPolicy = new TypeDescriptorImpl;
   tdDurabilityQosPolicy->kind(TK_STRUCTURE);
+  tdDurabilityQosPolicy->extensibility_kind(DDS::APPENDABLE);
   tdDurabilityQosPolicy->name("DDS::DurabilityQosPolicy");
 
   DynamicTypeImpl* dtDurabilityQosPolicy = new DynamicTypeImpl;
@@ -175,6 +176,7 @@ DynamicTypeMember_var memberForServiceCleanupDelay()
 {
   TypeDescriptor_var tdDuration = new TypeDescriptorImpl;
   tdDuration->kind(TK_STRUCTURE);
+  tdDuration->extensibility_kind(DDS::FINAL);
   tdDuration->name("DDS::Duration_t");
 
   DynamicTypeImpl* dtDuration = new DynamicTypeImpl;
@@ -223,6 +225,7 @@ DynamicTypeMember_var memberForDurabilityService()
 {
   TypeDescriptor_var tdDurabilityServiceQosPolicy = new TypeDescriptorImpl;
   tdDurabilityServiceQosPolicy->kind(TK_STRUCTURE);
+  tdDurabilityServiceQosPolicy->extensibility_kind(DDS::APPENDABLE);
   tdDurabilityServiceQosPolicy->name("DDS::DurabilityServiceQosPolicy");
 
   DynamicTypeImpl* dtDurabilityServiceQosPolicy = new DynamicTypeImpl;
@@ -254,6 +257,7 @@ DynamicType* DummyTypeSupport::get_type() const
 
   TypeDescriptor_var td = new TypeDescriptorImpl;
   td->kind(TK_STRUCTURE);
+  td->extensibility_kind(DDS::APPENDABLE);
   td->name("TBTD");
 
   DynamicTypeImpl* dtimpl = new DynamicTypeImpl;

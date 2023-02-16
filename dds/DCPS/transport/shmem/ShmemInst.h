@@ -19,9 +19,7 @@ namespace DCPS {
 
 class OpenDDS_Shmem_Export ShmemInst : public TransportInst {
 public:
-
-  static const suseconds_t DEFAULT_ASSOCIATION_RESEND_PERIOD_USEC = 250000;
-  static const long DEFAULT_ASSOCIATION_RESEND_MAX_COUNT = 10;
+  static const TimeDuration default_association_resend_period;
 
   virtual int load(ACE_Configuration_Heap& cf,
                    ACE_Configuration_Section_Key& sect);
@@ -49,11 +47,6 @@ public:
     return association_resend_period_;
   }
 
-  size_t association_resend_max_count() const
-  {
-    return association_resend_max_count_;
-  }
-
 private:
   friend class ShmemType;
   template <typename T, typename U>
@@ -63,9 +56,7 @@ private:
   TransportImpl_rch new_impl();
   std::string hostname_;
   std::string poolname_;
-
   TimeDuration association_resend_period_;
-  size_t association_resend_max_count_;
 };
 
 } // namespace DCPS

@@ -417,50 +417,6 @@ public:
                               const GUID_t& /* remote_guid */) {}
 
 private:
-  struct MatchingData {
-    MatchingData()
-      : got_minimal(false), got_complete(false)
-    {}
-
-    /// Sequence number of the first request for remote minimal types.
-    SequenceNumber rpc_seqnum_minimal;
-
-    /// Whether all minimal types are obtained.
-    bool got_minimal;
-
-    /// Sequence number of the first request for remote complete types.
-    /// Set to SEQUENCENUMBER_UNKNOWN if there is no such request.
-    SequenceNumber rpc_seqnum_complete;
-
-    /// Whether all complete types are obtained.
-    bool got_complete;
-
-    MonotonicTimePoint time_added_to_map;
-  };
-
-  struct MatchingPair {
-    MatchingPair(GUID_t writer, GUID_t reader)
-      : writer_(writer), reader_(reader) {}
-
-    GUID_t writer_;
-    GUID_t reader_;
-
-    bool operator<(const MatchingPair& a_other) const
-    {
-      if (GUID_tKeyLessThan()(writer_, a_other.writer_)) return true;
-
-      if (GUID_tKeyLessThan()(a_other.writer_, writer_)) return false;
-
-      if (GUID_tKeyLessThan()(reader_, a_other.reader_)) return true;
-
-      if (GUID_tKeyLessThan()(a_other.reader_, reader_)) return false;
-
-      return false;
-    }
-  };
-  typedef OPENDDS_MAP(MatchingPair, MatchingData) MatchingDataMap;
-  typedef MatchingDataMap::iterator MatchingDataIter;
-
   void match(const GUID_t& writer, const GUID_t& reader);
   void need_minimal_and_or_complete_types(const XTypes::TypeInformation* type_info,
                                           bool& need_minimal,
@@ -500,7 +456,6 @@ private:
 #endif
 
   XTypes::TypeLookupService_rch type_lookup_service_;
-  MatchingDataMap matching_data_buffer_;
   typedef PmfSporadicTask<StaticEndpointManager> StaticEndpointManagerSporadic;
   RcHandle<StaticEndpointManagerSporadic> type_lookup_reply_deadline_processor_;
   TimeDuration max_type_lookup_service_reply_period_;

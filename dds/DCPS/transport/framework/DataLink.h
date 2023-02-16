@@ -261,7 +261,7 @@ public:
   bool add_on_start_callback(const TransportClient_wrch& client, const GUID_t& remote);
   void remove_on_start_callback(const TransportClient_wrch& client, const GUID_t& remote);
   void invoke_on_start_callbacks(bool success);
-  void invoke_on_start_callbacks(const GUID_t& local, const GUID_t& remote, bool success);
+  bool invoke_on_start_callbacks(const GUID_t& local, const GUID_t& remote, bool success);
   void remove_startup_callbacks(const GUID_t& local, const GUID_t& remote);
 
   class Interceptor : public ReactorInterceptor {

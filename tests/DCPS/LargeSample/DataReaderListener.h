@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,14 +7,16 @@
 #define DATAREADER_LISTENER_IMPL
 
 #include <dds/DCPS/LocalObject.h>
+
 #include <dds/DdsDcpsSubscriptionC.h>
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 #include <map>
 #include <set>
+#include <limits>
 
 class DataReaderListenerImpl
   : public virtual OpenDDS::DCPS::LocalObject<DDS::DataReaderListener> {
@@ -56,13 +56,15 @@ public:
 
   size_t num_samples() const
   {
+    ACE_GUARD_RETURN(ACE_Thread_Mutex, guard, lock_, (std::numeric_limits<size_t>::max)());
     return num_samples_;
   }
 
   bool data_consistent() const;
 
 private:
-  DDS::DataReader_var  reader_;
+  mutable ACE_Thread_Mutex lock_;
+  DDS::DataReader_var reader_;
   size_t num_samples_;
   typedef CORBA::Long ProcessId, WriterId, SampleId;
   typedef std::set<SampleId> Counts;

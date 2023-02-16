@@ -78,7 +78,6 @@ namespace DCPS {
       }
     }
 
-    /// This accessor is purely for debugging purposes
     long ref_count() const
     {
       return ref_count_;
