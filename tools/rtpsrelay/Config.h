@@ -33,6 +33,7 @@ public:
     , publish_participant_statistics_(false)
     , restart_detection_(false)
     , admission_control_queue_size_(0)
+    , max_addr_set_size_(0)
   {}
 
   void relay_id(const std::string& value)
@@ -295,6 +296,26 @@ public:
     return run_time_;
   }
 
+  void max_addr_set_size(size_t value)
+  {
+    max_addr_set_size_ = value;
+  }
+
+  size_t max_addr_set_size() const
+  {
+    return max_addr_set_size_;
+  }
+
+  OpenDDS::DCPS::TimeDuration rejected_address_duration() const
+  {
+    return rejected_address_duration_;
+  }
+
+  void rejected_address_duration(OpenDDS::DCPS::TimeDuration value)
+  {
+    rejected_address_duration_ = value;
+  }
+
 private:
   std::string relay_id_;
   OpenDDS::DCPS::GUID_t application_participant_guid_;
@@ -322,6 +343,8 @@ private:
   size_t admission_control_queue_size_;
   OpenDDS::DCPS::TimeDuration admission_control_queue_duration_;
   OpenDDS::DCPS::TimeDuration run_time_;
+  size_t max_addr_set_size_;
+  OpenDDS::DCPS::TimeDuration rejected_address_duration_;
 };
 
 }

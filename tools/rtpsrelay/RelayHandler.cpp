@@ -291,6 +291,11 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     proxy.process_expirations(now);
+    if (!proxy.check_address(remote_address)) {
+      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C dropping message from rejected address %C\n"),
+        name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
+      return 0;
+    }
   }
 
   AddrPort addr_port(remote_address, port());
@@ -606,7 +611,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
           }
           auto p = proxy.find(guid);
           if (p != proxy.end()) {
-            for (const auto& addr : *p->second.select_addr_set(port())) {
+            for (const auto& addr : *p->second.select_addr_set(port(), now)) {
               venqueue_message(addr.first.addr,
                 *p->second.select_stats_reporter(port()), msg, now, type);
               ++sent;
@@ -622,7 +627,7 @@ CORBA::ULong VerticalHandler::send(GuidAddrSet::Proxy& proxy,
           }
           auto p = proxy.find(guid);
           if (p != proxy.end()) {
-            for (const auto& addr : *p->second.select_addr_set(port())) {
+            for (const auto& addr : *p->second.select_addr_set(port(), now)) {
               venqueue_message(addr.first.addr,
                 *p->second.select_stats_reporter(port()), msg, now, type);
               ++sent;
@@ -743,7 +748,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
     for (const auto& guid : relay_header.to_guids()) {
       const auto p = proxy.find(relay_guid_to_rtps_guid(guid));
       if (p != proxy.end()) {
-        for (const auto& addr : *p->second.select_addr_set(port())) {
+        for (const auto& addr : *p->second.select_addr_set(port(), now)) {
           vertical_handler_->venqueue_message(
             addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
           ++sent;
@@ -756,7 +761,7 @@ CORBA::ULong HorizontalHandler::process_message(const ACE_INET_Addr& from,
     for (const auto& guid : guids) {
       const auto p = proxy.find(guid);
       if (p != proxy.end()) {
-        for (const auto& addr : *p->second.select_addr_set(port())) {
+        for (const auto& addr : *p->second.select_addr_set(port(), now)) {
           vertical_handler_->venqueue_message(
             addr.first.addr, *p->second.select_stats_reporter(port()), msg, now, type);
           ++sent;
@@ -918,6 +923,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                      OpenDDS::DCPS::LogAddr(application_participant_addr_).c_str(),
                      guid_to_string(src_guid).c_str(),
                      OpenDDS::DCPS::LogAddr(remote).c_str()));
+      proxy.reject_address(remote, now);
       return false;
     }
 
@@ -927,7 +933,7 @@ bool SpdpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port())) {
+          for (const auto& addr : *pos->second.select_addr_set(port(), now)) {
             venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
               msg, now, MessageType::Rtps);
             ++sent;
@@ -1069,6 +1075,7 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
                      OpenDDS::DCPS::LogAddr(application_participant_addr_).c_str(),
                      guid_to_string(src_guid).c_str(),
                      OpenDDS::DCPS::LogAddr(remote).c_str()));
+      proxy.reject_address(remote, now);
       return false;
     }
 
@@ -1078,7 +1085,7 @@ bool SedpHandler::do_normal_processing(GuidAddrSet::Proxy& proxy,
       for (const auto& guid : to) {
         const auto pos = proxy.find(guid);
         if (pos != proxy.end()) {
-          for (const auto& addr : *pos->second.select_addr_set(port())) {
+          for (const auto& addr : *pos->second.select_addr_set(port(), now)) {
             venqueue_message(addr.first.addr, *pos->second.select_stats_reporter(port()),
               msg, now, MessageType::Rtps);
             ++sent;
