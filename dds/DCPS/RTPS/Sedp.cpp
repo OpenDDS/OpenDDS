@@ -1635,6 +1635,7 @@ Sedp::replay_durable_data_for(const DCPS::GUID_t& remote_sub_id)
 {
   DCPS::GuidConverter conv(remote_sub_id);
   ACE_DEBUG((LM_DEBUG, "Sedp::replay_durable_data_for %C\n", OPENDDS_STRING(conv).c_str()));
+  ACE_GUARD(ACE_Thread_Mutex, g, lock_);
   if (remote_sub_id.entityId == ENTITYID_SEDP_BUILTIN_PUBLICATIONS_READER) {
     write_durable_publication_data(remote_sub_id, false);
   } else if (remote_sub_id.entityId == ENTITYID_SEDP_BUILTIN_SUBSCRIPTIONS_READER) {
