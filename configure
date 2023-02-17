@@ -48,7 +48,7 @@ my @default_configh = (
 
 sub perlOS_to_host {
   return 'win32' if $^O eq 'MSWin32';
-  return 'macosx' if $^O eq 'darwin';
+  return 'macos' if $^O eq 'darwin';
   return $^O;
 }
 
@@ -69,10 +69,22 @@ my %platforminfo =
                                  19.2 => 'vs2019', 19.3 => 'vs2022'},
                'cl_archs' => {'x64' => 1, 'Win32' => 1, 'ARM64' => 0, 'ARM' => 0}, # 1 if supported
               },
-   'macosx' => {
-                'compilers' => ['clang++'],
-                'libpath' => 'DYLD_LIBRARY_PATH',
-               },
+   'macos' => {
+               'compilers' => ['clang++'],
+               'libpath' => 'DYLD_LIBRARY_PATH',
+               'aceconfig' => 'macosx',
+               'aceplatform' => 'macosx',
+              },
+   'macos-cross' => {
+                     'compilers' => ['clang++'],
+                     'libpath' => 'DYLD_LIBRARY_PATH',
+                     'aceconfig' => 'macosx',
+                     'aceplatform' => 'macosx',
+                     'no_host' => 1,
+                     'java_platform' => 'darwin',
+                     'usage' => ['Use --target-arch or --target-compiler to ' .
+                                 'specify how the target', 'build should work'],
+                    },
    'linux' => {
                'compilers' => ['g++', 'clang', 'clang++'],
                'libpath' => 'LD_LIBRARY_PATH',
@@ -180,6 +192,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'compiler=s', 'Compiler (auto detect / guess by searching PATH)',
     'std=s', 'C++ standard version (for compilers that use -std)',
     'target=s', 'Cross-compile target (none): see --target-help',
+    'target-arch=s', 'Architecture for target (none): see --target-help',
     'target-compiler=s', 'Compiler for target (if req\'d): see --target-help',
     'host-tools=s', 'DDS_ROOT of host tools for cross compile (build)',
     'host-ace=s', 'Define host ACE_ROOT (uses relative path from' .
@@ -1238,6 +1251,10 @@ sub write_platform_macros {
             $opts{'nonstdcompiler'} = $tcomp;
             print $PMG 'LDFLAGS += -Wl,-rpath-link,$(ACE_ROOT)/lib', "\n";
           }
+        }
+        if ($opts{'target-arch'}) {
+          print $PMG "FLAGS_C_CC += -target $opts{'target-arch'}\n";
+          print $PMG "LDFLAGS += -target $opts{'target-arch'}\n";
         }
         if ($opts{'target'} eq 'android') {
           print $PMG 'ifeq (,$(findstring -isystem$(ACE_ROOT),$(INCLDIRS)))', "\n";
