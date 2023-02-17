@@ -83,15 +83,15 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const GUID_t& pub_id,
 
   const OPENDDS_LIST(FragSample)& flist = iter->second.sample_list_;
   const FragmentNumber first = flist.front().frag_range_.first;
-  const CORBA::ULong base = (first == 1)
+  const CORBA::ULong base = static_cast<CORBA::ULong>((first == 1)
     ? flist.front().frag_range_.second + 1
-    : 1;
+    : 1);
 
   if (first != 1) {
     // Represent the "gap" before the first list element.
     // base == 1 and the first 2 args to fill_bitmap_range() are deltas of base
     ACE_CDR::ULong bits_added = 0;
-    DisjointSequence::fill_bitmap_range(0, first - 2,
+    DisjointSequence::fill_bitmap_range(0, static_cast<CORBA::ULong>(first - 2),
                                         bitmap, length, numBits, bits_added);
   } else if (flist.size() == 1) {
     // No gaps, but we know there are (at least 1) more_fragments
@@ -118,8 +118,8 @@ TransportReassembly::get_gaps(const SequenceNumber& seq, const GUID_t& pub_id,
     if (it_next == flist.end()) {
       break;
     }
-    const CORBA::ULong low = it->frag_range_.second + 1 - base,
-                       high = it_next->frag_range_.first - 1 - base;
+    const CORBA::ULong low = static_cast<CORBA::ULong>(it->frag_range_.second + 1 - base),
+                       high = static_cast<CORBA::ULong>(it_next->frag_range_.first - 1 - base);
     ACE_CDR::ULong bits_added = 0;
     DisjointSequence::fill_bitmap_range(low, high, bitmap, length, numBits, bits_added);
   }

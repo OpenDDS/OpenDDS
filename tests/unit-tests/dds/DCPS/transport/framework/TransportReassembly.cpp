@@ -1101,7 +1101,7 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Permutations)
         const FragmentNumber fn2 = static_cast<FragmentNumber>((sn + 1) * fragments_per_sample);
         std::cout << " - Creating sample " << sn << " with fragments (" << fn1 << "-" << fn2 << ") and 'more_fragments' set to " << ((i + 1) != sample_count ? "true" : "false") << std::endl;
       }
-      samples.push_back(make_rch<Sample>(pub_id, msg_seq, (i + 1) != sample_count, 1024 * fragments_per_sample, 'a' + i));
+      samples.push_back(make_rch<Sample>(pub_id, msg_seq, (i + 1) != sample_count, 1024 * fragments_per_sample, static_cast<unsigned char>('a' + i)));
       DDS::OctetSeq data = samples.back()->sample.copy_data();
       ASSERT_EQ(data.length(), 1024 * fragments_per_sample);
 #ifdef ACE_HAS_CPP11
@@ -1130,10 +1130,10 @@ TEST(dds_DCPS_transport_framework_TransportReassembly, Test_Permutations)
         uint32_t end_hash = 0;
 #endif
         for (size_t i = 0; i < sample_count; ++i) {
-          ASSERT_EQ(data[i * 1024 * fragments_per_sample], 'a' + i);
-          ASSERT_EQ(data[(i + 1) * 1024 * fragments_per_sample - 1], 'a' + i);
+          ASSERT_EQ(data[static_cast<CORBA::ULong>(i * 1024 * fragments_per_sample)], 'a' + i);
+          ASSERT_EQ(data[static_cast<CORBA::ULong>((i + 1) * 1024 * fragments_per_sample - 1)], 'a' + i);
 #ifdef ACE_HAS_CPP11
-          end_hash = one_at_a_time_hash(&data[i * 1024 * fragments_per_sample], 1024 * fragments_per_sample, end_hash);
+          end_hash = one_at_a_time_hash(&data[static_cast<CORBA::ULong>(i * 1024 * fragments_per_sample)], 1024 * fragments_per_sample, end_hash);
 #endif
         }
 #ifdef ACE_HAS_CPP11
