@@ -61,7 +61,7 @@ struct AddrSetStats {
       break;
     }
 
-    relay_stats_reporter_.max_addr_set_size(result->size(), now);
+    relay_stats_reporter_.max_addr_set_size(static_cast<uint32_t>(result->size()), now);
 
     return result;
   }
