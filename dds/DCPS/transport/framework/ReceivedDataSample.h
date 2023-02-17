@@ -11,7 +11,7 @@
 #include <dds/DCPS/DataSampleHeader.h>
 #include <dds/DCPS/PoolAllocator.h>
 
-#include <ace/Message_Block.h>
+#include <dds/DCPS/MessageBlock.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,12 +35,15 @@ namespace DCPS {
  */
 class OpenDDS_Dcps_Export ReceivedDataSample {
 public:
-  ReceivedDataSample() {}
+  ReceivedDataSample();
 
   explicit ReceivedDataSample(const ACE_Message_Block& payload);
 
   /// The demarshalled sample header.
   DataSampleHeader header_;
+
+  /// Fragment size used by this sample
+  ACE_UINT32 fragment_size_;
 
   /// true if at least one Data Block is stored (even if it has 0 useable bytes)
   bool has_data() const { return !blocks_.empty(); }
@@ -87,81 +90,12 @@ public:
   /// @param size number of bytes to use as the payload
   void replace(const char* data, size_t size);
 
+  ReceivedDataSample get_fragment_range(FragmentNumber start_frag, FragmentNumber end_frag = INVALID_FRAGMENT);
+
 private:
-
-  struct MessageBlock {
-    /// construct a MessageBlock that references the existing amb's ACE_Data_Block
-    explicit MessageBlock(const ACE_Message_Block& amb);
-
-    /// construct a MessageBlock with 'size' bytes allocated but not used (wr_ptr_ is 0)
-    explicit MessageBlock(size_t size);
-
-    /// construct a MessageBlock that points to external data, doesn't allocate or copy
-    MessageBlock(const char* data, size_t size);
-
-    ~MessageBlock() { if (data_) data_->release(); }
-
-    MessageBlock(const MessageBlock& rhs);
-    MessageBlock& operator=(const MessageBlock& rhs);
-#ifdef ACE_HAS_CPP11
-    MessageBlock(MessageBlock&& rhs);
-    MessageBlock& operator=(MessageBlock&& rhs);
-#endif
-
-    ACE_Data_Block* data_;
-    size_t rd_ptr_, wr_ptr_;
-  };
-
-  friend void swap(MessageBlock& lhs, MessageBlock& rhs);
 
   OPENDDS_VECTOR(MessageBlock) blocks_;
 };
-
-inline ReceivedDataSample::MessageBlock::MessageBlock(const ACE_Message_Block& amb)
-  : data_(amb.data_block()->duplicate())
-  , rd_ptr_(amb.rd_ptr() - amb.base())
-  , wr_ptr_(amb.wr_ptr() - amb.base())
-{}
-
-inline ReceivedDataSample::MessageBlock::MessageBlock(const MessageBlock& rhs)
-  : data_(rhs.data_->duplicate())
-  , rd_ptr_(rhs.rd_ptr_)
-  , wr_ptr_(rhs.wr_ptr_)
-{}
-
-inline ReceivedDataSample::MessageBlock&
-ReceivedDataSample::MessageBlock::operator=(const MessageBlock& rhs)
-{
-  if (&rhs != this) {
-    MessageBlock copy(rhs);
-    swap(*this, copy);
-  }
-  return *this;
-}
-
-inline void swap(ReceivedDataSample::MessageBlock& lhs, ReceivedDataSample::MessageBlock& rhs)
-{
-  std::swap(lhs.data_, rhs.data_);
-  std::swap(lhs.rd_ptr_, rhs.rd_ptr_);
-  std::swap(lhs.wr_ptr_, rhs.wr_ptr_);
-}
-
-#ifdef ACE_HAS_CPP11
-inline ReceivedDataSample::MessageBlock::MessageBlock(MessageBlock&& rhs)
-  : data_(rhs.data_)
-  , rd_ptr_(rhs.rd_ptr_)
-  , wr_ptr_(rhs.wr_ptr_)
-{
-  rhs.data_ = 0;
-}
-
-inline ReceivedDataSample::MessageBlock&
-ReceivedDataSample::MessageBlock::operator=(MessageBlock&& rhs)
-{
-  swap(*this, rhs);
-  return *this;
-}
-#endif
 
 } // namespace DCPS
 } // namespace OpenDDS

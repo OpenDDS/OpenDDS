@@ -35,6 +35,7 @@ RtpsUdpReceiveStrategy::RtpsUdpReceiveStrategy(RtpsUdpDataLink* link,
   , link_(link)
   , last_received_()
   , recvd_sample_(0)
+  , fragment_size_(0)
   , total_frags_(0)
   , reassembly_(link->config()->fragment_reassembly_timeout_)
   , receiver_(local_prefix)
@@ -1053,6 +1054,7 @@ RtpsUdpReceiveStrategy::check_header(const RtpsSampleHeader& header)
     const RTPS::DataFragSubmessage& rtps = header.submessage_.data_frag_sm();
     frags_.first = rtps.fragmentStartingNum.value;
     frags_.second = frags_.first + (rtps.fragmentsInSubmessage - 1);
+    fragment_size_ = rtps.fragmentSize;
     total_frags_ = (rtps.sampleSize / rtps.fragmentSize) + (rtps.sampleSize % rtps.fragmentSize ? 1 : 0);
   }
 
@@ -1106,6 +1108,7 @@ bool RtpsUdpReceiveStrategy::reassemble_i(ReceivedDataSample& data, RtpsSampleHe
 {
   using namespace RTPS;
   receiver_.fill_header(data.header_); // set publication_id_.guidPrefix
+  data.fragment_size_ = fragment_size_;
   if (link_->is_target(data.header_.publication_id_) && reassembly_.reassemble(frags_, data, total_frags_)) {
 
     // Reassembly was successful, replace DataFrag with Data.  This doesn't have

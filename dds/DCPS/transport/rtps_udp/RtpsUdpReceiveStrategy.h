@@ -137,7 +137,8 @@ private:
   const ReceivedDataSample* recvd_sample_;
   RepoIdSet readers_withheld_, readers_selected_;
 
-  SequenceRange frags_;
+  ACE_UINT16 fragment_size_;
+  FragmentRange frags_;
   ACE_UINT32 total_frags_;
   TransportReassembly reassembly_;
 

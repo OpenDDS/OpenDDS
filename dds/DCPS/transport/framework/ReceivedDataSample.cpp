@@ -17,7 +17,13 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace DCPS {
 
+ReceivedDataSample::ReceivedDataSample()
+  : fragment_size_(0)
+{
+}
+
 ReceivedDataSample::ReceivedDataSample(const ACE_Message_Block& payload)
+  : fragment_size_(0)
 {
   const ACE_Message_Block* amb = &payload;
   do {
@@ -30,7 +36,7 @@ size_t ReceivedDataSample::data_length() const
 {
   size_t len = 0;
   for (size_t i = 0; i < blocks_.size(); ++i) {
-    len += blocks_[i].wr_ptr_ - blocks_[i].rd_ptr_;
+    len += blocks_[i].len();
   }
   return len;
 }
@@ -57,9 +63,9 @@ ACE_Message_Block* ReceivedDataSample::data(ACE_Allocator* mb_alloc) const
   for (size_t i = 0; i < blocks_.size(); ++i) {
     const MessageBlock& element = blocks_[i];
     ACE_Message_Block* const mb = make_mb(mb_alloc);
-    mb->data_block(element.data_->duplicate());
-    mb->rd_ptr(element.rd_ptr_);
-    mb->wr_ptr(element.wr_ptr_);
+    mb->data_block(element.duplicate_data());
+    mb->rd_ptr(element.rd_ptr());
+    mb->wr_ptr(element.wr_ptr());
     if (first) {
       last->cont(mb);
     } else {
@@ -74,8 +80,8 @@ bool ReceivedDataSample::write_data(Serializer& ser) const
 {
   for (size_t i = 0; i < blocks_.size(); ++i) {
     const MessageBlock& element = blocks_[i];
-    const unsigned int len = static_cast<unsigned int>(element.wr_ptr_ - element.rd_ptr_);
-    const char* const data = element.data_->base() + element.rd_ptr_;
+    const unsigned int len = static_cast<unsigned int>(element.len());
+    const char* const data = element.rd_ptr();
     if (!ser.write_octet_array(reinterpret_cast<const ACE_CDR::Octet*>(data), len)) {
       return false;
     }
@@ -90,8 +96,8 @@ DDS::OctetSeq ReceivedDataSample::copy_data() const
   unsigned char* out_iter = dst.get_buffer();
   for (size_t i = 0; i < blocks_.size(); ++i) {
     const MessageBlock& element = blocks_[i];
-    const unsigned int len = static_cast<unsigned int>(element.wr_ptr_ - element.rd_ptr_);
-    const char* const data = element.data_->base() + element.rd_ptr_;
+    const unsigned int len = static_cast<unsigned int>(element.len());
+    const char* const data = element.rd_ptr();
     std::memcpy(out_iter, data, len);
     out_iter += len;
   }
@@ -103,9 +109,9 @@ unsigned char ReceivedDataSample::peek(size_t offset) const
   size_t remain = offset;
   for (size_t i = 0; i < blocks_.size(); ++i) {
     const MessageBlock& element = blocks_[i];
-    const size_t len = element.wr_ptr_ - element.rd_ptr_;
+    const size_t len = element.len();
     if (remain < len) {
-      return element.data_->base()[element.rd_ptr_ + remain];
+      return element.rd_ptr()[remain];
     }
     remain -= len;
   }
@@ -135,8 +141,8 @@ void ReceivedDataSample::append(ReceivedDataSample& suffix)
 void ReceivedDataSample::append(const char* data, size_t size)
 {
   blocks_.push_back(MessageBlock(size));
-  std::memcpy(blocks_.back().data_->base(), data, size);
-  blocks_.back().wr_ptr_ = size;
+  std::memcpy(blocks_.back().base(), data, size);
+  blocks_.back().write(size);
 }
 
 void ReceivedDataSample::replace(const char* data, size_t size)
@@ -145,28 +151,38 @@ void ReceivedDataSample::replace(const char* data, size_t size)
   blocks_.push_back(MessageBlock(data, size));
 }
 
-ReceivedDataSample::MessageBlock::MessageBlock(size_t size)
-  : data_()
-  , rd_ptr_()
-  , wr_ptr_()
+ReceivedDataSample
+ReceivedDataSample::get_fragment_range(FragmentNumber start_frag, FragmentNumber end_frag)
 {
-  ACE_Allocator* const alloc = ACE_Allocator::instance();
-  ACE_NEW_MALLOC(data_,
-    (ACE_Data_Block*) alloc->malloc(sizeof(ACE_Data_Block)),
-    ACE_Data_Block(size, ACE_Message_Block::MB_DATA, 0, alloc, 0,
-                   0, alloc));
-}
+  ReceivedDataSample result;
+  result.header_ = header_;
 
-ReceivedDataSample::MessageBlock::MessageBlock(const char* data, size_t size)
-  : data_()
-  , rd_ptr_()
-  , wr_ptr_(size)
-{
-  ACE_Allocator* const alloc = ACE_Allocator::instance();
-  ACE_NEW_MALLOC(data_,
-    (ACE_Data_Block*) alloc->malloc(sizeof(ACE_Data_Block)),
-    ACE_Data_Block(size, ACE_Message_Block::MB_DATA, data, alloc, 0,
-                   ACE_Message_Block::DONT_DELETE, alloc));
+  const size_t fsize = static_cast<size_t>(fragment_size_);
+  const size_t start_offset = start_frag * fsize;
+  const size_t end_offset = end_frag == INVALID_FRAGMENT ? std::numeric_limits<size_t>::max() : (end_frag + 1) * fsize - 1;
+
+  size_t current_offset = 0;
+
+  bool default_push = false;
+
+  for (OPENDDS_VECTOR(MessageBlock)::iterator it = blocks_.begin(); current_offset < end_offset && it != blocks_.end(); ++it) {
+    const size_t len = it->len();
+    if (default_push) {
+      result.blocks_.push_back(*it);
+      if (end_offset < current_offset + len) {
+        result.blocks_.back().write(end_offset - current_offset - len); // this should be negative
+      }
+    } else if (start_offset < current_offset + len) {
+      default_push = true;
+      result.blocks_.push_back(*it);
+      if (current_offset < start_offset) {
+        result.blocks_.back().read(start_offset - current_offset);
+      }
+    }
+    current_offset += len;
+  }
+
+  return result;
 }
 
 }
