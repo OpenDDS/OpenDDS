@@ -9,9 +9,9 @@
 #include "AssociationRecord.h"
 #include "DiscoveredEntities.h"
 #include "LocalEntities.h"
-#include "TypeLookup.h"
 #include "MessageTypes.h"
 #include "MessageUtils.h"
+#include "TypeLookupTypeSupportImpl.h"
 #ifdef OPENDDS_SECURITY
 #  include "ParameterListConverter.h"
 #endif

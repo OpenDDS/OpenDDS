@@ -1261,6 +1261,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   }
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+  const NestedKeyOnly<const XTypes::TypeIdentifier>& uni)
+{
+  serialized_size(encoding, size, uni.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
 {
   if (!(strm << ACE_OutputCDR::from_octet(uni.kind()))) {
@@ -1314,6 +1320,11 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifier& uni)
   default:
     return (strm << uni.extended_defn());
   }
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifier>& uni)
+{
+  return (strm << uni.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
@@ -1373,6 +1384,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifier& uni)
   }
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifier>& uni)
+{
+  return (strm >> uni.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::LBoundSeq& seq)
@@ -2300,6 +2315,12 @@ void serialized_size(const Encoding& encoding, size_t& size,
   primitive_serialized_size(encoding, size, stru.typeobject_serialized_size);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
 {
   size_t total_size = 0;
@@ -2310,6 +2331,11 @@ bool operator<<(Serializer& strm, const XTypes::TypeIdentifierWithSize& stru)
 
   return (strm << stru.type_id)
     && (strm << stru.typeobject_serialized_size);
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierWithSize>& stru)
+{
+  return (strm << stru.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
@@ -2330,6 +2356,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierWithSize& stru)
   return ret;
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierWithSize>& stru)
+{
+  return (strm >> stru.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierWithDependencies& stru)
@@ -4895,10 +4925,21 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size(encoding, size, stru.type_object);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierTypeObjectPair& stru)
 {
   return (strm << stru.type_identifier)
     && (strm << stru.type_object);
+}
+
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  return (strm << stru.value);
 }
 
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
@@ -4907,6 +4948,10 @@ bool operator>>(Serializer& strm, XTypes::TypeIdentifierTypeObjectPair& stru)
     && (strm >> stru.type_object);
 }
 
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierTypeObjectPair>& stru)
+{
+  return (strm >> stru.value);
+}
 
 void serialized_size(const Encoding& encoding, size_t& size,
   const XTypes::TypeIdentifierPair& stru)
@@ -4915,16 +4960,32 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size(encoding, size, stru.type_identifier2);
 }
 
+void serialized_size(const Encoding& encoding, size_t& size,
+                     const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru)
+{
+  serialized_size(encoding, size, stru.value);
+}
+
 bool operator<<(Serializer& strm, const XTypes::TypeIdentifierPair& stru)
 {
   return (strm << stru.type_identifier1)
     && (strm << stru.type_identifier2);
 }
 
+bool operator<<(Serializer& strm, const NestedKeyOnly<const XTypes::TypeIdentifierPair>& stru)
+{
+  return (strm << stru.value);
+}
+
 bool operator>>(Serializer& strm, XTypes::TypeIdentifierPair& stru)
 {
   return (strm >> stru.type_identifier1)
     && (strm >> stru.type_identifier2);
+}
+
+bool operator>>(Serializer& strm, NestedKeyOnly<XTypes::TypeIdentifierPair>& stru)
+{
+  return (strm >> stru.value);
 }
 
 bool to_type_object(const unsigned char* buffer, size_t size, XTypes::TypeObject& to)
