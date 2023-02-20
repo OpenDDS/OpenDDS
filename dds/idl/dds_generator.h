@@ -832,7 +832,7 @@ void generateCaseBody(
         be_global->impl_ <<
           "        if (strm.get_construction_status() == Serializer::BoundConstructionFailure && " << check_not_empty << " && ("
                     << bounded_arg(br) << " < " << get_length << ")) {\n"
-          "          " << strtype << " s = tmp;\n"
+          "          " << strtype << " s = tmp.c_str();\n"
           "          s.resize(" << bounded_arg(br) << ");\n"
           "          uni." << name << "(s.c_str());\n"
           "          strm.set_construction_status(Serializer::ConstructionSuccessful);\n"
