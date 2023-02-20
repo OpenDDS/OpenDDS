@@ -991,7 +991,18 @@ private:
   // Copy values of a basic sequence member from sequence map to a DynamicData object.
   bool move_sequence_to_complex(const DataContainer::const_sequence_iterator& it,
                                 DynamicDataImpl* data);
+
+  // Indicate whether the value of a member is found in the complex map or
+  // one of the other two maps or not found from any map in the container.
+  enum FoundStatus { FOUND_IN_COMPLEX_MAP, FOUND_IN_NON_COMPLEX_MAP, NOT_FOUND };
+  bool get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
+                                   FoundStatus& found_status);
+
   bool get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  bool write_discriminator_helper(CORBA::Long value, TypeKind treat_as);
+  bool write_discriminator(CORBA::Long value);
+  bool get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  bool get_complex_from_collection(DDS::DynamicData_tr& value, DDS::MemberId id);
 
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                           DataContainer::const_single_iterator it) const;

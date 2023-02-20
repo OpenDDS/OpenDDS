@@ -2665,7 +2665,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
     if (has_disc) {
       if (DCPS::log_level >= DCPS::LogLevel::Notice) {
         ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_union:"
-                   " Branch with Id %u is not the active branch in the union\n"));
+                   " Branch Id %u is not the active branch in the union\n", id));
       }
       return false;
     }
@@ -3366,11 +3366,13 @@ bool DynamicDataImpl::move_sequence_to_complex(const DataContainer::const_sequen
   return true;
 }
 
-bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
+bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
+                                                  FoundStatus& found_status)
 {
   DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
   if (complex_it != container_.complex_map_.end()) {
     value = DDS::DynamicData::_duplicate(complex_it->second);
+    found_status = FOUND_IN_COMPLEX_MAP;
     return true;
   }
 
@@ -3387,14 +3389,187 @@ bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::
   DDS::DynamicData_var dd_var = dd_impl;
 
   DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
-  DataContainer::const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
   if (single_it != container_.single_map_.end()) {
     if (!move_single_to_complex(single_it, dd_impl)) {
       return false;
     }
-  } else if (sequence_it != container_.sequence_map_.end()) {
-    if (!move_sequence_to_complex(sequence_it, dd_impl)) {
+    found_status = FOUND_IN_NON_COMPLEX_MAP;
+  } else {
+    DataContainer::const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
+    if (sequence_it != container_.sequence_map_.end()) {
+      if (!move_sequence_to_complex(sequence_it, dd_impl)) {
+        return false;
+      }
+      found_status = FOUND_IN_NON_COMPLEX_MAP;
+    } else {
+      found_status = NOT_FOUND;
+    }
+  }
+  value = DDS::DynamicData::_duplicate(dd_var);
+  return true;
+}
+
+bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  FoundStatus found_status = NOT_FOUND;
+  DDS::DynamicData_var dd_var;
+  if (!get_complex_from_aggregated(dd_var, id, found_status)) {
+    return false;
+  }
+
+  if (found_status == FOUND_IN_NON_COMPLEX_MAP || found_status == NOT_FOUND) {
+    insert_complex(id, dd_var);
+  }
+  value = DDS::DynamicData::_duplicate(dd_var);
+  return true;
+}
+
+bool DynamicDataImpl::write_discriminator_helper(CORBA::Long value, TypeKind treat_as)
+{
+  switch (treat_as) {
+  case TK_BOOLEAN:
+    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_boolean(value));
+  case TK_BYTE:
+    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_byte(value));
+  case TK_CHAR8:
+    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_char(value));
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16:
+    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_wchar(value));
+#endif
+  case TK_INT8:
+    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_int8(value));
+  case TK_UINT8:
+    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_uint8(value));
+  case TK_INT16:
+    return insert_single(MEMBER_ID_INVALID, static_cast<CORBA::Short>(value));
+  case TK_UINT16:
+    return insert_single(MEMBER_ID_INVALID, static_cast<CORBA::UShort>(value));
+  case TK_INT32:
+    return insert_single(MEMBER_ID_INVALID, value);
+  case TK_UINT32:
+    return insert_single(MEMBER_ID_INVALID, static_cast<CORBA::ULong>(value));
+  case TK_INT64:
+    return insert_single(MEMBER_ID_INVALID, static_cast<CORBA::LongLong>(value));
+  case TK_UINT64:
+    return insert_single(MEMBER_ID_INVALID, static_cast<CORBA::ULongLong>(value));
+  default:
+    return false;
+  }
+}
+
+// Write value to discriminator represented by a DynamicData instance.
+bool DynamicDataImpl::write_discriminator(CORBA::Long value)
+{
+  const TypeKind treat_as = type_->get_kind();
+  if (treat_as == TK_ENUM) {
+    if (enum_bound(type_, treat_as) != DDS::RETCODE_OK) {
       return false;
+    }
+  }
+  return write_discriminator_helper(value, treat_as);
+}
+
+bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  FoundStatus found_status = NOT_FOUND;
+  DDS::DynamicData_var dd_var;
+  if (!get_complex_from_aggregated(dd_var, id, found_status)) {
+    return false;
+  }
+  if (found_status != NOT_FOUND) {
+    if (found_status == FOUND_IN_NON_COMPLEX_MAP) {
+      insert_complex(id, dd_var);
+    }
+    value = DDS::DynamicData::_duplicate(dd_var);
+    return true;
+  }
+
+  // Requested member with the given Id is not present in the container.
+  if (id == DISCRIMINATOR_ID) {
+    DDS::TypeDescriptor_var td;
+    if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::DynamicType_var disc_type = get_base_type(td->discriminator_type());
+    CORBA::Long disc_value;
+    if (!container_.set_default_discriminator_value(disc_value, disc_type)) {
+      return false;
+    }
+    bool found_selected_member = false;
+    DDS::MemberDescriptor_var selected_md;
+    if (!container_.select_union_member(disc_value, found_selected_member, selected_md)) {
+      return false;
+    }
+    DynamicDataImpl* dd_impl = new DynamicDataImpl(disc_type);
+    DDS::DynamicData_var dd_var = dd_impl;
+    dd_impl->write_discriminator(disc_value);
+    insert_complex(DISCRIMINATOR_ID, dd_var);
+    if (found_selected_member && !selected_md->is_optional()) {
+      DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
+      if (clear_value_i(selected_md->id(), selected_type, selected_type->get_kind()) != DDS::RETCODE_OK) {
+        return false;
+      }
+    }
+    value = DDS::DynamicData::_duplicate(dd_var);
+  } else {
+    DataContainer::const_single_iterator single_it = container_.single_map_.find(DISCRIMINATOR_ID);
+    DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(DISCRIMINATOR_ID);
+    const bool has_disc = single_it != container_.single_map_.end() ||
+      complex_it != container_.complex_map_.end();
+    if (has_disc) {
+      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_from_union:"
+                   " Branch Id %u is not the active branch in the union\n", id));
+      }
+      return false;
+    }
+    DDS::DynamicTypeMember_var dtm;
+    if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+      return false;
+    }
+    DDS::MemberDescriptor_var md;
+    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+      return false;
+    }
+    // An empty DynamicData object implicitly contains default value of the associated type.
+    DynamicDataImpl* dd_impl = new DynamicDataImpl(md->type());
+    DDS::DynamicData_var dd_var = dd_impl;
+    if (!insert_valid_discriminator(md)) {
+      return false;
+    }
+    insert_complex(id, dd_var);
+    value = DDS::DynamicData::_duplicate(dd_var);
+  }
+  return true;
+}
+
+bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id)
+{
+  DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(id);
+  if (complex_it != container_.complex_map_.end()) {
+    value = DDS::DynamicData::_duplicate(complex_it->second);
+    return true;
+  }
+
+  DDS::TypeDescriptor_var td;
+  if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
+    return false;
+  }
+  DynamicDataImpl* dd_impl = new DynamicDataImpl(td->element_type());
+  DDS::DynamicData_var dd_var = dd_impl;
+
+  DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
+  if (single_it != container_.single_map_.end()) {
+    if (!move_single_to_complex(single_it, dd_impl)) {
+      return false;
+    }
+  } else {
+    DataContainer::const_sequence_iterator sequence_it = container_.sequence_map_.find(id);
+    if (sequence_it != container_.sequence_map_.end()) {
+      if (!move_sequence_to_complex(sequence_it, dd_impl)) {
+        return false;
+      }
     }
   }
   insert_complex(id, dd_var);
@@ -3402,13 +3577,6 @@ bool DynamicDataImpl::get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::
   return true;
 }
 
-bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id)
-{
-  // TODO:
-  
-}
-
-// TODO(sonndinh)
 DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value, DDS::MemberId id)
 {
   const TypeKind tk = type_->get_kind();
@@ -3422,10 +3590,23 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
     break;
   case TK_SEQUENCE:
   case TK_ARRAY:
+    good = get_complex_from_collection(value, id);
   case TK_MAP:
+    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_value:"
+                 " Map is currently not supported\n"));
+    }
+    good = false;
+    break;
   default:
     good = false;
     break;
+  }
+
+  if (!good && DCPS::log_level >= DCPS::LogLevel::Notice) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_value:"
+               " Failed to read a complex value from a DynamicData object of type %C\n",
+               typekind_to_string(tk)));
   }
   return good ? DDS::RETCODE_OK : DDS::RETCODE_ERROR;
 }
@@ -7779,8 +7960,10 @@ bool DynamicDataImpl::DataContainer::serialize_discriminator_member_xcdr2(
     return ser << static_cast<CORBA::Octet>(value);
   case TK_CHAR8:
     return ser << static_cast<CORBA::Char>(value);
+#ifdef DDS_HAS_WCHAR
   case TK_CHAR16:
     return ser << static_cast<CORBA::WChar>(value);
+#endif
   case TK_INT8:
     return ser << static_cast<CORBA::Int8>(value);
   case TK_UINT8:
