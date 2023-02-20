@@ -158,7 +158,7 @@ int RelayHandler::handle_input(ACE_HANDLE handle)
   }
 
   buffer->length(bytes);
-  MessageType type;
+  MessageType type = MessageType::Unknown;
   const CORBA::ULong generated_messages = process_message(remote, now, buffer, type);
   stats_reporter_.max_gain(generated_messages, now);
   stats_reporter_.input_message(static_cast<size_t>(bytes),
@@ -288,19 +288,18 @@ CORBA::ULong VerticalHandler::process_message(const ACE_INET_Addr& remote_addres
                                               const OpenDDS::DCPS::Message_Block_Shared_Ptr& msg,
                                               MessageType& type)
 {
+  const auto msg_len = msg->length();
   {
     GuidAddrSet::Proxy proxy(guid_addr_set_);
     proxy.process_expirations(now);
     if (!proxy.check_address(remote_address)) {
-      HANDLER_WARNING((LM_WARNING, ACE_TEXT("(%P|%t) WARNING: VerticalHandler::process_message %C dropping message from rejected address %C\n"),
-        name_.c_str(), OpenDDS::DCPS::LogAddr(remote_address).c_str()));
+      stats_reporter_.ignored_message(msg_len, now, type);
       return 0;
     }
   }
 
   AddrPort addr_port(remote_address, port());
 
-  const auto msg_len = msg->length();
   if (msg_len >= 4 && ACE_OS::memcmp(msg->rd_ptr(), "RTPS", 4) == 0) {
     type = MessageType::Rtps;
 
