@@ -47,5 +47,11 @@ module Unions {
   union P switch(unsigned long) {
     case 0: boolean val;
   };
+
+  enum Dog { Mastiff, St_Bernard };
+  union O switch(Dog) {
+    case Mastiff: float mval;
+    case St_Bernard: long long val;
+  };
 };
 

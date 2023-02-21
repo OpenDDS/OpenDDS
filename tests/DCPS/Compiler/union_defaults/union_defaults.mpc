@@ -1,4 +1,4 @@
-project: dcps {
+project: dcps_test, googletest {
   TypeSupport_Files {
     union_defaults.idl
   }
