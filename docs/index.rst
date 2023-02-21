@@ -34,7 +34,7 @@ This documentation are for those who want to contribute to OpenDDS and those who
   Unit Testing Guidelines <internal/unit_tests>
   Github Actions <internal/github_actions>
   Running Tests <internal/running_tests>
-  Bench 2 <internal/bench2>
+  Bench <internal/bench>
 
 ******************
 Indices and tables
