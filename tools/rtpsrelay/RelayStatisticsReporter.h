@@ -143,7 +143,6 @@ public:
     report(guard, now);
   }
 
-  //handler_statistics_sub_count
   void handler_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -152,7 +151,6 @@ public:
     report(guard, now);
   }
 
-  //relay_statistics_sub_count
   void relay_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -161,7 +159,6 @@ public:
     report(guard, now);
   }
 
-  //participant_statistics_sub_count
   void participant_statistics_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -170,7 +167,6 @@ public:
     report(guard, now);
   }
 
-  //relay_partitions_sub_count
   void relay_partitions_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -179,7 +175,6 @@ public:
     report(guard, now);
   }
 
-  //relay_participant_status_sub_count
   void relay_participant_status_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -188,7 +183,6 @@ public:
     report(guard, now);
   }
 
-  //spdp_replay_sub_count
   void spdp_replay_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -197,7 +191,6 @@ public:
     report(guard, now);
   }
 
-  //relay_address_sub_count
   void relay_address_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -206,7 +199,6 @@ public:
     report(guard, now);
   }
 
-  //relay_status_sub_count
   void relay_status_sub_count(uint32_t count, const OpenDDS::DCPS::MonotonicTimePoint& now)
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -247,6 +239,30 @@ public:
     report(guard, now);
   }
 
+  void remote_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.remote_map_size(size);
+    publish_relay_statistics_.remote_map_size(size);
+    report(guard, now);
+  }
+
+  void max_addr_set_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.max_addr_set_size(std::max(log_relay_statistics_.max_addr_set_size(), size));
+    publish_relay_statistics_.max_addr_set_size(std::max(publish_relay_statistics_.max_addr_set_size(), size));
+    report(guard, now);
+  }
+
+  void rejected_address_map_size(uint32_t size, const OpenDDS::DCPS::MonotonicTimePoint& now)
+  {
+    ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
+    log_relay_statistics_.rejected_address_map_size(std::max(log_relay_statistics_.rejected_address_map_size(), size));
+    publish_relay_statistics_.rejected_address_map_size(std::max(publish_relay_statistics_.rejected_address_map_size(), size));
+    report(guard, now);
+  }
+
   void report()
   {
     ACE_Guard<ACE_Thread_Mutex> guard(mutex_);
@@ -276,6 +292,7 @@ private:
     log_relay_statistics_.new_address_count(0);
     log_relay_statistics_.expired_address_count(0);
     log_relay_statistics_.admission_deferral_count(0);
+    log_relay_statistics_.max_addr_set_size(0);
   }
 
   void publish_report(ACE_Guard<ACE_Thread_Mutex>& guard,
@@ -293,6 +310,7 @@ private:
     publish_relay_statistics_.new_address_count(0);
     publish_relay_statistics_.expired_address_count(0);
     publish_relay_statistics_.admission_deferral_count(0);
+    publish_relay_statistics_.max_addr_set_size(0);
 
     guard.release();
 
