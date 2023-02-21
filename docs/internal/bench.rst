@@ -1,24 +1,24 @@
 ################################################
-Bench 2 Performance & Scalability Test Framework
+Bench Performance & Scalability Test Framework
 ################################################
 
 **********
 Motivation
 **********
 
-The Bench 2 framework grew out of a desire to be able to test the performance and scalability of OpenDDS in large and heterogeneous deployments, along with the ability to quickly develop and deploy new test scenarios across a potentially-unspecified number of machines.
+The Bench framework (version 2) grew out of a desire to be able to test the performance and scalability of OpenDDS in large and heterogeneous deployments, along with the ability to quickly develop and deploy new test scenarios across a potentially-unspecified number of machines.
 
 ********
 Overview
 ********
 
-The resulting design of the Bench 2 framework depends on three primary test
+The resulting design of the Bench framework depends on three primary test
 applications: worker processes, one or more node controllers, and a test
 controller.
 
 .. figure:: images/bench_architecture.png
 
-  Bench 2 Overview
+  Bench Overview
 
 Worker
 ======
@@ -46,16 +46,16 @@ The ``test_controller`` may also optionally adjust certain worker configuration 
 After sending the allocated scenario to each of the available node controllers, the test controller waits to receive reports from each of the node controllers.
 After receiving all the reports, the ``test_controller`` coalesces the performance statistics from each of the workers and presents the final results to the user (both on screen & in a results file).
 
-****************
-Building Bench 2
-****************
+**************
+Building Bench
+**************
 
 Required Features
 =================
 
-The primary requirements for building OpenDDS such that Bench 2 also gets built:
+The primary requirements for building OpenDDS such that Bench also gets built:
 
- - C++11 Support (``--std=c++11``)
+ - C++11 Support, either with a compiler that defaults to C++11 (or later) support or by manually specifying a compatible standard (e.g. ``--std=c++11``)
  - RapidJSON present and enabled (``--rapidjson``)
  - Tests are being built (``--tests``)
 
@@ -65,17 +65,17 @@ Required Targets
 If these elements are present, you can either build the entire test suite (slow) or use these 3 targets (faster), which also cover all the required libraries:
 
  - ``Bench_Worker``
- - ``node_controller``
- - ``test_controller``
+ - ``Bench_node_controller``
+ - ``Bench_test_controller``
 
-****************
-Running Bench 2
-****************
+*************
+Running Bench
+*************
 
 Environment Variables
 =====================
 
-To run Bench 2 executables with dynamically linked or shared libraries, you’ll want to make sure the Bench 2 libraries are in your library path.
+To run Bench executables with dynamically linked or shared libraries, you’ll want to make sure the Bench libraries are in your library path.
 
 Linux/Unix
 ----------
@@ -89,13 +89,13 @@ Add ``%DDS_ROOT%\performance-tests\bench\lib`` to your ``PATH``
 
 Assuming :envvar:`DDS_ROOT` is already set on your system (from the ``configure`` script or from sourcing ``setenv.sh``), there are convenience scripts to do this for you in the :ghfile:`performance-tests/bench` directory (``set_bench_env[.sh/.cmd]``)
 
-Running a Bench 2 CI Test
-=========================
+Running a Bench CI Test
+=======================
 
-In the event that you’re debugging a failing Bench 2 CI test, you can use :ghfile:`performance-tests/bench/run_test.pl` to execute the full scenario without first setting the environment as listed above.
-This is because the perl script sets it automatically before launching a single ``node_controller`` in the background and executing the test controller with the requested scenario.
+In the event that you’re debugging a failing Bench CI test, you can use :ghfile:`performance-tests/bench/run_test.pl` to execute the full scenario without first setting the environment as listed above.
+This is because the perl script sets the appropriate environment variables automatically before launching its processes (a single ``node_controller`` in the background, as well as the test controller with the requested scenario).
 The perl script can be inspected in order to determine which scenarios have been made available in this way.
-It can be modified to easily run other scenarios against a single node controller with relative ease.
+The script can be modified to easily run other available scenarios (see :ghfile:`performance-tests/bench/example/config/scenario`) against a single node controller with relative ease.
 
 Running Scenarios Manually
 ==========================
@@ -106,8 +106,8 @@ Assuming you already have scenario and worker configuration files defined, the g
 Configuration Files
 *******************
 
-As a rule, Bench 2 uses JSON configuration files that directly map onto the C++ Platform Specific Model (PSM) of the IDL found in :ghfile:`performance-tests/bench/idl` and the IDL used in the `DDS specification <https://www.omg.org/spec/DDS/About-DDS/>`_.
-This allows the test applications to easily convert between configuration files and C++ structures useful for the configuration of DDS entities.
+As a general rule, Bench uses JSON configuration files that directly map onto the C++ Platform Specific Model (PSM) of the IDL found in :ghfile:`performance-tests/bench/idl` and the IDL used in the `DDS specification <https://www.omg.org/spec/DDS/About-DDS/>`_.
+This allows the test applications to easily convert between configuration files and the C++ structures used for the configuration of DDS entities.
 
 Scenario Configuration Files
 ============================
@@ -199,8 +199,7 @@ And finally, one “master” process will be started wherever there is room ava
 The “name_wildcard” field is used to filter the ``node_controller`` instances that can be used to host the nodes in the current node config - only the ``node_controller`` instances with names matching the wildcard can be used.
 If the “name_wildcard” is omitted or its value is empty, any ``node_controller`` can be used.
 If node “prototypes” are marked exclusive, the test controller will attempt to allocate them exclusively to their own node controllers.
-If not enough node controllers exist to honor all the exclusive nodes, the test controller will
-fail with an error message.
+If not enough node controllers exist to honor all the exclusive nodes, the test controller will fail with an error message.
 
 Worker Configuration Files
 ==========================
@@ -508,7 +507,7 @@ List of topics to register for this participant
               "type_name": "Bench::Data"
 
 Note the type name.
-``"Bench::Data"`` is currently the only topic type supported by the Bench 2 framework.
+``"Bench::Data"`` is currently the only topic type supported by the Bench framework.
 That said, it contains a variably sized array of octets, allowing a configurable range of data payload sizes (see write_action below).
 
 ::
