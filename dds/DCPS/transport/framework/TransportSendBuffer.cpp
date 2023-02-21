@@ -365,7 +365,6 @@ SingleSendBuffer::check_capacity_i(BufferVec& removed)
       ));
     }
 
-    destinations_.erase(it->first);
     remove_i(it, removed);
   }
 }
