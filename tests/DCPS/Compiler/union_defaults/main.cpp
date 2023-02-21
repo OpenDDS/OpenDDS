@@ -10,10 +10,10 @@ int ACE_TMAIN(int, ACE_TCHAR**)
   OpenDDS::DCPS::set_default(x);
   Unions::V v;
   OpenDDS::DCPS::set_default(v);
-  //Unions::U u;
-  //OpenDDS::DCPS::set_default(u);
-  //Unions::T t;
-  //OpenDDS::DCPS::set_default(t);
+  Unions::U u;
+  OpenDDS::DCPS::set_default(u);
+  Unions::T t;
+  OpenDDS::DCPS::set_default(t);
   return 0;
 }
 

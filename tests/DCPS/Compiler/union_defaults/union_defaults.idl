@@ -20,14 +20,14 @@ module Unions {
     case 0: dummy d;
   };
 
-  // The generated type support code for U and T does not compile.
+  typedef sequence<dummy> dummy_sequence;
+  union U switch(unsigned short) {
+    case 0: dummy_sequence dsequence;
+  };
 
-  //union U switch(unsigned short) {
-  //  case 0: sequence<dummy> dsequence;
-  //};
-
-  //union T switch(unsigned short) {
-  //  case 0: dummy darray[10];
-  //};
+  typedef dummy dummy_array[10];
+  union T switch(unsigned short) {
+    case 0: dummy_array darray;
+  };
 };
 
