@@ -3951,7 +3951,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     if (!found) {
       be_global->impl_ << " " << scoped(discriminator->name()) << " temp;\n";
       be_global->impl_ << type_to_default("", discriminator, "  temp");
-      be_global->impl_ << "  uni._d(temp);\n";
+      be_global->impl_ << "  " << varname << "._d(temp);\n";
     }
   }
 
