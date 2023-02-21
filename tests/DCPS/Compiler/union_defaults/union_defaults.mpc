@@ -1,0 +1,5 @@
+project: dcps {
+  TypeSupport_Files {
+    union_defaults.idl
+  }
+}

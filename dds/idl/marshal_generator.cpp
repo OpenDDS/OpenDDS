@@ -3888,17 +3888,20 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   const bool not_final = exten != extensibilitykind_final;
 
   {
+    // Define the set_default function in the header and implementation file.
+    const std::string varname("uni");
     Function set_default("set_default", "void", "");
-    set_default.addArg("uni", cxx + "&");
+    set_default.addArg(varname.c_str(), cxx + "&");
     set_default.endArgs();
-    be_global->impl_ << "  " << scoped(discriminator->name()) << " temp;\n";
-    be_global->impl_ << type_to_default("  ", discriminator, "  temp");
-    be_global->impl_ << "  uni._d(temp);\n";
+
+    // Add a reference to the idl file, if the descriminator is user defined.
     AST_Type* disc_type = resolveActualType(discriminator);
-    Classification disc_cls = classify(disc_type);
+    const Classification disc_cls = classify(disc_type);
     if (!disc_type->in_main_file() && disc_type->node_type() != AST_Decl::NT_pre_defined) {
       be_global->add_referenced(disc_type->file_name().c_str());
     }
+
+    // Determine the default enum value
     ACE_CDR::ULong default_enum_val = 0;
     if (disc_cls & CL_ENUM) {
       AST_Enum* enu = dynamic_cast<AST_Enum*>(disc_type);
@@ -3906,6 +3909,9 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       AST_EnumVal *item = dynamic_cast<AST_EnumVal*>(i.item());
       default_enum_val = item->constant_value()->ev()->u.eval;
     }
+
+    // Search the union branches to find the default value according to
+    // Table 9 of the XTypes spec v1.3
     bool found = false;
     for (std::vector<AST_UnionBranch*>::const_iterator itr = branches.begin(); itr < branches.end() && !found; ++itr) {
       AST_UnionBranch* branch = *itr;
@@ -3932,18 +3938,20 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
               (ev->et == AST_Expression::EV_octet && ev->u.oval == 0) ||
               (ev->et == AST_Expression::EV_bool && ev->u.bval == 0))
           {
-            AST_Type* br = resolveActualType(branch->field_type());
-            Classification br_cls = classify(br);
-            if (br_cls & (CL_SEQUENCE | CL_ARRAY)) {
-              be_global->impl_ << scoped(branch->field_type()->name()) << " " << getWrapper("tmp", branch->field_type(), WD_INPUT) << ";\n";
-            }
-            be_global->impl_ << type_to_default("  ", branch->field_type(), string("uni.")
-              + branch->local_name()->get_string(), false, true);
+            gen_union_default(branch, varname);
             found = true;
             break;
           }
         }
       }
+    }
+
+    // If a default value was not found, just set the discriminator to the
+    // default value.
+    if (!found) {
+      be_global->impl_ << " " << scoped(discriminator->name()) << " temp;\n";
+      be_global->impl_ << type_to_default("", discriminator, "  temp");
+      be_global->impl_ << "  uni._d(temp);\n";
     }
   }
 
@@ -4111,4 +4119,25 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
 
   TopicKeys keys(node);
   return generate_marshal_traits(node, cxx, exten, keys);
+}
+
+void marshal_generator::gen_union_default(AST_UnionBranch* branch, const std::string& varname)
+{
+  AST_Type* br = resolveActualType(branch->field_type());
+  const Classification br_cls = classify(br);
+
+  if (br_cls & (CL_SEQUENCE | CL_ARRAY)) {
+    be_global->impl_ << " " << scoped(branch->field_type()->name()) << " "
+                     << getWrapper("tmp", branch->field_type(), WD_INPUT) << ";\n";
+  }
+
+  if (br_cls & (CL_STRUCTURE | CL_UNION)) {
+    be_global->impl_ << " " << scoped(branch->field_type()->name()) << " "
+                     << getWrapper("tmp", branch->field_type(), WD_INPUT) << ";\n"
+                     << "  " << varname << "." << branch->local_name()->get_string() << "(tmp);\n";
+  }
+
+  be_global->impl_ << type_to_default("  ", branch->field_type(),
+                                      varname + "." + branch->local_name()->get_string(),
+                                      false, true);
 }

@@ -29,6 +29,9 @@ public:
   static void generate_dheader_code(const std::string& code, bool dheader_required, bool is_ser_func = true);
 
   static void gen_field_getValueFromSerialized(AST_Structure* node, const std::string& clazz);
+
+private:
+  void gen_union_default(AST_UnionBranch* branch, const std::string& varname);
 };
 
 #endif
