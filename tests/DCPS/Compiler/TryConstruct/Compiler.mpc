@@ -1,5 +1,4 @@
 project(*TryConstruct): dcps_test, googletest, msvc_bigobj{
-  requires += no_opendds_safety_profile
   exename = *
   Source_Files {
     TryConstruct.cpp
