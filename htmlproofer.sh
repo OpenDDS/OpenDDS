@@ -7,8 +7,8 @@ url_swap_list=() # Format is REGEX:REPLACE_STRING
 if grep -RI --quiet 'href="/pages/OpenDDS/OpenDDS/' "$site_dir"
 then
   url_swap_list+=(
-    '^https?\:\/\/github\.com\/pages\/objectcomputing\/OpenDDS:'
-    '^\/pages\/objectcomputing\/OpenDDS:'
+    '^https?\:\/\/github\.com\/pages\/OpenDDS\/OpenDDS:'
+    '^\/pages\/OpenDDS\/OpenDDS:'
   )
 else
   url_swap_list+=(
@@ -34,7 +34,7 @@ url_ignore_list=(
   '/brighttalk\.com\//'
   # New pages will have invalid "Edit this page on GitHub" links until they are
   # merged into the main repo's gh-pages.
-  '/github\.com\/objectcomputing\/OpenDDS\/blob\/gh-pages\//'
+  '/github\.com\/OpenDDS\/OpenDDS\/blob\/gh-pages\//'
 )
 url_ignore_arg="$(printf ",%s" "${url_ignore_list[@]}")"
 url_ignore_arg="${url_ignore_arg:1}"
