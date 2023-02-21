@@ -4,30 +4,48 @@ module Unions {
   };
 
   union Z switch(boolean) {
-    case TRUE: short s;
+    case TRUE: short val;
   };
 
-  union Y switch(short) {
-    case 0: string q;
+  union Y switch(char) {
+    case 0: string val;
   };
 
-  union X switch(long) {
-    case 78: short s;
+  union X switch(short) {
+    case 78: short val;
     case 0: Z zz;
   };
 
-  union V switch(short) {
-    case 0: dummy d;
+  union V switch(unsigned short) {
+    case 0: dummy val;
   };
 
   typedef sequence<dummy> dummy_sequence;
-  union U switch(unsigned short) {
+  union U switch(long) {
     case 0: dummy_sequence dsequence;
   };
 
   typedef dummy dummy_array[10];
-  union T switch(unsigned short) {
+  union T switch(unsigned long) {
     case 0: dummy_array darray;
+  };
+
+#ifndef OPENDDS_SAFETY_PROFILE
+  union S switch(long) {
+    case 0: wstring val;
+  };
+
+  union R switch(unsigned long) {
+    case 0: wchar val;
+  };
+#endif
+
+  union Q switch(unsigned long) {
+    case 0: long double val;
+  };
+
+  union P switch(unsigned long) {
+    case 0: boolean val;
   };
 };
 
