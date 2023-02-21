@@ -86,6 +86,7 @@ tests/DCPS/Compiler/explicit_ints/run_test.pl classic: !DCPS_MIN
 tests/DCPS/Compiler/explicit_ints/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
 tests/DCPS/Compiler/char_literals/run_test.pl classic: !DCPS_MIN
 tests/DCPS/Compiler/char_literals/run_test.pl cpp11: !DCPS_MIN CXX11 !OPENDDS_SAFETY_PROFILE
+tests/DCPS/Compiler/union_defaults/run_test.pl: !DCPS_MIN
 
 tests/DCPS/C++11/Messenger/run_test.pl: !DCPS_MIN CXX11 !DDS_NO_OWNERSHIP_PROFILE !OPENDDS_SAFETY_PROFILE
 
