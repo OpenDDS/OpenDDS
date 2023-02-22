@@ -53,38 +53,65 @@ To the right of each file name is the name of the tool that generates it, follow
 
 **Table  Generated files descriptions**
 
-+--------------------------------------+------------------------------------------------------+
-| File                                 | Generation Tool                                      |
-+======================================+======================================================+
-| ``Foo.idl``                          | Developer-written description of the DDS sample type |
-+--------------------------------------+------------------------------------------------------+
-| ``Foo{C,S}.``                        | ``tao_idl``: C++ representation of the IDL           |
-| ``{h,inl,cpp}``                      |                                                      |
-+--------------------------------------+------------------------------------------------------+
-| ``FooTypeSupport.idl``               | ``opendds_idl``: DDS type-specific interfaces        |
-+--------------------------------------+------------------------------------------------------+
-| ``FooTypeSupport{C,S}.``             | ``tao_idl``                                          |
-| ``{h,inl,cpp}``                      |                                                      |
-+--------------------------------------+------------------------------------------------------+
-| ``Baz/BarSeq{Helper,Holder}.java``   | ``idl2jni``                                          |
-+--------------------------------------+------------------------------------------------------+
-| ``Baz/BarData{Reader,Writer}*.java`` | ``idl2jni``                                          |
-+--------------------------------------+------------------------------------------------------+
-| ``Baz/BarTypeSupport*.java``         | ``idl2jni`` (except TypeSupportImpl, see below)      |
-+--------------------------------------+------------------------------------------------------+
-| ``FooTypeSupportJC.``                | ``idl2jni``: JNI native method implementations       |
-| ``{h,cpp}``                          |                                                      |
-+--------------------------------------+------------------------------------------------------+
-| ``FooTypeSupportImpl.``              | ``opendds_idl``: DDS type-specific C++ impl.         |
-| ``{h,cpp}``                          |                                                      |
-+--------------------------------------+------------------------------------------------------+
-| ``Baz/BarTypeSupportImpl.java``      | ``opendds_idl``: DDS type-specific Java impl.        |
-+--------------------------------------+------------------------------------------------------+
-| ``Baz/Bar*.java``                    | ``idl2jni``: Java representation of IDL struct       |
-+--------------------------------------+------------------------------------------------------+
-| ``FooJC.``                           | ``idl2jni``: JNI native method implementations       |
-| ``{h,cpp}``                          |                                                      |
-+--------------------------------------+------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - File
+
+     - Generation Tool
+
+   * - ``Foo.idl``
+
+     - Developer-written description of the DDS sample type
+
+   * - ``Foo{C,S}.``
+       ``{h,inl,cpp}``
+
+     - ``tao_idl``: C++ representation of the IDL
+
+   * - ``FooTypeSupport.idl``
+
+     - ``opendds_idl``: DDS type-specific interfaces
+
+   * - ``FooTypeSupport{C,S}.``
+       ``{h,inl,cpp}``
+
+     - ``tao_idl``
+
+   * - ``Baz/BarSeq{Helper,Holder}.java``
+
+     - ``idl2jni``
+
+   * - ``Baz/BarData{Reader,Writer}*.java``
+
+     - ``idl2jni``
+
+   * - ``Baz/BarTypeSupport*.java``
+
+     - ``idl2jni`` (except TypeSupportImpl, see below)
+
+   * - ``FooTypeSupportJC.``
+       ``{h,cpp}``
+
+     - ``idl2jni``: JNI native method implementations
+
+   * - ``FooTypeSupportImpl.``
+       ``{h,cpp}``
+
+     - ``opendds_idl``: DDS type-specific C++ impl.
+
+   * - ``Baz/BarTypeSupportImpl.java``
+
+     - ``opendds_idl``: DDS type-specific Java impl.
+
+   * - ``Baz/Bar*.java``
+
+     - ``idl2jni``: Java representation of IDL struct
+
+   * - ``FooJC.``
+       ``{h,cpp}``
+
+     - ``idl2jni``: JNI native method implementations
 
 Foo.idl:
 
@@ -138,20 +165,20 @@ Windows:
 .. code-block:: mpc
 
     project: dcps_java {
-     idlflags += -Wb,stub_export_include=Foo_Export.h \
-     -Wb,stub_export_macro=Foo_Export
-     dcps_ts_flags += -Wb,export_macro=Foo_Export
-     idl2jniflags += -Wb,stub_export_include=Foo_Export.h \
+      idlflags += -Wb,stub_export_include=Foo_Export.h \
         -Wb,stub_export_macro=Foo_Export
-     dynamicflags += FOO_BUILD_DLL
+      dcps_ts_flags += -Wb,export_macro=Foo_Export
+      idl2jniflags += -Wb,stub_export_include=Foo_Export.h \
+        -Wb,stub_export_macro=Foo_Export
+      dynamicflags += FOO_BUILD_DLL
 
-     specific {
+      specific {
      jarname = DDS_Foo_types
-     }
+      }
 
      TypeSupport_Files {
-     Foo.idl
-     }
+        Foo.idl
+      }
     }
 
 You can leave out the specific {...} block if you do not need to create a jar file.

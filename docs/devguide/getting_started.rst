@@ -42,9 +42,7 @@ Identifying Topic Types
     Sect<2.1.1.1>
 
 Each data type used by DDS is defined using OMG Interface Definition Language (IDL).
-OpenDDS uses IDL annotations1For backwards compatibility, OpenDDS also parses ``#pragma`` directives which were used before release 3.14.
-This guide will describe IDL annotations only.
-to identify the data types that it transmits and processes.
+OpenDDS uses IDL annotations [#footnote1]_ to identify the data types that it transmits and processes.
 These data types are processed by the TAO IDL compiler and the OpenDDS IDL compiler to generate the necessary code to transmit data of these types with OpenDDS.
 Here is the IDL file that defines our Message data type:
 
@@ -486,9 +484,9 @@ The basic steps involved in waiting for the subscriber are:
 
 * Attach the status condition to the wait set
 
-* .. _getting_started--rtf35353737353a204e756d6265:
+* .. _getting_started--refnumpara-2987-508699783:
 
-  .. _getting_started--refnumpara-2987-508699783:
+  .. _getting_started--rtf35353737353a204e756d6265:
 
   Get the publication matched status
 
@@ -503,7 +501,8 @@ Here is the corresponding code:
 .. code-block:: cpp
 
         // Block until Subscriber is available
-        DDS::StatusCondition_var condition = writer->get_statuscondition();
+        DDS::StatusCondition_var condition =
+    writer->get_statuscondition();
         condition->set_enabled_statuses(
             DDS::PUBLICATION_MATCHED_STATUS);
 
@@ -858,7 +857,7 @@ First we will start a ``DCPSInfoRepo`` service so our publishers and subscribers
 
 .. note:: This step is not necessary if you are using peer-to-peer discovery by configuring your environment to use RTPS discovery.
 
-The ``DCPSInfoRepo``  executable is found in :ghfile:`bin`.
+The ``DCPSInfoRepo`` executable is found in ``bin/DCPSInfoRepo``.
 When we start the ``DCPSInfoRepo`` we need to ensure that publisher and subscriber application processes can also find the started ``DCPSInfoRepo``.
 This information can be provided in one of three ways: a.)
 parameters on the command line , b.)
@@ -1116,3 +1115,9 @@ If the ``read()`` or ``take()`` operation’s ``max_samples`` parameter is large
 
 Although the application can change the length of a zero-copy sequence, by calling the ``length(len)`` operation, you are advised against doing so because this call results in copying the data and creating a single-copy sequence of samples.
 
+.. rubric:: Footnotes
+
+.. [#footnote1]
+
+   For backwards compatibility, OpenDDS also parses ``#pragma`` directives which were used before release 3.14.
+   This guide will describe IDL annotations only.

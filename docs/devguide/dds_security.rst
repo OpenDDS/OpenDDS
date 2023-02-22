@@ -41,7 +41,7 @@ Building OpenDDS with security enabled requires the following dependencies:
 
 #. CMake (required if building OpenDDS tests and building Google Test and other dependencies from source).
 
-**General Notes on Using OpenDDS Configure Script with DDS Security**
+.. note:: General Notes on Using OpenDDS Configure Script with DDS Security
 
 #. DDS Security is disabled by default, enable it with ``--security``
 
@@ -70,17 +70,21 @@ As of this writing, vcpkg is only supported on Visual Studio 2015 Update 3 and l
 
        * If you need to obtain and install vcpkg, navigate to `https://github.com/Microsoft/vcpkg <#https://github.com/Microsoft/vcpkg>`__ and follow the instructions to obtain vcpkg by cloning the repository and bootstrapping it.
 
-       * Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:``vcpkg install openssl:x64-windows xerces-c:x64-windows``
+       * Fetch and build the dependencies; by default, vcpkg targets x86 so be sure to specify the x64 target if required by specifying it when invoking vcpkg install, as shown here:
+
+         ``vcpkg install openssl:x64-windows xerces-c:x64-windows``
 
        * Configure OpenDDS by passing the openssl and xerces3 switches.
-         As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.``set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windowsconfigure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%``
+         As a convenience, it can be helpful to set an environment variable to store the path since it is the same location for both dependencies.
+         ``set VCPKG_INSTALL=c:\path\to\vcpkg\installed\x64-windows``
+
+         ``configure --security --openssl=%VCPKG_INSTALL% --xerces3=%VCPKG_INSTALL%``
 
        * Compile with msbuild or by launching Visual Studio from this command prompt so it inherits the correct environment variables and building from there.
 
 ``msbuild /m DDS_TAOv2_all.sln``
 
 ::
-
 
 **Manual Build**
 
@@ -148,7 +152,9 @@ Official Xerces instructions can be found `here <https://xerces.apache.org/xerce
 
 #. * If a different location was used (assuming environment variables ``NEW_SSL_ROOT`` and ``NEW_XERCES_ROOT`` point to their respective library directories):
 
-``configure --security --openssl=%NEW_SSL_ROOT%   --xerces3=%NEW_XERCES_ROOT%``
+``configure --security --openssl=%NEW_SSL_ROOT%``
+
+``--xerces3=%NEW_XERCES_ROOT%``
 
 #. Compile with msbuild (or by opening the solution file in Visual Studio and building from there).
 
@@ -214,25 +220,34 @@ Terms and Background Info
 DDS Security uses current industry standards and best-practices in security.
 As such, this document makes use of several security concepts which may warrant additional research by OpenDDS users.
 
-+--------------------------------------------------+-------------------------------------------------------------------------------------------+
-| Term Group                                       | References                                                                                |
-+==================================================+===========================================================================================+
-| Public Key Cryptography (including Private Keys) | * https://en.wikipedia.org/wiki/Public-key_cryptography                                   |
-|                                                  |                                                                                           |
-|                                                  | * RSA – https://en.wikipedia.org/wiki/RSA_(algorithm)                                     |
-|                                                  |                                                                                           |
-|                                                  | * Elliptic Curve Cryptography - https://en.wikipedia.org/wiki/Elliptic_curve_cryptography |
-+--------------------------------------------------+-------------------------------------------------------------------------------------------+
-| Public Key Certificate                           | * https://en.wikipedia.org/wiki/Public_key_certificate                                    |
-|                                                  |                                                                                           |
-|                                                  | * Certificate Authority – https://en.wikipedia.org/wiki/Certificate_authority             |
-|                                                  |                                                                                           |
-|                                                  | * X.509 – https://en.wikipedia.org/wiki/X.509                                             |
-|                                                  |                                                                                           |
-|                                                  | * PEM - https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail                    |
-+--------------------------------------------------+-------------------------------------------------------------------------------------------+
-| Signed Documents                                 | * https://en.wikipedia.org/wiki/Digital_signature                                         |
-+--------------------------------------------------+-------------------------------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Term Group
+
+     - References
+
+   * - Public Key Cryptography (including Private Keys)
+
+     - * https://en.wikipedia.org/wiki/Public-key_cryptography
+
+       * RSA – https://en.wikipedia.org/wiki/RSA_(algorithm)
+
+       * Elliptic Curve Cryptography - https://en.wikipedia.org/wiki/Elliptic_curve_cryptography
+
+   * - Public Key Certificate
+
+     - * https://en.wikipedia.org/wiki/Public_key_certificate
+
+       * Certificate Authority – https://en.wikipedia.org/wiki/Certificate_authority
+
+       * X.509 – https://en.wikipedia.org/wiki/X.509
+
+       * PEM - https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail
+
+   * - Signed Documents
+
+     - * https://en.wikipedia.org/wiki/Digital_signature
 
 .. _dds_security--reftable36:
 
@@ -316,23 +331,56 @@ When the application creates a DomainParticipant object, the DomainParticipantQo
 The following properties must be included to enable security.
 Except where noted, these values take the form of a URI starting with either the scheme “file:” followed by a filesystem path (absolute or relative) or the scheme “data:” followed by the literal data.
 
-+---------------------------------------+----------------------------------+------------------------------------------+
-| Name                                  | Value                            | Notes                                    |
-+=======================================+==================================+==========================================+
-| ``dds.sec.auth.identity_ca``          | Certificate PEM file             | Can be the same as ``permissions_ca``    |
-+---------------------------------------+----------------------------------+------------------------------------------+
-| ``dds.sec.access.permissions_ca``     | Certificate PEM file             | Can be the ``same as identity_ca``       |
-+---------------------------------------+----------------------------------+------------------------------------------+
-| ``dds.sec.access.governance``         | Signed XML (.p7s)                | Signed by ``permissions_ca``             |
-+---------------------------------------+----------------------------------+------------------------------------------+
-| ``dds.sec.auth.identity_certificate`` | Certificate PEM file             | Signed by ``identity_ca``                |
-+---------------------------------------+----------------------------------+------------------------------------------+
-| ``dds.sec.auth.private_key``          | Private Key PEM file             | Private key for ``identity_certificate`` |
-+---------------------------------------+----------------------------------+------------------------------------------+
-| ``dds.sec.auth.password``             | Private Key Password (not a URI) | Optional, Base64 encoded                 |
-+---------------------------------------+----------------------------------+------------------------------------------+
-| ``dds.sec.access.permissions``        | Signed XML (.p7s)                | Signed by ``permissions_ca``             |
-+---------------------------------------+----------------------------------+------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Name
+
+     - Value
+
+     - Notes
+
+   * - ``dds.sec.auth.identity_ca``
+
+     - Certificate PEM file
+
+     - Can be the same as ``permissions_ca``
+
+   * - ``dds.sec.access.permissions_ca``
+
+     - Certificate PEM file
+
+     - Can be the ``same as identity_ca``
+
+   * - ``dds.sec.access.governance``
+
+     - Signed XML (.p7s)
+
+     - Signed by ``permissions_ca``
+
+   * - ``dds.sec.auth.identity_certificate``
+
+     - Certificate PEM file
+
+     - Signed by ``identity_ca``
+
+   * - ``dds.sec.auth.private_key``
+
+     - Private Key PEM file
+
+     - Private key for ``identity_certificate``
+
+   * - ``dds.sec.auth.password``
+
+     - Private Key Password (not a URI)
+
+     - Optional, Base64 encoded
+
+   * - ``dds.sec.access.permissions``
+
+     - Signed XML (.p7s)
+
+     - Signed by ``permissions_ca``
 
 .. _dds_security--reftable37:
 
@@ -431,21 +479,36 @@ Examples to demonstrate how the DDS Security features are used with OpenDDS can 
 
 The following table describes the various examples and where to find them in the source tree.
 
-+-----------------------------------------------------------------------------------+----------------------------------------------------------------------+
-| **Example**                                                                       | **Source Location**                                                  |
-+===================================================================================+======================================================================+
-| C++ application that configures security QoS policies via command-line parameters | :ghfile:`tests/DCPS/Messenger/publisher.cpp`                         |
-+-----------------------------------------------------------------------------------+----------------------------------------------------------------------+
-| Identity CA Certificate (along with private key)                                  | :ghfile:`tests/security/certs/identity/identity_ca_cert.pem`         |
-+-----------------------------------------------------------------------------------+----------------------------------------------------------------------+
-| Permissions CA Certificate (along with private key)                               | :ghfile:`tests/security/certs/permissions/permissions_ca_cert.pem`   |
-+-----------------------------------------------------------------------------------+----------------------------------------------------------------------+
-| Participant Identity Certificate (along with private key)                         | :ghfile:`tests/security/certs/identity/test_participant_01_cert.pem` |
-+-----------------------------------------------------------------------------------+----------------------------------------------------------------------+
-| Governance XML Document (alongside signed document)                               | :ghfile:`tests/DCPS/Messenger/governance.xml`                        |
-+-----------------------------------------------------------------------------------+----------------------------------------------------------------------+
-| Permissions XML Document (alongside signed document)                              | :ghfile:`tests/DCPS/Messenger/permissions_1.xml`                     |
-+-----------------------------------------------------------------------------------+----------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - **Example**
+
+     - **Source Location**
+
+   * - C++ application that configures security QoS policies via command-line parameters
+
+     - :ghfile:`tests/DCPS/Messenger/publisher.cpp`
+
+   * - Identity CA Certificate (along with private key)
+
+     - :ghfile:`tests/security/certs/identity/identity_ca_cert.pem`
+
+   * - Permissions CA Certificate (along with private key)
+
+     - :ghfile:`tests/security/certs/permissions/permissions_ca_cert.pem`
+
+   * - Participant Identity Certificate (along with private key)
+
+     - :ghfile:`tests/security/certs/identity/test_participant_01_cert.pem`
+
+   * - Governance XML Document (alongside signed document)
+
+     - :ghfile:`tests/DCPS/Messenger/governance.xml`
+
+   * - Permissions XML Document (alongside signed document)
+
+     - :ghfile:`tests/DCPS/Messenger/permissions_1.xml`
 
 .. _dds_security--reftable38:
 
@@ -624,22 +687,47 @@ Domain Rule Configuration Options
 
 The following XML elements are used to configure domain participant behaviors.
 
-+------------------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Element                                  | Type           | Description                                                                                                                                                                                                                                                                                                        |
-+==========================================+================+====================================================================================================================================================================================================================================================================================================================+
-| ``<allow_unauthenticated_participants>`` | Boolean        | A boolean value which determines whether to allow unauthenticated participants for the current domain rule                                                                                                                                                                                                         |
-+------------------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``<enable_join_access_control>``         | Boolean        | A boolean value which determines whether to enforce domain access controls for authenticated participants                                                                                                                                                                                                          |
-+------------------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| <discovery_protection_kind>              | ProtectionKind | The discovery protection element specifies the protection kind used for the built-in DataWriter(s) and DataReader(s) used for secure endpoint discovery messages                                                                                                                                                   |
-+------------------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| <liveliness_protection_kind>             | ProtectionKind | The liveliness protection element specifies the protection kind used for the built-in DataWriter and DataReader used for secure liveliness messages                                                                                                                                                                |
-+------------------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| <rtps_protection_kind>                   | ProtectionKind | Indicate the desired level of protection for the whole RTPS message.                                                                                                                                                                                                                                               |
-|                                          |                | Very little RTPS data exists outside the “metadata protection” envelope (see topic rule configuration options), and so for most use cases topic-level “data protection” or “metadata protection” can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately. |
-|                                          |                | One item that is not secured by "metadata protection" is the timestamp, since RTPS uses a separate InfoTimestamp submessage for this.                                                                                                                                                                              |
-|                                          |                | The timestamp can be secured by using <rtps_protection_kind>                                                                                                                                                                                                                                                       |
-+------------------------------------------+----------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Element
+
+     - Type
+
+     - Description
+
+   * - ``<allow_unauthenticated_participants>``
+
+     - Boolean
+
+     - A boolean value which determines whether to allow unauthenticated participants for the current domain rule
+
+   * - ``<enable_join_access_control>``
+
+     - Boolean
+
+     - A boolean value which determines whether to enforce domain access controls for authenticated participants
+
+   * - <discovery_protection_kind>
+
+     - ProtectionKind
+
+     - The discovery protection element specifies the protection kind used for the built-in DataWriter(s) and DataReader(s) used for secure endpoint discovery messages
+
+   * - <liveliness_protection_kind>
+
+     - ProtectionKind
+
+     - The liveliness protection element specifies the protection kind used for the built-in DataWriter and DataReader used for secure liveliness messages
+
+   * - <rtps_protection_kind>
+
+     - ProtectionKind
+
+     - Indicate the desired level of protection for the whole RTPS message.
+       Very little RTPS data exists outside the “metadata protection” envelope (see topic rule configuration options), and so for most use cases topic-level “data protection” or “metadata protection” can be combined with discovery protection and/or liveliness protection in order to secure domain data adequately.
+       One item that is not secured by "metadata protection" is the timestamp, since RTPS uses a separate InfoTimestamp submessage for this.
+       The timestamp can be secured by using <rtps_protection_kind>
 
 .. _dds_security--reftable39:
 

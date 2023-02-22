@@ -22,27 +22,64 @@ The table below shows the command line options for the ``DCPSInfoRepo`` server:
 
 **Table  DCPS Information Repository Options**
 
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| Option                  | Description                                                                                                              | Default                       |
-+=========================+==========================================================================================================================+===============================+
-| ``-o file``             | Write the IOR of the ``DCPSInfo`` object to the specified file                                                           | ``repo.ior``                  |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| ``-NOBITS``             | Disable the publication of built-in topics                                                                               | Built-in topics are published |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| ``-a address``          | Listening address for built-in topics (when built-in topics are published).                                              | Random port                   |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| ``-z``                  | Turn on verbose transport logging                                                                                        | Minimal transport logging.    |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| ``-r``                  | Resurrect from persistent file                                                                                           | ``1`` (true)                  |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| ``-FederationId <id>``  | Unique identifier for this repository within any federation.                                                             | N/A                           |
-|                         | This is supplied as a 32 bit decimal numeric value.                                                                      |                               |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| ``-FederateWith <ref>`` | Repository federation reference at which to join a federation.                                                           | N/A                           |
-|                         | This is supplied as a valid CORBA object reference in string form: stringified IOR, file: or corbaloc: reference string. |                               |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
-| ``-?``                  | Display the command line usage and exit                                                                                  | N/A                           |
-+-------------------------+--------------------------------------------------------------------------------------------------------------------------+-------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Option
+
+     - Description
+
+     - Default
+
+   * - ``-o file``
+
+     - Write the IOR of the ``DCPSInfo`` object to the specified file
+
+     - ``repo.ior``
+
+   * - ``-NOBITS``
+
+     - Disable the publication of built-in topics
+
+     - Built-in topics are published
+
+   * - ``-a address``
+
+     - Listening address for built-in topics (when built-in topics are published).
+
+     - Random port
+
+   * - ``-z``
+
+     - Turn on verbose transport logging
+
+     - Minimal transport logging.
+
+   * - ``-r``
+
+     - Resurrect from persistent file
+
+     - ``1`` (true)
+
+   * - ``-FederationId <id>``
+
+     - Unique identifier for this repository within any federation.
+       This is supplied as a 32 bit decimal numeric value.
+
+     - N/A
+
+   * - ``-FederateWith <ref>``
+
+     - Repository federation reference at which to join a federation.
+       This is supplied as a valid CORBA object reference in string form: stringified IOR, file: or corbaloc: reference string.
+
+     - N/A
+
+   * - ``-?``
+
+     - Display the command line usage and exit
+
+     - N/A
 
 OpenDDS clients often use the IOR file that ``DCPSInfoRepo`` outputs to locate the service.
 The ``-o`` option allows you to place the IOR file into an application-specific directory or file name.
@@ -64,13 +101,26 @@ Currently available configuration options are:
 
 **Table  InfoRepo persistence directives**
 
-+------------+-------------------------------+---------------------+
-| Options    | Description                   | Defaults            |
-+============+===============================+=====================+
-| ``-file``  | Name of the persistent file   | ``InforepoPersist`` |
-+------------+-------------------------------+---------------------+
-| ``-reset`` | Wipe out old persistent data. | ``0`` (false)       |
-+------------+-------------------------------+---------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Options
+
+     - Description
+
+     - Defaults
+
+   * - ``-file``
+
+     - Name of the persistent file
+
+     - ``InforepoPersist``
+
+   * - ``-reset``
+
+     - Wipe out old persistent data.
+
+     - ``0`` (false)
 
 The following directive:
 
@@ -170,21 +220,46 @@ This endpoint information is used to create a CORBA object reference using the c
 
 **Table  repoctl Repository Management Command**
 
-+--------------+----------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Command      | Syntax                                                   | Description                                                                                                                                                                                                              |
-+==============+==========================================================+==========================================================================================================================================================================================================================+
-| ``join``     | ``repoctl join <target> <peer> [ <federation domain> ]`` | Calls the ``<peer>`` to join ``<target>`` to the federation.                                                                                                                                                             |
-|              |                                                          | ``<federation domain>`` is passed if present, or the default Federation Domain value is passed.                                                                                                                          |
-+--------------+----------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``leave``    | ``repoctl leave <target>``                               | Causes the ``<target>`` to gracefully leave the federation, removing all managed associations between applications using ``<target>`` as a repository with applications that are not using ``<target>`` as a repository. |
-+--------------+----------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``shutdown`` | ``repoctl shutdown <target>``                            | Causes the ``<target>`` to shutdown without removing any managed associations.                                                                                                                                           |
-|              |                                                          | This is the same effect as a repository which has crashed during operation.                                                                                                                                              |
-+--------------+----------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``kill``     | ``repoctl kill <target>``                                | Kills the ``<target>`` repository regardless of its federation status.                                                                                                                                                   |
-+--------------+----------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``help``     | ``repoctl help``                                         | Prints a usage message and quits.                                                                                                                                                                                        |
-+--------------+----------------------------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Command
+
+     - Syntax
+
+     - Description
+
+   * - ``join``
+
+     - ``repoctl join <target> <peer> [ <federation domain> ]``
+
+     - Calls the ``<peer>`` to join ``<target>`` to the federation.
+       ``<federation domain>`` is passed if present, or the default Federation Domain value is passed.
+
+   * - ``leave``
+
+     - ``repoctl leave <target>``
+
+     - Causes the ``<target>`` to gracefully leave the federation, removing all managed associations between applications using ``<target>`` as a repository with applications that are not using ``<target>`` as a repository.
+
+   * - ``shutdown``
+
+     - ``repoctl shutdown <target>``
+
+     - Causes the ``<target>`` to shutdown without removing any managed associations.
+       This is the same effect as a repository which has crashed during operation.
+
+   * - ``kill``
+
+     - ``repoctl kill <target>``
+
+     - Kills the ``<target>`` repository regardless of its federation status.
+
+   * - ``help``
+
+     - ``repoctl help``
+
+     - Prints a usage message and quits.
 
 A join command specifies two repository servers (by endpoint) and asks the second to join the first in a federation:
 
@@ -201,19 +276,28 @@ A full description of the command arguments are shown in :ref:`Table 9-4 <the_dc
 
 **Table  Federation Management Command Arguments**
 
-+-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| Option                  | Description                                                                                                                                                     |
-+=========================+=================================================================================================================================================================+
-| ``<target>``            | This is endpoint information that can be used to locate the ``Federator::Manager`` CORBA interface of a repository which is used to manage federation behavior. |
-|                         | This is used to command leave and shutdown federation operations and to identify the joining repository for the join command.                                   |
-+-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``<peer>``              | This is endpoint information that can be used to locate the ``Federator::Manager`` CORBA interface of a repository which is used to manage federation behavior. |
-|                         | This is used to command join federation operations.                                                                                                             |
-+-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+
-| ``<federation domain>`` | This is the domain specification used by federation participants to distribute service metadata amongst the federated repositories.                             |
-|                         | This only needs to be specified if more than one federation exists among the same set of repositories, which is currently not supported.                        |
-|                         | The default domain is sufficient for single federations.                                                                                                        |
-+-------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Option
+
+     - Description
+
+   * - ``<target>``
+
+     - This is endpoint information that can be used to locate the ``Federator::Manager`` CORBA interface of a repository which is used to manage federation behavior.
+       This is used to command leave and shutdown federation operations and to identify the joining repository for the join command.
+
+   * - ``<peer>``
+
+     - This is endpoint information that can be used to locate the ``Federator::Manager`` CORBA interface of a repository which is used to manage federation behavior.
+       This is used to command join federation operations.
+
+   * - ``<federation domain>``
+
+     - This is the domain specification used by federation participants to distribute service metadata amongst the federated repositories.
+       This only needs to be specified if more than one federation exists among the same set of repositories, which is currently not supported.
+       The default domain is sufficient for single federations.
 
 .. _the_dcps_information_repository--federation-example:
 

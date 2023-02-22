@@ -119,69 +119,143 @@ Each RtpsRelay process has a set of ports for exchanging RTPS messages with the 
 The RtpsRelay contains an embedded webserver called the meta discovery server.
 The webserver has the following endpoints:
 
-* ``/configResponds with configured content and content type.``
+* ``/config``
+
+  ``Responds with configured content and content type.``
   ``See -MetaDiscovery options below.``
   ``Potential client participants can download the necessary configuration from this endpoint.``
 
-* /``healthcheck`` Responds with HTTP 200 (OK) or 503 (Service Unavailable) if thread monitoring is enabled and the RtpsRelay is not admitting new client participants.
+* /``healthcheck``
+
+  Responds with HTTP 200 (OK) or 503 (Service Unavailable) if thread monitoring is enabled and the RtpsRelay is not admitting new client participants.
   Load balancers can use this endpoint to route new client participants to an available RtpsRelay instance.
 
 The command-line options for the RtpsRelay:
 
-* ``-Id STRINGThe Id option is mandatory and is a unique id associated with all topics published by the relay.``
+* ``-Id STRING``
 
-* ``-HorizontalAddress ADDRESS`` Determines the base network address used for receiving RTPS message from other relays.
+  ``The Id option is mandatory and is a unique id associated with all topics published by the relay.``
+
+* ``-HorizontalAddress ADDRESS``
+
+  Determines the base network address used for receiving RTPS message from other relays.
   By default, the relay listens on the first IP network and uses port 11444 for SPDP messages, 11445 for SEDP messages, and 11446 for data messages.
 
-* ``-VerticalAddress ADDRESS`` Determines the base network address used for receiving RTPS messages from the participants.
+* ``-VerticalAddress ADDRESS``
+
+  Determines the base network address used for receiving RTPS messages from the participants.
   By default, the relay listens on 0.0.0.0:4444 for SPDP messages, 0.0.0.0:4445 for SEDP messages, and 0.0.0.0.4446 for data messages.
 
-* ``-RelayDomain DOMAIN`` Sets the DDS domain used by the Relay Participant.
+* ``-RelayDomain DOMAIN``
+
+  Sets the DDS domain used by the Relay Participant.
   The default is 0.
 
-* ``-ApplicationDomain DOMAIN`` Sets the DDS domain used by the Application Participant.
+* ``-ApplicationDomain DOMAIN``
+
+  Sets the DDS domain used by the Application Participant.
   The default is 1.
 
-* ``-UserData STRINGSet the contents of the Application Participant’s UserData QoS policy to the provided string.``
+* ``-UserData STRING``
 
-* ``-BufferSize INTEGERSend of send and receive buffers in bytes``
+  ``Set the contents of the Application Participant’s UserData QoS policy to the provided string.``
 
-* ``-Lifespan SECONDS`` RtpsRelay will only forward a datagram to a client if it has received a datagram from the client in this amount of time.
+* ``-BufferSize INTEGER``
+
+  ``Send of send and receive buffers in bytes``
+
+* ``-Lifespan SECONDS``
+
+  RtpsRelay will only forward a datagram to a client if it has received a datagram from the client in this amount of time.
   Otherwise, participant is marked as not alive.
   The default is 60 seconds.
 
-* ``-InactivePeriodSECONDS`` RtpsRelay will mark participant as not active if does not receive a datagram from the client in this amount of time.
+* ``-InactivePeriodSECONDS``
+
+  RtpsRelay will mark participant as not active if does not receive a datagram from the client in this amount of time.
   The default is 60 seconds.
 
-* ``-AllowEmptyPartitions 0|1Allow client participants with no partitions.``
+* ``-AllowEmptyPartitions 0|1``
+
+  ``Allow client participants with no partitions.``
   ``Defaults to 1 (true).``
 
-* ``-IdentityCA PATH-PermissionsCA PATH-IdentityCertificate PATH-IdentityKey PATH-Governance PATH-Permissions PATH`` Provide paths to the DDS Security documents.
+* ``-IdentityCA PATH``
+
+  ``-PermissionsCA PATH``
+
+  ``-IdentityCertificate PATH``
+
+  ``-IdentityKey PATH``
+
+  ``-Governance PATH``
+
+  ``-Permissions PATH``
+
+  Provide paths to the DDS Security documents.
   Requires a security-enabled build.
 
-* ``-RestartDetection 0|1Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.``
+* ``-RestartDetection 0|1``
+
+  ``Setting RestartDetction to 1 causes the relay to track clients by the first 6 bytes of their RTPS GUID and source IP address and clean up older sessions with the same key.``
   ``The default is 0 (false).``
 
-* ``-LogWarnings0|1-LogDiscovery0|1-LogActivity0|1`` Enable/disable logging of the various event types.
+* ``-LogWarnings0|1``
 
-* ``-LogRelayStatisticsSECONDS-LogHandlerStatistics SECONDS-LogParticipantStatistics SECONDS`` Write statistics for the various event types to the log at the given interval, defaults to 0 (disabled).
+  ``-LogDiscovery0|1``
 
-* ``-PublishRelayStatisticsSECONDS-PublishHandlerStatistics SECONDS-PublishParticipantStatistics SECONDS`` Configure the relay to publish usage statistics on DDS topics at the given interval, defaults to 0 (disabled).
+  ``-LogActivity0|1``
 
-* ``-LogThreadStatus 0|1`` Log the status of the threads in the RtpsRelay, defaults to 0 (disabled).
+  Enable/disable logging of the various event types.
 
-* ``-ThreadStatusSafetyFactor INTEGER`` Restart if thread monitoring is enabled and a thread has not checked in for this many reporting intervals, default 3.
+* ``-LogRelayStatisticsSECONDS``
 
-* ``-UtilizationLimit DECIMAL`` If thread monitoring is enabled, the RtpsRelay will not accept to new client participants if the CPU utilization of any thread is above this limit, default .95.
+  ``-LogHandlerStatistics SECONDS``
 
-* ``-PublishRelayStatusSECONDS-PublishRelayStatusLivelinessSECONDS`` Setting PublishRelayStatus to a positive integer causes the relay to publish its status at that interval.
+  ``-LogParticipantStatistics SECONDS``
+
+  Write statistics for the various event types to the log at the given interval, defaults to 0 (disabled).
+
+* ``-PublishRelayStatisticsSECONDS``
+
+  ``-PublishHandlerStatistics SECONDS``
+
+  ``-PublishParticipantStatistics SECONDS``
+
+  Configure the relay to publish usage statistics on DDS topics at the given interval, defaults to 0 (disabled).
+
+* ``-LogThreadStatus 0|1``
+
+  Log the status of the threads in the RtpsRelay, defaults to 0 (disabled).
+
+* ``-ThreadStatusSafetyFactor INTEGER``
+
+  Restart if thread monitoring is enabled and a thread has not checked in for this many reporting intervals, default 3.
+
+* ``-UtilizationLimit DECIMAL``
+
+  If thread monitoring is enabled, the RtpsRelay will not accept to new client participants if the CPU utilization of any thread is above this limit, default .95.
+
+* ``-PublishRelayStatusSECONDS``
+
+  ``-PublishRelayStatusLivelinessSECONDS``
+
+  Setting PublishRelayStatus to a positive integer causes the relay to publish its status at that interval.
   Setting PublishRelayStatusLiveliness to a positive integer causes the relay to set the liveliness QoS on the relay status topic.
 
-* ``-MetaDiscoveryAddress`` Listening address for the meta discovery server, default 0.0.0.0:8080.
+* ``-MetaDiscoveryAddress``
 
-* ``-MetaDiscoveryContentType`` The HTTP content type to report for the meta discovery config endpoint, default application/json.
+  Listening address for the meta discovery server, default 0.0.0.0:8080.
 
-* ``-MetaDiscoveryContentPathPATH-MetaDiscoveryContentCONTENT`` The content returned by the meta discovery config endpoint, default {}.
+* ``-MetaDiscoveryContentType``
+
+  The HTTP content type to report for the meta discovery config endpoint, default application/json.
+
+* ``-MetaDiscoveryContentPathPATH``
+
+  ``-MetaDiscoveryContentCONTENT``
+
+  The content returned by the meta discovery config endpoint, default {}.
   If a path is specified, the content of the file will be used.
 
 .. _internet_enabled_rtps--deployment-considerations:

@@ -162,17 +162,28 @@ The following table shows the built-in topics defined within the DDS specificati
 
 **Table  Built-in Topics**
 
-+----------------------+---------------------------------------------------------+
-| Topic Name           | Description                                             |
-+======================+=========================================================+
-| ``DCPSParticipant``  | Each instance represents a domain participant.          |
-+----------------------+---------------------------------------------------------+
-| ``DCPSTopic``        | Each instance represents a normal (not built-in) topic. |
-+----------------------+---------------------------------------------------------+
-| ``DCPSPublication``  | Each instance represents a data writer.                 |
-+----------------------+---------------------------------------------------------+
-| ``DCPSSubscription`` | Each instance represents a data reader.                 |
-+----------------------+---------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Topic Name
+
+     - Description
+
+   * - ``DCPSParticipant``
+
+     - Each instance represents a domain participant.
+
+   * - ``DCPSTopic``
+
+     - Each instance represents a normal (not built-in) topic.
+
+   * - ``DCPSPublication``
+
+     - Each instance represents a data writer.
+
+   * - ``DCPSSubscription``
+
+     - Each instance represents a data reader.
 
 .. _introduction--quality-of-service-policies:
 
@@ -304,7 +315,9 @@ Section numbers of the DDSI-RTPS specification are supplied with each item for f
 
 Items not implemented in OpenDDS:
 
-#. Writer-side content filtering (8.7.3)OpenDDS may still drop samples that aren't needed (due to content filtering) by any associated readers — this is done above the transport layer
+#. Writer-side content filtering (8.7.3)
+
+   OpenDDS may still drop samples that aren't needed (due to content filtering) by any associated readers — this is done above the transport layer
 
 #. Coherent sets for ``PRESENTATION`` QoS (8.7.5)
 
@@ -586,7 +599,11 @@ If you are not using the ``configure`` script, continue reading below for instru
 For the features described below, MPC is used for enabling (the default) a feature or disabling the feature.
 For a feature named *feature*, the following steps are used to disable the feature from the build:
 
-#. Use the command line “features” argument to MPC:``mwc.pl -type <type> -featuresfeature=0 DDS.mwc`` Or alternatively, add the line ``feature=0`` to the file ``$ACE_ROOT/bin/MakeProjectCreator/config/default.features`` and regenerate the project files using MPC.
+#. Use the command line “features” argument to MPC:
+
+   ``mwc.pl -type <type> -featuresfeature=0 DDS.mwc``
+
+   Or alternatively, add the line ``feature=0`` to the file ``$ACE_ROOT/bin/MakeProjectCreator/config/default.features`` and regenerate the project files using MPC.
 
 #. If you are using the ``gnuace`` MPC project type (which is the case if you will be using GNU make as your build system), add line “``feature=0``” to the file ``$ACE_ROOT/include/makeinclude/platform_macros.GNU``.
 
@@ -643,15 +660,24 @@ In addition, individual classes can be excluded by using the features given in t
 
 **Table : Content-Subscription Class Features**
 
-+----------------------+----------------------------+
-| Class                | Feature                    |
-+======================+============================+
-| ContentFilteredTopic | ``content_filtered_topic`` |
-+----------------------+----------------------------+
-| QueryCondition       | ``query_condition``        |
-+----------------------+----------------------------+
-| MultiTopic           | ``multi_topic``            |
-+----------------------+----------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Class
+
+     - Feature
+
+   * - ContentFilteredTopic
+
+     - ``content_filtered_topic``
+
+   * - QueryCondition
+
+     - ``query_condition``
+
+   * - MultiTopic
+
+     - ``multi_topic``
 
 .. _introduction--persistence-profile:
 

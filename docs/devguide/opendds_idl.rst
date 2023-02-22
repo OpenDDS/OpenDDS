@@ -38,87 +38,220 @@ The following table summarizes the options supported by ``opendds_idl``.
 
 **Table  opendds_idl Command Line Options**
 
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| Option                                    | Description                                                                                                                                           | Default                                              |
-+===========================================+=======================================================================================================================================================+======================================================+
-| ``-v``                                    | Enables verbose execution                                                                                                                             | Quiet execution                                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-h``                                    | Prints a help (usage) message and exits                                                                                                               | N/A                                                  |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-V``                                    | Prints version numbers of both TAO and OpenDDS                                                                                                        | N/A                                                  |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--idl-version VERSION``                 | Set the version of IDL to use.                                                                                                                        | 4                                                    |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--list-idl-versions``                   | List the versions of IDL at least partially supported.                                                                                                | N/A                                                  |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--syntax-only``                         | Just check syntax of input files, exiting after parsing.                                                                                              | Goes on to generate code                             |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Wb,export_macro=macro``                | Export macro used for generating C++ implementation code.``--export`` is equivalent to ``-Wb,export_macro``                                           | No export macro used                                 |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Wb,export_include=file``               | Additional header to ``#include`` in generated code — this header ``#defines`` the export macro                                                       | No additional include                                |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Wb,pch_include=file``                  | Pre-compiled header file to include in generated C++ files                                                                                            | No pre-compiled header included                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Dname[=value]``                        | Define a preprocessor macro                                                                                                                           | N/A                                                  |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Idir``                                 | Add ``dir`` to the preprocessor include path                                                                                                          | N/A                                                  |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-o outputdir``                          | Output directory where ``opendds_idl`` should place the generated files.                                                                              | The current directory                                |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Wb,java``                              | Enable OpenDDS Java Bindings for generated TypeSupport implementation classes                                                                         | No Java support                                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Gitl``                                 | Generates “Intermediate Type Language” descriptions of datatypes.                                                                                     | Not generated                                        |
-|                                           | These files are used by the Wireshark dissector or other external applications.                                                                       |                                                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-GfaceTS``                              | Generates FACE (Future Airborne Capability Environment) Transport Services API                                                                        | Not generated                                        |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Gv8``                                  | Generate type support for converting data samples to/from V8 JavaScript objects ``-Wb,v8`` is an alternative form of this option                      | Not generated                                        |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Grapidjson``                           | Generate type support for converting data samples to/from RapidJSON objects                                                                           | Not generated                                        |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| .. _opendds_idl--gxtypes-complete:        | Generate complete XTypes TypeObjects which can be used to provide type information to applications that don’t have compile-time knowledge of the IDL. | Only minimal TypeObjects are generated               |
-|                                           | See section :ref:`xtypes--dynamic-language-binding-1`.                                                                                                |                                                      |
-| .. _opendds_idl--gxtypes-complete-option: |                                                                                                                                                       |                                                      |
-|                                           |                                                                                                                                                       |                                                      |
-| ``-Gxtypes-complete``                     |                                                                                                                                                       |                                                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Lface``                                | Generates IDL-to-C++ mapping for FACE                                                                                                                 | Not generated                                        |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Lspcpp``                               | Generates IDL-to-C++ mapping for Safety Profile                                                                                                       | Not generated                                        |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Lc++11``                               | Generates IDL-to-C++11 mapping                                                                                                                        | Not generated                                        |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-Wb,tao_include_prefix=s``              | Prefix the string *s* to #include directives meant to include headers generated by ``tao_idl``                                                        | N/A                                                  |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``-St``                                   | Suppress generation of IDL TypeCodes when one of the ``-L`` options are present.                                                                      | IDL TypeCodes generated                              |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--unknown-annotations VAL``             | For IDL version 4, control the reaction to unknown annotations.                                                                                       | ``warn-once``                                        |
-|                                           | The options are:                                                                                                                                      |                                                      |
-|                                           |                                                                                                                                                       |                                                      |
-|                                           | * ``warn-once, the default, warn once per annotation with the same name.``                                                                            |                                                      |
-|                                           |                                                                                                                                                       |                                                      |
-|                                           | * ``warn-all, warn for every use of an unknown annotation.``                                                                                          |                                                      |
-|                                           |                                                                                                                                                       |                                                      |
-|                                           | * ``error, similar to warn-all, but causes the compiler to exit with an error status when finished.``                                                 |                                                      |
-|                                           |                                                                                                                                                       |                                                      |
-|                                           | * ``ignore, ignore all unknown annotations.``                                                                                                         |                                                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--no-dcps-data-type-warnings``          | Don't warn about ``#pragma DCPS_DATA_TYPE``                                                                                                           | Warnings are issued, use annotations to silence them |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--[no-]default-nested``                 | Un-annotated types/modules are treated as nested.                                                                                                     | Types are nested by default.                         |
-|                                           | See section :ref:`getting_started--topic-types-vs-nested-types` for details.                                                                          |                                                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--default-extensibility VAL``           | Set the default XTypes Extensibility – see section :ref:`xtypes--determining-extensibility`                                                           | ``appendable``                                       |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--default-enum-extensibility-zero``     | Do not set the type flags for enums.                                                                                                                  |                                                      |
-|                                           | This flag is for simulating the behavior of previous versions of OpenDDS.                                                                             |                                                      |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--default-autoid VAL``                  | Set the default XTypes auto member-id assignment strategy: sequential or hash – see section :ref:`xtypes--autoid-value`                               | ``sequential``                                       |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--default-try-construct VAL``           | Set the default XTypes try-construct strategy: ``discard``, ``use-default``, or ``trim`` – see section :ref:`xtypes--customizing-xtypes-per-member`   | ``discard``                                          |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
-| ``--old-typeobject-encoding``             | Use the pre-3.18 encoding of ``TypeObject`` s when deriving ``TypeIdentifier`` s                                                                      | Use standard encoding                                |
-+-------------------------------------------+-------------------------------------------------------------------------------------------------------------------------------------------------------+------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Option
+
+     - Description
+
+     - Default
+
+   * - ``-v``
+
+     - Enables verbose execution
+
+     - Quiet execution
+
+   * - ``-h``
+
+     - Prints a help (usage) message and exits
+
+     - N/A
+
+   * - ``-V``
+
+     - Prints version numbers of both TAO and OpenDDS
+
+     - N/A
+
+   * - ``--idl-version VERSION``
+
+     - Set the version of IDL to use.
+
+     - 4
+
+   * - ``--list-idl-versions``
+
+     - List the versions of IDL at least partially supported.
+
+     - N/A
+
+   * - ``--syntax-only``
+
+     - Just check syntax of input files, exiting after parsing.
+
+     - Goes on to generate code
+
+   * - ``-Wb,export_macro=macro``
+
+     - Export macro used for generating C++ implementation code.
+       ``--export`` is equivalent to ``-Wb,export_macro``
+
+     - No export macro used
+
+   * - ``-Wb,export_include=file``
+
+     - Additional header to ``#include`` in generated code — this header ``#defines`` the export macro
+
+     - No additional include
+
+   * - ``-Wb,pch_include=file``
+
+     - Pre-compiled header file to include in generated C++ files
+
+     - No pre-compiled header included
+
+   * - ``-Dname[=value]``
+
+     - Define a preprocessor macro
+
+     - N/A
+
+   * - ``-Idir``
+
+     - Add ``dir`` to the preprocessor include path
+
+     - N/A
+
+   * - ``-o outputdir``
+
+     - Output directory where ``opendds_idl`` should place the generated files.
+
+     - The current directory
+
+   * - ``-Wb,java``
+
+     - Enable OpenDDS Java Bindings for generated TypeSupport implementation classes
+
+     - No Java support
+
+   * - ``-Gitl``
+
+     - Generates “Intermediate Type Language” descriptions of datatypes.
+       These files are used by the Wireshark dissector or other external applications.
+
+     - Not generated
+
+   * - ``-GfaceTS``
+
+     - Generates FACE (Future Airborne Capability Environment) Transport Services API
+
+     - Not generated
+
+   * - ``-Gv8``
+
+     - Generate type support for converting data samples to/from V8 JavaScript objects
+
+       ``-Wb,v8`` is an alternative form of this option
+
+     - Not generated
+
+   * - ``-Grapidjson``
+
+     - Generate type support for converting data samples to/from RapidJSON objects
+
+     - Not generated
+
+   * - .. _opendds_idl--gxtypes-complete-option:
+
+       .. _opendds_idl--gxtypes-complete:
+
+       ``-Gxtypes-complete``
+
+     - Generate complete XTypes TypeObjects which can be used to provide type information to applications that don’t have compile-time knowledge of the IDL.
+       See section :ref:`xtypes--dynamic-language-binding-1`.
+
+     - Only minimal TypeObjects are generated
+
+   * - ``-Lface``
+
+     - Generates IDL-to-C++ mapping for FACE
+
+     - Not generated
+
+   * - ``-Lspcpp``
+
+     - Generates IDL-to-C++ mapping for Safety Profile
+
+     - Not generated
+
+   * - ``-Lc++11``
+
+     - Generates IDL-to-C++11 mapping
+
+     - Not generated
+
+   * - ``-Wb,tao_include_prefix=s``
+
+     - Prefix the string *s* to #include directives meant to include headers generated by ``tao_idl``
+
+     - N/A
+
+   * - ``-St``
+
+     - Suppress generation of IDL TypeCodes when one of the ``-L`` options are present.
+
+     - IDL TypeCodes generated
+
+   * - ``--unknown-annotations VAL``
+
+     - For IDL version 4, control the reaction to unknown annotations.
+       The options are:
+
+       * ``warn-once, the default, warn once per annotation with the same name.``
+
+       * ``warn-all, warn for every use of an unknown annotation.``
+
+       * ``error, similar to warn-all, but causes the compiler to exit with an error status when finished.``
+
+       * ``ignore, ignore all unknown annotations.``
+
+     - ``warn-once``
+
+   * - ``--no-dcps-data-type-warnings``
+
+     - Don't warn about ``#pragma DCPS_DATA_TYPE``
+
+     - Warnings are issued, use annotations to silence them
+
+   * - ``--[no-]default-nested``
+
+     - Un-annotated types/modules are treated as nested.
+       See section :ref:`getting_started--topic-types-vs-nested-types` for details.
+
+     - Types are nested by default.
+
+   * - ``--default-extensibility VAL``
+
+     - Set the default XTypes Extensibility – see section :ref:`xtypes--determining-extensibility`
+
+     - ``appendable``
+
+   * - ``--default-enum-extensibility-zero``
+
+     - Do not set the type flags for enums.
+       This flag is for simulating the behavior of previous versions of OpenDDS.
+
+     -
+
+   * - ``--default-autoid VAL``
+
+     - Set the default XTypes auto member-id assignment strategy: sequential or hash – see section :ref:`xtypes--autoid-value`
+
+     - ``sequential``
+
+   * - ``--default-try-construct VAL``
+
+     - Set the default XTypes try-construct strategy: ``discard``, ``use-default``, or ``trim`` – see section :ref:`xtypes--customizing-xtypes-per-member`
+
+     - ``discard``
+
+   * - ``--old-typeobject-encoding``
+
+     - Use the pre-3.18 encoding of ``TypeObject`` s when deriving ``TypeIdentifier`` s
+
+     - Use standard encoding
 
 The code generation options allow the application developer to use the generated code in a wide variety of environments.
 Since IDL may contain preprocessing directives (``#include``, ``#define``, etc.

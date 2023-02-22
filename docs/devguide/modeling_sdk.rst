@@ -241,25 +241,44 @@ The process of generating code is documented in the Eclipse help.
 
 **Table  Generated Files**
 
-+---------------------------+-------------------------------------------------------------------------------------------+
-| File Name                 | Description                                                                               |
-+===========================+===========================================================================================+
-| ``<ModelName>.idl``       | Data types from the model’s ``DataLib``                                                   |
-+---------------------------+-------------------------------------------------------------------------------------------+
-| ``<ModelName>_T.h``       | C++ class from the model’s ``DcpsLib``                                                    |
-+---------------------------+-------------------------------------------------------------------------------------------+
-| ``<ModelName>_T.cpp``     | C++ implementation of the model’s ``DcpsLib``                                             |
-+---------------------------+-------------------------------------------------------------------------------------------+
-| ``<ModelName>.mpc``       | MPC project file for the generated C++ library                                            |
-+---------------------------+-------------------------------------------------------------------------------------------+
-| ``<ModelName>.mpb``       | MPC base project for use by the application                                               |
-+---------------------------+-------------------------------------------------------------------------------------------+
-| ``<ModelName>_paths.mpb`` | MPC base project with paths, see section :ref:`modeling_sdk--dependencies-between-models` |
-+---------------------------+-------------------------------------------------------------------------------------------+
-| ``<ModelName>Traits.h``   | Transport configuration from the .codegen file                                            |
-+---------------------------+-------------------------------------------------------------------------------------------+
-| ``<ModelName>Traits.cpp`` | Transport configuration from the .codegen file                                            |
-+---------------------------+-------------------------------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - File Name
+
+     - Description
+
+   * - ``<ModelName>.idl``
+
+     - Data types from the model’s ``DataLib``
+
+   * - ``<ModelName>_T.h``
+
+     - C++ class from the model’s ``DcpsLib``
+
+   * - ``<ModelName>_T.cpp``
+
+     - C++ implementation of the model’s ``DcpsLib``
+
+   * - ``<ModelName>.mpc``
+
+     - MPC project file for the generated C++ library
+
+   * - ``<ModelName>.mpb``
+
+     - MPC base project for use by the application
+
+   * - ``<ModelName>_paths.mpb``
+
+     - MPC base project with paths, see section :ref:`modeling_sdk--dependencies-between-models`
+
+   * - ``<ModelName>Traits.h``
+
+     - Transport configuration from the .codegen file
+
+   * - ``<ModelName>Traits.cpp``
+
+     - Transport configuration from the .codegen file
 
 .. _modeling_sdk--the-dcps-model-class:
 
@@ -767,5 +786,4 @@ Our full MPC file looks like this:
         MinimalSubscriber.cpp
       }
     }
-
 

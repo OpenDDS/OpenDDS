@@ -135,21 +135,32 @@ Conventions
 
 This guide uses the following conventions:
 
-+---------------------------+------------------------------------------------------------------------------------------------------------------+
-| ``Fixed pitch text``      | Indicates example code or information a user would enter using a keyboard.                                       |
-+===========================+==================================================================================================================+
-| ``Bold fixed pitch text`` | Indicates example code that has been modified from a previous example or text appearing in a menu or dialog box. |
-+---------------------------+------------------------------------------------------------------------------------------------------------------+
-| *Italic text*             | Indicates a point of emphasis.                                                                                   |
-+---------------------------+------------------------------------------------------------------------------------------------------------------+
-| ...                       | A horizontal ellipsis indicates that the statement is omitting text.                                             |
-+---------------------------+------------------------------------------------------------------------------------------------------------------+
-| .                         | A vertical ellipsis indicates that a segment of code is omitted from the example.                                |
-|                           |                                                                                                                  |
-| .                         |                                                                                                                  |
-|                           |                                                                                                                  |
-| .                         |                                                                                                                  |
-+---------------------------+------------------------------------------------------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - ``Fixed pitch text``
+
+     - Indicates example code or information a user would enter using a keyboard.
+
+   * - ``Bold fixed pitch text``
+
+     - Indicates example code that has been modified from a previous example or text appearing in a menu or dialog box.
+
+   * - *Italic text*
+
+     - Indicates a point of emphasis.
+
+   * - ...
+
+     - A horizontal ellipsis indicates that the statement is omitting text.
+
+   * - .
+
+       .
+
+       .
+
+     - A vertical ellipsis indicates that a segment of code is omitted from the example.
 
 .. _preface--coding-examples:
 
@@ -189,19 +200,32 @@ Additional documentation on OpenDDS is produced and maintained by Object Computi
 
 Here are some documents of interest and their locations:
 
-+--------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
-| Document                                                                                                                                         | Location                                  |
-+==================================================================================================================================================+===========================================+
-| Data Distribution Service (DDS) for Real-Time Systems v1.4 (OMG Document formal/2015-04-10)                                                      | http://www.omg.org/spec/DDS/1.4/PDF       |
-+--------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
-| The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document formal/2019-04-03) | http://www.omg.org/spec/DDSI-RTPS/2.3/PDF |
-+--------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
-| OMG Data Distribution Portal                                                                                                                     | http://portals.omg.org/dds/               |
-+--------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
-| OpenDDS Build Instructions, Architecture, and Doxygen Documentation                                                                              | http://www.opendds.org/documentation.html |
-+--------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
-| OpenDDS Frequently Asked Questions                                                                                                               | http://www.opendds.org/faq.html           |
-+--------------------------------------------------------------------------------------------------------------------------------------------------+-------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Document
+
+     - Location
+
+   * - Data Distribution Service (DDS) for Real-Time Systems v1.4 (OMG Document formal/2015-04-10)
+
+     - http://www.omg.org/spec/DDS/1.4/PDF
+
+   * - The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document formal/2019-04-03)
+
+     - http://www.omg.org/spec/DDSI-RTPS/2.3/PDF
+
+   * - OMG Data Distribution Portal
+
+     - http://portals.omg.org/dds/
+
+   * - OpenDDS Build Instructions, Architecture, and Doxygen Documentation
+
+     - http://www.opendds.org/documentation.html
+
+   * - OpenDDS Frequently Asked Questions
+
+     - http://www.opendds.org/faq.html
 
 .. _preface--supported-platforms:
 

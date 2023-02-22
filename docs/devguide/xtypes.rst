@@ -172,13 +172,16 @@ Suppose that some time in the future, a subset of the weather stations are upgra
 .. code-block:: omg-idl
 
     enum WindDir {N, NE, NW, S, SE, SW, W, E};
-    // Version 2@topic
+    // Version 2
+    @topic
     @mutable
-    struct StationData {  short temperature;
+    struct StationData {
+      short temperature;
       double pressure;
       double humidity;
       short wind_speed;
-      WindDir wind_direction;};
+      WindDir wind_direction;
+    };
 
 When a Version 2 writer interacts with a Version 1 reader, the additional fields will be ignored by the reader.
 When a Version 1 writer interacts with a Version 2 reader, the additional fields will be initialized to a "logical zero" value for its type (empty string, ``FALSE`` boolean) - see Table 9 of the XTypes specification for details.
@@ -215,17 +218,21 @@ A policy for a type can be set with either ``@autoid(SEQUENTIAL)`` or ``@autoid(
     @topic
     @mutable
     @autoid(SEQUENTIAL)
-    struct StationData {  short temperature;
+    struct StationData {
+      short temperature;
       double pressure;
-      double humidity;};
+      double humidity;
+    };
 
     // Version 4
     @topic
     @mutable
     @autoid(HASH)
-    struct StationData {  short temperature;
+    struct StationData {
+      short temperature;
       double pressure;
-      double humidity;};
+      double humidity;
+    };
 
 SEQUENTIAL causes ids to be assigned based on the position in the type.
 HASH causes ids to be computed by hashing the name of the member.
@@ -238,7 +245,8 @@ In this case, the ids of the pre-existing members can be set with @id:
 
     enum WindDir {N, NE, NW, S, SE, SW, W, E};
 
-    // Version 5@topic
+    // Version 5
+    @topic
     @mutable
     @autoid(HASH)
     struct StationData {
@@ -269,9 +277,11 @@ With @appendable, the initial version of the weather station IDL would be:
     // Version 6
     @topic
     @appendable
-    struct StationData {  short temperature;
+    struct StationData {
+      short temperature;
       double pressure;
-      double humidity;};
+      double humidity;
+    };
 
 And the subsequent addition of the wind speed and direction members would be:
 
@@ -279,13 +289,16 @@ And the subsequent addition of the wind speed and direction members would be:
 
     enum WindDir {N, NE, NW, S, SE, SW, W, E};
 
-    // Version 7@topic
+    // Version 7
+    @topic
     @appendable
-    struct StationData {  short temperature;
+    struct StationData {
+      short temperature;
       double pressure;
       double humidity;
       short wind_speed;
-      WindDir wind_direction;};
+      WindDir wind_direction;
+    };
 
 As with @mutable, when a Version 7 Writer interacts with a Version 6 Reader, the additional fields will be ignored by the reader.
 When a Version 6 Writer interacts with a Version 7 Reader, the additional fields will be initialized to default values based on Table 9 of the XTypes specification.
@@ -330,8 +343,10 @@ Suppose that the weather stations also publish a topic containing station inform
     // Version 1
     @topic
     @mutable
-    struct StationInfo {  @try_construct(TRIM) StationID station_id;
-      StationName station_name;};
+    struct StationInfo {
+      @try_construct(TRIM) StationID station_id;
+      StationName station_name;
+    };
 
 Eventually, the pool of station IDs is exhausted so the IDL must be refined as follows:
 
@@ -343,8 +358,10 @@ Eventually, the pool of station IDs is exhausted so the IDL must be refined as f
     // Version 2
     @topic
     @mutable
-    struct StationInfo {  @try_construct(TRIM) StationID station_id;
-      StationName station_name;};
+    struct StationInfo {
+      @try_construct(TRIM) StationID station_id;
+      StationName station_name;
+    };
 
 If a Version 2 writer interacts with a Version 1 reader, the station ID will be truncated to 8 characters.
 While perhaps not ideal, it will still allow the systems to interoperate.
@@ -1010,7 +1027,8 @@ To create a DynamicData object, use the DynamicDataFactory API defined by the XT
 
 .. code-block:: cpp
 
-    DDS::DynamicData_var dynamic =   DDS::DynamicDataFactory::get_instance()->create_data(type);
+    DDS::DynamicData_var dynamic =
+      DDS::DynamicDataFactory::get_instance()->create_data(type);
 
 Like other data types defined by IDL interfaces (for example, the DataWriter types), the "dynamic" object's lifetime is managed with a smart pointer – in this case DDS::DynamicData_var.
 
@@ -1070,7 +1088,9 @@ But, crucially, it does have the DynamicType object that we'll need to set up a 
 
 .. code-block:: cpp
 
-    DDS::DynamicType_var type = ts_static->get_type();DDS::DynamicTypeSupport_var ts_dynamic = new DynamicTypeSupport(type);DDS::ReturnCode_t ret = ts_dynamic->register_type(participant, "");
+    DDS::DynamicType_var type = ts_static->get_type();
+    DDS::DynamicTypeSupport_var ts_dynamic = new DynamicTypeSupport(type);
+    DDS::ReturnCode_t ret = ts_dynamic->register_type(participant, "");
 
 Now the type support object ts_dynamic can be used in the usual DataWriter/DataReader setup sequence (creating a Topic first, etc.)
 but the created DataWriters will be DynamicDataWriters (see section :ref:`xtypes--creating-and-using-a-dynamicdatawriter`) and the created DataReaders will be DynamicDataReaders (see section :ref:`xtypes--creating-and-using-a-dynamicdatareader`).
@@ -1080,7 +1100,8 @@ To do this, use the get_dynamic_type method on the singleton Service_Participant
 
 .. code-block:: cpp
 
-    DDS::DynamicType_var type; // NOTE: passed by reference belowDDS::ReturnCode_t ret = TheServiceParticipant->get_dynamic_type(type, participant, key);
+    DDS::DynamicType_var type; // NOTE: passed by reference below
+    DDS::ReturnCode_t ret = TheServiceParticipant->get_dynamic_type(type, participant, key);
 
 The two input parameters to get_dynamic_type are the 'participant' (an object reference to the DomainParticipant that will be used to register our TypeSupport and create Topics, DataWriters, and/or DataReders) and the 'key' which is the DDS::BuiltinTopicKey_t that identifies the remote entity which has the data type that we'll use.
 This key can be obtained from the Built-In Publications topic (which identifies remote DataWriters) or the Built-In Subscriptions topic (which identifies remote DataReaders).
@@ -1090,7 +1111,8 @@ The type obtained from get_dynamic_type can be used to create and register a Typ
 
 .. code-block:: cpp
 
-    DDS::DynamicTypeSupport_var ts_dynamic = new DynamicTypeSupport(type);DDS::ReturnCode_t ret = ts_dynamic->register_type(participant, "");
+    DDS::DynamicTypeSupport_var ts_dynamic = new DynamicTypeSupport(type);
+    DDS::ReturnCode_t ret = ts_dynamic->register_type(participant, "");
 
 .. _xtypes--creating-and-using-a-dynamicdatawriter:
 

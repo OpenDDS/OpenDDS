@@ -46,14 +46,22 @@ Content-Filtered Topic
 The domain participant interface contains operations for creating and deleting a content-filtered topic.
 Creating a content-filtered topic requires the following parameters:
 
-* NameAssigns a name to this content-filtered topic which could later be used with the ``lookup_topicdescription()`` operation.
+* Name
 
-* Related topicSpecifies the topic that this content-filtered topic is based on.
+  Assigns a name to this content-filtered topic which could later be used with the ``lookup_topicdescription()`` operation.
+
+* Related topic
+
+  Specifies the topic that this content-filtered topic is based on.
   This is the same topic that matched data writers will use to publish data samples.
 
-* Filter expressionAn SQL-like expression (see section :ref:`content_subscription_profile--filter-expressions`) which defines the subset of samples published on the related topic that should be received by the content-filtered topic’s data readers.
+* Filter expression
 
-* Expression parametersThe filter expression can contain parameter placeholders.
+  An SQL-like expression (see section :ref:`content_subscription_profile--filter-expressions`) which defines the subset of samples published on the related topic that should be received by the content-filtered topic’s data readers.
+
+* Expression parameters
+
+  The filter expression can contain parameter placeholders.
   This argument provides initial values for those parameters.
   The expression parameters can be changed after the content-filtered topic is created (the filter expression cannot be changed).
 
@@ -193,13 +201,19 @@ One of those inherited capabilities is that the query condition can be used like
 The ``DataReader`` interface contains operations for creating (``create_querycondition``) and deleting (``delete_readcondition``) a query condition.
 Creating a query condition requires the following parameters:
 
-* Sample, view, and instance state masksThese are the same state masks that would be passed to ``create_readcondition()``, ``read()``, or ``take()``.
+* Sample, view, and instance state masks
 
-* Query expressionAn SQL-like expression (see :ref:`content_subscription_profile--query-expressions`) describing a subset of samples which cause the condition to be triggered.
+  These are the same state masks that would be passed to ``create_readcondition()``, ``read()``, or ``take()``.
+
+* Query expression
+
+  An SQL-like expression (see :ref:`content_subscription_profile--query-expressions`) describing a subset of samples which cause the condition to be triggered.
   This same expression is used to filter the data set returned from a ``read_w_condition()`` or ``take_w_condition()`` operation.
   It may also impose a sort order (``ORDER BY``) on that data set.
 
-* Query parametersThe query expression can contain parameter placeholders.
+* Query parameters
+
+  The query expression can contain parameter placeholders.
   This argument provides initial values for those parameters.
   The query parameters can be changed after the query condition is created (the query expression cannot be changed).
 
@@ -284,15 +298,23 @@ The multi topic’s topic expression (see section :ref:`content_subscription_pro
 The domain participant interface contains operations for creating and deleting a multi topic.
 Creating a multi topic requires the following parameters:
 
-* NameAssigns a name to this multi topic which could later be used with the ``lookup_topicdescription()`` operation.
+* Name
 
-* Type nameSpecifies the resulting type of the multi topic.
+  Assigns a name to this multi topic which could later be used with the ``lookup_topicdescription()`` operation.
+
+* Type name
+
+  Specifies the resulting type of the multi topic.
   This type must have its type support registered before creating the multi topic.
 
-* Topic expression (also known as subscription expression)An SQL-like expression (see section :ref:`content_subscription_profile--topic-expressions`) which defines the mapping of constituent topic fields to resulting type fields.
+* Topic expression (also known as subscription expression)
+
+  An SQL-like expression (see section :ref:`content_subscription_profile--topic-expressions`) which defines the mapping of constituent topic fields to resulting type fields.
   It can also specify a filter (``WHERE`` clause).
 
-* Expression parametersThe topic expression can contain parameter placeholders.
+* Expression parameters
+
+  The topic expression can contain parameter placeholders.
   This argument provides initial values for those parameters.
   The expression parameters can be changed after the multi topic is created (the topic expression cannot be changed).
 

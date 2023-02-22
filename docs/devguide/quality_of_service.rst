@@ -125,260 +125,605 @@ The following tables summarize the default QoS policies for each entity type in 
 
 **Table  Default DomainParticipant QoS Policies**
 
-+--------------------+---------------------------------+----------------------+
-| Policy             | Member                          | Default Value        |
-+====================+=================================+======================+
-| ``USER_DATA``      | ``value``                       | ``(empty sequence)`` |
-+--------------------+---------------------------------+----------------------+
-| ``ENTITY_FACTORY`` | ``autoenable_created_entities`` | ``true``             |
-+--------------------+---------------------------------+----------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Policy
+
+     - Member
+
+     - Default Value
+
+   * - ``USER_DATA``
+
+     - ``value``
+
+     - ``(empty sequence)``
+
+   * - ``ENTITY_FACTORY``
+
+     - ``autoenable_created_entities``
+
+     - ``true``
 
 .. _quality_of_service--reftable3:
 
 **Table  Default Topic QoS Policies**
 
-+------------------------+-----------------------------------+-------------------------------------------------+
-| Policy                 | Member                            | Default Value                                   |
-+========================+===================================+=================================================+
-| ``TOPIC_DATA``         | ``value``                         | ``(empty sequence)``                            |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``DURABILITY``         | ``kind``                          | ``VOLATILE_DURABILITY_QOS``                     |
-|                        |                                   |                                                 |
-|                        | ``service_cleanup_delay.sec``     | ``DURATION_ZERO_SEC``                           |
-|                        |                                   |                                                 |
-|                        | ``service_cleanup_delay.nanosec`` | ``DURATION_ZERO_NSEC``                          |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``DURABILITY_SERVICE`` | ``service_cleanup_delay.sec``     | ``DURATION_ZERO_SEC``                           |
-|                        |                                   |                                                 |
-|                        | ``service_cleanup_delay.nanosec`` | ``DURATION_ZERO_NSEC``                          |
-|                        |                                   |                                                 |
-|                        | ``history_kind``                  | ``KEEP_LAST_HISTORY_QOS``                       |
-|                        |                                   |                                                 |
-|                        | ``history_depth``                 | ``1``                                           |
-|                        |                                   |                                                 |
-|                        | ``max_samples``                   | ``LENGTH_UNLIMITED``                            |
-|                        |                                   |                                                 |
-|                        | ``max_instances``                 | ``LENGTH_UNLIMITED``                            |
-|                        |                                   |                                                 |
-|                        | ``max_samples_per_instance``      | ``LENGTH_UNLIMITED``                            |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``DEADLINE``           | ``period.sec``                    | ``DURATION_INFINITE_SEC``                       |
-|                        |                                   |                                                 |
-|                        | ``period.nanosec``                | ``DURATION_INFINITE_NSEC``                      |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``LATENCY_BUDGET``     | ``duration.sec``                  | ``DURATION_ZERO_SEC``                           |
-|                        |                                   |                                                 |
-|                        | ``duration.nanosec``              | ``DURATION_ZERO_NSEC``                          |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``LIVELINESS``         | ``kind``                          | ``AUTOMATIC_LIVELINESS_QOS``                    |
-|                        |                                   |                                                 |
-|                        | ``lease_duration.sec``            | ``DURATION_INFINITE_SEC``                       |
-|                        |                                   |                                                 |
-|                        | ``lease_duration.nanosec``        | ``DURATION_INFINITE_NSEC``                      |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``RELIABILITY``        | ``kind``                          | ``BEST_EFFORT_RELIABILITY_QOS``                 |
-|                        |                                   |                                                 |
-|                        | ``max_blocking_time.sec``         | ``DURATION_INFINITE_SEC``                       |
-|                        |                                   |                                                 |
-|                        | ``max_blocking_time.nanosec``     | ``DURATION_INFINITE_NSEC``                      |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``DESTINATION_ORDER``  | ``kind``                          | ``BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS`` |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``HISTORY``            | ``kind``                          | ``KEEP_LAST_HISTORY_QOS``                       |
-|                        |                                   |                                                 |
-|                        | ``depth``                         | ``1``                                           |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``RESOURCE_LIMITS``    | ``max_samples``                   | ``LENGTH_UNLIMITED``                            |
-|                        |                                   |                                                 |
-|                        | ``max_instances``                 | ``LENGTH_UNLIMITED``                            |
-|                        |                                   |                                                 |
-|                        | ``max_samples_per_instance``      | ``LENGTH_UNLIMITED``                            |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``TRANSPORT_PRIORITY`` | ``value``                         | ``0``                                           |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``LIFESPAN``           | ``duration.sec``                  | ``DURATION_INFINITE_SEC``                       |
-|                        |                                   |                                                 |
-|                        | ``duration.nanosec``              | ``DURATION_INFINITE_NSEC``                      |
-+------------------------+-----------------------------------+-------------------------------------------------+
-| ``OWNERSHIP``          | ``kind``                          | ``SHARED_OWNERSHIP_QOS``                        |
-+------------------------+-----------------------------------+-------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Policy
+
+     - Member
+
+     - Default Value
+
+   * - ``TOPIC_DATA``
+
+     - ``value``
+
+     - ``(empty sequence)``
+
+   * - ``DURABILITY``
+
+     - ``kind``
+
+       ``service_cleanup_delay.sec``
+
+       ``service_cleanup_delay.nanosec``
+
+     - ``VOLATILE_DURABILITY_QOS``
+
+       ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+   * - ``DURABILITY_SERVICE``
+
+     - ``service_cleanup_delay.sec``
+
+       ``service_cleanup_delay.nanosec``
+
+       ``history_kind``
+
+       ``history_depth``
+
+       ``max_samples``
+
+       ``max_instances``
+
+       ``max_samples_per_instance``
+
+     - ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+       ``KEEP_LAST_HISTORY_QOS``
+
+       ``1``
+
+       ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+   * - ``DEADLINE``
+
+     - ``period.sec``
+
+       ``period.nanosec``
+
+     - ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``LATENCY_BUDGET``
+
+     - ``duration.sec``
+
+       ``duration.nanosec``
+
+     - ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+   * - ``LIVELINESS``
+
+     - ``kind``
+
+       ``lease_duration.sec``
+
+       ``lease_duration.nanosec``
+
+     - ``AUTOMATIC_LIVELINESS_QOS``
+
+       ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``RELIABILITY``
+
+     - ``kind``
+
+       ``max_blocking_time.sec``
+
+       ``max_blocking_time.nanosec``
+
+     - ``BEST_EFFORT_RELIABILITY_QOS``
+
+       ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``DESTINATION_ORDER``
+
+     - ``kind``
+
+     - ``BY_RECEPTION_TIMESTAMP_``
+
+       ``DESTINATIONORDER_QOS``
+
+   * - ``HISTORY``
+
+     - ``kind``
+
+       ``depth``
+
+     - ``KEEP_LAST_HISTORY_QOS``
+
+       ``1``
+
+   * - ``RESOURCE_LIMITS``
+
+     - ``max_samples``
+
+       ``max_instances``
+
+       ``max_samples_per_instance``
+
+     - ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+   * - ``TRANSPORT_PRIORITY``
+
+     - ``value``
+
+     - ``0``
+
+   * - ``LIFESPAN``
+
+     - ``duration.sec``
+
+       ``duration.nanosec``
+
+     - ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``OWNERSHIP``
+
+     - ``kind``
+
+     - ``SHARED_OWNERSHIP_QOS``
 
 .. _quality_of_service--reftable4:
 
 **Table  Default Publisher QoS Policies**
 
-+--------------------+---------------------------------+-------------------------------+
-| Policy             | Member                          | Default Value                 |
-+====================+=================================+===============================+
-| ``PRESENTATION``   | ``access_scope``                | ``INSTANCE_PRESENTATION_QOS`` |
-|                    |                                 |                               |
-|                    | ``coherent_access``             | ``0``                         |
-|                    |                                 |                               |
-|                    | ``ordered_access``              | ``0``                         |
-+--------------------+---------------------------------+-------------------------------+
-| ``PARTITION``      | ``name``                        | ``(empty sequence)``          |
-+--------------------+---------------------------------+-------------------------------+
-| ``GROUP_DATA``     | ``value``                       | ``(empty sequence)``          |
-+--------------------+---------------------------------+-------------------------------+
-| ``ENTITY_FACTORY`` | ``autoenable_created_entities`` | ``true``                      |
-+--------------------+---------------------------------+-------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Policy
+
+     - Member
+
+     - Default Value
+
+   * - ``PRESENTATION``
+
+     - ``access_scope``
+
+       ``coherent_access``
+
+       ``ordered_access``
+
+     - ``INSTANCE_PRESENTATION_QOS``
+
+       ``0``
+
+       ``0``
+
+   * - ``PARTITION``
+
+     - ``name``
+
+     - ``(empty sequence)``
+
+   * - ``GROUP_DATA``
+
+     - ``value``
+
+     - ``(empty sequence)``
+
+   * - ``ENTITY_FACTORY``
+
+     - ``autoenable_created_entities``
+
+     - ``true``
 
 .. _quality_of_service--reftable5:
 
 **Table  Default Subscriber QoS Policies**
 
-+--------------------+---------------------------------+-------------------------------+
-| Policy             | Member                          | Default Value                 |
-+====================+=================================+===============================+
-| ``PRESENTATION``   | ``access_scope``                | ``INSTANCE_PRESENTATION_QOS`` |
-|                    |                                 |                               |
-|                    | ``coherent_access``             | ``0``                         |
-|                    |                                 |                               |
-|                    | ``ordered_access``              | ``0``                         |
-+--------------------+---------------------------------+-------------------------------+
-| ``PARTITION``      | ``name``                        | ``(empty sequence)``          |
-+--------------------+---------------------------------+-------------------------------+
-| ``GROUP_DATA``     | ``value``                       | ``(empty sequence)``          |
-+--------------------+---------------------------------+-------------------------------+
-| ``ENTITY_FACTORY`` | ``autoenable_created_entities`` | ``true``                      |
-+--------------------+---------------------------------+-------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Policy
+
+     - Member
+
+     - Default Value
+
+   * - ``PRESENTATION``
+
+     - ``access_scope``
+
+       ``coherent_access``
+
+       ``ordered_access``
+
+     - ``INSTANCE_PRESENTATION_QOS``
+
+       ``0``
+
+       ``0``
+
+   * - ``PARTITION``
+
+     - ``name``
+
+     - ``(empty sequence)``
+
+   * - ``GROUP_DATA``
+
+     - ``value``
+
+     - ``(empty sequence)``
+
+   * - ``ENTITY_FACTORY``
+
+     - ``autoenable_created_entities``
+
+     - ``true``
 
 .. _quality_of_service--reftable6:
 
 **Table  Default DataWriter QoS Policies**
 
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| Policy                    | Member                                 | Default Value                                                                                                               |
-+===========================+========================================+=============================================================================================================================+
-| ``DURABILITY``            | ``kind``                               | ``VOLATILE_DURABILITY_QOS``                                                                                                 |
-|                           |                                        |                                                                                                                             |
-|                           | ``service_cleanup_delay.sec``          | ``DURATION_ZERO_SEC``                                                                                                       |
-|                           |                                        |                                                                                                                             |
-|                           | ``service_cleanup_delay.nanosec``      | ``DURATION_ZERO_NSEC``                                                                                                      |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``DURABILITY_SERVICE``    | ``service_cleanup_delay.sec``          | ``DURATION_ZERO_SEC``                                                                                                       |
-|                           |                                        |                                                                                                                             |
-|                           | ``service_cleanup_delay.nanosec``      | ``DURATION_ZERO_NSEC``                                                                                                      |
-|                           |                                        |                                                                                                                             |
-|                           | ``history_kind``                       | ``KEEP_LAST_HISTORY_QOS``                                                                                                   |
-|                           |                                        |                                                                                                                             |
-|                           | ``history_depth``                      | ``1``                                                                                                                       |
-|                           |                                        |                                                                                                                             |
-|                           | ``max_samples``                        | ``LENGTH_UNLIMITED``                                                                                                        |
-|                           |                                        |                                                                                                                             |
-|                           | ``max_instances``                      | ``LENGTH_UNLIMITED``                                                                                                        |
-|                           |                                        |                                                                                                                             |
-|                           | ``max_samples_per_instance``           | ``LENGTH_UNLIMITED``                                                                                                        |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``DEADLINE``              | ``period.sec``                         | ``DURATION_INFINITE_SEC``                                                                                                   |
-|                           |                                        |                                                                                                                             |
-|                           | ``period.nanosec``                     | ``DURATION_INFINITE_NSEC``                                                                                                  |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``LATENCY_BUDGET``        | ``duration.sec``                       | ``DURATION_ZERO_SEC``                                                                                                       |
-|                           |                                        |                                                                                                                             |
-|                           | ``duration.nanosec``                   | ``DURATION_ZERO_NSEC``                                                                                                      |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``LIVELINESS``            | ``kind``                               | ``AUTOMATIC_LIVELINESS_QOS``                                                                                                |
-|                           |                                        |                                                                                                                             |
-|                           | ``lease_duration.sec``                 | ``DURATION_INFINITE_SEC``                                                                                                   |
-|                           |                                        |                                                                                                                             |
-|                           | ``lease_duration.nanosec``             | ``DURATION_INFINITE_NSEC``                                                                                                  |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``RELIABILITY``           | ``kind``                               | ``RELIABLE_RELIABILITY_QOS2For OpenDDS versions, up to 2.0, the default reliability kind for data writers is best effort.`` |
-|                           |                                        | ``For versions 2.0.1 and later, this is changed to reliable (to conform to the DDS specification).``                        |
-|                           | ``max_blocking_time.sec``              |                                                                                                                             |
-|                           |                                        | ``0``                                                                                                                       |
-|                           | ``max_blocking_time.nanosec``          |                                                                                                                             |
-|                           |                                        | ``100000000 (100 ms)``                                                                                                      |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``DESTINATION_ORDER``     | ``kind``                               | ``BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS``                                                                             |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``HISTORY``               | ``kind``                               | ``KEEP_LAST_HISTORY_QOS``                                                                                                   |
-|                           |                                        |                                                                                                                             |
-|                           | ``depth``                              | ``1``                                                                                                                       |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``RESOURCE_LIMITS``       | ``max_samples``                        | ``LENGTH_UNLIMITED``                                                                                                        |
-|                           |                                        |                                                                                                                             |
-|                           | ``max_instances``                      | ``LENGTH_UNLIMITED``                                                                                                        |
-|                           |                                        |                                                                                                                             |
-|                           | ``max_samples_per_instance``           | ``LENGTH_UNLIMITED``                                                                                                        |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``TRANSPORT_PRIORITY``    | ``value``                              | ``0``                                                                                                                       |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``LIFESPAN``              | ``duration.sec``                       | ``DURATION_INFINITE_SEC``                                                                                                   |
-|                           |                                        |                                                                                                                             |
-|                           | ``duration.nanosec``                   | ``DURATION_INFINITE_NSEC``                                                                                                  |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``USER_DATA``             | ``value``                              | ``(empty sequence)``                                                                                                        |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``OWNERSHIP``             | ``kind``                               | ``SHARED_OWNERSHIP_QOS``                                                                                                    |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``OWNERSHIP_STRENGTH``    | ``value``                              | ``0``                                                                                                                       |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| ``WRITER_DATA_LIFECYCLE`` | ``autodispose_unregistered_instances`` | ``1``                                                                                                                       |
-+---------------------------+----------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Policy
+
+     - Member
+
+     - Default Value
+
+   * - ``DURABILITY``
+
+     - ``kind``
+
+       ``service_cleanup_delay.sec``
+
+       ``service_cleanup_delay.nanosec``
+
+     - ``VOLATILE_DURABILITY_QOS``
+
+       ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+   * - ``DURABILITY_SERVICE``
+
+     - ``service_cleanup_delay.sec``
+
+       ``service_cleanup_delay.nanosec``
+
+       ``history_kind``
+
+       ``history_depth``
+
+       ``max_samples``
+
+       ``max_instances``
+
+       ``max_samples_per_instance``
+
+     - ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+       ``KEEP_LAST_HISTORY_QOS``
+
+       ``1``
+
+       ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+   * - ``DEADLINE``
+
+     - ``period.sec``
+
+       ``period.nanosec``
+
+     - ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``LATENCY_BUDGET``
+
+     - ``duration.sec``
+
+       ``duration.nanosec``
+
+     - ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+   * - ``LIVELINESS``
+
+     - ``kind``
+
+       ``lease_duration.sec``
+
+       ``lease_duration.nanosec``
+
+     - ``AUTOMATIC_LIVELINESS_QOS``
+
+       ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``RELIABILITY``
+
+     - ``kind``
+
+       ``max_blocking_time.sec``
+
+       ``max_blocking_time.nanosec``
+
+     - ``RELIABLE_RELIABILITY_QOS`` [#footnote1]_
+
+       ``0``
+
+       ``100000000 (100 ms)``
+
+   * - ``DESTINATION_ORDER``
+
+     - ``kind``
+
+     - ``BY_RECEPTION_TIMESTAMP_``
+
+       ``DESTINATIONORDER_QOS``
+
+   * - ``HISTORY``
+
+     - ``kind``
+
+       ``depth``
+
+     - ``KEEP_LAST_HISTORY_QOS``
+
+       ``1``
+
+   * - ``RESOURCE_LIMITS``
+
+     - ``max_samples``
+
+       ``max_instances``
+
+       ``max_samples_per_instance``
+
+     - ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+   * - ``TRANSPORT_PRIORITY``
+
+     - ``value``
+
+     - ``0``
+
+   * - ``LIFESPAN``
+
+     - ``duration.sec``
+
+       ``duration.nanosec``
+
+     - ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``USER_DATA``
+
+     - ``value``
+
+     - ``(empty sequence)``
+
+   * - ``OWNERSHIP``
+
+     - ``kind``
+
+     - ``SHARED_OWNERSHIP_QOS``
+
+   * - ``OWNERSHIP_STRENGTH``
+
+     - ``value``
+
+     - ``0``
+
+   * - ``WRITER_DATA_LIFECYCLE``
+
+     - ``autodispose_unregistered_instances``
+
+     - ``1``
 
 .. _quality_of_service--reftable7:
 
 **Table  Default DataReader QoS Policies**
 
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| Policy                    | Member                                       | Default Value                                   |
-+===========================+==============================================+=================================================+
-| ``DURABILITY``            | ``kind``                                     | ``VOLATILE_DURABILITY_QOS``                     |
-|                           |                                              |                                                 |
-|                           | ``service_cleanup_delay.sec``                | ``DURATION_ZERO_SEC``                           |
-|                           |                                              |                                                 |
-|                           | ``service_cleanup_delay.nanosec``            | ``DURATION_ZERO_NSEC``                          |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``DEADLINE``              | ``period.sec``                               | ``DURATION_INFINITE_SEC``                       |
-|                           |                                              |                                                 |
-|                           | ``period.nanosec``                           | ``DURATION_INFINITE_NSEC``                      |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``LATENCY_BUDGET``        | ``duration.sec``                             | ``DURATION_ZERO_SEC``                           |
-|                           |                                              |                                                 |
-|                           | ``duration.nanosec``                         | ``DURATION_ZERO_NSEC``                          |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``LIVELINESS``            | ``kind``                                     | ``AUTOMATIC_LIVELINESS_QOS``                    |
-|                           |                                              |                                                 |
-|                           | ``lease_duration.sec``                       | ``DURATION_INFINITE_SEC``                       |
-|                           |                                              |                                                 |
-|                           | ``lease_duration.nanosec``                   | ``DURATION_INFINITE_NSEC``                      |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``RELIABILITY``           | ``kind``                                     | ``BEST_EFFORT_RELIABILITY_QOS``                 |
-|                           |                                              |                                                 |
-|                           | ``max_blocking_time.sec``                    | ``DURATION_INFINITE_SEC``                       |
-|                           |                                              |                                                 |
-|                           | ``max_blocking_time.nanosec``                | ``DURATION_INFINITE_NSEC``                      |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``DESTINATION_ORDER``     | ``kind``                                     | ``BY_RECEPTION_TIMESTAMP_DESTINATIONORDER_QOS`` |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``HISTORY``               | ``kind``                                     | ``KEEP_LAST_HISTORY_QOS``                       |
-|                           |                                              |                                                 |
-|                           | ``depth``                                    | ``1``                                           |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``RESOURCE_LIMITS``       | ``max_samples``                              | ``LENGTH_UNLIMITED``                            |
-|                           |                                              |                                                 |
-|                           | ``max_instances``                            | ``LENGTH_UNLIMITED``                            |
-|                           |                                              |                                                 |
-|                           | ``max_samples_per_instance``                 | ``LENGTH_UNLIMITED``                            |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``USER_DATA``             | ``value``                                    | ``(empty sequence)``                            |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``OWNERSHIP``             | ``kind``                                     | ``SHARED_OWNERSHIP_QOS``                        |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``TIME_BASED_FILTER``     | ``minimum_separation.sec``                   | ``DURATION_ZERO_SEC``                           |
-|                           |                                              |                                                 |
-|                           | ``minimum_separation.nanosec``               | ``DURATION_ZERO_NSEC``                          |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
-| ``READER_DATA_LIFECYCLE`` | ``autopurge_nowriter_samples_delay.sec``     | ``DURATION_INFINITE_SEC``                       |
-|                           |                                              |                                                 |
-|                           | ``autopurge_nowriter_samples_delay.nanosec`` | ``DURATION_INFINITE_NSEC``                      |
-|                           |                                              |                                                 |
-|                           | ``autopurge_disposed_samples_delay.sec``     | ``DURATION_INFINITE_SEC``                       |
-|                           |                                              |                                                 |
-|                           | ``autopurge_disposed_samples_delay.nanosec`` | ``DURATION_INFINITE_NSEC``                      |
-+---------------------------+----------------------------------------------+-------------------------------------------------+
+.. list-table::
+   :header-rows: 1
+
+   * - Policy
+
+     - Member
+
+     - Default Value
+
+   * - ``DURABILITY``
+
+     - ``kind``
+
+       ``service_cleanup_delay.sec``
+
+       ``service_cleanup_delay.nanosec``
+
+     - ``VOLATILE_DURABILITY_QOS``
+
+       ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+   * - ``DEADLINE``
+
+     - ``period.sec``
+
+       ``period.nanosec``
+
+     - ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``LATENCY_BUDGET``
+
+     - ``duration.sec``
+
+       ``duration.nanosec``
+
+     - ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+   * - ``LIVELINESS``
+
+     - ``kind``
+
+       ``lease_duration.sec``
+
+       ``lease_duration.nanosec``
+
+     - ``AUTOMATIC_LIVELINESS_QOS``
+
+       ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``RELIABILITY``
+
+     - ``kind``
+
+       ``max_blocking_time.sec``
+
+       ``max_blocking_time.nanosec``
+
+     - ``BEST_EFFORT_RELIABILITY_QOS``
+
+       ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+   * - ``DESTINATION_ORDER``
+
+     - ``kind``
+
+     - ``BY_RECEPTION_TIMESTAMP_``
+
+       ``DESTINATIONORDER_QOS``
+
+   * - ``HISTORY``
+
+     - ``kind``
+
+       ``depth``
+
+     - ``KEEP_LAST_HISTORY_QOS``
+
+       ``1``
+
+   * - ``RESOURCE_LIMITS``
+
+     - ``max_samples``
+
+       ``max_instances``
+
+       ``max_samples_per_instance``
+
+     - ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+       ``LENGTH_UNLIMITED``
+
+   * - ``USER_DATA``
+
+     - ``value``
+
+     - ``(empty sequence)``
+
+   * - ``OWNERSHIP``
+
+     - ``kind``
+
+     - ``SHARED_OWNERSHIP_QOS``
+
+   * - ``TIME_BASED_FILTER``
+
+     - ``minimum_separation.sec``
+
+       ``minimum_separation.nanosec``
+
+     - ``DURATION_ZERO_SEC``
+
+       ``DURATION_ZERO_NSEC``
+
+   * - ``READER_DATA_LIFECYCLE``
+
+     - ``autopurge_nowriter_samples_delay.sec``
+
+       ``autopurge_nowriter_samples_delay.nanosec``
+
+       ``autopurge_disposed_samples_delay.sec``
+
+       ``autopurge_disposed_samples_delay.nanosec``
+
+     - ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
+
+       ``DURATION_INFINITE_SEC``
+
+       ``DURATION_INFINITE_NSEC``
 
 .. _quality_of_service--liveliness:
 
@@ -404,7 +749,6 @@ Below is the IDL related to the liveliness QoS policy:
       LivelinessQosPolicyKind kind;
       Duration_t lease_duration;
     };
-
 
 The ``LIVELINESS`` policy controls when and how the service determines whether participants are alive, meaning they are still reachable and active.
 The kind member setting indicates whether liveliness is asserted automatically by the service or manually by the specified entity.
@@ -456,7 +800,6 @@ Below is the IDL related to the reliability QoS policy:
       ReliabilityQosPolicyKind kind;
       Duration_t max_blocking_time;
     };
-
 
 This policy controls how data readers and writers treat the data samples they process.
 The “best effort” value (``BEST_EFFORT_RELIABILITY_QOS``) makes no promises as to the reliability of the samples and could be expected to drop samples under some circumstances.
@@ -1192,3 +1535,9 @@ This means that when 100 samples are waiting to be delivered, the writer can blo
 These same QoS settings on the Data Reader side would mean that up to 100 unread samples are queued by the framework before any are rejected.
 Rejected samples are dropped and the SampleRejectedStatus is updated.
 
+.. rubric:: Footnotes
+
+.. [#footnote1]
+
+   For OpenDDS versions, up to 2.0, the default reliability kind for data writers is best effort.
+   For versions 2.0.1 and later, this is changed to reliable (to conform to the DDS specification).
