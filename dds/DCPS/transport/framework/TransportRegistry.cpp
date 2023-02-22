@@ -751,8 +751,8 @@ TransportRegistry::create_new_transport_instance_for_participant(DDS::DomainId_t
 
   TransportConfig_rch cfg = get_config(transport_config_name);
 
-  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + transport_instance_name;
-  OPENDDS_STRING config_name = cfg->name() + "_" + transport_instance_name;
+  OPENDDS_STRING inst_name = cfg->instances_[0]->name() + "_" + to_dds_string(id) + "_" + transport_instance_name;
+  OPENDDS_STRING config_name = cfg->name() + "_" + to_dds_string(id) + "_" + transport_instance_name;
 
   // assign new config and inst names
   transport_config_name = config_name;
