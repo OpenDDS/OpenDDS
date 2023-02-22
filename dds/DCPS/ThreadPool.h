@@ -12,6 +12,7 @@
 
 #include "ConditionVariable.h"
 #include "PoolAllocator.h"
+#include "RcObject.h"
 
 #include <ace/Thread.h>
 
@@ -31,8 +32,7 @@ namespace DCPS {
  * at destruction. Users of ThreadPool are responsible for making sure the
  * running threads are in a joinable state before the destruction of ThreadPool
  */
-class OpenDDS_Dcps_Export ThreadPool
-{
+class OpenDDS_Dcps_Export ThreadPool : public virtual RcObject {
 public:
 
   /// A typedef for the starting point of the ThreadPool
