@@ -93,12 +93,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: checkout MPC
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       uses: actions/checkout@v3
@@ -2239,12 +2244,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(g++-8 --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -2964,12 +2974,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_master_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -4098,12 +4113,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c06_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -4700,12 +4720,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -6019,12 +6044,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: sudo apt-get -y install libxerces-c-dev
@@ -8971,12 +9001,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -9726,12 +9761,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$("C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -property catalog_productDisplayVersion)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c02_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: setup for run-vcpkg
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       shell: bash
@@ -11130,12 +11170,17 @@ jobs:
         cd OpenDDS/ACE_TAO
         export ACE_COMMIT=$(git rev-parse HEAD)
         echo "ACE_COMMIT=$ACE_COMMIT" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
@@ -12142,12 +12187,17 @@ jobs:
       run: |
         export COMPILER_VERSION=$(c++ --version 2>&1 | head -n 1)
         echo "COMPILER_VERSION=$COMPILER_VERSION" >> $GITHUB_ENV
+    - name: get jdk version
+      shell: bash
+      run: |
+        export JDK_VERSION=$(java -version 2>&1 | grep -i version)
+        echo "JDK_VERSION=$JDK_VERSION" >> $GITHUB_ENV
     - name: Cache Artifact
       id: cache-artifact
       uses: actions/cache@v3
       with:
         path: ${{ github.job }}.tar.xz
-        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}
+        key: c01_${{ github.job }}_ace6tao2_${{ env.ACE_COMMIT }}_${{ env.COMPILER_VERSION }}_${{ env.JDK_VERSION }}
     - name: install xerces-c
       if: steps.cache-artifact.outputs.cache-hit != 'true'
       run: |
