@@ -784,5 +784,5 @@ Users of OpenDDS are strongly encouraged to select one of the two options listed
 If this is not possible, users of OpenDDS must make sure that all code generator, compiler, and linker settings in the custom build setup result in API- and ABI-compatible code.
 To do this, start with an MPC or CMake-generated project file (makefile or Visual Studio project file) and make sure all relevant settings are represented in the custom build system.
 This is often done through a combination of inspecting the project file and running the build with verbose output to see how the toolchain (code generators, compiler, linker) is invoked.
-Contact Object Computing, Inc. (OCI) via https://objectcomputing.com/products/opendds/consulting-support to have our expert software engineers work on this for you.
+Contact Object Computing, Inc. (OCI) via https://objectcomputing.com/products/opendds/opendds-consulting-and-support to have our expert software engineers work on this for you.
 
