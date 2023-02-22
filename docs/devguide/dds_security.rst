@@ -229,25 +229,25 @@ As such, this document makes use of several security concepts which may warrant 
 
    * - Public Key Cryptography (including Private Keys)
 
-     - * https://en.wikipedia.org/wiki/Public-key_cryptography
+     - * `Public Key Cryptography <https://en.wikipedia.org/wiki/Public-key_cryptography>`__
 
-       * RSA – https://en.wikipedia.org/wiki/RSA_(algorithm)
+       * `RSA <https://en.wikipedia.org/wiki/RSA_(cryptosystem)>`__
 
-       * Elliptic Curve Cryptography - https://en.wikipedia.org/wiki/Elliptic_curve_cryptography
+       * `Elliptic Curve Cryptography <https://en.wikipedia.org/wiki/Elliptic_curve_cryptography>`__
 
    * - Public Key Certificate
 
-     - * https://en.wikipedia.org/wiki/Public_key_certificate
+     - * `Public Key Certificate <https://en.wikipedia.org/wiki/Public_key_certificate>`__
 
-       * Certificate Authority – https://en.wikipedia.org/wiki/Certificate_authority
+       * `Certificate Authority <https://en.wikipedia.org/wiki/Certificate_authority>`__
 
-       * X.509 – https://en.wikipedia.org/wiki/X.509
+       * `X.509 <https://en.wikipedia.org/wiki/X.509>`__
 
-       * PEM - https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail
+       * `PEM <https://en.wikipedia.org/wiki/Privacy-enhanced_Electronic_Mail>`__
 
    * - Signed Documents
 
-     - * https://en.wikipedia.org/wiki/Digital_signature
+     - * `Digital Signature <https://en.wikipedia.org/wiki/Digital_signature>`__
 
 .. _dds_security--reftable36:
 
