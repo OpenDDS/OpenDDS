@@ -91,7 +91,7 @@ struct RecursiveTestEventTwo : public TestEventBase {
 
 TEST(dds_DCPS_ProactorEventDispatcher, RecursiveDispatchDelta)
 {
-  
+
 #if defined (ACE_HAS_AIO_CALLS)
       // POSIX Proactor.
 #  if defined (ACE_POSIX_AIOCB_PROACTOR)
