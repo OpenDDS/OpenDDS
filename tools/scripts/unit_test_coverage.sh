@@ -1,14 +1,15 @@
 #!/bin/bash
 
-# This script generates an intentional unit test coverage report for
-# OpenDDS.  It requires lcov and a compatible compiler like gcc or
-# clang.  A unit is a source code module consisting of a *.h, *.cpp,
-# and/or *.inl file.  The unit is named by the path to the prefix,
-# e.g., FACE/Sequence.  With no arguments, it generates a coverage
-# report for all units.  Otherwise, the arguments are interpretted as
-# a list of units.  Thus, if you want to improve the coverage for a
-# single unit, the script can be used to geneerate the coverage for
-# that unit in isolation.
+# This script generates a unit test coverage report for OpenDDS.  It
+# does not generate an intentional unit test coverage report due to
+# deficiencies in the tools involved.  It requires lcov and a
+# compatible compiler like gcc or clang.  A unit is a source code
+# module consisting of a *.h, *.cpp, and/or *.inl file.  The unit is
+# named by the path to the prefix, e.g., FACE/Sequence.  With no
+# arguments, it generates a coverage report for all units.  Otherwise,
+# the arguments are interpreted as a list of units.  Thus, if you
+# want to improve the coverage for a single unit, the script can be
+# used to geneerate the coverage for that unit in isolation.
 
 start=$(date +'%s')
 
@@ -16,37 +17,11 @@ args=($@)
 
 cd "${DDS_ROOT}"
 
-function cleanup {
-    rm -f baseline current files_to_keep files_to_remove
-}
-
-trap cleanup EXIT
-
-function get-all-files {
-    git ls-files |
-        sed -n -E \
-            -e '/^(FACE|dds|tools)/! d' \
-            -e '/^tools\/modeling\/tests/ d' \
-            -e '/\.(h|cpp|inl)$/! d' \
-            -e '/[Ex]port\.h$/ d' \
-            -e 'p'
-}
-
 function get-units {
-    if [[ ${#args[@]} == 0 ]]
-    then
-        get-all-files | sed -E -e 's/\.[^.]*$//' | sort -u
-    else
-        for arg in "${args[@]}"
-        do
-            if [[ -d "${arg}" ]]
-            then
-                get-all-files | grep "${args}" | sed -E -e 's/\.[^.]*$//' | sort -u
-            else
-                echo "${arg}"
-            fi
-        done
-    fi
+    for arg in "${args[@]}"
+    do
+        echo "${arg%.*}"
+    done | sort -u
 }
 
 function get-gcda {
@@ -67,65 +42,39 @@ echo '==========================================================================
 echo 'auto_run_tests: tools/scripts/unit_test_coverage.sh'
 echo ''
 
-rm -f coverage-total.info
-
 lcov --zerocounters --directory .
-(
-    cd "${DDS_ROOT}/tests/unit-tests"
-    ./UnitTests --gtest_filter="DOES NOT MATCH"
-)
-find . -name "*.gcda" | xargs md5sum | sort -k2,2 > baseline
 
-for unit_name in $(get-units)
-do
-    echo "Testing coverage of ${unit_name}"
-
-    # Compute the test label.
-    prefix=$(echo "${unit_name}" | sed -e 's@/@_@g')
-
-    # Clean up.
-    lcov --zerocounters --directory .
-
-    # Run the unit test with label.
+if [[ ${#args[@]} == 0 ]]
+then
+    echo "Testing coverage of all unit tests"
     (
         cd "${DDS_ROOT}/tests/unit-tests"
-        output=$(./UnitTests --gtest_filter="${prefix}*" 2>&1)
-        echo "${output}"
-        if [[ ${output} == *"0 tests from 0 test cases ran"* ]]
-        then
-            echo "ERROR: No test cases for ${unit_name}"
-            result=1
-        fi
-    )
+        ./UnitTests
+    ) || result=1
+else
+    for unit_name in $(get-units)
+    do
+        echo "Testing coverage of ${unit_name}"
 
-    # Delete gcda files that did not change.
-    find . -name "*.gcda" | xargs md5sum | sort -k2,2 > current
-    diff baseline current | grep '^<' | cut -d' ' -f4 > files_to_keep
-    find . -name "*.gcda" | grep -v -F -f files_to_keep > files_to_remove
-    if [ -s files_to_remove ]
-    then
-        cat files_to_remove | xargs rm
-    fi
+        # Compute the test label.
+        prefix=$(echo "${unit_name}" | sed -e 's@/@_@g')
 
-    # Collect data.
-    rm -f coverage.info
-    { lcov --capture --directory . --output-file coverage.info --no-external &&
-          lcov --extract coverage.info --output-file coverage.info "*${unit_name}.*" &&
-          [ -s coverage.info ] &&
-          if [ -e coverage-total.info ]
-          then
-              lcov --add-tracefile coverage.info --add-tracefile coverage-total.info --output-file coverage-total.info
-          else
-              mv coverage.info coverage-total.info
-          fi ;
-    } || true
-done
+        # Run the unit test with label.
+        (
+            cd "${DDS_ROOT}/tests/unit-tests"
+            ./UnitTests --gtest_filter="${prefix}*"
+        ) || result=1
+    done
+fi
 
-lcov --remove coverage-total.info --output-file coverage-total.info '*/tests/unit-tests/*'
+# Collect data.
+rm -f coverage.info
+lcov --capture --directory . --output-file coverage.info --no-external
+lcov --remove coverage.info --output-file coverage.info '*tests/*' '*/ACE/*' '*/TAO/*' '*/rapidjson/*' '*/yard/*' '*C.h' '*C.inl' '*C.cpp' '*TypeSupportImpl.h' '*TypeSupportImpl.cpp'
 
 # Generate HTML
 rm -rf coverage-out
-genhtml coverage-total.info --output-directory coverage-out
+genhtml coverage.info --output-directory coverage-out
 
 stop=$(date +'%s')
 
