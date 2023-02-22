@@ -346,9 +346,9 @@ string type_to_default_array(const std::string& indent, AST_Type* type, const st
     val = indent + n + "_forany " + temp + "(const_cast<"
       + n + "_slice*>(" + (is_union ? "tmp": name) + "));\n";
     val += indent + "set_default(" + temp + ");\n";
-    if (is_union) {
-      val += indent + name + "(tmp);\n";
-    }
+  }
+  if (is_union) {
+    val += indent + name + "(tmp);\n";
   }
   return val;
 }
