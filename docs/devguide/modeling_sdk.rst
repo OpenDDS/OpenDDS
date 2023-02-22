@@ -129,7 +129,7 @@ Installation
 * The standard ``eclipse.org`` sites (Eclipse Project Updates and Galileo) should be enabled.
   If they are disabled, enable them now.
 
-* Add a new Site entry named OpenDDS with URL http://www.opendds.org/modeling/eclipse_44
+* Add a new Site entry named OpenDDS with URL http://download.opendds.org/modeling/eclipse_44/
 
 * Click OK to close the Preferences dialog and return to the Install dialog.
 

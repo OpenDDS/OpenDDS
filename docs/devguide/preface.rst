@@ -49,7 +49,7 @@ There is no charge for development or run-time licenses.
 The source code is designed to be compiled, and used, across a wide variety of hardware and operating systems architectures.
 You may modify it for your own needs, within the terms of the license agreements.
 You must not copyright OpenDDS software.
-For details of the licensing terms, see the file named ``LICENSE`` that is included in the OpenDDS source code distribution or visit http://www.opendds.org/license.html.
+For details of the licensing terms, see the file named ``LICENSE`` that is included in the OpenDDS source code distribution or visit https://opendds.org/about/license.html.
 
 OpenDDS also utilizes other open source software products, including MPC (Make Project Creator), ACE (the ADAPTIVE Communication Environment), and TAO (The ACE ORB).
 More information about these products is available from OCI’s web site at http://www.objectcomputing.com/products.
@@ -213,7 +213,7 @@ Here are some documents of interest and their locations:
 
    * - The Real-time Publish-Subscribe Wire Protocol DDS Interoperability Wire Protocol Specification (DDSI-RTPS) v2.3 (OMG Document formal/2019-04-03)
 
-     - http://www.omg.org/spec/DDSI-RTPS/2.3/PDF
+     - https://www.omg.org/spec/DDSI-RTPS/2.3/PDF
 
    * - OMG Data Distribution Portal
 
