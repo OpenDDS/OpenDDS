@@ -1124,7 +1124,7 @@ TEST(dds_DCPS_XTypes_TypeObject, CompleteElementDetail_equal)
 {
   AppliedBuiltinMemberAnnotations builtin;
   builtin.unit = Optional<OpenDDS::DCPS::String>("meters");
-  
+
   CompleteElementDetail uut1;
   uut1.ann_builtin = Optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut2;
