@@ -11,8 +11,8 @@
 #include "EventDispatcher.h"
 #include "ThreadPool.h"
 
-#include "ace/Barrier.h"
-#include "ace/Proactor.h"
+#include <ace/Refcounted_Auto_Ptr.h>
+#include <ace/Proactor.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -40,7 +40,6 @@ public:
 
 private:
 
-  //typedef RcHandle<ACE_Proactor> Proactor_rap;
   typedef ACE_Refcounted_Auto_Ptr<ACE_Proactor, ACE_Thread_Mutex> Proactor_rap;
 
   static ACE_THR_FUNC_RETURN run(void* arg);
