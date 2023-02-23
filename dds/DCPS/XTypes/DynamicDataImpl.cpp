@@ -255,145 +255,244 @@ DDS::ReturnCode_t DynamicDataImpl::clear_nonkey_values()
   return DDS::RETCODE_UNSUPPORTED;
 }
 
-DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
-{
+DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id) {
   const TypeKind this_tk = type_->get_kind();
-  DDS::DynamicType_var value_type;
-  // TODO(sonndinh): May need rewrite to consider all type kinds in here since each type
-  // can interpret members differently.
-  // Array and sequence (and map): members are elements.
-  // Struct and union: members are actual members.
-  // Bitmask: members are individual bits.
-  // Enum and primitive: there is no member, only the value of the type itself.
-  // String and wide string: members are characters.
-  // So we need to consider each type kind and clear its member's value appropriately.
-  if (this_tk == TK_ARRAY) {
-    DDS::TypeDescriptor_var descriptor;
-    DDS::ReturnCode_t rc = type_->get_descriptor(descriptor);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
+  if (is_primitive(this_tk) || this_tk == TK_ENUM) {
+    if (id != MEMBER_ID_INVALID) {
+      return DDS::RETCODE_BAD_PARAMETER;
     }
-    value_type = get_base_type(descriptor->element_type());
-
-  } else {
-    DDS::DynamicTypeMember_var dtm;
-    DDS::ReturnCode_t rc = type_->get_member(dtm, id);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-
-    DDS::MemberDescriptor_var md;
-    rc = dtm->get_descriptor(md);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-
-    value_type = get_base_type(md->type());
+    return clear_value_i(id, type_);
   }
 
-  return clear_value_i(id, value_type, value_type->get_kind());
-}
-
-DDS::ReturnCode_t DynamicDataImpl::clear_value_i(
-  DDS::MemberId id, DDS::DynamicType_ptr type, DDS::TypeKind treat_as)
-{
-  switch (treat_as) {
-  case TK_BOOLEAN:
-    insert_single(id, ACE_OutputCDR::from_boolean(false));
-    break;
-  case TK_BYTE:
-    insert_single(id, ACE_OutputCDR::from_octet(0));
-    break;
-  case TK_UINT8:
-    insert_single(id, ACE_OutputCDR::from_uint8(0));
-    break;
-  case TK_UINT16:
-    insert_single(id, CORBA::UInt16(0));
-    break;
-  case TK_UINT32:
-    insert_single(id, CORBA::UInt32(0));
-    break;
-  case TK_UINT64:
-    insert_single(id, CORBA::UInt64(0));
-    break;
-  case TK_INT8:
-    insert_single(id, ACE_OutputCDR::from_int8(0));
-    break;
-  case TK_INT16:
-    insert_single(id, CORBA::Int16(0));
-    break;
-  case TK_INT32:
-    insert_single(id, CORBA::Int32(0));
-    break;
-  case TK_INT64:
-    insert_single(id, CORBA::Int64(0));
-    break;
-  case TK_FLOAT32:
-    insert_single(id, CORBA::Float(0.0f));
-    break;
-  case TK_FLOAT64:
-    insert_single(id, CORBA::Double(0.0));
-    break;
-  case TK_FLOAT128: {
-    const ACE_CDR::LongDouble ld = ACE_CDR_LONG_DOUBLE_INITIALIZER;
-    insert_single(id, ld);
-    break;
-  }
-  case TK_CHAR8:
-    insert_single(id, ACE_OutputCDR::from_char('\0'));
-    break;
-  case TK_CHAR16:
-    insert_single(id, ACE_OutputCDR::from_wchar(L'\0'));
-    break;
-  case TK_STRING8:
-    insert_single(id, CORBA::string_dup(""));
-    break;
-  case TK_STRING16:
-    insert_single(id, CORBA::wstring_dup(L""));
-    break;
-
-  case TK_ENUM:
-    {
-      DDS::TypeKind bound_kind;
-      const DDS::ReturnCode_t rc = enum_bound(type, bound_kind);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
-      return clear_value_i(id, type, bound_kind);
-    }
-    break;
+  switch (this_tk) {
   case TK_BITMASK:
-    {
-      DDS::TypeKind bound_kind;
-      const DDS::ReturnCode_t rc = bitmask_bound(type, bound_kind);
-      if (rc != DDS::RETCODE_OK) {
-        return rc;
-      }
-      return clear_value_i(id, type, bound_kind);
+    return set_boolean_value(id, false);
+  case TK_ARRAY: {
+    DDS::TypeDescriptor_var td;
+    if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
     }
+    const CORBA::ULong bound = bound_total(td);
+    if (id >= bound) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    DDS::DynamicType_var elem_type = get_base_type(td->element_type());
+    return clear_value_i(id, elem_type);
+  }
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_SEQUENCE:
+    // TODO: The rule for variable-length collection types needs clarification (7.5.2.11.3)
+    // If we shift the subsequent elements, does that mean their IDs also change?
+    // Are string and wstring considered variable-length collections?
     break;
-
-  case TK_ARRAY:
+  case TK_STRUCTURE:
+  case TK_UNION: {
+    DDS::DynamicTypeMember_var dtm;
+    if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+    DDS::MemberDescriptor_var md;
+    if (dtm->get_descriptor(md) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (md->is_optional()) {
+      if (container_.single_map_.erase(id) == 0) {
+        if (container_.sequence_map_.erase(id) == 0) {
+          container_.complex_map_.erase(id);
+        }
+      }
+      break;
+    }
+    DDS::DynamicType_var member_type = get_base_type(md->type());
+    return clear_value_i(id, member_type);
+  }
   case TK_MAP:
   case TK_BITSET:
-  case TK_SEQUENCE:
-  case TK_STRUCTURE:
-  case TK_UNION:
-    {
-      DDS::DynamicData_var dd = new DynamicDataImpl(type);
-      insert_complex(id, dd);
-    }
-    break;
-
   case TK_ALIAS:
   case TK_ANNOTATION:
   default:
     if (log_level >= LogLevel::Warning) {
-      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::clear_value: "
-        "member %d has unexpected TypeKind %C\n", id, typekind_to_string(treat_as)));
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::clear_value:"
+                 " Encounter unexpected type kind %C\n", typekind_to_string(this_tk)));
     }
+    return DDS::RETCODE_ERROR;
   }
+  return DDS::RETCODE_OK;
+}
 
+DDS::ReturnCode_t DynamicDataImpl::clear_value_i(DDS::MemberId id, DDS::DynamicType_ptr member_type)
+{
+  const TypeKind tk = member_type->get_kind();
+  switch (tk) {
+  case TK_BOOLEAN: {
+    ACE_OutputCDR::from_boolean val(false);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_BYTE: {
+    ACE_OutputCDR::from_octet val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_UINT8: {
+    ACE_OutputCDR::from_uint8 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_UINT16: {
+    CORBA::UInt16 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_UINT32: {
+    CORBA::UInt32 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_UINT64: {
+    CORBA::UInt64 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_INT8: {
+    ACE_OutputCDR::from_int8 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_INT16: {
+    CORBA::Int16 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_INT32: {
+    CORBA::Int32 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_INT64: {
+    CORBA::Int64 val(0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_FLOAT32: {
+    CORBA::Float val(0.0f);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_FLOAT64: {
+    CORBA::Double val(0.0);
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_FLOAT128: {
+    CORBA::LongDouble val;
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_CHAR8: {
+    ACE_OutputCDR::from_char val('\0');
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_STRING8: {
+    const char* val = 0;
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+#ifdef DDS_HAS_WCHAR
+  case TK_CHAR16: {
+    ACE_OutputCDR::from_wchar val(L'\0');
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+  case TK_STRING16: {
+    const CORBA::WChar* val = 0;
+    container_.set_default_basic_value(val);
+    insert_single(id, val);
+    break;
+  }
+#endif
+  case TK_ENUM: {
+    // Set to first enumerator
+    CORBA::Long value;
+    if (!container_.set_default_enum_value(member_type, value)) {
+      return DDS::RETCODE_ERROR;
+    }
+    TypeKind treat_as = tk;
+    if (enum_bound(member_type, treat_as) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (treat_as == TK_INT8) {
+      ACE_OutputCDR::from_int8 val(static_cast<CORBA::Int8>(value));
+      insert_single(id, val);
+    } else if (treat_as == TK_INT16) {
+      insert_single(id, static_cast<CORBA::Short>(value));
+    } else {
+      insert_single(id, value);
+    }
+    break;
+  }
+  case TK_BITMASK: {
+    // Set to default bitmask value
+    TypeKind treat_as = tk;
+    if (bitmask_bound(member_type, treat_as) != DDS::RETCODE_OK) {
+      return DDS::RETCODE_ERROR;
+    }
+    if (treat_as == TK_UINT8) {
+      ACE_OutputCDR::from_uint8 val(0);
+      container_.set_default_bitmask_value(val);
+      insert_single(id, val);
+    } else if (treat_as == TK_UINT16) {
+      CORBA::UShort val;
+      container_.set_default_bitmask_value(val);
+      insert_single(id, val);
+    } else if (treat_as == TK_UINT32) {
+      CORBA::ULong val;
+      container_.set_default_bitmask_value(val);
+      insert_single(id, val);
+    } else {
+      CORBA::ULongLong val;
+      container_.set_default_bitmask_value(val);
+      insert_single(id, val);
+    }
+    break;
+  }
+  case TK_ARRAY:
+  case TK_SEQUENCE:
+  case TK_STRUCTURE:
+  case TK_UNION: {
+    DDS::DynamicData_var dd = new DynamicDataImpl(member_type);
+    insert_complex(id, dd);
+    break;
+  }
+  case TK_MAP:
+  case TK_BITSET:
+  case TK_ALIAS:
+  case TK_ANNOTATION:
+  default:
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::clear_value_i:"
+                 " Member %u has unexpected type kind %C\n", id, typekind_to_string(tk)));
+    }
+    return DDS::RETCODE_ERROR;
+  }
   return DDS::RETCODE_OK;
 }
 
@@ -2577,7 +2676,6 @@ template<TypeKind ValueTypeKind, typename ValueType>
 bool DynamicDataImpl::get_value_from_bitmask(ValueType& value, DDS::MemberId id)
 {
   // Allow bitmask to be read as an unsigned integer.
-  CORBA::UInt64 bound_max;
   TypeKind treat_as_tk;
   const DDS::ReturnCode_t rc = bitmask_bound(type_, treat_as_tk);
   if (rc != DDS::RETCODE_OK || treat_as_tk != ValueTypeKind || id != MEMBER_ID_INVALID) {
@@ -2653,7 +2751,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
     insert_single(id, value);
     if (found_selected_member && !selected_md->is_optional()) {
       DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
-      if (clear_value_i(selected_md->id(), selected_type, selected_type->get_kind()) != DDS::RETCODE_OK) {
+      if (clear_value_i(selected_md->id(), selected_type) != DDS::RETCODE_OK) {
         return false;
       }
     }
@@ -2679,7 +2777,7 @@ bool DynamicDataImpl::get_value_from_union(ValueType& value, DDS::MemberId id)
       return false;
     }
     DDS::DynamicType_var dt = get_base_type(md->type());
-    if (clear_value_i(id, dt, dt->get_kind()) != DDS::RETCODE_OK) {
+    if (clear_value_i(id, dt) != DDS::RETCODE_OK) {
       return false;
     }
     if (!insert_valid_discriminator(md)) {
@@ -2726,7 +2824,6 @@ bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId 
     }
     break;
   case TK_BITMASK: {
-    CORBA::UInt64 bound_max;
     if (bitmask_bound(elem_type, treat_as_tk) != DDS::RETCODE_OK) {
       return false;
     }
@@ -3430,7 +3527,7 @@ bool DynamicDataImpl::write_discriminator_helper(CORBA::Long value, TypeKind tre
   case TK_BOOLEAN:
     return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_boolean(value));
   case TK_BYTE:
-    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_byte(value));
+    return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_octet(value));
   case TK_CHAR8:
     return insert_single(MEMBER_ID_INVALID, ACE_OutputCDR::from_char(value));
 #ifdef DDS_HAS_WCHAR
@@ -3461,7 +3558,7 @@ bool DynamicDataImpl::write_discriminator_helper(CORBA::Long value, TypeKind tre
 // Write value to discriminator represented by a DynamicData instance.
 bool DynamicDataImpl::write_discriminator(CORBA::Long value)
 {
-  const TypeKind treat_as = type_->get_kind();
+  TypeKind treat_as = type_->get_kind();
   if (treat_as == TK_ENUM) {
     if (enum_bound(type_, treat_as) != DDS::RETCODE_OK) {
       return false;
@@ -3507,7 +3604,7 @@ bool DynamicDataImpl::get_complex_from_union(DDS::DynamicData_ptr& value, DDS::M
     insert_complex(DISCRIMINATOR_ID, dd_var);
     if (found_selected_member && !selected_md->is_optional()) {
       DDS::DynamicType_var selected_type = get_base_type(selected_md->type());
-      if (clear_value_i(selected_md->id(), selected_type, selected_type->get_kind()) != DDS::RETCODE_OK) {
+      if (clear_value_i(selected_md->id(), selected_type) != DDS::RETCODE_OK) {
         return false;
       }
     }

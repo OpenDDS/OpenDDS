@@ -361,8 +361,7 @@ private:
   bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
                                      DDS::MemberId id, TypeKind collection_tk) const;
 
-  DDS::ReturnCode_t clear_value_i(
-    DDS::MemberId id, DDS::DynamicType_ptr type, DDS::TypeKind treat_as);
+  DDS::ReturnCode_t clear_value_i(DDS::MemberId id, DDS::DynamicType_ptr member_type);
 
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value);
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value);
@@ -1002,7 +1001,7 @@ private:
   bool write_discriminator_helper(CORBA::Long value, TypeKind treat_as);
   bool write_discriminator(CORBA::Long value);
   bool get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
-  bool get_complex_from_collection(DDS::DynamicData_tr& value, DDS::MemberId id);
+  bool get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
 
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                           DataContainer::const_single_iterator it) const;
