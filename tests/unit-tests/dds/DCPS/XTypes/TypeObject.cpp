@@ -20,6 +20,20 @@ using namespace OpenDDS::DCPS;
 const Encoding xcdr2_be(Encoding::KIND_XCDR2, ENDIAN_BIG);
 const Encoding xcdr2_le(Encoding::KIND_XCDR2, ENDIAN_LITTLE);
 
+class Destruction
+{
+public:
+  Destruction(bool& ref)
+    : ref_(ref) {
+    ref_ = false;
+  }
+  virtual ~Destruction() {
+    ref_ = true;
+  }
+private:
+  bool& ref_;
+};
+
 // @appendable
 struct Struct {
   ACE_CDR::ULong member;
@@ -159,6 +173,56 @@ TEST(dds_DCPS_XTypes_TypeObject, Optional_equal)
 
   EXPECT_NE(uut1, uut3);
   EXPECT_NE(uut4, uut5);
+}
+
+TEST(dds_DCPS_XTypes_TypeObject, Optional_has_value)
+{
+  Optional<OpenDDS::DCPS::String> opt1;
+  Optional<OpenDDS::DCPS::String> opt2("test");
+
+  EXPECT_FALSE(opt1);
+  EXPECT_FALSE(opt1.has_value());
+  EXPECT_TRUE(opt2);
+  EXPECT_TRUE(opt2.has_value());
+}
+
+TEST(dds_DCPS_XTypes_TypeObject, Optional_destructor)
+{
+  // The Destruction object 'd' will set destroyed to true in
+  // its destructor.
+  bool destroyed = false;
+  Destruction d(destroyed);
+
+  // But, because opt1 will be destroyed first, it should set
+  // destroyed to true first.
+  {
+    Optional<Destruction> opt1(d);
+    EXPECT_TRUE(opt1);
+  }
+
+  // This should be true because the destructor of the Destruction
+  // object inside of the Optional will have run.
+  EXPECT_TRUE(destroyed);
+}
+
+TEST(dds_DCPS_XTypes_TypeObject, Optional_assignment)
+{
+  Optional<OpenDDS::DCPS::String> opt1;
+  Optional<OpenDDS::DCPS::String> opt2("test");
+  Optional<OpenDDS::DCPS::String> opt3;
+  Optional<OpenDDS::DCPS::String> opt4("other");
+
+  opt1 = opt2;
+  EXPECT_EQ(opt1, opt2);
+
+  opt2 = opt1;
+  EXPECT_TRUE(opt2);
+
+  opt4 = opt3;
+  EXPECT_EQ(opt3, opt4);
+
+  opt3 = opt4;
+  EXPECT_FALSE(opt3);
 }
 
 TEST(dds_DCPS_XTypes_TypeObject, Sequence_equal)
@@ -568,11 +632,9 @@ TEST(dds_DCPS_XTypes_TypeObject, AppliedVerbatimAnnotation_equal)
 TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinMemberAnnotations_equal)
 {
   AppliedBuiltinMemberAnnotations uut1;
-  uut1.unit.present = true;
-  uut1.unit.value = "meters";
+  uut1.unit = Optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut2;
-  uut2.unit.present = true;
-  uut2.unit.value = "meters";
+  uut2.unit = Optional<OpenDDS::DCPS::String>("meters");
   AppliedBuiltinMemberAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -639,12 +701,13 @@ TEST(dds_DCPS_XTypes_TypeObject, MinimalStructMember_equal)
 
 TEST(dds_DCPS_XTypes_TypeObject, AppliedBuiltinTypeAnnotations_equal)
 {
+  AppliedVerbatimAnnotation value;
+  value.text = "text";
+
   AppliedBuiltinTypeAnnotations uut1;
-  uut1.verbatim.present = true;
-  uut1.verbatim.value.text = "text";
+  uut1.verbatim = Optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut2;
-  uut2.verbatim.present = true;
-  uut2.verbatim.value.text = "text";
+  uut2.verbatim = Optional<AppliedVerbatimAnnotation>(value);
   AppliedBuiltinTypeAnnotations uut3;
 
   EXPECT_EQ(uut1, uut2);
@@ -1059,14 +1122,13 @@ TEST(dds_DCPS_XTypes_TypeObject, MinimalAliasType_equal)
 
 TEST(dds_DCPS_XTypes_TypeObject, CompleteElementDetail_equal)
 {
+  AppliedBuiltinMemberAnnotations builtin;
+  builtin.unit = Optional<OpenDDS::DCPS::String>("meters");
+  
   CompleteElementDetail uut1;
-  uut1.ann_builtin.present = true;
-  uut1.ann_builtin.value.unit.present = true;;
-  uut1.ann_builtin.value.unit.value = "meters";
+  uut1.ann_builtin = Optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut2;
-  uut2.ann_builtin.present = true;
-  uut2.ann_builtin.value.unit.present = true;
-  uut2.ann_builtin.value.unit.value = "meters";
+  uut2.ann_builtin = Optional<AppliedBuiltinMemberAnnotations>(builtin);
   CompleteElementDetail uut3;
 
   EXPECT_EQ(uut1, uut2);
