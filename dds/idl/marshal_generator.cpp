@@ -13,6 +13,7 @@
 #include <dds/DCPS/SafetyProfileStreams.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/Util.h>
+#include <dds/DCPS/Serializer.h>
 
 #include <utl_identifier.h>
 
@@ -27,6 +28,7 @@
 using std::string;
 using namespace AstTypeClassification;
 using OpenDDS::DCPS::array_count;
+using namespace OpenDDS::DCPS;
 
 namespace {
   const string RtpsNamespace = " ::OpenDDS::RTPS::", DdsNamespace = " ::DDS::";
@@ -148,14 +150,6 @@ namespace {
     }
     return 0;
   }
-
-  // TODO(iguessthislldo): Replace with Encoding::Kind from libOpenDDS_Util. See XTYPE-140
-  enum Encoding {
-    encoding_unaligned_cdr,
-    encoding_xcdr1,
-    encoding_xcdr2,
-    encoding_count
-  };
 
   string streamCommon(const std::string& indent, const string& name, AST_Type* type,
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
@@ -1577,7 +1571,7 @@ namespace {
     return 0;
   }
 
-  bool is_bounded_type(AST_Type* type, Encoding encoding)
+  bool is_bounded_type(AST_Type* type, Encoding::Kind encoding)
   {
     bool bounded = true;
     static std::vector<AST_Type*> type_stack;
@@ -1592,7 +1586,7 @@ namespace {
       bounded = false;
     } else if (fld_cls & CL_STRUCTURE) {
       const ExtensibilityKind exten = be_global->extensibility(type);
-      if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+      if (exten != extensibilitykind_final && encoding != Encoding::KIND_UNALIGNED_CDR) {
         /*
          * TODO(iguessthislldo): This is a workaround for not properly
          * implementing serialized_size_bound for XCDR. See XTYPE-83.
@@ -1620,7 +1614,7 @@ namespace {
       if (!is_bounded_type(array_node->base_type(), encoding)) bounded = false;
     } else if (fld_cls & CL_UNION) {
       const ExtensibilityKind exten = be_global->extensibility(type);
-      if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+      if (exten != extensibilitykind_final && encoding != Encoding::KIND_UNALIGNED_CDR) {
         /*
          * TODO(iguessthislldo): This is a workaround for not properly
          * implementing serialized_size_bound for XCDR. See XTYPE-83.
@@ -1691,12 +1685,12 @@ namespace {
    * Convert a compiler Encoding value to the string name of the corresponding
    * OpenDDS::DCPS::Encoding::XcdrVersion.
    */
-  std::string encoding_to_xcdr_version(Encoding encoding)
+  std::string encoding_to_xcdr_version(Encoding::Kind encoding)
   {
     switch (encoding) {
-    case encoding_xcdr1:
+    case Encoding::KIND_XCDR1:
       return "Encoding::XCDR_VERSION_1";
-    case encoding_xcdr2:
+    case Encoding::KIND_XCDR2:
       return "Encoding::XCDR_VERSION_2";
     default:
       return "Encoding::XCDR_VERSION_NONE";
@@ -1707,57 +1701,39 @@ namespace {
    * Convert a compiler Encoding value to the string name of the corresponding
    * OpenDDS::DCPS::Encoding::Kind.
    */
-  std::string encoding_to_encoding_kind(Encoding encoding)
+  std::string encoding_to_encoding_kind(Encoding::Kind encoding)
   {
     switch (encoding) {
-    case encoding_xcdr1:
+    case Encoding::KIND_XCDR1:
       return "Encoding::KIND_XCDR1";
-    case encoding_xcdr2:
+    case Encoding::KIND_XCDR2:
       return "Encoding::KIND_XCDR2";
     default:
       return "Encoding::KIND_UNALIGNED_CDR";
     }
   }
 
-  size_t max_alignment(Encoding encoding)
+  void align(Encoding::Kind encoding, size_t& value, size_t by)
   {
-    switch (encoding) {
-    case encoding_xcdr1:
-      return 8;
-    case encoding_xcdr2:
-      return 4;
-    default:
-      return 0;
-    }
-  }
-
-  // TODO(iguessthislldo): Replace with align from libOpenDDS_Util. See XTYPE-140
-  void align(Encoding encoding, size_t& value, size_t by)
-  {
-    const size_t align_by = std::min(max_alignment(encoding), by);
-    if (align_by) {
-      const size_t offset_by = value % align_by;
-      if (offset_by) {
-        value += align_by - offset_by;
-      }
-    }
+    const Encoding enc(encoding);
+    enc.align(value, by);
   }
 
   void idl_max_serialized_size_dheader(
-    Encoding encoding, ExtensibilityKind exten, size_t& size)
+    Encoding::Kind encoding, ExtensibilityKind exten, size_t& size)
   {
-    if (exten != extensibilitykind_final && encoding == encoding_xcdr2) {
+    if (exten != extensibilitykind_final && encoding == Encoding::KIND_XCDR2) {
       align(encoding, size, 4);
       size += 4;
     }
   }
 
-  void idl_max_serialized_size(Encoding encoding, size_t& size, AST_Type* type);
+  void idl_max_serialized_size(Encoding::Kind encoding, size_t& size, AST_Type* type);
 
   // Max marshaled size of repeating 'type' 'n' times in the stream
   // (for an array or sequence)
   void idl_max_serialized_size_repeating(
-    Encoding encoding, size_t& size, AST_Type* type, size_t n)
+    Encoding::Kind encoding, size_t& size, AST_Type* type, size_t n)
   {
     if (n > 0) {
       // 1st element may need padding relative to whatever came before
@@ -1773,7 +1749,7 @@ namespace {
   }
 
   /// Should only be called on bounded types
-  void idl_max_serialized_size(Encoding encoding, size_t& size, AST_Type* type)
+  void idl_max_serialized_size(Encoding::Kind encoding, size_t& size, AST_Type* type)
   {
     type = resolveActualType(type);
     const ExtensibilityKind exten = be_global->extensibility(type);
@@ -2341,7 +2317,7 @@ namespace {
 
   typedef void (*KeyIterationFn)(
     const std::string& indent,
-    Encoding encoding,
+    Encoding::Kind encoding,
     const string& key_name, AST_Type* ast_type,
     size_t* size,
     string* expr, Intro* intro);
@@ -2349,7 +2325,7 @@ namespace {
   bool
   iterate_over_keys(
     const std::string& indent,
-    Encoding encoding,
+    Encoding::Kind encoding,
     AST_Structure* node,
     const std::string& struct_name,
     IDL_GlobalData::DCPS_Data_Type_Info* info,
@@ -2393,14 +2369,14 @@ namespace {
 
   // Args must match KeyIterationFn.
   void idl_max_serialized_size_iteration(
-    const std::string&, Encoding encoding, const string&, AST_Type* ast_type,
+    const std::string&, Encoding::Kind encoding, const string&, AST_Type* ast_type,
     size_t* size, string*, Intro*)
   {
     idl_max_serialized_size(encoding, *size, ast_type);
   }
 
   void serialized_size_iteration(
-    const std::string& indent, Encoding, const string& key_name, AST_Type* ast_type,
+    const std::string& indent, Encoding::Kind, const string& key_name, AST_Type* ast_type,
     size_t*, string* expr, Intro* intro)
   {
     *expr += findSizeCommon(indent, key_name, ast_type, "stru.value", false, *intro);
@@ -2433,7 +2409,7 @@ namespace {
     return ss.str();
   }
 
-  bool is_bounded_topic_struct(AST_Type* type, Encoding encoding, bool key_only,
+  bool is_bounded_topic_struct(AST_Type* type, Encoding::Kind encoding, bool key_only,
     TopicKeys& keys, IDL_GlobalData::DCPS_Data_Type_Info* info = 0)
   {
     /*
@@ -2441,7 +2417,7 @@ namespace {
      * serialized_size_bound for XCDR. See XTYPE-83.
      */
     const ExtensibilityKind exten = be_global->extensibility(type);
-    if (exten != extensibilitykind_final && encoding != encoding_unaligned_cdr) {
+    if (exten != extensibilitykind_final && encoding != Encoding::KIND_UNALIGNED_CDR) {
       return false;
     }
 
@@ -2488,8 +2464,8 @@ namespace {
         "serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
-    for (unsigned e = 0; e < encoding_count; ++e) {
-      const Encoding encoding = static_cast<Encoding>(e);
+    for (unsigned e = 0; e <= Encoding::KIND_UNALIGNED_CDR; ++e) {
+      const Encoding::Kind encoding = static_cast<Encoding::Kind>(e);
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
@@ -2535,8 +2511,8 @@ namespace {
       "  static SerializedSizeBound serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
-    for (unsigned e = 0; e < encoding_count; ++e) {
-      const Encoding encoding = static_cast<Encoding>(e);
+    for (unsigned e = 0; e <= Encoding::KIND_UNALIGNED_CDR; ++e) {
+      const Encoding::Kind encoding = static_cast<Encoding::Kind>(e);
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
@@ -2559,8 +2535,8 @@ namespace {
       "  static SerializedSizeBound key_only_serialized_size_bound(const Encoding& encoding)\n"
       "  {\n"
       "    switch (encoding.kind()) {\n";
-    for (unsigned e = 0; e < encoding_count; ++e) {
-      const Encoding encoding = static_cast<Encoding>(e);
+    for (unsigned e = 0; e <= Encoding::KIND_UNALIGNED_CDR; ++e) {
+      const Encoding::Kind encoding = static_cast<Encoding::Kind>(e);
       be_global->header_ <<
         "    case " << encoding_to_encoding_kind(encoding) << ":\n"
         "      return SerializedSizeBound(";
@@ -2568,7 +2544,7 @@ namespace {
        * TODO(iguessthislldo): This is a workaround for not properly implementing
        * serialized_size_bound for Mutable. See XTYPE-83.
        */
-      if (exten == extensibilitykind_final || encoding == encoding_unaligned_cdr) {
+      if (exten == extensibilitykind_final || encoding == Encoding::KIND_UNALIGNED_CDR) {
         size_t size = 0;
         if (has_key) {
           idl_max_serialized_size(encoding, size, node->disc_type());
@@ -3265,10 +3241,10 @@ bool marshal_generator::gen_struct(AST_Structure* node,
       be_global->impl_ <<
         "  switch (encoding.xcdr_version()) {\n";
       const char* indent = "    ";
-      for (unsigned e = 0; e < encoding_count; ++e) {
+      for (unsigned e = 0; e <= Encoding::KIND_UNALIGNED_CDR; ++e) {
         string expr;
         Intro intro;
-        const Encoding encoding = static_cast<Encoding>(e);
+        const Encoding::Kind encoding = static_cast<Encoding::Kind>(e);
         if (!iterate_over_keys(indent, encoding, node, cxx, info, 0,
               serialized_size_iteration, 0, &expr, &intro)) {
           return false;
