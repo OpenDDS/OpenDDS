@@ -815,8 +815,8 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     break;
   case TK_SEQUENCE: {
     td->kind(TK_SEQUENCE);
-    if (cto.sequence_type.header.detail.present) {
-      td->name(cto.sequence_type.header.detail.value.type_name.c_str());
+    if (cto.sequence_type.header.detail) {
+      td->name(cto.sequence_type.header.detail.value().type_name.c_str());
     }
     td->bound().length(1);
     td->bound()[0] = cto.sequence_type.header.common.bound;
@@ -840,8 +840,8 @@ void TypeLookupService::complete_to_dynamic_i(DynamicTypeImpl* dt,
     break;
   case TK_MAP: {
     td->kind(TK_MAP);
-    if (cto.map_type.header.detail.present) {
-      td->name(cto.map_type.header.detail.value.type_name.c_str());
+    if (cto.map_type.header.detail) {
+      td->name(cto.map_type.header.detail.value().type_name.c_str());
     }
     td->bound().length(1);
     td->bound()[0] = cto.map_type.header.common.bound;

@@ -64,32 +64,83 @@ namespace XTypes {
   const DCPS::Encoding& get_typeobject_encoding();
 
   template <typename T>
-  struct Optional {
-    bool present;
-    T value;
-
+  class Optional {
+  public:
     Optional()
-      : present(false)
+      : present_(false),
+        value_()
     {}
 
     Optional(const T& v)
-      : present(true)
-      , value(v)
-    {}
+      : present_(true)
+    {
+      new(value_) T(v);
+    }
+
+    ~Optional() {
+      if (present_) {
+        value().~T();
+      }
+    }
+
+    Optional(const Optional& rhs)
+      : present_(false) {
+      *this = rhs;
+    }
+
+    Optional& operator=(const Optional& rhs) {
+      if (this != &rhs) {
+        if (present_) {
+          if (rhs.present_) {
+            value() = rhs.value();
+          }
+          else {
+            value().~T();
+          }
+        }
+        else {
+          if (rhs.present_) {
+            new(value_) T(rhs.value());
+          }
+        }
+        present_ = rhs.present_;
+      }
+      return *this;
+    }
 
     bool operator==(const Optional& other) const
     {
-      if (present) {
-        return present == other.present && value == other.value;
+      if (present_) {
+        return present_ == other.present_ && value() == other.value();
       }
 
-      return present == other.present;
+      return present_ == other.present_;
     }
 
     bool operator!=(const Optional& other) const
     {
       return !(*this == other);
     }
+
+    operator bool() const {
+      return present_;
+    }
+
+    bool has_value() const {
+      return present_;
+    }
+
+    T& value() {
+      return reinterpret_cast<T&>(value_);
+    }
+
+    const T& value() const {
+      return reinterpret_cast<const T&>(value_);
+    }
+
+  private:
+    bool present_;
+    unsigned char value_[sizeof(T)];
   };
 
   template <typename T>
@@ -3409,27 +3460,35 @@ void serialized_size(const Encoding& encoding, size_t& size,
                      const XTypes::Optional<T>& opt)
 {
   size += DCPS::boolean_cdr_size;
-  if (opt.present) {
-    serialized_size(encoding, size, opt.value);
+  if (opt) {
+    serialized_size(encoding, size, opt.value());
   }
 }
 
 template<typename T>
 bool operator<<(Serializer& strm, const XTypes::Optional<T>& opt)
 {
-  if (!(strm << ACE_OutputCDR::from_boolean(opt.present))) {
+  if (!(strm << ACE_OutputCDR::from_boolean(opt.has_value()))) {
     return false;
   }
-  return !opt.present || strm << opt.value;
+  return !opt.has_value() || strm << opt.value();
 }
 
 template<typename T>
 bool operator>>(Serializer& strm, XTypes::Optional<T>& opt)
 {
-  if (!(strm >> ACE_InputCDR::to_boolean(opt.present))) {
+  bool present;
+  if (!(strm >> ACE_InputCDR::to_boolean(present))) {
     return false;
   }
-  return !opt.present || strm >> opt.value;
+  if (present) {
+    T value;
+    const bool status = strm >> value;
+    opt = XTypes::Optional<T>(value);
+    return status;
+  }
+
+  return true;
 }
 
 
