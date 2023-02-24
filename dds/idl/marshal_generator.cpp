@@ -4111,8 +4111,7 @@ void marshal_generator::gen_union_default(AST_UnionBranch* branch, const std::st
   if (br_cls & (CL_STRUCTURE | CL_UNION)) {
     be_global->impl_ << type_to_default("  ", branch->field_type(), tmpname);
     be_global->impl_ << "  " << varname << "." << branch->local_name()->get_string() << "(tmp);\n";
-  }
-  else {
+  } else {
     be_global->impl_ << type_to_default("  ", branch->field_type(),
                                         varname + "." + branch->local_name()->get_string(),
                                         false, true);
