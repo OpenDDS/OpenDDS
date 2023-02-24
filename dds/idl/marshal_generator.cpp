@@ -4101,16 +4101,20 @@ void marshal_generator::gen_union_default(AST_UnionBranch* branch, const std::st
 {
   AST_Type* br = resolveActualType(branch->field_type());
   const Classification br_cls = classify(br);
+  const std::string tmpname = "tmp";
 
   if (br_cls & (CL_SEQUENCE | CL_ARRAY | CL_STRUCTURE | CL_UNION)) {
     be_global->impl_ << " " << scoped(branch->field_type()->name()) << " "
-                     << getWrapper("tmp", branch->field_type(), WD_INPUT) << ";\n";
-    if (br_cls & (CL_STRUCTURE | CL_UNION)) {
-      be_global->impl_ << "  " << varname << "." << branch->local_name()->get_string() << "(tmp);\n";
-    }
+                     << getWrapper(tmpname, branch->field_type(), WD_INPUT) << ";\n";
   }
 
-  be_global->impl_ << type_to_default("  ", branch->field_type(),
-                                      varname + "." + branch->local_name()->get_string(),
-                                      false, true);
+  if (br_cls & (CL_STRUCTURE | CL_UNION)) {
+    be_global->impl_ << type_to_default("  ", branch->field_type(), tmpname);
+    be_global->impl_ << "  " << varname << "." << branch->local_name()->get_string() << "(tmp);\n";
+  }
+  else {
+    be_global->impl_ << type_to_default("  ", branch->field_type(),
+                                        varname + "." + branch->local_name()->get_string(),
+                                        false, true);
+  }
 }
