@@ -10208,25 +10208,29 @@ jobs:
     - name: checkout OpenDDS
       uses: actions/checkout@v3
       with:
-        path: C:/OpenDDS
+        path: OpenDDS
         submodules: true
     - name: checkout ACE_TAO
       uses: actions/checkout@v3
       with:
         repository: DOCGroup/ACE_TAO
         ref: ace6tao2
-        path: C:/OpenDDS/ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: download ACE_TAO artifact
       uses: actions/download-artifact@v3
       with:
         name: ACE_TAO_w22_x86_i0_artifact
-        path: C:/OpenDDS/ACE_TAO
+        path: OpenDDS/ACE_TAO
     - name: extract ACE_TAO artifact
       shell: bash
       run: |
-        cd /d C:/OpenDDS/ACE_TAO
+        cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
+    - name: Move OpenDDS to C Drive
+      shell: bash
+      run: |
+        mv OpenDDS /c/
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
