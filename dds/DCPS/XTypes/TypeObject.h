@@ -67,8 +67,8 @@ namespace XTypes {
   class Optional {
   public:
     Optional()
-      : present_(false),
-        value_()
+      : present_(false)
+      , value_()
     {}
 
     Optional(const T& v)
@@ -84,8 +84,8 @@ namespace XTypes {
     }
 
     Optional(const Optional& rhs)
-      : present_(false),
-        value_()
+      : present_(false)
+      , value_()
     {
       *this = rhs;
     }
@@ -95,12 +95,10 @@ namespace XTypes {
         if (present_) {
           if (rhs.present_) {
             value() = rhs.value();
-          }
-          else {
+          } else {
             value().~T();
           }
-        }
-        else {
+        } else {
           if (rhs.present_) {
             new(value_) T(rhs.value());
           }
