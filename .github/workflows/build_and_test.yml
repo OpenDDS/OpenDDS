@@ -10333,19 +10333,23 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
         rm -f build_w22_x86_i0_j_FM-1f.tar.xz
+    - name: Move OpenDDS to C Drive
+      shell: bash
+      run: |
+        mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: check build configuration
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: Build CMake Tests
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         mkdir C:\tests\cmake\build
         cd /d C:\tests\cmake\build
@@ -10354,7 +10358,7 @@ jobs:
     - name: create autobuild config
       shell: bash
       run: |
-        cd OpenDDS
+        cd /c/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
@@ -10387,7 +10391,7 @@ jobs:
     - name: run OpenDDS tests
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
         perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
@@ -10399,9 +10403,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w22_p1:
 
