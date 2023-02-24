@@ -84,7 +84,9 @@ namespace XTypes {
     }
 
     Optional(const Optional& rhs)
-      : present_(false) {
+      : present_(false),
+        value_()
+    {
       *this = rhs;
     }
 
@@ -140,7 +142,10 @@ namespace XTypes {
 
   private:
     bool present_;
-    unsigned char value_[sizeof(T)];
+    union {
+      ACE_CDR::LongDouble max_alignment;
+      unsigned char value_[sizeof(T)];
+    };
   };
 
   template <typename T>
