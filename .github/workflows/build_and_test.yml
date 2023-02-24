@@ -10256,7 +10256,7 @@ jobs:
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
-        cd /d C:\OpenDDS
+        cd /d/OpenDDS
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
