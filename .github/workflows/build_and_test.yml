@@ -10317,11 +10317,6 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
-      shell: bash
-      run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
