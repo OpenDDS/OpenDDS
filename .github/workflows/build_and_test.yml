@@ -10389,7 +10389,7 @@ jobs:
         cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
