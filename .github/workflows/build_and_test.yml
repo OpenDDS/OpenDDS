@@ -10398,7 +10398,7 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
         cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
         grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
