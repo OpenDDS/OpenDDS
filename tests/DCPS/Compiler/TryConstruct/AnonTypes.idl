@@ -11,8 +11,10 @@ module TryCon {
     sequence<unsigned short, 3> AnonUnsignedShortSeqBound;
     // string
     sequence<str64, 3> AnonStringSeqBound;
+#ifndef OPENDDS_SAFETY_PROFILE
     // wstring
     sequence<wstr64, 3> AnonWideStringSeqBound;
+#endif
     // array
     sequence<ShortArray, 3> AnonShortArraySeqBound;
     // sequence
@@ -31,8 +33,10 @@ module TryCon {
     @try_construct(TRIM) sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
     // string
     @try_construct(TRIM) sequence<@try_construct(TRIM) str20, 2> AnonStringSeqBound;
+#ifndef OPENDDS_SAFETY_PROFILE
     // wstring
     @try_construct(TRIM) sequence<@try_construct(TRIM) wstr20, 2> AnonWideStringSeqBound;
+#endif
     // array
     @try_construct(TRIM) sequence<ShortArray, 2> AnonShortArraySeqBound;
     // sequence
@@ -51,8 +55,10 @@ module TryCon {
     @try_construct(USE_DEFAULT) sequence<unsigned short, 2> AnonUnsignedShortSeqBound;
     // string
     @try_construct(USE_DEFAULT) sequence<str20, 2> AnonStringSeqBound;
+#ifndef OPENDDS_SAFETY_PROFILE
     // wstring
     @try_construct(USE_DEFAULT) sequence<wstr20, 2> AnonWideStringSeqBound;
+#endif
     // array
     @try_construct(USE_DEFAULT) sequence<ShortArray, 2> AnonShortArraySeqBound;
     // sequence
@@ -67,8 +73,10 @@ module TryCon {
   struct AnonArrStruct {
     // string
     str64 AnonStringArr[3];
+#ifndef OPENDDS_SAFETY_PROFILE
     // wstring
     wstr64 AnonWideStringArr[3];
+#endif
     // array
     str64Array AnonArrayArr[3];
     // sequence
@@ -80,8 +88,10 @@ module TryCon {
   struct AnonArrStructTrim {
     // string
     str20 AnonStringArr @try_construct(TRIM)[3];
+#ifndef OPENDDS_SAFETY_PROFILE
     // wstring
     wstr20 AnonWideStringArr @try_construct(TRIM)[3];
+#endif
     // array
     str20ArrayTrim AnonArrayArr[3];
     // sequence
@@ -93,8 +103,10 @@ module TryCon {
   struct AnonArrStructUseDefault {
     // string
     str20 AnonStringArr @try_construct(USE_DEFAULT)[3];
+#ifndef OPENDDS_SAFETY_PROFILE
     // wstring
     wstr20 AnonWideStringArr @try_construct(USE_DEFAULT)[3];
+#endif
     // array
     str20Array AnonArrayArr @try_construct(USE_DEFAULT)[3];
     // sequence

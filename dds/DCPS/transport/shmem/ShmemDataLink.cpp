@@ -103,29 +103,29 @@ ShmemDataLink::open(const std::string& peer_address)
   assoc_resends_task_ = make_rch<SmPeriodicTask>(reactor_task_->interceptor(),
     ref(*this), &ShmemDataLink::resend_association_msgs);
   ShmemInst_rch cfg = config();
-  assoc_resends_task_->enable(false, cfg ? cfg->association_resend_period() : TimeDuration(0, ShmemInst::DEFAULT_ASSOCIATION_RESEND_PERIOD_USEC));
+  if (!cfg) {
+    return false;
+  }
+  assoc_resends_task_->enable(false, cfg->association_resend_period());
 
   return true;
-}
-
-int ShmemDataLink::make_reservation(const GUID_t& remote_sub, const GUID_t& local_pub,
-  const TransportSendListener_wrch& send_listener, bool reliable)
-{
-  const int result = DataLink::make_reservation(remote_sub, local_pub, send_listener, reliable);
-  send_association_msg(local_pub, remote_sub);
-  return result;
 }
 
 int ShmemDataLink::make_reservation(const GUID_t& remote_pub, const GUID_t& local_sub,
   const TransportReceiveListener_wrch& receive_listener, bool reliable)
 {
   const int result = DataLink::make_reservation(remote_pub, local_sub, receive_listener, reliable);
-  send_association_msg(local_sub, remote_pub);
-  // Resend until we get a response.
-  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, result);
-  ShmemInst_rch cfg = config();
-  assoc_resends_.insert(std::pair<GuidPair, size_t>(GuidPair(local_sub, remote_pub), cfg ? cfg->association_resend_max_count() : ShmemInst::DEFAULT_ASSOCIATION_RESEND_MAX_COUNT));
-  return result;
+  if (result != 0) {
+    return result;
+  }
+
+  // Tell writer we are ready and resend that message until we get a response.
+  ACE_GUARD_RETURN(ACE_Thread_Mutex, g, assoc_resends_mutex_, -1);
+  if (assoc_resends_.insert(GuidPair(local_sub, remote_pub)).second) {
+    send_association_msg(local_sub, remote_pub);
+  }
+
+  return 0;
 }
 
 void
@@ -168,14 +168,17 @@ void ShmemDataLink::resend_association_msgs(const MonotonicTimePoint&)
   VDBG((LM_DEBUG, "(%P|%t) ShmemDataLink::resend_association_msgs\n"));
 
   ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
-  for (AssocResends::iterator i = assoc_resends_.begin(); i != assoc_resends_.end();) {
-    send_association_msg(i->first.local, i->first.remote);
-    if (--i->second) {
-      ++i;
-    } else {
-      assoc_resends_.erase(i++);
-    }
+  for (AssocResends::iterator i = assoc_resends_.begin(); i != assoc_resends_.end(); ++i) {
+    send_association_msg(i->local, i->remote);
   }
+}
+
+void ShmemDataLink::stop_resend_association_msgs(const GUID_t& local, const GUID_t& remote)
+{
+  VDBG((LM_DEBUG, "(%P|%t) ShmemDataLink::stop_resend_association_msgs: "
+    "local %C remote %C\n", LogGuid(local).c_str(), LogGuid(remote).c_str()));
+  ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
+  assoc_resends_.erase(GuidPair(local, remote));
 }
 
 void
@@ -188,18 +191,22 @@ ShmemDataLink::request_ack_received(ReceivedDataSample& sample)
     Serializer ser(payload.get(), encoding_unaligned_native);
     if (ser >> local) {
       const GUID_t& remote = sample.header_.publication_id_;
-      GuidConverter gc(local);
-      const bool is_writer = gc.isWriter();
+      const GuidConverter local_gc(local);
+      const bool local_is_writer = local_gc.isWriter();
       VDBG((LM_DEBUG, "(%P|%t) ShmemDataLink::request_ack_received: "
-        "association msg from %C to %C is writer %d\n",
-        LogGuid(remote).c_str(), std::string(gc).c_str(), is_writer));
-      if (is_writer) {
+        "association msg from remote %C %C to local %C %C\n",
+        local_is_writer ? "reader" : "writer", LogGuid(remote).c_str(),
+        local_is_writer ? "writer" : "reader", std::string(local_gc).c_str()));
+      if (local_is_writer) {
         // Reader has signaled it's ready to receive messages.
-        invoke_on_start_callbacks(local, remote, true);
+        if (invoke_on_start_callbacks(local, remote, true)) {
+          // In case we're getting duplicates, only acknowledge if we can invoke
+          // the on start callback, which should only happen once.
+          send_association_msg(local, remote);
+        }
       } else {
         // Writer has responded to association ack, stop sending.
-        ACE_GUARD(ACE_Thread_Mutex, g, assoc_resends_mutex_);
-        assoc_resends_.erase(GuidPair(local, remote));
+        stop_resend_association_msgs(local, remote);
       }
     }
     return;

@@ -1,0 +1,14 @@
+main
+union_defaultsC.cpp
+union_defaultsC.h
+union_defaultsC.inl
+union_defaultsS.cpp
+union_defaultsS.h
+union_defaultsTypeSupport.idl
+union_defaultsTypeSupportC.cpp
+union_defaultsTypeSupportC.h
+union_defaultsTypeSupportC.inl
+union_defaultsTypeSupportImpl.cpp
+union_defaultsTypeSupportImpl.h
+union_defaultsTypeSupportS.cpp
+union_defaultsTypeSupportS.h

@@ -1005,7 +1005,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
         VDBG_LVL((LM_DEBUG,"(%P|%t) DBG: Found DataLinkSet. Sending element %@.\n"
                   , cur), 5);
 
-  #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
 
         // Content-Filtering adjustment to the pub_links:
         // - If the sample should be filtered out of all subscriptions on a given
@@ -1057,7 +1057,7 @@ TransportClient::send_i(SendStateDataSampleList send_list, ACE_UINT64 transactio
           pub_links = subset;
         }
 
-  #endif /* OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE */
+#endif
 
         // This will do several things, including adding to the membership
         // of the send_links set.  Any DataLinks added to the send_links

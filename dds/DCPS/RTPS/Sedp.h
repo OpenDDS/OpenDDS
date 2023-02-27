@@ -9,9 +9,9 @@
 #include "AssociationRecord.h"
 #include "DiscoveredEntities.h"
 #include "LocalEntities.h"
-#include "TypeLookup.h"
 #include "MessageTypes.h"
 #include "MessageUtils.h"
+#include "TypeLookupTypeSupportImpl.h"
 #ifdef OPENDDS_SECURITY
 #  include "ParameterListConverter.h"
 #endif
@@ -30,7 +30,6 @@
 #include <dds/DCPS/DataSampleHeader.h>
 #include <dds/DCPS/Definitions.h>
 #include <dds/DCPS/FibonacciSequence.h>
-#include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/GuidUtils.h>
 #include <dds/DCPS/JobQueue.h>
 #include <dds/DCPS/Marked_Default_Qos.h>
@@ -70,6 +69,7 @@ namespace RTPS {
 
 using DCPS::RepoIdSet;
 using DCPS::AtomicBool;
+using DCPS::GUID_UNKNOWN;
 
 class RtpsDiscovery;
 class Spdp;
@@ -889,17 +889,17 @@ private:
 
   DDS::ReturnCode_t write_publication_data(const DCPS::GUID_t& rid,
                                            LocalPublication& pub,
-                                           const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                           const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_publication_data_secure(const DCPS::GUID_t& rid,
                                                   LocalPublication& pub,
-                                                  const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                                  const DCPS::GUID_t& reader = GUID_UNKNOWN);
 #endif
 
   DDS::ReturnCode_t write_publication_data_unsecure(const DCPS::GUID_t& rid,
                                                     LocalPublication& pub,
-                                                    const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                                    const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
   DDS::ReturnCode_t add_subscription_i(const DCPS::GUID_t& rid,
                                        LocalSubscription& sub);
@@ -907,25 +907,25 @@ private:
 
   DDS::ReturnCode_t write_subscription_data(const DCPS::GUID_t& rid,
                                             LocalSubscription& sub,
-                                            const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                            const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_subscription_data_secure(const DCPS::GUID_t& rid,
                                                    LocalSubscription& sub,
-                                                   const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                                   const DCPS::GUID_t& reader = GUID_UNKNOWN);
 #endif
 
   DDS::ReturnCode_t write_subscription_data_unsecure(const DCPS::GUID_t& rid,
                                                      LocalSubscription& sub,
-                                                     const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                                     const DCPS::GUID_t& reader = GUID_UNKNOWN);
 
   DDS::ReturnCode_t write_participant_message_data(const DCPS::GUID_t& rid,
                                                    DCPS::SequenceNumber& sn,
-                                                   const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                                   const DCPS::GUID_t& reader = GUID_UNKNOWN);
 #ifdef OPENDDS_SECURITY
   DDS::ReturnCode_t write_participant_message_data_secure(const DCPS::GUID_t& rid,
                                                           DCPS::SequenceNumber& sn,
-                                                          const DCPS::GUID_t& reader = DCPS::GUID_UNKNOWN);
+                                                          const DCPS::GUID_t& reader = GUID_UNKNOWN);
 #endif
 
   virtual bool is_expectant_opendds(const GUID_t& endpoint) const;
@@ -1074,31 +1074,44 @@ protected:
     MonotonicTimePoint time_added_to_map;
   };
 
-  struct MatchingPair {
-    MatchingPair(GUID_t writer, GUID_t reader, DCPS::TypeObjReqCond* non_match_cond = 0)
-      : writer_(writer)
-      , reader_(reader)
-      , non_match_cond_(non_match_cond)
+  struct MatchingPair : public DCPS::GuidPair {
+    bool local_is_reader;
+    /**
+     * This is used by get_dynamic_type on the service participant to wait for a
+     * TypeObject request to complete. This is does not take ownership because
+     * it should only be on the stack as the request should complete or fail
+     * within the call to get_dynamic_type.
+     */
+    DCPS::TypeObjReqCond* type_obj_req_cond;
+
+    MatchingPair(const GUID_t& reader, const GUID_t writer, bool reader_is_local)
+      : GuidPair(reader_is_local ? reader : writer, reader_is_local ? writer : reader)
+      , local_is_reader(reader_is_local)
+      , type_obj_req_cond(0)
     {
     }
 
-    GUID_t writer_;
-    GUID_t reader_;
-    DCPS::TypeObjReqCond* non_match_cond_;
-
-    bool operator<(const MatchingPair& a_other) const
+    MatchingPair(const GUID_t& remote, bool remote_is_reader, DCPS::TypeObjReqCond* type_obj_req_cond)
+      : GuidPair(GUID_UNKNOWN, remote)
+      , local_is_reader(!remote_is_reader)
+      , type_obj_req_cond(type_obj_req_cond)
     {
-      if (GUID_tKeyLessThan()(writer_, a_other.writer_)) return true;
+    }
 
-      if (GUID_tKeyLessThan()(a_other.writer_, writer_)) return false;
+    const GUID_t& reader() const
+    {
+      return local_is_reader ? local : remote;
+    }
 
-      if (GUID_tKeyLessThan()(reader_, a_other.reader_)) return true;
+    const GUID_t& writer() const
+    {
+      return local_is_reader ? remote : local;
+    }
 
-      if (GUID_tKeyLessThan()(a_other.reader_, reader_)) return false;
-
-      if (non_match_cond_ < a_other.non_match_cond_) return true;
-
-      return false;
+    bool operator<(const MatchingPair& other) const
+    {
+      const int pair_cmp = cmp(other);
+      return pair_cmp < 0 || (pair_cmp == 0 && type_obj_req_cond < other.type_obj_req_cond);
     }
   };
 
@@ -1118,11 +1131,10 @@ protected:
   void match_continue(const GUID_t& writer, const GUID_t& reader);
 
   void request_type_objects(const XTypes::TypeInformation* type_info,
-    const MatchingPair& mp, const DCPS::GUID_t& remote_id, bool is_discovery_protected,
-    bool get_minimal, bool get_complete);
+    const MatchingPair& mp, bool is_discovery_protected, bool get_minimal, bool get_complete);
 
   void get_remote_type_objects(const XTypes::TypeIdentifierWithDependencies& tid_with_deps,
-                               MatchingData& md, bool get_minimal, const DCPS::GUID_t& remote_id,
+                               MatchingData& md, bool get_minimal, const GUID_t& remote_id,
                                bool is_discovery_protected);
 #ifdef OPENDDS_SECURITY
   void match_continue_security_enabled(

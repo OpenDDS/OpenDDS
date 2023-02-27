@@ -1,6 +1,4 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
@@ -9,14 +7,16 @@
 #ifndef OPENDDS_DCPS_RTPS_ICE_ICE_H
 #define OPENDDS_DCPS_RTPS_ICE_ICE_H
 
-#include "dds/DCPS/Ice.h"
 #include "Stun.h"
-#include "dds/DCPS/TimeTypes.h"
-#include "dds/DCPS/RcObject.h"
 
-#if !defined (ACE_LACKS_PRAGMA_ONCE)
-#pragma once
-#endif /* ACE_LACKS_PRAGMA_ONCE */
+#include <dds/DCPS/Ice.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/RcObject.h>
+#include <dds/DCPS/GuidUtils.h>
+
+#ifndef ACE_LACKS_PRAGMA_ONCE
+#  pragma once
+#endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -35,26 +35,7 @@ Candidate make_server_reflexive_candidate(const ACE_INET_Addr& address, const AC
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, const ACE_INET_Addr& base, const ACE_INET_Addr& server_address, ACE_UINT32 priority);
 Candidate make_peer_reflexive_candidate(const ACE_INET_Addr& address, ACE_UINT32 priority, size_t q);
 
-struct OpenDDS_Rtps_Export GuidPair {
-  DCPS::GUID_t local;
-  DCPS::GUID_t remote;
-
-  GuidPair(const DCPS::GUID_t& a_local, const DCPS::GUID_t& a_remote) : local(a_local), remote(a_remote) {}
-
-  bool operator<(const GuidPair& a_other) const
-  {
-    if (DCPS::GUID_tKeyLessThan()(this->local, a_other.local)) return true;
-
-    if (DCPS::GUID_tKeyLessThan()(a_other.local, this->local)) return false;
-
-    if (DCPS::GUID_tKeyLessThan()(this->remote, a_other.remote)) return true;
-
-    if (DCPS::GUID_tKeyLessThan()(a_other.remote, this->remote)) return false;
-
-    return false;
-  }
-};
-
+using DCPS::GuidPair;
 typedef std::set<GuidPair> GuidSetType;
 
 class OpenDDS_Rtps_Export Endpoint : public virtual DCPS::RcObject {

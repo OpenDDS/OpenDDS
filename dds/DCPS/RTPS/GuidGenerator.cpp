@@ -1,46 +1,44 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "GuidGenerator.h"
 
-#include "dds/DCPS/GuidUtils.h"
-#include "dds/DCPS/TimeTypes.h"
+#include <dds/DCPS/GuidUtils.h>
+#include <dds/DCPS/TimeTypes.h>
+#include <dds/DCPS/debug.h>
 
-#include "dds/DdsDcpsGuidTypeSupportImpl.h"
+#include <dds/DdsDcpsGuidTypeSupportImpl.h>
 
-#include "ace/OS_NS_unistd.h"
-#include "ace/OS_NS_stdlib.h"
-#include "ace/OS_NS_netdb.h"
-#include "ace/OS_NS_sys_socket.h"
-#include "ace/OS_NS_sys_time.h"
-#include "ace/Log_Msg.h"
-
-#include "ace/os_include/net/os_if.h"
+#include <ace/OS_NS_unistd.h>
+#include <ace/OS_NS_stdlib.h>
+#include <ace/OS_NS_netdb.h>
+#include <ace/OS_NS_sys_socket.h>
+#include <ace/OS_NS_sys_time.h>
+#include <ace/Log_Msg.h>
+#include <ace/os_include/net/os_if.h>
 
 #include <cstring>
 
 #ifdef ACE_HAS_CPP11
-#include <random>
+#  include <random>
 #endif
 
 #ifdef ACE_LINUX
-# include <sys/types.h>
-# include <ifaddrs.h>
+#  include <sys/types.h>
+#  include <ifaddrs.h>
 #endif
 
 #if defined ACE_WIN32 && !defined ACE_HAS_WINCE
-# include <winsock2.h>
-# include <iphlpapi.h>
-# include "ace/Version.h"
+#  include <winsock2.h>
+#  include <iphlpapi.h>
+#  include <ace/Version.h>
 #endif
 
 #ifdef ACE_VXWORKS
-# include "ace/os_include/sys/os_sysctl.h"
-# include <net/route.h>
+#  include <ace/os_include/sys/os_sysctl.h>
+#  include <net/route.h>
 #endif
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -79,7 +77,7 @@ GuidGenerator::GuidGenerator()
     }
   }
 #else
-// iOS has non-unique MAC addresses
+  // iOS has non-unique MAC addresses
   ACE_UNUSED_ARG(result);
 
   for (int i = 0; i < NODE_ID_SIZE; ++i) {
@@ -148,9 +146,11 @@ GuidGenerator::interfaceName(const char* iface)
   // Guarantee that iface will fit in ifr.ifr_name and still be null terminated
   // ifr.ifr_name is sized to IFNAMSIZ
   if (std::strlen(iface) >= sizeof(ifr.ifr_name)) {
-    ACE_ERROR((LM_ERROR,
-      ACE_TEXT("Interface name %C exceeds max allowable length, must be < %d.\n"),
-      iface, IFNAMSIZ));
+    if (DCPS::log_level >= DCPS::LogLevel::Error) {
+      ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: GuidGenerator::interfaceName: "
+        "Interface name %C exceeds max allowable length, must be < %d.\n",
+        iface, IFNAMSIZ));
+    }
     return -1;
   }
   std::strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name));

@@ -53,3 +53,5 @@
 /TypeLookupC.h
 /TypeLookupC.inl
 /TypeLookupS.h
+/TypeLookupTypeSupportImpl.cpp
+/TypeLookupTypeSupportImpl.h

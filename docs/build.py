@@ -110,13 +110,16 @@ class DocEnv:
         self.sphinx_build('html')
         return self.abs_build_path / 'html/index.html'
 
+    def do_singlehtml(self):
+        self.sphinx_build('singlehtml')
+        return self.abs_build_path / 'singlehtml/index.html'
+
     def do_pdf(self):
         self.sphinx_build('latexpdf')
         return self.abs_build_path / 'latex/opendds.pdf'
 
     def do_dash(self):
         self.do(['html'], because_of='dash')
-        self.run('python', '-m', 'pip', 'install', 'doc2dash')
         self.run('doc2dash', 'html',
             '--name', 'OpenDDS',
             '--icon', str(abs_docs_path / 'logo_100_100.png'),
