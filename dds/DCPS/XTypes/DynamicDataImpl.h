@@ -308,9 +308,6 @@ private:
   template<typename UIntType>
   bool get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
 
-  template<>
-  bool get_boolean_from_bitmask<CORBA::UInt8>(CORBA::ULong index, CORBA::Boolean& value);
-
   template<TypeKind MemberTypeKind, typename MemberType>
   bool set_value_to_struct(DDS::MemberId id, const MemberType& value);
 
@@ -982,6 +979,8 @@ private:
   // Copy a value of a basic member from single map to a DynamicData object.
   bool move_single_to_complex(const DataContainer::const_single_iterator& it,
                               DynamicDataImpl* data);
+  bool move_single_to_complex_i(const DataContainer::const_single_iterator& it,
+                                DynamicDataImpl* data, const TypeKind treat_as);
 
   template<typename SequenceType>
   void move_sequence_helper(const DataContainer::const_sequence_iterator& it,

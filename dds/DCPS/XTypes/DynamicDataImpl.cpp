@@ -178,6 +178,14 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
 
 ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
+  if (type_->get_kind() == TK_ARRAY) {
+    DDS::TypeDescriptor_var descriptor;
+    if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
+      return 0;
+    }
+    return bound_total(descriptor);
+  }
+
   ACE_CDR::ULong count = static_cast<ACE_CDR::ULong>(
     container_.single_map_.size() + container_.sequence_map_.size() + container_.complex_map_.size());
   return count;
@@ -2814,6 +2822,10 @@ bool DynamicDataImpl::get_value_from_collection(ValueType& value, DDS::MemberId 
   if (type_->get_descriptor(descriptor) != DDS::RETCODE_OK) {
     return false;
   }
+  if (type_->get_kind() == TK_ARRAY && id >= bound_total(descriptor)) {
+    return false;
+  }
+
   DDS::DynamicType_var elem_type = get_base_type(descriptor->element_type());
   const TypeKind elem_tk = elem_type->get_kind();
   TypeKind treat_as_tk = elem_tk;
@@ -3191,7 +3203,20 @@ bool DynamicDataImpl::move_single_to_complex(const DataContainer::const_single_i
                                              DynamicDataImpl* data)
 {
   DDS::DynamicType_var member_type = data->type();
-  switch (member_type->get_kind()) {
+  const TypeKind member_tk = member_type->get_kind();
+  TypeKind treat_as = member_tk;
+  if (member_tk == TK_ENUM) {
+    if (enum_bound(member_type, treat_as) != DDS::RETCODE_OK) {
+      return false;
+    }
+  }
+  return move_single_to_complex_i(it, data, treat_as);
+}
+
+bool DynamicDataImpl::move_single_to_complex_i(const DataContainer::const_single_iterator& it,
+                                               DynamicDataImpl* data, const TypeKind treat_as)
+{
+  switch (treat_as) {
   case TK_INT8: {
     const ACE_OutputCDR::from_int8& value = it->second.get<ACE_OutputCDR::from_int8>();
     data->insert_single(MEMBER_ID_INVALID, value);
@@ -3273,8 +3298,7 @@ bool DynamicDataImpl::move_single_to_complex(const DataContainer::const_single_i
     const char* str = it->second.get<const char*>();
     const size_t len = ACE_OS::strlen(str);
     for (CORBA::ULong i = 0; i < len; ++i) {
-      DDS::MemberId id = get_member_id_at_index(i);
-      data->insert_single(id, str[i]);
+      data->insert_single(i, ACE_OutputCDR::from_char(str[i]));
     }
     break;
   }
@@ -3283,8 +3307,7 @@ bool DynamicDataImpl::move_single_to_complex(const DataContainer::const_single_i
     const CORBA::WChar* wstr = it->second.get<const CORBA::WChar*>();
     const size_t len = ACE_OS::strlen(wstr);
     for (CORBA::ULong i = 0; i < len; ++i) {
-      DDS::MemberId id = get_member_id_at_index(i);
-      data->insert_single(id, wstr[i]);
+      data->insert_single(i, ACE_OutputCDR::from_wchar(wstr[i]));
     }
     break;
   }
@@ -3301,8 +3324,7 @@ void DynamicDataImpl::move_sequence_helper(const DataContainer::const_sequence_i
 {
   const SequenceType& values = it->second.get<SequenceType>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    DDS::MemberId id = get_member_id_at_index(i);
-    data->insert_single(id, values[i]);
+    data->insert_single(i, values[i]);
   }
 }
 
@@ -3312,8 +3334,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::Int8Seq>(const DataContainer::co
 {
   const DDS::Int8Seq& values = it->second.get<DDS::Int8Seq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    DDS::MemberId id = get_member_id_at_index(i);
-    data->insert_single(id, ACE_OutputCDR::from_int8(values[i]));
+    data->insert_single(i, ACE_OutputCDR::from_int8(values[i]));
   }
 }
 
@@ -3323,8 +3344,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::UInt8Seq>(const DataContainer::c
 {
   const DDS::UInt8Seq& values = it->second.get<DDS::UInt8Seq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    DDS::MemberId id = get_member_id_at_index(i);
-    data->insert_single(id, ACE_OutputCDR::from_uint8(values[i]));
+    data->insert_single(i, ACE_OutputCDR::from_uint8(values[i]));
   }
 }
 
@@ -3334,8 +3354,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::CharSeq>(const DataContainer::co
 {
   const DDS::CharSeq& values = it->second.get<DDS::CharSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    DDS::MemberId id = get_member_id_at_index(i);
-    data->insert_single(id, ACE_OutputCDR::from_char(values[i]));
+    data->insert_single(i, ACE_OutputCDR::from_char(values[i]));
   }
 }
 
@@ -3345,8 +3364,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::ByteSeq>(const DataContainer::co
 {
   const DDS::ByteSeq& values = it->second.get<DDS::ByteSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    DDS::MemberId id = get_member_id_at_index(i);
-    data->insert_single(id, ACE_OutputCDR::from_octet(values[i]));
+    data->insert_single(i, ACE_OutputCDR::from_octet(values[i]));
   }
 }
 
@@ -3356,8 +3374,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::BooleanSeq>(const DataContainer:
 {
   const DDS::BooleanSeq& values = it->second.get<DDS::BooleanSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    DDS::MemberId id = get_member_id_at_index(i);
-    data->insert_single(id, ACE_OutputCDR::from_boolean(values[i]));
+    data->insert_single(i, ACE_OutputCDR::from_boolean(values[i]));
   }
 }
 
@@ -3368,8 +3385,7 @@ void DynamicDataImpl::move_sequence_helper<DDS::WcharSeq>(const DataContainer::c
 {
   const DDS::WcharSeq& values = it->second.get<DDS::WcharSeq>();
   for (CORBA::ULong i = 0; i < values.length(); ++i) {
-    DDS::MemberId id = get_member_id_at_index(i);
-    data->insert_single(id, ACE_OutputCDR::from_wchar(values[i]));
+    data->insert_single(i, ACE_OutputCDR::from_wchar(values[i]));
   }
 }
 #endif
@@ -3502,7 +3518,7 @@ bool DynamicDataImpl::get_complex_from_aggregated(DDS::DynamicData_var& value, D
       found_status = NOT_FOUND;
     }
   }
-  value = DDS::DynamicData::_duplicate(dd_var);
+  value = dd_var;
   return true;
 }
 
@@ -3653,6 +3669,10 @@ bool DynamicDataImpl::get_complex_from_collection(DDS::DynamicData_ptr& value, D
   if (type_->get_descriptor(td) != DDS::RETCODE_OK) {
     return false;
   }
+  if (type_->get_kind() == TK_ARRAY && id >= bound_total(td)) {
+    return false;
+  }
+
   DynamicDataImpl* dd_impl = new DynamicDataImpl(td->element_type());
   DDS::DynamicData_var dd_var = dd_impl;
 
@@ -3688,6 +3708,7 @@ DDS::ReturnCode_t DynamicDataImpl::get_complex_value(DDS::DynamicData_ptr& value
   case TK_SEQUENCE:
   case TK_ARRAY:
     good = get_complex_from_collection(value, id);
+    break;
   case TK_MAP:
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_complex_value:"
