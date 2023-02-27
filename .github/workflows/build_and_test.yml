@@ -10227,11 +10227,10 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
+    - name: Move OpenDDS to C Drive
       shell: bash
       run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
+        mv OpenDDS /c/
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
@@ -10240,28 +10239,29 @@ jobs:
     - name: configure OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
-        configure --tests --java --no-built-in-topics --rapidjson --ace="C:\ACE_TAO\ACE" --tao="C:\ACE_TAO\TAO" --mpc="C:\MPC" --xerces3="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
+        cd /d C:\OpenDDS
+        configure --tests --java --no-built-in-topics --rapidjson --mpc=${{ github.workspace }}\MPC --xerces3="%VCPKG_ROOT%\installed\x86-windows" --mpcopts="-features no_opendds_testing_features=0"
     - name: check build configuration
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: build OpenDDS
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         msbuild -p:Configuration=Debug,Platform=Win32 -m DDS.sln
     - name: create OpenDDS tar.xz artifact
       shell: bash
       run: |
-        cd OpenDDS
+        cd /c/OpenDDS
         find . -iname "*\.obj" -o -iname "*\.pdb" -o -iname "*\.idb" -o -type f -iname "*\.tlog" | xargs rm
         tar cvf ../${{ github.job }}.tar setenv.cmd
         git clean -xdfn | cut -d ' ' -f 3- | xargs tar uvf ../${{ github.job }}.tar
         xz -3 ../${{ github.job }}.tar
+        mv ../${{ github.job }}.tar.xz $GITHUB_WORKSPACE
     - name: upload OpenDDS artifact
       uses: actions/upload-artifact@v3
       with:
@@ -10317,11 +10317,6 @@ jobs:
         cd OpenDDS/ACE_TAO
         tar xvfJ ACE_TAO_w22_x86_i0.tar.xz
         rm -f ACE_TAO_w22_x86_i0.tar.xz
-    - name: Move ACE and MPC to C Drive
-      shell: bash
-      run: |
-        mv OpenDDS/ACE_TAO /c/
-        mv MPC /c/
     - name: download OpenDDS artifact
       uses: actions/download-artifact@v3
       with:
@@ -10333,19 +10328,23 @@ jobs:
         cd OpenDDS
         tar xvfJ build_w22_x86_i0_j_FM-1f.tar.xz
         rm -f build_w22_x86_i0_j_FM-1f.tar.xz
+    - name: Move OpenDDS to C Drive
+      shell: bash
+      run: |
+        mv OpenDDS /c/
     - name: set up msvc env
       uses: ilammy/msvc-dev-cmd@v1
     - uses: ammaraskar/msvc-problem-matcher@0.2.0
     - name: check build configuration
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         perl tools\scripts\show_build_config.pl
     - name: Build CMake Tests
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         mkdir C:\tests\cmake\build
         cd /d C:\tests\cmake\build
@@ -10354,7 +10353,7 @@ jobs:
     - name: create autobuild config
       shell: bash
       run: |
-        cd OpenDDS
+        cd /c/OpenDDS
         mkdir ${{ github.job }}_autobuild_workspace
         cd ${{ github.job }}_autobuild_workspace
         export FS_GHW=$(echo $GITHUB_WORKSPACE | sed 's/\\/\//g')
@@ -10387,10 +10386,10 @@ jobs:
     - name: run OpenDDS tests
       shell: cmd
       run: |
-        cd OpenDDS
+        cd /d C:\OpenDDS
         call setenv.cmd
         cd ${{ github.job }}_autobuild_workspace
-        perl "${{ github.workspace }}\autobuild\autobuild.pl" "${{ github.workspace }}\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
+        perl "${{ github.workspace }}\autobuild\autobuild.pl" "C:\OpenDDS\${{ github.job }}_autobuild_workspace\config.xml"
     - name: upload autobuild output
       uses: actions/upload-artifact@v3
       with:
@@ -10399,9 +10398,9 @@ jobs:
     - name: check results
       shell: bash
       run: |
-        $GITHUB_WORKSPACE/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
-        cat "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
-        grep -q 'Failures: 0' "$GITHUB_WORKSPACE/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        /c/OpenDDS/tools/scripts/autobuild_brief_html_to_text.pl "/c/OpenDDS/${{ github.job }}_autobuild_workspace/output.log_Brief.html"
+        cat "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
+        grep -q 'Failures: 0' "/c/OpenDDS/${{ github.job }}_autobuild_workspace/latest.txt"
 
   ACE_TAO_w22_p1:
 
