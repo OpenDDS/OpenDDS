@@ -502,8 +502,8 @@ void compute_dependencies(const TypeMap& type_map,
                           const Optional<AppliedAnnotationSeq>& ann_seq,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  if (ann_seq.present) {
-    compute_dependencies(type_map, ann_seq.value, dependencies);
+  if (ann_seq) {
+    compute_dependencies(type_map, ann_seq.value(), dependencies);
   }
 }
 
@@ -754,8 +754,8 @@ void compute_dependencies(const TypeMap& type_map,
                           const CompleteCollectionHeader& header,
                           OPENDDS_SET(TypeIdentifier)& dependencies)
 {
-  if (header.detail.present) {
-    compute_dependencies(type_map, header.detail.value, dependencies);
+  if (header.detail) {
+    compute_dependencies(type_map, header.detail.value(), dependencies);
   }
 }
 
@@ -3814,18 +3814,18 @@ void serialized_size(const Encoding& encoding, size_t& size,
   serialized_size_delimiter(encoding, size);
 
   size += DCPS::boolean_cdr_size;
-  if (stru.unit.present) {
+  if (stru.unit) {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(stru.unit.value.c_str()) + 1;
+    size += ACE_OS::strlen(stru.unit.value().c_str()) + 1;
   }
 
   serialized_size(encoding, size, stru.min);
   serialized_size(encoding, size, stru.max);
 
   size += DCPS::boolean_cdr_size;
-  if (stru.hash_id.present) {
+  if (stru.hash_id) {
     DCPS::primitive_serialized_size_ulong(encoding, size);
-    size += ACE_OS::strlen(stru.hash_id.value.c_str()) + 1;
+    size += ACE_OS::strlen(stru.hash_id.value().c_str()) + 1;
   }
 }
 
