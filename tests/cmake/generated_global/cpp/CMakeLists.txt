@@ -37,4 +37,7 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 
+# For tests/Utils when OpenDDS is installed
+target_include_directories(${publisher} PRIVATE "${src}/../../../")
+
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
