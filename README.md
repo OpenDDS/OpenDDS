@@ -123,12 +123,12 @@ There are two distributions of ACE/TAO that can be used with OpenDDS:
       also downloads the `master` branch of MPC as is.
   * Can be manually downloaded from:
     * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-6_5_19
-* DOC Group ACE 7.0.11 / TAO 3.0.11 or later in the ACE 7.x / TAO 3.x series.
-  This distribution requires a C++11 capable compiler
+* DOC Group ACE 7.1.0 / TAO 3.1.0 or later in the ACE 7.x / TAO 3.x series.
+  This distribution requires a C++14 capable compiler
   * When using the configure script, DOC Group ACE/TAO can be downloaded using:
     * `--doc-group3` for the latest release
   * Can be manually downloaded from:
-    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_0_11
+    * https://github.com/DOCGroup/ACE_TAO/releases/tag/ACE%2BTAO-7_1_0
 
 The TAO Developer's Guide book can be requested for free from
 https://objectcomputing.com/products/tao/tao-developers-guide and the CORBA Programmers
