@@ -28,8 +28,6 @@ use lib "$FindBin::RealBin/tools/scripts/modules";
 use command_utils;
 use ChangeDir;
 
-## Version of OCI's TAO to download
-my $oci_tao_version = '2.2a';
 ## Version of DOC Group ACE/TAO to download, uses the ACE version number
 my $doc_tao2_version = '6.5.19';
 my $doc_tao3_version = '7.0.11';
@@ -220,7 +218,7 @@ my @specs = # Array of array-refs, each inner array is an option group which
     'ace=s', 'ACE (use ACE_ROOT, ACE_wrappers, or download)',
     'tao=s', 'TAO (use TAO_ROOT, ACE_ROOT/TAO, or download)',
     'mpc=s', 'MPC (use MPC_ROOT, ACE_ROOT/MPC, or download)',
-    'doc-group|doc_group!', 'Use the DOC Group release of TAO 2.5.x (no)',
+    'doc-group|doc_group!', 'Use the DOC Group release of TAO 2.5.x (yes)',
     'doc-group3|doc_group3!', 'Use the DOC Group release of TAO 3.x (no)',
     'ace-github-latest!', 'Clone latest ACE/TAO/MPC from GitHub (no)',
     'force-ace-tao', 'Force configuration of ACE/TAO (no)',
@@ -871,15 +869,7 @@ if (!$ace_src || !$tao_src) {
   else {
     my($urlbase, $file, $download_message);
 
-    if ($opts{'doc-group'}) {
-      my $github_url_tao_version = $doc_tao2_version;
-      $github_url_tao_version =~ s/\./_/g;
-      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
-      $file = 'ACE+TAO-src-' . $doc_tao2_version . '.'
-        . ($is_windows ? 'zip' : 'tar.gz');
-      $download_message = "Downloading $file";
-    }
-    elsif ($opts{'doc-group3'}) {
+    if ($opts{'doc-group3'}) {
       my $github_url_tao_version = $doc_tao3_version;
       $github_url_tao_version =~ s/\./_/g;
       $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
@@ -888,11 +878,12 @@ if (!$ace_src || !$tao_src) {
       $download_message = "Downloading $file";
     }
     else {
-      $urlbase = 'http://download.ociweb.com/TAO-' . $oci_tao_version . '/';
-      $file = 'ACE+TAO-' . $oci_tao_version . '_with_latest_patches_NO_makefiles.'
+      my $github_url_tao_version = $doc_tao2_version;
+      $github_url_tao_version =~ s/\./_/g;
+      $urlbase = 'https://github.com/DOCGroup/ACE_TAO/releases/download/ACE%2BTAO-' . $github_url_tao_version . '/';
+      $file = 'ACE+TAO-src-' . $doc_tao2_version . '.'
         . ($is_windows ? 'zip' : 'tar.gz');
-      $download_message =
-        "Downloading ACE+TAO $oci_tao_version with latest patches";
+      $download_message = "Downloading $file";
     }
     if (-r $file) {
       print "Using ACE+TAO source package $file\n" if $opts{'verbose'};
