@@ -110,6 +110,7 @@ public:
      * Get the path of the key in reference to the root_
      */
     std::string path();
+    std::string canonical_path();
 
     /**
      * Get the level of recursion
@@ -161,7 +162,7 @@ public:
     /**
      * Internal Recursive Impl. of path()
      */
-    void path_i(std::stringstream& ss);
+    void path_i(std::stringstream& ss, bool canonical = false);
 
     void cleanup();
   };
