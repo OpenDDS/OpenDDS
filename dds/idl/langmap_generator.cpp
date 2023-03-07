@@ -434,7 +434,7 @@ struct GeneratorBase
     }
   }
 
-  static std::string generateCopyCtor(const std::string&, const std::string& name, AST_Type* field_type,
+  static std::string generateCopyCtor(const std::string&, AST_Decl*, const std::string& name, AST_Type* field_type,
                                       const std::string&, bool, Intro&,
                                       const std::string&)
   {
@@ -461,7 +461,7 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateAssign(const std::string&, const std::string& name, AST_Type* field_type,
+  static std::string generateAssign(const std::string&, AST_Decl*, const std::string& name, AST_Type* field_type,
                                     const std::string&, bool, Intro&,
                                     const std::string&)
   {
@@ -488,7 +488,7 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateEqual(const std::string&, const std::string& name, AST_Type* field_type,
+  static std::string generateEqual(const std::string&, AST_Decl*, const std::string& name, AST_Type* field_type,
                                    const std::string&, bool, Intro&,
                                    const std::string&)
   {
@@ -516,7 +516,7 @@ struct GeneratorBase
     return ss.str();
   }
 
-  static std::string generateReset(const std::string&, const std::string& name, AST_Type* field_type,
+  static std::string generateReset(const std::string&, AST_Decl*, const std::string& name, AST_Type* field_type,
                                    const std::string&, bool, Intro&,
                                    const std::string&)
   {
@@ -1648,35 +1648,35 @@ struct Cxx11Generator : GeneratorBase
     }
   }
 
-  static std::string union_copy(const std::string&, const std::string& name, AST_Type*,
+  static std::string union_copy(const std::string&, AST_Decl*, const std::string& name, AST_Type*,
                                 const std::string&, bool, Intro&,
                                 const std::string&)
   {
     return "    _" + name + " = rhs._" + name + ";\n";
   }
 
-  static std::string union_move(const std::string&, const std::string& name, AST_Type*,
+  static std::string union_move(const std::string&, AST_Decl*, const std::string& name, AST_Type*,
                                 const std::string&, bool, Intro&,
                                 const std::string&)
   {
     return "    _" + name + " = std::move(rhs._" + name + ");\n";
   }
 
-  static std::string union_assign(const std::string&, const std::string& name, AST_Type*,
+  static std::string union_assign(const std::string&, AST_Decl*, const std::string& name, AST_Type*,
                                   const std::string&, bool, Intro&,
                                   const std::string&)
   {
     return "    " + name + "(rhs._" + name + ");\n";
   }
 
-  static std::string union_move_assign(const std::string&, const std::string& name, AST_Type*,
+  static std::string union_move_assign(const std::string&, AST_Decl*, const std::string& name, AST_Type*,
                                        const std::string&, bool, Intro&,
                                        const std::string&)
   {
     return "    " + name + "(std::move(rhs._" + name + "));\n";
   }
 
-  static std::string union_activate(const std::string&, const std::string& name, AST_Type* type,
+  static std::string union_activate(const std::string&, AST_Decl*, const std::string& name, AST_Type* type,
                                     const std::string&, bool, Intro&,
                                     const std::string&)
   {
@@ -1689,7 +1689,7 @@ struct Cxx11Generator : GeneratorBase
     return "";
   }
 
-  static std::string union_reset(const std::string&, const std::string& name, AST_Type* type,
+  static std::string union_reset(const std::string&, AST_Decl*, const std::string& name, AST_Type* type,
                                  const std::string&, bool, Intro&,
                                  const std::string&)
   {

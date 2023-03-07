@@ -9,6 +9,7 @@ project: dcps_test, googletest, msvc_bigobj {
   IDL_Files {
     ../test.idl
   }
+  dcps_ts_flags += -Gxtypes-complete
   TypeSupport_Files {
     ../test.idl
   }

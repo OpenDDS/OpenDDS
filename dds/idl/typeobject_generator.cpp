@@ -542,17 +542,6 @@ void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
   }
 }
 
-OpenDDS::DCPS::String canonical_name(UTL_ScopedName* sn)
-{
-  // NOTE: Names should not have leading "::" according to the XTypes IDL.
-  return dds_generator::scoped_helper(sn, "::", EscapeContext_StripEscapes);
-}
-
-OpenDDS::DCPS::String canonical_name(Identifier* id)
-{
-  return dds_generator::to_string(id, EscapeContext_StripEscapes);
-}
-
 }
 
 void

@@ -6,6 +6,7 @@ project: dcps_test, opendds_cxx11, googletest, msvc_bigobj {
     ../main.cpp
   }
   idlflags += -I..
+  dcps_ts_flags += -Gxtypes-complete
   TypeSupport_Files {
     ../test.idl
   }

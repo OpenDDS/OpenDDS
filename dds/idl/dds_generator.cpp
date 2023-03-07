@@ -14,7 +14,9 @@ using namespace AstTypeClassification;
 
 dds_generator::~dds_generator() {}
 
-const std::string cxx_escape = "_cxx_";
+namespace {
+  const std::string cxx_escape = "_cxx_";
+}
 
 bool dds_generator::cxx_escaped(const std::string& s)
 {
