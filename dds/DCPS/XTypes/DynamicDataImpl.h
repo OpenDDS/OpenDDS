@@ -358,7 +358,7 @@ private:
   bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
                                      DDS::MemberId id, TypeKind collection_tk) const;
 
-  DDS::ReturnCode_t clear_value_i(DDS::MemberId id, DDS::DynamicType_ptr member_type);
+  DDS::ReturnCode_t clear_value_i(DDS::MemberId id, const DDS::DynamicType_var& member_type);
 
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value);
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value);
@@ -1008,7 +1008,7 @@ private:
   // Add a single value for any valid discriminator value that selects the given member
   bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
   bool insert_discriminator(ACE_CDR::Long value);
-  DDS::ReturnCode_t reset_union();
+  void reset_union();
 
   DataContainer container_;
 

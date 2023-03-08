@@ -443,7 +443,7 @@ void verify_int32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
 {
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT32);
-  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
   ret = data.set_int32_value(1, CORBA::Long(10));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   assert_serialized_data(64, data, expected_cdr);
@@ -451,7 +451,7 @@ void verify_int32_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   // A new discriminator value doesn't select the existing member.
   ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_UINT32);
   EXPECT_EQ(ret, DDS::RETCODE_ERROR);
-  // Change the selected member, then channge it back to the original member.
+  // Change the selected member, then change it back to the original member.
   ret = data.set_uint32_value(2, CORBA::ULong(100));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
   ret = data.set_int32_value(1, CORBA::Long(10));
@@ -468,7 +468,7 @@ void verify_default_int32_union_mutable(DDS::DynamicType_var dt)
     // Only set the discriminator.
     XTypes::DynamicDataImpl data(dt);
     DDS::ReturnCode_t ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT32);
-    EXPECT_EQ(ret, DDS::RETCODE_OK);
+    EXPECT_EQ(ret, DDS::RETCODE_ERROR);
     unsigned char expected_cdr[] = {
       0x00,0x00,0x00,0x10, // +4=4 dheader
       0x20,0x00,0x00,0x00, 0x00,0x00,0x00,0x00, // +8=12 discriminator
@@ -657,14 +657,14 @@ void verify_int64_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   XTypes::DynamicDataImpl data(dt);
   DDS::ReturnCode_t ret =  data.set_int64_value(7, CORBA::LongLong(0xfe));
   EXPECT_EQ(ret, DDS::RETCODE_OK);
-  //  assert_serialized_data(64, data, expected_cdr);
+  assert_serialized_data(64, data, expected_cdr);
 
-  //  ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
-  //  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
-  //  ret = data.set_uint8_value(4, CORBA::UInt8(7));
-  //  EXPECT_EQ(ret, DDS::RETCODE_OK);
-   ret = data.set_int64_value(7, CORBA::LongLong(0xbb));
-   EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_int32_value(XTypes::DISCRIMINATOR_ID, E_INT16);
+  EXPECT_EQ(ret, DDS::RETCODE_ERROR);
+  ret = data.set_uint8_value(4, CORBA::UInt8(7));
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
+  ret = data.set_int64_value(7, CORBA::LongLong(0xbb));
+  EXPECT_EQ(ret, DDS::RETCODE_OK);
 }
 
 void verify_default_int64_union_mutable(DDS::DynamicType_var dt)
