@@ -310,65 +310,38 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
 
 DDS::ReturnCode_t DynamicDataImpl::clear_all_values()
 {
-  // TODO(sonndinh): similar to clear_value(), this may also need to rewrite to consider
-  // all types.
-  // const TypeKind tk = type_->get_kind();
-  // switch (tk) {
-  // case TK_ARRAY:
-  //   {
-  //     DDS::TypeDescriptor_var td;
-  //     DDS::ReturnCode_t rc = type_->get_descriptor(td);
-  //     if (rc != DDS::RETCODE_OK) {
-  //       return rc;
-  //     }
-  //     const CORBA::ULong total = bound_total(td);
-  //     for (CORBA::ULong i = 0; i < total; ++i) {
-  //       rc = clear_value(get_member_id_at_index(i));
-  //       if (rc != DDS::RETCODE_OK) {
-  //         return rc;
-  //       }
-  //     }
-  //     return DDS::RETCODE_OK;
-  //   }
-  // }
+  const TypeKind tk = type_->get_kind();
+  if (is_primitive(tk) || tk == TK_ENUM) {
+    return clear_value_i(MEMBER_ID_INVALID, type_);
+  }
 
-  // if (tk == TK_UNION) {
-  //   const DDS::ReturnCode_t ret = reset_union();
-  //   if (ret != DDS::RETCODE_OK) {
-  //     return ret;
-  //   }
-  //   const DDS::MemberId selected_id = get_union_default_member(type_);
-  //   if (selected_id != MEMBER_ID_INVALID) {
-  //     return clear_value(selected_id);
-  //   }
-  //   // this discriminator value doesn't select a member
-  //   return DDS::RETCODE_OK;
-  // }
-
-  // DDS::DynamicTypeMembersById_var members;
-  // DDS::ReturnCode_t rc = type_->get_all_members(members);
-  // if (rc != DDS::RETCODE_OK) {
-  //   return rc;
-  // }
-
-  // DynamicTypeMembersByIdImpl* const members_i =
-  //   dynamic_cast<DynamicTypeMembersByIdImpl*>(members.in());
-  // if (!members_i) {
-  //   return DDS::RETCODE_BAD_PARAMETER;
-  // }
-
-  // for (DynamicTypeMembersByIdImpl::const_iterator it = members_i->begin();
-  //     it != members_i->end(); ++it) {
-  //   rc = clear_value(it->first);
-  //   if (rc != DDS::RETCODE_OK) {
-  //     return rc;
-  //   }
-  // }
-  // return DDS::RETCODE_OK;
-  return DDS::RETCODE_UNSUPPORTED;
+  switch (tk) {
+  case TK_BITMASK:
+  case TK_ARRAY:
+  case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
+  case TK_STRING16:
+#endif
+  case TK_SEQUENCE:
+  case TK_STRUCTURE:
+  case TK_UNION:
+    clear_container();
+    break;
+  case TK_MAP:
+  case TK_BITSET:
+  case TK_ALIAS:
+  case TK_ANNOTATION:
+  default:
+    if (log_level >= LogLevel::Warning) {
+      ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::clear_all_values:"
+                 " Encounter unexpected type kind %C\n", typekind_to_string(tk)));
+    }
+    return DDS::RETCODE_ERROR;
+  }
+  return DDS::RETCODE_OK;
 }
 
-void DynamicDataImpl::reset_union()
+void DynamicDataImpl::clear_container()
 {
   container_.single_map_.clear();
   container_.sequence_map_.clear();
@@ -405,7 +378,9 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id) {
     return clear_value_i(id, elem_type);
   }
   case TK_STRING8:
+#ifdef DDS_HAS_WCHAR
   case TK_STRING16:
+#endif
   case TK_SEQUENCE:
     // TODO: The rule for variable-length collection types needs clarification (7.5.2.11.3)
     // If we shift the subsequent elements, does that mean their IDs also change?
@@ -1518,7 +1493,7 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
   }
 
   // Activate a member
-  reset_union();
+  clear_container();
 
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
@@ -2156,7 +2131,7 @@ bool DynamicDataImpl::set_complex_to_union(DDS::MemberId id, DDS::DynamicData_va
   }
 
   // Activate a member
-  reset_union();
+  clear_container();
 
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
@@ -2331,7 +2306,7 @@ bool DynamicDataImpl::set_values_to_union(DDS::MemberId id, const SequenceType& 
     return false;
   }
 
-  reset_union();
+  clear_container();
 
   DDS::DynamicTypeMember_var member;
   if (type_->get_member(member, id) != DDS::RETCODE_OK) {
@@ -2844,7 +2819,15 @@ bool DynamicDataImpl::get_value_from_struct(ValueType& value, DDS::MemberId id)
   if (read_basic_member(value, id)) {
     return true;
   }
-  // Return default value if not found.
+
+  // Not returning a default value for a missing optional member.
+  if (md->is_optional()) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataImpl::get_value_from_struct:"
+                 " Optional member Id %u is not present\n", id));
+    }
+    return false;
+  }
   container_.set_default_basic_value(value);
   return true;
 }

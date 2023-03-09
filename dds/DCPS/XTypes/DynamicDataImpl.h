@@ -1008,7 +1008,7 @@ private:
   // Add a single value for any valid discriminator value that selects the given member
   bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
   bool insert_discriminator(ACE_CDR::Long value);
-  void reset_union();
+  void clear_container();
 
   DataContainer container_;
 
