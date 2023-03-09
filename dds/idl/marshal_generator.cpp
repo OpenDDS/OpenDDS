@@ -151,9 +151,9 @@ namespace {
     return 0;
   }
 
-  string streamCommon(const std::string& indent, const string& name, AST_Type* type,
-                      const string& prefix, bool wrap_nested_key_only, Intro& intro,
-                      const string& stru = "");
+  string streamCommon(const std::string& indent, AST_Decl* node, const string& name,
+                      AST_Type* type, const string& prefix, bool wrap_nested_key_only,
+                      Intro& intro, const string& stru = "");
 
   const std::string construct_bound_fail =
     "strm.get_construction_status() == Serializer::BoundConstructionFailure";
@@ -172,9 +172,13 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     insertion.addArg("strm", "Serializer&");
     insertion.addArg("enumval", "const " + cxx + "&");
     insertion.endArgs();
+    const std::string idl_name = canonical_name(name);
     be_global->impl_ <<
       "    if (CORBA::ULong(enumval) >= " << vals.size() << ") {\n"
-      "      ACE_DEBUG((LM_DEBUG, ACE_TEXT(\"(%P|%t) Invalid enumerated value for " << cxx << " (%u)\\n\"), enumval));\n"
+      "      if (OpenDDS::DCPS::log_level >= OpenDDS::DCPS::LogLevel::Warning) {\n"
+      "        ACE_ERROR((LM_WARNING, \"(%P|%t) WARNING: "
+        "%u is an invalid enumerated value for " << idl_name << "\\n\", enumval));\n"
+      "      }\n"
       "      return false;\n"
       "    }\n";
     be_global->impl_ <<
@@ -1400,7 +1404,7 @@ namespace {
             stream = "(strm >> " + classic_array_wrapper.ref() + ")";
           } else {
             stream = streamCommon(
-              indent, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
+              indent, 0, "", arr->base_type(), ">> " + elem_access, nested_key_only, intro);
           }
           intro.join(be_global->impl_, indent);
           be_global->impl_ <<
@@ -1886,9 +1890,9 @@ bool marshal_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name, AST_Type
 
 namespace {
   // common to both fields (in structs) and branches (in unions)
-  string findSizeCommon(const std::string& indent, const string& name, AST_Type* type,
-                        const string& prefix, bool wrap_nested_key_only, Intro& intro,
-                        const string& = "") // same sig as streamCommon
+  string findSizeCommon(const std::string& indent, AST_Decl*, const string& name,
+                        AST_Type* type, const string& prefix, bool wrap_nested_key_only,
+                        Intro& intro, const string& = "") // same sig as streamCommon
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix == "uni";
@@ -1928,12 +1932,12 @@ namespace {
     }
   }
 
-  string findSizeMutableUnion(const string& indent, const string& name, AST_Type* type,
+  string findSizeMutableUnion(const string& indent, AST_Decl* node, const string& name, AST_Type* type,
                               const string& prefix, bool wrap_nested_key_only, Intro& intro,
                               const string & = "") // same sig as streamCommon
   {
     return indent + "serialized_size_parameter_id(encoding, size, mutable_running_total);\n"
-      + findSizeCommon(indent, name, type, prefix, wrap_nested_key_only, intro);
+      + findSizeCommon(indent, node, name, type, prefix, wrap_nested_key_only, intro);
   }
 
   std::string generate_field_serialized_size(
@@ -1949,12 +1953,12 @@ namespace {
       return indent + "serialized_size(encoding, size, " + wrapper.ref() + ");\n";
     }
     return findSizeCommon(
-      indent, field->local_name()->get_string(), field->field_type(), prefix,
+      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
       wrap_nested_key_only, intro);
   }
 
   // common to both fields (in structs) and branches (in unions)
-  string streamCommon(const std::string& /*indent*/, const string& name, AST_Type* type,
+  string streamCommon(const std::string& /*indent*/, AST_Decl*, const string& name, AST_Type* type,
                       const string& prefix, bool wrap_nested_key_only, Intro& intro,
                       const string& stru)
   {
@@ -2021,7 +2025,7 @@ namespace {
       return "(strm " + wrapper.stream() + ")";
     }
     return streamCommon(
-      indent, field->local_name()->get_string(), field->field_type(), prefix,
+      indent, field, field->local_name()->get_string(), field->field_type(), prefix,
       wrap_nested_key_only, intro);
   }
 
@@ -2379,7 +2383,7 @@ namespace {
     const std::string& indent, Encoding::Kind, const string& key_name, AST_Type* ast_type,
     size_t*, string* expr, Intro* intro)
   {
-    *expr += findSizeCommon(indent, key_name, ast_type, "stru.value", false, *intro);
+    *expr += findSizeCommon(indent, 0, key_name, ast_type, "stru.value", false, *intro);
   }
 
   std::string fill_datareprseq(
@@ -3282,7 +3286,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, key_name, field_type, "<< stru.value", false, intro);
+        expr += streamCommon(indent, 0, key_name, field_type, "<< stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);
@@ -3309,7 +3313,7 @@ bool marshal_generator::gen_struct(AST_Structure* node,
         } else {
           expr += "\n    && ";
         }
-        expr += streamCommon(indent, key_name, field_type, ">> stru.value", false, intro);
+        expr += streamCommon(indent, 0, key_name, field_type, ">> stru.value", false, intro);
       }
 
       intro.join(be_global->impl_, indent);
@@ -3473,7 +3477,8 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
   for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
     AST_Field* const field = *i;
     size_t size = 0;
-    std::string field_name = field->local_name()->get_string();
+    const std::string field_name = field->local_name()->get_string();
+    const std::string idl_name = canonical_name(field);
     AST_Type* const field_type = resolveActualType(field->field_type());
     Classification fld_cls = classify(field_type);
     if (fld_cls & CL_SCALAR) {
@@ -3490,10 +3495,10 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         transformSuffix = "]";
       }
       expr +=
-        "    if (base_field == \"" + field_name + "\") {\n"
+        "    if (base_field == \"" + idl_name + "\") {\n"
         "      " + cxx_type + " val;\n"
         "      if (!(strm >> " + val + ")) {\n"
-        "        throw std::runtime_error(\"Field '" + field_name + "' could "
+        "        throw std::runtime_error(\"Field '" + idl_name + "' could "
         "not be deserialized\");\n"
         "      }\n"
         + boundsCheck +
@@ -3503,25 +3508,25 @@ marshal_generator::gen_field_getValueFromSerialized(AST_Structure* node, const s
         expr +=
           "      ACE_CDR::ULong len;\n"
           "      if (!(strm >> len)) {\n"
-          "        throw std::runtime_error(\"String '" + field_name +
+          "        throw std::runtime_error(\"String '" + idl_name +
           "' length could not be deserialized\");\n"
           "      }\n"
           "      if (!strm.skip(len)) {\n"
-          "        throw std::runtime_error(\"String '" + field_name +
+          "        throw std::runtime_error(\"String '" + idl_name +
           "' contents could not be skipped\");\n"
           "      }\n"
           "    }\n";
       } else {
         expr +=
           "      if (!strm.skip(1,  " + OpenDDS::DCPS::to_dds_string(size) + " )) {\n"
-          "        throw std::runtime_error(\"Field '" + field_name +
+          "        throw std::runtime_error(\"Field '" + idl_name +
           "' could not be skipped\");\n"
           "      }\n"
           "    }\n";
       }
     } else if (fld_cls & CL_STRUCTURE) {
         expr +=
-          "    if (base_field == \"" + field_name + "\") {\n"
+          "    if (base_field == \"" + idl_name + "\") {\n"
           "      return getMetaStruct<" + scoped(field_type->name()) + ">().getValue(strm, subfield.c_str());\n"
           "    } else {\n"
           "      if (!gen_skip_over(strm, static_cast<" + scoped(field_type->name()) + "*>(0))) {\n"

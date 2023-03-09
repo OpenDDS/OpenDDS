@@ -69,7 +69,7 @@ namespace {
   void gen_isDcpsKey_i(const char* key)
   {
     be_global->impl_ <<
-      "  if (!ACE_OS::strcmp(field, \"" <<  key << "\")) {\n"
+      "  if (!ACE_OS::strcmp(field, \"" << key << "\")) {\n"
       "    return true;\n"
       "  }\n";
   }
@@ -86,7 +86,7 @@ namespace {
   {
     TopicKeys::Iterator finished = keys.end();
     for (TopicKeys::Iterator i = keys.begin(); i != finished; ++i) {
-      gen_isDcpsKey_i(i.path().c_str());
+      gen_isDcpsKey_i(i.canonical_path().c_str());
     }
   }
 }

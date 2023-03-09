@@ -40,11 +40,6 @@ namespace {
     }
     bool activate_;
   };
-
-  OpenDDS::DCPS::String canonical_name(Identifier* id)
-  {
-    return dds_generator::to_string(id, EscapeContext_StripEscapes);
-  }
 }
 
 bool
@@ -59,7 +54,7 @@ metaclass_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
   be_global->header_ << decl_prefix << size_decl << ";\n";
   be_global->impl_ << array_decl << " = {\n";
   for (size_t i = 0; i < contents.size(); ++i) {
-    be_global->impl_ << "  \"" << canonical_name(contents[i]->local_name())
+    be_global->impl_ << "  \"" << canonical_name(contents[i])
       << ((i < contents.size() - 1) ? "\",\n" : "\"\n");
   }
   be_global->impl_ << "};\n";
@@ -119,7 +114,7 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
-    const std::string idl_name = canonical_name(field->local_name());
+    const std::string idl_name = canonical_name(field);
     if (cls & CL_SCALAR) {
       std::string prefix, suffix;
       if (cls & CL_ENUM) {
@@ -154,7 +149,7 @@ namespace {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     Classification cls = classify(field->field_type());
     const std::string fieldName = field->local_name()->get_string();
-    const std::string idl_name = canonical_name(field->local_name());
+    const std::string idl_name = canonical_name(field);
     if (cls & CL_SCALAR) {
       be_global->impl_ <<
         "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
@@ -179,7 +174,7 @@ namespace {
   void
   print_field_name(AST_Field* field)
   {
-    be_global->impl_ << '"' << canonical_name(field->local_name()) << '"' << ", ";
+    be_global->impl_ << '"' << canonical_name(field) << '"' << ", ";
   }
 
   void
@@ -187,7 +182,7 @@ namespace {
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const char* fieldName = field->local_name()->get_string();
-    const std::string idl_name = canonical_name(field->local_name());
+    const std::string idl_name = canonical_name(field);
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
       "      return &static_cast<const T*>(stru)->" << (use_cxx11 ? "_" : "")
@@ -205,13 +200,14 @@ namespace {
     std::string fieldType = (cls & CL_STRING) ?
       string_type(cls) : scoped(field->field_type()->name());
     FieldInfo af(*field);
+    const std::string idl_name = canonical_name(field);
     if (af.as_base_ && af.type_->anonymous()) {
       fieldType = af.scoped_type_;
     }
     if ((cls & (CL_SCALAR | CL_STRUCTURE | CL_SEQUENCE | CL_UNION))
         || (use_cxx11 && (cls & CL_ARRAY))) {
       be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
+        "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
         "      static_cast<T*>(lhs)->" << (use_cxx11 ? "_" : "") << af.name_ <<
         " = *static_cast<const " << fieldType <<
         "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n"
@@ -222,7 +218,7 @@ namespace {
       AST_Type* unTD = resolveActualType(field->field_type());
       AST_Array* arr = dynamic_cast<AST_Array*>(unTD);
       be_global->impl_ <<
-        "    if (std::strcmp(field, \"" << af.name_ << "\") == 0) {\n"
+        "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n"
         "      " << fieldType << "* lhsArr = &static_cast<T*>(lhs)->" << af.name_ << ";\n"
         "      const " << fieldType << "* rhsArr = static_cast<const " <<
         fieldType << "*>(rhsMeta.getRawField(rhs, rhsFieldSpec));\n";
@@ -262,7 +258,7 @@ namespace {
     Classification cls = classify(field->field_type());
     if (!(cls & CL_SCALAR)) return;
     const char* fieldName = field->local_name()->get_string();
-    const std::string idl_name = canonical_name(field->local_name());
+    const std::string idl_name = canonical_name(field);
     be_global->impl_ <<
       "    if (std::strcmp(field, \"" << idl_name << "\") == 0) {\n";
     be_global->add_include("<cstring>", BE_GlobalData::STREAM_CPP);
@@ -297,6 +293,7 @@ namespace {
     } else {
       return false;
     }
+    const std::string type_idl_name = canonical_name(name);
 
     if (first_struct_) {
       be_global->header_ <<
@@ -347,7 +344,7 @@ namespace {
         "  {\n"
         "    static const std::pair<std::string, ACE_CDR::ULong> name_to_id_pairs[] = {\n";
       for (size_t i = 0; i < fields.size(); ++i) {
-        be_global->impl_ << "      std::make_pair(\"" << canonical_name(fields[i]->local_name()) << "\", " <<
+        be_global->impl_ << "      std::make_pair(\"" << canonical_name(fields[i]) << "\", " <<
           be_global->get_id(fields[i]) << "),\n";
       }
       be_global->impl_ <<
@@ -370,7 +367,8 @@ namespace {
       "    ACE_UNUSED_ARG(typed);\n";
     std::for_each(fields.begin(), fields.end(), gen_field_getValueByMemberId);
     be_global->impl_ <<
-      "    " << "throw std::runtime_error(\"Member not found or its type is not supported (in struct" + clazz + ")\");\n"
+      "    " << "throw std::runtime_error(\"Member not found or its type is not supported "
+        "(in type" << type_idl_name << ")\");\n"
       "  }\n\n";
     be_global->impl_ <<
       "  Value getValue(const void* stru, const char* field) const\n"
@@ -392,7 +390,7 @@ namespace {
         "      return 0;\n"        // ...we've skipped the entire struct
         "    }\n"                  //    and the return value is ignored
         "    throw std::runtime_error(\"Field \" + OPENDDS_STRING(field) + \" not "
-        "valid for struct " << clazz << "\");\n"
+        "valid for union" << type_idl_name << "\");\n"
         "  }\n\n";
     }
     be_global->impl_ <<
@@ -664,7 +662,7 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
 }
 
 static std::string
-func(const std::string&, const std::string&, AST_Type* br_type, const std::string&,
+func(const std::string&, AST_Decl*, const std::string&, AST_Type* br_type, const std::string&,
   bool, Intro&, const std::string&)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;

@@ -542,17 +542,6 @@ void dump_bytes(const OpenDDS::XTypes::TypeObject& to)
   }
 }
 
-OpenDDS::DCPS::String canonical_name(UTL_ScopedName* sn)
-{
-  // NOTE: Names should not have leading "::" according to the XTypes IDL.
-  return dds_generator::scoped_helper(sn, "::", EscapeContext_StripEscapes);
-}
-
-OpenDDS::DCPS::String canonical_name(Identifier* id)
-{
-  return dds_generator::to_string(id, EscapeContext_StripEscapes);
-}
-
 }
 
 void
@@ -1030,9 +1019,12 @@ void typeobject_generator::set_builtin_member_annotations(AST_Decl* member,
   const HashidAnnotation* hashid_ann = dynamic_cast<const HashidAnnotation*>(be_global->builtin_annotations_["::@hashid"]);
   std::string hash_name;
   if (hashid_ann->node_value_exists(member, hash_name)) {
-    annotations.present = true;
-    annotations.value.hash_id.present = true;
-    annotations.value.hash_id.value = hash_name;
+    OpenDDS::XTypes::Optional<std::string> hash_id(hash_name);
+    if (!annotations) {
+      OpenDDS::XTypes::AppliedBuiltinMemberAnnotations value;
+      annotations = OpenDDS::XTypes::Optional<OpenDDS::XTypes::AppliedBuiltinMemberAnnotations>(value);
+    }
+    annotations.value().hash_id = hash_id;
   }
 }
 

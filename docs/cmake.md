@@ -128,7 +128,9 @@ the OpenDDS CMake package.
 | `OPENDDS_DEFAULT_NESTED`         | [Topic types must be declared explicitly.](#opendds_default_nested)          | `ON`      |
 | `OPENDDS_FILENAME_ONLY_INCLUDES` | [No directory info in generated #includes.](#opendds_filename_only_includes) | `OFF`     |
 | `OPENDDS_DEFAULT_SCOPE`          | Default scope of unscoped files in `OPENDDS_TARGET_SOURCES`                  | `PRIVATE` |
-| `OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER` | Default for `ALWAYS_GENERATE_LIB_EXPORT_HEADER` in `OPENDDS_TARGET_SOURCES` | `OFF`|
+| `OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER` | Default for `ALWAYS_GENERATE_LIB_EXPORT_HEADER` in `OPENDDS_TARGET_SOURCES` | `OFF` |
+| `OPENDDS_AUTO_LINK_DCPS` | Automatically link `OpenDDS::Dcps` to the target of `OPENDDS_TARGET_SOURCES` | `OFF` |
+| `OPENDDS_USE_CORRECT_INCLUDE_SCOPE` | Include using scope specified in `OPENDDS_TARGET_SOURCES` | `OFF` (Always `PUBLIC`) |
 
 ### Libraries
 
