@@ -133,10 +133,7 @@ bool DynamicDataBase::is_primitive(TypeKind tk) const
 
 bool DynamicDataBase::is_basic(TypeKind tk) const
 {
-  if (is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16) {
-    return true;
-  }
-  return false;
+  return is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16;
 }
 
 bool DynamicDataBase::is_complex(TypeKind tk) const
