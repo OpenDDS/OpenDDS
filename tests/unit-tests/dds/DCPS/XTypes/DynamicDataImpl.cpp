@@ -1539,6 +1539,7 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
   EXPECT_EQ(DDS::RETCODE_OK, enums_dd->get_complex_value(nested_dd, 0));
   EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_int32_value(enum_val, XTypes::MEMBER_ID_INVALID));
   EXPECT_EQ(CORBA::Long(E_UINT32), enum_val);
+  nested_dd = 0;
   EXPECT_EQ(DDS::RETCODE_OK, enums_dd->get_complex_value(nested_dd, 1));
   EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_int32_value(enum_val, XTypes::MEMBER_ID_INVALID));
   EXPECT_EQ(CORBA::Long(E_INT8), enum_val);
@@ -1577,6 +1578,7 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
   EXPECT_EQ(DDS::RETCODE_OK, strs_dd->get_string_value(str_val, 0));
   EXPECT_STREQ("abc", str_val);
   CORBA::string_free(str_val);
+  nested_dd = 0;
   EXPECT_EQ(DDS::RETCODE_OK, strs_dd->get_complex_value(nested_dd, 0));
   CORBA::Char char_val;
   EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_char8_value(char_val, 0));
@@ -1702,6 +1704,7 @@ void verify_array_struct(DDS::DynamicType_var type, const DataView& expected_cdr
   EXPECT_EQ(DDS::RETCODE_OK, int32a_dd->get_complex_value(nested_dd, 0));
   EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_int32_value(int32_val, XTypes::MEMBER_ID_INVALID));
   EXPECT_EQ(CORBA::Long(0x12), int32_val);
+  nested_dd = 0;
   EXPECT_EQ(DDS::RETCODE_OK, int32a_dd->get_complex_value(nested_dd, 1));
   EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_int32_value(int32_val, XTypes::MEMBER_ID_INVALID));
   EXPECT_EQ(CORBA::Long(0x34), int32_val);
