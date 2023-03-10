@@ -2624,8 +2624,10 @@ bool DynamicDataImpl::read_basic_value(char*& value) const
     if (!container_.reconstruct_string_value(str)) {
       return false;
     }
+    CORBA::string_free(value);
     value = str;
   } else {
+    CORBA::string_free(value);
     value = CORBA::string_dup("");
   }
   return true;
@@ -2646,8 +2648,10 @@ bool DynamicDataImpl::read_basic_value(CORBA::WChar*& value) const
     if (!container_.reconstruct_wstring_value(wstr)) {
       return false;
     }
+    CORBA::wstring_free(value);
     value = wstr;
   } else {
+    CORBA::wstring_free(value);
     value = CORBA::wstring_dup(L"");
   }
   return true;
@@ -2670,6 +2674,7 @@ bool DynamicDataImpl::read_basic_in_single_map(char*& value, DDS::MemberId id)
 {
   DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
+    CORBA::string_free(value);
     value = single_it->second.get_string();
     return true;
   }
@@ -2681,6 +2686,7 @@ bool DynamicDataImpl::read_basic_in_single_map(CORBA::WChar*& value, DDS::Member
 {
   DataContainer::const_single_iterator single_it = container_.single_map_.find(id);
   if (single_it != container_.single_map_.end()) {
+    CORBA::wstring_free(value);
     value = single_it->second.get_wstring();
     return true;
   }
@@ -3183,7 +3189,7 @@ bool DynamicDataImpl::get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolea
   if (!read_basic_value(bitmask)) {
     return false;
   }
-  value = ((1 << index) & bitmask) ? true : false;
+  value = (1ULL << index) & bitmask;
   return true;
 }
 
@@ -4530,6 +4536,7 @@ void DynamicDataImpl::DataContainer::set_default_basic_value(const char*& value)
 
 void DynamicDataImpl::DataContainer::set_default_basic_value(char*& value) const
 {
+  CORBA::string_free(value);
   value = CORBA::string_dup("");
 }
 
@@ -4551,6 +4558,7 @@ void DynamicDataImpl::DataContainer::set_default_basic_value(const CORBA::WChar*
 
 void DynamicDataImpl::DataContainer::set_default_basic_value(CORBA::WChar*& value) const
 {
+  CORBA::wstring_free(value);
   value = CORBA::wstring_dup(L"");
 }
 #endif

@@ -316,12 +316,12 @@ void verify_single_value_struct(DDS::DynamicType_var type, const DataView& expec
   CORBA::Long nested_long_val;
   EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_int32_value(nested_long_val, 0));
   EXPECT_EQ(input.nested_struct.l, nested_long_val);
-  char* str_val;
+  char* str_val = 0;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_string_value(str_val, 17));
   EXPECT_STREQ(input.str.in(), str_val);
   CORBA::string_free(str_val);
 #ifdef DDS_HAS_WCHAR
-  CORBA::WChar* wstr_val;
+  CORBA::WChar* wstr_val = 0;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_wstring_value(wstr_val, 18));
   EXPECT_STREQ(input.wstr.in(), wstr_val);
   CORBA::wstring_free(wstr_val);
@@ -386,12 +386,12 @@ void verify_default_single_value_struct(DDS::DynamicType_var type, const DataVie
     CORBA::Long nested_long_val;
     EXPECT_EQ(DDS::RETCODE_OK, nested_dd->get_int32_value(nested_long_val, 0));
     EXPECT_EQ(CORBA::Long(0), nested_long_val);
-    char* str_val;
+    char* str_val = 0;
     EXPECT_EQ(DDS::RETCODE_OK, data.get_string_value(str_val, 17));
     EXPECT_STREQ("", str_val);
     CORBA::string_free(str_val);
 #ifdef DDS_HAS_WCHAR
-    CORBA::WChar* wstr_val;
+    CORBA::WChar* wstr_val = 0;
     EXPECT_EQ(DDS::RETCODE_OK, data.get_wstring_value(wstr_val, 18));
     EXPECT_STREQ(L"", wstr_val);
     CORBA::wstring_free(wstr_val);
@@ -999,7 +999,7 @@ void verify_string_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   CORBA::Long disc_val;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(disc_val, XTypes::DISCRIMINATOR_ID));
   EXPECT_EQ(E_STRING8, disc_val);
-  char* str_val;
+  char* str_val = 0;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_string_value(str_val, 16));
   EXPECT_STREQ("def", str_val);
   CORBA::string_free(str_val);
@@ -1023,7 +1023,7 @@ void verify_wstring_union(DDS::DynamicType_var dt, const DataView& expected_cdr)
   CORBA::Long disc_val;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_int32_value(disc_val, XTypes::DISCRIMINATOR_ID));
   EXPECT_EQ(E_STRING16, disc_val);
-  CORBA::WChar* wstr_val;
+  CORBA::WChar* wstr_val = 0;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_wstring_value(wstr_val, 17));
   EXPECT_STREQ(L"def", wstr_val);
   CORBA::wstring_free(wstr_val);
@@ -1572,7 +1572,7 @@ void verify_sequence_value_struct(DDS::DynamicType_var type, const DataView& exp
   DDS::DynamicData_var strs_dd;
   EXPECT_EQ(DDS::RETCODE_OK, data.get_complex_value(strs_dd, 16));
   EXPECT_EQ(CORBA::ULong(1), strs_dd->get_item_count());
-  char* str_val;
+  char* str_val = 0;
   EXPECT_EQ(DDS::RETCODE_OK, strs_dd->get_string_value(str_val, 0));
   EXPECT_STREQ("abc", str_val);
   CORBA::string_free(str_val);
