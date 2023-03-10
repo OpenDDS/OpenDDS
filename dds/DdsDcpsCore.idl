@@ -217,8 +217,8 @@ module DDS {
   // This is for when we support XCDR1.
   // @appendable
   struct TransportPriorityQosPolicy {
-  long value;
-    };
+    long value;
+  };
 
   // This is for when we support XCDR1.
   // @appendable

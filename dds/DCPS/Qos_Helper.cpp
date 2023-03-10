@@ -13,7 +13,7 @@
 #endif /* __ACE_INLINE__ */
 
 #include "debug.h"
-#include "Service_Participant.h"
+#include "DCPS_Utils.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -484,6 +484,44 @@ bool Qos_Helper::valid(const DDS::DomainParticipantFactoryQos& qos)
   }
 
   return true;
+}
+
+DataWriterQosBuilder::DataWriterQosBuilder(DDS::Publisher_var publisher)
+{
+  const DDS::ReturnCode_t ret = publisher->get_default_datawriter_qos(qos_);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataWriterQosBuilder: ")
+               ACE_TEXT("could not get_default_datawriter_qos: %C\n"),
+               retcode_to_string(ret)));
+  }
+}
+
+DataWriterQosBuilder::DataWriterQosBuilder(DDS::Topic_var topic,
+                                           DDS::Publisher_var publisher)
+{
+  DDS::TopicQos tqos;
+  DDS::ReturnCode_t ret = topic->get_qos(tqos);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataWriterQosBuilder: ")
+               ACE_TEXT("could not get_qos on topic: %C\n"),
+               retcode_to_string(ret)));
+  }
+  ret = publisher->get_default_datawriter_qos(qos_);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataWriterQosBuilder: ")
+               ACE_TEXT("could not get_default_datawriter_qos: %C\n"),
+               retcode_to_string(ret)));
+  }
+  ret = publisher->copy_from_topic_qos(qos_, tqos);
+  if (ret != DDS::RETCODE_OK && log_level >= LogLevel::Warning) {
+    ACE_ERROR((LM_WARNING,
+               ACE_TEXT("(%P|%t) WARNING: DataWriterQosBuilder: ")
+               ACE_TEXT("could not copy_from_topic: %C\n"),
+               retcode_to_string(ret)));
+  }
 }
 
 } // namespace DCPS

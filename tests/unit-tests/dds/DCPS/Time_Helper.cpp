@@ -95,3 +95,10 @@ TEST(dds_DCPS_Time_Helper, MonotonicTime_t_equal)
   EXPECT_TRUE(!(tt1 == tt2));
   EXPECT_TRUE(!(tt2 == tt1));
 }
+
+TEST(dds_DCPS_Time_Helper, make_duration)
+{
+  const DDS::Duration_t d = make_duration(1, 2);
+  EXPECT_EQ(d.sec, 1);
+  EXPECT_EQ(d.nanosec, 2u);
+}
