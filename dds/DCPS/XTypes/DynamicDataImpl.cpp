@@ -1483,8 +1483,8 @@ bool DynamicDataImpl::set_value_to_union(DDS::MemberId id, const MemberType& val
       if (discriminator_selects_no_member(type_, disc_value)) {
         return insert_single(id, value);
       }
-      if (DCPS::log_level >= DCPS::LogLevel::Error) {
-        ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::set_value_to_union:"
+      if (DCPS::log_level >= DCPS::LogLevel::Warning) {
+        ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: DynamicDataImpl::set_value_to_union:"
                    " Can't directly set a discriminator that selects a member."
                    " Activate the member first!\n"));
       }
