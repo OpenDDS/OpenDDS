@@ -244,6 +244,9 @@ private:
   DDS::ReturnCode_t get_simple_value_enum(DCPS::Value& value, DDS::MemberId id) const;
 #endif
 
+  CORBA::ULong get_sequence_size() const;
+  void erase_member(DDS::MemberId id);
+
   /// Group of functions to read a basic value represented by this DynamicData instance
   bool read_basic_value(ACE_OutputCDR::from_int8& value);
   bool read_basic_value(ACE_OutputCDR::from_uint8& value);

@@ -176,6 +176,44 @@ DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
   return MEMBER_ID_INVALID;
 }
 
+CORBA::ULong DynamicDataImpl::get_sequence_size() const
+{
+  if (type_->get_kind() != TK_SEQUENCE) {
+    return 0;
+  }
+
+  if (!container_.single_map_.empty() || !container_.complex_map_.empty()) {
+    CORBA::ULong largest_index;
+    if (!container_.get_largest_index_basic(largest_index)) {
+      return 0;
+    }
+    if (!container_.sequence_map_.empty()) {
+      CORBA::ULong largest_seq_index;
+      if (!container_.get_largest_sequence_index(largest_seq_index)) {
+        return 0;
+      }
+      largest_index = std::max(largest_index, largest_seq_index);
+    }
+    return largest_index + 1;
+  } else if (!container_.sequence_map_.empty()) {
+    CORBA::ULong largest_index;
+    if (!container_.get_largest_sequence_index(largest_index)) {
+      return 0;
+    }
+    return largest_index + 1;
+  }
+  return 0;
+}
+
+void DynamicDataImpl::erase_member(DDS::MemberId id)
+{
+  if (container_.single_map_.erase(id) == 0) {
+    if (container_.sequence_map_.erase(id) == 0) {
+      container_.complex_map_.erase(id);
+    }
+  }
+}
+
 ACE_CDR::ULong DynamicDataImpl::get_item_count()
 {
   const TypeKind tk = type_->get_kind();
@@ -213,29 +251,8 @@ ACE_CDR::ULong DynamicDataImpl::get_item_count()
       }
       return 0;
     }
-  case TK_SEQUENCE: {
-    if (!container_.single_map_.empty() || !container_.complex_map_.empty()) {
-      CORBA::ULong largest_index;
-      if (!container_.get_largest_index_basic(largest_index)) {
-        return 0;
-      }
-      if (!container_.sequence_map_.empty()) {
-        CORBA::ULong largest_seq_index;
-        if (!container_.get_largest_sequence_index(largest_seq_index)) {
-          return 0;
-        }
-        largest_index = std::max(largest_index, largest_seq_index);
-      }
-      return largest_index + 1;
-    } else if (!container_.sequence_map_.empty()) {
-      CORBA::ULong largest_index;
-      if (!container_.get_largest_sequence_index(largest_index)) {
-        return 0;
-      }
-      return largest_index + 1;
-    }
-    return 0;
-  }
+  case TK_SEQUENCE:
+    return get_sequence_size();
   case TK_BITMASK:
     return static_cast<ACE_CDR::ULong>(container_.single_map_.size() +
                                        container_.complex_map_.size());
@@ -382,11 +399,39 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
 #ifdef DDS_HAS_WCHAR
   case TK_STRING16:
 #endif
-  case TK_SEQUENCE:
-    // TODO: The rule for variable-length collection types needs clarification (7.5.2.11.3)
-    // If we shift the subsequent elements, does that mean their IDs also change?
-    // Are string and wstring considered variable-length collections?
+  case TK_SEQUENCE: {
+    // Shift subsequent elements to the left (XTypes spec 7.5.2.11.3).
+    const CORBA::ULong size = get_sequence_size();
+    if (id >= size) {
+      return DDS::RETCODE_ERROR;
+    }
+
+    // At the begin of each iterator, member with the current id is not present
+    // in any of the maps. Copy over the next member to the current id.
+    erase_member(id);
+    for (CORBA::ULong i = id; i < size - 1; ++i) {
+      const DDS::MemberId next_id = i + 1;
+      DataContainer::const_single_iterator single_it = container_.single_map_.find(next_id);
+      if (single_it != container_.single_map_.end()) {
+        container_.single_map_.insert(std::make_pair(i, single_it->second));
+        container_.single_map_.erase(next_id);
+        continue;
+      }
+      DataContainer::const_sequence_iterator seq_it = container_.sequence_map_.find(next_id);
+      if (seq_it != container_.sequence_map_.end()) {
+        container_.sequence_map_.insert(std::make_pair(i, seq_it->second));
+        container_.sequence_map_.erase(next_id);
+        continue;
+      }
+      DataContainer::const_complex_iterator complex_it = container_.complex_map_.find(next_id);
+      if (complex_it != container_.complex_map_.end()) {
+        container_.complex_map_.insert(std::make_pair(i, complex_it->second));
+        container_.complex_map_.erase(next_id);
+        continue;
+      }
+    }
     break;
+  }
   case TK_STRUCTURE:
   case TK_UNION: {
     DDS::DynamicTypeMember_var dtm;
@@ -398,11 +443,7 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value(DDS::MemberId id)
       return DDS::RETCODE_ERROR;
     }
     if (md->is_optional()) {
-      if (container_.single_map_.erase(id) == 0) {
-        if (container_.sequence_map_.erase(id) == 0) {
-          container_.complex_map_.erase(id);
-        }
-      }
+      erase_member(id);
       break;
     }
     DDS::DynamicType_var member_type = get_base_type(md->type());
