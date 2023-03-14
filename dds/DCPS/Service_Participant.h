@@ -140,9 +140,7 @@ public:
   const DDS::DeadlineQosPolicy& initial_DeadlineQosPolicy() const;
   const DDS::LatencyBudgetQosPolicy& initial_LatencyBudgetQosPolicy() const;
   const DDS::OwnershipQosPolicy& initial_OwnershipQosPolicy() const;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   const DDS::OwnershipStrengthQosPolicy& initial_OwnershipStrengthQosPolicy() const;
-#endif
   const DDS::LivelinessQosPolicy& initial_LivelinessQosPolicy() const;
   const DDS::TimeBasedFilterQosPolicy& initial_TimeBasedFilterQosPolicy() const;
   const DDS::PartitionQosPolicy& initial_PartitionQosPolicy() const;
@@ -585,9 +583,7 @@ private:
   DDS::DeadlineQosPolicy              initial_DeadlineQosPolicy_;
   DDS::LatencyBudgetQosPolicy         initial_LatencyBudgetQosPolicy_;
   DDS::OwnershipQosPolicy             initial_OwnershipQosPolicy_;
-#ifndef OPENDDS_NO_OWNERSHIP_KIND_EXCLUSIVE
   DDS::OwnershipStrengthQosPolicy     initial_OwnershipStrengthQosPolicy_;
-#endif
   DDS::LivelinessQosPolicy            initial_LivelinessQosPolicy_;
   DDS::TimeBasedFilterQosPolicy       initial_TimeBasedFilterQosPolicy_;
   DDS::PartitionQosPolicy             initial_PartitionQosPolicy_;

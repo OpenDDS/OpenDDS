@@ -9,9 +9,9 @@
 
 #include <dds/DCPS/SporadicTask.h>
 
+#include "MockLogger.h"
+
 #include <ace/Thread_Manager.h>
-#include <ace/Log_Msg_Backend.h>
-#include <ace/Log_Record.h>
 
 using namespace OpenDDS::DCPS;
 
@@ -56,32 +56,6 @@ namespace {
 
     MOCK_METHOD1(myfunc, void(const MonotonicTimePoint&));
     PmfSporadicTask<MyTestClass> sporadic_task_;
-  };
-
-  class MyLogger : public ACE_Log_Msg_Backend {
-  public:
-    MyLogger()
-    {
-      // Install as backend.
-      previous_ = ACE_Log_Msg::msg_backend(this);
-      ACE_Log_Msg::instance()->set_flags(ACE_Log_Msg::CUSTOM);
-      ACE_Log_Msg::instance()->clr_flags(ACE_Log_Msg::STDERR);
-    }
-
-    ~MyLogger()
-    {
-      ACE_Log_Msg::instance()->clr_flags(ACE_Log_Msg::CUSTOM);
-      ACE_Log_Msg::instance()->set_flags(ACE_Log_Msg::STDERR);
-      ACE_Log_Msg::msg_backend(previous_);
-    }
-
-    MOCK_METHOD1(open, int(const ACE_TCHAR*));
-    MOCK_METHOD0(reset, int());
-    MOCK_METHOD0(close, int());
-    MOCK_METHOD1(log, ssize_t(ACE_Log_Record&));
-
-  private:
-    ACE_Log_Msg_Backend* previous_;
   };
 }
 
@@ -135,7 +109,7 @@ TEST(dds_DCPS_SporadicTask, schedule_pmf)
 
 TEST(dds_DCPS_SporadicTask, schedule_error)
 {
-  MyLogger logger;
+  OpenDDS::Test::MockLogger logger;
   MyTimeSource time_source;
   MyReactor reactor;
   RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
@@ -204,7 +178,7 @@ TEST(dds_DCPS_SporadicTask, schedule_later)
 
 TEST(dds_DCPS_SporadicTask, schedule_no_interceptor)
 {
-  MyLogger logger;
+  OpenDDS::Test::MockLogger logger;
   MyTimeSource time_source;
   MyReactor reactor;
   RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
@@ -257,7 +231,7 @@ TEST(dds_DCPS_SporadicTask, cancel_scheduled)
 
 TEST(dds_DCPS_SporadicTask, cancel_no_interceptor)
 {
-  MyLogger logger;
+  OpenDDS::Test::MockLogger logger;
   MyTimeSource time_source;
   MyReactor reactor;
   RcHandle<MyReactorInterceptor> reactor_interceptor = make_rch<MyReactorInterceptor>(&reactor);
