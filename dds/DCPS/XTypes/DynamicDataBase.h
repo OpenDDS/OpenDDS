@@ -41,11 +41,8 @@ public:
 
 protected:
   /// Verify that a given type is primitive or string or wstring.
-  ///
   bool is_type_supported(TypeKind tk, const char* func_name);
-  bool is_primitive(TypeKind tk) const;
-  bool is_basic(TypeKind tk) const;
-  bool is_complex(TypeKind tk) const;
+
   bool get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   bool enum_string_helper(char*& strInOut, MemberId id);
 

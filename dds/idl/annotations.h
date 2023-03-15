@@ -415,6 +415,28 @@ namespace OpenDDS {
   protected:
     DataRepresentation value_from_appl(AST_Annotation_Appl* appl) const;
   };
+
+  class NoDynamicDataAdapterAnnotation : public Annotation {
+  public:
+    std::string definition() const
+    {
+      return
+        "module OpenDDS {\n"
+        "  @annotation no_dynamic_data_adapter {\n"
+        "  };\n"
+        "};\n";
+    }
+
+    std::string name() const
+    {
+      return "no_dynamic_data_adapter";
+    }
+
+    std::string module() const
+    {
+      return "::OpenDDS::";
+    }
+  };
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

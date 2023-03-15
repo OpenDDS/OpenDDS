@@ -107,59 +107,6 @@ bool DynamicDataBase::is_type_supported(TypeKind tk, const char* func_name)
   return true;
 }
 
-bool DynamicDataBase::is_primitive(TypeKind tk) const
-{
-  switch (tk) {
-  case TK_BOOLEAN:
-  case TK_BYTE:
-  case TK_INT8:
-  case TK_UINT8:
-  case TK_CHAR8:
-  case TK_INT16:
-  case TK_UINT16:
-  case TK_CHAR16:
-  case TK_INT32:
-  case TK_UINT32:
-  case TK_FLOAT32:
-  case TK_INT64:
-  case TK_UINT64:
-  case TK_FLOAT64:
-  case TK_FLOAT128:
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool DynamicDataBase::is_basic(TypeKind tk) const
-{
-  if (is_primitive(tk)) {
-    return true;
-  }
-  switch (tk) {
-  case TK_STRING8:
-  case TK_STRING16:
-    return true;
-  default:
-    return false;
-  }
-}
-
-bool DynamicDataBase::is_complex(TypeKind tk) const
-{
-  switch (tk) {
-  case TK_ARRAY:
-  case TK_SEQUENCE:
-  case TK_MAP:
-  case TK_STRUCTURE:
-  case TK_UNION:
-  case TK_BITSET:
-    return true;
-  default:
-    return false;
-  }
-}
-
 bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
                                         ACE_CDR::ULong bound) const
 {

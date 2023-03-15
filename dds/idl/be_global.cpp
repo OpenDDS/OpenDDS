@@ -1042,3 +1042,8 @@ OpenDDS::XTypes::MemberId BE_GlobalData::get_id(AST_Field* field)
   be_util::misc_error_and_abort("Could not get member id for field");
   return -1;
 }
+
+bool BE_GlobalData::dynamic_data_adapter(AST_Decl* node) const
+{
+  return !builtin_annotations_["::OpenDDS::@no_dynamic_data_adapter"]->find_on(node);
+}

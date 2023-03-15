@@ -4805,7 +4805,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_sequence(const DCPS::Encodi
       }
       length = largest_index + 1;
     }
-    if (data_->is_primitive(elem_tk)) {
+    if (is_primitive(elem_tk)) {
       serialized_size_primitive_sequence(encoding, size, elem_tk, length);
       return true;
     } else if (elem_tk == TK_STRING8) {
@@ -4893,7 +4893,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence(DCPS::Serializer& ser, D
       }
       length = largest_index + 1;
     }
-    if (data_->is_primitive(elem_tk)) {
+    if (is_primitive(elem_tk)) {
       return serialize_primitive_sequence(ser, elem_tk, length, bound);
     } else if (elem_tk == TK_STRING8) {
       return serialize_generic_string_sequence<const char*>(ser, length, bound);
@@ -5746,7 +5746,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_primitive_member(const DCPS
 bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
   const DCPS::Encoding& encoding, size_t& size, TypeKind member_tk) const
 {
-  if (data_->is_primitive(member_tk)) {
+  if (is_primitive(member_tk)) {
     return serialized_size_primitive_member(encoding, size, member_tk);
   } else if (member_tk == TK_STRING8) {
     const char* str_default;
@@ -5769,7 +5769,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_basic_member_default_value(
 bool DynamicDataImpl::DataContainer::serialized_size_basic_member(const DCPS::Encoding& encoding,
   size_t& size, TypeKind member_tk, const_single_iterator it) const
 {
-  if (data_->is_primitive(member_tk)) {
+  if (is_primitive(member_tk)) {
     return serialized_size_primitive_member(encoding, size, member_tk);
   } else if (member_tk == TK_STRING8 || member_tk == TK_STRING16) {
     serialized_size_string_common(encoding, size, it->second);
@@ -6103,7 +6103,7 @@ void DynamicDataImpl::DataContainer::serialized_size_sequence_member_default_val
   const DCPS::Encoding& encoding, size_t& size, TypeKind elem_tk) const
 {
   // Zero-length sequence
-  if (!data_->is_primitive(elem_tk)) {
+  if (!is_primitive(elem_tk)) {
     serialized_size_delimiter(encoding, size);
   }
   primitive_serialized_size_ulong(encoding, size);
@@ -6114,7 +6114,7 @@ bool DynamicDataImpl::DataContainer::serialize_sequence_member_default_value(DCP
 {
   // Zero-length sequence
   const DCPS::Encoding& encoding = ser.encoding();
-  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !data_->is_primitive(elem_tk)) {
+  if (encoding.xcdr_version() == DCPS::Encoding::XCDR_VERSION_2 && !is_primitive(elem_tk)) {
     if (!ser.write_delimiter(2 * DCPS::uint32_cdr_size)) {
       return false;
     }
@@ -6824,7 +6824,7 @@ bool DynamicDataImpl::DataContainer::serialized_size_discriminator_member_xcdr2(
     serialized_size_parameter_id(encoding, size, mutable_running_total);
   }
   const TypeKind disc_tk = disc_type->get_kind();
-  if (data_->is_primitive(disc_tk)) {
+  if (is_primitive(disc_tk)) {
     return serialized_size_primitive_member(encoding, size, disc_tk);
   }
   return serialized_size_enum(encoding, size, disc_type);
@@ -6838,7 +6838,7 @@ bool DynamicDataImpl::DataContainer::serialize_discriminator_member_xcdr2(
   const TypeKind disc_tk = disc_type->get_kind();
   if (extensibility == DDS::MUTABLE) {
     size_t disc_size = 0;
-    if (data_->is_primitive(disc_tk)) {
+    if (is_primitive(disc_tk)) {
       serialized_size_primitive_member(encoding, disc_size, disc_tk);
     } else {
       serialized_size_enum(encoding, disc_size, disc_type);
@@ -7198,7 +7198,7 @@ bool DynamicDataImpl::DataContainer::serialize_union_xcdr2(DCPS::Serializer& ser
   if (single_it != single_map_.end()) {
     if (extensibility == DDS::MUTABLE) {
       size_t disc_size = 0;
-      if (data_->is_primitive(disc_tk)) {
+      if (is_primitive(disc_tk)) {
         serialized_size_primitive_member(encoding, disc_size, disc_tk);
       } else { // Enum is the only other type can be used for discriminator
         serialized_size_enum(encoding, disc_size, disc_type);

@@ -3442,6 +3442,14 @@ namespace XTypes {
   OpenDDS_Dcps_Export
   const char* typekind_to_string(TypeKind tk);
 
+  OpenDDS_Dcps_Export
+  bool is_primitive(TypeKind tk);
+
+  OpenDDS_Dcps_Export
+  bool is_basic(TypeKind tk);
+
+  OpenDDS_Dcps_Export
+  bool is_complex(TypeKind tk);
 } // namespace XTypes
 
 namespace DCPS {

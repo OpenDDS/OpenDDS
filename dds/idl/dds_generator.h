@@ -183,29 +183,47 @@ private:
 
 // common utilities for all "generator" derived classes
 
-const char* const namespace_guard_start =
-  "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n"
-  "namespace OpenDDS { namespace DCPS {\n\n";
-const char* const namespace_guard_end =
-  "} }\n"
-  "OPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
-
 struct NamespaceGuard {
   const bool enabled_;
+  std::vector<std::string>* ns_;
+  std::vector<std::string> default_ns_;
 
-  NamespaceGuard(bool enabled = true)
-  : enabled_(enabled)
+  NamespaceGuard(bool enabled = true, std::vector<std::string>* ns = 0)
+    : enabled_(enabled)
+    , ns_(ns)
   {
+    if (!ns_) {
+      default_ns_.push_back("OpenDDS");
+      default_ns_.push_back("DCPS");
+      ns_ = &default_ns_;
+    }
     if (enabled_) {
-      be_global->header_ << namespace_guard_start;
-      be_global->impl_ << namespace_guard_start;
+      std::string start_ns = "OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL\n";
+      for (size_t i = 0; i < ns_->size(); ++i) {
+        if (i > 0) {
+          start_ns += " ";
+        }
+        start_ns += "namespace " + (*ns_)[i] + " {";
+      }
+      start_ns += "\n\n";
+      be_global->header_ << start_ns;
+      be_global->impl_ << start_ns;
     }
   }
+
   ~NamespaceGuard()
   {
     if (enabled_) {
-      be_global->header_ << namespace_guard_end;
-      be_global->impl_ << namespace_guard_end;
+      std::string end_ns;
+      for (size_t i = 0; i < ns_->size(); ++i) {
+        if (i > 0) {
+          end_ns += " ";
+        }
+        end_ns += "}";
+      }
+      end_ns += "\nOPENDDS_END_VERSIONED_NAMESPACE_DECL\n\n";
+      be_global->header_ << end_ns;
+      be_global->impl_ << end_ns;
     }
   }
 };

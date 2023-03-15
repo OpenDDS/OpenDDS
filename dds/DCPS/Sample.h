@@ -240,7 +240,7 @@ public:
   {
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     if (type && !dynamic_data_) {
-      dynamic_data_ = new DynamicDataImpl(type, getMetaStruct<NativeType>(), *data_);
+      dynamic_data_ = new DynamicDataImpl(type, *data_);
     }
     return dynamic_data_;
 #  else

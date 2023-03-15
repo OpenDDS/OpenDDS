@@ -215,6 +215,8 @@ OpenDDS_Dcps_Export DDS::ReturnCode_t get_enumerator_name(
 OpenDDS_Dcps_Export DDS::ReturnCode_t get_enumerator_value(
   DDS::Int32& value, const char* name, DDS::DynamicType_ptr type);
 
+OpenDDS_Dcps_Export DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src);
+
 } // namespace XTypes
 } // namespace OpenDDS
 OPENDDS_END_VERSIONED_NAMESPACE_DECL

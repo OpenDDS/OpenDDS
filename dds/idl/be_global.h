@@ -245,6 +245,8 @@ public:
     return default_enum_extensibility_zero_;
   }
 
+  bool dynamic_data_adapter(AST_Decl* node) const;
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;
