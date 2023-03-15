@@ -7,6 +7,11 @@ categories: [opendds]
 
 ## Commercial Support
 
+### OpenDDS Foundation
+
+Members of the OpenDDS Foundation are available for enhancements, consulting, and troubleshooting.
+[Terms and Conditions](support_terms_and_conditions.pdf)
+
 ### Object Computing, Inc. (OCI)
 
 Members of the core OpenDDS development team are available to provide [training](https://objectcomputing.com/products/opendds/training), consulting, code review, troubleshooting, and more.
