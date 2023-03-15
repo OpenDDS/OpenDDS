@@ -96,7 +96,7 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
 
 bool DynamicDataBase::is_type_supported(TypeKind tk, const char* func_name)
 {
-  if (!is_primitive(tk) && tk != TK_STRING8 && tk != TK_STRING16) {
+  if (!is_basic(tk)) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::is_type_supported:"
                  " Called function %C on an unsupported type (%C)\n",
@@ -133,16 +133,7 @@ bool DynamicDataBase::is_primitive(TypeKind tk) const
 
 bool DynamicDataBase::is_basic(TypeKind tk) const
 {
-  if (is_primitive(tk)) {
-    return true;
-  }
-  switch (tk) {
-  case TK_STRING8:
-  case TK_STRING16:
-    return true;
-  default:
-    return false;
-  }
+  return is_primitive(tk) || tk == TK_STRING8 || tk == TK_STRING16;
 }
 
 bool DynamicDataBase::is_complex(TypeKind tk) const
@@ -185,7 +176,6 @@ bool DynamicDataBase::get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index,
   }
   return false;
 }
-
 
 bool DynamicDataBase::enum_string_helper(char*& strInOut, MemberId id)
 {
@@ -231,7 +221,6 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
       return rc;
     }
     break;
-
   case TK_BITMASK:
     rc = bitmask_bound(type, cmp_type_kind);
     if (rc != DDS::RETCODE_OK) {
@@ -243,8 +232,6 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
   bool invalid_tk = true;
   if (is_basic(cmp_type_kind)) {
     invalid_tk = cmp_type_kind != tk;
-  } else if (tk == TK_NONE) {
-    invalid_tk = !is_complex(type_kind);
   }
   if (invalid_tk) {
     if (DCPS::log_level >= DCPS::LogLevel::Notice) {
@@ -258,7 +245,6 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
     }
     return DDS::RETCODE_BAD_PARAMETER;
   }
-
   return DDS::RETCODE_OK;
 }
 
@@ -275,7 +261,7 @@ CORBA::ULong DynamicDataBase::bound_total(DDS::TypeDescriptor_var descriptor)
 DDS::MemberId DynamicDataBase::get_union_default_member(DDS::DynamicType* type)
 {
   //FUTURE: non-zero defaults for union discriminators are not currently represented
-  // in the MemberDescriptors created by converting CompleteTypeObject to DyanmicType.
+  // in the MemberDescriptors created by converting CompleteTypeObject to DynamicType.
   // When they are supported, change disc_default below to a value derived from the
   // 'type' parameter.  Note that 64-bit discriminators are not represented in TypeObject.
   static const ACE_CDR::Long disc_default = 0;

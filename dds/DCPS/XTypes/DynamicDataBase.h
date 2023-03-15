@@ -50,7 +50,7 @@ protected:
   bool enum_string_helper(char*& strInOut, MemberId id);
 
   DDS::ReturnCode_t check_member(DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
-    const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk = TK_NONE);
+    const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk);
 
   static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
   static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
