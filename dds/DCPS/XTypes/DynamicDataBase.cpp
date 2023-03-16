@@ -7,7 +7,10 @@
 
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicDataBase.h"
+
 #  include "Utils.h"
+
+#  include <dds/DCPS/debug.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
@@ -158,7 +161,7 @@ bool DynamicDataBase::enum_string_helper(char*& strInOut, MemberId id)
 
 DDS::ReturnCode_t DynamicDataBase::check_member(
   DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
-  const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk)
+  const char* method, const char* action, DDS::MemberId id, DDS::TypeKind tk)
 {
   DDS::ReturnCode_t rc = get_descriptor(md, id);
   if (rc != DDS::RETCODE_OK) {
@@ -199,7 +202,7 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
       const CORBA::String_var type_name = type_->get_name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %C: "
         "trying to %C %C.%C id %u kind %C (%C) as an invalid kind %C\n",
-        method, what, type_name.in(), member_name.in(), id,
+        method, action, type_name.in(), member_name.in(), id,
         typekind_to_string(cmp_type_kind), typekind_to_string(type_kind),
         typekind_to_string(tk)));
     }
@@ -314,6 +317,44 @@ bool DynamicDataBase::has_explicit_keys(DDS::DynamicType* dt)
     }
   }
   return false;
+}
+
+DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, bool warning) const
+{
+  if (DCPS::log_level >= (warning ? DCPS::LogLevel::Notice : DCPS::LogLevel::Notice)) {
+    ACE_ERROR((LM_NOTICE, "(%P|%t) %C: %C: not implemented\n",
+      warning ? "WARNING" : "NOTICE", method_name));
+  }
+  return DDS::RETCODE_UNSUPPORTED;
+}
+
+#ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
+DDS::ReturnCode_t DynamicDataBase::get_simple_value(DCPS::Value& /*value*/, DDS::MemberId /*id*/)
+{
+  return unsupported_method("DynamicData::get_simple_value");
+}
+#endif
+
+DDS::DynamicType_ptr DynamicDataBase::type()
+{
+  return DDS::DynamicType::_duplicate(type_);
+}
+
+DDS::Boolean DynamicDataBase::equals(DDS::DynamicData_ptr /*other*/)
+{
+  unsupported_method("DynamicData::equals", true);
+  return false;
+}
+
+DDS::DynamicData_ptr DynamicDataBase::loan_value(DDS::MemberId /*id*/)
+{
+  unsupported_method("DynamicData::loan_value");
+  return 0;
+}
+
+DDS::ReturnCode_t DynamicDataBase::return_loaned_value(DDS::DynamicData_ptr /*other*/)
+{
+  return unsupported_method("DynamicData::return_loaned_value");
 }
 
 } // namespace XTypes

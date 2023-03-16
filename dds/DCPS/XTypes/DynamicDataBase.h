@@ -9,7 +9,6 @@
 #ifndef OPENDDS_SAFETY_PROFILE
 #  include "DynamicTypeImpl.h"
 
-#  include <dds/DCPS/debug.h>
 #  include <dds/DCPS/LocalObject.h>
 #  include <dds/DCPS/Sample.h>
 
@@ -23,20 +22,24 @@ namespace DCPS {
 
 namespace XTypes {
 
-class DynamicDataBase : public virtual DCPS::LocalObject<DDS::DynamicData> {
+class OpenDDS_Dcps_Export DynamicDataBase : public virtual DCPS::LocalObject<DDS::DynamicData> {
 public:
   DynamicDataBase();
   DynamicDataBase(DDS::DynamicType_ptr type);
 
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
   DDS::MemberId get_member_id_by_name(const char* name);
+  DDS::DynamicType_ptr type();
+  DDS::Boolean equals(DDS::DynamicData_ptr other);
+  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
+  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr other);
 
   static bool has_explicit_keys(DDS::DynamicType* dt);
   static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);
   static DCPS::Sample::Extent nested(DCPS::Sample::Extent ext);
 
 #ifndef OPENDDS_NO_CONTENT_SUBSCRIPTION_PROFILE
-  virtual DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id) = 0;
+  virtual DDS::ReturnCode_t get_simple_value(DCPS::Value& value, DDS::MemberId id);
 #endif
 
 protected:
@@ -46,8 +49,17 @@ protected:
   bool get_index_from_id(DDS::MemberId id, ACE_CDR::ULong& index, ACE_CDR::ULong bound) const;
   bool enum_string_helper(char*& strInOut, MemberId id);
 
-  DDS::ReturnCode_t check_member(DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
-    const char* method, const char* what, DDS::MemberId id, DDS::TypeKind tk = TK_NONE);
+  DDS::ReturnCode_t check_member(
+    DDS::MemberDescriptor_var& member_desc, DDS::DynamicType_var& member_type,
+    const char* method, const char* action, DDS::MemberId id, DDS::TypeKind tk = TK_NONE);
+
+  DDS::ReturnCode_t check_member(
+    DDS::DynamicType_var& member_type, const char* method, const char* action,
+    DDS::MemberId id, DDS::TypeKind tk = TK_NONE)
+  {
+    DDS::MemberDescriptor_var md;
+    return check_member(md, member_type, method, action, id, tk);
+  }
 
   static CORBA::ULong bound_total(DDS::TypeDescriptor_var descriptor);
   static DDS::MemberId get_union_default_member(DDS::DynamicType* type);
@@ -57,6 +69,8 @@ protected:
   /// passing rules for IDL interfaces that are arguments to operations.
   /// Doesn't change the reference count.
   DDS::DynamicData* interface_from_this() const;
+
+  DDS::ReturnCode_t unsupported_method(const char* method_name, bool warning = false) const;
 
   /// The actual (i.e., non-alias) DynamicType of the associated type.
   DDS::DynamicType_var type_;

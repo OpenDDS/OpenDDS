@@ -13,7 +13,7 @@ module OpenDDS {
 
     @nested
     @final
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     union TypeIdentifier switch (TypeKind) {
       // =================== Future extensibility ============
       // Future extensions
@@ -21,42 +21,42 @@ module OpenDDS {
         char dummy;
     };
 
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     typedef sequence<TypeIdentifier> TypeIdentifierSeq;
 
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     struct TypeIdentifierPair {
       TypeIdentifier type_identifier1;
       TypeIdentifier type_identifier2;
     };
 
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     typedef sequence<TypeIdentifierPair> TypeIdentifierPairSeq;
 
     @nested
     @appendable
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     union TypeObject switch (EquivalenceKind) {
       default:
         char dummy;
     };
 
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     struct TypeIdentifierTypeObjectPair {
       TypeIdentifier type_identifier;
       TypeObject type_object;
     };
 
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     typedef sequence<TypeIdentifierTypeObjectPair> TypeIdentifierTypeObjectPairSeq;
 
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     struct TypeIdentifierWithSize {
       TypeIdentifier type_id;
       long typeobject_serialized_size;
     };
 
-    @OpenDDS::no_dynamic_data_adapter
+    @OpenDDS::internal::no_dynamic_data_adapter
     typedef sequence<TypeIdentifierWithSize> TypeIdentifierWithSizeSeq;
   }; // namespace XTypes
 }; // namespace OpenDDS

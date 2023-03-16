@@ -416,27 +416,41 @@ namespace OpenDDS {
     DataRepresentation value_from_appl(AST_Annotation_Appl* appl) const;
   };
 
-  class NoDynamicDataAdapterAnnotation : public Annotation {
-  public:
-    std::string definition() const
-    {
-      return
-        "module OpenDDS {\n"
-        "  @annotation no_dynamic_data_adapter {\n"
-        "  };\n"
-        "};\n";
-    }
+  namespace internal {
+    /**
+     * Types with this annotation will not get a DynamicDataAdapterImpl generated
+     * for them. Attempting to access struct or union members with this
+     * annotation on their type will result in an UNSUPPORTED retcode.
+     * get_dynamic_data_adapter will be generated, but will return nullptr.
+     *
+     * Struct or union members with this annotation will result in
+     * an UNSUPPORTED retcode when trying to access that member, regardless if
+     * they actually do have a DynamicDataAdapterImpl.
+     */
+    class NoDynamicDataAdapterAnnotation : public Annotation {
+    public:
+      std::string definition() const
+      {
+        return
+          "module OpenDDS {\n"
+          "  module internal {\n"
+          "    @annotation no_dynamic_data_adapter {\n"
+          "    };\n"
+          "  };\n"
+          "};\n";
+      }
 
-    std::string name() const
-    {
-      return "no_dynamic_data_adapter";
-    }
+      std::string name() const
+      {
+        return "no_dynamic_data_adapter";
+      }
 
-    std::string module() const
-    {
-      return "::OpenDDS::";
-    }
-  };
+      std::string module() const
+      {
+        return "::OpenDDS::internal::";
+      }
+    };
+  }
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
 

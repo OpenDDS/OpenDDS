@@ -10,13 +10,21 @@
 #include "TypeSupportImpl.h"
 #include "RcHandle_T.h"
 #include "FilterEvaluator.h"
-#include "XTypes/DynamicDataAdapter.h"
 
 #include <dds/DdsDynamicDataC.h>
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
+
+namespace XTypes {
+  template <typename T>
+  DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
+
+  template <typename T>
+  DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
+}
+
 namespace DCPS {
 
 class Sample;
@@ -109,9 +117,6 @@ public:
   typedef RcHandle<Sample_T<NativeType> > Rch;
   typedef DCPS::KeyOnly<const NativeType> KeyOnlyType;
   typedef DCPS::KeyOnly<NativeType> MutableKeyOnlyType;
-#if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-  typedef XTypes::DynamicDataAdapter<NativeType> DynamicDataImpl;
-#endif
 
   explicit Sample_T(const NativeType& data, Extent extent = Full)
     : Sample(ReadOnly, extent)
@@ -239,8 +244,9 @@ public:
   DDS::DynamicData_var get_dynamic_data(DDS::DynamicType_ptr type) const
   {
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-    if (type && !dynamic_data_) {
-      dynamic_data_ = new DynamicDataImpl(type, *data_);
+    if (!dynamic_data_ && data_) {
+      dynamic_data_ = read_only() ? XTypes::get_dynamic_data_adapter(type, *data_) :
+        XTypes::get_dynamic_data_adapter(type, mutable_data());
     }
     return dynamic_data_;
 #  else

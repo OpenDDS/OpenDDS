@@ -38,11 +38,7 @@ public:
   explicit DynamicDataImpl(DDS::DynamicType_ptr type);
   DynamicDataImpl(const DynamicDataImpl& other);
 
-  DDS::DynamicType_ptr type();
-
   DDS::ReturnCode_t set_descriptor(MemberId id, DDS::MemberDescriptor* value);
-
-  CORBA::Boolean equals(DDS::DynamicData_ptr other);
 
   MemberId get_member_id_at_index(ACE_CDR::ULong index);
   ACE_CDR::ULong get_item_count();
@@ -50,8 +46,6 @@ public:
   DDS::ReturnCode_t clear_all_values();
   DDS::ReturnCode_t clear_nonkey_values();
   DDS::ReturnCode_t clear_value(DDS::MemberId id);
-  DDS::DynamicData_ptr loan_value(DDS::MemberId id);
-  DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr value);
 
   DDS::DynamicData_ptr clone();
 

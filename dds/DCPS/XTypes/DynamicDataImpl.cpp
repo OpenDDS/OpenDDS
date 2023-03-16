@@ -39,21 +39,9 @@ DynamicDataImpl::DynamicDataImpl(const DynamicDataImpl& other)
   , container_(other.container_, this)
 {}
 
-DDS::DynamicType_ptr DynamicDataImpl::type()
-{
-  return DDS::DynamicType::_duplicate(type_);
-}
-
 DDS::ReturnCode_t DynamicDataImpl::set_descriptor(MemberId, DDS::MemberDescriptor*)
 {
   return DDS::RETCODE_UNSUPPORTED;
-}
-
-CORBA::Boolean DynamicDataImpl::equals(DDS::DynamicData_ptr /*other*/)
-{
-  // FUTURE: Implement this.
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::equals: Not implemented\n"));
-  return false;
 }
 
 DDS::MemberId DynamicDataImpl::get_member_id_at_index(ACE_CDR::ULong index)
@@ -387,18 +375,6 @@ DDS::ReturnCode_t DynamicDataImpl::clear_value_i(
   }
 
   return DDS::RETCODE_OK;
-}
-
-DDS::DynamicData_ptr DynamicDataImpl::loan_value(DDS::MemberId /*id*/)
-{
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::loan_value: Not implemented\n"));
-  return 0;
-}
-
-DDS::ReturnCode_t DynamicDataImpl::return_loaned_value(DDS::DynamicData_ptr /*value*/)
-{
-  ACE_ERROR((LM_ERROR, "(%P|%t) ERROR: DynamicDataImpl::return_loaned_value: Not implemented\n"));
-  return DDS::RETCODE_UNSUPPORTED;
 }
 
 DDS::DynamicData_ptr DynamicDataImpl::clone()

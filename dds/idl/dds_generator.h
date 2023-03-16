@@ -315,11 +315,11 @@ public:
     const std::string& what,
     bool impl = true, bool header = true,
     const std::string& indent = "")
-  : what_(what)
-  , impl_(impl)
-  , header_(header)
-  , indent_(indent)
-  , extra_newline_(false)
+    : what_(what)
+    , impl_(impl)
+    , header_(header)
+    , indent_(indent)
+    , extra_newline_(true)
   {
     output("#" + indent + "if" + what + "\n");
   }

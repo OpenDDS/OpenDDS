@@ -1045,5 +1045,5 @@ OpenDDS::XTypes::MemberId BE_GlobalData::get_id(AST_Field* field)
 
 bool BE_GlobalData::dynamic_data_adapter(AST_Decl* node) const
 {
-  return !builtin_annotations_["::OpenDDS::@no_dynamic_data_adapter"]->find_on(node);
+  return !builtin_annotations_["::OpenDDS::internal::@no_dynamic_data_adapter"]->find_on(node);
 }

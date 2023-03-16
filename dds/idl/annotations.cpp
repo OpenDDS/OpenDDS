@@ -29,7 +29,7 @@ void Annotations::register_all()
   register_one<MutableAnnotation>();
   register_one<TryConstructAnnotation>();
   register_one<OpenDDS::DataRepresentationAnnotation>();
-  register_one<OpenDDS::NoDynamicDataAdapterAnnotation>();
+  register_one<OpenDDS::internal::NoDynamicDataAdapterAnnotation>();
 }
 
 Annotations::Annotations()
