@@ -28,6 +28,7 @@ public:
   DynamicDataBase(DDS::DynamicType_ptr type);
 
   DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value, MemberId id);
+  DDS::ReturnCode_t set_descriptor(DDS::MemberId id, DDS::MemberDescriptor* value);
   DDS::MemberId get_member_id_by_name(const char* name);
   DDS::DynamicType_ptr type();
   DDS::Boolean equals(DDS::DynamicData_ptr other);

@@ -53,7 +53,7 @@ class DynamicDataAdapterImpl;
  *   - Part of this is accessing all types as complex value.
  * - Implement equals, clear_value, clear_all_values, and clear_nonkey_values
  */
-class DynamicDataAdapter : public DynamicDataBase {
+class OpenDDS_Dcps_Export DynamicDataAdapter : public DynamicDataBase {
 public:
   DynamicDataAdapter(DDS::DynamicType_ptr type, bool read_only)
     : DynamicDataBase(type)
@@ -61,10 +61,6 @@ public:
   {
   }
 
-  DDS::ReturnCode_t get_descriptor(DDS::MemberDescriptor*& value,
-                                   DDS::MemberId id);
-  DDS::ReturnCode_t set_descriptor(DDS::MemberId,
-                                   DDS::MemberDescriptor*);
   DDS::MemberId get_member_id_by_name(const char* name);
   virtual DDS::MemberId get_member_id_at_index_impl(DDS::UInt32);
   DDS::MemberId get_member_id_at_index(DDS::UInt32 index);

@@ -33,10 +33,17 @@ DDS::DynamicData* DynamicDataBase::interface_from_this() const
 DDS::ReturnCode_t DynamicDataBase::get_descriptor(DDS::MemberDescriptor*& value, MemberId id)
 {
   DDS::DynamicTypeMember_var dtm;
-  if (type_->get_member(dtm, id) != DDS::RETCODE_OK) {
-    return DDS::RETCODE_ERROR;
+  const DDS::ReturnCode_t rc = type_->get_member(dtm, id);
+  if (rc != DDS::RETCODE_OK) {
+    return rc;
   }
   return dtm->get_descriptor(value);
+}
+
+DDS::ReturnCode_t DynamicDataBase::set_descriptor(
+  DDS::MemberId /*id*/, DDS::MemberDescriptor* /*value*/)
+{
+  return unsupported_method("DynamicData::set_descriptor");
 }
 
 DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
