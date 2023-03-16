@@ -72,6 +72,7 @@ module OpenDDS {
        messages to provide binary information about individual sequence numbers
        within a range. */
     /* custom de/serializer implemented in opendds_idl: see 9.4.2.6 */
+    @OpenDDS::internal::special_serialization("rtps_set")
     struct SequenceNumberSet {
       SequenceNumber_t bitmapBase;
       unsigned long numBits;
@@ -236,6 +237,7 @@ module OpenDDS {
 
     /* contains a list of Parameters, terminated with a sentinel */
     /* custom de/serializer implemented in opendds_idl: see 9.4.2.11 */
+    @OpenDDS::internal::special_serialization
     typedef sequence<Parameter> ParameterList;
 
     // Identifies the original writer of a forwarded message
@@ -343,6 +345,7 @@ module OpenDDS {
 
     /* Always used inside a ParameterList */
     /* custom de/serializer implemented in opendds_idl */
+    @OpenDDS::internal::special_serialization
     union Parameter switch (ParameterId_t) {
       case PID_TOPIC_NAME:
       case PID_TYPE_NAME:
@@ -547,6 +550,7 @@ module OpenDDS {
     /* FragmentNumberSet SubmessageElements are used to provide binary
        information about individual fragment numbers within a range. */
     /* custom de/serializer implemented in opendds_idl: see 9.4.2.8 */
+    @OpenDDS::internal::special_serialization("rtps_set")
     struct FragmentNumberSet {
       FragmentNumber_t bitmapBase;
       unsigned long numBits;
@@ -763,6 +767,7 @@ module OpenDDS {
 
     // Security Submessages (0x30-0x3f) don't have a defined structure since
     // each plugin can impose its own definitions of CryptoContent/Header/Footer
+    @OpenDDS::internal::special_serialization
     struct SecuritySubmessage {
       SubmessageHeader smHeader;
       DDS::OctetSeq content;
@@ -825,6 +830,7 @@ module OpenDDS {
       RESERVED_53_SECURITY
     };
 
+    @OpenDDS::internal::special_serialization
     union Submessage switch (SubmessageKind) {
       case PAD:
         PadSubmessage pad_sm;

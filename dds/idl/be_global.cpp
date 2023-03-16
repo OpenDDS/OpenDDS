@@ -9,6 +9,7 @@
 
 #include "be_util.h"
 #include "be_extern.h"
+#include "dds_generator.h"
 
 #include "dds/DCPS/XTypes/TypeObject.h"
 
@@ -992,7 +993,7 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(
 
   using OpenDDS::XTypes::hash_member_name_to_id;
   using OpenDDS::XTypes::MemberId;
-  const string field_name = field->local_name()->get_string();
+  const string field_name = canonical_name(field);
   string hash_id;
   MemberId mid;
   if (id(field, member_id)) {
@@ -1017,8 +1018,7 @@ OpenDDS::XTypes::MemberId BE_GlobalData::compute_id(
   MemberIdCollisionMap::iterator lit = git->second.find(mid);
   if (lit != git->second.end()) {
     std::ostringstream msg;
-    msg << "Member id " << mid << " is the same as on field "
-      << lit->second->local_name()->get_string();
+    msg << "Member id " << mid << " is the same as on field " << canonical_name(lit->second);
     be_util::misc_error_and_abort(msg.str(), field);
   }
   git->second.insert(std::pair<MemberId, AST_Field*>(mid, field));
@@ -1046,4 +1046,18 @@ OpenDDS::XTypes::MemberId BE_GlobalData::get_id(AST_Field* field)
 bool BE_GlobalData::dynamic_data_adapter(AST_Decl* node) const
 {
   return !builtin_annotations_["::OpenDDS::internal::@no_dynamic_data_adapter"]->find_on(node);
+}
+
+bool BE_GlobalData::special_serialization(AST_Decl* node, std::string& template_name) const
+{
+  typedef OpenDDS::internal::SpecialSerializationAnnotation Anno;
+  const Anno* const anno =
+    dynamic_cast<const Anno*>(builtin_annotations_["::OpenDDS::internal::@special_serialization"]);
+  if (!anno->node_value_exists(node, template_name)) {
+    return false;
+  }
+  if (template_name.empty()) {
+    template_name = canonical_name(node->local_name());
+  }
+  return true;
 }

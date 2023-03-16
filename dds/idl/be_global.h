@@ -247,6 +247,8 @@ public:
 
   bool dynamic_data_adapter(AST_Decl* node) const;
 
+  bool special_serialization(AST_Decl* node, std::string& template_name) const;
+
 private:
   /// Name of the IDL file we are processing.
   const char* filename_;

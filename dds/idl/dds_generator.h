@@ -1244,4 +1244,308 @@ AST_Type* container_base_type(AST_Type* type)
   return 0;
 }
 
+/**
+ * Returns true for a type if nested key serialization is different from
+ * normal serialization.
+ */
+inline bool needs_nested_key_only(AST_Type* type)
+{
+  AST_Type* const non_aliased_type = type;
+
+  using namespace AstTypeClassification;
+
+  static std::vector<AST_Type*> type_stack;
+  type = resolveActualType(type);
+  // Check if we have encountered the same type recursively
+  for (size_t i = 0; i < type_stack.size(); ++i) {
+    if (type == type_stack[i]) {
+      return true;
+    }
+  }
+  type_stack.push_back(type);
+
+  bool result = false;
+  const std::string name = scoped(type->name());
+
+  std::string template_name;
+  if (be_global->special_serialization(non_aliased_type, template_name)) {
+    result = false;
+  } else {
+    const Classification type_class = classify(type);
+    if (type_class & CL_ARRAY) {
+      result = needs_nested_key_only(dynamic_cast<AST_Array*>(type)->base_type());
+    } else if (type_class & CL_SEQUENCE) {
+      result = needs_nested_key_only(dynamic_cast<AST_Sequence*>(type)->base_type());
+    } else if (type_class & CL_STRUCTURE) {
+      AST_Structure* const struct_node = dynamic_cast<AST_Structure*>(type);
+      // TODO(iguessthislldo): Possible optimization: If everything in a struct
+      // was a key recursively, then we could return false.
+      if (struct_has_explicit_keys(struct_node)) {
+        result = true;
+      } else {
+        const Fields fields(struct_node);
+        const Fields::Iterator fields_end = fields.end();
+        for (Fields::Iterator i = fields.begin(); i != fields_end; ++i) {
+          if (needs_nested_key_only((*i)->field_type())) {
+            result = true;
+            break;
+          }
+        }
+      }
+    } else if (type_class & CL_UNION) {
+      // A union will always be different as a key because it's just the
+      // discriminator.
+      result = true;
+    }
+  }
+  type_stack.pop_back();
+  return result;
+}
+
+inline bool needs_forany(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  const Classification type_class = classify(resolveActualType(type));
+  return be_global->language_mapping() != BE_GlobalData::LANGMAP_CXX11 &&
+    type_class & CL_ARRAY;
+}
+
+inline bool needs_distinct_type(AST_Type* type)
+{
+  using namespace AstTypeClassification;
+  const Classification type_class = classify(resolveActualType(type));
+  return be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11 &&
+    type_class & (CL_SEQUENCE | CL_ARRAY);
+}
+
+const char* const shift_out = "<< ";
+const char* const shift_in = ">> ";
+
+inline std::string strip_shift_op(const std::string& s)
+{
+  const size_t shift_len = 3;
+  std::string rv = s;
+  if (rv.size() > shift_len) {
+    const std::string first3 = rv.substr(0, shift_len);
+    if (first3 == shift_out || first3 == shift_in) {
+      rv.erase(0, 3);
+    }
+  }
+  return rv;
+}
+
+inline const char* get_shift_op(const std::string& s)
+{
+  const size_t shift_len = 3;
+  if (s.size() > shift_len) {
+    const std::string first3 = s.substr(0, shift_len);
+    if (first3 == shift_in) {
+      return shift_in;
+    }
+    if (first3 == shift_out) {
+      return shift_out;
+    }
+  }
+  return "";
+}
+
+/// Handling wrapping and unwrapping references in the wrapper types:
+/// NestedKeyOnly, IDL::DistinctType, and *_forany.
+struct RefWrapper {
+  AST_Type* const type_;
+  const std::string type_name_;
+  const std::string to_wrap_;
+  const char* const shift_op_;
+  const std::string fieldref_;
+  const std::string local_;
+  bool is_const_;
+  bool nested_key_only_;
+  bool classic_array_copy_;
+  std::string classic_array_copy_var_;
+  AST_Typedef* typedef_node_;
+
+  RefWrapper(AST_Type* type, const std::string& type_name,
+    const std::string& to_wrap, bool is_const = true)
+    : type_(type)
+    , type_name_(type_name)
+    , to_wrap_(strip_shift_op(to_wrap))
+    , shift_op_(get_shift_op(to_wrap))
+    , is_const_(is_const)
+    , nested_key_only_(false)
+    , classic_array_copy_(false)
+    , typedef_node_(0)
+    , done_(false)
+  {
+  }
+
+  RefWrapper(AST_Type* type, const std::string& type_name,
+    const std::string& fieldref, const std::string& local, bool is_const = true)
+    : type_(type)
+    , type_name_(type_name)
+    , shift_op_("")
+    , fieldref_(strip_shift_op(fieldref))
+    , local_(local)
+    , is_const_(is_const)
+    , nested_key_only_(false)
+    , classic_array_copy_(false)
+    , typedef_node_(0)
+    , done_(false)
+  {
+  }
+
+  std::string get_tag_name()
+  {
+    return dds_generator::get_tag_name(type_name_, nested_key_only_);
+  }
+
+  void generate_tag()
+  {
+    if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
+      be_global->header_ << "struct " << get_tag_name() << " {};\n\n";
+    }
+  }
+
+  void done(Intro* intro = 0)
+  {
+    ACE_ASSERT(!done_);
+
+    if (is_const_ && !std::strcmp(shift_op_, shift_in)) {
+      is_const_ = false;
+    }
+    const std::string const_str = is_const_ ? "const " : "";
+    const bool forany = classic_array_copy_ || needs_forany(type_);
+    nested_key_only_ = nested_key_only_ &&
+      needs_nested_key_only(typedef_node_ ? typedef_node_ : type_);
+    wrapped_type_name_ = type_name_;
+    bool by_ref = true;
+
+    if (to_wrap_.size()) {
+      ref_ = to_wrap_;
+    } else {
+      ref_ = fieldref_;
+      if (local_.size()) {
+        ref_ += '.' + local_;
+      }
+    }
+
+    if (forany) {
+      const std::string forany_type = type_name_ + "_forany";
+      if (classic_array_copy_) {
+        const std::string var_name = dds_generator::valid_var_name(ref_) + "_tmp_var";
+        classic_array_copy_var_ = var_name;
+        if (intro) {
+          intro->insert(type_name_ + "_var " + var_name + "= " + type_name_ + "_alloc();");
+        }
+        ref_ = var_name;
+      }
+      const std::string var_name = dds_generator::valid_var_name(ref_) + "_forany";
+      wrapped_type_name_ = forany_type;
+      if (intro) {
+        std::string line = forany_type + " " + var_name;
+        if (classic_array_copy_) {
+          line += " = " + ref_ + ".inout();";
+        } else {
+          line += "(const_cast<" + type_name_ + "_slice*>(" + ref_ + "));";
+        }
+        intro->insert(line);
+      }
+      ref_ = var_name;
+    }
+
+    if (nested_key_only_) {
+      wrapped_type_name_ =
+        std::string("NestedKeyOnly<") + const_str + wrapped_type_name_ + ">";
+      value_access_post_ = ".value" + value_access_post_;
+      const std::string nko_arg = "(" + ref_ + ")";
+      if (is_const_) {
+        ref_ = wrapped_type_name_ + nko_arg;
+      } else {
+        ref_ = dds_generator::valid_var_name(ref_) + "_nested_key_only";
+        if (intro) {
+          intro->insert(wrapped_type_name_ + " " + ref_ + nko_arg + ";");
+        }
+      }
+    }
+
+    if (needs_distinct_type(type_)) {
+      wrapped_type_name_ =
+        std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
+        ", " + get_tag_name() + ">";
+      value_access_pre_ += "(*";
+      value_access_post_ = ".val_)" + value_access_post_;
+      const std::string idt_arg = "(" + ref_ + ")";
+      if (is_const_) {
+        ref_ = wrapped_type_name_ + idt_arg;
+      } else {
+        ref_ = dds_generator::valid_var_name(ref_) + "_distinct_type";
+        if (intro) {
+          intro->insert(wrapped_type_name_ + " " + ref_ + idt_arg + ";");
+        }
+      }
+      by_ref = false;
+    }
+
+    wrapped_type_name_ = const_str + wrapped_type_name_ + (by_ref ? "&" : "");
+    done_ = true;
+  }
+
+  std::string ref() const
+  {
+    ACE_ASSERT(done_);
+    return ref_;
+  }
+
+  std::string wrapped_type_name() const
+  {
+    ACE_ASSERT(done_);
+    return wrapped_type_name_;
+  }
+
+  std::string get_var_name(const std::string& var_name) const
+  {
+    return var_name.size() ? var_name : to_wrap_;
+  }
+
+  std::string value_access(const std::string& var_name = "") const
+  {
+    return value_access_pre_ + get_var_name(var_name) + value_access_post_;
+  }
+
+  std::string seq_check_empty() const
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    return value_access() + (use_cxx11 ? ".empty()" : ".length() == 0");
+  }
+
+  std::string seq_get_length() const
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    const std::string value = value_access();
+    return use_cxx11 ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+  }
+
+  std::string seq_get_buffer() const
+  {
+    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
+    return value_access() + (use_cxx11 ? ".data()" : ".get_buffer()");
+  }
+
+  std::string stream() const
+  {
+    return shift_op_ + ref();
+  }
+
+  std::string classic_array_copy() const
+  {
+    return type_name_ + "_copy(" + to_wrap_ + ", " + classic_array_copy_var_ + ".in());";
+  }
+
+private:
+  bool done_;
+  std::string wrapped_type_name_;
+  std::string ref_;
+  std::string value_access_pre_;
+  std::string value_access_post_;
+};
+
 #endif

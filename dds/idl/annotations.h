@@ -450,6 +450,42 @@ namespace OpenDDS {
         return "::OpenDDS::internal::";
       }
     };
+
+    /**
+     * Types with this annotation have a special serialization case in
+     * marshal_generator.
+     */
+    class SpecialSerializationAnnotation : public AnnotationWithValue<std::string>
+    {
+    public:
+      std::string definition() const
+      {
+        return
+          "module OpenDDS {\n"
+          "  module internal {\n"
+          "    @annotation special_serialization {\n"
+          "      string template_name default \"\";\n"
+          "    };\n"
+          "  };\n"
+          "};\n";
+      }
+
+      std::string name() const
+      {
+        return "special_serialization";
+      }
+
+      std::string module() const
+      {
+        return "::OpenDDS::internal::";
+      }
+
+    protected:
+      std::string value_from_appl(AST_Annotation_Appl* appl) const
+      {
+        return get_str_annotation_member_value(appl, "template_name");
+      }
+    };
   }
 }
 OPENDDS_END_VERSIONED_NAMESPACE_DECL
