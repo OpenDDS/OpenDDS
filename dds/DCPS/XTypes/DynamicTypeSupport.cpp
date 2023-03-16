@@ -207,6 +207,22 @@ namespace OpenDDS {
 #endif
 
   }
+
+  namespace XTypes {
+    template <>
+    DDS::DynamicData_ptr get_dynamic_data_adapter<DynamicSample>(
+      DDS::DynamicType_ptr, const DynamicSample& value)
+    {
+      return value.dynamic_data()._retn();
+    }
+
+    template <>
+    DDS::DynamicData_ptr get_dynamic_data_adapter<DynamicSample>(
+      DDS::DynamicType_ptr, DynamicSample& value)
+    {
+      return value.dynamic_data()._retn();
+    }
+  }
 }
 
 namespace DDS {

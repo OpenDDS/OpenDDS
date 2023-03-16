@@ -8,11 +8,8 @@
 
 #include <dds/DCPS/Definitions.h>
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
-#  include "DynamicTypeImpl.h"
 #  include "DynamicDataBase.h"
 #  include "Utils.h"
-
-#  include <dds/DCPS/debug.h>
 
 #  include <dds/DdsDynamicDataC.h>
 
@@ -21,6 +18,8 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
+// If changing these, also change the get_dynamic_data_adapter forward
+// declarations in Sample.h.
 template <typename T>
 DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
 
@@ -655,8 +654,7 @@ protected:
     DDS::DynamicData* const source_dd = static_cast<DDS::DynamicData*>(const_cast<void*>(source));
 
     // If the source is another DynamicDataAdapter of the member type then do a
-    // direct copy, else do an indirect copy. See set_indirect_complex_value for
-    // the classic mapping array case.
+    // direct copy, else do an indirect copy.
     const T* const source_value = get_dynamic_data_adapter_value<T>(source_dd);
     if (source_value) {
       if (source_value != &dest) {

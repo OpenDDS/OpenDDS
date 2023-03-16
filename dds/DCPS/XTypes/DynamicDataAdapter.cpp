@@ -7,6 +7,8 @@
 
 #include "DynamicDataAdapter.h"
 
+#include <dds/DCPS/debug.h>
+
 #if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL

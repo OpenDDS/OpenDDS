@@ -18,9 +18,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 
 namespace XTypes {
+  // These are here because including DynamicDataAdapter.h creates a include loop.
   template <typename T>
   DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
-
   template <typename T>
   DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
 }

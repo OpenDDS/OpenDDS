@@ -1282,10 +1282,10 @@ private:
         const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
-        XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
+        DDS::DynamicData_var dda = XTypes::get_dynamic_data_adapter<MessageType>(dynamic_type_, *instance_data);
         // The remote participant might not be using security.
         if (remote_participant_permissions_handle != DDS::HANDLE_NIL &&
-            !security_config_->get_access_control()->check_remote_datawriter_register_instance(remote_participant_permissions_handle, this, publication_handle, &dda, ex)) {
+            !security_config_->get_access_control()->check_remote_datawriter_register_instance(remote_participant_permissions_handle, this, publication_handle, dda, ex)) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING,
                        "(%P|%t) WARNING: DataReaderImpl_T::store_instance_data_check: unable to register instance SecurityException[%d.%d]: %C\n",
@@ -1300,10 +1300,10 @@ private:
         const GUID_t remote_participant = make_id(header.publication_id_, ENTITYID_PARTICIPANT);
         const DDS::Security::ParticipantCryptoHandle remote_participant_permissions_handle = security_config_->get_handle_registry(local_participant)->get_remote_participant_permissions_handle(remote_participant);
         // Construct a DynamicData around the deserialized sample.
-        XTypes::DynamicDataAdapter<MessageType> dda(dynamic_type_, getMetaStruct<MessageType>(), *instance_data);
+        DDS::DynamicData_var dda = XTypes::get_dynamic_data_adapter<MessageType>(dynamic_type_, *instance_data);
         // The remote participant might not be using security.
         if (remote_participant_permissions_handle != DDS::HANDLE_NIL &&
-            !security_config_->get_access_control()->check_remote_datawriter_dispose_instance(remote_participant_permissions_handle, this, publication_handle, &dda, ex)) {
+            !security_config_->get_access_control()->check_remote_datawriter_dispose_instance(remote_participant_permissions_handle, this, publication_handle, dda, ex)) {
           if (log_level >= LogLevel::Warning) {
             ACE_ERROR((LM_WARNING,
                        "(%P|%t) WARNING: DataReaderImpl_T::store_instance_data_check: unable to dispose instance SecurityException[%d.%d]: %C\n",
