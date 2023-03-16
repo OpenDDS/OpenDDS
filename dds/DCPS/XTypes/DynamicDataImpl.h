@@ -238,11 +238,73 @@ private:
   DDS::ReturnCode_t get_simple_value_enum(DCPS::Value& value, DDS::MemberId id) const;
 #endif
 
-  bool is_basic_type(TypeKind tk) const;
+  CORBA::ULong get_sequence_size() const;
+  void erase_member(DDS::MemberId id);
+
+  /// Group of functions to read a basic value represented by this DynamicData instance
+  bool read_basic_value(ACE_OutputCDR::from_int8& value);
+  bool read_basic_value(ACE_OutputCDR::from_uint8& value);
+  bool read_basic_value(CORBA::Short& value);
+  bool read_basic_value(CORBA::UShort& value);
+  bool read_basic_value(CORBA::Long& value);
+  bool read_basic_value(CORBA::ULong& value);
+  bool read_basic_value(CORBA::LongLong& value);
+  bool read_basic_value(CORBA::ULongLong& value);
+  bool read_basic_value(CORBA::Float& value);
+  bool read_basic_value(CORBA::Double& value);
+  bool read_basic_value(CORBA::LongDouble& value);
+  bool read_basic_value(ACE_OutputCDR::from_char& value);
+  bool read_basic_value(ACE_OutputCDR::from_wchar& value);
+  bool read_basic_value(ACE_OutputCDR::from_octet& value);
+  bool read_basic_value(ACE_OutputCDR::from_boolean& value);
+  bool read_basic_value(char*& value) const;
+#ifdef DDS_HAS_WCHAR
+  bool read_basic_value(CORBA::WChar*& value) const;
+#endif
+
+  void cast_to_enum_value(ACE_OutputCDR::from_int8& dst, CORBA::Long src) const;
+  void cast_to_enum_value(CORBA::Short& dst, CORBA::Long src) const;
+  void cast_to_enum_value(CORBA::Long& dst, CORBA::Long src) const;
+
+  template<typename ValueType>
+  void cast_to_enum_value(ValueType& dst, CORBA::Long src) const;
+
+  /// Read a basic member from a containing type
+  template<typename ValueType>
+  bool read_basic_in_single_map(ValueType& value, DDS::MemberId id);
+
+  template<typename ValueType>
+  bool read_basic_in_complex_map(ValueType& value, DDS::MemberId id);
+
+  template<typename ValueType>
+  bool read_basic_member(ValueType& value, DDS::MemberId id);
+
+  template<typename ValueType>
+  bool get_value_from_self(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_enum(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_bitmask(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_struct(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_union(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind ValueTypeKind, typename ValueType>
+  bool get_value_from_collection(ValueType& value, DDS::MemberId id);
+
+  template<TypeKind CharKind, TypeKind StringKind, typename FromCharT, typename CharT>
+  DDS::ReturnCode_t get_char_common(CharT& value, DDS::MemberId id);
+
+  template<typename UIntType>
+  bool get_boolean_from_bitmask(CORBA::ULong index, CORBA::Boolean& value);
 
   template<TypeKind MemberTypeKind, typename MemberType>
-  bool set_value_to_struct(DDS::MemberId id, const MemberType& value,
-    TypeKind enum_or_bitmask = TK_NONE, LBound lower = 0, LBound upper = 0);
+  bool set_value_to_struct(DDS::MemberId id, const MemberType& value);
 
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_boolean& value) const;
   bool cast_to_discriminator_value(CORBA::Long& disc_value, const ACE_OutputCDR::from_octet& value) const;
@@ -291,8 +353,7 @@ private:
   bool validate_member_id_collection(const DDS::TypeDescriptor_var& descriptor,
                                      DDS::MemberId id, TypeKind collection_tk) const;
 
-  DDS::ReturnCode_t clear_value_i(
-    DDS::MemberId id, DDS::DynamicType_ptr type, DDS::TypeKind treat_as);
+  DDS::ReturnCode_t clear_value_i(DDS::MemberId id, const DDS::DynamicType_var& member_type);
 
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_int8& value);
   bool insert_single(DDS::MemberId id, const ACE_OutputCDR::from_uint8& value);
@@ -338,8 +399,8 @@ private:
                                         TypeKind enum_or_bitmask = TK_NONE,
                                         LBound lower = 0, LBound upper = 0);
 
-  template <typename Type>
-  DDS::ReturnCode_t get_single_value(Type& value, DDS::MemberId id, DDS::TypeKind tk);
+  template<TypeKind ValueTypeKind, typename ValueType>
+  DDS::ReturnCode_t get_single_value(ValueType& value, DDS::MemberId id);
 
   // Contain data for an instance of a basic type.
   struct SingleValue {
@@ -366,7 +427,14 @@ private:
 
     ~SingleValue();
 
+    // Return a reference to the stored value. Mostly for serialization.
     template<typename T> const T& get() const;
+
+    // Return a duplication of the stored string/wstring.
+    // Used for the get_* interfaces of DynamicData.
+    // Caller is responsible for release the returned string.
+    char* get_string() const;
+    CORBA::WChar* get_wstring() const;
 
     TypeKind kind_;
     // Used for types that need ACE_OutputCDR disambiguators.
@@ -529,11 +597,23 @@ private:
     void set_default_basic_value(ACE_OutputCDR::from_char& value) const;
     void set_default_basic_value(ACE_OutputCDR::from_octet& value) const;
     void set_default_basic_value(const char*& value) const;
+    void set_default_basic_value(char*& value) const;
     void set_default_basic_value(ACE_OutputCDR::from_boolean& value) const;
 #ifdef DDS_HAS_WCHAR
     void set_default_basic_value(ACE_OutputCDR::from_wchar& value) const;
     void set_default_basic_value(const CORBA::WChar*& value) const;
+    void set_default_basic_value(CORBA::WChar*& value) const;
 #endif
+
+    bool set_default_enum_value(const DDS::DynamicType_var& dt, CORBA::Long& value) const;
+
+    void set_default_bitmask_value(ACE_OutputCDR::from_uint8& value) const;
+    void set_default_bitmask_value(CORBA::UShort& value) const;
+    void set_default_bitmask_value(CORBA::ULong& value) const;
+    void set_default_bitmask_value(CORBA::ULongLong& value) const;
+
+    template<typename Type>
+    void set_default_bitmask_value(Type& value) const;
 
     void set_default_primitive_values(DDS::Int8Seq& collection) const;
     void set_default_primitive_values(DDS::UInt8Seq& collection) const;
@@ -891,13 +971,39 @@ private:
     const DynamicDataImpl* data_;
   };
 
+  // Copy a value of a basic member from single map to a DynamicData object.
+  bool move_single_to_complex(const DataContainer::const_single_iterator& it,
+                              DynamicDataImpl* data);
+  bool move_single_to_complex_i(const DataContainer::const_single_iterator& it,
+                                DynamicDataImpl* data, const TypeKind treat_as);
+
+  template<typename SequenceType>
+  void move_sequence_helper(const DataContainer::const_sequence_iterator& it,
+                            DynamicDataImpl* data);
+
+  // Copy values of a basic sequence member from sequence map to a DynamicData object.
+  bool move_sequence_to_complex(const DataContainer::const_sequence_iterator& it,
+                                DynamicDataImpl* data);
+
+  // Indicate whether the value of a member is found in the complex map or
+  // one of the other two maps or not found from any map in the container.
+  enum FoundStatus { FOUND_IN_COMPLEX_MAP, FOUND_IN_NON_COMPLEX_MAP, NOT_FOUND };
+  bool get_complex_from_aggregated(DDS::DynamicData_var& value, DDS::MemberId id,
+                                   FoundStatus& found_status);
+
+  bool get_complex_from_struct(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  bool write_discriminator_helper(CORBA::Long value, TypeKind treat_as);
+  bool write_discriminator(CORBA::Long value);
+  bool get_complex_from_union(DDS::DynamicData_ptr& value, DDS::MemberId id);
+  bool get_complex_from_collection(DDS::DynamicData_ptr& value, DDS::MemberId id);
+
   bool read_discriminator(CORBA::Long& disc_val, const DDS::DynamicType_var& disc_type,
                           DataContainer::const_single_iterator it) const;
 
   // Add a single value for any valid discriminator value that selects the given member
   bool insert_valid_discriminator(DDS::MemberDescriptor* memberSelected);
   bool insert_discriminator(ACE_CDR::Long value);
-  DDS::ReturnCode_t reset_union();
+  void clear_container();
 
   DataContainer container_;
 

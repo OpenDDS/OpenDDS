@@ -54,12 +54,15 @@ function(opendds_get_generated_output_dir target output_dir_var)
 endfunction()
 
 function(opendds_ensure_generated_output_dir target file o_arg output_dir_var)
+  get_filename_component(abs_file "${file}" ABSOLUTE)
+  get_filename_component(abs_dir "${abs_file}" DIRECTORY)
+  opendds_get_generated_output_dir("${target}" output_dir)
   if(o_arg)
-    set(output_dir ${o_arg})
-  else()
-    get_filename_component(abs_file "${file}" ABSOLUTE)
-    get_filename_component(abs_dir "${abs_file}" DIRECTORY)
-    opendds_get_generated_output_dir("${target}" output_dir)
+    if(IS_ABSOLUTE "${o_arg}")
+      set(output_dir "${o_arg}")
+    else()
+      set(output_dir "${output_dir}/${o_arg}")
+    endif()
   endif()
   file(MAKE_DIRECTORY "${output_dir}")
   set(${output_dir_var} "${output_dir}" PARENT_SCOPE)
@@ -80,9 +83,7 @@ endfunction()
 
 function(tao_idl_command target)
   set(multiValueArgs IDL_FLAGS IDL_FILES)
-  cmake_parse_arguments(_arg "" "" "${multiValueArgs}" ${ARGN})
-
-  set(_arg_IDL_FLAGS ${_arg_IDL_FLAGS})
+  cmake_parse_arguments(_arg "" "AUTO_INCLUDES" "${multiValueArgs}" ${ARGN})
 
   if (NOT _arg_IDL_FILES)
     message(FATAL_ERROR "called tao_idl_command(${target}) without specifying IDL_FILES")
@@ -111,21 +112,26 @@ function(tao_idl_command target)
   cmake_parse_arguments(_idl_cmd_arg "${optionArgs}" "-o;-oS;-oA" "" ${_arg_IDL_FLAGS})
 
   foreach(idl_file ${_arg_IDL_FILES})
-    set(default_ouput_args)
+    set(added_output_args)
     opendds_get_generated_idl_output(
       ${target} ${idl_file} "${_idl_cmd_arg_-o}" output_prefix output_dir)
-    if(NOT _idl_cmd_arg_-o)
-      list(APPEND default_ouput_args "-o" "${output_dir}")
+    list(APPEND auto_includes "${output_dir}")
+    list(APPEND added_output_args "-o" "${output_dir}")
+    if(_idl_cmd_arg_-oS)
+      opendds_get_generated_idl_output(
+        ${target} ${idl_file} "${_idl_cmd_arg_-oS}" skel_output_prefix skel_output_dir)
+      list(APPEND auto_includes "${skel_output_dir}")
+      list(APPEND added_output_args "-oS" "${skel_output_dir}")
+    else()
+      set(skel_output_prefix "${output_prefix}")
     endif()
-    opendds_get_generated_idl_output(
-      ${target} ${idl_file} "${_idl_cmd_arg_-oS}" skel_output_prefix skel_output_dir)
-    if(NOT _idl_cmd_arg_-oS)
-      list(APPEND default_ouput_args "-oS" "${skel_output_dir}")
-    endif()
-    opendds_get_generated_idl_output(
-      ${target} ${idl_file} "${_idl_cmd_arg_-oA}" anyop_output_prefix anyop_output_dir)
-    if(NOT _idl_cmd_arg_-oA)
-      list(APPEND default_ouput_args "-oA" "${anyop_output_dir}")
+    if(_idl_cmd_arg_-oA)
+      opendds_get_generated_idl_output(
+        ${target} ${idl_file} "${_idl_cmd_arg_-oA}" anyop_output_prefix anyop_output_dir)
+      list(APPEND auto_includes "${anyop_output_dir}")
+      list(APPEND added_output_args "-oA" "${anyop_output_dir}")
+    else()
+      set(anyop_output_prefix "${output_prefix}")
     endif()
 
     set(_STUB_HEADER_FILES)
@@ -207,7 +213,7 @@ function(tao_idl_command target)
         --idl-version 4 -as --unknown-annotations ignore
         -I${TAO_INCLUDE_DIR} -I${_working_source_dir}
         ${_converted_flags}
-        ${default_output_args}
+        ${added_output_args}
         ${idl_file_path}
     )
 
@@ -223,4 +229,8 @@ function(tao_idl_command target)
         ${_SKEL_HEADER_FILES}
         ${_ANYOP_HEADER_FILES})
   endforeach()
+
+  if(_arg_AUTO_INCLUDES)
+    set("${_arg_AUTO_INCLUDES}" "${auto_includes}" PARENT_SCOPE)
+  endif()
 endfunction()

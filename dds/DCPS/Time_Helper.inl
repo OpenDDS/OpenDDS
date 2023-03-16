@@ -307,6 +307,15 @@ const MonotonicTime_t& monotonic_time_zero()
   return zero;
 }
 
+ACE_INLINE OpenDDS_Dcps_Export
+DDS::Duration_t make_duration(int sec, unsigned long nanosec)
+{
+  DDS::Duration_t x;
+  x.sec = sec;
+  x.nanosec = nanosec;
+  return x;
+}
+
 } // namespace DCPS
 } // namespace OpenDDS
 

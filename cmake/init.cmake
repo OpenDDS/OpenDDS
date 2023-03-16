@@ -58,11 +58,38 @@ option(OPENDDS_FILENAME_ONLY_INCLUDES "No directory info in generated #includes.
 set(OPENDDS_DEFAULT_SCOPE "PRIVATE" CACHE STRING "Default scope for OPENDDS_TARGET_SOURCES")
 set_property(CACHE OPENDDS_DEFAULT_SCOPE PROPERTY STRINGS "PUBLIC" "PRIVATE" "INTERFACE")
 option(OPENDDS_ALWAYS_GENERATE_LIB_EXPORT_HEADER "Always generate an export header for libraries" OFF)
+# This is off because it's not compatible with a possible existing usage of
+# target_link_libraries that doesn't specify a scope:
+# "All uses of target_link_libraries with a target must be either all-keyword
+# or all-plain."
+# TODO: Make this default ON in v4.0
+option(OPENDDS_AUTO_LINK_DCPS "Automatically link OpenDDS::Dcps to the target of OPENDDS_TARGET_SOURCES" OFF)
+# This is off by default because it could cause "Cannot find source file"
+# errors on `TypeSupport.idl` files generated in a another directory.
+# TODO: Make this default ON in v4.0
+option(OPENDDS_USE_CORRECT_INCLUDE_SCOPE "Include using SCOPE specified in OPENDDS_TARGET_SOURCES" OFF)
 
 macro(_OPENDDS_RETURN_ERR msg)
   message(SEND_ERROR "${msg}")
   set(OPENDDS_FOUND FALSE)
   return()
+endmacro()
+
+macro(OPENDDS_SAVE_CACHE name type value)
+  list(APPEND _opendds_save_cache_vars ${name})
+  set(_opendds_save_cache_${name}_type ${type})
+  set(_opendds_save_cache_${name}_value "${${name}}")
+  set(${name} "${value}" CACHE ${type} "" FORCE)
+endmacro()
+
+macro(OPENDDS_RESTORE_CACHE)
+  foreach(name ${_opendds_save_cache_vars})
+    set(${name} "${_opendds_save_cache_${name}_value}" CACHE
+      "${_opendds_save_cache_${name}_type}" "" FORCE)
+    unset(_opendds_save_cache_${name}_type)
+    unset(_opendds_save_cache_${name}_value)
+  endforeach()
+  unset(_opendds_save_cache_vars)
 endmacro()
 
 if(NOT DEFINED OPENDDS_INSTALL_LIB)

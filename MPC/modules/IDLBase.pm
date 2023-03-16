@@ -268,6 +268,28 @@ sub get_scope {
   return \@scope;
 }
 
+sub locate_file {
+  my($self, $file) = @_;
+
+  ## Look through the idl2jni files to see if we can find our files actual
+  ## location according to the MPC file.  It is possible that the
+  ## TypeSupport.idl will not be generated in the same directory as the source
+  ## idl file.
+  my $base = $self->{'creator'}->mpc_basename($file);
+  my @comps = $self->{'creator'}->get_component_list('idl2jni_files');
+  foreach my $comp (@comps) {
+    if ($self->{'creator'}->mpc_basename($comp) eq $base) {
+      ## There should only be one that matches.  Some build tools, such as
+      ## Visual Studio, ignore duplicate file names (even if they are in
+      ## different directories).
+      return $comp;
+    }
+  }
+
+  ## Give back what we were given.  That's all we can do here.
+  return $file;
+}
+
 sub cached_parse {
   my($self, $file, $includes, $macros, $mparams) = @_;
 
@@ -294,6 +316,15 @@ sub cached_parse {
   my $ts = defined $self->{'strs'}->{$actual} ||
            ($actual =~ /$tsreg$/ && -r $actual) ?
                    undef : ($actual =~ s/$tsreg$/.idl/);
+
+  ## MPC v4.1.41 and older does not provide the ProjectCreator to the
+  ## CommandHelper.  If we have the ProjectCreator and the original file was
+  ## a TypeSupport.idl, but does not yet exist.  We will attempt to find the
+  ## location of the idl file from which the TypeSupport.idl will be generated.
+  if (exists $self->{'creator'} && $file ne $actual) {
+    $actual = $self->locate_file($actual);
+  }
+
   my($data, $forwards, $ts_str, $ts_pragma) =
        $self->parse($actual, $includes, $macros, $mparams);
 

@@ -25,8 +25,7 @@ set(src "${CMAKE_CURRENT_SOURCE_DIR}/../../../DCPS/Messenger")
 set(dst ${CMAKE_CURRENT_BINARY_DIR})
 set(all_targets ${publisher})
 
-foreach(file
-  publisher.cpp Args.h)
+foreach(file publisher.cpp Args.h)
   configure_file(${src}/${file} ${dst}/${file} COPYONLY)
 endforeach()
 
@@ -38,5 +37,7 @@ set_target_properties(${publisher}
   PROPERTIES OUTPUT_NAME publisher
 )
 
+# For tests/Utils when OpenDDS is installed
 target_include_directories(${publisher} PRIVATE "${src}/../../../")
+
 target_link_libraries(${publisher} ${messenger} OpenDDS::OpenDDS)
