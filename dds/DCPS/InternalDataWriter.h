@@ -39,7 +39,7 @@ namespace DCPS {
   UserDataQosPolicy user_data; => None
   OwnershipQosPolicy ownership; => None
   OwnershipStrengthQosPolicy ownership_strength; => None
-  WriterDataLifecycleQosPolicy writer_data_lifecycle; => None
+  WriterDataLifecycleQosPolicy writer_data_lifecycle; => Yes
 */
 
 template <typename T>
@@ -75,7 +75,7 @@ public:
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
     if (readers_.erase(reader)) {
-      reader->remove_publication(static_rchandle_cast<InternalEntity>(rchandle_from(this)));
+      reader->remove_publication(static_rchandle_cast<InternalEntity>(rchandle_from(this)), qos_.writer_data_lifecycle.autodispose_unregistered_instances);
     }
   }
 
@@ -126,6 +126,25 @@ public:
     }
   }
 
+  void dispose(const T& sample)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+    if (qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS) {
+      typename InstanceMap::iterator pos = instance_map_.find(sample);
+      if (pos != instance_map_.end()) {
+        pos->second.dispose();
+      }
+    }
+
+    for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
+      InternalDataReader_rch reader = pos->lock();
+      if (reader) {
+        reader->dispose(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
+      }
+    }
+  }
+
   void unregister_instance(const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -137,23 +156,10 @@ public:
     for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
       InternalDataReader_rch reader = pos->lock();
       if (reader) {
+        if (qos_.writer_data_lifecycle.autodispose_unregistered_instances) {
+          reader->dispose(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
+        }
         reader->unregister_instance(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
-      }
-    }
-  }
-
-  void dispose(const T& sample)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    if (qos_.durability.kind == DDS::TRANSIENT_LOCAL_DURABILITY_QOS) {
-      instance_map_.erase(sample);
-    }
-
-    for (typename ReaderSet::const_iterator pos = readers_.begin(), limit = readers_.end(); pos != limit; ++pos) {
-      InternalDataReader_rch reader = pos->lock();
-      if (reader) {
-        reader->dispose(static_rchandle_cast<InternalEntity>(rchandle_from(this)), sample);
       }
     }
   }
@@ -169,6 +175,13 @@ private:
   public:
     bool empty() const { return samples_.empty(); }
 
+    void add_reader(InternalDataReader_rch reader, RcHandle<InternalEntity> writer)
+    {
+      for (typename SampleList::const_iterator pos = samples_.begin(), limit = samples_.end(); pos != limit; ++pos) {
+        reader->write(writer, *pos);
+      }
+    }
+
     void write(const T& sample,
                const DDS::DataWriterQos& qos)
     {
@@ -180,11 +193,9 @@ private:
       }
     }
 
-    void add_reader(InternalDataReader_rch reader, RcHandle<InternalEntity> writer)
+    void dispose()
     {
-      for (typename SampleList::const_iterator pos = samples_.begin(), limit = samples_.end(); pos != limit; ++pos) {
-        reader->write(writer, *pos);
-      }
+      samples_.clear();
     }
 
   private:

@@ -117,14 +117,17 @@ TEST(dds_DCPS_InternalDataWriter, remove_reader)
 
   EXPECT_FALSE(writer->has_reader(reader));
 
-  ASSERT_EQ(samples.size(), 2U);
-  ASSERT_EQ(infos.size(), 2U);
+  ASSERT_EQ(samples.size(), 3U);
+  ASSERT_EQ(infos.size(), 3U);
 
   EXPECT_EQ(samples[0], sample);
   EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
 
   EXPECT_EQ(samples[1], sample);
-  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_UNREGISTER, writer->publication_handle()));
+  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_DISPOSE, writer->publication_handle()));
+
+  EXPECT_EQ(samples[2], sample);
+  EXPECT_EQ(infos[2], InternalSampleInfo(ISIK_UNREGISTER, writer->publication_handle()));
 }
 
 TEST(dds_DCPS_InternalDataWriter, register_instance)
@@ -181,14 +184,17 @@ TEST(dds_DCPS_InternalDataWriter, unregister_instance)
   writer->unregister_instance(sample);
   reader->take(samples, infos);
 
-  ASSERT_EQ(samples.size(), 2U);
-  ASSERT_EQ(infos.size(), 2U);
+  ASSERT_EQ(samples.size(), 3U);
+  ASSERT_EQ(infos.size(), 3U);
 
   EXPECT_EQ(samples[0], sample);
   EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
 
   EXPECT_EQ(samples[1], sample);
-  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_UNREGISTER, writer->publication_handle()));
+  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_DISPOSE, writer->publication_handle()));
+
+  EXPECT_EQ(samples[2], sample);
+  EXPECT_EQ(infos[2], InternalSampleInfo(ISIK_UNREGISTER, writer->publication_handle()));
 }
 
 TEST(dds_DCPS_InternalDataWriter, dispose)

@@ -131,6 +131,32 @@ TEST(dds_DCPS_InternalDataReader, dispose)
   EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_DISPOSE, writer));
 }
 
+TEST(dds_DCPS_InternalDataReader, remove_publication_autodispose)
+{
+  Sample sample("key");
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<InternalEntity> writer = make_rch<InternalEntity>();
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
+
+  reader->register_instance(writer, sample);
+  reader->remove_publication(writer, true);
+  reader->take(samples, infos);
+
+  ASSERT_EQ(samples.size(), 3U);
+  ASSERT_EQ(infos.size(), 3U);
+
+  EXPECT_EQ(samples[0], sample);
+  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer));
+
+  EXPECT_EQ(samples[1], sample);
+  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_DISPOSE, writer));
+
+  EXPECT_EQ(samples[2], sample);
+  EXPECT_EQ(infos[2], InternalSampleInfo(ISIK_UNREGISTER, writer));
+}
+
 TEST(dds_DCPS_InternalDataReader, remove_publication)
 {
   Sample sample("key");
@@ -141,7 +167,7 @@ TEST(dds_DCPS_InternalDataReader, remove_publication)
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
 
   reader->register_instance(writer, sample);
-  reader->remove_publication(writer);
+  reader->remove_publication(writer, false);
   reader->take(samples, infos);
 
   ASSERT_EQ(samples.size(), 2U);

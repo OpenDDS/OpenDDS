@@ -71,14 +71,18 @@ public:
   /// @{
   bool durable() const { return durable_; }
 
-  void remove_publication(InternalEntity_wrch publication_handle)
+  void remove_publication(InternalEntity_wrch publication_handle, bool autodispose_unregistered_instances)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
     // FUTURE: Index by publication_handle to avoid the loop.
     bool schedule = false;
     for (typename InstanceMap::iterator pos = instance_map_.begin(), limit = instance_map_.end(); pos != limit; ++pos) {
-      if (pos->second.unregister_instance(pos->first, publication_handle)) {
+      if (pos->second.is_publisher(publication_handle)) {
+        if (autodispose_unregistered_instances) {
+          pos->second.dispose(pos->first, publication_handle);
+        }
+        pos->second.unregister_instance(pos->first, publication_handle);
         schedule = true;
       }
     }
@@ -135,21 +139,6 @@ public:
     p.first->second.instance_state = DDS::ALIVE_INSTANCE_STATE;
   }
 
-  void unregister_instance(InternalEntity_wrch publication_handle, const T& sample)
-  {
-    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
-
-    typename InstanceMap::iterator pos = instance_map_.find(sample);
-    if (pos == instance_map_.end()) {
-      return;
-    }
-
-    const Listener_rch listener = listener_.lock();
-    if (pos->second.unregister_instance(sample, publication_handle) && listener) {
-      listener->schedule(rchandle_from(this));
-    }
-  }
-
   void dispose(InternalEntity_wrch publication_handle, const T& sample)
   {
     ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
@@ -159,13 +148,29 @@ public:
       return;
     }
 
-    pos->second.samples.push_back(sample);
-    pos->second.infos.push_back(InternalSampleInfo(ISIK_DISPOSE, publication_handle));
-    pos->second.instance_state = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+    pos->second.dispose(sample, publication_handle);
 
     const Listener_rch listener = listener_.lock();
     if (listener) {
       listener->schedule(rchandle_from(this));
+    }
+  }
+
+  void unregister_instance(InternalEntity_wrch publication_handle, const T& sample)
+  {
+    ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
+
+    typename InstanceMap::iterator pos = instance_map_.find(sample);
+    if (pos == instance_map_.end()) {
+      return;
+    }
+
+    if (pos->second.is_publisher(publication_handle)) {
+      pos->second.unregister_instance(sample, publication_handle);
+      const Listener_rch listener = listener_.lock();
+      if (listener) {
+        listener->schedule(rchandle_from(this));
+      }
     }
   }
   /// @}
@@ -225,20 +230,27 @@ private:
     DDS::ViewStateKind view_state;
     DDS::InstanceStateKind instance_state;
 
-    bool unregister_instance(const T& sample, InternalEntity_wrch publication_handle)
+    bool is_publisher(InternalEntity_wrch publication_handle) const
     {
-      if (publication_set.erase(publication_handle)) {
-        samples.push_back(sample);
-        infos.push_back(InternalSampleInfo(ISIK_UNREGISTER, publication_handle));
+      return publication_set.count(publication_handle);
+    }
 
-        if (publication_set.empty() && instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
-          instance_state = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
-        }
+    void dispose(const T& sample, InternalEntity_wrch publication_handle)
+    {
+      samples.push_back(sample);
+      infos.push_back(InternalSampleInfo(ISIK_DISPOSE, publication_handle));
+      instance_state = DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE;
+    }
 
-        return true;
+    void unregister_instance(const T& sample, InternalEntity_wrch publication_handle)
+    {
+      publication_set.erase(publication_handle);
+      samples.push_back(sample);
+      infos.push_back(InternalSampleInfo(ISIK_UNREGISTER, publication_handle));
+
+      if (publication_set.empty() && instance_state != DDS::NOT_ALIVE_DISPOSED_INSTANCE_STATE) {
+        instance_state = DDS::NOT_ALIVE_NO_WRITERS_INSTANCE_STATE;
       }
-
-      return false;
     }
   };
 

@@ -76,7 +76,7 @@ void NetworkConfigMonitor::set(const List& list)
     List::const_iterator iter = std::find_if(list.begin(), list.end(), NetworkInterfaceAddressKeyEqual(*pos));
     if (iter == list.end()) {
       // Deleted.
-      writer_->dispose(*pos);
+      writer_->unregister_instance(*pos);
     }
   }
 
@@ -88,7 +88,7 @@ void NetworkConfigMonitor::clear()
   ACE_GUARD(ACE_Thread_Mutex, g, mutex_);
 
   for (List::const_iterator pos = list_.begin(), limit = list_.end(); pos != limit; ++pos) {
-    writer_->dispose(*pos);
+    writer_->unregister_instance(*pos);
   }
 
   list_.clear();
@@ -116,7 +116,7 @@ void NetworkConfigMonitor::remove_interface(const OPENDDS_STRING& name)
 
   for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
     if (pos->name == name) {
-      writer_->dispose(*pos);
+      writer_->unregister_instance(*pos);
       list_.erase(pos++);
     } else {
       ++pos;
@@ -130,7 +130,7 @@ void NetworkConfigMonitor::remove_address(const OPENDDS_STRING& name, const Netw
 
   for (List::iterator pos = list_.begin(), limit = list_.end(); pos != limit;) {
     if (pos->name == name && pos->address == address) {
-      writer_->dispose(*pos);
+      writer_->unregister_instance(*pos);
       list_.erase(pos++);
     } else {
       ++pos;
