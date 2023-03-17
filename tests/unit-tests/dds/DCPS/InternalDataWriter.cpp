@@ -1,5 +1,7 @@
 #include <dds/DCPS/InternalDataWriter.h>
 
+#include <dds/DCPS/Qos_Helper.h>
+
 #include <gtest/gtest.h>
 
 using namespace OpenDDS::DCPS;
@@ -32,7 +34,7 @@ typedef InternalDataReader<Sample> ReaderType;
 
 TEST(dds_DCPS_InternalDataWriter, add_reader)
 {
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
 
@@ -48,10 +50,43 @@ TEST(dds_DCPS_InternalDataWriter, add_reader_durable)
   ReaderType::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  RcHandle<WriterType> writer = make_rch<WriterType>(true);
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().durability_transient_local().history_depth(2));
   RcHandle<ReaderType> reader = make_rch<ReaderType>(true);
 
   writer->register_instance(sample1);
+  writer->write(sample2);
+  writer->write(sample2);
+
+  writer->add_reader(reader);
+  reader->take(samples, infos);
+
+  ASSERT_EQ(samples.size(), 3U);
+  ASSERT_EQ(infos.size(), 3U);
+
+  EXPECT_EQ(samples[0], sample1);
+  EXPECT_EQ(infos[0], InternalSampleInfo(ISIK_REGISTER, writer->publication_handle()));
+
+  EXPECT_EQ(samples[1], sample2);
+  EXPECT_EQ(infos[1], InternalSampleInfo(ISIK_SAMPLE, writer->publication_handle()));
+
+  EXPECT_EQ(samples[2], sample2);
+  EXPECT_EQ(infos[2], InternalSampleInfo(ISIK_SAMPLE, writer->publication_handle()));
+}
+
+TEST(dds_DCPS_InternalDataWriter, add_reader_durable_history1)
+{
+  Sample sample1("key1");
+  Sample sample2("key2");
+  ASSERT_LT(sample1, sample2);
+
+  ReaderType::SampleSequence samples;
+  InternalSampleInfoSequence infos;
+
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder().durability_transient_local());
+  RcHandle<ReaderType> reader = make_rch<ReaderType>(true);
+
+  writer->register_instance(sample1);
+  writer->write(sample2);
   writer->write(sample2);
 
   writer->add_reader(reader);
@@ -73,7 +108,7 @@ TEST(dds_DCPS_InternalDataWriter, remove_reader)
   ReaderType::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
   writer->register_instance(sample);
@@ -98,7 +133,7 @@ TEST(dds_DCPS_InternalDataWriter, register_instance)
   ReaderType::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
 
@@ -118,7 +153,7 @@ TEST(dds_DCPS_InternalDataWriter, write)
   ReaderType::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
 
@@ -138,7 +173,7 @@ TEST(dds_DCPS_InternalDataWriter, unregister_instance)
   ReaderType::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
 
@@ -162,7 +197,7 @@ TEST(dds_DCPS_InternalDataWriter, dispose)
   ReaderType::SampleSequence samples;
   InternalSampleInfoSequence infos;
 
-  RcHandle<WriterType> writer = make_rch<WriterType>(false);
+  RcHandle<WriterType> writer = make_rch<WriterType>(DataWriterQosBuilder());
   RcHandle<ReaderType> reader = make_rch<ReaderType>(false);
   writer->add_reader(reader);
 

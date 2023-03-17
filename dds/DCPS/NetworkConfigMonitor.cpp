@@ -8,6 +8,8 @@
 #include "DCPS/DdsDcps_pch.h" //Only the _pch include should start with DCPS/
 
 #include "NetworkConfigMonitor.h"
+
+#include "Qos_Helper.h"
 #include "Service_Participant.h"
 
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
@@ -37,7 +39,7 @@ bool NetworkInterfaceAddress::exclude_from_multicast(const char* configured_inte
 }
 
 NetworkConfigMonitor::NetworkConfigMonitor()
-  : writer_(make_rch<InternalDataWriter<NetworkInterfaceAddress> >(true))
+  : writer_(make_rch<InternalDataWriter<NetworkInterfaceAddress> >(DataWriterQosBuilder().durability_transient_local()))
 {}
 
 NetworkConfigMonitor::~NetworkConfigMonitor()
