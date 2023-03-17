@@ -3481,6 +3481,29 @@ void DynamicDataImpl::move_sequence_helper(const DataContainer::const_sequence_i
   }
 }
 
+// Get the inner C-string explicitly
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::StringSeq>(const DataContainer::const_sequence_iterator& it,
+                                                           DynamicDataImpl* data)
+{
+  const DDS::StringSeq& values = it->second.get<DDS::StringSeq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    data->insert_single(i, values[i].in());
+  }
+}
+
+#ifdef DDS_HAS_WCHAR
+template<>
+void DynamicDataImpl::move_sequence_helper<DDS::WstringSeq>(const DataContainer::const_sequence_iterator& it,
+                                                            DynamicDataImpl* data)
+{
+  const DDS::WstringSeq& values = it->second.get<DDS::WstringSeq>();
+  for (CORBA::ULong i = 0; i < values.length(); ++i) {
+    data->insert_single(i, values[i].in());
+  }
+}
+#endif
+
 template<>
 void DynamicDataImpl::move_sequence_helper<DDS::Int8Seq>(const DataContainer::const_sequence_iterator& it,
                                                          DynamicDataImpl* data)
