@@ -96,7 +96,6 @@ namespace {
         template_name + "\"", typedef_node);
       result = false;
     } else {
-      printf("SPECIAL: %s\n", cpp_name.c_str());
       result = (it->second)(cpp_name);
     }
     return true;
@@ -117,7 +116,6 @@ namespace {
         template_name + "\"", node);
       result = false;
     } else {
-      printf("SPECIAL: %s\n", cpp_name.c_str());
       result = (it->second)(cpp_name);
     }
     return true;
@@ -139,7 +137,6 @@ namespace {
         template_name + "\"", node);
       result = false;
     } else {
-      printf("SPECIAL: %s\n", cpp_name.c_str());
       result = (it->second)(cpp_name, node, disc_type, branches);
     }
     return true;
