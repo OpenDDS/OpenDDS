@@ -216,7 +216,7 @@ void postprocess(const char* fn, ostringstream& content,
         out << "#if OPENDDS_HAS_EXPLICIT_INTS\n";
         indent = "  ";
       }
-      out << "#" << indent << "include <" << be_global->tao_inc_pre_ << taoheader << ">\n";
+      out << "#" << indent << "include \"" << be_global->tao_inc_pre_ << taoheader << "\"\n";
       if (explicit_ints) {
         out << "#endif\n";
       }
