@@ -20,13 +20,19 @@ namespace XTypes {
 
 // If changing these, also change the get_dynamic_data_adapter forward
 // declarations in Sample.h.
-template <typename T, typename Tag = void>
+template <typename T>
+DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
+template <typename T, typename Tag>
 DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
 
-template <typename T, typename Tag = void>
+template <typename T>
+DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
+template <typename T, typename Tag>
 DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
 
-template <typename T, typename Tag = void>
+template <typename T>
+const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
+template <typename T, typename Tag>
 const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
 
 template <typename T, typename Tag = void>

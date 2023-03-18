@@ -50,7 +50,6 @@
    while (0)
 #endif
 
-
 // If features content_filtered_topic, multi_topic, and query_condition
 // are all disabled, define a macro to indicate common code these
 // three features depend on should not be built.
@@ -117,7 +116,7 @@ struct Objref_Servant_Pair {
   }
 
   T_impl* svt_;
-  T_var   obj_;
+  T_var obj_;
 };
 
 /// Use a Foo_var in a std::set or std::map with this comparison function,
