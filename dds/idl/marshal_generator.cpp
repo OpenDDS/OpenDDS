@@ -495,6 +495,7 @@ namespace {
     }
     const std::string named_as = anonymous ? anonymous->scoped_type_ : scoped(tdname);
     RefWrapper base_wrapper(seq, named_as, "seq");
+    base_wrapper.typedef_node_ = typedef_node;
     base_wrapper.nested_key_only_ = nested_key_only;
 
     NamespaceGuard ng(!anonymous);
@@ -528,12 +529,11 @@ namespace {
       anonymous ? anonymous->scoped_elem_ : scoped(seq->base_type()->name());
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
 
-    base_wrapper.generate_tag();
+    RefWrapper(base_wrapper).done().generate_tag();
 
     {
       Intro intro;
       RefWrapper wrapper(base_wrapper);
-      wrapper.typedef_node_ = typedef_node;
       wrapper.done(&intro);
       const std::string value_access = wrapper.value_access();
       const std::string get_length = wrapper.seq_get_length();
@@ -943,7 +943,7 @@ namespace {
       anonymous ? anonymous->scoped_elem_ : scoped(arr->base_type()->name());
     const ACE_CDR::ULong n_elems = array_element_count(arr);
 
-    base_wrapper.generate_tag();
+    RefWrapper(base_wrapper).done().generate_tag();
 
     if (!nested_key_only) {
       RefWrapper wrapper(base_wrapper);

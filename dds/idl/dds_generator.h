@@ -49,7 +49,7 @@ class dds_generator {
 public:
   virtual ~dds_generator() = 0;
 
-  static std::string get_tag_name(const std::string& base_name, bool nested_key_only = false);
+  static std::string get_tag_name(const std::string& base_name, std::string qualifier = "");
 
   static std::string get_xtag_name(UTL_ScopedName* name);
 
@@ -1352,6 +1352,7 @@ inline const char* get_shift_op(const std::string& s)
 /// Handling wrapping and unwrapping references in the wrapper types:
 /// NestedKeyOnly, IDL::DistinctType, and *_forany.
 struct RefWrapper {
+  const bool cpp11_;
   AST_Type* const type_;
   const std::string type_name_;
   const std::string to_wrap_;
@@ -1361,18 +1362,21 @@ struct RefWrapper {
   bool is_const_;
   bool nested_key_only_;
   bool classic_array_copy_;
+  bool dynamic_data_adapter_;
   std::string classic_array_copy_var_;
   AST_Typedef* typedef_node_;
 
   RefWrapper(AST_Type* type, const std::string& type_name,
     const std::string& to_wrap, bool is_const = true)
-    : type_(type)
+    : cpp11_(be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11)
+    , type_(type)
     , type_name_(type_name)
     , to_wrap_(strip_shift_op(to_wrap))
     , shift_op_(get_shift_op(to_wrap))
     , is_const_(is_const)
     , nested_key_only_(false)
     , classic_array_copy_(false)
+    , dynamic_data_adapter_(false)
     , typedef_node_(0)
     , done_(false)
   {
@@ -1380,7 +1384,8 @@ struct RefWrapper {
 
   RefWrapper(AST_Type* type, const std::string& type_name,
     const std::string& fieldref, const std::string& local, bool is_const = true)
-    : type_(type)
+    : cpp11_(be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11)
+    , type_(type)
     , type_name_(type_name)
     , shift_op_("")
     , fieldref_(strip_shift_op(fieldref))
@@ -1388,24 +1393,13 @@ struct RefWrapper {
     , is_const_(is_const)
     , nested_key_only_(false)
     , classic_array_copy_(false)
+    , dynamic_data_adapter_(false)
     , typedef_node_(0)
     , done_(false)
   {
   }
 
-  std::string get_tag_name()
-  {
-    return dds_generator::get_tag_name(type_name_, nested_key_only_);
-  }
-
-  void generate_tag()
-  {
-    if (be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11) {
-      be_global->header_ << "struct " << get_tag_name() << " {};\n\n";
-    }
-  }
-
-  void done(Intro* intro = 0)
+  RefWrapper& done(Intro* intro = 0)
   {
     ACE_ASSERT(!done_);
 
@@ -1414,6 +1408,8 @@ struct RefWrapper {
     }
     const std::string const_str = is_const_ ? "const " : "";
     const bool forany = classic_array_copy_ || needs_forany(type_);
+    const bool distinct_type = needs_distinct_type(type_);
+    needs_dda_tag_ = dynamic_data_adapter_ && (forany || distinct_type);
     nested_key_only_ = nested_key_only_ &&
       needs_nested_key_only(typedef_node_ ? typedef_node_ : type_);
     wrapped_type_name_ = type_name_;
@@ -1428,7 +1424,7 @@ struct RefWrapper {
       }
     }
 
-    if (forany) {
+    if (forany && !dynamic_data_adapter_) {
       const std::string forany_type = type_name_ + "_forany";
       if (classic_array_copy_) {
         const std::string var_name = dds_generator::valid_var_name(ref_) + "_tmp_var";
@@ -1467,10 +1463,10 @@ struct RefWrapper {
       }
     }
 
-    if (needs_distinct_type(type_)) {
+    if (distinct_type && !dynamic_data_adapter_) {
       wrapped_type_name_ =
         std::string("IDL::DistinctType<") + const_str + wrapped_type_name_ +
-        ", " + get_tag_name() + ">";
+        ", " + get_tag_name_i() + ">";
       value_access_pre_ += "(*";
       value_access_post_ = ".val_)" + value_access_post_;
       const std::string idt_arg = "(" + ref_ + ")";
@@ -1487,6 +1483,7 @@ struct RefWrapper {
 
     wrapped_type_name_ = const_str + wrapped_type_name_ + (by_ref ? "&" : "");
     done_ = true;
+    return *this;
   }
 
   std::string ref() const
@@ -1501,6 +1498,25 @@ struct RefWrapper {
     return wrapped_type_name_;
   }
 
+  bool needs_dda_tag() const
+  {
+    ACE_ASSERT(done_);
+    return needs_dda_tag_;
+  }
+
+  void generate_tag() const
+  {
+    if (cpp11_ || needs_dda_tag_) {
+      be_global->header_ << "struct " << get_tag_name() << " {};\n\n";
+    }
+  }
+
+  std::string get_tag_name() const
+  {
+    ACE_ASSERT(done_);
+    return get_tag_name_i();
+  }
+
   std::string get_var_name(const std::string& var_name) const
   {
     return var_name.size() ? var_name : to_wrap_;
@@ -1513,21 +1529,40 @@ struct RefWrapper {
 
   std::string seq_check_empty() const
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    return value_access() + (use_cxx11 ? ".empty()" : ".length() == 0");
+    return value_access() + (cpp11_ ? ".empty()" : ".length() == 0");
   }
 
   std::string seq_get_length() const
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const std::string value = value_access();
-    return use_cxx11 ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+    return cpp11_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
+  }
+
+  std::string seq_resize() const
+  {
+    const std::string value = value_access();
+    return cpp11_ ? value + ".resize" : value + ".length";
   }
 
   std::string seq_get_buffer() const
   {
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    return value_access() + (use_cxx11 ? ".data()" : ".get_buffer()");
+    return value_access() + (cpp11_ ? ".data()" : ".get_buffer()");
+  }
+
+  std::string flat_collection_access(std::string index) const
+  {
+    AST_Array* const array_node = dynamic_cast<AST_Array*>(type_);
+    std::string ref;
+    if (array_node) {
+      ref = "(&" + value_access();
+      for (ACE_CDR::ULong dim = array_node->n_dims(); dim; --dim) {
+        ref += "[0]";
+      }
+      ref += ")";
+    } else {
+      ref = value_access();
+    }
+    return ref += "[" + index + "]";
   }
 
   std::string stream() const
@@ -1546,6 +1581,18 @@ private:
   std::string ref_;
   std::string value_access_pre_;
   std::string value_access_post_;
+  bool needs_dda_tag_;
+
+  std::string get_tag_name_i() const
+  {
+    std::string qualifier;
+    if (nested_key_only_) {
+      qualifier = "_nested_key_only";
+    } else if (needs_dda_tag_) {
+      qualifier = "_dda";
+    }
+    return dds_generator::get_tag_name(type_name_, qualifier);
+  }
 };
 
 #endif

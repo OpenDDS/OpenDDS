@@ -421,11 +421,8 @@ namespace OpenDDS {
      * Types with this annotation will not get a DynamicDataAdapterImpl generated
      * for them. Attempting to access struct or union members with this
      * annotation on their type will result in an UNSUPPORTED retcode.
-     * get_dynamic_data_adapter will be generated, but will return nullptr.
-     *
-     * Struct or union members with this annotation will result in
-     * an UNSUPPORTED retcode when trying to access that member, regardless if
-     * they actually do have a DynamicDataAdapterImpl.
+     * get_dynamic_data_adapter for these types will be generated, but will
+     * return nullptr.
      */
     class NoDynamicDataAdapterAnnotation : public Annotation {
     public:

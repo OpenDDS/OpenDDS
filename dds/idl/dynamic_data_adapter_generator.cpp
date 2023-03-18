@@ -18,7 +18,7 @@ namespace {
   class DynamicDataAdapterGuard : public PreprocessorIfGuard {
   public:
     DynamicDataAdapterGuard()
-      : PreprocessorIfGuard(" OPENDDS_HAS_DYNAMIC_DATA_ADAPTER")
+      : PreprocessorIfGuard(" OPENDDS_HAS_DYNAMIC_DATA_ADAPTER", true, false)
     {
     }
   };
@@ -31,7 +31,7 @@ namespace {
     }
   };
 
-  const char* dynamic_data_adapter_suffix(AST_Type* type, bool set, std::string& extra)
+  const char* dynamic_data_adapter_op_type(AST_Type* type, bool set, std::string& extra)
   {
     const bool cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     AST_Type* const t = resolveActualType(type);
@@ -142,8 +142,56 @@ namespace {
     return 0;
   }
 
+  std::string field_type_name(AST_Field* field, AST_Type* field_type)
+  {
+    std::string name;
+    const Classification cls = classify(field_type);
+    name = (cls & CL_STRING) ? string_type(cls) : scoped(field_type->name());
+    if (field) {
+      FieldInfo af(*field);
+      if (af.as_base_ && af.type_->anonymous()) {
+        name = af.scoped_type_;
+      }
+    }
+    return name;
+  }
+
+  std::string op(bool set)
+  {
+    return set ? "set" : "get";
+  }
+
+  void generate_op(unsigned indent, bool set, AST_Decl* node, AST_Type* type,
+    const std::string& type_name, const std::string& value, const char* rc_dest = "return")
+  {
+    std::string extra;
+    const char* const op_type = dynamic_data_adapter_op_type(type, set, extra);
+    if (!op_type) {
+      be_util::misc_error_and_abort(
+        "Unsupported type in dynamic_data_adapter_op_type", node);
+    }
+
+    RefWrapper type_wrapper(type, type_name, "");
+    type_wrapper.dynamic_data_adapter_ = true;
+    type_wrapper.done();
+    std::string template_params;
+    if (type_wrapper.needs_dda_tag()) {
+      template_params = "<" + type_name + ", " + type_wrapper.get_tag_name() + ">";
+    }
+
+    be_global->impl_ <<
+      std::string(indent * 2, ' ') << "  " << rc_dest << " " <<
+      op(set) << "_" << op_type << "_raw_value" << template_params << "(method, ";
+    if (set) {
+      be_global->impl_ << value << extra << ", id, source, tk";
+    } else {
+      be_global->impl_ << "dest, tk, " << value << extra << ", id";
+    }
+    be_global->impl_ << ");\n";
+  }
+
   void generate_dynamic_data_adapter_access_field(
-    AST_Union* union_node, bool set, const std::string& op,
+    AST_Union* union_node, bool set,
     OpenDDS::XTypes::MemberId field_id, AST_Type* field_type, AST_Field* field = 0)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
@@ -160,53 +208,30 @@ namespace {
     be_global->impl_ << ": // " << (disc ? "discriminator" : canonical_name(field)) << "\n"
       "      {\n";
 
-    std::string extra;
-    const char* const suffix = dynamic_data_adapter_suffix(field_type, set, extra);
-    if (!suffix) {
-      be_util::misc_error_and_abort("Unsupported field type in dynamic_data_adapter_suffix", field);
-    }
-
-    if (field && (!be_global->dynamic_data_adapter(field) ||
-        !be_global->dynamic_data_adapter(field->field_type()))) {
+    if (field && !be_global->dynamic_data_adapter(field->field_type())) {
       be_global->impl_ <<
         "        ACE_UNUSED_ARG(" << (set ? "source" : "dest") << ");\n"
         "        ACE_UNUSED_ARG(tk);\n"
         "        return missing_dda(method, id);\n";
 
     } else {
-      std::string args = "value_.";
+      const std::string type_name = field_type_name(field, field_type);
+      std::string value = "value_.";
       const char* rc_dest = "return";
       if (union_node) {
         if (set) {
           // Setting a union branch or discriminator requires a temporary
-          const Classification cls = classify(field_type);
-          std::string temp_type =
-            (cls & CL_STRING) ? string_type(cls) : scoped(field_type->name());
-          if (field) {
-            FieldInfo af(*field);
-            if (af.as_base_ && af.type_->anonymous()) {
-              temp_type = af.scoped_type_;
-            }
-          }
           be_global->impl_ <<
-            "        " << temp_type << " temp;\n";
+            "        " << type_name << " temp;\n";
           rc_dest = "rc =";
-          args = "temp" + extra;
+          value = "temp";
         } else {
-          args += cpp_field_name + "()" + extra;
+          value += cpp_field_name + "()";
         }
       } else {
-        args += (use_cxx11 ? "_" : "") + cpp_field_name + extra;
+        value += (use_cxx11 ? "_" : "") + cpp_field_name;
       }
-      args += ", id";
-      be_global->impl_ <<
-        "        " << rc_dest << " " << op << "_" << suffix << "_raw_value(method, ";
-      if (set) {
-        be_global->impl_ << args << ", source, tk";
-      } else {
-        be_global->impl_ << "dest, tk, " << args;
-      }
-      be_global->impl_ << ");\n";
+      generate_op(3, set, field, field_type, type_name, value, rc_dest);
       if (union_node && set) {
         be_global->impl_ <<
           "        if (rc == DDS::RETCODE_OK) {\n"
@@ -220,7 +245,7 @@ namespace {
       "      }\n";
   }
 
-  bool generate_dynamic_data_adapter_access(AST_Decl* node, bool set)
+  bool generate_dynamic_data_adapter_access(AST_Decl* node, RefWrapper& wrapper, bool set)
   {
     AST_Structure* struct_node = 0;
     AST_Union* union_node = 0;
@@ -246,10 +271,7 @@ namespace {
       return false;
     }
 
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-
-    const std::string op = set ? "set" : "get";
-    be_global->impl_ << "  DDS::ReturnCode_t " << op << "_raw_value(const char* method, ";
+    be_global->impl_ << "  DDS::ReturnCode_t " << op(set) << "_raw_value(const char* method, ";
     if (set) {
       be_global->impl_ << "DDS::MemberId id, const void* source, DDS::TypeKind tk";
     } else {
@@ -258,28 +280,28 @@ namespace {
     be_global->impl_ << ")\n"
       "  {\n";
 
+    if (set) {
+      be_global->impl_ <<
+        "    DDS::ReturnCode_t rc = assert_mutable(method);\n"
+        "    if (rc != DDS::RETCODE_OK) {\n"
+        "      return rc;\n"
+        "    }\n";
+    }
+
     if (struct_node || union_node) {
-      if (set) {
-        be_global->impl_ <<
-          "    DDS::ReturnCode_t rc = assert_mutable(method);\n"
-          "    if (rc != DDS::RETCODE_OK) {\n"
-          "      return rc;\n"
-          "    }\n";
-      }
       be_global->impl_ <<
         "    switch (id) {\n";
 
       if (union_node) {
         generate_dynamic_data_adapter_access_field(
-          union_node, set, op, OpenDDS::XTypes::DISCRIMINATOR_ID, union_node->disc_type());
+          union_node, set, OpenDDS::XTypes::DISCRIMINATOR_ID, union_node->disc_type());
       }
 
       const Fields fields(union_node ? union_node : struct_node);
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* const field = *i;
         generate_dynamic_data_adapter_access_field(
-          union_node, set, op,
-          be_global->get_id(field), field->field_type(), field);
+          union_node, set, be_global->get_id(field), field->field_type(), field);
       }
 
       be_global->impl_ <<
@@ -287,10 +309,13 @@ namespace {
         "      return invalid_id(method, id);\n"
         "    }\n";
     } else if (seq_node || array_node) {
-      be_global->impl_ <<
-        "    const DDS::ReturnCode_t rc = check_index(method, id, ";
-      if (seq_node || use_cxx11) {
-        be_global->impl_ << "value_." << (use_cxx11 ? "size" : "length") << "()";
+      be_global->impl_ << "    ";
+      if (!set) {
+        be_global->impl_ << "const DDS::ReturnCode_t ";
+      }
+      be_global->impl_ << "rc = check_index(method, id, ";
+      if (seq_node) {
+        be_global->impl_ << wrapper.seq_get_length();
       } else {
         be_global->impl_ << array_element_count(array_node);
       }
@@ -300,31 +325,18 @@ namespace {
         "    }\n";
 
       AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
-      std::string extra;
-      const char* const suffix = dynamic_data_adapter_suffix(base_type, set, extra);
-      if (!suffix) {
-        be_util::misc_error_and_abort(
-          "Unsupported array or sequence base type in dynamic_data_adapter_suffix", node);
+      // For the type name we need the deepest named type, not the actual type.
+      // This will be the name of the first typedef if it's an array or
+      // sequence, otherwise the name of the type.
+      AST_Type* consider = base_type;
+      AST_Type* named_type = base_type;
+      while (consider->node_type() == AST_Decl::NT_typedef) {
+        named_type = consider;
+        consider = dynamic_cast<AST_Typedef*>(named_type)->base_type();
       }
-      std::string args;
-      if (seq_node) {
-        args = "value_[id]";
-      } else {
-        args = "(&value_";
-        for (ACE_CDR::ULong dim = array_node->n_dims(); dim; --dim) {
-          args += "[0]";
-        }
-        args += ")[id]";
-      }
-      args += extra + ", id";
-      be_global->impl_ <<
-        "    return " << op << "_" << suffix << "_raw_value(method, ";
-      if (set) {
-        be_global->impl_ << args << ", source, tk";
-      } else {
-        be_global->impl_ << "dest, tk, " << args;
-      }
-      be_global->impl_ << ");\n";
+      generate_op(2, set, node, base_type, scoped(named_type->name()), wrapper.flat_collection_access("id"));
+    } else {
+      return false;
     }
 
     be_global->impl_ <<
@@ -334,25 +346,25 @@ namespace {
   }
 
   void generate_get_dynamic_data_adapter(
-    const std::string& cpp_name, const std::string& export_macro,
+    const std::string& cpp_name, const std::string& tag, const std::string& export_macro,
     bool is_const, bool dda_generated)
   {
     be_global->header_ <<
       "template <>\n" <<
-      export_macro << "DDS::DynamicData_ptr get_dynamic_data_adapter<" << cpp_name <<
+      export_macro << "DDS::DynamicData_ptr get_dynamic_data_adapter<" << cpp_name << tag <<
         ">(DDS::DynamicType_ptr type, " << (is_const ? "const " : "") << cpp_name << "& value);\n"
       "\n";
 
     be_global->impl_ <<
       "template <>\n"
-      "DDS::DynamicData_ptr get_dynamic_data_adapter<" << cpp_name <<
+      "DDS::DynamicData_ptr get_dynamic_data_adapter<" << cpp_name << tag <<
         ">(DDS::DynamicType_ptr type, " << (is_const ? "const " : "") << cpp_name << "& value)\n"
       "{\n";
     if (dda_generated) {
       be_global->impl_ <<
         "#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER\n"
         "  if (type) {\n"
-        "    return new DynamicDataAdapterImpl<" << cpp_name << ">(type, value);\n"
+        "    return new DynamicDataAdapterImpl<" << cpp_name << tag << ">(type, value);\n"
         "  }\n"
         "#  else\n";
     }
@@ -369,7 +381,8 @@ namespace {
       "\n";
   }
 
-  bool generate_dynamic_data_adapter(AST_Decl* node, const std::string* use_scoped_name = 0)
+  bool generate_dynamic_data_adapter(
+    AST_Decl* node, const std::string* use_scoped_name = 0, AST_Typedef* typedef_node = 0)
   {
     AST_Structure* struct_node = 0;
     AST_Union* union_node = 0;
@@ -395,8 +408,10 @@ namespace {
       return true;
     }
     const std::string cpp_name = use_scoped_name ? *use_scoped_name : scoped(node->name());
-    const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    const bool generate = be_global->dynamic_data_adapter(node);
+    const bool generate = be_global->dynamic_data_adapter(typedef_node ? typedef_node : node);
+    RefWrapper wrapper(dynamic_cast<AST_Type*>(node), cpp_name, "value_", false);
+    wrapper.dynamic_data_adapter_ = true;
+    wrapper.done();
 
     be_global->add_include("dds/DCPS/XTypes/DynamicDataAdapter.h", BE_GlobalData::STREAM_H);
 
@@ -422,12 +437,17 @@ namespace {
     ns.push_back("XTypes");
     NamespaceGuard ng(true, &ns);
 
+    std::string tag;
+    if (wrapper.needs_dda_tag()) {
+      tag = ", " + wrapper.get_tag_name();
+    }
+
     if (generate) {
       DynamicDataAdapterGuard ddag;
 
       be_global->impl_ <<
         "template <>\n"
-        "class DynamicDataAdapterImpl<" << cpp_name << "> : public DynamicDataAdapter_T<"
+        "class DynamicDataAdapterImpl<" << cpp_name << tag << " > : public DynamicDataAdapter_T<"
           << cpp_name << "> {\n"
         "public:\n"
         "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, " << cpp_name << "& value)\n"
@@ -448,7 +468,7 @@ namespace {
       } else if (union_node) {
         be_global->impl_ << union_node->nfields() + 1;
       } else if (seq_node) {
-        be_global->impl_ << "value_." << (use_cxx11 ? "size" : "length") << "()";
+        be_global->impl_ << wrapper.seq_get_length();
       } else if (array_node) {
         be_global->impl_ << array_element_count(array_node);
       }
@@ -461,9 +481,9 @@ namespace {
         be_global->impl_ <<
           "  DDS::MemberId get_member_id_at_index_impl(DDS::UInt32 index)\n"
           "  {\n"
-          "    const DDS::UInt32 count = value_." << (use_cxx11 ? "size" : "length") << "();\n"
+          "    const DDS::UInt32 count = " << wrapper.seq_get_length() << ";\n"
           "    if (!read_only_ && index >= count) {\n"
-          "      value_." << (use_cxx11 ? "resize" : "length") << "(index + 1);\n"
+          "      " << wrapper.seq_resize() << "(index + 1);\n"
           "      return index;\n"
           "    }\n"
           "    return check_index(\"get_member_id_at_index\", index, count)"
@@ -473,13 +493,13 @@ namespace {
       }
 
       be_global->impl_ <<
-          "protected:\n";
+        "protected:\n";
 
-      if (!generate_dynamic_data_adapter_access(node, false)) {
+      if (!generate_dynamic_data_adapter_access(node, wrapper, false)) {
         return false;
       }
       be_global->impl_ << "\n";
-      if (!generate_dynamic_data_adapter_access(node, true)) {
+      if (!generate_dynamic_data_adapter_access(node, wrapper, true)) {
         return false;
       }
 
@@ -489,31 +509,34 @@ namespace {
     }
 
     {
+      NoSafetyProfileGuard nspg;
+
+      wrapper.generate_tag();
+
       std::string export_macro = be_global->export_macro().c_str();
       if (export_macro.size()) {
         export_macro += " ";
       }
 
-      NoSafetyProfileGuard nspg;
-      generate_get_dynamic_data_adapter(cpp_name, export_macro, true, generate);
-      generate_get_dynamic_data_adapter(cpp_name, export_macro, false, generate);
+      generate_get_dynamic_data_adapter(cpp_name, tag, export_macro, true, generate);
+      generate_get_dynamic_data_adapter(cpp_name, tag, export_macro, false, generate);
 
       be_global->header_ <<
         "template <>\n" <<
         export_macro << "const " << cpp_name << "* get_dynamic_data_adapter_value<" <<
-          cpp_name << ">(DDS::DynamicData_ptr dd);\n"
+          cpp_name << tag << ">(DDS::DynamicData_ptr dd);\n"
         "\n";
 
       be_global->impl_ <<
         "template <>\n"
         "const " << cpp_name << "* get_dynamic_data_adapter_value<" <<
-          cpp_name << ">(DDS::DynamicData_ptr dd)\n"
+          cpp_name << tag << ">(DDS::DynamicData_ptr dd)\n"
         "{\n"
         "  ACE_UNUSED_ARG(dd);\n";
       if (generate) {
         be_global->impl_ <<
           "#  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER\n"
-          "  typedef DynamicDataAdapterImpl<" << cpp_name << "> Dda;\n"
+          "  typedef DynamicDataAdapterImpl<" << cpp_name << tag << "> Dda;\n"
           "  const Dda* const dda = dynamic_cast<Dda*>(dd);\n"
           "  if (dda) {\n"
           "    return &dda->wrapped();\n"
@@ -536,7 +559,7 @@ bool dynamic_data_adapter_generator::gen_struct(AST_Structure* node, UTL_ScopedN
   return generate_dynamic_data_adapter(node);
 }
 
-bool dynamic_data_adapter_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
+bool dynamic_data_adapter_generator::gen_typedef(AST_Typedef* typedef_node, UTL_ScopedName* name,
   AST_Type* type, const char*)
 {
   const AST_Decl::NodeType nt = type->node_type();
@@ -544,7 +567,7 @@ bool dynamic_data_adapter_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* n
     return true;
   }
   const std::string cpp_name = scoped(name);
-  return generate_dynamic_data_adapter(type, &cpp_name);
+  return generate_dynamic_data_adapter(type, &cpp_name, typedef_node);
 }
 
 bool dynamic_data_adapter_generator::gen_union(AST_Union* node, UTL_ScopedName*,

@@ -285,7 +285,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
   SimpleKeyStruct sample;
   sample.key = 10;
   sample.value = 20;
-  DynamicDataAdapter<SimpleKeyStruct> dda(dt, getMetaStruct<SimpleKeyStruct>(), sample);
+  DDS::DynamicData_var dda = get_dynamic_data_adapter<SimpleKeyStruct>(dt, sample);
 
   std::vector<ACE_CDR::Long> expected_values;
   expected_values.push_back(10);
@@ -293,7 +293,7 @@ TEST_F(dds_DCPS_XTypes_Utils, member_path_get_member_from_data)
   for (MemberPathVec::iterator it = keys.begin(); it != keys.end(); ++it) {
     DDS::DynamicData_var container;
     DDS::MemberId id;
-    ASSERT_RC_OK(it->get_member_from_data(&dda, container, id));
+    ASSERT_RC_OK(it->get_member_from_data(dda, container, id));
     ACE_CDR::Long value;
     ASSERT_RC_OK(container->get_int32_value(value, id));
     actual_values.push_back(value);

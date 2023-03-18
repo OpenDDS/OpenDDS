@@ -58,9 +58,9 @@ std::string dds_generator::valid_var_name(const std::string& str)
   return s;
 }
 
-std::string dds_generator::get_tag_name(const std::string& base_name, bool nested_key_only)
+std::string dds_generator::get_tag_name(const std::string& base_name, std::string qualifier)
 {
-  return valid_var_name(base_name) + (nested_key_only ? "_nested_key_only" : "") + "_tag";
+  return valid_var_name(base_name) + qualifier + "_tag";
 }
 
 std::string dds_generator::get_xtag_name(UTL_ScopedName* name)

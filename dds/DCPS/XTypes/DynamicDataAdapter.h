@@ -20,16 +20,16 @@ namespace XTypes {
 
 // If changing these, also change the get_dynamic_data_adapter forward
 // declarations in Sample.h.
-template <typename T>
+template <typename T, typename Tag = void>
 DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
 
-template <typename T>
+template <typename T, typename Tag = void>
 DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
 
-template <typename T>
+template <typename T, typename Tag = void>
 const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
 
-template <typename T>
+template <typename T, typename Tag = void>
 class DynamicDataAdapterImpl;
 
 /**
@@ -37,7 +37,6 @@ class DynamicDataAdapterImpl;
  * as DynamicData.
  *
  * TODO not later:
- * - Support DistinctType
  * - clone
  * TODO:
  * - Support direct array methods, like get_int32_values
@@ -611,7 +610,7 @@ protected:
     const char* method, std::wstring& dest, DDS::MemberId id,
     const void* source, DDS::TypeKind tk);
 
-  template <typename T>
+  template <typename T, typename Tag = void>
   DDS::ReturnCode_t get_complex_raw_value(
     const char* method, void* dest, DDS::TypeKind tk, T& source, DDS::MemberId id)
   {
@@ -622,26 +621,26 @@ protected:
     }
     DDS::DynamicData*& dest_value = *static_cast<DDS::DynamicData**>(dest);
     CORBA::release(dest_value);
-    dest_value = get_dynamic_data_adapter<T>(member_type, source);
+    dest_value = get_dynamic_data_adapter<T, Tag>(member_type, source);
     if (!dest_value) {
       return missing_dda(method, id);
     }
     return rc;
   }
 
-  template <typename T>
+  template <typename T, typename Tag = void>
   DDS::ReturnCode_t set_indirect_complex_raw_value_impl(
     const char* method, T& dest, DDS::MemberId id, DDS::DynamicType_ptr member_type,
     DDS::DynamicData_ptr source_dd)
   {
-    DDS::DynamicData_var dest_dda = get_dynamic_data_adapter<T>(member_type, dest);
+    DDS::DynamicData_var dest_dda = get_dynamic_data_adapter<T, Tag>(member_type, dest);
     if (!dest_dda) {
       return missing_dda(method, id);
     }
     return copy(dest_dda, source_dd);
   }
 
-  template <typename T>
+  template <typename T, typename Tag = void>
   DDS::ReturnCode_t set_direct_complex_raw_value(
     const char* method, T& dest, DDS::MemberId id, const void* source, DDS::TypeKind tk)
   {
@@ -655,7 +654,7 @@ protected:
 
     // If the source is another DynamicDataAdapter of the member type then do a
     // direct copy, else do an indirect copy.
-    const T* const source_value = get_dynamic_data_adapter_value<T>(source_dd);
+    const T* const source_value = get_dynamic_data_adapter_value<T, Tag>(source_dd);
     if (source_value) {
       if (source_value != &dest) {
         dest = *source_value;
@@ -663,12 +662,12 @@ protected:
       return DDS::RETCODE_OK;
     }
 
-    return set_indirect_complex_raw_value_impl(method, dest, id, member_type, source_dd);
+    return set_indirect_complex_raw_value_impl<T, Tag>(method, dest, id, member_type, source_dd);
   }
 
   // In the classic mapping arrays are C arrays, which can't be copied using =,
   // so only do a indirect copy.
-  template <typename T>
+  template <typename T, typename Tag = void>
   DDS::ReturnCode_t set_indirect_complex_raw_value(
     const char* method, T& dest, DDS::MemberId id, const void* source, DDS::TypeKind tk)
   {
@@ -677,7 +676,7 @@ protected:
     if (rc != DDS::RETCODE_OK) {
       return rc;
     }
-    return set_indirect_complex_raw_value_impl(method, dest, id, member_type,
+    return set_indirect_complex_raw_value_impl<T, Tag>(method, dest, id, member_type,
       static_cast<DDS::DynamicData*>(const_cast<void*>(source)));
   }
 };
