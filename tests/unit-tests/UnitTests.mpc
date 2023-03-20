@@ -10,6 +10,7 @@ project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transport
     dds/DCPS/XTypes/DynamicDataXcdrReadImpl.idl
     dds/DCPS/XTypes/DynamicDataImpl.idl
     dds/DCPS/XTypes/XTypesUtils.idl
+    dds/DCPS/XTypes/DynamicDataAdapter.idl
     ../DCPS/Compiler/key_annotation/key_annotation.idl
   }
 
@@ -17,6 +18,7 @@ project(UnitTests): dcps, dcps_rtps_udp, dcps_rtpsexe, dcps_test, dcps_transport
     dds/DCPS/XTypes/CompleteToDynamicType.idl
     dds/DCPS/XTypes/CompleteToMinimalTypeObject.idl
     dds/DCPS/XTypes/XTypesUtils.idl
+    dds/DCPS/XTypes/DynamicDataAdapter.idl
     ../DCPS/Compiler/key_annotation/key_annotation.idl
   }
 

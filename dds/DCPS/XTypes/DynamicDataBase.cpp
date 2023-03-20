@@ -9,6 +9,7 @@
 #  include "DynamicDataBase.h"
 
 #  include "Utils.h"
+#  include "DynamicDataFactory.h"
 
 #  include <dds/DCPS/debug.h>
 
@@ -16,6 +17,9 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
 namespace XTypes {
+
+using DCPS::LogLevel;
+using DCPS::log_level;
 
 DynamicDataBase::DynamicDataBase() {}
 
@@ -97,7 +101,7 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
     }
   }
   }
-  if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+  if (log_level >= LogLevel::Notice) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::get_member_id_by_name:"
                " Calling on an unexpected type %C\n", typekind_to_string(tk)));
   }
@@ -107,7 +111,7 @@ DDS::MemberId DynamicDataBase::get_member_id_by_name(const char* name)
 bool DynamicDataBase::is_type_supported(TypeKind tk, const char* func_name)
 {
   if (!is_basic(tk)) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::is_type_supported:"
                  " Called function %C on an unsupported type (%C)\n",
                  func_name, typekind_to_string(tk)));
@@ -169,12 +173,35 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
   DDS::MemberDescriptor_var& md, DDS::DynamicType_var& type,
   const char* method, const char* action, DDS::MemberId id, DDS::TypeKind tk)
 {
-  DDS::ReturnCode_t rc = get_descriptor(md, id);
-  if (rc != DDS::RETCODE_OK) {
-    return rc;
-  }
-  type = get_base_type(md->type());
-  if (!type) {
+  DDS::ReturnCode_t rc = DDS::RETCODE_OK;
+  switch (type_->get_kind()) {
+  case TK_STRING8:
+  case TK_STRING16:
+  case TK_SEQUENCE:
+  case TK_ARRAY:
+  case TK_MAP:
+    {
+      DDS::TypeDescriptor_var td;
+      rc = type_->get_descriptor(td);
+      if (rc != DDS::RETCODE_OK) {
+        return rc;
+      }
+      type = get_base_type(td->element_type());
+    }
+    break;
+  case TK_BITMASK:
+  case TK_STRUCTURE:
+  case TK_UNION:
+    rc = get_descriptor(md, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    type = get_base_type(md->type());
+    if (!type) {
+      return DDS::RETCODE_BAD_PARAMETER;
+    }
+    break;
+  default:
     return DDS::RETCODE_BAD_PARAMETER;
   }
 
@@ -202,7 +229,7 @@ DDS::ReturnCode_t DynamicDataBase::check_member(
     invalid_tk = !is_complex(type_kind);
   }
   if (invalid_tk) {
-    if (DCPS::log_level >= DCPS::LogLevel::Notice) {
+    if (log_level >= LogLevel::Notice) {
       const CORBA::String_var member_name = md->name();
       const CORBA::String_var type_name = type_->get_name();
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: %C: "
@@ -325,7 +352,7 @@ bool DynamicDataBase::has_explicit_keys(DDS::DynamicType* dt)
 
 DDS::ReturnCode_t DynamicDataBase::unsupported_method(const char* method_name, bool warning) const
 {
-  if (DCPS::log_level >= (warning ? DCPS::LogLevel::Notice : DCPS::LogLevel::Notice)) {
+  if (log_level >= (warning ? LogLevel::Notice : LogLevel::Notice)) {
     ACE_ERROR((LM_NOTICE, "(%P|%t) %C: %C: not implemented\n",
       warning ? "WARNING" : "NOTICE", method_name));
   }
@@ -359,6 +386,18 @@ DDS::DynamicData_ptr DynamicDataBase::loan_value(DDS::MemberId /*id*/)
 DDS::ReturnCode_t DynamicDataBase::return_loaned_value(DDS::DynamicData_ptr /*other*/)
 {
   return unsupported_method("DynamicData::return_loaned_value");
+}
+
+DDS::DynamicData_ptr DynamicDataBase::clone()
+{
+  DDS::DynamicData_var new_copy = DDS::DynamicDataFactory::get_instance()->create_data(type_);
+  if (!new_copy || copy(new_copy, this) != DDS::RETCODE_OK) {
+    if (log_level >= LogLevel::Notice) {
+      ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: DynamicDataBase::clone: Failed to create a copy\n"));
+    }
+    return 0;
+  }
+  return new_copy._retn();
 }
 
 } // namespace XTypes

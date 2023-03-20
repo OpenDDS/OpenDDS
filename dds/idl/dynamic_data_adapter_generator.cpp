@@ -31,131 +31,6 @@ namespace {
     }
   };
 
-  const char* dynamic_data_adapter_op_type(AST_Type* type, bool set, std::string& extra)
-  {
-    const bool cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
-    AST_Type* const t = resolveActualType(type);
-    switch (t->node_type()) {
-    case AST_Decl::NT_pre_defined:
-      switch (dynamic_cast<AST_PredefinedType*>(t)->pt()) {
-      case AST_PredefinedType::PT_octet:
-        return "byte";
-      case AST_PredefinedType::PT_boolean:
-        return "bool";
-      case AST_PredefinedType::PT_int8:
-        return "i8";
-      case AST_PredefinedType::PT_uint8:
-        return "u8";
-      case AST_PredefinedType::PT_short:
-      case AST_PredefinedType::PT_long:
-      case AST_PredefinedType::PT_longlong:
-      case AST_PredefinedType::PT_ushort:
-      case AST_PredefinedType::PT_ulong:
-      case AST_PredefinedType::PT_ulonglong:
-      case AST_PredefinedType::PT_float:
-      case AST_PredefinedType::PT_double:
-      case AST_PredefinedType::PT_longdouble:
-        return "simple";
-      case AST_PredefinedType::PT_char:
-        return "c8";
-      case AST_PredefinedType::PT_wchar:
-        return "c16";
-      case AST_PredefinedType::PT_any:
-      case AST_PredefinedType::PT_object:
-      case AST_PredefinedType::PT_value:
-      case AST_PredefinedType::PT_abstract:
-      case AST_PredefinedType::PT_void:
-      case AST_PredefinedType::PT_pseudo:
-        return 0;
-      }
-      break;
-    case AST_Decl::NT_enum:
-      return "enum";
-    case AST_Decl::NT_string:
-      if (cxx11) {
-        return "cpp11_s8";
-      }
-      if (set) {
-        extra = ".inout()";
-      }
-      return "s8";
-    case AST_Decl::NT_wstring:
-      if (cxx11) {
-        return "cpp11_s16";
-      }
-      if (set) {
-        extra = ".inout()";
-      }
-      return "s16";
-    case AST_Decl::NT_struct:
-    case AST_Decl::NT_sequence:
-    case AST_Decl::NT_union:
-      return set ? "direct_complex" : "complex";
-    case AST_Decl::NT_array:
-      if (set) {
-        return cxx11 ? "direct_complex" : "indirect_complex";
-      }
-      return "complex";
-    case AST_Decl::NT_module:
-    case AST_Decl::NT_root:
-    case AST_Decl::NT_interface:
-    case AST_Decl::NT_interface_fwd:
-    case AST_Decl::NT_valuetype:
-    case AST_Decl::NT_valuetype_fwd:
-    case AST_Decl::NT_const:
-    case AST_Decl::NT_except:
-    case AST_Decl::NT_attr:
-    case AST_Decl::NT_op:
-    case AST_Decl::NT_argument:
-    case AST_Decl::NT_union_fwd:
-    case AST_Decl::NT_union_branch:
-    case AST_Decl::NT_struct_fwd:
-    case AST_Decl::NT_field:
-    case AST_Decl::NT_enum_val:
-    case AST_Decl::NT_typedef:
-    case AST_Decl::NT_native:
-    case AST_Decl::NT_factory:
-    case AST_Decl::NT_finder:
-    case AST_Decl::NT_component:
-    case AST_Decl::NT_component_fwd:
-    case AST_Decl::NT_home:
-    case AST_Decl::NT_eventtype:
-    case AST_Decl::NT_eventtype_fwd:
-    case AST_Decl::NT_valuebox:
-    case AST_Decl::NT_type:
-    case AST_Decl::NT_fixed:
-    case AST_Decl::NT_porttype:
-    case AST_Decl::NT_provides:
-    case AST_Decl::NT_uses:
-    case AST_Decl::NT_publishes:
-    case AST_Decl::NT_emits:
-    case AST_Decl::NT_consumes:
-    case AST_Decl::NT_ext_port:
-    case AST_Decl::NT_mirror_port:
-    case AST_Decl::NT_connector:
-    case AST_Decl::NT_param_holder:
-    case AST_Decl::NT_annotation_decl:
-    case AST_Decl::NT_annotation_appl:
-    case AST_Decl::NT_annotation_member:
-      return 0;
-    }
-    return 0;
-  }
-
-  std::string field_type_name(AST_Field* field, AST_Type* field_type)
-  {
-    std::string name;
-    const Classification cls = classify(field_type);
-    name = (cls & CL_STRING) ? string_type(cls) : scoped(field_type->name());
-    if (field) {
-      FieldInfo af(*field);
-      if (af.as_base_ && af.type_->anonymous()) {
-        name = af.scoped_type_;
-      }
-    }
-    return name;
-  }
-
   std::string op(bool set)
   {
     return set ? "set" : "get";
@@ -164,9 +39,50 @@ namespace {
   void generate_op(unsigned indent, bool set, AST_Decl* node, AST_Type* type,
     const std::string& type_name, const std::string& value, const char* rc_dest = "return")
   {
+    const bool cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     std::string extra;
-    const char* const op_type = dynamic_data_adapter_op_type(type, set, extra);
-    if (!op_type) {
+    bool is_complex = false;
+    const char* op_type = 0;
+    switch (resolveActualType(type)->node_type()) {
+    case AST_Decl::NT_pre_defined:
+      op_type = "simple";
+      break;
+    case AST_Decl::NT_enum:
+      op_type = "enum";
+      break;
+    case AST_Decl::NT_string:
+      if (cxx11) {
+        op_type = "cpp11_s8";
+      }
+      if (set) {
+        extra = ".inout()";
+      }
+      op_type = "s8";
+      break;
+    case AST_Decl::NT_wstring:
+      if (cxx11) {
+        op_type = "cpp11_s16";
+      }
+      if (set) {
+        extra = ".inout()";
+      }
+      op_type = "s16";
+      break;
+    case AST_Decl::NT_struct:
+    case AST_Decl::NT_sequence:
+    case AST_Decl::NT_union:
+      is_complex = true;
+      op_type = set ? "direct_complex" : "complex";
+      break;
+    case AST_Decl::NT_array:
+      is_complex = true;
+      if (set) {
+        op_type = cxx11 ? "direct_complex" : "indirect_complex";
+      } else {
+        op_type = "complex";
+      }
+      break;
+    default:
       be_util::misc_error_and_abort(
         "Unsupported type in dynamic_data_adapter_op_type", node);
     }
@@ -177,6 +93,8 @@ namespace {
     std::string template_params;
     if (type_wrapper.needs_dda_tag()) {
       template_params = "<" + type_name + ", " + type_wrapper.get_tag_name() + ">";
+    } else if (is_complex) {
+      template_params = "<" + type_name + ", " + type_name + ">";
     }
 
     be_global->impl_ <<
@@ -227,6 +145,10 @@ namespace {
           value = "temp";
         } else {
           value += cpp_field_name + "()";
+          if (!use_cxx11 && classify(field_type) & CL_ARRAY) {
+            // Unions return pointer to array elements, get reference to array.
+            value = std::string("*reinterpret_cast<") + type_name + "*>(" + value + ")";
+          }
         }
       } else {
         value += (use_cxx11 ? "_" : "") + cpp_field_name;
@@ -415,8 +337,8 @@ namespace {
 
     be_global->add_include("dds/DCPS/XTypes/DynamicDataAdapter.h", BE_GlobalData::STREAM_H);
 
-    if (struct_node) {
-      const Fields fields(struct_node);
+    if (struct_node || union_node) {
+      const Fields fields(union_node ? union_node : struct_node);
       FieldInfo::EleLenSet anonymous_seq_generated;
       for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
         AST_Field* const field = *i;
@@ -440,6 +362,8 @@ namespace {
     std::string tag;
     if (wrapper.needs_dda_tag()) {
       tag = ", " + wrapper.get_tag_name();
+    } else {
+      tag = ", " + cpp_name;
     }
 
     if (generate) {
@@ -483,7 +407,7 @@ namespace {
           "  {\n"
           "    const DDS::UInt32 count = " << wrapper.seq_get_length() << ";\n"
           "    if (!read_only_ && index >= count) {\n"
-          "      " << wrapper.seq_resize() << "(index + 1);\n"
+          "      " << wrapper.seq_resize("index + 1") <<
           "      return index;\n"
           "    }\n"
           "    return check_index(\"get_member_id_at_index\", index, count)"
@@ -544,8 +468,7 @@ namespace {
           "#  endif\n";
       }
       be_global->impl_ <<
-        "  return 0;\n";
-      be_global->impl_ <<
+        "  return 0;\n"
         "}\n";
     }
 

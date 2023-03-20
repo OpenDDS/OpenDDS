@@ -1,13 +1,13 @@
 /*
- *
- *
  * Distributed under the OpenDDS License.
  * See: http://www.opendds.org/license.html
  */
 
 #include "dds_generator.h"
 
-#include "utl_identifier.h"
+#include "field_info.h"
+
+#include <utl_identifier.h>
 
 using namespace std;
 using namespace AstTypeClassification;
@@ -419,4 +419,18 @@ string type_to_default(const std::string& indent, AST_Type* type, const string& 
     }
   }
   return indent + name + pre + def_val + post + ";\n";
+}
+
+std::string field_type_name(AST_Field* field, AST_Type* field_type)
+{
+  std::string name;
+  const Classification cls = classify(field_type);
+  name = (cls & CL_STRING) ? string_type(cls) : scoped(field_type->name());
+  if (field) {
+    FieldInfo af(*field);
+    if (af.as_base_ && af.type_->anonymous()) {
+      name = af.scoped_type_;
+    }
+  }
+  return name;
 }

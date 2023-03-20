@@ -409,26 +409,14 @@ namespace {
   }
 }
 
-bool
-metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
-  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
+void generate_anon_fields(AST_Structure* node)
 {
-  const std::string clazz = scoped(name);
-
-  be_global->add_include("dds/DCPS/PoolAllocator.h",
-    BE_GlobalData::STREAM_CPP);
-
-  ContentSubscriptionGuard csg;
-  NamespaceGuard ng;
-
-  if (!generate_metaclass(node, name, fields, first_struct_, clazz)) {
-    return false;
-  }
-
+  const Fields fields(node);
   FieldInfo::EleLenSet anonymous_seq_generated;
-  for (size_t i = 0; i < fields.size(); ++i) {
-    if (fields[i]->field_type()->anonymous()) {
-      FieldInfo af(*fields[i]);
+  for (Fields::Iterator i = fields.begin(); i != fields.end(); ++i) {
+    AST_Field* const field = *i;
+    if (field->field_type()->anonymous()) {
+      FieldInfo af(*field);
       if (af.arr_ || (af.seq_ && af.is_new(anonymous_seq_generated))) {
         Function f("gen_skip_over", "bool");
         f.addArg("ser", "Serializer&");
@@ -501,6 +489,26 @@ metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
       }
     }
   }
+
+}
+
+bool
+metaclass_generator::gen_struct(AST_Structure* node, UTL_ScopedName* name,
+  const std::vector<AST_Field*>& fields, AST_Type::SIZE_TYPE, const char*)
+{
+  const std::string clazz = scoped(name);
+
+  be_global->add_include("dds/DCPS/PoolAllocator.h",
+    BE_GlobalData::STREAM_CPP);
+
+  ContentSubscriptionGuard csg;
+  NamespaceGuard ng;
+
+  if (!generate_metaclass(node, name, fields, first_struct_, clazz)) {
+    return false;
+  }
+
+  generate_anon_fields(node);
 
   {
     Function f("gen_skip_over", "bool");
@@ -604,9 +612,9 @@ metaclass_generator::gen_typedef(AST_Typedef*, UTL_ScopedName* name,
   return true;
 }
 
-static std::string
-func(const std::string&, AST_Decl*, const std::string&, AST_Type* br_type, const std::string&,
-  bool, Intro&, const std::string&)
+static
+std::string gen_union_branch(const std::string&, AST_Decl* branch, const std::string&,
+  AST_Type* br_type, const std::string&, bool, Intro&, const std::string&)
 {
   const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
   std::stringstream ss;
@@ -634,7 +642,8 @@ func(const std::string&, AST_Decl*, const std::string&, AST_Type* br_type, const
     }
     ss <<
       "    if (!gen_skip_over(ser, static_cast<" << pre
-      << scoped(br_type->name()) << post << "*>(0))) return false;\n";
+      << field_type_name(dynamic_cast<AST_Field*>(branch), br_type) << post <<
+        "*>(0))) return false;\n";
   }
 
   ss <<
@@ -656,6 +665,8 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   if (!generate_metaclass(node, name, dummy_field_list, first_struct_, clazz)) {
     return false;
   }
+
+  generate_anon_fields(node);
 
   {
     Function f("gen_skip_over", "bool");
@@ -688,7 +699,7 @@ metaclass_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       "  if (!(ser >> " << getWrapper("disc", discriminator, WD_INPUT) << ")) {\n"
       "    return false;\n"
       "  }\n";
-    if (generateSwitchForUnion(node, "disc", func, branches, discriminator, "", "", "",
+    if (generateSwitchForUnion(node, "disc", gen_union_branch, branches, discriminator, "", "", "",
                                false, true, false)) {
       be_global->impl_ <<
         "  return true;\n";

@@ -19,13 +19,9 @@ namespace OpenDDS {
 
 namespace XTypes {
   // These are here because including DynamicDataAdapter.h creates a include loop.
-  template <typename T>
-  DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
   template <typename T, typename Tag>
   DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
 
-  template <typename T>
-  DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
   template <typename T, typename Tag>
   DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
 }
@@ -250,8 +246,9 @@ public:
   {
 #  if OPENDDS_HAS_DYNAMIC_DATA_ADAPTER
     if (!dynamic_data_ && data_) {
-      dynamic_data_ = read_only() ? XTypes::get_dynamic_data_adapter(type, *data_) :
-        XTypes::get_dynamic_data_adapter(type, mutable_data());
+      dynamic_data_ = read_only() ?
+        XTypes::get_dynamic_data_adapter<NativeType, NativeType>(type, *data_) :
+        XTypes::get_dynamic_data_adapter<NativeType, NativeType>(type, mutable_data());
     }
     return dynamic_data_;
 #  else

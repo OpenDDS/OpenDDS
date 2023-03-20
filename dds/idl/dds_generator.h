@@ -786,6 +786,8 @@ struct Intro {
   }
 };
 
+std::string field_type_name(AST_Field* field, AST_Type* field_type);
+
 typedef std::string (*CommonFn)(
   const std::string& indent, AST_Decl* node,
   const std::string& name, AST_Type* type,
@@ -803,7 +805,8 @@ void generateCaseBody(
   const bool use_cxx11 = lmap == BE_GlobalData::LANGMAP_CXX11;
   const std::string name = branch->local_name()->get_string();
   if (namePrefix == std::string(">> ")) {
-    std::string brType = scoped(branch->field_type()->name()), forany;
+    std::string brType = field_type_name(branch, branch->field_type());
+    std::string forany;
     AST_Type* br = resolveActualType(branch->field_type());
     Classification br_cls = classify(br);
     if (!br->in_main_file()
@@ -1538,10 +1541,10 @@ struct RefWrapper {
     return cpp11_ ? "static_cast<uint32_t>(" + value + ".size())" : value + ".length()";
   }
 
-  std::string seq_resize() const
+  std::string seq_resize(const std::string& new_size) const
   {
     const std::string value = value_access();
-    return cpp11_ ? value + ".resize" : value + ".length";
+    return value + (cpp11_ ? ".resize" : ".length") + "(" + new_size + ");\n";
   }
 
   std::string seq_get_buffer() const

@@ -210,7 +210,7 @@ bool MemberPathParser::get_next_subpath()
   return consume(i);
 }
 
-bool MemberPathParser::get_index(CORBA::UInt32& index)
+bool MemberPathParser::get_index(DDS::UInt32& index)
 {
   if (!in_subscript || subpath.empty() ||
       subpath.find_first_not_of("0123456789") != DCPS::String::npos) {
@@ -546,10 +546,10 @@ namespace {
     switch (tk) {
     case TK_BOOLEAN:
       {
-        CORBA::Boolean a_value;
+        DDS::Boolean a_value;
         a_rc = a_data->get_boolean_value(a_value, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::Boolean b_value;
+          DDS::Boolean b_value;
           b_rc = b_data->get_boolean_value(b_value, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -560,10 +560,10 @@ namespace {
 
     case TK_BYTE:
       {
-        CORBA::Octet a_value;
+        DDS::Byte a_value;
         a_rc = a_data->get_byte_value(a_value, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::Octet b_value;
+          DDS::Byte b_value;
           b_rc = b_data->get_byte_value(b_value, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -577,10 +577,10 @@ namespace {
     case TK_UINT32:
     case TK_UINT64:
       {
-        CORBA::UInt64 a_value;
+        DDS::UInt64 a_value;
         a_rc = get_uint_value(a_value, a_data, a_id, tk);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::UInt64 b_value;
+          DDS::UInt64 b_value;
           b_rc = get_uint_value(b_value, b_data, b_id, tk);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -594,10 +594,10 @@ namespace {
     case TK_INT32:
     case TK_INT64:
       {
-        CORBA::Int64 a_value;
+        DDS::Int64 a_value;
         a_rc = get_int_value(a_value, a_data, a_id, tk);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::Int64 b_value;
+          DDS::Int64 b_value;
           b_rc = get_int_value(b_value, b_data, b_id, tk);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -608,10 +608,10 @@ namespace {
 
     case TK_FLOAT32:
       {
-        CORBA::Float a_value;
+        DDS::Float32 a_value;
         a_rc = a_data->get_float32_value(a_value, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::Float b_value;
+          DDS::Float32 b_value;
           b_rc = b_data->get_float32_value(b_value, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -622,10 +622,10 @@ namespace {
 
     case TK_FLOAT64:
       {
-        CORBA::Double a_value;
+        DDS::Float64 a_value;
         a_rc = a_data->get_float64_value(a_value, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::Double b_value;
+          DDS::Float64 b_value;
           b_rc = b_data->get_float64_value(b_value, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -636,10 +636,10 @@ namespace {
 
     case TK_FLOAT128:
       {
-        CORBA::LongDouble a_value;
+        DDS::Float128 a_value;
         a_rc = a_data->get_float128_value(a_value, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::LongDouble b_value;
+          DDS::Float128 b_value;
           b_rc = b_data->get_float128_value(b_value, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -706,10 +706,10 @@ namespace {
 
     case TK_ENUM:
       {
-        CORBA::Int32 a_value;
+        DDS::Int32 a_value;
         a_rc = get_enum_value(a_value, a_type, a_data, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::Int32 b_value;
+          DDS::Int32 b_value;
           b_rc = get_enum_value(b_value, b_type, b_data, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -720,10 +720,10 @@ namespace {
 
     case TK_BITMASK:
       {
-        CORBA::UInt64 a_value;
+        DDS::UInt64 a_value;
         a_rc = get_bitmask_value(a_value, a_type, a_data, a_id);
         if (a_rc == DDS::RETCODE_OK) {
-          CORBA::UInt64 b_value;
+          DDS::UInt64 b_value;
           b_rc = get_bitmask_value(b_value, b_type, b_data, b_id);
           if (b_rc == DDS::RETCODE_OK) {
             cmp(result, a_value, b_value);
@@ -925,13 +925,13 @@ bool is_uint(DDS::TypeKind tk)
 }
 
 DDS::ReturnCode_t get_uint_value(
-  CORBA::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
+  DDS::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
 {
   DDS::ReturnCode_t rc = DDS::RETCODE_BAD_PARAMETER;
   switch (kind) {
   case TK_UINT8:
     {
-      CORBA::UInt8 v;
+      DDS::UInt8 v;
       rc = src->get_uint8_value(v, id);
       if (rc == DDS::RETCODE_OK) {
         value = v;
@@ -940,7 +940,7 @@ DDS::ReturnCode_t get_uint_value(
     break;
   case TK_UINT16:
     {
-      CORBA::UInt16 v;
+      DDS::UInt16 v;
       rc = src->get_uint16_value(v, id);
       if (rc == DDS::RETCODE_OK) {
         value = v;
@@ -949,7 +949,7 @@ DDS::ReturnCode_t get_uint_value(
     break;
   case TK_UINT32:
     {
-      CORBA::UInt32 v;
+      DDS::UInt32 v;
       rc = src->get_uint32_value(v, id);
       if (rc == DDS::RETCODE_OK) {
         value = v;
@@ -964,29 +964,29 @@ DDS::ReturnCode_t get_uint_value(
 }
 
 DDS::ReturnCode_t set_uint_value(
-  DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind, CORBA::UInt64 value)
+  DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, DDS::UInt64 value)
 {
   switch (kind) {
   case TK_UINT8:
-    return src->set_uint8_value(id, static_cast<DDS::UInt8>(value));
+    return dest->set_uint8_value(id, static_cast<DDS::UInt8>(value));
   case TK_UINT16:
-    return src->set_uint16_value(id, static_cast<DDS::UInt16>(value));
+    return dest->set_uint16_value(id, static_cast<DDS::UInt16>(value));
   case TK_UINT32:
-    return src->set_uint32_value(id, static_cast<DDS::UInt32>(value));
+    return dest->set_uint32_value(id, static_cast<DDS::UInt32>(value));
   case TK_UINT64:
-    return src->set_uint64_value(id, value);
+    return dest->set_uint64_value(id, value);
   }
   return DDS::RETCODE_BAD_PARAMETER;
 }
 
 DDS::ReturnCode_t get_int_value(
-  CORBA::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
+  DDS::Int64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
 {
   DDS::ReturnCode_t rc = DDS::RETCODE_BAD_PARAMETER;
   switch (kind) {
   case TK_INT8:
     {
-      CORBA::Int8 v;
+      DDS::Int8 v;
       rc = src->get_int8_value(v, id);
       if (rc == DDS::RETCODE_OK) {
         value = v;
@@ -995,7 +995,7 @@ DDS::ReturnCode_t get_int_value(
     break;
   case TK_INT16:
     {
-      CORBA::Int16 v;
+      DDS::Int16 v;
       rc = src->get_int16_value(v, id);
       if (rc == DDS::RETCODE_OK) {
         value = v;
@@ -1004,7 +1004,7 @@ DDS::ReturnCode_t get_int_value(
     break;
   case TK_INT32:
     {
-      CORBA::Int32 v;
+      DDS::Int32 v;
       rc = src->get_int32_value(v, id);
       if (rc == DDS::RETCODE_OK) {
         value = v;
@@ -1019,17 +1019,17 @@ DDS::ReturnCode_t get_int_value(
 }
 
 DDS::ReturnCode_t set_int_value(
-  DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind, CORBA::Int64 value)
+  DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, DDS::Int64 value)
 {
   switch (kind) {
   case TK_INT8:
-    return src->set_int8_value(id, static_cast<DDS::Int8>(value));
+    return dest->set_int8_value(id, static_cast<DDS::Int8>(value));
   case TK_INT16:
-    return src->set_int16_value(id, static_cast<DDS::Int16>(value));
+    return dest->set_int16_value(id, static_cast<DDS::Int16>(value));
   case TK_INT32:
-    return src->set_int32_value(id, static_cast<DDS::Int32>(value));
+    return dest->set_int32_value(id, static_cast<DDS::Int32>(value));
   case TK_INT64:
-    return src->set_int64_value(id, value);
+    return dest->set_int64_value(id, value);
   }
   return DDS::RETCODE_BAD_PARAMETER;
 }
@@ -1073,7 +1073,7 @@ DDS::ReturnCode_t bitmask_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_
 }
 
 DDS::ReturnCode_t get_bitmask_value(
-  CORBA::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
+  DDS::UInt64& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
 {
   DDS::TypeKind bound_kind;
   const DDS::ReturnCode_t rc = bitmask_bound(type, bound_kind);
@@ -1083,9 +1083,9 @@ DDS::ReturnCode_t get_bitmask_value(
   return get_uint_value(value, src, id, bound_kind);
 }
 
-DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kind)
+DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr enum_type, DDS::TypeKind& bound_kind)
 {
-  const DDS::TypeKind kind = type->get_kind();
+  const DDS::TypeKind kind = enum_type->get_kind();
   if (kind != TK_ENUM) {
     if (log_level >= LogLevel::Notice) {
       ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: enum_bound: "
@@ -1096,7 +1096,7 @@ DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kin
   }
 
   DDS::TypeDescriptor_var td;
-  const DDS::ReturnCode_t rc = type->get_descriptor(td);
+  const DDS::ReturnCode_t rc = enum_type->get_descriptor(td);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
@@ -1120,19 +1120,19 @@ DDS::ReturnCode_t enum_bound(DDS::DynamicType_ptr type, DDS::TypeKind& bound_kin
 }
 
 DDS::ReturnCode_t get_enum_value(
-  CORBA::Int32& value, DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id)
+  DDS::Int32& value, DDS::DynamicType_ptr enum_type, DDS::DynamicData_ptr src, DDS::MemberId id)
 {
   DDS::TypeKind bound_kind;
-  DDS::ReturnCode_t rc = enum_bound(type, bound_kind);
+  DDS::ReturnCode_t rc = enum_bound(enum_type, bound_kind);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  CORBA::Int64 v;
+  DDS::Int64 v;
   rc = get_int_value(v, src, id, bound_kind);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  value = static_cast<CORBA::Int32>(v);
+  value = static_cast<DDS::Int32>(v);
   return rc;
 }
 
@@ -1175,18 +1175,18 @@ DDS::ReturnCode_t get_enumerator_value(
 }
 
 DDS::ReturnCode_t set_enum_value(
-  DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id, CORBA::Int32 value)
+  DDS::DynamicType_ptr enum_type, DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::Int32 value)
 {
   DDS::TypeKind bound_kind;
-  const DDS::ReturnCode_t rc = enum_bound(type, bound_kind);
+  const DDS::ReturnCode_t rc = enum_bound(enum_type, bound_kind);
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return set_int_value(src, id, bound_kind, value);
+  return set_int_value(dest, id, bound_kind, value);
 }
 
 DDS::ReturnCode_t set_enum_value(
-  DDS::DynamicType_ptr type, DDS::DynamicData_ptr src, DDS::MemberId id, const char* enumeral_name)
+  DDS::DynamicType_ptr type, DDS::DynamicData_ptr dest, DDS::MemberId id, const char* enumeral_name)
 {
   DDS::DynamicTypeMember_var dtm;
   DDS::ReturnCode_t rc = type->get_member_by_name(dtm, enumeral_name);
@@ -1203,106 +1203,7 @@ DDS::ReturnCode_t set_enum_value(
   if (rc != DDS::RETCODE_OK) {
     return rc;
   }
-  return set_enum_value(type, src, id, md->id());
-}
-
-namespace {
-  DDS::ReturnCode_t uint_like_bound(
-    DDS::DynamicType_ptr type, size_t& bound_max, DDS::TypeKind& bound_kind)
-  {
-    const DDS::TypeKind kind = type->get_kind();
-    if (kind != TK_ENUM && kind != TK_BITMASK) {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: uint_like_bound: "
-          "expected bound uint-like, got %C\n",
-          typekind_to_string(kind)));
-      }
-      return DDS::RETCODE_BAD_PARAMETER;
-    }
-
-    DDS::TypeDescriptor_var td;
-    const DDS::ReturnCode_t rc = type->get_descriptor(td);
-    if (rc != DDS::RETCODE_OK) {
-      return rc;
-    }
-
-    const size_t bound_size = td->bound()[0];
-    // enum max is 32, bitmask is 64
-    if (bound_size >= 1 && bound_size <= 8) {
-      bound_kind = TK_UINT8;
-    } else if (bound_size >= 9 && bound_size <= 16) {
-      bound_kind = TK_UINT16;
-    } else if (bound_size >= 17 && bound_size <= 32) {
-      bound_kind = TK_UINT32;
-    } else if (bound_size >= 33 && bound_size <= 64 && kind == TK_BITMASK) {
-      bound_kind = TK_UINT64;
-    } else {
-      if (DCPS::log_level >= DCPS::LogLevel::Notice) {
-        ACE_ERROR((LM_NOTICE, "(%P|%t) NOTICE: uint_like_bound: "
-          "Got unexpected bound size %B for %C\n",
-          bound_size, typekind_to_string(kind)));
-      }
-      return DDS::RETCODE_BAD_PARAMETER;
-    }
-    bound_max = (1 << bound_size) - 1;
-    return DDS::RETCODE_OK;
-  }
-
-  DDS::ReturnCode_t get_uint_like(
-    CORBA::UInt64& value, DDS::DynamicData_ptr src, DDS::MemberId id, DDS::TypeKind kind)
-  {
-    DDS::ReturnCode_t rc = DDS::RETCODE_BAD_PARAMETER;
-    switch (kind) {
-    case TK_UINT8:
-      {
-        CORBA::UInt8 v;
-        rc = src->get_uint8_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_UINT16:
-      {
-        CORBA::UInt16 v;
-        rc = src->get_uint16_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_UINT32:
-      {
-        CORBA::UInt32 v;
-        rc = src->get_uint32_value(v, id);
-        if (rc != DDS::RETCODE_OK) {
-          value = v;
-        }
-      }
-      break;
-    case TK_UINT64:
-      rc = src->get_uint64_value(value, id);
-      break;
-    }
-    return rc;
-  }
-
-  DDS::ReturnCode_t set_uint_like(
-    DDS::DynamicData_ptr dest, DDS::MemberId id, DDS::TypeKind kind, CORBA::UInt64 value)
-  {
-    switch (kind) {
-    case TK_UINT8:
-      return dest->set_uint8_value(id, value);
-    case TK_UINT16:
-      return dest->set_uint16_value(id, value);
-    case TK_UINT32:
-      return dest->set_uint32_value(id, value);
-    case TK_UINT64:
-      return dest->set_uint64_value(id, value);
-    default:
-      return DDS::RETCODE_BAD_PARAMETER;
-    }
-  }
+  return set_enum_value(type, dest, id, md->id());
 }
 
 DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
@@ -1363,7 +1264,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
     switch (src_tk) {
     case TK_BOOLEAN:
       {
-        CORBA::Boolean value;
+        DDS::Boolean value;
         get_rc = src->get_boolean_value(value, id);
         if (get_rc == DDS::RETCODE_OK) {
           set_rc = dest->set_boolean_value(id, value);
@@ -1373,7 +1274,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
     case TK_BYTE:
       {
-        CORBA::Octet value;
+        DDS::Byte value;
         get_rc = src->get_byte_value(value, id);
         if (get_rc == DDS::RETCODE_OK) {
           set_rc = dest->set_byte_value(id, value);
@@ -1382,41 +1283,14 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
       break;
 
     case TK_INT8:
-      {
-        CORBA::Int8 value;
-        get_rc = src->get_int8_value(value, id);
-        if (get_rc == DDS::RETCODE_OK) {
-          set_rc = dest->set_int8_value(id, value);
-        }
-      }
-      break;
-
     case TK_INT16:
-      {
-        CORBA::Int16 value;
-        get_rc = src->get_int16_value(value, id);
-        if (get_rc == DDS::RETCODE_OK) {
-          set_rc = dest->set_int16_value(id, value);
-        }
-      }
-      break;
-
     case TK_INT32:
-      {
-        CORBA::Int32 value;
-        get_rc = src->get_int32_value(value, id);
-        if (get_rc == DDS::RETCODE_OK) {
-          set_rc = dest->set_int32_value(id, value);
-        }
-      }
-      break;
-
     case TK_INT64:
       {
-        CORBA::Int64 value;
-        get_rc = src->get_int64_value(value, id);
+        DDS::Int64 value;
+        get_rc = get_int_value(value, src, id, src_tk);
         if (get_rc == DDS::RETCODE_OK) {
-          set_rc = dest->set_int64_value(id, value);
+          set_rc = set_int_value(dest, id, dest_tk, value);
         }
       }
       break;
@@ -1426,17 +1300,17 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
     case TK_UINT32:
     case TK_UINT64:
       {
-        CORBA::UInt64 value;
-        get_rc = get_uint_like(value, src, id, src_tk);
+        DDS::UInt64 value;
+        get_rc = get_uint_value(value, src, id, src_tk);
         if (get_rc == DDS::RETCODE_OK) {
-          set_rc = set_uint_like(dest, id, dest_tk, value);
+          set_rc = set_uint_value(dest, id, dest_tk, value);
         }
       }
       break;
 
     case TK_FLOAT32:
       {
-        CORBA::Float value;
+        DDS::Float32 value;
         get_rc = src->get_float32_value(value, id);
         if (get_rc == DDS::RETCODE_OK) {
           set_rc = dest->set_float32_value(id, value);
@@ -1446,7 +1320,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
     case TK_FLOAT64:
       {
-        CORBA::Double value;
+        DDS::Float64 value;
         get_rc = src->get_float64_value(value, id);
         if (get_rc == DDS::RETCODE_OK) {
           set_rc = dest->set_float64_value(id, value);
@@ -1456,7 +1330,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
     case TK_FLOAT128:
       {
-        CORBA::LongDouble value;
+        DDS::Float128 value;
         get_rc = src->get_float128_value(value, id);
         if (get_rc == DDS::RETCODE_OK) {
           set_rc = dest->set_float128_value(id, value);
@@ -1466,7 +1340,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
     case TK_CHAR8:
       {
-        CORBA::Char value;
+        DDS::Char8 value;
         get_rc = src->get_char8_value(value, id);
         if (get_rc == DDS::RETCODE_OK) {
           set_rc = dest->set_char8_value(id, value);
@@ -1476,7 +1350,7 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
 
     case TK_CHAR16:
       {
-        CORBA::WChar value;
+        DDS::Char16 value;
         get_rc = src->get_char16_value(value, id);
         if (get_rc == DDS::RETCODE_OK) {
           set_rc = dest->set_char16_value(id, value);
@@ -1505,28 +1379,11 @@ DDS::ReturnCode_t copy(DDS::DynamicData_ptr dest, DDS::DynamicData_ptr src)
       break;
 
     case TK_ENUM:
-    case TK_BITMASK:
       {
-        size_t src_bound_max;
-        DDS::TypeKind src_bound_kind;
-        get_rc = uint_like_bound(src_mem_type, src_bound_max, src_bound_kind);
-        CORBA::UInt64 value;
+        DDS::Int32 value;
+        get_rc = get_enum_value(value, src_mem_type, src, id);
         if (get_rc == DDS::RETCODE_OK) {
-          get_rc = get_uint_like(value, src, id, src_bound_kind);
-          if (get_rc == DDS::RETCODE_OK) {
-            size_t dest_bound_max;
-            DDS::TypeKind dest_bound_kind;
-            set_rc = uint_like_bound(dest_mem_type, dest_bound_max, dest_bound_kind);
-            if (set_rc == DDS::RETCODE_OK) {
-              if (value <= dest_bound_max) {
-                set_rc = set_uint_like(dest, id, dest_bound_kind, value);
-              } else if (DCPS::log_level >= DCPS::LogLevel::Warning) {
-                ACE_ERROR((LM_WARNING, "(%P|%t) WARNING: copy(DynamicData): "
-                  "can't store enum/bitmask value %B in %C bound value\n",
-                  value, typekind_to_string(dest_bound_kind)));
-              }
-            }
-          }
+          set_rc = set_enum_value(dest_mem_type, dest, id, value);
         }
       }
       break;

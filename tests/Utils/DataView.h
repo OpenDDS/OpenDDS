@@ -120,4 +120,7 @@ bool operator==(const DataView& a, const DataView& b)
     << result.str();
 }
 
+#define EXPECT_DATA_EQ(A, B) EXPECT_PRED_FORMAT2(assert_DataView, (A), (B))
+#define ASSERT_DATA_EQ(A, B) ASSERT_PRED_FORMAT2(assert_DataView, (A), (B))
+
 #endif // TESTUTILS_DATAVIEW_H

@@ -171,8 +171,7 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
         "%u is an invalid enumerated value for " << idl_name << "\\n\", enumval));\n"
       "      }\n"
       "      return false;\n"
-      "    }\n";
-    be_global->impl_ <<
+      "    }\n"
       "  return strm << static_cast<CORBA::ULong>(enumval);\n";
   }
   {
@@ -182,13 +181,11 @@ bool marshal_generator::gen_enum(AST_Enum*, UTL_ScopedName* name,
     extraction.endArgs();
     be_global->impl_ <<
       "  CORBA::ULong temp = 0;\n"
-      "  if (strm >> temp) {\n";
-    be_global->impl_ <<
+      "  if (strm >> temp) {\n"
       "    if (temp >= " << vals.size() << ") {\n"
       "      strm.set_construction_status(Serializer::ElementConstructionFailure);\n"
       "      return false;\n"
-      "    }\n";
-    be_global->impl_ <<
+      "    }\n"
       "    enumval = static_cast<" << cxx << ">(temp);\n"
       "    return true;\n"
       "  }\n"
@@ -738,10 +735,8 @@ namespace {
           be_global->impl_ <<
             "  if (length > " << bound << ") {\n"
             "    new_length = " << bound << ";\n"
-            "  }\n";
-          be_global->impl_ <<
-            (use_cxx11 ? "  " + value_access + ".resize(" : "  " + value_access +
-            ".length(") << "new_length);\n";
+            "  }\n"
+            "  " << wrapper.seq_resize("new_length");
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
             be_global->impl_ <<
             "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n"
@@ -763,8 +758,7 @@ namespace {
             "  }\n";
         } else {
           be_global->impl_ <<
-            (use_cxx11 ? "  " + value_access + ".resize(new_length);\n" : "  " + value_access +
-            ".length(new_length);\n");
+            "  " << wrapper.seq_resize("new_length");
           if (use_cxx11 && predef->pt() == AST_PredefinedType::PT_boolean) {
             be_global->impl_ <<
               "  for (CORBA::ULong i = 0; i < length; ++i) {\n"
@@ -800,7 +794,7 @@ namespace {
         }
         //change the size of seq length to prepare
         be_global->impl_ <<
-          (use_cxx11 ? "  " + value_access + ".resize(new_length);\n" : "  " + value_access + ".length(new_length);\n");
+          "  " << wrapper.seq_resize("new_length");
         //read the entire length of the writer's sequence
         be_global->impl_ <<
           "  for (CORBA::ULong i = 0; i < new_length; ++i) {\n";
@@ -835,8 +829,6 @@ namespace {
         intro.join(be_global->impl_, indent);
         be_global->impl_ <<
           indent << " if (!(strm >> " << stream_to << ")) {\n";
-
-        const std::string seq_resize_func = use_cxx11 ? "resize" : "length";
 
         if (try_construct == tryconstructfailaction_use_default) {
           be_global->impl_ <<
@@ -1578,7 +1570,7 @@ bool marshal_generator::gen_typedef(AST_Typedef* node, UTL_ScopedName* name, AST
 
 namespace {
   // common to both fields (in structs) and branches (in unions)
-  string findSizeCommon(const std::string& indent, AST_Decl*, const string& name,
+  string findSizeCommon(const std::string& indent, AST_Decl*field, const string& name,
                         AST_Type* type, const string& prefix, bool wrap_nested_key_only,
                         Intro& intro, const string& = "") // same sig as streamCommon
   {
@@ -1612,7 +1604,7 @@ namespace {
     } else if (fld_cls == CL_UNKNOWN) {
       return ""; // warning will be issued for the serialize functions
     } else { // sequence, struct, union, array
-      RefWrapper wrapper(type, scoped(type->name()),
+      RefWrapper wrapper(type, field_type_name(dynamic_cast<AST_Field*>(field), type),
         prefix + "." + insert_cxx11_accessor_parens(name, is_union_member));
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
@@ -1646,9 +1638,9 @@ namespace {
   }
 
   // common to both fields (in structs) and branches (in unions)
-  string streamCommon(const std::string& /*indent*/, AST_Decl*, const string& name, AST_Type* type,
-                      const string& prefix, bool wrap_nested_key_only, Intro& intro,
-                      const string& stru)
+  string streamCommon(const std::string& /*indent*/, AST_Decl* field, const string& name,
+    AST_Type* type, const string& prefix, bool wrap_nested_key_only, Intro& intro,
+    const string& stru)
   {
     const bool use_cxx11 = be_global->language_mapping() == BE_GlobalData::LANGMAP_CXX11;
     const bool is_union_member = prefix.substr(3) == "uni";
@@ -1681,7 +1673,6 @@ namespace {
       }
       return "false";
     } else { // sequence, struct, union, array, enum, string(insertion)
-      const std::string type_name = scoped(type->name());
       string fieldref = prefix, local = insert_cxx11_accessor_parens(name, is_union_member);
       const bool accessor = local.size() > 2 && local.substr(local.size() - 2) == "()";
       if (fld_cls & CL_STRING) {
@@ -1693,7 +1684,8 @@ namespace {
           return "(strm " + shift + ' ' + getWrapper(args, actual_type, WD_OUTPUT) + ')';
         }
       }
-      RefWrapper wrapper(type, scoped(type->name()), fieldref, local, dir == WD_OUTPUT);
+      RefWrapper wrapper(type, field_type_name(dynamic_cast<AST_Field*>(field), type),
+        fieldref, local, dir == WD_OUTPUT);
       wrapper.nested_key_only_ = wrap_nested_key_only;
       wrapper.done(&intro);
       return "(strm " + shift + " " + wrapper.ref() + ")";
@@ -3508,6 +3500,18 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
   string cxx = scoped(name); // name as a C++ class
   Classification disc_cls = classify(discriminator);
 
+  FieldInfo::EleLenSet anonymous_seq_generated;
+  for (size_t i = 0; i < branches.size(); ++i) {
+    if (branches[i]->field_type()->anonymous()) {
+      FieldInfo af(*branches[i]);
+      if (af.arr_) {
+        gen_anonymous_array(af);
+      } else if (af.seq_ && af.is_new(anonymous_seq_generated)) {
+        gen_anonymous_sequence(af);
+      }
+    }
+  }
+
   const ExtensibilityKind exten = be_global->extensibility(node);
   const bool not_final = exten != extensibilitykind_final;
 
@@ -3573,9 +3577,10 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
     // If a default value was not found, just set the discriminator to the
     // default value.
     if (!found) {
-      be_global->impl_ << " " << scoped(discriminator->name()) << " temp;\n";
-      be_global->impl_ << type_to_default("", discriminator, "  temp");
-      be_global->impl_ << "  " << varname << "._d(temp);\n";
+      be_global->impl_ <<
+        " " << scoped(discriminator->name()) << " temp;\n" <<
+        type_to_default("", discriminator, "  temp") <<
+        "  " << varname << "._d(temp);\n";
     }
   }
 
@@ -3729,6 +3734,7 @@ bool marshal_generator::gen_union(AST_Union* node, UTL_ScopedName* name,
       be_global->impl_ <<
         "  " << scoped(discriminator->name()) << " disc;\n" <<
         streamAndCheck(">> " + getWrapper("disc", discriminator, WD_INPUT));
+      be_global->impl_ << "/* HERE */\n";
       if (generateSwitchForUnion(node, "disc", streamCommon, branches,
           discriminator, "", ">> ", cxx.c_str())) {
         be_global->impl_ <<

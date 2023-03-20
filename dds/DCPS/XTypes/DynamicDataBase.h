@@ -34,6 +34,7 @@ public:
   DDS::Boolean equals(DDS::DynamicData_ptr other);
   DDS::DynamicData_ptr loan_value(DDS::MemberId id);
   DDS::ReturnCode_t return_loaned_value(DDS::DynamicData_ptr other);
+  DDS::DynamicData_ptr clone();
 
   static bool has_explicit_keys(DDS::DynamicType* dt);
   static bool exclude_member(DCPS::Sample::Extent ext, bool is_key, bool has_explicit_keys);

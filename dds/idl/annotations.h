@@ -452,8 +452,7 @@ namespace OpenDDS {
      * Types with this annotation have a special serialization case in
      * marshal_generator.
      */
-    class SpecialSerializationAnnotation : public AnnotationWithValue<std::string>
-    {
+    class SpecialSerializationAnnotation : public AnnotationWithValue<std::string> {
     public:
       std::string definition() const
       {

@@ -18,20 +18,25 @@ OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 namespace OpenDDS {
 namespace XTypes {
 
-// If changing these, also change the get_dynamic_data_adapter forward
+// If changing just these two, also change the get_dynamic_data_adapter forward
 // declarations in Sample.h.
-template <typename T>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
 template <typename T, typename Tag>
 DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value);
-
-template <typename T>
-DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
 template <typename T, typename Tag>
 DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value);
 
 template <typename T>
-const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
+DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, T& value)
+{
+  return get_dynamic_data_adapter<T, T>(type, value);
+}
+
+template <typename T>
+DDS::DynamicData_ptr get_dynamic_data_adapter(DDS::DynamicType_ptr type, const T& value)
+{
+  return get_dynamic_data_adapter<T, T>(type, value);
+}
+
 template <typename T, typename Tag>
 const T* get_dynamic_data_adapter_value(DDS::DynamicData_ptr dda);
 
@@ -42,8 +47,6 @@ class DynamicDataAdapterImpl;
  * Base class for all classes that allow interfacing with the C++ mapping types
  * as DynamicData.
  *
- * TODO not later:
- * - clone
  * TODO:
  * - Support direct array methods, like get_int32_values
  * - Support casting, like using get_int32_value on a int16 member. Right now
@@ -245,7 +248,7 @@ public:
   DDS::ReturnCode_t get_boolean_value(CORBA::Boolean& value,
                                       DDS::MemberId id)
   {
-    return get_raw_value("get_boolean_value", &value, TK_BYTE, id);
+    return get_raw_value("get_boolean_value", &value, TK_BOOLEAN, id);
   }
 
   DDS::ReturnCode_t set_boolean_value(DDS::MemberId id,
@@ -535,38 +538,6 @@ protected:
     return rc;
   }
 
-  DDS::ReturnCode_t get_byte_raw_value(
-    const char* method, void* dest, DDS::TypeKind tk,
-    DDS::Byte source, DDS::MemberId id);
-  DDS::ReturnCode_t set_byte_raw_value(
-    const char* method, DDS::Byte& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
-  DDS::ReturnCode_t get_bool_raw_value(
-    const char* method, void* dest, DDS::TypeKind tk, DDS::Boolean source, DDS::MemberId id);
-  DDS::ReturnCode_t set_bool_raw_value(
-    const char* method, DDS::Boolean& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
-  DDS::ReturnCode_t get_i8_raw_value(
-    const char* method, void* dest, DDS::TypeKind tk, DDS::Int8 source, DDS::MemberId id);
-  DDS::ReturnCode_t set_i8_raw_value(
-    const char* method, DDS::Int8& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
-  DDS::ReturnCode_t get_u8_raw_value(
-    const char* method, void* dest, DDS::TypeKind tk, DDS::UInt8 source, DDS::MemberId id);
-  DDS::ReturnCode_t set_u8_raw_value(
-    const char* method, DDS::UInt8& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
-  DDS::ReturnCode_t get_c8_raw_value(
-    const char* method, void* dest, DDS::TypeKind tk, DDS::Char8 source, DDS::MemberId id);
-  DDS::ReturnCode_t set_c8_raw_value(
-    const char* method, DDS::Char8& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
-  DDS::ReturnCode_t get_c16_raw_value(
-    const char* method, void* dest, DDS::TypeKind tk, DDS::Char16 source, DDS::MemberId id);
-  DDS::ReturnCode_t set_c16_raw_value(
-    const char* method, DDS::Char16& dest, DDS::MemberId id,
-    const void* source, DDS::TypeKind tk);
-
   /// For now dest must be a Int32 and tk must be TK_INT32
   template <typename Enum>
   DDS::ReturnCode_t get_enum_raw_value(
@@ -616,7 +587,7 @@ protected:
     const char* method, std::wstring& dest, DDS::MemberId id,
     const void* source, DDS::TypeKind tk);
 
-  template <typename T, typename Tag = void>
+  template <typename T, typename Tag>
   DDS::ReturnCode_t get_complex_raw_value(
     const char* method, void* dest, DDS::TypeKind tk, T& source, DDS::MemberId id)
   {
@@ -634,7 +605,7 @@ protected:
     return rc;
   }
 
-  template <typename T, typename Tag = void>
+  template <typename T, typename Tag>
   DDS::ReturnCode_t set_indirect_complex_raw_value_impl(
     const char* method, T& dest, DDS::MemberId id, DDS::DynamicType_ptr member_type,
     DDS::DynamicData_ptr source_dd)
@@ -646,7 +617,7 @@ protected:
     return copy(dest_dda, source_dd);
   }
 
-  template <typename T, typename Tag = void>
+  template <typename T, typename Tag>
   DDS::ReturnCode_t set_direct_complex_raw_value(
     const char* method, T& dest, DDS::MemberId id, const void* source, DDS::TypeKind tk)
   {
@@ -673,7 +644,7 @@ protected:
 
   // In the classic mapping arrays are C arrays, which can't be copied using =,
   // so only do a indirect copy.
-  template <typename T, typename Tag = void>
+  template <typename T, typename Tag>
   DDS::ReturnCode_t set_indirect_complex_raw_value(
     const char* method, T& dest, DDS::MemberId id, const void* source, DDS::TypeKind tk)
   {
