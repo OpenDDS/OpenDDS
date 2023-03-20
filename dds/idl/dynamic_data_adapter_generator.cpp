@@ -43,9 +43,18 @@ namespace {
     std::string extra;
     bool is_complex = false;
     const char* op_type = 0;
-    switch (resolveActualType(type)->node_type()) {
+    AST_Type* const t = resolveActualType(type);
+    AST_Type* const node_as_type = dynamic_cast<AST_Type*>(node);
+    switch (t->node_type()) {
     case AST_Decl::NT_pre_defined:
-      op_type = "simple";
+      if (set && cxx11 && node_as_type &&
+          resolveActualType(node_as_type)->node_type() == AST_Decl::NT_sequence &&
+          dynamic_cast<AST_PredefinedType*>(t)->pt() == AST_PredefinedType::PT_boolean) {
+        // setting a std::vector<bool> requires a special case
+        op_type = "bool_vector_elem";
+      } else {
+        op_type = "simple";
+      }
       break;
     case AST_Decl::NT_enum:
       op_type = "enum";
@@ -53,24 +62,26 @@ namespace {
     case AST_Decl::NT_string:
       if (cxx11) {
         op_type = "cpp11_s8";
+      } else {
+        if (set) {
+          extra = ".inout()";
+        }
+        op_type = "s8";
       }
-      if (set) {
-        extra = ".inout()";
-      }
-      op_type = "s8";
       break;
     case AST_Decl::NT_wstring:
       if (cxx11) {
         op_type = "cpp11_s16";
+      } else {
+        if (set) {
+          extra = ".inout()";
+        }
+        op_type = "s16";
       }
-      if (set) {
-        extra = ".inout()";
-      }
-      op_type = "s16";
       break;
     case AST_Decl::NT_struct:
-    case AST_Decl::NT_sequence:
     case AST_Decl::NT_union:
+    case AST_Decl::NT_sequence:
       is_complex = true;
       op_type = set ? "direct_complex" : "complex";
       break;
@@ -248,7 +259,7 @@ namespace {
 
       AST_Type* const base_type = seq_node ? seq_node->base_type() : array_node->base_type();
       // For the type name we need the deepest named type, not the actual type.
-      // This will be the name of the first typedef if it's an array or
+      // This will be the name of the deepest typedef if it's an array or
       // sequence, otherwise the name of the type.
       AST_Type* consider = base_type;
       AST_Type* named_type = base_type;
@@ -375,12 +386,12 @@ namespace {
           << cpp_name << "> {\n"
         "public:\n"
         "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, " << cpp_name << "& value)\n"
-        "    : DynamicDataAdapter_T(type, value)\n"
+        "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
         "  {\n"
         "  }\n"
         "\n"
         "  DynamicDataAdapterImpl(DDS::DynamicType_ptr type, const " << cpp_name << "& value)\n"
-        "    : DynamicDataAdapter_T(type, value)\n"
+        "    : DynamicDataAdapter_T<" << cpp_name << ">(type, value)\n"
         "  {\n"
         "  }\n"
         "\n"

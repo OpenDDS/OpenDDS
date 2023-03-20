@@ -13,6 +13,8 @@
 
 #  include <dds/DdsDynamicDataC.h>
 
+#  include <vector>
+
 OPENDDS_BEGIN_VERSIONED_NAMESPACE_DECL
 
 namespace OpenDDS {
@@ -535,6 +537,18 @@ protected:
       return rc;
     }
     dest = *static_cast<const T*>(source);
+    return rc;
+  }
+
+  DDS::ReturnCode_t set_bool_vector_elem_raw_value(
+    const char* method, std::vector<bool>::reference dest, DDS::MemberId id,
+    const void* source, DDS::TypeKind tk)
+  {
+    const DDS::ReturnCode_t rc = check_member(method, tk, id);
+    if (rc != DDS::RETCODE_OK) {
+      return rc;
+    }
+    dest = *static_cast<const bool*>(source);
     return rc;
   }
 
